@@ -31,14 +31,18 @@ import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.restservices.shared.Pagination;
 import org.edu_sharing.restservices.shared.SearchResult;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @Path("/archive/v1")
-@Api(tags = { "ARCHIVE v1" })
+@Tag(name= "ARCHIVE v1" )
 @ApiService(value = "ARCHIVE", major = 1, minor = 0)
 public class ArchiveApi {
 
@@ -55,24 +59,24 @@ public class ArchiveApi {
 	@GET
 	@Path("/search/{repository}/{pattern}")
 	
-	@ApiOperation(value = "Searches for archive nodes.", notes = "Searches for archive nodes.")
+	@Operation(summary = "Searches for archive nodes.", description = "Searches for archive nodes.")
 	
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "OK.", response = SearchResult.class),
-	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
+			@ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = SearchResult.class))),
+	        @ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 	
-	public Response search(@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = "search pattern", required = true) @PathParam("pattern") String pattern,
-			@ApiParam(value = "maximum items per page", defaultValue="10") @QueryParam("maxItems") Integer maxItems,
-		    @ApiParam(value = "skip a number of items", defaultValue="0") @QueryParam("skipCount") Integer skipCount,   
-		    @ApiParam(value = "sort properties") @QueryParam("sortProperties") List<String> sortProperties,
-		    @ApiParam(value = "sort ascending") @QueryParam("sortAscending") List<Boolean> sortAscending,
-		    @ApiParam(value = "property filter for result nodes (or \"-all-\" for all properties)") @QueryParam("propertyFilter") List<String> propertyFilter,
+	public Response search(@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "search pattern", required = true) @PathParam("pattern") String pattern,
+			@Parameter(description = "maximum items per page", schema = @Schema(defaultValue="10")) @QueryParam("maxItems") Integer maxItems,
+		    @Parameter(description = "skip a number of items", schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
+		    @Parameter(description = "sort properties") @QueryParam("sortProperties") List<String> sortProperties,
+		    @Parameter(description = "sort ascending") @QueryParam("sortAscending") List<Boolean> sortAscending,
+		    @Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)") @QueryParam("propertyFilter") List<String> propertyFilter,
 			@Context HttpServletRequest req){
 			
 		return search(repository,pattern,null,maxItems,skipCount,sortProperties,sortAscending,new Filter(propertyFilter));
@@ -81,7 +85,7 @@ public class ArchiveApi {
 	
 	@OPTIONS    
 	@Path("/search/{repository}/{pattern}")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
 	public Response options() {
 		
@@ -91,25 +95,25 @@ public class ArchiveApi {
 	@GET
 	@Path("/search/{repository}/{pattern}/{person}")
 	
-	@ApiOperation(value = "Searches for archive nodes.", notes = "Searches for archive nodes.")
+	@Operation(summary = "Searches for archive nodes.", description = "Searches for archive nodes.")
 	
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "OK.", response = SearchResult.class),
-	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
+			@ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = SearchResult.class))),
+	        @ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 	
-	public Response search(@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = "search pattern", required = true) @PathParam("pattern") String pattern,
-			@ApiParam(value = "person", required = true, defaultValue = "-me-") @PathParam("person") String person,
-			@ApiParam(value = "maximum items per page", defaultValue="10") @QueryParam("maxItems") Integer maxItems,
-		    @ApiParam(value = "skip a number of items", defaultValue="0") @QueryParam("skipCount") Integer skipCount,   
-		    @ApiParam(value = "sort properties") @QueryParam("sortProperties") List<String> sortProperties,
-		    @ApiParam(value = "sort ascending") @QueryParam("sortAscending") List<Boolean> sortAscending,
-		    @ApiParam(value = "property filter for result nodes (or \"-all-\" for all properties)") @QueryParam("propertyFilter") List<String> propertyFilter,
+	public Response search(@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "search pattern", required = true) @PathParam("pattern") String pattern,
+			@Parameter(description = "person", required = true, schema = @Schema(defaultValue="-me-")) @PathParam("person") String person,
+			@Parameter(description = "maximum items per page", schema = @Schema(defaultValue="10")) @QueryParam("maxItems") Integer maxItems,
+		    @Parameter(description = "skip a number of items", schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
+		    @Parameter(description = "sort properties") @QueryParam("sortProperties") List<String> sortProperties,
+		    @Parameter(description = "sort ascending") @QueryParam("sortAscending") List<Boolean> sortAscending,
+		    @Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)") @QueryParam("propertyFilter") List<String> propertyFilter,
 			@Context HttpServletRequest req){
 		
 		return search(repository, pattern, person, maxItems, skipCount,sortProperties,sortAscending, new Filter(propertyFilter));
@@ -117,7 +121,7 @@ public class ArchiveApi {
 	
 	@OPTIONS    
 	@Path("/search/{repository}/{pattern}/{person}")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
 	public Response options1() {
 		
@@ -171,19 +175,19 @@ public class ArchiveApi {
 	@DELETE
 	@Path("/purge/{repository}")
 	
-	@ApiOperation(value = "Searches for archive nodes.", notes = "Searches for archive nodes.")
+	@Operation(summary = "Searches for archive nodes.", description = "Searches for archive nodes.")
 	
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "OK.", response = String.class),
-	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
+			@ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = String.class))),
+	        @ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 	
-	public Response purge(@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = "archived node", required = true) @QueryParam("archivedNodeIds")  List<String> archivedNodeIds,
+	public Response purge(@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "archived node", required = true) @QueryParam("archivedNodeIds")  List<String> archivedNodeIds,
 			@Context HttpServletRequest req){
 		
 		try {
@@ -197,7 +201,7 @@ public class ArchiveApi {
 	
 	@OPTIONS    
 	@Path("/purge/{repository}/{archivedNodeId}")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
 	public Response options2() {
 		
@@ -207,20 +211,20 @@ public class ArchiveApi {
 	@POST
 	@Path("/restore/{repository}")
 	
-	@ApiOperation(value = "restore archived nodes.", notes = "restores archived nodes. restoreStatus can have the following values: FALLBACK_PARENT_NOT_EXISTS, FALLBACK_PARENT_NO_PERMISSION, DUPLICATENAME, FINE")
+	@Operation(summary = "restore archived nodes.", description = "restores archived nodes. restoreStatus can have the following values: FALLBACK_PARENT_NOT_EXISTS, FALLBACK_PARENT_NO_PERMISSION, DUPLICATENAME, FINE")
 	
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "OK.", response = RestoreResults.class),
-	        @ApiResponse(code = 400, message = "Preconditions are not present.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = "Authorization failed.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = "Session user has insufficient rights to perform this operation.", response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = "Ressources are not found.", response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = "Fatal error occured.", response = ErrorResponse.class) 
+			@ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = RestoreResults.class))),
+	        @ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 	
-	public Response restore(@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = "archived nodes", required = true) @QueryParam("archivedNodeIds") List<String> archivedNodeIds,
-			@ApiParam(value = "to target", required = false) @QueryParam("target") String target,
+	public Response restore(@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "archived nodes", required = true) @QueryParam("archivedNodeIds") List<String> archivedNodeIds,
+			@Parameter(description = "to target", required = false) @QueryParam("target") String target,
 			@Context HttpServletRequest req){
 		
 		try {
@@ -236,7 +240,7 @@ public class ArchiveApi {
 	
 	@OPTIONS    
 	@Path("/restore/{repository}/{archivedNodeId}/{target}")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
 	public Response options3() {
 		

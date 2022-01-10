@@ -5,17 +5,17 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
-@ApiModel(description = "settings for statistic request")
+@Schema(description = "settings for statistic request")
 public class StatisticRequest {
 	
 	Filter filter;
 	
 	List<String> properties = new ArrayList<String>();
 	
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("filter")
 	public Filter getFilter() {
 		return filter;
@@ -24,7 +24,7 @@ public class StatisticRequest {
 		this.filter = filter;
 	}
 	
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("properties")
 	public List<String> getProperties() {
 		return properties;

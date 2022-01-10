@@ -2,7 +2,7 @@ package org.edu_sharing.restservices.shared;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.restservices.UserStatus;
 
@@ -30,7 +30,7 @@ public class UserSimple extends Authority{
 
 	/**
 	 **/
-	@ApiModelProperty(value = "")
+	@Schema(description = "")
 	@JsonProperty("userName")
 	public String getUserName() {
 		return userName;
@@ -42,7 +42,7 @@ public class UserSimple extends Authority{
 
 	/**
 	 **/
-	@ApiModelProperty(value = "")
+	@Schema(description = "")
 	@JsonProperty("profile")
 	public UserProfile getProfile() {
 		return profile;

@@ -2,11 +2,11 @@ package org.edu_sharing.restservices.about.v1.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class ServiceInstance  {
   
   private ServiceVersion version = null;
@@ -15,7 +15,7 @@ public class ServiceInstance  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("version")
   public ServiceVersion getVersion() {
     return version;
@@ -27,7 +27,7 @@ public class ServiceInstance  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("endpoint")
   public String getEndpoint() {
     return endpoint;

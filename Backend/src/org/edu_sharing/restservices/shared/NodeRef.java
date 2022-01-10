@@ -1,7 +1,7 @@
 package org.edu_sharing.restservices.shared;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import org.edu_sharing.restservices.RepositoryDao;
 
@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class NodeRef implements Comparable<NodeRef> {
 
 	private String repo = null;
@@ -31,7 +31,7 @@ public class NodeRef implements Comparable<NodeRef> {
 
 	/**
    **/
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("repo")
 	public String getRepo() {
 		return repo;
@@ -43,7 +43,7 @@ public class NodeRef implements Comparable<NodeRef> {
 
 	/**
    **/
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("id")
 	public String getId() {
 		return id;
@@ -57,7 +57,7 @@ public class NodeRef implements Comparable<NodeRef> {
 		this.archived = archived;
 	}
 	
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("archived")
 	public boolean isArchived() {
 		return archived;

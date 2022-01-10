@@ -1,17 +1,17 @@
 package org.edu_sharing.restservices.shared;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class MdsDesc {
 
 	private MdsRef ref = null;
 	private Boolean isDefaultMds = null;
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("ref")
 	public MdsRef getRef() {
 		return ref;
@@ -23,7 +23,7 @@ public class MdsDesc {
 
 	/**
 	   **/
-	  @ApiModelProperty(required = true, value = "")
+	  @Schema(required = true, description = "")
 	  @JsonProperty("isDefaultMds")
 	  public Boolean isDefaultMds() {
 	    return isDefaultMds;

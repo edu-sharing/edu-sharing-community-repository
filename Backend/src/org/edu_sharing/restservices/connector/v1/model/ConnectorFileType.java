@@ -4,9 +4,9 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class ConnectorFileType {
 	private String ccressourceversion,ccressourcetype,ccresourcesubtype,editorType;
 	@JsonProperty("ccressourceversion")

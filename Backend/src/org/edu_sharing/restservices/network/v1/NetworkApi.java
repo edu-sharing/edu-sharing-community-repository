@@ -9,7 +9,12 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
-import io.swagger.annotations.*;
+import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.restservices.*;
@@ -21,7 +26,7 @@ import org.edu_sharing.service.network.model.Service;
 import org.edu_sharing.service.network.model.StoredService;
 
 @Path("/network/v1")
-@Api(tags = {"NETWORK v1"})
+@Tag(name="NETWORK v1")
 @ApiService(value="NETWORK", major=1, minor=0)
 public class NetworkApi {
 
@@ -29,17 +34,15 @@ public class NetworkApi {
 
     @GET
     @Path("/repositories")
-    @ApiOperation(
-            value = "Get repositories.",
-            notes = "Get repositories.")
+    @Operation(summary = "Get repositories.", description = "Get repositories.")
     @ApiResponses(
             value = {
-                    @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = RepoEntries[].class),
-                    @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-                    @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-                    @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-                    @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-                    @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+                    @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = RepoEntries[].class))),
+                    @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
 
     public Response getRepositories(
@@ -65,7 +68,7 @@ public class NetworkApi {
 
     @OPTIONS
     @Path("/repositories")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
     public Response options() {
 
@@ -73,17 +76,15 @@ public class NetworkApi {
     }
     @GET
     @Path("/service")
-    @ApiOperation(
-            value = "Get own service.",
-            notes = "Get the servic entry from the current repository.")
+    @Operation(summary = "Get own service.", description = "Get the servic entry from the current repository.")
     @ApiResponses(
             value = {
-                    @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = StoredService.class),
-                    @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-                    @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-                    @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-                    @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-                    @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+                    @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = StoredService.class))),
+                    @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
     public Response getService(
             @Context HttpServletRequest req
@@ -97,21 +98,19 @@ public class NetworkApi {
     }
     @GET
     @Path("/services")
-    @ApiOperation(
-            value = "Get services.",
-            notes = "Get registerted services.")
+    @Operation(summary = "Get services.", description = "Get registerted services.")
     @ApiResponses(
             value = {
-                    @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = StoredService[].class),
-                    @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-                    @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-                    @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-                    @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-                    @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+                    @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = StoredService[].class))),
+                    @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
     public Response getServices(
             @Context HttpServletRequest req,
-            @ApiParam(value = "search or filter for services", defaultValue = "", required = false) @QueryParam("query") String query
+            @Parameter(description = "search or filter for services", schema = @Schema(defaultValue=""), required = false) @QueryParam("query") String query
             ) {
         try {
             Collection<StoredService> response = NetworkDao.getServices();
@@ -123,21 +122,19 @@ public class NetworkApi {
 
     @POST
     @Path("/services")
-    @ApiOperation(
-            value = "Register service.",
-            notes = "Register a new service.")
+    @Operation(summary = "Register service.", description = "Register a new service.")
     @ApiResponses(
             value = {
-                    @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = StoredService.class),
-                    @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-                    @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-                    @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-                    @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-                    @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+                    @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = StoredService.class))),
+                    @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
     public Response addService(
             @Context HttpServletRequest req,
-            @ApiParam(value = "Service data object") Service service
+            @Parameter(description = "Service data object") Service service
     ) {
         try {
             StoredService response = NetworkDao.addService(service);
@@ -148,22 +145,20 @@ public class NetworkApi {
     }
     @PUT
     @Path("/services/{id}")
-    @ApiOperation(
-            value = "Update a service.",
-            notes = "Update an existing service.")
+    @Operation(summary = "Update a service.", description = "Update an existing service.")
     @ApiResponses(
             value = {
-                    @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = StoredService.class),
-                    @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-                    @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-                    @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-                    @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-                    @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+                    @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = StoredService.class))),
+                    @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
     public Response updateService(
             @Context HttpServletRequest req,
-            @ApiParam(value = "Service id", required=true ) @PathParam("id") String id,
-            @ApiParam(value = "Service data object") Service service
+            @Parameter(description = "Service id", required=true ) @PathParam("id") String id,
+            @Parameter(description = "Service data object") Service service
     ) {
         try {
             StoredService response = NetworkDao.updateService(id,service);

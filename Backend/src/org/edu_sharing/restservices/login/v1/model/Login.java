@@ -1,7 +1,7 @@
 package org.edu_sharing.restservices.login.v1.model;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import java.util.List;
 import java.util.Map;
@@ -18,7 +18,7 @@ import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class Login  {
 
   private Map<String, RemoteAuthDescription> remoteAuthentications;
@@ -83,7 +83,7 @@ public Login(boolean isValidLogin, String scope, HttpSession session) {
 		this.authorityName = authorityName;
 	}
 
-@ApiModelProperty(required = true, value = "")
+@Schema(required = true, description = "")
   @JsonProperty("isGuest")
   public boolean isGuest() {
 		return isGuest;
@@ -92,7 +92,7 @@ public Login(boolean isValidLogin, String scope, HttpSession session) {
 	public void setGuest(boolean isGuest) {
 		this.isGuest = isGuest;
 	}
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("sessionTimeout")
   public int getSessionTimeout() {
 	return sessionTimeout;
@@ -103,7 +103,7 @@ public void setSessionTimeout(int sessionTimeout) {
 }
 /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("currentScope")
   public String getCurrentScope() {
     return currentScope;
@@ -111,7 +111,7 @@ public void setSessionTimeout(int sessionTimeout) {
   public void setCurrentScope(String currentScope) {
     this.currentScope = currentScope;
   }
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("isValidLogin")
   public boolean isValidLogin() {
     return isValidLogin;
@@ -119,7 +119,7 @@ public void setSessionTimeout(int sessionTimeout) {
   public void setIsValidLogin(boolean isValidLogin) {
     this.isValidLogin = isValidLogin;
   }
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("isAdmin")
   public boolean isAdmin() {
     return isAdmin;
@@ -127,7 +127,7 @@ public void setSessionTimeout(int sessionTimeout) {
   public void setIsAdmin(boolean isAdmin) {
     this.isAdmin = isAdmin;
   }
-  @ApiModelProperty(required = false, value = "")
+  @Schema(required = false, description = "")
   @JsonProperty("userHome")
   public String getUserHome() {
 	return userHome;

@@ -4,13 +4,13 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 public class Suggestions {
 
 	private List<Suggestion> values;
 	
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("values")
 	public List<Suggestion> getValues() {
 		return values;
@@ -27,19 +27,19 @@ public class Suggestions {
 		String key;
 		
 		
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("displayString")
 		public String getDisplayString() {
 			return displayString;
 		}
 		
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("replacementString")
 		public String getReplacementString() {
 			return replacementString;
 		}
 		
-		@ApiModelProperty(required = false, value = "")
+		@Schema(required = false, description = "")
 		@JsonProperty("key")
 		public String getKey() {
 			return key;

@@ -80,14 +80,18 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @Path("/admin/v1")
-@Api(tags = { "ADMIN v1" })
+@Tag(name="ADMIN v1")
 @ApiService(value = "ADMIN", major = 1, minor = 0)
 public class AdminApi {
 	static Map<String, String[]> XML_FILTER = new HashMap<>();
@@ -100,14 +104,14 @@ public class AdminApi {
 	@POST
 	@Path("/refreshAppInfo")
 
-	@ApiOperation(value = "refresh app info", notes = "Refresh the application info.")
+	@Operation(summary = "refresh app info", description = "Refresh the application info.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response refreshAppInfo(@Context HttpServletRequest req) {
 		try {
 			AdminServiceFactory.getInstance().refreshApplicationInfo();
@@ -119,18 +123,18 @@ public class AdminApi {
 	@GET
 	@Path("/toolpermissions/{authority}")
 
-	@ApiOperation(value = "get all toolpermissions for an authority", notes="Returns explicit (rights set for this authority) + effective (resulting rights for this authority) toolpermission")
+	@Operation(summary = "get all toolpermissions for an authority", description="Returns explicit (rights set for this authority) + effective (resulting rights for this authority) toolpermission")
 
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Map.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Map.class))),
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	    })
 	public Response getAllToolpermissions(
-			@ApiParam(value = "Authority to load (user or group)",required=true) @PathParam("authority") String authority,
+			@Parameter(description = "Authority to load (user or group)",required=true) @PathParam("authority") String authority,
 			@Context HttpServletRequest req){
 		try {
 			Map<String, ToolPermission> result = AdminServiceFactory.getInstance().getToolpermissions(authority);
@@ -142,18 +146,18 @@ public class AdminApi {
 	@PUT
 	@Path("/toolpermissions/{authority}")
 
-	@ApiOperation(value = "set toolpermissions for an authority", notes="If a toolpermission has status UNDEFINED, it will remove explicit permissions for the authority")
+	@Operation(summary = "set toolpermissions for an authority", description="If a toolpermission has status UNDEFINED, it will remove explicit permissions for the authority")
 
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Map.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Map.class))),
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	    })
 	public Response setToolpermissions(
-			@ApiParam(value = "Authority to set (user or group)",required=true) @PathParam("authority") String authority,
+			@Parameter(description = "Authority to set (user or group)",required=true) @PathParam("authority") String authority,
 			Map<String,ToolPermission.Status> permissions,
 			@Context HttpServletRequest req){
 		try {
@@ -166,18 +170,18 @@ public class AdminApi {
 	@POST
 	@Path("/applyTemplate")
 
-	@ApiOperation(value = "apply a folder template", notes = "apply a folder template.")
+	@Operation(summary = "apply a folder template", description = "apply a folder template.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response applyTemplate(@Context HttpServletRequest req,
-			@ApiParam(value = "Template Filename", required = true) @QueryParam("template") String template,
-			@ApiParam(value = "Group name (authority name)", required = true) @QueryParam("group") String group,
-			@ApiParam(value = "Folder name", required = false) @QueryParam("folder") String folder) {
+			@Parameter(description = "Template Filename", required = true) @QueryParam("template") String template,
+			@Parameter(description = "Group name (authority name)", required = true) @QueryParam("group") String group,
+			@Parameter(description = "Folder name", required = false) @QueryParam("folder") String folder) {
 		try {
 			AdminServiceFactory.getInstance().applyTemplate(template, group, folder);
 			return Response.ok().build();
@@ -189,18 +193,18 @@ public class AdminApi {
 	@POST
 	@Path("/toolpermissions/add/{name}")
 
-	@ApiOperation(value = "add a new toolpermissions")
+	@Operation(summary = "add a new toolpermissions")
 
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Node.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Node.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 	public Response addToolpermission(
-			@ApiParam(value = "Name/ID of toolpermission",required=true) @PathParam("name") String name,
+			@Parameter(description = "Name/ID of toolpermission",required=true) @PathParam("name") String name,
 			@Context HttpServletRequest req){
 		try {
 			String nodeId=AdminServiceFactory.getInstance().addToolpermission(name);
@@ -213,7 +217,7 @@ public class AdminApi {
 
 	@OPTIONS
 	@Path("/refreshAppInfo")
-	@ApiOperation(hidden = true, value = "")
+	@Hidden
 
 	public Response options() {
 
@@ -223,14 +227,14 @@ public class AdminApi {
 	@GET
 	@Path("/applications")
 
-	@ApiOperation(value = "list applications", notes = "List all registered applications.")
+	@Operation(summary = "list applications", description = "List all registered applications.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Application[].class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Application[].class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response getApplications(@Context HttpServletRequest req) {
 		try {
 			List<Application> result = new ArrayList<Application>();
@@ -261,14 +265,14 @@ public class AdminApi {
 	@GET
 	@Path("/jobs")
 
-	@ApiOperation(value = "get all running jobs")
+	@Operation(summary = "get all running jobs")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = JobInfo[].class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = JobInfo[].class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response getJobs(@Context HttpServletRequest req) {
 		try {
 			return Response.ok().entity(AdminServiceFactory.getInstance().getJobs()).build();
@@ -280,14 +284,14 @@ public class AdminApi {
 	@GET
 	@Path("/jobs/all")
 
-	@ApiOperation(value = "get all available jobs")
+	@Operation(summary = "get all available jobs")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = JobDescription[].class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = JobDescription[].class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response getAllJobs(@Context HttpServletRequest req) {
 		try {
 			return Response.ok().entity(AdminServiceFactory.getInstance().getJobDescriptions()).build();
@@ -301,14 +305,14 @@ public class AdminApi {
 	@DELETE
 	@Path("/jobs/{job}")
 
-	@ApiOperation(value = "cancel a running job")
+	@Operation(summary = "cancel a running job")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response cancelJob(@Context HttpServletRequest req,
 							  @PathParam("job") String name) {
 		try {
@@ -322,15 +326,15 @@ public class AdminApi {
 	@GET
 	@Path("/statistics")
 
-	@ApiOperation(value = "get statistics", notes = "get statistics.")
+	@Operation(summary = "get statistics", description = "get statistics.")
 
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = AdminStatistics.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = AdminStatistics.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response getStatistics(@Context HttpServletRequest req) {
 		try {
 			AdminStatistics statistics = new AdminStatistics();
@@ -355,17 +359,17 @@ public class AdminApi {
 	@GET
 	@Path("/applications/{xml}")
 
-	@ApiOperation(value = "list any xml properties (like from homeApplication.properties.xml)", notes = "list any xml properties (like from homeApplication.properties.xml)")
+	@Operation(summary = "list any xml properties (like from homeApplication.properties.xml)", description = "list any xml properties (like from homeApplication.properties.xml)")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Map.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Map.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 
 	public Response getApplicationXML(@Context HttpServletRequest req,
-			@ApiParam(value = "Properties Filename (*.xml)", required = true) @PathParam("xml") String xml) {
+			@Parameter(description = "Properties Filename (*.xml)", required = true) @PathParam("xml") String xml) {
 		try {
 			Set<Entry<Object, Object>> set = AdminServiceFactory.getInstance().getPropertiesXML(xml).entrySet();
 			Map<String, String> map = new HashMap<String, String>();
@@ -385,16 +389,16 @@ public class AdminApi {
 	@PUT
 	@Path("/applications/{xml}")
 
-	@ApiOperation(value = "edit any properties xml (like homeApplication.properties.xml)", notes = "if the key exists, it will be overwritten. Otherwise, it will be created. You only need to transfer keys you want to edit")
+	@Operation(summary = "edit any properties xml (like homeApplication.properties.xml)", description = "if the key exists, it will be overwritten. Otherwise, it will be created. You only need to transfer keys you want to edit")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response updateApplicationXML(@Context HttpServletRequest req,
-			@ApiParam(value = "Properties Filename (*.xml)", required = true) @PathParam("xml") String xml,
+			@Parameter(description = "Properties Filename (*.xml)", required = true) @PathParam("xml") String xml,
 			Map<String, String> properties) {
 		try {
 			AdminServiceFactory.getInstance().updatePropertiesXML(xml, properties);
@@ -408,15 +412,15 @@ public class AdminApi {
 	@DELETE
 	@Path("/applications/{id}")
 
-	@ApiOperation(value = "remove an application", notes = "remove the specified application.")
+	@Operation(summary = "remove an application", description = "remove the specified application.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
-	public Response removeApplication(@ApiParam(value = "Application id", required = true) @PathParam("id") String id,
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+	public Response removeApplication(@Parameter(description = "Application id", required = true) @PathParam("id") String id,
 			@Context HttpServletRequest req) {
 		try {
 			ApplicationInfo info = ApplicationInfoList.getRepositoryInfoById(id);
@@ -432,16 +436,16 @@ public class AdminApi {
 	@PUT
 	@Path("/applications/xml")
 
-	@ApiOperation(value = "register/add an application via xml file", notes = "register the xml file provided.")
+	@Operation(summary = "register/add an application via xml file", description = "register the xml file provided.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = HashMap.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = HashMap.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response addApplication(
-			@ApiParam(value = "XML file for app to register", required = true) @FormDataParam("xml") InputStream is,
+			@Parameter(description = "XML file for app to register", required = true) @FormDataParam("xml") InputStream is,
 			@Context HttpServletRequest req) {
 		try {
 			HashMap<String, String> result = AdminServiceFactory.getInstance().addApplicationFromStream(is);
@@ -454,16 +458,16 @@ public class AdminApi {
 	@PUT
 	@Path("/applications")
 
-	@ApiOperation(value = "register/add an application", notes = "register the specified application.")
+	@Operation(summary = "register/add an application", description = "register the specified application.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = HashMap.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = HashMap.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response addApplication(
-			@ApiParam(value = "Remote application metadata url", required = true) @QueryParam("url") String url,
+			@Parameter(description = "Remote application metadata url", required = true) @QueryParam("url") String url,
 			@Context HttpServletRequest req) {
 		try {
 			HashMap<String, String> result = AdminServiceFactory.getInstance().addApplication(url);
@@ -475,7 +479,7 @@ public class AdminApi {
 
 	@OPTIONS
 	@Path("/applications")
-	@ApiOperation(hidden = true, value = "")
+	@Hidden
 
 	public Response options1() {
 
@@ -485,15 +489,15 @@ public class AdminApi {
 	@GET
 	@Path("/serverUpdate/list")
 
-	@ApiOperation(value = "list available update tasks", notes = "list available update tasks")
+	@Operation(summary = "list available update tasks", description = "list available update tasks")
 
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = ServerUpdateInfo[].class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = ServerUpdateInfo[].class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response serverUpdateList(@Context HttpServletRequest req) {
 		try {
 			List<ServerUpdateInfo> result = AdminServiceFactory.getInstance().getServerUpdateInfos();
@@ -505,7 +509,7 @@ public class AdminApi {
 
 	@OPTIONS
 	@Path("/serverUpdate/list")
-	@ApiOperation(hidden = true, value = "")
+	@Hidden
 
 	public Response options2() {
 
@@ -515,18 +519,18 @@ public class AdminApi {
 	@POST
 	@Path("/serverUpdate/run/{id}")
 
-	@ApiOperation(value = "Run an update tasks", notes = "Run a specific update task (test or full update).")
+	@Operation(summary = "Run an update tasks", description = "Run a specific update task (test or full update).")
 
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = ServerUpdateInfo[].class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = ServerUpdateInfo[].class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response serverUpdateList(
-			@ApiParam(value = "Id of the update task", required = true) @PathParam("id") String id,
-			@ApiParam(value = "Actually execute (if false, just runs in test mode)", defaultValue = "false", required = true) @QueryParam("execute") Boolean execute,
+			@Parameter(description = "Id of the update task", required = true) @PathParam("id") String id,
+			@Parameter(description = "Actually execute (if false, just runs in test mode)", schema = @Schema(defaultValue="false"), required = true) @QueryParam("execute") Boolean execute,
 			@Context HttpServletRequest req) {
 		try {
 			UpdateResult result = new UpdateResult(
@@ -539,7 +543,7 @@ public class AdminApi {
 
 	@OPTIONS
 	@Path("/serverUpdate/run/{id}")
-	@ApiOperation(hidden = true, value = "")
+	@Hidden
 
 	public Response options3() {
 
@@ -549,18 +553,18 @@ public class AdminApi {
 	@POST
 	@Path("/cache/refreshEduGroupCache")
 
-	@ApiOperation(value = "Refresh the Edu Group Cache", notes = "Refresh the Edu Group Cache.")
+	@Operation(summary = "Refresh the Edu Group Cache", description = "Refresh the Edu Group Cache.")
 
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	    })
 	public Response refreshEduGroupCache(
-            @ApiParam(value="keep existing", defaultValue="false") @QueryParam("keepExisting") Boolean keepExisting,
+            @Parameter(description = "keep existing", schema = @Schema(defaultValue="false")) @QueryParam("keepExisting") Boolean keepExisting,
             @Context HttpServletRequest req){
 		try {
             AdminServiceFactory.getInstance().refreshEduGroupCache(keepExisting);
@@ -572,7 +576,7 @@ public class AdminApi {
 
 	@OPTIONS
 	@Path("/cache/refreshEduGroupCache")
-	@ApiOperation(hidden = true, value = "")
+	@Hidden
 
 	public Response options4() {
 
@@ -582,19 +586,19 @@ public class AdminApi {
 	@POST
 	@Path("/cache/removeCacheEntry")
 
-	@ApiOperation(value = "remove cache entry", notes = "remove cache entry")
+	@Operation(summary = "remove cache entry", description = "remove cache entry")
 
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	    })
 	public Response removeCacheEntry(
-            @ApiParam(value="cacheIndex") @QueryParam("cacheIndex") Integer cacheIndex,
-            @ApiParam(value="bean") @QueryParam("bean") String bean,
+            @Parameter(description = "cacheIndex") @QueryParam("cacheIndex") Integer cacheIndex,
+            @Parameter(description = "bean") @QueryParam("bean") String bean,
             @Context HttpServletRequest req){
 		try {
             AdminServiceFactory.getInstance().removeCacheEntry(cacheIndex, bean);
@@ -607,19 +611,19 @@ public class AdminApi {
 	@POST
 	@Path("/cache/clearCache")
 
-	@ApiOperation(value = "clear cache", notes = "clear cache")
+	@Operation(summary = "clear cache", description = "clear cache")
 
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 	public Response clearCache(
 
-			@ApiParam(value="bean") @QueryParam("bean") String bean,
+			@Parameter(description = "bean") @QueryParam("bean") String bean,
 			@Context HttpServletRequest req){
 		try {
 			AdminServiceFactory.getInstance().clearCache(bean);
@@ -632,15 +636,15 @@ public class AdminApi {
 	@GET
 	@Path("/cache/cacheEntries/{id}")
 
-	@ApiOperation(value = "Get entries of a cache", notes = "Get entries of a cache.")
+	@Operation(summary = "Get entries of a cache", description = "Get entries of a cache.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Map.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
-	public Response getCacheEntries(@ApiParam(value = "Id/bean name of the cache") @PathParam("id") String id,
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Map.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+	public Response getCacheEntries(@Parameter(description = "Id/bean name of the cache") @PathParam("id") String id,
 								 @Context HttpServletRequest req) {
 		try {
 			Map<Serializable, Serializable> result = AdminServiceFactory.getInstance().getCacheEntries(id);
@@ -655,15 +659,15 @@ public class AdminApi {
 	@GET
 	@Path("/cache/cacheInfo/{id}")
 
-	@ApiOperation(value = "Get information about a cache", notes = "Get information about a cache.")
+	@Operation(summary = "Get information about a cache", description = "Get information about a cache.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = CacheInfo.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
-	public Response getCacheInfo(@ApiParam(value = "Id/bean name of the cache") @PathParam("id") String id,
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = CacheInfo.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+	public Response getCacheInfo(@Parameter(description = "Id/bean name of the cache") @PathParam("id") String id,
 			@Context HttpServletRequest req) {
 		try {
 			CacheInfo result = AdminServiceFactory.getInstance().getCacheInfo(id);
@@ -676,14 +680,14 @@ public class AdminApi {
 	@GET
 	@Path("/catalina")
 
-	@ApiOperation(value = "Get last info from catalina out", notes = "Get catalina.out log.")
+	@Operation(summary = "Get last info from catalina out", description = "Get catalina.out log.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = String[].class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = String[].class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response getCatalinaOut(@Context HttpServletRequest req) {
 		try {
 			List<String> result = AdminServiceFactory.getInstance().getCatalinaOut();
@@ -695,7 +699,7 @@ public class AdminApi {
 
 	@OPTIONS
 	@Path("/cacheInfo/{id}")
-	@ApiOperation(hidden = true, value = "")
+	@Hidden
 
 	public Response options5() {
 
@@ -705,14 +709,14 @@ public class AdminApi {
 	@GET
 	@Path("/globalGroups")
 
-	@ApiOperation(value = "Get global groups", notes = "Get global groups (groups across repositories).")
+	@Operation(summary = "Get global groups", description = "Get global groups (groups across repositories).")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Group[].class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Group[].class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response getGlobalGroups(@Context HttpServletRequest req) {
 		try {
 			List<GlobalGroup> result = AdminServiceFactory.getInstance().getGlobalGroups();
@@ -728,7 +732,7 @@ public class AdminApi {
 
 	@OPTIONS
 	@Path("/globalGroups")
-	@ApiOperation(hidden = true, value = "")
+	@Hidden
 
 	public Response options6() {
 
@@ -738,18 +742,18 @@ public class AdminApi {
 	@POST
 	@Path("/import/collections")
 
-	@ApiOperation(value = "import collections via a xml file", notes = "xml file must be structured as defined by the xsd standard")
+	@Operation(summary = "import collections via a xml file", description = "xml file must be structured as defined by the xsd standard")
 
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = CollectionsResult.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = CollectionsResult.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response importCollections(
-			@ApiParam(value = "Id of the root to initialize the collection structure, or '-root-' to inflate them on the first level") @QueryParam("parent") String parent,
-			@ApiParam(value = "XML file to parse (or zip file containing exactly 1 xml file to parse)", required = true) @FormDataParam("xml") InputStream is,
+			@Parameter(description = "Id of the root to initialize the collection structure, or '-root-' to inflate them on the first level") @QueryParam("parent") String parent,
+			@Parameter(description = "XML file to parse (or zip file containing exactly 1 xml file to parse)", required = true) @FormDataParam("xml") InputStream is,
 			@Context HttpServletRequest req) {
 		try {
 			if (CollectionDao.ROOT.equals(parent)) {
@@ -767,17 +771,17 @@ public class AdminApi {
 	@POST
 	@Path("/import/excel")
 
-	@ApiOperation(value = "Import excel data", notes = "Import excel data.")
+	@Operation(summary = "Import excel data", description = "Import excel data.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = ExcelResult.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
-	public Response importExcel(@ApiParam(value = "parent", required = true) @QueryParam("parent") String parent,
-								@ApiParam(value = "addToCollection", required = true, defaultValue = "false") @QueryParam("addToCollection") Boolean addToCollection,
-			@ApiParam(value = "Excel file to import", required = true) @FormDataParam("excel") InputStream is,
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = ExcelResult.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+	public Response importExcel(@Parameter(description = "parent", required = true) @QueryParam("parent") String parent,
+								@Parameter(description = "addToCollection", required = true, schema = @Schema(defaultValue="false")) @QueryParam("addToCollection") Boolean addToCollection,
+			@Parameter(description = "Excel file to import", required = true) @FormDataParam("excel") InputStream is,
 			@Context HttpServletRequest req) {
 		try {
 			addToCollection = (addToCollection == null) ? false : addToCollection;
@@ -793,16 +797,16 @@ public class AdminApi {
 	@PUT
 	@Path("/upload/temp/{name}")
 
-	@ApiOperation(value = "Upload a file", notes = "Upload a file to tomcat temp directory, to use it on the server (e.g. an update)")
+	@Operation(summary = "Upload a file", description = "Upload a file to tomcat temp directory, to use it on the server (e.g. an update)")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = UploadResult.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
-	public Response uploadTemp(@ApiParam(value = "filename", required = true) @PathParam("name") String name,
-			@ApiParam(value = "file to upload", required = true) @FormDataParam("file") InputStream is,
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = UploadResult.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+	public Response uploadTemp(@Parameter(description = "filename", required = true) @PathParam("name") String name,
+			@Parameter(description = "file to upload", required = true) @FormDataParam("file") InputStream is,
 			@Context HttpServletRequest req) {
 		try {
 			String file = AdminServiceFactory.getInstance().uploadTemp(name, is);
@@ -815,29 +819,29 @@ public class AdminApi {
 	@POST
 	@Path("/import/oai")
 
-	@ApiOperation(value = "Import oai data", notes = "Import oai data.")
+	@Operation(summary = "Import oai data", description = "Import oai data.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
-	public Response importOai(@ApiParam(value = "base url", required = true) @QueryParam("baseUrl") String baseUrl,
-			@ApiParam(value = "set/catalog id", required = true) @QueryParam("set") String set,
-			@ApiParam(value = "metadata prefix", required = true) @QueryParam("metadataPrefix") String metadataPrefix,
-			@ApiParam(value = "id metadataset", required = false) @QueryParam("metadataset") String metadataset,
-			@ApiParam(value = "importer job class name (call /classes to obtain a list)", required = true, defaultValue = "org.edu_sharing.repository.server.jobs.quartz.ImporterJob") @QueryParam("className") String className,
-			@ApiParam(value = "importer class name (call /classes to obtain a list)", required = false, defaultValue = "org.edu_sharing.repository.server.importer.OAIPMHLOMImporter") @QueryParam("importerClassName") String importerClassName,
-			@ApiParam(value = "RecordHandler class name", required = false, defaultValue = "org.edu_sharing.repository.server.importer.RecordHandlerLOM") @QueryParam("recordHandlerClassName") String recordHandlerClassName,
-			@ApiParam(value = "BinaryHandler class name (may be empty for none)", required = false, defaultValue = "") @QueryParam("binaryHandlerClassName") String binaryHandlerClassName,
-		    @ApiParam(value = "PersistentHandlerClassName class name (may be empty for none)", required = false, defaultValue = "") @QueryParam("persistentHandlerClassName") String persistentHandlerClassName,
-			@ApiParam(value = "url to file", required = false) @QueryParam("fileUrl") String fileUrl,
-			@ApiParam(value = "OAI Ids to import, can be null than the whole set will be imported", required = false, defaultValue = "") @QueryParam("oaiIds") String oaiIds,
-			@ApiParam(value = "force Update of all entries", required = false, defaultValue = "false") @QueryParam("forceUpdate") Boolean forceUpdate,
-			@ApiParam(value = "from: datestring yyyy-MM-dd)", required = false, defaultValue = "") @QueryParam("from") String from,
-			@ApiParam(value = "until: datestring yyyy-MM-dd)", required = false, defaultValue = "") @QueryParam("until") String until,
-		  	@ApiParam(value = "periodInDays: internal sets from and until. only effective if from/until not set)", required = false, defaultValue = "") @QueryParam("periodInDays") String periodInDays,
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+	public Response importOai(@Parameter(description = "base url", required = true) @QueryParam("baseUrl") String baseUrl,
+			@Parameter(description = "set/catalog id", required = true) @QueryParam("set") String set,
+			@Parameter(description = "metadata prefix", required = true) @QueryParam("metadataPrefix") String metadataPrefix,
+			@Parameter(description = "id metadataset", required = false) @QueryParam("metadataset") String metadataset,
+			@Parameter(description = "importer job class name (call /classes to obtain a list)", required = true, schema = @Schema(defaultValue="org.edu_sharing.repository.server.jobs.quartz.ImporterJob")) @QueryParam("className") String className,
+			@Parameter(description = "importer class name (call /classes to obtain a list)", required = false, schema = @Schema(defaultValue="org.edu_sharing.repository.server.importer.OAIPMHLOMImporter")) @QueryParam("importerClassName") String importerClassName,
+			@Parameter(description = "RecordHandler class name", required = false, schema = @Schema(defaultValue="org.edu_sharing.repository.server.importer.RecordHandlerLOM")) @QueryParam("recordHandlerClassName") String recordHandlerClassName,
+			@Parameter(description = "BinaryHandler class name (may be empty for none)", required = false, schema = @Schema(defaultValue="")) @QueryParam("binaryHandlerClassName") String binaryHandlerClassName,
+		    @Parameter(description = "PersistentHandlerClassName class name (may be empty for none)", required = false, schema = @Schema(defaultValue="")) @QueryParam("persistentHandlerClassName") String persistentHandlerClassName,
+			@Parameter(description = "url to file", required = false) @QueryParam("fileUrl") String fileUrl,
+			@Parameter(description = "OAI Ids to import, can be null than the whole set will be imported", required = false, schema = @Schema(defaultValue="")) @QueryParam("oaiIds") String oaiIds,
+			@Parameter(description = "force Update of all entries", required = false, schema = @Schema(defaultValue="false")) @QueryParam("forceUpdate") Boolean forceUpdate,
+			@Parameter(description = "from: datestring yyyy-MM-dd)", required = false, schema = @Schema(defaultValue="")) @QueryParam("from") String from,
+			@Parameter(description = "until: datestring yyyy-MM-dd)", required = false, schema = @Schema(defaultValue="")) @QueryParam("until") String until,
+		  	@Parameter(description = "periodInDays: internal sets from and until. only effective if from/until not set)", required = false, schema = @Schema(defaultValue="")) @QueryParam("periodInDays") String periodInDays,
 		    @Context HttpServletRequest req) {
 		try {
 			AdminServiceFactory.getInstance().importOai(set, fileUrl, baseUrl, metadataset, metadataPrefix, className,
@@ -850,15 +854,15 @@ public class AdminApi {
 
 	@POST
 	@Path("/import/oai/xml")
-	@ApiOperation(value = "Import single xml via oai (for testing)")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Node.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
-	public Response importOaiXML (@ApiParam(value = "RecordHandler class name", required = false, defaultValue = "org.edu_sharing.repository.server.importer.RecordHandlerLOM") @QueryParam("recordHandlerClassName") String recordHandlerClassName,
-							  @ApiParam(value = "BinaryHandler class name (may be empty for none)", required = false, defaultValue = "") @QueryParam("binaryHandlerClassName") String binaryHandlerClassName,
+	@Operation(summary = "Import single xml via oai (for testing)")
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Node.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+	public Response importOaiXML (@Parameter(description = "RecordHandler class name", required = false, schema = @Schema(defaultValue="org.edu_sharing.repository.server.importer.RecordHandlerLOM")) @QueryParam("recordHandlerClassName") String recordHandlerClassName,
+							  @Parameter(description = "BinaryHandler class name (may be empty for none)", required = false, schema = @Schema(defaultValue="")) @QueryParam("binaryHandlerClassName") String binaryHandlerClassName,
 							  @FormDataParam("xml") InputStream xml,
 								@Context HttpServletRequest req) {
 		try {
@@ -875,7 +879,7 @@ public class AdminApi {
 
 	@OPTIONS
 	@Path("/import/oai")
-	@ApiOperation(hidden = true, value = "")
+	@Hidden
 
 	public Response options7() {
 
@@ -885,14 +889,14 @@ public class AdminApi {
 	@GET
 	@Path("/import/oai/classes")
 
-	@ApiOperation(value = "Get OAI class names", notes = "Get available importer classes for OAI import.")
+	@Operation(summary = "Get OAI class names", description = "Get available importer classes for OAI import.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = String[].class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = String[].class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response getOaiClasses(@Context HttpServletRequest req) {
 		try {
 			List<String> result =
@@ -906,7 +910,7 @@ public class AdminApi {
 
 	@OPTIONS
 	@Path("/import/oai/classes")
-	@ApiOperation(hidden = true, value = "")
+	@Hidden
 
 	public Response options8() {
 
@@ -916,17 +920,17 @@ public class AdminApi {
 	@POST
 	@Path("/import/refreshCache/{folder}")
 
-	@ApiOperation(value = "Refresh cache", notes = "Refresh importer cache.")
+	@Operation(summary = "Refresh cache", description = "Refresh importer cache.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response refreshCache(
-			@ApiParam(value = "refresh cache root folder id", defaultValue = "-userhome-", required = true) @PathParam("folder") String rootFolder,
-			@ApiParam(value = "sticky", required = true, defaultValue = "false") @QueryParam("sticky") Boolean sticky,
+			@Parameter(description = "refresh cache root folder id", schema = @Schema(defaultValue="-userhome-"), required = true) @PathParam("folder") String rootFolder,
+			@Parameter(description = "sticky", required = true, schema = @Schema(defaultValue="false")) @QueryParam("sticky") Boolean sticky,
 			@Context HttpServletRequest req) {
 		try {
 			AdminServiceFactory.getInstance().startCacheRefreshingJob(NodeDao.mapNodeConstants(RepositoryDao.getHomeRepository(),rootFolder), sticky != null && sticky);
@@ -938,7 +942,7 @@ public class AdminApi {
 
 	@OPTIONS
 	@Path("/import/refreshCache/{folder}")
-	@ApiOperation(hidden = true, value = "")
+	@Hidden
 
 	public Response options9() {
 
@@ -948,18 +952,18 @@ public class AdminApi {
 	@DELETE
 	@Path("/import/oai")
 
-	@ApiOperation(value = "Remove deleted imports", notes = "Remove deleted imports.")
+	@Operation(summary = "Remove deleted imports", description = "Remove deleted imports.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response removeOaiImports(
-			@ApiParam(value = "base url", required = true) @QueryParam("baseUrl") String baseUrl,
-			@ApiParam(value = "set/catalog id", required = true) @QueryParam("set") String set,
-			@ApiParam(value = "metadata prefix", required = true) @QueryParam("metadataPrefix") String metadataPrefix,
+			@Parameter(description = "base url", required = true) @QueryParam("baseUrl") String baseUrl,
+			@Parameter(description = "set/catalog id", required = true) @QueryParam("set") String set,
+			@Parameter(description = "metadata prefix", required = true) @QueryParam("metadataPrefix") String metadataPrefix,
 			@Context HttpServletRequest req) {
 		try {
 			AdminServiceFactory.getInstance().removeDeletedImports(baseUrl, set, metadataPrefix);
@@ -972,16 +976,16 @@ public class AdminApi {
 	@GET
 	@Path("/propertyToMds")
 
-	@ApiOperation(value = "Get a Mds Valuespace for all values of the given properties", notes = "Get a Mds Valuespace for all values of the given properties.")
+	@Operation(summary = "Get a Mds Valuespace for all values of the given properties", description = "Get a Mds Valuespace for all values of the given properties.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = String.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = String.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response getPropertyToMds(
-			@ApiParam(value = "one or more properties", required = true) @QueryParam("properties") List<String> properties,
+			@Parameter(description = "one or more properties", required = true) @QueryParam("properties") List<String> properties,
 			@Context HttpServletRequest req) {
 		try {
 			XMLResult result = new XMLResult();
@@ -994,7 +998,7 @@ public class AdminApi {
 
 	@OPTIONS
 	@Path("/propertyToMds")
-	@ApiOperation(hidden = true, value = "")
+	@Hidden
 
 	public Response options10() {
 
@@ -1003,14 +1007,14 @@ public class AdminApi {
 
 	@GET
 	@Path("/clusterInfo")
-	@ApiOperation(value = "Get information about the Cluster", notes = "Get information the Cluster")
+	@Operation(summary = "Get information about the Cluster", description = "Get information the Cluster")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = CacheCluster.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = CacheCluster.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response getCluster(@Context HttpServletRequest req) {
 		try {
 			CacheCluster result = AdminServiceFactory.getInstance().getCacheCluster();
@@ -1022,7 +1026,7 @@ public class AdminApi {
 
 	@OPTIONS
 	@Path("/clusterInfo")
-	@ApiOperation(hidden = true, value = "")
+	@Hidden
 
 	public Response options11() {
 
@@ -1031,14 +1035,14 @@ public class AdminApi {
 
 	@GET
 	@Path("/clusterInfos")
-	@ApiOperation(value = "Get information about the Cluster", notes = "Get information the Cluster")
+	@Operation(summary = "Get information about the Cluster", description = "Get information the Cluster")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = CacheCluster.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = CacheCluster.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response getClusters(@Context HttpServletRequest req) {
 		try {
 			List<CacheCluster> result = AdminServiceFactory.getInstance().getCacheClusters();
@@ -1050,7 +1054,7 @@ public class AdminApi {
 
 	@OPTIONS
 	@Path("/clusterInfos")
-	@ApiOperation(hidden = true, value = "")
+	@Hidden
 
 	public Response options12() {
 
@@ -1059,18 +1063,18 @@ public class AdminApi {
 
 	@POST
 	@Path("/mail/{receiver}/{template}")
-	@ApiOperation(value = "Test a mail template", notes = "Sends the given template as a test to the given receiver.")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@Operation(summary = "Test a mail template", description = "Sends the given template as a test to the given receiver.")
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 
 	public Response testMail(
-			@ApiParam(required = true) @PathParam("receiver") String receiver,
-			@ApiParam(required = true) @PathParam("template") String template,
+			@Parameter(required = true) @PathParam("receiver") String receiver,
+			@Parameter(required = true) @PathParam("template") String template,
 			@Context HttpServletRequest req) {
 		try {
 			AdminServiceFactory.getInstance().testMail(receiver,template);
@@ -1086,18 +1090,18 @@ public class AdminApi {
 	@GET
 	@Path("/export/lom")
 
-	@ApiOperation(value = "Export Nodes with LOM Metadata Format", notes = "Export Nodes with LOM Metadata Format.")
+	@Operation(summary = "Export Nodes with LOM Metadata Format", description = "Export Nodes with LOM Metadata Format.")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response exportLOM(
-			@ApiParam(value = "filterQuery", required = true) @QueryParam("filterQuery") String filterQuery,
-			@ApiParam(value = "targetDir", required = true) @QueryParam("targetDir") String targetDir,
-			@ApiParam(value = "subObjectHandler", required = true) @QueryParam("subObjectHandler") Boolean subObjectHandler,
+			@Parameter(description = "filterQuery", required = true) @QueryParam("filterQuery") String filterQuery,
+			@Parameter(description = "targetDir", required = true) @QueryParam("targetDir") String targetDir,
+			@Parameter(description = "subObjectHandler", required = true) @QueryParam("subObjectHandler") Boolean subObjectHandler,
 			@Context HttpServletRequest req) {
 		try {
 			AdminServiceFactory.getInstance().exportLom(filterQuery, targetDir, subObjectHandler);
@@ -1109,7 +1113,7 @@ public class AdminApi {
 
 	@OPTIONS
 	@Path("/export/lom")
-	@ApiOperation(hidden = true, value = "")
+	@Hidden
 
 	public Response options13() {
 
@@ -1118,18 +1122,18 @@ public class AdminApi {
 
 	@POST
 	@Path("/job/{jobClass}")
-	@ApiOperation(value = "Start a Job.", notes = "Start a Job.")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@Operation(summary = "Start a Job.", description = "Start a Job.")
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 
 	public Response startJob(
-			@ApiParam(value = "jobClass", required = true) @PathParam("jobClass") String jobClass,
-			@ApiParam(value = "params", required = true) HashMap<String, String> params,
+			@Parameter(description = "jobClass", required = true) @PathParam("jobClass") String jobClass,
+			@Parameter(description = "params", required = true) HashMap<String, String> params,
 			@Context HttpServletRequest req) {
 		try {
 			AdminServiceFactory.getInstance().startJob(jobClass, new HashMap<String,Object>(params));
@@ -1144,7 +1148,7 @@ public class AdminApi {
 
 	@OPTIONS
 	@Path("/job")
-	@ApiOperation(hidden = true, value = "")
+	@Hidden
 
 	public Response options14() {
 
@@ -1155,17 +1159,17 @@ public class AdminApi {
 	@Path("/elastic")
 	@Consumes({ "application/json" })
 
-	@ApiOperation(value = "Search for custom elastic DSL query")
+	@Operation(summary = "Search for custom elastic DSL query")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = SearchResultElastic.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResultElastic.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 
 	public Response searchByElasticDSL(
-			@ApiParam(value = "dsl query (json encoded)", defaultValue = "") @QueryParam("dsl") String dsl,
+			@Parameter(description = "dsl query (json encoded)", schema = @Schema(defaultValue="")) @QueryParam("dsl") String dsl,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -1207,24 +1211,24 @@ public class AdminApi {
 	@Path("/lucene")
 	@Consumes({ "application/json" })
 
-	@ApiOperation(value = "Search for custom lucene query", notes = "e.g. @cm\\:name:\"*\"")
+	@Operation(summary = "Search for custom lucene query", description = "e.g. @cm\\:name:\"*\"")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = SearchResult.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResult.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 
 	public Response searchByLucene(
-			@ApiParam(value = "query", defaultValue = "@cm\\:name:\"*\"") @QueryParam("query") String query,
-			@ApiParam(value = "maximum items per page", defaultValue = "10") @QueryParam("maxItems") Integer maxItems,
-			@ApiParam(value = "skip a number of items", defaultValue = "0") @QueryParam("skipCount") Integer skipCount,
-			@ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-			@ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
-			@ApiParam(value = "property filter for result nodes (or \"-all-\" for all properties)", defaultValue = "-all-") @QueryParam("propertyFilter") List<String> propertyFilter,
-			@ApiParam(value = "store, workspace or archive") @QueryParam("store") LuceneStore store,
-			@ApiParam(value = "authority scope to search for") @QueryParam("authorityScope") List<String> authorityScope,
+			@Parameter(description = "query", schema = @Schema(defaultValue="@cm\\:name:\"*\"") ) @QueryParam("query") String query,
+			@Parameter(description = "maximum items per page", schema = @Schema(defaultValue="10") ) @QueryParam("maxItems") Integer maxItems,
+			@Parameter(description = "skip a number of items", schema = @Schema(defaultValue="0") ) @QueryParam("skipCount") Integer skipCount,
+			@Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+			@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", schema = @Schema(defaultValue="-all-") ) @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Parameter(description = "store, workspace or archive") @QueryParam("store") LuceneStore store,
+			@Parameter(description = "authority scope to search for") @QueryParam("authorityScope") List<String> authorityScope,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -1275,7 +1279,7 @@ public class AdminApi {
 
 	@OPTIONS
 	@Path("/lucene")
-	@ApiOperation(hidden = true, value = "")
+	@Hidden
 
 	public Response options03() {
 
@@ -1286,22 +1290,22 @@ public class AdminApi {
 	@Path("/lucene/export")
 	@Consumes({ "application/json" })
 
-	@ApiOperation(value = "Search for custom lucene query and choose specific properties to load", notes = "e.g. @cm\\:name:\"*\"")
+	@Operation(summary = "Search for custom lucene query and choose specific properties to load", description = "e.g. @cm\\:name:\"*\"")
 
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = List.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = List.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 
 	public Response exportByLucene(
-			@ApiParam(value = "query", defaultValue = "@cm\\:name:\"*\"") @QueryParam("query") String query,
-			@ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-			@ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
-			@ApiParam(value = "properties to fetch, use parent::<property> to include parent property values") @QueryParam("properties") List<String> properties,
-			@ApiParam(value = "store, workspace or archive") @QueryParam("store") LuceneStore store,
-			@ApiParam(value = "authority scope to search for") @QueryParam("authorityScope") List<String> authorityScope,
+			@Parameter(description = "query", schema = @Schema(defaultValue="@cm\\:name:\"*\"") ) @QueryParam("query") String query,
+			@Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+			@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+			@Parameter(description = "properties to fetch, use parent::<property> to include parent property values") @QueryParam("properties") List<String> properties,
+			@Parameter(description = "store, workspace or archive") @QueryParam("store") LuceneStore store,
+			@Parameter(description = "authority scope to search for") @QueryParam("authorityScope") List<String> authorityScope,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -1375,16 +1379,16 @@ public class AdminApi {
 
 	@PUT
 	@Path("/deletePersons")
-	@ApiOperation(value = "delete persons", notes = "delete the given persons. Their status must be set to \"todelete\"")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = PersonReport.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	@Operation(summary = "delete persons", description = "delete the given persons. Their status must be set to \"todelete\"")
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = PersonReport.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response deletePerson(
-			@ApiParam(value = "names of the users to delete", required = true) @QueryParam("username") List<String> username,
-			@ApiParam(value = "options object what and how to delete user contents") PersonDeleteOptions options,
+			@Parameter(description = "names of the users to delete", required = true) @QueryParam("username") List<String> username,
+			@Parameter(description = "options object what and how to delete user contents") PersonDeleteOptions options,
 			@Context HttpServletRequest req) {
 		try {
 			PersonReport result=new PersonLifecycleService().deletePersons(username,options);
@@ -1397,19 +1401,19 @@ public class AdminApi {
 
     @POST
     @Path("/log")
-    @ApiOperation(value = "Change the loglevel for classes at runtime.", notes = "Root appenders are used. Check the appender treshold.")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-            @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-            @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-            @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-            @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-            @ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class),
-            @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+    @Operation(summary = "Change the loglevel for classes at runtime.", description = "Root appenders are used. Check the appender treshold.")
+    @ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+            @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 
 	public Response changeLogging(
-			@ApiParam(value = "name", required = true) @QueryParam("name") String name,
-			@ApiParam(value = "loglevel", required = true) @QueryParam("loglevel") String loglevel,
-			@ApiParam(value = "appender", defaultValue = "File") @QueryParam("appender") String appender,
+			@Parameter(description = "name", required = true) @QueryParam("name") String name,
+			@Parameter(description = "loglevel", required = true) @QueryParam("loglevel") String loglevel,
+			@Parameter(description = "appender", schema = @Schema(defaultValue="File") ) @QueryParam("appender") String appender,
 			@Context HttpServletRequest req) {
 		try {
 
@@ -1475,14 +1479,14 @@ public class AdminApi {
 
 	@GET
 	@Path("/repositoryConfig")
-	@ApiOperation(value = "get the repository config object")
+	@Operation(summary = "get the repository config object")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = RepositoryConfig.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = RepositoryConfig.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response getConfig(@Context HttpServletRequest req) {
 		try {
 			return Response.ok().entity(AdminServiceFactory.getInstance().getConfig()).build();
@@ -1492,14 +1496,14 @@ public class AdminApi {
 	}
 	@PUT
 	@Path("/repositoryConfig")
-	@ApiOperation(value = "set/update the repository config object")
+	@Operation(summary = "set/update the repository config object")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response setConfig(@Context HttpServletRequest req,RepositoryConfig config) {
 		try {
 			AdminServiceFactory.getInstance().setConfig(config);
@@ -1510,16 +1514,16 @@ public class AdminApi {
 	}
 	@GET
 	@Path("/configFile")
-	@ApiOperation(value = "get a base system config file (e.g. edu-sharing.conf)")
+	@Operation(summary = "get a base system config file (e.g. edu-sharing.conf)")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = String.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = String.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response getConfigFile(@Context HttpServletRequest req,
-								  @ApiParam(value = "filename to fetch", required = true) @QueryParam("filename") String filename
+								  @Parameter(description = "filename to fetch", required = true) @QueryParam("filename") String filename
 								  ) {
 		try {
 			String content=AdminServiceFactory.getInstance().getConfigFile(filename);
@@ -1530,14 +1534,14 @@ public class AdminApi {
 	}
 	@GET
 	@Path("/config/merged")
-	@ApiOperation(value = "Get the fully merged & parsed (lightbend) backend config")
+	@Operation(summary = "Get the fully merged & parsed (lightbend) backend config")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Object.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+			@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Object.class))),
+			@ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response getLightbendConfig(@Context HttpServletRequest req) {
 		try {
 			return Response.ok().entity(
@@ -1550,16 +1554,16 @@ public class AdminApi {
 
 	@PUT
 	@Path("/configFile")
-	@ApiOperation(value = "update a base system config file (e.g. edu-sharing.conf)")
+	@Operation(summary = "update a base system config file (e.g. edu-sharing.conf)")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response updateConfigFile(@Context HttpServletRequest req,
-									 @ApiParam(value = "filename to fetch", required = true) @QueryParam("filename") String filename,
+									 @Parameter(description = "filename to fetch", required = true) @QueryParam("filename") String filename,
 									 String content) {
 		try {
 			AdminServiceFactory.getInstance().updateConfigFile(filename,content);
@@ -1570,16 +1574,16 @@ public class AdminApi {
 	}
 	@POST
 	@Path("/authenticate/{authorityName}")
-	@ApiOperation(value = "switch the session to a known authority name")
+	@Operation(summary = "switch the session to a known authority name")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+			@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response switchAuthority(@Context HttpServletRequest req,
-									 @ApiParam(value = "the authority to use (must be a person)") @PathParam("authorityName") String authorityName) {
+									 @Parameter(description = "the authority to use (must be a person)") @PathParam("authorityName") String authorityName) {
 		try {
 			AdminServiceFactory.getInstance().switchAuthentication(authorityName);
 			return Response.ok().build();

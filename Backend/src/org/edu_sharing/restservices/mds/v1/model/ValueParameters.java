@@ -2,7 +2,7 @@ package org.edu_sharing.restservices.mds.v1.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 public class ValueParameters {
 	
@@ -13,13 +13,13 @@ public class ValueParameters {
 	private String pattern;
 	
 	
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("property")
 	public String getProperty() {
 		return property;
 	}
 	
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("query")
 	public String getQuery() {
 		return query;
@@ -27,7 +27,7 @@ public class ValueParameters {
 	
 	
 	
-	@ApiModelProperty(required = true, value = "prefix of the value (or \"-all-\" for all values)")
+	@Schema(required = true, description = "prefix of the value (or \"-all-\" for all values)")
 	@JsonProperty("pattern")
 	public void setPattern(String pattern) {
 		this.pattern = pattern;

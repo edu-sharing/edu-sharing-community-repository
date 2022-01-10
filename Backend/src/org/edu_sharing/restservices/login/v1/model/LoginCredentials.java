@@ -2,7 +2,7 @@ package org.edu_sharing.restservices.login.v1.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 public class LoginCredentials {
 
@@ -12,7 +12,7 @@ public class LoginCredentials {
 	
 	String scope;
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("userName")
 	public String getUserName() {
 		return userName;
@@ -22,7 +22,7 @@ public class LoginCredentials {
 		this.userName = userName;
 	}
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("password")
 	public String getPassword() {
 		return password;
@@ -36,7 +36,7 @@ public class LoginCredentials {
 		this.scope = scope;
 	}
 	
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("scope")
 	public String getScope() {
 		return scope;

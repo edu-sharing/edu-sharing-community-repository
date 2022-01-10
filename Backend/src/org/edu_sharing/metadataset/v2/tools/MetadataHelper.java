@@ -1,6 +1,5 @@
 package org.edu_sharing.metadataset.v2.tools;
 
-import io.swagger.config.ConfigFactory;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.StringUtils;

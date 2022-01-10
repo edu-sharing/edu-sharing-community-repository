@@ -6,11 +6,11 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 import org.edu_sharing.restservices.UserStatus;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class User extends UserSimple {
 
 	
@@ -24,7 +24,7 @@ public class User extends UserSimple {
 		homeFolder=new NodeRef(user.getRepositoryId(),user.getNodeId());
 	}
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("homeFolder")
 	public NodeRef getHomeFolder() {
 		return homeFolder;
@@ -34,7 +34,7 @@ public class User extends UserSimple {
 		this.homeFolder = homeFolder;
 	}
 
-	@ApiModelProperty(value = "")
+	@Schema(description = "")
 	@JsonProperty("sharedFolders")
 	public List<NodeRef> getSharedFolders() {
 		return sharedFolders;

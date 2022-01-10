@@ -1,15 +1,15 @@
 package org.edu_sharing.restservices.shared;
 
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class Pagination  {
   
   private Integer total = null;
@@ -24,7 +24,7 @@ public class Pagination  {
   }
 /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("total")
   public Integer getTotal() {
     return total;
@@ -36,7 +36,7 @@ public class Pagination  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("from")
   public Integer getFrom() {
     return from;
@@ -48,7 +48,7 @@ public class Pagination  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("count")
   public Integer getCount() {
     return count;

@@ -1,13 +1,13 @@
 package org.edu_sharing.restservices.shared;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class Mds {
 
 	private MdsRef ref = null;
@@ -17,7 +17,7 @@ public class Mds {
 	private List<MdsView> views = null;
 	private MdsQueries queries = null;
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("ref")
 	public MdsRef getRef() {
 		return ref;
@@ -28,7 +28,7 @@ public class Mds {
 	}
 
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("types")
 	public List<MdsType> getModel() {
 		return types;
@@ -39,7 +39,7 @@ public class Mds {
 	}
 
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("forms")
 	public List<MdsForm> getForms() {
 		return forms;
@@ -49,7 +49,7 @@ public class Mds {
 		this.forms = forms;
 	}
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("lists")
 	public List<MdsList> getLists() {
 		return lists;
@@ -59,7 +59,7 @@ public class Mds {
 		this.lists = lists;
 	}
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("views")
 	public List<MdsView> getViews() {
 		return views;
@@ -69,7 +69,7 @@ public class Mds {
 		this.views = views;
 	}
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("queries")
 	public MdsQueries getQueries() {
 		return queries;

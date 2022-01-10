@@ -8,11 +8,11 @@ import org.edu_sharing.restservices.shared.UserSimple;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class UserEntries  {
   
 	  private List<UserSimple> list = null;
@@ -21,7 +21,7 @@ public class UserEntries  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("users")
   public List<UserSimple> getList() {
     return list;
@@ -41,7 +41,7 @@ public class UserEntries  {
     sb.append("}\n");
     return sb.toString();
   }
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("pagination")
 	public Pagination getPagination() {
 		return pagination;

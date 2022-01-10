@@ -9,6 +9,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.core.util.Json;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
@@ -72,7 +73,6 @@ import org.edu_sharing.service.share.ShareServiceImpl;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import io.swagger.util.Json;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.core.Authentication;
 
