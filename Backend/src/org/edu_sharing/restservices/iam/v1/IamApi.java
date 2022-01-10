@@ -3,6 +3,7 @@ package org.edu_sharing.restservices.iam.v1;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -200,10 +201,10 @@ public class IamApi  {
     		    })
 
     public Response getNodeList(
-    		@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-    		@Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue="-me-" )) @PathParam("person") String person,
-    		@Parameter(description = "list name",required=true) @PathParam("list") String list,
-    	    @Parameter(description = RestConstants.MESSAGE_PROPERTY_FILTER, schema = @Schema(defaultValue="-all-")) @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = "username (or \"-me-\" for current user)", required = true, schema = @Schema(defaultValue="-me-" )) @PathParam("person") String person,
+			@Parameter(description = "list name",required=true) @PathParam("list") String list,
+			@Parameter(description = RestConstants.MESSAGE_PROPERTY_FILTER, array = @ArraySchema(schema = @Schema(defaultValue="-all-")))  @QueryParam("propertyFilter") List<String> propertyFilter,
     		@Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
     		@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
     		@Context HttpServletRequest req) {
