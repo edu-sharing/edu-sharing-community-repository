@@ -50,6 +50,7 @@
             <configuration>
               <includeArtifactIds>
                 edu_sharing-community-repository-plugin-elastic-deploy-installer-repository-scripts-debian-bullseye,
+                edu_sharing-enterprise-repository-plugin-cluster-deploy-installer-repository-scripts-debian-bullseye,
                 edu_sharing-enterprise-repository-plugin-transform-deploy-installer-repository-scripts-debian-bullseye
               </includeArtifactIds>
               <excludes>META-INF/**</excludes>
@@ -125,6 +126,27 @@
   </dependencies>
 
   <profiles>
+
+    <profile>
+
+      <id>plugin.cluster</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.PLUGIN_CLUSTER_ENABLED</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <dependencies>
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-enterprise-repository-plugin-cluster-deploy-installer-repository-scripts-debian-bullseye</artifactId>
+        </dependency>
+      </dependencies>
+
+    </profile>
 
     <profile>
 

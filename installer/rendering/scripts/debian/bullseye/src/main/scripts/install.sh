@@ -174,9 +174,11 @@ install_edu_sharing() {
 		echo "- WARNING local maven cache is used"
 	else
 		echo "- download edu-sharing rendering-service distribution"
+		mvn help:effective-settings
+
 		mvn -q dependency:get \
 				-Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-rendering-distribution:${org.edu_sharing:edu_sharing-community-deploy-installer-rendering-distribution:tar.gz:bin.version}:tar.gz:bin \
-				-DremoteRepositories=myreleases::::https://artifacts.edu-sharing.com/repository/community-releases/,mysnapshots::::https://artifacts.edu-sharing.com/repository/community-snapshots/ \
+				-DremoteRepositories=edusharing-remote::::https://artifacts.edu-sharing.com/repository/maven-remote/ \
 				-Dtransitive=false
 	fi
 

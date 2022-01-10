@@ -510,7 +510,7 @@ else
 	echo "- download edu-sharing repository distribution"
 	mvn -q dependency:get \
 		-Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}:tar.gz:bin \
-		-DremoteRepositories=edu-sharing::::https://artifacts.edu-sharing.com/repository/maven-remote/ \
+		-DremoteRepositories=edusharing-remote::::https://artifacts.edu-sharing.com/repository/maven-remote/ \
 		-Dtransitive=false
 fi
 

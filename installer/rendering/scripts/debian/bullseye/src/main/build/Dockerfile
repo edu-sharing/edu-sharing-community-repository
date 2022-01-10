@@ -162,6 +162,7 @@ COPY assets/rendering/de.metaventis.esrender.log4php.properties $RS_ROOT/conf/
 COPY assets/rendering/de.metaventis.esrender.log4php.cachecleaner.properties $RS_ROOT/install/_tmpl/conf/
 
 COPY assets/entrypoint.sh ./
+COPY assets/settings.xml $HOME/.m2/
 COPY assets/apache2-foreground ./
 
 RUN set -eux \

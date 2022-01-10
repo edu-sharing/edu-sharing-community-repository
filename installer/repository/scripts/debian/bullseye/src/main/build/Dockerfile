@@ -234,6 +234,7 @@ RUN set -eux \
 RUN echo "test"
 COPY install.sh .env.base bin/installer/
 COPY assets/entrypoint.sh bin/
+COPY assets/settings.xml /root/.m2/
 
 #RUN set -eux \
 #    && chmod +x install.sh \

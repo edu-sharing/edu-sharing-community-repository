@@ -74,9 +74,7 @@ Installation or Update
    BRANCH=maven-release-6.1
    mvn -q dependency:get \
        -Dartifact="org.edu_sharing:edu_sharing-community-deploy-installer-repository-scripts-debian-bullseye:${BRANCH}:tar.gz:bin" \
-       -DremoteRepositories= \
-            myreleases::::https://artifacts.edu-sharing.com/repository/community-releases/, \
-            mysnapshots::::https://artifacts.edu-sharing.com/repository/community-snapshots/ \
+       -DremoteRepositories=edusharing-remote::::https://artifacts.edu-sharing.com/repository/maven-remote/ \
        -Dtransitive=false
       
    mvn -q dependency:copy \
