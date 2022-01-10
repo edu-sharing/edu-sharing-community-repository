@@ -7,10 +7,10 @@ export COMPOSE_NAME="${COMPOSE_PROJECT_NAME:-installer-$GIT_BRANCH}"
 
 case "$(uname)" in
 MINGW*)
-	COMPOSE_EXEC="winpty docker-compose"
+	COMPOSE_EXEC="winpty docker-compose -p $COMPOSE_NAME"
 	;;
 *)
-	COMPOSE_EXEC="docker-compose"
+	COMPOSE_EXEC="docker-compose -p $COMPOSE_NAME"
 	;;
 esac
 
@@ -52,12 +52,6 @@ COMPOSE_DIR="compose/debian/bullseye/target/compose"
 	cp -f ".env" "${COMPOSE_DIR}"
 }
 
-export COMPOSE_CI=""
-if [ -n "${CI}" ]; then
-	export REPOSITORY_SERVICE_HOST="docker"
-	export RENDERING_SERVICE_HOST="docker"
-	export COMPOSE_CI=" -f aio-ci.yml ${COMPOSE_CI}"
-fi
 
 [[ ! -d "${COMPOSE_DIR}" ]] && {
 	echo "Initializing ..."
@@ -92,19 +86,94 @@ info() {
 	echo ""
 }
 
+compose_yml() {
+
+	COMPOSE_BASE_FILE="$1"
+	COMPOSE_DIRECTORY="$(dirname "$COMPOSE_BASE_FILE")"
+	COMPOSE_FILE_NAME="$(basename "$COMPOSE_BASE_FILE" | cut -f 1 -d '.')" # without extension
+
+	COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME.yml"
+	COMPOSE_LIST=
+	if [[ -f "$COMPOSE_FILE" ]]; then
+		COMPOSE_LIST="$COMPOSE_LIST -f $COMPOSE_FILE"
+	fi
+
+	shift || {
+		echo "$COMPOSE_LIST"
+		exit
+	}
+
+	while true; do
+		flag="$1"
+		shift || break
+
+		COMPOSE_FILE=""
+		case "$flag" in
+		-ci) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-ci.yml" ;;
+		-local) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-local.yml" ;;
+		-remote) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-remote.yml" ;;
+		*)
+			{
+				echo "error: unknown flag: $flag"
+				echo ""
+				echo "valid flags are:"
+				echo "  -ci"
+				echo "  -local"
+				echo "  -remote"
+			} >&2
+			exit 1
+			;;
+		esac
+
+		if [[ -f "$COMPOSE_FILE" ]]; then
+			COMPOSE_LIST="$COMPOSE_LIST -f $COMPOSE_FILE"
+		fi
+	done
+
+	echo $COMPOSE_LIST
+}
+
+compose_all_plugins() {
+	COMPOSE_LIST=
+	for plugin in plugin*/; do
+		[ ! -d $plugin ] && continue
+		COMPOSE_PLUGIN="$(compose_yml "./$plugin$(basename $plugin).yml" "$@")"
+		COMPOSE_LIST="$COMPOSE_LIST $COMPOSE_PLUGIN"
+	done
+
+	echo $COMPOSE_LIST
+}
+
+export COMPOSE_CI=""
+if [ -n "${CI}" ]; then
+	export REPOSITORY_SERVICE_HOST="docker"
+	export RENDERING_SERVICE_HOST="docker"
+
+	export COMPOSE_CI="$(compose_yml aio.yml -ci) $(compose_all_plugins -ci)"
+fi
+
 logs() {
+	COMPOSE_LIST="$(compose_yml aio.yml) $(compose_all_plugins)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "aio.yml" \
+		$COMPOSE_LIST \
 		logs -f || exit
 }
 
 ps() {
+	COMPOSE_LIST="$(compose_yml aio.yml) $(compose_all_plugins)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "aio.yml" \
+		$COMPOSE_LIST \
 		ps || exit
 }
 
 init() {
+	rm -f .env.repository .env.rendering .env.elastic
 	{
 		echo "REPOSITORY_SERVICE_ADMIN_PASS=${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
 		echo "REPOSITORY_SERVICE_HOST_EXTERNAL=${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}"
@@ -112,7 +181,12 @@ init() {
 		echo "REPOSITORY_SERVICE_PORT_EXTERNAL=${REPOSITORY_SERVICE_PORT:-8100}"
 		echo "REPOSITORY_SERVICE_PORT_INTERNAL=80"
 		echo "REPOSITORY_SERVICE_HOME_APPID=${COMPOSE_PROJECT_NAME:-compose}"
-	} >>.env.repository
+
+		#elastic plugin
+		echo "REPOSITORY_SEARCH_ELASTIC_HOST=elastic"
+		echo "REPOSITORY_SEARCH_ELASTIC_PORT=9200"
+	} >> .env.repository
+
 	{
 		echo "RENDERING_DATABASE_PASS=${RENDERING_DATABASE_PASS:-rendering}"
 		echo "RENDERING_DATABASE_USER=${RENDERING_DATABASE_USER:-rendering}"
@@ -122,38 +196,55 @@ init() {
 		echo "RENDERING_SERVICE_PORT_INTERNAL=80"
 		echo "REPOSITORY_SERVICE_ADMIN_PASS=${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
 		echo "REPOSITORY_SERVICE_HOST=repository"
+
 		echo "REPOSITORY_SERVICE_PORT=80"
-	} >>.env.rendering
+	} >> .env.rendering
+
+	{
+		echo "REPOSITORY_SERVICE_ADMIN_PASS=${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
+    echo "REPOSITORY_SERVICE_HOST_INTERNAL=repository"
+    echo "REPOSITORY_SERVICE_PORT_INTERNAL=80"
+	} >> .env.elastic
+
 }
 
 rstart() {
+	COMPOSE_LIST="$(compose_yml aio.yml -remote) $(compose_all_plugins -remote)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "aio.yml" \
-		-f "aio-remote.yml" \
+		$COMPOSE_LIST \
 		pull || exit
 
 	$COMPOSE_EXEC \
-		-f "aio.yml" \
-		-f "aio-remote.yml" \
+		$COMPOSE_LIST \
 		$COMPOSE_CI \
 		up -d || exit
 }
 
 lstart() {
+	COMPOSE_LIST="$(compose_yml aio.yml -local) $(compose_all_plugins -local)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	[[ -z "${MAVEN_HOME}" ]] && {
-		export MAVEN_HOME="$HOME/.m2"
-	}
+  	export MAVEN_HOME="$HOME/.m2"
+  }
 
 	$COMPOSE_EXEC \
-		-f "aio.yml" \
-		-f "aio-local.yml" \
+		$COMPOSE_LIST \
 		$COMPOSE_CI \
 		up -d || exit
 }
 
 stop() {
+	COMPOSE_LIST="$(compose_yml aio.yml) $(compose_all_plugins)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
 	$COMPOSE_EXEC \
-		-f "aio.yml" \
+		$COMPOSE_LIST \
 		stop || exit
 }
 
@@ -161,10 +252,13 @@ remove() {
 	read -p "Are you sure you want to continue? [y/N] " answer
 	case ${answer:0:1} in
 	y | Y)
+		COMPOSE_LIST="$(compose_yml aio.yml) $(compose_all_plugins)"
+
+		echo "Use compose set: $COMPOSE_LIST"
+
 		$COMPOSE_EXEC \
-			-f "aio.yml" \
-			down -v || exit
-		;;
+			$COMPOSE_LIST \
+			down || exit
 	*)
 		echo Canceled.
 		;;

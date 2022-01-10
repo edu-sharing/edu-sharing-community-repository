@@ -94,7 +94,10 @@
             </goals>
             <phase>package</phase>
             <configuration>
-              <includeArtifactIds>edu_sharing-community-repository-config</includeArtifactIds>
+              <includeArtifactIds>
+                edu_sharing-community-repository-config,
+                edu_sharing-community-repository-plugin-mongo-config
+              </includeArtifactIds>
               <outputDirectory>${project.build.directory}/dist/tomcat/shared/classes</outputDirectory>
             </configuration>
           </execution>
@@ -109,19 +112,7 @@
               <outputDirectory>${project.build.directory}/dist/tomcat/webapps/edu-sharing</outputDirectory>
             </configuration>
           </execution>
-<!--
-          <execution>
-            <id>elastic-tracker</id>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <phase>package</phase>
-            <configuration>
-              <includeArtifactIds>edu_sharing-community-repository-backend-search-elastic-tracker</includeArtifactIds>
-              <outputDirectory>${project.build.directory}/dist/elastictracker</outputDirectory>
-            </configuration>
-          </execution>
--->
+
           <execution>
             <id>rest-api</id>
             <goals>
@@ -170,13 +161,6 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>edu_sharing-community-repository-backend-services-rest-api</artifactId>
     </dependency>
-
-<!--
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-repository-backend-search-elastic-tracker</artifactId>
-    </dependency>
--->
 
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -287,6 +271,11 @@
           <groupId>${project.groupId}</groupId>
           <artifactId>edu_sharing-community-repository-plugin-mongo-backend-services-module</artifactId>
           <type>amp</type>
+        </dependency>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-community-repository-plugin-mongo-config</artifactId>
         </dependency>
 
       </dependencies>

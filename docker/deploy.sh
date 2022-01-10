@@ -332,5 +332,3 @@ esac
 
 popd >/dev/null || exit
 popd >/dev/null || exit
-
-# TODO plugin handling

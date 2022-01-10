@@ -21,13 +21,25 @@ export CATALINA_PID
 
 
 start() {
-	./install.sh --all -f .env "$@"
-	./install.sh --all -f .env "$@"
+
+	echo "current path: $PWD"
+	bin/installer/install.sh -f .env "$@" #|| exit 1
+	bin/installer/install.sh -f .env "$@" #|| exit 1
+
+	######################################################################################################################
+
+	# PLUGIN BEFORE
+	for plugin in bin/plugins/plugin-*/entrypoint-before.sh; do
+		 [[ -f $plugin ]] && {
+				source $plugin || exit 1
+		 }
+	done
+
+	######################################################################################################################
 
 	./postgresql/scripts/ctl.sh start
 	./libreoffice/scripts/ctl.sh start
-	systemctl start elasticsearch
-	#./tomcat/scripts/ctl.sh daemon
+
 
 	local catalinaPid
 
@@ -42,31 +54,22 @@ start() {
 
 	apache2ctl start
 
-	until wait-for-it "localhost:9200" -t 3; do sleep 1; done
+	######################################################################################################################
 
-	until [[ $(curl -sSf -w "%{http_code}\n" -o /dev/null "http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=3s") -eq 200 ]]; do
-		echo >&2 "Waiting for elasticsearch ..."
-		sleep 3
+	# PLUGIN AFTER
+	for plugin in bin/plugins/plugin-*/entrypoint-after.sh; do
+		 [[ -f $plugin ]] && {
+				source $plugin || exit 1
+		 }
 	done
 
-	until wait-for-it "localhost:8080" -t 3; do sleep 1; done
-
-	until [[ $(curl -sSf -w "%{http_code}\n" -o /dev/null -H 'Accept: application/json' "http://localhost:8080/edu-sharing/rest/_about/status/SERVICE?timeoutSeconds=3") -eq 200 ]]; do
-		echo >&2 "Waiting for edu-sharing ..."
-		sleep 3
-	done
-
-	until [[ $(curl -sSf -w "%{http_code}\n" -o /dev/null -H 'Accept: application/json' "http://localhost:8080/edu-sharing/rest/_about/status/SEARCH?timeoutSeconds=3") -eq 200 ]]; do
-		echo >&2 "Waiting for edu-sharing ..."
-		sleep 3
-	done
-
-	systemctl start elastictracker
+	######################################################################################################################
 
 	echo "CATALINA_PID: $CATALINA_PID"
 	wait "$catalinaPid"
 
 	#https://stackoverflow.com/questions/60676374/unable-to-trap-signals-in-docker-entrypoint-script
+
 }
 
 stop() {
@@ -110,11 +113,3 @@ stop() {
 }
 
 start "$@"
-
-#./postgresql/scripts/ctl.sh start
-#./libreoffice/scripts/ctl.sh start
-##./tomcat/scripts/ctl.sh daemon
-#./tomcat/scripts/ctl.sh start
-#apache2ctl start
-#
-#tail -f /opt/alfresco/tomcat/logs/catalina.out
