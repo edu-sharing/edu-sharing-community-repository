@@ -11,15 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.OPTIONS;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
@@ -34,17 +26,9 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.*;
+import org.edu_sharing.restservices.node.v1.model.SearchResult;
 import org.edu_sharing.restservices.node.v1.model.*;
-import org.edu_sharing.restservices.shared.ACL;
-import org.edu_sharing.restservices.shared.ErrorResponse;
-import org.edu_sharing.restservices.shared.Filter;
-import org.edu_sharing.restservices.shared.Node;
-import org.edu_sharing.restservices.shared.NodeRef;
-import org.edu_sharing.restservices.shared.NodeRemote;
-import org.edu_sharing.restservices.shared.NodeSearch;
-import org.edu_sharing.restservices.shared.Pagination;
-import org.edu_sharing.restservices.shared.User;
-
+import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.clientutils.ClientUtilsService;
 import org.edu_sharing.service.clientutils.WebsiteInformation;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
@@ -72,6 +56,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @Path("/node/v1")
 @Tag(name="NODE v1")
 @ApiService(value="NODE", major=1, minor=0)
+@Consumes({ "application/json" })
+@Produces({"application/json"})
 public class NodeApi  {
 
 	
@@ -1162,7 +1148,7 @@ public class NodeApi  {
 	    			if(inputStream != null) inputStream.close();
 				}
 			}
-	    	
+
 			if(versionComment!=null && !versionComment.isEmpty()){
 				child.createVersion(versionComment);
 			}
@@ -1385,7 +1371,6 @@ public class NodeApi  {
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			node=NodeDao.mapNodeConstants(repoDao,node);
 			source=NodeDao.mapNodeConstants(repoDao,source);
-
 			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 			NodeDao child = nodeDao.createChildByMove(source);
 	    			

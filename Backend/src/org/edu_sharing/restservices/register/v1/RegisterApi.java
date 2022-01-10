@@ -1,6 +1,7 @@
 package org.edu_sharing.restservices.register.v1;
 
-import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -21,6 +22,8 @@ import javax.ws.rs.core.Response;
 @Path("/register/v1")
 @Tag(name="REGISTER v1")
 @ApiService(value="REGISTER", major=1, minor=0)
+@Consumes({ "application/json" })
+@Produces({"application/json"})
 public class RegisterApi {
 
 	@POST

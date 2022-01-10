@@ -1,13 +1,17 @@
 package org.edu_sharing.restservices.rating.v1;
 
-import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.log4j.Logger;
-import org.edu_sharing.restservices.*;
+import org.edu_sharing.restservices.ApiService;
+import org.edu_sharing.restservices.RatingDao;
+import org.edu_sharing.restservices.RepositoryDao;
+import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +22,8 @@ import javax.ws.rs.core.Response;
 @Path("/rating/v1")
 @Tag(name= "RATING v1" )
 @ApiService(value = "RATING", major = 1, minor = 0)
+@Consumes({ "application/json" })
+@Produces({"application/json"})
 public class RatingApi {
 	private static Logger logger = Logger.getLogger(RatingApi.class);
 	@PUT

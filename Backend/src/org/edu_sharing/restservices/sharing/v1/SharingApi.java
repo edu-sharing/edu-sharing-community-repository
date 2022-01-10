@@ -1,6 +1,7 @@
 package org.edu_sharing.restservices.sharing.v1;
 
-import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -9,21 +10,15 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.log4j.Logger;
 import org.edu_sharing.restservices.*;
-import org.edu_sharing.restservices.node.v1.NodeApi;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
-import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
-import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.sharing.v1.model.SharingInfo;
 import org.edu_sharing.service.search.model.SortDefinition;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -32,6 +27,8 @@ import java.util.List;
 @Path("/sharing/v1")
 @Tag(name="SHARING v1")
 @ApiService(value="SHARING", major=1, minor=0)
+@Consumes({ "application/json" })
+@Produces({"application/json"})
 public class SharingApi {
 
 

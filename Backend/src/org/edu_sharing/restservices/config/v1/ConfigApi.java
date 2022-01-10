@@ -1,13 +1,7 @@
 package org.edu_sharing.restservices.config.v1;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
-
-import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -24,13 +18,20 @@ import org.edu_sharing.restservices.config.v1.model.Variables;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.config.DynamicConfig;
-
 import org.json.JSONObject;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Path("/config/v1")
 @Tag(name= "CONFIG v1" )
 @ApiService(value = "CONFIG", major = 1, minor = 0)
-public class ConfigApi {	
+@Consumes({ "application/json" })
+@Produces({"application/json"})
+public class ConfigApi {
 	private static Logger logger = Logger.getLogger(ConfigApi.class);
 	@GET
 	@Path("/values")

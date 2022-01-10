@@ -1,6 +1,8 @@
 package org.edu_sharing.restservices.collection.v1;
 
-import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -39,6 +41,8 @@ import java.util.List;
 @Path("/collection/v1")
 @Tag(name= "COLLECTION v1" )
 @ApiService(value = "COLLECTION", major = 1, minor = 0)
+@Consumes({ "application/json" })
+@Produces({"application/json"})
 public class CollectionApi {
 
 	private static Logger logger = Logger.getLogger(CollectionApi.class);
@@ -329,8 +333,8 @@ public class CollectionApi {
 			Filter filter = new Filter();
 			filter.setProperties(propertyFilter);
 			CollectionBaseEntries base = CollectionDao.getCollectionsReferences(repoDao, parentId, filter, sortDefinition, skipCount == null ? 0 : skipCount, maxItems == null ? 500 : maxItems);
-			for(Node item : base.getEntries()) {
-					references.add((CollectionReference) item);
+			for (Node item : base.getEntries()) {
+				references.add((CollectionReference) item);
 			}
 			response.setReferences(references);
 			response.setPagination(base.getPagination());
