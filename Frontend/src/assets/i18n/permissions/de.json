@@ -159,6 +159,11 @@
                 "RECEIVER_GROUP": "Folgende Organisation erhält die Verwaltungsrechte für alle Daten: {{group}}",
                 "FINAL": "Durch betätigen von \"Vorgang Starten\" werden die gewählten Aktionen unwiderruflich durchgeführt. Prüfen Sie bitte alle Optionen, bevor Sie fortfahren."
             },
+            "JOBS": {
+              "CAPTION": "Löschprofil auswählen",
+              "TITLE": "Löschprofil",
+              "DEFAULT": "Standard-Löschprofil (Parameter unten benutzen)"
+            },
             "HOME_FOLDER": {
                 "CAPTION": "Stamm-Verzeichnisse der Nutzer & enthaltene Daten",
                 "FOLDERS_CAPTION": "Ordner",

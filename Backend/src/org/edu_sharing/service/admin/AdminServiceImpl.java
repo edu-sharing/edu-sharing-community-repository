@@ -1,9 +1,8 @@
 package org.edu_sharing.service.admin;
 
 import java.io.*;
-import java.lang.annotation.Annotation;
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.text.Collator;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,7 +20,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import net.sf.acegisecurity.Authentication;
 import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -70,6 +68,8 @@ import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.StreamUtils;
 import org.w3c.dom.Document;
@@ -868,10 +868,10 @@ public class AdminServiceImpl implements AdminService  {
 	}
 
 	@Override
-	public void startJob(String jobClass, HashMap<String,Object> params) throws Exception {
+	public ImmediateJobListener startJob(String jobClass, HashMap<String,Object> params) throws Exception {
 
 		if(params == null) {
-			params = new HashMap<String,Object>();
+			params = new HashMap<>();
 		}
 		if(!AuthenticationUtil.isRunAsUserTheSystemUser()) {
 			params.put(OAIConst.PARAM_USERNAME, getAuthInfo().get(CCConstants.AUTH_USERNAME));
@@ -883,7 +883,26 @@ public class AdminServiceImpl implements AdminService  {
 		if(jobListener != null && jobListener.isVetoed()){
 			throw new Exception("job was vetoed by " + jobListener.getVetoBy());
 		}
+		return jobListener;
 
+	}
+
+	@Override
+	public Object startJobSync(String jobClass, HashMap<String,Object> params) throws Throwable {
+		ImmediateJobListener listener = startJob(jobClass, params);
+		while(true) {
+			if(listener.wasExecuted()) {
+				Optional<JobInfo> result = getJobs().stream().filter(job -> job.getStatus().equals(JobInfo.Status.Finished) && job.getJobDetail().getJobClass().getName().equals(jobClass)).max((a, b) -> Long.compare(a.getFinishTime(), b.getFinishTime()));
+				if(!result.isPresent()) {
+					throw new IllegalStateException("Job status not found");
+				}
+				return result.get().getJobDetail().getJobDataMap().get(JobHandler.KEY_RESULT_DATA);
+			}
+			if(listener.isVetoed()) {
+				throw new Exception("job was vetoed by " + listener.getVetoBy());
+			}
+			Thread.sleep(1000);
+		}
 	}
 
 	@Override
@@ -961,18 +980,24 @@ public class AdminServiceImpl implements AdminService  {
 	}
 
 	@Override
-	public List<JobDescription> getJobDescriptions() {
+	public List<JobDescription> getJobDescriptions(boolean fetchAbstractJobs) {
 
 		List<JobDescription> result = new ArrayList<>();
 
 		List<Class> jobClasses = ClassHelper.getSubclasses(AbstractJob.class);
 
 		for(Class clazz : jobClasses){
+			if(!fetchAbstractJobs) {
+				if(Modifier.isAbstract(clazz.getModifiers())) {
+					continue;
+				}
+			}
 			JobDescription desc = new JobDescription();
 			desc.setName(clazz.getName());
 			if(clazz.isAnnotationPresent(org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription.class)) {
 				org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription annotationDesc = (org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription) clazz.getAnnotation(org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription.class);
 				desc.setDescription(annotationDesc.description());
+				desc.setTags(annotationDesc.tags());
 			}
 			desc.setParams(Arrays.stream(clazz.getDeclaredFields()).filter(
 					(f) -> f.isAnnotationPresent(JobFieldDescription.class)

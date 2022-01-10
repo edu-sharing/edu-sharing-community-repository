@@ -790,7 +790,7 @@ export class AdminComponent {
     }
     reloadJobStatus() {
         this.admin.getJobs().subscribe((jobs)=> {
-            this.jobs=jobs;
+            this.jobs = jobs.filter((j: any) => !!j);
             this.updateJobLogs();
         })
     }

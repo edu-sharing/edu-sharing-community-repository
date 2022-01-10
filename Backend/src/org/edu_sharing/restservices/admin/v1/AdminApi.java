@@ -272,7 +272,7 @@ public class AdminApi {
 			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response getAllJobs(@Context HttpServletRequest req) {
 		try {
-			return Response.ok().entity(AdminServiceFactory.getInstance().getJobDescriptions()).build();
+			return Response.ok().entity(AdminServiceFactory.getInstance().getJobDescriptions(false)).build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}
@@ -1111,11 +1111,36 @@ public class AdminApi {
 
 	public Response startJob(
 			@Parameter(description = "jobClass", required = true) @PathParam("jobClass") String jobClass,
-			@Parameter(description = "params", required = true) HashMap<String, String> params,
+			@Parameter(description = "params", required = true) HashMap<String, Serializable> params,
 			@Context HttpServletRequest req) {
 		try {
 			AdminServiceFactory.getInstance().startJob(jobClass, new HashMap<String,Object>(params));
 			return Response.ok().build();
+		} catch (NotAnAdminException e) {
+			return ErrorResponse.createResponse(e);
+		} catch (Exception e) {
+			return ErrorResponse.createResponse(e);
+		}
+
+	}
+	@POST
+	@Path("/job/{jobClass}/sync")
+	@Operation(summary = "Start a Job.", description = "Start a Job. Wait for the result synchronously")
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Object.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+
+	public Response startJobSync(
+			@Parameter(description = "jobClass", required = true) @PathParam("jobClass") String jobClass,
+			@Parameter(description = "params", required = true) HashMap<String, Serializable> params,
+			@Context HttpServletRequest req) {
+		try {
+			Object result = AdminServiceFactory.getInstance().startJobSync(jobClass, new HashMap<>(params));
+			return Response.ok().entity(result).build();
 		} catch (NotAnAdminException e) {
 			return ErrorResponse.createResponse(e);
 		} catch (Exception e) {

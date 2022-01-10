@@ -1,3 +1,4 @@
+
 {
     "PERMISSIONS": {
         "TAB": {
@@ -158,6 +159,11 @@
                 "RECEIVER": "The following user will become the owner of all data: {{user}}",
                 "RECEIVER_GROUP": "The following organization receives the administrative rights for all data: {{group}}",
                 "FINAL": "By pressing \"Start process\" the selected actions will be executed irreversibly. Please check all options before continuing."
+            },
+            "JOBS": {
+              "CAPTION": "Select delete profil",
+              "TITLE": "Delete profil",
+              "DEFAULT": "Default delete profil (Use the custom parameters provided below)"
             },
             "HOME_FOLDER": {
                 "CAPTION": "Root directories of users & contained data",
