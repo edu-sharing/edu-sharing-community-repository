@@ -55,7 +55,7 @@ public class StreamApi {
 	    	@Parameter(description = "generic text to search for (in title or description)",required=false ) @QueryParam("query") String query,
 		    @Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue=""+RestConstants.DEFAULT_MAX_ITEMS)) @QueryParam("maxItems") Integer maxItems,
 		    @Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
-		    @Parameter(description = "map with property + value to search", schema = @Schema(defaultValue="0")) Map<String,String> properties,
+		    @Parameter(description = "map with property + value to search") Map<String,String> properties,
 		    @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES+", currently supported: created, priority, default: priority desc, created desc") @QueryParam("sortProperties") List<String> sortProperties,
 		    @Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
 			@Context HttpServletRequest req) {

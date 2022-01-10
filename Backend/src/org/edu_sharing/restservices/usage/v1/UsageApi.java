@@ -191,7 +191,7 @@ public class UsageApi {
 	}
 	
 	@GET
-	@Path("/usages/repository/{repositoryId}/{nodeid}")
+	@Path("/usages/repository/{repositoryId}/{nodeId}")
 	public Response getUsages(@Parameter(description = "ID of repository", required = true, schema = @Schema(defaultValue=RepositoryDao.HOME))  @PathParam("repositoryId") String repositoryId,
 			@Parameter(description = "ID of node. Use -all- for getting usages of all nodes", required = true, schema = @Schema(defaultValue="-all-")) @PathParam("nodeId") String nodeId,
 			@Parameter(description = "from date", required = false) @QueryParam("from") Long from,
@@ -233,7 +233,7 @@ public class UsageApi {
 					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
-	public Response setUsage(@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	public Response setUsage(@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repositoryId") String repository,
 							 @Parameter(description = " usage date",required = true) CreateUsage usage){
 		try {
 			RepositoryDao homeRepo = RepositoryDao.getRepository(RepositoryDao.HOME);
