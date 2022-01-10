@@ -2,6 +2,7 @@ import {TranslateService} from '@ngx-translate/core';
 import {FormatSizePipe} from './pipes/file-size.pipe';
 import {Observable, Observer} from 'rxjs';
 import {Params, Router} from '@angular/router';
+import {Location} from '@angular/common';
 import {DefaultGroups, OptionGroup, OptionItem} from './option-item';
 import {DateHelper} from './DateHelper';
 import {UIConstants} from '../core-module/ui/ui-constants';
@@ -79,6 +80,7 @@ export class NodeHelperService {
         private toast: Toast,
         private router:Router,
         private storage:TemporaryStorageService,
+        private location: Location,
     ) {
     }
     setViewContainerRef(viewContainerRef: ViewContainerRef){
@@ -655,34 +657,37 @@ export class NodeHelperService {
         return !!o.properties?.[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]?.[0];
     }
 
+    private getNodeLinkInner(node: Node): { routerLink: string; queryParams: Params } {
+        if (!node?.ref) {
+            return null;
+        } else if (this.isNodeCollection(node)) {
+            return {
+                routerLink: UIConstants.ROUTER_PREFIX + 'collections',
+                queryParams: { id: node.ref.id },
+            };
+        } else if (node.isDirectory) {
+            return {
+                routerLink: UIConstants.ROUTER_PREFIX + 'workspace',
+                queryParams: { id: node.ref.id },
+            };
+        } else {
+            const fromHome = RestNetworkService.isFromHomeRepo(node);
+            return {
+                routerLink: UIConstants.ROUTER_PREFIX + 'render/' + node.ref.id,
+                queryParams: {
+                    repository: fromHome ? null : node.ref.repo,
+                    proposal: (node as ProposalNode).proposal?.ref.id,
+                    proposalCollection: (node as ProposalNode).proposalCollection?.ref.id,
+                },
+            };
+        }
+    }
+
     getNodeLink(mode: "routerLink" | "queryParams", node: Node) {
         if (!node) {
             return null;
         }
-        let data: { routerLink: string; queryParams: Params } = null;
-        if (this.isNodeCollection(node)) {
-            data = {
-                routerLink: UIConstants.ROUTER_PREFIX + 'collections',
-                queryParams: { id: node.ref.id },
-            };
-        } else {
-            if (node.isDirectory) {
-                data = {
-                    routerLink: UIConstants.ROUTER_PREFIX + 'workspace',
-                    queryParams: { id: node.ref.id },
-                };
-            } else if (node.ref) {
-                const fromHome = RestNetworkService.isFromHomeRepo(node);
-                data = {
-                    routerLink: UIConstants.ROUTER_PREFIX + 'render/' + node.ref.id,
-                    queryParams: {
-                        repository: fromHome ? null : node.ref.repo,
-              proposal: (node as ProposalNode).proposal?.ref.id,
-              proposalCollection: (node as ProposalNode).proposalCollection?.ref.id,
-                    },
-                };
-            }
-        }
+        let data = this.getNodeLinkInner(node)
         if (data === null) {
             return '';
         }
@@ -690,6 +695,21 @@ export class NodeHelperService {
             return '/' + data.routerLink;
         }
         return data.queryParams;
+    }
+
+    /**
+     * Returns the full URL to a node, including the server origin and base href.
+     */
+    getNodeUrl(node: Node): string {
+        const link = this.getNodeLinkInner(node);
+        if (link) {
+            const urlTree = this.router.createUrlTree([link.routerLink], {
+                queryParams: link.queryParams,
+            });
+            return location.origin + this.location.prepareExternalUrl(urlTree.toString());
+        } else {
+            return null;
+        }
     }
 
     copyDataToNode<T extends Node>(target: T, source: T) {

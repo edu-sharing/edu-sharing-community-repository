@@ -973,12 +973,11 @@ export class OptionsHelperService implements OnDestroy {
         reportNode.group = DefaultGroups.View;
         reportNode.priority = 60;
 
-        const qrCodeNode = new OptionItem('OPTIONS.QR_CODE', 'edu-qr_code', (node) =>
-            management.qr = {
-                node: this.getObjects(node)[0],
-                data: window.location.href
-            }
-        );
+        const qrCodeNode = new OptionItem('OPTIONS.QR_CODE', 'edu-qr_code', (node) => {
+            node = this.getObjects(node)[0];
+            const url = this.nodeHelper.getNodeUrl(node);
+            management.qr = { node, data: url };
+        });
         qrCodeNode.constrains = [Constrain.NoBulk];
         qrCodeNode.scopes = [Scope.Render, Scope.CollectionsCollection];
         qrCodeNode.group = DefaultGroups.View;
