@@ -200,7 +200,20 @@ ps() {
 }
 
 init() {
-	rm -f .env.repository .env.rendering .env.elastic .env.transform
+	rm -f .env.rendering .env.repository .env.repository.elastic .env.repository.transform
+	{
+		echo "RENDERING_DATABASE_PASS=${RENDERING_DATABASE_PASS:-rendering}"
+		echo "RENDERING_DATABASE_USER=${RENDERING_DATABASE_USER:-rendering}"
+		echo "RENDERING_SERVICE_HOST_EXTERNAL=${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.nip.io}"
+		echo "RENDERING_SERVICE_HOST_INTERNAL=rendering"
+		echo "RENDERING_SERVICE_PORT_EXTERNAL=${RENDERING_SERVICE_PORT:-9100}"
+		echo "RENDERING_SERVICE_PORT_INTERNAL=80"
+		echo "REPOSITORY_SERVICE_ADMIN_PASS=${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
+		echo "REPOSITORY_SERVICE_HOST=repository"
+
+		echo "REPOSITORY_SERVICE_PORT=80"
+	} >> .env.rendering
+
 	{
 		echo "REPOSITORY_SERVICE_ADMIN_PASS=${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
 		echo "REPOSITORY_SERVICE_HOST_EXTERNAL=${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}"
@@ -218,31 +231,18 @@ init() {
 		echo "REPOSITORY_TRANSFORM_SERVER_PORT=8080"
 	} >> .env.repository
 
-	{
-		echo "RENDERING_DATABASE_PASS=${RENDERING_DATABASE_PASS:-rendering}"
-		echo "RENDERING_DATABASE_USER=${RENDERING_DATABASE_USER:-rendering}"
-		echo "RENDERING_SERVICE_HOST_EXTERNAL=${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.nip.io}"
-		echo "RENDERING_SERVICE_HOST_INTERNAL=rendering"
-		echo "RENDERING_SERVICE_PORT_EXTERNAL=${RENDERING_SERVICE_PORT:-9100}"
-		echo "RENDERING_SERVICE_PORT_INTERNAL=80"
-		echo "REPOSITORY_SERVICE_ADMIN_PASS=${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
-		echo "REPOSITORY_SERVICE_HOST=repository"
-
-		echo "REPOSITORY_SERVICE_PORT=80"
-	} >> .env.rendering
-
 	# plugin elastic (please check deploy/installer/tracker/scripts/../install.sh inside plugin)
 	{
 		echo "REPOSITORY_SERVICE_ADMIN_PASS=${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
     echo "REPOSITORY_SERVICE_HOST_INTERNAL=repository"
     echo "REPOSITORY_SERVICE_PORT_INTERNAL=80"
-	} >> .env.elastic
+	} >> .env.repository.elastic
 
 	# plugin transform (please check deploy/installer/server/scripts/../install.sh inside plugin)
 	{
 		echo "REPOSITORY_TRANSFORM_SERVER_SERVER_HOST=0.0.0.0"
 		echo "REPOSITORY_TRANSFORM_SERVER_MANAGEMENT_SERVER_HOST=0.0.0.0"
-	} >> .env.transform
+	} >> .env.repository.transform
 
 }
 
