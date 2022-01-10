@@ -240,7 +240,8 @@ init() {
 
 	# plugin transform (please check deploy/installer/server/scripts/../install.sh inside plugin)
 	{
-		echo ""
+		echo "REPOSITORY_TRANSFORM_SERVER_SERVER_HOST=0.0.0.0"
+		echo "REPOSITORY_TRANSFORM_SERVER_MANAGEMENT_SERVER_HOST=0.0.0.0"
 	} >> .env.transform
 
 }
