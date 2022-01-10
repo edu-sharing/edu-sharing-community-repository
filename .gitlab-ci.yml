@@ -6,7 +6,7 @@ variables:
   MAVEN_HOME: "/builds/$CI_PROJECT_PATH/mnt/.m2"
   MAVEN_CLI: "-Ddocker.registry=$DOCKER_REGISTRY -Dhelm.deploy.url=$HELM_REGISTRY -Dhelm.deploy.type=$HELM_TYPE -Dmaven.deploy.releases=$MAVEN_DEPLOY_RELEASES -Dmaven.deploy.snapshots=$MAVEN_DEPLOY_SNAPSHOTS --batch-mode --errors --fail-fast --show-version"
   MAVEN_OPTS: "-Dmaven.repo.local=/builds/$CI_PROJECT_PATH/mnt/.m2/repository"
-  PLUGIN_CLUSTER_ENABLED: "true"
+  PLUGIN_CLUSTER_ENABLED: "false"
   PLUGIN_ELASTIC_ENABLED: "true"
   PLUGIN_MONGO_ENABLED: "false"
   PLUGIN_REMOTE_ENABLED: "false"
