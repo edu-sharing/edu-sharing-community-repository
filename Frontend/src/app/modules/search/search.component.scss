@@ -662,7 +662,7 @@ div.dialog.darken {
     }
     es-mds-editor-embedded {
         es-mds-editor-core {
-            padding: 0 20px;
+            --mds-editor-horizontal-padding: 20px;
         }
     }
 }

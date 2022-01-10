@@ -42,6 +42,7 @@ h3 {
     flex-direction: column;
     opacity: 1;
     transition: all $transitionNormal;
+    padding: var(--mds-content-padding, 0);
     &.content-hidden {
         overflow: hidden;
         margin: 0;

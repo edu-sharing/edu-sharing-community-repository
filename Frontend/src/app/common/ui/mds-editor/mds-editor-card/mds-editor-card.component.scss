@@ -7,6 +7,7 @@ es-input-fill-progress {
 }
 
 :host ::ng-deep es-mds-editor-core {
+    --mds-content-padding: 25px;
     .extended-toggle-container {
         position: sticky;
         top: 0;
@@ -34,8 +35,5 @@ es-input-fill-progress {
         font-weight: normal;
         // padding: 12px 17px;
         // background-color: #f7f7f7;
-    }
-    .content {
-        margin: 25px;
     }
 }
