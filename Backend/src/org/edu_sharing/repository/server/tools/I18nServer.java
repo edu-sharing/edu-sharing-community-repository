@@ -76,7 +76,7 @@ public class I18nServer {
 			return key;
 		}
 	}
-	private static String getTranslationDefaultResourcebundle(String key, String locale){
+	public static String getTranslationDefaultResourcebundle(String key, String locale){
 		
 		return getTranslation(key,locale,defaultResourceBundle);
 	}
