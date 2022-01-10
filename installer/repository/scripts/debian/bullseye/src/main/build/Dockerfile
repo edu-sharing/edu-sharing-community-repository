@@ -7,11 +7,17 @@
 FROM docker.io/${os.distribution}:${os.codename}
 
 ENV ALF_HOME /opt/alfresco
-#ENV PATH $ALF_HOME/bin:$PATH
+ENV PATH $ALF_HOME/bin:$PATH
+
 WORKDIR $ALF_HOME
 
 RUN set -eux \
     && ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
+
+RUN set -eux \
+    && adduser --uid=1000 --home=$ALF_HOME --disabled-password --gecos "" --shell=/bin/bash worker \
+    && chown -RL worker:worker .
+
 
 RUN set -eux \
     && apt-get update -y \
@@ -225,21 +231,38 @@ RUN set -eux \
 
 
 ########################################################################################################################
+RUN echo "test"
+COPY install.sh .env.base bin/installer/
+COPY assets/entrypoint.sh bin/
 
-COPY install.sh .env.base ./
-
-COPY assets/entrypoint.sh ./
-
-RUN set -eux \
-    && chmod +x install.sh \
-    && chmod +x libreoffice/scripts/ctl.sh \
-    && chmod +x postgresql/scripts/ctl.sh \
-    && chmod +x tomcat/scripts/ctl.sh \
-    && chmod +x entrypoint.sh
+#RUN set -eux \
+#    && chmod +x install.sh \
+#    && chmod +x libreoffice/scripts/ctl.sh \
+#    && chmod +x postgresql/scripts/ctl.sh \
+#    && chmod +x tomcat/scripts/ctl.sh \
+#    && chmod +x bin/entrypoint.sh
 
 ########################################################################################################################
 
-ENTRYPOINT ["./entrypoint.sh"]
+COPY /plugins/docker/ bin/plugins/
+COPY /plugins/installer bin/installer/plugins
+
+
+#RUN set -eux \
+#    && chmod -R +x bin/plugins/ \
+#    && chmod -R +x ./plugins
+
+# THANK YOU BILL ;)
+RUN set -eux \
+    && find -type f -name "*.sh" -exec chmod +x {} \;
+
+########################################################################################################################
+
+
+
+
+ENTRYPOINT ["bin/entrypoint.sh"]
+#CMD ["/bin/bash"]
 
 EXPOSE 80 8080
 

@@ -94,6 +94,7 @@
                   <includeArtifactIds>
                     edu_sharing-community-repository-plugin-elastic-deploy-docker-compose
                   </includeArtifactIds>
+                  <excludes>META-INF/**</excludes>
                   <outputDirectory>${project.build.directory}/compose/plugin-elastic/</outputDirectory>
                 </configuration>
               </execution>
@@ -145,6 +146,7 @@
                   <includeArtifactIds>
                     edu_sharing-community-repository-plugin-mongo-deploy-docker-compose
                   </includeArtifactIds>
+                  <excludes>META-INF/**</excludes>
                   <outputDirectory>${project.build.directory}/compose/plugin-mongo/</outputDirectory>
                 </configuration>
               </execution>

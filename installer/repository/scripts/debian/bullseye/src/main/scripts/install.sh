@@ -3,12 +3,27 @@ set -e
 set -o pipefail
 
 ########################################################################################################################
+execution_folder=$(dirname -- "${BASH_SOURCE[0]}")
+
+pushd "$execution_folder" &> /dev/null
 
 # load the default configuration
 if [[ -f ".env.base" ]] ; then
 	echo "Load .env.base"
-	source .env.base
+	source .env.base &> /dev/null
 fi
+
+# LOAD PLUGIN BASE ENVIRONENT VARIABLES
+if [[ -d "$execution_folder/plugins" ]] ; then
+	for plugin in "$execution_folder"/plugins/plugin-*/.env.base; do
+		 [[ -f "$plugin" ]] && {
+		 		source "$plugin" || exit 1
+		 }
+	done
+fi
+
+popd
+
 
 ########################################################################################################################
 
@@ -28,28 +43,12 @@ usage() {
 
 	echo "--local"
 	echo "  Use local maven cache for installation"
-
-	echo "--all"
-  echo "  Setup all products"
-	echo ""
-
-  echo "--repository"
-  echo "  Setup edu-sharing repository"
-	echo ""
-
-#  echo "--elastictracker"
-#  echo "  Setup elastic tracker"
-#  echo ""
-
 }
 
 ########################################################################################################################
 
-REPOSITORY=$((1<<0));
-#ELASTIC_TRACKER=$((1<<1));
-
-install_options=0
 use_local_maven_cache=0
+envfile=
 
 while true; do
 	flag="$1"
@@ -57,12 +56,8 @@ while true; do
 
 	case "$flag" in
 			--help|'-?') usage && exit 0 ;;
-			--file|-f) source "$1" && shift	;;
+			--file|-f) envfile="$1" && source "$1" && shift	;;
 			--local) use_local_maven_cache=1 ;;
-			--all) install_options=$((REPOSITORY)) ;;
-#			--all) install_options=$((REPOSITORY | ELASTIC_TRACKER)) ;;
-			--repository) install_options=$((install_options | REPOSITORY)) ;;
-#			--elastictracker) install_options=$((install_options | ELASTIC_TRACKER)) ;;
 			*) {
 				echo "error: unknown flag: $flag"
 				usage
@@ -119,16 +114,16 @@ repository_transform_port="${REPOSITORY_TRANSFORM_PORT:-8100}"
 repository_contentstore="${REPOSITORY_SERVICE_CONTENTSTORE:-}"
 repository_contentstore_deleted="${REPOSITORY_SERVICE_CONTENTSTORE_DELETED:-}"
 
-#repository_search_elastic_tracker_server_address="${REPOSITORY_SEARCH_ELASTIC_TRACKER_SERVER_HOST:-"127.0.0.1"}"
-#repository_search_elastic_tracker_server_port="${REPOSITORY_SEARCH_ELASTIC_TRACKER_SERVER_PORT:-8081}"
-#repository_search_elastic_tracker_management_server_address="${REPOSITORY_SEARCH_ELASTIC_TRACKER_MANAGEMENT_SERVER_HOST:-"127.0.0.1"}"
-#repository_search_elastic_tracker_management_server_port="${REPOSITORY_SEARCH_ELASTIC_TRACKER_MANAGEMENT_SERVER_PORT:-8082}"
+########################################################################################################################
 
-#repository_search_elastic_host="${REPOSITORY_SEARCH_ELASTIC_HOST:-"127.0.0.1"}"
-#repository_search_elastic_port="${REPOSITORY_SEARCH_ELASTIC_PORT:-9200}"
-#repository_search_elastic_base="http://${repository_search_elastic_host}:${repository_search_elastic_port}"
-#repository_search_elastic_index_shards="${REPOSITORY_SEARCH_ELASTIC_INDEX_SHARDS:-1}"
-#repository_search_elastic_index_replicas="${REPOSITORY_SEARCH_ELASTIC_INDEX_REPLICAS:-1}"
+# LOAD PLUGIN CONFIG VARIABLES
+if [[ -d "$execution_folder/plugins" ]] ; then
+	for plugin in "$execution_folder"/plugins/plugin-*/load_config.sh; do
+		 [[ -f "$plugin" ]] && {
+		 		source "$plugin" || exit 1
+		 }
+	done
+fi
 
 ########################################################################################################################
 
@@ -207,36 +202,12 @@ info() {
   echo "  Host:                ${repository_search_solr4_host}"
   echo "  Port:                ${repository_search_solr4_port}"
   echo ""
-#  echo "#########################################################################"
-#  echo ""
-#  echo "elastic search:"
-#  echo ""
-#  echo "  Host:                ${repository_search_elastic_host}"
-#  echo "  Port:                ${repository_search_elastic_port}"
-#  echo ""
-#  echo "  Index:"
-#  echo ""
-#  echo "    Shards:            ${repository_search_elastic_index_shards}"
-#  echo "    Replicas:          ${repository_search_elastic_index_replicas}"
-#  echo ""
-#  echo "  tracker:"
-#  echo ""
-#  echo "    Host:              ${repository_search_elastic_tracker_server_address}"
-#  echo "    Port:              ${repository_search_elastic_tracker_server_port}"
-#  echo ""
-#  echo "    Management:"
-#  echo ""
-#  echo "      Host:            ${repository_search_elastic_tracker_management_server_address}"
-#  echo "      Port:            ${repository_search_elastic_tracker_management_server_port}"
-#  echo ""
  	echo "#########################################################################"
   echo ""
   echo "transformer:"
   echo ""
   echo "  Host:                ${repository_transform_host}"
   echo "  Port:                ${repository_transform_port}"
-  echo ""
-  echo "#########################################################################"
   echo ""
 
 
@@ -248,17 +219,27 @@ info() {
   echo "  contentstore:        ${repository_contentstore}"
   echo "  contentstore.delete: ${repository_contentstore_deleted}"
   echo ""
-  echo "#########################################################################"
-  echo ""
   fi
 
+  ######################################################################################################################
+
+  # PRINT PLUGIN CONFIG
+  if [[ -d "$execution_folder/plugins" ]] ; then
+  	for plugin in "$execution_folder"/plugins/plugin-*/print_config.sh; do
+  		 [[ -f "$plugin" ]] && {
+  		 		source "$plugin" || exit 1
+  		 }
+  	done
+  fi
+
+  echo "#########################################################################"
   echo ""
 }
 
 ########################################################################################################################
 
 install_edu_sharing() {
-	pushd "$ALF_HOME"
+	pushd "$ALF_HOME" &> /dev/null
 
 	echo "- clean up outdated libraries"
 	rm -f tomcat/lib/postgresql-*
@@ -269,8 +250,7 @@ install_edu_sharing() {
 	######################################################################################################################
 
 	echo "- unpack edu-sharing repository"
-	tar xzf edu_sharing-community-deploy-installer-repository-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}-bin.tar.gz # \
-#		--exclude='./elastictracker'
+	tar xzf edu_sharing-community-deploy-installer-repository-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}-bin.tar.gz
 
 	echo "- install Alfresco Module Packages"
 	if [[ -d amps/alfresco/0 ]]; then
@@ -438,9 +418,6 @@ install_edu_sharing() {
     		tomcat/shared/classes/homeApplication.properties.xml
 	fi
 
-#	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
-#		set "elasticsearch.servers" '["'"${repository_search_elastic_host}:${repository_search_elastic_port}"'"]'
-
 	if [[ -n "${repository_httpclient_disablesni4hosts}" ]] ; then
 		hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
 			set "repository.httpclient.disableSNI4Hosts" "${repository_httpclient_disablesni4hosts}"
@@ -477,128 +454,24 @@ install_edu_sharing() {
   fi
 
 	popd
+
+	######################################################################################################################
+
+	# LOAD PLUGIN CONFIG
+	if [[ -d "$execution_folder/plugins" ]] ; then
+		for plugin in "$execution_folder"/plugins/plugin-*/setup_config.sh; do
+  		 [[ -f "$plugin" ]] && {
+  		 		source "$plugin" || exit 1
+  		 }
+  	done
+  fi
+
 }
 
 ########################################################################################################################
 
-#can_install_elastic_tracker() {
-#	pushd "$ALF_HOME"
-#
-#		#if [[ -f "/etc/systemd/system/elastictracker" && "$(systemctl status elastictracker)" == "elastictracker is running"  ]] ; then
-#		if [[ -f "/etc/systemd/system/elastictracker" && $(systemctl is-active --quiet elastictracker) ]] ; then
-#  		echo ""
-#  		echo "You must stop the elastic tracker before you can run the installation."
-#  		exit 1
-#  	fi
-#
-#	popd
-#}
-
-########################################################################################################################
-
-#install_elastic_tracker() {
-#	pushd "$ALF_HOME"
-#
-#	echo "- remove elastictracker"
-#	rm -rf elastictracker
-#
-#	### elastic tracker - fix security issues ############################################################################
-#
-#	echo "- create worker user"
-#	id -u elastictracker &>/dev/null || adduser --home=$ALF_HOME/elastictracker --disabled-password --gecos "" --shell=/bin/bash elastictracker
-#	chown -RL elastictracker:elastictracker /tmp
-#
-#	### elastic tracker - installation ###################################################################################
-#
-#	echo "- unpack edu-sharing elastic tracker"
-#	tar -zxf edu_sharing-community-deploy-installer-repository-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}-bin.tar.gz \
-#			elastictracker
-#
-#	chown -RL elastictracker:elastictracker ./elastictracker
-#
-#	###  elastic tracker #################################################################################################
-#
-#	echo "- update elastic tracker env"
-#	elasticApplicationProps="elastictracker/application.properties"
-#	touch "${elasticApplicationProps}"
-#
-#	sed -i -r 's|^[#]*\s*server\.address=.*|alfresco.address='"${repository_search_elastic_tracker_server_address}"'|' "${elasticApplicationProps}"
-#	grep -q '^[#]*\s*server\.address=' "${elasticApplicationProps}" || echo "server.address=${repository_search_elastic_tracker_server_address}" >>"${elasticApplicationProps}"
-#
-#	sed -i -r 's|^[#]*\s*server\.port=.*|alfresco.host='"${repository_search_elastic_tracker_server_port}"'|' "${elasticApplicationProps}"
-#	grep -q '^[#]*\s*server\.port=' "${elasticApplicationProps}" || echo "server.port=${repository_search_elastic_tracker_server_port}" >>"${elasticApplicationProps}"
-#
-#	sed -i -r 's|^[#]*\s*management\.server.\address=.*|alfresco.host='"${repository_search_elastic_tracker_management_server_address}"'|' "${elasticApplicationProps}"
-#	grep -q '^[#]*\s*management\.server.\address=' "${elasticApplicationProps}" || echo "management.server.address=${repository_search_elastic_tracker_management_server_address}" >>"${elasticApplicationProps}"
-#
-#	sed -i -r 's|^[#]*\s*management\.server.\port=.*|alfresco.host='"${repository_search_elastic_tracker_management_server_port}"'|' "${elasticApplicationProps}"
-#	grep -q '^[#]*\s*management\.server.\port=' "${elasticApplicationProps}" || echo "management.server.port=${repository_search_elastic_tracker_management_server_port}" >>"${elasticApplicationProps}"
-#
-#	sed -i -r 's|^[#]*\s*alfresco\.host=.*|alfresco.host='"${my_host_internal}"'|' "${elasticApplicationProps}"
-#	grep -q '^[#]*\s*alfresco\.host=' "${elasticApplicationProps}" || echo "alfresco.host=${my_host_internal}" >>"${elasticApplicationProps}"
-#
-#	sed -i -r 's|^[#]*\s*alfresco\.port=.*|alfresco.port='"${my_port_internal}"'|' "${elasticApplicationProps}"
-#	grep -q '^[#]*\s*alfresco\.port=' "${elasticApplicationProps}"|| echo "alfresco.port=${my_port_internal}" >>"${elasticApplicationProps}"
-#
-#	sed -i -r 's|^[#]*\s*alfresco\.password=.*|alfresco.password='"${my_admin_pass}"'|' "${elasticApplicationProps}"
-#	grep -q '^[#]*\s*alfresco\.password=' "${elasticApplicationProps}" || echo "alfresco.password=${my_admin_pass}" >>"${elasticApplicationProps}"
-#
-#	sed -i -r 's|^[#]*\s*elastic\.host=.*|elastic.host='"${repository_search_elastic_host}"'|' "${elasticApplicationProps}"
-#	grep -q '^[#]*\s*elastic\.host=' "${elasticApplicationProps}" || echo "elastic.host=${repository_search_elastic_host}" >>"${elasticApplicationProps}"
-#
-#	sed -i -r 's|^[#]*\s*elastic\.port=.*|elastic.port='"${repository_search_elastic_port}"'|' "${elasticApplicationProps}"
-#	grep -q '^[#]*\s*elastic\.port=' "${elasticApplicationProps}" || echo "elastic.port=${repository_search_elastic_port}" >>"${elasticApplicationProps}"
-#
-#	sed -i -r 's|^[#]*\s*elastic\.index.\number_of_shards=.*|elastic.index.number_of_shards='"${repository_search_elastic_index_shards}"'|' "${elasticApplicationProps}"
-# 	grep -q '^[#]*\s*elastic\.index.\number_of_shards=' "${elasticApplicationProps}" || echo "elastic.index.number_of_shards=${repository_search_elastic_index_shards}" >>"${elasticApplicationProps}"
-#
-#	sed -i -r 's|^[#]*\s*elastic.\index\.number_of_replicas=.*|elastic.index.number_of_replicas='"${repository_search_elastic_index_replicas}"'|' "${elasticApplicationProps}"
-#	grep -q '^[#]*\s*elastic.\index\.number_of_replicas=' "${elasticApplicationProps}" || echo "elastic.index.number_of_replicas=${repository_search_elastic_index_replicas}" >>"${elasticApplicationProps}"
-#
-#	### elastic tracker - register systemd service #######################################################################
-#
-#	#ln -s "${ALF_HOME}/elastictracker/tracker.jar" /etc/init.d/elastictracker
-#
-#	pushd /etc/systemd/system
-#
-#	elastic_tracker_jar=edu_sharing-community-repository-backend-search-elastic-tracker-${org.edu_sharing:edu_sharing-community-repository-backend-search-elastic-tracker:jar.version}.jar
-#
-#	# TODO Logfile
-#	if [[ ! -f elastictracker.service ]]; then
-#		echo "- create systemd service"
-#		touch elastictracker.service
-#		{
-#			echo "[Unit]"
-#			echo "Description=edu-sharing elastic tracker"
-#			echo "After=syslog.target network.target postgresql.service"
-#			echo ""
-#			echo "[Service]"
-#			echo "WorkingDirectory=${ALF_HOME}/elastictracker"
-#			echo "User=elastictracker"
-#			echo "ExecStart=/usr/bin/java -jar ${ALF_HOME}/elastictracker/${elastic_tracker_jar}"
-#			echo "SuccessExitStatus=143"
-#			echo ""
-#			echo "[Install]"
-#			echo "WantedBy=multi-user.target"
-#		 } >> elastictracker.service
-#	else
-#		echo "- update systemd service"
-#
-#		sed -i -r 's|^WorkingDirectory=.*|WorkingDirectory='"${ALF_HOME}/elastictracker"'|' elastictracker.service
-#    grep -q '^WorkingDirectory=' elastictracker.service || echo "WorkingDirectory=${ALF_HOME}/elastictracker" >> elastictracker.service
-#
-#		sed -i -r 's|^ExecStart=.*|ExecStart='"${ALF_HOME}/elastictracker/${elastic_tracker_jar}"'|' elastictracker.service
-#    grep -q '^ExecStart=' elastictracker.service || echo "ExecStart=/usr/bin/java -jar ${ALF_HOME}/elastictracker/${elastic_tracker_jar}" >> elastictracker.service
-#	fi
-#
-#	popd
-#	popd
-#}
-
-########################################################################################################################
-
 can_install_repository(){
-	pushd "$ALF_HOME"
+	pushd "$ALF_HOME" &> /dev/null
 	if [[ ! -f alfresco.sh ]] ; then
 		echo ""
 		echo "Env ALF_HOME must point to the home directory of your Alfresco Platform!"
@@ -629,8 +502,6 @@ can_install_repository(){
 
 install_repository() {
 
-	pushd "$ALF_HOME"
-
 	alfresco_base_snapshot="alfresco-base-SNAPSHOT-DO-NOT-DELETE-ME.tar.gz"
 	if [[ -f ../$alfresco_base_snapshot ]] ; then
 
@@ -659,7 +530,7 @@ install_repository() {
 		fi
 
 		echo "- delete old edu-sharing SNAPSHOTS (keep 3 backups)"
-		pushd ..
+		pushd .. &> /dev/null
 		ls -pt | grep -v / | grep "edu-sharing-SNAPSHOT" | tail -n +4 | xargs -I {} rm {}
 		popd
 
@@ -681,46 +552,73 @@ install_repository() {
 
 ########################################################################################################################
 
-if [[ $install_options == 0 ]]  ; then
-	usage
-	exit 1
-fi
-
-
-if [[ $((install_options & REPOSITORY)) != 0 ]]; then
-	can_install_repository
-fi
-
-#if [[ $((install_options & ELASTIC_TRACKER)) != 0 ]]; then
-#	can_install_elastic_tracker
-#fi
-
-########################################################################################################################
-
 if [[ use_local_maven_cache -eq 1 ]] ; then
 	echo "- WARNING local maven cache is used"
 else
 	echo "- download edu-sharing repository distribution"
 	mvn -q dependency:get \
 		-Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}:tar.gz:bin \
-		-DremoteRepositories=myreleases::::https://artifacts.edu-sharing.com/repository/community-releases/,mysnapshots::::https://artifacts.edu-sharing.com/repository/community-snapshots/ \
+		-DremoteRepositories=edu-sharing::::https://artifacts.edu-sharing.com/repository/maven-remote/ \
 		-Dtransitive=false
 fi
+
+
+pushd "$ALF_HOME" &> /dev/null
 
 echo "- unpack edu-sharing repository distribution"
 mvn -q dependency:copy \
 	-Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}:tar.gz:bin \
 	-DoutputDirectory=.
 
-if [[ $((install_options & REPOSITORY)) != 0 ]]; then
-	install_repository
+
+alfresco_base_snapshot="alfresco-base-SNAPSHOT-DO-NOT-DELETE-ME.tar.gz"
+if [[ -f ../$alfresco_base_snapshot ]] ; then
+
+	echo ""
+	echo "Update ... "
+
+	echo "- make a snapshot of edu-sharing platform"
+	snapshot_name=edu-sharing-SNAPSHOT-$(date "+%Y.%m.%d-%H.%M.%S")".tar.gz"
+	tar -czf ../$snapshot_name amps tomcat solr4
+
+	echo "- cleanup amps and tomcat"
+	rm -rf amps
+	rm -rf tomcat
+	rm -rf solr4
+
+	echo "- restore amps and tomcat"
+	tar -zxf ../$alfresco_base_snapshot
+
+	install_edu_sharing
+
+	echo "- restore persistent data of Alfresco platform"
+	if [[ $(tar -tf  ../$snapshot_name | grep 'tomcat/shared/classes/config/persistent' | wc -l) -gt 0 ]]; then
+		tar -zxf ../$snapshot_name tomcat/shared/classes/config/persistent -C tomcat/shared/classes/config/
+	else
+		echo "nothing to restore"
+	fi
+
+	echo "- delete old edu-sharing SNAPSHOTS (keep 3 backups)"
+	pushd .. &> /dev/null
+	ls -pt | grep -v / | grep "edu-sharing-SNAPSHOT" | tail -n +4 | xargs -I {} rm {}
+	popd
+
+else
+
+	echo ""
+	echo "Install ... "
+
+	echo "- make a snapshot of Alfresco platform"
+	tar -czf ../$alfresco_base_snapshot amps tomcat solr4
+
+	install_edu_sharing
+
 fi
 
-#if [[ $((install_options & ELASTIC_TRACKER)) != 0 ]]; then
-#	install_elastic_tracker
-#fi
+echo "- you may need to delete the solr4 index, model and content folders!"
 
 rm edu_sharing-community-deploy-installer-repository-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}-bin.tar.gz
+popd
 
 info >> "install_log-$(date "+%Y.%m.%d-%H.%M.%S").txt"
 info

@@ -20,6 +20,11 @@
       <outputDirectory>.</outputDirectory>
       <filtered>true</filtered>
     </fileSet>
+    <fileSet>
+      <directory>${project.build.directory}/build/plugins/installer</directory>
+      <outputDirectory>./plugins</outputDirectory>
+      <filtered>true</filtered>
+    </fileSet>
 
   </fileSets>
 
