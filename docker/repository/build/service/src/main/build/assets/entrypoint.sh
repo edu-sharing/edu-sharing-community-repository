@@ -89,15 +89,6 @@ done
 
 ########################################################################################################################
 
-# PLUGIN BEFORE
-for plugin in bin/plugins/plugin-*/entrypoint-before.sh; do
-	 [[ -f $plugin ]] && {
-	 		source $plugin || exit 1
-	 }
-done
-
-### Tomcat #############################################################################################################
-
 export CATALINA_OUT="/dev/stdout"
 
 export CATALINA_OPTS="-Dfile.encoding=UTF-8 $CATALINA_OPTS"
@@ -371,8 +362,8 @@ xmlstarlet ed -L \
 
 ########################################################################################################################
 
-# PLUGIN AFTER
-for plugin in bin/plugins/plugin-*/entrypoint-after.sh; do
+# PLUGIN
+for plugin in bin/plugins/plugin-*/entrypoint.sh; do
 	 [[ -f $plugin ]] && {
 	 		source $plugin || exit 1
 	 }
