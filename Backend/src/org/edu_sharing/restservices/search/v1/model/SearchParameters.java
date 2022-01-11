@@ -13,18 +13,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class SearchParameters {
 
 	private List<String> permissions;
-	private List<MdsQueryCriteria> criterias;
+	private List<MdsQueryCriteria> criteria;
 	private List<String> facets;
 	private boolean resolveCollections = false;
 
 	@Schema(required = true, description = "")
 	@JsonProperty("criterias")
-	public List<MdsQueryCriteria> getCriterias() {
-		return criterias;
+	public List<MdsQueryCriteria> getCriteria() {
+		return criteria;
 	}
 
-	public void setCriterias(List<MdsQueryCriteria> criterias) {
-		this.criterias = criterias;
+	public void setCriteria(List<MdsQueryCriteria> criteria) {
+		this.criteria = criteria;
 	}
 
 	@Schema(required = true, description = "")
