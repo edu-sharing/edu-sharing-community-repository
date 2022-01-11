@@ -530,6 +530,7 @@ if [[ -f "$alfresco_base_image" ]] ; then
 
 	echo "- make a snapshot of edu-sharing platform"
 	snapshot_name="$execution_folder/snapshots/edu-sharing-SNAPSHOT-$(date "+%Y.%m.%d-%H.%M.%S").tar.gz"
+	mkdir -p "$(dirname "$snapshot_name")"
 	tar -czf "$snapshot_name" amps tomcat solr4
 
 	echo "- cleanup amps and tomcat"
@@ -560,6 +561,7 @@ else
 	echo "Install ... "
 
 	echo "- make a snapshot of Alfresco platform"
+	mkdir -p "$(dirname "$alfresco_base_image")"
 	tar -czf "$alfresco_base_image" amps tomcat solr4
 
 	install_edu_sharing
