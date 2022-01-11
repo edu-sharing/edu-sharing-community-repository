@@ -784,7 +784,7 @@ public class MetadataReader {
 			return translationBundles.get(i18nFile);
 		ResourceBundle bundle = null;
 		try {
-			bundle = PropertiesHelper.Config.getResourceBundleForFile(getPath()+"i18n/"+i18nFile);
+			bundle = PropertiesHelper.Config.getResourceBundleForFile(getPath()+"i18n/"+i18nFile + ".properties");
 		}catch(Throwable t) {
 		}
 		translationBundles.put(i18nFile, bundle);
