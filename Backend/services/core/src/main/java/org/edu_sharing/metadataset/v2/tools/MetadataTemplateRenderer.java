@@ -50,11 +50,11 @@ public class MetadataTemplateRenderer {
 	private static final String TEXT_MULTIVALUE_SEPERATOR = "; ";
 	private String userName;
 	private NodeRef nodeRef;
-	private MetadataSetV2 mds;
+	private MetadataSet mds;
 	private Map<String, String[]> properties;
 	private static Logger logger=Logger.getLogger(MetadataTemplateRenderer.class);
 
-	public MetadataTemplateRenderer(MetadataSetV2 mds, NodeRef nodeRef, String userName, String type, List<String> aspects, Map<String, Object> properties) {
+	public MetadataTemplateRenderer(MetadataSet mds, NodeRef nodeRef, String userName, String type, List<String> aspects, Map<String, Object> properties) {
 		this.mds = mds;
 		this.nodeRef = nodeRef;
 		this.userName = userName;

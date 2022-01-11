@@ -1444,7 +1444,7 @@ export class MdsComponent {
                         property: id,
                         pattern: element.value,
                     },
-                    criterias:this.mode==='search' ?
+                    criteria:this.mode==='search' ?
                         RestSearchService.convertCritierias(
                             Helper.arrayJoin(this._currentValues,this.getValues()),this.mds.widgets
                         ) : null,

@@ -17,7 +17,6 @@ import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
-import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -137,15 +136,15 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return audienceQueryBuilder;
     }
     @Override
-    public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String,String[]> criterias,
-                                        SearchToken searchToken) throws Throwable {
+    public SearchResultNodeRef search(MetadataSet mds, String query, Map<String,String[]> criterias,
+                                      SearchToken searchToken) throws Throwable {
         checkClient();
         MetadataQuery queryData;
         try{
-            queryData = mds.findQuery(query, MetadataReaderV2.QUERY_SYNTAX_DSL);
+            queryData = mds.findQuery(query, MetadataReader.QUERY_SYNTAX_DSL);
         } catch(IllegalArgumentException e){
             logger.info("Query " + query + " is not defined within dsl language, switching to lucene...");
-            return super.searchV2(mds,query,criterias,searchToken);
+            return super.search(mds,query,criterias,searchToken);
         }
 
         String[] searchword = criterias.get("ngsearchword");
@@ -164,7 +163,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchRequest searchRequest = new SearchRequest("workspace");
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
-            QueryBuilder metadataQueryBuilder = MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_DSL),queryData,criterias);
+            QueryBuilder metadataQueryBuilder = MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL),queryData,criterias);
             BoolQueryBuilder queryBuilder = (searchToken.getAuthorityScope() != null && searchToken.getAuthorityScope().size() > 0)
                     ? QueryBuilders.boolQuery().must(metadataQueryBuilder).must(getPermissionsQuery("permissions.read",new HashSet<>(searchToken.getAuthorityScope())))
                     : QueryBuilders.boolQuery().must(metadataQueryBuilder).must(getReadPermissionsQuery());
@@ -181,8 +180,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 queryBuilder = queryBuilder.must(QueryBuilders.termQuery("properties.ccm:eduscopename.keyword",NodeServiceInterceptor.getEduSharingScope()));
             }
 
-            if(searchToken.getFacettes() != null) {
-                for (String facette : searchToken.getFacettes()) {
+            if(searchToken.getFacets() != null) {
+                for (String facette : searchToken.getFacets()) {
                     searchSourceBuilder.aggregation(AggregationBuilders.terms(facette).field("properties." + facette + ".keyword"));
                 }
             }

@@ -1,7 +1,7 @@
 package org.edu_sharing.restservices.node.v1.model;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import org.edu_sharing.restservices.shared.NodeVersionRef;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class NodeVersionEntries  {
   
   private List<NodeVersion> versions = null;
@@ -19,7 +19,7 @@ public class NodeVersionEntries  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("versions")
   public List<NodeVersion> getVersions() {
     return versions;

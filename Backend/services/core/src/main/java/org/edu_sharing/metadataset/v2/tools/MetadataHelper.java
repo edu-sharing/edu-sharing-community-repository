@@ -1,15 +1,13 @@
 package org.edu_sharing.metadataset.v2.tools;
 
-import io.swagger.config.ConfigFactory;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
@@ -21,28 +19,28 @@ import java.util.Map;
 
 public class MetadataHelper {
 
-	public static MetadataSetV2 getLocalDefaultMetadataset() throws Exception{
-		return MetadataReaderV2.getMetadataset(ApplicationInfoList.getHomeRepository(),CCConstants.metadatasetdefault_id,getLocale());
+	public static MetadataSet getLocalDefaultMetadataset() throws Exception{
+		return MetadataReader.getMetadataset(ApplicationInfoList.getHomeRepository(),CCConstants.metadatasetdefault_id,getLocale());
 	}
-	public static MetadataSetV2 getMetadataset(ApplicationInfo appId,String mdsSet) throws Exception{
-		return MetadataReaderV2.getMetadataset(appId, mdsSet,getLocale());
+	public static MetadataSet getMetadataset(ApplicationInfo appId, String mdsSet) throws Exception{
+		return MetadataReader.getMetadataset(appId, mdsSet,getLocale());
 	}
-	public static MetadataSetV2 getMetadataset(NodeRef node) throws Exception{
+	public static MetadataSet getMetadataset(NodeRef node) throws Exception{
 		String mdsSet = NodeServiceHelper.getProperty(node, CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
 		if(mdsSet==null || mdsSet.isEmpty())
 			mdsSet=CCConstants.metadatasetdefault_id;
 
-		return MetadataReaderV2.getMetadataset(ApplicationInfoList.getHomeRepository(), mdsSet,getLocale());
+		return MetadataReader.getMetadataset(ApplicationInfoList.getHomeRepository(), mdsSet,getLocale());
 	}
-	public static MetadataSetV2 getMetadataset(org.edu_sharing.restservices.shared.NodeRef node) throws Exception{
+	public static MetadataSet getMetadataset(org.edu_sharing.restservices.shared.NodeRef node) throws Exception{
 		if(node.isHomeRepo()) {
 			return getMetadataset(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node.getId()));
 		} else {
-			return MetadataReaderV2.getMetadataset(ApplicationInfoList.getRepositoryInfoById(node.getRepo()), CCConstants.metadatasetdefault_id, getLocale());
+			return MetadataReader.getMetadataset(ApplicationInfoList.getRepositoryInfoById(node.getRepo()), CCConstants.metadatasetdefault_id, getLocale());
 		}
 	}
 	public static List<MetadataWidget> getWidgetsByNode(NodeRef node) throws Exception{
-		MetadataSetV2 metadata = getMetadataset(node);
+		MetadataSet metadata = getMetadataset(node);
 		return metadata.getWidgetsByNode(NodeServiceFactory.getLocalService().getType(node.getId()),Arrays.asList(NodeServiceHelper.getAspects(node)));
 	}
 
@@ -57,10 +55,10 @@ public class MetadataHelper {
 		return getTranslation(ApplicationInfoList.getHomeRepository(),key,null);
 	}
 	public static String getTranslation(ApplicationInfo appId,String key,String fallback) throws Exception {
-		return MetadataReaderV2.getTranslation(getMetadataset(appId,CCConstants.metadatasetdefault_id).getI18n(),key,fallback,getLocale());
+		return MetadataReader.getTranslation(getMetadataset(appId,CCConstants.metadatasetdefault_id).getI18n(),key,fallback,getLocale());
 	}
 
-	public static String[] getDisplayNames(MetadataSetV2 mds, String key, Serializable value){
+	public static String[] getDisplayNames(MetadataSet mds, String key, Serializable value){
 		try{
 			if(mds == null){
 				return null;

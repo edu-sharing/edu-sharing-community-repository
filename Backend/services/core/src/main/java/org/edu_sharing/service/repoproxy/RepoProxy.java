@@ -25,11 +25,11 @@ public interface RepoProxy {
 			List<String> sortProperties, List<Boolean> sortAscending, String assocName, List<String> propertyFilter,
 			HttpServletRequest req) throws Throwable;
 
-	Response getMetadataSetsV2(String repository, HttpServletRequest req) throws Throwable;
+	Response getMetadataSets(String repository, HttpServletRequest req) throws Throwable;
 
-	Response getMetadataSetV2(String repository, String mdsId, HttpServletRequest req) throws Throwable;
+	Response getMetadataSet(String repository, String mdsId, HttpServletRequest req) throws Throwable;
 
-	Response getValuesV2(String repository, String mdsId, SuggestionParam suggestionParam, HttpServletRequest req) throws Throwable;
+	Response getValues(String repository, String mdsId, SuggestionParam suggestionParam, HttpServletRequest req) throws Throwable;
 
 	/**
 	 * Whenever possible, prefer to use the method with nodeId to also find out if it is a local node pointing to a remote

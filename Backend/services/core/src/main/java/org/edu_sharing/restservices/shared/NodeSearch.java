@@ -1,25 +1,25 @@
 package org.edu_sharing.restservices.shared;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class NodeSearch {
 
-	@ApiModel(description = "")
-	public static class Facette {
+	@Schema(description = "")
+	public static class Facet {
 
-		@ApiModel(description = "")
+		@Schema(description = "")
 		public static class Value {
 
 			private String value = null;
 			private Integer count = null;
 
-			@ApiModelProperty(required = true, value = "")
+			@Schema(required = true, description = "")
 			@JsonProperty(value = "value")
 			public String getValue() {
 				return value;
@@ -29,7 +29,7 @@ public class NodeSearch {
 				this.value = value;
 			}
 
-			@ApiModelProperty(required = true, value = "")
+			@Schema(required = true, description = "")
 			@JsonProperty(value = "count")
 			public Integer getCount() {
 				return count;
@@ -43,7 +43,7 @@ public class NodeSearch {
 		private String property = null;
 		private List<Value> values = null;
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty(value = "property")
 		public String getProperty() {
 			return property;
@@ -53,7 +53,7 @@ public class NodeSearch {
 			this.property = property;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty(value = "values")
 		public List<Value> getValues() {
 			return values;
@@ -66,14 +66,14 @@ public class NodeSearch {
 	
 	private List<String> ignored = null;
 	private List<NodeRef> result = null;
-	private List<Facette> facettes = null;
+	private List<Facet> facets = null;
 	private Integer count = null;
 	private Integer skip = null;
 	private List<Node> nodes = null;
 
 	/**
    **/
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty(value = "result")
 	public List<NodeRef> getResult() {
 		return result;
@@ -94,19 +94,19 @@ public class NodeSearch {
 
 	/**
 	   **/
-	@ApiModelProperty(required = true, value = "")
-	@JsonProperty(value = "facettes")
-	public List<Facette> getFacettes() {
-		return facettes;
+	@Schema(required = true, description = "")
+	@JsonProperty(value = "facets")
+	public List<Facet> getFacets() {
+		return facets;
 	}
 
-	public void setFacettes(List<Facette> facettes) {
-		this.facettes = facettes;
+	public void setFacets(List<Facet> facets) {
+		this.facets = facets;
 	}
 
 	/**
    **/
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty(value = "count")
 	public Integer getCount() {
 		return count;
@@ -118,7 +118,7 @@ public class NodeSearch {
 
 	/**
    **/
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty(value = "skip")
 	public Integer getSkip() {
 		return skip;

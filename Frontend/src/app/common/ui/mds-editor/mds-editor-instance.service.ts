@@ -385,14 +385,14 @@ export class MdsEditorInstanceService implements OnDestroy {
             if (!searchString || searchString.length < 2) {
                 return [];
             }
-            let criterias: any[] = [];
+            let criteria: any[] = [];
             if (this.mdsEditorInstanceService.editorMode === 'search') {
                 const values = await this.mdsEditorInstanceService.getValues();
                 delete values[this.definition.id];
                 values[RestConstants.PRIMARY_SEARCH_CRITERIA] = [
                     this.mdsEditorInstanceService.searchService.searchTerm,
                 ];
-                criterias = RestSearchService.convertCritierias(
+                criteria = RestSearchService.convertCritierias(
                     values,
                     this.mdsEditorInstanceService.widgets.value.map((w) => w.definition),
                 );
@@ -405,7 +405,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                             property: this.definition.id,
                             pattern: searchString,
                         },
-                        criterias,
+                        criteria,
                         /*
                         criterias: RestSearchService.convertCritierias(
                             Helper.arrayJoin(this._currentValues, this.getValues()),

@@ -1,6 +1,14 @@
 package org.edu_sharing.restservices.collection.v1;
 
-import io.swagger.annotations.*;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
@@ -32,37 +40,39 @@ import java.util.HashMap;
 import java.util.List;
 
 @Path("/collection/v1")
-@Api(tags = { "COLLECTION v1" })
+@Tag(name= "COLLECTION v1" )
 @ApiService(value = "COLLECTION", major = 1, minor = 0)
+@Consumes({ "application/json" })
+@Produces({"application/json"})
 public class CollectionApi {
 
 	private static Logger logger = Logger.getLogger(CollectionApi.class);
 
 	@GET
-	@Path("/collections/{repository}/{collection}")
-	
-	@ApiOperation(value = "Get a collection.", notes = "Get a collection.")
-	
+	@Path("/collections/{repository}/{collectionId}")
+
+	@Operation(summary = "Get a collection.", description = "Get a collection.")
+
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = CollectionEntry.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
-	    })
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = CollectionEntry.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
 
 	public Response getCollection(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = "ID of collection", required = true) @PathParam("collection") String collectionId,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of collection", required = true) @PathParam("collectionId") String collectionId,
 			@Context HttpServletRequest req) {
 
 			try {
-		
+
 				RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-				
+
 				if (repoDao == null) {
-					
+
 					return Response.status(Response.Status.NOT_FOUND).build();
 				}
 
@@ -75,149 +85,150 @@ public class CollectionApi {
 				}
 
 				CollectionEntry response = new CollectionEntry();
-				
+
 				Node collection = nodeDao.asNode();
-				
+
 				response.setCollection(collection);
 
 				return Response.status(Response.Status.OK).entity(response).build();
-		
+
 			} catch (Throwable t) {
 	    		return ErrorResponse.createResponse(t);
 	    	}
 	}
 	@POST
 	@Path("/collections/{repository}/{collection}/order")
-	@ApiOperation(value = "Set order of nodes in a collection. In order to work as expected, provide a list of all nodes in this collection", notes = "Current order will be overriden. Requires full permissions for the parent collection")
+	@Operation(summary = "Set order of nodes in a collection. In order to work as expected, provide a list of all nodes in this collection", description = "Current order will be overriden. Requires full permissions for the parent collection")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
-	    })
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
 	public Response setCollectionOrder(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = "ID of collection", required = true) @PathParam("collection") String collectionId,
-			@ApiParam(value = "List of nodes in the order to be saved. If empty, custom order of the collection will be disabled", required = false) String[] nodes
-			) {
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of collection", required = true) @PathParam("collection") String collectionId,
+			@Parameter(description = "List of nodes in the order to be saved. If empty, custom order of the collection will be disabled", required = false) String[] nodes
+	) {
 		try {
-			
+
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-		
+
 			if (repoDao == null) {
 				return Response.status(Response.Status.NOT_FOUND).build();
 			}
 			CollectionDao.getCollection(repoDao, collectionId).setOrder(nodes);
 			return Response.status(Response.Status.OK).build();
-	
+
 		} catch (Throwable t) {
     		return ErrorResponse.createResponse(t);
     	}
 	}
+
 	@POST
 	@Path("/collections/{repository}/pinning")
-	@ApiOperation(value = "Set pinned collections.", notes = "Remove all currently pinned collections and set them in the order send. Requires "+CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING)
+	@Operation(summary = "Set pinned collections.", description = "Remove all currently pinned collections and set them in the order send. Requires " + CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING)
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
-	    })
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
 	public Response setPinnedCollections(
-			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-			@ApiParam(value = "List of collections that should be pinned",required=true, defaultValue="-home-" ) String[] collections
-			) {
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "List of collections that should be pinned", required = true, array = @ArraySchema( schema = @Schema(defaultValue="-home-"))) String[] collections
+	) {
 		try {
-			
+
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-		
+
 			if (repoDao == null) {
 				return Response.status(Response.Status.NOT_FOUND).build();
 			}
 			CollectionDao.setPinned(repoDao,collections);
 			return Response.status(Response.Status.OK).build();
-	
+
 		} catch (Throwable t) {
     		return ErrorResponse.createResponse(t);
     	}
 	}
 	@GET
 	@Path("/collections/{repository}/search")
-	@ApiOperation(value = "Search collections.", notes = "Search collections.")
+	@Operation(operationId = "searchCollections", summary = "Search collections.", description = "Search collections.")
 	@ApiResponses(value = {
-		@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = CollectionEntries.class),
-        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = CollectionEntries.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
-    public Response search(
-        	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    	    @ApiParam(value = "query string",required=true ) @QueryParam("query") String query,
-    	    @ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue="500" ) @QueryParam("maxItems") Integer maxItems,
-    	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0" ) @QueryParam("skipCount") Integer skipCount,
-    	    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-    	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending){
-	try{
-				RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-				
-				if (repoDao == null) {
-					
-					return Response.status(Response.Status.NOT_FOUND).build();
-				}
-        		SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getId());
-        		SearchToken token=new SearchToken();
-        		token.setContentType(ContentType.COLLECTIONS);
-        		token.setFrom(skipCount!=null ? skipCount : 0);
-        		token.setMaxResult(maxItems!=null ? maxItems : 500);
-        		token.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
-				token.setLuceneString("@cm\\:name:\"*" + QueryParser.escape(query)+"*\"");
-        		SearchResultNodeRef result = searchService.search(token);
-        		CollectionEntries response = new CollectionEntries();
-				List<Node> collections=new ArrayList<>();
-				for(NodeRef entry : AlfrescoDaoHelper.marshall(result.getData())){
-					Node collection = NodeDao.getNode(repoDao, entry.getId(), Filter.createShowAllFilter()).asNode();
-					collections.add(collection);
-				}
-				
-				response.setCollections(collections);
-				return Response.status(Response.Status.OK).entity(response).build();
-        	}
-	catch(Throwable t){
-		return ErrorResponse.createResponse(t);
+	public Response search(
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "query string", required = true) @QueryParam("query") String query,
+			@Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue="500")) @QueryParam("maxItems") Integer maxItems,
+			@Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
+			@Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+			@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending) {
+		try {
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+
+			if (repoDao == null) {
+
+				return Response.status(Response.Status.NOT_FOUND).build();
+			}
+			SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getId());
+			SearchToken token = new SearchToken();
+			token.setContentType(ContentType.COLLECTIONS);
+			token.setFrom(skipCount != null ? skipCount : 0);
+			token.setMaxResult(maxItems != null ? maxItems : 500);
+			token.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
+			token.setLuceneString("@cm\\:name:\"*" + QueryParser.escape(query) + "*\"");
+			SearchResultNodeRef result = searchService.search(token);
+			CollectionEntries response = new CollectionEntries();
+			List<Node> collections = new ArrayList<>();
+			for (NodeRef entry : AlfrescoDaoHelper.marshall(result.getData())) {
+				Node collection = NodeDao.getNode(repoDao, entry.getId(), Filter.createShowAllFilter()).asNode();
+				collections.add(collection);
+			}
+
+			response.setCollections(collections);
+			return Response.status(Response.Status.OK).entity(response).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
 	}
-}
-    	    
+
 	@PUT
-	
+
 	@Path("/collections/{repository}/{collection}")
-	
-	@ApiOperation(value = "Update a collection.", notes = "Update a collection.")
-	
+
+	@Operation(summary = "Update a collection.", description = "Update a collection.")
+
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 	public Response updateCollection(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = "collection", required = true) Node node,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of collection", required = true) @PathParam("collection") String collection,
+			@Parameter(description = "collection node", required = true) Node node,
 			@Context HttpServletRequest req) {
 
 			try {
-		
+
 				RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-				
+
 				if (repoDao == null) {
-					
+
 					return Response.status(Response.Status.NOT_FOUND).build();
 				}
 
@@ -231,38 +242,38 @@ public class CollectionApi {
 				collectionDao.update(node);
 
 				return Response.status(Response.Status.OK).build();
-		
+
 			} catch (Throwable t) {
 	    		return ErrorResponse.createResponse(t);
 	    	}
 	}
 
 	@DELETE
-	
+
 	@Path("/collections/{repository}/{collection}")
-	
-	@ApiOperation(value = "Delete a collection.", notes = "Delete a collection.")
-	
+
+	@Operation(summary = "Delete a collection.", description = "Delete a collection.")
+
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
-	    })
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
 
 	public Response deleteCollection(
-		@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-		@ApiParam(value = "ID of collection", required = true) @PathParam("collection") String collectionId,
-		@Context HttpServletRequest req) {
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of collection", required = true) @PathParam("collection") String collectionId,
+			@Context HttpServletRequest req) {
 
 		try {
-	
+
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			
+
 			if (repoDao == null) {
-				
+
 				return Response.status(Response.Status.NOT_FOUND).build();
 			}
 
@@ -276,18 +287,18 @@ public class CollectionApi {
 			collectionDao.delete();
 
 			return Response.status(Response.Status.OK).build();
-	
+
 		} catch (Throwable t) {
     		return ErrorResponse.createResponse(t);
     	}
 	}
-	
+
 	@OPTIONS
-	
+
 	@Path("/collections/{repository}/{collection}")
-	
-	@ApiOperation(hidden = true, value = "")
-	
+
+	@Hidden
+
 	public Response options01() {
 
 		return Response.status(Response.Status.OK)
@@ -296,24 +307,24 @@ public class CollectionApi {
 
 	@GET
 	@Path("/collections/{repository}/{collection}/children/references")
-	@ApiOperation(value = "Get references objects for collection.")
+	@Operation(summary = "Get references objects for collection.")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = ReferenceEntries.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
-	    })
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = ReferenceEntries.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
 
 	public Response getCollectionsReferences(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = "ID of parent collection", required = true) @PathParam("collection") String parentId,
-            @ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue="500" ) @QueryParam("maxItems") Integer maxItems,
-            @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0" ) @QueryParam("skipCount") Integer skipCount,
-            @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-		    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
-			@ApiParam(value = "property filter for result nodes (or \"-all-\" for all properties)") @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of parent collection", required = true) @PathParam("collection") String parentId,
+			@Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue="500")) @QueryParam("maxItems") Integer maxItems,
+			@Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
+			@Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+			@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)") @QueryParam("propertyFilter") List<String> propertyFilter,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -324,8 +335,8 @@ public class CollectionApi {
 			Filter filter = new Filter();
 			filter.setProperties(propertyFilter);
 			CollectionBaseEntries base = CollectionDao.getCollectionsReferences(repoDao, parentId, filter, sortDefinition, skipCount == null ? 0 : skipCount, maxItems == null ? 500 : maxItems);
-			for(Node item : base.getEntries()) {
-					references.add((CollectionReference) item);
+			for (Node item : base.getEntries()) {
+				references.add((CollectionReference) item);
 			}
 			response.setReferences(references);
 			response.setPagination(base.getPagination());
@@ -338,26 +349,26 @@ public class CollectionApi {
 
 	@GET
 	@Path("/collections/{repository}/{collection}/children/collections")
-	@ApiOperation(value = "Get child collections for collection (or root).")
+	@Operation(summary = "Get child collections for collection (or root).")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = ReferenceEntries.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = ReferenceEntries.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 
 	public Response getCollectionsSubcollections(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = "ID of parent collection (or \"-root-\" for level0 collections)", required = true) @PathParam("collection") String parentId,
-			@ApiParam(value = "scope (only relevant if parent == -root-)", required = true) @QueryParam("scope") @DefaultValue(value = "MY") SearchScope scope,
-			@ApiParam(value = "fetch counts of collections (materials and subcollections). This parameter will decrease performance so only enable if if you need this data", required = false) @QueryParam("fetchCounts") @DefaultValue(value = "true") Boolean fetchCounts,
-			@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue="500" ) @QueryParam("maxItems") Integer maxItems,
-			@ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0" ) @QueryParam("skipCount") Integer skipCount,
-			@ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-			@ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
-			@ApiParam(value = "property filter for result nodes (or \"-all-\" for all properties)") @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of parent collection (or \"-root-\" for level0 collections)", required = true) @PathParam("collection") String parentId,
+			@Parameter(description = "scope (only relevant if parent == -root-)", required = true) @QueryParam("scope") @DefaultValue(value = "MY") SearchScope scope,
+			@Parameter(description = "fetch counts of collections (materials and subcollections). This parameter will decrease performance so only enable if if you need this data", required = false) @QueryParam("fetchCounts") @DefaultValue(value = "true") Boolean fetchCounts,
+			@Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue="500") ) @QueryParam("maxItems") Integer maxItems,
+			@Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue="0"))@QueryParam("skipCount") Integer skipCount,
+			@Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+			@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)") @QueryParam("propertyFilter") List<String> propertyFilter,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -389,21 +400,21 @@ public class CollectionApi {
 	
 	@Path("/collections/{repository}/{collection}/children")
 	
-	@ApiOperation(value = "Create a new collection.", notes = "Create a new collection.")
+	@Operation(summary = "Create a new collection.", description = "Create a new collection.")
 	
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = CollectionEntry.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = CollectionEntry.class))),
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	    })
 
 	public Response createCollection(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = "ID of parent collection (or \"-root-\" for level0 collections)", required = true) @PathParam("collection") String parentId,
-			@ApiParam(value = "collection", required = true) Node collection,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of parent collection (or \"-root-\" for level0 collections)", required = true) @PathParam("collection") String parentId,
+			@Parameter(description = "collection", required = true) Node collection,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -447,7 +458,7 @@ public class CollectionApi {
 	
 	@Path("/collections/{repository}/{collection}/children")
 	
-	@ApiOperation(hidden = true, value = "")
+	@Hidden
 	
 	public Response options02() {
 
@@ -459,24 +470,24 @@ public class CollectionApi {
 	
 	@Path("/collections/{repository}/{collection}/references/{node}")
 	
-	@ApiOperation(value = "Add a node to a collection.", notes = "Add a node to a collection.")
+	@Operation(summary = "Add a node to a collection.", description = "Add a node to a collection.")
 	
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-	        @ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class),        
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	    })
 
 	public Response addToCollection(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = "ID of collection", required = true) @PathParam("collection") String collectionId,
-			@ApiParam(value = "ID of node", required = true) @PathParam("node") String nodeId,
-			@ApiParam(value = "ID of source repository", required=false ) @QueryParam("sourceRepo")  String sourceRepo,
-			@ApiParam(value = "Allow that a node that already is inside the collection can be added again", required=false, defaultValue = "false") @QueryParam("allowDuplicate")  Boolean allowDuplicate,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of collection", required = true) @PathParam("collection") String collectionId,
+			@Parameter(description = "ID of node", required = true) @PathParam("node") String nodeId,
+			@Parameter(description = "ID of source repository", required=false ) @QueryParam("sourceRepo")  String sourceRepo,
+			@Parameter(description = "Allow that a node that already is inside the collection can be added again", required = false, schema = @Schema(defaultValue="false")) @QueryParam("allowDuplicate")  Boolean allowDuplicate,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -509,21 +520,21 @@ public class CollectionApi {
 	
 	@Path("/collections/{repository}/{collection}/references/{node}")
 	
-	@ApiOperation(value = "Delete a node from a collection.", notes = "Delete a node from a collection.")
+	@Operation(summary = "Delete a node from a collection.", description = "Delete a node from a collection.")
 	
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	    })
 
 	public Response deleteFromCollection(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = "ID of collection", required = true) @PathParam("collection") String collectionId,
-			@ApiParam(value = "ID of node", required = true) @PathParam("node") String nodeId,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of collection", required = true) @PathParam("collection") String collectionId,
+			@Parameter(description = "ID of node", required = true) @PathParam("node") String nodeId,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -563,7 +574,7 @@ public class CollectionApi {
 	
 	@Path("/collections/{repository}/{collection}/references")
 	
-	@ApiOperation(hidden = true, value = "")
+	@Hidden
 	
 	public Response options03() {
 
@@ -578,21 +589,21 @@ public class CollectionApi {
 	@Path("/collections/{repository}/{collection}/icon")
 	@Consumes({ "multipart/form-data" })
 	
-	@ApiOperation(value = "Writes Preview Image of a collection.", notes = "Writes Preview Image of a collection.")
+	@Operation(summary = "Writes Preview Image of a collection.", description = "Writes Preview Image of a collection.")
 	
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = CollectionEntry.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = CollectionEntry.class))),
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	    })
 
 	public Response changeIconOfCollection(
-			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)", required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = "ID of collection", required = true) @PathParam("collection") String collectionId,
-			@ApiParam(value = "MIME-Type", required=true ) @QueryParam("mimetype")  String mimetype,
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of collection", required = true) @PathParam("collection") String collectionId,
+			@Parameter(description = "MIME-Type", required=true ) @QueryParam("mimetype")  String mimetype,
 		    @FormDataParam("file") InputStream inputStream,
 			@Context HttpServletRequest req) {
 
@@ -630,20 +641,20 @@ public class CollectionApi {
 	@DELETE
 	@Path("/collections/{repository}/{collection}/icon")
 
-	@ApiOperation(value = "Deletes Preview Image of a collection.", notes = "Deletes Preview Image of a collection.")
+	@Operation(summary = "Deletes Preview Image of a collection.", description = "Deletes Preview Image of a collection.")
 
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 
 	public Response removeIconOfCollection(
-			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID, required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = "ID of collection", required = true) @PathParam("collection") String collectionId,
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of collection", required = true) @PathParam("collection") String collectionId,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -674,18 +685,18 @@ public class CollectionApi {
 
 	@POST
 	@Path("/collections/{repository}/{collection}/feedback")
-	@ApiOperation(value = "Post feedback to collection.", notes = "Requires permission \"Feedback\" on the specific collection")
+	@Operation(summary = "Post feedback to collection.", description = "Requires permission \"Feedback\" on the specific collection")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 	public Response addFeedbackToCollection(
-			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID, required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = "ID of collection", required = true) @PathParam("collection") String collectionId,
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of collection", required = true) @PathParam("collection") String collectionId,
 			HashMap<String,String[]> body,
 			@Context HttpServletRequest req) {
 
@@ -707,18 +718,18 @@ public class CollectionApi {
 	}
 	@GET
 	@Path("/collections/{repository}/{collection}/feedback")
-	@ApiOperation(value = "Get feedback of collection.", notes = "Requires permission \"???\" on the specific permission")
+	@Operation(summary = "Get feedback of collection.", description = "Requires permission \"???\" on the specific permission")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = CollectionFeedback[].class),
-			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = CollectionFeedback[].class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 	public Response getFeedbackOfCollection(
-			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID, required = true, defaultValue = "-home-") @PathParam("repository") String repository,
-			@ApiParam(value = "ID of collection", required = true) @PathParam("collection") String collectionId,
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of collection", required = true) @PathParam("collection") String collectionId,
 			@Context HttpServletRequest req) {
 
 		try {

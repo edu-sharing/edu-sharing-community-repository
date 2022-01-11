@@ -1,7 +1,7 @@
 package org.edu_sharing.restservices.collection.v1.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;;
 import org.edu_sharing.restservices.shared.Pagination;
 
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ public class ReferenceEntries {
 
     /**
      **/
-    @ApiModelProperty(required = true, value = "")
+    @Schema(required = true, description = "")
     @JsonProperty("references")
     public List<CollectionReference> getReferences() {
         return references;

@@ -6,10 +6,10 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class ACL {
 
 	private boolean inherited = false;	
@@ -38,7 +38,7 @@ public class ACL {
 			permissions.add(new ACE(ace));
 		}
 	}
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("inherited")
 	public boolean isInherited() {
 		return inherited;
@@ -47,7 +47,7 @@ public class ACL {
 		this.inherited = inherited;
 	}
 		
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("permissions")
 	public List<ACE> getPermissions() {
 		return permissions;

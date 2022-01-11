@@ -1,8 +1,8 @@
 package org.edu_sharing.restservices.shared;
 
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import java.util.HashMap;
 
@@ -19,7 +19,7 @@ import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class Preview  {
   
   private String url = null;
@@ -60,7 +60,7 @@ public class Preview  {
   }
 /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("url")
   public String getUrl() {
     return url;
@@ -72,7 +72,7 @@ public class Preview  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("width")
   public Integer getWidth() {
     return width;
@@ -84,7 +84,7 @@ public class Preview  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("height")
   public Integer getHeight() {
     return height;
@@ -108,7 +108,7 @@ public class Preview  {
   }
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("isIcon")
   public boolean isIcon() {
     return isIcon;

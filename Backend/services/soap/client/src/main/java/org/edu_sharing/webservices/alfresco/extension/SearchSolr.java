@@ -14,11 +14,11 @@ public class SearchSolr  implements java.io.Serializable {
 
     private int nrOfresults;
 
-    private java.lang.String[] facettes;
+    private java.lang.String[] facets;
 
-    private int facettesMinCount;
+    private int facetsMinCount;
 
-    private int facettesLimit;
+    private int facetsLimit;
 
     public SearchSolr() {
     }
@@ -27,15 +27,15 @@ public class SearchSolr  implements java.io.Serializable {
            java.lang.String query,
            int startIdx,
            int nrOfresults,
-           java.lang.String[] facettes,
-           int facettesMinCount,
-           int facettesLimit) {
+           java.lang.String[] facets,
+           int facetsMinCount,
+           int facetsLimit) {
            this.query = query;
            this.startIdx = startIdx;
            this.nrOfresults = nrOfresults;
-           this.facettes = facettes;
-           this.facettesMinCount = facettesMinCount;
-           this.facettesLimit = facettesLimit;
+           this.facets = facets;
+           this.facetsMinCount = facetsMinCount;
+           this.facetsLimit = facetsLimit;
     }
 
 
@@ -104,26 +104,26 @@ public class SearchSolr  implements java.io.Serializable {
      * 
      * @return facettes
      */
-    public java.lang.String[] getFacettes() {
-        return facettes;
+    public java.lang.String[] getFacets() {
+        return facets;
     }
 
 
     /**
      * Sets the facettes value for this SearchSolr.
      * 
-     * @param facettes
+     * @param facets
      */
-    public void setFacettes(java.lang.String[] facettes) {
-        this.facettes = facettes;
+    public void setFacets(java.lang.String[] facets) {
+        this.facets = facets;
     }
 
     public java.lang.String getFacettes(int i) {
-        return this.facettes[i];
+        return this.facets[i];
     }
 
     public void setFacettes(int i, java.lang.String _value) {
-        this.facettes[i] = _value;
+        this.facets[i] = _value;
     }
 
 
@@ -132,18 +132,18 @@ public class SearchSolr  implements java.io.Serializable {
      * 
      * @return facettesMinCount
      */
-    public int getFacettesMinCount() {
-        return facettesMinCount;
+    public int getFacetsMinCount() {
+        return facetsMinCount;
     }
 
 
     /**
      * Sets the facettesMinCount value for this SearchSolr.
      * 
-     * @param facettesMinCount
+     * @param facetsMinCount
      */
-    public void setFacettesMinCount(int facettesMinCount) {
-        this.facettesMinCount = facettesMinCount;
+    public void setFacetsMinCount(int facetsMinCount) {
+        this.facetsMinCount = facetsMinCount;
     }
 
 
@@ -152,18 +152,18 @@ public class SearchSolr  implements java.io.Serializable {
      * 
      * @return facettesLimit
      */
-    public int getFacettesLimit() {
-        return facettesLimit;
+    public int getFacetsLimit() {
+        return facetsLimit;
     }
 
 
     /**
      * Sets the facettesLimit value for this SearchSolr.
      * 
-     * @param facettesLimit
+     * @param facetsLimit
      */
-    public void setFacettesLimit(int facettesLimit) {
-        this.facettesLimit = facettesLimit;
+    public void setFacetsLimit(int facetsLimit) {
+        this.facetsLimit = facetsLimit;
     }
 
     private java.lang.Object __equalsCalc = null;
@@ -183,11 +183,11 @@ public class SearchSolr  implements java.io.Serializable {
               this.query.equals(other.getQuery()))) &&
             this.startIdx == other.getStartIdx() &&
             this.nrOfresults == other.getNrOfresults() &&
-            ((this.facettes==null && other.getFacettes()==null) || 
-             (this.facettes!=null &&
-              java.util.Arrays.equals(this.facettes, other.getFacettes()))) &&
-            this.facettesMinCount == other.getFacettesMinCount() &&
-            this.facettesLimit == other.getFacettesLimit();
+            ((this.facets ==null && other.getFacets()==null) ||
+             (this.facets !=null &&
+              java.util.Arrays.equals(this.facets, other.getFacets()))) &&
+            this.facetsMinCount == other.getFacetsMinCount() &&
+            this.facetsLimit == other.getFacetsLimit();
         __equalsCalc = null;
         return _equals;
     }
@@ -204,19 +204,19 @@ public class SearchSolr  implements java.io.Serializable {
         }
         _hashCode += getStartIdx();
         _hashCode += getNrOfresults();
-        if (getFacettes() != null) {
+        if (getFacets() != null) {
             for (int i=0;
-                 i<java.lang.reflect.Array.getLength(getFacettes());
+                 i<java.lang.reflect.Array.getLength(getFacets());
                  i++) {
-                java.lang.Object obj = java.lang.reflect.Array.get(getFacettes(), i);
+                java.lang.Object obj = java.lang.reflect.Array.get(getFacets(), i);
                 if (obj != null &&
                     !obj.getClass().isArray()) {
                     _hashCode += obj.hashCode();
                 }
             }
         }
-        _hashCode += getFacettesMinCount();
-        _hashCode += getFacettesLimit();
+        _hashCode += getFacetsMinCount();
+        _hashCode += getFacetsLimit();
         __hashCodeCalc = false;
         return _hashCode;
     }

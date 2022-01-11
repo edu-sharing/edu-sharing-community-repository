@@ -1,7 +1,7 @@
 package org.edu_sharing.restservices.collection.v1.model;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,14 +10,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.Pagination;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class CollectionEntries {
 
 	private List<Node> collections = new ArrayList<>();
 	private Pagination pagination;
 	/**
 	   **/
-	@ApiModelProperty(required = true, value = "")
+    @Schema(required = true, description = "")
 	@JsonProperty("collections")
 	public List<Node> getCollections() {
 		return collections;

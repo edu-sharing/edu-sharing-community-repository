@@ -167,7 +167,7 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 		}
 		// ignore the auth for the login
 		if(validatedAuth == null && !noAuthenticationNeeded){
-			if(httpReq.getPathInfo().equals("/swagger.json"))
+			if(httpReq.getPathInfo().equals("/openapi.json"))
 				httpResp.setHeader("WWW-Authenticate", "BASIC realm=\""+ "Edu-Sharing Rest API" +"\"");
 			httpResp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			httpResp.flushBuffer();

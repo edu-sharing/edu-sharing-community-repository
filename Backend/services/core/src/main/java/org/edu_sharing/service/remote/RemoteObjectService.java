@@ -51,7 +51,7 @@ public class RemoteObjectService {
 								.getPermissionService(ApplicationInfoList.getHomeRepository().getAppId());
 						String remoteObjectFolderId = null;
 						remoteObjectFolderId = getRemoteObjectsFolder();
-		
+
 						// schau nach ob remote object schon existiert
 						mcAlfrescoBaseClient.setResolveRemoteObjects(false);
 						HashMap<String, Object> remoteObjectProps = mcAlfrescoBaseClient.getChild(remoteObjectFolderId,
@@ -173,7 +173,7 @@ public class RemoteObjectService {
 		// propsIn.put(CCConstants.CCM_PROP_IO_WWWURL, propsIn.get(CCConstants.LOM_PROP_TECHNICAL_LOCATION));
 
 		// set the metadataset to keep the rendering of metadata consistent
-		propsIn.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, repInfo.getMetadatsetsV2()[0]);
+		propsIn.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, repInfo.getMetadatsets()[0]);
 		// We also need to store repository information for remote edu-sharing objects
 		propsIn.put(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID, originalNodeId);
 		propsIn.put(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORY_TYPE, repInfo.getRepositoryType());

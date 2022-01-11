@@ -1,46 +1,25 @@
 package org.edu_sharing.service.search;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.log4j.Logger;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.client.tools.forms.VCardTool;
-import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
-import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.nodeservice.NodeServiceBrockhausImpl;
-import org.edu_sharing.service.nodeservice.NodeServicePixabayImpl;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.extensions.surf.util.URLEncoder;
-import org.springframework.util.StreamUtils;
 
-import javax.net.ssl.HttpsURLConnection;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 public class SearchServiceBrockhausImpl extends SearchServiceAdapter{
 
@@ -108,14 +87,14 @@ public class SearchServiceBrockhausImpl extends SearchServiceAdapter{
 		return "https://www.brockhaus.de/portal/user/"+URLEncoder.encodeUriComponent(apiKey)+"?url="+URLEncoder.encodeUriComponent("/ecs/" + id);
 	}
 	@Override
-	public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String, String[]> criterias,
-			SearchToken searchToken) throws Throwable {
+	public SearchResultNodeRef search(MetadataSet mds, String query, Map<String, String[]> criterias,
+									  SearchToken searchToken) throws Throwable {
 				
-		if(!MetadataSetV2.DEFAULT_CLIENT_QUERY.equals(query)){
+		if(!MetadataSet.DEFAULT_CLIENT_QUERY.equals(query)){
 			throw new Exception("Only ngsearch query is supported for this repository type, requested "+query);
 		}
 
-		String[] searchWordCriteria=criterias.get(MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA);
+		String[] searchWordCriteria=criterias.get(MetadataSet.DEFAULT_CLIENT_QUERY_CRITERIA);
 		if(searchWordCriteria == null){
 			searchWordCriteria = new String[] {"*"};
 		}

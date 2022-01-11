@@ -662,9 +662,9 @@ public class SearchServiceImpl implements SearchService {
 		return new SearchResult<String>(result, skipCount, data.getNodeCount());
 	}
 	@Override
-	public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query,Map<String,String[]> criterias,
-			SearchToken searchToken) throws Throwable {
-		MetadataQueries queries = mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_LUCENE);
+	public SearchResultNodeRef search(MetadataSet mds, String query, Map<String,String[]> criterias,
+									  SearchToken searchToken) throws Throwable {
+		MetadataQueries queries = mds.getQueries(MetadataReader.QUERY_SYNTAX_LUCENE);
 		searchToken.setMetadataQuery(queries,query,criterias);
 		SearchCriterias scParam = new SearchCriterias();
 		scParam.setRepositoryId(mds.getRepositoryId());
@@ -675,7 +675,7 @@ public class SearchServiceImpl implements SearchService {
 		HashMap<ContentType, SearchToken> lastTokens = getLastSearchTokens();
 		lastTokens.put(searchToken.getContentType(),searchToken);
 		Context.getCurrentInstance().getRequest().getSession().setAttribute(CCConstants.SESSION_LAST_SEARCH_TOKENS,lastTokens);
-		List<String> facettes = searchToken.getFacettes();
+		List<String> facettes = searchToken.getFacets();
 		SearchResultNodeRef search = search(searchToken,true);
 		return search;
 	}
@@ -728,7 +728,7 @@ public class SearchServiceImpl implements SearchService {
 				}
 			}
 
-			List<String> facettes = searchToken.getFacettes();
+			List<String> facettes = searchToken.getFacets();
 
 			if (facettes != null && facettes.size() > 0) {
 				for (String facetteProp : facettes) {
@@ -737,8 +737,6 @@ public class SearchServiceImpl implements SearchService {
 						fieldFacette = "@" + facetteProp;
 					}
 					FieldFacet fieldFacet = new FieldFacet(fieldFacette);
-					fieldFacet.setLimit(searchToken.getFacettesLimit());
-					fieldFacet.setMinCount(searchToken.getFacettesMinCount());
 					searchParameters.addFieldFacet(fieldFacet);
 				}
 			}
@@ -986,7 +984,7 @@ public class SearchServiceImpl implements SearchService {
 		return parameter.getStatement(value).replace("${value}","*"+QueryParser.escape(value)+"*");
 	}
 	@Override
-	public List<? extends Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) {
+	public List<? extends Suggestion> getSuggestions(MetadataSet mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) {
 			List<Suggestion> result = new ArrayList<>();
 			ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 			org.alfresco.service.cmr.search.SearchService searchService = (org.alfresco.service.cmr.search.SearchService)applicationContext.getBean("scopedSearchService");
@@ -997,7 +995,7 @@ public class SearchServiceImpl implements SearchService {
 
 			searchParameters.setSkipCount(0);
 			searchParameters.setMaxItems(1);
-			MetadataQueryParameter parameter = mds.findQuery(queryId, MetadataReaderV2.QUERY_SYNTAX_LUCENE).findParameterByName(parameterId);
+			MetadataQueryParameter parameter = mds.findQuery(queryId, MetadataReader.QUERY_SYNTAX_LUCENE).findParameterByName(parameterId);
 			String luceneQuery = "(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\"" +") AND ("+getLuceneSuggestionQuery(parameter, value)+")";
 			if(criterias != null && criterias.size() > 0 ) {
 
@@ -1005,7 +1003,7 @@ public class SearchServiceImpl implements SearchService {
 				for(MdsQueryCriteria criteria : criterias){
 					criteriasMap.put(criteria.getProperty(),criteria.getValues().toArray(new String[0]));
 				}
-				MetadataQueries queries = mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_LUCENE);
+				MetadataQueries queries = mds.getQueries(MetadataReader.QUERY_SYNTAX_LUCENE);
 				MetadataQuery queryObj = queries.findQuery(queryId);
 				queryObj.setApplyBasequery(false);
 				queryObj.setBasequery(null);

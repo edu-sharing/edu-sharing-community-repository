@@ -9,7 +9,7 @@ import java.util.Map;
 
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.SearchCriterias;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -41,14 +41,14 @@ public class SearchServiceYouTubeImpl extends SearchServiceAdapter{
 	private SearchResultNodeRef searchInternal(SearchCriterias rc, String query, List<MdsQueryCriteria> criterias, SearchToken token)
 			throws Throwable {
 		
-		if (!MetadataSetV2.DEFAULT_CLIENT_QUERY.equals(query)) {
+		if (!MetadataSet.DEFAULT_CLIENT_QUERY.equals(query)) {
 			throw new Exception("Only ngsearch query is supported for this repository type, requested "+query);
 		}
 		
 		MdsQueryCriteria searchWordCriteria = null;
 		
 		for(MdsQueryCriteria criteria : criterias){
-			if (MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA.equals(criteria.getProperty())) {
+			if (MetadataSet.DEFAULT_CLIENT_QUERY_CRITERIA.equals(criteria.getProperty())) {
 				searchWordCriteria = criteria;
 			}	
 		}
@@ -156,8 +156,8 @@ public class SearchServiceYouTubeImpl extends SearchServiceAdapter{
 	}
 	
 	@Override
-	public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String, String[]> criterias,
-			SearchToken searchToken) throws Throwable {
+	public SearchResultNodeRef search(MetadataSet mds, String query, Map<String, String[]> criterias,
+									  SearchToken searchToken) throws Throwable {
 		SearchCriterias rc = new SearchCriterias();
 		rc.setMetadataSetId(mds.getId());
 		rc.setMetadataSetQuery(query);
@@ -169,8 +169,8 @@ public class SearchServiceYouTubeImpl extends SearchServiceAdapter{
 			if (searchword == null) {
 				searchword = "Mathematik";
 			}
-			criterias.put(MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA, new String[] {searchword});
-			query = MetadataSetV2.DEFAULT_CLIENT_QUERY;
+			criterias.put(MetadataSet.DEFAULT_CLIENT_QUERY_CRITERIA, new String[] {searchword});
+			query = MetadataSet.DEFAULT_CLIENT_QUERY;
 		}
 		
 		List<MdsQueryCriteria> criterasConverted = MdsQueryCriteria.fromMap(criterias);

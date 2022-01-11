@@ -1,10 +1,5 @@
 package org.edu_sharing.restservices;
 
-import java.io.ByteArrayInputStream;
-import java.io.StringReader;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -13,27 +8,24 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.usage.v1.model.CreateUsage;
 import org.edu_sharing.restservices.usage.v1.model.Usages;
-import org.edu_sharing.restservices.usage.v1.model.Usages.NodeUsage;
 import org.edu_sharing.restservices.usage.v1.model.Usages.Usage;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.usage.Usage2Service;
 
-import io.swagger.annotations.ApiParam;
-import org.edu_sharing.service.usage.UsageException;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.core.Context;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.ValidationEvent;
 import javax.xml.bind.ValidationEventHandler;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class UsageDao {
 	Logger logger = Logger.getLogger(UsageDao.class);

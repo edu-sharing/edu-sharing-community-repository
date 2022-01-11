@@ -52,7 +52,7 @@ public class MetadataQueryParameter implements Serializable {
 		return QueryUtils.replaceCommonQueryParams(statement, QueryUtils.replacerFromSyntax(syntax));
 	}
 	private String getDefaultStatement() {
-		if(syntax.equals(MetadataReaderV2.QUERY_SYNTAX_DSL)){
+		if(syntax.equals(MetadataReader.QUERY_SYNTAX_DSL)){
 			//return "{\"wildcard\":{\"properties." + name  +"\":{\"value\":\"${value}\"}}}";
 			try {
 
@@ -67,7 +67,7 @@ public class MetadataQueryParameter implements Serializable {
 			}catch(JSONException e){
 				throw new RuntimeException(e);
 			}
-		} else if(syntax.equals(MetadataReaderV2.QUERY_SYNTAX_LUCENE)) {
+		} else if(syntax.equals(MetadataReader.QUERY_SYNTAX_LUCENE)) {
 			return "@" + name.replace(":", "\\:") + ":\"*${value}*\"";
 		}
 		throw new RuntimeException("Unsupported syntax for query language: " + syntax);

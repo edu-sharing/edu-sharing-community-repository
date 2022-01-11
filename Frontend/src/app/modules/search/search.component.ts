@@ -552,7 +552,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.isSearchingCollections = true;
                 this.search
                     .searchWithBody(
-                      {criterias: this.getCriterias(this.currentValues, searchString, false), facettes: []},
+                      {criteria: this.getCriterias(this.currentValues, searchString, false), facets: []},
                         {sortBy: [
                                 RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
                                 RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
@@ -677,10 +677,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             return;
         }
         if (init) {
-            this.searchService.facettes = data.facettes;
+            this.searchService.facettes = data.facets;
             this.mdsSuggestions = {};
-            if (data.facettes) {
-                for (let facette of data.facettes) {
+            if (data.facets) {
+                for (let facette of data.facets) {
                     facette.values = facette.values.slice(0, 5);
                     this.mdsSuggestions[facette.property] = [];
                     const widget = MdsHelper.getWidget(facette.property, null, this.currentMdsSet?.widgets);
@@ -1062,7 +1062,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private searchRepository(
         repos: any[],
-        criterias: SearchRequestCriteria[],
+        criteria: SearchRequestCriteria[],
         init: boolean,
         position = 0,
         count = 0,
@@ -1077,7 +1077,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
         let repo = repos[position];
         if (!repo.enabled) {
-            this.searchRepository(repos, criterias, init, position + 1, count);
+            this.searchRepository(repos, criteria, init, position + 1, count);
             return;
         }
 
@@ -1130,17 +1130,17 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         if(this.applyMode){
             permissions = [RestConstants.ACCESS_CC_PUBLISH];
         }
-        let facettes;
+        let facets;
         try {
-            facettes = MdsHelper.getUsedWidgets(this.currentMdsSet, 'search_suggestions').map((w: any) => w.id);
+            facets = MdsHelper.getUsedWidgets(this.currentMdsSet, 'search_suggestions').map((w: any) => w.id);
         } catch(e) {
-            console.warn('Could not load used facettes from search_suggestions', e);
-            facettes = [RestConstants.LOM_PROP_GENERAL_KEYWORD];
+            console.warn('Could not load used facets from search_suggestions', e);
+            facets = [RestConstants.LOM_PROP_GENERAL_KEYWORD];
         }
         let queryRequest =
         this.search
             .searchWithBody(
-                {criterias, facettes, permissions},
+                {criteria, facets, permissions},
                 request,
                 RestConstants.CONTENT_TYPE_FILES,
                 repo ? repo.id : RestConstants.HOME_REPOSITORY,
@@ -1162,7 +1162,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     this.searchService.showchosenfilters = true;
                     this.searchRepository(
                         repos,
-                        criterias,
+                        criteria,
                         init,
                         position + 1,
                         count + data.pagination.total,
@@ -1172,7 +1172,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                         console.warn('Could not fetch frontpage data, will fallback to a regular search', error);
                         this.searchRepository(
                             repos,
-                            criterias,
+                            criteria,
                             init,
                             position,
                             count,
@@ -1183,7 +1183,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     this.toast.error(error);
                     this.searchRepository(
                         repos,
-                        criterias,
+                        criteria,
                         init,
                         position + 1,
                         count,

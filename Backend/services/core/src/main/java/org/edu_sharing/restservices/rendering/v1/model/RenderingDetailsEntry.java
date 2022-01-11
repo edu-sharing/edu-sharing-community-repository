@@ -4,7 +4,7 @@ import org.edu_sharing.restservices.shared.Node;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 public class RenderingDetailsEntry {
 
@@ -14,7 +14,7 @@ public class RenderingDetailsEntry {
 	
 	Node node;
 	
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	  @JsonProperty("detailsSnippet")
 	public String getDetailsSnippet() {
 		return detailsSnippet;
@@ -24,7 +24,7 @@ public class RenderingDetailsEntry {
 		this.detailsSnippet = detailsSnippet;
 	}
 	
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("mimeType")
 	public String getMimeType() {
 		return mimeType;
@@ -38,7 +38,7 @@ public class RenderingDetailsEntry {
 		this.node = node;
 	}
 	
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("node")
 	public Node getNode() {
 		return node;

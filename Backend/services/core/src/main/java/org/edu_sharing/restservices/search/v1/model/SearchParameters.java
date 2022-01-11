@@ -1,7 +1,7 @@
 package org.edu_sharing.restservices.search.v1.model;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+;
 
 import java.util.List;
 
@@ -9,32 +9,32 @@ import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class SearchParameters {
 
 	private List<String> permissions;
-	private List<MdsQueryCriteria> criterias;
-	private List<String> facettes;
+	private List<MdsQueryCriteria> criteria;
+	private List<String> facets;
 	private boolean resolveCollections = false;
 
-	@ApiModelProperty(required = true, value = "")
-	@JsonProperty("criterias")
-	public List<MdsQueryCriteria> getCriterias() {
-		return criterias;
+	@Schema(required = true, description = "")
+	@JsonProperty("criteria")
+	public List<MdsQueryCriteria> getCriteria() {
+		return criteria;
 	}
 
-	public void setCriterias(List<MdsQueryCriteria> criterias) {
-		this.criterias = criterias;
+	public void setCriteria(List<MdsQueryCriteria> criteria) {
+		this.criteria = criteria;
 	}
 
-	@ApiModelProperty(required = true, value = "")
-	@JsonProperty("facettes")
-	public List<String> getFacettes() {
-		return facettes;
+	@Schema(required = true, description = "")
+	@JsonProperty("facets")
+	public List<String> getFacets() {
+		return facets;
 	}
 
-	public void setFacettes(List<String> facettes) {
-		this.facettes = facettes;
+	public void setFacets(List<String> facets) {
+		this.facets = facets;
 	}
 
 	@JsonProperty

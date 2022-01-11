@@ -1,7 +1,5 @@
 package org.edu_sharing.repository.server.tools;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -17,12 +15,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.log4j.Logger;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.restservices.NodeDao;
-import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.tracking.TrackingService;
@@ -108,11 +103,11 @@ public class XApiTool {
 
     /**
      *
-     * @param authority if null, do not filter by authority and fetch all facettes
+     * @param authority if null, do not filter by authority and fetch all facets
      * @param fieldName
      * @return
      */
-    public static List<String> getFacettesFromStore(String authority, String fieldName,int limit) throws Exception {
+    public static List<String> getFacetsFromStore(String authority, String fieldName, int limit) throws Exception {
         /**
          * [
          *   {
@@ -165,7 +160,7 @@ public class XApiTool {
             }
             return mapped;
         }catch(Exception e){
-            logger.info("Could not fetch facettes from xapi store: "+e.getMessage());
+            logger.info("Could not fetch facets from xapi store: "+e.getMessage());
             return null;
         }
     }

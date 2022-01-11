@@ -1140,7 +1140,7 @@
 					<type>d:text</type>
 					<multiple>true</multiple>
 				</property>
-				<!-- for learnline facette counting: save also the parentId's -->
+				<!-- for learnline facet counting: save also the parentId's -->
 				<property name="ccm:taxonid_path">
 					<type>d:text</type>
 					<multiple>true</multiple>

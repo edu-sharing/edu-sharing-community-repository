@@ -10,7 +10,7 @@ public interface StatisticService {
 
 	long countForQuery(String mdsId, String queryId, String type, String customLucene) throws Throwable;
 
-	public List<Map<String, Integer>> countFacettesForQuery(String mdsId, String queryId,
-			String type, String lucene, Collection<String> facettes) throws Throwable;
+	public List<Map<String, Integer>> countFacetsForQuery(String mdsId, String queryId,
+														  String type, String lucene, Collection<String> facets) throws Throwable;
 	
 }

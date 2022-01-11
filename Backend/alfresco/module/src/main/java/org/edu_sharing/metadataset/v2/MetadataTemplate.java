@@ -2,7 +2,13 @@ package org.edu_sharing.metadataset.v2;
 
 
 public class MetadataTemplate extends MetadataTranslatable {
-	private String id,caption,icon,html,rel;
+
+	public static enum REL_TYPE{
+		suggestions
+	};
+
+	private REL_TYPE rel;
+	private String id,caption,icon,html;
 	private boolean hideIfEmpty=false;
 	private boolean extended;
 
@@ -39,11 +45,11 @@ public class MetadataTemplate extends MetadataTranslatable {
 		this.icon = icon;
 	}
 	
-	public String getRel() {
+	public REL_TYPE getRel() {
 		return rel;
 	}
 
-	public void setRel(String rel) {
+	public void setRel(REL_TYPE rel) {
 		this.rel = rel;
 	}
 

@@ -9,6 +9,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.core.util.Json;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
@@ -29,7 +30,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
 import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
+import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.rpc.User;
@@ -46,9 +47,9 @@ import org.edu_sharing.restservices.node.v1.model.NodeShare;
 import org.edu_sharing.restservices.node.v1.model.NotifyEntry;
 import org.edu_sharing.restservices.node.v1.model.WorkflowHistory;
 import org.edu_sharing.restservices.shared.*;
+import org.edu_sharing.restservices.shared.NodeSearch.Facet;
+import org.edu_sharing.restservices.shared.NodeSearch.Facet.Value;
 import org.edu_sharing.restservices.shared.NodeRef;
-import org.edu_sharing.restservices.shared.NodeSearch.Facette;
-import org.edu_sharing.restservices.shared.NodeSearch.Facette.Value;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.comment.CommentService;
 import org.edu_sharing.service.license.LicenseService;
@@ -72,7 +73,6 @@ import org.edu_sharing.service.share.ShareServiceImpl;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import io.swagger.util.Json;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.core.Authentication;
 
@@ -192,16 +192,16 @@ public class NodeDao {
 		return transform(repoDao,searchService.search(searchToken,scoped));
 	}
 	
-	public static NodeSearch searchV2(RepositoryDao repoDao,MdsDaoV2 mdsDao,
-			String query, List<MdsQueryCriteria> criterias,SearchToken token, Filter filter) throws DAOException {
+	public static NodeSearch search(RepositoryDao repoDao, MdsDao mdsDao,
+									String query, List<MdsQueryCriteria> criterias, SearchToken token, Filter filter) throws DAOException {
 		SearchService searchService=SearchServiceFactory.getSearchService(repoDao.getId());
 		Map<String,String[]> criteriasMap = MetadataSearchHelper.convertCriterias(criterias);
 		try {
-			NodeSearch result = transform(repoDao,searchService.searchV2(mdsDao.getMds(),query,criteriasMap,token),filter);
+			NodeSearch result = transform(repoDao,searchService.search(mdsDao.getMds(),query,criteriasMap,token),filter);
 			if(result.getCount()==0) {
 				// try to search for ignorable properties to be null
-				List<String> removed=slackCriteriasMap(criteriasMap,mdsDao.getMds().findQuery(query, MetadataReaderV2.QUERY_SYNTAX_LUCENE));
-				result=transform(repoDao,searchService.searchV2(mdsDao.getMds(),query,criteriasMap,token),filter);
+				List<String> removed=slackCriteriasMap(criteriasMap,mdsDao.getMds().findQuery(query, MetadataReader.QUERY_SYNTAX_LUCENE));
+				result=transform(repoDao,searchService.search(mdsDao.getMds(),query,criteriasMap,token),filter);
 				result.setIgnored(removed);
 				return result;
 			}
@@ -232,14 +232,14 @@ public class NodeDao {
 	}
 
 	public static NodeSearch search(RepositoryDao repoDao, String query,
-			int startIdx, int nrOfresults, List<String> facettes,
-			int facettesMinCount, int facettesLimit) throws DAOException {
+			int startIdx, int nrOfresults, List<String> facets,
+			int facetsMinCount, int facetsLimit) throws DAOException {
 
 		try {
 			
 			SearchResultNodeRef search = ((MCAlfrescoAPIClient)repoDao.getBaseClient()).searchSolrNodeRef(query,
-					startIdx, nrOfresults, facettes, facettesMinCount,
-					facettesLimit);
+					startIdx, nrOfresults, facets, facetsMinCount,
+					facetsLimit);
 	
 			return transform(repoDao, search);
 			
@@ -291,11 +291,11 @@ public class NodeDao {
 		Map<String, Map<String, Integer>> countedProps = search
 				.getCountedProps();
 		if (countedProps != null) {
-			List<Facette> resultFacettes = new ArrayList<Facette>();
+			List<Facet> resultFacettes = new ArrayList<Facet>();
 			for (Entry<String, Map<String, Integer>> entry : countedProps
 					.entrySet()) {
 
-				Facette facette = new Facette();
+				Facet facette = new Facet();
 				facette.setProperty(entry.getKey());
 
 				List<Value> values = new ArrayList<Value>();
@@ -321,7 +321,7 @@ public class NodeDao {
 
 				resultFacettes.add(facette);
 			}
-			result.setFacettes(resultFacettes);
+			result.setFacets(resultFacettes);
 		}
 
 		return result;
@@ -409,7 +409,29 @@ public class NodeDao {
 			throw DAOException.mapping(e);
 		}
 	}
-	public SearchResult<Node> runSavedSearch(int skipCount, int maxItems, SearchService.ContentType contentType, SortDefinition sort, List<String> facettes) throws DAOException {
+
+	/**
+	 * create an empty, Node dummy interface
+	 *
+	 * @param nodeRef
+	 * @return
+	 */
+	public static <T extends Node> T createEmptyDummy(Class<T> clazz, NodeRef nodeRef) throws IllegalAccessException, InstantiationException {
+		T node = clazz.newInstance();
+		node.setRef(nodeRef);
+		node.setName(nodeRef.getId());
+		node.setPreview(new Preview());
+		// allow fetching as admin to properly resolve the url
+		AuthenticationUtil.runAsSystem(() -> {
+			node.getPreview().setUrl(
+					URLTool.getPreviewServletUrl(nodeRef.getId(), StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier())
+			);
+			return null;
+		});
+		return node;
+	}
+
+	public SearchResult<Node> runSavedSearch(int skipCount, int maxItems, SearchService.ContentType contentType, SortDefinition sort, List<String> facets) throws DAOException {
 		try {
 			if(!CCConstants.getValidLocalName(CCConstants.CCM_TYPE_SAVED_SEARCH).equals(getType())){
 				throw new IllegalArgumentException("The given node must be of type "+CCConstants.CCM_TYPE_SAVED_SEARCH);
@@ -417,10 +439,10 @@ public class NodeDao {
 			HashMap<String, Object> props = getNativeProperties();
 			RepositoryDao repoDao = RepositoryDao
 					.getRepository((String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY));
-			MdsDaoV2 mdsDao = MdsDaoV2.getMds(repoDao, (String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_MDS));
+			MdsDao mdsDao = MdsDao.getMds(repoDao, (String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_MDS));
 
 			SearchToken token = new SearchToken();
-			token.setFacettes(facettes);
+			token.setFacets(facets);
 			token.setSortDefinition(sort);
 			token.setFrom(skipCount);
 			token.setMaxResult(maxItems);
@@ -429,7 +451,7 @@ public class NodeDao {
 			ObjectMapper mapper = new ObjectMapper();
 			List<MdsQueryCriteria> parameters = Arrays.asList(mapper.readValue(
 					(String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS), MdsQueryCriteria[].class));
-			NodeSearch search = NodeDao.searchV2(repoDao, mdsDao,
+			NodeSearch search = NodeDao.search(repoDao, mdsDao,
 					(String) props.get(CCConstants.CCM_PROP_SAVED_SEARCH_QUERY), parameters, token, filter);
 
 			List<Node> data;
@@ -454,7 +476,7 @@ public class NodeDao {
 			SearchResult<Node> response = new SearchResult<>();
 			response.setNodes(data);
 			response.setPagination(pagination);
-			response.setFacettes(search.getFacettes());
+			response.setFacets(search.getFacets());
 
 			return response;
 		}catch(Throwable t){
@@ -478,7 +500,7 @@ public class NodeDao {
 
 	private NodeDao(RepositoryDao repoDao, org.edu_sharing.service.model.NodeRef nodeRef, Filter filter) throws DAOException {
 		try{
-	
+
 			this.repoDao = repoDao;
 			this.nodeId = nodeRef.getNodeId();
 			

@@ -2,8 +2,8 @@ package org.edu_sharing.restservices.shared;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.service.rating.RatingDetails;
 import org.edu_sharing.service.rating.RatingsCache;
@@ -13,7 +13,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class Node {
 
 	private NodeRef ref = null;
@@ -48,14 +48,14 @@ public class Node {
 
 	/**
    **/
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("ref")
 	public NodeRef getRef() {
 		return ref;
 	}
 
 	
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("collection")
 	public Collection getCollection() {
 		return collection;
@@ -66,7 +66,7 @@ public class Node {
 	}
 	/**
    **/
-	@ApiModelProperty(value = "")
+	@Schema(description = "")
 	@JsonProperty("parent")
 	public NodeRef getParent() {
 		return parent;
@@ -89,17 +89,17 @@ public class Node {
 
 	/**
    **/
-	@ApiModelProperty(value = "")
+	@Schema(description = "")
 	@JsonProperty("type")
 	public String getType() {
 		return type;
 	}
-	@ApiModelProperty(value = "")
+	@Schema(description = "")
 	@JsonProperty("iconURL")
 	public String getIconURL() {
 		return iconURL;
 	}
-	@ApiModelProperty(value = "")
+	@Schema(description = "")
 	@JsonProperty("isDirectory")
 	public boolean isDirectory() {
 		return isDirectory;
@@ -112,7 +112,7 @@ public class Node {
 	 
 	/**
 	   **/
-	@ApiModelProperty(value = "")
+	@Schema(description = "")
 	@JsonProperty("aspects")
 	public List<String> getAspects() {
 		return aspects;
@@ -124,7 +124,7 @@ public class Node {
 
 	/**
    **/
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("name")
 	public String getName() {
 		return name;
@@ -136,7 +136,7 @@ public class Node {
 
 	/**
    **/
-	@ApiModelProperty(value = "")
+	@Schema(description = "")
 	@JsonProperty("title")
 	public String getTitle() {
 		return title;
@@ -148,7 +148,7 @@ public class Node {
 
 	/**
    **/
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("createdAt")
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssX")
 	public Date getCreatedAt() {
@@ -161,7 +161,7 @@ public class Node {
 
 	/**
    **/
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("createdBy")
 	public Person getCreatedBy() {
 		return createdBy;
@@ -171,7 +171,7 @@ public class Node {
 		this.createdBy = createdBy;
 	}
 	
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("owner")
 		public Person getOwner() {
 			return owner;
@@ -182,7 +182,7 @@ public class Node {
 		}
 	/**
    **/
-	@ApiModelProperty(value = "")
+	@Schema(description = "")
 	@JsonProperty("modifiedAt")
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssX")
 	public Date getModifiedAt() {
@@ -195,7 +195,7 @@ public class Node {
 
 	/**
    **/
-	@ApiModelProperty(value = "")
+	@Schema(description = "")
 	@JsonProperty("modifiedBy")
 	public Person getModifiedBy() {
 		return modifiedBy;
@@ -219,7 +219,7 @@ public class Node {
 		this.downloadUrl = downloadUrl;
 	}
 	
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("downloadUrl")
 	public String getDownloadUrl() {
 		return downloadUrl;
@@ -227,7 +227,7 @@ public class Node {
 
 	/**
    **/
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("access")
 	public List<String> getAccess() {
 		return access;
@@ -239,7 +239,7 @@ public class Node {
 
 	/**
    **/
-	@ApiModelProperty(value = "")
+	@Schema(description = "")
 	@JsonProperty("properties")
 	public HashMap<String, String[]> getProperties() {
 		return properties;
@@ -252,7 +252,7 @@ public class Node {
 
 	/**
    **/
-	@ApiModelProperty(value = "")
+	@Schema(description = "")
 	@JsonProperty("mimetype")
 	public String getMimetype() {
 		return mimetype;
@@ -263,7 +263,7 @@ public class Node {
 	}
 	/**
 	   **/
-		@ApiModelProperty(value = "")
+		@Schema(description = "")
 		@JsonProperty("mediatype")
 		public String getMediatype() {
 			return mediatype;
@@ -274,7 +274,7 @@ public class Node {
 		}
 	/**
    **/
-	@ApiModelProperty(value = "")
+	@Schema(description = "")
 	@JsonProperty("size")
 	public String getSize() {
 		return size;
@@ -298,7 +298,7 @@ public class Node {
 
 	/**
    **/
-	@ApiModelProperty(value = "")
+	@Schema(description = "")
 	@JsonProperty("preview")
 	public Preview getPreview() {
 		return preview;

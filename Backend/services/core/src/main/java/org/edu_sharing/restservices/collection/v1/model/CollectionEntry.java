@@ -1,13 +1,13 @@
 package org.edu_sharing.restservices.collection.v1.model;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.edu_sharing.restservices.shared.Node;
 
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class CollectionEntry  {
   
   private Node collection = null;
@@ -15,7 +15,7 @@ public class CollectionEntry  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("collection")
   public Node getCollection() {
     return collection;

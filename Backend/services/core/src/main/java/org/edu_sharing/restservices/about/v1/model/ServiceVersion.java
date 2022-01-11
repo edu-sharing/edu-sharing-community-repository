@@ -1,13 +1,13 @@
 package org.edu_sharing.restservices.about.v1.model;
 
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class ServiceVersion  {
   
   private String repository;
@@ -19,7 +19,7 @@ public class ServiceVersion  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("major")
   public int getMajor() {
     return major;
@@ -31,7 +31,7 @@ public class ServiceVersion  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("minor")
   public int getMinor() {
     return minor;
