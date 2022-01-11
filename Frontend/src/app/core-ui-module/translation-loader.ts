@@ -49,12 +49,15 @@ export class TranslationLoader implements TranslateLoader {
         return this.getOriginalTranslations(lang).pipe(
             // Default to empty dictionary if we got nothing
             map(translations => translations || {}),
+            map(translations =>
+                this.replaceGenderCharacter(translations)
+            ),
             switchMap(translations =>
                 this.fetchAndApplyOverrides(translations, lang).pipe(
                     catchError((error, obs) => {
                         console.error(error);
                         return of(error);
-                    })
+                    }),
                 )
             ),
         );
@@ -160,6 +163,19 @@ export class TranslationLoader implements TranslateLoader {
                 ref[pathLast] = value;
             }
         }
+        return translations;
+    }
+
+    private replaceGenderCharacter(translations: Dictionary) {
+        for(let key of Object.keys(translations)) {
+            if(typeof translations[key] === 'string') {
+                translations[key] = (translations[key] as string).replace(/{{GENDER_SEPARATOR}}/g, "*");
+                console.log(translations[key]);
+            } else {
+                translations[key] = this.replaceGenderCharacter(translations[key] as Dictionary);
+            }
+        }
+
         return translations;
     }
 }
