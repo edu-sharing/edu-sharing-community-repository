@@ -156,7 +156,7 @@ export class FileDropDirective {
     }
     const transfer = this.getDataTransfer(event);
 
-    if (!transfer.files.length) {
+    if (!this.haveFiles(transfer.types) || !transfer.files.length) {
       return;
     }
 
