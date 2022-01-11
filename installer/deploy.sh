@@ -223,11 +223,11 @@ init() {
 		echo "REPOSITORY_SERVICE_HOME_APPID=${COMPOSE_PROJECT_NAME:-compose}"
 
 		# plugin elastic (please check deploy/installer/repository/scripts/../load_config.sh inside plugin)
-		echo "REPOSITORY_SEARCH_ELASTIC_HOST=elastic"
+		echo "REPOSITORY_SEARCH_ELASTIC_HOST=repository-elastic"
 		echo "REPOSITORY_SEARCH_ELASTIC_PORT=9200"
 
 		# plugin transform (please check deploy/installer/repository/scripts/../load_config.sh inside plugin)
-		echo "REPOSITORY_TRANSFORM_SERVER_HOST=transform"
+		echo "REPOSITORY_TRANSFORM_SERVER_HOST=repository-transform"
 		echo "REPOSITORY_TRANSFORM_SERVER_PORT=8080"
 	} >> .env.repository
 
