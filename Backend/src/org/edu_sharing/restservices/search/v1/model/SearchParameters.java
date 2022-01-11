@@ -18,7 +18,7 @@ public class SearchParameters {
 	private boolean resolveCollections = false;
 
 	@Schema(required = true, description = "")
-	@JsonProperty("criterias")
+	@JsonProperty("criteria")
 	public List<MdsQueryCriteria> getCriteria() {
 		return criteria;
 	}
@@ -28,7 +28,7 @@ public class SearchParameters {
 	}
 
 	@Schema(required = true, description = "")
-	@JsonProperty("facettes")
+	@JsonProperty("facets")
 	public List<String> getFacets() {
 		return facets;
 	}
