@@ -1761,7 +1761,9 @@ public class NodeDao {
 
 	public List<WorkflowHistory> getWorkflowHistory() throws DAOException{
 		List<WorkflowHistory> workflow=new ArrayList<>();
-		String[] data=getAllProperties().get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_WF_PROTOCOL));
+		List<String> data= (List<String>) NodeServiceHelper.getPropertyNative(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
+				CCConstants.getValidLocalName(CCConstants.CCM_PROP_WF_PROTOCOL)
+		);
 		if(data==null)
 			return workflow;
 		try{
