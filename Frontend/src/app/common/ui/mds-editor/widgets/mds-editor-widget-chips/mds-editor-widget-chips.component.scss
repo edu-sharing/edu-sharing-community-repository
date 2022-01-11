@@ -11,3 +11,8 @@ mat-form-field {
     display: flex;
     flex-grow: 1;
 }
+
+.mat-select-arrow {
+    // Use the button color which respects disabled state.
+    color: unset;
+}
