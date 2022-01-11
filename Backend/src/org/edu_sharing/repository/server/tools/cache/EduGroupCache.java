@@ -104,10 +104,13 @@ public class EduGroupCache {
 		synchronized(EduGroupCache.cache){
 			logger.info("size before refresh:"+EduGroupCache.cache.getKeys().size());
 			clear();
-			for(NodeRef eduGroupNodeRef : getEduGroupNodeRefs()){
-				Map<QName, Serializable> properties = serviceRegistry.getNodeService().getProperties(eduGroupNodeRef);
-				EduGroupCache.put(eduGroupNodeRef,properties);
-			}
+			serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+				for (NodeRef eduGroupNodeRef : getEduGroupNodeRefs()) {
+					Map<QName, Serializable> properties = serviceRegistry.getNodeService().getProperties(eduGroupNodeRef);
+					EduGroupCache.put(eduGroupNodeRef, properties);
+				}
+				return null;
+			});
 			logger.info("size after refresh:"+EduGroupCache.cache.getKeys().size());
 		}		
 	}
