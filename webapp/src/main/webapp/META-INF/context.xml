@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context useHttpOnly="false" antiResourceLocking="true">
+		<Loader loaderClass="org.edu_sharing.alfrescocontext.loader.AlfrescoContextClassLoader"/>
+</Context>

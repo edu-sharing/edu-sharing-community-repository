@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+  <Appenders>
+    <Console name="CONSOLE" target="SYSTEM_OUT">
+      <PatternLayout pattern=" %d %-5p [%c{3}] [%t] %m%n"/>
+    </Console>
+    <File name="FILE" fileName="edu-sharing.log">
+      <PatternLayout pattern=" %d %-5p [%c{3}] [%t] %m%n"/>
+    </File>
+    <Async name="ASYNC">
+      <AppenderRef ref="FILE"/>
+      <AppenderRef ref="CONSOLE"/>
+    </Async>
+  </Appenders>
+  <Loggers>
+    <Root level="info">
+      <AppenderRef ref="ASYNC"/>
+    </Root>
+  </Loggers>
+</Configuration>
