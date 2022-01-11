@@ -230,7 +230,7 @@ export class FileDropDirective {
     }
 
     if (types.indexOf) {
-      return types.indexOf('Files') !== -1;
+      return types.indexOf('text/uri-list') === -1 && types.indexOf('Files') !== -1;
     }
 
     if (types.contains) {
