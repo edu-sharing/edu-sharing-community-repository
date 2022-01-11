@@ -43,7 +43,7 @@ spec:
       {{- end }}
       containers:
       - name: {{ include "edusharing_rediscluster.name" . }}
-        image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/eedu_sharing-community-deploy-docker-build-rediscluster:{{ .Values.image.tag }}
+        image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/edu_sharing-community-deploy-docker-build-rediscluster:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         command:
           - "/bin/bash"
