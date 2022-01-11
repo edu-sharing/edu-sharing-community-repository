@@ -1143,7 +1143,7 @@ public class AdminApi {
 			return Response.ok().entity(result).build();
 		} catch (NotAnAdminException e) {
 			return ErrorResponse.createResponse(e);
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			return ErrorResponse.createResponse(e);
 		}
 
