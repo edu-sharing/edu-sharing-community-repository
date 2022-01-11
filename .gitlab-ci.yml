@@ -7,9 +7,47 @@ default:
   image: maven:3.8.4-jdk-8
 
 stages:
+  - test
   - deploy
 
 deploy:
   stage: deploy
+  needs: []
   script:
     - mvn $MAVEN_CLI -s .mvn/settings.xml deploy
+
+.frontend_job: &frontend_job
+  variables:
+    NODE_VERSION: 16
+  image: node:$NODE_VERSION
+  cache:
+    key:
+      files:
+        - Frontend/package-lock.json
+      prefix: node-modules-$NODE_VERSION  
+    paths:
+      - Frontend/node_modules
+  before_script:
+    - cd Frontend
+    # Install dependencies on cache miss, e.g., when first running on a ci runner.
+    - ([[ -d node_modules ]] || npm ci)
+
+# build:
+#   <<: *frontend_job
+#   stage: build
+#   script:
+#     - npm run build
+
+check formatting:
+  <<: *frontend_job
+  stage: test
+  needs: []
+  script:
+    - npm run check:format
+
+check linting:
+  <<: *frontend_job
+  stage: test
+  needs: []
+  script:
+    - npm run check:lint
