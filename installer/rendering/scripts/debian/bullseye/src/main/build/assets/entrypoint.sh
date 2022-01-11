@@ -6,8 +6,8 @@ pg_ctlcluster 13 rendering start
 
 apache2ctl start
 
-./install.sh -f .env "$@"
-./install.sh -f .env "$@"
+./install.sh -f .env "$@" || exit 1
+./install.sh -f .env "$@" || exit 1
 
 apache2ctl stop
 

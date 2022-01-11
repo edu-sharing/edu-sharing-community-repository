@@ -204,44 +204,52 @@ init() {
 	{
 		echo "RENDERING_DATABASE_PASS=${RENDERING_DATABASE_PASS:-rendering}"
 		echo "RENDERING_DATABASE_USER=${RENDERING_DATABASE_USER:-rendering}"
-		echo "RENDERING_SERVICE_HOST_EXTERNAL=${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.nip.io}"
-		echo "RENDERING_SERVICE_HOST_INTERNAL=rendering"
-		echo "RENDERING_SERVICE_PORT_EXTERNAL=${RENDERING_SERVICE_PORT:-9100}"
-		echo "RENDERING_SERVICE_PORT_INTERNAL=80"
-		echo "REPOSITORY_SERVICE_ADMIN_PASS=${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
-		echo "REPOSITORY_SERVICE_HOST=repository"
 
+		echo "RENDERING_SERVICE_HOST_EXTERNAL=${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.nip.io}"
+		echo "RENDERING_SERVICE_PORT_EXTERNAL=${RENDERING_SERVICE_PORT:-9100}"
+
+		echo "RENDERING_SERVICE_HOST_INTERNAL=rendering"
+		echo "RENDERING_SERVICE_PORT_INTERNAL=80"
+
+		echo "REPOSITORY_SERVICE_ADMIN_PASS=${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
+
+		echo "REPOSITORY_SERVICE_HOST=repository"
 		echo "REPOSITORY_SERVICE_PORT=80"
 	} >> .env.rendering
 
 	{
-		echo "REPOSITORY_SERVICE_ADMIN_PASS=${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
-		echo "REPOSITORY_SERVICE_HOST_EXTERNAL=${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}"
-		echo "REPOSITORY_SERVICE_HOST_INTERNAL=repository"
-		echo "REPOSITORY_SERVICE_PORT_EXTERNAL=${REPOSITORY_SERVICE_PORT:-8100}"
-		echo "REPOSITORY_SERVICE_PORT_INTERNAL=80"
 		echo "REPOSITORY_SERVICE_HOME_APPID=${COMPOSE_PROJECT_NAME:-compose}"
+
+		echo "REPOSITORY_SERVICE_ADMIN_PASS=${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
+
+		echo "REPOSITORY_SERVICE_HOST_EXTERNAL=${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}"
+		echo "REPOSITORY_SERVICE_PORT_EXTERNAL=${REPOSITORY_SERVICE_PORT:-8100}"
+
+		echo "REPOSITORY_SERVICE_HOST_INTERNAL=repository"
+		echo "REPOSITORY_SERVICE_PORT_INTERNAL=80"
+
+		# plugin cluster (please check deploy/installer/repository/scripts/../load_config.sh inside plugin)
+		echo "REPOSITORY_SERVICE_CLUSTER_NETWORK_TCPIP_MEMBERS=repository"
 
 		# plugin elastic (please check deploy/installer/repository/scripts/../load_config.sh inside plugin)
 		echo "REPOSITORY_SEARCH_ELASTIC_HOST=repository-elastic"
-		echo "REPOSITORY_SEARCH_ELASTIC_PORT=9200"
 
 		# plugin transform (please check deploy/installer/repository/scripts/../load_config.sh inside plugin)
 		echo "REPOSITORY_TRANSFORM_SERVER_HOST=repository-transform"
-		echo "REPOSITORY_TRANSFORM_SERVER_PORT=8080"
 	} >> .env.repository
 
 	# plugin elastic (please check deploy/installer/tracker/scripts/../install.sh inside plugin)
 	{
 		echo "REPOSITORY_SERVICE_ADMIN_PASS=${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
-    echo "REPOSITORY_SERVICE_HOST_INTERNAL=repository"
-    echo "REPOSITORY_SERVICE_PORT_INTERNAL=80"
+
+    echo "REPOSITORY_SERVICE_HOST=repository"
+    echo "REPOSITORY_SERVICE_PORT=80"
 	} >> .env.repository.elastic
 
 	# plugin transform (please check deploy/installer/server/scripts/../install.sh inside plugin)
 	{
-		echo "REPOSITORY_TRANSFORM_SERVER_SERVER_HOST=0.0.0.0"
-		echo "REPOSITORY_TRANSFORM_SERVER_MANAGEMENT_SERVER_HOST=0.0.0.0"
+		echo "REPOSITORY_TRANSFORM_SERVER_BIND=0.0.0.0"
+		echo "REPOSITORY_TRANSFORM_MANAGEMENT_SERVER_BIND=0.0.0.0"
 	} >> .env.repository.transform
 
 }
