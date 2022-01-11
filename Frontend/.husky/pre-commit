@@ -1,0 +1,11 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# This script might be called from the `edu-sharing` repository or from `core-module`. In the first
+# case, we need to `cd` into `Frontend` to use `node_modules`.
+
+if [ $(basename $(pwd)) != "core-module" ]; then
+    cd Frontend
+fi
+
+npx lint-staged
