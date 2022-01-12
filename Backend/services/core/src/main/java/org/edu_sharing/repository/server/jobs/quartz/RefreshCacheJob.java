@@ -31,7 +31,7 @@ import java.util.HashMap;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
-import org.apache.axis2.databinding.types.xsd._boolean;
+//import org.apache.axis2.databinding.types.xsd._boolean;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;

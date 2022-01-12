@@ -10,7 +10,7 @@
   <parent>
     <groupId>org.edu_sharing</groupId>
     <artifactId>edu_sharing-community-parent</artifactId>
-    <version>release-6.1-SNAPSHOT</version>
+    <version>develop-SNAPSHOT</version>
     <relativePath/>
   </parent>
 
@@ -35,7 +35,7 @@
 
   <properties>
 
-    <repackaged.version>release-6.1-SNAPSHOT</repackaged.version>
+    <repackaged.version>develop-SNAPSHOT</repackaged.version>
 
   </properties>
 
