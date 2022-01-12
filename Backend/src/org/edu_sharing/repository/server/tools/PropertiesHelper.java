@@ -31,22 +31,34 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.logging.Logger;
 
 public class PropertiesHelper {
 
 	public static class Config {
-		public static String PATH_CONFIG = "config/";
-		public static String PATH_PREFIX_LOCAL = "local";
-		public static String PATH_PREFIX_LOCAL_APPLICATIONS = PATH_PREFIX_LOCAL + "/applications";
-		public static String PATH_PREFIX_DEPLOYMENT = "deployment";
-		public static String PATH_PREFIX_DEFAULTS = "defaults";
-		public static String PATH_PREFIX_DEFAULTS_METADATASETS = PATH_PREFIX_DEFAULTS + "/metadatasets";
-		public static String PATH_PREFIX_DEFAULTS_MAILTEMPLATES = PATH_PREFIX_DEFAULTS + "/mailtemplates";
+		public enum PathPrefix {
+			NODE("node"),
+			NODE_APPLICATIONS("node/applications"),
+			CLUSTER("cluster"),
+			DEFAULTS("defaults"),
+			DEFAULTS_METADATASETS("defaults/metadatasets"),
+			DEFAULTS_MAILTEMPLATES("defaults/mailtemplates");
 
+			private final String path;
+
+			PathPrefix(String path) {
+				this.path = path;
+			}
+			@Override
+			public String toString() {
+				return path;
+			}
+		}
+		public static String PATH_CONFIG = "config/";
 		public static String getPropertyFilePath(String propertyFile) {
-			return PATH_CONFIG + PATH_PREFIX_LOCAL_APPLICATIONS + "/" +
+			return PATH_CONFIG + PathPrefix.NODE_APPLICATIONS + "/" +
 					propertyFile;
 		}
 		public static URLClassLoader getClassLoaderForPath(String configPath) {

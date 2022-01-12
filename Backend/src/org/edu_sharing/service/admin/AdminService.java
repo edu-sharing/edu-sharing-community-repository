@@ -15,6 +15,7 @@ import org.edu_sharing.repository.client.rpc.cache.CacheCluster;
 import org.edu_sharing.repository.client.rpc.cache.CacheInfo;
 import org.edu_sharing.repository.server.jobs.quartz.JobDescription;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.service.admin.model.GlobalGroup;
 import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
 import org.edu_sharing.service.admin.model.RepositoryConfig;
@@ -112,8 +113,8 @@ public interface AdminService {
 
     String importOaiXml(InputStream xml, String recordHandlerClassName, String binaryHandlerClassName) throws Exception;
 
-    void updateConfigFile(String filename,String content) throws Throwable;
-	String getConfigFile(String filename) throws Throwable;
+    void updateConfigFile(String filename, PropertiesHelper.Config.PathPrefix pathPrefix, String content) throws Throwable;
+	String getConfigFile(String filename, PropertiesHelper.Config.PathPrefix pathPrefix) throws Throwable;
 
 	List<JobDescription> getJobDescriptions();
 

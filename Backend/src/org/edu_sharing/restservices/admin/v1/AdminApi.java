@@ -42,6 +42,7 @@ import org.edu_sharing.repository.server.jobs.quartz.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.CollectionDao;
@@ -1519,10 +1520,11 @@ public class AdminApi {
 			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
 			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
 	public Response getConfigFile(@Context HttpServletRequest req,
-								  @ApiParam(value = "filename to fetch", required = true) @QueryParam("filename") String filename
+								  @ApiParam(value = "filename to fetch", required = true) @QueryParam("filename") String filename,
+								  @ApiParam(value = "path prefix this file belongs to", required = true) @QueryParam("pathPrefix") PropertiesHelper.Config.PathPrefix pathPrefix
 								  ) {
 		try {
-			String content=AdminServiceFactory.getInstance().getConfigFile(filename);
+			String content=AdminServiceFactory.getInstance().getConfigFile(filename, pathPrefix);
 			return Response.ok().entity(content).build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
@@ -1560,9 +1562,10 @@ public class AdminApi {
 			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
 	public Response updateConfigFile(@Context HttpServletRequest req,
 									 @ApiParam(value = "filename to fetch", required = true) @QueryParam("filename") String filename,
+									 @ApiParam(value = "path prefix this file belongs to", required = true) @QueryParam("pathPrefix") PropertiesHelper.Config.PathPrefix pathPrefix,
 									 String content) {
 		try {
-			AdminServiceFactory.getInstance().updateConfigFile(filename,content);
+			AdminServiceFactory.getInstance().updateConfigFile(filename,pathPrefix,content);
 			return Response.ok().build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);

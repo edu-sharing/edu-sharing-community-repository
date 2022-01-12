@@ -1,6 +1,6 @@
 import {RestAdminService} from "../../../core-module/rest/services/rest-admin.service";
 import {Component} from "@angular/core";
-import {DialogButton, RestLocatorService} from "../../../core-module/core.module";
+import {ConfigFilePrefix, DialogButton, RestLocatorService} from '../../../core-module/core.module';
 import {Toast} from "../../../core-ui-module/toast";
 import {ModalMessageType} from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import {Observable} from 'rxjs';
@@ -14,44 +14,51 @@ declare var Chart:any;
   styleUrls: ['config.component.scss']
 })
 export class AdminConfigComponent {
-  public static CONFIG_FILE_BASE="edu-sharing.base.conf";
-  public static EXTENSION_CONFIG_FILE="edu-sharing.conf";
-  public static SERVER_CONFIG_FILE="edu-sharing.server-{{hostname}}.conf";
+  public static CONFIG_FILE_REFERENCE="edu-sharing.reference.conf";
+  public static EXTENSION_CONFIG_FILE="edu-sharing.application.conf";
+  public static OVERRIDE_CONFIG_FILE="edu-sharing.override.conf";
   public static CONFIG_DEPLOYMENT_FILE="edu-sharing.deployment.conf";
   public static CLIENT_CONFIG_FILE="client.config.xml";
-  codeOptionsGlobal = {minimap: {enabled: false}, language: 'json', readOnly: true, automaticLayout: true};
-  codeOptions = {minimap: {enabled: false}, language: 'json', automaticLayout: true};
+  codeOptionsHocoonRO = {minimap: {enabled: false}, language: 'json', readOnly: true, automaticLayout: true};
+  codeOptionsHocoonRW = {minimap: {enabled: false}, language: 'json', automaticLayout: true};
   clientCodeOptions = {minimap: {enabled: false}, language: 'xml', automaticLayout: true};
-  configClient = '';
-  configGlobal = '';
-  configDeployment = '';
-  configParsed = '';
-  serverConfig = '';
-  extensionConfig = '';
+  configs: any = {
+      clientConfig: null,
+      reference: null,
+      clusterDeployment: null,
+      nodeDeployment: null,
+      clusterOverride: null,
+      nodeOverride: null,
+      parsed: null,
+  };
   size = 'medium';
+  showRO = false;
 
   constructor(
       private adminService: RestAdminService,
       private locator: RestLocatorService,
       private toast: Toast,
   ) {
-      this.adminService.getConfigFile(AdminConfigComponent.CLIENT_CONFIG_FILE).subscribe((data)=>{
-          this.configClient = data;
-          this.adminService.getConfigFile(AdminConfigComponent.CONFIG_FILE_BASE).subscribe((base) => {
-              this.configGlobal = base;
-              this.adminService.getConfigFile(AdminConfigComponent.CONFIG_DEPLOYMENT_FILE).subscribe((deployment) => {
-                  this.configDeployment = deployment;
-              });
-              this.adminService.getConfigMerged().subscribe((merged) => {
-                  this.configParsed = JSON.stringify(merged, null, 2);
-              });
-              this.adminService.getConfigFile(AdminConfigComponent.EXTENSION_CONFIG_FILE).subscribe((extension) => {
-                  this.extensionConfig = extension;
-              });
-              this.adminService.getConfigFile(AdminConfigComponent.SERVER_CONFIG_FILE).subscribe((server) => {
-                  this.serverConfig = server;
-              });
-          });
+      this.adminService.getConfigFile(AdminConfigComponent.CLIENT_CONFIG_FILE, 'DEFAULTS').subscribe((data)=>
+          this.configs.clientConfig = data
+      );
+      this.adminService.getConfigFile(AdminConfigComponent.CONFIG_FILE_REFERENCE, 'DEFAULTS').subscribe((base) =>
+          this.configs.reference = base
+      );
+      this.adminService.getConfigFile(AdminConfigComponent.CONFIG_DEPLOYMENT_FILE, 'CLUSTER').subscribe((deployment) =>
+          this.configs.clusterDeployment = deployment
+      );
+      this.adminService.getConfigFile(AdminConfigComponent.CONFIG_DEPLOYMENT_FILE, 'NODE').subscribe((deployment) =>
+          this.configs.nodeDeployment = deployment
+      );
+      this.adminService.getConfigFile(AdminConfigComponent.OVERRIDE_CONFIG_FILE, 'CLUSTER').subscribe((c) =>
+          this.configs.clusterOverride = c
+      );
+      this.adminService.getConfigFile(AdminConfigComponent.OVERRIDE_CONFIG_FILE, 'NODE').subscribe((c) =>
+          this.configs.nodeOverride = c
+      );
+      this.adminService.getConfigMerged().subscribe((merged) => {
+          this.configs.parsed = JSON.stringify(merged, null, 2);
       });
   }
   displayError(error: any) {
@@ -69,9 +76,9 @@ export class AdminConfigComponent {
   save() {
     this.toast.showProgressDialog();
     Observable.forkJoin(
-        this.adminService.updateConfigFile(AdminConfigComponent.EXTENSION_CONFIG_FILE,this.extensionConfig),
-        this.adminService.updateConfigFile(AdminConfigComponent.CLIENT_CONFIG_FILE, this.configClient),
-        this.adminService.updateConfigFile(AdminConfigComponent.SERVER_CONFIG_FILE, this.serverConfig),
+        this.adminService.updateConfigFile(AdminConfigComponent.CLIENT_CONFIG_FILE, 'DEFAULTS', this.configs.clientConfig),
+        this.adminService.updateConfigFile(AdminConfigComponent.OVERRIDE_CONFIG_FILE, 'CLUSTER', this.configs.clusterOverride),
+        this.adminService.updateConfigFile(AdminConfigComponent.OVERRIDE_CONFIG_FILE, 'NODE', this.configs.nodeOverride),
     ).subscribe(() => {
       this.adminService.refreshAppInfo().subscribe(() => {
         this.toast.closeModalDialog();

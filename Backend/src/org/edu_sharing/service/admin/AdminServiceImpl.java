@@ -759,8 +759,8 @@ public class AdminServiceImpl implements AdminService  {
 		return new ImporterJob().start(JobHandler.createJobDataMap(paramsMap));
 	}
 	@Override
-	public void updateConfigFile(String filename, String content) throws Throwable {
-		filename = mapConfigFile(filename);
+	public void updateConfigFile(String filename, PropertiesHelper.Config.PathPrefix pathPrefix, String content) throws Throwable {
+		filename = mapConfigFile(filename, pathPrefix);
 		File file = new File(getCatalinaBase() + "/shared/classes/" + filename);
 		try {
 			Files.copy(file, new File(file.getAbsolutePath() + System.currentTimeMillis() + ".bak"));
@@ -772,14 +772,15 @@ public class AdminServiceImpl implements AdminService  {
 	}
 
 	@Override
-	public String getConfigFile(String filename) throws Throwable {
-		filename = mapConfigFile(filename);
+	public String getConfigFile(String filename, PropertiesHelper.Config.PathPrefix pathPrefix) throws Throwable {
+		// use new File() to remove any folder like access
+		filename = mapConfigFile(new File(filename).getName(), pathPrefix);
 		File file = new File(getCatalinaBase()+"/shared/classes/"+ filename);
 		return FileUtils.readFileToString(file);
 	}
 
-	private String mapConfigFile(String filename) {
-		return LightbendConfigLoader.getConfigFileLocation(filename);
+	private String mapConfigFile(String filename, PropertiesHelper.Config.PathPrefix pathPrefix) {
+		return LightbendConfigLoader.getConfigFileLocation(filename, pathPrefix);
 	}
 
 	@Override
