@@ -1,9 +1,12 @@
 <div class="config config-size-{{ size }}">
-  <div class="config-hide">
+  <div class="config-hide" *ngIf="editSupported">
     <mat-slide-toggle class="toggle-reverse" name="showRO" [(ngModel)]="showRO">
       {{'ADMIN.GLOBAL_CONFIG.SHOW_RO' | translate}}
     </mat-slide-toggle>
   </div>
+  <info-message mode="info" *ngIf="!editSupported">
+    {{'ADMIN.GLOBAL_CONFIG.EDIT_DISABLED' | translate:{key: 'security.configuration.inlineEditing'} }}
+  </info-message>
   <!--<div class="size-chooser">
       <mat-label>{{'ADMIN.GLOBAL_CONFIG.SIZE' | translate}}</mat-label>
       <mat-button-toggle-group name="size" [(ngModel)]="size">
@@ -12,7 +15,7 @@
       </mat-button-toggle-group>
   </div>-->
   <h3 class="mat-heading-3 mat-heading-underline">{{ 'ADMIN.GLOBAL_CONFIG.CLIENT_CONFIG_TITLE' | translate}}</h3>
-  <info-message mode="warning">{{'ADMIN.GLOBAL_CONFIG.VOLATILE_WARNING' | translate}}</info-message>
+  <info-message mode="warning" *ngIf="editSupported">{{'ADMIN.GLOBAL_CONFIG.VOLATILE_WARNING' | translate}}</info-message>
   <div class="monaco-editor">
     <ngx-monaco-editor [options]="clientCodeOptions" [(ngModel)]="configs.clientConfig" [ngModelOptions]="{standalone: true}"></ngx-monaco-editor>
     <mat-hint><div>{{'ADMIN.GLOBAL_CONFIG.CLIENT_CONFIG_HINT' | translate}}</div></mat-hint>
@@ -32,11 +35,13 @@
       </div>
     </ng-container>
   </ng-container>
-  <h3 class="mat-heading-3 mat-heading-underline">{{'ADMIN.GLOBAL_CONFIG.CLUSTER_OVERRIDE_CONFIG_TITLE' | translate}}</h3>
-  <div class="monaco-editor">
-    <ngx-monaco-editor [options]="codeOptionsHocoonRW" [(ngModel)]="configs.clusterOverride" [ngModelOptions]="{standalone: true}"></ngx-monaco-editor>
-    <mat-hint><div>{{'ADMIN.GLOBAL_CONFIG.CLUSTER_OVERRIDE_CONFIG_HINT' | translate}}</div></mat-hint>
-  </div>
+  <ng-container *ngIf="editSupported || configs.clusterOverride">
+    <h3 class="mat-heading-3 mat-heading-underline">{{'ADMIN.GLOBAL_CONFIG.CLUSTER_OVERRIDE_CONFIG_TITLE' | translate}}</h3>
+    <div class="monaco-editor">
+      <ngx-monaco-editor [options]="codeOptionsHocoonRW" [(ngModel)]="configs.clusterOverride" [ngModelOptions]="{standalone: true}"></ngx-monaco-editor>
+      <mat-hint><div>{{'ADMIN.GLOBAL_CONFIG.CLUSTER_OVERRIDE_CONFIG_HINT' | translate}}</div></mat-hint>
+    </div>
+  </ng-container>
   <ng-container *ngIf="showRO && configs.nodeDeployment">
     <h3 class="mat-heading-3 mat-heading-underline">{{ 'ADMIN.GLOBAL_CONFIG.NODE_DEPLOYMENT_CONFIG_TITLE' | translate}}</h3>
     <div class="monaco-editor">
@@ -44,20 +49,22 @@
       <mat-hint><div>{{'ADMIN.GLOBAL_CONFIG.NODE_DEPLOYMENT_CONFIG_HINT' | translate}}</div></mat-hint>
     </div>
   </ng-container>
-  <h3 class="mat-heading-3 mat-heading-underline">{{ 'ADMIN.GLOBAL_CONFIG.NODE_OVERRIDE_CONFIG_TITLE' | translate}}</h3>
-  <div class="monaco-editor">
-    <ngx-monaco-editor [options]="codeOptionsHocoonRW" [(ngModel)]="configs.nodeOverride" [ngModelOptions]="{standalone: true}"></ngx-monaco-editor>
-    <mat-hint><div>{{'ADMIN.GLOBAL_CONFIG.NODE_OVERRIDE_CONFIG_HINT' | translate}}</div></mat-hint>
-  </div>
+  <ng-container *ngIf="editSupported || configs.translate">
+    <h3 class="mat-heading-3 mat-heading-underline">{{ 'ADMIN.GLOBAL_CONFIG.NODE_OVERRIDE_CONFIG_TITLE' | translate}}</h3>
+    <div class="monaco-editor">
+      <ngx-monaco-editor [options]="codeOptionsHocoonRW" [(ngModel)]="configs.nodeOverride" [ngModelOptions]="{standalone: true}"></ngx-monaco-editor>
+      <mat-hint><div>{{'ADMIN.GLOBAL_CONFIG.NODE_OVERRIDE_CONFIG_HINT' | translate}}</div></mat-hint>
+    </div>
+  </ng-container>
   <ng-container *ngIf="showRO">
     <h3 class="mat-heading-3 mat-heading-underline">{{'ADMIN.GLOBAL_CONFIG.PARSED_TITLE' | translate}}</h3>
     <div class="monaco-editor">
       <ngx-monaco-editor class="roConfig" [options]="codeOptionsHocoonRO" [(ngModel)]="configs.parsed" [ngModelOptions]="{standalone: true}"></ngx-monaco-editor>
       <mat-hint><div>{{'ADMIN.GLOBAL_CONFIG.PARSED_HINT' | translate}}</div></mat-hint>
     </div>
-    <info-message mode="warning">{{'ADMIN.GLOBAL_CONFIG.WARNING' | translate}}</info-message>
   </ng-container>
-  <div class="actions">
+  <div class="actions" *ngIf="editSupported">
+    <info-message mode="warning">{{'ADMIN.GLOBAL_CONFIG.WARNING' | translate}}</info-message>
     <button mat-raised-button color="primary" (click)="save()">{{'SAVE' | translate}}</button>
   </div>
 </div>

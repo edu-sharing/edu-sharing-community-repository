@@ -19,9 +19,9 @@ export class AdminConfigComponent {
   public static OVERRIDE_CONFIG_FILE="edu-sharing.override.conf";
   public static CONFIG_DEPLOYMENT_FILE="edu-sharing.deployment.conf";
   public static CLIENT_CONFIG_FILE="client.config.xml";
-  codeOptionsHocoonRO = {minimap: {enabled: false}, language: 'json', readOnly: true, automaticLayout: true};
-  codeOptionsHocoonRW = {minimap: {enabled: false}, language: 'json', automaticLayout: true};
-  clientCodeOptions = {minimap: {enabled: false}, language: 'xml', automaticLayout: true};
+  codeOptionsHocoonRO: any = {minimap: {enabled: false}, language: 'json', readOnly: true, automaticLayout: true};
+  codeOptionsHocoonRW: any = {minimap: {enabled: false}, language: 'json', automaticLayout: true};
+  clientCodeOptions: any = {minimap: {enabled: false}, language: 'xml', automaticLayout: true};
   configs: any = {
       clientConfig: null,
       reference: null,
@@ -33,6 +33,7 @@ export class AdminConfigComponent {
   };
   size = 'medium';
   showRO = false;
+  editSupported = false;
 
   constructor(
       private adminService: RestAdminService,
@@ -57,9 +58,17 @@ export class AdminConfigComponent {
       this.adminService.getConfigFile(AdminConfigComponent.OVERRIDE_CONFIG_FILE, 'NODE').subscribe((c) =>
           this.configs.nodeOverride = c
       );
+      this.setEditSupported(false);
       this.adminService.getConfigMerged().subscribe((merged) => {
           this.configs.parsed = JSON.stringify(merged, null, 2);
+          this.setEditSupported(merged?.security?.configuration?.inlineEditing);
       });
+  }
+  setEditSupported(status: boolean) {
+      this.editSupported = status;
+      this.showRO = !this.editSupported;
+      this.codeOptionsHocoonRW.readOnly = !this.editSupported;
+      this.clientCodeOptions.readOnly = !this.editSupported;
   }
   displayError(error: any) {
     console.warn(error);

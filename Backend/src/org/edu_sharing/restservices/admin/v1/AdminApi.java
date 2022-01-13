@@ -2,13 +2,8 @@ package org.edu_sharing.restservices.admin.v1;
 
 import java.io.*;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -50,12 +45,7 @@ import org.edu_sharing.restservices.DAOException;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
-import org.edu_sharing.restservices.admin.v1.model.AdminStatistics;
-import org.edu_sharing.restservices.admin.v1.model.CollectionsResult;
-import org.edu_sharing.restservices.admin.v1.model.ExcelResult;
-import org.edu_sharing.restservices.admin.v1.model.UpdateResult;
-import org.edu_sharing.restservices.admin.v1.model.UploadResult;
-import org.edu_sharing.restservices.admin.v1.model.XMLResult;
+import org.edu_sharing.restservices.admin.v1.model.*;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.admin.AdminService;
@@ -1526,6 +1516,24 @@ public class AdminApi {
 		try {
 			String content=AdminServiceFactory.getInstance().getConfigFile(filename, pathPrefix);
 			return Response.ok().entity(content).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+	@GET
+	@Path("/plugins")
+	@ApiOperation(value = "get enabled system plugins")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = PluginStatus[].class),
+			@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
+			@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
+			@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
+			@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
+			@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) })
+	public Response getEnabledPlugins(@Context HttpServletRequest req) {
+		try {
+			Collection<PluginStatus> plugins=AdminServiceFactory.getInstance().getPlugins();
+			return Response.ok().entity(plugins).build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}

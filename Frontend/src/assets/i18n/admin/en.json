@@ -6,6 +6,7 @@
         "WARNING_INFO": "This area is intended for repository administration only.\nImproper settings can lead to errors or even data loss.\n\nDo not carry out any actions that you are unsure about!",
         "MODE": {
             "INFO": "Info",
+            "PLUGINS": "Extensions",
             "STATISTICS": "Statistics",
             "FRONTPAGE": "Start page",
             "MEDIACENTER": "Media centres",
@@ -19,7 +20,20 @@
             "BROWSER": "Node Browser & Solr-Debugging",
             "FOLDERTEMPLATES": "Folder templates"
         },
+        "PLUGINS": {
+            "TITLE":  "Extensions",
+            "INFO":  "This list shows enabled extensions for edu-sharing. These are functional extensions for the repository.",
+            "NO_DESCRIPTION":  "There are no details available for this plugin",
+            "PLUGIN_DETAILS": {
+                "Test 1": {
+                    "DESCRIPTION": "Example Plugin"
+                }
+            },
+            "MORE": "More information about how to obtain, confiure and deploy extensions can be found on the edu-sharing website",
+            "MORE_LINK": "Go to edu-sharing website"
+        },
         "GLOBAL_CONFIG": {
+            "EDIT_DISABLED": "The configuration was set to read-only. No modifications can be made via this tool. The parameter {{key}} must be set to true in order to change parameters via this tool.",
             "SHOW_RO": "Display read-only configuration files",
             "INHERIT_INFO": "The displayed configurations are read from top to bottom. Configuration values can be overriden by files underneath the one they're declared",
             "VOLATILE_WARNING": "Changes for this configuration file are volatile and will be removed on next update/rollout. If you want to persist them please share them with the edu-sharing dev team",

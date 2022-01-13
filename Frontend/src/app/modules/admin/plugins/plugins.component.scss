@@ -1,0 +1,36 @@
+@import "../../../core-ui-module/styles/variables";
+.plugins {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    .plugin-list {
+        width: 100%;
+        max-width: 600px;
+        padding-top: 40px;
+        li {
+            padding: 10px 0;
+            display: grid;
+            grid-template-columns: 60px auto;
+            i {
+                color: $textVeryLight;
+                font-size: 40px;
+            }
+            .name {
+                font-weight: bold;
+                font-size: $fontSizeXLarge;
+            }
+
+            .description {
+                color: $textLight;
+            }
+        }
+    }
+    .more {
+        padding-top: 60px;
+        color: $textLight;
+        font-size: $fontSizeSmall;
+        > p {
+            margin: 2px 0;
+        }
+    }
+}

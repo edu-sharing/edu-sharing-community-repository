@@ -16,6 +16,10 @@
     }
     .actions{
         margin:10px 0;
+        info-message {
+            display: flex;
+            margin: 20px 0;
+        }
     }
     > info-message {
         display: flex;

@@ -20,6 +20,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.alfresco.repo.cache.SimpleCache;
+import org.alfresco.repo.module.ModuleServiceImpl;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -52,6 +53,7 @@ import org.edu_sharing.repository.tomcat.ClassHelper;
 import org.edu_sharing.repository.update.*;
 import org.edu_sharing.restservices.GroupDao;
 import org.edu_sharing.restservices.RepositoryDao;
+import org.edu_sharing.restservices.admin.v1.model.PluginStatus;
 import org.edu_sharing.restservices.shared.Group;
 import org.edu_sharing.service.admin.model.GlobalGroup;
 import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
@@ -75,7 +77,10 @@ import org.w3c.dom.Element;
 import com.google.common.io.Files;
 
 public class AdminServiceImpl implements AdminService  {
-	
+
+	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+
 	private static Logger logger = Logger.getLogger(AdminServiceImpl.class);
 	
 	@Override
@@ -1004,5 +1009,16 @@ public class AdminServiceImpl implements AdminService  {
 	@Override
 	public Object getLightbendConfig() {
 		return LightbendConfigLoader.get().root().unwrapped();
+	}
+
+	@Override
+	public Collection<PluginStatus> getPlugins() {
+		Object moduleService = applicationContext.getBean("moduleService");
+		// getAllModules();
+		// @TODO
+		return Arrays.asList(
+				new PluginStatus("Test 1", true),
+				new PluginStatus("Test 2", true)
+		);
 	}
 }

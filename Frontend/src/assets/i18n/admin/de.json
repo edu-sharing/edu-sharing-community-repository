@@ -6,6 +6,7 @@
         "WARNING_INFO": "Dieser Bereich ist nur zur Administration des Repositorys gedacht.\nFalsche Änderungen können zu Fehlern bis hin zu Datenverlust führen.\n\nFühren Sie keine Aktionen durch, bei denen sie unsicher sind!",
         "MODE": {
             "INFO": "Info",
+            "PLUGINS": "Erweiterungen",
             "STATISTICS": "Statistiken",
             "FRONTPAGE": "Startseite",
             "MEDIACENTER": "Medienzentren",
@@ -19,7 +20,20 @@
             "BROWSER": "Node Browser & Solr-Debugging",
             "FOLDERTEMPLATES": "Ordnervorlagen"
         },
+        "PLUGINS": {
+            "TITLE":  "Erweiterungen",
+            "INFO":  "In dieser Liste werden aktive Erweiterungen für edu-sharing angezeigt. Es handelt sich hierbei um zusätzliche Funktionskomponenten für das Repository.",
+            "NO_DESCRIPTION":  "Für dieses Plugin sind keine Details verfügbar",
+            "PLUGIN_DETAILS": {
+                "Test 1": {
+                    "DESCRIPTION": "Beispiel Plugin"
+                }
+            },
+            "MORE": "Weitere Informationen zu Erweiterungen und wie diese bezogen, konfiguriert und installiert werden können, sind auf der edu-sharing Website zu finden",
+            "MORE_LINK": "Zur edu-sharing Webseite"
+        },
         "GLOBAL_CONFIG": {
+            "EDIT_DISABLED": "Die Konfiguration wurde auf Read-Only eingestellt. Es können keine Modifikationen über dieses Tool vorgenommen werden. Der Parameter {{key}} muss auf true gesetzt werden, damit die Config hier bearbeitet werden kann. Dies ist nur für Testsysteme empfohlen.",
             "SHOW_RO": "Read-Only Konfigurationsdateien anzeigen",
             "INHERIT_INFO": "Die angezeigten Konfigurationswerte werden von unten nach oben eingelesen. Konfigurationswerte der darunterliegenden Konfiguration haben eine höhere Priorität und können Werte überschreiben.",
             "VOLATILE_WARNING": "Die Änderungen an dieser Konfigurationsdatei sind temporär und werden beim nächsten Update/Rollout überschrieben! Persistente Änderungen müssen an das edu-sharing Entwicklerteam weitergegeben werden",
