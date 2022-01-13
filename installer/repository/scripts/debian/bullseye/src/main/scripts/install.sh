@@ -4,8 +4,15 @@ set -o pipefail
 
 ########################################################################################################################
 
+if [[ -z $ALF_HOME ]] ; then
+	echo ""
+	echo "Env ALF_HOME is not defined! It must point to the home directory of your Alfresco Platform!"
+	exit 1
+fi
+
+########################################################################################################################
+
 execution_folder="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-echo execution_folder
 
 pushd "$execution_folder" &> /dev/null
 
@@ -244,7 +251,7 @@ info() {
 ########################################################################################################################
 
 install_edu_sharing() {
-	
+
 	setEnvSh="tomcat/bin/setenv.sh"
 
 	eduCConf="tomcat/shared/classes/config/defaults/client.config.xml"
@@ -378,7 +385,7 @@ install_edu_sharing() {
 	echo "solr.host=${repository_search_solr4_host}" >> "${alfProps}"
   echo "solr.port=${repository_search_solr4_port}" >> "${alfProps}"
   echo "solr.secureComms=none" >> "${alfProps}"
-  
+
   echo "alfresco.secureComms=none" >> "${solr4Wor}"
   echo "alfresco.secureComms=none" >> "${solr4Arc}"
 

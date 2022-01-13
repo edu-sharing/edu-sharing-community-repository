@@ -17,11 +17,41 @@ set -o pipefail
 #	exit
 #}
 
+########################################################################################################################
+
+if [[ -z  $WWW_ROOT ]] ; then
+	echo ""
+	echo "Env WWW_ROOT not defined! It must point to the data directory of your Apache webservice!"
+	exit 1
+fi
+
+
+if [[ -z  $RS_ROOT ]] ; then
+	echo ""
+	echo "Env RS_ROOT not defined! It must point to the installation directory of the rederingservice inside your Apache webservice!"
+	exit 1
+fi
+
+
+if [[ -z  $RS_CACHE ]] ; then
+	echo ""
+	echo "Env RS_CACHE not defined! It must point to an cache directory of the rederingservice!"
+	exit 1
+fi
+
+########################################################################################################################
+
+execution_folder="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+pushd "$execution_folder" &> /dev/null
 
 # load the default configuration
 if [[ -f ".env.base" ]] ; then
 	source .env.base
 fi
+
+popd
+
 
 
 usage() {
