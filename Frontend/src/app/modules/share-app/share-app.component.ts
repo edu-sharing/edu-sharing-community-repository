@@ -82,8 +82,15 @@ export class ShareAppComponent {
           return "file-txt";
       if(this.mimetype=="application/pdf")
           return "file-pdf";
-      if(this.mimetype)
-          return "file-"+this.mimetype.split("/")[0];
+      if(this.mimetype) {
+          let type = this.mimetype.split("/");
+          if(this.translate.instant('MEDIATYPE.' + type) === 'MEDIATYPE.' + type) {
+              type = null;
+          }
+          if(type != null) {
+              return "file-" + type
+          }
+      }
       return "file";
     }
     saveInternal(callback:Function){
