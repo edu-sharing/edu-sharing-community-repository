@@ -10,7 +10,7 @@
   <parent>
     <groupId>org.edu_sharing</groupId>
     <artifactId>edu_sharing-community-parent</artifactId>
-    <version>develop-SNAPSHOT</version>
+    <version>git</version>
     <relativePath/>
   </parent>
 
@@ -33,12 +33,6 @@
     <module>webapp</module>
   </modules>
 
-  <properties>
-
-    <repackaged.version>develop-SNAPSHOT</repackaged.version>
-
-  </properties>
-
   <dependencyManagement>
 
     <dependencies>
@@ -46,13 +40,13 @@
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-parent-repackaged-elasticsearch</artifactId>
-        <version>${repackaged.version}</version>
+        <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-parent-repackaged-isoparser</artifactId>
-        <version>${repackaged.version}</version>
+        <version>${project.version}</version>
       </dependency>
 
       <dependency>
