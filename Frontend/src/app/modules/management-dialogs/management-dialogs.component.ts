@@ -541,6 +541,7 @@ export class WorkspaceManagementDialogsComponent  {
             this.onUploadFilesProcessed.emit(nodes);
         } else if(!saved && this._nodeSimpleFromUpload) {
             this.deleteNodes(this._nodeSimpleEdit);
+            this.onUploadFilesProcessed.emit(null);
         }
         if (nodes) {
             this.onRefresh.emit(nodes);

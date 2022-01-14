@@ -22,7 +22,7 @@ import {TemporaryStorageService} from '../../core-module/core.module';
   styleUrls: ['file-upload.component.scss']
 })
 export class FileUploadComponent{
-    filesToUpload: FileList;
+    filesToUpload: Node[];
     loading = true;
     _showUploadSelect: boolean;
 
@@ -65,12 +65,12 @@ export class FileUploadComponent{
         this._showUploadSelect=false;
         this.filesToUpload=event;
     }
-    onDone(node: Node){
+    onDone(node: Node[]){
        if(node==null){
            // canceled;
            this._showUploadSelect=true;
            return;
        }
-       NodeHelper.addNodeToLms(this.router,this.temporaryStorage,node,this.reurl);
+       NodeHelper.addNodeToLms(this.router,this.temporaryStorage,node[0],this.reurl);
     }
 }
