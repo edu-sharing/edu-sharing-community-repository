@@ -1076,6 +1076,10 @@ export class AdminComponent {
                     icon: 'info_outline'
                 },
                 {
+                    id: 'PLUGINS',
+                    icon: 'extension'
+                },
+                {
                   id: 'FRONTPAGE',
                   icon: 'home'
                 },

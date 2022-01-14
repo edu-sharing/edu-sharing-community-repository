@@ -54,7 +54,7 @@ public class MetadataReader {
 	}
 
 	public static String getPath(){
-		return PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PATH_PREFIX_DEFAULTS_METADATASETS + "/";
+		return PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PathPrefix.DEFAULTS_METADATASETS + "/";
 	}
 
 	public static List<MetadataWidget> getWidgetsByNode(NodeRef node,String locale) throws Exception{

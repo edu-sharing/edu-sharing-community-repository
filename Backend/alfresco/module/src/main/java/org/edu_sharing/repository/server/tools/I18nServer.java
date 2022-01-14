@@ -44,7 +44,7 @@ public class I18nServer {
 	
 	private static Log logger = LogFactory.getLog(I18nServer.class);
 	
-	public static final String defaultResourceBundle = PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PATH_PREFIX_DEFAULTS_METADATASETS + "/i18n/mds";
+	public static final String defaultResourceBundle = PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PathPrefix.DEFAULTS_METADATASETS + "/i18n/mds";
 	
 	/**
 	 * returns I18n value for locale found in system properties user.language and user.country

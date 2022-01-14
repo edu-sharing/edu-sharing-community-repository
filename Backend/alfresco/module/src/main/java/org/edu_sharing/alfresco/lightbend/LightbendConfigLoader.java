@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.lf5.util.StreamUtils;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
+import org.edu_sharing.service.config.ConfigServiceFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -17,11 +18,10 @@ import java.util.Arrays;
 public class LightbendConfigLoader {
     private static SimpleCache<String, String> configCache = (SimpleCache) AlfAppContextGate.getApplicationContext().getBean("eduSharingLightBendConfigCache");
     private static Logger logger = Logger.getLogger(LightbendConfigLoader.class);
-    public static String BASE_FILE = "edu-sharing.base.conf";
+    public static String BASE_FILE = "edu-sharing.reference.conf";
     public static String DEPLOYMENT_FILE = "edu-sharing.deployment.conf";
-    public static String SERVER_FILE = "edu-sharing.server-{{hostname}}.conf";
-    public static String CUSTOM_FILE = "edu-sharing.conf";
-    public static String CONFIG_FILENAME = "client.config.xml";
+    public static String OVERRIDE_FILE = "edu-sharing.override.conf";
+    public static String CUSTOM_FILE = "edu-sharing.application.conf";
 
     /**
      * parsing of lightbend config is expensive
@@ -32,12 +32,16 @@ public class LightbendConfigLoader {
         if(configCache.get("config") != null) {
             return ConfigFactory.parseString(configCache.get("config"), ConfigParseOptions.defaults());
         }
-        String base = getConfigFileLocation(BASE_FILE);
-        String deployment = getConfigFileLocation(DEPLOYMENT_FILE);
-        String server = getConfigFileLocation(SERVER_FILE);
-        String custom = getConfigFileLocation(CUSTOM_FILE);
-        Config config = ConfigFactory.parseResourcesAnySyntax(server)
-                .withFallback(ConfigFactory.parseResourcesAnySyntax(deployment))
+        String base = getConfigFileLocation(BASE_FILE, PropertiesHelper.Config.PathPrefix.DEFAULTS);
+        String custom = getConfigFileLocation(CUSTOM_FILE, PropertiesHelper.Config.PathPrefix.DEFAULTS);
+        String deploymentCluster = getConfigFileLocation(DEPLOYMENT_FILE, PropertiesHelper.Config.PathPrefix.CLUSTER);
+        String overrideCluster = getConfigFileLocation(OVERRIDE_FILE, PropertiesHelper.Config.PathPrefix.CLUSTER);
+        String deploymentNode = getConfigFileLocation(DEPLOYMENT_FILE, PropertiesHelper.Config.PathPrefix.CLUSTER);
+        String overrideNode = getConfigFileLocation(OVERRIDE_FILE, PropertiesHelper.Config.PathPrefix.CLUSTER);
+        Config config = ConfigFactory.parseResourcesAnySyntax(overrideNode)
+                .withFallback(ConfigFactory.parseResourcesAnySyntax(deploymentNode))
+                .withFallback(ConfigFactory.parseResourcesAnySyntax(overrideCluster))
+                .withFallback(ConfigFactory.parseResourcesAnySyntax(deploymentCluster))
                 .withFallback(ConfigFactory.parseResourcesAnySyntax(custom))
                 .withFallback(ConfigFactory.parseResourcesAnySyntax(base))
                 .resolve();
@@ -45,18 +49,18 @@ public class LightbendConfigLoader {
         return config;
     }
 
-    public static String getConfigFileLocation(String configFileName) {
+    public static String getConfigFileLocation(String configFileName, PropertiesHelper.Config.PathPrefix pathPrefix) {
         if(Arrays.asList(BASE_FILE, CUSTOM_FILE).contains(configFileName)) {
-            return PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PATH_PREFIX_DEFAULTS + "/" + configFileName;
+            return PropertiesHelper.Config.PATH_CONFIG + pathPrefix + "/" + configFileName;
         }
         if(configFileName.equals(DEPLOYMENT_FILE)) {
-            return PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PATH_PREFIX_DEPLOYMENT + "/" + configFileName;
+            return PropertiesHelper.Config.PATH_CONFIG + pathPrefix + "/" + configFileName;
         }
-        if(configFileName.equals(SERVER_FILE)) {
-            return PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PATH_PREFIX_LOCAL + "/" + getServerConfigName();
+        if(configFileName.equals(OVERRIDE_FILE)) {
+            return PropertiesHelper.Config.PATH_CONFIG + pathPrefix + "/" + getServerConfigName();
         }
-        if(configFileName.equals(CONFIG_FILENAME)) {
-            return PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PATH_PREFIX_DEFAULTS + "/" + configFileName;
+        if(configFileName.equals(ConfigServiceFactory.CONFIG_FILENAME)) {
+            return PropertiesHelper.Config.PATH_CONFIG + pathPrefix + "/" + configFileName;
         }
 
         throw new RuntimeException("Invalid config filename: " + configFileName);
@@ -74,7 +78,7 @@ public class LightbendConfigLoader {
             logger.warn("Could not determine hostname, using \"default\"");
             hostname = "default";
         }
-        return SERVER_FILE.replace(
+        return OVERRIDE_FILE.replace(
                 "{{hostname}}", hostname
         );
     }

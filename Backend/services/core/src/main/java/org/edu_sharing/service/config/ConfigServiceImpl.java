@@ -24,6 +24,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.service.NotAnAdminException;
@@ -133,7 +134,7 @@ public class ConfigServiceImpl implements ConfigService{
 
 	private InputStream getConfigInputStream() throws IOException {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		String file = LightbendConfigLoader.getConfigFileLocation(LightbendConfigLoader.CONFIG_FILENAME);
+		String file = LightbendConfigLoader.getConfigFileLocation(ConfigServiceFactory.CONFIG_FILENAME, PropertiesHelper.Config.PathPrefix.DEFAULTS);
 		InputStream is = classLoader.getResourceAsStream(file);
 		if(is==null)
 			throw new IOException(file + " missing");

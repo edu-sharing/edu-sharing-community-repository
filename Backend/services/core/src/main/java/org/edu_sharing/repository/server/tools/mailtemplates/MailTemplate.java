@@ -127,10 +127,10 @@ public class MailTemplate {
 		if(override)
 			overridePostfix="_override";
 		try{
-			in = PropertiesHelper.Config.getInputStreamForFile(PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PATH_PREFIX_DEFAULTS_MAILTEMPLATES + "/templates_"+locale + overridePostfix + ".xml");
+			in = PropertiesHelper.Config.getInputStreamForFile(PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PathPrefix.DEFAULTS_MAILTEMPLATES + "/templates_"+locale + overridePostfix + ".xml");
 		}
 		catch(Throwable t){
-			in = PropertiesHelper.Config.getInputStreamForFile(PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PATH_PREFIX_DEFAULTS_MAILTEMPLATES + "/templates"+overridePostfix+".xml");
+			in = PropertiesHelper.Config.getInputStreamForFile(PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PathPrefix.DEFAULTS_MAILTEMPLATES + "/templates"+overridePostfix+".xml");
 		}
 		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 		return builder.parse(in);
