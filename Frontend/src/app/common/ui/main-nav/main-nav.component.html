@@ -141,6 +141,15 @@
               <i esIcon="add"></i> <span>{{ 'WORKSPACE.ADD' | translate }}</span>
             </button>
             <button
+              mat-button
+              class="addDesktop mat-button-no-uppercase"
+              *ngIf="!connector.getCurrentLogin()?.isGuest && create.allowed === 'EMIT_EVENT'"
+              (click)="onCreateNotAllowed.emit()"
+              [attr.aria-label]="'WORKSPACE.ADD' | translate"
+            >
+              <i esIcon="add"></i> <span>{{ 'WORKSPACE.ADD' | translate }}</span>
+            </button>
+            <button
               class="create-dummy"
               *ngIf="isCreateAllowed()"
               [style.left]="createMenuX + 'px'"

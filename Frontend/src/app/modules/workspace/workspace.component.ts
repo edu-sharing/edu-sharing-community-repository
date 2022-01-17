@@ -95,7 +95,8 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     public editNodeDeleteOnCancel = false;
     private createMds: string;
     private nodeDisplayedVersion: string;
-    createAllowed: boolean;
+    createAllowed: boolean | 'EMIT_EVENT';
+    notAllowedReason: string;
     currentFolder: Node;
     user: IamUser;
     public searchQuery: any;
@@ -425,7 +426,8 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         if (node == null && this.root !== 'RECYCLE') {
             this.root = 'ALL_FILES';
         }
-        this.createAllowed = false;
+        this.createAllowed = 'EMIT_EVENT';
+        this.notAllowedReason = 'WORKSPACE.CREATE_REASON.SEARCH';
         this.path = [];
         this.setSelection([]);
     }
@@ -507,11 +509,11 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     private openDirectoryFromRoute(params: any = null) {
         let id = params?.id;
         this.closeMetadata();
-        this.createAllowed = false;
         if (!id) {
             this.path = [];
             id = this.getRootFolderInternalId();
             if (this.root === 'RECYCLE') {
+                this.createAllowed = false;
                 // GlobalContainerComponent.finishPreloading();
                 // return;
             }
@@ -521,6 +523,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             this.node.getNodeParents(id).subscribe((data: NodeList) => {
                 if (this.root === 'RECYCLE') {
                     this.path = [];
+                    this.createAllowed = false;
                 }
                 else {
                     this.path = data.nodes.reverse();
@@ -545,7 +548,8 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                     }
                 });
                 this.updateNodeByParams(params, data.node);
-                this.createAllowed = !this.searchQuery && this.nodeHelper.getNodesRight([data.node], RestConstants.ACCESS_ADD_CHILDREN);
+                this.createAllowed = !this.searchQuery && this.nodeHelper.getNodesRight([data.node], RestConstants.ACCESS_ADD_CHILDREN) ? true : 'EMIT_EVENT';
+                this.notAllowedReason = 'WORKSPACE.CREATE_REASON.PERMISSIONS';
                 this.recoverScrollposition();
             }, (error: any) => {
                 this.updateNodeByParams(params, { ref: { id } });
@@ -558,9 +562,13 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 || id === '-to_me_shared_files-') {
                 this.isRootFolder = false;
             }
-
             if (id === RestConstants.USERHOME) {
                 this.createAllowed = true;
+            } else if (this.root === 'RECYCLE') {
+                this.createAllowed = false;
+            } else {
+                this.createAllowed = 'EMIT_EVENT';
+                this.notAllowedReason = 'WORKSPACE.CREATE_REASON.VIRTUAL';
             }
             const node: Node|any = {
                 ref: {
@@ -794,5 +802,22 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 }
             });
         }
+    }
+
+    async createNotAllowed() {
+        const message = (await this.translate.get(this.notAllowedReason).toPromise()) + '\n\n' +
+                (await this.translate.get('WORKSPACE.CREATE_REASON.GENERAL').toPromise());
+            this.toast.showConfigurableDialog({
+                title: 'WORKSPACE.CREATE_REASON.TITLE',
+                message,
+                isCancelable: true,
+                buttons: [
+                    new DialogButton('WORKSPACE.GO_TO_HOME', DialogButton.TYPE_PRIMARY + DialogButton.TYPE_SECONDARY, () => {
+                        this.openDirectory(RestConstants.USERHOME);
+                        this.toast.closeModalDialog();
+                    }),
+                    new DialogButton('CLOSE', DialogButton.TYPE_CANCEL, () => this.toast.closeModalDialog()),
+                ]
+            });
     }
 }

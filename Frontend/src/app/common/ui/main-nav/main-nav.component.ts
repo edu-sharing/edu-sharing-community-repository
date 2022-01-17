@@ -148,7 +148,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
      * "add material" options
      */
     @Input() create: {
-        allowed?: boolean;
+        allowed?: boolean | 'EMIT_EVENT';
         allowBinary?: boolean;
         parent?: Node;
         folder?: boolean;
@@ -160,6 +160,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         parent: null,
         folder: false,
     };
+    @Output() onCreateNotAllowed = new EventEmitter<void>();
     @Input() searchQuery: string;
     @Input()
     set currentScope(currentScope: string) {
@@ -575,7 +576,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
 
     isCreateAllowed() {
         // @TODO: May Check for more constrains
-        return this.create.allowed && !this.connector.getCurrentLogin()?.isGuest;
+        return (this.create.allowed === true) && !this.connector.getCurrentLogin()?.isGuest;
     }
 
     openCreateMenu(x: number, y: number) {

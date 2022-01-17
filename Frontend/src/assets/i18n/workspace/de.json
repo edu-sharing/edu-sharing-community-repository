@@ -428,6 +428,14 @@
             "NO_WRITE_PERMISSIONS": "Für den gewählten Ordner sind keine Schreibrechte verfügbar. Bitte wählen Sie einen anderen Speicherort.",
             "HOME_FOLDER_NO_PERMISSIONS": "In diesem Ordner können keine Elemente abgelegt werden. Bitte wählen Sie einen Unterordner."
         },
+        "GO_TO_HOME": "\"Meine Inhalte\" öffnen",
+        "CREATE_REASON": {
+          "TITLE": "Erstellen hier nicht möglich",
+          "SEARCH": "Sie befinden sich aktuell in einer Suchansicht und können hier keine Elemente ablegen.",
+          "PERMISSIONS": "Sie haben im aktuellen Ordner keine Rechte, Elemente hinzuzufügen.",
+          "VIRTUAL": "Sie befinden sich in einem Ordner, wo das Ablegen von Elementen nicht möglich ist.",
+          "GENERAL": "Navigieren Sie in einen anderen Ordner und fügen Sie die Elemente dort hinzu."
+        },
         "TOAST": {
             "FOLDER_ADDED": "Ordner wurde erstellt",
             "NODE_EXISTS_IN_COLLECTION": "Das Element {{name}} ist bereits in der Sammlung enthalten",

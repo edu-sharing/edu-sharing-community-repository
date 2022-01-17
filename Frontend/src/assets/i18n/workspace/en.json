@@ -419,6 +419,14 @@
             "NO_WRITE_PERMISSIONS": "You don't have write permissions for the selected directory. Please select a different one.",
             "HOME_FOLDER_NO_PERMISSIONS": "You can't store elements in this directory. Please choose a sub-directory."
         },
+        "GO_TO_HOME": "Open \"My files\"",
+        "CREATE_REASON": {
+          "TITLE": "Create not possible",
+          "SEARCH": "You're currently in a search view and can not insert elements here.",
+          "PERMISSIONS": "You don't have sufficient permissions to create elements in the current folder.",
+          "VIRTUAL": "You're inside a folder where inserting elements is not possible.",
+          "GENERAL": "Navigate to a different folder and create your elements there."
+        },
         "TOAST": {
             "FOLDER_ADDED": "Folder added",
             "NODE_EXISTS_IN_COLLECTION": "The collection already contains the element {{name}}",
