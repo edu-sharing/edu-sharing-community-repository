@@ -50,7 +50,7 @@
 
   <profiles>
     <profile>
-      <id>helm.charts</id>
+      <id>deploy.docker.helm</id>
       <activation>
         <activeByDefault>false</activeByDefault>
         <property>

@@ -162,7 +162,21 @@
 
   <modules>
     <module>docker</module>
-    <module>installer</module>
   </modules>
+
+  <profiles>
+    <profile>
+      <id>deploy.installer</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.CI</name>
+        </property>
+      </activation>
+      <modules>
+        <module>installer</module>
+      </modules>
+    </profile>
+  </profiles>
 
 </project>
