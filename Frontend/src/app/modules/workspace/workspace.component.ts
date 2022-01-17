@@ -638,19 +638,17 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         });
     }
 
-    private routeTo(root: string, node: string = null, search: string = null) {
-        const params: any = { root, id: node, query: search, mainnav: this.mainnav };
+    private async routeTo(root: string, node: string = null, search: string = null) {
+        const params = await UIHelper.getCommonParameters(this.route).toPromise();
+        params.root = root;
+        params.id = node;
+        params.query = search;
+        params.mainnav = this.mainnav;
         // tslint:disable-next-line:triple-equals
-        if(this.displayType !== null) {
+        if (this.displayType !== null) {
             params.displayType = this.displayType;
         }
-        if (this.reurl) {
-            params.reurl = this.reurl;
-        }
-        if (this.reurlDirectories) {
-            params.applyDirectories = this.reurlDirectories;
-        }
-        this.router.navigate(['./'], { queryParams: params, relativeTo: this.route })
+        this.router.navigate(['./'], {queryParams: params, relativeTo: this.route})
             .then((result: boolean) => {
                 if (!result) {
                     this.refresh(false);

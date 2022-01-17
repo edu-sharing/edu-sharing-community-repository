@@ -308,7 +308,7 @@ export class MainMenuEntriesService {
                     first())
                     .toPromise();
                 const params: Params = {};
-                for (const key of ['reurl', 'applyDirectories']) {
+                for (const key of UIHelper.COPY_URL_PARAMS) {
                     if (currentParams.hasOwnProperty(key)) {
                         params[key] = currentParams[key];
                     }
