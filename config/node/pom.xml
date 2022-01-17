@@ -14,10 +14,10 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>edu_sharing-community-repository-config-local</artifactId>
+  <artifactId>edu_sharing-community-repository-config-node</artifactId>
   <packaging>jar</packaging>
 
-  <name>edu_sharing-community-repository-config-local</name>
+  <name>edu_sharing-community-repository-config-node</name>
 
   <build>
 

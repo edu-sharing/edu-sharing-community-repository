@@ -31,7 +31,6 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -40,7 +39,7 @@ public class PropertiesHelper {
 	public static class Config {
 		public enum PathPrefix {
 			NODE("node"),
-			NODE_APPLICATIONS("node/applications"),
+			CLUSTER_PROPERTIES("cluster/applications"),
 			CLUSTER("cluster"),
 			DEFAULTS("defaults"),
 			DEFAULTS_METADATASETS("defaults/metadatasets"),
@@ -56,9 +55,10 @@ public class PropertiesHelper {
 				return path;
 			}
 		}
+		public static String CONFIG_FILENAME = "client.config.xml";
 		public static String PATH_CONFIG = "config/";
 		public static String getPropertyFilePath(String propertyFile) {
-			return PATH_CONFIG + PathPrefix.NODE_APPLICATIONS + "/" +
+			return PATH_CONFIG + PathPrefix.CLUSTER_PROPERTIES + "/" +
 					propertyFile;
 		}
 		public static URLClassLoader getClassLoaderForPath(String configPath) {

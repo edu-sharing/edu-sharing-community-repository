@@ -20,8 +20,9 @@
   <name>edu_sharing-community-repository-config</name>
 
   <modules>
+    <module>cluster</module>
     <module>defaults</module>
-    <module>local</module>
+    <module>node</module>
   </modules>
 
 </project>

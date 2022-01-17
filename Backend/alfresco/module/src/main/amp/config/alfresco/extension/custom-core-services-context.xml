@@ -7,25 +7,27 @@
   <bean id="global-properties" class="org.alfresco.config.JndiPropertiesFactoryBean">
     <property name="locations">
       <list>
-        <!--  Defaults -->
         <value>classpath:alfresco/repository.properties</value>
         <value>classpath:alfresco/domain/transaction.properties</value>
         <value>classpath:alfresco/caches.properties</value>
-        <!--  Overrides supplied by extension -->
+
         <value>classpath*:alfresco/extension/alfresco-global.properties</value>
         <value>classpath*:alfresco/extension/caches.properties</value>
-        <!--  Overrides supplied by modules -->
+
         <value>classpath*:alfresco/module/*/alfresco-global.properties</value>
         <value>classpath*:alfresco/module/*/caches.properties</value>
-        <!--  Config defaults -->
+
         <value>classpath*:config/defaults/alfresco-global.properties</value>
         <value>classpath*:config/defaults/caches.properties</value>
-        <!--  Config deployment -->
-        <value>classpath*:config/deployment/alfresco-global.deployment.properties</value>
-        <value>classpath*:config/deployment/caches.deployment.properties</value>
-        <!--  Config deployment -->
-        <value>classpath*:config/local/alfresco-global.local.properties</value>
-        <value>classpath*:config/local/caches.local.properties</value>
+
+        <value>classpath*:config/defaults/plugin-*/alfresco-global.properties</value>
+        <value>classpath*:config/defaults/plugin-*/caches.properties</value>
+
+        <value>classpath*:config/cluster/alfresco-global.properties</value>
+        <value>classpath*:config/node/caches.properties</value>
+
+        <value>classpath*:config/node/alfresco-global.properties</value>
+        <value>classpath*:config/cluster/caches.properties</value>
       </list>
     </property>
 

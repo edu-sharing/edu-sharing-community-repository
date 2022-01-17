@@ -9,7 +9,6 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.lf5.util.StreamUtils;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
-import org.edu_sharing.service.config.ConfigServiceFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -36,8 +35,8 @@ public class LightbendConfigLoader {
         String custom = getConfigFileLocation(CUSTOM_FILE, PropertiesHelper.Config.PathPrefix.DEFAULTS);
         String deploymentCluster = getConfigFileLocation(DEPLOYMENT_FILE, PropertiesHelper.Config.PathPrefix.CLUSTER);
         String overrideCluster = getConfigFileLocation(OVERRIDE_FILE, PropertiesHelper.Config.PathPrefix.CLUSTER);
-        String deploymentNode = getConfigFileLocation(DEPLOYMENT_FILE, PropertiesHelper.Config.PathPrefix.CLUSTER);
-        String overrideNode = getConfigFileLocation(OVERRIDE_FILE, PropertiesHelper.Config.PathPrefix.CLUSTER);
+        String deploymentNode = getConfigFileLocation(DEPLOYMENT_FILE, PropertiesHelper.Config.PathPrefix.NODE);
+        String overrideNode = getConfigFileLocation(OVERRIDE_FILE, PropertiesHelper.Config.PathPrefix.NODE);
         Config config = ConfigFactory.parseResourcesAnySyntax(overrideNode)
                 .withFallback(ConfigFactory.parseResourcesAnySyntax(deploymentNode))
                 .withFallback(ConfigFactory.parseResourcesAnySyntax(overrideCluster))
@@ -59,7 +58,7 @@ public class LightbendConfigLoader {
         if(configFileName.equals(OVERRIDE_FILE)) {
             return PropertiesHelper.Config.PATH_CONFIG + pathPrefix + "/" + getServerConfigName();
         }
-        if(configFileName.equals(ConfigServiceFactory.CONFIG_FILENAME)) {
+        if(configFileName.equals(PropertiesHelper.Config.CONFIG_FILENAME)) {
             return PropertiesHelper.Config.PATH_CONFIG + pathPrefix + "/" + configFileName;
         }
 

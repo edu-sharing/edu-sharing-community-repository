@@ -19,6 +19,11 @@
     }
   },
   "version": {
-    "main": "${git.closest.tag.fixed}"
+    "full": "${git.closest.tag.fixed}",
+    "major": "${parsedVersion.majorVersion}",
+    "minor": "${parsedVersion.minorVersion}",
+    "patch": "${parsedVersion.incrementalVersion}",
+    "qualifier": "${parsedVersion.qualifier}",
+    "build": "${parsedVersion.buildNumber}"
   }
 }

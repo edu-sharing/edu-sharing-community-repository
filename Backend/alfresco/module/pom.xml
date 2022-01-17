@@ -125,6 +125,11 @@
     </dependency>
 
     <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-backend-alfresco-common</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>net.handle</groupId>
       <artifactId>handle-client</artifactId>
     </dependency>
@@ -269,13 +274,19 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-config-cluster</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>edu_sharing-community-repository-config-defaults</artifactId>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-repository-config-local</artifactId>
+      <artifactId>edu_sharing-community-repository-config-node</artifactId>
       <scope>provided</scope>
     </dependency>
 

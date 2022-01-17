@@ -134,7 +134,7 @@ public class ConfigServiceImpl implements ConfigService{
 
 	private InputStream getConfigInputStream() throws IOException {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		String file = LightbendConfigLoader.getConfigFileLocation(ConfigServiceFactory.CONFIG_FILENAME, PropertiesHelper.Config.PathPrefix.DEFAULTS);
+		String file = LightbendConfigLoader.getConfigFileLocation(PropertiesHelper.Config.CONFIG_FILENAME, PropertiesHelper.Config.PathPrefix.DEFAULTS);
 		InputStream is = classLoader.getResourceAsStream(file);
 		if(is==null)
 			throw new IOException(file + " missing");

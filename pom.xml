@@ -150,13 +150,19 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-config-cluster</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-config-defaults</artifactId>
         <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-config-local</artifactId>
+        <artifactId>edu_sharing-community-repository-config-node</artifactId>
         <version>${project.version}</version>
       </dependency>
 
