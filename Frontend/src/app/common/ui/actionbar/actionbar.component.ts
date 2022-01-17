@@ -1,5 +1,5 @@
 import {trigger} from '@angular/animations';
-import { Component, Input } from '@angular/core';
+import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { UIService } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
@@ -17,7 +17,7 @@ import { UIHelper } from '../../../core-ui-module/ui-helper';
 /**
  * The action bar provides several icons, usually at the top right, with actions for a current context
  */
-export class ActionbarComponent {
+export class ActionbarComponent implements OnChanges {
     /**
      * The amount of options which are not hidden inside an overflow menu
      * (default: depending on mobile (1) or not (2))
@@ -47,7 +47,7 @@ export class ActionbarComponent {
     @Input() style: 'default' | 'flat' = 'default';
     /**
      * Highlight one or more of the always-visible buttons as primary action.
-     * 
+     *
      * - `first`, `last`: The first / last of `optionsAlways` by order.
      * - `manual`: Highlight all options that set `isPrimary = true`.
      */
@@ -103,6 +103,7 @@ export class ActionbarComponent {
         if (window.innerWidth < UIConstants.MOBILE_WIDTH) {
             return this.numberOfAlwaysVisibleOptionsMobile;
         }
+        console.log(this.numberOfAlwaysVisibleOptions);
         return this.numberOfAlwaysVisibleOptions;
     }
 
@@ -164,5 +165,9 @@ export class ActionbarComponent {
             case 'manual':
                 return option.isPrimary;
         }
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        this.invalidate();
     }
 }

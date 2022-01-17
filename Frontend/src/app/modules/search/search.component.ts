@@ -533,30 +533,29 @@ export class SearchComponent implements AfterViewInit, OnDestroy {
             parameters = await this.getMdsValues();
         }
         this.scrollTo();
-        const result = await this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
-            queryParams: {
-                addToCollection: this.addToCollection
-                    ? this.addToCollection.ref.id
-                    : null,
-                query: query,
-                parameters:
-                    parameters && Object.keys(parameters)
-                        ? JSON.stringify(parameters)
-                        : null,
-                repositoryFilter: this.getEnabledRepositories().join(','),
-                mds: mds,
-                repository: repository,
-                mdsExtended: this.mdsExtended,
-                sidenav: this.searchService.sidenavOpened,
-                materialsSortBy: this.searchService.sort.active,
-                materialsSortAscending: this.searchService.sort.direction === 'asc',
-                reurl: this.searchService.reurl,
-            },
+        UIHelper.getCommonParameters(this.activatedRoute).subscribe(async (queryParams) => {
+            queryParams.addToCollection = this.addToCollection
+                ? this.addToCollection.ref.id
+                : null;
+            queryParams.query = query;
+            queryParams.parameters = parameters && Object.keys(parameters)
+                ? JSON.stringify(parameters)
+                : null;
+            queryParams.repositoryFilter = this.getEnabledRepositories().join(',');
+            queryParams.mds = mds;
+            queryParams.repository = repository;
+            queryParams.mdsExtended = this.mdsExtended;
+            queryParams.sidenav = this.searchService.sidenavOpened;
+            queryParams.materialsSortBy = this.searchService.sort.active;
+            queryParams.materialsSortAscending = this.searchService.sort.direction === 'asc';
+            const result = await this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'],
+                {queryParams}
+            );
+            if (result !== true) {
+                // this.invalidateMds();
+                // this.searchService.init();
+            }
         });
-        if(result !== true) {
-            // this.invalidateMds();
-            // this.searchService.init();
-        }
     }
 
     getSearch(

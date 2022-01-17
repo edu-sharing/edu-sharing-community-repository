@@ -103,21 +103,11 @@
                   class="image-upload-field-input">
               </div>
               <div class="button-icon">
-                  <button mat-fab [color]="$any('white')" (click)="file.click()"
-                    [matTooltip]="'collectionNew_uploadCollectionImage' | translate"
-                    [attr.aria-label]="'collectionNew_uploadCollectionImage' | translate"
-                  >
-                    <i esIcon="file_upload"></i>
-                  </button>
-                  <button
-                    mat-fab
-                    [color]="$any('white')"
-                    *ngIf="imageData || (currentCollection.preview && !currentCollection.preview.isIcon)" (click)="deleteImage()"
-                    [matTooltip]="'collectionNew_deleteCollectionImage' | translate"
-                    [attr.aria-label]="'collectionNew_deleteCollectionImage' | translate"
-                  >
-                    <i esIcon="delete"></i>
-                  </button>
+                <es-actionbar [options]="imageOptions"
+                              appearance="round"
+                              [numberOfAlwaysVisibleOptions]="0"
+                              [numberOfAlwaysVisibleOptionsMobile]="0"
+                ></es-actionbar>
               </div>
 
               <!-- Making the image area clickable poses a violation of accessibility rules. Merge

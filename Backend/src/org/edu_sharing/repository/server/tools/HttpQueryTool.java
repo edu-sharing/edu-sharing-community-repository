@@ -22,6 +22,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocket;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -148,7 +149,8 @@ public class HttpQueryTool {
 					if(type == String.class){
 						return (T)EntityUtils.toString(result);
 					}else if(type == InputStream.class){
-						return (T)result.getContent();
+						//@TODO: prevent memory allocation
+						return (T)new ByteArrayInputStream(EntityUtils.toByteArray(result));
 					}else{
 						throw new RuntimeException("unsupported return type:"+type);
 					}

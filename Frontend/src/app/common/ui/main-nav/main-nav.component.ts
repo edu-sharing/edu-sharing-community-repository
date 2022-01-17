@@ -162,6 +162,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     };
     @Output() onCreateNotAllowed = new EventEmitter<void>();
     @Input() searchQuery: string;
+    private queryParams: Params;
     @Input()
     set currentScope(currentScope: string) {
         this._currentScope = currentScope;
@@ -265,6 +266,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                     }
                     setInterval(() => this.updateTimeout(), 1000);
                     this.route.queryParams.subscribe(async (params: Params) => {
+                        this.queryParams = params;
                         if (params.noNavigation === 'true') {
                             this.canOpen = false;
                         }
@@ -576,7 +578,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
 
     isCreateAllowed() {
         // @TODO: May Check for more constrains
-        return (this.create.allowed === true) && !this.connector.getCurrentLogin()?.isGuest;
+        return (this.create.allowed === true) && !this.connector.getCurrentLogin()?.isGuest && this.queryParams.reurlCreate !== 'false';
     }
 
     openCreateMenu(x: number, y: number) {

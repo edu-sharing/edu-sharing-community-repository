@@ -210,10 +210,15 @@ export class NodeHelperService {
             const options:any=this.rest.getRequestOptions();
             options.responseType='blob';
 
-            this.rest.get(node.preview.url+'&quality='+quality,options,false).subscribe((data:HttpResponse<Blob>)=> {
-                node.preview.data=data.body;
-                observer.next(node);
-                observer.complete();
+            this.rest.get(node.preview.url+'&allowRedirect=false&quality='+quality,options,false).subscribe(async (data: Blob)=> {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const dataUrl = reader.result;
+                    node.preview.data = dataUrl.toString();
+                    observer.next(node);
+                    observer.complete();
+                };
+                reader.readAsDataURL(data);
             },(error)=> {
                 observer.error(error);
                 observer.complete();
