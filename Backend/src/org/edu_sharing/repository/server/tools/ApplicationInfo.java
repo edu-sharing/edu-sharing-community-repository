@@ -138,6 +138,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	public static final String KEY_LTI_AUTH_TOKEN_ENDPOINT = "lti_auth_token_endpoint";
 
+	public static final String KEY_LTI_KEYSET_URL = "lti_keyset_url";
+
 	/**
 	 * property file vals
 	 */
@@ -350,6 +352,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	private String ltiIss;
 
+	private final String ltiKeysetUrl;
+
 	/**
 	 * der Anfangsteil des alfresco Intergity Pattern:
 	 * (.*[\"\*\\\>\<\?\/\:\|]+.*)|(.*[\.]?.*[\.]+$)|(.*[ ]+$)
@@ -508,6 +512,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		ltiDeploymentId = properties.getProperty(KEY_LTI_DEPLOYMENT_ID);
 		ltiOidc = properties.getProperty(KEY_LTI_OIDC_ENDPOINT);
 		ltiAuthTokenEndpoint = properties.getProperty(KEY_LTI_AUTH_TOKEN_ENDPOINT);
+		ltiKeysetUrl = properties.getProperty(KEY_LTI_KEYSET_URL);
 	}
 	
 	public String getXml() {
@@ -996,4 +1001,6 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	public String getLtiAuthTokenEndpoint() {
 		return ltiAuthTokenEndpoint;
 	}
+
+	public String getLtiKeysetUrl() {return ltiKeysetUrl;}
 }

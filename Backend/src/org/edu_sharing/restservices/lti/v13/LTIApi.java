@@ -3,6 +3,10 @@ package org.edu_sharing.restservices.lti.v13;
 import com.nimbusds.jose.jwk.AsymmetricJWK;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
+import edu.uoc.elc.lti.tool.Tool;
+import edu.uoc.elc.lti.tool.oidc.LoginRequest;
+import edu.uoc.elc.spring.lti.security.openid.LoginRequestFactory;
+import edu.uoc.elc.spring.lti.tool.ToolFactory;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,8 +28,10 @@ import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.lti13.*;
 import org.edu_sharing.service.lti13.model.LTISessionObject;
 import org.edu_sharing.service.lti13.model.LoginInitiationDTO;
+import org.edu_sharing.service.lti13.uoc.Config;
 import org.springframework.util.StringUtils;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.*;
@@ -33,6 +39,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
@@ -73,25 +80,28 @@ public class LTIApi {
          * @TODO check if multiple deployments got an own key pair
          */
 
-        LoginInitiationDTO dto = new LoginInitiationDTO(iss,loginHint,targetLinkUrl,ltiMessageHint,clientId,ltiDeploymentId);
         RepoTools repoTools = new RepoTools();
         try {
-            /**
-             * @TODO maybe use db instead of applicationinfo
-             */
-            ApplicationInfo applicationInfo = repoTools.getApplicationInfo(iss, clientId, ltiDeploymentId);
-            Map<String, String> model = new LTIOidcUtil().generateAuthRequestPayload(applicationInfo, dto);
-            /**
-             * store nonce and state in session for later validation
-             */
-            HttpSession session = req.getSession();
-            Map<String,String> toSession = new HashMap<>();
-            toSession.put(LTIConstants.LTI_TOOL_SESS_ATT_NONCE, model.get("nonce"));
-            toSession.put(LTIConstants.LTI_TOOL_SESS_ATT_STATE, model.get("state"));
-            storeInSession(session,toSession);
+            ApplicationInfo platform = repoTools.getApplicationInfo(iss, clientId, ltiDeploymentId);
+            Tool tool = Config.getTool(platform,req,true);
+            // get data from request
+            final LoginRequest loginRequest = LoginRequestFactory.from(req);
+            if (this.logger.isInfoEnabled()) {
+                this.logger.info("OIDC launch received with " + loginRequest.toString());
+            }
+            final URI uri = new URI(loginRequest.getTarget_link_uri());
+			/* commented in local because localhost resolves to 0:0:0:0
+			if (!uri.getHost().equals(request.getRemoteHost())) {
+				throw new ServletException("Bad request");
+			}
+			*/
 
-            return Response.status(Response.Status.OK).entity(getHTML(applicationInfo.getLtiOidc(),model,null)).build();
-        } catch (LTIException | GeneralSecurityException | IOException e) {
+            // do the redirection
+            String authRequest = tool.getOidcAuthUrl(loginRequest);
+            //response.sendRedirect(authRequest);
+            return Response.status(302).location(new URI(authRequest)).build();
+
+        } catch (LTIException | URISyntaxException e) {
             return Response.status(Response.Status.OK).entity(getHTML(null,null,e.getMessage())).build();
         }
     }
@@ -346,6 +356,7 @@ public class LTIApi {
         properties.put(ApplicationInfo.KEY_LTI_CLIENT_ID, clientId);
         properties.put(ApplicationInfo.KEY_LTI_OIDC_ENDPOINT, authenticationRequestUrl);
         properties.put(ApplicationInfo.KEY_LTI_AUTH_TOKEN_ENDPOINT,authTokenUrl);
+        properties.put(ApplicationInfo.KEY_LTI_KEYSET_URL,keysetUrl);
 
         JWKSet publicKeys = JWKSet.load(new URL(keysetUrl));
         if(publicKeys == null){
