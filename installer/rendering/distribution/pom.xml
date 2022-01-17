@@ -32,7 +32,7 @@
             </goals>
             <phase>package</phase>
             <configuration>
-              <includeArtifactIds>edu_sharing-community-rendering</includeArtifactIds>
+              <includeArtifactIds>edu_sharing-community-services-rendering</includeArtifactIds>
               <type>tar.gz</type>
               <classifier>bin</classifier>
               <outputDirectory>${project.build.directory}/dist/esrender</outputDirectory>
@@ -67,7 +67,7 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-rendering</artifactId>
+      <artifactId>edu_sharing-community-services-rendering</artifactId>
       <type>tar.gz</type>
       <classifier>bin</classifier>
     </dependency>
