@@ -120,7 +120,6 @@ RUN set -eux \
 COPY --chown=worker:worker assets/share/log4j.properties tomcat/webapps/share/WEB-INF/classes/log4j.properties
 COPY --chown=worker:worker assets/share/share-config-custom.xml tomcat/shared/classes/alfresco/web-extension/share-config-custom.xml
 
-
 COPY --chown=worker:worker artifacts/alfresco-pdf-renderer-${org.alfresco:alfresco-pdf-renderer:tgz:linux.version}-linux.tgz /tmp/alfresco-pdf-renderer.tgz
 
 RUN set -eux \
@@ -128,12 +127,7 @@ RUN set -eux \
     && tar -xvzf /tmp/alfresco-pdf-renderer.tgz -C /tmp/install/alfresco-pdf-renderer \
     && rm -f /tmp/alfresco-pdf-renderer.tgz \
     && mkdir -p common \
-    && mv /tmp/install/alfresco-pdf-renderer common/alfresco-pdf-renderer \
-    && echo "alfresco-pdf-renderer.root=$ALF_HOME/common/alfresco-pdf-renderer" >> \
-        tomcat/shared/classes/alfresco-global.deployment.properties \
-    && echo 'alfresco-pdf-renderer.exe=${alfresco-pdf-renderer.root}/alfresco-pdf-renderer' >> \
-        tomcat/shared/classes/alfresco-global.deployment.properties
-
+    && mv /tmp/install/alfresco-pdf-renderer common/alfresco-pdf-renderer
 
 COPY --chown=worker:worker artifacts/edu_sharing-community-repository-backend-tomcat-${org.edu_sharing:edu_sharing-community-repository-backend-tomcat:jar.version}.jar tomcat/lib/
 
@@ -155,25 +149,11 @@ RUN set -eux \
     && if [ -d amps/alfresco/1 ] && [ -n $(ls -A amps/alfresco/1 | wc -l) ]; then java -jar bin/alfresco-mmt.jar install amps/alfresco/1 tomcat/webapps/alfresco -directory -nobackup -force; fi \
     && if [ -d amps/edu-sharing/1 ] && [ -n $(ls -A amps/edu-sharing/1 | wc -l) ]; then java -jar bin/alfresco-mmt.jar install amps/edu-sharing/1 tomcat/webapps/edu-sharing -directory -nobackup -force; fi
 
-
-COPY --chown=worker:worker artifacts/edu_sharing-community-repository-config-${org.edu_sharing:edu_sharing-community-repository-config:jar.version}.jar tomcat/shared/lib/
-
-RUN set -eux \
-	&& unzip tomcat/shared/lib/edu_sharing-community-repository-config-${org.edu_sharing:edu_sharing-community-repository-config:jar.version}.jar \
-	    -d tomcat/shared/classes -x META-INF/* \
-	&& rm -f tomcat/shared/lib/edu_sharing-community-repository-config-${org.edu_sharing:edu_sharing-community-repository-config:jar.version}.jar \
-	&& touch tomcat/shared/classes/config/edu-sharing.conf \
-	&& touch tomcat/shared/classes/config/edu-sharing.deployment.conf \
-    && tar cvf tomcat/shared.tar tomcat/shared
+COPY --chown=worker:worker config tomcat/shared/lib/
 
 ########################################################################################################################
 
-COPY --chown=worker:worker /plugins/docker/ bin/plugins/
-COPY --chown=worker:worker /plugins/configuration/ tomcat/shared/classes/
-
-# THANK YOU BILL ;)
-#RUN set -eux \
-#    && find plugins -type f -name *.sh -exec chmod +x {} \;
+COPY --chown=worker:worker assets/plugins bin/plugins/
 
 ########################################################################################################################
 

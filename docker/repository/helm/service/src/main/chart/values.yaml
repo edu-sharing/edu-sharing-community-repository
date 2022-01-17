@@ -123,8 +123,10 @@ config:
       transportMode: "NIO"
 
   cluster:
-    backupCount: 1
-    readBackupData: true
+    enabled: ${helm.config.cluster.enabled}
+    backup:
+      count: 0
+      read: false
 
   connector:
 

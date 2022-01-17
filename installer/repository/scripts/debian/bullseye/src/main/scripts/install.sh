@@ -3,7 +3,7 @@ set -e
 set -o pipefail
 
 ########################################################################################################################
-#execution_folder=$(dirname -- "${BASH_SOURCE[0]}")
+
 execution_folder="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 echo execution_folder
 
@@ -25,7 +25,6 @@ if [[ -d "$execution_folder/plugins" ]] ; then
 fi
 
 popd
-
 
 ########################################################################################################################
 
@@ -245,6 +244,18 @@ info() {
 ########################################################################################################################
 
 install_edu_sharing() {
+	
+	setEnvSh="tomcat/bin/setenv.sh"
+
+	eduCConf="tomcat/shared/classes/config/defaults/client.config.xml"
+
+	alfProps="tomcat/shared/classes/config/cluster/alfresco-global.properties"
+	eduSConf="tomcat/shared/classes/config/cluster/edu-sharing.deployment.conf"
+	eduProps="tomcat/shared/classes/config/cluster/applications/homeApplication.properties.xml"
+
+	solr4Wor="solr4/workspace-SpacesStore/conf/solrcore.properties"
+	solr4Arc="solr4/archive-SpacesStore/conf/solrcore.properties"
+
 	pushd "$ALF_HOME" &> /dev/null
 
 	echo "- clean up outdated libraries"
@@ -275,103 +286,101 @@ install_edu_sharing() {
 	### Tomcat ###########################################################################################################
 
 	echo "- update tomcat env"
-	sed -i -r 's|file\.encoding=.*\"|file.encoding=UTF-8 $CATALINA_OPTS \"|' tomcat/bin/setenv.sh
-	grep -q 'file\.encoding' tomcat/bin/setenv.sh || echo 'CATALINA_OPTS="-Dfile.encoding=UTF-8 $CATALINA_OPTS "' >> tomcat/bin/setenv.sh
+	sed -i -r 's|file\.encoding=.*\"|file.encoding=UTF-8 $CATALINA_OPTS \"|' ${setEnvSh}
+	grep -q 'file\.encoding' ${setEnvSh} || echo 'CATALINA_OPTS="-Dfile.encoding=UTF-8 $CATALINA_OPTS "' >> ${setEnvSh}
 
-	sed -i -r 's|org\.xml\.sax\.parser=.*\"|org.xml.sax.parser=com.sun.org.apache.xerces.internal.parsers.SAXParser $CATALINA_OPTS \"|' tomcat/bin/setenv.sh
-	grep -q 'org\.xml\.sax\.parser' tomcat/bin/setenv.sh || echo 'CATALINA_OPTS="-Dorg.xml.sax.parser=com.sun.org.apache.xerces.internal.parsers.SAXParser $CATALINA_OPTS "' >> tomcat/bin/setenv.sh
+	sed -i -r 's|user\.country=.*\"|user.country=DE $CATALINA_OPTS \"|' ${setEnvSh}
+	grep -q 'user\.country' ${setEnvSh} || echo 'CATALINA_OPTS="-Duser.country=DE $CATALINA_OPTS "' >> ${setEnvSh}
 
-	sed -i -r 's|javax\.xml\.parsers\.DocumentBuilderFactory=.*\"|javax.xml.parsers.DocumentBuilderFactory=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl $CATALINA_OPTS \"|' tomcat/bin/setenv.sh
-	grep -q 'javax\.xml\.parsers\.DocumentBuilderFactory' tomcat/bin/setenv.sh || echo 'CATALINA_OPTS="-Djavax.xml.parsers.DocumentBuilderFactory=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl $CATALINA_OPTS "' >> tomcat/bin/setenv.sh
+	sed -i -r 's|user\.language=.*\"|user.language=de $CATALINA_OPTS \"|' ${setEnvSh}
+	grep -q 'user\.language' ${setEnvSh} || echo 'CATALINA_OPTS="-Duser.language=de $CATALINA_OPTS "' >> ${setEnvSh}
 
-	sed -i -r 's|javax\.xml\.parsers\.SAXParserFactory=.*\"|javax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl $CATALINA_OPTS \"|' tomcat/bin/setenv.sh
-	grep -q 'javax\.xml\.parsers\.SAXParserFactory' tomcat/bin/setenv.sh || echo 'CATALINA_OPTS="-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl $CATALINA_OPTS "' >> tomcat/bin/setenv.sh
+	sed -i -r 's|org\.xml\.sax\.parser=.*\"|org.xml.sax.parser=com.sun.org.apache.xerces.internal.parsers.SAXParser $CATALINA_OPTS \"|' ${setEnvSh}
+	grep -q 'org\.xml\.sax\.parser' ${setEnvSh} || echo 'CATALINA_OPTS="-Dorg.xml.sax.parser=com.sun.org.apache.xerces.internal.parsers.SAXParser $CATALINA_OPTS "' >> ${setEnvSh}
+
+	sed -i -r 's|javax\.xml\.parsers\.DocumentBuilderFactory=.*\"|javax.xml.parsers.DocumentBuilderFactory=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl $CATALINA_OPTS \"|' ${setEnvSh}
+	grep -q 'javax\.xml\.parsers\.DocumentBuilderFactory' ${setEnvSh} || echo 'CATALINA_OPTS="-Djavax.xml.parsers.DocumentBuilderFactory=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl $CATALINA_OPTS "' >> ${setEnvSh}
+
+	sed -i -r 's|javax\.xml\.parsers\.SAXParserFactory=.*\"|javax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl $CATALINA_OPTS \"|' ${setEnvSh}
+	grep -q 'javax\.xml\.parsers\.SAXParserFactory' ${setEnvSh} || echo 'CATALINA_OPTS="-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl $CATALINA_OPTS "' >> ${setEnvSh}
 
 	if [[ -n "${repository_httpclient_proxy_nonproxyhosts}" ]]  ; then
-		sed -i -r "s|http\.nonProxyHosts=.*\"|http.nonProxyHosts=${repository_httpclient_proxy_nonproxyhosts} "'$CATALINA_OPTS'" \"|" tomcat/bin/setenv.sh
-    grep -q 'http\.nonProxyHosts' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttp.nonProxyHosts=${repository_httpclient_proxy_nonproxyhosts} "'$CATALINA_OPTS'" \"" >> tomcat/bin/setenv.sh
+		sed -i -r "s|http\.nonProxyHosts=.*\"|http.nonProxyHosts=${repository_httpclient_proxy_nonproxyhosts} "'$CATALINA_OPTS'" \"|" ${setEnvSh}
+    grep -q 'http\.nonProxyHosts' ${setEnvSh} || echo "CATALINA_OPTS=\"-Dhttp.nonProxyHosts=${repository_httpclient_proxy_nonproxyhosts} "'$CATALINA_OPTS'" \"" >> ${setEnvSh}
 
-		sed -i -r "s|https\.nonProxyHosts=.*\"|https.nonProxyHosts=${repository_httpclient_proxy_nonproxyhosts} "'$CATALINA_OPTS'" \"|" tomcat/bin/setenv.sh
-		grep -q 'https\.nonProxyHosts' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttps.nonProxyHosts=${repository_httpclient_proxy_nonproxyhosts} "'$CATALINA_OPTS'" \"" >> tomcat/bin/setenv.sh
+		sed -i -r "s|https\.nonProxyHosts=.*\"|https.nonProxyHosts=${repository_httpclient_proxy_nonproxyhosts} "'$CATALINA_OPTS'" \"|" ${setEnvSh}
+		grep -q 'https\.nonProxyHosts' ${setEnvSh} || echo "CATALINA_OPTS=\"-Dhttps.nonProxyHosts=${repository_httpclient_proxy_nonproxyhosts} "'$CATALINA_OPTS'" \"" >> ${setEnvSh}
 	fi
 
 	if [[ -n "${repository_httpclient_proxy_proxyhost}" ]] ; then
-		sed -i -r "s|http\.proxyHost=.*\"|http.proxyHost=${repository_httpclient_proxy_proxyhost} "'$CATALINA_OPTS'" \"|" tomcat/bin/setenv.sh
-    grep -q 'http\.proxyHost' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttp.proxyHost=${repository_httpclient_proxy_proxyhost} "'$CATALINA_OPTS'" \"" >> tomcat/bin/setenv.sh
+		sed -i -r "s|http\.proxyHost=.*\"|http.proxyHost=${repository_httpclient_proxy_proxyhost} "'$CATALINA_OPTS'" \"|" ${setEnvSh}
+    grep -q 'http\.proxyHost' ${setEnvSh} || echo "CATALINA_OPTS=\"-Dhttp.proxyHost=${repository_httpclient_proxy_proxyhost} "'$CATALINA_OPTS'" \"" >> ${setEnvSh}
 
-		sed -i -r "s|https\.proxyHost=.*\"|https.proxyHost=${repository_httpclient_proxy_proxyhost} "'$CATALINA_OPTS'" \"|" tomcat/bin/setenv.sh
-		grep -q 'https\.proxyHost' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttps.proxyHost=${repository_httpclient_proxy_proxyhost} "'$CATALINA_OPTS'" \"" >> tomcat/bin/setenv.sh
+		sed -i -r "s|https\.proxyHost=.*\"|https.proxyHost=${repository_httpclient_proxy_proxyhost} "'$CATALINA_OPTS'" \"|" ${setEnvSh}
+		grep -q 'https\.proxyHost' ${setEnvSh} || echo "CATALINA_OPTS=\"-Dhttps.proxyHost=${repository_httpclient_proxy_proxyhost} "'$CATALINA_OPTS'" \"" >> ${setEnvSh}
 	fi
 
 	if [[ -n "${repository_httpclient_proxy_proxypass}" ]] ; then
-		sed -i -r "s|http\.proxyPass=.*\"|http.proxyPass=${repository_httpclient_proxy_proxypass} "'$CATALINA_OPTS'" \"|" tomcat/bin/setenv.sh
-    grep -q 'http\.proxyPass' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttp.proxyPass=${repository_httpclient_proxy_proxypass} "'$CATALINA_OPTS'" \"" >> tomcat/bin/setenv.sh
+		sed -i -r "s|http\.proxyPass=.*\"|http.proxyPass=${repository_httpclient_proxy_proxypass} "'$CATALINA_OPTS'" \"|" ${setEnvSh}
+    grep -q 'http\.proxyPass' ${setEnvSh} || echo "CATALINA_OPTS=\"-Dhttp.proxyPass=${repository_httpclient_proxy_proxypass} "'$CATALINA_OPTS'" \"" >> ${setEnvSh}
 
-		sed -i -r "s|https\.proxyPass=.*\"|https.proxyPass=${repository_httpclient_proxy_proxypass}\"|" tomcat/bin/setenv.sh
-		grep -q 'https\.proxyPass' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttps.proxyPass=${repository_httpclient_proxy_proxypass} "'$CATALINA_OPTS'" \"" >> tomcat/bin/setenv.sh
+		sed -i -r "s|https\.proxyPass=.*\"|https.proxyPass=${repository_httpclient_proxy_proxypass}\"|" ${setEnvSh}
+		grep -q 'https\.proxyPass' ${setEnvSh} || echo "CATALINA_OPTS=\"-Dhttps.proxyPass=${repository_httpclient_proxy_proxypass} "'$CATALINA_OPTS'" \"" >> ${setEnvSh}
 	fi
 
 	if [[ -n "${repository_httpclient_proxy_proxyport}" ]] ; then
-		sed -i -r "s|http\.proxyPort=.*\"|http.proxyPort=${repository_httpclient_proxy_proxyport} "'$CATALINA_OPTS'" \"|" tomcat/bin/setenv.sh
-    grep -q 'http\.proxyPort' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttp.proxyPort=${repository_httpclient_proxy_proxyport} "'$CATALINA_OPTS'" \"" >> tomcat/bin/setenv.sh
+		sed -i -r "s|http\.proxyPort=.*\"|http.proxyPort=${repository_httpclient_proxy_proxyport} "'$CATALINA_OPTS'" \"|" ${setEnvSh}
+    grep -q 'http\.proxyPort' ${setEnvSh} || echo "CATALINA_OPTS=\"-Dhttp.proxyPort=${repository_httpclient_proxy_proxyport} "'$CATALINA_OPTS'" \"" >> ${setEnvSh}
 
-		sed -i -r "s|https\.proxyPort=.*\"|https.proxyPort=${repository_httpclient_proxy_proxyport} "'$CATALINA_OPTS'" \"|" tomcat/bin/setenv.sh
-		grep -q 'https\.proxyPort' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttps.proxyPort=${repository_httpclient_proxy_proxyport} "'$CATALINA_OPTS'" \"" >> tomcat/bin/setenv.sh
+		sed -i -r "s|https\.proxyPort=.*\"|https.proxyPort=${repository_httpclient_proxy_proxyport} "'$CATALINA_OPTS'" \"|" ${setEnvSh}
+		grep -q 'https\.proxyPort' ${setEnvSh} || echo "CATALINA_OPTS=\"-Dhttps.proxyPort=${repository_httpclient_proxy_proxyport} "'$CATALINA_OPTS'" \"" >> ${setEnvSh}
 	fi
 
 	if [[ -n "${repository_httpclient_proxy_proxyuser}" ]] ; then
-		sed -i -r "s|http\.proxyUser=.*\"|http.proxyUser=${repository_httpclient_proxy_proxyuser} "'$CATALINA_OPTS'" \"|" tomcat/bin/setenv.sh
-    grep -q 'http\.proxyUser' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttp.proxyUser=${repository_httpclient_proxy_proxyuser} "'$CATALINA_OPTS'" \"" >> tomcat/bin/setenv.sh
+		sed -i -r "s|http\.proxyUser=.*\"|http.proxyUser=${repository_httpclient_proxy_proxyuser} "'$CATALINA_OPTS'" \"|" ${setEnvSh}
+    grep -q 'http\.proxyUser' ${setEnvSh} || echo "CATALINA_OPTS=\"-Dhttp.proxyUser=${repository_httpclient_proxy_proxyuser} "'$CATALINA_OPTS'" \"" >> ${setEnvSh}
 
-		sed -i -r "s|https\.proxyUser=.*\"|https.proxyUser=${repository_httpclient_proxy_proxyuser} "'$CATALINA_OPTS'" \"|" tomcat/bin/setenv.sh
-		grep -q 'https\.proxyUser' tomcat/bin/setenv.sh || echo "CATALINA_OPTS=\"-Dhttps.proxyUser=${repository_httpclient_proxy_proxyuser} "'$CATALINA_OPTS'" \"" >> tomcat/bin/setenv.sh
+		sed -i -r "s|https\.proxyUser=.*\"|https.proxyUser=${repository_httpclient_proxy_proxyuser} "'$CATALINA_OPTS'" \"|" ${setEnvSh}
+		grep -q 'https\.proxyUser' ${setEnvSh} || echo "CATALINA_OPTS=\"-Dhttps.proxyUser=${repository_httpclient_proxy_proxyuser} "'$CATALINA_OPTS'" \"" >> ${setEnvSh}
 	fi
 
-
 	### Alfresco platform ################################################################################################
-
-	alfGlobalProps="tomcat/shared/classes/alfresco-global.deployment.properties"
-	solr4WorkspaceProps="solr4/workspace-SpacesStore/conf/solrcore.properties"
-	solr4ArchiveProps="solr4/archive-SpacesStore/conf/solrcore.properties"
-
-	touch $alfGlobalProps
-	touch tomcat/shared/classes/config/000-default.conf
-	touch tomcat/shared/classes/config/edu-sharing.deployment.conf
 
 	echo "- update alfresco env"
 
 	if [[ -n $repository_contentstore ]] ; then
-  	echo "dir.contentstore=${repository_contentstore}" >> "${alfGlobalProps}"
+  	echo "dir.contentstore=${repository_contentstore}" >> "${alfProps}"
   fi
 
   if [[ -n $repository_contentstore_deleted ]] ; then
-	  echo "dir.contentstore.deleted=${repository_contentstore_deleted}" >> "${alfGlobalProps}"
+	  echo "dir.contentstore.deleted=${repository_contentstore_deleted}" >> "${alfProps}"
 	fi
 
-  echo 'img.root=/usr' >> "${alfGlobalProps}"
-  echo 'img.gslib=/usr/bin' >> "${alfGlobalProps}"
-  echo 'exiftool.dyn=/usr/bin' >> "${alfGlobalProps}"
-  echo 'exiftool.exe=${exiftool.dyn}/exiftool' >> "${alfGlobalProps}"
-  echo 'ffmpeg.dyn=/usr/bin' >> "${alfGlobalProps}"
-  echo 'ffmpeg.exe=${ffmpeg.dyn}/ffmpeg' >> "${alfGlobalProps}"
-  echo 'img.dyn=/usr/bin' >> "${alfGlobalProps}"
-  echo 'img.exe=${img.dyn}/convert' >> "${alfGlobalProps}"
-	echo "alfresco_user_store.adminpassword=${my_admin_pass_md4}" >> "${alfGlobalProps}"
-	echo "db.driver=${repository_database_driv}" >> "${alfGlobalProps}"
-	echo "db.url=${repository_database_jdbc}" >> "${alfGlobalProps}"
-	echo "db.username=${repository_database_user}" >> "${alfGlobalProps}"
-	echo "db.password=${repository_database_pass}" >> "${alfGlobalProps}"
-	echo "db.pool.max=${repository_database_pool_max}" >> "${alfGlobalProps}"
-	echo "db.pool.validate.query=${repository_database_pool_sql}" >> "${alfGlobalProps}"
-	echo "ooo.enabled=true" >> "${alfGlobalProps}"
-	echo "ooo.exe=" >> "${alfGlobalProps}"
-	echo "ooo.host=${repository_transform_host}" >> "${alfGlobalProps}"
-	echo "ooo.port=${repository_transform_port}" >> "${alfGlobalProps}"
-	echo "solr.host=${repository_search_solr4_host}" >> "${alfGlobalProps}"
-  echo "solr.port=${repository_search_solr4_port}" >> "${alfGlobalProps}"
-  echo "solr.secureComms=none" >> "${alfGlobalProps}"
-  echo "alfresco.secureComms=none" >> "${solr4WorkspaceProps}"
-  echo "alfresco.secureComms=none" >> "${solr4ArchiveProps}"
+  echo 'img.root=/usr' >> "${alfProps}"
+  echo 'img.gslib=/usr/bin' >> "${alfProps}"
+  echo 'exiftool.dyn=/usr/bin' >> "${alfProps}"
+  echo 'exiftool.exe=${exiftool.dyn}/exiftool' >> "${alfProps}"
+  echo 'ffmpeg.dyn=/usr/bin' >> "${alfProps}"
+  echo 'ffmpeg.exe=${ffmpeg.dyn}/ffmpeg' >> "${alfProps}"
+  echo 'img.dyn=/usr/bin' >> "${alfProps}"
+  echo 'img.exe=${img.dyn}/convert' >> "${alfProps}"
+	echo "alfresco_user_store.adminpassword=${my_admin_pass_md4}" >> "${alfProps}"
+	echo "db.driver=${repository_database_driv}" >> "${alfProps}"
+	echo "db.url=${repository_database_jdbc}" >> "${alfProps}"
+	echo "db.username=${repository_database_user}" >> "${alfProps}"
+	echo "db.password=${repository_database_pass}" >> "${alfProps}"
+	echo "db.pool.max=${repository_database_pool_max}" >> "${alfProps}"
+	echo "db.pool.validate.query=${repository_database_pool_sql}" >> "${alfProps}"
+	echo "ooo.enabled=true" >> "${alfProps}"
+	echo "ooo.exe=" >> "${alfProps}"
+	echo "ooo.host=${repository_transform_host}" >> "${alfProps}"
+	echo "ooo.port=${repository_transform_port}" >> "${alfProps}"
+	echo "solr.host=${repository_search_solr4_host}" >> "${alfProps}"
+  echo "solr.port=${repository_search_solr4_port}" >> "${alfProps}"
+  echo "solr.secureComms=none" >> "${alfProps}"
+  
+  echo "alfresco.secureComms=none" >> "${solr4Wor}"
+  echo "alfresco.secureComms=none" >> "${solr4Arc}"
 
 	### edu-sharing ######################################################################################################
 
@@ -385,7 +394,7 @@ install_edu_sharing() {
 		-u '/properties/entry[@key="host"]' -v "${my_host_internal}" \
 		-u '/properties/entry[@key="password"]' -v "${my_admin_pass}" \
 		-u '/properties/entry[@key="port"]' -v "${my_port_internal}" \
-		tomcat/shared/classes/homeApplication.properties.xml
+		${eduProps}
 
 	if [[ -n "${my_home_auth}" ]] ; then
 		xmlstarlet ed -L \
@@ -393,7 +402,7 @@ install_edu_sharing() {
 			-s '/properties' -t elem -n "entry" -v "${my_home_auth}" \
 			--var entry '$prev' \
 			-i '$entry' -t attr -n "key" -v "allowed_authentication_types" \
-			tomcat/shared/classes/homeApplication.properties.xml
+			${eduProps}
 
 		if [[ "${my_home_auth}" == "shibboleth" ]] ; then
 			sed -i -r 's|<!--\s*SAML||g' tomcat/webapps/edu-sharing/WEB-INF/web.xml
@@ -410,7 +419,7 @@ install_edu_sharing() {
 				-s '/config/values/logout' -t elem -n 'destroySession' -v '' \
 				-d '/config/values/logout/destroySession[position() != 1]' \
 				-u '/config/values/logout/destroySession' -v 'false' \
-				tomcat/shared/classes/config/client.config.xml
+				${eduCConf}
 		fi
 	fi
 
@@ -421,41 +430,41 @@ install_edu_sharing() {
     		-s '/properties' -t elem -n "entry" -v "${my_home_provider}" \
     		--var entry '$prev' \
     		-i '$entry' -t attr -n "key" -v "remote_provider" \
-    		tomcat/shared/classes/homeApplication.properties.xml
+    		${eduProps}
 	fi
 
 	if [[ -n "${repository_httpclient_disablesni4hosts}" ]] ; then
-		hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+		hocon -f ${eduSConf} \
 			set "repository.httpclient.disableSNI4Hosts" "${repository_httpclient_disablesni4hosts}"
 	fi
 
 	if [[ -n "${repository_httpclient_proxy_host}" ]] ; then
-		hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+		hocon -f ${eduSConf} \
 			set "repository.httpclient.proxy.host" "${repository_httpclient_proxy_host}"
 	fi
 
   if [[ -n "${repository_httpclient_proxy_nonproxyhosts}" ]]  ; then
-  	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+  	hocon -f ${eduSConf} \
   		set "repository.httpclient.proxy.nonproxyhosts" "${repository_httpclient_proxy_nonproxyhosts}"
   fi
 
   if [[ -n "${repository_httpclient_proxy_proxyhost}" ]] ; then
-  	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+  	hocon -f ${eduSConf} \
   		set "repository.httpclient.proxy.proxyhost" "${repository_httpclient_proxy_proxyhost}"
   fi
 
   if [[ -n "${repository_httpclient_proxy_proxypass}" ]] ; then
-  	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+  	hocon -f ${eduSConf} \
   		set "repository.httpclient.proxy.proxypass" "${repository_httpclient_proxy_proxypass}"
   fi
 
   if [[ -n "${repository_httpclient_proxy_proxyport}" ]] ; then
-  	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+  	hocon -f ${eduSConf} \
   		set "repository.httpclient.proxy.proxyport" "${repository_httpclient_proxy_proxyport}"
   fi
 
   if [[ -n "${repository_httpclient_proxy_proxyuser}" ]] ; then
-  	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+  	hocon -f ${eduSConf} \
   		set "repository.httpclient.proxy.proxyuser" "${repository_httpclient_proxy_proxyuser}"
   fi
 
@@ -543,9 +552,18 @@ if [[ -f "$alfresco_base_image" ]] ; then
 
 	install_edu_sharing
 
-	echo "- restore persistent data of Alfresco platform"
-	if [[ $(tar -tf  "$snapshot_name" | grep 'tomcat/shared/classes/config/persistent' | wc -l) -gt 0 ]]; then
-		tar -zxf "$snapshot_name" tomcat/shared/classes/config/persistent -C tomcat/shared/classes/config/
+	echo "- restore cluster config"
+	if [[ $(tar -tf  "$snapshot_name" | grep 'tomcat/shared/classes/config/cluster' | wc -l) -gt 0 ]]; then
+		tar -zxf "$snapshot_name" tomcat/shared/classes/config/cluster -C tomcat/shared/classes/config/
+	else
+		echo "nothing to restore"
+	fi
+
+	cp -f tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/cluster
+
+	echo "- restore node config"
+	if [[ $(tar -tf  "$snapshot_name" | grep 'tomcat/shared/classes/config/node' | wc -l) -gt 0 ]]; then
+		tar -zxf "$snapshot_name" tomcat/shared/classes/config/node -C tomcat/shared/classes/config/
 	else
 		echo "nothing to restore"
 	fi

@@ -13,6 +13,11 @@ repository_service_port="${REPOSITORY_SERVICE_PORT:-8080}"
 
 repository_service_base="http://${repository_service_host}:${repository_service_port}/edu-sharing"
 
+catSConf="tomcat/conf/server.xml"
+
+solr4Wor="solr4/workspace-SpacesStore/conf/solrcore.properties"
+solr4Arc="solr4/archive-SpacesStore/conf/solrcore.properties"
+
 ### Wait ###############################################################################################################
 
 until wait-for-it "${repository_service_host}:${repository_service_port}" -t 3; do sleep 1; done
@@ -26,7 +31,10 @@ done
 ### Tomcat #############################################################################################################
 
 export CATALINA_OUT="/dev/stdout"
+
 export CATALINA_OPTS="-Dfile.encoding=UTF-8 $CATALINA_OPTS"
+export CATALINA_OPTS="-Duser.country=DE $CATALINA_OPTS"
+export CATALINA_OPTS="-Duser.language=de $CATALINA_OPTS"
 
 xmlstarlet ed -L \
   -d '/Server/Service[@name="Catalina"]/Connector' \
@@ -39,31 +47,27 @@ xmlstarlet ed -L \
   -i '$internal' -t attr -n "proxyPort"          -v "${my_port}" \
   -i '$internal' -t attr -n "protocol"           -v "HTTP/1.1" \
   -i '$internal' -t attr -n "connectionTimeout"  -v "20000" \
-  tomcat/conf/server.xml
+  ${catSConf}
 
 ### Alfresco solr4 #####################################################################################################
 
-prop="solr4/archive-SpacesStore/conf/solrcore.properties"
+sed -i -r 's|^[#]*\s*alfresco\.host=.*|alfresco.host='"${repository_service_host}"'|' "${solr4Wor}"
+grep -q   '^[#]*\s*alfresco\.host=' "${solr4Wor}" || echo "alfresco.host=${repository_service_host}" >> "${solr4Wor}"
 
-sed -i -r 's|^[#]*\s*alfresco\.host=.*|alfresco.host='"${repository_service_host}"'|' "${prop}"
-grep -q   '^[#]*\s*alfresco\.host=' "${prop}" || echo "alfresco.host=${repository_service_host}" >> "${prop}"
+sed -i -r 's|^[#]*\s*alfresco\.port=.*|alfresco.port='"${repository_service_port}"'|' "${solr4Wor}"
+grep -q   '^[#]*\s*alfresco\.port=' "${solr4Wor}" || echo "alfresco.port=${repository_service_port}" >> "${solr4Wor}"
 
-sed -i -r 's|^[#]*\s*alfresco\.port=.*|alfresco.port='"${repository_service_port}"'|' "${prop}"
-grep -q   '^[#]*\s*alfresco\.port=' "${prop}" || echo "alfresco.port=${repository_service_port}" >> "${prop}"
+sed -i -r 's|^[#]*\s*alfresco\.secureComms=.*|alfresco.secureComms=none|' "${solr4Wor}"
+grep -q   '^[#]*\s*alfresco\.secureComms=' "${solr4Wor}" || echo "alfresco.secureComms=none" >> "${solr4Wor}"
 
-sed -i -r 's|^[#]*\s*alfresco\.secureComms=.*|alfresco.secureComms=none|' "${prop}"
-grep -q   '^[#]*\s*alfresco\.secureComms=' "${prop}" || echo "alfresco.secureComms=none" >> "${prop}"
+sed -i -r 's|^[#]*\s*alfresco\.host=.*|alfresco.host='"${repository_service_host}"'|' "${solr4Arc}"
+grep -q   '^[#]*\s*alfresco\.host=' "${solr4Arc}" || echo "alfresco.host=${repository_service_host}" >> "${solr4Arc}"
 
-prop="solr4/workspace-SpacesStore/conf/solrcore.properties"
+sed -i -r 's|^[#]*\s*alfresco\.port=.*|alfresco.port='"${repository_service_port}"'|' "${solr4Arc}"
+grep -q   '^[#]*\s*alfresco\.port=' "${solr4Arc}" || echo "alfresco.port=${repository_service_port}" >> "${solr4Arc}"
 
-sed -i -r 's|^[#]*\s*alfresco\.host=.*|alfresco.host='"${repository_service_host}"'|' "${prop}"
-grep -q   '^[#]*\s*alfresco\.host=' "${prop}" || echo "alfresco.host=${repository_service_host}" >> "${prop}"
-
-sed -i -r 's|^[#]*\s*alfresco\.port=.*|alfresco.port='"${repository_service_port}"'|' "${prop}"
-grep -q   '^[#]*\s*alfresco\.port=' "${prop}" || echo "alfresco.port=${repository_service_port}" >> "${prop}"
-
-sed -i -r 's|^[#]*\s*alfresco\.secureComms=.*|alfresco.secureComms=none|' "${prop}"
-grep -q   '^[#]*\s*alfresco\.secureComms=' "${prop}" || echo "alfresco.secureComms=none" >> "${prop}"
+sed -i -r 's|^[#]*\s*alfresco\.secureComms=.*|alfresco.secureComms=none|' "${solr4Arc}"
+grep -q   '^[#]*\s*alfresco\.secureComms=' "${solr4Arc}" || echo "alfresco.secureComms=none" >> "${solr4Arc}"
 
 ########################################################################################################################
 

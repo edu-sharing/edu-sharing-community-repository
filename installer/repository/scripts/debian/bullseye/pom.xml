@@ -54,7 +54,7 @@
                 edu_sharing-enterprise-repository-plugin-transform-deploy-installer-repository-scripts-debian-bullseye
               </includeArtifactIds>
               <excludes>META-INF/**</excludes>
-              <outputDirectory>${project.build.directory}/build</outputDirectory>
+              <outputDirectory>${project.build.directory}/build/plugins</outputDirectory>
             </configuration>
           </execution>
         </executions>
@@ -129,12 +129,12 @@
 
     <profile>
 
-      <id>plugin.cluster</id>
+      <id>repository.cluster</id>
 
       <activation>
         <activeByDefault>false</activeByDefault>
         <property>
-          <name>env.PLUGIN_CLUSTER_ENABLED</name>
+          <name>env.REPOSITORY_CLUSTER_ENABLED</name>
           <value>true</value>
         </property>
       </activation>
@@ -150,12 +150,12 @@
 
     <profile>
 
-      <id>plugin.elastic</id>
+      <id>repository.elastic</id>
 
       <activation>
         <activeByDefault>false</activeByDefault>
         <property>
-          <name>env.PLUGIN_ELASTIC_ENABLED</name>
+          <name>env.REPOSITORY_ELASTIC_ENABLED</name>
           <value>true</value>
         </property>
       </activation>
@@ -171,12 +171,12 @@
 
     <profile>
 
-      <id>plugin.transform</id>
+      <id>repository.transform</id>
 
       <activation>
         <activeByDefault>false</activeByDefault>
         <property>
-          <name>env.PLUGIN_TRANSFORM_ENABLED</name>
+          <name>env.REPOSITORY_TRANSFORM_ENABLED</name>
           <value>true</value>
         </property>
       </activation>

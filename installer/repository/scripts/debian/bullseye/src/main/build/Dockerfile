@@ -139,8 +139,6 @@ RUN set -eux \
         tomcat/conf/catalina.properties \
     && xmlstarlet ed -L \
         -i '/Server/Service[@name="Catalina"]/Connector[@port="8009"]' -t attr -n 'secretRequired' -v 'false' \
-        #-d '/Server/Service[@name="Catalina"]/Connector[@port="8080"]' \
-        #-d '/Server/Service[@name="Catalina"]/Connector[@port="8009"]' \  apache Weiterleitung für: edu-sharing, share, alfresco
         -d '/Server/Service[@name="Catalina"]/Connector[@port="8443"]' \
         tomcat/conf/server.xml \
     && xmlstarlet ed -L \
@@ -154,9 +152,7 @@ RUN set -eux \
         -s '/Context' -t elem -n "Resources" -v "" \
         --var resources '$prev' \
         -i '$resources' -t attr -n "cacheMaxSize" -v "20480" \
-        tomcat/conf/Catalina/localhost/share.xml \
-    && touch tomcat/shared/classes/alfresco-global.deployment.properties
-
+        tomcat/conf/Catalina/localhost/share.xml
 
 RUN set -eux \
     && mkdir -p alf_data/postgresql postgresql \
@@ -184,12 +180,6 @@ RUN set -eux \
         /etc/postgresql/${postgresql.version.major}/repository/pg_hba.conf
 
 RUN set -eux \
-    && rm -rf common/lib \
-    && echo 'img.root=/usr' >> tomcat/shared/classes/alfresco-global.deployment.properties \
-    && echo 'ooo.exe=' >> tomcat/shared/classes/alfresco-global.deployment.properties \
-    && echo 'ooo.host=127.0.0.1' >> tomcat/shared/classes/alfresco-global.deployment.properties
-
-RUN set -eux \
     && apt-get update -y \
     && apt-get install -y --no-install-recommends \
 	    maven=3.6.3-* \
@@ -209,9 +199,7 @@ RUN set -eux \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
 
-
 ########################################################################################################################
-
 
 RUN set -eux \
     && wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add - \
@@ -229,41 +217,24 @@ RUN set -eux \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
 
-
 ########################################################################################################################
-RUN echo "test"
+
 COPY install.sh .env.base bin/installer/
 COPY assets/entrypoint.sh bin/
 COPY assets/settings.xml /root/.m2/
 
-#RUN set -eux \
-#    && chmod +x install.sh \
-#    && chmod +x libreoffice/scripts/ctl.sh \
-#    && chmod +x postgresql/scripts/ctl.sh \
-#    && chmod +x tomcat/scripts/ctl.sh \
-#    && chmod +x bin/entrypoint.sh
-
 ########################################################################################################################
 
-COPY /plugins/docker/ bin/plugins/
-COPY /plugins/installer bin/installer/plugins
+COPY plugins/docker/ bin/plugins/
+COPY plugins/installer bin/installer/plugins
 
-
-#RUN set -eux \
-#    && chmod -R +x bin/plugins/ \
-#    && chmod -R +x ./plugins
+########################################################################################################################
 
 # THANK YOU BILL ;)
 RUN set -eux \
-    && find -type f -name "*.sh" -exec chmod +x {} \;
-
-########################################################################################################################
-
-
-
+    && find . -type f -name "*.sh" -exec chmod +x {} \;
 
 ENTRYPOINT ["bin/entrypoint.sh"]
-#CMD ["/bin/bash"]
 
 EXPOSE 80 8080
 

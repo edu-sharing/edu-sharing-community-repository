@@ -20,24 +20,24 @@
 
   <properties>
 
-    <chart.edusharing_repository_search_elastic.enabled>false</chart.edusharing_repository_search_elastic.enabled>
-    <chart.edusharing_repository_search_elastic.line1/>
-    <chart.edusharing_repository_search_elastic.line2/>
-    <chart.edusharing_repository_search_elastic.line3/>
-    <chart.edusharing_repository_search_elastic.line4/>
+    <helm.edusharing_repository_search_elastic.enabled>false</helm.edusharing_repository_search_elastic.enabled>
+    <helm.edusharing_repository_search_elastic.line1/>
+    <helm.edusharing_repository_search_elastic.line2/>
+    <helm.edusharing_repository_search_elastic.line3/>
+    <helm.edusharing_repository_search_elastic.line4/>
 
-    <chart.edusharing_repository_search_elastic_tracker.enabled>false
-    </chart.edusharing_repository_search_elastic_tracker.enabled>
-    <chart.edusharing_repository_search_elastic_tracker.line1/>
-    <chart.edusharing_repository_search_elastic_tracker.line2/>
-    <chart.edusharing_repository_search_elastic_tracker.line3/>
-    <chart.edusharing_repository_search_elastic_tracker.line4/>
+    <helm.edusharing_repository_search_elastic_tracker.enabled>false
+    </helm.edusharing_repository_search_elastic_tracker.enabled>
+    <helm.edusharing_repository_search_elastic_tracker.line1/>
+    <helm.edusharing_repository_search_elastic_tracker.line2/>
+    <helm.edusharing_repository_search_elastic_tracker.line3/>
+    <helm.edusharing_repository_search_elastic_tracker.line4/>
 
-    <chart.edusharing_repository_transform.enabled>false</chart.edusharing_repository_transform.enabled>
-    <chart.edusharing_repository_transform.line1/>
-    <chart.edusharing_repository_transform.line2/>
-    <chart.edusharing_repository_transform.line3/>
-    <chart.edusharing_repository_transform.line4/>
+    <helm.edusharing_repository_transform.enabled>false</helm.edusharing_repository_transform.enabled>
+    <helm.edusharing_repository_transform.line1/>
+    <helm.edusharing_repository_transform.line2/>
+    <helm.edusharing_repository_transform.line3/>
+    <helm.edusharing_repository_transform.line4/>
 
   </properties>
 
@@ -270,51 +270,50 @@
 
   </dependencies>
 
-
   <profiles>
 
     <profile>
 
-      <id>plugin.elastic</id>
+      <id>repository.elastic</id>
 
       <activation>
         <activeByDefault>false</activeByDefault>
         <property>
-          <name>env.PLUGIN_ELASTIC_ENABLED</name>
+          <name>env.REPOSITORY_ELASTIC_ENABLED</name>
           <value>true</value>
         </property>
       </activation>
 
       <properties>
 
-        <chart.edusharing_repository_search_elastic.enabled>true</chart.edusharing_repository_search_elastic.enabled>
-        <chart.edusharing_repository_search_elastic.line1>
+        <helm.edusharing_repository_search_elastic.enabled>true</helm.edusharing_repository_search_elastic.enabled>
+        <helm.edusharing_repository_search_elastic.line1>
           - name: edusharing_community_elasticsearch
-        </chart.edusharing_repository_search_elastic.line1>
-        <chart.edusharing_repository_search_elastic.line2>
+        </helm.edusharing_repository_search_elastic.line1>
+        <helm.edusharing_repository_search_elastic.line2>
           version: ${helm.chart.version}
-        </chart.edusharing_repository_search_elastic.line2>
-        <chart.edusharing_repository_search_elastic.line3>
+        </helm.edusharing_repository_search_elastic.line2>
+        <helm.edusharing_repository_search_elastic.line3>
           alias: edusharing_repository_search_elastic
-        </chart.edusharing_repository_search_elastic.line3>
-        <chart.edusharing_repository_search_elastic.line4>
+        </helm.edusharing_repository_search_elastic.line3>
+        <helm.edusharing_repository_search_elastic.line4>
           condition: edusharing_repository_search_elastic.enabled
-        </chart.edusharing_repository_search_elastic.line4>
+        </helm.edusharing_repository_search_elastic.line4>
 
-        <chart.edusharing_repository_search_elastic_tracker.enabled>true
-        </chart.edusharing_repository_search_elastic_tracker.enabled>
-        <chart.edusharing_repository_search_elastic_tracker.line1>
+        <helm.edusharing_repository_search_elastic_tracker.enabled>true
+        </helm.edusharing_repository_search_elastic_tracker.enabled>
+        <helm.edusharing_repository_search_elastic_tracker.line1>
           - name: edusharing_community_repository_search_elastic_tracker
-        </chart.edusharing_repository_search_elastic_tracker.line1>
-        <chart.edusharing_repository_search_elastic_tracker.line2>
+        </helm.edusharing_repository_search_elastic_tracker.line1>
+        <helm.edusharing_repository_search_elastic_tracker.line2>
           version: ${helm.chart.version}
-        </chart.edusharing_repository_search_elastic_tracker.line2>
-        <chart.edusharing_repository_search_elastic_tracker.line3>
+        </helm.edusharing_repository_search_elastic_tracker.line2>
+        <helm.edusharing_repository_search_elastic_tracker.line3>
           alias: edusharing_repository_search_elastic_tracker
-        </chart.edusharing_repository_search_elastic_tracker.line3>
-        <chart.edusharing_repository_search_elastic_tracker.line4>
+        </helm.edusharing_repository_search_elastic_tracker.line3>
+        <helm.edusharing_repository_search_elastic_tracker.line4>
           condition: edusharing_repository_search_elastic_tracker.enabled
-        </chart.edusharing_repository_search_elastic_tracker.line4>
+        </helm.edusharing_repository_search_elastic_tracker.line4>
 
       </properties>
 
@@ -340,31 +339,31 @@
 
     <profile>
 
-      <id>plugin.transform</id>
+      <id>repository.transform</id>
 
       <activation>
         <activeByDefault>false</activeByDefault>
         <property>
-          <name>env.PLUGIN_TRANSFORM_ENABLED</name>
+          <name>env.REPOSITORY_TRANSFORM_ENABLED</name>
           <value>true</value>
         </property>
       </activation>
 
       <properties>
 
-        <chart.edusharing_repository_transform.enabled>true</chart.edusharing_repository_transform.enabled>
-        <chart.edusharing_repository_transform.line1>
+        <helm.edusharing_repository_transform.enabled>true</helm.edusharing_repository_transform.enabled>
+        <helm.edusharing_repository_transform.line1>
           - name: edusharing_enterprise_repository_transform
-        </chart.edusharing_repository_transform.line1>
-        <chart.edusharing_repository_transform.line2>
+        </helm.edusharing_repository_transform.line1>
+        <helm.edusharing_repository_transform.line2>
           version: ${helm.chart.version}
-        </chart.edusharing_repository_transform.line2>
-        <chart.edusharing_repository_transform.line3>
+        </helm.edusharing_repository_transform.line2>
+        <helm.edusharing_repository_transform.line3>
           alias: edusharing_repository_transform
-        </chart.edusharing_repository_transform.line3>
-        <chart.edusharing_repository_transform.line4>
+        </helm.edusharing_repository_transform.line3>
+        <helm.edusharing_repository_transform.line4>
           condition: edusharing_repository_transform.enabled
-        </chart.edusharing_repository_transform.line4>
+        </helm.edusharing_repository_transform.line4>
 
       </properties>
 

@@ -158,7 +158,7 @@ compose_all() {
 
 compose_only_plugins() {
 	COMPOSE_LIST=
-	for plugin in plugin*/; do
+	for plugin in repository/plugin*/; do
 		[ ! -d "$plugin" ] && continue
 		COMPOSE_PLUGIN="$(compose_only "./$plugin$(basename $plugin).yml" "$@")"
 		COMPOSE_LIST="$COMPOSE_LIST $COMPOSE_PLUGIN"
@@ -170,7 +170,7 @@ compose_only_plugins() {
 compose_all_plugins() {
 
 	COMPOSE_LIST=
-	for plugin in plugin*/; do
+	for plugin in repository/plugin*/; do
 		[ ! -d "$plugin" ] && continue
 		COMPOSE_PLUGIN="$(compose_all "./$plugin$(basename $plugin).yml" "$@")"
 		COMPOSE_LIST="$COMPOSE_LIST $COMPOSE_PLUGIN"

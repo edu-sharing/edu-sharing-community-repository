@@ -7,15 +7,18 @@ data:
   CATALINA_OPTS: >-
     -XX:MinRAMPercentage={{ .Values.config.jvm.ram.minPercentage }}
     -XX:MaxRAMPercentage={{ .Values.config.jvm.ram.maxPercentage }}
-    -Dcaches.join=kubernetes
-    -Dcaches.join.kubernetes.dns={{ printf "%s-headless.%s.svc.%s" (include "edusharing_repository_service.name" .) .Release.Namespace .Values.global.cluster.domain }}
-    -Dcaches.backupCount={{ .Values.config.cluster.backupCount }}
-    -Dcaches.readBackupData={{ .Values.config.cluster.readBackupData }}
-    -Dhazelcast.graceful.shutdown.max.wait={{ .Values.terminationGracePeriod }}
     -Dcom.sun.management.jmxremote
     -Dcom.sun.management.jmxremote.authenticate=false
     -Dcom.sun.management.jmxremote.port=7199
     -Dcom.sun.management.jmxremote.ssl=false
+    {{- if .Values.config.cluster.enabled }}
+    -Dcaches.backupCount={{ .Values.config.cluster.backup.count }}
+    -Dcaches.readBackupData={{ .Values.config.cluster.backup.read }}
+    -Dhazelcast.network=kubernetes
+    -Dhazelcast.network.kubernetes.dns={{ printf "%s-headless.%s.svc.%s" (include "edusharing_repository_service.name" .) .Release.Namespace .Values.global.cluster.domain }}
+    -Dhazelcast.shutdownhook.policy=GRACEFUL
+    -Dhazelcast.graceful.shutdown.max.wait={{ .Values.terminationGracePeriod }}
+    {{- end }}
     {{- if .Values.config.metrics }}
     -javaagent:/opt/alfresco/tomcat/agent/jmx_prometheus_javaagent.jar=9090:/opt/alfresco/tomcat/agent/jmx-exporter-config.yaml
     {{- end }}
@@ -37,7 +40,6 @@ data:
   REPOSITORY_SERVICE_BIND: {{ if .Values.global.cluster.istio.enabled }}"127.0.0.1"{{ else }}"0.0.0.0"{{ end }}
   REPOSITORY_SERVICE_HOME_APPID: {{ .Values.config.home.appid | quote }}
   REPOSITORY_SERVICE_HOME_AUTH: {{ if .Values.config.saml.enabled }}"shibboleth"{{ else }}""{{ end }}
-  REPOSITORY_SERVICE_HOME_PROVIDER: {{ if .Values.config.search.elastic.enabled }}"org.edu_sharing.service.provider.ElasticSearchProvider"{{ else }}""{{ end }}
   REPOSITORY_SERVICE_HOST_EXTERNAL: {{ .Values.ingress.hosts | first | quote }}
   REPOSITORY_SERVICE_HOST_INTERNAL: {{ include "edusharing_repository_service.name" . | quote }}
   REPOSITORY_SERVICE_HTTP_CLIENT_DISABLE_SNI4HOSTS: {{ .Values.config.http.client.disablesni4host | quote }}

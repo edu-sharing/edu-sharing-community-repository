@@ -44,8 +44,6 @@ services:
       CATALINA_OPTS: >-
         -Xms${REPOSITORY_SERVICE_JAVA_XMS:-1g}
         -Xmx${REPOSITORY_SERVICE_JAVA_XMX:-1g}
-        -Dcaches.join=tcpip
-        -Dcaches.join.tcpip.members=repository-service_1
         -Dcom.sun.management.jmxremote
         -Dcom.sun.management.jmxremote.authenticate=false
         -Dcom.sun.management.jmxremote.port=7199

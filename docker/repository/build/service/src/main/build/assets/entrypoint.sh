@@ -60,6 +60,16 @@ repository_search_solr4_port="${REPOSITORY_SEARCH_SOLR4_PORT:-8080}"
 repository_transform_host="${REPOSITORY_TRANSFORM_HOST:-}"
 repository_transform_port="${REPOSITORY_TRANSFORM_PORT:-}"
 
+catSConf="tomcat/conf/server.xml"
+catCConf="tomcat/conf/Catalina/localhost/edu-sharing.xml"
+catWConf="tomcat/webapps/edu-sharing/WEB-INF/web.xml"
+
+eduCConf="tomcat/shared/classes/config/defaults/client.config.xml"
+
+alfProps="tomcat/shared/classes/config/cluster/alfresco-global.properties"
+eduSConf="tomcat/shared/classes/config/cluster/edu-sharing.deployment.conf"
+homeProp="tomcat/shared/classes/config/cluster/applications/homeApplication.properties.xml"
+
 ### Wait ###############################################################################################################
 
 [[ -n "${repository_cache_host}" && -n "${repository_cache_port}" ]] && {
@@ -92,15 +102,12 @@ done
 export CATALINA_OUT="/dev/stdout"
 
 export CATALINA_OPTS="-Dfile.encoding=UTF-8 $CATALINA_OPTS"
+export CATALINA_OPTS="-Duser.country=DE $CATALINA_OPTS"
+export CATALINA_OPTS="-Duser.language=de $CATALINA_OPTS"
 
 export CATALINA_OPTS="-Dorg.xml.sax.parser=com.sun.org.apache.xerces.internal.parsers.SAXParser $CATALINA_OPTS"
 export CATALINA_OPTS="-Djavax.xml.parsers.DocumentBuilderFactory=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl $CATALINA_OPTS"
 export CATALINA_OPTS="-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl $CATALINA_OPTS"
-
-export CATALINA_OPTS="-Dcaches.backupCount=1 $CATALINA_OPTS"
-export CATALINA_OPTS="-Dcaches.readBackupData=false $CATALINA_OPTS"
-
-export CATALINA_OPTS="-Dhazelcast.shutdownhook.policy=GRACEFUL $CATALINA_OPTS"
 
 xmlstarlet ed -L \
 	-d '/Server/Service[@name="Catalina"]/Connector' \
@@ -124,117 +131,7 @@ xmlstarlet ed -L \
 	-i '$external' -t attr -n "protocol" -v "org.apache.coyote.http11.Http11NioProtocol" \
 	-i '$external' -t attr -n "connectionTimeout" -v "${my_wait_external}" \
 	-i '$external' -t attr -n "maxThreads" -v "${my_pool_external}" \
-	tomcat/conf/server.xml
-
-xmlstarlet ed -L \
-  -N x="http://java.sun.com/xml/ns/javaee" \
-	-u '/x:web-app/x:session-config/x:session-timeout' -v "${my_session_timeout}" \
-	tomcat/webapps/edu-sharing/WEB-INF/web.xml
-
-### Tomcat shared ######################################################################################################
-
-tar -x -v --skip-old-files --no-same-permissions -f tomcat/shared.tar
-
-### Alfresco platform ##################################################################################################
-
-global="tomcat/shared/classes/alfresco-global.deployment.properties"
-
-touch ${global}
-
-sed -i -r 's|^[#]*\s*dir\.root=.*|dir.root='"$ALF_HOME/alf_data"'|' "${global}"
-grep -q '^[#]*\s*dir\.root=' "${global}" || echo "dir.root=$ALF_HOME/alf_data" >>"${global}"
-
-sed -i -r 's|^[#]*\s*dir\.keystore=.*|dir.keystore='"$ALF_HOME/keystore"'|' "${global}"
-grep -q '^[#]*\s*dir\.keystore=' "${global}" || echo "dir.keystore=$ALF_HOME/keystore" >>"${global}"
-
-sed -i -r 's|^[#]*\s*img\.root=.*|img.root=/usr|' "${global}"
-grep -q '^[#]*\s*img\.root=' "${global}" || echo 'img.root=/usr' >>"${global}"
-
-sed -i -r 's|^[#]*\s*img\.gslib=.*|img.gslib=/usr/bin|' "${global}"
-grep -q '^[#]*\s*img\.gslib=' "${global}" || echo 'img.gslib=/usr/bin' >>"${global}"
-
-sed -i -r 's|^[#]*\s*exiftool\.dyn=.*|exiftool.dyn=/usr/bin|' "${global}"
-grep -q '^[#]*\s*exiftool\.dyn=' "${global}" || echo 'exiftool.dyn=/usr/bin' >>"${global}"
-
-sed -i -r 's|^[#]*\s*exiftool\.exe=.*|exiftool.exe=${exiftool.dyn}/exiftool|' "${global}"
-grep -q '^[#]*\s*exiftool\.exe=' "${global}" || echo 'exiftool.exe=${exiftool.dyn}/exiftool' >>"${global}"
-
-sed -i -r 's|^[#]*\s*ffmpeg\.dyn=.*|ffmpeg.dyn=/usr/bin|' "${global}"
-grep -q '^[#]*\s*ffmpeg\.dyn=' "${global}" || echo 'ffmpeg.dyn=/usr/bin' >>"${global}"
-
-sed -i -r 's|^[#]*\s*ffmpeg\.exe=.*|ffmpeg.exe=${ffmpeg.dyn}/ffmpeg|' "${global}"
-grep -q '^[#]*\s*ffmpeg\.exe=' "${global}" || echo 'ffmpeg.exe=${ffmpeg.dyn}/ffmpeg' >>"${global}"
-
-sed -i -r 's|^[#]*\s*img\.dyn=.*|img.dyn=/usr/bin|' "${global}"
-grep -q '^[#]*\s*img\.dyn=' "${global}" || echo 'img.dyn=/usr/bin' >>"${global}"
-
-sed -i -r 's|^[#]*\s*img\.exe=.*|img.exe=${img.dyn}/convert|' "${global}"
-grep -q '^[#]*\s*img\.exe=' "${global}" || echo 'img.exe=${img.dyn}/convert' >>"${global}"
-
-sed -i -r 's|^[#]*\s*alfresco_user_store\.adminpassword=.*|alfresco_user_store.adminpassword='"${my_admin_pass_md4}"'|' "${global}"
-grep -q '^[#]*\s*alfresco_user_store\.adminpassword=' "${global}" || echo "alfresco_user_store.adminpassword=${my_admin_pass_md4}" >>"${global}"
-
-sed -i -r 's|^[#]*\s*db\.driver=.*|db.driver='"${repository_database_driv}"'|' "${global}"
-grep -q '^[#]*\s*db\.driver=' "${global}" || echo "db.driver=${repository_database_driv}" >>"${global}"
-
-sed -i -r 's|^[#]*\s*db\.url=.*|db.url='"${repository_database_jdbc}"'|' "${global}"
-grep -q '^[#]*\s*db\.url=' "${global}" || echo "db.url=${repository_database_jdbc}" >>"${global}"
-
-sed -i -r 's|^[#]*\s*db\.username=.*|db.username='"${repository_database_user}"'|' "${global}"
-grep -q '^[#]*\s*db\.username=' "${global}" || echo "db.username=${repository_database_user}" >>"${global}"
-
-sed -i -r 's|^[#]*\s*db\.password=.*|db.password='"${repository_database_pass}"'|' "${global}"
-grep -q '^[#]*\s*db\.password=' "${global}" || echo "db.password=${repository_database_pass}" >>"${global}"
-
-sed -i -r 's|^[#]*\s*db\.pool\.max=.*|db.pool.max='"${repository_database_pool_max}"'|' "${global}"
-grep -q '^[#]*\s*db\.pool\.max=' "${global}" || echo "db.pool.max=${repository_database_pool_max}" >>"${global}"
-
-sed -i -r 's|^[#]*\s*db\.pool\.validate\.query=.*|db.pool.validate.query='"${repository_database_pool_sql}"'|' "${global}"
-grep -q '^[#]*\s*db\.pool\.validate\.query=' "${global}" || echo "db.pool.validate.query=${repository_database_pool_sql}" >>"${global}"
-
-sed -i -r 's|^[#]*\s*alfresco\.protocol=.*|alfresco.protocol='"${my_prot_external}"'|' "${global}"
-grep -q '^[#]*\s*alfresco\.protocol=' "${global}" || echo "alfresco.protocol=${my_prot_external}" >>"${global}"
-
-sed -i -r 's|^[#]*\s*alfresco\.host=.*|alfresco.host='"${my_host_external}"'|' "${global}"
-grep -q '^[#]*\s*alfresco\.host=' "${global}" || echo "alfresco.host=${my_host_external}" >>"${global}"
-
-sed -i -r 's|^[#]*\s*alfresco\.port=.*|alfresco.port='"${my_port_external}"'|' "${global}"
-grep -q '^[#]*\s*alfresco\.port=' "${global}" || echo "alfresco.port=${my_port_external}" >>"${global}"
-
-sed -i -r 's|^[#]*\s*ooo\.enabled=.*|ooo.enabled=true|' "${global}"
-grep -q '^[#]*\s*ooo\.enabled=' "${global}" || echo "ooo.enabled=true" >>"${global}"
-
-sed -i -r 's|^[#]*\s*ooo\.exe=.*|ooo.exe=|' "${global}"
-grep -q '^[#]*\s*ooo\.exe=' "${global}" || echo "ooo.exe=" >>"${global}"
-
-sed -i -r 's|^[#]*\s*ooo\.host=.*|ooo.host='"${repository_transform_host}"'|' "${global}"
-grep -q '^[#]*\s*ooo\.host=' "${global}" || echo "ooo.host=${repository_transform_host}" >>"${global}"
-
-sed -i -r 's|^[#]*\s*ooo\.port=.*|ooo.port='"${repository_transform_port}"'|' "${global}"
-grep -q '^[#]*\s*ooo\.port=' "${global}" || echo "ooo.port=${repository_transform_port}" >>"${global}"
-
-sed -i -r 's|^[#]*\s*share\.protocol=.*|share.protocol='"${my_prot_external}"'|' "${global}"
-grep -q '^[#]*\s*share\.protocol=' "${global}" || echo "share.protocol=${my_prot_external}" >>"${global}"
-
-sed -i -r 's|^[#]*\s*share\.host=.*|share.host='"${my_host_external}"'|' "${global}"
-grep -q '^[#]*\s*share\.host=' "${global}" || echo "share.host=${my_host_external}" >>"${global}"
-
-sed -i -r 's|^[#]*\s*share\.port=.*|share.port='"${my_port_external}"'|' "${global}"
-grep -q '^[#]*\s*share\.port=' "${global}" || echo "share.port=${my_port_external}" >>"${global}"
-
-sed -i -r 's|^[#]*\s*solr\.host=.*|solr.host='"${repository_search_solr4_host}"'|' "${global}"
-grep -q '^[#]*\s*solr\.host=' "${global}" || echo "solr.host=${repository_search_solr4_host}" >>"${global}"
-
-sed -i -r 's|^[#]*\s*solr\.port=.*|solr.port='"${repository_search_solr4_port}"'|' "${global}"
-grep -q '^[#]*\s*solr\.port=' "${global}" || echo "solr.port=${repository_search_solr4_port}" >>"${global}"
-
-sed -i -r 's|^[#]*\s*solr\.secureComms=.*|solr.secureComms=none|' "${global}"
-grep -q '^[#]*\s*solr\.secureComms=' "${global}" || echo "solr.secureComms=none" >>"${global}"
-
-sed -i -r 's|^[#]*\s*index\.subsystem\.name=.*|index.subsystem.name=solr4|' "${global}"
-grep -q '^[#]*\s*index\.subsystem\.name=' "${global}" || echo "index.subsystem.name=solr4" >>"${global}"
-
-### edu-sharing ########################################################################################################
+	${catSConf}
 
 [[ -n "${repository_cache_host}" && -n "${repository_cache_port}" ]] && {
 	xmlstarlet ed -L \
@@ -247,8 +144,132 @@ grep -q '^[#]*\s*index\.subsystem\.name=' "${global}" || echo "index.subsystem.n
 		-i '$redis' -t attr -n "updateMode" -v "AFTER_REQUEST" \
 		-i '$redis' -t attr -n "broadcastSessionEvents" -v "true" \
 		-i '$redis' -t attr -n "broadcastSessionUpdates" -v "true" \
-		tomcat/conf/Catalina/localhost/edu-sharing.xml
+		${catCConf}
 }
+
+xmlstarlet ed -L \
+  -N x="http://java.sun.com/xml/ns/javaee" \
+	-u '/x:web-app/x:session-config/x:session-timeout' -v "${my_session_timeout}" \
+	${catWConf}
+
+### config #############################################################################################################
+
+configs=(defaults cluster node)
+
+for config in "${configs[@]}"; do
+	[[ ! -d tomcat/shared/classes/config/"$config" ]] && {
+		mkdir -p tomcat/shared/classes/config/"$config"
+		for jar in tomcat/shared/lib/"$config"/*.jar; do
+			unzip "$jar" -d tomcat/shared/classes/config/"$config" -x META-INF/*
+			rm "$jar"
+		done
+	}
+done
+
+cp -f tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/cluster
+
+### Alfresco platform ##################################################################################################
+
+sed -i -r 's|^[#]*\s*dir\.root=.*|dir.root='"$ALF_HOME/alf_data"'|' "${alfProps}"
+grep -q '^[#]*\s*dir\.root=' "${alfProps}" || echo "dir.root=$ALF_HOME/alf_data" >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*dir\.keystore=.*|dir.keystore='"$ALF_HOME/keystore"'|' "${alfProps}"
+grep -q '^[#]*\s*dir\.keystore=' "${alfProps}" || echo "dir.keystore=$ALF_HOME/keystore" >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*img\.root=.*|img.root=/usr|' "${alfProps}"
+grep -q '^[#]*\s*img\.root=' "${alfProps}" || echo 'img.root=/usr' >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*img\.gslib=.*|img.gslib=/usr/bin|' "${alfProps}"
+grep -q '^[#]*\s*img\.gslib=' "${alfProps}" || echo 'img.gslib=/usr/bin' >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*exiftool\.dyn=.*|exiftool.dyn=/usr/bin|' "${alfProps}"
+grep -q '^[#]*\s*exiftool\.dyn=' "${alfProps}" || echo 'exiftool.dyn=/usr/bin' >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*exiftool\.exe=.*|exiftool.exe=${exiftool.dyn}/exiftool|' "${alfProps}"
+grep -q '^[#]*\s*exiftool\.exe=' "${alfProps}" || echo 'exiftool.exe=${exiftool.dyn}/exiftool' >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*ffmpeg\.dyn=.*|ffmpeg.dyn=/usr/bin|' "${alfProps}"
+grep -q '^[#]*\s*ffmpeg\.dyn=' "${alfProps}" || echo 'ffmpeg.dyn=/usr/bin' >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*ffmpeg\.exe=.*|ffmpeg.exe=${ffmpeg.dyn}/ffmpeg|' "${alfProps}"
+grep -q '^[#]*\s*ffmpeg\.exe=' "${alfProps}" || echo 'ffmpeg.exe=${ffmpeg.dyn}/ffmpeg' >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*img\.dyn=.*|img.dyn=/usr/bin|' "${alfProps}"
+grep -q '^[#]*\s*img\.dyn=' "${alfProps}" || echo 'img.dyn=/usr/bin' >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*img\.exe=.*|img.exe=${img.dyn}/convert|' "${alfProps}"
+grep -q '^[#]*\s*img\.exe=' "${alfProps}" || echo 'img.exe=${img.dyn}/convert' >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*alfresco_user_store\.adminpassword=.*|alfresco_user_store.adminpassword='"${my_admin_pass_md4}"'|' "${alfProps}"
+grep -q '^[#]*\s*alfresco_user_store\.adminpassword=' "${alfProps}" || echo "alfresco_user_store.adminpassword=${my_admin_pass_md4}" >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*db\.driver=.*|db.driver='"${repository_database_driv}"'|' "${alfProps}"
+grep -q '^[#]*\s*db\.driver=' "${alfProps}" || echo "db.driver=${repository_database_driv}" >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*db\.url=.*|db.url='"${repository_database_jdbc}"'|' "${alfProps}"
+grep -q '^[#]*\s*db\.url=' "${alfProps}" || echo "db.url=${repository_database_jdbc}" >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*db\.username=.*|db.username='"${repository_database_user}"'|' "${alfProps}"
+grep -q '^[#]*\s*db\.username=' "${alfProps}" || echo "db.username=${repository_database_user}" >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*db\.password=.*|db.password='"${repository_database_pass}"'|' "${alfProps}"
+grep -q '^[#]*\s*db\.password=' "${alfProps}" || echo "db.password=${repository_database_pass}" >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*db\.pool\.max=.*|db.pool.max='"${repository_database_pool_max}"'|' "${alfProps}"
+grep -q '^[#]*\s*db\.pool\.max=' "${alfProps}" || echo "db.pool.max=${repository_database_pool_max}" >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*db\.pool\.validate\.query=.*|db.pool.validate.query='"${repository_database_pool_sql}"'|' "${alfProps}"
+grep -q '^[#]*\s*db\.pool\.validate\.query=' "${alfProps}" || echo "db.pool.validate.query=${repository_database_pool_sql}" >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*alfresco\.protocol=.*|alfresco.protocol='"${my_prot_external}"'|' "${alfProps}"
+grep -q '^[#]*\s*alfresco\.protocol=' "${alfProps}" || echo "alfresco.protocol=${my_prot_external}" >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*alfresco\.host=.*|alfresco.host='"${my_host_external}"'|' "${alfProps}"
+grep -q '^[#]*\s*alfresco\.host=' "${alfProps}" || echo "alfresco.host=${my_host_external}" >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*alfresco\.port=.*|alfresco.port='"${my_port_external}"'|' "${alfProps}"
+grep -q '^[#]*\s*alfresco\.port=' "${alfProps}" || echo "alfresco.port=${my_port_external}" >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*alfresco-pdf-renderer\.root=.*|alfresco-pdf-renderer.root='"$ALF_HOME/common/alfresco-pdf-renderer"'|' "${alfProps}"
+grep -q '^[#]*\s*alfresco-pdf-renderer\.root=' "${alfProps}" || echo "alfresco-pdf-renderer.root=$ALF_HOME/common/alfresco-pdf-renderer" >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*alfresco-pdf-renderer\.exe=.*|alfresco-pdf-renderer.exe=${alfresco-pdf-renderer.root}/alfresco-pdf-renderer|' "${alfProps}"
+grep -q '^[#]*\s*alfresco-pdf-renderer\.exe=' "${alfProps}" || echo 'alfresco-pdf-renderer.exe=${alfresco-pdf-renderer.root}/alfresco-pdf-renderer' >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*ooo\.enabled=.*|ooo.enabled=true|' "${alfProps}"
+grep -q '^[#]*\s*ooo\.enabled=' "${alfProps}" || echo "ooo.enabled=true" >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*ooo\.exe=.*|ooo.exe=|' "${alfProps}"
+grep -q '^[#]*\s*ooo\.exe=' "${alfProps}" || echo "ooo.exe=" >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*ooo\.host=.*|ooo.host='"${repository_transform_host}"'|' "${alfProps}"
+grep -q '^[#]*\s*ooo\.host=' "${alfProps}" || echo "ooo.host=${repository_transform_host}" >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*ooo\.port=.*|ooo.port='"${repository_transform_port}"'|' "${alfProps}"
+grep -q '^[#]*\s*ooo\.port=' "${alfProps}" || echo "ooo.port=${repository_transform_port}" >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*share\.protocol=.*|share.protocol='"${my_prot_external}"'|' "${alfProps}"
+grep -q '^[#]*\s*share\.protocol=' "${alfProps}" || echo "share.protocol=${my_prot_external}" >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*share\.host=.*|share.host='"${my_host_external}"'|' "${alfProps}"
+grep -q '^[#]*\s*share\.host=' "${alfProps}" || echo "share.host=${my_host_external}" >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*share\.port=.*|share.port='"${my_port_external}"'|' "${alfProps}"
+grep -q '^[#]*\s*share\.port=' "${alfProps}" || echo "share.port=${my_port_external}" >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*solr\.host=.*|solr.host='"${repository_search_solr4_host}"'|' "${alfProps}"
+grep -q '^[#]*\s*solr\.host=' "${alfProps}" || echo "solr.host=${repository_search_solr4_host}" >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*solr\.port=.*|solr.port='"${repository_search_solr4_port}"'|' "${alfProps}"
+grep -q '^[#]*\s*solr\.port=' "${alfProps}" || echo "solr.port=${repository_search_solr4_port}" >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*solr\.secureComms=.*|solr.secureComms=none|' "${alfProps}"
+grep -q '^[#]*\s*solr\.secureComms=' "${alfProps}" || echo "solr.secureComms=none" >>"${alfProps}"
+
+sed -i -r 's|^[#]*\s*index\.subsystem\.name=.*|index.subsystem.name=solr4|' "${alfProps}"
+grep -q '^[#]*\s*index\.subsystem\.name=' "${alfProps}" || echo "index.subsystem.name=solr4" >>"${alfProps}"
+
+### edu-sharing ########################################################################################################
 
 xmlstarlet ed -L \
 	-u '/properties/entry[@key="appid"]' -v "${my_home_appid}" \
@@ -259,7 +280,7 @@ xmlstarlet ed -L \
 	-u '/properties/entry[@key="host"]' -v "${my_host_internal}" \
 	-u '/properties/entry[@key="password"]' -v "${my_admin_pass}" \
 	-u '/properties/entry[@key="port"]' -v "${my_port_internal}" \
-	tomcat/shared/classes/homeApplication.properties.xml
+	${homeProp}
 
 [[ -n "${my_guest_user}" ]] && {
 	xmlstarlet ed -L \
@@ -267,7 +288,7 @@ xmlstarlet ed -L \
 		-s '/properties' -t elem -n "entry" -v "${my_guest_user}" \
 		--var entry '$prev' \
 		-i '$entry' -t attr -n "key" -v "guest_username" \
-		tomcat/shared/classes/homeApplication.properties.xml
+		${homeProp}
 }
 
 [[ -n "${my_guest_pass}" ]] && {
@@ -276,7 +297,7 @@ xmlstarlet ed -L \
 		-s '/properties' -t elem -n "entry" -v "${my_guest_pass}" \
 		--var entry '$prev' \
 		-i '$entry' -t attr -n "key" -v "guest_password" \
-		tomcat/shared/classes/homeApplication.properties.xml
+		${homeProp}
 }
 
 [[ -n "${my_home_auth}" ]] && {
@@ -285,7 +306,7 @@ xmlstarlet ed -L \
 		-s '/properties' -t elem -n "entry" -v "${my_home_auth}" \
 		--var entry '$prev' \
 		-i '$entry' -t attr -n "key" -v "allowed_authentication_types" \
-		tomcat/shared/classes/homeApplication.properties.xml
+		${homeProp}
 
 	[[ "${my_home_auth}" == "shibboleth" ]] && {
 		sed -i -r 's|<!--\s*SAML||g' tomcat/webapps/edu-sharing/WEB-INF/web.xml
@@ -302,7 +323,7 @@ xmlstarlet ed -L \
 			-s '/config/values/logout' -t elem -n 'destroySession' -v '' \
 			-d '/config/values/logout/destroySession[position() != 1]' \
 			-u '/config/values/logout/destroySession' -v 'false' \
-			tomcat/shared/classes/config/client.config.xml
+			${eduCConf}
 	}
 }
 
@@ -312,60 +333,60 @@ xmlstarlet ed -L \
 		-s '/properties' -t elem -n "entry" -v "${my_home_provider}" \
 		--var entry '$prev' \
 		-i '$entry' -t attr -n "key" -v "remote_provider" \
-		tomcat/shared/classes/homeApplication.properties.xml
+		${homeProp}
 }
 
 [[ -n "${repository_httpclient_disablesni4hosts}" ]] && {
-	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+	hocon -f ${eduSConf} \
 		set "repository.httpclient.disableSNI4Hosts" "${repository_httpclient_disablesni4hosts}"
 }
 
 [[ -n "${repository_httpclient_proxy_host}" ]] && {
-	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+	hocon -f ${eduSConf} \
 		set "repository.httpclient.proxy.host" "${repository_httpclient_proxy_host}"
 }
 
 [[ -n "${repository_httpclient_proxy_nonproxyhosts}" ]] && {
 	export CATALINA_OPTS="-Dhttp.nonProxyHosts=${repository_httpclient_proxy_nonproxyhosts} $CATALINA_OPTS"
 	export CATALINA_OPTS="-Dhttps.nonProxyHosts=${repository_httpclient_proxy_nonproxyhosts} $CATALINA_OPTS"
-	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+	hocon -f ${eduSConf} \
 		set "repository.httpclient.proxy.nonproxyhosts" "${repository_httpclient_proxy_nonproxyhosts}"
 }
 
 [[ -n "${repository_httpclient_proxy_proxyhost}" ]] && {
 	export CATALINA_OPTS="-Dhttp.proxyHost=${repository_httpclient_proxy_proxyhost} $CATALINA_OPTS"
 	export CATALINA_OPTS="-Dhttps.proxyHost=${repository_httpclient_proxy_proxyhost} $CATALINA_OPTS"
-	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+	hocon -f ${eduSConf} \
 		set "repository.httpclient.proxy.proxyhost" "${repository_httpclient_proxy_proxyhost}"
 }
 
 [[ -n "${repository_httpclient_proxy_proxypass}" ]] && {
 	export CATALINA_OPTS="-Dhttp.proxyPass=${repository_httpclient_proxy_proxypass} $CATALINA_OPTS"
 	export CATALINA_OPTS="-Dhttps.proxyPass=${repository_httpclient_proxy_proxypass} $CATALINA_OPTS"
-	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+	hocon -f ${eduSConf} \
 		set "repository.httpclient.proxy.proxypass" "${repository_httpclient_proxy_proxypass}"
 }
 
 [[ -n "${repository_httpclient_proxy_proxyport}" ]] && {
 	export CATALINA_OPTS="-Dhttp.proxyPort=${repository_httpclient_proxy_proxyport} $CATALINA_OPTS"
 	export CATALINA_OPTS="-Dhttps.proxyPort=${repository_httpclient_proxy_proxyport} $CATALINA_OPTS"
-	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+	hocon -f ${eduSConf} \
 		set "repository.httpclient.proxy.proxyport" "${repository_httpclient_proxy_proxyport}"
 }
 
 [[ -n "${repository_httpclient_proxy_proxyuser}" ]] && {
 	export CATALINA_OPTS="-Dhttp.proxyUser=${repository_httpclient_proxy_proxyuser} $CATALINA_OPTS"
 	export CATALINA_OPTS="-Dhttps.proxyUser=${repository_httpclient_proxy_proxyuser} $CATALINA_OPTS"
-	hocon -f tomcat/shared/classes/config/edu-sharing.deployment.conf \
+	hocon -f ${eduSConf} \
 		set "repository.httpclient.proxy.proxyuser" "${repository_httpclient_proxy_proxyuser}"
 }
 
 ########################################################################################################################
 
 # PLUGIN
-for plugin in bin/plugins/plugin-*/entrypoint.sh; do
-	 [[ -f $plugin ]] && {
-	 		source $plugin || exit 1
+for entrypoint in bin/plugins/plugin-*/entrypoint.sh; do
+	 [[ -f $entrypoint ]] && {
+	 		source "$entrypoint" || exit 1
 	 }
 done
 

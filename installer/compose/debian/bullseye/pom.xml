@@ -34,45 +34,19 @@
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
-            <id>plugin-cluster</id>
+            <id>plugins</id>
             <goals>
               <goal>unpack-dependencies</goal>
             </goals>
             <phase>compile</phase>
             <configuration>
               <includeArtifactIds>
-                edu_sharing-enterprise-repository-plugin-cluster-deploy-installer-compose-debian-bullseye
-              </includeArtifactIds>
-              <excludes>META-INF/**</excludes>
-              <outputDirectory>${project.build.directory}/compose/plugin-cluster/</outputDirectory>
-            </configuration>
-          </execution>
-          <execution>
-            <id>plugin-elastic</id>
-            <goals>
-              <goal>unpack-dependencies</goal>
-            </goals>
-            <phase>compile</phase>
-            <configuration>
-              <includeArtifactIds>
-                edu_sharing-community-repository-plugin-elastic-deploy-installer-compose-debian-bullseye
-              </includeArtifactIds>
-              <excludes>META-INF/**</excludes>
-              <outputDirectory>${project.build.directory}/compose/plugin-elastic/</outputDirectory>
-            </configuration>
-          </execution>
-          <execution>
-            <id>plugin-transform</id>
-            <goals>
-              <goal>unpack-dependencies</goal>
-            </goals>
-            <phase>compile</phase>
-            <configuration>
-              <includeArtifactIds>
+                edu_sharing-community-repository-plugin-elastic-deploy-installer-compose-debian-bullseye,
+                edu_sharing-enterprise-repository-plugin-cluster-deploy-installer-compose-debian-bullseye,
                 edu_sharing-enterprise-repository-plugin-transform-deploy-installer-compose-debian-bullseye
               </includeArtifactIds>
               <excludes>META-INF/**</excludes>
-              <outputDirectory>${project.build.directory}/compose/plugin-transform/</outputDirectory>
+              <outputDirectory>${project.build.directory}/compose/repository</outputDirectory>
             </configuration>
           </execution>
         </executions>
@@ -115,12 +89,12 @@
 
     <profile>
 
-      <id>plugin.cluster</id>
+      <id>repository.cluster</id>
 
       <activation>
         <activeByDefault>false</activeByDefault>
         <property>
-          <name>env.PLUGIN_CLUSTER_ENABLED</name>
+          <name>env.REPOSITORY_CLUSTER_ENABLED</name>
           <value>true</value>
         </property>
       </activation>
@@ -137,12 +111,12 @@
 
     <profile>
 
-      <id>plugin.elastic</id>
+      <id>repository.elastic</id>
 
       <activation>
         <activeByDefault>false</activeByDefault>
         <property>
-          <name>env.PLUGIN_ELASTIC_ENABLED</name>
+          <name>env.REPOSITORY_ELASTIC_ENABLED</name>
           <value>true</value>
         </property>
       </activation>
@@ -159,12 +133,12 @@
 
     <profile>
 
-      <id>plugin.transform</id>
+      <id>repository.transform</id>
 
       <activation>
         <activeByDefault>false</activeByDefault>
         <property>
-          <name>env.PLUGIN_TRANSFORM_ENABLED</name>
+          <name>env.REPOSITORY_TRANSFORM_ENABLED</name>
           <value>true</value>
         </property>
       </activation>

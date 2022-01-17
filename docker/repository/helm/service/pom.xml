@@ -18,6 +18,12 @@
 
   <name>edu_sharing-community-deploy-docker-repository-helm-service</name>
 
+  <properties>
+
+    <helm.config.cluster.enabled>false</helm.config.cluster.enabled>
+
+  </properties>
+
   <build>
 
     <plugins>
@@ -94,5 +100,29 @@
     </plugins>
 
   </build>
+
+  <profiles>
+
+    <profile>
+
+      <id>repository.cluster</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.REPOSITORY_CLUSTER_ENABLED</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <properties>
+
+        <helm.config.cluster.enabled>true</helm.config.cluster.enabled>
+
+      </properties>
+
+    </profile>
+
+  </profiles>
 
 </project>

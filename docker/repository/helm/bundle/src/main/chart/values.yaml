@@ -56,7 +56,7 @@ edusharing_repository_rediscluster:
 
 edusharing_repository_search_elastic:
 
-  enabled: ${chart.edusharing_repository_search_elastic.enabled}
+  enabled: ${helm.edusharing_repository_search_elastic.enabled}
 
   nameOverride: &searchElasticNameOverride edusharing-repository-search-elastic
 
@@ -88,7 +88,7 @@ edusharing_repository_search_solr4:
 
 edusharing_repository_transform:
 
-  enabled: ${chart.edusharing_repository_transform.enabled}
+  enabled: ${helm.edusharing_repository_transform.enabled}
 
   nameOverride: &transformNameOverride edusharing-repository-transform
 
@@ -125,7 +125,7 @@ edusharing_repository_service:
     search:
 
       elastic:
-        enabled: ${chart.edusharing_repository_search_elastic_tracker.enabled}
+        enabled: ${helm.edusharing_repository_search_elastic.enabled}
         host: *searchElasticNameOverride
         port: *searchElasticServicePortApi
 
@@ -136,7 +136,7 @@ edusharing_repository_service:
     transform:
 
       pool:
-        enabled: ${chart.edusharing_repository_transform.enabled}
+        enabled: ${helm.edusharing_repository_transform.enabled}
         host: *transformNameOverride
         port: *transformServicePortApi
 
@@ -144,7 +144,7 @@ edusharing_repository_service:
 
 edusharing_repository_search_elastic_tracker:
 
-  enabled: ${chart.edusharing_repository_search_elastic_tracker.enabled}
+  enabled: ${helm.edusharing_repository_search_elastic_tracker.enabled}
 
   config:
 

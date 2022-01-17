@@ -39,7 +39,6 @@
                 alfresco-pdf-renderer,
                 alfresco-platform-community-distributionzip,
                 edu_sharing-community-repository-backend-tomcat,
-                edu_sharing-community-repository-config,
                 edu_sharing-community-repository-webapp,
                 jmx_prometheus_javaagent,
                 postgresql,
@@ -47,6 +46,53 @@
                 redisson-tomcat-8
               </includeArtifactIds>
               <outputDirectory>${project.build.directory}/build/artifacts</outputDirectory>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>config-defaults</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-repository-config-defaults,
+                edu_sharing-community-repository-plugin-elastic-config-defaults,
+                edu_sharing-community-repository-plugin-mongo-config-defaults,
+                edu_sharing-enterprise-repository-plugin-cluster-config-defaults,
+                edu_sharing-enterprise-repository-plugin-remote-config-defaults,
+                edu_sharing-enterprise-repository-plugin-transform-config-defaults
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/build/config/defaults</outputDirectory>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>config-cluster</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-repository-config-cluster
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/build/config/cluster</outputDirectory>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>config-node</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-repository-config-node
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/build/config/node</outputDirectory>
             </configuration>
           </execution>
 
@@ -101,21 +147,6 @@
           </execution>
 
           <execution>
-            <id>plugin-config</id>
-            <goals>
-              <goal>unpack-dependencies</goal>
-            </goals>
-            <phase>package</phase>
-            <configuration>
-              <includeArtifactIds>
-                edu_sharing-community-repository-plugin-mongo-config
-              </includeArtifactIds>
-              <excludes>META-INF/**</excludes>
-              <outputDirectory>${project.build.directory}/build/plugins/configuration</outputDirectory>
-            </configuration>
-          </execution>
-
-          <execution>
             <id>plugin-docker</id>
             <goals>
               <goal>unpack-dependencies</goal>
@@ -125,10 +156,11 @@
               <includeArtifactIds>
                 edu_sharing-community-repository-plugin-elastic-deploy-docker-build-service,
                 edu_sharing-community-repository-plugin-mongo-deploy-docker-build-service,
+                edu_sharing-enterprise-repository-plugin-cluster-deploy-docker-build-service,
                 edu_sharing-enterprise-repository-plugin-transform-deploy-docker-build-service
               </includeArtifactIds>
               <excludes>META-INF/**</excludes>
-              <outputDirectory>${project.build.directory}/build/plugins/docker</outputDirectory>
+              <outputDirectory>${project.build.directory}/build/assets/plugins</outputDirectory>
             </configuration>
           </execution>
 
@@ -227,7 +259,17 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-repository-config</artifactId>
+      <artifactId>edu_sharing-community-repository-config-cluster</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-config-defaults</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-config-node</artifactId>
     </dependency>
 
     <dependency>
@@ -262,12 +304,12 @@
 
     <profile>
 
-      <id>plugin.cluster</id>
+      <id>repository.cluster</id>
 
       <activation>
         <activeByDefault>false</activeByDefault>
         <property>
-          <name>env.PLUGIN_CLUSTER_ENABLED</name>
+          <name>env.REPOSITORY_CLUSTER_ENABLED</name>
           <value>true</value>
         </property>
       </activation>
@@ -286,18 +328,29 @@
           <type>amp</type>
         </dependency>
 
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-enterprise-repository-plugin-cluster-config-defaults</artifactId>
+        </dependency>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-enterprise-repository-plugin-cluster-deploy-docker-build-service</artifactId>
+          <classifier>sources</classifier>
+        </dependency>
+
       </dependencies>
 
     </profile>
 
     <profile>
 
-      <id>plugin.elastic</id>
+      <id>repository.elastic</id>
 
       <activation>
         <activeByDefault>false</activeByDefault>
         <property>
-          <name>env.PLUGIN_ELASTIC_ENABLED</name>
+          <name>env.REPOSITORY_ELASTIC_ENABLED</name>
           <value>true</value>
         </property>
       </activation>
@@ -318,6 +371,11 @@
 
         <dependency>
           <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-community-repository-plugin-elastic-config-defaults</artifactId>
+        </dependency>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
           <artifactId>edu_sharing-community-repository-plugin-elastic-deploy-docker-build-service</artifactId>
           <classifier>sources</classifier>
         </dependency>
@@ -328,12 +386,12 @@
 
     <profile>
 
-      <id>plugin.mongo</id>
+      <id>repository.mongo</id>
 
       <activation>
         <activeByDefault>false</activeByDefault>
         <property>
-          <name>env.PLUGIN_MONGO_ENABLED</name>
+          <name>env.REPOSITORY_MONGO_ENABLED</name>
           <value>true</value>
         </property>
       </activation>
@@ -354,7 +412,7 @@
 
         <dependency>
           <groupId>${project.groupId}</groupId>
-          <artifactId>edu_sharing-community-repository-plugin-mongo-config</artifactId>
+          <artifactId>edu_sharing-community-repository-plugin-mongo-config-defaults</artifactId>
         </dependency>
 
         <dependency>
@@ -369,12 +427,12 @@
 
     <profile>
 
-      <id>plugin.remote</id>
+      <id>repository.remote</id>
 
       <activation>
         <activeByDefault>false</activeByDefault>
         <property>
-          <name>env.PLUGIN_REMOTE_ENABLED</name>
+          <name>env.REPOSITORY_REMOTE_ENABLED</name>
           <value>true</value>
         </property>
       </activation>
@@ -393,18 +451,23 @@
           <type>amp</type>
         </dependency>
 
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-enterprise-repository-plugin-remote-config-defaults</artifactId>
+        </dependency>
+
       </dependencies>
 
     </profile>
 
     <profile>
 
-      <id>plugin.transform</id>
+      <id>repository.transform</id>
 
       <activation>
         <activeByDefault>false</activeByDefault>
         <property>
-          <name>env.PLUGIN_TRANSFORM_ENABLED</name>
+          <name>env.REPOSITORY_TRANSFORM_ENABLED</name>
           <value>true</value>
         </property>
       </activation>
@@ -421,6 +484,11 @@
           <groupId>${project.groupId}</groupId>
           <artifactId>edu_sharing-enterprise-repository-plugin-transform-backend-services-module</artifactId>
           <type>amp</type>
+        </dependency>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-enterprise-repository-plugin-transform-config-defaults</artifactId>
         </dependency>
 
         <dependency>
