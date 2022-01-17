@@ -802,7 +802,6 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
                             this.collectionContent.node.ref.repo,
                         )
                         .subscribe(refs => {
-                            console.log(refs);
                             this.dataSourceReferences.setData(refs.references, refs.pagination);
                             this.finishCollectionLoading(callback);
                         });
@@ -1049,7 +1048,8 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
     }
 
     hasNonIconPreview(): boolean {
-        return !this.collectionContent?.node?.preview?.isIcon;
+        const preview = this.collectionContent?.node?.preview;
+        return preview && !preview.isIcon;
     }
 
     private renderBreadcrumbs() {
@@ -1406,27 +1406,41 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         };
     }
 
-    createAllowed() {
-        if(this.isRootLevelCollection()) {
-            let allowed = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS);
-            if(this.tabSelected === RestConstants.COLLECTIONSCOPE_MY) {
+    createAllowed(): boolean {
+        if (this.isGuest) {
+            return false;
+        }
+        if (this.isRootLevelCollection()) {
+            let allowed = this.connector.hasToolPermissionInstant(
+                RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS,
+            );
+            if (this.tabSelected === RestConstants.COLLECTIONSCOPE_MY) {
                 return allowed;
             }
             // for anything else, the user must be able to invite everyone
-            allowed = allowed && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES);
-            if(this.tabSelected === RestConstants.COLLECTIONSCOPE_ORGA) {
+            allowed =
+                allowed &&
+                this.connector.hasToolPermissionInstant(
+                    RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES,
+                );
+            if (this.tabSelected === RestConstants.COLLECTIONSCOPE_ORGA) {
                 allowed = false;
-            } else if(this.tabSelected === RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL) {
+            } else if (this.tabSelected === RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL) {
                 allowed = allowed && this.adminMediacenters?.length === 1;
-            } else if(this.tabSelected === RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL) {
-                allowed = allowed && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_EDITORIAL);
+            } else if (this.tabSelected === RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL) {
+                allowed =
+                    allowed &&
+                    this.connector.hasToolPermissionInstant(
+                        RestConstants.TOOLPERMISSION_COLLECTION_EDITORIAL,
+                    );
             }
             return allowed;
         } else {
-            return !this.isGuest && this.isAllowedToEditCollection();
+            return this.isAllowedToEditCollection();
         }
     }
 }
+
 export interface SortInfo {
     name: 'cm:name' | 'cm:modified' | 'ccm:collection_ordered_position';
     ascending: boolean;

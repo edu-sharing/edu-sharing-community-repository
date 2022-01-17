@@ -260,6 +260,7 @@ import {CommonModule} from '@angular/common';
         PermissionNamePipe,
         UrlPipe,
         AuthorityAffiliationPipe,
+        ListItemLabelPipe,
         NodeSourcePipe,
         NodesDragSourceDirective,
         NodesDropTargetDirective,

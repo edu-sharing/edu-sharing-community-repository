@@ -241,8 +241,11 @@ export class OptionsHelperService implements OnDestroy {
                          dropdown: DropdownComponent = null) {
         this.mainNav = mainNav;
         if(!this.mainNav) {
-            console.info('no mainnav provided to options helper, will use singleton from service');
             this.mainNav = this.injector.get(MainNavService).getMainNav();
+            console.info('no mainnav provided to options helper, will use singleton from service', this.mainNav);
+            if(!this.mainNav) {
+                console.warn('mainnav was not available via singleton service');
+            }
         }
         this.actionbar = actionbar;
         this.list = list;
@@ -970,14 +973,13 @@ export class OptionsHelperService implements OnDestroy {
         reportNode.group = DefaultGroups.View;
         reportNode.priority = 60;
 
-        const qrCodeNode = new OptionItem('OPTIONS.QR_CODE', 'edu-qr_code', (node) =>
-            management.qr = {
-                node: this.getObjects(node)[0],
-                data: window.location.href
-            }
-        );
-        qrCodeNode.constrains = [Constrain.Files, Constrain.NoBulk];
-        qrCodeNode.scopes = [Scope.Render];
+        const qrCodeNode = new OptionItem('OPTIONS.QR_CODE', 'edu-qr_code', (node) => {
+            node = this.getObjects(node)[0];
+            const url = this.nodeHelper.getNodeUrl(node);
+            management.qr = { node, data: url };
+        });
+        qrCodeNode.constrains = [Constrain.NoBulk];
+        qrCodeNode.scopes = [Scope.Render, Scope.CollectionsCollection];
         qrCodeNode.group = DefaultGroups.View;
         qrCodeNode.priority = 70;
 
@@ -1229,6 +1231,12 @@ export class OptionsHelperService implements OnDestroy {
                 nodes.map((n) => {
                     if(n.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1) {
                         return this.nodeService.getNodeMetadata(n.properties[RestConstants.CCM_PROP_IO_ORIGINAL][0])
+                    } else if(n.type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL) {
+                        return this.nodeService.getNodeMetadata(
+                            RestHelper.removeSpacesStoreRef(
+                                n.properties[RestConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET][0]
+                            )
+                        );
                     } else {
                         return of({
                             node: n

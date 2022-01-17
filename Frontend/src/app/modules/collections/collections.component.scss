@@ -17,10 +17,13 @@ mat-tab-group {
 .collectionsContainer {
     width: 100%;
     display: grid;
-    overflow-x: hidden;
+    // Do not set `overflow: hidden` as this would inhibit the `position: sticky` property of the
+    // actionbar.
     grid-template-columns: $sidenavWidth auto;
     position: relative;
-    top: $mainnavHeight;
+    // Use `margin-top` instead of `top` to not create a negative position offset at the bottom of
+    // the container, which could be overlapped by a custom footer.
+    margin-top: $mainnavHeight;
     min-height: calc(100vh - #{$mainnavHeight});
 
     .collections-right {
@@ -29,7 +32,7 @@ mat-tab-group {
         }
     }
     &.collectionsContainerTabs {
-        top: $mainnavHeight + 48px;
+        margin-top: $mainnavHeight + 48px;
     }
     &.collectionsContainerNoSidebar {
         padding:0 10%;
@@ -280,9 +283,14 @@ section {
     }
 }
 .actionbarMaterials {
+    position: sticky;
+    top: $mainnavHeight;
     display: flex;
     justify-content: flex-end;
-    padding: 0 10px 20px 0;
+    padding: 20px 30px;
+    margin: -20px -20px 0;
+    z-index: 2;
+    background-color: $backgroundColor;
 }
 .content-header {
     display: flex;
@@ -299,7 +307,6 @@ section {
 }
 .breadcrumb-space {
     padding: 15px 30px;
-    width: calc(100vw - #{$sidenavWidth});
     background: #fff;
     @include materialShadow();
 }
@@ -391,6 +398,7 @@ section {
         padding-top: 22px;
         padding-bottom: 20px;
         padding-right: 50px;
+        margin: 0;
     }
     .collection-new-preview-infoline,
     .collection-description,
@@ -404,6 +412,8 @@ section {
     .collections-header {
         margin-top: 0;
         width: 100%;
+        // Handle negative margin of `mds-editor-widget-container`.
+        overflow: hidden;
     }
 
     .collections-header-texttop {

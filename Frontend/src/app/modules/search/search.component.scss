@@ -305,6 +305,12 @@ a, a:hover, a:visited, a:active, button {
 
 .top {
     position: fixed;
+    // On mobile, the underlying `div` of this container gets hidden by `MainNav` via
+    // `.mobile-move-top`, however, this container remains invisibly on its usual position. This
+    // inhibits mouse clicks on content below the invisible container. To fix this, we disable
+    // pointer events on this container and explicitly enable them again on the underlying `div`
+    // using `pointer-events: auto`.
+    pointer-events: none;
     top: $mainnavHeight+48px;
     z-index: 12;
     width:100%;
@@ -315,6 +321,7 @@ a, a:hover, a:visited, a:active, button {
         margin-right: -5px;
     }
     >div {
+        pointer-events: auto; // See above.
         height: $secondaryBarHeight;
         background-color: #fff;
         display: flex;
@@ -655,7 +662,7 @@ div.dialog.darken {
     }
     es-mds-editor-embedded {
         es-mds-editor-core {
-            padding: 0 20px;
+            --mds-editor-horizontal-padding: 20px;
         }
     }
 }

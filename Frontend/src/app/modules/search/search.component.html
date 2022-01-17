@@ -296,14 +296,14 @@
                         </es-node-entries-wrapper>
                     </div>
                 </div>
-                <div *ngIf="!(currentRepository=='-all-' && groupResults && !searchService.dataSourceSearchResult[0]?.isLoading)" class="searchUngrouped">
+                <div [class.display-none]="(currentRepository=='-all-' && groupResults && !searchService.dataSourceSearchResult[0]?.isLoading)" class="searchUngrouped">
                     <div class="noResultsMatched" *ngIf="!searchService.dataSourceSearchResult[0]?.isEmpty() && searchService.ignored && searchService.ignored.length">
                         <i class="material-icons">search</i>
                         {{'SEARCH.QUERY_NO_RESULT' | translate}}
                     </div>
                   <es-node-entries-wrapper
                     #nodeEntriesResults
-                    *ngIf="searchService.dataSourceSearchResult[0]"
+                    [class.display-none]="!searchService.dataSourceSearchResult[0]"
                     [dataSource]="searchService.dataSourceSearchResult[0]"
                     [columns]="searchService.columns"
                     [sort]="{

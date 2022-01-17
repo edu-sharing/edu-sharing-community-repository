@@ -332,7 +332,8 @@
 		<widget>
 			<id>cclom:size</id>
 			<caption>lom_prop_size</caption>
-			<type>filesize</type>
+			<type>number</type>
+			<format>bytes</format>
 		</widget>
 		<widget>
 			<id>ccm:educationaltypicalagerange</id>

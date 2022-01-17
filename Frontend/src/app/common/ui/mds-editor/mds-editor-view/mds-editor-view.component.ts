@@ -18,15 +18,15 @@ import {
     ViewContainerRef,
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
-import {first, map, takeUntil} from 'rxjs/operators';
+import {BehaviorSubject, combineLatest, Observable, ReplaySubject} from 'rxjs';
+import {filter, first, map, takeUntil} from 'rxjs/operators';
 import { Node } from '../../../../core-module/core.module';
 import { UIAnimation } from '../../../../core-module/ui/ui-animation';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { MdsWidgetComponent } from '../../mds-viewer/widget/mds-widget.component';
 import { MdsEditorCardComponent } from '../mds-editor-card/mds-editor-card.component';
 import { MdsEditorCoreComponent } from '../mds-editor-core/mds-editor-core.component';
-import { MdsEditorInstanceService, Widget } from '../mds-editor-instance.service';
+import {GeneralWidget, MdsEditorInstanceService, Widget} from '../mds-editor-instance.service';
 import {
     Constraints,
     InputStatus,
@@ -61,6 +61,7 @@ import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-ve
 import { ViewInstanceService } from './view-instance.service';
 import {EditorMode} from '../../../../core-ui-module/mds-types';
 import {MdsEditorWidgetBase} from '../widgets/mds-editor-widget-base';
+import {MdsEditorWidgetVCardComponent} from '../widgets/mds-editor-widget-vcard/mds-editor-widget-vcard.component';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;
@@ -108,6 +109,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         [MdsWidgetType.Month]: MdsEditorWidgetTextComponent,
         [MdsWidgetType.Color]: MdsEditorWidgetTextComponent,
         [MdsWidgetType.Textarea]: MdsEditorWidgetTextComponent,
+        [MdsWidgetType.VCard]: MdsEditorWidgetVCardComponent,
         [MdsWidgetType.Checkbox]: MdsEditorWidgetCheckboxComponent,
         [MdsWidgetType.RadioHorizontal]: MdsEditorWidgetRadioButtonComponent,
         [MdsWidgetType.RadioVertical]: MdsEditorWidgetRadioButtonComponent,
@@ -147,6 +149,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
 
     private knownWidgetTags: string[];
     private destroyed = new ReplaySubject<void>(1);
+    private allWidgetsHidden = false;
 
     constructor(
         private sanitizer: DomSanitizer,
@@ -164,7 +167,13 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
             ...this.mdsEditorInstance.mdsDefinition$.value.widgets.map((w) => w.id),
         ];
     }
-
+    getWidgets() {
+        return (this.mdsEditorInstance.widgets.value as GeneralWidget[])
+            .concat(this.mdsEditorInstance.nativeWidgets.value)
+            .filter((w) =>
+                w.viewId === this.view.id
+            );
+    }
     ngOnInit(): void {
         this.html = this.getHtml();
         this.mdsEditorInstance.activeViews
@@ -173,6 +182,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 map((activeViews) => activeViews.some((view) => view.id === this.view.id)),
             )
             .subscribe((isActive) => (this.isHidden = !isActive));
+
         this.core?.card?.onScrollToJumpmark.pipe(takeUntil(this.destroyed)).subscribe(async (j) => {
             if (
                 j.id === this.view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX &&
@@ -368,7 +378,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         } else if (this.view.rel === 'suggestions') {
             return MdsEditorViewComponent.suggestionWidgetComponents[
                 widget.definition.type as MdsWidgetType
-            ];
+                ];
         } else if (widget.definition.interactionType === 'None' || editorMode === 'inline') {
             // if inline editing -> we don't hide any widget so it can be edited
             if(editorMode === 'inline') {
@@ -426,6 +436,18 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 mdsWidgetComponent.finishEdit(instance);
             })
         });
+    }
+
+    isInHiddenState() {
+        if(this.isHidden) {
+            return true;
+        }
+        if(this.mdsEditorInstance.shouldShowExtendedWidgets$.value) {
+            return false;
+        }
+        return this.getWidgets().filter((w) =>
+            !(w as Widget).definition?.isExtended
+        ).length === 0;
     }
 }
 

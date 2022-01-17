@@ -790,7 +790,7 @@ export class AdminComponent {
     }
     reloadJobStatus() {
         this.admin.getJobs().subscribe((jobs)=> {
-            this.jobs=jobs;
+            this.jobs = jobs.filter((j: any) => !!j);
             this.updateJobLogs();
         })
     }
@@ -1021,7 +1021,15 @@ export class AdminComponent {
     this.storage.set('admin_lucene',this.lucene);
     this.globalProgress=true;
     const props=this.lucene.properties.split('\n');
-    this.admin.exportLucene(this.lucene.query, this.lucene.store, props).subscribe((data)=> {
+
+    const authorities=[];
+    if(this.lucene.authorities) {
+      for(const auth of this.lucene.authorities) {
+          authorities.push(auth.authorityName);
+      }
+    }
+
+    this.admin.exportLucene(this.lucene.query, this.lucene.store, props, authorities).subscribe((data)=> {
       const filename='Export-'+DateHelper.formatDate(this.translate,new Date().getTime(),{useRelativeLabels:false});
       this.globalProgress=false;
 

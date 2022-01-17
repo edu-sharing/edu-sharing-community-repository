@@ -14,6 +14,13 @@
   }
   .group{
     padding: 10px 20px;
+      &.group-jobs {
+          > mat-form-field {
+              padding: 30px 20px;
+              width: 100%;
+              max-width: 800px;
+          }
+      }
   }
   .group-interactions,.group-metadata{
     display: flex;

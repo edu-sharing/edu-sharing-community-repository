@@ -18,7 +18,6 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
-import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -32,7 +31,7 @@ import org.edu_sharing.service.model.CollectionRef;
 import org.edu_sharing.service.model.CollectionRefImpl;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.model.NodeRefImpl;
-import org.edu_sharing.service.nodeservice.PropertiesInterceptor;
+import org.edu_sharing.service.nodeservice.PropertiesGetInterceptor;
 import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.search.model.SearchToken;
@@ -56,16 +55,12 @@ import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.metrics.ParsedCardinality;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.ScoreSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
-import org.elasticsearch.search.suggest.Suggest;
 import org.elasticsearch.search.suggest.SuggestBuilder;
 import org.elasticsearch.search.suggest.SuggestBuilders;
 import org.elasticsearch.search.suggest.phrase.DirectCandidateGeneratorBuilder;
 import org.elasticsearch.search.suggest.phrase.PhraseSuggestion;
-import org.elasticsearch.search.suggest.phrase.PhraseSuggestionBuilder;
-import org.elasticsearch.search.suggest.phrase.SmoothingModel;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
@@ -707,10 +702,14 @@ public class SearchServiceElastic extends SearchServiceImpl {
         eduNodeRef.setAspects(((List<String>)sourceAsMap.get("aspects")).
                 stream().map(CCConstants::getValidGlobalName).filter(Objects::nonNull).collect(Collectors.toList()));
 
-        PropertiesInterceptor.PropertiesContext propertiesContext = PropertiesInterceptorFactory.getPropertiesContext(alfNodeRef,props,eduNodeRef.getAspects());
-        for (PropertiesInterceptor i : PropertiesInterceptorFactory.getPropertiesInterceptors()) {
+        // @TODO: remove all of this from/to multivalue
+        ValueTool.getMultivalue(props);
+        PropertiesGetInterceptor.PropertiesContext propertiesContext = PropertiesInterceptorFactory.getPropertiesContext(alfNodeRef,props,eduNodeRef.getAspects());
+        for (PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
             props = new HashMap<>(i.beforeDeliverProperties(propertiesContext));
         }
+        // @TODO: remove all of this from/to multivalue
+        ValueTool.toMultivalue(props);
         eduNodeRef.setProperties(props);
 
         eduNodeRef.setOwner((String)sourceAsMap.get("owner"));

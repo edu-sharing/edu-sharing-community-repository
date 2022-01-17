@@ -68,6 +68,9 @@ button{
     &.actionbar-all-flat button{
         background: white;
         color: $primary;
+        &:disabled {
+            color: $textLight;
+        }
     }
     .more, .actionAlways {
         background: white;

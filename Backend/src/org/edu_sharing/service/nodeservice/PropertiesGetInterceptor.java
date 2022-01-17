@@ -5,7 +5,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import java.util.Collection;
 import java.util.Map;
 
-public interface PropertiesInterceptor {
+public interface PropertiesGetInterceptor {
 
     class PropertiesContext {
         private NodeRef nodeRef;

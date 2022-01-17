@@ -130,7 +130,8 @@ export class NodeEntriesWrapperComponent<T extends Node> implements AfterViewIni
         if (this.componentRef) {
             this.componentRef.instance.changeDetectorRef?.detectChanges();
         }
-        this.ngAfterViewInit();
+        // This might need wrapping with `setTimeout`.
+        this.updateTemplates();
     }
     /**
      * Replaces this wrapper with the configured custom-node-list component.
@@ -238,6 +239,11 @@ export class NodeEntriesWrapperComponent<T extends Node> implements AfterViewIni
     }
 
     ngAfterViewInit(): void {
+        // Prevent changed-after-checked error
+        Promise.resolve().then(() => this.updateTemplates());
+    }
+
+    private updateTemplates(): void {
         this.templatesService.title = this.titleRef;
         this.templatesService.empty = this.emptyRef;
         this.templatesService.actionArea = this.actionAreaRef;

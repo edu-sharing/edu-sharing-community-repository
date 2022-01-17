@@ -93,7 +93,7 @@ export class RenderHelperService {
         const metadata = document.querySelector('.edusharing_rendering_metadata_body');
         const parent = metadata.parentElement;
         parent.removeChild(metadata);
-        UIHelper.injectAngularComponent(
+        const component = UIHelper.injectAngularComponent(
             this.componentFactoryResolver,
             this.viewContainerRef,
             MdsEditorWrapperComponent,
@@ -105,6 +105,8 @@ export class RenderHelperService {
                 embedded: true,
             },
         );
+        // enforce to render all widgets, since rendering does not support extended state
+        component.instance.getInstanceService().shouldShowExtendedWidgets$.next(true);
     }
 
     private getCollectionsContainingNode(node: Node): Observable<Node[]> {

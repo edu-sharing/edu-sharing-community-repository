@@ -714,7 +714,7 @@
             <div><button mat-flat-button color="primary" (click)="exportLucene()">{{'ADMIN.BROWSER.LUCENE_EXPORT_START' | translate}}</button></div>
           </div>
         </ng-container>
-        <ng-container *ngIf="lucene.mode === 'SOLR' && lucene.outputMode=='view'">
+        <ng-container *ngIf="lucene.mode === 'SOLR'">
           <div class="inputGroupGrow">
             <div class="info">{{'ADMIN.BROWSER.LUCENE_AUTHORITIES' | translate }}</div>
             <es-authority-search-input [globalSearchAllowed]="true" [placeholder]="'ADMIN.BROWSER.ADD_AUTHORITY'" [allowAny]="true" (onChooseAuthority)="addLuceneAuthority($event)"></es-authority-search-input>

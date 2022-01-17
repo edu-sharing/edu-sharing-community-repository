@@ -68,6 +68,7 @@ export class LoginComponent implements OnInit {
         private bridge: BridgeService,
         private authentication: AuthenticationService,
     ) {
+        this.isLoading = true;
         this.updateButtons();
         Translation.initialize(translate, this.configService, this.storage, this.route).subscribe(() => {
             this.configService.getAll().subscribe((data: any) => {
@@ -167,7 +168,6 @@ export class LoginComponent implements OnInit {
             });
 
         });
-        this.isLoading = true;
     }
 
     canRegister(): boolean {

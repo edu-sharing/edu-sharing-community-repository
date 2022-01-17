@@ -13,6 +13,9 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataTemplateRenderer;
@@ -121,7 +124,7 @@ public class RenderingServiceImpl implements RenderingService{
 
 	@Override
 	public String getDetails(String renderingServiceUrl, RenderingServiceData data) throws JsonProcessingException, UnsupportedEncodingException {
-		PostMethod post = new PostMethod(renderingServiceUrl);
+		HttpPost post = new HttpPost(renderingServiceUrl);
 		/*
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
@@ -137,7 +140,8 @@ public class RenderingServiceImpl implements RenderingService{
 			return "";
 		}
 		*/
-		post.setRequestEntity(new StringRequestEntity(json,"application/json","UTF-8"));
+
+		post.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
 		try {
 			return new HttpQueryTool().query(post);
 		}catch(HttpException e){

@@ -206,8 +206,17 @@ public class NodeDao {
 			NodeSearch result = transform(repoDao,searchService.search(mdsDao.getMds(),query,criteriasMap,token),filter);
 			if(result.getCount()==0) {
 				// try to search for ignorable properties to be null
-				// @TODO: needs to be adopted for elastic/dsl syntax
-				List<String> removed=slackCriteriasMap(criteriasMap,mdsDao.getMds().findQuery(query, MetadataReader.QUERY_SYNTAX_LUCENE));
+				List<String> removed;
+				if(searchService instanceof SearchServiceElastic) {
+					try {
+						removed = slackCriteriasMap(criteriasMap, mdsDao.getMds().findQuery(query, MetadataReader.QUERY_SYNTAX_DSL));
+					}catch(IllegalArgumentException e) {
+						// query not available via dsl, so no slacking is done
+						return result;
+					}
+				} else {
+					removed = slackCriteriasMap(criteriasMap, mdsDao.getMds().findQuery(query, MetadataReader.QUERY_SYNTAX_LUCENE));
+				}
 				result=transform(repoDao,searchService.search(mdsDao.getMds(),query,criteriasMap,token),filter);
 				result.setIgnored(removed);
 				return result;
@@ -1752,7 +1761,9 @@ public class NodeDao {
 
 	public List<WorkflowHistory> getWorkflowHistory() throws DAOException{
 		List<WorkflowHistory> workflow=new ArrayList<>();
-		String[] data=getAllProperties().get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_WF_PROTOCOL));
+		List<String> data= (List<String>) NodeServiceHelper.getPropertyNative(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
+				CCConstants.getValidLocalName(CCConstants.CCM_PROP_WF_PROTOCOL)
+		);
 		if(data==null)
 			return workflow;
 		try{

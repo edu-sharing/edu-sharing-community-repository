@@ -86,7 +86,7 @@ import {InteractionType, ListSortConfig, NodeEntriesDisplayType} from '../../cor
     providers: [WindowRefService],
     animations: [trigger('fromLeft', UIAnimation.fromLeft())],
 })
-export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
+export class SearchComponent implements AfterViewInit, OnDestroy {
     readonly SCOPES = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
@@ -221,7 +221,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.didYouMeanSuggestion$.pipe(takeUntil(this.destroyed$)).subscribe();
     }
 
-    ngOnInit() {
+    ngAfterViewInit() {
         setTimeout(() => {
             this.tutorialElement = this.mainNavRef.searchField.input;
             this.handleScroll();
@@ -347,13 +347,12 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.searchService.sidenavOpened$
             .pipe(takeUntil(this.destroyed$))
             .subscribe(() => this.extendedSearchTabGroup?.realignInkBar());
-    }
 
-    ngAfterViewInit() {
         this.scrollTo(this.searchService.offset);
         this.innerWidth = this.winRef.getNativeWindow().innerWidth;
         //this.autocompletesArray = this.autocompletes.toArray();
         this.registerSearchOnMdsUpdate();
+        this.registerOnSelectionChange();
     }
 
     ngOnDestroy() {
@@ -386,7 +385,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.applyParameters('did-you-mean-suggestion')
     }
 
-    async applyParameters(origin: 'mainnav' | 'mds' | 'did-you-mean-suggestion', props: Values = null) {
+    async applyParameters(
+        origin: 'mainnav' | 'mds' | 'did-you-mean-suggestion' | 'sort',
+        props: Values = null,
+    ) {
         this.searchService.reinit = true;
         this.searchService.extendedSearchUsed = true;
         if(origin === 'mds') {
@@ -414,7 +416,17 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     updateSelection(selection: Node[]) {
         this.nodeEntriesResults.getSelection().clear();
         this.nodeEntriesResults.getSelection().select(...selection);
+        this.onSelectionChanged();
+    }
+
+    private onSelectionChanged(): void {
         this.setFixMobileNav();
+    }
+
+    private registerOnSelectionChange(): void {
+        this.nodeEntriesResults.getSelection().changed.pipe(
+            takeUntil(this.destroyed$),
+        ).subscribe(() => this.onSelectionChanged());
     }
 
     getHomeRepoList() {
@@ -680,7 +692,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     setDisplayType(type: NodeEntriesDisplayType) {
-        this.nodeEntriesResults.displayType = type;
+        this.searchService.displayType = type;
         this.router.navigate(['./'], {
             relativeTo: this.activatedRoute,
             queryParams: {
@@ -740,7 +752,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     updateSort(sort: ListSortConfig) {
         this.searchService.sort = sort;
-        this.routeSearch();
+        this.applyParameters('sort');
     }
 
     permissionAddToCollection(node: Node) {

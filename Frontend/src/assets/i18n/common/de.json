@@ -273,11 +273,12 @@
         "cclom:general_keyword": "Schlagwörter",
         "cclom:general_description": "Beschreibung",
         "cclom:duration": "Dauer",
+        "ccm:taxonid": "Fachgebiet",
         "sys:archivedDate": "gelöscht",
         "cclom:version": "Version",
         "virtual:usagecount": "Anz. Verwendungen",
-        "ccm:author_freetext": "Freie Urheber-Angabe",
-        "ccm:lifecyclecontributer_authorFN": "Autor",
+        "ccm:author_freetext": "Freie Urheber{{GENDER_SEPARATOR}}in-Angabe",
+        "ccm:lifecyclecontributer_authorFN": "Autor{{GENDER_SEPARATOR}}in",
         "ccm:wf_status": "Status",
         "ccm:eaf_productionyear": "Prod. Jahr",
         "counts": {
@@ -321,7 +322,7 @@
         "DESCRIPTION": {
             "NONE": "Nutzung und Quellenangabe gemäß den im Medium genannten Bedingungen bzw. gemäß der allgemeingültigen gesetzlichen Regelung (UrhG).",
             "MULTI": "Die gewählten Elemente besitzen unterschiedliche Lizenzen.<br />Durch das Festlegen einer Lizenz werden die Lizeninformationen aller Elemente überschrieben",
-            "CC_BY": "Autor(in) muss genannt werden.",
+            "CC_BY": "Autor{{GENDER_SEPARATOR}}in muss genannt werden.",
             "CC_SHARE_ND": "Keine Bearbeitung des Werks erlaubt.",
             "CC_SHARE_SA": "Bearbeitung erlaubt, wenn es unter gleichen Bedingungen weitergegeben wird.",
             "CC_COMMERCIAL_NC": "Keine kommerzielle Verwendung erlaubt.",
@@ -370,9 +371,9 @@
         "CREATED": "Die Variante wurde angelegt und im Ordner \"{{folder}}\" gespeichert",
         "CREATED_LINK": "anzeigen",
         "WARNING": {
-            "NO_LICENSE": "Dieses Material besitzt noch keine Lizenz.\nSetzen Sie sich ggf. mit dem Autor in Verbindung, um Lizenzverstöße zu vermeiden.",
-            "COPYRIGHT": "Dieses Material besitzt eine Copyright-Lizenz.\nSetzen Sie sich ggf. mit dem Autor in Verbindung, um Lizenzverstöße zu vermeiden.",
-            "ND": "Dieses Material besitzt eine Non Derivative Lizenz. Diese Lizenz legt fest, dass das Material nicht verändert werden darf.\nSetzen Sie sich ggf. mit den Autor in Verbindung, um Lizenzverstöße zu vermeiden.",
+            "NO_LICENSE": "Dieses Material besitzt noch keine Lizenz.\nSetzen Sie sich ggf. mit dem/der Autor{{GENDER_SEPARATOR}}in in Verbindung, um Lizenzverstöße zu vermeiden.",
+            "COPYRIGHT": "Dieses Material besitzt eine Copyright-Lizenz.\nSetzen Sie sich ggf. mit dem/der Autor{{GENDER_SEPARATOR}}in in Verbindung, um Lizenzverstöße zu vermeiden.",
+            "ND": "Dieses Material besitzt eine Non Derivative Lizenz. Diese Lizenz legt fest, dass das Material nicht verändert werden darf.\nSetzen Sie sich ggf. mit dem/der Autor{{GENDER_SEPARATOR}}in in Verbindung, um Lizenzverstöße zu vermeiden.",
             "LINK": "Lizenzinformationen anzeigen"
         }
     },
@@ -471,7 +472,7 @@
     },
     "ACCESSIBILITY": {
         "LASTMODIFIED": "Letztes Änderungsdatum",
-        "AUTHOR": "Autor",
+        "AUTHOR": "Autor{{GENDER_SEPARATOR}}in",
         "SOURCE": "Quelle",
         "TITLE": "Barrierefreiheit",
         "SUBTITLE": "Optionen für barrierefreie Nutzung",
@@ -586,6 +587,7 @@
         "COLLECTION_PROPSE_INFO": "Sie haben auf die Sammlung \"{{collection}}\" keine ausreichenden Rechte. Sie können das Material jedoch als Vorschlag einreichen. Möchten Sie fortfahren?"
     },
     "OPTIONS_FOR": "Aktionen für {{element}}",
+    "NO_AVAILABLE_OPTIONS": "Es sind keine Aktionen für die ausgewählten Elemente verfügbar",
     "OPTIONS": {
         "SHOW_ALL_OPTIONS": "Weitere Aktionen",
         "APPLY": "Übernehmen",
@@ -650,7 +652,7 @@
         "AUTHOR_LABEL": "Urheber-Angaben",
         "AUTHOR_FREETEXT": "Freie Urheber-Angabe",
         "AUTHOR_FREETEXT_PLACEHOLDER": "Wer sind die Urheber des Werks? Wie sollen sie genannt werden?",
-        "AUTHOR_PERSON": "Autoren & Beteiligte",
+        "AUTHOR_PERSON": "Autor{{GENDER_SEPARATOR}}innen & Beteiligte",
         "AUTHOR_UNSET": "<keine Angabe>",
         "LICENSE": "Lizenz",
         "WORKFLOW": "Workflow-Status",

@@ -4,11 +4,12 @@
   [class.grid-card-virtual]="node.virtual"
   [style.background-color]="nodeHelper.isNodeCollection(node) ? node.collection.color : null"
   (contextmenu)="openContextmenu($event)"
+  (keydown.ContextMenu)="openContextmenu($event)"
 >
   <button
     #menuTrigger="matMenuTrigger"
     mat-button
-    class="dropdown-dummy"
+    class="dropdown-dummy cdk-visually-hidden"
     [style.left.px]="dropdownLeft"
     [style.top.px]="dropdownTop"
     [matMenuTriggerFor]="dropdown.menu"

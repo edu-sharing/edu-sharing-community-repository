@@ -6,6 +6,7 @@ public class JobDescription {
     String name;
     String description;
     List<JobFieldDescription> params;
+    private org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription.JobTag[] tags;
 
     public String getName() {
         return name;
@@ -29,6 +30,14 @@ public class JobDescription {
 
     public String getDescription() {
         return description;
+    }
+
+    public void setTags(org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription.JobTag[] tags) {
+        this.tags = tags;
+    }
+
+    public org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription.JobTag[] getTags() {
+        return tags;
     }
 
     public static class JobFieldDescription{

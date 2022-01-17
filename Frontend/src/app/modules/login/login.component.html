@@ -21,8 +21,7 @@
     [height]="showProviders ? '' : 'large'"
     [attr.showProviders]="showProviders"
   >
-    <es-spinner *ngIf="isLoading" class="center"></es-spinner>
-    <div class="login-content" *ngIf="!isLoading">
+    <div class="login-content">
       <h1 esTitle class="cdk-visually-hidden">{{ 'LOGIN.TITLE' | translate }}</h1>
       <div class="branding"><img src="assets/images/logo.svg" esImage-config alt="{{ 'LOGIN.APP_LOGO' | translate }}" /></div>
       <div class="groups">

@@ -3,6 +3,7 @@
   [class.grid-card-collection]="nodeHelper.isNodeCollection(node)"
   [style.background-color]="nodeHelper.isNodeCollection(node) ? node.collection.color : null"
   (contextmenu)="openContextmenu($event)"
+  (keydown.ContextMenu)="openContextmenu($event)"
 >
   <es-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
                 mode="wrapper"

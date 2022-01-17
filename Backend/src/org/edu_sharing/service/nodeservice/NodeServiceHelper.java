@@ -475,4 +475,8 @@ public class NodeServiceHelper {
 		return NodeServiceFactory.getLocalService().exists(ref.getStoreRef().getProtocol(),
 				ref.getStoreRef().getIdentifier(), ref.getId());
     }
+
+	public static void renameNode(NodeRef node, String newName) {
+		NodeServiceHelper.setProperty(node, CCConstants.CM_NAME, newName);
+	}
 }

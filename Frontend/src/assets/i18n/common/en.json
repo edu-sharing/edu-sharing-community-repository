@@ -253,6 +253,7 @@
         "cclom:general_keyword": "keywords",
         "cclom:general_description": "description",
         "cclom:duration": "duration",
+        "ccm:taxonid": "Discipline",
         "sys:archivedDate": "deleted",
         "cclom:version": "version",
         "virtual:usagecount": "usage count",
@@ -547,6 +548,7 @@
         "COLLECTION_PROPSE_INFO": "You don't have sufficient permissions for the collection \"{{collection}}\". You can, however, propose this material for this collection. Do you want to continue?"
     },
     "OPTIONS_FOR": "Actions for {{element}}",
+    "NO_AVAILABLE_OPTIONS": "There are no available options for the selected elements",
     "OPTIONS": {
         "SHOW_ALL_OPTIONS": "More actions",
         "APPLY": "Apply",
