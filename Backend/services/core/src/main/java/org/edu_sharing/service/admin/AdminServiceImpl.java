@@ -356,17 +356,17 @@ public class AdminServiceImpl implements AdminService  {
 	}
 	
 	private String getAppPropertiesApplications() throws Exception{
-		String appRegistryfileName = "ccapp-registry.properties.xml";
+		String appRegistryfileName = PropertiesHelper.Config.getPropertyFilePath("ccapp-registry.properties.xml");
 		Properties propsAppRegistry = PropertiesHelper.getProperties(appRegistryfileName, PropertiesHelper.XML);
 		return propsAppRegistry.getProperty("applicationfiles");
 	}
 	
 	private void changeAppPropertiesApplications(String newValue,String comment) throws Exception{
-		String appRegistryfileName = "ccapp-registry.properties.xml";
+		String appRegistryfileName = PropertiesHelper.Config.getPropertyFilePath("ccapp-registry.properties.xml");
 		
 		Properties propsAppRegistry = PropertiesHelper.getProperties(appRegistryfileName, PropertiesHelper.XML);
 		
-		String pathAppRegistry = getCatalinaBase()+"/shared/classes/"+appRegistryfileName;
+		String pathAppRegistry = PropertiesHelper.Config.getAbsolutePathForConfigFile(appRegistryfileName);
 		
 		//backup
 		propsAppRegistry.storeToXML(new FileOutputStream(new File(pathAppRegistry+System.currentTimeMillis()+".bak")), " backup of registry");
@@ -393,18 +393,6 @@ public class AdminServiceImpl implements AdminService  {
 		appFile.renameTo(new File(appFile.getAbsolutePath()+System.currentTimeMillis()+".bak"));
 		ApplicationInfoList.refresh();
 		RepoFactory.refresh();
-	}
-	
-	private String getCatalinaBase() throws Exception{
-		String catalinaBase = System.getProperty("catalina.base");
-		logger.info("catalinaBase:"+catalinaBase);
-		if(catalinaBase == null || catalinaBase.trim().equals("")){
-			throw new Exception("could not find catalina base in System Properties"); 
-		}
-		if(catalinaBase.contains("\\")){
-			catalinaBase = catalinaBase.replace("\\","/");
-		}
-		return catalinaBase;
 	}
 	
 	@Override
@@ -473,7 +461,7 @@ public class AdminServiceImpl implements AdminService  {
 			
 		}
 		
-		File appFile = new File(getCatalinaBase()+"/shared/classes/"+filename);
+		File appFile = new File(PropertiesHelper.Config.getAbsolutePathForConfigFile(PropertiesHelper.Config.getPropertyFilePath(filename)));
 		if(!appFile.exists()){
 			props.storeToXML(new FileOutputStream(appFile), "");
 		}else{
@@ -493,11 +481,11 @@ public class AdminServiceImpl implements AdminService  {
 			//store that in the homeApplication.properties.xml cause every repository has it's own renderservice
 			//and we don't want to config an renderservice of an remote repository
 			
-			String homeAppFileName = AdminServiceFactory.HOME_APPLICATION_PROPERTIES;
+			String homeAppFileName = PropertiesHelper.Config.getPropertyFilePath(AdminServiceFactory.HOME_APPLICATION_PROPERTIES);
 			Properties homeAppProps = PropertiesHelper.getProperties(homeAppFileName, PropertiesHelper.XML);
 			homeAppProps = new SortedProperties(homeAppProps);
 			
-			String homeAppPath = getCatalinaBase()+"/shared/classes/"+homeAppFileName;
+			String homeAppPath = PropertiesHelper.Config.getAbsolutePathForConfigFile(homeAppFileName);
 			
 			//backup
 			homeAppProps.storeToXML(new FileOutputStream(new File(homeAppPath+System.currentTimeMillis()+".bak")), " backup of homeApplication.properties.xml");
@@ -766,7 +754,7 @@ public class AdminServiceImpl implements AdminService  {
 	@Override
 	public void updateConfigFile(String filename, PropertiesHelper.Config.PathPrefix pathPrefix, String content) throws Throwable {
 		filename = mapConfigFile(filename, pathPrefix);
-		File file = new File(getCatalinaBase() + "/shared/classes/" + filename);
+		File file = new File(PropertiesHelper.Config.getAbsolutePathForConfigFile(PropertiesHelper.Config.getPropertyFilePath(filename)));
 		try {
 			Files.copy(file, new File(file.getAbsolutePath() + System.currentTimeMillis() + ".bak"));
 		}catch(FileNotFoundException e){
@@ -780,7 +768,7 @@ public class AdminServiceImpl implements AdminService  {
 	public String getConfigFile(String filename, PropertiesHelper.Config.PathPrefix pathPrefix) throws Throwable {
 		// use new File() to remove any folder like access
 		filename = mapConfigFile(new File(filename).getName(), pathPrefix);
-		File file = new File(getCatalinaBase()+"/shared/classes/"+ filename);
+		File file = new File(PropertiesHelper.Config.getAbsolutePathForConfigFile(PropertiesHelper.Config.getPropertyFilePath(filename)));
 		return FileUtils.readFileToString(file);
 	}
 
