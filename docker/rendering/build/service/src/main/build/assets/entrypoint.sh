@@ -95,7 +95,7 @@ sed -i 's|^\(\s*\)[#]*ServerName.*|\1ServerName '"${my_host_internal}"'|' /etc/a
 
 ########################################################################################################################
 
-if mkdir "${RS_CACHE}/config/.init" >/dev/null 2>&1; then
+if mkdir "${RS_CACHE}/config/version.json" >/dev/null 2>&1; then
 
 	echo "install started."
 
@@ -146,6 +146,8 @@ if mkdir "${RS_CACHE}/config/.init" >/dev/null 2>&1; then
 	find -L . -type f -newer "${before}" -exec cp {} "${RS_CACHE}/config/{}" \;
 	find "${RS_CACHE}/config" -type d -empty -delete
 
+	cp "$RS_ROOT"/version.json "${RS_CACHE}"/config/version.json
+
 	echo "config saved."
 
 else
@@ -156,6 +158,11 @@ else
 
 	find . -type d -exec mkdir -p "${RS_ROOT}/{}" \;
 	find . -type f -exec cp -f {} "${RS_ROOT}/{}" \;
+
+	cmp -s "$RS_ROOT"/version.json version.json || {
+		mv version.json version.json.$(date +%d-%m-%Y_%H-%M-%S )
+		cp "$RS_ROOT"/version.json version.json
+	}
 
 	popd
 

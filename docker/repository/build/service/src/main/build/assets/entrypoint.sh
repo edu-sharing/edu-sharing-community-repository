@@ -97,9 +97,7 @@ done
 	until wait-for-it "${repository_transform_host}:${repository_transform_port}" -t 3; do sleep 1; done
 }
 
-### install ############################################################################################################
-
-reinstall.sh
+### config #############################################################################################################
 
 configs=(defaults plugins cluster node)
 
@@ -112,10 +110,14 @@ for config in "${configs[@]}"; do
 		done
 		cp -f tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/$config
 	else
-		mv tomcat/shared/classes/config/$config/version.json tomcat/shared/classes/config/$config/version.json.$(date +%d-%m-%Y_%H-%M-%S )
-		cp -f tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/$config
+		cmp -s tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/$config/version.json || {
+			mv tomcat/shared/classes/config/$config/version.json tomcat/shared/classes/config/$config/version.json.$(date +%d-%m-%Y_%H-%M-%S )
+			cp tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/$config/version.json
+		}
 	fi
 done
+
+reinstall.sh
 
 ########################################################################################################################
 
