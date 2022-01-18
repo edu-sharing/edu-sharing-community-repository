@@ -71,24 +71,6 @@
         ],
         "type": "object"
       },
-      "AbstractEntries": {
-        "properties": {
-          "nodes": {
-            "items": {
-              "type": "object"
-            },
-            "type": "array"
-          },
-          "pagination": {
-            "$ref": "#/components/schemas/Pagination"
-          }
-        },
-        "required": [
-          "nodes",
-          "pagination"
-        ],
-        "type": "object"
-      },
       "Admin": {
         "properties": {
           "statistics": {
@@ -410,9 +392,6 @@
             "description": "false",
             "type": "boolean"
           },
-          "orderAscending": {
-            "type": "boolean"
-          },
           "orderMode": {
             "type": "string"
           },
@@ -537,23 +516,6 @@
         },
         "type": "object"
       },
-      "CollectionProposalEntries": {
-        "properties": {
-          "collections": {
-            "items": {
-              "$ref": "#/components/schemas/NodeCollectionProposalCount"
-            },
-            "type": "array"
-          },
-          "pagination": {
-            "$ref": "#/components/schemas/Pagination"
-          }
-        },
-        "required": [
-          "collections"
-        ],
-        "type": "object"
-      },
       "CollectionReference": {
         "properties": {
           "access": {
@@ -651,12 +613,6 @@
           },
           "ref": {
             "$ref": "#/components/schemas/NodeRef"
-          },
-          "relations": {
-            "additionalProperties": {
-              "$ref": "#/components/schemas/Node"
-            },
-            "type": "object"
           },
           "remote": {
             "$ref": "#/components/schemas/Remote"
@@ -786,17 +742,6 @@
       "ConfigPrivacy": {
         "properties": {
           "cookieDisclaimer": {
-            "type": "boolean"
-          }
-        },
-        "type": "object"
-      },
-      "ConfigPublish": {
-        "properties": {
-          "authorMandatory": {
-            "type": "boolean"
-          },
-          "licenseMandatory": {
             "type": "boolean"
           }
         },
@@ -1155,10 +1100,6 @@
         "properties": {
           "property": {
             "type": "string"
-          },
-          "sumOtherDocCount": {
-            "format": "int64",
-            "type": "integer"
           },
           "values": {
             "items": {
@@ -2131,12 +2072,6 @@
       },
       "MdsValue": {
         "properties": {
-          "alternativeIds": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
           "caption": {
             "type": "string"
           },
@@ -2147,9 +2082,6 @@
             "type": "string"
           },
           "parent": {
-            "type": "string"
-          },
-          "url": {
             "type": "string"
           }
         },
@@ -2189,9 +2121,6 @@
       },
       "MdsWidget": {
         "properties": {
-          "allowValuespaceSuggestions": {
-            "type": "boolean"
-          },
           "allowempty": {
             "type": "boolean"
           },
@@ -2230,13 +2159,6 @@
           "id": {
             "type": "string"
           },
-          "interactionType": {
-            "enum": [
-              "Input",
-              "None"
-            ],
-            "type": "string"
-          },
           "isExtended": {
             "type": "boolean"
           },
@@ -2244,7 +2166,6 @@
             "enum": [
               "mandatory",
               "mandatoryForPublish",
-              "recommended",
               "optional",
               "ignore"
             ],
@@ -2275,7 +2196,6 @@
             "enum": [
               "mandatory",
               "mandatoryForPublish",
-              "recommended",
               "optional",
               "ignore"
             ],
@@ -2586,153 +2506,6 @@
           },
           "ref": {
             "$ref": "#/components/schemas/NodeRef"
-          },
-          "relations": {
-            "additionalProperties": {
-              "$ref": "#/components/schemas/Node"
-            },
-            "type": "object"
-          },
-          "remote": {
-            "$ref": "#/components/schemas/Remote"
-          },
-          "repositoryType": {
-            "type": "string"
-          },
-          "size": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string"
-          },
-          "usedInCollections": {
-            "items": {
-              "$ref": "#/components/schemas/Node"
-            },
-            "type": "array"
-          }
-        },
-        "required": [
-          "access",
-          "collection",
-          "createdAt",
-          "createdBy",
-          "downloadUrl",
-          "name",
-          "owner",
-          "ref"
-        ],
-        "type": "object"
-      },
-      "NodeCollectionProposalCount": {
-        "properties": {
-          "access": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "aspects": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "collection": {
-            "$ref": "#/components/schemas/Collection"
-          },
-          "commentCount": {
-            "format": "int32",
-            "type": "integer"
-          },
-          "content": {
-            "$ref": "#/components/schemas/Content"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "createdBy": {
-            "$ref": "#/components/schemas/Person"
-          },
-          "downloadUrl": {
-            "type": "string"
-          },
-          "iconURL": {
-            "type": "string"
-          },
-          "isDirectory": {
-            "type": "boolean"
-          },
-          "license": {
-            "$ref": "#/components/schemas/License"
-          },
-          "mediatype": {
-            "type": "string"
-          },
-          "metadataset": {
-            "type": "string"
-          },
-          "mimetype": {
-            "type": "string"
-          },
-          "modifiedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "modifiedBy": {
-            "$ref": "#/components/schemas/Person"
-          },
-          "name": {
-            "type": "string"
-          },
-          "owner": {
-            "$ref": "#/components/schemas/Person"
-          },
-          "parent": {
-            "$ref": "#/components/schemas/NodeRef"
-          },
-          "preview": {
-            "$ref": "#/components/schemas/Preview"
-          },
-          "properties": {
-            "additionalProperties": {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            "type": "object"
-          },
-          "proposalCount": {
-            "additionalProperties": {
-              "format": "int32",
-              "type": "integer"
-            },
-            "type": "object",
-            "writeOnly": true
-          },
-          "proposalCounts": {
-            "additionalProperties": {
-              "format": "int32",
-              "type": "integer"
-            },
-            "type": "object"
-          },
-          "rating": {
-            "$ref": "#/components/schemas/RatingDetails"
-          },
-          "ref": {
-            "$ref": "#/components/schemas/NodeRef"
-          },
-          "relations": {
-            "additionalProperties": {
-              "$ref": "#/components/schemas/Node"
-            },
-            "type": "object"
           },
           "remote": {
             "$ref": "#/components/schemas/Remote"
@@ -3297,6 +3070,17 @@
         },
         "type": "object"
       },
+      "PluginStatus": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Preferences": {
         "properties": {
           "preferences": {
@@ -3682,19 +3466,6 @@
             },
             "type": "array"
           },
-          "facetLimit": {
-            "default": 10,
-            "format": "int32",
-            "type": "integer"
-          },
-          "facetMinCount": {
-            "default": 5,
-            "format": "int32",
-            "type": "integer"
-          },
-          "facetSuggest": {
-            "type": "string"
-          },
           "facets": {
             "items": {
               "type": "string"
@@ -3709,42 +3480,6 @@
           },
           "resolveCollections": {
             "type": "boolean"
-          },
-          "returnSuggestions": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "criteria"
-        ],
-        "type": "object"
-      },
-      "SearchParametersFacets": {
-        "properties": {
-          "criteria": {
-            "items": {
-              "$ref": "#/components/schemas/MdsQueryCriteria"
-            },
-            "type": "array"
-          },
-          "facetLimit": {
-            "default": 10,
-            "format": "int32",
-            "type": "integer"
-          },
-          "facetMinCount": {
-            "default": 5,
-            "format": "int32",
-            "type": "integer"
-          },
-          "facetSuggest": {
-            "type": "string"
-          },
-          "facets": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
           }
         },
         "required": [
@@ -3803,12 +3538,6 @@
           },
           "pagination": {
             "$ref": "#/components/schemas/Pagination"
-          },
-          "suggests": {
-            "items": {
-              "$ref": "#/components/schemas/Suggest"
-            },
-            "type": "array"
           }
         },
         "required": [
@@ -3840,12 +3569,6 @@
           },
           "pagination": {
             "$ref": "#/components/schemas/Pagination"
-          },
-          "suggests": {
-            "items": {
-              "$ref": "#/components/schemas/Suggest"
-            },
-            "type": "array"
           }
         },
         "required": [
@@ -4357,28 +4080,6 @@
             "type": "string"
           }
         },
-        "type": "object"
-      },
-      "Suggest": {
-        "properties": {
-          "highlighted": {
-            "description": "suggested text with corrected words highlighted",
-            "type": "string"
-          },
-          "score": {
-            "description": "score of the suggestion",
-            "format": "float",
-            "type": "number"
-          },
-          "text": {
-            "description": "suggested text",
-            "type": "string"
-          }
-        },
-        "required": [
-          "score",
-          "text"
-        ],
         "type": "object"
       },
       "Suggestion": {
@@ -5157,9 +4858,6 @@
           "privacyInformationUrl": {
             "type": "string"
           },
-          "publish": {
-            "$ref": "#/components/schemas/ConfigPublish"
-          },
           "publishingNotice": {
             "type": "boolean"
           },
@@ -5214,12 +4912,6 @@
           },
           "userDisplayName": {
             "type": "string"
-          },
-          "userMenuOverrides": {
-            "items": {
-              "$ref": "#/components/schemas/ContextMenuEntry"
-            },
-            "type": "array"
           },
           "userSecondaryDisplayName": {
             "type": "string"
@@ -6749,7 +6441,6 @@
     },
     "/admin/v1/config/merged": {
       "get": {
-        "description": "Get the fully merged & parsed (lightbend) backend config",
         "operationId": "getLightbendConfig",
         "responses": {
           "200": {
@@ -6813,6 +6504,7 @@
             "description": "Fatal error occured."
           }
         },
+        "summary": "Get the fully merged & parsed (lightbend) backend config",
         "tags": [
           "ADMIN v1"
         ]
@@ -6828,6 +6520,23 @@
             "name": "filename",
             "required": true,
             "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "path prefix this file belongs to",
+            "in": "query",
+            "name": "pathPrefix",
+            "required": true,
+            "schema": {
+              "enum": [
+                "node",
+                "cluster/applications",
+                "cluster",
+                "defaults",
+                "defaults/metadatasets",
+                "defaults/mailtemplates"
+              ],
               "type": "string"
             }
           }
@@ -6908,6 +6617,23 @@
             "name": "filename",
             "required": true,
             "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "path prefix this file belongs to",
+            "in": "query",
+            "name": "pathPrefix",
+            "required": true,
+            "schema": {
+              "enum": [
+                "node",
+                "cluster/applications",
+                "cluster",
+                "defaults",
+                "defaults/metadatasets",
+                "defaults/mailtemplates"
+              ],
               "type": "string"
             }
           }
@@ -8925,6 +8651,77 @@
         ]
       }
     },
+    "/admin/v1/plugins": {
+      "get": {
+        "operationId": "getEnabledPlugins",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "get enabled system plugins",
+        "tags": [
+          "ADMIN v1"
+        ]
+      }
+    },
     "/admin/v1/propertyToMds": {
       "get": {
         "description": "Get a Mds Valuespace for all values of the given properties.",
@@ -10853,154 +10650,6 @@
         ]
       }
     },
-    "/collection/v1/collections/{repository}/children/proposals/collections": {
-      "get": {
-        "operationId": "getCollectionsContainingProposals",
-        "parameters": [
-          {
-            "description": "ID of repository (or \"-home-\" for home repository)",
-            "in": "path",
-            "name": "repository",
-            "required": true,
-            "schema": {
-              "default": "-home-",
-              "type": "string"
-            }
-          },
-          {
-            "description": "status of the proposals to search for",
-            "in": "query",
-            "name": "status",
-            "schema": {
-              "default": "PENDING",
-              "enum": [
-                "PENDING",
-                "ACCEPTED",
-                "DECLINED"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "fetch counts of collections (materials and subcollections). This parameter will decrease performance so only enable if if you need this data",
-            "in": "query",
-            "name": "fetchCounts",
-            "schema": {
-              "default": true,
-              "type": "boolean"
-            }
-          },
-          {
-            "description": "maximum items per page",
-            "in": "query",
-            "name": "maxItems",
-            "schema": {
-              "default": 50,
-              "format": "int32",
-              "type": "integer"
-            }
-          },
-          {
-            "description": "skip a number of items",
-            "in": "query",
-            "name": "skipCount",
-            "schema": {
-              "default": 0,
-              "format": "int32",
-              "type": "integer"
-            }
-          },
-          {
-            "description": "sort properties",
-            "in": "query",
-            "name": "sortProperties",
-            "schema": {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            }
-          },
-          {
-            "description": "sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index",
-            "in": "query",
-            "name": "sortAscending",
-            "schema": {
-              "items": {
-                "type": "boolean"
-              },
-              "type": "array"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CollectionProposalEntries"
-                }
-              }
-            },
-            "description": "OK."
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Preconditions are not present."
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Authorization failed."
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Session user has insufficient rights to perform this operation."
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Ressources are not found."
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Fatal error occured."
-          }
-        },
-        "summary": "Get all collections containing proposals with a given state (via search index)",
-        "tags": [
-          "COLLECTION v1"
-        ]
-      }
-    },
     "/collection/v1/collections/{repository}/pinning": {
       "post": {
         "description": "Remove all currently pinned collections and set them in the order send. Requires TOOLPERMISSION_COLLECTION_PINNING",
@@ -11782,112 +11431,6 @@
           }
         },
         "summary": "Get child collections for collection (or root).",
-        "tags": [
-          "COLLECTION v1"
-        ]
-      }
-    },
-    "/collection/v1/collections/{repository}/{collection}/children/proposals": {
-      "get": {
-        "operationId": "getCollectionsProposals",
-        "parameters": [
-          {
-            "description": "ID of repository (or \"-home-\" for home repository)",
-            "in": "path",
-            "name": "repository",
-            "required": true,
-            "schema": {
-              "default": "-home-",
-              "type": "string"
-            }
-          },
-          {
-            "description": "ID of parent collection",
-            "in": "path",
-            "name": "collection",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "Only show elements with given status",
-            "in": "query",
-            "name": "status",
-            "required": true,
-            "schema": {
-              "enum": [
-                "PENDING",
-                "ACCEPTED",
-                "DECLINED"
-              ],
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AbstractEntries"
-                }
-              }
-            },
-            "description": "OK."
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Preconditions are not present."
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Authorization failed."
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Session user has insufficient rights to perform this operation."
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Ressources are not found."
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Fatal error occured."
-          }
-        },
-        "summary": "Get proposed objects for collection (requires edit permissions on collection).",
         "tags": [
           "COLLECTION v1"
         ]
@@ -12679,15 +12222,6 @@
             "description": "Allow that a node that already is inside the collection can be added again",
             "in": "query",
             "name": "allowDuplicate",
-            "schema": {
-              "default": false,
-              "type": "boolean"
-            }
-          },
-          {
-            "description": "Mark this node only as a proposal (not really adding but just marking it). This can also be used for collections where you don't have permissions",
-            "in": "query",
-            "name": "asProposal",
             "schema": {
               "default": false,
               "type": "boolean"
@@ -17714,7 +17248,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Mds"
+                  "$ref": "#/components/schemas/Suggestions"
                 }
               }
             },
@@ -17772,126 +17306,6 @@
           }
         },
         "summary": "Get values.",
-        "tags": [
-          "MDS v1"
-        ]
-      }
-    },
-    "/mds/v1/metadatasets/{repository}/{metadataset}/values/{widget}/suggest": {
-      "post": {
-        "description": "Suggest a new value for a given metadataset and widget. The suggestion will be forwarded to the corresponding person in the metadataset file",
-        "operationId": "suggestValue",
-        "parameters": [
-          {
-            "description": "ID of repository (or \"-home-\" for home repository)",
-            "in": "path",
-            "name": "repository",
-            "required": true,
-            "schema": {
-              "default": "-home-",
-              "type": "string"
-            }
-          },
-          {
-            "description": "ID of metadataset (or \"-default-\" for default metadata set)",
-            "in": "path",
-            "name": "metadataset",
-            "required": true,
-            "schema": {
-              "default": "-default-",
-              "type": "string"
-            }
-          },
-          {
-            "description": "widget id, e.g. cm:name",
-            "in": "path",
-            "name": "widget",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "caption of the new entry (id will be auto-generated)",
-            "in": "query",
-            "name": "caption",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "parent id of the new entry (might be null)",
-            "in": "query",
-            "name": "parent",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MdsValue"
-                }
-              }
-            },
-            "description": "OK."
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Preconditions are not present."
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Authorization failed."
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Session user has insufficient rights to perform this operation."
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Ressources are not found."
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Fatal error occured."
-          }
-        },
-        "summary": "Suggest a value.",
         "tags": [
           "MDS v1"
         ]
@@ -25663,7 +25077,6 @@
                 "FILES_AND_FOLDERS",
                 "COLLECTIONS",
                 "TOOLPERMISSIONS",
-                "COLLECTION_PROPOSALS",
                 "ALL"
               ],
               "type": "string"
@@ -25862,7 +25275,6 @@
                 "FILES_AND_FOLDERS",
                 "COLLECTIONS",
                 "TOOLPERMISSIONS",
-                "COLLECTION_PROPOSALS",
                 "ALL"
               ],
               "type": "string"
@@ -26324,7 +25736,6 @@
                 "FILES_AND_FOLDERS",
                 "COLLECTIONS",
                 "TOOLPERMISSIONS",
-                "COLLECTION_PROPOSALS",
                 "ALL"
               ],
               "type": "string"
@@ -26459,110 +25870,6 @@
           }
         },
         "summary": "Perform queries based on metadata sets.",
-        "tags": [
-          "SEARCH v1"
-        ]
-      }
-    },
-    "/search/v1/queries/{repository}/{metadataset}/{query}/facets": {
-      "post": {
-        "description": "Perform queries based on metadata sets.",
-        "operationId": "searchFacets",
-        "parameters": [
-          {
-            "description": "ID of repository (or \"-home-\" for home repository)",
-            "in": "path",
-            "name": "repository",
-            "required": true,
-            "schema": {
-              "default": "-home-",
-              "type": "string"
-            }
-          },
-          {
-            "description": "ID of metadataset (or \"-default-\" for default metadata set)",
-            "in": "path",
-            "name": "metadataset",
-            "required": true,
-            "schema": {
-              "default": "-default-",
-              "type": "string"
-            }
-          },
-          {
-            "description": "ID of query",
-            "in": "path",
-            "name": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SearchParametersFacets"
-              }
-            }
-          },
-          "description": "facet parameters",
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SearchResultNode"
-                }
-              }
-            },
-            "description": "OK."
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Preconditions are not present."
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Authorization failed."
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Session user has insufficient rights to perform this operation."
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Fatal error occured."
-          }
-        },
-        "summary": "Search in facets.",
         "tags": [
           "SEARCH v1"
         ]
