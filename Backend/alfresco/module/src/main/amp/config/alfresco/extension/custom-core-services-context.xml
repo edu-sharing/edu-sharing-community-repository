@@ -20,14 +20,14 @@
         <value>classpath*:config/defaults/alfresco-global.properties</value>
         <value>classpath*:config/defaults/caches.properties</value>
 
-        <value>classpath*:config/defaults/plugin-*/alfresco-global.properties</value>
-        <value>classpath*:config/defaults/plugin-*/caches.properties</value>
+        <value>classpath*:config/plugins/plugin-*/alfresco-global.properties</value>
+        <value>classpath*:config/plugins/plugin-*/caches.properties</value>
 
         <value>classpath*:config/cluster/alfresco-global.properties</value>
-        <value>classpath*:config/node/caches.properties</value>
+        <value>classpath*:config/cluster/caches.properties</value>
 
         <value>classpath*:config/node/alfresco-global.properties</value>
-        <value>classpath*:config/cluster/caches.properties</value>
+        <value>classpath*:config/node/caches.properties</value>
       </list>
     </property>
 
