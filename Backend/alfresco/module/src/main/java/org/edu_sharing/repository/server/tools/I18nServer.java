@@ -37,7 +37,7 @@ import java.util.ResourceBundle;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
+import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 
 
@@ -78,7 +78,7 @@ public class I18nServer {
 		}
 	}
 	public static String getTranslationDefaultResourcebundle(String key, String locale){
-		return MetadataReaderV2.getTranslation("mds", key, null, locale);
+		return MetadataReader.getTranslation("mds", key, null, locale);
 		// return getTranslation(key,locale,defaultResourceBundle);
 	}
 	
