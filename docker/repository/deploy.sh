@@ -364,6 +364,24 @@ reload() {
 
 	echo "Use compose set: $COMPOSE_LIST"
 
+	echo "Redeploy alfresco 0 amps ..."
+	$COMPOSE_EXEC \
+		$COMPOSE_LIST \
+		exec repository-service \
+		[[ -d amps/alfresco/0 ]] && java -jar bin/alfresco-mmt.jar install amps/alfresco/0 tomcat/webapps/alfresco -directory -nobackup -force || exit
+
+	echo "Redeploy alfresco 1 amps ..."
+	$COMPOSE_EXEC \
+		$COMPOSE_LIST \
+		exec repository-service \
+		[[ -d amps/alfresco/1 ]] && java -jar bin/alfresco-mmt.jar install amps/alfresco/1 tomcat/webapps/alfresco -directory -nobackup -force || exit
+
+	echo "Redeploy edu-sharing 1 amps..."
+	$COMPOSE_EXEC \
+		$COMPOSE_LIST \
+		exec repository-service \
+		[[ -d amps/edu-sharing/1 ]] && java -jar bin/alfresco-mmt.jar install amps/edu-sharing/1 tomcat/webapps/edu-sharing -directory -nobackup -force || exit
+
 	echo "Reloading $CLI_OPT2 ..."
 	$COMPOSE_EXEC \
 		$COMPOSE_LIST \
