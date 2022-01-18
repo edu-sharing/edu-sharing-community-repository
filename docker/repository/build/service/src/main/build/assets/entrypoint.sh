@@ -97,6 +97,26 @@ done
 	until wait-for-it "${repository_transform_host}:${repository_transform_port}" -t 3; do sleep 1; done
 }
 
+### install ############################################################################################################
+
+reinstall.sh
+
+configs=(defaults plugins cluster node)
+
+for config in "${configs[@]}"; do
+	if [[ ! -f tomcat/shared/classes/config/$config/version.json ]]; then
+		mkdir -p tomcat/shared/classes/config/$config
+		for jar in tomcat/shared/lib/$config/*.jar; do
+			unzip -o $jar -d tomcat/shared/classes/config/$config -x 'META-INF/*'
+			rm $jar
+		done
+		cp -f tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/$config
+	else
+		mv tomcat/shared/classes/config/$config/version.json tomcat/shared/classes/config/$config/version.json.$(date +%d-%m-%Y_%H-%M-%S )
+		cp -f tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/$config
+	fi
+done
+
 ########################################################################################################################
 
 export CATALINA_OUT="/dev/stdout"
@@ -151,21 +171,6 @@ xmlstarlet ed -L \
   -N x="http://java.sun.com/xml/ns/javaee" \
 	-u '/x:web-app/x:session-config/x:session-timeout' -v "${my_session_timeout}" \
 	${catWConf}
-
-### config #############################################################################################################
-
-configs=(defaults plugins cluster node)
-
-for config in "${configs[@]}"; do
-	[[ ! -f tomcat/shared/classes/config/$config/version.json ]] && {
-		mkdir -p tomcat/shared/classes/config/$config
-		for jar in tomcat/shared/lib/$config/*.jar; do
-			unzip -o $jar -d tomcat/shared/classes/config/$config -x 'META-INF/*'
-			rm $jar
-		done
-		cp -f tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/$config
-	}
-done
 
 ### Alfresco platform ##################################################################################################
 
