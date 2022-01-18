@@ -235,7 +235,6 @@ persistence:
         resources:
           requests:
             storage: 1Gi
-
     data:
       create: true
       spec:

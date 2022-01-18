@@ -29,9 +29,9 @@ app.kubernetes.io/name: {{ include "edusharing_repository_service.name" . }}
 {{- end -}}
 
 {{- define "edusharing_repository_service.pvc.share.config" -}}
-share-{{ include "edusharing_repository_service.name" . }}-config
+share-config-{{ include "edusharing_repository_service.name" . }}
 {{- end -}}
 
 {{- define "edusharing_repository_service.pvc.share.data" -}}
-share-{{ include "edusharing_repository_service.name" . }}-data
+share-data-{{ include "edusharing_repository_service.name" . }}
 {{- end -}}
