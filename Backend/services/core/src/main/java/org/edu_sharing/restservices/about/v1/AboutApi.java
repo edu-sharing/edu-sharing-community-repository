@@ -145,18 +145,14 @@ public class AboutApi  {
 	    	//NodeServiceFactory.getLocalService().exists(protocol, store, result)
 
 			if(result == null){
-				return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-						.entity(ErrorResponse.createResponse(new Exception(mode +" check failed. no result returned."))).build();
+				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 			}
 	    	
 	    	return Response.ok().build();
 	    	
-    	}catch(java.util.concurrent.TimeoutException e){
-    		logger.debug(e.getMessage(),e);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(e)).build();
 		}catch(Throwable t) {
-    		logger.error(t.getMessage(), t);			
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+			logger.debug(t.getMessage(),t);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     	}
     	
     	

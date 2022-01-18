@@ -92,7 +92,12 @@ public class ErrorFilter implements Filter {
 				response.setMessage("LogLevel is > INFO");
 			}
 			if(t != null) {
-				Logger.getLogger(ErrorFilter.class).error(t.getMessage(), t);
+				boolean isAboutStatusCall = req.getQueryString().contains("timeoutSeconds");
+				if (isAboutStatusCall) {
+					Logger.getLogger(ErrorFilter.class).debug(t.getMessage(), t);
+				} else {
+					Logger.getLogger(ErrorFilter.class).error(t.getMessage(), t);
+				}
 			}
 			resp.setStatus(statusCode);
 			String accept = req.getHeader("accept");
