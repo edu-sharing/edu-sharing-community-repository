@@ -171,7 +171,8 @@ public class I18nServer {
         	currentLocale = new Locale(language, country);
         }
 		try {
-			messages = PropertiesHelper.Config.getResourceBundleForFile(resourceBoundle + "_" + currentLocale.toString() + ".properties");
+			messages = ResourceBundle.getBundle(resourceBoundle, currentLocale);
+//			messages = PropertiesHelper.Config.getResourceBundleForFile(resourceBoundle + "_" + currentLocale.toString() + ".properties");
 		}catch(Exception e) {
 			throw new RuntimeException(e);
 		}
