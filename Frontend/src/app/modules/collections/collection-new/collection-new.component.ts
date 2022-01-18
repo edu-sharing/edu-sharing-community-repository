@@ -171,15 +171,16 @@ export class CollectionNewComponent implements EventListener{
           const imageData = data.preview?.data;
           if(imageData) {
             this.imageData = imageData;
+            this.updateImageOptions();
             fetch(this.imageData).then(res => res.blob()).then(blob => {
-                this.imageFile = new File([blob], 'Image');
+                this.imageFile = blob as File;
             });
           } else {
               this.toast.error(
                   null, 'COLLECTIONS.TOAST.ERROR_IMAGE_APPLY'
               );
           }
-        this.imageWindow.close();
+        this.imageWindow?.close();
       }
   }
 
