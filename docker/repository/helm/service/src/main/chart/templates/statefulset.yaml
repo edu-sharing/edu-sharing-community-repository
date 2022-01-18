@@ -84,8 +84,10 @@ spec:
         - name: gossip
           containerPort: 5701
         volumeMounts:
+        - name: data-config
+          mountPath: /usr/local/tomcat/shared/classes/config/node
         - name: share-config
-          mountPath: /usr/local/tomcat/shared
+          mountPath: /usr/local/tomcat/shared/classes/config/cluster
         - name: share-data
           mountPath: /opt/alfresco/alf_data
         - name: file
@@ -245,4 +247,8 @@ spec:
           name: {{ include "edusharing_repository_service.name" . }}-saml-files
       {{- end }}
       {{- end }}
-
+  volumeClaimTemplates:
+    - metadata:
+        name: data-config
+        labels: {{ include "edusharing_repository_service.labels" . | nindent 8 }}
+      spec: {{ merge .Values.persistence.data.config.spec .Values.global.cluster.storage.data.spec | toYaml | nindent 6 }}

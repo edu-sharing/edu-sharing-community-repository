@@ -22,6 +22,10 @@ global:
 
     storage:
 
+      data:
+        permission: false
+        spec: {}
+
       share:
         permission: false
         spec: {}
@@ -213,6 +217,15 @@ config:
 
 persistence:
 
+  data:
+
+    config:
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi
+
   share:
 
     config:
@@ -222,6 +235,7 @@ persistence:
         resources:
           requests:
             storage: 1Gi
+
     data:
       create: true
       spec:
