@@ -7,6 +7,7 @@ import { environment } from '../../environments/environment';
 import { Translation } from './translation';
 import { TranslationSource } from './translation-source';
 import * as rxjs from 'rxjs';
+import {CsvHelper} from '../core-module/csv.helper';
 
 export const TRANSLATION_LIST = [
     'common',
@@ -163,12 +164,16 @@ export class TranslationLoader implements TranslateLoader {
         return translations;
     }
 
-    private replaceGenderCharacter(translations: Dictionary) {
+    private replaceGenderCharacter(translations: Dictionary, path: string[] = []) {
         for(let key of Object.keys(translations)) {
             if(typeof translations[key] === 'string') {
+                // DO NOT REMOVE (required for csv language dumping)
+                /*console.log(CsvHelper.fromArray(null, [[
+                        path.concat(key).join('.'), translations[key]
+                ]]));*/
                 translations[key] = (translations[key] as string).replace(/{{GENDER_SEPARATOR}}/g, "*");
             } else {
-                translations[key] = this.replaceGenderCharacter(translations[key] as Dictionary);
+                translations[key] = this.replaceGenderCharacter(translations[key] as Dictionary, path.concat(key));
             }
         }
 
