@@ -219,9 +219,88 @@ rstart() {
 		up -d || exit
 }
 
+rtest() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_all repository/repository.yml -remote -test) $(compose_all_plugins repository -remote -test)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_all rendering/rendering.yml -remote -test) $(compose_all_plugins rendering -remote -test)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
+	$COMPOSE_EXEC \
+		$COMPOSE_LIST \
+		pull || exit
+
+	$COMPOSE_EXEC \
+		$COMPOSE_LIST \
+		up -d || exit
+}
+
+rdebug() {
+	[[ -z $CLI_OPT2 ]] && {
+		CLI_OPT2="../.."
+	}
+
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_all repository/repository.yml -remote -test -debug) $(compose_all_plugins repository -remote -test -debug)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_all rendering/rendering.yml -remote -test -debug) $(compose_all_plugins rendering -remote -test -debug)"
+
+	case $CLI_OPT2 in
+	/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
+	*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
+	esac
+
+	COMMUNITY_PATH=$(pwd)
+
+	export COMMUNITY_PATH
+	popd >/dev/null || exit
+
+	echo "Use compose set: $COMPOSE_LIST"
+
+	$COMPOSE_EXEC \
+		$COMPOSE_LIST \
+		pull || exit
+
+	$COMPOSE_EXEC \
+		$COMPOSE_LIST \
+		up -d || exit
+}
+
 lstart() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose_all repository/repository.yml) $(compose_all_plugins repository)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose_all rendering/rendering.yml) $(compose_all_plugins rendering)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
+	$COMPOSE_EXEC \
+		$COMPOSE_LIST \
+		up -d || exit
+}
+
+ltest() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_all repository/repository.yml -test) $(compose_all_plugins repository -test)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_all rendering/rendering.yml -test) $(compose_all_plugins rendering -test)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
+	$COMPOSE_EXEC \
+		$COMPOSE_LIST \
+		up -d || exit
+}
+
+ldebug() {
+	[[ -z "${CLI_OPT2}" ]] && {
+		CLI_OPT2="../.."
+	}
+
+	case $CLI_OPT2 in
+	/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
+	*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
+	esac
+
+	COMMUNITY_PATH=$(pwd)
+	export COMMUNITY_PATH
+	popd >/dev/null || exit
+
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_all repository/repository.yml -test -debug) $(compose_all_plugins repository -test -debug)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose_all rendering/rendering.yml -test -debug) $(compose_all_plugins rendering -test -debug)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -288,8 +367,20 @@ case "${CLI_OPT1}" in
 rstart)
 	rstart && info
 	;;
+rtest)
+	rtest && logs
+	;;
+rdebug)
+	rdebug && logs
+	;;
 lstart)
 	lstart && info
+	;;
+ltest)
+	ltest && logs
+	;;
+ldebug)
+	ldebug && logs
 	;;
 info)
 	info
@@ -316,7 +407,12 @@ ci)
 	echo "Option:"
 	echo ""
 	echo "  - rstart            startup containers from remote images"
+	echo "  - rtest             startup containers from remote images with dev ports"
+	echo "  - rdebug [<path>]   startup containers from remote images with dev ports and artifacts [../..]"
+	echo ""
 	echo "  - lstart            startup containers from local images"
+	echo "  - ltest             startup containers from local images with dev ports"
+	echo "  - ldebug [<path>]   startup containers from local images with dev ports and artifacts [../..]"
 	echo ""
 	echo "  - ci                startup containers inside ci-pipeline"
 	echo ""
