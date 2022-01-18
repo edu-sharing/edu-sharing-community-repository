@@ -16,6 +16,7 @@ import org.edu_sharing.service.lti13.model.LTISessionObject;
 import org.edu_sharing.service.lti13.model.LoginInitiationDTO;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.Key;
@@ -26,6 +27,8 @@ import java.util.*;
 public class LTIJWTUtil {
 
     Logger logger = Logger.getLogger(LTIJWTUtil.class);
+
+    ApplicationInfo platform = null;
 
     public String generateState(ApplicationInfo platformDeployment, Map<String, String> authRequestMap, LoginInitiationDTO loginInitiationDTO, String clientIdValue, String deploymentIdValue) throws GeneralSecurityException, IOException {
 
@@ -77,6 +80,10 @@ public class LTIJWTUtil {
         // If we are on this point, then the state signature has been validated. We can start other tasks now.
     }
 
+    public Jws<Claims> validateJWT(String jwt){
+        return validateJWT(jwt,null,null);
+    }
+
     public Jws<Claims> validateJWT(String jwt, String clientId, String deploymentId) {
 
         return Jwts.parser().setSigningKeyResolver(new SigningKeyResolverAdapter() {
@@ -85,11 +92,17 @@ public class LTIJWTUtil {
             // we don't know the key and we need to check it pre-extracting the claims and finding the kid
             @Override
             public Key resolveSigningKey(JwsHeader header, Claims claims) {
-                ApplicationInfo platform;
+
+                String tmpClientId = clientId;
+                String tmpDeploymentId = deploymentId;
                 try {
+
+
+                    if(tmpClientId == null) tmpClientId = claims.getAudience();
+                    if(tmpDeploymentId == null) tmpDeploymentId = claims.get(LTIConstants.LTI_DEPLOYMENT_ID, String.class);
                     // We are dealing with RS256 encryption, so we have some Oauth utils to manage the keys and
                     // convert them to keys from the string stored in DB. There are for sure other ways to manage this.
-                    platform = new RepoTools().getApplicationInfo(claims.getIssuer(),clientId,deploymentId);
+                    platform = new RepoTools().getApplicationInfo(claims.getIssuer(),tmpClientId,tmpDeploymentId);
                 } catch (LTIException ex) {
                     logger.error("no platform with " + claims.getIssuer() +" " + clientId + " registered", ex);
                     return null;
@@ -97,13 +110,13 @@ public class LTIJWTUtil {
                 // If the platform has a JWK Set endpoint... we try that.
                 if (StringUtils.isNoneEmpty(platform.getPublicKey())) {
                     try {
-                        //JWKSet publicKeys = JWKSet.load(new URL(platformDeployment.getJwksEndpoint()));
-                        //JWK jwk = publicKeys.getKeyByKeyId(header.getKeyId());
-                        //return ((AsymmetricJWK) jwk).toPublicKey();
-                        return new Signing().getPemPublicKey(
+                        JWKSet publicKeys = JWKSet.load(new URL(platform.getLtiKeysetUrl()));
+                        JWK jwk = publicKeys.getKeyByKeyId(header.getKeyId());
+                        return ((AsymmetricJWK) jwk).toPublicKey();
+                        /*return new Signing().getPemPublicKey(
                                 platform.getPublicKey(),
-                                CCConstants.SECURITY_KEY_ALGORITHM);
-                    } catch (GeneralSecurityException e) {
+                                CCConstants.SECURITY_KEY_ALGORITHM); */
+                    } catch (Exception e) {
                         logger.error("Error getting the iss public key", e);
                         return null;
                     }
@@ -115,6 +128,8 @@ public class LTIJWTUtil {
             }
         }).parseClaimsJws(jwt);
     }
+
+
 
     public String getDeepLinkingResponseJwt(LTISessionObject ltiSessionObject, String eduNodeId, String eduNodeTitle) throws GeneralSecurityException{
         String appId = ltiSessionObject.getEduSharingAppId();
@@ -195,5 +210,7 @@ public class LTIJWTUtil {
         return deepLink;
     }
 
-
+    public ApplicationInfo getPlatform() {
+        return platform;
+    }
 }

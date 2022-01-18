@@ -6,9 +6,12 @@ import com.nimbusds.jose.jwk.JWKSet;
 import edu.uoc.elc.lti.tool.Tool;
 import edu.uoc.elc.lti.tool.oidc.LoginRequest;
 import edu.uoc.elc.spring.lti.security.openid.LoginRequestFactory;
+import edu.uoc.elc.spring.lti.security.utils.TokenFactory;
 import edu.uoc.elc.spring.lti.tool.ToolFactory;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.Jwts;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -29,6 +32,8 @@ import org.edu_sharing.service.lti13.*;
 import org.edu_sharing.service.lti13.model.LTISessionObject;
 import org.edu_sharing.service.lti13.model.LoginInitiationDTO;
 import org.edu_sharing.service.lti13.uoc.Config;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.ServletException;
@@ -101,7 +106,8 @@ public class LTIApi {
             //response.sendRedirect(authRequest);
             return Response.status(302).location(new URI(authRequest)).build();
 
-        } catch (LTIException | URISyntaxException e) {
+        } catch (Throwable e) {
+            logger.error(e.getMessage(),e);
             return Response.status(Response.Status.OK).entity(getHTML(null,null,e.getMessage())).build();
         }
     }
@@ -167,29 +173,48 @@ public class LTIApi {
                         @Context HttpServletRequest req){
         logger.info("id_token:"+idToken +" state:"+state);
 
+
         try{
             if(state == null) {
                 throw new IllegalStateException("no state param provided");
             }
 
-            List<String> sessionStates = (List<String>)req.getSession().getAttribute(LTIConstants.LTI_TOOL_SESS_ATT_STATE);
+            if (idToken == null) {
+                String message = "The request is not a LTI request, so no credentials at all. Returning current credentials";
+                this.logger.info(message);
+                throw new IllegalStateException(message);
+            }
+
+            /**
+             * get claims cause we need clientId,deploymentId,iss for applicationinfo of plattform to instance tool
+             * token will be validated with public key of the platform app
+             * @TODO use keyset url
+             */
+            LTIJWTUtil ltijwtUtil = new LTIJWTUtil();
+            Jws<Claims> jws = ltijwtUtil.validateJWT(idToken);
+            Tool tool = Config.getTool(ltijwtUtil.getPlatform(),req,true);
+
+            tool.validate(idToken, state);
+            if (!tool.isValid()) {
+                logger.error(tool.getReason());
+                throw new IllegalStateException(tool.getReason());
+            }
+
+
+            /*List<String> sessionStates = (List<String>)req.getSession().getAttribute(LTIConstants.LTI_TOOL_SESS_ATT_STATE);
             if(sessionStates == null){
                 throw new IllegalStateException("no states initiated for this session");
             }
 
             if(!sessionStates.contains(state)){
                 throw new IllegalStateException("LTI request doesn't contains the expected state");
-            }
+            }*/
 
 
-            LTIJWTUtil ltijwtUtil = new LTIJWTUtil();
-            Jws<Claims> stateClaims = ltijwtUtil.validateState(state);
+
 
             if(StringUtils.hasText(idToken)){
                 //Now we validate the JWT token
-                Jws<Claims> jws = ltijwtUtil.validateJWT(idToken,
-                        stateClaims.getBody().getAudience(),
-                        stateClaims.getBody().get(LTIConstants.LTI_STATE_DEPLOYMENT_ID, String.class));
                 if (jws != null) {
                     //Here we create and populate the LTI3Request object and we will add it to the httpServletRequest, so the redirect endpoint will have all that information
                     //ready and will be able to use it.
@@ -228,7 +253,7 @@ public class LTIApi {
                     ltiSessionObject.setNonce(jws.getBody().get(LTIConstants.LTI_NONCE,String.class));
                     ltiSessionObject.setMessageType(ltiMessageType);
                     ltiSessionObject.setEduSharingAppId(new RepoTools().getAppId(ltiSessionObject.getIss(),
-                            stateClaims.getBody().getAudience(),
+                            jws.getBody().getAudience(),
                             ltiSessionObject.getDeploymentId()));
 
                     /**
@@ -269,6 +294,7 @@ public class LTIApi {
                 }
             }
         }catch(Exception e){
+            logger.error(e.getMessage(),e);
             return Response.status(Response.Status.OK).entity(getHTML(null,null,e.getMessage())).build();
         }
 
