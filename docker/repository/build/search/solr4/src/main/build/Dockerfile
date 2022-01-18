@@ -87,6 +87,8 @@ EXPOSE 8080
 ENTRYPOINT ["entrypoint.sh"]
 CMD ["catalina.sh", "run"]
 
+VOLUME [ "/opt/alfresco/alf_data" ]
+
 ########################################################################################################################
 
 LABEL git.branch=${git.branch}

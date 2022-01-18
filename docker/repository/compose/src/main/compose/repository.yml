@@ -12,7 +12,7 @@ services:
     expose:
       - "5432"
     volumes:
-      - "repository-database-volume:/bitnami/postgresql"
+      - "repository-database-volume-data:/bitnami/postgresql"
 
   repository-search-solr4:
     image: "${docker.repository}/edu_sharing-community-deploy-docker-repository-build-search-solr4:${docker.tag}"
@@ -34,7 +34,7 @@ services:
       - "8080"
       - "9090"
     volumes:
-      - "repository-search-solr4-volume:/opt/alfresco/alf_data"
+      - "repository-search-solr4-volume-data:/opt/alfresco/alf_data"
     depends_on:
       - repository-service
 
@@ -89,8 +89,8 @@ services:
       - "8100"
 
 volumes:
-  repository-database-volume:
-  repository-search-solr4-volume:
+  repository-database-volume-data:
+  repository-search-solr4-volume-data:
   repository-service-volume-config-cluster:
   repository-service-volume-config-node:
   repository-service-volume-data:

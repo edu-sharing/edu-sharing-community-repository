@@ -169,6 +169,8 @@ EXPOSE 80 8080 8081
 ENTRYPOINT ["entrypoint.sh"]
 CMD ["catalina.sh", "run"]
 
+VOLUME [ "/opt/alfresco/alf_data", "/usr/local/tomcat/shared/classes/config/cluster", "/usr/local/tomcat/shared/classes/config/node" ]
+
 ########################################################################################################################
 
 

@@ -97,6 +97,8 @@ EXPOSE 8080 8081
 ENTRYPOINT ["entrypoint.sh"]
 CMD ["apache2-foreground"]
 
+VOLUME [ "/var/cache/esrender/config", "/var/cache/esrender/data" ]
+
 ########################################################################################################################
 
 LABEL git.branch=${git.branch}
