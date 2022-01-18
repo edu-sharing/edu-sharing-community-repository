@@ -154,19 +154,18 @@ xmlstarlet ed -L \
 
 ### config #############################################################################################################
 
-configs=(defaults cluster node)
+configs=(defaults plugins cluster node)
 
 for config in "${configs[@]}"; do
-	[[ ! -d tomcat/shared/classes/config/"$config" ]] && {
-		mkdir -p tomcat/shared/classes/config/"$config"
-		for jar in tomcat/shared/lib/"$config"/*.jar; do
-			unzip "$jar" -d tomcat/shared/classes/config/"$config" -x META-INF/*
-			rm "$jar"
+	[[ ! -f tomcat/shared/classes/config/$config/version.json ]] && {
+		mkdir -p tomcat/shared/classes/config/$config
+		for jar in tomcat/shared/lib/$config/*.jar; do
+			unzip -o $jar -d tomcat/shared/classes/config/$config -x 'META-INF/*'
+			rm $jar
 		done
+		cp -f tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/$config
 	}
 done
-
-cp -f tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/cluster
 
 ### Alfresco platform ##################################################################################################
 

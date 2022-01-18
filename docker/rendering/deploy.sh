@@ -113,7 +113,6 @@ note() {
 }
 
 compose_yml() {
-
 	COMPOSE_BASE_FILE="$1"
 	COMPOSE_DIRECTORY="$(dirname "$COMPOSE_BASE_FILE")"
 	COMPOSE_FILE_NAME="$(basename "$COMPOSE_BASE_FILE" | cut -f 1 -d '.')" # without extension
@@ -159,7 +158,6 @@ compose_yml() {
 	echo $COMPOSE_LIST
 }
 
-# shellcheck disable=SC2120
 compose_all_plugins() {
 	COMPOSE_LIST=
 	for plugin in plugin*/; do
@@ -172,7 +170,6 @@ compose_all_plugins() {
 }
 
 logs() {
-
 	COMPOSE_LIST="$(compose_yml rendering.yml) $(compose_all_plugins)"
 
 	echo "Use compose set: $COMPOSE_LIST"
@@ -221,11 +218,11 @@ rtest() {
 }
 
 rdebug() {
-	[[ -z "${CLI_OPT2}" ]] && {
-		echo ""
-		echo "Usage: ${CLI_CMD} ${CLI_OPT1} <edu-sharing community services rendering>"
-		exit
+	[[ -z $CLI_OPT2 ]] && {
+		CLI_OPT2="../.."
 	}
+
+	COMPOSE_LIST="$(compose_yml rendering.yml -remote -test -debug) $(compose_all_plugins -remote -test -debug)"
 
 	case $CLI_OPT2 in
 	/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
@@ -233,10 +230,9 @@ rdebug() {
 	esac
 
 	COMMUNITY_PATH=$(pwd)
+
 	export COMMUNITY_PATH
 	popd >/dev/null || exit
-
-	COMPOSE_LIST="$(compose_yml rendering.yml -remote -test -debug) $(compose_all_plugins -remote -test)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -271,9 +267,7 @@ ltest() {
 
 ldebug() {
 	[[ -z "${CLI_OPT2}" ]] && {
-		echo ""
-		echo "Usage: ${CLI_CMD} ${CLI_OPT1} <edu-sharing community services rendering>"
-		exit
+		CLI_OPT2="../.."
 	}
 
 	case $CLI_OPT2 in
@@ -285,7 +279,7 @@ ldebug() {
 	export COMMUNITY_PATH
 	popd >/dev/null || exit
 
-	COMPOSE_LIST="$(compose_yml rendering.yml -test -debug) $(compose_all_plugins -test)"
+	COMPOSE_LIST="$(compose_yml rendering.yml -test -debug) $(compose_all_plugins -test -debug)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -364,11 +358,11 @@ remove)
 	echo ""
 	echo "  - rstart            startup containers from remote images"
 	echo "  - rtest             startup containers from remote images with dev ports"
-	echo "  - rdebug <path>     startup containers from remote images with dev ports and artifacts"
+	echo "  - rdebug [<path>]   startup containers from remote images with dev ports and artifacts [../..]"
 	echo ""
 	echo "  - lstart            startup containers from local images"
 	echo "  - ltest             startup containers from local images with dev ports"
-	echo "  - ldebug <path>     startup containers from local images with dev ports and artifacts"
+	echo "  - ldebug [<path>]   startup containers from local images with dev ports and artifacts [../..]"
 	echo ""
 	echo "  - info              show information"
 	echo "  - logs              show logs"

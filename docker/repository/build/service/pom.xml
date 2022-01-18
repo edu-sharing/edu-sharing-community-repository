@@ -57,14 +57,27 @@
             <phase>package</phase>
             <configuration>
               <includeArtifactIds>
-                edu_sharing-community-repository-config-defaults,
+                edu_sharing-community-repository-config-defaults
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/build/config/defaults</outputDirectory>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>config-plugin-elastic</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
                 edu_sharing-community-repository-plugin-elastic-config-defaults,
                 edu_sharing-community-repository-plugin-mongo-config-defaults,
                 edu_sharing-enterprise-repository-plugin-cluster-config-defaults,
                 edu_sharing-enterprise-repository-plugin-remote-config-defaults,
                 edu_sharing-enterprise-repository-plugin-transform-config-defaults
               </includeArtifactIds>
-              <outputDirectory>${project.build.directory}/build/config/defaults</outputDirectory>
+              <outputDirectory>${project.build.directory}/build/config/plugins</outputDirectory>
             </configuration>
           </execution>
 

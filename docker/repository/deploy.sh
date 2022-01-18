@@ -152,7 +152,6 @@ note() {
 }
 
 compose_yml() {
-
 	COMPOSE_BASE_FILE="$1"
 	COMPOSE_DIRECTORY="$(dirname "$COMPOSE_BASE_FILE")"
 	COMPOSE_FILE_NAME="$(basename "$COMPOSE_BASE_FILE" | cut -f 1 -d '.')" # without extension
@@ -229,88 +228,7 @@ ps() {
 		ps || exit
 }
 
-lstart() {
-	COMPOSE_LIST="$(compose_yml repository.yml) $(compose_all_plugins)"
-
-	echo "Use compose set: $COMPOSE_LIST"
-
-	$COMPOSE_EXEC \
-		$COMPOSE_LIST \
-		up -d || exit
-}
-
-ltest() {
-	COMPOSE_LIST="$(compose_yml repository.yml -test) $(compose_all_plugins -test)"
-
-	echo "Use compose set: $COMPOSE_LIST"
-
-	$COMPOSE_EXEC \
-		$COMPOSE_LIST \
-		up -d || exit
-}
-
-ldebug() {
-
-	[[ -z "${CLI_OPT2}" ]] && {
-		echo ""
-		echo "Usage: "
-		echo "  ${CLI_CMD} ${CLI_OPT1} -repo <PROJECT_ROOT_PATH>"
-		echo "  ${CLI_CMD} ${CLI_OPT1} -plugin <PLUGIN_NAME> <PROJECT_ROOT_PATH>"
-		exit
-	}
-
-	COMPOSE_LIST=
-	case "$CLI_OPT2" in
-
-	-repo)
-		COMPOSE_LIST="$(compose_yml repository.yml -test -debug) $(compose_all_plugins -test)"
-
-		case $CLI_OPT3 in
-		/*) pushd "${CLI_OPT3}" >/dev/null || exit ;;
-		*) pushd "${ROOT_PATH}/${CLI_OPT3}" >/dev/null || exit ;;
-		esac
-
-		COMMUNITY_PATH=$(pwd)
-		export COMMUNITY_PATH
-		popd >/dev/null || exit
-		;;
-
-	-plugin)
-		COMPOSE_LIST="$(compose_yml repository.yml -test) $(compose_all_plugins -test) $(compose_yml plugin-$CLI_OPT3/plugin-$CLI_OPT3 -debug)"
-
-		case $CLI_OPT4 in
-		/*) pushd "${CLI_OPT4}" >/dev/null || exit ;;
-		*) pushd "${ROOT_PATH}/${CLI_OPT4}" >/dev/null || exit ;;
-		esac
-
-		PLUGIN_PATH=$(pwd)
-		export PLUGIN_PATH
-		popd >/dev/null || exit
-		;;
-
-	*)
-		{
-			echo "error: ldebug unknown flag: $flag"
-			echo ""
-			echo "valid flags for ldebug are:"
-			echo "  -repo <PROJECT_ROOT_PATH>"
-			echo "  -plugin <PLUGIN_NAME> <PROJECT_ROOT_PATH>"
-		} >&2
-		exit 1
-		;;
-	esac
-
-	echo "Use compose set: $COMPOSE_LIST"
-
-	$COMPOSE_EXEC \
-		$COMPOSE_LIST \
-		up -d || exit
-
-	reload
-}
-
 rstart() {
-
 	COMPOSE_LIST="$(compose_yml repository.yml -remote) $(compose_all_plugins -remote)"
 
 	echo "Use compose set: $COMPOSE_LIST"
@@ -338,59 +256,22 @@ rtest() {
 		up -d || exit
 }
 
-#TODO DEBUG PLUGIN
-
 rdebug() {
-
-	[[ -z "${CLI_OPT2}" ]] && {
-		echo ""
-		echo "Usage: "
-		echo "  ${CLI_CMD} ${CLI_OPT1} -repo <PROJECT_ROOT_PATH>"
-		echo "  ${CLI_CMD} ${CLI_OPT1} -plugin <PLUGIN_NAME> <PROJECT_ROOT_PATH>"
-		exit
+	[[ -z $CLI_OPT2 ]] && {
+		CLI_OPT2="../.."
 	}
 
-	COMPOSE_LIST=
-	case "$CLI_OPT2" in
+	COMPOSE_LIST="$(compose_yml repository.yml -remote -test -debug) $(compose_all_plugins -remote -test -debug)"
 
-	-repo)
-		COMPOSE_LIST="$(compose_yml repository.yml -remote -test -debug) $(compose_all_plugins -remote -test)"
-
-		case $CLI_OPT3 in
-		/*) pushd "${CLI_OPT3}" >/dev/null || exit ;;
-		*) pushd "${ROOT_PATH}/${CLI_OPT3}" >/dev/null || exit ;;
-		esac
-
-		COMMUNITY_PATH=$(pwd)
-		export COMMUNITY_PATH
-		popd >/dev/null || exit
-		;;
-
-	-plugin)
-		COMPOSE_LIST="$(compose_yml repository.yml -remote -test) $(compose_all_plugins -remote -test) $(compose_yml plugin-$CLI_OPT3/plugin-$CLI_OPT3 -debug)"
-
-		case $CLI_OPT4 in
-		/*) pushd "${CLI_OPT4}" >/dev/null || exit ;;
-		*) pushd "${ROOT_PATH}/${CLI_OPT4}" >/dev/null || exit ;;
-		esac
-
-		pushd "${ROOT_PATH}/${CLI_OPT4}" >/dev/null || exit
-		PLUGIN_PATH=$(pwd)
-		export PLUGIN_PATH
-		popd >/dev/null || exit
-		;;
-
-	*)
-		{
-			echo "error: ldebug unknown flag: $flag"
-			echo ""
-			echo "valid flags for ldebug are:"
-			echo "  -repo <PROJECT_ROOT_PATH>"
-			echo "  -plugin <PLUGIN_NAME> <PROJECT_ROOT_PATH>"
-		} >&2
-		exit 1
-		;;
+	case $CLI_OPT2 in
+	/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
+	*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
 	esac
+
+	COMMUNITY_PATH=$(pwd)
+
+	export COMMUNITY_PATH
+	popd >/dev/null || exit
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -401,8 +282,49 @@ rdebug() {
 	$COMPOSE_EXEC \
 		$COMPOSE_LIST \
 		up -d || exit
+}
 
-	reload
+lstart() {
+	COMPOSE_LIST="$(compose_yml repository.yml) $(compose_all_plugins)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
+	$COMPOSE_EXEC \
+		$COMPOSE_LIST \
+		up -d || exit
+}
+
+ltest() {
+	COMPOSE_LIST="$(compose_yml repository.yml -test) $(compose_all_plugins -test)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
+	$COMPOSE_EXEC \
+		$COMPOSE_LIST \
+		up -d || exit
+}
+
+ldebug() {
+	[[ -z "${CLI_OPT2}" ]] && {
+		CLI_OPT2="../.."
+	}
+
+	case $CLI_OPT2 in
+	/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
+	*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
+	esac
+
+	COMMUNITY_PATH=$(pwd)
+	export COMMUNITY_PATH
+	popd >/dev/null || exit
+
+	COMPOSE_LIST="$(compose_yml repository.yml -test -debug) $(compose_all_plugins -test -debug)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
+	$COMPOSE_EXEC \
+		$COMPOSE_LIST \
+		up -d || exit
 }
 
 stop() {
@@ -434,64 +356,21 @@ remove() {
 }
 
 reload() {
-
-	COMPOSE_LIST="$(compose_yml repository.yml) $(compose_all_plugins)"
-
-	echo "Use compose set: $COMPOSE_LIST"
-
-
-	echo "Redeploy alfresco 0 plugins ..."
-	$COMPOSE_EXEC \
-		$COMPOSE_LIST \
-		exec repository-service \
-		java -jar bin/alfresco-mmt.jar install amps/alfresco/0 tomcat/webapps/edu-sharing -directory -nobackup -force || exit
-
-	echo "Redeploy alfresco 1 plugins ..."
-	$COMPOSE_EXEC \
-		$COMPOSE_LIST \
-		exec repository-service \
-		java -jar bin/alfresco-mmt.jar install amps/alfresco/1 tomcat/webapps/edu-sharing -directory -nobackup -force || exit
-
-	echo "Redeploy edu-sharing plugins..."
-	$COMPOSE_EXEC \
-		$COMPOSE_LIST \
-		exec repository-service \
-		java -jar bin/alfresco-mmt.jar install amps/edu-sharing/1 tomcat/webapps/edu-sharing -directory -nobackup -force || exit
-
-	echo "Trigger edu-sharing reloading ..."
-	$COMPOSE_EXEC \
-		$COMPOSE_LIST \
-		exec repository-service \
-		touch tomcat/webapps/edu-sharing/WEB-INF/web.xml || exit
-
-	echo "Done."
-}
-
-watch() {
 	[[ -z "${CLI_OPT2}" ]] && {
-		echo ""
-		echo "Usage: ${CLI_CMD} ${CLI_OPT1} <edu-sharing community repository>"
-		exit
+		CLI_OPT2="edu-sharing"
 	}
 
-	case $CLI_OPT2 in
-	/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
-	*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
-	esac
-	COMMUNITY_PATH=$(pwd)
-	export COMMUNITY_PATH
-	popd >/dev/null || exit
-
 	COMPOSE_LIST="$(compose_yml repository.yml) $(compose_all_plugins)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
-	echo "Watching ..."
-	fswatch -o "${COMMUNITY_PATH}/Backend/services/webapp/target/edu-sharing.war" | tee /dev/tty | xargs -n1 \
-		$COMPOSE_EXEC \
+	echo "Reloading $CLI_OPT2 ..."
+	$COMPOSE_EXEC \
 		$COMPOSE_LIST \
 		exec repository-service \
-		touch tomcat/webapps/edu-sharing/WEB-INF/web.xml
+		touch tomcat/webapps/$CLI_OPT2/WEB-INF/web.xml || exit
+
+	echo "Done."
 }
 
 case "${CLI_OPT1}" in
@@ -516,9 +395,6 @@ ldebug)
 reload)
 	reload
 	;;
-watch)
-	watch
-	;;
 info)
 	info
 	;;
@@ -542,18 +418,13 @@ remove)
 	echo ""
 	echo "  - rstart            startup containers from remote images"
 	echo "  - rtest             startup containers from remote images with dev ports"
-	echo "  - rdebug            startup containers from remote images with dev ports and artifacts"
-	echo "      -repo <PROJECT_ROOT_PATH> "
-	echo "      -plugin <PLUGIN_NAME> <PROJECT_ROOT_PATH>"
+	echo "  - rdebug [<path>]   startup containers from remote images with dev ports and artifacts [../..]"
 	echo ""
 	echo "  - lstart            startup containers from local images"
 	echo "  - ltest             startup containers from local images with dev ports"
-	echo "  - ldebug            startup containers from local images with dev ports and artifacts"
-	echo "      -repo <PROJECT_ROOT_PATH> "
-	echo "      -plugin <PLUGIN_NAME> <PROJECT_ROOT_PATH>"
+	echo "  - ldebug [<path>]   startup containers from local images with dev ports and artifacts [../..]"
 	echo ""
-	echo "  - reload            reload services"
-	echo "  - watch <path>      reload services if webapp artifact changed"
+	echo "  - reload [service]  reload tomcat webapp [edu-sharing]"
 	echo ""
 	echo "  - info              show information"
 	echo "  - logs              show logs"

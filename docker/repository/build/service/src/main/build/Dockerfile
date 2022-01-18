@@ -34,8 +34,17 @@ RUN set -eux \
 
 RUN set -eux \
     && adduser --uid=1000 --home=$ALF_HOME --disabled-password --gecos "" --shell=/bin/bash worker \
-    && chown -RL worker:worker . \
-    && chown -RL worker:worker /tmp
+    && chown -RL worker:worker /tmp \
+    && mkdir -p alf_data \
+    && mkdir -p tomcat/shared/classes/config/defaults \
+    && mkdir -p tomcat/shared/classes/config/plugins/plugin-cluster \
+    && mkdir -p tomcat/shared/classes/config/plugins/plugin-elastic \
+    && mkdir -p tomcat/shared/classes/config/plugins/plugin-mongo \
+    && mkdir -p tomcat/shared/classes/config/plugins/plugin-remote \
+    && mkdir -p tomcat/shared/classes/config/plugins/plugin-transform \
+    && mkdir -p tomcat/shared/classes/config/cluster/applications \
+    && mkdir -p tomcat/shared/classes/config/node \
+    && chown -RL worker:worker .
 
 USER worker
 
@@ -145,9 +154,9 @@ COPY --chown=worker:worker assets/edu-sharing/log4j2.xml tomcat/webapps/edu-shar
 COPY --chown=worker:worker amps amps/
 
 RUN set -eux \
-    && if [ -d amps/alfresco/0 ] && [ -n $(ls -A amps/alfresco/0 | wc -l) ]; then java -jar bin/alfresco-mmt.jar install amps/alfresco/0 tomcat/webapps/alfresco -directory -nobackup -force; fi \
-    && if [ -d amps/alfresco/1 ] && [ -n $(ls -A amps/alfresco/1 | wc -l) ]; then java -jar bin/alfresco-mmt.jar install amps/alfresco/1 tomcat/webapps/alfresco -directory -nobackup -force; fi \
-    && if [ -d amps/edu-sharing/1 ] && [ -n $(ls -A amps/edu-sharing/1 | wc -l) ]; then java -jar bin/alfresco-mmt.jar install amps/edu-sharing/1 tomcat/webapps/edu-sharing -directory -nobackup -force; fi
+    && if [ -d amps/alfresco/0 ]; then java -jar bin/alfresco-mmt.jar install amps/alfresco/0 tomcat/webapps/alfresco -directory -nobackup -force; fi \
+    && if [ -d amps/alfresco/1 ]; then java -jar bin/alfresco-mmt.jar install amps/alfresco/1 tomcat/webapps/alfresco -directory -nobackup -force; fi \
+    && if [ -d amps/edu-sharing/1 ]; then java -jar bin/alfresco-mmt.jar install amps/edu-sharing/1 tomcat/webapps/edu-sharing -directory -nobackup -force; fi
 
 COPY --chown=worker:worker config tomcat/shared/lib/
 
