@@ -5,6 +5,7 @@ import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import edu.uoc.elc.lti.tool.Tool;
 import edu.uoc.elc.lti.tool.oidc.LoginRequest;
+import edu.uoc.elc.spring.lti.security.openid.HttpSessionOIDCLaunchSession;
 import edu.uoc.elc.spring.lti.security.openid.LoginRequestFactory;
 import edu.uoc.elc.spring.lti.security.utils.TokenFactory;
 import edu.uoc.elc.spring.lti.tool.ToolFactory;
@@ -181,7 +182,7 @@ public class LTIApi {
 
             if (idToken == null) {
                 String message = "The request is not a LTI request, so no credentials at all. Returning current credentials";
-                this.logger.info(message);
+                this.logger.error(message);
                 throw new IllegalStateException(message);
             }
 
@@ -192,6 +193,14 @@ public class LTIApi {
              */
             LTIJWTUtil ltijwtUtil = new LTIJWTUtil();
             Jws<Claims> jws = ltijwtUtil.validateJWT(idToken);
+
+            //validate nonce
+            String nonce = jws.getBody().get("nonce", String.class);
+            String sessionNonce = new HttpSessionOIDCLaunchSession(req).getNonce();
+            if(!nonce.equals(sessionNonce)){
+                throw new IllegalStateException("nonce is invalid");
+            }
+
             Tool tool = Config.getTool(ltijwtUtil.getPlatform(),req,true);
 
             tool.validate(idToken, state);
