@@ -53,7 +53,7 @@
             <goals>
               <goal>jar</goal>
             </goals>
-            <phase>verify</phase>
+            <phase>package</phase>
           </execution>
         </executions>
       </plugin>
