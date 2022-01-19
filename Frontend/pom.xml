@@ -102,7 +102,7 @@
             <goals>
               <goal>single</goal>
             </goals>
-            <phase>verify</phase>
+            <phase>package</phase>
             <configuration>
               <descriptors>
                 <descriptor>sources.xml</descriptor>
