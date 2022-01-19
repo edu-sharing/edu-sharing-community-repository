@@ -9,21 +9,15 @@
 
   <parent>
     <groupId>org.edu_sharing</groupId>
-    <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client</artifactId>
+    <artifactId>edu_sharing-community-repository-backend-services-rest-client</artifactId>
     <version>git</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-core</artifactId>
+  <artifactId>edu_sharing-community-repository-backend-services-rest-client-java</artifactId>
   <packaging>jar</packaging>
 
-  <name>edu_sharing-community-repository-backend-alfresco-rest-client-core</name>
-
-  <properties>
-
-    <repository.alfresco.rest.part>core</repository.alfresco.rest.part>
-
-  </properties>
+  <name>edu_sharing-community-repository-backend-services-rest-client-java</name>
 
   <build>
 
@@ -40,7 +34,7 @@
             <phase>initialize</phase>
             <configuration>
               <includeArtifactIds>
-                api-explorer
+                edu_sharing-community-repository-backend-services-rest-api
               </includeArtifactIds>
               <excludes>META-INF/**</excludes>
               <outputDirectory>${project.build.directory}/api</outputDirectory>
@@ -59,11 +53,11 @@
             </goals>
             <phase>generate-sources</phase>
             <configuration>
-              <inputSpec>${project.build.directory}/api/definitions/alfresco-${repository.alfresco.rest.part}.json</inputSpec>
+              <inputSpec>${project.build.directory}/api/openapi.json</inputSpec>
               <generatorName>java</generatorName>
-              <apiPackage>${repository.alfresco.rest.root}.${repository.alfresco.rest.part}.api</apiPackage>
-              <modelPackage>${repository.alfresco.rest.root}.${repository.alfresco.rest.part}.model</modelPackage>
-              <skipValidateSpec>true</skipValidateSpec>
+              <apiPackage>io.swagger.client.api</apiPackage>
+              <modelPackage>io.swagger.client.model</modelPackage>
+              <skipValidateSpec>false</skipValidateSpec>
             </configuration>
           </execution>
         </executions>
@@ -89,6 +83,26 @@
                 <replacement>
                   <token>@javax.annotation.Generated(.)*</token>
                   <value/>
+                </replacement>
+              </replacements>
+            </configuration>
+          </execution>
+          <execution>
+            <id>fixes</id>
+            <phase>process-sources</phase>
+            <goals>
+              <goal>replace</goal>
+            </goals>
+            <configuration>
+              <basedir>${project.basedir}</basedir>
+              <includes>
+                <include>target/generated-sources/openapi/src/main/java/io/swagger/client/model/JobDetail.java</include>
+              </includes>
+              <regex>false</regex>
+              <replacements>
+                <replacement>
+                  <token><![CDATA[this.jobDataMap = ;]]></token>
+                  <value><![CDATA[this.jobDataMap = new HashMap<String, Object>();]]></value>
                 </replacement>
               </replacements>
             </configuration>
@@ -161,9 +175,8 @@
     <!-- provided -->
 
     <dependency>
-      <groupId>org.alfresco</groupId>
-      <artifactId>api-explorer</artifactId>
-      <type>war</type>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-backend-services-rest-api</artifactId>
       <scope>provided</scope>
     </dependency>
 

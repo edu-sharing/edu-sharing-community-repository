@@ -9,19 +9,19 @@
 
   <parent>
     <groupId>org.edu_sharing</groupId>
-    <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client</artifactId>
+    <artifactId>edu_sharing-community-repository-backend-services-rest-client</artifactId>
     <version>git</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-workflow</artifactId>
+  <artifactId>edu_sharing-community-repository-backend-services-rest-client-php</artifactId>
   <packaging>jar</packaging>
 
-  <name>edu_sharing-community-repository-backend-alfresco-rest-client-workflow</name>
+  <name>edu_sharing-community-repository-backend-services-rest-client-php</name>
 
   <properties>
 
-    <repository.alfresco.rest.part>workflow</repository.alfresco.rest.part>
+    <composer.project>rest-client-php</composer.project>
 
   </properties>
 
@@ -40,7 +40,7 @@
             <phase>initialize</phase>
             <configuration>
               <includeArtifactIds>
-                api-explorer
+                edu_sharing-community-repository-backend-services-rest-api
               </includeArtifactIds>
               <excludes>META-INF/**</excludes>
               <outputDirectory>${project.build.directory}/api</outputDirectory>
@@ -59,38 +59,14 @@
             </goals>
             <phase>generate-sources</phase>
             <configuration>
-              <inputSpec>${project.build.directory}/api/definitions/alfresco-${repository.alfresco.rest.part}.json</inputSpec>
-              <generatorName>java</generatorName>
-              <apiPackage>${repository.alfresco.rest.root}.${repository.alfresco.rest.part}.api</apiPackage>
-              <modelPackage>${repository.alfresco.rest.root}.${repository.alfresco.rest.part}.model</modelPackage>
-              <skipValidateSpec>true</skipValidateSpec>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>com.google.code.maven-replacer-plugin</groupId>
-        <artifactId>replacer</artifactId>
-        <executions>
-          <execution>
-            <id>removeGeneratedAnnotation</id>
-            <phase>process-sources</phase>
-            <goals>
-              <goal>replace</goal>
-            </goals>
-            <configuration>
-              <basedir>${project.basedir}</basedir>
-              <includes>
-                <include>target/generated-sources/openapi/src/main/java/**/*.java</include>
-              </includes>
-              <regex>true</regex>
-              <replacements>
-                <replacement>
-                  <token>@javax.annotation.Generated(.)*</token>
-                  <value/>
-                </replacement>
-              </replacements>
+              <inputSpec>${project.build.directory}/api/openapi.json</inputSpec>
+              <generatorName>php</generatorName>
+              <apiPackage>api</apiPackage>
+              <modelPackage>model</modelPackage>
+              <skipValidateSpec>false</skipValidateSpec>
+              <gitUserId>${composer.vendor}</gitUserId>
+              <gitRepoId>${composer.project}</gitRepoId>
+              <artifactVersion>${composer.version}</artifactVersion>
             </configuration>
           </execution>
         </executions>
@@ -98,14 +74,21 @@
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
+        <artifactId>maven-assembly-plugin</artifactId>
         <executions>
           <execution>
-            <id>attach-sources</id>
             <goals>
-              <goal>jar</goal>
+              <goal>single</goal>
             </goals>
             <phase>package</phase>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/bin.xml</descriptor>
+              </descriptors>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <finalName>${composer.vendor}/${composer.project}-${composer.version}</finalName>
+              <appendAssemblyId>false</appendAssemblyId>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -161,9 +144,8 @@
     <!-- provided -->
 
     <dependency>
-      <groupId>org.alfresco</groupId>
-      <artifactId>api-explorer</artifactId>
-      <type>war</type>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-backend-services-rest-api</artifactId>
       <scope>provided</scope>
     </dependency>
 

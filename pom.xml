@@ -75,7 +75,7 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-services-rest-client</artifactId>
+        <artifactId>edu_sharing-community-repository-backend-services-rest-client-java</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -100,7 +100,7 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-services-soap-client</artifactId>
+        <artifactId>edu_sharing-community-repository-backend-services-soap-client-java</artifactId>
         <version>${project.version}</version>
       </dependency>
 

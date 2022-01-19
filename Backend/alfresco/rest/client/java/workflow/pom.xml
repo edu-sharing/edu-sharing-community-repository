@@ -9,19 +9,19 @@
 
   <parent>
     <groupId>org.edu_sharing</groupId>
-    <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client</artifactId>
+    <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-java</artifactId>
     <version>git</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-discovery</artifactId>
+  <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-java-workflow</artifactId>
   <packaging>jar</packaging>
 
-  <name>edu_sharing-community-repository-backend-alfresco-rest-client-discovery</name>
+  <name>edu_sharing-community-repository-backend-alfresco-rest-client-java-workflow</name>
 
   <properties>
 
-    <repository.alfresco.rest.part>discovery</repository.alfresco.rest.part>
+    <repository.alfresco.rest.part>workflow</repository.alfresco.rest.part>
 
   </properties>
 

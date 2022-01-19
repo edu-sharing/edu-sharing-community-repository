@@ -19,18 +19,8 @@
 
   <name>edu_sharing-community-repository-backend-alfresco-rest-client</name>
 
-  <properties>
-
-    <repository.alfresco.rest.root>org.edu_sharing.alfresco.client</repository.alfresco.rest.root>
-
-  </properties>
-
   <modules>
-    <module>auth</module>
-    <module>core</module>
-    <module>discovery</module>
-    <module>search</module>
-    <module>workflow</module>
+    <module>java</module>
   </modules>
 
 </project>
