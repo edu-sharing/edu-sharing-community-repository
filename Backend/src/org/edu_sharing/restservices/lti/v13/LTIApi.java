@@ -194,7 +194,9 @@ public class LTIApi {
             LTIJWTUtil ltijwtUtil = new LTIJWTUtil();
             Jws<Claims> jws = ltijwtUtil.validateJWT(idToken);
 
-            //validate nonce
+            /**
+             * validate nonce
+             */
             String nonce = jws.getBody().get("nonce", String.class);
             String sessionNonce = new HttpSessionOIDCLaunchSession(req).getNonce();
             if(!nonce.equals(sessionNonce)){
@@ -203,6 +205,10 @@ public class LTIApi {
 
             Tool tool = Config.getTool(ltijwtUtil.getPlatform(),req,true);
 
+            /**
+             * Launch validation: validates authentication response, and specific message(deeplink,....) validation
+             * https://www.imsglobal.org/spec/security/v1p0/#authentication-response-validation
+             */
             tool.validate(idToken, state);
             if (!tool.isValid()) {
                 logger.error(tool.getReason());
@@ -225,19 +231,6 @@ public class LTIApi {
             if(StringUtils.hasText(idToken)){
                 //Now we validate the JWT token
                 if (jws != null) {
-                    //Here we create and populate the LTI3Request object and we will add it to the httpServletRequest, so the redirect endpoint will have all that information
-                    //ready and will be able to use it.
-                    /*LTI3Request lti3Request = new LTI3Request(httpServletRequest, ltiDataService, true, link); // IllegalStateException if invalid
-                    req.setAttribute("LTI3", true); // indicate this request is an LTI3 one
-                    req.setAttribute("lti3_valid", lti3Request.isLoaded() && lti3Request.isComplete()); // is LTI3 request totally valid and complete
-                    req.setAttribute("lti3_message_type", lti3Request.getLtiMessageType()); // is LTI3 request totally valid and complete
-                    req.setAttribute(LTI3Request.class.getName(), lti3Request); // make the LTI3 data accessible later in the request if needed
-                     */
-                    /**
-                     * @TODO: validate correctly:
-                     *
-                     * https://www.imsglobal.org/spec/security/v1p0/#authentication-response-validation
-                     */
 
                     /**
                      * edu-sharing authentication
@@ -253,7 +246,7 @@ public class LTIApi {
 
 
                     /**
-                     * deep linking stuff
+                     * safe to session for later usage
                      */
                     String ltiMessageType = jws.getBody().get(LTIConstants.LTI_MESSAGE_TYPE,String.class);
                     LTISessionObject ltiSessionObject = new LTISessionObject();
