@@ -21,7 +21,7 @@
 
   <properties>
 
-    <composer.project>community-rest-client-php</composer.project>
+    <composer.project.package>community-repository-backend-services-rest-client-php</composer.project.package>
 
   </properties>
 

@@ -21,7 +21,7 @@
 
   <properties>
 
-    <composer.project>community-rest-client-php-laravel</composer.project>
+    <composer.project>${composer.project.package}-laravel</composer.project>
 
   </properties>
 

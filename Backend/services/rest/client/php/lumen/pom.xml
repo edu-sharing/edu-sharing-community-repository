@@ -21,7 +21,7 @@
 
   <properties>
 
-    <composer.project>community-rest-client-php-lumen</composer.project>
+    <composer.project>${composer.project.package}-lumen</composer.project>
 
   </properties>
 

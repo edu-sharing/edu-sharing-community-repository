@@ -21,7 +21,7 @@
 
   <properties>
 
-    <composer.project>community-rest-client-php-slim4</composer.project>
+    <composer.project>${composer.project.package}-slim4</composer.project>
 
   </properties>
 
