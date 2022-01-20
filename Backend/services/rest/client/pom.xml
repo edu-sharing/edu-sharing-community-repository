@@ -22,9 +22,6 @@
   <modules>
     <module>java</module>
     <module>php</module>
-    <module>php-laravel</module>
-    <module>php-lumen</module>
-    <module>php-slim4</module>
   </modules>
 
 </project>

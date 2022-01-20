@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response;
 
 import com.benfante.jslideshare.App;
-import io.swagger.client.model.RenderingDetailsEntry;
+import org.edu_sharing.generated.restservices.client.model.RenderingDetailsEntry;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;

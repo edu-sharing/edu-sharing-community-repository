@@ -55,8 +55,8 @@
             <configuration>
               <inputSpec>${project.build.directory}/api/openapi.json</inputSpec>
               <generatorName>java</generatorName>
-              <apiPackage>io.swagger.client.api</apiPackage>
-              <modelPackage>io.swagger.client.model</modelPackage>
+              <apiPackage>org.edu_sharing.generated.restservices.client.api</apiPackage>
+              <modelPackage>org.edu_sharing.generated.restservices.client.model</modelPackage>
               <skipValidateSpec>false</skipValidateSpec>
             </configuration>
           </execution>
@@ -96,7 +96,7 @@
             <configuration>
               <basedir>${project.basedir}</basedir>
               <includes>
-                <include>target/generated-sources/openapi/src/main/java/io/swagger/client/model/JobDetail.java</include>
+                <include>target/generated-sources/openapi/src/main/java/org/edu_sharing/generated/restservices/client/model/JobDetail.java</include>
               </includes>
               <regex>false</regex>
               <replacements>
