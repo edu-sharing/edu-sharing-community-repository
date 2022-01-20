@@ -21,7 +21,7 @@
 
   <properties>
 
-    <composer.project>rest-client-php</composer.project>
+    <composer.project>community-rest-client-php</composer.project>
 
   </properties>
 
@@ -88,6 +88,26 @@
               <outputDirectory>${project.build.directory}</outputDirectory>
               <finalName>${composer.vendor}/${composer.project}-${composer.version}</finalName>
               <appendAssemblyId>false</appendAssemblyId>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>maven-upload-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>upload-file</goal>
+            </goals>
+            <phase>deploy</phase>
+            <configuration>
+              <file>${project.build.directory}/${composer.vendor}/${composer.project}-${composer.version}.zip</file>
+              <repositoryPath>/packages/upload/${composer.vendor}/${composer.project}/${composer.version}</repositoryPath>
+              <repositoryUrl>${composer.repo.url}</repositoryUrl>
+              <serverId>edusharing-remote</serverId>
+              <ignoreMissingFile>false</ignoreMissingFile>
             </configuration>
           </execution>
         </executions>
