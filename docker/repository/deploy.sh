@@ -2,7 +2,7 @@
 set -e
 set -o pipefail
 
-GIT_BRANCH="$(git rev-parse --abbrev-ref HEAD | sed 's/\//-/')"
+GIT_BRANCH="$(git rev-parse --abbrev-ref HEAD | sed 's|[\/\.]|-|g')"
 export COMPOSE_NAME="${COMPOSE_PROJECT_NAME:-docker-$GIT_BRANCH}"
 
 case "$(uname)" in
