@@ -412,7 +412,7 @@ ci)
 	echo "  - ps                show containers"
 	echo ""
 	echo "  - stop              stop all containers"
-	echo "  - remove            remove all containers"
+	echo "  - remove            remove all containers and volumes"
 	echo ""
 	;;
 esac
