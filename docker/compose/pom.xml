@@ -20,6 +20,15 @@
 
   <build>
 
+    <resources>
+
+      <resource>
+        <directory>src/main/scripts</directory>
+        <filtering>true</filtering>
+      </resource>
+
+    </resources>
+
     <plugins>
 
       <plugin>

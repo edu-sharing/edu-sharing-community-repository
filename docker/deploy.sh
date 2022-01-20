@@ -84,7 +84,7 @@ info() {
 	echo ""
 }
 
-compose_only() {
+compose() {
 
 	COMPOSE_BASE_FILE="$1"
 	COMPOSE_DIRECTORY="$(dirname "$COMPOSE_BASE_FILE")"
@@ -100,6 +100,7 @@ compose_only() {
 
 			COMPOSE_FILE=""
 			case "$flag" in
+			-common) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-common.yml" ;;
 			-test) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-test.yml" ;;
 			-debug) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-debug.yml" ;;
 			-remote) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-remote.yml" ;;
@@ -108,6 +109,7 @@ compose_only() {
 					echo "error: unknown flag: $flag"
 					echo ""
 					echo "valid flags are:"
+					echo "  -common"
 					echo "  -test"
 					echo "  -debug"
 					echo "  -remote"
@@ -127,55 +129,14 @@ compose_only() {
 	echo $COMPOSE_LIST
 }
 
-compose_all() {
-
-	COMPOSE_BASE_FILE="$1"
-	COMPOSE_DIRECTORY="$(dirname "$COMPOSE_BASE_FILE")"
-	COMPOSE_FILE_NAME="$(basename "$COMPOSE_BASE_FILE" | cut -f 1 -d '.')" # without extension
-
-	COMPOSE_LIST=
-
-	COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME.yml"
-	if [[ -f "$COMPOSE_FILE" ]]; then
-		COMPOSE_LIST="$COMPOSE_LIST -f $COMPOSE_FILE"
-	fi
-
-	shift && {
-
-		while true; do
-			flag="$1"
-			shift || break
-
-			COMPOSE_LIST="$COMPOSE_LIST $(compose_only "$COMPOSE_BASE_FILE" "$flag")"
-		done
-
-	}
-
-	echo $COMPOSE_LIST
-}
-
-compose_only_plugins() {
+compose_plugins() {
 	PLUGIN_DIR="$1"
 	shift
 
 	COMPOSE_LIST=
 	for plugin in $PLUGIN_DIR/plugin*/; do
 		[ ! -d $plugin ] && continue
-		COMPOSE_PLUGIN="$(compose_only "./$plugin$(basename $plugin).yml" "$@")"
-		COMPOSE_LIST="$COMPOSE_LIST $COMPOSE_PLUGIN"
-	done
-
-	echo $COMPOSE_LIST
-}
-
-compose_all_plugins() {
-	PLUGIN_DIR="$1"
-	shift
-
-	COMPOSE_LIST=
-	for plugin in $PLUGIN_DIR/plugin*/; do
-		[ ! -d $plugin ] && continue
-		COMPOSE_PLUGIN="$(compose_all "./$plugin$(basename $plugin).yml" "$@")"
+		COMPOSE_PLUGIN="$(compose "./$plugin$(basename $plugin).yml" "$@")"
 		COMPOSE_LIST="$COMPOSE_LIST $COMPOSE_PLUGIN"
 	done
 
@@ -183,8 +144,8 @@ compose_all_plugins() {
 }
 
 logs() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose_all repository/repository.yml) $(compose_all_plugins repository)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose_all rendering/rendering.yml) $(compose_all_plugins rendering)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -194,8 +155,8 @@ logs() {
 }
 
 ps() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose_all repository/repository.yml) $(compose_all_plugins repository)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose_all rendering/rendering.yml) $(compose_all_plugins rendering)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -205,8 +166,8 @@ ps() {
 }
 
 rstart() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose_all repository/repository.yml -remote) $(compose_all_plugins repository -remote)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose_all rendering/rendering.yml -remote) $(compose_all_plugins rendering -remote)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote) $(compose_plugins repository -common -remote)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -remote) $(compose_plugins rendering -common -remote)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -220,8 +181,8 @@ rstart() {
 }
 
 rtest() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose_all repository/repository.yml -remote -test) $(compose_all_plugins repository -remote -test)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose_all rendering/rendering.yml -remote -test) $(compose_all_plugins rendering -remote -test)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote -test) $(compose_plugins repository -common -remote -test)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -remote -test) $(compose_plugins rendering -common -remote -test)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -239,8 +200,8 @@ rdebug() {
 		CLI_OPT2="../.."
 	}
 
-	COMPOSE_LIST="$COMPOSE_LIST $(compose_all repository/repository.yml -remote -test -debug) $(compose_all_plugins repository -remote -test -debug)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose_all rendering/rendering.yml -remote -test -debug) $(compose_all_plugins rendering -remote -test -debug)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote -test -debug) $(compose_plugins repository -common -remote -test -debug)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -remote -test -debug) $(compose_plugins rendering -common -remote -test -debug)"
 
 	case $CLI_OPT2 in
 	/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
@@ -264,8 +225,8 @@ rdebug() {
 }
 
 lstart() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose_all repository/repository.yml) $(compose_all_plugins repository)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose_all rendering/rendering.yml) $(compose_all_plugins rendering)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -275,8 +236,8 @@ lstart() {
 }
 
 ltest() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose_all repository/repository.yml -test) $(compose_all_plugins repository -test)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose_all rendering/rendering.yml -test) $(compose_all_plugins rendering -test)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -test) $(compose_plugins repository -common -test)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -test) $(compose_plugins rendering -common -test)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -299,8 +260,8 @@ ldebug() {
 	export COMMUNITY_PATH
 	popd >/dev/null || exit
 
-	COMPOSE_LIST="$COMPOSE_LIST $(compose_all repository/repository.yml -test -debug) $(compose_all_plugins repository -test -debug)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose_all rendering/rendering.yml -test -debug) $(compose_all_plugins rendering -test -debug)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -test -debug) $(compose_plugins repository -common -test -debug)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -test -debug) $(compose_plugins rendering -common -test -debug)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -310,8 +271,8 @@ ldebug() {
 }
 
 stop() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose_all repository/repository.yml) $(compose_all_plugins repository)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose_all rendering/rendering.yml) $(compose_all_plugins rendering)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -324,8 +285,8 @@ remove() {
 	read -p "Are you sure you want to continue? [y/N] " answer
 	case ${answer:0:1} in
 	y | Y)
-		COMPOSE_LIST="$COMPOSE_LIST $(compose_all repository/repository.yml) $(compose_all_plugins repository)"
-		COMPOSE_LIST="$COMPOSE_LIST $(compose_all rendering/rendering.yml) $(compose_all_plugins rendering)"
+		COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
+		COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
 
 		echo "Use compose set: $COMPOSE_LIST"
 
@@ -339,10 +300,35 @@ remove() {
 	esac
 }
 
+reload() {
+	[[ -z "${CLI_OPT2}" ]] && {
+		CLI_OPT2="edu-sharing"
+	}
+
+	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
+	echo "Reinstall"
+	$COMPOSE_EXEC \
+		$COMPOSE_LIST \
+		exec repository-service \
+		reinstall.sh || exit
+
+	echo "Reloading $CLI_OPT2 ..."
+	$COMPOSE_EXEC \
+		$COMPOSE_LIST \
+		exec repository-service \
+		touch tomcat/webapps/$CLI_OPT2/WEB-INF/web.xml || exit
+
+	echo "Done."
+}
+
 ci() {
 
-	COMPOSE_LIST1="$(compose_only_plugins repository -remote)"
-	COMPOSE_LIST2="$(compose_only_plugins rendering -remote)"
+	COMPOSE_LIST1="$(compose_plugins repository -common -remote)"
+	COMPOSE_LIST2="$(compose_plugins rendering -common -remote)"
 
   [[ -n $COMPOSE_LIST1 || -n $COMPOSE_LIST2 ]] && {
 		echo "Use compose set: $COMPOSE_LIST1 $COMPOSE_LIST2"
@@ -352,8 +338,8 @@ ci() {
 			pull || exit
 	}
 
-	COMPOSE_LIST="$COMPOSE_LIST $(compose_all repository/repository.yml) $(compose_all_plugins repository -remote)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose_all rendering/rendering.yml) $(compose_all_plugins rendering -remote)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common -remote)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common -remote)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -368,19 +354,22 @@ rstart)
 	rstart && info
 	;;
 rtest)
-	rtest && logs
+	rtest && info
 	;;
 rdebug)
-	rdebug && logs
+	rdebug && info
 	;;
 lstart)
 	lstart && info
 	;;
 ltest)
-	ltest && logs
+	ltest && info
 	;;
 ldebug)
-	ldebug && logs
+	ldebug && info
+	;;
+reload)
+	reload
 	;;
 info)
 	info
@@ -415,6 +404,8 @@ ci)
 	echo "  - ldebug [<path>]   startup containers from local images with dev ports and artifacts [../..]"
 	echo ""
 	echo "  - ci                startup containers inside ci-pipeline"
+	echo ""
+	echo "  - reload [service]  reload services [edu-sharing]"
 	echo ""
 	echo "  - info              show information"
 	echo "  - logs              show logs"

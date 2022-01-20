@@ -22,14 +22,14 @@ export CLI_OPT2="$2"
 export CLI_OPT3="$3"
 export CLI_OPT4="$4"
 
-if [ -z "${M2_HOME}" ]; then
-	export MVN_EXEC="mvn"
-else
-	export MVN_EXEC="${M2_HOME}/bin/mvn"
-fi
+export MAVEN_CMD="mvn"
 
-[[ -z "${MVN_EXEC_OPTS}" ]] && {
-	export MVN_EXEC_OPTS="-q -ff"
+[[ -z "${MAVEN_CMD_OPTS}" ]] && {
+	export MAVEN_CMD_OPTS="-q -ff"
+}
+
+[[ -z "${MAVEN_HOME}" ]] && {
+	export MAVEN_HOME="$HOME/.m2"
 }
 
 ROOT_PATH="$(
@@ -40,23 +40,17 @@ export ROOT_PATH
 
 pushd "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)" >/dev/null || exit
 
-BUILD_PATH="$(
-	cd "$(dirname ".")"
-	pwd -P
-)"
-export BUILD_PATH
-
 COMPOSE_DIR="compose/target/compose"
-
-[[ -f ".env" ]] && {
-	cp -f ".env" "${COMPOSE_DIR}"
-}
 
 [[ ! -d "${COMPOSE_DIR}" ]] && {
 	echo "Initializing ..."
 	pushd "compose" >/dev/null || exit
-	$MVN_EXEC $MVN_EXEC_OPTS -Dmaven.test.skip=true package || exit
+	$MAVEN_CMD $MAVEN_CMD_OPTS -Dmaven.test.skip=true package || exit
 	popd >/dev/null || exit
+}
+
+[[ -f ".env" ]] && {
+	cp -f ".env" "${COMPOSE_DIR}"
 }
 
 pushd "${COMPOSE_DIR}" >/dev/null || exit
@@ -112,7 +106,7 @@ note() {
 	echo ""
 }
 
-compose_all() {
+compose() {
 
 	COMPOSE_BASE_FILE="$1"
 	COMPOSE_DIRECTORY="$(dirname "$COMPOSE_BASE_FILE")"
@@ -120,18 +114,36 @@ compose_all() {
 
 	COMPOSE_LIST=
 
-	COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME.yml"
-	if [[ -f "$COMPOSE_FILE" ]]; then
-		COMPOSE_LIST="$COMPOSE_LIST -f $COMPOSE_FILE"
-	fi
-
 	shift && {
 
 		while true; do
 			flag="$1"
 			shift || break
 
-			COMPOSE_LIST="$COMPOSE_LIST $(compose_only "$COMPOSE_BASE_FILE" "$flag")"
+			COMPOSE_FILE=""
+			case "$flag" in
+			-common) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-common.yml" ;;
+			-test) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-test.yml" ;;
+			-debug) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-debug.yml" ;;
+			-remote) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-remote.yml" ;;
+			*)
+				{
+					echo "error: unknown flag: $flag"
+					echo ""
+					echo "valid flags are:"
+					echo "  -common"
+					echo "  -test"
+					echo "  -debug"
+					echo "  -remote"
+				} >&2
+				exit 1
+				;;
+			esac
+
+			if [[ -f "$COMPOSE_FILE" ]]; then
+				COMPOSE_LIST="$COMPOSE_LIST -f $COMPOSE_FILE"
+			fi
+
 		done
 
 	}
@@ -139,14 +151,14 @@ compose_all() {
 	echo $COMPOSE_LIST
 }
 
-compose_all_plugins() {
+compose_plugins() {
 	PLUGIN_DIR="$1"
 	shift
 
 	COMPOSE_LIST=
 	for plugin in $PLUGIN_DIR/plugin*/; do
 		[ ! -d $plugin ] && continue
-		COMPOSE_PLUGIN="$(compose_all "./$plugin$(basename $plugin).yml" "$@")"
+		COMPOSE_PLUGIN="$(compose "./$plugin$(basename $plugin).yml" "$@")"
 		COMPOSE_LIST="$COMPOSE_LIST $COMPOSE_PLUGIN"
 	done
 
@@ -154,7 +166,7 @@ compose_all_plugins() {
 }
 
 logs() {
-	COMPOSE_LIST="$(compose_all rendering.yml) $(compose_all_plugins)"
+	COMPOSE_LIST="$(compose rendering.yml -common) $(compose_plugins -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -164,7 +176,7 @@ logs() {
 }
 
 ps() {
-	COMPOSE_LIST="$(compose_all rendering.yml) $(compose_all_plugins)"
+	COMPOSE_LIST="$(compose rendering.yml -common) $(compose_plugins -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -174,7 +186,7 @@ ps() {
 }
 
 rstart() {
-	COMPOSE_LIST="$(compose_all rendering.yml -remote) $(compose_all_plugins -remote)"
+	COMPOSE_LIST="$(compose rendering.yml -common -remote) $(compose_plugins -common -remote)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -188,7 +200,7 @@ rstart() {
 }
 
 rtest() {
-	COMPOSE_LIST="$(compose_all rendering.yml -remote -test) $(compose_all_plugins -remote -test)"
+	COMPOSE_LIST="$(compose rendering.yml -common -remote -test) $(compose_plugins -common -remote -test)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -206,7 +218,7 @@ rdebug() {
 		CLI_OPT2="../.."
 	}
 
-	COMPOSE_LIST="$(compose_all rendering.yml -remote -test -debug) $(compose_all_plugins -remote -test -debug)"
+	COMPOSE_LIST="$(compose rendering.yml -common -remote -test -debug) $(compose_plugins -common -remote -test -debug)"
 
 	case $CLI_OPT2 in
 	/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
@@ -230,7 +242,7 @@ rdebug() {
 }
 
 lstart() {
-	COMPOSE_LIST="$(compose_all rendering.yml) $(compose_all_plugins)"
+	COMPOSE_LIST="$(compose rendering.yml -common) $(compose_plugins -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -240,7 +252,7 @@ lstart() {
 }
 
 ltest() {
-	COMPOSE_LIST="$(compose_all rendering.yml -test) $(compose_all_plugins -test)"
+	COMPOSE_LIST="$(compose rendering.yml -common -test) $(compose_plugins -common -test)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -263,7 +275,7 @@ ldebug() {
 	export COMMUNITY_PATH
 	popd >/dev/null || exit
 
-	COMPOSE_LIST="$(compose_all rendering.yml -test -debug) $(compose_all_plugins -test -debug)"
+	COMPOSE_LIST="$(compose rendering.yml -common -test -debug) $(compose_plugins -common -test -debug)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -273,7 +285,7 @@ ldebug() {
 }
 
 stop() {
-	COMPOSE_LIST="$(compose_all rendering.yml) $(compose_all_plugins)"
+	COMPOSE_LIST="$(compose rendering.yml -common) $(compose_plugins -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -286,7 +298,7 @@ remove() {
 	read -p "Are you sure you want to continue? [y/N] " answer
 	case ${answer:0:1} in
 	y | Y)
-		COMPOSE_LIST="$(compose_all rendering.yml) $(compose_all_plugins)"
+		COMPOSE_LIST="$(compose rendering.yml -common) $(compose_plugins -common)"
 
 		echo "Use compose set: $COMPOSE_LIST"
 
@@ -305,19 +317,19 @@ rstart)
 	rstart && note
 	;;
 rtest)
-	rtest && logs
+	rtest && note
 	;;
 rdebug)
-	rdebug && logs
+	rdebug && note
 	;;
 lstart)
 	lstart && note
 	;;
 ltest)
-	ltest && logs
+	ltest && note
 	;;
 ldebug)
-	ldebug && logs
+	ldebug && note
 	;;
 info)
 	info
@@ -353,7 +365,7 @@ remove)
 	echo "  - ps                show containers"
 	echo ""
 	echo "  - stop              stop all containers"
-	echo "  - remove            remove all containers"
+	echo "  - remove            remove all containers and volumes"
 	echo ""
 	;;
 esac

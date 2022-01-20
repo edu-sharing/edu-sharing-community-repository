@@ -40,24 +40,17 @@ export ROOT_PATH
 
 pushd "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)" >/dev/null || exit
 
-BUILD_PATH="$(
-	cd "$(dirname ".")"
-	pwd -P
-)"
-export BUILD_PATH
-
 COMPOSE_DIR="compose/debian/bullseye/target/compose"
-
-[[ -f ".env" ]] && {
-	cp -f ".env" "${COMPOSE_DIR}"
-}
-
 
 [[ ! -d "${COMPOSE_DIR}" ]] && {
 	echo "Initializing ..."
 	pushd "compose" >/dev/null || exit
 	$MAVEN_CMD $MAVEN_CMD_OPTS -Dmaven.test.skip=true package || exit
 	popd >/dev/null || exit
+}
+
+[[ -f ".env" ]] && {
+	cp -f ".env" "${COMPOSE_DIR}"
 }
 
 pushd "${COMPOSE_DIR}" >/dev/null || exit
@@ -84,9 +77,10 @@ info() {
 	echo ""
 	echo "#########################################################################"
 	echo ""
+	echo ""
 }
 
-compose_only() {
+compose() {
 
 	COMPOSE_BASE_FILE="$1"
 	COMPOSE_DIRECTORY="$(dirname "$COMPOSE_BASE_FILE")"
@@ -102,6 +96,7 @@ compose_only() {
 
 			COMPOSE_FILE=""
 			case "$flag" in
+				-common) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-common.yml" ;;
 				-ci) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-ci.yml" ;;
       	-local) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-local.yml" ;;
       	-remote) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-remote.yml" ;;
@@ -110,6 +105,7 @@ compose_only() {
 					echo "error: unknown flag: $flag"
 					echo ""
 					echo "valid flags are:"
+					echo "  -common"
 					echo "  -ci"
           echo "  -local"
           echo "  -remote"
@@ -129,50 +125,14 @@ compose_only() {
 	echo $COMPOSE_LIST
 }
 
-compose_all() {
+compose_plugins() {
+	PLUGIN_DIR="repository"
 
-	COMPOSE_BASE_FILE="$1"
-	COMPOSE_DIRECTORY="$(dirname "$COMPOSE_BASE_FILE")"
-	COMPOSE_FILE_NAME="$(basename "$COMPOSE_BASE_FILE" | cut -f 1 -d '.')" # without extension
 
 	COMPOSE_LIST=
-
-	COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME.yml"
-	if [[ -f "$COMPOSE_FILE" ]]; then
-		COMPOSE_LIST="$COMPOSE_LIST -f $COMPOSE_FILE"
-	fi
-
-	shift && {
-
-		while true; do
-			flag="$1"
-			shift || break
-
-			COMPOSE_LIST="$COMPOSE_LIST $(compose_only "$COMPOSE_BASE_FILE" "$flag")"
-		done
-
-	}
-
-	echo $COMPOSE_LIST
-}
-
-compose_only_plugins() {
-	COMPOSE_LIST=
-	for plugin in repository/plugin*/; do
-		[ ! -d "$plugin" ] && continue
-		COMPOSE_PLUGIN="$(compose_only "./$plugin$(basename $plugin).yml" "$@")"
-		COMPOSE_LIST="$COMPOSE_LIST $COMPOSE_PLUGIN"
-	done
-
-	echo $COMPOSE_LIST
-}
-
-compose_all_plugins() {
-
-	COMPOSE_LIST=
-	for plugin in repository/plugin*/; do
-		[ ! -d "$plugin" ] && continue
-		COMPOSE_PLUGIN="$(compose_all "./$plugin$(basename $plugin).yml" "$@")"
+	for plugin in $PLUGIN_DIR/plugin*/; do
+		[ ! -d $plugin ] && continue
+		COMPOSE_PLUGIN="$(compose "./$plugin$(basename $plugin).yml" "$@")"
 		COMPOSE_LIST="$COMPOSE_LIST $COMPOSE_PLUGIN"
 	done
 
@@ -180,7 +140,7 @@ compose_all_plugins() {
 }
 
 logs() {
-	COMPOSE_LIST="$(compose_all aio.yml) $(compose_all_plugins)"
+	COMPOSE_LIST="$(compose aio.yml -common) $(compose_plugins -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -190,12 +150,12 @@ logs() {
 }
 
 ps() {
-	COMPOSE_LIST="$(compose_all aio.yml) $(compose_all_plugins)"
+	COMPOSE_LIST="$(compose aio.yml -common) $(compose_plugins -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
 	$COMPOSE_EXEC \
-		$COMPOSE_LIST \
+		-f $COMPOSE_LIST \
 		ps || exit
 }
 
@@ -255,7 +215,7 @@ init() {
 }
 
 rstart() {
-	COMPOSE_LIST="$(compose_all aio.yml -remote) $(compose_all_plugins -remote)"
+	COMPOSE_LIST="$(compose aio.yml -common -remote) $(compose_plugins -common -remote)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -269,7 +229,7 @@ rstart() {
 }
 
 lstart() {
-	COMPOSE_LIST="$(compose_all aio.yml -local) $(compose_all_plugins -local)"
+	COMPOSE_LIST="$(compose aio.yml -common -local) $(compose_plugins -common -local)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -279,7 +239,7 @@ lstart() {
 }
 
 stop() {
-	COMPOSE_LIST="$(compose_all aio.yml) $(compose_all_plugins)"
+	COMPOSE_LIST="$(compose aio.yml -common) $(compose_plugins -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -289,7 +249,7 @@ stop() {
 }
 
 remove() {
-		COMPOSE_LIST="$(compose_all aio.yml) $(compose_all_plugins)"
+		COMPOSE_LIST="$(compose aio.yml -common) $(compose_plugins -common)"
 
 		echo "Use compose set: $COMPOSE_LIST"
 
@@ -299,7 +259,7 @@ remove() {
 }
 
 ci() {
-	COMPOSE_LIST="$(compose_only_plugins -remote)"
+	COMPOSE_LIST="$(compose_plugins -common -remote)"
 
   [[ -n $COMPOSE_LIST ]] && {
 		echo "Use compose set: $COMPOSE_LIST"
@@ -310,7 +270,7 @@ ci() {
 	}
 
 	COMPOSE_LIST=
-	COMPOSE_LIST="$(compose_all aio.yml -local -ci) $(compose_all_plugins -remote -ci)"
+	COMPOSE_LIST="$(compose aio.yml -common -local -ci) $(compose_plugins -common -remote -ci)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -360,7 +320,7 @@ ci)
 	echo "  - ps                show containers"
 	echo ""
 	echo "  - stop              stop all containers"
-	echo "  - remove            remove all containers"
+	echo "  - remove            remove all containers and volumes"
 	echo ""
 	;;
 esac

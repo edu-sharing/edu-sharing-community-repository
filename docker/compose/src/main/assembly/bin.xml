@@ -8,6 +8,7 @@
 
   <formats>
     <format>tar.gz</format>
+    <format>zip</format>
   </formats>
 
   <includeBaseDirectory>false</includeBaseDirectory>
@@ -15,17 +16,20 @@
   <fileSets>
 
     <fileSet>
-      <directory>${project.basedir}/..</directory>
+      <directory>${project.build.directory}/classes</directory>
       <outputDirectory>.</outputDirectory>
       <includes>
         <include>deploy.sh</include>
-        <include>README.md</include>
       </includes>
     </fileSet>
 
     <fileSet>
       <directory>${project.build.directory}/compose</directory>
-      <outputDirectory>compose/target/compose</outputDirectory>
+      <outputDirectory>compose</outputDirectory>
+      <includes>
+        <include>**/*-common.yml</include>
+        <include>**/*-remote.yml</include>
+      </includes>
     </fileSet>
 
   </fileSets>
