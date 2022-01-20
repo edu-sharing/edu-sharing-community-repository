@@ -2,6 +2,6 @@ version: '3.7'
 
 services:
 
-  rendering-service:
-    volumes:
-      - "${COMMUNITY_PATH}/services-rendering/target/php:/var/www/html/esrender"
+  rendering-database:
+    ports:
+      - "${COMMON_BIND_HOST:-127.0.0.1}:${RENDERING_DATABASE_PORT:-9000}:5432"

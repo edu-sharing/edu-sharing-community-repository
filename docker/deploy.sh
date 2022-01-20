@@ -2,7 +2,7 @@
 set -e
 set -o pipefail
 
-GIT_BRANCH="$(git rev-parse --abbrev-ref HEAD | sed 's/\//-/')"
+GIT_BRANCH="$(git rev-parse --abbrev-ref HEAD | sed 's|[\/\.]|-|g')"
 export COMPOSE_NAME="${COMPOSE_PROJECT_NAME:-docker-$GIT_BRANCH}"
 
 case "$(uname)" in
@@ -101,8 +101,8 @@ compose() {
 			COMPOSE_FILE=""
 			case "$flag" in
 			-common) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-common.yml" ;;
-			-test) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-test.yml" ;;
 			-debug) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-debug.yml" ;;
+			-dev) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-dev.yml" ;;
 			-remote) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-remote.yml" ;;
 			*)
 				{
@@ -110,8 +110,8 @@ compose() {
 					echo ""
 					echo "valid flags are:"
 					echo "  -common"
-					echo "  -test"
 					echo "  -debug"
+					echo "  -dev"
 					echo "  -remote"
 				} >&2
 				exit 1
@@ -180,9 +180,9 @@ rstart() {
 		up -d || exit
 }
 
-rtest() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote -test) $(compose_plugins repository -common -remote -test)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -remote -test) $(compose_plugins rendering -common -remote -test)"
+rdebug() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote -debug) $(compose_plugins repository -common -remote -debug)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -remote -debug) $(compose_plugins rendering -common -remote -debug)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -195,13 +195,13 @@ rtest() {
 		up -d || exit
 }
 
-rdebug() {
+rdev() {
 	[[ -z $CLI_OPT2 ]] && {
 		CLI_OPT2="../.."
 	}
 
-	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote -test -debug) $(compose_plugins repository -common -remote -test -debug)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -remote -test -debug) $(compose_plugins rendering -common -remote -test -debug)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote -debug -dev) $(compose_plugins repository -common -remote -debug -dev)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -remote -debug -dev) $(compose_plugins rendering -common -remote -debug -dev)"
 
 	case $CLI_OPT2 in
 	/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
@@ -235,9 +235,9 @@ lstart() {
 		up -d || exit
 }
 
-ltest() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -test) $(compose_plugins repository -common -test)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -test) $(compose_plugins rendering -common -test)"
+ldebug() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -debug) $(compose_plugins repository -common -debug)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -debug) $(compose_plugins rendering -common -debug)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -246,7 +246,7 @@ ltest() {
 		up -d || exit
 }
 
-ldebug() {
+ldev() {
 	[[ -z "${CLI_OPT2}" ]] && {
 		CLI_OPT2="../.."
 	}
@@ -260,8 +260,8 @@ ldebug() {
 	export COMMUNITY_PATH
 	popd >/dev/null || exit
 
-	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -test -debug) $(compose_plugins repository -common -test -debug)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -test -debug) $(compose_plugins rendering -common -test -debug)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -debug -dev) $(compose_plugins repository -common -debug -dev)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -debug -dev) $(compose_plugins rendering -common -debug -dev)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -353,20 +353,20 @@ case "${CLI_OPT1}" in
 rstart)
 	rstart && info
 	;;
-rtest)
-	rtest && info
-	;;
 rdebug)
 	rdebug && info
+	;;
+rdev)
+	rdev && info
 	;;
 lstart)
 	lstart && info
 	;;
-ltest)
-	ltest && info
-	;;
 ldebug)
 	ldebug && info
+	;;
+ldev)
+	ldev && info
 	;;
 reload)
 	reload
@@ -396,12 +396,12 @@ ci)
 	echo "Option:"
 	echo ""
 	echo "  - rstart            startup containers from remote images"
-	echo "  - rtest             startup containers from remote images with dev ports"
-	echo "  - rdebug [<path>]   startup containers from remote images with dev ports and artifacts [../..]"
+	echo "  - rdebug            startup containers from remote images with dev ports"
+	echo "  - rdev [<path>]     startup containers from remote images with dev ports and artifacts [../..]"
 	echo ""
 	echo "  - lstart            startup containers from local images"
-	echo "  - ltest             startup containers from local images with dev ports"
-	echo "  - ldebug [<path>]   startup containers from local images with dev ports and artifacts [../..]"
+	echo "  - ldebug            startup containers from local images with dev ports"
+	echo "  - ldev [<path>]     startup containers from local images with dev ports and artifacts [../..]"
 	echo ""
 	echo "  - ci                startup containers inside ci-pipeline"
 	echo ""

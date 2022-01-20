@@ -105,8 +105,10 @@ for config in "${configs[@]}"; do
 	if [[ ! -f tomcat/shared/classes/config/$config/version.json ]]; then
 		mkdir -p tomcat/shared/classes/config/$config
 		for jar in tomcat/shared/lib/$config/*.jar; do
-			unzip -o $jar -d tomcat/shared/classes/config/$config -x 'META-INF/*'
-			rm $jar
+		  if [[ -f $jar ]] ; then
+        unzip -o $jar -d tomcat/shared/classes/config/$config -x 'META-INF/*'
+        rm $jar
+			fi
 		done
 		cp -f tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/$config
 	else
