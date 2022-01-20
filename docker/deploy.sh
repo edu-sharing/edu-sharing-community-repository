@@ -271,8 +271,8 @@ ldev() {
 }
 
 stop() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -debug) $(compose_plugins repository -common -debug)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -debug) $(compose_plugins rendering -common -debug)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -285,8 +285,8 @@ remove() {
 	read -p "Are you sure you want to continue? [y/N] " answer
 	case ${answer:0:1} in
 	y | Y)
-		COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-		COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
+		COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -debug) $(compose_plugins repository -common -debug)"
+		COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -debug) $(compose_plugins rendering -common -debug)"
 
 		echo "Use compose set: $COMPOSE_LIST"
 
