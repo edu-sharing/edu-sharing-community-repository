@@ -19,12 +19,31 @@
   <properties>
 
     <docker.repository>installer</docker.repository>
+    <docker.skip>true</docker.skip>
 
   </properties>
+
+  <profiles>
+
+    <profile>
+      <id>deploy.installer.withDocker</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.CI</name>
+        </property>
+      </activation>
+      <properties>
+        <docker.skip>false</docker.skip>
+      </properties>
+    </profile>
+
+  </profiles>
 
   <modules>
     <module>compose</module>
     <module>rendering</module>
     <module>repository</module>
   </modules>
+
 </project>
