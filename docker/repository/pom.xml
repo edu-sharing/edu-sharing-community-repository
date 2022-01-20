@@ -19,21 +19,7 @@
   <modules>
     <module>build</module>
     <module>compose</module>
+    <module>helm</module>
   </modules>
-
-  <profiles>
-    <profile>
-      <id>deploy.docker.helm</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-        <property>
-          <name>env.CI</name>
-        </property>
-      </activation>
-      <modules>
-        <module>helm</module>
-      </modules>
-    </profile>
-  </profiles>
 
 </project>
