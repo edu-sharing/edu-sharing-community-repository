@@ -427,8 +427,9 @@ public class EduVersion2ServiceImpl extends org.alfresco.repo.version.Version2Se
 			
 			
 			Action action = actionService.createAction("create-thumbnail");
+            action.setExecuteAsynchronously(true);
 			action.setParameterValue("thumbnail-name", CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
-			actionService.executeAction(action, nodeRef);
+            actionService.executeAction(action, nodeRef);
 		}
             
         
