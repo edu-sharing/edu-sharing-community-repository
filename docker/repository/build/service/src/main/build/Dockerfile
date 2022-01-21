@@ -74,15 +74,7 @@ RUN set -eux \
         -s '/Context' -t elem -n "Resources" -v "" \
         --var resources '$prev' \
         -i '$resources' -t attr -n "cacheMaxSize" -v "20480" \
-        tomcat/conf/context.xml \
-    && xmlstarlet ed -L \
-        -i '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t attr -n 'hostConfigClass' -v 'org.edu_sharing.catalina.startup.OrderedHostConfig' \
-        -d '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[@className="org.apache.catalina.valves.AccessLogValve"]/@directory' \
-        -d '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[@className="org.apache.catalina.valves.AccessLogValve"]/@prefix' \
-        -d '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[@className="org.apache.catalina.valves.AccessLogValve"]/@suffix' \
-        -u '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[@className="org.apache.catalina.valves.AccessLogValve"]/@className' -v 'org.edu_sharing.catalina.valves.StdoutAccessLogValve' \
-        tomcat/conf/server.xml
-
+        tomcat/conf/context.xml
 
 COPY --chown=worker:worker artifacts/alfresco-platform-community-distributionzip-${org.alfresco:alfresco-platform-community-distributionzip:zip.version}.zip \
     /tmp/alfresco-platform-community-distributionzip.zip
@@ -101,11 +93,16 @@ RUN set -eux \
     && xmlstarlet ed -L -d '/Context/Loader' tomcat/conf/Catalina/localhost/alfresco.xml \
     && rm -rf /tmp/install/alfresco-platform \
     && mkdir -p tomcat/webapps/alfresco \
-    && unzip tomcat/webapps/alfresco.war -d tomcat/webapps/alfresco -x "WEB-INF/lib/hazelcast-*" -x "WEB-INF/lib/jackson-*" -x "WEB-INF/lib/commons-lang3-*" \
+    && unzip tomcat/webapps/alfresco.war -d tomcat/webapps/alfresco \
+      -x "WEB-INF/lib/commons-lang3-*" \
+      -x "WEB-INF/lib/hazelcast-*" \
+      -x "WEB-INF/lib/jackson-*" \
+      -x "WEB-INF/lib/log4j-*" \
+      -x "WEB-INF/lib/slf4j-*" \
     && rm -f tomcat/webapps/alfresco.war \
     && mv alf_data/keystore .
 
-COPY --chown=worker:worker assets/alfresco/log4j.properties tomcat/webapps/alfresco/WEB-INF/classes/log4j.properties
+COPY --chown=worker:worker assets/alfresco/log4j2.xml tomcat/webapps/alfresco/WEB-INF/log4j2.xml
 COPY --chown=worker:worker assets/alfresco/web-scripts-config-custom.xml tomcat/shared/classes/alfresco/extension/web-scripts-config-custom.xml
 
 
@@ -141,7 +138,6 @@ RUN set -eux \
 
 COPY --chown=worker:worker artifacts/edu_sharing-community-repository-backend-tomcat-${org.edu_sharing:edu_sharing-community-repository-backend-tomcat:jar.version}.jar tomcat/lib/
 
-
 COPY --chown=worker:worker artifacts/edu_sharing-community-repository-webapp-${org.edu_sharing:edu_sharing-community-repository-webapp:war.version}.war tomcat/webapps/
 
 RUN set -eux \
@@ -149,8 +145,6 @@ RUN set -eux \
 	&& unzip tomcat/webapps/edu_sharing-community-repository-webapp-${org.edu_sharing:edu_sharing-community-repository-webapp:war.version}.war -d tomcat/webapps/edu-sharing \
 	&& rm -f tomcat/webapps/edu_sharing-community-repository-webapp-${org.edu_sharing:edu_sharing-community-repository-webapp:war.version}.war \
 	&& cp tomcat/webapps/edu-sharing/META-INF/context.xml tomcat/conf/Catalina/localhost/edu-sharing.xml
-
-COPY --chown=worker:worker assets/edu-sharing/log4j2.xml tomcat/webapps/edu-sharing/WEB-INF/log4j2.xml
 
 COPY --chown=worker:worker amps amps/
 
@@ -164,7 +158,7 @@ COPY --chown=worker:worker assets/plugins bin/plugins/
 
 STOPSIGNAL SIGWINCH
 
-EXPOSE 80 8080 8081
+EXPOSE 8080 8081
 
 ENTRYPOINT ["entrypoint.sh"]
 CMD ["catalina.sh", "run"]

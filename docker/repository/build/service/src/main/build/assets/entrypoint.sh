@@ -29,7 +29,17 @@ my_port_internal="${REPOSITORY_SERVICE_PORT_INTERNAL:-8080}"
 my_pool_internal="${REPOSITORY_SERVICE_POOL_INTERNAL:-200}"
 my_wait_internal="${REPOSITORY_SERVICE_WAIT_INTERNAL:--1}"
 
-my_session_timeout="${REPOSITORY_SERVICE_HTTP_SESSION_TIMEOUT:-60}"
+my_http_client_disablesni4hosts="${REPOSITORY_SERVICE_HTTP_CLIENT_DISABLE_SNI4HOSTS:-}"
+my_http_client_proxy_host="${REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_HOST:-}"
+my_http_client_proxy_nonproxyhosts="${REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_NONPROXYHOSTS:-}"
+my_http_client_proxy_proxyhost="${REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PROXYHOST:-}"
+my_http_client_proxy_proxypass="${REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PROXYPASS:-}"
+my_http_client_proxy_proxyport="${REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PROXYPORT:-}"
+my_http_client_proxy_proxyuser="${REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PROXYUSER:-}"
+
+my_http_session_timeout="${REPOSITORY_SERVICE_HTTP_SESSION_TIMEOUT:-60}"
+
+my_http_accesslog_enabled="${REPOSITORY_SERVICE_HTTP_ACCESSLOG_ENABLED:-}"
 
 repository_cache_host="${REPOSITORY_CACHE_HOST:-}"
 repository_cache_port="${REPOSITORY_CACHE_PORT:-}"
@@ -45,14 +55,6 @@ repository_database_port="${REPOSITORY_DATABASE_PORT:-5432}"
 repository_database_prot="${REPOSITORY_DATABASE_PROT:-"postgresql"}"
 repository_database_user="${REPOSITORY_DATABASE_USER:-repository}"
 repository_database_jdbc="jdbc:${repository_database_prot}://${repository_database_host}:${repository_database_port}/${repository_database_name}${repository_database_opts}"
-
-repository_httpclient_disablesni4hosts="${REPOSITORY_SERVICE_HTTP_CLIENT_DISABLE_SNI4HOSTS:-}"
-repository_httpclient_proxy_host="${REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_HOST:-}"
-repository_httpclient_proxy_nonproxyhosts="${REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_NONPROXYHOSTS:-}"
-repository_httpclient_proxy_proxyhost="${REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PROXYHOST:-}"
-repository_httpclient_proxy_proxypass="${REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PROXYPASS:-}"
-repository_httpclient_proxy_proxyport="${REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PROXYPORT:-}"
-repository_httpclient_proxy_proxyuser="${REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PROXYUSER:-}"
 
 repository_search_solr4_host="${REPOSITORY_SEARCH_SOLR4_HOST:-repository-search-solr4}"
 repository_search_solr4_port="${REPOSITORY_SEARCH_SOLR4_PORT:-8080}"
@@ -133,6 +135,16 @@ export CATALINA_OPTS="-Dorg.xml.sax.parser=com.sun.org.apache.xerces.internal.pa
 export CATALINA_OPTS="-Djavax.xml.parsers.DocumentBuilderFactory=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl $CATALINA_OPTS"
 export CATALINA_OPTS="-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl $CATALINA_OPTS"
 
+[[ -n $my_http_accesslog_enabled ]] && {
+	xmlstarlet ed -L \
+		-i '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t attr -n 'hostConfigClass' -v 'org.edu_sharing.catalina.startup.OrderedHostConfig' \
+		-d '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[@className="org.apache.catalina.valves.AccessLogValve"]/@directory' \
+		-d '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[@className="org.apache.catalina.valves.AccessLogValve"]/@prefix' \
+		-d '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[@className="org.apache.catalina.valves.AccessLogValve"]/@suffix' \
+		-u '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[@className="org.apache.catalina.valves.AccessLogValve"]/@className' -v 'org.edu_sharing.catalina.valves.StdoutAccessLogValve' \
+		${catSConf}
+}
+
 xmlstarlet ed -L \
 	-d '/Server/Service[@name="Catalina"]/Connector' \
 	-s '/Server/Service[@name="Catalina"]' -t elem -n 'Connector' -v '' \
@@ -173,7 +185,7 @@ xmlstarlet ed -L \
 
 xmlstarlet ed -L \
   -N x="http://java.sun.com/xml/ns/javaee" \
-	-u '/x:web-app/x:session-config/x:session-timeout' -v "${my_session_timeout}" \
+	-u '/x:web-app/x:session-config/x:session-timeout' -v "${my_http_session_timeout}" \
 	${catWConf}
 
 ### Alfresco platform ##################################################################################################
@@ -344,49 +356,49 @@ xmlstarlet ed -L \
 		${homeProp}
 }
 
-[[ -n "${repository_httpclient_disablesni4hosts}" ]] && {
+[[ -n "${my_http_client_disablesni4hosts}" ]] && {
 	hocon -f ${eduSConf} \
-		set "repository.httpclient.disableSNI4Hosts" "${repository_httpclient_disablesni4hosts}"
+		set "repository.httpclient.disableSNI4Hosts" "${my_http_client_disablesni4hosts}"
 }
 
-[[ -n "${repository_httpclient_proxy_host}" ]] && {
+[[ -n "${my_http_client_proxy_host}" ]] && {
 	hocon -f ${eduSConf} \
-		set "repository.httpclient.proxy.host" "${repository_httpclient_proxy_host}"
+		set "repository.httpclient.proxy.host" "${my_http_client_proxy_host}"
 }
 
-[[ -n "${repository_httpclient_proxy_nonproxyhosts}" ]] && {
-	export CATALINA_OPTS="-Dhttp.nonProxyHosts=${repository_httpclient_proxy_nonproxyhosts} $CATALINA_OPTS"
-	export CATALINA_OPTS="-Dhttps.nonProxyHosts=${repository_httpclient_proxy_nonproxyhosts} $CATALINA_OPTS"
+[[ -n "${my_http_client_proxy_nonproxyhosts}" ]] && {
+	export CATALINA_OPTS="-Dhttp.nonProxyHosts=${my_http_client_proxy_nonproxyhosts} $CATALINA_OPTS"
+	export CATALINA_OPTS="-Dhttps.nonProxyHosts=${my_http_client_proxy_nonproxyhosts} $CATALINA_OPTS"
 	hocon -f ${eduSConf} \
-		set "repository.httpclient.proxy.nonproxyhosts" "${repository_httpclient_proxy_nonproxyhosts}"
+		set "repository.httpclient.proxy.nonproxyhosts" "${my_http_client_proxy_nonproxyhosts}"
 }
 
-[[ -n "${repository_httpclient_proxy_proxyhost}" ]] && {
-	export CATALINA_OPTS="-Dhttp.proxyHost=${repository_httpclient_proxy_proxyhost} $CATALINA_OPTS"
-	export CATALINA_OPTS="-Dhttps.proxyHost=${repository_httpclient_proxy_proxyhost} $CATALINA_OPTS"
+[[ -n "${my_http_client_proxy_proxyhost}" ]] && {
+	export CATALINA_OPTS="-Dhttp.proxyHost=${my_http_client_proxy_proxyhost} $CATALINA_OPTS"
+	export CATALINA_OPTS="-Dhttps.proxyHost=${my_http_client_proxy_proxyhost} $CATALINA_OPTS"
 	hocon -f ${eduSConf} \
-		set "repository.httpclient.proxy.proxyhost" "${repository_httpclient_proxy_proxyhost}"
+		set "repository.httpclient.proxy.proxyhost" "${my_http_client_proxy_proxyhost}"
 }
 
-[[ -n "${repository_httpclient_proxy_proxypass}" ]] && {
-	export CATALINA_OPTS="-Dhttp.proxyPass=${repository_httpclient_proxy_proxypass} $CATALINA_OPTS"
-	export CATALINA_OPTS="-Dhttps.proxyPass=${repository_httpclient_proxy_proxypass} $CATALINA_OPTS"
+[[ -n "${my_http_client_proxy_proxypass}" ]] && {
+	export CATALINA_OPTS="-Dhttp.proxyPass=${my_http_client_proxy_proxypass} $CATALINA_OPTS"
+	export CATALINA_OPTS="-Dhttps.proxyPass=${my_http_client_proxy_proxypass} $CATALINA_OPTS"
 	hocon -f ${eduSConf} \
-		set "repository.httpclient.proxy.proxypass" "${repository_httpclient_proxy_proxypass}"
+		set "repository.httpclient.proxy.proxypass" "${my_http_client_proxy_proxypass}"
 }
 
-[[ -n "${repository_httpclient_proxy_proxyport}" ]] && {
-	export CATALINA_OPTS="-Dhttp.proxyPort=${repository_httpclient_proxy_proxyport} $CATALINA_OPTS"
-	export CATALINA_OPTS="-Dhttps.proxyPort=${repository_httpclient_proxy_proxyport} $CATALINA_OPTS"
+[[ -n "${my_http_client_proxy_proxyport}" ]] && {
+	export CATALINA_OPTS="-Dhttp.proxyPort=${my_http_client_proxy_proxyport} $CATALINA_OPTS"
+	export CATALINA_OPTS="-Dhttps.proxyPort=${my_http_client_proxy_proxyport} $CATALINA_OPTS"
 	hocon -f ${eduSConf} \
-		set "repository.httpclient.proxy.proxyport" "${repository_httpclient_proxy_proxyport}"
+		set "repository.httpclient.proxy.proxyport" "${my_http_client_proxy_proxyport}"
 }
 
-[[ -n "${repository_httpclient_proxy_proxyuser}" ]] && {
-	export CATALINA_OPTS="-Dhttp.proxyUser=${repository_httpclient_proxy_proxyuser} $CATALINA_OPTS"
-	export CATALINA_OPTS="-Dhttps.proxyUser=${repository_httpclient_proxy_proxyuser} $CATALINA_OPTS"
+[[ -n "${my_http_client_proxy_proxyuser}" ]] && {
+	export CATALINA_OPTS="-Dhttp.proxyUser=${my_http_client_proxy_proxyuser} $CATALINA_OPTS"
+	export CATALINA_OPTS="-Dhttps.proxyUser=${my_http_client_proxy_proxyuser} $CATALINA_OPTS"
 	hocon -f ${eduSConf} \
-		set "repository.httpclient.proxy.proxyuser" "${repository_httpclient_proxy_proxyuser}"
+		set "repository.httpclient.proxy.proxyuser" "${my_http_client_proxy_proxyuser}"
 }
 
 ########################################################################################################################

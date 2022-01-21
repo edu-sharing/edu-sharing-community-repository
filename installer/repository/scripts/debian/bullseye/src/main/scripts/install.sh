@@ -270,6 +270,8 @@ install_edu_sharing() {
 	rm -f tomcat/webapps/alfresco/WEB-INF/lib/commons-lang3-*
 	rm -f tomcat/webapps/alfresco/WEB-INF/lib/hazelcast-*
 	rm -f tomcat/webapps/alfresco/WEB-INF/lib/jackson-*
+	rm -f tomcat/webapps/alfresco/WEB-INF/lib/log4j-*
+	rm -f tomcat/webapps/alfresco/WEB-INF/lib/slf4j-*
 
 	######################################################################################################################
 
