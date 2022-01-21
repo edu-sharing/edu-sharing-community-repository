@@ -64,7 +64,7 @@ public class H5PTransformerWorker extends ContentTransformerHelper implements Co
 			}
 		}
 		catch(Throwable t){
-
+			logger.debug(t.getMessage(),t);
 		}
 	}
 
