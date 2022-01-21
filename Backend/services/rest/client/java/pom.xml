@@ -19,6 +19,12 @@
 
   <name>edu_sharing-community-repository-backend-services-rest-client-java</name>
 
+  <properties>
+
+    <java.package>${java.package.root}</java.package>
+
+  </properties>
+
   <build>
 
     <plugins>
@@ -55,8 +61,8 @@
             <configuration>
               <inputSpec>${project.build.directory}/api/openapi.json</inputSpec>
               <generatorName>java</generatorName>
-              <apiPackage>org.edu_sharing.generated.restservices.client.api</apiPackage>
-              <modelPackage>org.edu_sharing.generated.restservices.client.model</modelPackage>
+              <apiPackage>${java.package}.api</apiPackage>
+              <modelPackage>${java.package}.model</modelPackage>
               <skipValidateSpec>false</skipValidateSpec>
             </configuration>
           </execution>
@@ -96,7 +102,7 @@
             <configuration>
               <basedir>${project.basedir}</basedir>
               <includes>
-                <include>target/generated-sources/openapi/src/main/java/org/edu_sharing/generated/restservices/client/model/JobDetail.java</include>
+                <include>target/generated-sources/openapi/src/main/java/**/JobDetail.java</include>
               </includes>
               <regex>false</regex>
               <replacements>

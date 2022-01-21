@@ -21,7 +21,7 @@
 
   <properties>
 
-    <composer.project>${composer.project.package}-lumen</composer.project>
+    <composer.project>${composer.project.root}-lumen</composer.project>
 
   </properties>
 

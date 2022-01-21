@@ -22,7 +22,7 @@ import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.generated.restservices.client.model.NodeEntry;
+import org.edu_sharing.generated.repository.backend.services.rest.client.model.NodeEntry;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.service.remote.RemoteObjectService;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;

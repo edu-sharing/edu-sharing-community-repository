@@ -21,7 +21,7 @@
 
   <properties>
 
-    <composer.project>${composer.project.package}-core</composer.project>
+    <composer.project>${composer.project.root}-core</composer.project>
 
   </properties>
 

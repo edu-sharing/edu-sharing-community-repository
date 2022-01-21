@@ -19,12 +19,6 @@
 
   <name>edu_sharing-community-repository-backend-services-rest-client-php</name>
 
-  <properties>
-
-    <composer.project.package>community-repository-backend-services-rest-client-php</composer.project.package>
-
-  </properties>
-
   <build>
 
     <pluginManagement>
@@ -89,10 +83,12 @@
   </build>
 
   <modules>
+
     <module>core</module>
     <module>laravel</module>
     <module>lumen</module>
     <module>slim4</module>
+
   </modules>
 
 </project>

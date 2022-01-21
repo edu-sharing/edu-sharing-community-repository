@@ -9,19 +9,19 @@
 
   <parent>
     <groupId>org.edu_sharing</groupId>
-    <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-java</artifactId>
+    <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-search</artifactId>
     <version>git</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-java-core</artifactId>
+  <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-search-java</artifactId>
   <packaging>jar</packaging>
 
-  <name>edu_sharing-community-repository-backend-alfresco-rest-client-java-core</name>
+  <name>edu_sharing-community-repository-backend-alfresco-rest-client-search-java</name>
 
   <properties>
 
-    <repository.alfresco.rest.part>core</repository.alfresco.rest.part>
+    <java.package>${java.package.root}.search</java.package>
 
   </properties>
 
@@ -59,10 +59,10 @@
             </goals>
             <phase>generate-sources</phase>
             <configuration>
-              <inputSpec>${project.build.directory}/api/definitions/alfresco-${repository.alfresco.rest.part}.json</inputSpec>
+              <inputSpec>${project.build.directory}/api/definitions/alfresco-search.json</inputSpec>
               <generatorName>java</generatorName>
-              <apiPackage>${repository.alfresco.rest.root}.${repository.alfresco.rest.part}.api</apiPackage>
-              <modelPackage>${repository.alfresco.rest.root}.${repository.alfresco.rest.part}.model</modelPackage>
+              <apiPackage>${java.package}.api</apiPackage>
+              <modelPackage>${java.package}.model</modelPackage>
               <skipValidateSpec>true</skipValidateSpec>
             </configuration>
           </execution>
