@@ -95,7 +95,7 @@ sed -i 's|^\(\s*\)[#]*ServerName.*|\1ServerName '"${my_host_internal}"'|' /etc/a
 
 ########################################################################################################################
 
-if mkdir "${RS_CACHE}/config/version.json" >/dev/null 2>&1; then
+if [[ ! -f "${RS_CACHE}/config/version.json" ]]; then
 
 	echo "install started."
 
