@@ -346,7 +346,7 @@ export class PermissionsAuthoritiesComponent {
       return nodes[0].signupMethod === 'list';
     };
     orgSignupList.priority = 20;
-    orgSignupList.constrains = [Constrain.Admin, Constrain.NoBulk];
+    orgSignupList.constrains = [Constrain.NoBulk];
     options.push(orgSignupList);
     const orgSignup = new OptionItem('PERMISSIONS.ORG_SIGNUP', 'checkbox', (data) => {
           this.groupSignup = this.getList(data)[0];
@@ -359,7 +359,7 @@ export class PermissionsAuthoritiesComponent {
     orgSignup.elementType = [ElementType.Group];
     orgSignup.group = DefaultGroups.Edit;
     orgSignup.priority = 30;
-    orgSignup.constrains = [Constrain.Admin, Constrain.NoBulk];
+    orgSignup.constrains = [Constrain.NoBulk];
     options.push(orgSignup);
     const addToGroup = new OptionItem('PERMISSIONS.MENU_ADD_TO_GROUP', 'group_add', (data) =>
         this.addToGroup(data)
