@@ -456,8 +456,6 @@
 		</template>
 		<template>
 			<id>node_general_template</id>
-			<caption>dialog_upload_tab_basic</caption>
-			<icon>description</icon>
 			<html><![CDATA[
 			  <ccm:educationallearningresourcetype>
               <cclom:general_keyword>
