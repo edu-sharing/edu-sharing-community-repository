@@ -40,17 +40,12 @@ has_my_appid=$( \
 		"${repository_service_base}/rest/admin/v1/applications" | jq -r '.[] | select(.id == "'"${my_appid}"'") | .id' \
 )
 
-if [ -n "${has_my_appid}" ]
+if [ -z "${has_my_appid}" ]
 then
 	curl -sS \
 		-H "Accept: application/json" \
 		--user "${repository_service_admin_user}:${repository_service_admin_pass}" \
-		-XDELETE \
-		"${repository_service_base}/rest/admin/v1/applications/${my_appid}"
+		-XPUT \
+		"${repository_service_base}/rest/admin/v1/applications?url=$( jq -nr --arg v "${my_meta_internal}" '$v|@uri' )"
 fi
 
-curl -sS \
-	-H "Accept: application/json" \
-	--user "${repository_service_admin_user}:${repository_service_admin_pass}" \
-	-XPUT \
-	"${repository_service_base}/rest/admin/v1/applications?url=$( jq -nr --arg v "${my_meta_internal}" '$v|@uri' )"
