@@ -1089,7 +1089,7 @@ export class PermissionsAuthoritiesComponent {
         new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => {this.editStatus = null; }),
         new DialogButton('SAVE', DialogButton.TYPE_PRIMARY, () => this.savePersonStatus())
         ];
-        this.signupButtons = DialogButton.getSaveCancel(() => this.groupSignup = null, () => this.saveGroupSignup());
+        this.signupButtons = DialogButton.getSaveCancel(() => this.groupSignupDetails = null, () => this.saveGroupSignup());
         this.signupListButtons = [new DialogButton('CLOSE', DialogButton.TYPE_CANCEL, () => this.groupSignupList = null)];
     }
   private setPersonStatus(data: UserSimple) {
