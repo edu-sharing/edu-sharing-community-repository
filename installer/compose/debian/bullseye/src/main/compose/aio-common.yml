@@ -14,6 +14,6 @@ services:
     ports:
       - "${COMMON_BIND_HOST:-127.0.0.1}:${RENDERING_SERVICE_PORT:-9100}:80"
     volumes:
-      - ".env.rendering:/opt/rendering/.env"
+      - ".env.rendering:/opt/alfresco/.env"
     depends_on:
       - repository

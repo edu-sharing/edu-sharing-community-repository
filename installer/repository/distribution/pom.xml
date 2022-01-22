@@ -27,7 +27,7 @@
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
-            <id>amps-1</id>
+            <id>amps-alf-0</id>
             <goals>
               <goal>copy-dependencies</goal>
             </goals>
@@ -40,7 +40,7 @@
             </configuration>
           </execution>
           <execution>
-            <id>amps-2</id>
+            <id>amps-alf-1</id>
             <goals>
               <goal>copy-dependencies</goal>
             </goals>
@@ -57,7 +57,7 @@
             </configuration>
           </execution>
           <execution>
-            <id>amps-3</id>
+            <id>amps-edu-1</id>
             <goals>
               <goal>copy-dependencies</goal>
             </goals>
@@ -88,50 +88,59 @@
             </configuration>
           </execution>
           <execution>
-            <id>tomcat-shared-classes-defaults</id>
+            <id>config-defaults</id>
             <goals>
-              <goal>unpack-dependencies</goal>
+              <goal>copy-dependencies</goal>
             </goals>
             <phase>package</phase>
             <configuration>
               <includeArtifactIds>
-                edu_sharing-community-repository-config-defaults,
+                edu_sharing-community-repository-config-defaults
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/dist/tomcat/shared/lib/defaults</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>config-plugin-elastic</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
                 edu_sharing-community-repository-plugin-elastic-config-defaults,
                 edu_sharing-community-repository-plugin-mongo-config-defaults,
                 edu_sharing-enterprise-repository-plugin-cluster-config-defaults,
                 edu_sharing-enterprise-repository-plugin-remote-config-defaults,
                 edu_sharing-enterprise-repository-plugin-transform-config-defaults
               </includeArtifactIds>
-              <excludes>META-INF/**</excludes>
-              <outputDirectory>${project.build.directory}/dist/tomcat/shared/classes/config/defaults</outputDirectory>
+              <outputDirectory>${project.build.directory}/dist/tomcat/shared/lib/plugins</outputDirectory>
             </configuration>
           </execution>
           <execution>
-            <id>tomcat-shared-classes-cluster</id>
+            <id>config-cluster</id>
             <goals>
-              <goal>unpack-dependencies</goal>
+              <goal>copy-dependencies</goal>
             </goals>
             <phase>package</phase>
             <configuration>
               <includeArtifactIds>
                 edu_sharing-community-repository-config-cluster
               </includeArtifactIds>
-              <excludes>META-INF/**</excludes>
-              <outputDirectory>${project.build.directory}/dist/tomcat/shared/classes/config/cluster</outputDirectory>
+              <outputDirectory>${project.build.directory}/dist/tomcat/shared/lib/cluster</outputDirectory>
             </configuration>
           </execution>
           <execution>
-            <id>tomcat-shared-classes-node</id>
+            <id>config-node</id>
             <goals>
-              <goal>unpack-dependencies</goal>
+              <goal>copy-dependencies</goal>
             </goals>
             <phase>package</phase>
             <configuration>
               <includeArtifactIds>
                 edu_sharing-community-repository-config-node
               </includeArtifactIds>
-              <excludes>META-INF/**</excludes>
-              <outputDirectory>${project.build.directory}/dist/tomcat/shared/classes/config/node</outputDirectory>
+              <outputDirectory>${project.build.directory}/dist/tomcat/shared/lib/node</outputDirectory>
             </configuration>
           </execution>
           <execution>
@@ -145,7 +154,6 @@
               <outputDirectory>${project.build.directory}/dist/tomcat/webapps/edu-sharing</outputDirectory>
             </configuration>
           </execution>
-
           <execution>
             <id>rest-api</id>
             <goals>

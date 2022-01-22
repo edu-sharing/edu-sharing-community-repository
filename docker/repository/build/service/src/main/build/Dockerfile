@@ -102,10 +102,6 @@ RUN set -eux \
     && rm -f tomcat/webapps/alfresco.war \
     && mv alf_data/keystore .
 
-COPY --chown=worker:worker assets/alfresco/log4j2.xml tomcat/webapps/alfresco/WEB-INF/log4j2.xml
-COPY --chown=worker:worker assets/alfresco/web-scripts-config-custom.xml tomcat/shared/classes/alfresco/extension/web-scripts-config-custom.xml
-
-
 COPY --chown=worker:worker artifacts/alfresco-content-services-share-distribution-${org.alfresco:alfresco-content-services-share-distribution:zip.version}.zip \
     /tmp/alfresco-content-services-share-distribution.zip
 
@@ -125,7 +121,6 @@ RUN set -eux \
     && rm -f tomcat/webapps/share.war
 
 COPY --chown=worker:worker assets/share/log4j.properties tomcat/webapps/share/WEB-INF/classes/log4j.properties
-COPY --chown=worker:worker assets/share/share-config-custom.xml tomcat/shared/classes/alfresco/web-extension/share-config-custom.xml
 
 COPY --chown=worker:worker artifacts/alfresco-pdf-renderer-${org.alfresco:alfresco-pdf-renderer:tgz:linux.version}-linux.tgz /tmp/alfresco-pdf-renderer.tgz
 

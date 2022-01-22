@@ -23,60 +23,30 @@ RUN set -eux \
 RUN set -eux \
     && apt-get update -y \
     && apt-get install -y --no-install-recommends \
-        apt-utils \
         apt-transport-https \
+        apt-utils \
         ca-certificates \
-        gnupg \
-        lsb-release \
-        procps \
-        unzip \
-        wget \
-        xmlstarlet \
+        cron \
         curl \
         dirmngr \
-        postgresql-client \
+        dnsutils \
+        gnupg \
         jq \
+        lsb-release \
+        lsof \
+        nano \
+        net-tools \
+        postgresql-client \
+        procps \
+        ruby-hocon \
+        systemctl \
+        unzip \
+        vim \
         wait-for-it \
+        wget \
+        xmlstarlet \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
-
-########################################################################################################################
-
-ENV ALF_HOME /opt/alfresco
-WORKDIR $ALF_HOME
-
-COPY assets/postgresql/ postgresql/
-
-RUN set -eux \
-    && wget -q -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
-    && echo "deb http://apt.postgresql.org/pub/repos/apt `lsb_release -cs`-pgdg main" | tee  /etc/apt/sources.list.d/pgdg.list \
-    && apt-get update -y \
-    && apt-get install -y --no-install-recommends \
-        postgresql-${postgresql.version.major} \
-    && pg_dropcluster ${postgresql.version.major} main \
-    && apt-get clean \
-    && rm -r /var/lib/apt/lists/*
-
-RUN set -eux \
-    && mkdir -p alf_data/postgresql postgresql \
-    && pg_createcluster \
-      --datadir=$ALF_HOME/alf_data/postgresql \
-      --logfile=$ALF_HOME/postgresql/postgresql.log \
-      --encoding UTF8 \
-      --port=5432 \
-      --start \
-      --start-conf=manual \
-      ${postgresql.version.major} rendering \
-    && su -c 'psql -f postgresql/conf/init_db.sql' postgres \
-    && sed -i -r \
-        "s|^[#]*\s*listen_addresses\s*=\s*.*|listen_addresses = '\*'                 # what IP address(es) to listen on;|" \
-        /etc/postgresql/${postgresql.version.major}/rendering/postgresql.conf \
-    && sed -i -r \
-        's|host    all             all             127.0.0.1/32            md5|host    all             all             0.0.0.0/0            md5|' \
-        /etc/postgresql/${postgresql.version.major}/rendering/pg_hba.conf \
-    && sed -i -r \
-        's|host    all             all             ::1/128                 md5|host    all             all             ::0/0                 md5|' \
-        /etc/postgresql/${postgresql.version.major}/rendering/pg_hba.conf
 
 ########################################################################################################################
 
@@ -103,81 +73,114 @@ RUN set -eux \
 
 ########################################################################################################################
 
+RUN set -eux \
+    && apt-get update -y \
+    && apt-get install -y --no-install-recommends \
+        exiftool \
+        ffmpeg \
+        ghostscript \
+        gsfonts \
+        imagemagick \
+    && apt-get clean \
+    && rm -r /var/lib/apt/lists/*
+
+########################################################################################################################
+
+ENV ALF_HOME /opt/alfresco
+ENV PATH $ALF_HOME/bin:$PATH
+
+WORKDIR $ALF_HOME
+
+########################################################################################################################
+
+COPY assets/postgresql/ postgresql/
+
+RUN set -eux \
+    && wget -q -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
+    && echo "deb http://apt.postgresql.org/pub/repos/apt `lsb_release -cs`-pgdg main" | tee  /etc/apt/sources.list.d/pgdg.list \
+    && apt-get update -y \
+    && apt-get install -y --no-install-recommends \
+        postgresql-${postgresql.version.major} \
+    && pg_dropcluster ${postgresql.version.major} main \
+    && apt-get clean \
+    && rm -r /var/lib/apt/lists/*
+
+RUN set -eux \
+    && mkdir -p alf_data/postgresql postgresql \
+    && pg_createcluster \
+      --datadir=$ALF_HOME/alf_data/postgresql \
+      --logfile=$ALF_HOME/postgresql/postgresql.log \
+      --encoding UTF8 \
+      --port=5432 \
+      --start \
+      --start-conf=manual \
+      ${postgresql.version.major} rendering \
+    && su -c 'psql -f postgresql/conf/init_db.sql' postgres \
+    && pg_ctlcluster ${postgresql.version.major} rendering stop \
+    && sed -i -r \
+        "s|^[#]*\s*listen_addresses.*|listen_addresses = '\*'|" \
+        /etc/postgresql/${postgresql.version.major}/rendering/postgresql.conf \
+    && sed -i -r 's|127.0.0.1/32|0.0.0.0/0|' \
+        /etc/postgresql/${postgresql.version.major}/rendering/pg_hba.conf \
+    && sed -i -r 's|::1/128|::0/0|' \
+        /etc/postgresql/${postgresql.version.major}/rendering/pg_hba.conf
+
+########################################################################################################################
+
+RUN set -eux \
+    && apt-get update -y \
+    && apt-get install -y --no-install-recommends \
+      apache2 \
+    && a2enmod headers \
+    && a2enmod rewrite \
+    && apt-get clean \
+    && rm -r /var/lib/apt/lists/*
+
+COPY assets/apache2/ports.conf /etc/apache2/ports.conf
+COPY assets/apache2/sites/* /etc/apache2/sites-available/
+
+########################################################################################################################
+
 ENV WWW_ROOT /var/www/html/
-ENV RS_ROOT /var/www/html/esrender
+ENV RS_ROOT $WWW_ROOT/esrender
 ENV RS_CACHE /var/cache/esrender
 ENV PHP_VERSION ${php.version.major}.${php.version.minor}
-
-WORKDIR $WWW_ROOT
 
 RUN set -eux \
     && curl -sL https://packages.sury.org/php/apt.gpg -o /etc/apt/trusted.gpg.d/php.gpg \
     && echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list \
     && apt-get update -y \
     && apt-get install -y --no-install-recommends \
-      jq \
-      imagemagick \
-      ghostscript \
       php${PHP_VERSION} \
-      php${PHP_VERSION}-dom \
-      php${PHP_VERSION}-soap \
       php${PHP_VERSION}-common \
+      php${PHP_VERSION}-curl \
+      php${PHP_VERSION}-dom \
+      php${PHP_VERSION}-exif \
       php${PHP_VERSION}-gd \
       php${PHP_VERSION}-mbstring \
-      php${PHP_VERSION}-zip \
-      php${PHP_VERSION}-curl \
-      php${PHP_VERSION}-exif \
       php${PHP_VERSION}-pgsql \
+      php${PHP_VERSION}-soap \
+      php${PHP_VERSION}-zip \
 	  php-xdebug \
-      apache2 \
-      ffmpeg \
-      cron \
-    && a2enmod rewrite \
-    && a2enmod headers \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
 
-#      php${PHP_VERSION}-session \
-#      php${PHP_VERSION}-openssl \
-#      php${PHP_VERSION}-zlib \
-
-#        php${PHP_VERSION}-common -> instead of:
-#        php${PHP_VERSION}-sockets \
-#        php${PHP_VERSION}-fileinfo \
-#        php${PHP_VERSION}-iconv \
-#
-#        extension not available!!!
-#        php${PHP_VERSION}-wddx \
-#      ncdu \
-#      tzdata \
-
-WORKDIR /opt/rendering
+########################################################################################################################
 
 COPY install.sh .env.base ./
 
-COPY assets/apache2/ports.conf /etc/apache2/ports.conf
-COPY assets/apache2/sites/* /etc/apache2/sites-available/
+COPY assets/entrypoint.sh assets/apache2-foreground ./
 
-COPY assets/rendering/de.metaventis.esrender.log4php.properties $RS_ROOT/conf/
-COPY assets/rendering/de.metaventis.esrender.log4php.cachecleaner.properties $RS_ROOT/install/_tmpl/conf/
-
-COPY assets/entrypoint.sh ./
-COPY assets/settings.xml $HOME/.m2/
-COPY assets/apache2-foreground ./
-
-RUN set -eux \
-    && chmod +x install.sh \
-    && chmod +x entrypoint.sh \
-    && chmod +x apache2-foreground
+COPY assets/settings.xml root/.m2/
 
 ########################################################################################################################
 
-# https://httpd.apache.org/docs/2.4/stopping.html#gracefulstop
-STOPSIGNAL SIGWINCH
+ENTRYPOINT ["./entrypoint.sh"]
 
 EXPOSE 8080
 
-ENTRYPOINT ["./entrypoint.sh"]
+# https://httpd.apache.org/docs/2.4/stopping.html#gracefulstop
+STOPSIGNAL SIGWINCH
 
 ########################################################################################################################
 

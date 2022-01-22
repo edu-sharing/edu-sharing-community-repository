@@ -31,7 +31,7 @@
     <docker.from.rediscluster.server>docker.io/bitnami/redis-cluster:6.2.6</docker.from.rediscluster.server>
     <docker.from.tomcat>docker.io/tomcat:${tomcat.version}-jdk8</docker.from.tomcat>
 
-    <docker.repository>docker</docker.repository>
+    <docker.repository>${docker.repository.docker}</docker.repository>
 
     <rendering.redis.client.version>5.3.4</rendering.redis.client.version>
 

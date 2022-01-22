@@ -249,13 +249,13 @@ stop() {
 }
 
 remove() {
-		COMPOSE_LIST="$(compose aio.yml -common) $(compose_plugins -common)"
+	COMPOSE_LIST="$(compose aio.yml -common) $(compose_plugins -common)"
 
-		echo "Use compose set: $COMPOSE_LIST"
+	echo "Use compose set: $COMPOSE_LIST"
 
-		$COMPOSE_EXEC \
-			$COMPOSE_LIST \
-			down || exit
+	$COMPOSE_EXEC \
+		$COMPOSE_LIST \
+		down -v || exit
 }
 
 ci() {

@@ -276,7 +276,7 @@ install_edu_sharing() {
 	######################################################################################################################
 
 	echo "- unpack edu-sharing repository"
-	tar xzf edu_sharing-community-deploy-installer-repository-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}-bin.tar.gz
+	tar --no-same-owner -xzf edu_sharing-community-deploy-installer-repository-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}-bin.tar.gz
 
 	echo "- install Alfresco Module Packages"
 	if [[ -d amps/alfresco/0 ]]; then
@@ -291,10 +291,32 @@ install_edu_sharing() {
     java -jar bin/alfresco-mmt.jar install amps/edu-sharing/1 tomcat/webapps/edu-sharing -directory -nobackup -force 2> /dev/null
   fi
 
+	### config ###########################################################################################################
+
+	configs=(defaults plugins cluster node)
+
+	for config in "${configs[@]}"; do
+		if [[ ! -f tomcat/shared/classes/config/$config/version.json ]]; then
+			mkdir -p tomcat/shared/classes/config/$config
+			for jar in tomcat/shared/lib/$config/*.jar; do
+				if [[ -f $jar ]] ; then
+					unzip -o $jar -d tomcat/shared/classes/config/$config -x 'META-INF/*'
+					rm $jar
+				fi
+			done
+			cp -f tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/$config
+		else
+			cmp -s tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/$config/version.json || {
+				mv tomcat/shared/classes/config/$config/version.json tomcat/shared/classes/config/$config/version.json.$(date +%d-%m-%Y_%H-%M-%S )
+				cp tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/$config/version.json
+			}
+		fi
+	done
 
 	### Tomcat ###########################################################################################################
 
 	echo "- update tomcat env"
+
 	sed -i -r 's|file\.encoding=.*\"|file.encoding=UTF-8 $CATALINA_OPTS \"|' ${setEnvSh}
 	grep -q 'file\.encoding' ${setEnvSh} || echo 'CATALINA_OPTS="-Dfile.encoding=UTF-8 $CATALINA_OPTS "' >> ${setEnvSh}
 
@@ -367,27 +389,36 @@ install_edu_sharing() {
 
   echo 'img.root=/usr' >> "${alfProps}"
   echo 'img.gslib=/usr/bin' >> "${alfProps}"
+
   echo 'exiftool.dyn=/usr/bin' >> "${alfProps}"
   echo 'exiftool.exe=${exiftool.dyn}/exiftool' >> "${alfProps}"
+
   echo 'ffmpeg.dyn=/usr/bin' >> "${alfProps}"
   echo 'ffmpeg.exe=${ffmpeg.dyn}/ffmpeg' >> "${alfProps}"
+
   echo 'img.dyn=/usr/bin' >> "${alfProps}"
   echo 'img.exe=${img.dyn}/convert' >> "${alfProps}"
+
+  echo "alfresco-pdf-renderer.root=$ALF_HOME/common/alfresco-pdf-renderer" >>"${alfProps}"
+  echo 'alfresco-pdf-renderer.exe=${alfresco-pdf-renderer.root}/alfresco-pdf-renderer' >>"${alfProps}"
+
 	echo "alfresco_user_store.adminpassword=${my_admin_pass_md4}" >> "${alfProps}"
+
 	echo "db.driver=${repository_database_driv}" >> "${alfProps}"
 	echo "db.url=${repository_database_jdbc}" >> "${alfProps}"
 	echo "db.username=${repository_database_user}" >> "${alfProps}"
 	echo "db.password=${repository_database_pass}" >> "${alfProps}"
 	echo "db.pool.max=${repository_database_pool_max}" >> "${alfProps}"
 	echo "db.pool.validate.query=${repository_database_pool_sql}" >> "${alfProps}"
+
 	echo "ooo.enabled=true" >> "${alfProps}"
 	echo "ooo.exe=" >> "${alfProps}"
 	echo "ooo.host=${repository_transform_host}" >> "${alfProps}"
 	echo "ooo.port=${repository_transform_port}" >> "${alfProps}"
+
 	echo "solr.host=${repository_search_solr4_host}" >> "${alfProps}"
   echo "solr.port=${repository_search_solr4_port}" >> "${alfProps}"
   echo "solr.secureComms=none" >> "${alfProps}"
-
   echo "alfresco.secureComms=none" >> "${solr4Wor}"
   echo "alfresco.secureComms=none" >> "${solr4Arc}"
 
@@ -573,6 +604,15 @@ if [[ -f "$alfresco_base_image" ]] ; then
 	echo "- restore node config"
 	if [[ $(tar -tf  "$snapshot_name" | grep 'tomcat/shared/classes/config/node' | wc -l) -gt 0 ]]; then
 		tar -zxf "$snapshot_name" tomcat/shared/classes/config/node -C tomcat/shared/classes/config/
+	else
+		echo "nothing to restore"
+	fi
+
+	cp -f tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/node
+
+	echo "- restore logging config"
+	if [[ $(tar -tf  "$snapshot_name" | grep 'tomcat/webapps/alfresco/WEB-INF/classes/log4j2.xml' | wc -l) -gt 0 ]]; then
+		tar -zxf "$snapshot_name" tomcat/webapps/alfresco/WEB-INF/classes/log4j2.xml -C tomcat/webapps/alfresco/WEB-INF/classes/
 	else
 		echo "nothing to restore"
 	fi
