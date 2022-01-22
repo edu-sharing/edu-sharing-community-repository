@@ -61,7 +61,7 @@
             </goals>
             <phase>compile</phase>
             <configuration>
-              <arguments>run ${npm.build}</arguments>
+              <arguments>run ${node.run}</arguments>
             </configuration>
           </execution>
         </executions>
