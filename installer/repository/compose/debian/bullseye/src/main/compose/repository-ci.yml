@@ -1,0 +1,9 @@
+version: '3.7'
+
+services:
+
+  repository:
+    environment:
+      MAVEN_REMOTE_USERNAME: ${MAVEN_REMOTE_USERNAME}
+      MAVEN_REMOTE_PASSWORD: ${MAVEN_REMOTE_PASSWORD}
+      REPOSITORY_SERVICE_HOST_EXTERNAL: "docker"

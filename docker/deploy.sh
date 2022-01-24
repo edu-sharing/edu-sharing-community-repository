@@ -144,6 +144,7 @@ compose_plugins() {
 }
 
 logs() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
 
@@ -155,6 +156,7 @@ logs() {
 }
 
 ps() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
 
@@ -166,6 +168,7 @@ ps() {
 }
 
 rstart() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -remote)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote) $(compose_plugins repository -common -remote)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -remote) $(compose_plugins rendering -common -remote)"
 
@@ -181,6 +184,7 @@ rstart() {
 }
 
 rdebug() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -remote -debug)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote -debug) $(compose_plugins repository -common -remote -debug)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -remote -debug) $(compose_plugins rendering -common -remote -debug)"
 
@@ -200,6 +204,7 @@ rdev() {
 		CLI_OPT2="../.."
 	}
 
+	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -remote -debug -dev)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote -debug -dev) $(compose_plugins repository -common -remote -debug -dev)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -remote -debug -dev) $(compose_plugins rendering -common -remote -debug -dev)"
 
@@ -225,6 +230,7 @@ rdev() {
 }
 
 lstart() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
 
@@ -236,6 +242,7 @@ lstart() {
 }
 
 ldebug() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -debug)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -debug) $(compose_plugins repository -common -debug)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -debug) $(compose_plugins rendering -common -debug)"
 
@@ -260,6 +267,7 @@ ldev() {
 	export COMMUNITY_PATH
 	popd >/dev/null || exit
 
+	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -debug -dev)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -debug -dev) $(compose_plugins repository -common -debug -dev)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -debug -dev) $(compose_plugins rendering -common -debug -dev)"
 
@@ -271,6 +279,7 @@ ldev() {
 }
 
 stop() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -debug)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -debug) $(compose_plugins repository -common -debug)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -debug) $(compose_plugins rendering -common -debug)"
 
@@ -285,6 +294,7 @@ remove() {
 	read -p "Are you sure you want to continue? [y/N] " answer
 	case ${answer:0:1} in
 	y | Y)
+		COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -debug)"
 		COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -debug) $(compose_plugins repository -common -debug)"
 		COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -debug) $(compose_plugins rendering -common -debug)"
 
@@ -305,6 +315,7 @@ reload() {
 		CLI_OPT2="edu-sharing"
 	}
 
+	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
 
@@ -326,7 +337,6 @@ reload() {
 }
 
 ci() {
-
 	COMPOSE_LIST1="$(compose_plugins repository -common -remote)"
 	COMPOSE_LIST2="$(compose_plugins rendering -common -remote)"
 
@@ -338,6 +348,7 @@ ci() {
 			pull || exit
 	}
 
+	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common -remote)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common -remote)"
 

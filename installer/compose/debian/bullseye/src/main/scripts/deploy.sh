@@ -2,7 +2,7 @@
 set -e
 set -o pipefail
 
-export COMPOSE_NAME="docker-${project.version}"
+export COMPOSE_NAME="installer-${project.version}"
 
 case "$(uname)" in
 MINGW*)
@@ -43,14 +43,14 @@ info() {
 	echo ""
 	echo "  edu-sharing community repository:"
 	echo ""
-	echo "    http://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}:${REPOSITORY_SERVICE_PORT_HTTP:-8100}/edu-sharing/"
+	echo "    http://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}:${REPOSITORY_SERVICE_PORT:-8100}/edu-sharing/"
 	echo ""
 	echo "    username: admin"
 	echo "    password: ${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
 	echo ""
 	echo "  edu-sharing community services rendering:"
 	echo ""
-	echo "    http://${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.nip.io}:${RENDERING_SERVICE_PORT_HTTP:-9100}/esrender/admin/"
+	echo "    http://${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.nip.io}:${RENDERING_SERVICE_PORT:-9100}/esrender/admin/"
 	echo ""
 	echo "    username: ${RENDERING_DATABASE_USER:-rendering}"
 	echo "    password: ${RENDERING_DATABASE_PASS:-rendering}"
@@ -116,8 +116,9 @@ compose_plugins() {
 }
 
 logs() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -127,8 +128,9 @@ logs() {
 }
 
 ps() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -137,9 +139,70 @@ ps() {
 		ps || exit
 }
 
+init() {
+	mkdir -p rendering
+	mkdir -p repository/plugin-elastic
+	mkdir -p repository/plugin-transform
+
+	rm -f rendering/.env repository/.env repository/plugin-elastic/.env repository/plugin-transform/.env
+
+	{
+		echo "RENDERING_DATABASE_PASS=${RENDERING_DATABASE_PASS:-rendering}"
+		echo "RENDERING_DATABASE_USER=${RENDERING_DATABASE_USER:-rendering}"
+
+		echo "RENDERING_SERVICE_HOST_EXTERNAL=${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.nip.io}"
+		echo "RENDERING_SERVICE_PORT_EXTERNAL=${RENDERING_SERVICE_PORT:-9100}"
+
+		echo "RENDERING_SERVICE_HOST_INTERNAL=rendering"
+		echo "RENDERING_SERVICE_PORT_INTERNAL=80"
+
+		echo "REPOSITORY_SERVICE_ADMIN_PASS=${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
+
+		echo "REPOSITORY_SERVICE_HOST=repository"
+		echo "REPOSITORY_SERVICE_PORT=80"
+	} >> rendering/.env
+
+	{
+		echo "REPOSITORY_SERVICE_HOME_APPID=${COMPOSE_PROJECT_NAME:-compose}"
+
+		echo "REPOSITORY_SERVICE_ADMIN_PASS=${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
+
+		echo "REPOSITORY_SERVICE_HOST_EXTERNAL=${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}"
+		echo "REPOSITORY_SERVICE_PORT_EXTERNAL=${REPOSITORY_SERVICE_PORT:-8100}"
+
+		echo "REPOSITORY_SERVICE_HOST_INTERNAL=repository"
+		echo "REPOSITORY_SERVICE_PORT_INTERNAL=80"
+
+		# plugin cluster (please check deploy/installer/repository/scripts/../load_config.sh inside plugin)
+		echo "REPOSITORY_SERVICE_CLUSTER_NETWORK_TCPIP_MEMBERS=repository"
+
+		# plugin elastic (please check deploy/installer/repository/scripts/../load_config.sh inside plugin)
+		echo "REPOSITORY_SEARCH_ELASTIC_HOST=repository-elastic"
+
+		# plugin transform (please check deploy/installer/repository/scripts/../load_config.sh inside plugin)
+		echo "REPOSITORY_TRANSFORM_SERVER_HOST=repository-transform"
+	} >> repository/.env
+
+	# plugin elastic (please check deploy/installer/tracker/scripts/../install.sh inside plugin)
+	{
+		echo "REPOSITORY_SERVICE_ADMIN_PASS=${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
+
+    echo "REPOSITORY_SERVICE_HOST=repository"
+    echo "REPOSITORY_SERVICE_PORT=80"
+	} >> repository/plugin-elastic/.env
+
+	# plugin transform (please check deploy/installer/server/scripts/../install.sh inside plugin)
+	{
+		echo "REPOSITORY_TRANSFORM_SERVER_BIND=0.0.0.0"
+		echo "REPOSITORY_TRANSFORM_MANAGEMENT_SERVER_BIND=0.0.0.0"
+	} >> repository/plugin-transform/.env
+
+}
+
 rstart() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -remote)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote) $(compose_plugins repository -common -remote)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -remote) $(compose_plugins rendering -common -remote)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -remote)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -153,8 +216,9 @@ rstart() {
 }
 
 stop() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -167,8 +231,9 @@ remove() {
 	read -p "Are you sure you want to continue? [y/N] " answer
 	case ${answer:0:1} in
 	y | Y)
+		COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 		COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-		COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
+		COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common)"
 
 		echo "Use compose set: $COMPOSE_LIST"
 
@@ -184,7 +249,7 @@ remove() {
 
 case "${CLI_OPT1}" in
 start)
-	rstart && info
+	init && rstart && info
 	;;
 info)
 	info
