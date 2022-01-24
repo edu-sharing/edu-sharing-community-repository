@@ -10,6 +10,24 @@ if [[ -z $ALF_HOME ]] ; then
 	exit 1
 fi
 
+if [[ ! -f alfresco.sh ]] ; then
+	echo ""
+	echo "Missing $ALF_HOME/alfresco.sh."
+	exit 1
+fi
+
+if [[ "$(./alfresco.sh status tomcat)" != "tomcat not running" ]] ; then
+	echo ""
+	echo "Please stop Tomcat before you can run the installation!"
+	exit 1
+fi
+
+if [[ "$(./alfresco.sh status postgresql)" != "postgresql not running" ]] ; then
+	echo ""
+	echo "Please stop Postgresql before you can run the installation!"
+	exit 1
+fi
+
 ########################################################################################################################
 
 execution_folder="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -51,15 +69,11 @@ usage() {
 
 	echo "--local"
 	echo "  Use local maven cache for installation"
-
-	echo "--baseimage"
-	echo "  Define the path to the alfresco base image"
 }
 
 ########################################################################################################################
 
 use_local_maven_cache=0
-alfresco_base_image="$execution_folder/alfresco-base-image-for-edu-sharing_DO-NOT-DELETE-ME.tar.gz"
 
 while true; do
 	flag="$1"
@@ -69,7 +83,6 @@ while true; do
 			--help|'-?') usage && exit 0 ;;
 			--file|-f) source "$1" && shift	;;
 			--local) use_local_maven_cache=1 ;;
-			--baseimage) alfresco_base_image="$1" && shift;;
 			*) {
 				echo "error: unknown flag: $flag"
 				usage
@@ -235,7 +248,6 @@ info() {
 
   ######################################################################################################################
 
-  # PRINT PLUGIN CONFIG
   if [[ -d "$execution_folder/plugins" ]] ; then
   	for plugin in "$execution_folder"/plugins/plugin-*/print_config.sh; do
   		 [[ -f "$plugin" ]] && {
@@ -246,13 +258,83 @@ info() {
 
   echo "#########################################################################"
   echo ""
+  echo ""
 }
 
 ########################################################################################################################
 
 install_edu_sharing() {
 
+	echo "- unpack edu-sharing repository distribution"
+
+	mkdir -p dist
+	tar -xzf edu_sharing-community-deploy-installer-repository-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}-bin.tar.gz -C dist
+
+	######################################################################################################################
+
+	echo "- update tomcat"
+
+	tar -czf dist/catalina.tar.gz tomcat/conf/Catalina
+
+	rm -rf tomcat/bin/*
+	rm -rf tomcat/conf/*
+	rm -rf tomcat/lib/*
+	rm -rf tomcat/temp/*
+	rm -rf tomcat/work/*
+
+  tar -xzf dist/artifacts/tomcat-${tomcat.version}.tar.gz -C tomcat --strip 1 --exclude apache-tomcat-${tomcat.version}/webapps
+	tar -xzf dist/catalina.tar.gz
+
+	######################################################################################################################
+
+	echo "- update edu-sharing"
+
+	rm -f tomcat/webapps/alfresco/WEB-INF/lib/commons-lang3-*
+	rm -f tomcat/webapps/alfresco/WEB-INF/lib/hazelcast-*
+	rm -f tomcat/webapps/alfresco/WEB-INF/lib/jackson-*
+	rm -f tomcat/webapps/alfresco/WEB-INF/lib/log4j-*
+	rm -f tomcat/webapps/alfresco/WEB-INF/lib/slf4j-*
+
+	rm -rf tomcat/webapps/edu-sharing
+
+	cp -r dist/tomcat/* tomcat
+
+	######################################################################################################################
+
+	echo "- install amps"
+
+	rm -rf amps/alfresco/*
+	rm -rf amps/edu-sharing/*
+
+	cp -r dist/amps/* amps
+
+	if [[ -d amps/alfresco/0 ]]; then
+	  java -jar bin/alfresco-mmt.jar install amps/alfresco/0 tomcat/webapps/alfresco -directory -nobackup -force
+	fi
+
+	if [[ -d amps/alfresco/1 ]]; then
+	  java -jar bin/alfresco-mmt.jar install amps/alfresco/1 tomcat/webapps/alfresco -directory -nobackup -force
+  fi
+
+  if [[ -d amps/edu-sharing/1 ]]; then
+    java -jar bin/alfresco-mmt.jar install amps/edu-sharing/1 tomcat/webapps/edu-sharing -directory -nobackup -force
+  fi
+
+	######################################################################################################################
+
+	rm -rf dist
+}
+
+config_edu_sharing() {
+
 	setEnvSh="tomcat/bin/setenv.sh"
+
+	catProps="tomcat/conf/catalina.properties"
+	catServe="tomcat/conf/server.xml"
+
+	catCxAlf="tomcat/conf/Catalina/localhost/alfresco.xml"
+	catCxShr="tomcat/conf/Catalina/localhost/share.xml"
+	catCxSol="tomcat/conf/Catalina/localhost/solr4.xml"
 
 	eduCConf="tomcat/shared/classes/config/defaults/client.config.xml"
 
@@ -260,62 +342,43 @@ install_edu_sharing() {
 	eduSConf="tomcat/shared/classes/config/cluster/edu-sharing.deployment.conf"
 	eduProps="tomcat/shared/classes/config/cluster/applications/homeApplication.properties.xml"
 
-	solr4Wor="solr4/workspace-SpacesStore/conf/solrcore.properties"
 	solr4Arc="solr4/archive-SpacesStore/conf/solrcore.properties"
-
-	pushd "$ALF_HOME" &> /dev/null
-
-	echo "- clean up outdated libraries"
-	rm -f tomcat/lib/postgresql-*
-	rm -f tomcat/webapps/alfresco/WEB-INF/lib/commons-lang3-*
-	rm -f tomcat/webapps/alfresco/WEB-INF/lib/hazelcast-*
-	rm -f tomcat/webapps/alfresco/WEB-INF/lib/jackson-*
-	rm -f tomcat/webapps/alfresco/WEB-INF/lib/log4j-*
-	rm -f tomcat/webapps/alfresco/WEB-INF/lib/slf4j-*
-
-	######################################################################################################################
-
-	echo "- unpack edu-sharing repository"
-	tar --no-same-owner -xzf edu_sharing-community-deploy-installer-repository-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}-bin.tar.gz
-
-	echo "- install Alfresco Module Packages"
-	if [[ -d amps/alfresco/0 ]]; then
-	  java -jar bin/alfresco-mmt.jar install amps/alfresco/0 tomcat/webapps/alfresco -directory -nobackup -force 2> /dev/null
-	fi
-
-	if [[ -d amps/alfresco/1 ]]; then
-	  java -jar bin/alfresco-mmt.jar install amps/alfresco/1 tomcat/webapps/alfresco -directory -nobackup -force 2> /dev/null
-  fi
-
-  if [[ -d amps/edu-sharing/1 ]]; then
-    java -jar bin/alfresco-mmt.jar install amps/edu-sharing/1 tomcat/webapps/edu-sharing -directory -nobackup -force 2> /dev/null
-  fi
-
-	### config ###########################################################################################################
-
-	configs=(defaults plugins cluster node)
-
-	for config in "${configs[@]}"; do
-		if [[ ! -f tomcat/shared/classes/config/$config/version.json ]]; then
-			mkdir -p tomcat/shared/classes/config/$config
-			for jar in tomcat/shared/lib/$config/*.jar; do
-				if [[ -f $jar ]] ; then
-					unzip -o $jar -d tomcat/shared/classes/config/$config -x 'META-INF/*'
-					rm $jar
-				fi
-			done
-			cp -f tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/$config
-		else
-			cmp -s tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/$config/version.json || {
-				mv tomcat/shared/classes/config/$config/version.json tomcat/shared/classes/config/$config/version.json.$(date +%d-%m-%Y_%H-%M-%S )
-				cp tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/$config/version.json
-			}
-		fi
-	done
+	solr4Wor="solr4/workspace-SpacesStore/conf/solrcore.properties"
 
 	### Tomcat ###########################################################################################################
 
-	echo "- update tomcat env"
+	echo "- update ${catProps}"
+
+  mkdir -p tomcat/shared/classes
+  mkdir -p tomcat/shared/lib
+  sed -i -r \
+		's|^[#]*\s*shared\.loader=.*|shared.loader=${catalina.base}/shared/classes,${catalina.base}/shared/lib/*.jar|' \
+		${catProps}
+
+	echo "- update ${catServe}"
+
+  xmlstarlet ed -L \
+    -d '/Server/Service[@name="Catalina"]/Connector[@port="8080"]' \
+		-s '/Server/Service[@name="Catalina"]' -t elem -n "Connector" \
+		--var http '$prev' \
+		-i '$http' -t attr -n "protocol" -v "HTTP/1.1" \
+		-i '$http' -t attr -n "address" -v "0.0.0.0" \
+		-i '$http' -t attr -n "port" -v "8080" \
+		-i '$http' -t attr -n "connectionTimeout" -v "20000" \
+    -d '/Server/Service[@name="Catalina"]/Connector[@port="8009"]' \
+		-s '/Server/Service[@name="Catalina"]' -t elem -n "Connector" \
+		--var ajp '$prev' \
+		-i '$ajp' -t attr -n "protocol" -v "AJP/1.3" \
+		-i '$ajp' -t attr -n "address" -v "0.0.0.0" \
+		-i '$ajp' -t attr -n "port" -v "8009" \
+		-i '$ajp' -t attr -n "secretRequired" -v "false" \
+		-d '/Server/Service[@name="Catalina"]/Connector[@port="8443"]' \
+		${catServe}
+
+	echo "- update ${setEnvSh}"
+
+	sed -i -r 's|alfresco\.home=.*\"|alfresco.home=$ALF_HOME $CATALINA_OPTS \"|' ${setEnvSh}
+	grep -q 'alfresco\.home' ${setEnvSh} || echo 'CATALINA_OPTS="-Dalfresco.home=$ALF_HOME $CATALINA_OPTS "' >> ${setEnvSh}
 
 	sed -i -r 's|file\.encoding=.*\"|file.encoding=UTF-8 $CATALINA_OPTS \"|' ${setEnvSh}
 	grep -q 'file\.encoding' ${setEnvSh} || echo 'CATALINA_OPTS="-Dfile.encoding=UTF-8 $CATALINA_OPTS "' >> ${setEnvSh}
@@ -377,7 +440,35 @@ install_edu_sharing() {
 
 	### Alfresco platform ################################################################################################
 
-	echo "- update alfresco env"
+	echo "- update ${catCxAlf}"
+
+	xmlstarlet ed -L \
+		-d '/Context/Loader' \
+		-s '/Context' -t elem -n "Resources" -v "" \
+		--var resources '$prev' \
+		-i '$resources' -t attr -n "cacheMaxSize" -v "20480" \
+		${catCxAlf}
+
+	echo "- update ${catCxShr}"
+
+	xmlstarlet ed -L \
+		-d '/Context/Loader' \
+		-s '/Context' -t elem -n "Resources" -v "" \
+		--var resources '$prev' \
+		-i '$resources' -t attr -n "cacheMaxSize" -v "20480" \
+		${catCxShr}
+
+	if [[ -f ${solr4Arc} ]] ; then
+		echo "- update ${solr4Arc}"
+		echo "alfresco.secureComms=none" >> "${solr4Arc}"
+	fi
+
+	if [[ -f ${solr4Wor} ]] ; then
+		echo "- update ${solr4Wor}"
+		echo "alfresco.secureComms=none" >> "${solr4Wor}"
+	fi
+
+	echo "- update ${alfProps}"
 
 	if [[ -n $repository_contentstore ]] ; then
   	echo "dir.contentstore=${repository_contentstore}" >> "${alfProps}"
@@ -419,12 +510,11 @@ install_edu_sharing() {
 	echo "solr.host=${repository_search_solr4_host}" >> "${alfProps}"
   echo "solr.port=${repository_search_solr4_port}" >> "${alfProps}"
   echo "solr.secureComms=none" >> "${alfProps}"
-  echo "alfresco.secureComms=none" >> "${solr4Wor}"
-  echo "alfresco.secureComms=none" >> "${solr4Arc}"
 
 	### edu-sharing ######################################################################################################
 
-	echo "- update edu-sharing env"
+	echo "- update ${eduProps}"
+
 	xmlstarlet ed -L \
 		-u '/properties/entry[@key="appid"]' -v "${my_home_appid}" \
 		-u '/properties/entry[@key="authenticationwebservice"]' -v "${my_auth_external}" \
@@ -435,6 +525,15 @@ install_edu_sharing() {
 		-u '/properties/entry[@key="password"]' -v "${my_admin_pass}" \
 		-u '/properties/entry[@key="port"]' -v "${my_port_internal}" \
 		${eduProps}
+
+	if [[ -n "${my_home_provider}" ]] ; then
+		xmlstarlet ed -L \
+				-d '/properties/entry[@key="remote_provider"]' \
+				-s '/properties' -t elem -n "entry" -v "${my_home_provider}" \
+				--var entry '$prev' \
+				-i '$entry' -t attr -n "key" -v "remote_provider" \
+				${eduProps}
+	fi
 
 	if [[ -n "${my_home_auth}" ]] ; then
 		xmlstarlet ed -L \
@@ -463,15 +562,7 @@ install_edu_sharing() {
 		fi
 	fi
 
-
-	if [[ -n "${my_home_provider}" ]] ; then
-		xmlstarlet ed -L \
-    		-d '/properties/entry[@key="remote_provider"]' \
-    		-s '/properties' -t elem -n "entry" -v "${my_home_provider}" \
-    		--var entry '$prev' \
-    		-i '$entry' -t attr -n "key" -v "remote_provider" \
-    		${eduProps}
-	fi
+	echo "- update ${eduSConf}"
 
 	if [[ -n "${repository_httpclient_disablesni4hosts}" ]] ; then
 		hocon -f ${eduSConf} \
@@ -508,16 +599,13 @@ install_edu_sharing() {
   		set "repository.httpclient.proxy.proxyuser" "${repository_httpclient_proxy_proxyuser}"
   fi
 
-	popd
-
 	######################################################################################################################
 
-	# LOAD PLUGIN CONFIG
 	if [[ -d "$execution_folder/plugins" ]] ; then
 		for plugin in "$execution_folder"/plugins/plugin-*/setup_config.sh; do
-  		 [[ -f "$plugin" ]] && {
-  		 		source "$plugin" || exit 1
-  		 }
+			if [[ -f plugin ]] ; then
+				source "$plugin" || exit 1
+		  fi
   	done
   fi
 
@@ -526,118 +614,105 @@ install_edu_sharing() {
 ########################################################################################################################
 
 pushd "$ALF_HOME" &> /dev/null
-if [[ ! -f alfresco.sh ]] ; then
-	echo ""
-	echo "Env ALF_HOME must point to the home directory of your Alfresco Platform!"
-	exit 1
-fi
-
-if [[ ! -d tomcat/webapps/alfresco || ! -d tomcat/webapps/solr4 ]] ; then
-	echo ""
-	echo "You must have started the Alfresco Platform at least once before you can run the installation."
-	exit 1
-fi
-
-if [[ "$(./alfresco.sh status tomcat)" != "tomcat not running" ]] ; then
-	echo ""
-	echo "Please stop Tomcat before you can run the installation!"
-	exit 1
-fi
-
-if [[ "$(./alfresco.sh status postgresql)" != "postgresql not running" ]] ; then
-	echo ""
-	echo "Please stop Postgresql before you can run the installation!"
-	exit 1
-fi
-popd
-
-########################################################################################################################
 
 if [[ use_local_maven_cache -eq 1 ]] ; then
-	echo "- WARNING local maven cache is used"
+	echo "- WARNING: local maven cache is being used"
 else
 	echo "- download edu-sharing repository distribution"
+
 	mvn -q dependency:get \
 		-Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}:tar.gz:bin \
 		-DremoteRepositories=edusharing-remote::::https://artifacts.edu-sharing.com/repository/maven-remote/ \
 		-Dtransitive=false
 fi
 
+echo "- copy edu-sharing repository distribution"
 
-pushd "$ALF_HOME" &> /dev/null
-
-echo "- unpack edu-sharing repository distribution"
 mvn -q dependency:copy \
 	-Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}:tar.gz:bin \
 	-DoutputDirectory=.
 
-
-if [[ -f "$alfresco_base_image" ]] ; then
-
-	echo ""
-	echo "Update ... "
-
-	echo "- make a snapshot of edu-sharing platform"
-	snapshot_name="$execution_folder/snapshots/edu-sharing-SNAPSHOT-$(date "+%Y.%m.%d-%H.%M.%S").tar.gz"
-	mkdir -p "$(dirname "$snapshot_name")"
-	tar -czf "$snapshot_name" amps tomcat solr4
-
-	echo "- cleanup amps and tomcat"
-	rm -rf amps
-	rm -rf tomcat
-	rm -rf solr4
-
-	echo "- restore amps and tomcat"
-	tar -zxf "$alfresco_base_image"
-
-	install_edu_sharing
-
-	echo "- restore cluster config"
-	if [[ $(tar -tf  "$snapshot_name" | grep 'tomcat/shared/classes/config/cluster' | wc -l) -gt 0 ]]; then
-		tar -zxf "$snapshot_name" tomcat/shared/classes/config/cluster -C tomcat/shared/classes/config/
-	else
-		echo "nothing to restore"
-	fi
-
-	cp -f tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/cluster
-
-	echo "- restore node config"
-	if [[ $(tar -tf  "$snapshot_name" | grep 'tomcat/shared/classes/config/node' | wc -l) -gt 0 ]]; then
-		tar -zxf "$snapshot_name" tomcat/shared/classes/config/node -C tomcat/shared/classes/config/
-	else
-		echo "nothing to restore"
-	fi
-
-	cp -f tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/node
-
-	echo "- restore logging config"
-	if [[ $(tar -tf  "$snapshot_name" | grep 'tomcat/webapps/alfresco/WEB-INF/classes/log4j2.xml' | wc -l) -gt 0 ]]; then
-		tar -zxf "$snapshot_name" tomcat/webapps/alfresco/WEB-INF/classes/log4j2.xml -C tomcat/webapps/alfresco/WEB-INF/classes/
-	else
-		echo "nothing to restore"
-	fi
-
-	echo "- delete old edu-sharing SNAPSHOTS (keep 3 backups)"
-	pushd .. &> /dev/null
-	ls -pt | grep -v / | grep "edu-sharing-SNAPSHOT" | tail -n +4 | xargs -I {} rm {}
-	popd
-
-else
+if [[ ! -d "tomcat/webapps/edu-sharing" ]] ; then
 
 	echo ""
 	echo "Install ... "
 
-	echo "- make a snapshot of Alfresco platform"
-	mkdir -p "$(dirname "$alfresco_base_image")"
-	tar -czf "$alfresco_base_image" amps tomcat solr4
+	if [[ -d $ALF_HOME/alf_data/solr4 && $(find $ALF_HOME/alf_data/solr4 -type f | wc -l) -gt 0 ]] ; then
+		echo "ERROR: You have to clean $ALF_HOME/alf_data/solr4 before install due to content model changes!"
+		exit 1;
+	fi
 
-	install_edu_sharing
+else
+
+	echo ""
+	echo "Update ... "
 
 fi
 
-echo "- you may need to delete the solr4 index, model and content folders!"
+echo "- make a snapshot"
+snapshot_name="$execution_folder/snapshots/edu-sharing-SNAPSHOT-$(date "+%Y.%m.%d-%H.%M.%S").tar.gz"
+mkdir -p "$(dirname "$snapshot_name")"
+tar -czf "$snapshot_name" tomcat
+
+install_edu_sharing || exit 1
+
+restores=(
+	'tomcat/bin/setenv.sh'
+	'tomcat/conf/logging.properties'
+	'tomcat/webapps/alfresco/WEB-INF/classes/log4j2.xml'
+	'tomcat/webapps/share/WEB-INF/classes/log4j.properties'
+	'tomcat/shared/classes/config/cluster'
+	'tomcat/shared/classes/config/node'
+)
+
+for restore in "${restores[@]}"
+do
+	if [[ $(tar -tf  "$snapshot_name" | grep -c "${restore}") -gt 0 ]]; then
+		echo "- restore ${restore} from snapshot"
+		tar -zxf "$snapshot_name" "${restore}" -C $(dirname "${restore}")
+	fi
+done
+
+echo "- prune snapshots (keep 3)"
+pushd "$execution_folder"/snapshots &> /dev/null
+ls -pt | grep -v / | grep "edu-sharing-SNAPSHOT" | tail -n +4 | xargs -I {} rm {}
+popd
+
+configs=(
+	'defaults'
+	'plugins'
+	'cluster'
+	'node'
+)
+
+for config in "${configs[@]}"; do
+	if [[ ! -f tomcat/shared/classes/config/$config/version.json ]]; then
+		mkdir -p tomcat/shared/classes/config/$config
+		for jar in tomcat/shared/lib/$config/*.jar; do
+			if [[ -f $jar ]] ; then
+				echo "- unpack $jar into tomcat/shared/classes/config/$config"
+				unzip -qq -o $jar -d tomcat/shared/classes/config/$config -x 'META-INF/*'
+			fi
+		done
+		cp -f tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/$config
+	else
+		cmp -s tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/$config/version.json || {
+			echo "- update tomcat/shared/classes/config/$config/version.json"
+			mv tomcat/shared/classes/config/$config/version.json tomcat/shared/classes/config/$config/version.json.$(date +%d-%m-%Y_%H-%M-%S )
+			cp tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/$config/version.json
+
+			if [[ $config == 'cluster' ]] ; then
+				echo "- WARNING: You may need to clean $ALF_HOME/alf_data/solr4 due to content model changes!"
+			fi
+		}
+	fi
+done
+rm -rf tomcat/shared/lib/*
+
+config_edu_sharing || exit 1
 
 rm edu_sharing-community-deploy-installer-repository-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}-bin.tar.gz
+
 popd
 
 info >> "$execution_folder/install_log-$(date "+%Y.%m.%d-%H.%M.%S").txt"

@@ -2,40 +2,25 @@
 set -e
 set -o pipefail
 
-
-# TODO check if apache is stopped otherwise exit!
-#[[ "$(apache2 status )" != "tomcat not running" ]] && {
-#	echo ""
-#	echo "Please stop Tomcat before you can run the installation!"
-#	exit
-#}
-
-# TODO check if db is running otherwise exit!
-#[[ "$(./alfresco.sh status postgresql)" != "postgresql not running" ]] && {
-#	echo ""
-#	echo "Please stop Postgresql before you can run the installation!"
-#	exit
-#}
-
 ########################################################################################################################
 
-if [[ -z  $WWW_ROOT ]] ; then
+if [[ -z $WWW_ROOT ]] ; then
 	echo ""
 	echo "Env WWW_ROOT not defined! It must point to the data directory of your Apache webservice!"
 	exit 1
 fi
 
 
-if [[ -z  $RS_ROOT ]] ; then
+if [[ -z $RS_ROOT ]] ; then
 	echo ""
-	echo "Env RS_ROOT not defined! It must point to the installation directory of the rederingservice inside your Apache webservice!"
+	echo "Env RS_ROOT not defined! It must point to the installation directory of the renderingservice inside your Apache webservice!"
 	exit 1
 fi
 
 
-if [[ -z  $RS_CACHE ]] ; then
+if [[ -z $RS_CACHE ]] ; then
 	echo ""
-	echo "Env RS_CACHE not defined! It must point to an cache directory of the rederingservice!"
+	echo "Env RS_CACHE not defined! It must point to an cache directory of the renderingservice!"
 	exit 1
 fi
 
@@ -47,24 +32,33 @@ pushd "$execution_folder" &> /dev/null
 
 # load the default configuration
 if [[ -f ".env.base" ]] ; then
-	source .env.base
+	echo "Load .env.base"
+	source .env.base &> /dev/null
 fi
 
 popd
 
-
+########################################################################################################################
 
 usage() {
 	echo "Options:"
 	echo ""
 
+	echo "-?"
+	echo "--help"
+	echo "  Display available options"
+	echo ""
+
 	echo "-f = environment file"
 	echo "--file"
-	echo "Loads the configuration from the specified environment file"
+	echo "  Loads the configuration from the specified environment file"
+	echo ""
 
 	echo "--local"
 	echo "  Use local maven cache for installation"
 }
+
+########################################################################################################################
 
 use_local_maven_cache=0
 
@@ -76,7 +70,6 @@ while true; do
 			--help|'-?') usage && exit 0 ;;
 			--file|-f) source "$1" && shift	;;
 			--local) use_local_maven_cache=1 ;;
-
 			*) {
 				echo "error: unknown flag: $flag"
 				usage
@@ -85,7 +78,9 @@ while true; do
 	esac
 done
 
-my_home_appid="${RENDERING_SERVICE_HOME_APPID:-esrender}" # Kundenprojekt ?
+########################################################################################################################
+
+my_home_appid="${RENDERING_SERVICE_HOME_APPID:-esrender}"
 
 my_prot_external="${RENDERING_SERVICE_PROT_EXTERNAL:-http}"
 my_host_external="${RENDERING_SERVICE_HOST_EXTERNAL:-localhost}"
@@ -123,6 +118,34 @@ rendering_proxy_host="${RENDERING_PROXY_HOST:-}"
 rendering_proxy_port="${RENDERING_PROXY_PORT:-}"
 rendering_proxy_user="${RENDERING_PROXY_USER:-}"
 rendering_proxy_pass="${RENDERING_PROXY_PASS:-}"
+
+########################################################################################################################
+
+until wait-for-it "${db_host}:${db_port}" -t 3; do sleep 1; done
+
+if [[ "${db_driv}" == "pgsql" ]] ; then
+	until PGPASSWORD="${db_pass}" psql -h "${db_host}" -p "${db_port}" -U "${db_user}" -d "${db_name}" -c '\q'; do
+		echo >&2 "Waiting for database postgresql ${db_host}:${db_port} ..."
+		sleep 3
+	done
+fi
+
+
+if [[ -n $repository_service_base ]] ; then
+	until wait-for-it "${repository_service_host}:${repository_service_port}" -t 3; do sleep 1; done
+
+	until [[ $(curl -sSf -w "%{http_code}\n" -o /dev/null -H 'Accept: application/json' "${repository_service_base}/rest/_about/status/SERVICE?timeoutSeconds=3") -eq 200 ]]; do
+		echo >&2 "Waiting for repository ${repository_service_host} service ..."
+		sleep 3
+	done
+
+	until [[ $(curl -sSf -w "%{http_code}\n" -o /dev/null -H 'Accept: application/json' "${repository_service_base}/rest/_about/status/SEARCH?timeoutSeconds=3") -eq 200 ]]; do
+		echo >&2 "Waiting for repository ${repository_service_host} search ..."
+		sleep 3
+	done
+fi
+
+########################################################################################################################
 
 info() {
 	echo ""
@@ -197,70 +220,82 @@ info() {
   echo ""
 }
 
-
+########################################################################################################################
 
 install_edu_sharing() {
-	if [[ use_local_maven_cache -eq 1 ]] ; then
-		echo "- WARNING local maven cache is used"
-	else
-		echo "- download edu-sharing rendering-service distribution"
-		mvn help:effective-settings
 
-		mvn -q dependency:get \
-				-Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-rendering-distribution:${org.edu_sharing:edu_sharing-community-deploy-installer-rendering-distribution:tar.gz:bin.version}:tar.gz:bin \
-				-DremoteRepositories=edusharing-remote::::https://artifacts.edu-sharing.com/repository/maven-remote/ \
-				-Dtransitive=false
-	fi
+	echo "- reset rendering server"
+	rm -rf $RS_ROOT
 
 	echo "- unpack edu-sharing rendering-service distribution"
-	mvn -q dependency:copy \
-			-Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-rendering-distribution:${org.edu_sharing:edu_sharing-community-deploy-installer-rendering-distribution:tar.gz:bin.version}:tar.gz:bin \
-			-DoutputDirectory=.
-
 	tar xzf edu_sharing-community-deploy-installer-rendering-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-rendering-distribution:tar.gz:bin.version}-bin.tar.gz --exclude './vendor/lib/converter'
-	rm edu_sharing-community-deploy-installer-rendering-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-rendering-distribution:tar.gz:bin.version}-bin.tar.gz
+
+  mkdir -p "${RS_CACHE}"
+
+}
+
+config_edu_sharing() {
+
+	if [[ -n $rendering_proxy_host ]] ; then
+  	proxyConf="${RS_ROOT}"/conf/proxy.conf.php
+  	echo "- update $proxyConf"
+  	cp -rf "${RS_ROOT}"/conf/proxy.conf.php.example "${proxyConf}"
+  	sed -i -r "s|define\('HTTP_PROXY_HOST',.*);|define('HTTP_PROXY_HOST', '$rendering_proxy_host');|" "${proxyConf}"
+  	sed -i -r "s|define\('HTTP_PROXY_PORT',.*);|define('HTTP_PROXY_PORT', $rendering_proxy_port);|" "${proxyConf}"
+  	sed -i -r "s|define\('HTTP_PROXY_USER',.*);|define('HTTP_PROXY_USER', '$rendering_proxy_user');|" "${proxyConf}"
+  	sed -i -r "s|define\('HTTP_PROXY_PASS',.*);|define('HTTP_PROXY_PASS', '$rendering_proxy_pass');|" "${proxyConf}"
+  fi
+
+  dbConf="${RS_ROOT}"/conf/db.conf.php
+  echo "- update ${dbConf}"
+  sed -i -r "s|\$dsn.*|\$dsn = \"${db_driver}:host=${db_host};port=${db_port};dbname=${db_name}\";|" "${dbConf}"
+  sed -i -r "s|\$dbuser.*|\$dbuser = \"$db_user\";|" "${dbConf}"
+  sed -i -r "s|\$pwd.*|\pwd = \"$db_password\";|" "${dbConf}"
+
+  systemConf="${RS_ROOT}"/conf/system.conf.php
+  echo "- update ${systemConf}"
+  sed -i -r "s|\$MC_URL.*|\$MC_URL = '$db_user';|" "${systemConf}"
+  sed -i -r "s|\$MC_DOCROOT.*|\$MC_DOCROOT = '$db_user';|" "${systemConf}"
+  sed -i -r "s|\$CC_RENDER_PATH.*|\$CC_RENDER_PATH = '$db_user';|" "${systemConf}"
+
+  homeApp="${RS_ROOT}/conf/esmain/homeApplication.properties.xml"
+  echo "- update ${homeApp}"
+  xmlstarlet ed -L \
+  	-u '/properties/entry[@key="scheme"]' -v "${my_prot_internal}" \
+  	-u '/properties/entry[@key="host"]' -v "${my_host_internal}" \
+  	-u '/properties/entry[@key="port"]' -v "${my_port_internal}" \
+  	-u '/properties/entry[@key="appid"]' -v "${my_home_appid}" \
+  	"${homeApp}"
 
 }
 
 ########################################################################################################################
 
-until wait-for-it "${db_host}:${db_port}" -t 3; do sleep 1; done
+pushd $WWW_ROOT &> /dev/null
 
-if [[ "${db_driv}" == "pgsql" ]] ; then
-	until PGPASSWORD="${db_pass}" psql -h "${db_host}" -p "${db_port}" -U "${db_user}" -d "${db_name}" -c '\q'; do
-		echo >&2 "Waiting for database postgresql ${db_host}:${db_port} ..."
-		sleep 3
-	done
+if [[ use_local_maven_cache -eq 1 ]] ; then
+	echo "- WARNING: local maven cache is being used"
+else
+	echo "- download edu-sharing rendering-service distribution"
+
+	mvn -q dependency:get \
+			-Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-rendering-distribution:${org.edu_sharing:edu_sharing-community-deploy-installer-rendering-distribution:tar.gz:bin.version}:tar.gz:bin \
+			-DremoteRepositories=edusharing-remote::::https://artifacts.edu-sharing.com/repository/maven-remote/ \
+			-Dtransitive=false
 fi
 
+echo "- copy edu-sharing rendering-service distribution"
 
-if [[ -n $repository_service_base ]] ; then
-	until wait-for-it "${repository_service_host}:${repository_service_port}" -t 3; do sleep 1; done
-
-	until [[ $(curl -sSf -w "%{http_code}\n" -o /dev/null -H 'Accept: application/json' "${repository_service_base}/rest/_about/status/SERVICE?timeoutSeconds=3") -eq 200 ]]; do
-		echo >&2 "Waiting for repository ${repository_service_host} service ..."
-		sleep 3
-	done
-
-	until [[ $(curl -sSf -w "%{http_code}\n" -o /dev/null -H 'Accept: application/json' "${repository_service_base}/rest/_about/status/SEARCH?timeoutSeconds=3") -eq 200 ]]; do
-		echo >&2 "Waiting for repository ${repository_service_host} search ..."
-		sleep 3
-	done
-fi
-
-########################################################################################################################
-
-pushd $WWW_ROOT
+mvn -q dependency:copy \
+		-Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-rendering-distribution:${org.edu_sharing:edu_sharing-community-deploy-installer-rendering-distribution:tar.gz:bin.version}:tar.gz:bin \
+		-DoutputDirectory=.
 
 if [[ ! -d "${RS_CACHE}" ]] ; then
 
 	echo ""
 	echo "Install ... "
 
-	install_edu_sharing
-
-  mkdir -p "${RS_CACHE}"
-  chown -R www-data:www-data "${RS_CACHE}"
+	install_edu_sharing || exit 1
 
   cat >/tmp/config.ini <<-EOF
 		[application]
@@ -299,6 +334,7 @@ if [[ ! -d "${RS_CACHE}" ]] ; then
 	EOF
 
   php "${RS_ROOT}"/admin/cli/install.php -c /tmp/config.ini || {
+		echo "- rollback"
   	result=$?;
   	rm -rf "${RS_CACHE}" 2> /dev/null
   	rm -rf "${RS_ROOT}" 2> /dev/null
@@ -306,13 +342,9 @@ if [[ ! -d "${RS_CACHE}" ]] ; then
   	exit $result
   }
 
-
   rm -f /tmp/config.ini
-  rm -rf "${RS_ROOT}"/install.bak
-	mv "${RS_ROOT}"/install/ "${RS_ROOT}"/install.bak
 
 	if [[ -n $repository_service_base ]] && [[ -n $repository_user ]] && [[ -n $repository_password ]] ; then
-		echo "- register rendering service with the repository"
 
 		until [[ $( curl -sSf -w "%{http_code}\n" -o /dev/null "${my_internal_url}/admin/" ) -eq 200 ]]
 		do
@@ -332,19 +364,15 @@ if [[ ! -d "${RS_CACHE}" ]] ; then
 				"${repository_service_base}/rest/admin/v1/applications" | jq -r '.[] | select(.id == "'"${my_appid}"'") | .id' \
 		)
 
-		if [[ -n "${has_my_appid}" ]] ; then
+		if [[ -z "${has_my_appid}" ]] ; then
+			echo "- register service with ${repository_service_base}"
 			curl -sS \
 				-H "Accept: application/json" \
 				--user "${repository_user}:${repository_password}" \
-				-XDELETE \
-				"${repository_service_base}/rest/admin/v1/applications/${my_appid}"
+				-XPUT \
+				"${repository_service_base}/rest/admin/v1/applications?url=$( jq -nr --arg v "${my_meta_internal}" '$v|@uri' )"
 		fi
 
-		curl -sS \
-			-H "Accept: application/json" \
-			--user "${repository_user}:${repository_password}" \
-			-XPUT \
-			"${repository_service_base}/rest/admin/v1/applications?url=$( jq -nr --arg v "${my_meta_internal}" '$v|@uri' )"
 	fi
 
 else
@@ -353,70 +381,47 @@ else
 	echo "Update ... "
 
 	echo "- make a snapshot of the rendering service"
-  snapshot_name=rendering-SNAPSHOT-$(date "+%Y.%m.%d-%H.%M.%S")".tar.gz"
+  snapshot_name="$execution_folder/snapshots/edu-sharing-SNAPSHOT-$(date "+%Y.%m.%d-%H.%M.%S").tar.gz"
 	tar -czf $snapshot_name $(basename "${RS_ROOT}")
 
-	echo "- cleanup rendering server"
-	rm -rf $RS_ROOT
+	install_edu_sharing || exit 1
 
-	install_edu_sharing
-
-  echo "- restore base rendering config"
+  echo "- restore rendering config"
   tar -zxf $snapshot_name $(basename "${RS_ROOT}")/conf
   tar -zxf $snapshot_name --wildcards "*config.php" -C $(basename "${RS_ROOT}")
 
 	echo "- update rendering service"
 	yes | php "${RS_ROOT}"/admin/cli/update.php || true
-	mv "${RS_ROOT}"/install/ "${RS_ROOT}"/install.bak
 
-	echo ""
-	echo "- delete old rendering SNAPSHOTS (keep 3 backups)"
-  ls -pt | grep -v / | grep "rendering-SNAPSHOT" | tail -n +4 | xargs -I {} rm {}
+	echo "- prune snapshots (keep 3)"
+	pushd "$execution_folder"/snapshots &> /dev/null
+	ls -pt | grep -v / | grep "edu-sharing-SNAPSHOT" | tail -n +4 | xargs -I {} rm {}
+	popd
 
 fi
 
-echo "- update configuration"
-if [[ -n $rendering_proxy_host ]] ; then
-	proxyConf="${RS_ROOT}"/conf/proxy.conf.php
-	cp -rf "${RS_ROOT}"/conf/proxy.conf.php.example "${proxyConf}"
-	sed -i -r "s|define\('HTTP_PROXY_HOST',.*);|define('HTTP_PROXY_HOST', '$rendering_proxy_host');|" "${proxyConf}"
-	sed -i -r "s|define\('HTTP_PROXY_PORT',.*);|define('HTTP_PROXY_PORT', $rendering_proxy_port);|" "${proxyConf}"
-	sed -i -r "s|define\('HTTP_PROXY_USER',.*);|define('HTTP_PROXY_USER', '$rendering_proxy_user');|" "${proxyConf}"
-	sed -i -r "s|define\('HTTP_PROXY_PASS',.*);|define('HTTP_PROXY_PASS', '$rendering_proxy_pass');|" "${proxyConf}"
-fi
+config_edu_sharing || exit 1
 
-dbConf="${RS_ROOT}"/conf/db.conf.php
-sed -i -r "s|\$dsn.*|\$dsn = \"${db_driver}:host=${db_host};port=${db_port};dbname=${db_name}\";|" "${dbConf}"
-sed -i -r "s|\$dbuser.*|\$dbuser = \"$db_user\";|" "${dbConf}"
-sed -i -r "s|\$pwd.*|\pwd = \"$db_password\";|" "${dbConf}"
-
-systemConf="${RS_ROOT}"/conf/system.conf.php
-sed -i -r "s|\$MC_URL.*|\$MC_URL = '$db_user';|" "${systemConf}"
-sed -i -r "s|\$MC_DOCROOT.*|\$MC_DOCROOT = '$db_user';|" "${systemConf}"
-sed -i -r "s|\$CC_RENDER_PATH.*|\$CC_RENDER_PATH = '$db_user';|" "${systemConf}"
-
-xmlstarlet ed -L \
-	-u '/properties/entry[@key="scheme"]' -v "${my_prot_internal}" \
-	-u '/properties/entry[@key="host"]' -v "${my_host_internal}" \
-	-u '/properties/entry[@key="port"]' -v "${my_port_internal}" \
-	-u '/properties/entry[@key="appid"]' -v "${my_home_appid}" \
-	"${RS_ROOT}"/conf/esmain/homeApplication.properties.xml
-
-echo "- set cache cleaner CronJob"
+echo "- set cache cleaner cronjob"
 croneJob=/tmp/mycron
 crontab -l > "${croneJob}" 2> /dev/null || touch "${croneJob}"
-
 sed -i -r 's|^[#]*.*Rendering-Service cache cleaner|'"${my_cache_cleaner_interval} ${RS_CACHE} www-data php /func/classes.new/Helper/cacheCleaner.php # Rendering-Service cache cleaner"'|' "${croneJob}"
 grep -q '^[#]*.*Rendering-Service cache cleaner' "${croneJob}" || echo "${my_cache_cleaner_interval} ${RS_CACHE} www-data php /func/classes.new/Helper/cacheCleaner.php # Rendering-Service cache cleaner" >>"${croneJob}"
-
 crontab "${croneJob}"
 rm -f  "${croneJob}"
 
+echo "- set permission"
 chown -R www-data:www-data "${RS_ROOT}"
+chown -R www-data:www-data "${RS_CACHE}"
+
+rm edu_sharing-community-deploy-installer-rendering-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-rendering-distribution:tar.gz:bin.version}-bin.tar.gz
 
 popd
 
-
-
-info >> "install_log-$(date "+%Y.%m.%d-%H.%M.%S").txt"
+info >> "$execution_folder/install_log-$(date "+%Y.%m.%d-%H.%M.%S").txt"
 info
+
+echo "- done."
+exit
+
+########################################################################################################################

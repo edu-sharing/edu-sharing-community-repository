@@ -18,6 +18,10 @@
 
   <name>edu_sharing-community-deploy-installer-repository-compose-debian</name>
 
+  <properties>
+    <os.distribution>debian</os.distribution>
+  </properties>
+
   <modules>
     <module>bullseye</module>
   </modules>

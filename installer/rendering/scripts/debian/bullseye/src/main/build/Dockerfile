@@ -86,47 +86,6 @@ RUN set -eux \
 
 ########################################################################################################################
 
-ENV ALF_HOME /opt/alfresco
-ENV PATH $ALF_HOME/bin:$PATH
-
-WORKDIR $ALF_HOME
-
-########################################################################################################################
-
-COPY assets/postgresql/ postgresql/
-
-RUN set -eux \
-    && wget -q -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
-    && echo "deb http://apt.postgresql.org/pub/repos/apt `lsb_release -cs`-pgdg main" | tee  /etc/apt/sources.list.d/pgdg.list \
-    && apt-get update -y \
-    && apt-get install -y --no-install-recommends \
-        postgresql-${postgresql.version.major} \
-    && pg_dropcluster ${postgresql.version.major} main \
-    && apt-get clean \
-    && rm -r /var/lib/apt/lists/*
-
-RUN set -eux \
-    && mkdir -p alf_data/postgresql postgresql \
-    && pg_createcluster \
-      --datadir=$ALF_HOME/alf_data/postgresql \
-      --logfile=$ALF_HOME/postgresql/postgresql.log \
-      --encoding UTF8 \
-      --port=5432 \
-      --start \
-      --start-conf=manual \
-      ${postgresql.version.major} rendering \
-    && su -c 'psql -f postgresql/conf/init_db.sql' postgres \
-    && pg_ctlcluster ${postgresql.version.major} rendering stop \
-    && sed -i -r \
-        "s|^[#]*\s*listen_addresses.*|listen_addresses = '\*'|" \
-        /etc/postgresql/${postgresql.version.major}/rendering/postgresql.conf \
-    && sed -i -r 's|127.0.0.1/32|0.0.0.0/0|' \
-        /etc/postgresql/${postgresql.version.major}/rendering/pg_hba.conf \
-    && sed -i -r 's|::1/128|::0/0|' \
-        /etc/postgresql/${postgresql.version.major}/rendering/pg_hba.conf
-
-########################################################################################################################
-
 RUN set -eux \
     && apt-get update -y \
     && apt-get install -y --no-install-recommends \
@@ -141,9 +100,6 @@ COPY assets/apache2/sites/* /etc/apache2/sites-available/
 
 ########################################################################################################################
 
-ENV WWW_ROOT /var/www/html/
-ENV RS_ROOT $WWW_ROOT/esrender
-ENV RS_CACHE /var/cache/esrender
 ENV PHP_VERSION ${php.version.major}.${php.version.minor}
 
 RUN set -eux \
@@ -164,6 +120,50 @@ RUN set -eux \
 	  php-xdebug \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
+
+########################################################################################################################
+
+ENV ALF_HOME /opt/alfresco
+ENV PATH $ALF_HOME/bin:$PATH
+ENV WWW_ROOT /var/www/html/
+ENV RS_ROOT /var/www/html/esrender
+ENV RS_CACHE /var/cache/esrender
+
+WORKDIR $ALF_HOME
+
+########################################################################################################################
+
+RUN set -eux \
+    && wget -q -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
+    && echo "deb http://apt.postgresql.org/pub/repos/apt `lsb_release -cs`-pgdg main" | tee  /etc/apt/sources.list.d/pgdg.list \
+    && apt-get update -y \
+    && apt-get install -y --no-install-recommends \
+        postgresql-${postgresql.version.major} \
+    && pg_dropcluster ${postgresql.version.major} main \
+    && apt-get clean \
+    && rm -r /var/lib/apt/lists/*
+
+COPY assets/postgresql/ postgresql/
+
+RUN set -eux \
+    && mkdir -p alf_data/postgresql postgresql \
+    && pg_createcluster \
+      --datadir=$ALF_HOME/alf_data/postgresql \
+      --logfile=$ALF_HOME/postgresql/postgresql.log \
+      --encoding UTF8 \
+      --port=5432 \
+      --start \
+      --start-conf=manual \
+      ${postgresql.version.major} rendering \
+    && su -c 'psql -f postgresql/conf/init_db.sql' postgres \
+    && pg_ctlcluster ${postgresql.version.major} rendering stop \
+    && sed -i -r \
+        "s|^[#]*\s*listen_addresses.*|listen_addresses = '\*'|" \
+        /etc/postgresql/${postgresql.version.major}/rendering/postgresql.conf \
+    && sed -i -r 's|127.0.0.1/32|0.0.0.0/0|' \
+        /etc/postgresql/${postgresql.version.major}/rendering/pg_hba.conf \
+    && sed -i -r 's|::1/128|::0/0|' \
+        /etc/postgresql/${postgresql.version.major}/rendering/pg_hba.conf
 
 ########################################################################################################################
 

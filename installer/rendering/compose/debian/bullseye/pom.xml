@@ -18,6 +18,10 @@
 
   <name>edu_sharing-community-deploy-installer-rendering-compose-debian-bullseye</name>
 
+  <properties>
+    <os.codename>bullseye</os.codename>
+  </properties>
+
   <build>
 
     <resources>

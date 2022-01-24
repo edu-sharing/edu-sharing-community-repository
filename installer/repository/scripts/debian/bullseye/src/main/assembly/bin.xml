@@ -16,13 +16,16 @@
   <fileSets>
 
     <fileSet>
-      <directory>${project.basedir}/src/main/scripts</directory>
+      <directory>${project.build.directory}/build/scripts</directory>
+      <excludes>
+        <exclude>plugins/**/*</exclude>
+      </excludes>
       <outputDirectory>.</outputDirectory>
       <filtered>true</filtered>
     </fileSet>
     <fileSet>
-      <directory>${project.build.directory}/build/plugins/installer</directory>
-      <outputDirectory>./plugins</outputDirectory>
+      <directory>${project.build.directory}/build/scripts/plugins/installer</directory>
+      <outputDirectory>plugins</outputDirectory>
       <filtered>true</filtered>
     </fileSet>
 

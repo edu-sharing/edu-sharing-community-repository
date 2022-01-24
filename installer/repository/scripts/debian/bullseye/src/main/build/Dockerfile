@@ -86,6 +86,21 @@ RUN set -eux \
 
 ########################################################################################################################
 
+RUN set -eux \
+    && apt-get update -y \
+    && apt-get install -y --no-install-recommends \
+      apache2 \
+    && a2enmod proxy \
+    && a2enmod proxy_ajp \
+    && a2enmod proxy_http \
+    && apt-get clean \
+    && rm -r /var/lib/apt/lists/*
+
+COPY assets/apache2/ports.conf /etc/apache2/ports.conf
+COPY assets/apache2/sites/* /etc/apache2/sites-available/
+
+########################################################################################################################
+
 ENV ALF_HOME /opt/alfresco
 ENV PATH $ALF_HOME/bin:$PATH
 
@@ -93,7 +108,47 @@ WORKDIR $ALF_HOME
 
 ########################################################################################################################
 
-COPY assets/postgresql/ postgresql/
+RUN set -eux \
+    && wget -q https://download.alfresco.com/release/community/201707-build-00028/alfresco-community-installer-201707-linux-x64.bin \
+    && chmod +x alfresco-community-installer-201707-linux-x64.bin \
+    && ./alfresco-community-installer-201707-linux-x64.bin \
+      --mode unattended \
+      --enable-components alfrescosolr4 \
+      --disable-components javaalfresco,postgres,libreofficecomponent,alfrescosolr,aosmodule,alfrescowcmqs,alfrescogoogledocs \
+      --prefix $ALF_HOME \
+      --jdbc_url jdbc:postgresql://127.0.0.1/repository \
+      --postgres_port 5432 \
+      --jdbc_username repository \
+      --jdbc_password repository \
+      --alfresco_admin_password admin \
+      --baseunixservice_install_as_service 0 \
+    && rm alfresco-community-installer-201707-linux-x64.bin \
+    && mkdir -p tomcat/webapps/alfresco \
+    && unzip tomcat/webapps/alfresco.war -d tomcat/webapps/alfresco \
+    && rm tomcat/webapps/alfresco.war \
+    && mkdir -p tomcat/webapps/share \
+    && unzip tomcat/webapps/share.war -d tomcat/webapps/share \
+    && rm tomcat/webapps/share.war \
+    && mkdir -p tomcat/webapps/solr4 \
+    && unzip tomcat/webapps/solr4.war -d tomcat/webapps/solr4 \
+    && rm tomcat/webapps/solr4.war
+
+COPY assets/share tomcat/webapps/share/WEB-INF/classes/
+COPY assets/solr4 solr4/
+COPY assets/tomcat tomcat/
+
+########################################################################################################################
+
+RUN set -eux \
+    && apt-get update -y \
+    && apt-get install -y --no-install-recommends \
+        libreoffice \
+    && apt-get clean \
+    && rm -r /var/lib/apt/lists/*
+
+COPY assets/libreoffice libreoffice/
+
+########################################################################################################################
 
 RUN set -eux \
     && wget -q -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
@@ -104,6 +159,8 @@ RUN set -eux \
     && pg_dropcluster ${postgresql.version.major} main \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
+
+COPY assets/postgresql postgresql/
 
 RUN set -eux \
     && mkdir -p alf_data/postgresql postgresql \
@@ -127,98 +184,11 @@ RUN set -eux \
 
 ########################################################################################################################
 
-RUN set -eux \
-    && apt-get update -y \
-    && apt-get install -y --no-install-recommends \
-      apache2 \
-    && a2enmod proxy \
-    && a2enmod proxy_ajp \
-    && a2enmod proxy_http \
-    && apt-get clean \
-    && rm -r /var/lib/apt/lists/*
-
-COPY assets/apache2/ports.conf /etc/apache2/ports.conf
-COPY assets/apache2/sites/* /etc/apache2/sites-available/
-
-########################################################################################################################
-
-RUN set -eux \
-    && wget -q https://dlcdn.apache.org/tomcat/tomcat-${tomcat.version.major}/v${tomcat.version}/bin/apache-tomcat-${tomcat.version}.tar.gz \
-    && mkdir -p tomcat \
-    && tar -xzvf apache-tomcat-${tomcat.version}.tar.gz -C tomcat --strip 1 \
-    && rm apache-tomcat-${tomcat.version}.tar.gz
-
-########################################################################################################################
-
-RUN set -eux \
-    && wget -q https://download.alfresco.com/release/community/201707-build-00028/alfresco-community-installer-201707-linux-x64.bin \
-    && chmod +x alfresco-community-installer-201707-linux-x64.bin \
-    && mkdir -p tomcat/webapps \
-    && ./alfresco-community-installer-201707-linux-x64.bin \
-      --mode unattended \
-      --enable-components alfrescosolr4 \
-      --disable-components javaalfresco,postgres,libreofficecomponent,alfrescosolr,aosmodule,alfrescowcmqs,alfrescogoogledocs \
-      --prefix $ALF_HOME \
-      --jdbc_url jdbc:postgresql://127.0.0.1/repository \
-      --postgres_port 5432 \
-      --jdbc_username repository \
-      --jdbc_password repository \
-      --alfresco_admin_password admin \
-      --baseunixservice_install_as_service 0 \
-      --tomcat_installation_type existing \
-    && rm alfresco-community-installer-201707-linux-x64.bin \
-    && mkdir -p tomcat/webapps/alfresco \
-    && unzip tomcat/webapps/alfresco.war -d tomcat/webapps/alfresco \
-    && rm tomcat/webapps/alfresco.war \
-    && mkdir -p tomcat/webapps/share \
-    && unzip tomcat/webapps/share.war -d tomcat/webapps/share \
-    && rm tomcat/webapps/share.war \
-    && mkdir -p tomcat/webapps/solr4 \
-    && unzip tomcat/webapps/solr4.war -d tomcat/webapps/solr4 \
-    && rm tomcat/webapps/solr4.war \
-    && rm tomcat/lib/postgresql-* \
-    && wget -q https://jdbc.postgresql.org/download/postgresql-${repository.postgresql.client.version}.jar \
-    && mv postgresql-${repository.postgresql.client.version}.jar tomcat/lib \
-    && sed -i -r \
-        's|^[#]*\s*shared\.loader=.*|shared.loader=${catalina.base}/shared/classes,${catalina.base}/shared/lib/*.jar|' \
-        tomcat/conf/catalina.properties \
-    && xmlstarlet ed -L \
-        -i '/Server/Service[@name="Catalina"]/Connector[@port="8009"]' -t attr -n 'secretRequired' -v 'false' \
-        -d '/Server/Service[@name="Catalina"]/Connector[@port="8443"]' \
-        tomcat/conf/server.xml \
-    && xmlstarlet ed -L \
-        -d '/Context/Loader' \
-        -s '/Context' -t elem -n "Resources" -v "" \
-        --var resources '$prev' \
-        -i '$resources' -t attr -n "cacheMaxSize" -v "20480" \
-        tomcat/conf/Catalina/localhost/alfresco.xml \
-    && xmlstarlet ed -L \
-        -d '/Context/Loader' \
-        -s '/Context' -t elem -n "Resources" -v "" \
-        --var resources '$prev' \
-        -i '$resources' -t attr -n "cacheMaxSize" -v "20480" \
-        tomcat/conf/Catalina/localhost/share.xml
-
-COPY assets/tomcat/ ./tomcat/
-
-########################################################################################################################
-
-RUN set -eux \
-    && apt-get update -y \
-    && apt-get install -y --no-install-recommends \
-        libreoffice \
-    && apt-get clean \
-    && rm -r /var/lib/apt/lists/*
-
-COPY assets/libreoffice/ ./libreoffice/
-
-########################################################################################################################
-
-COPY install.sh .env.base bin/installer/
-COPY plugins/installer/ bin/installer/plugins/
+COPY scripts/install.sh scripts/.env.base bin/installer/
+COPY scripts/plugins/installer bin/installer/plugins/
 
 COPY assets/entrypoint.sh bin/
-COPY plugins/docker/ bin/plugins/
+COPY scripts/plugins/docker bin/plugins/
 
 COPY assets/settings.xml /root/.m2/
 

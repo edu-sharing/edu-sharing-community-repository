@@ -3,7 +3,7 @@ version: '3.7'
 services:
 
   rendering:
-    image: "${docker.repository}/edu_sharing-community-deploy-installer-rendering-scripts-debian-bullseye:${docker.tag}"
+    image: "${docker.repository}/edu_sharing-community-deploy-installer-rendering-scripts-${os.distribution}-${os.codename}:${docker.tag}"
     ports:
       - "${COMMON_BIND_HOST:-127.0.0.1}:${RENDERING_SERVICE_PORT:-9100}:80"
     volumes:

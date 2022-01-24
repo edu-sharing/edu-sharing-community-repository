@@ -18,6 +18,10 @@
 
   <name>edu_sharing-community-deploy-installer-compose-debian-bullseye</name>
 
+  <properties>
+    <os.codename>bullseye</os.codename>
+  </properties>
+
   <build>
 
     <resources>
@@ -76,6 +80,14 @@
         <artifactId>maven-resources-plugin</artifactId>
         <configuration>
           <outputDirectory>${project.build.directory}/compose</outputDirectory>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <classesDirectory>${project.build.directory}/compose</classesDirectory>
         </configuration>
       </plugin>
 

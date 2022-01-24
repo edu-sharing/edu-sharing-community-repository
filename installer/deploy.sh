@@ -2,7 +2,7 @@
 set -e
 set -o pipefail
 
-GIT_BRANCH="$(git rev-parse --abbrev-ref HEAD | sed 's/\//-/')"
+GIT_BRANCH="$(git rev-parse --abbrev-ref HEAD | sed 's|[\/\.]|-|g')"
 export COMPOSE_NAME="${COMPOSE_PROJECT_NAME:-installer-$GIT_BRANCH}"
 
 case "$(uname)" in
@@ -40,11 +40,18 @@ export ROOT_PATH
 
 pushd "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)" >/dev/null || exit
 
-COMPOSE_DIR="compose/debian/bullseye/target/compose"
+PLATFORM="debian/bullseye"
+COMPOSE_DIR="compose/$PLATFORM/target/compose"
 
 [[ ! -d "${COMPOSE_DIR}" ]] && {
 	echo "Initializing ..."
-	pushd "compose" >/dev/null || exit
+	pushd "rendering/compose/$PLATFORM" >/dev/null || exit
+	$MAVEN_CMD $MAVEN_CMD_OPTS -Dmaven.test.skip=true install || exit
+	popd >/dev/null || exit
+	pushd "repository/compose/$PLATFORM" >/dev/null || exit
+	$MAVEN_CMD $MAVEN_CMD_OPTS -Dmaven.test.skip=true install || exit
+	popd >/dev/null || exit
+	pushd "compose/$PLATFORM" >/dev/null || exit
 	$MAVEN_CMD $MAVEN_CMD_OPTS -Dmaven.test.skip=true package || exit
 	popd >/dev/null || exit
 }
@@ -126,8 +133,8 @@ compose() {
 }
 
 compose_plugins() {
-	PLUGIN_DIR="repository"
-
+	PLUGIN_DIR="$1"
+	shift
 
 	COMPOSE_LIST=
 	for plugin in $PLUGIN_DIR/plugin*/; do
@@ -140,7 +147,9 @@ compose_plugins() {
 }
 
 logs() {
-	COMPOSE_LIST="$(compose aio.yml -common) $(compose_plugins -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -150,7 +159,9 @@ logs() {
 }
 
 ps() {
-	COMPOSE_LIST="$(compose aio.yml -common) $(compose_plugins -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -160,7 +171,12 @@ ps() {
 }
 
 init() {
-	rm -f .env.rendering .env.repository .env.repository.elastic .env.repository.transform
+	mkdir -p rendering
+	mkdir -p repository/plugin-elastic
+	mkdir -p repository/plugin-transform
+
+	rm -f rendering/.env repository/.env repository/plugin-elastic/.env repository/plugin-transform/.env
+
 	{
 		echo "RENDERING_DATABASE_PASS=${RENDERING_DATABASE_PASS:-rendering}"
 		echo "RENDERING_DATABASE_USER=${RENDERING_DATABASE_USER:-rendering}"
@@ -175,7 +191,7 @@ init() {
 
 		echo "REPOSITORY_SERVICE_HOST=repository"
 		echo "REPOSITORY_SERVICE_PORT=80"
-	} >> .env.rendering
+	} >> rendering/.env
 
 	{
 		echo "REPOSITORY_SERVICE_HOME_APPID=${COMPOSE_PROJECT_NAME:-compose}"
@@ -196,7 +212,7 @@ init() {
 
 		# plugin transform (please check deploy/installer/repository/scripts/../load_config.sh inside plugin)
 		echo "REPOSITORY_TRANSFORM_SERVER_HOST=repository-transform"
-	} >> .env.repository
+	} >> repository/.env
 
 	# plugin elastic (please check deploy/installer/tracker/scripts/../install.sh inside plugin)
 	{
@@ -204,18 +220,20 @@ init() {
 
     echo "REPOSITORY_SERVICE_HOST=repository"
     echo "REPOSITORY_SERVICE_PORT=80"
-	} >> .env.repository.elastic
+	} >> repository/plugin-elastic/.env
 
 	# plugin transform (please check deploy/installer/server/scripts/../install.sh inside plugin)
 	{
 		echo "REPOSITORY_TRANSFORM_SERVER_BIND=0.0.0.0"
 		echo "REPOSITORY_TRANSFORM_MANAGEMENT_SERVER_BIND=0.0.0.0"
-	} >> .env.repository.transform
+	} >> repository/plugin-transform/.env
 
 }
 
 rstart() {
-	COMPOSE_LIST="$(compose aio.yml -common -remote) $(compose_plugins -common -remote)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -remote)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote) $(compose_plugins repository -common -remote)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -remote) $(compose_plugins rendering -common -remote)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -229,7 +247,9 @@ rstart() {
 }
 
 lstart() {
-	COMPOSE_LIST="$(compose aio.yml -common -local) $(compose_plugins -common -local)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -local)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -local) $(compose_plugins repository -common -local)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -local) $(compose_plugins rendering -common -local)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -239,7 +259,9 @@ lstart() {
 }
 
 stop() {
-	COMPOSE_LIST="$(compose aio.yml -common) $(compose_plugins -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -249,34 +271,23 @@ stop() {
 }
 
 remove() {
-	COMPOSE_LIST="$(compose aio.yml -common) $(compose_plugins -common)"
+	read -p "Are you sure you want to continue? [y/N] " answer
+	case ${answer:0:1} in
+	y | Y)
+		COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
+		COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
+		COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
 
-	echo "Use compose set: $COMPOSE_LIST"
-
-	$COMPOSE_EXEC \
-		$COMPOSE_LIST \
-		down -v || exit
-}
-
-ci() {
-	COMPOSE_LIST="$(compose_plugins -common -remote)"
-
-  [[ -n $COMPOSE_LIST ]] && {
 		echo "Use compose set: $COMPOSE_LIST"
 
 		$COMPOSE_EXEC \
 			$COMPOSE_LIST \
-			pull || exit
-	}
-
-	COMPOSE_LIST=
-	COMPOSE_LIST="$(compose aio.yml -common -local -ci) $(compose_plugins -common -remote -ci)"
-
-	echo "Use compose set: $COMPOSE_LIST"
-
-	$COMPOSE_EXEC \
-		$COMPOSE_LIST \
-		up -d || exit
+			down -v || exit
+		;;
+	*)
+		echo Canceled.
+		;;
+	esac
 }
 
 case "${CLI_OPT1}" in

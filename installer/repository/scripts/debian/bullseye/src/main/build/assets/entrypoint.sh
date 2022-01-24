@@ -14,9 +14,8 @@ declare triggerThreadDumpBeforeStop="${TRIGGER_THREAD_DUMP_BEFORE_STOP:-false}"
 mkdir -p $ALF_HOME/tomcat/temp
 mkdir -p $ALF_HOME/tomcat/logs
 CATALINA_OUT=$ALF_HOME/tomcat/logs/catalina.out
-CATALINA_PID=$ALF_HOME/tomcat/temp/catalina.pid
 export CATALINA_OUT
-export CATALINA_PID
+CATALINA_PID=$ALF_HOME/tomcat/temp/catalina.pid
 export CATALINA_PID
 
 
