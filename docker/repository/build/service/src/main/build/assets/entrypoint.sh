@@ -109,7 +109,6 @@ for config in "${configs[@]}"; do
 		for jar in tomcat/shared/lib/$config/*.jar; do
 		  if [[ -f $jar ]] ; then
         unzip -o $jar -d tomcat/shared/classes/config/$config -x 'META-INF/*'
-        rm $jar
 			fi
 		done
 		cp -f tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/$config
@@ -120,6 +119,8 @@ for config in "${configs[@]}"; do
 		}
 	fi
 done
+
+rm -rf tomcat/shared/lib/*
 
 reinstall.sh
 
@@ -285,9 +286,6 @@ grep -q '^[#]*\s*solr\.port=' "${alfProps}" || echo "solr.port=${repository_sear
 
 sed -i -r 's|^[#]*\s*solr\.secureComms=.*|solr.secureComms=none|' "${alfProps}"
 grep -q '^[#]*\s*solr\.secureComms=' "${alfProps}" || echo "solr.secureComms=none" >>"${alfProps}"
-
-sed -i -r 's|^[#]*\s*index\.subsystem\.name=.*|index.subsystem.name=solr4|' "${alfProps}"
-grep -q '^[#]*\s*index\.subsystem\.name=' "${alfProps}" || echo "index.subsystem.name=solr4" >>"${alfProps}"
 
 ### edu-sharing ########################################################################################################
 

@@ -144,7 +144,6 @@ config:
 
   custom:
     enabled: false
-    alfresco: ""
     services: ""
 
   database:

@@ -41,11 +41,14 @@ spec:
         - "/bin/bash"
         - "-ec"
         - |
-          chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /usr/local/tomcat/shared
+          chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /usr/local/tomcat/shared/classes/config/cluster
+          chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /usr/local/tomcat/shared/classes/config/node
           chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /opt/alfresco/alf_data
         volumeMounts:
+        - name: data
+          mountPath: /usr/local/tomcat/shared/classes/config/node
         - name: share-config
-          mountPath: /usr/local/tomcat/shared
+          mountPath: /usr/local/tomcat/shared/classes/config/cluster
         - name: share-data
           mountPath: /opt/alfresco/alf_data
         {{- with .Values.init.permission.resources }}
@@ -95,10 +98,7 @@ spec:
           subPath: redisson
         {{- if .Values.config.custom.enabled }}
         - name: file-custom
-          mountPath: /usr/local/tomcat/shared/classes/alfresco-global.properties
-          subPath: alfresco
-        - name: file-custom
-          mountPath: /usr/local/tomcat/shared/classes/config/edu-sharing.conf
+          mountPath: /usr/local/tomcat/shared/classes/config/cluster/edu-sharing.override.conf
           subPath: services
         {{- end }}
         {{- if .Values.config.saml.enabled }}
