@@ -125,7 +125,7 @@ public class PreviewJob implements Job {
 			@Override
 			public Void doWork() throws Exception {
 
-				logger.info("PreviewJob is starting firetime:" + context.getFireTime() + " name:"
+				logger.debug("starting: " + context.getFireTime() + " name:"
 						+ context.getJobDetail().getName());
 
 				try {
@@ -139,19 +139,19 @@ public class PreviewJob implements Job {
 						
 						if (jec.getJobInstance().getClass().equals(PreviewJob.class)
 								&& !context.getJobDetail().equals(jec.getJobDetail())) {
-							logger.info("another instance is running. returning firetime:" + jec.getFireTime());
+							logger.debug("another instance is running. returning firetime:" + jec.getFireTime());
 							return null;
 						}
 					}
 					
-					logger.info("count preview jobs:" + countPreviewJobs);
+					logger.debug("count preview jobs:" + countPreviewJobs);
 					
 				} catch (SchedulerException e) {
 					logger.error(e.getMessage(), e);
 					return null;
 				}
 
-				logger.info("starting, nodes with actions:" + ActionObserver.getInstance().getNodeActionsMap().size());
+				logger.debug("starting, nodes with actions:" + ActionObserver.getInstance().getNodeActionsMap().size());
 				ActionObserver.getInstance().removeInactiveActions();
 
 				
@@ -169,7 +169,7 @@ public class PreviewJob implements Job {
 				}
 				
 				
-				logger.info("returning");
+				logger.debug("returning");
 				return null;
 			}
 		};
@@ -199,7 +199,7 @@ public class PreviewJob implements Job {
 				}
 			}
 
-			logger.info("found " + countRunning + " running/pending" + " countPending:" + countPending);
+			logger.debug("found " + countRunning + " running/pending" + " countPending:" + countPending);
 
 			if (countRunning < maxRunning) {
 				int newRunning = 0;
@@ -269,14 +269,14 @@ public class PreviewJob implements Job {
 									/**
 									 * @todo rember the tries and remove from ActionObserver
 									 */
-									logger.info(entry.getKey() + " does not have content yet");
+									logger.debug(entry.getKey() + " does not have content yet");
 								}
 							}
 						}
 					}
 
 					if (countRunning + newRunning >= maxRunning) {
-						logger.info("returning cause countRunning + newRunning >= maxRunning");
+						logger.debug("returning cause countRunning + newRunning >= maxRunning");
 					}
 				}
 
