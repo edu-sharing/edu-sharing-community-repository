@@ -768,7 +768,7 @@ public class AdminServiceImpl implements AdminService  {
 	public String getConfigFile(String filename, PropertiesHelper.Config.PathPrefix pathPrefix) throws Throwable {
 		// use new File() to remove any folder like access
 		filename = mapConfigFile(new File(filename).getName(), pathPrefix);
-		File file = new File(PropertiesHelper.Config.getAbsolutePathForConfigFile(PropertiesHelper.Config.getPropertyFilePath(filename)));
+		File file = new File(PropertiesHelper.Config.getAbsolutePathForConfigFile(filename));
 		return FileUtils.readFileToString(file);
 	}
 
