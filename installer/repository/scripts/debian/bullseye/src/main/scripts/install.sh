@@ -40,9 +40,8 @@ if [[ -f ".env.base" ]] ; then
 	source .env.base &> /dev/null
 fi
 
-# LOAD PLUGIN BASE ENVIRONMENT VARIABLES
-if [[ -d "$execution_folder/plugins" ]] ; then
-	for plugin in "$execution_folder"/plugins/plugin-*/.env.base; do
+if [[ -d plugins ]] ; then
+	for plugin in plugins/plugin-*/.env.base; do
 		 [[ -f "$plugin" ]] && {
 		 		source "$plugin" || exit 1
 		 }
@@ -141,14 +140,15 @@ repository_contentstore_deleted="${REPOSITORY_SERVICE_CONTENTSTORE_DELETED:-}"
 
 ########################################################################################################################
 
-# LOAD PLUGIN CONFIG VARIABLES
-if [[ -d "$execution_folder/plugins" ]] ; then
-	for plugin in "$execution_folder"/plugins/plugin-*/load_config.sh; do
+pushd "$execution_folder" &> /dev/null
+if [[ -d plugins ]] ; then
+	for plugin in plugins/plugin-*/load_config.sh; do
 		 [[ -f "$plugin" ]] && {
 		 		source "$plugin" || exit 1
 		 }
 	done
 fi
+popd
 
 ########################################################################################################################
 
@@ -248,13 +248,15 @@ info() {
 
   ######################################################################################################################
 
-  if [[ -d "$execution_folder/plugins" ]] ; then
-  	for plugin in "$execution_folder"/plugins/plugin-*/print_config.sh; do
+	pushd "$execution_folder" &> /dev/null
+  if [[ -d plugins ]] ; then
+  	for plugin in plugins/plugin-*/print_config.sh; do
   		 [[ -f "$plugin" ]] && {
   		 		source "$plugin" || exit 1
   		 }
   	done
   fi
+  popd
 
   echo "#########################################################################"
   echo ""
@@ -309,15 +311,15 @@ install_edu_sharing() {
 	cp -r dist/amps/* amps
 
 	if [[ -d amps/alfresco/0 ]]; then
-	  java -jar bin/alfresco-mmt.jar install amps/alfresco/0 tomcat/webapps/alfresco -directory -nobackup -force
+	  java -jar bin/alfresco-mmt.jar install amps/alfresco/0 tomcat/webapps/alfresco -directory -nobackup -force 2> /dev/null
 	fi
 
 	if [[ -d amps/alfresco/1 ]]; then
-	  java -jar bin/alfresco-mmt.jar install amps/alfresco/1 tomcat/webapps/alfresco -directory -nobackup -force
+	  java -jar bin/alfresco-mmt.jar install amps/alfresco/1 tomcat/webapps/alfresco -directory -nobackup -force 2> /dev/null
   fi
 
   if [[ -d amps/edu-sharing/1 ]]; then
-    java -jar bin/alfresco-mmt.jar install amps/edu-sharing/1 tomcat/webapps/edu-sharing -directory -nobackup -force
+    java -jar bin/alfresco-mmt.jar install amps/edu-sharing/1 tomcat/webapps/edu-sharing -directory -nobackup -force 2> /dev/null
   fi
 
 	######################################################################################################################
@@ -601,13 +603,15 @@ config_edu_sharing() {
 
 	######################################################################################################################
 
-	if [[ -d "$execution_folder/plugins" ]] ; then
-		for plugin in "$execution_folder"/plugins/plugin-*/setup_config.sh; do
-			if [[ -f plugin ]] ; then
+	pushd "$execution_folder" &> /dev/null
+	if [[ -d plugins ]] ; then
+		for plugin in plugins/plugin-*/setup_config.sh; do
+			if [[ -f "$plugin" ]] ; then
 				source "$plugin" || exit 1
 		  fi
   	done
   fi
+  popd
 
 }
 
@@ -717,6 +721,11 @@ popd
 
 info >> "$execution_folder/install_log-$(date "+%Y.%m.%d-%H.%M.%S").txt"
 info
+
+echo "- Please check logging configuration:"
+echo "    ${ALF_HOME}/solr4/log4j-solr.properties"
+echo "    ${ALF_HOME}/tomcat/conf/logging.properties"
+echo "    ${ALF_HOME}/tomcat/webapps/alfresco/WEB-INF/classes/log4j2.xml"
 
 echo "- done."
 exit

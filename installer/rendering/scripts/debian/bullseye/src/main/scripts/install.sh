@@ -29,13 +29,10 @@ fi
 execution_folder="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 pushd "$execution_folder" &> /dev/null
-
-# load the default configuration
 if [[ -f ".env.base" ]] ; then
 	echo "Load .env.base"
 	source .env.base &> /dev/null
 fi
-
 popd
 
 ########################################################################################################################
@@ -230,29 +227,27 @@ install_edu_sharing() {
 	echo "- unpack edu-sharing rendering-service distribution"
 	tar xzf edu_sharing-community-deploy-installer-rendering-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-rendering-distribution:tar.gz:bin.version}-bin.tar.gz --exclude './vendor/lib/converter'
 
-  mkdir -p "${RS_CACHE}"
-
 }
 
 config_edu_sharing() {
 
 	if [[ -n $rendering_proxy_host ]] ; then
-  	proxyConf="${RS_ROOT}"/conf/proxy.conf.php
+  	proxyConf="${RS_ROOT}/conf/proxy.conf.php"
   	echo "- update $proxyConf"
-  	cp -rf "${RS_ROOT}"/conf/proxy.conf.php.example "${proxyConf}"
+  	cp -rf "${RS_ROOT}/conf/proxy.conf.php.example" "${proxyConf}"
   	sed -i -r "s|define\('HTTP_PROXY_HOST',.*);|define('HTTP_PROXY_HOST', '$rendering_proxy_host');|" "${proxyConf}"
   	sed -i -r "s|define\('HTTP_PROXY_PORT',.*);|define('HTTP_PROXY_PORT', $rendering_proxy_port);|" "${proxyConf}"
   	sed -i -r "s|define\('HTTP_PROXY_USER',.*);|define('HTTP_PROXY_USER', '$rendering_proxy_user');|" "${proxyConf}"
   	sed -i -r "s|define\('HTTP_PROXY_PASS',.*);|define('HTTP_PROXY_PASS', '$rendering_proxy_pass');|" "${proxyConf}"
   fi
 
-  dbConf="${RS_ROOT}"/conf/db.conf.php
+  dbConf="${RS_ROOT}/conf/db.conf.php"
   echo "- update ${dbConf}"
   sed -i -r "s|\$dsn.*|\$dsn = \"${db_driver}:host=${db_host};port=${db_port};dbname=${db_name}\";|" "${dbConf}"
   sed -i -r "s|\$dbuser.*|\$dbuser = \"$db_user\";|" "${dbConf}"
   sed -i -r "s|\$pwd.*|\pwd = \"$db_password\";|" "${dbConf}"
 
-  systemConf="${RS_ROOT}"/conf/system.conf.php
+  systemConf="${RS_ROOT}/conf/system.conf.php"
   echo "- update ${systemConf}"
   sed -i -r "s|\$MC_URL.*|\$MC_URL = '$db_user';|" "${systemConf}"
   sed -i -r "s|\$MC_DOCROOT.*|\$MC_DOCROOT = '$db_user';|" "${systemConf}"
@@ -291,6 +286,9 @@ mvn -q dependency:copy \
 		-DoutputDirectory=.
 
 if [[ ! -d "${RS_CACHE}" ]] ; then
+
+  mkdir -p "${RS_CACHE}"
+  chown -R www-data:www-data "${RS_CACHE}"
 
 	echo ""
 	echo "Install ... "
@@ -333,6 +331,9 @@ if [[ ! -d "${RS_CACHE}" ]] ; then
 		repository_url=${repository_service_base}
 	EOF
 
+  cat /tmp/config.ini
+
+	echo "- call ${RS_ROOT}/admin/cli/install.php"
   php "${RS_ROOT}"/admin/cli/install.php -c /tmp/config.ini || {
 		echo "- rollback"
   	result=$?;
@@ -382,15 +383,16 @@ else
 
 	echo "- make a snapshot of the rendering service"
   snapshot_name="$execution_folder/snapshots/edu-sharing-SNAPSHOT-$(date "+%Y.%m.%d-%H.%M.%S").tar.gz"
+	mkdir -p "$(dirname "$snapshot_name")"
 	tar -czf $snapshot_name $(basename "${RS_ROOT}")
 
 	install_edu_sharing || exit 1
 
-  echo "- restore rendering config"
+  echo "- restore config"
   tar -zxf $snapshot_name $(basename "${RS_ROOT}")/conf
   tar -zxf $snapshot_name --wildcards "*config.php" -C $(basename "${RS_ROOT}")
 
-	echo "- update rendering service"
+	echo "- call ${RS_ROOT}/admin/cli/update.php"
 	yes | php "${RS_ROOT}"/admin/cli/update.php || true
 
 	echo "- prune snapshots (keep 3)"
@@ -410,16 +412,19 @@ grep -q '^[#]*.*Rendering-Service cache cleaner' "${croneJob}" || echo "${my_cac
 crontab "${croneJob}"
 rm -f  "${croneJob}"
 
-echo "- set permission"
-chown -R www-data:www-data "${RS_ROOT}"
-chown -R www-data:www-data "${RS_CACHE}"
-
 rm edu_sharing-community-deploy-installer-rendering-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-rendering-distribution:tar.gz:bin.version}-bin.tar.gz
 
 popd
 
+echo "- set permission ${RS_ROOT}"
+chown -R www-data:www-data "${RS_ROOT}"
+
 info >> "$execution_folder/install_log-$(date "+%Y.%m.%d-%H.%M.%S").txt"
 info
+
+echo "- Please check logging configuration:"
+echo "    ${RS_ROOT}/conf/de.metaventis.esrender.cachecleaner.properties"
+echo "    ${RS_ROOT}/conf/de.metaventis.esrender.log4php.properties"
 
 echo "- done."
 exit

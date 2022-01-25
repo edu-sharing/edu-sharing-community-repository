@@ -114,10 +114,11 @@ RUN set -eux \
       php${PHP_VERSION}-exif \
       php${PHP_VERSION}-gd \
       php${PHP_VERSION}-mbstring \
+      php${PHP_VERSION}-pdo \
+      php${PHP_VERSION}-pdo-pgsql \
       php${PHP_VERSION}-pgsql \
       php${PHP_VERSION}-soap \
       php${PHP_VERSION}-zip \
-	  php-xdebug \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
 
@@ -125,9 +126,6 @@ RUN set -eux \
 
 ENV ALF_HOME /opt/alfresco
 ENV PATH $ALF_HOME/bin:$PATH
-ENV WWW_ROOT /var/www/html/
-ENV RS_ROOT /var/www/html/esrender
-ENV RS_CACHE /var/cache/esrender
 
 WORKDIR $ALF_HOME
 
@@ -174,6 +172,10 @@ COPY assets/entrypoint.sh assets/apache2-foreground ./
 COPY assets/settings.xml root/.m2/
 
 ########################################################################################################################
+
+ENV WWW_ROOT /var/www/html/
+ENV RS_ROOT /var/www/html/esrender
+ENV RS_CACHE /var/cache/esrender
 
 ENTRYPOINT ["./entrypoint.sh"]
 
