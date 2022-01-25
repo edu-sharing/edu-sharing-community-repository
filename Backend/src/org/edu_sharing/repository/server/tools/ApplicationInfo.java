@@ -617,7 +617,12 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	}
 	
 	public String getClientBaseUrl(){
-		String result = this.getClientprotocol() + "://"+ ((this.getDomain() == null) ? this.getHost() : this.getDomain()) +":"+ this.getClientport() + "/"+getWebappname();
+		String result = this.getClientprotocol() + "://"+ ((this.getDomain() == null) ? this.getHost() : this.getDomain());
+		if(this.getClientport().equals("80") || this.getClientport().equals("443")){
+			result += "/"+getWebappname();
+		}else{
+			result += ":"+ this.getClientport() + "/"+getWebappname();
+		}
 		return result;
 	}
 
