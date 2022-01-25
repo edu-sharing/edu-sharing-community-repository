@@ -30,10 +30,6 @@ RUN set -eux \
 COPY assets/entrypoint.sh assets/reinstall.sh bin/
 
 RUN set -eux \
-    && chmod +x bin/entrypoint.sh \
-    && chmod +x bin/reinstall.sh
-
-RUN set -eux \
     && adduser --uid=1000 --home=$ALF_HOME --disabled-password --gecos "" --shell=/bin/bash worker \
     && chown -RL worker:worker /tmp \
     && mkdir -p alf_data \

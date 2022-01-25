@@ -24,9 +24,6 @@ RUN set -eux \
 COPY assets/entrypoint.sh bin/
 
 RUN set -eux \
-    && chmod +x bin/entrypoint.sh
-
-RUN set -eux \
     && adduser --uid=1000 --home=$ALF_HOME --disabled-password --gecos "" --shell=/bin/bash worker \
     && chown -RL worker:worker /tmp \
     && mkdir -p alf_data \
