@@ -337,8 +337,8 @@ reload() {
 }
 
 ci() {
-	COMPOSE_LIST1="$(compose_plugins repository -common -remote)"
-	COMPOSE_LIST2="$(compose_plugins rendering -common -remote)"
+	COMPOSE_LIST1="$(compose_plugins repository -remote)"
+	COMPOSE_LIST2="$(compose_plugins rendering -remote)"
 
   [[ -n $COMPOSE_LIST1 || -n $COMPOSE_LIST2 ]] && {
 		echo "Use compose set: $COMPOSE_LIST1 $COMPOSE_LIST2"
@@ -357,7 +357,6 @@ ci() {
 	$COMPOSE_EXEC \
 		$COMPOSE_LIST \
 		up -d || exit
-
 }
 
 case "${CLI_OPT1}" in

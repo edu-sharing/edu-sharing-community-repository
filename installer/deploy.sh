@@ -290,6 +290,29 @@ remove() {
 	esac
 }
 
+ci() {
+	COMPOSE_LIST1="$(compose_plugins repository -remote)"
+	COMPOSE_LIST2="$(compose_plugins rendering -remote)"
+
+  [[ -n $COMPOSE_LIST1 || -n $COMPOSE_LIST2 ]] && {
+		echo "Use compose set: $COMPOSE_LIST1 $COMPOSE_LIST2"
+
+		$COMPOSE_EXEC \
+			$COMPOSE_LIST1 $COMPOSE_LIST2 \
+			pull || exit
+	}
+
+	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -local -ci)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -local -ci) $(compose_plugins repository -common -remote -ci)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -local -ci) $(compose_plugins rendering -common -remote -ci)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
+	$COMPOSE_EXEC \
+		$COMPOSE_LIST \
+		up -d || exit
+}
+
 case "${CLI_OPT1}" in
 rstart)
 	init && rstart && info
