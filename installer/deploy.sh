@@ -44,6 +44,7 @@ PLATFORM="debian/bullseye"
 COMPOSE_DIR="compose/$PLATFORM/target/compose"
 
 [[ ! -d "${COMPOSE_DIR}" ]] && {
+	export DEPLOY_INSTALLER="true"
 	echo "Initializing ..."
 	pushd "repository/compose/$PLATFORM" >/dev/null || exit
 	$MAVEN_CMD $MAVEN_CMD_OPTS -Dmaven.test.skip=true install || exit

@@ -169,7 +169,7 @@ COPY install.sh .env.base ./
 
 COPY assets/entrypoint.sh assets/apache2-foreground ./
 
-COPY assets/settings.xml root/.m2/
+COPY assets/settings.xml /root/.m2/
 
 ########################################################################################################################
 

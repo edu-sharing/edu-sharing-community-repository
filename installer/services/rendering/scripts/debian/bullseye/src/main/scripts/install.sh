@@ -6,21 +6,21 @@ set -o pipefail
 
 if [[ -z $WWW_ROOT ]] ; then
 	echo ""
-	echo "Env WWW_ROOT not defined! It must point to the data directory of your Apache webservice!"
+	echo "Env WWW_ROOT not defined! It must point to your website document root!"
 	exit 1
 fi
 
 
 if [[ -z $RS_ROOT ]] ; then
 	echo ""
-	echo "Env RS_ROOT not defined! It must point to the installation directory of the rendering-service inside your website document root!"
+	echo "Env RS_ROOT not defined! It must point inside \"$(basename "${RS_ROOT}")\" of your website document root!"
 	exit 1
 fi
 
 
 if [[ -z $RS_CACHE ]] ; then
 	echo ""
-	echo "Env RS_CACHE not defined! It must point to an cache directory of the rendering-service outside your website document root!"
+	echo "Env RS_CACHE not defined! It must point outside of your website document root!"
 	exit 1
 fi
 
@@ -77,8 +77,6 @@ done
 
 ########################################################################################################################
 
-my_home_appid="${RENDERING_SERVICE_HOME_APPID:-esrender}"
-
 my_prot_external="${RENDERING_SERVICE_PROT_EXTERNAL:-http}"
 my_host_external="${RENDERING_SERVICE_HOST_EXTERNAL:-localhost}"
 my_port_external="${RENDERING_SERVICE_PORT_EXTERNAL:-80}"
@@ -120,13 +118,12 @@ rendering_proxy_pass="${RENDERING_PROXY_PASS:-}"
 
 until wait-for-it "${db_host}:${db_port}" -t 3; do sleep 1; done
 
-if [[ "${db_driv}" == "pgsql" ]] ; then
-	until PGPASSWORD="${db_pass}" psql -h "${db_host}" -p "${db_port}" -U "${db_user}" -d "${db_name}" -c '\q'; do
+if [[ "${db_driver}" == "pgsql" ]] ; then
+	until PGPASSWORD="${db_password}" psql -h "${db_host}" -p "${db_port}" -U "${db_user}" -d "${db_name}" -c '\q'; do
 		echo >&2 "Waiting for database postgresql ${db_host}:${db_port} ..."
 		sleep 3
 	done
 fi
-
 
 if [[ -n $repository_service_base ]] ; then
 	until wait-for-it "${repository_service_host}:${repository_service_port}" -t 3; do sleep 1; done
@@ -164,10 +161,6 @@ info() {
 	echo "#########################################################################"
 	echo ""
 	echo "rendering-service:"
-	echo ""
-	echo "  Common:"
-	echo ""
-	echo "    AppId:        ${my_home_appid}"
 	echo ""
 	echo "  Public:"
 	echo ""
@@ -222,51 +215,16 @@ info() {
 install_edu_sharing() {
 
 	echo "- reset rendering server"
-	rm -rf $RS_ROOT
+	rm -rf "${RS_ROOT}"
 
 	echo "- unpack edu-sharing rendering-service distribution"
 	tar xzf edu_sharing-community-deploy-installer-services-rendering-distribution-${org.edu_sharing:edu_sharing-community-deploy-installer-services-rendering-distribution:tar.gz:bin.version}-bin.tar.gz --exclude './vendor/lib/converter'
 
 }
 
-config_edu_sharing() {
-
-	if [[ -n $rendering_proxy_host ]] ; then
-  	proxyConf="${RS_ROOT}/conf/proxy.conf.php"
-  	echo "- update $proxyConf"
-  	cp -rf "${RS_ROOT}/conf/proxy.conf.php.example" "${proxyConf}"
-  	sed -i -r "s|define\('HTTP_PROXY_HOST',.*);|define('HTTP_PROXY_HOST', '$rendering_proxy_host');|" "${proxyConf}"
-  	sed -i -r "s|define\('HTTP_PROXY_PORT',.*);|define('HTTP_PROXY_PORT', $rendering_proxy_port);|" "${proxyConf}"
-  	sed -i -r "s|define\('HTTP_PROXY_USER',.*);|define('HTTP_PROXY_USER', '$rendering_proxy_user');|" "${proxyConf}"
-  	sed -i -r "s|define\('HTTP_PROXY_PASS',.*);|define('HTTP_PROXY_PASS', '$rendering_proxy_pass');|" "${proxyConf}"
-  fi
-
-  dbConf="${RS_ROOT}/conf/db.conf.php"
-  echo "- update ${dbConf}"
-  sed -i -r "s|\$dsn.*|\$dsn = \"${db_driver}:host=${db_host};port=${db_port};dbname=${db_name}\";|" "${dbConf}"
-  sed -i -r "s|\$dbuser.*|\$dbuser = \"$db_user\";|" "${dbConf}"
-  sed -i -r "s|\$pwd.*|\pwd = \"$db_password\";|" "${dbConf}"
-
-  systemConf="${RS_ROOT}/conf/system.conf.php"
-  echo "- update ${systemConf}"
-  sed -i -r "s|\$MC_URL.*|\$MC_URL = '$db_user';|" "${systemConf}"
-  sed -i -r "s|\$MC_DOCROOT.*|\$MC_DOCROOT = '$db_user';|" "${systemConf}"
-  sed -i -r "s|\$CC_RENDER_PATH.*|\$CC_RENDER_PATH = '$db_user';|" "${systemConf}"
-
-  homeApp="${RS_ROOT}/conf/esmain/homeApplication.properties.xml"
-  echo "- update ${homeApp}"
-  xmlstarlet ed -L \
-  	-u '/properties/entry[@key="scheme"]' -v "${my_prot_internal}" \
-  	-u '/properties/entry[@key="host"]' -v "${my_host_internal}" \
-  	-u '/properties/entry[@key="port"]' -v "${my_port_internal}" \
-  	-u '/properties/entry[@key="appid"]' -v "${my_home_appid}" \
-  	"${homeApp}"
-
-}
-
 ########################################################################################################################
 
-pushd $WWW_ROOT &> /dev/null
+pushd "${WWW_ROOT}" &> /dev/null
 
 if [[ use_local_maven_cache -eq 1 ]] ; then
 	echo "- WARNING: local maven cache is being used"
@@ -347,6 +305,8 @@ if [[ ! -d "${RS_CACHE}" ]] ; then
 
 	if [[ -n $repository_service_base ]] && [[ -n $repository_user ]] && [[ -n $repository_password ]] ; then
 
+		# TODO: check Apache has to be running to provide own metadata
+
 		until [[ $( curl -sSf -w "%{http_code}\n" -o /dev/null "${my_internal_url}/admin/" ) -eq 200 ]]
 		do
 			echo >&2 "Waiting for ${my_internal_url} ..."
@@ -384,13 +344,13 @@ else
 	echo "- make a snapshot of the rendering service"
   snapshot_name="$execution_folder/snapshots/edu-sharing-SNAPSHOT-$(date "+%Y.%m.%d-%H.%M.%S").tar.gz"
 	mkdir -p "$(dirname "$snapshot_name")"
-	tar -czf $snapshot_name $(basename "${RS_ROOT}")
+	tar -czf "$snapshot_name" $(basename "${RS_ROOT}")
 
 	install_edu_sharing || exit 1
 
   echo "- restore config"
-  tar -zxf $snapshot_name $(basename "${RS_ROOT}")/conf
-  tar -zxf $snapshot_name --wildcards "*config.php" -C $(basename "${RS_ROOT}")
+  tar -zxf "$snapshot_name" $(basename "${RS_ROOT}")/conf
+  tar -zxf "$snapshot_name" --wildcards "*config.php" -C $(basename "${RS_ROOT}")
 
 	echo "- call ${RS_ROOT}/admin/cli/update.php"
 	yes | php "${RS_ROOT}"/admin/cli/update.php || true
@@ -402,7 +362,27 @@ else
 
 fi
 
-config_edu_sharing || exit 1
+if [[ -n $rendering_proxy_host ]] ; then
+	proxyConf="${RS_ROOT}/conf/proxy.conf.php"
+	echo "- update $proxyConf"
+	cp -rf "${RS_ROOT}/conf/proxy.conf.php.example" "${proxyConf}"
+	sed -i -r "s|define\('HTTP_PROXY_HOST',.*);|define('HTTP_PROXY_HOST', '$rendering_proxy_host');|" "${proxyConf}"
+	sed -i -r "s|define\('HTTP_PROXY_PORT',.*);|define('HTTP_PROXY_PORT', '$rendering_proxy_port');|" "${proxyConf}"
+	sed -i -r "s|define\('HTTP_PROXY_USER',.*);|define('HTTP_PROXY_USER', '$rendering_proxy_user');|" "${proxyConf}"
+	sed -i -r "s|define\('HTTP_PROXY_PASS',.*);|define('HTTP_PROXY_PASS', '$rendering_proxy_pass');|" "${proxyConf}"
+fi
+
+dbConf="${RS_ROOT}/conf/db.conf.php"
+echo "- update ${dbConf}"
+sed -i -r "s|\$dsn.*|\$dsn = \"${db_driver}:host=${db_host};port=${db_port};dbname=${db_name}\";|" "${dbConf}"
+sed -i -r "s|\$dbuser.*|\$dbuser = \"${db_user}\";|" "${dbConf}"
+sed -i -r "s|\$pwd.*|\pwd = \"${db_password}\";|" "${dbConf}"
+
+systemConf="${RS_ROOT}/conf/system.conf.php"
+echo "- update ${systemConf}"
+sed -i -r "s|\$MC_URL.*|\$MC_URL = '${my_external_url}';|" "${systemConf}"
+sed -i -r "s|\$MC_DOCROOT.*|\$MC_DOCROOT = '${RS_ROOT}';|" "${systemConf}"
+sed -i -r "s|\$CC_RENDER_PATH.*|\$CC_RENDER_PATH = '${RS_CACHE}';|" "${systemConf}"
 
 echo "- set cache cleaner cronjob"
 croneJob=/tmp/mycron
