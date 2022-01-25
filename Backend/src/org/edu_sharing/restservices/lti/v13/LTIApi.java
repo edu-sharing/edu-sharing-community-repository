@@ -22,8 +22,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
+import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Repo;
@@ -104,6 +106,15 @@ public class LTIApi {
 
             // do the redirection
             String authRequest = tool.getOidcAuthUrl(loginRequest);
+
+            /**
+             * fix: when it's an LtiResourceLinkRequest moodle sends rendering url (/edu-sharing/components/render)
+             * as targetUrl. edu.uoc.elc.lti.tool.Tool take this url for redirect_url which is wrong
+             */
+            authRequest = UrlTool.removeParam(authRequest,"redirect_uri");
+            authRequest = UrlTool.setParam(authRequest,"redirect_uri",ApplicationInfoList.getHomeRepository().getClientBaseUrl()+"/rest/lti/v13/" + LTIConstants.LTI_TOOL_REDIRECTURL_PATH);
+
+
             //response.sendRedirect(authRequest);
             return Response.status(302).location(new URI(authRequest)).build();
 
@@ -203,7 +214,7 @@ public class LTIApi {
                 throw new IllegalStateException("nonce is invalid");
             }
 
-            Tool tool = Config.getTool(ltijwtUtil.getPlatform(),req,true);
+            Tool tool = Config.getTool(ltijwtUtil.getPlatform(),req,false);
 
             /**
              * Launch validation: validates authentication response, and specific message(deeplink,....) validation
