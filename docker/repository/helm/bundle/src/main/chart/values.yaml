@@ -54,9 +54,9 @@ edusharing_repository_rediscluster:
 
 ########################################################################################################################
 
-edusharing_repository_search_elastic:
+edusharing_repository_search_elastic_index:
 
-  enabled: ${helm.edusharing_repository_search_elastic.enabled}
+  enabled: ${helm.edusharing_repository_search_elastic_index.enabled}
 
   nameOverride: &searchElasticNameOverride edusharing-repository-search-elastic
 
@@ -125,7 +125,7 @@ edusharing_repository_service:
     search:
 
       elastic:
-        enabled: ${helm.edusharing_repository_search_elastic.enabled}
+        enabled: ${helm.edusharing_repository_search_elastic_index.enabled}
         host: *searchElasticNameOverride
         port: *searchElasticServicePortApi
 

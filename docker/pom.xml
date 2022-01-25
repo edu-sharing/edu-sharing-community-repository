@@ -45,8 +45,8 @@
     <module>build</module>
     <module>compose</module>
     <module>helm</module>
-    <module>rendering</module>
     <module>repository</module>
+    <module>services</module>
   </modules>
 
 </project>

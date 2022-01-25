@@ -32,8 +32,8 @@
 
   <modules>
     <module>compose</module>
-    <module>rendering</module>
     <module>repository</module>
+    <module>services</module>
   </modules>
 
 </project>

@@ -1,6 +1,6 @@
 variables:
   COMMON_BIND_HOST: "0.0.0.0"
-  DEPLOY_HELM: "true"
+  DEPLOY_DOCKER_HELM: "true"
   DEPLOY_INSTALLER: "true"
   DEPLOY_TIMESTAMP: "false"
   DOCKER_DRIVER: "$DIND_DRIVER"

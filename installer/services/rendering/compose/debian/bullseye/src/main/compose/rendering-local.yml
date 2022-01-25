@@ -1,0 +1,8 @@
+version: '3.7'
+
+services:
+
+  services-rendering:
+    command: ["--local"]
+    volumes:
+      - "${MAVEN_HOME}:/root/.m2"

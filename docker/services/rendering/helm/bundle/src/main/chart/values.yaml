@@ -1,0 +1,72 @@
+########################################################################################################################
+# GLOBAL
+########################################################################################################################
+
+global:
+
+  patroni:
+    name: &postgresqlNameOverride edusharing-services-rendering-postgresql
+
+########################################################################################################################
+# LOCAL
+########################################################################################################################
+
+nameOverride: edusharing-services-rendering
+
+image:
+  registry: ${docker.registry}
+  repository: ${docker.repository}
+  tag: ${docker.tag}
+
+########################################################################################################################
+# DEPENDENCY
+########################################################################################################################
+
+edusharing_services_rendering_postgresql:
+
+  enabled: true
+
+  nameOverride: *postgresqlNameOverride
+
+  service:
+    port:
+      api: &postgresqlServicePortApi 5432
+
+  config:
+
+    database: &postgresqlConfigDatabase rendering
+    username: &postgresqlConfigUsername rendering
+    password: &postgresqlConfigPassword rendering
+
+########################################################################################################################
+
+edusharing_services_rendering_rediscluster:
+
+  enabled: true
+
+  nameOverride: &redisclusterNameOverride edusharing-services-rendering-rediscluster
+
+  service:
+    port:
+      api: &redisclusterServicePortApi 6379
+
+########################################################################################################################
+
+edusharing_services_rendering_service:
+
+  enabled: true
+
+  config:
+
+    cache:
+      host: *redisclusterNameOverride
+      port: *redisclusterServicePortApi
+
+    database:
+      host: *postgresqlNameOverride
+      port: *postgresqlServicePortApi
+      database: *postgresqlConfigDatabase
+      username: *postgresqlConfigUsername
+      password: *postgresqlConfigPassword
+
+########################################################################################################################

@@ -1,9 +1,0 @@
-version: '3.7'
-
-services:
-
-  rendering:
-    environment:
-      MAVEN_REMOTE_USERNAME: ${MAVEN_REMOTE_USERNAME}
-      MAVEN_REMOTE_PASSWORD: ${MAVEN_REMOTE_PASSWORD}
-      RENDERING_SERVICE_HOST_EXTERNAL: "docker"

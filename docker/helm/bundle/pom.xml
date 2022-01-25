@@ -42,18 +42,18 @@
             </configuration>
           </execution>
           <execution>
-            <id>edusharing_rendering</id>
+            <id>edusharing_services_rendering</id>
             <goals>
               <goal>unpack-dependencies</goal>
             </goals>
             <phase>generate-sources</phase>
             <configuration>
               <includeArtifactIds>
-                edu_sharing-community-deploy-docker-rendering-helm-bundle
+                edu_sharing-community-deploy-docker-services-rendering-helm-bundle
               </includeArtifactIds>
               <type>tar.gz</type>
               <classifier>bin</classifier>
-              <outputDirectory>${project.build.directory}/chart/charts/edusharing_community_rendering</outputDirectory>
+              <outputDirectory>${project.build.directory}/chart/charts/edusharing_community_services_rendering</outputDirectory>
             </configuration>
           </execution>
           <execution>
@@ -158,7 +158,7 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-deploy-docker-rendering-helm-bundle</artifactId>
+      <artifactId>edu_sharing-community-deploy-docker-services-rendering-helm-bundle</artifactId>
       <type>tar.gz</type>
       <classifier>bin</classifier>
     </dependency>

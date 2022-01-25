@@ -60,22 +60,6 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-docker-rendering-helm-bundle</artifactId>
-        <version>${project.version}</version>
-        <type>tar.gz</type>
-        <classifier>bin</classifier>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-docker-rendering-helm-service</artifactId>
-        <version>${project.version}</version>
-        <type>tar.gz</type>
-        <classifier>bin</classifier>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-deploy-docker-repository-helm-bundle</artifactId>
         <version>${project.version}</version>
         <type>tar.gz</type>
@@ -100,7 +84,7 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-docker-rendering-compose</artifactId>
+        <artifactId>edu_sharing-community-deploy-docker-services-rendering-compose</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -112,13 +96,15 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-installer-rendering-compose-debian-bullseye</artifactId>
+        <artifactId>edu_sharing-community-deploy-docker-services-rendering-helm-bundle</artifactId>
         <version>${project.version}</version>
+        <type>tar.gz</type>
+        <classifier>bin</classifier>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-installer-rendering-distribution</artifactId>
+        <artifactId>edu_sharing-community-deploy-docker-services-rendering-helm-service</artifactId>
         <version>${project.version}</version>
         <type>tar.gz</type>
         <classifier>bin</classifier>
@@ -133,6 +119,20 @@
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-deploy-installer-repository-distribution</artifactId>
+        <version>${project.version}</version>
+        <type>tar.gz</type>
+        <classifier>bin</classifier>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-deploy-installer-services-rendering-compose-debian-bullseye</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-deploy-installer-services-rendering-distribution</artifactId>
         <version>${project.version}</version>
         <type>tar.gz</type>
         <classifier>bin</classifier>

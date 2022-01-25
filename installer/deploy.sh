@@ -45,10 +45,10 @@ COMPOSE_DIR="compose/$PLATFORM/target/compose"
 
 [[ ! -d "${COMPOSE_DIR}" ]] && {
 	echo "Initializing ..."
-	pushd "rendering/compose/$PLATFORM" >/dev/null || exit
+	pushd "repository/compose/$PLATFORM" >/dev/null || exit
 	$MAVEN_CMD $MAVEN_CMD_OPTS -Dmaven.test.skip=true install || exit
 	popd >/dev/null || exit
-	pushd "repository/compose/$PLATFORM" >/dev/null || exit
+	pushd "services/rendering/compose/$PLATFORM" >/dev/null || exit
 	$MAVEN_CMD $MAVEN_CMD_OPTS -Dmaven.test.skip=true install || exit
 	popd >/dev/null || exit
 	pushd "compose/$PLATFORM" >/dev/null || exit
@@ -75,12 +75,14 @@ info() {
 	echo "    username: admin"
 	echo "    password: ${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
 	echo ""
-	echo "  edu-sharing community services rendering:"
+	echo "  edu-sharing community services:"
 	echo ""
-	echo "    http://${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.nip.io}:${RENDERING_SERVICE_PORT:-9100}/esrender/admin/"
+	echo "    rendering:"
 	echo ""
-	echo "    username: ${RENDERING_DATABASE_USER:-rendering}"
-	echo "    password: ${RENDERING_DATABASE_PASS:-rendering}"
+	echo "      http://${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.nip.io}:${RENDERING_SERVICE_PORT:-9100}/esrender/admin/"
+	echo ""
+	echo "      username: ${RENDERING_DATABASE_USER:-rendering}"
+	echo "      password: ${RENDERING_DATABASE_PASS:-rendering}"
 	echo ""
 	echo "#########################################################################"
 	echo ""
@@ -149,7 +151,7 @@ compose_plugins() {
 logs() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -161,7 +163,7 @@ logs() {
 ps() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -171,27 +173,11 @@ ps() {
 }
 
 init() {
-	mkdir -p rendering
 	mkdir -p repository/plugin-elastic
 	mkdir -p repository/plugin-transform
+	mkdir -p services/rendering
 
-	rm -f rendering/.env repository/.env repository/plugin-elastic/.env repository/plugin-transform/.env
-
-	{
-		echo "RENDERING_DATABASE_PASS=${RENDERING_DATABASE_PASS:-rendering}"
-		echo "RENDERING_DATABASE_USER=${RENDERING_DATABASE_USER:-rendering}"
-
-		echo "RENDERING_SERVICE_HOST_EXTERNAL=${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.nip.io}"
-		echo "RENDERING_SERVICE_PORT_EXTERNAL=${RENDERING_SERVICE_PORT:-9100}"
-
-		echo "RENDERING_SERVICE_HOST_INTERNAL=rendering"
-		echo "RENDERING_SERVICE_PORT_INTERNAL=80"
-
-		echo "REPOSITORY_SERVICE_ADMIN_PASS=${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
-
-		echo "REPOSITORY_SERVICE_HOST=repository"
-		echo "REPOSITORY_SERVICE_PORT=80"
-	} >> rendering/.env
+	rm -f repository/.env repository/plugin-elastic/.env repository/plugin-transform/.env services/rendering/.env
 
 	{
 		echo "REPOSITORY_SERVICE_HOME_APPID=${COMPOSE_PROJECT_NAME:-compose}"
@@ -228,12 +214,28 @@ init() {
 		echo "REPOSITORY_TRANSFORM_MANAGEMENT_SERVER_BIND=0.0.0.0"
 	} >> repository/plugin-transform/.env
 
+	{
+		echo "RENDERING_DATABASE_PASS=${RENDERING_DATABASE_PASS:-rendering}"
+		echo "RENDERING_DATABASE_USER=${RENDERING_DATABASE_USER:-rendering}"
+
+		echo "RENDERING_SERVICE_HOST_EXTERNAL=${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.nip.io}"
+		echo "RENDERING_SERVICE_PORT_EXTERNAL=${RENDERING_SERVICE_PORT:-9100}"
+
+		echo "RENDERING_SERVICE_HOST_INTERNAL=services-rendering"
+		echo "RENDERING_SERVICE_PORT_INTERNAL=80"
+
+		echo "REPOSITORY_SERVICE_ADMIN_PASS=${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
+
+		echo "REPOSITORY_SERVICE_HOST=repository"
+		echo "REPOSITORY_SERVICE_PORT=80"
+	} >> services/rendering/.env
+
 }
 
 rstart() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -remote)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote) $(compose_plugins repository -common -remote)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -remote) $(compose_plugins rendering -common -remote)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -remote)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -249,7 +251,7 @@ rstart() {
 lstart() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -local)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -local) $(compose_plugins repository -common -local)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -local) $(compose_plugins rendering -common -local)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -local)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -261,7 +263,7 @@ lstart() {
 stop() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -276,7 +278,7 @@ remove() {
 	y | Y)
 		COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 		COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-		COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
+		COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
 
 		echo "Use compose set: $COMPOSE_LIST"
 
@@ -292,7 +294,7 @@ remove() {
 
 ci() {
 	COMPOSE_LIST1="$(compose_plugins repository -remote)"
-	COMPOSE_LIST2="$(compose_plugins rendering -remote)"
+	COMPOSE_LIST2="$(compose_plugins services/rendering -remote)"
 
   [[ -n $COMPOSE_LIST1 || -n $COMPOSE_LIST2 ]] && {
 		echo "Use compose set: $COMPOSE_LIST1 $COMPOSE_LIST2"
@@ -304,7 +306,7 @@ ci() {
 
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -local -ci)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -local -ci) $(compose_plugins repository -common -remote -ci)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -local -ci) $(compose_plugins rendering -common -remote -ci)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -local -ci)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 

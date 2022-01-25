@@ -20,11 +20,11 @@
 
   <properties>
 
-    <helm.edusharing_repository_search_elastic.enabled>false</helm.edusharing_repository_search_elastic.enabled>
-    <helm.edusharing_repository_search_elastic.line1/>
-    <helm.edusharing_repository_search_elastic.line2/>
-    <helm.edusharing_repository_search_elastic.line3/>
-    <helm.edusharing_repository_search_elastic.line4/>
+    <helm.edusharing_repository_search_elastic_index.enabled>false</helm.edusharing_repository_search_elastic_index.enabled>
+    <helm.edusharing_repository_search_elastic_index.line1/>
+    <helm.edusharing_repository_search_elastic_index.line2/>
+    <helm.edusharing_repository_search_elastic_index.line3/>
+    <helm.edusharing_repository_search_elastic_index.line4/>
 
     <helm.edusharing_repository_search_elastic_tracker.enabled>false
     </helm.edusharing_repository_search_elastic_tracker.enabled>
@@ -81,18 +81,19 @@
             </configuration>
           </execution>
           <execution>
-            <id>edu_sharing_elasticsearch</id>
+            <id>edusharing_repository_search_elastic_index</id>
             <goals>
               <goal>unpack-dependencies</goal>
             </goals>
             <phase>generate-sources</phase>
             <configuration>
               <includeArtifactIds>
-                edu_sharing-community-repository-plugin-elastic-deploy-docker-helm-elasticsearch
+                edu_sharing-community-repository-plugin-elastic-deploy-docker-helm-index
               </includeArtifactIds>
               <type>tar.gz</type>
               <classifier>bin</classifier>
-              <outputDirectory>${project.build.directory}/chart/charts/edusharing_community_elasticsearch
+              <outputDirectory>
+                ${project.build.directory}/chart/charts/edusharing_community_repository_search_elastic_index
               </outputDirectory>
             </configuration>
           </execution>
@@ -104,7 +105,7 @@
             <phase>generate-sources</phase>
             <configuration>
               <includeArtifactIds>
-                edu_sharing-community-repository-plugin-elastic-deploy-docker-helm-server
+                edu_sharing-community-repository-plugin-elastic-deploy-docker-helm-tracker
               </includeArtifactIds>
               <type>tar.gz</type>
               <classifier>bin</classifier>
@@ -153,7 +154,7 @@
             <phase>generate-sources</phase>
             <configuration>
               <includeArtifactIds>
-                edu_sharing-enterprise-repository-plugin-transform-deploy-docker-helm-server
+                edu_sharing-enterprise-repository-plugin-transform-deploy-docker-helm
               </includeArtifactIds>
               <type>tar.gz</type>
               <classifier>bin</classifier>
@@ -286,21 +287,24 @@
 
       <properties>
 
-        <helm.edusharing_repository_search_elastic.enabled>true</helm.edusharing_repository_search_elastic.enabled>
-        <helm.edusharing_repository_search_elastic.line1>
-          - name: edusharing_community_elasticsearch
-        </helm.edusharing_repository_search_elastic.line1>
-        <helm.edusharing_repository_search_elastic.line2>
+        <helm.edusharing_repository_search_elastic_index.enabled>
+          true
+        </helm.edusharing_repository_search_elastic_index.enabled>
+        <helm.edusharing_repository_search_elastic_index.line1>
+          - name: edusharing_community_repository_search_elastic_index
+        </helm.edusharing_repository_search_elastic_index.line1>
+        <helm.edusharing_repository_search_elastic_index.line2>
           version: ${helm.chart.version}
-        </helm.edusharing_repository_search_elastic.line2>
-        <helm.edusharing_repository_search_elastic.line3>
-          alias: edusharing_repository_search_elastic
-        </helm.edusharing_repository_search_elastic.line3>
-        <helm.edusharing_repository_search_elastic.line4>
+        </helm.edusharing_repository_search_elastic_index.line2>
+        <helm.edusharing_repository_search_elastic_index.line3>
+          alias: edusharing_repository_search_elastic_index
+        </helm.edusharing_repository_search_elastic_index.line3>
+        <helm.edusharing_repository_search_elastic_index.line4>
           condition: edusharing_repository_search_elastic.enabled
-        </helm.edusharing_repository_search_elastic.line4>
+        </helm.edusharing_repository_search_elastic_index.line4>
 
-        <helm.edusharing_repository_search_elastic_tracker.enabled>true
+        <helm.edusharing_repository_search_elastic_tracker.enabled>
+          true
         </helm.edusharing_repository_search_elastic_tracker.enabled>
         <helm.edusharing_repository_search_elastic_tracker.line1>
           - name: edusharing_community_repository_search_elastic_tracker
@@ -321,14 +325,14 @@
 
         <dependency>
           <groupId>${project.groupId}</groupId>
-          <artifactId>edu_sharing-community-repository-plugin-elastic-deploy-docker-helm-elasticsearch</artifactId>
+          <artifactId>edu_sharing-community-repository-plugin-elastic-deploy-docker-helm-index</artifactId>
           <type>tar.gz</type>
           <classifier>bin</classifier>
         </dependency>
 
         <dependency>
           <groupId>${project.groupId}</groupId>
-          <artifactId>edu_sharing-community-repository-plugin-elastic-deploy-docker-helm-server</artifactId>
+          <artifactId>edu_sharing-community-repository-plugin-elastic-deploy-docker-helm-tracker</artifactId>
           <type>tar.gz</type>
           <classifier>bin</classifier>
         </dependency>
@@ -371,7 +375,7 @@
 
         <dependency>
           <groupId>${project.groupId}</groupId>
-          <artifactId>edu_sharing-enterprise-repository-plugin-transform-deploy-docker-helm-server</artifactId>
+          <artifactId>edu_sharing-enterprise-repository-plugin-transform-deploy-docker-helm</artifactId>
           <type>tar.gz</type>
           <classifier>bin</classifier>
         </dependency>

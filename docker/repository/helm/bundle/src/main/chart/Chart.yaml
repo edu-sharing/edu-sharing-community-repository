@@ -31,10 +31,10 @@ dependencies:
     alias: edusharing_repository_service
     condition: edusharing_repository_service.enabled
 
-  ${helm.edusharing_repository_search_elastic.line1}
-    ${helm.edusharing_repository_search_elastic.line2}
-    ${helm.edusharing_repository_search_elastic.line3}
-    ${helm.edusharing_repository_search_elastic.line4}
+  ${helm.edusharing_repository_search_elastic_index.line1}
+    ${helm.edusharing_repository_search_elastic_index.line2}
+    ${helm.edusharing_repository_search_elastic_index.line3}
+    ${helm.edusharing_repository_search_elastic_index.line4}
   
   ${helm.edusharing_repository_search_elastic_tracker.line1}
     ${helm.edusharing_repository_search_elastic_tracker.line2}

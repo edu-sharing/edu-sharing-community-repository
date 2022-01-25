@@ -48,10 +48,10 @@
             <phase>package</phase>
             <configuration>
               <includeArtifactIds>
-                edu_sharing-community-deploy-docker-rendering-compose
+                edu_sharing-community-deploy-docker-services-rendering-compose
               </includeArtifactIds>
               <excludes>META-INF/**</excludes>
-              <outputDirectory>${project.build.directory}/compose/rendering</outputDirectory>
+              <outputDirectory>${project.build.directory}/compose/services/rendering</outputDirectory>
             </configuration>
           </execution>
           <execution>
@@ -113,12 +113,12 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-deploy-docker-rendering-compose</artifactId>
+      <artifactId>edu_sharing-community-deploy-docker-repository-compose</artifactId>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-deploy-docker-repository-compose</artifactId>
+      <artifactId>edu_sharing-community-deploy-docker-services-rendering-compose</artifactId>
     </dependency>
 
   </dependencies>

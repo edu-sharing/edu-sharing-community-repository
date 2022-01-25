@@ -85,26 +85,26 @@ edusharing_repository:
 
 ########################################################################################################################
 
-edusharing_rendering:
+edusharing_services_rendering:
 
   enabled: true
 
-  edusharing_rendering_rediscluster:
+  edusharing_services_rendering_rediscluster:
 
     enabled: false
 
-  edusharing_rendering_postgresql:
+  edusharing_services_rendering_postgresql:
 
     enabled: true
 
-    nameOverride: &renderingPostgresqlNameOverride edusharing-rendering-postgresql
+    nameOverride: &renderingPostgresqlNameOverride edusharing-services-rendering-postgresql
 
     config:
       patroni:
         enabled: false
         name: *renderingPostgresqlNameOverride
 
-  edusharing_rendering_service:
+  edusharing_services_rendering_service:
 
     config:
 

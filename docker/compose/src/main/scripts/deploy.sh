@@ -48,12 +48,14 @@ info() {
 	echo "    username: admin"
 	echo "    password: ${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
 	echo ""
-	echo "  edu-sharing community services rendering:"
+	echo "  edu-sharing community services:"
 	echo ""
-	echo "    http://${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.nip.io}:${RENDERING_SERVICE_PORT_HTTP:-9100}/esrender/admin/"
+	echo "  	rendering:"
 	echo ""
-	echo "    username: ${RENDERING_DATABASE_USER:-rendering}"
-	echo "    password: ${RENDERING_DATABASE_PASS:-rendering}"
+	echo "      http://${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.nip.io}:${RENDERING_SERVICE_PORT_HTTP:-9100}/esrender/admin/"
+	echo ""
+	echo "      username: ${RENDERING_DATABASE_USER:-rendering}"
+	echo "      password: ${RENDERING_DATABASE_PASS:-rendering}"
 	echo ""
 	echo "#########################################################################"
 	echo ""
@@ -116,8 +118,9 @@ compose_plugins() {
 }
 
 logs() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -127,8 +130,9 @@ logs() {
 }
 
 ps() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -138,8 +142,9 @@ ps() {
 }
 
 rstart() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -remote)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote) $(compose_plugins repository -common -remote)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -remote) $(compose_plugins rendering -common -remote)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -remote)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -153,8 +158,9 @@ rstart() {
 }
 
 stop() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -167,8 +173,9 @@ remove() {
 	read -p "Are you sure you want to continue? [y/N] " answer
 	case ${answer:0:1} in
 	y | Y)
+		COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 		COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-		COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
+		COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
 
 		echo "Use compose set: $COMPOSE_LIST"
 

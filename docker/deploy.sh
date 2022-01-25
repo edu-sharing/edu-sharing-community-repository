@@ -42,10 +42,10 @@ COMPOSE_DIR="compose/target/compose"
 
 [[ ! -d "${COMPOSE_DIR}" ]] && {
 	echo "Initializing ..."
-	pushd "rendering/compose" >/dev/null || exit
+	pushd "repository/compose" >/dev/null || exit
 	$MAVEN_CMD $MAVEN_CMD_OPTS -Dmaven.test.skip=true install || exit
 	popd >/dev/null || exit
-	pushd "repository/compose" >/dev/null || exit
+	pushd "services/rendering/compose" >/dev/null || exit
 	$MAVEN_CMD $MAVEN_CMD_OPTS -Dmaven.test.skip=true install || exit
 	popd >/dev/null || exit
 	pushd "compose" >/dev/null || exit
@@ -72,12 +72,14 @@ info() {
 	echo "    username: admin"
 	echo "    password: ${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
 	echo ""
-	echo "  edu-sharing community services rendering:"
+	echo "  edu-sharing community services:"
 	echo ""
-	echo "    http://${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.nip.io}:${RENDERING_SERVICE_PORT_HTTP:-9100}/esrender/admin/"
+	echo "    rendering:"
 	echo ""
-	echo "    username: ${RENDERING_DATABASE_USER:-rendering}"
-	echo "    password: ${RENDERING_DATABASE_PASS:-rendering}"
+	echo "      http://${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.nip.io}:${RENDERING_SERVICE_PORT_HTTP:-9100}/esrender/admin/"
+	echo ""
+	echo "      username: ${RENDERING_DATABASE_USER:-rendering}"
+	echo "      password: ${RENDERING_DATABASE_PASS:-rendering}"
 	echo ""
 	echo "#########################################################################"
 	echo ""
@@ -146,7 +148,7 @@ compose_plugins() {
 logs() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -158,7 +160,7 @@ logs() {
 ps() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -170,7 +172,7 @@ ps() {
 rstart() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -remote)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote) $(compose_plugins repository -common -remote)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -remote) $(compose_plugins rendering -common -remote)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -remote)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -186,7 +188,7 @@ rstart() {
 rdebug() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -remote -debug)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote -debug) $(compose_plugins repository -common -remote -debug)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -remote -debug) $(compose_plugins rendering -common -remote -debug)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -remote -debug)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -206,7 +208,7 @@ rdev() {
 
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -remote -debug -dev)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote -debug -dev) $(compose_plugins repository -common -remote -debug -dev)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -remote -debug -dev) $(compose_plugins rendering -common -remote -debug -dev)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -remote -debug -dev)"
 
 	case $CLI_OPT2 in
 	/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
@@ -232,7 +234,7 @@ rdev() {
 lstart() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -244,7 +246,7 @@ lstart() {
 ldebug() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -debug)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -debug) $(compose_plugins repository -common -debug)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -debug) $(compose_plugins rendering -common -debug)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -debug) $(compose_plugins services/rendering -common -debug)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -269,7 +271,7 @@ ldev() {
 
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -debug -dev)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -debug -dev) $(compose_plugins repository -common -debug -dev)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -debug -dev) $(compose_plugins rendering -common -debug -dev)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -debug -dev) $(compose_plugins services/rendering -common -debug -dev)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -281,7 +283,7 @@ ldev() {
 stop() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -debug)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -debug) $(compose_plugins repository -common -debug)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -debug) $(compose_plugins rendering -common -debug)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -debug) $(compose_plugins services/rendering -common -debug)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -296,7 +298,7 @@ remove() {
 	y | Y)
 		COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -debug)"
 		COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -debug) $(compose_plugins repository -common -debug)"
-		COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common -debug) $(compose_plugins rendering -common -debug)"
+		COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -debug) $(compose_plugins services/rendering -common -debug)"
 
 		echo "Use compose set: $COMPOSE_LIST"
 
@@ -317,7 +319,7 @@ reload() {
 
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -338,7 +340,7 @@ reload() {
 
 ci() {
 	COMPOSE_LIST1="$(compose_plugins repository -remote)"
-	COMPOSE_LIST2="$(compose_plugins rendering -remote)"
+	COMPOSE_LIST2="$(compose_plugins services/rendering -remote)"
 
   [[ -n $COMPOSE_LIST1 || -n $COMPOSE_LIST2 ]] && {
 		echo "Use compose set: $COMPOSE_LIST1 $COMPOSE_LIST2"
@@ -350,7 +352,7 @@ ci() {
 
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common -remote)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose rendering/rendering.yml -common) $(compose_plugins rendering -common -remote)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 

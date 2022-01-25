@@ -1,7 +1,0 @@
-version: '3.7'
-
-services:
-
-  rendering-service:
-    volumes:
-      - "${COMMUNITY_PATH}/services-rendering/target/php:/var/www/html/esrender"

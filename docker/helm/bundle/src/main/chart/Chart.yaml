@@ -16,12 +16,12 @@ dependencies:
     alias: edusharing_rediscluster
     condition: edusharing_rediscluster.enabled
 
-  - name: edusharing_community_rendering
-    version: ${helm.chart.version}
-    alias: edusharing_rendering
-    condition: edusharing_rendering.enabled
-
   - name: edusharing_community_repository
     version: ${helm.chart.version}
     alias: edusharing_repository
     condition: edusharing_repository.enabled
+
+  - name: edusharing_community_services_rendering
+    version: ${helm.chart.version}
+    alias: edusharing_services_rendering
+    condition: edusharing_services_rendering.enabled
