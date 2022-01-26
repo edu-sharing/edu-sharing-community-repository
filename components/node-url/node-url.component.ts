@@ -4,6 +4,7 @@ import {Params} from "@angular/router";
 import {NodeHelper} from "../../node-helper";
 import {UIConstants} from "../../../core-module/ui/ui-constants";
 import {RestNetworkService} from "../../../core-module/rest/services/rest-network.service";
+import {RestConstants} from '../../../core-module/rest/rest-constants';
 
 @Component({
   selector: 'app-node-url',
@@ -52,8 +53,14 @@ export class NodeUrlComponent {
       };
     } else {
       if (node.isDirectory) {
+        let path;
+        if (node.properties?.[RestConstants.CCM_PROP_EDUSCOPENAME]?.[0] === RestConstants.SAFE_SCOPE) {
+          path = UIConstants.ROUTER_PREFIX + 'workspace/safe';
+        } else {
+          path = UIConstants.ROUTER_PREFIX + 'workspace';
+        }
         data = {
-          routerLink: UIConstants.ROUTER_PREFIX + 'workspace',
+          routerLink: path,
           queryParams: { id: node.ref.id },
         };
       } else if(node.ref) {

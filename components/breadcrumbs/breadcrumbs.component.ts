@@ -5,7 +5,7 @@ import {
     Node,
     RestNodeService,
     TemporaryStorageService,
-    UIService,
+    UIService, RestConstants,
 } from '../../../core-module/core.module';
 import { Router } from '@angular/router';
 import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
@@ -76,7 +76,7 @@ export class BreadcrumbsComponent {
      */
     @Input() set breadcrumbsForId(id: string) {
         if (id == null) return;
-        this.node.getNodeParents(id).subscribe(nodes => {
+        this.node.getNodeParents(id, false, [RestConstants.ALL]).subscribe(nodes => {
             this._breadcrumbsAsNode = nodes.nodes.reverse();
             this.generateShort();
         });
