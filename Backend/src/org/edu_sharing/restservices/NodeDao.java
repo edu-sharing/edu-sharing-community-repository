@@ -1730,16 +1730,13 @@ public class NodeDao {
 	}
 	
 	public void addWorkflowHistory(WorkflowHistory history) throws DAOException{
-		HashMap<String, String[]> properties = getAllProperties();
-		String[] data=properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_WF_PROTOCOL));
-		List<String> list=new ArrayList<>();
+		HashMap<String, Object> properties = getNativeProperties();
+		List<String> data= (List<String>) properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_WF_PROTOCOL));
+		ArrayList<String> list=new ArrayList<>();
 		if(data!=null)
-			list=new ArrayList<>(Arrays.asList(data));
+			list=new ArrayList<>(data);
 		try{
-			String[] receivers=new String[history.getReceiver().length];
-			for(int i=0;i<receivers.length;i++){
-				receivers[i]=history.getReceiver()[i].getAuthorityName();
-			}
+			ArrayList<String> receivers = Arrays.stream(history.getReceiver()).map(Authority::getAuthorityName).collect(Collectors.toCollection(ArrayList::new));
 			JSONObject json=new JSONObject();
 			json.put("comment", history.getComment());
 			json.put("editor", (history.getEditor()!=null && !history.getEditor().getAuthorityName().isEmpty()) ? history.getEditor().getAuthorityName() : AuthenticationUtil.getFullyAuthenticatedUser());
@@ -1747,13 +1744,12 @@ public class NodeDao {
 			json.put("status", history.getStatus());
 			json.put("time", history.getTime()>0 ? history.getTime() : System.currentTimeMillis());
 			list.add(0, json.toString());
-			String[] result=new String[0];
-			result=list.toArray(result);
-			properties.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_WF_INSTRUCTIONS),new String[]{history.getComment()});
-			properties.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_WF_RECEIVER),receivers);
-			properties.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_WF_STATUS),new String[]{history.getStatus()});
-			properties.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_WF_PROTOCOL),result);
-			changeProperties(properties);
+			org.alfresco.service.cmr.repository.NodeRef nodeRef = new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+					nodeId);
+			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_INSTRUCTIONS,history.getComment());
+			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_RECEIVER,receivers);
+			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_STATUS,history.getStatus());
+			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_PROTOCOL,list);
 		}catch (Throwable t) {
 			throw DAOException.mapping(t);
 		}
