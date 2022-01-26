@@ -80,29 +80,29 @@ done
 
 ########################################################################################################################
 
-my_home_appid="${RENDERING_SERVICE_HOME_APPID:-esrender}"
+my_home_appid="${SERVICES_RENDERING_SERVICE_HOME_APPID:-esrender}"
 
-my_prot_external="${RENDERING_SERVICE_PROT_EXTERNAL:-http}"
-my_host_external="${RENDERING_SERVICE_HOST_EXTERNAL:-localhost}"
-my_port_external="${RENDERING_SERVICE_PORT_EXTERNAL:-80}"
-my_path_external="${RENDERING_SERVICE_PATH_EXTERNAL:-$(basename "${RS_ROOT}")}"
+my_prot_external="${SERVICES_RENDERING_SERVICE_PROT_EXTERNAL:-http}"
+my_host_external="${SERVICES_RENDERING_SERVICE_HOST_EXTERNAL:-localhost}"
+my_port_external="${SERVICES_RENDERING_SERVICE_PORT_EXTERNAL:-80}"
+my_path_external="${SERVICES_RENDERING_SERVICE_PATH_EXTERNAL:-$(basename "${RS_ROOT}")}"
 
-my_prot_internal="${RENDERING_SERVICE_PROT_INTERNAL:-http}"
-my_host_internal="${RENDERING_SERVICE_HOST_INTERNAL:-127.0.0.1}"
-my_port_internal="${RENDERING_SERVICE_PORT_INTERNAL:-80}"
-my_path_internal="${RENDERING_SERVICE_PATH_INTERNAL:-$(basename "${RS_ROOT}")}"
+my_prot_internal="${SERVICES_RENDERING_SERVICE_PROT_INTERNAL:-http}"
+my_host_internal="${SERVICES_RENDERING_SERVICE_HOST_INTERNAL:-127.0.0.1}"
+my_port_internal="${SERVICES_RENDERING_SERVICE_PORT_INTERNAL:-80}"
+my_path_internal="${SERVICES_RENDERING_SERVICE_PATH_INTERNAL:-$(basename "${RS_ROOT}")}"
 
 my_internal_url="${my_prot_internal}://${my_host_internal}:${my_port_internal}/${my_path_internal}"
 my_external_url="${my_prot_external}://${my_host_external}:${my_port_external}/${my_path_external}"
 
-my_cache_cleaner_interval="${RENDERING_SERVICE_CACHE_CLEANER_INTERVAL:-"10 * * * *"}"
+my_cache_cleaner_interval="${SERVICES_RENDERING_SERVICE_CACHE_CLEANER_INTERVAL:-"10 * * * *"}"
 
 db_driver=pgsql
-db_host="${RENDERING_DATABASE_HOST:-127.0.0.1}"
-db_port="${RENDERING_DATABASE_PORT:-5432}"
-db_name="${RENDERING_DATABASE_NAME:-rendering}"
-db_user="${RENDERING_DATABASE_USER:-rendering}"
-db_password="${RENDERING_DATABASE_PASS:-rendering}"
+db_host="${SERVICES_RENDERING_DATABASE_HOST:-127.0.0.1}"
+db_port="${SERVICES_RENDERING_DATABASE_PORT:-5432}"
+db_name="${SERVICES_RENDERING_DATABASE_NAME:-rendering}"
+db_user="${SERVICES_RENDERING_DATABASE_USER:-rendering}"
+db_password="${SERVICES_RENDERING_DATABASE_PASS:-rendering}"
 
 repository_service_host="${REPOSITORY_SERVICE_HOST:-}"
 repository_service_port="${REPOSITORY_SERVICE_PORT:-80}"
@@ -114,10 +114,10 @@ fi
 repository_user="admin"
 repository_password="${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
 
-rendering_proxy_host="${RENDERING_SERVICE_PROXY_HOST:-}"
-rendering_proxy_port="${RENDERING_SERVICE_PROXY_PORT:-}"
-rendering_proxy_user="${RENDERING_SERVICE_PROXY_USER:-}"
-rendering_proxy_pass="${RENDERING_SERVICE_PROXY_PASS:-}"
+rendering_proxy_host="${SERVICES_RENDERING_SERVICE_PROXY_HOST:-}"
+rendering_proxy_port="${SERVICES_RENDERING_SERVICE_PROXY_PORT:-}"
+rendering_proxy_user="${SERVICES_RENDERING_SERVICE_PROXY_USER:-}"
+rendering_proxy_pass="${SERVICES_RENDERING_SERVICE_PROXY_PASS:-}"
 
 ########################################################################################################################
 

@@ -49,7 +49,7 @@ spec:
         {{- $patroni := merge .Values.config.database.patroni .Values.global.patroni }}
         {{- if $patroni.enabled }}
         env:
-        - name: RENDERING_DATABASE_PASS
+        - name: SERVICES_RENDERING_DATABASE_PASS
           valueFrom:
             secretKeyRef:
               name: {{ .Values.config.database.username }}.{{ $patroni.name }}.{{ $patroni.secrets }}

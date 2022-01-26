@@ -80,10 +80,10 @@ info() {
 	echo ""
 	echo "    rendering:"
 	echo ""
-	echo "      http://${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.nip.io}:${RENDERING_SERVICE_PORT:-9100}/esrender/admin/"
+	echo "      http://${SERVICES_RENDERING_SERVICE_HOST:-rendering.services.127.0.0.1.nip.io}:${SERVICES_RENDERING_SERVICE_PORT:-9100}/esrender/admin/"
 	echo ""
-	echo "      username: ${RENDERING_DATABASE_USER:-rendering}"
-	echo "      password: ${RENDERING_DATABASE_PASS:-rendering}"
+	echo "      username: ${SERVICES_RENDERING_DATABASE_USER:-rendering}"
+	echo "      password: ${SERVICES_RENDERING_DATABASE_PASS:-rendering}"
 	echo ""
 	echo "#########################################################################"
 	echo ""
@@ -227,14 +227,14 @@ init() {
 	} >> repository/plugin-transform/.env
 
 	{
-		echo "RENDERING_DATABASE_PASS=${RENDERING_DATABASE_PASS:-rendering}"
-		echo "RENDERING_DATABASE_USER=${RENDERING_DATABASE_USER:-rendering}"
+		echo   "SERVICES_RENDERING_DATABASE_PASS=${SERVICES_RENDERING_DATABASE_PASS:-rendering}"
+		echo   "SERVICES_RENDERING_DATABASE_USER=${SERVICES_RENDERING_DATABASE_USER:-rendering}"
 
-		echo "RENDERING_SERVICE_HOST_EXTERNAL=${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.nip.io}"
-		echo "RENDERING_SERVICE_PORT_EXTERNAL=${RENDERING_SERVICE_PORT:-9100}"
+		echo   "SERVICES_RENDERING_SERVICE_HOST_EXTERNAL=${SERVICES_RENDERING_SERVICE_HOST:-rendering.services.127.0.0.1.nip.io}"
+		echo   "SERVICES_RENDERING_SERVICE_PORT_EXTERNAL=${SERVICES_RENDERING_SERVICE_PORT:-9100}"
 
-		echo "RENDERING_SERVICE_HOST_INTERNAL=services-rendering"
-		echo "RENDERING_SERVICE_PORT_INTERNAL=80"
+		echo   "SERVICES_RENDERING_SERVICE_HOST_INTERNAL=services-rendering"
+		echo   "SERVICES_RENDERING_SERVICE_PORT_INTERNAL=80"
 
 		echo "REPOSITORY_SERVICE_ADMIN_PASS=${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
 

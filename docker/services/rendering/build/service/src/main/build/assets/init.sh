@@ -3,8 +3,8 @@ set -eux
 
 ########################################################################################################################
 
-my_host_internal="${RENDERING_SERVICE_HOST_INTERNAL:-rendering-service}"
-my_port_internal="${RENDERING_SERVICE_PORT_INTERNAL:-8080}"
+my_host_internal="${SERVICES_RENDERING_SERVICE_HOST_INTERNAL:-services-rendering-service}"
+my_port_internal="${SERVICES_RENDERING_SERVICE_PORT_INTERNAL:-8080}"
 
 my_base_internal="http://${my_host_internal}:${my_port_internal}/esrender"
 my_meta_internal="${my_base_internal}/application/esmain/metadata.php"

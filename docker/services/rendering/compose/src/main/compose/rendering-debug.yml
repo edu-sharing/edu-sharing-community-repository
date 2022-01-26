@@ -4,4 +4,4 @@ services:
 
   services-rendering-database:
     ports:
-      - "${COMMON_BIND_HOST:-127.0.0.1}:${RENDERING_DATABASE_PORT:-9000}:5432"
+      - "${COMMON_BIND_HOST:-127.0.0.1}:${SERVICES_RENDERING_DATABASE_PORT:-9000}:5432"
