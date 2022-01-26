@@ -179,7 +179,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     ngOnDestroy(): void {
         this.storage.remove('workspace_clipboard');
         if(this.currentFolder) {
-            this.storage.set(TemporaryStorageService.WORKSPACE_LAST_LOCATION, this.currentFolder.ref.id);
+            this.storage.set(this.getLastLocationStorageId(), this.currentFolder.ref.id);
         }
     }
     constructor(
@@ -406,7 +406,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                                 if (!needsUpdate) {
                                     return;
                                 }
-                                const lastLocation = this.storage.pop(TemporaryStorageService.WORKSPACE_LAST_LOCATION, null);
+                                const lastLocation = this.storage.pop(this.getLastLocationStorageId(), null);
                                 if(!params.id && lastLocation) {
                                     this.openDirectory(lastLocation);
                                 } else {
@@ -824,5 +824,9 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             return this.root === 'TO_ME_SHARED_FILES';
         }
         this.customOptions.addOptions = [toggle];
+    }
+
+    private getLastLocationStorageId() {
+        return TemporaryStorageService.WORKSPACE_LAST_LOCATION + (this.isSafe ? RestConstants.SAFE_SCOPE : '');
     }
 }
