@@ -2,7 +2,8 @@
 set -e
 set -o pipefail
 
-export COMPOSE_NAME="docker-${project.version}"
+GIT_BRANCH="$(echo '${project.version}' | sed 's|[\/\.]|-|g')"
+export COMPOSE_NAME="${COMPOSE_PROJECT_NAME:-edusharing-$GIT_BRANCH}"
 
 case "$(uname)" in
 MINGW*)
@@ -27,7 +28,7 @@ export ROOT_PATH
 
 pushd "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)" >/dev/null || exit
 
-COMPOSE_DIR="compose"
+COMPOSE_DIR="."
 
 [[ -f ".env" ]] && {
 	cp -f ".env" "${COMPOSE_DIR}"
@@ -50,12 +51,23 @@ info() {
 	echo ""
 	echo "  edu-sharing community services:"
 	echo ""
-	echo "  	rendering:"
+	echo "    rendering:"
 	echo ""
 	echo "      http://${RENDERING_SERVICE_HOST:-rendering.127.0.0.1.nip.io}:${RENDERING_SERVICE_PORT_HTTP:-9100}/esrender/admin/"
 	echo ""
 	echo "      username: ${RENDERING_DATABASE_USER:-rendering}"
 	echo "      password: ${RENDERING_DATABASE_PASS:-rendering}"
+	echo ""
+	echo "#########################################################################"
+	echo ""
+	echo "  All exposed ports are bound to network address: ${COMMON_BIND_HOST:-127.0.0.1}."
+	echo ""
+	echo "#########################################################################"
+	echo ""
+	echo "  If you need to customize the installation, then:"
+	echo ""
+	echo "    - make a copy of \".env.sample\" to \".env\""
+	echo "    - comment out and update relevant entities inside \".env\""
 	echo ""
 	echo "#########################################################################"
 	echo ""

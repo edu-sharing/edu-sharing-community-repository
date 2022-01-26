@@ -5,15 +5,24 @@ set -eux
 
 my_bind="${RENDERING_SERVICE_BIND:-"0.0.0.0"}"
 
+my_home_appid="${RENDERING_SERVICE_HOME_APPID:-esrender}"
+
 my_prot_external="${RENDERING_SERVICE_PROT_EXTERNAL:-http}"
 my_host_external="${RENDERING_SERVICE_HOST_EXTERNAL:-rendering.127.0.0.1.nip.io}"
 my_port_external="${RENDERING_SERVICE_PORT_EXTERNAL:-9100}"
-my_path_external="${RENDERING_SERVICE_PATH_EXTERNAL:-/esrender}"
-my_base_external="${my_prot_external}://${my_host_external}:${my_port_external}${my_path_external}"
+my_path_external="${RENDERING_SERVICE_PATH_EXTERNAL:-$(basename "${RS_ROOT}")}"
+my_base_external="${my_prot_external}://${my_host_external}:${my_port_external}/${my_path_external}"
 
+my_prot_internal="${RENDERING_SERVICE_PROT_INTERNAL:-http}"
 my_host_internal="${RENDERING_SERVICE_HOST_INTERNAL:-rendering-service}"
 my_port_internal="${RENDERING_SERVICE_PORT_INTERNAL:-8080}"
-my_base_internal="http://${my_host_internal}:${my_port_internal}/esrender"
+my_path_internal="${RENDERING_SERVICE_PATH_INTERNAL:-$(basename "${RS_ROOT}")}"
+my_base_internal="${my_prot_internal}://${my_host_internal}:${my_port_internal}/${my_path_internal}"
+
+my_proxy_host="${RENDERING_SERVICE_PROXY_HOST:-}"
+my_proxy_port="${RENDERING_SERVICE_PROXY_PORT:-}"
+my_proxy_user="${RENDERING_SERVICE_PROXY_USER:-}"
+my_proxy_pass="${RENDERING_SERVICE_PROXY_PASS:-}"
 
 rendering_cache_host="${RENDERING_CACHE_HOST:-}"
 rendering_cache_port="${RENDERING_CACHE_PORT:-}"
@@ -172,6 +181,35 @@ fi
 ########################################################################################################################
 
 yes | php admin/cli/update.php
+
+proxyConf="${RS_ROOT}/conf/proxy.conf.php"
+if [[ -n $my_proxy_host ]] ; then
+	cp -f "${RS_ROOT}/conf/proxy.conf.php.example" "${proxyConf}"
+	sed -i -r "s|define\('HTTP_PROXY_HOST',.*);|define('HTTP_PROXY_HOST', '$my_proxy_host');|" "${proxyConf}"
+	sed -i -r "s|define\('HTTP_PROXY_PORT',.*);|define('HTTP_PROXY_PORT', '$my_proxy_port');|" "${proxyConf}"
+	sed -i -r "s|define\('HTTP_PROXY_USER',.*);|define('HTTP_PROXY_USER', '$my_proxy_user');|" "${proxyConf}"
+	sed -i -r "s|define\('HTTP_PROXY_PASS',.*);|define('HTTP_PROXY_PASS', '$my_proxy_pass');|" "${proxyConf}"
+else
+	rm -f "${proxyConf}"
+fi
+
+dbConf="${RS_ROOT}/conf/db.conf.php"
+sed -i -r "s|\$dsn.*|\$dsn = \"${rendering_database_driv}:host=${rendering_database_host};port=${rendering_database_port};dbname=${rendering_database_name}\";|" "${dbConf}"
+sed -i -r "s|\$dbuser.*|\$dbuser = \"${rendering_database_user}\";|" "${dbConf}"
+sed -i -r "s|\$pwd.*|\pwd = \"${rendering_database_pass}\";|" "${dbConf}"
+
+systemConf="${RS_ROOT}/conf/system.conf.php"
+sed -i -r "s|\$MC_URL.*|\$MC_URL = '${my_base_external}';|" "${systemConf}"
+sed -i -r "s|\$MC_DOCROOT.*|\$MC_DOCROOT = '${RS_ROOT}';|" "${systemConf}"
+sed -i -r "s|\$CC_RENDER_PATH.*|\$CC_RENDER_PATH = '${RS_CACHE}';|" "${systemConf}"
+
+homeApp="${RS_ROOT}/conf/esmain/homeApplication.properties.xml"
+xmlstarlet ed -L \
+	-u '/properties/entry[@key="scheme"]' -v "${my_prot_internal}" \
+	-u '/properties/entry[@key="host"]' -v "${my_host_internal}" \
+	-u '/properties/entry[@key="port"]' -v "${my_port_internal}" \
+	-u '/properties/entry[@key="appid"]' -v "${my_home_appid}" \
+	"${homeApp}"
 
 ########################################################################################################################
 

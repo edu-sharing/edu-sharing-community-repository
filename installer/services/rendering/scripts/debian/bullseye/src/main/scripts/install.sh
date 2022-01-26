@@ -24,6 +24,9 @@ if [[ -z $RS_CACHE ]] ; then
 	exit 1
 fi
 
+# TODO check if apache is running!
+# TODO check if postgresql is running!
+
 ########################################################################################################################
 
 execution_folder="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -77,6 +80,8 @@ done
 
 ########################################################################################################################
 
+my_home_appid="${RENDERING_SERVICE_HOME_APPID:-esrender}"
+
 my_prot_external="${RENDERING_SERVICE_PROT_EXTERNAL:-http}"
 my_host_external="${RENDERING_SERVICE_HOST_EXTERNAL:-localhost}"
 my_port_external="${RENDERING_SERVICE_PORT_EXTERNAL:-80}"
@@ -109,10 +114,10 @@ fi
 repository_user="admin"
 repository_password="${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
 
-rendering_proxy_host="${RENDERING_PROXY_HOST:-}"
-rendering_proxy_port="${RENDERING_PROXY_PORT:-}"
-rendering_proxy_user="${RENDERING_PROXY_USER:-}"
-rendering_proxy_pass="${RENDERING_PROXY_PASS:-}"
+rendering_proxy_host="${RENDERING_SERVICE_PROXY_HOST:-}"
+rendering_proxy_port="${RENDERING_SERVICE_PROXY_PORT:-}"
+rendering_proxy_user="${RENDERING_SERVICE_PROXY_USER:-}"
+rendering_proxy_pass="${RENDERING_SERVICE_PROXY_PASS:-}"
 
 ########################################################################################################################
 
@@ -161,6 +166,10 @@ info() {
 	echo "#########################################################################"
 	echo ""
 	echo "rendering-service:"
+	echo ""
+	echo "  Common:"
+	echo ""
+	echo "    AppId:        ${my_home_appid}"
 	echo ""
 	echo "  Public:"
 	echo ""
@@ -362,14 +371,17 @@ else
 
 fi
 
+proxyConf="${RS_ROOT}/conf/proxy.conf.php"
 if [[ -n $rendering_proxy_host ]] ; then
-	proxyConf="${RS_ROOT}/conf/proxy.conf.php"
 	echo "- update $proxyConf"
-	cp -rf "${RS_ROOT}/conf/proxy.conf.php.example" "${proxyConf}"
+	cp -f "${RS_ROOT}/conf/proxy.conf.php.example" "${proxyConf}"
 	sed -i -r "s|define\('HTTP_PROXY_HOST',.*);|define('HTTP_PROXY_HOST', '$rendering_proxy_host');|" "${proxyConf}"
 	sed -i -r "s|define\('HTTP_PROXY_PORT',.*);|define('HTTP_PROXY_PORT', '$rendering_proxy_port');|" "${proxyConf}"
 	sed -i -r "s|define\('HTTP_PROXY_USER',.*);|define('HTTP_PROXY_USER', '$rendering_proxy_user');|" "${proxyConf}"
 	sed -i -r "s|define\('HTTP_PROXY_PASS',.*);|define('HTTP_PROXY_PASS', '$rendering_proxy_pass');|" "${proxyConf}"
+else
+	echo "- remove $proxyConf"
+	rm -f "${proxyConf}"
 fi
 
 dbConf="${RS_ROOT}/conf/db.conf.php"
@@ -383,6 +395,15 @@ echo "- update ${systemConf}"
 sed -i -r "s|\$MC_URL.*|\$MC_URL = '${my_external_url}';|" "${systemConf}"
 sed -i -r "s|\$MC_DOCROOT.*|\$MC_DOCROOT = '${RS_ROOT}';|" "${systemConf}"
 sed -i -r "s|\$CC_RENDER_PATH.*|\$CC_RENDER_PATH = '${RS_CACHE}';|" "${systemConf}"
+
+homeApp="${RS_ROOT}/conf/esmain/homeApplication.properties.xml"
+echo "- update ${homeApp}"
+xmlstarlet ed -L \
+	-u '/properties/entry[@key="scheme"]' -v "${my_prot_internal}" \
+	-u '/properties/entry[@key="host"]' -v "${my_host_internal}" \
+	-u '/properties/entry[@key="port"]' -v "${my_port_internal}" \
+	-u '/properties/entry[@key="appid"]' -v "${my_home_appid}" \
+	"${homeApp}"
 
 echo "- set cache cleaner cronjob"
 croneJob=/tmp/mycron

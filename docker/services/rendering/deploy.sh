@@ -103,6 +103,17 @@ note() {
 	echo ""
 	echo "#########################################################################"
 	echo ""
+	echo "  All exposed ports are bound to network address: ${COMMON_BIND_HOST:-127.0.0.1}."
+	echo ""
+	echo "#########################################################################"
+	echo ""
+	echo "  If you need to customize the installation, then:"
+	echo ""
+	echo "    - make a copy of \".env.sample\" to \".env\""
+	echo "    - comment out and update relevant entities inside \".env\""
+	echo ""
+	echo "#########################################################################"
+	echo ""
 	echo ""
 }
 

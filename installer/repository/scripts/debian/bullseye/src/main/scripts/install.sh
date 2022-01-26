@@ -55,24 +55,25 @@ popd
 usage() {
 	echo "Options:"
 	echo ""
-
 	echo "-?"
 	echo "--help"
 	echo "  Display available options"
 	echo ""
-
 	echo "-f = environment file"
 	echo "--file"
 	echo "  Loads the configuration from the specified environment file"
 	echo ""
-
 	echo "--local"
 	echo "  Use local maven cache for installation"
+	echo ""
+	echo "--backup"
+	echo "  Define the path to the initial backup"
 }
 
 ########################################################################################################################
 
 use_local_maven_cache=0
+backup="$execution_folder/backup-for-edu-sharing_DO-NOT-DELETE-ME.tar.gz"
 
 while true; do
 	flag="$1"
@@ -82,6 +83,7 @@ while true; do
 			--help|'-?') usage && exit 0 ;;
 			--file|-f) source "$1" && shift	;;
 			--local) use_local_maven_cache=1 ;;
+			--backup) backup="$1" && shift;;
 			*) {
 				echo "error: unknown flag: $flag"
 				usage
@@ -92,7 +94,7 @@ done
 
 ########################################################################################################################
 
-my_home_appid="${REPOSITORY_SERVICE_HOME_APPID:-"local"}" # Kundenprojekt ?
+my_home_appid="${REPOSITORY_SERVICE_HOME_APPID:-"local"}"
 my_home_auth="${REPOSITORY_SERVICE_HOME_AUTH:-}"
 my_home_provider="${REPOSITORY_SERVICE_HOME_PROVIDER:-}"
 
@@ -274,22 +276,27 @@ install_edu_sharing() {
 
 	######################################################################################################################
 
-	echo "- update tomcat"
+	echo "- cleanup"
 
-	tar -czf dist/catalina.tar.gz tomcat/conf/Catalina
-
-	rm -rf tomcat/bin/*
-	rm -rf tomcat/conf/*
-	rm -rf tomcat/lib/*
-	rm -rf tomcat/temp/*
-	rm -rf tomcat/work/*
-
-  tar -xzf dist/artifacts/tomcat-${tomcat.version}.tar.gz -C tomcat --strip 1 --exclude apache-tomcat-${tomcat.version}/webapps
-	tar -xzf dist/catalina.tar.gz
+	rm -rf amps/*
+	rm -rf solr4/*
+	rm -rf tomcat/*
 
 	######################################################################################################################
 
-	echo "- update edu-sharing"
+	echo "- install tomcat"
+
+  tar -xzf dist/artifacts/tomcat-${tomcat.version}.tar.gz -C tomcat --strip 1 --exclude apache-tomcat-${tomcat.version}/webapps
+
+	######################################################################################################################
+
+	echo "- restore based on $backup"
+
+	tar -zxf "$backup"
+
+	######################################################################################################################
+
+	echo "- install edu-sharing"
 
 	rm -f tomcat/webapps/alfresco/WEB-INF/lib/commons-lang3-*
 	rm -f tomcat/webapps/alfresco/WEB-INF/lib/hazelcast-*
@@ -297,16 +304,11 @@ install_edu_sharing() {
 	rm -f tomcat/webapps/alfresco/WEB-INF/lib/log4j-*
 	rm -f tomcat/webapps/alfresco/WEB-INF/lib/slf4j-*
 
-	rm -rf tomcat/webapps/edu-sharing
-
 	cp -r dist/tomcat/* tomcat
 
 	######################################################################################################################
 
 	echo "- install amps"
-
-	rm -rf amps/alfresco/*
-	rm -rf amps/edu-sharing/*
 
 	cp -r dist/amps/* amps
 
@@ -344,6 +346,8 @@ config_edu_sharing() {
 	eduSConf="tomcat/shared/classes/config/cluster/edu-sharing.deployment.conf"
 	eduProps="tomcat/shared/classes/config/cluster/applications/homeApplication.properties.xml"
 
+	eduWebXm="tomcat/webapps/edu-sharing/WEB-INF/web.xml"
+
 	solr4Arc="solr4/archive-SpacesStore/conf/solrcore.properties"
 	solr4Wor="solr4/workspace-SpacesStore/conf/solrcore.properties"
 
@@ -377,7 +381,12 @@ config_edu_sharing() {
 		-d '/Server/Service[@name="Catalina"]/Connector[@port="8443"]' \
 		${catServe}
 
-	echo "- update ${setEnvSh}"
+	if [[ ! -f ${setEnvSh} ]] ; then
+		echo "- create ${setEnvSh}"
+		touch ${setEnvSh}
+	else
+		echo "- update ${setEnvSh}"
+	fi
 
 	sed -i -r 's|alfresco\.home=.*\"|alfresco.home=$ALF_HOME $CATALINA_OPTS \"|' ${setEnvSh}
 	grep -q 'alfresco\.home' ${setEnvSh} || echo 'CATALINA_OPTS="-Dalfresco.home=$ALF_HOME $CATALINA_OPTS "' >> ${setEnvSh}
@@ -451,14 +460,16 @@ config_edu_sharing() {
 		-i '$resources' -t attr -n "cacheMaxSize" -v "20480" \
 		${catCxAlf}
 
-	echo "- update ${catCxShr}"
+	if [[ -f ${catCxShr} ]] ; then
+		echo "- update ${catCxShr}"
 
-	xmlstarlet ed -L \
-		-d '/Context/Loader' \
-		-s '/Context' -t elem -n "Resources" -v "" \
-		--var resources '$prev' \
-		-i '$resources' -t attr -n "cacheMaxSize" -v "20480" \
-		${catCxShr}
+		xmlstarlet ed -L \
+			-d '/Context/Loader' \
+			-s '/Context' -t elem -n "Resources" -v "" \
+			--var resources '$prev' \
+			-i '$resources' -t attr -n "cacheMaxSize" -v "20480" \
+			${catCxShr}
+	fi
 
 	if [[ -f ${solr4Arc} ]] ; then
 		echo "- update ${solr4Arc}"
@@ -546,8 +557,11 @@ config_edu_sharing() {
 			${eduProps}
 
 		if [[ "${my_home_auth}" == "shibboleth" ]] ; then
-			sed -i -r 's|<!--\s*SAML||g' tomcat/webapps/edu-sharing/WEB-INF/web.xml
-			sed -i -r 's|SAML\s*-->||g'  tomcat/webapps/edu-sharing/WEB-INF/web.xml
+			echo "- update ${eduWebXm}"
+			sed -i -r 's|<!--\s*SAML||g' ${eduWebXm}
+			sed -i -r 's|SAML\s*-->||g'  ${eduWebXm}
+
+			echo "- update ${eduCConf}"
 			xmlstarlet ed -L \
 				-s '/config/values' -t elem -n 'loginUrl' -v '' \
 				-d '/config/values/loginUrl[position() != 1]' \
@@ -636,7 +650,7 @@ mvn -q dependency:copy \
 	-Dartifact=org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:${org.edu_sharing:edu_sharing-community-deploy-installer-repository-distribution:tar.gz:bin.version}:tar.gz:bin \
 	-DoutputDirectory=.
 
-if [[ ! -d "tomcat/webapps/edu-sharing" ]] ; then
+if [[ ! -f "$backup" ]] ; then
 
 	echo ""
 	echo "Install ... "
@@ -645,6 +659,10 @@ if [[ ! -d "tomcat/webapps/edu-sharing" ]] ; then
 		echo "ERROR: You have to clean $ALF_HOME/alf_data/solr4 before install due to content model changes!"
 		exit 1;
 	fi
+
+	echo "- make an initial backup on $backup"
+	mkdir -p "$(dirname "$backup")"
+	tar -czf "$backup" amps solr4 tomcat/conf/Catalina tomcat/webapps
 
 else
 
