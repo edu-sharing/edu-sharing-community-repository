@@ -138,6 +138,9 @@ public class SearchApi {
 		    	response.setPagination(pagination);	    	
 		    	response.setFacets(search.getFacets());
 				response.setSuggests(search.getSuggests());
+				if(ltiSessionObject != null){
+					response.setLtiActive(true);
+				}
 		    	
 		    	return Response.status(Response.Status.OK).entity(response).build();
 		

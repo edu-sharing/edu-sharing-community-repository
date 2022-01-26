@@ -26,8 +26,12 @@ import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.restservices.NodeDao;
+import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.shared.ErrorResponse;
+import org.edu_sharing.restservices.shared.Node;
+import org.edu_sharing.restservices.shared.NodeLTIDeepLink;
 import org.edu_sharing.restservices.shared.Repo;
 import org.edu_sharing.service.admin.AdminServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
@@ -313,6 +317,43 @@ public class LTIApi {
 
 
         return Response.status(Response.Status.OK).build();
+    }
+
+    @GET
+    @Path("/generateDeepLinkingResponse")
+    @Operation(summary = "generate DeepLinkingResponse")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeLTIDeepLink.class))),
+            @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+    public Response generateDeepLinkingResponse(@Parameter(description = "selected node id's",required=true)  @QueryParam("nodeIds")  List<String> nodeIds,
+                                                @Context HttpServletRequest req){
+        LTISessionObject ltiSessionObject = (LTISessionObject)req
+                .getSession()
+                .getAttribute(LTISessionObject.class.getName());
+        try {
+            if (ltiSessionObject != null) {
+                RepositoryDao repoDao = RepositoryDao.getHomeRepository();
+                List<Node> nodes = new ArrayList<>();
+                for(String nodeId : nodeIds){
+                    Node n = NodeDao.getNode(repoDao, nodeId).asNode();
+                    nodes.add(n);
+                }
+
+                NodeLTIDeepLink dl = new NodeLTIDeepLink((String)ltiSessionObject.getDeepLinkingSettings().get(LTIConstants.DEEP_LINK_RETURN_URL),
+                        new LTIJWTUtil().getDeepLinkingResponseJwt(ltiSessionObject, nodes.toArray(new Node[]{})));
+                return Response.ok(dl).build();
+            }else{
+                throw new Exception("no active lti session");
+            }
+        }catch (Throwable t){
+            return ErrorResponse.createResponse(t);
+        }
     }
 
     @POST

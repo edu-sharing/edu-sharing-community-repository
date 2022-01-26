@@ -56,6 +56,7 @@ import {
     NodeEntriesDisplayType
 } from './components/node-entries-wrapper/entries-model';
 import {MainNavService} from '../common/services/main-nav.service';
+import {FormBuilder} from '@angular/forms';
 
 
 export class OptionsHelperConfig {
@@ -653,6 +654,17 @@ export class OptionsHelperService implements OnDestroy {
         addNodeToCollection.group = DefaultGroups.Reuse;
         addNodeToCollection.priority = 10;
 
+        const addNodeToLTIPlatform = new OptionItem('OPTIONS.LTI', 'layers', (object) => {
+                console.log('YUHU LTI');
+                this.nodeHelper.addNodesToLTIPlatform(object);
+            }
+        );
+        addNodeToLTIPlatform.elementType = OptionsHelperService.ElementTypesAddToCollection;
+        addNodeToLTIPlatform.showAsAction = true;
+        addNodeToLTIPlatform.constrains = [Constrain.Files, Constrain.User];
+        addNodeToLTIPlatform.group = DefaultGroups.Reuse;
+        addNodeToLTIPlatform.priority = 11;
+
         const bookmarkNode = new OptionItem('OPTIONS.ADD_NODE_STORE', 'bookmark_border', (object) =>
             this.bookmarkNodes(this.getObjects(object))
         );
@@ -1144,6 +1156,7 @@ export class OptionsHelperService implements OnDestroy {
         options.push(editNode);
         // add to collection
         options.push(addNodeToCollection);
+        options.push(addNodeToLTIPlatform);
         // create variant
         options.push(createNodeVariant);
         options.push(templateNode);

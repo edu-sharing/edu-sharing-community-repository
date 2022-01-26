@@ -12,6 +12,8 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.Signing;
+import org.edu_sharing.restservices.shared.Node;
+import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.service.lti13.model.LTISessionObject;
 import org.edu_sharing.service.lti13.model.LoginInitiationDTO;
 
@@ -129,9 +131,16 @@ public class LTIJWTUtil {
         }).parseClaimsJws(jwt);
     }
 
+    public String getDeepLinkingResponseJwt(LTISessionObject ltiSessionObject, String nodeId, String title) throws GeneralSecurityException{
+        Node n = new Node();
+        n.setRef(new NodeRef(ApplicationInfoList.getHomeRepository().getAppId(),nodeId));
+        n.setTitle(title);
+        return getDeepLinkingResponseJwt(ltiSessionObject,new Node[]{n});
+    }
 
 
-    public String getDeepLinkingResponseJwt(LTISessionObject ltiSessionObject, String eduNodeId, String eduNodeTitle) throws GeneralSecurityException{
+
+    public String getDeepLinkingResponseJwt(LTISessionObject ltiSessionObject, Node[] nodes) throws GeneralSecurityException{
         String appId = ltiSessionObject.getEduSharingAppId();
         Key toolPrivateKey = new Signing().getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM);
 
@@ -160,43 +169,45 @@ public class LTIJWTUtil {
                     .claim(LTIConstants.LTI_MESSAGE_TYPE, LTIConstants.LTI_MESSAGE_TYPE_DEEP_LINKING_RESPONSE)
                 .claim(LTIConstants.LTI_VERSION, LTIConstants.LTI_VERSION_3)
                 .claim(LTIConstants.LTI_DATA, ltiSessionObject.getDeepLinkingSettings().get(LTIConstants.DEEP_LINK_DATA))
-                .claim(LTIConstants.LTI_CONTENT_ITEMS, generateContentItems(eduNodeTitle,eduNodeId))
+                .claim(LTIConstants.LTI_CONTENT_ITEMS, generateContentItems(nodes))
                 .signWith(SignatureAlgorithm.RS256, toolPrivateKey)  //We sign it
                 .compact();
         return jwt;
     }
 
-    private List<Map<String, Object>> generateContentItems(String eduTitle, String eduNodeId){
+    private List<Map<String, Object>> generateContentItems(Node[] nodes){
         List<Map<String, Object>> deepLinks = new ArrayList<>();
-        Map<String, Object> deepLink = new HashMap<>();
+        for(Node node : nodes){
+            Map<String, Object> deepLink = new HashMap<>();
 
-        deepLink.put(LTIConstants.DEEP_LINK_TYPE, LTIConstants.DEEP_LINK_LTIRESOURCELINK);
-        deepLink.put(LTIConstants.DEEP_LINK_TITLE, eduTitle);
-        deepLink.put(LTIConstants.DEEP_LINK_URL, ApplicationInfoList.getHomeRepository().getClientBaseUrl() + "/components/render/"+eduNodeId);
+            deepLink.put(LTIConstants.DEEP_LINK_TYPE, LTIConstants.DEEP_LINK_LTIRESOURCELINK);
+            deepLink.put(LTIConstants.DEEP_LINK_TITLE, node.getTitle());
+            deepLink.put(LTIConstants.DEEP_LINK_URL, ApplicationInfoList.getHomeRepository().getClientBaseUrl() + "/components/render/"+node.getRef().getId());
 
-        /**
-         * @TODO if h5p add scoreMaximum stuff
-         */
-        //deepLink.put("lineItem", lineItem());
+            /**
+             * @TODO if h5p add scoreMaximum stuff
+             */
+            //deepLink.put("lineItem", lineItem());
 
 
-        /**
-         * @TODO check if needed
-         */
-        /*
-        Map<String, String> availableDates = new HashMap<>();
-        Map<String, String> submissionDates = new HashMap<>();
-        Map<String, String> custom = new HashMap<>();
-        availableDates.put("startDateTime", "2018-03-07T20:00:03Z");
-        availableDates.put("endDateTime", "2022-03-07T20:00:03Z");
-        submissionDates.put("startDateTime", "2019-03-07T20:00:03Z");
-        submissionDates.put("endDateTime", "2021-08-07T20:00:03Z");
-        custom.put("dueDate", "$Resource.submission.endDateTime");
-        custom.put("controlValue", "This is whatever I want to write here");
-        deepLink.put("available", availableDates);
-        deepLink.put("submission", submissionDates);
-        deepLink.put("custom", custom);*/
-        deepLinks.add(deepLink);
+            /**
+             * @TODO check if needed
+             */
+            /*
+            Map<String, String> availableDates = new HashMap<>();
+            Map<String, String> submissionDates = new HashMap<>();
+            Map<String, String> custom = new HashMap<>();
+            availableDates.put("startDateTime", "2018-03-07T20:00:03Z");
+            availableDates.put("endDateTime", "2022-03-07T20:00:03Z");
+            submissionDates.put("startDateTime", "2019-03-07T20:00:03Z");
+            submissionDates.put("endDateTime", "2021-08-07T20:00:03Z");
+            custom.put("dueDate", "$Resource.submission.endDateTime");
+            custom.put("controlValue", "This is whatever I want to write here");
+            deepLink.put("available", availableDates);
+            deepLink.put("submission", submissionDates);
+            deepLink.put("custom", custom);*/
+            deepLinks.add(deepLink);
+        }
         return deepLinks;
     }
 

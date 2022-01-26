@@ -16,6 +16,7 @@ public class SearchResult<T> {
 	private List<Facet> facets = null;
 	private List<NodeSearch.Suggest> suggests = null;
 	private List<String> ignored;
+	private boolean ltiActive = false;
 
 	/**
 	   **/
@@ -66,4 +67,12 @@ public class SearchResult<T> {
 	@Schema(required = false, description = "")
 	public List<NodeSearch.Suggest> getSuggests() { return suggests; }
 
+	@JsonProperty("ltiActive")
+	public boolean isLtiActive() {
+		return ltiActive;
+	}
+
+	public void setLtiActive(boolean ltiActive) {
+		this.ltiActive = ltiActive;
+	}
 }

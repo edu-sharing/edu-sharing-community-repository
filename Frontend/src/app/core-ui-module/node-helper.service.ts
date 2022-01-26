@@ -24,7 +24,7 @@ import {
     User,
     WorkflowDefinition,
     Repository,
-    ProposalNode
+    ProposalNode, DeepLinkResponse
 } from '../core-module/rest/data-object';
 import {TemporaryStorageService} from '../core-module/rest/services/temporary-storage.service';
 import {RestConstants} from '../core-module/rest/rest-constants';
@@ -36,6 +36,7 @@ import {RestNetworkService} from '../core-module/rest/services/rest-network.serv
 import {SpinnerSmallComponent} from './components/spinner-small/spinner-small.component';
 import {AVAILABLE_LIST_WIDGETS} from './components/list-table/widgets/available-widgets';
 import {NodePersonNamePipe} from './pipes/node-person-name.pipe';
+import {FormBuilder} from '@angular/forms';
 
 export type WorkflowDefinitionStatus = {
     current: WorkflowDefinition
@@ -81,6 +82,7 @@ export class NodeHelperService {
         private router:Router,
         private storage:TemporaryStorageService,
         private location: Location,
+        private formBuilder: FormBuilder,
     ) {
     }
     setViewContainerRef(viewContainerRef: ViewContainerRef){
@@ -420,6 +422,35 @@ export class NodeHelperService {
         this.storage.set(TemporaryStorageService.APPLY_TO_LMS_PARAMETER_NODE,node);
         this.router.navigate([UIConstants.ROUTER_PREFIX+'apply-to-lms',node.ref.repo, node.ref.id],{queryParams:{reurl}});
     }
+
+    addNodesToLTIPlatform(nodes: Node[]) {
+
+        const nodeIdsParams = new Array();
+        nodes.forEach(n => nodeIdsParams.push(['nodeIds', n.ref.id]));
+        const url = this.connector.createUrl('/lti/v13/generateDeepLinkingResponse?:nodeIds', null, [nodeIdsParams]);
+        this.connector.get<DeepLinkResponse>(url, this.connector.getRequestOptions())
+            .subscribe( (data: DeepLinkResponse) => {
+                this.postLtiDeepLinkResponse(data.jwt, data.ltiDeepLinkReturnUrl);
+            } );
+    }
+
+    private postLtiDeepLinkResponse(jwt: string, url: string) {
+        const form = window.document.createElement('form');
+        form.setAttribute('method', 'post');
+        form.setAttribute('action', url);
+        form.appendChild(this.createHiddenElement('JWT', jwt));
+        window.document.body.appendChild(form);
+        form.submit();
+    }
+
+    private createHiddenElement(name: string, value: string): HTMLInputElement {
+        const hiddenField = document.createElement('input');
+        hiddenField.setAttribute('name', name);
+        hiddenField.setAttribute('value', value);
+        hiddenField.setAttribute('type', 'hidden');
+        return hiddenField;
+    }
+
     /**
      * Download one or multiple nodes
      * @param node
