@@ -541,7 +541,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         }
         else {
             this.selectedNodeTree = id;
-            this.node.getNodeParents(id).subscribe((data: NodeList) => {
+            this.node.getNodeParents(id, false, [RestConstants.ALL]).subscribe((data: NodeList) => {
                 if (this.root === 'RECYCLE') {
                     this.path = [];
                 }
