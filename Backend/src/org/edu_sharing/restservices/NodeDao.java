@@ -1731,7 +1731,7 @@ public class NodeDao {
 	
 	public void addWorkflowHistory(WorkflowHistory history) throws DAOException{
 		HashMap<String, Object> properties = getNativeProperties();
-		List<String> data= (List<String>) properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_WF_PROTOCOL));
+		List<String> data= (List<String>) properties.get(CCConstants.CCM_PROP_WF_PROTOCOL);
 		ArrayList<String> list=new ArrayList<>();
 		if(data!=null)
 			list=new ArrayList<>(data);
