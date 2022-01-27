@@ -14,4 +14,5 @@ export interface Login {
     statusCode?: string;
     toolPermissions?: Array<string>;
     userHome?: string;
+    isLtiSession: boolean;
 }

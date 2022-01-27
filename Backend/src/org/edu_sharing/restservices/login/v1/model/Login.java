@@ -13,6 +13,7 @@ import org.edu_sharing.repository.server.authentication.LoginHelper;
 import org.edu_sharing.repository.server.authentication.RemoteAuthDescription;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.lti13.model.LTISessionObject;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -31,6 +32,7 @@ public class Login  {
   private boolean isAdmin;
   private String statusCode;
   private String authorityName;
+  private boolean isLtiSession;
   
   
   public final static String STATUS_CODE_OK ="OK";
@@ -73,6 +75,11 @@ public Login(boolean isValidLogin, String scope, HttpSession session) {
 	this.userHome = userHome;
 	this.isGuest = service.isGuest();
 	this.sessionTimeout = session.getMaxInactiveInterval();
+
+      LTISessionObject ltiSessionObject = (LTISessionObject)session.getAttribute(LTISessionObject.class.getName());
+      if(ltiSessionObject != null){
+          this.isLtiSession = true;
+      }
   }
   	@JsonProperty("authorityName")
 	public String getAuthorityName() {
@@ -145,8 +152,12 @@ public void setSessionTimeout(int sessionTimeout) {
   public String getStatusCode() {
 	return statusCode;
   }
+    @JsonProperty("isLtiSession")
+    public boolean isLtiSession() {
+        return isLtiSession;
+    }
 
-public void setToolPermissions(List<String> toolPermissions) {
+    public void setToolPermissions(List<String> toolPermissions) {
 	this.toolPermissions = toolPermissions;
 }
 

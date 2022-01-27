@@ -217,6 +217,7 @@ export enum Constrain {
   HomeRepository, // Only visible when the nodes are from the local (home) repository
   User, // Only visible when a user is present and logged in
   ReurlMode, // Only visible when a reurl is present (called to pick object from lms)
+  LTI,
 }
 export enum KeyCombination {
   CtrlOrAppleCmd

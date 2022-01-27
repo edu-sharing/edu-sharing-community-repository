@@ -665,9 +665,10 @@ export class OptionsHelperService implements OnDestroy {
         );
         addNodeToLTIPlatform.elementType = OptionsHelperService.ElementTypesAddToCollection;
         addNodeToLTIPlatform.showAsAction = true;
-        addNodeToLTIPlatform.constrains = [Constrain.Files, Constrain.User];
+        addNodeToLTIPlatform.constrains = [Constrain.Files, Constrain.User, Constrain.LTI];
         addNodeToLTIPlatform.group = DefaultGroups.Reuse;
         addNodeToLTIPlatform.priority = 11;
+        //addNodeToLTIPlatform.permissions = [RestConstants.ACCESS_CC_PUBLISH];
 
         const bookmarkNode = new OptionItem('OPTIONS.ADD_NODE_STORE', 'bookmark_border', (object) =>
             this.bookmarkNodes(this.getObjects(object))
@@ -1376,6 +1377,11 @@ export class OptionsHelperService implements OnDestroy {
             if (this.connectors.getRestConnector().getCurrentLogin() &&
                 this.connectors.getRestConnector().getCurrentLogin().statusCode !== RestConstants.STATUS_CODE_OK) {
                 return Constrain.User;
+            }
+        }
+        if (constrains.indexOf(Constrain.LTI) !== -1) {
+            if (!this.connectors.getRestConnector().getCurrentLogin().isLtiSession) {
+                return Constrain.LTI;
             }
         }
         if (constrains.indexOf(Constrain.NoSelection) !== -1) {
