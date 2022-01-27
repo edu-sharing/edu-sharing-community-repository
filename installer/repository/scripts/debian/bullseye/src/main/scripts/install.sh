@@ -662,7 +662,7 @@ if [[ ! -f "$backup" ]] ; then
 
 	echo "- make an initial backup on $backup"
 	mkdir -p "$(dirname "$backup")"
-	tar -czf "$backup" amps solr4 tomcat/conf/Catalina tomcat/webapps
+	tar -czf "$backup" amps solr4 tomcat/conf/Catalina tomcat/scripts tomcat/webapps
 
 else
 
