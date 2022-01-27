@@ -77,10 +77,6 @@ COPY assets/rendering/de.metaventis.esrender.log4php.cachecleaner.properties con
 COPY assets/entrypoint.sh /usr/local/bin/
 COPY assets/init.sh /usr/local/bin/
 
-RUN set -eux \
-    && chmod +x /usr/local/bin/entrypoint.sh \
-    && chmod +x /usr/local/bin/init.sh
-
 ########################################################################################################################
 
 RUN set -eux \
@@ -89,6 +85,11 @@ RUN set -eux \
 	&& chown -R www-data:www-data /etc/apache2 $RS_ROOT $RS_CACHE $PHP_INI_DIR
 
 USER www-data
+
+########################################################################################################################
+
+RUN set -eux \
+	&& find . -type f -name *.sh -exec chmod +x {} \;
 
 ########################################################################################################################
 

@@ -173,6 +173,11 @@ COPY assets/settings.xml /root/.m2/
 
 ########################################################################################################################
 
+RUN set -eux \
+	&& find . -type f -name *.sh -exec chmod +x {} \;
+
+########################################################################################################################
+
 ENV WWW_ROOT /var/www/html/
 ENV RS_ROOT /var/www/html/esrender
 ENV RS_CACHE /var/cache/esrender
