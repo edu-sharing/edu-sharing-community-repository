@@ -39,6 +39,7 @@
         "LTI_CONSUMER_KEY": "Consumer Key",
         "LTI_SHARED_SECRET": "Shared Secret",
         "SHARED_FILES": "Shared content",
+        "RESTRICTED_FOLDER": "Foreign folder",
         "MY_SHARED_FILES": "Shared by me",
         "TO_ME_SHARED_FILES": "Shared with me",
         "WORKFLOW_RECEIVE": "Assigned to me",
