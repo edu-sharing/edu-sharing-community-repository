@@ -3,6 +3,7 @@ package org.edu_sharing.restservices.login.v1.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.Schema;;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +14,7 @@ import org.edu_sharing.repository.server.authentication.LoginHelper;
 import org.edu_sharing.repository.server.authentication.RemoteAuthDescription;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.lti13.LTIConstants;
 import org.edu_sharing.service.lti13.model.LTISessionObject;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 
@@ -32,7 +34,7 @@ public class Login  {
   private boolean isAdmin;
   private String statusCode;
   private String authorityName;
-  private boolean isLtiSession;
+  private LTISession ltiSession;
   
   
   public final static String STATUS_CODE_OK ="OK";
@@ -43,6 +45,29 @@ public class Login  {
   public final static String STATUS_CODE_INVALID_SCOPE = "INVALID_SCOPE";
   public final static String STATUS_CODE_PASSWORD_EXPIRED = "PASSWORD_EXPIRED";
   public final static String STATUS_CODE_PERSON_BLOCKED = "PERSON_BLOCKED";
+
+  public class LTISession{
+      @JsonProperty("acceptMultiple")
+      boolean acceptMultiple;
+
+      @JsonProperty("deeplinkReturnUrl")
+      String deeplinkReturnUrl;
+
+      @JsonProperty("acceptTypes")
+      List<String> acceptTypes = new ArrayList<>();
+
+      @JsonProperty("acceptPresentationDocumentTargets")
+      List<String> acceptPresentationDocumentTargets = new ArrayList<>();
+
+      @JsonProperty("canConfirm")
+      boolean canConfirm;
+
+      @JsonProperty("title")
+      String title;
+
+      @JsonProperty("text")
+      String text;
+  }
 
 
   public Login(){
@@ -78,7 +103,31 @@ public Login(boolean isValidLogin, String scope, HttpSession session) {
 
       LTISessionObject ltiSessionObject = (LTISessionObject)session.getAttribute(LTISessionObject.class.getName());
       if(ltiSessionObject != null){
-          this.isLtiSession = true;
+          LTISession ltiSession = new LTISession();
+          if(ltiSessionObject.getDeepLinkingSettings() != null) {
+              if(ltiSessionObject.getDeepLinkingSettings().containsKey(LTIConstants.DEEP_LINK_ACCEPT_MULTIPLE)) {
+                  ltiSession.acceptMultiple = (Boolean) ltiSessionObject.getDeepLinkingSettings().get(LTIConstants.DEEP_LINK_ACCEPT_MULTIPLE);
+              }
+              if(ltiSessionObject.getDeepLinkingSettings().containsKey(LTIConstants.DEEP_LINK_DOCUMENT_TARGETS)){
+                  ltiSession.acceptPresentationDocumentTargets = (List<String>)ltiSessionObject.getDeepLinkingSettings().get(LTIConstants.DEEP_LINK_DOCUMENT_TARGETS);
+              }
+              if(ltiSessionObject.getDeepLinkingSettings().containsKey(LTIConstants.DEEP_LINK_ACCEPT_TYPES)){
+                  ltiSession.acceptTypes = (List<String>)ltiSessionObject.getDeepLinkingSettings().get(LTIConstants.DEEP_LINK_ACCEPT_TYPES);
+              }
+              if(ltiSessionObject.getDeepLinkingSettings().containsKey(LTIConstants.DEEP_LINK_CAN_CONFIRM)) {
+                  ltiSession.canConfirm = (Boolean) ltiSessionObject.getDeepLinkingSettings().get(LTIConstants.DEEP_LINK_CAN_CONFIRM);
+              }
+              if(ltiSessionObject.getDeepLinkingSettings().containsKey(LTIConstants.DEEP_LINK_RETURN_URL)) {
+                  ltiSession.deeplinkReturnUrl = (String) ltiSessionObject.getDeepLinkingSettings().get(LTIConstants.DEEP_LINK_RETURN_URL);
+              }
+              if(ltiSessionObject.getDeepLinkingSettings().containsKey(LTIConstants.DEEP_LINK_TEXT)) {
+                  ltiSession.text = (String) ltiSessionObject.getDeepLinkingSettings().get(LTIConstants.DEEP_LINK_TEXT);
+              }
+              if(ltiSessionObject.getDeepLinkingSettings().containsKey(LTIConstants.DEEP_LINK_TITLE)) {
+                  ltiSession.title = (String) ltiSessionObject.getDeepLinkingSettings().get(LTIConstants.DEEP_LINK_TITLE);
+              }
+          }
+          this.ltiSession = ltiSession;
       }
   }
   	@JsonProperty("authorityName")
@@ -152,9 +201,10 @@ public void setSessionTimeout(int sessionTimeout) {
   public String getStatusCode() {
 	return statusCode;
   }
-    @JsonProperty("isLtiSession")
-    public boolean isLtiSession() {
-        return isLtiSession;
+
+    @JsonProperty
+    public LTISession getLtiSession() {
+        return ltiSession;
     }
 
     public void setToolPermissions(List<String> toolPermissions) {

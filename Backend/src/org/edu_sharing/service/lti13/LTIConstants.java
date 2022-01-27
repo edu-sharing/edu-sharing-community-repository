@@ -59,6 +59,7 @@ public class LTIConstants {
     public static final String DEEP_LINK_DOCUMENT_TARGETS = "accept_presentation_document_targets";
     public static final String DEEP_LINK_ACCEPT_MULTIPLE = "accept_multiple";
     public static final String DEEP_LINK_AUTO_CREATE = "auto_create";
+    public static final String DEEP_LINK_CAN_CONFIRM = "can_confirm";
     public static final String DEEP_LINK_TITLE = "title";
     public static final String DEEP_LINK_TEXT = "text";
     public static final String DEEP_LINK_LTIRESOURCELINK = "ltiResourceLink";

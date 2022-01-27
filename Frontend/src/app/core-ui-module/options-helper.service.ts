@@ -656,10 +656,6 @@ export class OptionsHelperService implements OnDestroy {
 
         const addNodeToLTIPlatform = new OptionItem('OPTIONS.LTI', 'layers', (object) => {
                 const nodes: Node[] = this.getObjects(object);
-                for ( const n of nodes ) {
-                    console.log('YUHU LTI' + n.title);
-                }
-
                 this.nodeHelper.addNodesToLTIPlatform(nodes);
             }
         );
@@ -668,7 +664,19 @@ export class OptionsHelperService implements OnDestroy {
         addNodeToLTIPlatform.constrains = [Constrain.Files, Constrain.User, Constrain.LTI];
         addNodeToLTIPlatform.group = DefaultGroups.Reuse;
         addNodeToLTIPlatform.priority = 11;
-        //addNodeToLTIPlatform.permissions = [RestConstants.ACCESS_CC_PUBLISH];
+        addNodeToLTIPlatform.permissions = [RestConstants.ACCESS_CC_PUBLISH];
+        addNodeToLTIPlatform.customEnabledCallback = (nodes: Node[]) => {
+            const ltiSession = this.connectors.getRestConnector().getCurrentLogin().ltiSession;
+            if (!ltiSession) {
+                return false;
+            }
+            if (!ltiSession.acceptMultiple) {
+                if (this.data.selectedObjects && this.data.selectedObjects.length > 1) {
+                    return false;
+                }
+            }
+            return true;
+        };
 
         const bookmarkNode = new OptionItem('OPTIONS.ADD_NODE_STORE', 'bookmark_border', (object) =>
             this.bookmarkNodes(this.getObjects(object))
@@ -1380,7 +1388,7 @@ export class OptionsHelperService implements OnDestroy {
             }
         }
         if (constrains.indexOf(Constrain.LTI) !== -1) {
-            if (!this.connectors.getRestConnector().getCurrentLogin().isLtiSession) {
+            if (!this.connectors.getRestConnector().getCurrentLogin().ltiSession) {
                 return Constrain.LTI;
             }
         }
