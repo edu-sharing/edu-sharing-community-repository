@@ -21,6 +21,7 @@ public class RenderingException extends ServletException {
         usage_missing,
         node_missing,
         usage_missing_permissions,
+        permissions_missing,
         internal,
         unknown,
     }
