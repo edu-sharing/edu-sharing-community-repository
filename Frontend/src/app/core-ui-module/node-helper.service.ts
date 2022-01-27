@@ -425,12 +425,18 @@ export class NodeHelperService {
 
     addNodesToLTIPlatform(nodes: Node[]) {
 
-        const nodeIdsParams = new Array();
-        nodes.forEach(n => nodeIdsParams.push(['nodeIds', n.ref.id]));
-        const url = this.connector.createUrl('/lti/v13/generateDeepLinkingResponse?:nodeIds', null, [nodeIdsParams]);
+        let url = this.connector.createUrl('/lti/v13/generateDeepLinkingResponse', null, []);
+        nodes.forEach(n => {
+            if (!url.includes('?')) {
+                url += '?nodeIds=' + n.ref.id;
+            } else {
+                url += '&nodeIds=' + n.ref.id;
+            }
+        });
+
         this.connector.get<DeepLinkResponse>(url, this.connector.getRequestOptions())
             .subscribe( (data: DeepLinkResponse) => {
-                this.postLtiDeepLinkResponse(data.jwt, data.ltiDeepLinkReturnUrl);
+                this.postLtiDeepLinkResponse(data.jwtDeepLinkResponse, data.ltiDeepLinkReturnUrl);
             } );
     }
 
