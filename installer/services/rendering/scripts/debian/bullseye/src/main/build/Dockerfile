@@ -171,10 +171,9 @@ COPY assets/entrypoint.sh assets/apache2-foreground ./
 
 COPY assets/settings.xml /root/.m2/
 
-########################################################################################################################
-
 RUN set -eux \
-	&& find . -type f -name '*.sh' -exec chmod +x {} \;
+	&& find . -type f -name '*.sh' -exec chmod +x {} \; \
+	&& find . -type f -name 'apache2-foreground' -exec chmod +x {} \;
 
 ########################################################################################################################
 

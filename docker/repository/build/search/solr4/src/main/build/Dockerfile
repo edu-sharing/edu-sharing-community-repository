@@ -24,6 +24,9 @@ RUN set -eux \
 COPY assets/entrypoint.sh bin/
 
 RUN set -eux \
+	&& find bin -type f -name '*.sh' -exec chmod +x {} \;
+
+RUN set -eux \
     && adduser --uid=1000 --home=$ALF_HOME --disabled-password --gecos "" --shell=/bin/bash worker \
     && chown -RL worker:worker /tmp \
     && mkdir -p alf_data \
@@ -76,11 +79,6 @@ RUN set -eux \
         solr4/workspace-SpacesStore/conf/solrcore.properties
 
 COPY --chown=worker:worker assets/solr4 solr4/log4j-solr.properties
-
-########################################################################################################################
-
-RUN set -eux \
-	&& find . -type f -name '*.sh' -exec chmod +x {} \;
 
 ########################################################################################################################
 

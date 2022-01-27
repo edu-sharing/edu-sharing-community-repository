@@ -48,11 +48,6 @@ RUN set -eux \
 
 ########################################################################################################################
 
-RUN set -eux \
-	&& find . -type f -name '*.sh' -exec chmod +x {} \;
-
-########################################################################################################################
-
 ENV RS_ROOT /var/www/html/esrender
 ENV RS_CACHE /var/cache/esrender
 
@@ -81,6 +76,9 @@ COPY assets/rendering/de.metaventis.esrender.log4php.cachecleaner.properties con
 
 COPY assets/entrypoint.sh /usr/local/bin/
 COPY assets/init.sh /usr/local/bin/
+
+RUN set -eux \
+	&& find /usr/local/bin -type f -name '*.sh' -exec chmod +x {} \;
 
 ########################################################################################################################
 
