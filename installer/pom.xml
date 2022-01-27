@@ -20,14 +20,6 @@
 
     <docker.repository>${docker.repository.installer}</docker.repository>
 
-    <assembly.skipAssembly>${installer.skip}</assembly.skipAssembly>
-    <docker.skip>${installer.skip}</docker.skip>
-    <maven.deploy.skip>${installer.skip}</maven.deploy.skip>
-    <maven.install.skip>${installer.skip}</maven.install.skip>
-    <maven.resources.skip>${installer.skip}</maven.resources.skip>
-    <maven.source.skip>${installer.skip}</maven.source.skip>
-    <mdep.skip>${installer.skip}</mdep.skip>
-
   </properties>
 
   <modules>
