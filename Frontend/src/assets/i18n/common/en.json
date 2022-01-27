@@ -598,7 +598,8 @@
         "SWITCH_TO_CARDS_VIEW": "Switch to cards view",
         "LIST_SETTINGS": "Configure List",
         "METADATA_SIDEBAR": "Material details",
-        "ACCESSIBILITY": "Accessibility"
+        "ACCESSIBILITY": "Accessibility",
+        "LTI": "Add to LTI Platform"
     },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Version comment",

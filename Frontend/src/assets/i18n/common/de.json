@@ -639,7 +639,8 @@
         "SWITCH_TO_CARDS_VIEW": "Zur Kachelansicht wechseln",
         "LIST_SETTINGS": "Liste konfigurieren",
         "METADATA_SIDEBAR": "Materialinformationen",
-        "ACCESSIBILITY": "Barrierefreiheit"
+        "ACCESSIBILITY": "Barrierefreiheit",
+        "LTI": "In LTI Plattform übernehmen"
     },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Versionskommentar",
