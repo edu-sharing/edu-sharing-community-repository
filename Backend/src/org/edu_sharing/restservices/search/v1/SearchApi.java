@@ -109,22 +109,6 @@ public class SearchApi {
 		    		// @TODO: we may need to still call convertToRest to make sure we've latest data from remote repos
 		    	}
 
-				LTISessionObject ltiSessionObject = (LTISessionObject)req
-						.getSession()
-						.getAttribute(LTISessionObject.class.getName());
-				if(ltiSessionObject != null){
-					for(Node n : data) {
-						if (LTIConstants.LTI_MESSAGE_TYPE_DEEP_LINKING.equals(ltiSessionObject.getMessageType())) {
-							String deepLinkingResponseJwt = new LTIJWTUtil().getDeepLinkingResponseJwt(
-									ltiSessionObject, n.getRef().getId(), n.getTitle() );
-							n.setNodeLTIDeepLink(
-									new NodeLTIDeepLink(
-											(String)ltiSessionObject.getDeepLinkingSettings().get(LTIConstants.DEEP_LINK_RETURN_URL),
-											deepLinkingResponseJwt));
-						}
-					}
-				}
-		    	
 		    	
 		    	Pagination pagination = new Pagination();
 		    	pagination.setFrom(search.getSkip());
@@ -138,10 +122,7 @@ public class SearchApi {
 		    	response.setPagination(pagination);	    	
 		    	response.setFacets(search.getFacets());
 				response.setSuggests(search.getSuggests());
-				if(ltiSessionObject != null){
-					response.setLtiActive(true);
-				}
-		    	
+
 		    	return Response.status(Response.Status.OK).entity(response).build();
 		
 	    	}  catch (Throwable t) {

@@ -103,7 +103,6 @@ import {ListItemLabelPipe} from './pipes/list-item-label.pipe';
 import {DragCursorDirective} from './directives/drag-cursor.directive';
 import { ConfigService } from 'ngx-edu-sharing-api';
 import { BorderBoxObserverDirective } from './directives/border-box-observer.directive';
-import { NodeEntriesCardLtiComponent } from './components/node-entries/node-entries-card/lti/node-entries-card-lti/node-entries-card-lti.component';
 import {CommonModule} from '@angular/common';
 
 @NgModule({
@@ -177,7 +176,6 @@ import {CommonModule} from '@angular/common';
         ListItemLabelPipe,
         DragCursorDirective,
         BorderBoxObserverDirective,
-        NodeEntriesCardLtiComponent,
     ],
     imports: [
         A11yModule,
