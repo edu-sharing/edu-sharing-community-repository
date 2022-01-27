@@ -77,6 +77,10 @@ COPY assets/rendering/de.metaventis.esrender.log4php.cachecleaner.properties con
 COPY assets/entrypoint.sh /usr/local/bin/
 COPY assets/init.sh /usr/local/bin/
 
+RUN set -eux \
+    && chmod +x /usr/local/bin/entrypoint.sh \
+    && chmod +x /usr/local/bin/init.sh
+
 ########################################################################################################################
 
 RUN set -eux \

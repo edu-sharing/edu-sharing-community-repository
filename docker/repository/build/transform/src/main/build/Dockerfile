@@ -40,6 +40,9 @@ RUN set -eux \
 
 COPY assets/entrypoint*.sh bin/
 
+RUN set -eux \
+    && chmod +x bin/entrypoint*.sh
+
 ########################################################################################################################
 
 RUN set -eux \
