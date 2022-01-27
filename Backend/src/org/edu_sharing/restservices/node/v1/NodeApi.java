@@ -457,38 +457,42 @@ public class NodeApi  {
 	    	Node last=nodeDao.asNode();
 	    	parents.add(last);
 	    	String userHome=repoDao.getUserHome();
-	    	List<NodeRef> shared = PersonDao.getPerson(repoDao,PersonDao.ME).asPerson().getSharedFolders();
-	    	boolean collection=last.getMediatype().equals("collection");
-	    	if(fullPath==null)
-	    		fullPath=false;
-	    	while(true){
-	    		if(last==null || last.getParent()==null || last.getParent().getId()==null)
-	    			break;
-	    		if(!fullPath){
-	    			if(last.getParent().getId().equals(userHome)){
-	    				response.setScope("MY_FILES");
-	    				break;
-	    			}
-	    			if((shared!=null && shared.contains(last.getRef()))){
-	    				response.setScope("SHARED_FILES");
-	    				break;
-	    			}
-	    		}
-	    		if(collection && !fullPath){
-					Node finalLast = last;
-					last=AuthenticationUtil.runAsSystem(()-> NodeDao.getNode(repoDao, finalLast.getParent().getId(),filter).asNode());
-					if(!last.getMediatype().equals("collection")){
-	    				response.setScope("COLLECTION");
-	    				break;
-	    			}
-	    		}
-	    		else{
-					last=NodeDao.getNode(repoDao, last.getParent().getId(),filter).asNode();
+			if(last.getRef().getId().equals(userHome)) {
+				response.setNodes(new ArrayList<>());
+				response.setScope("MY_FILES");
+			} else {
+				List<NodeRef> shared = PersonDao.getPerson(repoDao, PersonDao.ME).asPerson().getSharedFolders();
+				boolean collection = last.getMediatype().equals("collection");
+				if (fullPath == null)
+					fullPath = false;
+				while (true) {
+					if (last == null || last.getParent() == null || last.getParent().getId() == null)
+						break;
+					if (!fullPath) {
+						if (last.getParent().getId().equals(userHome)) {
+							response.setScope("MY_FILES");
+							break;
+						}
+						if ((shared != null && shared.contains(last.getRef()))) {
+							response.setScope("SHARED_FILES");
+							break;
+						}
+					}
+					if (collection && !fullPath) {
+						Node finalLast = last;
+						last = AuthenticationUtil.runAsSystem(() -> NodeDao.getNode(repoDao, finalLast.getParent().getId(), filter).asNode());
+						if (!last.getMediatype().equals("collection")) {
+							response.setScope("COLLECTION");
+							break;
+						}
+					} else {
+						last = NodeDao.getNode(repoDao, last.getParent().getId(), filter).asNode();
+					}
+					parents.add(last);
 				}
-	    		parents.add(last);
-	    	}
-	    	
-	    	response.setNodes(parents);
+
+				response.setNodes(parents);
+			}
 	    	return Response.status(Response.Status.OK).entity(response).build();
 	
     	} catch (Throwable t) {
