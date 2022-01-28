@@ -144,6 +144,7 @@
         <es-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
                       [node]="node"
                       #link
+                      [matTooltip]="node.title"
         >
           <es-list-base
             [item]="displayPart"
