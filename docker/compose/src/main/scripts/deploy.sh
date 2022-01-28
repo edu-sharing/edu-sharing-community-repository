@@ -36,7 +36,12 @@ COMPOSE_DIR="."
 
 pushd "${COMPOSE_DIR}" >/dev/null || exit
 
-[[ -f ".env" ]] && source .env
+if [[ -f ".env" ]] ; then
+	source .env
+else
+	REPOSITORY_SERVICE_HOST="127.0.0.1"
+	SERVICES_RENDERING_SERVICE_HOST="127.0.0.1"
+fi
 
 info() {
 	echo ""
