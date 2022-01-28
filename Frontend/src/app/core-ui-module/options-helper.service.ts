@@ -654,7 +654,7 @@ export class OptionsHelperService implements OnDestroy {
         addNodeToCollection.group = DefaultGroups.Reuse;
         addNodeToCollection.priority = 10;
 
-        const addNodeToLTIPlatform = new OptionItem('OPTIONS.LTI', 'layers', (object) => {
+        const addNodeToLTIPlatform = new OptionItem('OPTIONS.LTI', 'input', (object) => {
                 const nodes: Node[] = this.getObjects(object);
                 this.nodeHelper.addNodesToLTIPlatform(nodes);
             }
