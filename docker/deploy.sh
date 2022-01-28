@@ -36,7 +36,8 @@ ROOT_PATH="$(
 )"
 export ROOT_PATH
 
-pushd "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)" >/dev/null || exit
+SOURCE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
+pushd "${SOURCE_PATH}" >/dev/null || exit
 
 COMPOSE_DIR="compose/target/compose"
 
@@ -213,23 +214,22 @@ rdebug() {
 }
 
 rdev() {
-	[[ -z $CLI_OPT2 ]] && {
-		CLI_OPT2="../.."
-	}
+  if [[ -z "${CLI_OPT2}" ]] ; then
+    pushd "${SOURCE_PATH}/../.." >/dev/null || exit
+  else
+    case $CLI_OPT2 in
+    /*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
+    *) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
+    esac
+  fi
+
+	COMMUNITY_PATH=$(pwd)
+	export COMMUNITY_PATH
+	popd >/dev/null || exit
 
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -remote -debug -dev)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote -debug -dev) $(compose_plugins repository -common -remote -debug -dev)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -remote -debug -dev)"
-
-	case $CLI_OPT2 in
-	/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
-	*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
-	esac
-
-	COMMUNITY_PATH=$(pwd)
-
-	export COMMUNITY_PATH
-	popd >/dev/null || exit
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -267,14 +267,14 @@ ldebug() {
 }
 
 ldev() {
-	[[ -z "${CLI_OPT2}" ]] && {
-		CLI_OPT2="../.."
-	}
-
-	case $CLI_OPT2 in
-	/*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
-	*) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
-	esac
+	if [[ -z "${CLI_OPT2}" ]] ; then
+    pushd "${SOURCE_PATH}/../.." >/dev/null || exit
+	else
+    case $CLI_OPT2 in
+    /*) pushd "${CLI_OPT2}" >/dev/null || exit ;;
+    *) pushd "${ROOT_PATH}/${CLI_OPT2}" >/dev/null || exit ;;
+    esac
+	fi
 
 	COMMUNITY_PATH=$(pwd)
 	export COMMUNITY_PATH
