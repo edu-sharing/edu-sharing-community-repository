@@ -19,10 +19,6 @@
 
   <name>edu_sharing-community-repository-frontend-webapp</name>
 
-  <properties>
-    <skip.npm>false</skip.npm>
-  </properties>
-
   <build>
 
     <finalName>edu-sharing</finalName>
@@ -77,7 +73,6 @@
               <directory>dist</directory>
             </resource>
           </webResources>
-          <skip>${skip.npm}</skip>
         </configuration>
       </plugin>
 
