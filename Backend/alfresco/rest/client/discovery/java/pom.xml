@@ -37,7 +37,7 @@
             <goals>
               <goal>unpack-dependencies</goal>
             </goals>
-            <phase>initialize</phase>
+            <phase>generate-sources</phase>
             <configuration>
               <includeArtifactIds>
                 api-explorer

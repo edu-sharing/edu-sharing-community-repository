@@ -45,7 +45,7 @@
             <goals>
               <goal>unpack-dependencies</goal>
             </goals>
-            <phase>initialize</phase>
+            <phase>generate-sources</phase>
             <configuration>
               <includeArtifactIds>
                 edu_sharing-community-repository-backend-services-soap-api
