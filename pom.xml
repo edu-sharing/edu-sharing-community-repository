@@ -9,8 +9,8 @@
 
   <parent>
     <groupId>org.edu_sharing</groupId>
-    <artifactId>edu_sharing-community-parent</artifactId>
-    <version>git</version>
+    <artifactId>edu_sharing-super-pom</artifactId>
+    <version>develop-SNAPSHOT</version>
     <relativePath/>
   </parent>
 
@@ -33,9 +33,54 @@
     <module>webapp</module>
   </modules>
 
+  <properties>
+
+    <community.platform>${project.version}</community.platform>
+
+  </properties>
+
+  <build>
+
+    <plugins>
+
+      <plugin>
+        <groupId>com.github.tommyk-gears</groupId>
+        <artifactId>bom-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>import-properties</goal>
+            </goals>
+            <phase>validate</phase>
+            <configuration>
+              <artifacts>
+                <dependency>
+                  <groupId>${project.groupId}</groupId>
+                  <artifactId>edu_sharing-community-bom</artifactId>
+                  <version>${community.platform}</version>
+                  <type>pom</type>
+                </dependency>
+              </artifacts>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+
+  </build>
+
   <dependencyManagement>
 
     <dependencies>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-bom</artifactId>
+        <version>${community.platform}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>

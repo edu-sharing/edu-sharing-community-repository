@@ -11,6 +11,6 @@
 	<import resource="classpath:org/edu_sharing/spring/jmx-services.xml"/>
 	<import resource="classpath:org/edu_sharing/spring/cluster-services.xml"/>
 	<import resource="classpath*:org/edu_sharing/spring/plugin-*.xml"/>
-	<import resource="classpath*:org/edu_sharing/spring/extension-*.xml"/>
+	<import resource="classpath*:org/edu_sharing/spring/project-*.xml"/>
 
 </beans>

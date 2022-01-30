@@ -83,12 +83,10 @@
   </build>
 
   <modules>
-
     <module>core</module>
     <module>laravel</module>
     <module>lumen</module>
     <module>slim4</module>
-
   </modules>
 
 </project>
