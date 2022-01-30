@@ -19,7 +19,7 @@
   <properties>
 
     <docker.from.apache.exporter>docker.io/bitnami/apache-exporter:0.10.1</docker.from.apache.exporter>
-    <docker.from.apache.server>docker.io/php:${php.version}-apache</docker.from.apache.server>
+    <docker.from.apache.server>docker.io/php:${php.version}-apache-bullseye</docker.from.apache.server>
     <docker.from.minideb>docker.io/bitnami/minideb:bullseye</docker.from.minideb>
     <docker.from.openjdk>docker.io/openjdk:8-jdk-bullseye</docker.from.openjdk>
     <docker.from.postgresql.exporter>quay.io/prometheuscommunity/postgres-exporter:v0.10.0
@@ -29,7 +29,7 @@
     <docker.from.redis.exporter>docker.io/bitnami/redis-exporter:1.32.0</docker.from.redis.exporter>
     <docker.from.redis.server>docker.io/bitnami/redis:6.2.6</docker.from.redis.server>
     <docker.from.rediscluster.server>docker.io/bitnami/redis-cluster:6.2.6</docker.from.rediscluster.server>
-    <docker.from.tomcat>docker.io/tomcat:${tomcat.version}-jdk8</docker.from.tomcat>
+    <docker.from.tomcat>docker.io/tomcat:${tomcat.version}-jdk8-openjdk-bullseye</docker.from.tomcat>
 
     <docker.repository>${docker.repository.docker}</docker.repository>
 
@@ -48,5 +48,25 @@
     <module>repository</module>
     <module>services</module>
   </modules>
+
+  <build>
+
+    <pluginManagement>
+
+      <plugins>
+
+        <plugin>
+          <groupId>io.kokuwa.maven</groupId>
+          <artifactId>helm-maven-plugin</artifactId>
+          <configuration>
+            <helmVersion>${helm.version}</helmVersion>
+          </configuration>
+        </plugin>
+
+      </plugins>
+
+    </pluginManagement>
+
+  </build>
 
 </project>

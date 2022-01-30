@@ -20,11 +20,4 @@
     <version>${commit.short}${dirty.snapshot}</version>
   </rev>
 
-  <relatedProjects>
-    <project>
-      <groupId>org.edu_sharing</groupId>
-      <artifactId>edu_sharing-community-parent</artifactId>
-    </project>
-  </relatedProjects>
-
 </configuration>

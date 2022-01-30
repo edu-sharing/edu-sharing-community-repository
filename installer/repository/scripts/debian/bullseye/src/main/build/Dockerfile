@@ -155,7 +155,7 @@ RUN set -eux \
     && echo "deb http://apt.postgresql.org/pub/repos/apt `lsb_release -cs`-pgdg main" | tee  /etc/apt/sources.list.d/pgdg.list \
     && apt-get update -y \
     && apt-get install -y --no-install-recommends \
-        postgresql-${postgresql.version.major} \
+        postgresql-${postgresql.version.major}=${postgresql.version.major}.${postgresql.version.minor}-${postgresql.version.patch}* \
     && pg_dropcluster ${postgresql.version.major} main \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*

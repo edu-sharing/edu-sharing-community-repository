@@ -107,18 +107,18 @@ RUN set -eux \
     && echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list \
     && apt-get update -y \
     && apt-get install -y --no-install-recommends \
-      php${PHP_VERSION} \
-      php${PHP_VERSION}-common \
-      php${PHP_VERSION}-curl \
+      php${PHP_VERSION}=${php.version}* \
+      php${PHP_VERSION}-common=${php.version}* \
+      php${PHP_VERSION}-curl=${php.version}* \
       php${PHP_VERSION}-dom \
       php${PHP_VERSION}-exif \
-      php${PHP_VERSION}-gd \
-      php${PHP_VERSION}-mbstring \
+      php${PHP_VERSION}-gd=${php.version}* \
+      php${PHP_VERSION}-mbstring=${php.version}* \
       php${PHP_VERSION}-pdo \
       php${PHP_VERSION}-pdo-pgsql \
-      php${PHP_VERSION}-pgsql \
-      php${PHP_VERSION}-soap \
-      php${PHP_VERSION}-zip \
+      php${PHP_VERSION}-pgsql=${php.version}* \
+      php${PHP_VERSION}-soap=${php.version}* \
+      php${PHP_VERSION}-zip=${php.version}* \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
 
@@ -136,7 +136,7 @@ RUN set -eux \
     && echo "deb http://apt.postgresql.org/pub/repos/apt `lsb_release -cs`-pgdg main" | tee  /etc/apt/sources.list.d/pgdg.list \
     && apt-get update -y \
     && apt-get install -y --no-install-recommends \
-        postgresql-${postgresql.version.major} \
+        postgresql-${postgresql.version.major}=${postgresql.version.major}.${postgresql.version.minor}-${postgresql.version.patch}* \
     && pg_dropcluster ${postgresql.version.major} main \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
