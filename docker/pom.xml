@@ -42,15 +42,6 @@
 
   </properties>
 
-
-  <modules>
-    <module>build</module>
-    <module>compose</module>
-    <module>helm</module>
-    <module>repository</module>
-    <module>services</module>
-  </modules>
-
   <build>
 
     <pluginManagement>
@@ -70,5 +61,13 @@
     </pluginManagement>
 
   </build>
+
+  <modules>
+    <module>build</module>
+    <module>compose</module>
+    <module>helm</module>
+    <module>repository</module>
+    <module>services</module>
+  </modules>
 
 </project>

@@ -50,4 +50,5 @@
     <module>redis_exporter</module>
     <module>rediscluster</module>
   </modules>
+
 </project>

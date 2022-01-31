@@ -19,9 +19,7 @@
   <name>edu_sharing-community-deploy-docker-services</name>
 
   <modules>
-
     <module>rendering</module>
-
   </modules>
 
 </project>
