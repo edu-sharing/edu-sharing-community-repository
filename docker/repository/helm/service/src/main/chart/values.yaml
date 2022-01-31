@@ -198,7 +198,7 @@ config:
 
     elastic:
       enabled: false
-      host: edusharing-repository-search-elastic
+      host: edusharing-repository-search-elastic-index
       port: 9200
 
     solr4:

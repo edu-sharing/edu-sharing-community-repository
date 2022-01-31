@@ -33,8 +33,10 @@ data:
   REPOSITORY_DATABASE_POOL_SQL: {{ .Values.config.database.pool.sql | quote }}
   REPOSITORY_DATABASE_PORT: {{ .Values.config.database.port | quote }}
   REPOSITORY_DATABASE_PROT: {{ .Values.config.database.protocol | quote }}
-  REPOSITORY_SEARCH_ELASTIC_HOST: {{ .Values.config.search.elastic.host | quote }}
-  REPOSITORY_SEARCH_ELASTIC_PORT: {{ .Values.config.search.elastic.port | quote }}
+  {{- if .Values.config.search.elastic.enabled }}
+  REPOSITORY_SEARCH_ELASTIC_INDEX_HOST: {{ .Values.config.search.elastic.host | quote }}
+  REPOSITORY_SEARCH_ELASTIC_INDEX_PORT: {{ .Values.config.search.elastic.port | quote }}
+  {{- end }}
   REPOSITORY_SEARCH_SOLR4_HOST: {{ .Values.config.search.solr4.host | quote }}
   REPOSITORY_SEARCH_SOLR4_PORT: {{ .Values.config.search.solr4.port | quote }}
   REPOSITORY_SERVICE_BIND: {{ if .Values.global.cluster.istio.enabled }}"127.0.0.1"{{ else }}"0.0.0.0"{{ end }}

@@ -58,7 +58,7 @@ edusharing_repository_search_elastic_index:
 
   enabled: ${helm.edusharing_repository_search_elastic_index.enabled}
 
-  nameOverride: &searchElasticNameOverride edusharing-repository-search-elastic
+  nameOverride: &searchElasticNameOverride edusharing-repository-search-elastic-index
 
   service:
 

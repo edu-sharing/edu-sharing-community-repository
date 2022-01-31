@@ -205,7 +205,7 @@ init() {
 		echo "REPOSITORY_SERVICE_CLUSTER_NETWORK_TCPIP_MEMBERS=repository"
 
 		# plugin elastic (please check deploy/installer/repository/scripts/../load_config.sh inside plugin)
-		echo "REPOSITORY_SEARCH_ELASTIC_HOST=repository-elastic"
+		echo "REPOSITORY_SEARCH_ELASTIC_INDEX_HOST=repository-elastic"
 
 		# plugin transform (please check deploy/installer/repository/scripts/../load_config.sh inside plugin)
 		echo "REPOSITORY_TRANSFORM_SERVER_HOST=repository-transform"
