@@ -26,10 +26,8 @@
   </properties>
 
   <modules>
-
     <module>java</module>
     <module>php</module>
-
   </modules>
 
 </project>

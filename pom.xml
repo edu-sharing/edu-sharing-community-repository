@@ -29,13 +29,6 @@
     <url>https://scm.edu-sharing.com/edu-sharing/community/repository/edu-sharing-community-repository.git</url>
   </scm>
 
-  <modules>
-    <module>Backend</module>
-    <module>config</module>
-    <module>Frontend</module>
-    <module>webapp</module>
-  </modules>
-
   <properties>
 
     <community.platform>${project.version}</community.platform>
@@ -242,5 +235,12 @@
     </repository>
 
   </repositories>
+
+  <modules>
+    <module>Backend</module>
+    <module>config</module>
+    <module>Frontend</module>
+    <module>webapp</module>
+  </modules>
 
 </project>

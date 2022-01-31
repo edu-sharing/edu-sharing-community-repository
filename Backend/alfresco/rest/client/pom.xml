@@ -25,13 +25,11 @@
   </properties>
 
   <modules>
-
     <module>auth</module>
     <module>core</module>
     <module>discovery</module>
     <module>search</module>
     <module>workflow</module>
-
   </modules>
 
 </project>

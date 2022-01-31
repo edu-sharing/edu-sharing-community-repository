@@ -19,9 +19,7 @@
   <name>edu_sharing-community-repository-backend-alfresco-rest-client-workflow</name>
 
   <modules>
-
     <module>java</module>
-
   </modules>
 
 </project>
