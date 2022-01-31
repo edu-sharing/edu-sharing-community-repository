@@ -1,11 +1,11 @@
-# edu-sharing community - deploy docker repository
+# edu-sharing community - deploy docker - repository
 
 Prerequisites
 -------------
 
 - Docker Engine 18.06.0+
 - Apache Maven 3.8.4+
-- Java SE Development Kit 1.8
+- Java SE Development Kit 1.8 (<11)
 - Git SCM
 
 Install
@@ -36,26 +36,12 @@ Build
          <mirrorOf>!edusharing-remote,*</mirrorOf>
        </mirror>
      </mirrors>
-     <servers>
-       <server>
-         <id>edusharing-remote</id>
-         <username>...</username>
-         <password>...</password>
-       </server>
-     </servers>
    ```      
-
-   To switch on/off plugins, please set following environment variables:
-
-   ```
-   export PLUGIN_ELASTIC_ENABLED="true"
-   export PLUGIN_MONGO_ENABLED="true"
-   ```
 
 1. Build local docker images by calling:
 
    ```
-   mvn install
+   mvn clean install
    ```
 
 Test
@@ -66,7 +52,7 @@ Test
 2. Start up an instance from local docker images with dev ports by calling:
 
    ```
-   ./deploy.sh ltest
+   ./deploy.sh ldebug
    ```
 
 3. Request all necessary information by calling:
@@ -92,11 +78,10 @@ Debugging
 
 1. [Build](#build) local docker images first.
 
-2. Start up an instance from local docker images with dev ports and artifacts from your local   
-   [edu-sharing-community-repository](https://scm.edu-sharing.com/edu-sharing/community/repository/edu-sharing-community-repository) project by calling:
+2. Start up an instance from local docker images with dev ports and local artifacts
 
    ```
-   ./deploy.sh ldebug -repo <path>
+   ./deploy.sh ldev
    ```
 
 3. Request all necessary information by calling:
@@ -125,15 +110,6 @@ Debugging
       ./deploy.sh reload
       ```
 
-    * for changes inside frontend-modules:
-
-      > You have to start the Angular dev server once at the beginning by calling
-      (inside [edu-sharing-community-repository](https://scm.edu-sharing.com/edu-sharing/community/repository/edu-sharing-community-repository)):
-      > ```
-      > ./node/npm run start
-      > ```     
-      > and use the special URL shown (instead of the usual one).
-
 Uninstall
 ---------
 
@@ -148,7 +124,7 @@ Uninstall
    ```
    ./deploy.sh remove
    ```
-   
+
 ---
 If you need more information, please consult
 our [edu-sharing community sdk](https://scm.edu-sharing.com/edu-sharing-community/edu-sharing-community-sdk) project.

@@ -1,18 +1,11 @@
 # edu-sharing community deploy
+===========================
 
 The edu-sharing open-source project started in 2007 to develop networked E-Learning environments for managing and
 sharing educational contents inter-organisationally.
 
 Documentation
 -------------
-
-- [Docker](deploy/docker/README.md)
-    - [Rendering](deploy/docker/rendering/README.md)
-    - [Repository](deploy/docker/repository/README.md)
-- Installer
-    - [Rendering](deploy/installer/rendering/README.md)
-    - [Repository](deploy/installer/repository/README.md)
-
 More information can be found on the [homepage](http://www.edu-sharing.com).
 
 Or visit the edu-sharing [documentation](http://docs.edu-sharing.com/confluence/edp).
@@ -20,7 +13,7 @@ Or visit the edu-sharing [documentation](http://docs.edu-sharing.com/confluence/
 Where can I get the latest release?
 -----------------------------------
 You can download source and binaries from
-our [artifact repository](https://artifacts.edu-sharing.com/#browse/browse:community-releases).
+our [artifact repository](https://artifacts.edu-sharing.com).
 
 Contributing
 ------------
@@ -37,13 +30,14 @@ Thanks!
 
 Windows as a host system
 ------------------------
-By default, the line endings under Windows are in CRLF format, they are not compatible with linux distributions 
-that uses LF the format. In order to enforce LF as the standard line end format, we have explicitly defined
-the format for the respective files in .gitattributes file.
+By default, the line endings under Windows are in CRLF format, they are not compatible with linux distributions that
+uses LF the format. In order to enforce LF as the standard line end format, we have explicitly defined the format for
+the respective files in .gitattributes file.
 
 In addition to this configuration, Windows users must specify the following git settings from the command line:
 
 In the git command shell, go to the project directory and set core.eol to lf and core.autocrlf to input.
+
 ```
 cd <Path to the project root>
 git config core.eol lf
@@ -51,6 +45,7 @@ git config core.autocrlf input
 ```
 
 Finally, perform the checkout-index command to enforce the end-of-line format.
+
 ```
 git checkout-index --force --all
 ```

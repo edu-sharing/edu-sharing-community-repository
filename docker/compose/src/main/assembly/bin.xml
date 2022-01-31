@@ -19,7 +19,9 @@
       <directory>${project.build.directory}/compose</directory>
       <outputDirectory>.</outputDirectory>
       <includes>
+        <include>.env.sample</include>
         <include>deploy.sh</include>
+        <include>README.md</include>
         <include>**/*-common.yml</include>
         <include>**/*-remote.yml</include>
       </includes>
