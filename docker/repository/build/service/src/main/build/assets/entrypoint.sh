@@ -209,11 +209,11 @@ grep -q '^[#]*\s*exiftool\.dyn=' "${alfProps}" || echo 'exiftool.dyn=/usr/bin' >
 sed -i -r 's|^[#]*\s*exiftool\.exe=.*|exiftool.exe=${exiftool.dyn}/exiftool|' "${alfProps}"
 grep -q '^[#]*\s*exiftool\.exe=' "${alfProps}" || echo 'exiftool.exe=${exiftool.dyn}/exiftool' >>"${alfProps}"
 
-sed -i -r 's|^[#]*\s*ffmpeg\.dyn=.*|ffmpeg.dyn=/usr/bin|' "${alfProps}"
-grep -q '^[#]*\s*ffmpeg\.dyn=' "${alfProps}" || echo 'ffmpeg.dyn=/usr/bin' >>"${alfProps}"
+#sed -i -r 's|^[#]*\s*ffmpeg\.dyn=.*|ffmpeg.dyn=/usr/bin|' "${alfProps}"
+#grep -q '^[#]*\s*ffmpeg\.dyn=' "${alfProps}" || echo 'ffmpeg.dyn=/usr/bin' >>"${alfProps}"
 
-sed -i -r 's|^[#]*\s*ffmpeg\.exe=.*|ffmpeg.exe=${ffmpeg.dyn}/ffmpeg|' "${alfProps}"
-grep -q '^[#]*\s*ffmpeg\.exe=' "${alfProps}" || echo 'ffmpeg.exe=${ffmpeg.dyn}/ffmpeg' >>"${alfProps}"
+#sed -i -r 's|^[#]*\s*ffmpeg\.exe=.*|ffmpeg.exe=${ffmpeg.dyn}/ffmpeg|' "${alfProps}"
+#grep -q '^[#]*\s*ffmpeg\.exe=' "${alfProps}" || echo 'ffmpeg.exe=${ffmpeg.dyn}/ffmpeg' >>"${alfProps}"
 
 sed -i -r 's|^[#]*\s*img\.dyn=.*|img.dyn=/usr/bin|' "${alfProps}"
 grep -q '^[#]*\s*img\.dyn=' "${alfProps}" || echo 'img.dyn=/usr/bin' >>"${alfProps}"

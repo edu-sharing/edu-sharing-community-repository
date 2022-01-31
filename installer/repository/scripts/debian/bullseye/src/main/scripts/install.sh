@@ -497,8 +497,8 @@ config_edu_sharing() {
   echo 'exiftool.dyn=/usr/bin' >> "${alfProps}"
   echo 'exiftool.exe=${exiftool.dyn}/exiftool' >> "${alfProps}"
 
-  echo 'ffmpeg.dyn=/usr/bin' >> "${alfProps}"
-  echo 'ffmpeg.exe=${ffmpeg.dyn}/ffmpeg' >> "${alfProps}"
+#  echo 'ffmpeg.dyn=/usr/bin' >> "${alfProps}"
+#  echo 'ffmpeg.exe=${ffmpeg.dyn}/ffmpeg' >> "${alfProps}"
 
   echo 'img.dyn=/usr/bin' >> "${alfProps}"
   echo 'img.exe=${img.dyn}/convert' >> "${alfProps}"
