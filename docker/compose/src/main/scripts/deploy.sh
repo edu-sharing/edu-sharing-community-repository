@@ -198,6 +198,26 @@ remove() {
 
 		$COMPOSE_EXEC \
 			$COMPOSE_LIST \
+			down || exit
+		;;
+	*)
+		echo Canceled.
+		;;
+	esac
+}
+
+purge() {
+	read -p "Are you sure you want to continue? [y/N] " answer
+	case ${answer:0:1} in
+	y | Y)
+		COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
+		COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
+		COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
+
+		echo "Use compose set: $COMPOSE_LIST"
+
+		$COMPOSE_EXEC \
+			$COMPOSE_LIST \
 			down -v || exit
 		;;
 	*)
@@ -225,6 +245,9 @@ stop)
 remove)
 	remove
 	;;
+purge)
+	purge
+	;;
 *)
 	echo ""
 	echo "Usage: ${CLI_CMD} [option]"
@@ -238,7 +261,8 @@ remove)
 	echo "  - ps                show containers"
 	echo ""
 	echo "  - stop              stop all containers"
-	echo "  - remove            remove all containers and volumes"
+	echo "  - remove            remove all containers"
+	echo "  - purge             remove all containers and volumes"
 	echo ""
 	;;
 esac

@@ -31,11 +31,16 @@ Uninstall
    ./deploy.sh stop
    ```
 
-2. Clean up all data volumes by calling:
+2. Clean up all container by calling:
 
    ```
    ./deploy.sh remove
    ```
 
+   or clean up all container and data volumes by calling:
+
+   ```
+   ./deploy.sh purge
+   ```
 ---
 If you need more information, please consult our [edu-sharing community sdk](https://scm.edu-sharing.com/edu-sharing-community/edu-sharing-community-sdk) project.
