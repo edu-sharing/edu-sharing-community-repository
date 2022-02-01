@@ -36,8 +36,6 @@
     <!--suppress UnresolvedMavenProperty -->
     <docker.from.tomcat>docker.io/tomcat:${tomcat.version}-jdk8-openjdk-bullseye</docker.from.tomcat>
 
-    <docker.repository>${docker.repository.docker}</docker.repository>
-
     <rendering.redis.client.version>5.3.4</rendering.redis.client.version>
 
     <repository.prometheus.agent.version>0.14.0</repository.prometheus.agent.version>

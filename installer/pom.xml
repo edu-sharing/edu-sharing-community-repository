@@ -18,12 +18,6 @@
 
   <name>edu_sharing-community-deploy-installer</name>
 
-  <properties>
-
-    <docker.repository>${docker.repository.installer}</docker.repository>
-
-  </properties>
-
   <modules>
     <module>compose</module>
     <module>repository</module>
