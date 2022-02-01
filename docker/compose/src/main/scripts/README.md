@@ -5,7 +5,6 @@ Prerequisites
 -------------
 
 - Docker Engine 18.06.0+
-- Git SCM
 
 Install
 -------
