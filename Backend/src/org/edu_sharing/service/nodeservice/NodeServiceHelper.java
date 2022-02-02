@@ -143,8 +143,7 @@ public class NodeServiceHelper {
 		}
 		if(property instanceof String) {
 			return !((String) property).trim().isEmpty();
-		}
-		if(property instanceof Collection) {
+		} else if(property instanceof Collection) {
 			if(((Collection<?>) property).isEmpty()) {
 				return false;
 			}
@@ -154,6 +153,8 @@ public class NodeServiceHelper {
 				// don't know what to do, we assume it has a value if it is NOT a null value
 				return ((Collection<?>) property).stream().anyMatch(Objects::nonNull);
 			}
+		} else {
+			return true;
 		}
 	}
 	public static Serializable getPropertyNative(NodeRef nodeRef, String key){
