@@ -11,6 +11,10 @@ public class SimpleEdit implements Serializable {
     @XmlElement
     public String organizationFilter;
 
+    @XmlElement
+    public String[] licenses;
+
+
     private static class SimpleEditOrganization implements Serializable{
         @XmlElement
         public String[] groupTypes;
