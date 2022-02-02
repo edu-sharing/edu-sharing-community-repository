@@ -972,6 +972,19 @@ public class CollectionServiceImpl implements CollectionService{
 	}
 
 	@Override
+	public List<NodeRef> getReferenceObjectsSync(String nodeId){
+		Map<String,Object> map = new HashMap<>();
+		map.put(CCConstants.CCM_PROP_IO_ORIGINAL,nodeId);
+
+		List<String> aspects = new ArrayList<>();
+		aspects.add(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
+		logger.debug("cmis helper start");
+		List<org.alfresco.service.cmr.repository.NodeRef> nodes = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO,map,aspects,null,100000);
+		logger.debug("cmis helper finished");
+		return nodes;
+	}
+
+	@Override
 	public String addFeedback(String id, HashMap<String, String[]> feedbackData) throws Throwable {
 		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK);
 		new PermissionServiceHelper(PermissionServiceFactory.getLocalService()).validatePermissionOrThrow(id,CCConstants.PERMISSION_FEEDBACK);
