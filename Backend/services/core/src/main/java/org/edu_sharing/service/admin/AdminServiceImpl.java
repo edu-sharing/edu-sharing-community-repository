@@ -754,7 +754,7 @@ public class AdminServiceImpl implements AdminService  {
 	@Override
 	public void updateConfigFile(String filename, PropertiesHelper.Config.PathPrefix pathPrefix, String content) throws Throwable {
 		filename = mapConfigFile(filename, pathPrefix);
-		File file = new File(PropertiesHelper.Config.getAbsolutePathForConfigFile(PropertiesHelper.Config.getPropertyFilePath(filename)));
+		File file = new File(PropertiesHelper.Config.getAbsolutePathForConfigFile(filename));
 		try {
 			Files.copy(file, new File(file.getAbsolutePath() + System.currentTimeMillis() + ".bak"));
 		}catch(FileNotFoundException e){
