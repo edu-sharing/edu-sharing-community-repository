@@ -10,7 +10,7 @@
   <includeBaseDirectory>false</includeBaseDirectory>
   <fileSets>
     <fileSet>
-      <directory>${project.build.directory}/generated-sources/openapi</directory>
+      <directory>${project.build.directory}/generated-sources/openapi/lib</directory>
       <outputDirectory>.</outputDirectory>
     </fileSet>
   </fileSets>
