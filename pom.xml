@@ -30,6 +30,9 @@
 
     <community.platform>${project.version}</community.platform>
 
+    <helm.kube.version>&gt;= 1.18.0</helm.kube.version>
+    <helm.version>3.7.2</helm.version>
+
   </properties>
 
   <build>
@@ -41,6 +44,7 @@
         <artifactId>bom-maven-plugin</artifactId>
         <executions>
           <execution>
+            <id>community</id>
             <goals>
               <goal>import-properties</goal>
             </goals>
@@ -51,6 +55,24 @@
                   <groupId>${project.groupId}</groupId>
                   <artifactId>edu_sharing-community-bom</artifactId>
                   <version>${community.platform}</version>
+                  <type>pom</type>
+                </dependency>
+              </artifacts>
+            </configuration>
+          </execution>
+          <execution>
+            <id>community-repository</id>
+            <goals>
+              <goal>import-properties</goal>
+            </goals>
+            <phase>validate</phase>
+            <configuration>
+              <artifacts>
+                <dependency>
+                  <groupId>${project.groupId}</groupId>
+                  <artifactId>edu_sharing-community-repository</artifactId>
+                  <!--suppress UnresolvedMavenProperty -->
+                  <version>${repository.version}</version>
                   <type>pom</type>
                 </dependency>
               </artifacts>
