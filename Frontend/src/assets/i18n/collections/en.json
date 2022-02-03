@@ -55,7 +55,10 @@
         },
         "PINNING": {
             "TITLE": "pinned collections",
-            "UPDATED": "The list of pinned collections has been updated."
+            "UPDATED": "The list of pinned collections has been updated.",
+            "POSITION_SLIDER": "Position of collection \"{{ collection }}\" within the list",
+            "MOVE_DOWN": "Move down",
+            "MOVE_UP": "Move up"
         },
         "NO_ADD_PERMISSIONS": "You have insufficient permissions to add materials to this collection",
         "ERROR_NOT_FOUND": "Collection not found",
