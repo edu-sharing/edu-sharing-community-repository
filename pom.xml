@@ -31,51 +31,136 @@
 
   <properties>
 
-    <community.platform>${project.version}</community.platform>
+    <alfresco.pdf-renderer.version>1.1</alfresco.pdf-renderer.version>
+    <alfresco.platform.version>5.2.g</alfresco.platform.version>
+    <alfresco.share.version>5.2.f</alfresco.share.version>
+
+    <elasticsearch.version.major>7</elasticsearch.version.major>
+    <elasticsearch.version.minor>16</elasticsearch.version.minor>
+    <elasticsearch.version.patch>3</elasticsearch.version.patch>
+    <elasticsearch.version>
+      ${elasticsearch.version.major}.${elasticsearch.version.minor}.${elasticsearch.version.patch}
+    </elasticsearch.version>
+
+    <java.version.range>[1.8.0, 9)</java.version.range>
+
+    <node.version>v14.18.1</node.version>
+
+    <npm.args.install>install</npm.args.install>
+    <npm.args.build>run build-dev</npm.args.build>
+    <npm.version>7.24.2</npm.version>
+
+    <php.version.major>7</php.version.major>
+    <php.version.minor>4</php.version.minor>
+    <php.version.patch>27</php.version.patch>
+    <php.version>${php.version.major}.${php.version.minor}.${php.version.patch}</php.version>
+
+    <postgresql.jdbc.version>42.3.1</postgresql.jdbc.version>
+
+    <postgresql.version.major>13</postgresql.version.major>
+    <postgresql.version.minor>5</postgresql.version.minor>
+    <postgresql.version.patch>0</postgresql.version.patch>
+    <postgresql.version>${postgresql.version.major}.${postgresql.version.minor}.${postgresql.version.patch}
+    </postgresql.version>
+
+    <repackaged.version>${project.version}</repackaged.version>
+
+    <tomcat.version.major>8</tomcat.version.major>
+    <tomcat.version.minor>5</tomcat.version.minor>
+    <tomcat.version.patch>75</tomcat.version.patch>
+    <tomcat.version>${tomcat.version.major}.${tomcat.version.minor}.${tomcat.version.patch}
+    </tomcat.version>
 
   </properties>
-
-  <build>
-
-    <plugins>
-
-      <plugin>
-        <groupId>com.github.tommyk-gears</groupId>
-        <artifactId>bom-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>import-properties</goal>
-            </goals>
-            <phase>validate</phase>
-            <configuration>
-              <artifacts>
-                <dependency>
-                  <groupId>${project.groupId}</groupId>
-                  <artifactId>edu_sharing-community-bom</artifactId>
-                  <version>${community.platform}</version>
-                  <type>pom</type>
-                </dependency>
-              </artifacts>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-    </plugins>
-
-  </build>
 
   <dependencyManagement>
 
     <dependencies>
 
       <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-bom</artifactId>
-        <version>${community.platform}</version>
+        <groupId>org.apache.activemq</groupId>
+        <artifactId>activemq-client</artifactId>
+        <version>5.13.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.alfresco</groupId>
+        <artifactId>alfresco-content-services-share-distribution</artifactId>
+        <version>${alfresco.share.version}</version>
+        <type>zip</type>
+      </dependency>
+
+      <dependency>
+        <groupId>org.alfresco</groupId>
+        <artifactId>alfresco-pdf-renderer</artifactId>
+        <version>${alfresco.pdf-renderer.version}</version>
+        <type>tgz</type>
+        <classifier>linux</classifier>
+      </dependency>
+
+      <dependency>
+        <groupId>org.alfresco</groupId>
+        <artifactId>alfresco-platform-community-distributionzip</artifactId>
+        <version>${alfresco.platform.version}</version>
+        <type>zip</type>
+      </dependency>
+
+      <dependency>
+        <groupId>org.alfresco</groupId>
+        <artifactId>alfresco-platform-distribution</artifactId>
+        <version>${alfresco.platform.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.alfresco</groupId>
+        <artifactId>alfresco-solr4-distribution</artifactId>
+        <version>${alfresco.platform.version}</version>
+        <type>zip</type>
+      </dependency>
+
+      <dependency>
+        <groupId>org.alfresco</groupId>
+        <artifactId>api-explorer</artifactId>
+        <version>${alfresco.platform.version}</version>
+        <type>war</type>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.axis</groupId>
+        <artifactId>axis</artifactId>
+        <version>1.4</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.axis</groupId>
+        <artifactId>axis-jaxrpc</artifactId>
+        <version>1.4</version>
+      </dependency>
+
+      <dependency>
+        <groupId>net.sourceforge.cardme</groupId>
+        <artifactId>cardme</artifactId>
+        <version>0.4.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.11</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.typesafe</groupId>
+        <artifactId>config</artifactId>
+        <version>1.4.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>de.acosix.alfresco.simplecontentstores</groupId>
+        <artifactId>de.acosix.alfresco.simplecontentstores.repo</artifactId>
+        <version>1.1.0</version>
       </dependency>
 
       <dependency>
@@ -93,6 +178,43 @@
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-backend-alfresco-module</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-backend-alfresco-module</artifactId>
+        <version>${project.version}</version>
+        <type>amp</type>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-java-auth</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-java-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-java-discovery</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-java-search</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-java-workflow</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -118,6 +240,34 @@
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-backend-services-rest-client-java</artifactId>
         <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-backend-services-rest-client-php-core</artifactId>
+        <version>${project.version}</version>
+        <type>zip</type>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-backend-services-rest-client-php-laravel</artifactId>
+        <version>${project.version}</version>
+        <type>zip</type>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-backend-services-rest-client-php-lumen</artifactId>
+        <version>${project.version}</version>
+        <type>zip</type>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-backend-services-rest-client-php-slim4</artifactId>
+        <version>${project.version}</version>
+        <type>zip</type>
       </dependency>
 
       <dependency>
@@ -199,7 +349,324 @@
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-frontend-webapp</artifactId>
         <version>${project.version}</version>
+        <classifier>sources</classifier>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-frontend-webapp</artifactId>
+        <version>${project.version}</version>
         <type>war</type>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-repackaged-elasticsearch</artifactId>
+        <version>${repackaged.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-repackaged-isoparser</artifactId>
+        <version>${repackaged.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-webapp</artifactId>
+        <version>${project.version}</version>
+        <type>war</type>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.apis</groupId>
+        <artifactId>google-api-services-youtube</artifactId>
+        <version>v3-rev157-1.19.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>2.8.6</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.gsonfire</groupId>
+        <artifactId>gson-fire</artifactId>
+        <version>1.8.5</version>
+      </dependency>
+
+      <dependency>
+        <groupId>net.handle</groupId>
+        <artifactId>handle-client</artifactId>
+        <version>9.3.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.hazelcast</groupId>
+        <artifactId>hazelcast-all</artifactId>
+        <version>3.12</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.hazelcast</groupId>
+        <artifactId>hazelcast-client</artifactId>
+        <version>3.12</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.hazelcast</groupId>
+        <artifactId>hazelcast-kubernetes</artifactId>
+        <version>1.5.4</version>
+      </dependency>
+
+      <dependency>
+        <groupId>net.sourceforge.htmlunit</groupId>
+        <artifactId>htmlunit</artifactId>
+        <version>2.13</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>2.12.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>2.12.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-core-asl</artifactId>
+        <version>1.9.13</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>2.12.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openapitools</groupId>
+        <artifactId>jackson-databind-nullable</artifactId>
+        <version>0.2.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-cbor</artifactId>
+        <version>2.12.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-smile</artifactId>
+        <version>2.12.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-xml</artifactId>
+        <version>2.12.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-yaml</artifactId>
+        <version>2.12.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.datatype</groupId>
+        <artifactId>jackson-datatype-joda</artifactId>
+        <version>2.4.5</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.datatype</groupId>
+        <artifactId>jackson-datatype-jsr310</artifactId>
+        <version>2.12.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.jaxrs</groupId>
+        <artifactId>jackson-jaxrs-base</artifactId>
+        <version>2.12.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.jaxrs</groupId>
+        <artifactId>jackson-jaxrs-json-provider</artifactId>
+        <version>2.12.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-mapper-asl</artifactId>
+        <version>1.9.13</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.module</groupId>
+        <artifactId>jackson-module-jaxb-annotations</artifactId>
+        <version>2.12.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>javax.servlet-api</artifactId>
+        <version>3.0.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.glassfish.jersey.containers</groupId>
+        <artifactId>jersey-container-servlet-core</artifactId>
+        <version>2.22</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.glassfish.jersey.media</groupId>
+        <artifactId>jersey-media-jaxb</artifactId>
+        <version>2.22</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.glassfish.jersey.media</groupId>
+        <artifactId>jersey-media-json-jackson</artifactId>
+        <version>2.22</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.glassfish.jersey.media</groupId>
+        <artifactId>jersey-media-multipart</artifactId>
+        <version>2.22</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.glassfish.jersey.core</groupId>
+        <artifactId>jersey-server</artifactId>
+        <version>2.22</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jsoup</groupId>
+        <artifactId>jsoup</artifactId>
+        <version>1.12.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.code.findbugs</groupId>
+        <artifactId>jsr305</artifactId>
+        <version>1.3.9</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-bom</artifactId>
+        <version>2.17.1</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>com.squareup.okhttp3</groupId>
+        <artifactId>logging-interceptor</artifactId>
+        <version>4.9.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.squareup.okhttp3</groupId>
+        <artifactId>okhttp</artifactId>
+        <version>4.9.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.oltu.oauth2</groupId>
+        <artifactId>org.apache.oltu.oauth2.authzserver</artifactId>
+        <version>1.0.2</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.restlet.jee</groupId>
+        <artifactId>org.restlet.ext.servlet</artifactId>
+        <version>2.0.12</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
+        <artifactId>owasp-java-html-sanitizer</artifactId>
+        <version>20180219.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>${postgresql.jdbc.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>1.7.33</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework.security.extensions</groupId>
+        <artifactId>spring-security-saml2-core</artifactId>
+        <version>1.0.3.RELEASE</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.swagger</groupId>
+        <artifactId>swagger-annotations</artifactId>
+        <version>1.6.2</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.swagger.core.v3</groupId>
+        <artifactId>swagger-jaxrs2</artifactId>
+        <version>2.1.11</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.threeten</groupId>
+        <artifactId>threetenbp</artifactId>
+        <version>1.5.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.tomcat</groupId>
+        <artifactId>tomcat</artifactId>
+        <type>tar.gz</type>
+        <version>${tomcat.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.tomcat</groupId>
+        <artifactId>tomcat-catalina</artifactId>
+        <version>${tomcat.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.tomcat</groupId>
+        <artifactId>tomcat-coyote</artifactId>
+        <version>${tomcat.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.ws.security</groupId>
+        <artifactId>wss4j</artifactId>
+        <version>1.6.19</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.dspace</groupId>
+        <artifactId>xoai-data-provider</artifactId>
+        <version>4.2.0</version>
       </dependency>
 
     </dependencies>
