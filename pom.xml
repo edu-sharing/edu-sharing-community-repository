@@ -669,6 +669,31 @@
         <version>4.2.0</version>
       </dependency>
 
+
+      <dependency>
+        <groupId>com.jayway.jsonpath</groupId>
+        <artifactId>json-path</artifactId>
+        <version>2.6.0</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>com.bazaarvoice.jolt</groupId>
+        <artifactId>jolt-core</artifactId>
+        <version>0.1.5</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.bazaarvoice.jolt</groupId>
+        <artifactId>json-utils</artifactId>
+        <version>0.1.5</version>
+      </dependency>
+
       <dependency>
         <groupId>org.mongodb</groupId>
         <artifactId>mongodb-driver-sync</artifactId>
