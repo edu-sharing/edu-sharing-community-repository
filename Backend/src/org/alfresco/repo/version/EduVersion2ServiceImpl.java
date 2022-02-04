@@ -366,8 +366,9 @@ public class EduVersion2ServiceImpl extends org.alfresco.repo.version.Version2Se
                     /**
                 	 * edu-sharing FIX don't remove edu-sharing children
                 	 */
-                	if(!typesToKeep.contains(this.nodeService.getType(ref.getChildRef()).toString())
-                    && !this.nodeService.hasAspect(ref.getChildRef(),QName.createQName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT))){ // childobjects in >= 4.2
+                	if(this.nodeService.exists(ref.getChildRef())
+                            && !typesToKeep.contains(this.nodeService.getType(ref.getChildRef()).toString())
+                            && !this.nodeService.hasAspect(ref.getChildRef(),QName.createQName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT))){ // childobjects in >= 4.2
                 		this.nodeService.removeChild(nodeRef, ref.getChildRef());
                 	}
             	}
