@@ -453,13 +453,18 @@
             <h5 class="mat-heading-5">{{'ADMIN.JOBS.PARAMETERS' | translate}}</h5>
             <div class="param-table">
               <div class="param-row" *ngFor="let param of job.object.params">
-                <div class="param-name">{{param.name}} <span *ngIf="param.file">(file)</span></div>
+                <div class="param-name">
+                  {{param.name}}
+                  <span *ngIf="param.array">[]</span>
+                  <span *ngIf="param.file">(file)</span></div>
                 <div>{{param.description}}</div>
                 <div class="param-value">
                   <ng-container *ngIf="param.values">
                     <div class="param-table">
                       <div class="param-row" *ngFor="let value of param.values">
-                        <div>{{value.name}}</div>
+                        <div>
+                          {{value.name}}
+                        </div>
                         <div>{{value.description}}</div>
                       </div>
                     </div>

@@ -1252,9 +1252,12 @@ export class AdminComponent {
       if (param.file) {
         continue;
       }
-      data[param.name] = param.sampleValue ?? '';
+      data[param.name] = param.type === 'boolean' ? param.sampleValue === 'true' : param.sampleValue ?? '';
       if(param.values) {
         data[param.name] = param.values.map((v) => v.name).join('|');
+      }
+      if(param.array) {
+          data[param.name] = [data[param.name]];
       }
       modified = true;
     }

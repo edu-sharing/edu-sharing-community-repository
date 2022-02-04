@@ -1,28 +1,28 @@
 /**
  *
- *  
- * 
- * 
- *	
  *
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
  *
  */
 package org.edu_sharing.repository.server.jobs.quartz;
@@ -35,11 +35,12 @@ import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.quartz.*;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class AbstractJobMapAnnotationParams extends AbstractJob {
 	@Override
@@ -51,14 +52,9 @@ public abstract class AbstractJobMapAnnotationParams extends AbstractJob {
 				try {
 					field.setAccessible(true);
 					if(field.getType().isEnum()) {
-						try {
-							Object mapped = field.getType().getMethod("valueOf", String.class).invoke(null,
-									(String) jobExecutionContext.getJobDetail().getJobDataMap().get(field.getName())
-							);
-							field.set(this, mapped);
-						} catch (Exception e) {
-							logger.warn(e.getMessage(), e);
-						}
+						field.set(this,
+								mapEnum(field.getType(), jobExecutionContext.getJobDetail().getJobDataMap().getString(field.getName()))
+						);
 					} else if(field.getType().isPrimitive()) {
 						try {
 							if(field.getType().getName().equals("boolean")) {
@@ -70,6 +66,19 @@ public abstract class AbstractJobMapAnnotationParams extends AbstractJob {
 						} catch (Exception e) {
 							logger.warn(e.getMessage(), e);
 						}
+					} else if(field.getType().isAssignableFrom(Collection.class) || field.getType().equals(List.class)) {
+						Class<?> type = (Class<?>) ((ParameterizedType)field.getGenericType()).getActualTypeArguments()[0];
+						field.set(this,
+								((Collection<?>)jobExecutionContext.getJobDetail().getJobDataMap().get(field.getName())).stream().map(
+										(v) -> {
+											if(type.isEnum()) {
+												return mapEnum(type,
+														(String) v);
+											} else {
+												return v;
+											}
+										}
+								).collect(Collectors.toList()));
 					} else {
 						field.set(this, jobExecutionContext.getJobDetail().getJobDataMap().get(field.getName()));
 					}
@@ -79,6 +88,17 @@ public abstract class AbstractJobMapAnnotationParams extends AbstractJob {
 			}
 		}
 		this.executeInternal(jobExecutionContext);
+	}
+
+	private <T> T mapEnum(Class<T> type, String value) {
+		try {
+			return (T) type.getMethod("valueOf", String.class).invoke(null,
+					value
+			);
+		} catch (Exception e) {
+			logger.warn(e.getMessage(), e);
+			return null;
+		}
 	}
 
 	protected abstract void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException;

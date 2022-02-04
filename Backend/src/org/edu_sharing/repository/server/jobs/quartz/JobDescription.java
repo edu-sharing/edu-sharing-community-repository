@@ -47,6 +47,7 @@ public class JobDescription {
         boolean file;
         List<JobFieldDescription> values;
         String sampleValue;
+        private boolean isArray;
 
         public String getName() {
             return name;
@@ -94,6 +95,14 @@ public class JobDescription {
 
         public String getSampleValue() {
             return sampleValue;
+        }
+
+        public void setIsArray(boolean array) {
+            this.isArray = array;
+        }
+
+        public boolean isArray() {
+            return isArray;
         }
     }
 }

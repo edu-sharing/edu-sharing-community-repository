@@ -3,6 +3,7 @@ package org.edu_sharing.service.admin;
 import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 import java.text.Collator;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -1004,12 +1005,15 @@ public class AdminServiceImpl implements AdminService  {
 			).map((f) -> {
 				JobDescription.JobFieldDescription fieldDesc = new JobDescription.JobFieldDescription();
 				fieldDesc.setName(f.getName());
-				fieldDesc.setType(f.getType());
+				boolean isArray = f.getType().isAssignableFrom(Collection.class) || f.getType().equals(List.class);
+				Class<?> type = isArray ? (Class<?>) ((ParameterizedType)f.getGenericType()).getActualTypeArguments()[0] : f.getType();
+				fieldDesc.setType(type);
+				fieldDesc.setIsArray(isArray);
 				fieldDesc.setDescription(f.getAnnotation(JobFieldDescription.class).description());
 				fieldDesc.setSampleValue(f.getAnnotation(JobFieldDescription.class).sampleValue());
 				fieldDesc.setFile(f.getAnnotation(JobFieldDescription.class).file());
-				if(f.getType().isEnum()){
-					fieldDesc.setValues(Arrays.stream(f.getType().getDeclaredFields()).
+				if(type.isEnum()){
+					fieldDesc.setValues(Arrays.stream(type.getDeclaredFields()).
 							filter((v) -> !v.getName().startsWith("$")).
 							map((v) -> {
 						JobDescription.JobFieldDescription value = new JobDescription.JobFieldDescription();

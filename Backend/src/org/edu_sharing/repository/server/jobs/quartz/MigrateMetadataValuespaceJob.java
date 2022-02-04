@@ -68,8 +68,8 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 	private String sourceProperty;
 	@JobFieldDescription(description = "the target property to store the migrated values, may be the same as sourceProperty", sampleValue = "ccm:taxonid")
 	private String targetProperty;
-	@JobFieldDescription(description = "The relation to use")
-	private MetadataKey.MetadataKeyRelated.Relation relation;
+	@JobFieldDescription(description = "The relation(s) to use (all values will be combined into the result)")
+	private List<MetadataKey.MetadataKeyRelated.Relation> relations;
 	@JobFieldDescription(description = "The mode to use (Merge = Merge any existing target field values with the mapping values, Replace = replace the target field valiues")
 	private Mode mode;
 	@JobFieldDescription(description = "Only test and output, but do not modify/store the metadata")
@@ -95,12 +95,12 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 			try {
 				MetadataSet mds = MetadataHelper.getMetadataset(nodeRef);
 				MetadataWidget widget;
-				Map<String, Collection<MetadataKey.MetadataKeyRelated>> mapping;
+				List<Map<String, Collection<MetadataKey.MetadataKeyRelated>>> mappings;
 				try {
 					widget = mds.findWidget(mdsWidgetId);
-					mapping = widget.getValuespaceMappingByRelation(relation);
+					mappings = relations.stream().map(widget::getValuespaceMappingByRelation).collect(Collectors.toList());
 				} catch(IllegalArgumentException e) {
-					logger.debug("Metadataset " + mds.getId() +" does not have widget id " + mdsWidgetId + ", node " + nodeRef);
+					logger.warn("Metadataset " + mds.getId() +" does not have widget id " + mdsWidgetId + ", node " + nodeRef);
 					return;
 				}
 				Object value = NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.getValidGlobalName(sourceProperty));
@@ -109,12 +109,13 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 					logger.debug("Skipping null value, node " + nodeRef);
 					return;
 				}
-				HashSet<String> mapped = mapValueToTarget(nodeRef, mapping, mode, value, target, true);
-				if(mapped!=null && mapped.size() > 0) {
+				HashSet<String> mapped = new HashSet<>();
+				mappings.forEach((m) -> mapped.addAll(mapValueToTarget(nodeRef, m, mode, value, target, true)));
+				if(mapped.size() > 0) {
 					logger.info("Mapped " + value + " -> " + StringUtils.join(mapped,", "));
 				}
 				if(!testRun) {
-					 if(mapped!=null && mapped.size() > 0) {
+					 if(mapped.size() > 0) {
 						NodeServiceHelper.setProperty(nodeRef,
 								CCConstants.getValidGlobalName(targetProperty),
 								mapped
