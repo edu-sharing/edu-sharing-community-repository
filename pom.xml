@@ -35,6 +35,8 @@
     <alfresco.platform.version>5.2.g</alfresco.platform.version>
     <alfresco.share.version>5.2.f</alfresco.share.version>
 
+    <bom.repository-repackaged.version>${project.version}</bom.repository-repackaged.version>
+
     <elasticsearch.version.major>7</elasticsearch.version.major>
     <elasticsearch.version.minor>16</elasticsearch.version.minor>
     <elasticsearch.version.patch>3</elasticsearch.version.patch>
@@ -62,8 +64,6 @@
     <postgresql.version.patch>0</postgresql.version.patch>
     <postgresql.version>${postgresql.version.major}.${postgresql.version.minor}.${postgresql.version.patch}
     </postgresql.version>
-
-    <repackaged.version>${project.version}</repackaged.version>
 
     <tomcat.version.major>8</tomcat.version.major>
     <tomcat.version.minor>5</tomcat.version.minor>
@@ -362,13 +362,13 @@
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-repackaged-elasticsearch</artifactId>
-        <version>${repackaged.version}</version>
+        <version>${bom.repository-repackaged.version}</version>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-repackaged-isoparser</artifactId>
-        <version>${repackaged.version}</version>
+        <version>${bom.repository-repackaged.version}</version>
       </dependency>
 
       <dependency>
