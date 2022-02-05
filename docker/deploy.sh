@@ -223,8 +223,8 @@ rdev() {
     esac
   fi
 
-	COMMUNITY_PATH=$(pwd)
-	export COMMUNITY_PATH
+	GIT_ROOT=$(pwd)
+	export GIT_ROOT
 	popd >/dev/null || exit
 
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -remote -debug -dev)"
@@ -276,8 +276,8 @@ ldev() {
     esac
 	fi
 
-	COMMUNITY_PATH=$(pwd)
-	export COMMUNITY_PATH
+	GIT_ROOT=$(pwd)
+	export GIT_ROOT
 	popd >/dev/null || exit
 
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -debug -dev)"

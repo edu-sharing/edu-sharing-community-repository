@@ -4,4 +4,4 @@ services:
 
   services-rendering-service:
     volumes:
-      - "${COMMUNITY_PATH}/services-rendering/target/php:/var/www/html/esrender"
+      - "${GIT_ROOT}/services-rendering/target/php:/var/www/html/esrender"

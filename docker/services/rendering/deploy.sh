@@ -235,8 +235,8 @@ rdev() {
     esac
   fi
 
-	COMMUNITY_PATH=$(pwd)
-	export COMMUNITY_PATH
+	GIT_ROOT=$(pwd)
+	export GIT_ROOT
 	popd >/dev/null || exit
 
 	COMPOSE_LIST="$(compose rendering.yml -common -remote -debug -dev) $(compose_plugins -common -remote -debug -dev)"
@@ -282,8 +282,8 @@ ldev() {
     esac
   fi
 
-	COMMUNITY_PATH=$(pwd)
-	export COMMUNITY_PATH
+	GIT_ROOT=$(pwd)
+	export GIT_ROOT
 	popd >/dev/null || exit
 
 	COMPOSE_LIST="$(compose rendering.yml -common -debug -dev) $(compose_plugins -common -debug -dev)"
@@ -365,11 +365,11 @@ remove)
 	echo ""
 	echo "  - rstart            startup containers from remote images"
 	echo "  - rdebug            startup containers from remote images with dev ports"
-	echo "  - rdev [<path>]     startup containers from remote images with dev ports and artifacts [../..]"
+	echo "  - rdev [<path>]     startup containers from remote images with dev ports and artifacts [../../../..]"
 	echo ""
 	echo "  - lstart            startup containers from local images"
 	echo "  - ldebug            startup containers from local images with dev ports"
-	echo "  - ldev [<path>]     startup containers from local images with dev ports and artifacts [../..]"
+	echo "  - ldev [<path>]     startup containers from local images with dev ports and artifacts [../../../..]"
 	echo ""
 	echo "  - info              show information"
 	echo "  - logs              show logs"
