@@ -98,7 +98,7 @@ sed -i 's|^\(\s*\)[#]*ServerName.*|\1ServerName '"${my_host_internal}"'|' /etc/a
 
 	if [[ ${cache_cluster} == "true" ]] ; then
 		sed -i 's|^[;\s]*session\.save_handler.*|session.save_handler = 'rediscluster'|' "${PHP_INI_DIR}/php.ini"
-		echo "session.save_path = \"seed[]=${cache_host}:${cache_port}&database=${cache_database}\"" >>"${PHP_INI_DIR}/php.ini"
+		echo "session.save_path = \"seed[]=${cache_host}:${cache_port}\"" >>"${PHP_INI_DIR}/php.ini"
 	else
 		sed -i 's|^[;\s]*session\.save_handler.*|session.save_handler = 'redis'|' "${PHP_INI_DIR}/php.ini"
 		echo "session.save_path = \"tcp://${cache_host}:${cache_port}?database=${cache_database}\"" >>"${PHP_INI_DIR}/php.ini"

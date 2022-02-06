@@ -190,7 +190,6 @@ xmlstarlet ed -L \
 				echo "clusterServersConfig:"
 				echo "  nodeAddresses:"
 				echo "    - \"redis://${cache_host}:${cache_port}\""
-				echo "  database: ${cache_database}"
 			} >> tomcat/conf/redisson.yaml
 		else
 			{
