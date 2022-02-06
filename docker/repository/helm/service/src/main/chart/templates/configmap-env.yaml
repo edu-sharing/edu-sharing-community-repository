@@ -4,6 +4,10 @@ metadata:
   name: {{ include "edusharing_repository_service.name" . }}-env
   labels: {{ include "edusharing_repository_service.labels" . | nindent 4 }}
 data:
+  CACHE_CLUSTER: {{ .Values.config.cache.cluster | quote }}
+  CACHE_DATABASE: {{ .Values.config.cache.database | quote }}
+  CACHE_HOST: {{ .Values.config.cache.host | quote }}
+  CACHE_PORT: {{ .Values.config.cache.port | quote }}
   CATALINA_OPTS: >-
     -XX:MinRAMPercentage={{ .Values.config.jvm.ram.minPercentage }}
     -XX:MaxRAMPercentage={{ .Values.config.jvm.ram.maxPercentage }}
@@ -23,8 +27,6 @@ data:
     -javaagent:/opt/alfresco/tomcat/agent/jmx_prometheus_javaagent.jar=9090:/opt/alfresco/tomcat/agent/jmx-exporter-config.yaml
     {{- end }}
   JPDA_ADDRESS: {{ if .Values.global.cluster.istio.enabled }}"127.0.0.1:5005"{{ else }}"0.0.0.0:5005"{{ end }}
-  REPOSITORY_CACHE_HOST: {{ .Values.config.cache.host | quote }}
-  REPOSITORY_CACHE_PORT: {{ .Values.config.cache.port | quote }}
   REPOSITORY_DATABASE_DRIV: {{ .Values.config.database.driver | quote }}
   REPOSITORY_DATABASE_HOST: {{ .Values.config.database.host | quote }}
   REPOSITORY_DATABASE_NAME: {{ .Values.config.database.database | quote }}

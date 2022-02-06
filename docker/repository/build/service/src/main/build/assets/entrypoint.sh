@@ -41,8 +41,10 @@ my_http_session_timeout="${REPOSITORY_SERVICE_HTTP_SESSION_TIMEOUT:-60}"
 
 my_http_accesslog_enabled="${REPOSITORY_SERVICE_HTTP_ACCESSLOG_ENABLED:-}"
 
-repository_cache_host="${REPOSITORY_CACHE_HOST:-}"
-repository_cache_port="${REPOSITORY_CACHE_PORT:-}"
+cache_cluster="${CACHE_CLUSTER:-false}"
+cache_database="${CACHE_DATABASE:-0}"
+cache_host="${CACHE_HOST:-}"
+cache_port="${CACHE_PORT:-}"
 
 repository_database_driv="${REPOSITORY_DATABASE_DRIV:-"org.postgresql.Driver"}"
 repository_database_host="${REPOSITORY_DATABASE_HOST:-repository-database}"
@@ -74,13 +76,13 @@ homeProp="tomcat/shared/classes/config/cluster/applications/homeApplication.prop
 
 ### Wait ###############################################################################################################
 
-[[ -n "${repository_cache_host}" && -n "${repository_cache_port}" ]] && {
+[[ -n "${cache_host}" && -n "${cache_port}" ]] && {
 
-	until wait-for-it "${repository_cache_host}:${repository_cache_port}" -t 3; do sleep 1; done
+	until wait-for-it "${cache_host}:${cache_port}" -t 3; do sleep 1; done
 
-	grep -Fq 'clusterServersConfig' tomcat/conf/redisson.yaml && {
-		until [[ $(redis-cli --cluster info "${repository_cache_host}" "${repository_cache_port}" | grep '[OK]' | cut -d ' ' -f5) -gt 1 ]]; do
-			echo >&2 "Waiting for ${repository_cache_host} ..."
+	[[ "${cache_cluster}" == "true" ]] && {
+		until [[ $(redis-cli --cluster info "${cache_host}" "${cache_port}" | grep '[OK]' | cut -d ' ' -f5) -gt 1 ]]; do
+			echo >&2 "Waiting for ${cache_host} ..."
 			sleep 3
 		done
 	}
@@ -170,7 +172,7 @@ xmlstarlet ed -L \
 	-i '$external' -t attr -n "maxThreads" -v "${my_pool_external}" \
 	${catSConf}
 
-[[ -n "${repository_cache_host}" && -n "${repository_cache_port}" ]] && {
+[[ -n "${cache_host}" && -n "${cache_port}" ]] && {
 	xmlstarlet ed -L \
 		-d '/Context/Manager[@className="org.redisson.tomcat.RedissonSessionManager"]' \
 		-s '/Context' -t elem -n "Manager" -v "" \
@@ -182,6 +184,21 @@ xmlstarlet ed -L \
 		-i '$redis' -t attr -n "broadcastSessionEvents" -v "true" \
 		-i '$redis' -t attr -n "broadcastSessionUpdates" -v "true" \
 		${catCConf}
+
+		if [[ "${cache_cluster}" == "true" ]] ; then
+			{
+				echo "clusterServersConfig:"
+				echo "  nodeAddresses:"
+				echo "    - \"redis://${cache_host}:${cache_port}\""
+				echo "  database: ${cache_database}"
+			} >> tomcat/conf/redisson.yaml
+		else
+			{
+				echo "singleServerConfig:"
+        echo "  address: \"redis://${CACHE_HOST}:${CACHE_PORT}\""
+				echo "  database: ${cache_database}"
+			} >> tomcat/conf/redisson.yaml
+		fi
 }
 
 xmlstarlet ed -L \

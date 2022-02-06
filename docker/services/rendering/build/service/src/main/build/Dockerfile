@@ -40,7 +40,7 @@ RUN set -eux \
     && rm -r /var/lib/apt/lists/*
 
 RUN set -eux \
-    && curl -L -o /tmp/phpredis.tar.gz https://github.com/phpredis/phpredis/archive/${rendering.redis.client.version}.tar.gz \
+    && curl -L -o /tmp/phpredis.tar.gz https://github.com/phpredis/phpredis/archive/${phpredis.version}.tar.gz \
     && mkdir -p /usr/src/php/ext/redis \
     && tar -C /usr/src/php/ext/redis -xzf /tmp/phpredis.tar.gz --strip 1 \
     && rm -r /tmp/phpredis.tar.gz \

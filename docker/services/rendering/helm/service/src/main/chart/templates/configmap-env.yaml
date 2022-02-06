@@ -4,13 +4,12 @@ metadata:
   name: {{ include "edusharing_rendering_service.name" . }}-env
   labels: {{ include "edusharing_rendering_service.labels" . | nindent 4 }}
 data:
+  CACHE_CLUSTER: {{ .Values.config.cache.cluster | quote }}
+  CACHE_DATABASE: {{ .Values.config.cache.database | quote }}
+  CACHE_HOST: {{ .Values.config.cache.host | quote }}
+  CACHE_PORT: {{ .Values.config.cache.port | quote }}
   REPOSITORY_SERVICE_HOST: {{ .Values.config.repository.host | quote }}
   REPOSITORY_SERVICE_PORT: {{ .Values.config.repository.port | quote }}
-  SERVICES_RENDERING_CACHE_HOST: {{ .Values.config.cache.host | quote }}
-  SERVICES_RENDERING_CACHE_OPTS: {{ .Values.config.cache.options | quote }}
-  SERVICES_RENDERING_CACHE_PORT: {{ .Values.config.cache.port | quote }}
-  SERVICES_RENDERING_CACHE_PROT: {{ .Values.config.cache.protocol | quote }}
-  SERVICES_RENDERING_CACHE_TYPE: {{ .Values.config.cache.type | quote }}
   SERVICES_RENDERING_DATABASE_DRIV: {{ .Values.config.database.driver | quote }}
   SERVICES_RENDERING_DATABASE_HOST: {{ .Values.config.database.host | quote }}
   SERVICES_RENDERING_DATABASE_NAME: {{ .Values.config.database.database | quote }}

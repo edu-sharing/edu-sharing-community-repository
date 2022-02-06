@@ -1,2 +1,0 @@
-singleServerConfig:
-  address: "redis://${REPOSITORY_CACHE_HOST}:${REPOSITORY_CACHE_PORT}"

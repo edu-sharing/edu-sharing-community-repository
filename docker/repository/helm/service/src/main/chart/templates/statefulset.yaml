@@ -14,9 +14,8 @@ spec:
       labels: {{ include "edusharing_repository_service.labels" . | nindent 8 }}
       annotations:
         checksum/configmap-env: {{ include (print .Template.BasePath "/configmap-env.yaml") . | sha256sum | trunc 63 }}
-        checksum/configmap-file: {{ include (print .Template.BasePath "/configmap-file.yaml") . | sha256sum | trunc 63 }}
         {{- if .Values.config.custom.enabled }}
-        checksum/configmap-file-custom: {{ include (print .Template.BasePath "/configmap-file-custom.yaml") . | sha256sum | trunc 63 }}
+        checksum/configmap-file: {{ include (print .Template.BasePath "/configmap-file.yaml") . | sha256sum | trunc 63 }}
         {{- end }}
         {{- if .Values.config.saml.enabled }}
         {{- if .Values.config.saml.config }}
@@ -93,11 +92,8 @@ spec:
           mountPath: /usr/local/tomcat/shared/classes/config/cluster
         - name: share-data
           mountPath: /opt/alfresco/alf_data
-        - name: file
-          mountPath: /usr/local/tomcat/conf/redisson.yaml
-          subPath: redisson
         {{- if .Values.config.custom.enabled }}
-        - name: file-custom
+        - name: file
           mountPath: /usr/local/tomcat/shared/classes/config/cluster/edu-sharing.override.conf
           subPath: services
         {{- end }}
@@ -227,13 +223,10 @@ spec:
       - name: share-data
         persistentVolumeClaim:
           claimName: {{ include "edusharing_repository_service.pvc.share.data" . }}
+      {{- if .Values.config.custom.enabled }}
       - name: file
         configMap:
           name: {{ include "edusharing_repository_service.name" . }}-file
-      {{- if .Values.config.custom.enabled }}
-      - name: file-custom
-        configMap:
-          name: {{ include "edusharing_repository_service.name" . }}-file-custom
       {{- end }}
       {{- if .Values.config.saml.enabled }}
       {{- if .Values.config.saml.config }}

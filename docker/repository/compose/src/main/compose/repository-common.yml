@@ -41,6 +41,10 @@ services:
   repository-service:
     image: "${docker.repository}/edu_sharing-community-deploy-docker-repository-build-service:${docker.tag}"
     environment:
+      CACHE_CLUSTER: false
+      CACHE_DATABASE: 0
+#      CACHE_HOST: cache
+      CACHE_PORT: 6379
       CATALINA_OPTS: >-
         -Xms${REPOSITORY_SERVICE_JAVA_XMS:-1g}
         -Xmx${REPOSITORY_SERVICE_JAVA_XMX:-1g}

@@ -48,19 +48,19 @@
       <dependency>
         <groupId>io.prometheus.jmx</groupId>
         <artifactId>jmx_prometheus_javaagent</artifactId>
-        <version>${repository.prometheus.agent.version}</version>
+        <version>${prometheus.jmx.version}</version>
       </dependency>
 
       <dependency>
         <groupId>org.redisson</groupId>
         <artifactId>redisson-all</artifactId>
-        <version>${repository.redis.client.version}</version>
+        <version>${redisson.version}</version>
       </dependency>
 
       <dependency>
         <groupId>org.redisson</groupId>
         <artifactId>redisson-tomcat-8</artifactId>
-        <version>${repository.redis.client.version}</version>
+        <version>${redisson.version}</version>
       </dependency>
 
     </dependencies>

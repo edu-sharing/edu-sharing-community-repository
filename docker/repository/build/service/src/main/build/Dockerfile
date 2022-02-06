@@ -63,7 +63,6 @@ COPY --chown=worker:worker artifacts/redisson-all-${org.redisson:redisson-all:ja
 COPY --chown=worker:worker artifacts/redisson-tomcat-8-${org.redisson:redisson-tomcat-8:jar.version}.jar tomcat/lib/
 
 COPY --chown=worker:worker assets/tomcat/logging.properties tomcat/conf/logging.properties
-COPY --chown=worker:worker assets/tomcat/redisson.yaml tomcat/conf/redisson.yaml
 
 RUN set -eux \
     && sed -i -r \

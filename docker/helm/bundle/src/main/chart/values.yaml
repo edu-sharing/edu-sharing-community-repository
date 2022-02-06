@@ -81,8 +81,6 @@ edusharing_repository:
         host: *redisclusterNameOverride
         port: *redisclusterServicePortApi
 
-      database:
-
 ########################################################################################################################
 
 edusharing_services_rendering:

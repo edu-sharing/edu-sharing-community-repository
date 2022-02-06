@@ -17,6 +17,10 @@ services:
   services-rendering-service:
     image: "${docker.repository}/edu_sharing-community-deploy-docker-services-rendering-build-service:${docker.tag}"
     environment:
+      CACHE_CLUSTER: false
+      CACHE_DATABASE: 0
+      CACHE_HOST: cache
+      CACHE_PORT: 6379
       SERVICES_RENDERING_DATABASE_DRIV: pgsql
       SERVICES_RENDERING_DATABASE_HOST: services-rendering-database
       SERVICES_RENDERING_DATABASE_NAME: "${SERVICES_RENDERING_DATABASE_NAME:-rendering}"

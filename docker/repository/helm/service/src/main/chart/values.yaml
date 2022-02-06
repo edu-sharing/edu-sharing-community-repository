@@ -78,8 +78,6 @@ ingress:
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/affinity: cookie
-    nginx.ingress.kubernetes.io/session-cookie-name: edusharing-repository
-    nginx.ingress.kubernetes.io/session-cookie-path: "*"
     nginx.ingress.kubernetes.io/proxy-body-size: "5g"
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "15"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
@@ -113,18 +111,10 @@ config:
     password: admin
 
   cache:
-    host: edusharing-repository-rediscluster
+    cluster: true
+    database: 0
+    host: edusharing-rediscluster
     port: 6379
-    type: rediscluster
-    # https://github.com/redisson/redisson/wiki/2.-Configuration#242-cluster-yaml-config-format
-    options: |
-      readMode: "MASTER"
-      subscriptionMode: "MASTER"
-    # https://github.com/redisson/redisson/wiki/2.-Configuration#23-common-settings
-    commons: |
-      threads: 16
-      nettyThreads: 32
-      transportMode: "NIO"
 
   cluster:
     enabled: ${helm.config.cluster.enabled}
