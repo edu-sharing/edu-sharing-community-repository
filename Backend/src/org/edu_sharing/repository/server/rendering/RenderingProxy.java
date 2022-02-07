@@ -325,12 +325,16 @@ public class RenderingProxy extends HttpServlet {
 			if (options.displayMode.equals(RenderingTool.DISPLAY_INLINE)) {
 				NodeTrackingDetails details = new NodeTrackingDetails(getVersion(req));
 				details.setLms(new NodeTrackingDetails.NodeTrackingLms(usage));
-				AuthenticationUtil.runAs(() ->
-								TrackingServiceFactory.getTrackingService().trackActivityOnNode(
-										new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
-										details,
-										TrackingService.EventType.VIEW_MATERIAL_EMBEDDED)
-				,usernameDecrypted);
+				try {
+					TrackingServiceFactory.getTrackingService().trackActivityOnNode(
+							new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
+							details,
+							TrackingService.EventType.VIEW_MATERIAL_EMBEDDED,
+							usernameDecrypted
+					);
+				} catch (Throwable t) {
+					logger.info("Could not track " + TrackingService.EventType.VIEW_MATERIAL_EMBEDDED + " event", t);
+				}
 			}
 		} catch (HttpException e) {
 			throw new RenderingException(e);

@@ -119,46 +119,44 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         }),authorityName);
 
     }
-
     @Override
-    public boolean trackActivityOnNode(NodeRef nodeRef,NodeTrackingDetails details, EventType type) {
+    public boolean trackActivityOnNode(NodeRef nodeRef,NodeTrackingDetails details, EventType type, String authorityName) {
         super.trackActivityOnNode(nodeRef,details,type);
-        
-            String version;
-            String nodeVersion = details==null ? null : details.getNodeVersion();
-            if(nodeVersion==null || nodeVersion.isEmpty() || nodeVersion.equals("-1")){
-                version=NodeServiceHelper.getProperty(nodeRef,CCConstants.CM_PROP_VERSIONABLELABEL);
-            }
-            else{
-                version=nodeVersion;
-            }
-            return execDatabaseQuery(TRACKING_INSERT_NODE, statement -> {
-                statement.setLong(1, (Long) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.SYS_PROP_NODE_DBID)));
-                statement.setString(2, nodeRef.getId());
-                statement.setString(3, version);
-                statement.setString(4, super.getTrackedUsername(null));
-                try {
-                    statement.setArray(5,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllOrganizations(true).getData().stream().map(EduGroup::getGroupname).toArray()));
-                } catch (Exception e) {
-                    logger.info("Failed to track organizations of user",e);
-                }
-                try {
-                    statement.setArray(6,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllMediacenters().toArray()));
-                } catch (Exception e) {
-                    logger.info("Failed to track mediacenter of user",e);
-                }
-                statement.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
-                statement.setString(8, type.name());
-                JSONObject json = buildJson(nodeRef, details, type);
-                PGobject obj = new PGobject();
-                obj.setType("json");
-                if (json != null)
-                    obj.setValue(json.toString());
-                statement.setObject(9, obj);
 
-                return true;
-            });
-        
+        String version;
+        String nodeVersion = details==null ? null : details.getNodeVersion();
+        if(nodeVersion==null || nodeVersion.isEmpty() || nodeVersion.equals("-1")){
+            version=NodeServiceHelper.getProperty(nodeRef,CCConstants.CM_PROP_VERSIONABLELABEL);
+        }
+        else{
+            version=nodeVersion;
+        }
+        return execDatabaseQuery(TRACKING_INSERT_NODE, statement -> {
+            statement.setLong(1, (Long) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.SYS_PROP_NODE_DBID)));
+            statement.setString(2, nodeRef.getId());
+            statement.setString(3, version);
+            statement.setString(4, super.getTrackedUsername(authorityName));
+            try {
+                statement.setArray(5,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllOrganizations(true).getData().stream().map(EduGroup::getGroupname).toArray()));
+            } catch (Exception e) {
+                logger.info("Failed to track organizations of user",e);
+            }
+            try {
+                statement.setArray(6,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllMediacenters().toArray()));
+            } catch (Exception e) {
+                logger.info("Failed to track mediacenter of user",e);
+            }
+            statement.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
+            statement.setString(8, type.name());
+            JSONObject json = buildJson(nodeRef, details, type);
+            PGobject obj = new PGobject();
+            obj.setType("json");
+            if (json != null)
+                obj.setValue(json.toString());
+            statement.setObject(9, obj);
+
+            return true;
+        });
     }
 
     /**
