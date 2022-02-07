@@ -141,13 +141,13 @@ public class HttpQueryTool {
 					if(returnCode >= 400){
 						String rsStrg = null;
 						if (result != null) {
-							rsStrg = EntityUtils.toString(result);
+							rsStrg = EntityUtils.toString(result,"UTF-8");
 						}
 						throw new HttpException(returnCode,rsStrg);
 					}
 
 					if(callback == null){
-						return EntityUtils.toString(result);
+						return EntityUtils.toString(result,"UTF-8");
 					}else{
 						callback.handle(result.getContent());
 						return null;
