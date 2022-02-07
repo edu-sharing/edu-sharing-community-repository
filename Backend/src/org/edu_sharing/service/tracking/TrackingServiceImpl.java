@@ -121,7 +121,7 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
     }
     @Override
     public boolean trackActivityOnNode(NodeRef nodeRef,NodeTrackingDetails details, EventType type, String authorityName) {
-        super.trackActivityOnNode(nodeRef,details,type);
+        super.trackActivityOnNode(nodeRef,details,type, authorityName);
 
         String version;
         String nodeVersion = details==null ? null : details.getNodeVersion();
