@@ -35,7 +35,7 @@
 	<!--
 		list of allowed CORS domains
 	-->
-	<entry key="allow_origin"></entry>
+	<entry key="allow_origin">http://localhost:54361</entry>
 
 	<entry key="webappname">edu-sharing</entry>
 	<entry key="wspath">/alfresco/api</entry>
