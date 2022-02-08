@@ -327,7 +327,7 @@ input.mat-input-element::placeholder {
     }
 }
 button{
-    &.mat-button, &.mat-flat-button, &.mat-raised-button, &.mat-icon-button {
+    &.mat-button, &.mat-flat-button, &.mat-raised-button, &.mat-icon-button, &.mat-fab {
         &.cdk-keyboard-focused {
             @include setGlobalKeyboardFocus();
         }
