@@ -55,7 +55,10 @@
         },
         "PINNING": {
             "TITLE": "Gepinnte Sammlungen",
-            "UPDATED": "Liste gepinnter Sammlungen wurde aktualisiert"
+            "UPDATED": "Liste gepinnter Sammlungen wurde aktualisiert",
+            "POSITION_SLIDER": "Position der Sammlung \"{{ collection }}\" in der Liste",
+            "MOVE_DOWN": "Nach unten verschieben",
+            "MOVE_UP": "Nach oben verschieben"
         },
         "NO_ADD_PERMISSIONS": "Sie besitzen keine Berechtigung um Materialien in diese Sammlung aufzunehmen",
         "ERROR_NOT_FOUND": "Sammlung wurde nicht gefunden",
