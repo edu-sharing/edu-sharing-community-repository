@@ -30,10 +30,29 @@
 
     <bom.version>${project.version}</bom.version>
 
-    <helm.kube.version>&gt;= 1.18.0</helm.kube.version>
-    <helm.version>3.7.2</helm.version>
-
   </properties>
+
+  <profiles>
+
+    <profile>
+
+      <id>dev</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.DEV</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <properties>
+        <bom.version>${project.version}</bom.version>
+      </properties>
+
+    </profile>
+
+  </profiles>
 
   <build>
 
