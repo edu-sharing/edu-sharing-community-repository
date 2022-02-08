@@ -283,7 +283,7 @@ public class MetadataSearchHelper {
 		 * remote repo
 		 */
 		if(!ApplicationInfoList.getHomeRepository().getAppId().equals(repoId) &&
-				!ApplicationInfo.REPOSITORY_TYPE_LOCAL.equals(ApplicationInfoList.getRepositoryInfo(repoId).getRepositoryType())) {
+				!ApplicationInfo.REPOSITORY_TYPE_LOCAL.equals(ApplicationInfoList.getRepositoryInfoById(repoId).getRepositoryType())) {
 			return SearchServiceFactory.getSearchService(repoId).getSuggestions(mds, queryId, parameterId, value, criterias);
 		}
 
