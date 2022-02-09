@@ -1200,7 +1200,7 @@ export class AdminComponent {
     }
 
   getOwnAppUrl() {
-    return this.connector.getAbsoluteEdusharingUrl()+'metadata?format='+this.ownAppMode;
+    return this.connector.getAbsoluteEdusharingUrl()+'metadata?format='+this.ownAppMode + '&external=true';
   }
 
   copyOwnApp() {
