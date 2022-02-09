@@ -18,6 +18,7 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.server.tools.*;
@@ -2290,9 +2291,10 @@ public class NodeDao {
 			String parentRef = NodeServiceFactory.getLocalService().getPrimaryParent(getRef().getId());
 			HashMap<String,Object> propsParent =
 					NodeServiceHelper.getProperties(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentRef));
-			// ignore some technical properties, like mimetypes etc.
-			for(String prop : CCConstants.CHILDOBJECT_IGNORED_PARENT_PROPERTIES)
+			// ignore some technical properties, like mimetypes etc. (configured via lightbend)
+			for(String prop : LightbendConfigLoader.get().getStringList("repository.childobjects.ignoredInheritMetadata")) {
 				propsParent.remove(prop);
+			}
 			// override it with the props from the child
 			for(Map.Entry<String,Object> entry : propsChild.entrySet()){
 				if(entry.getValue() != null && !entry.getValue().toString().isEmpty()) {
