@@ -818,6 +818,7 @@
         "CONFIRM_GROUP": "Sie werden der folgenden Gruppe beitreten:",
         "GROUP_PASSWORD": "Gruppen-Passwort eingeben",
         "SIGNUP": "Beitreten",
+        "ALREADY_MEMBER": "Sie sind bereits Mitglied",
         "SIGNUP_TYPE": {
             "simple": "Zutritt ohne Beschränkung möglich",
             "password": "Zutritt nur mit Passwort möglich",

@@ -1,4 +1,4 @@
-import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
+import {Component, Input, EventEmitter, Output, ViewChild, ElementRef, OnInit} from '@angular/core';
 import {DialogButton, Group, RestConnectorService} from "../../../core-module/core.module";
 import {Toast} from "../../../core-ui-module/toast";
 import {RestNodeService} from "../../../core-module/core.module";
@@ -27,7 +27,7 @@ enum Step {
   templateUrl: 'signup-group.component.html',
   styleUrls: ['signup-group.component.scss'],
 })
-export class SignupGroupComponent  {
+export class SignupGroupComponent implements OnInit {
   readonly STEP = Step;
   @Output() onCancel = new EventEmitter<void>();
   buttons: DialogButton[];
@@ -36,6 +36,7 @@ export class SignupGroupComponent  {
   groups: Group[];
   password = '';
   groupsLoading = true;
+  userGroups: Group[];
   constructor(
       private connector : RestConnectorService,
       private iam : RestIamService,
@@ -55,7 +56,7 @@ export class SignupGroupComponent  {
         this.toast.error(error);
         this.groupsLoading = false;
         this.toast.closeModalDialog();
-      })
+      });
     });
   }
 
@@ -65,7 +66,7 @@ export class SignupGroupComponent  {
         this.dialogStep = Step.confirmGroup;
         this.updateButtons();
       });
-      this.buttons[1].disabled = !this.group;
+      this.buttons[1].disabled = !this.group || this.isMemberOf(this.group);
     }
     if(this.dialogStep === Step.confirmGroup) {
       const back = new DialogButton('BACK', DialogButton.TYPE_CANCEL, () => {
@@ -104,5 +105,14 @@ export class SignupGroupComponent  {
     select(group: Group) {
       this.group = group;
       this.updateButtons();
+    }
+
+    async ngOnInit() {
+        this.userGroups = (await this.iam.getUserGroups().toPromise()).groups;
+
+    }
+
+    isMemberOf(group: Group) {
+        return !!this.userGroups?.find(g => g.authorityName === group.authorityName);
     }
 }
