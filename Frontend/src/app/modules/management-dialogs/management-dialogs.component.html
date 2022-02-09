@@ -137,6 +137,8 @@
         (onDone)="closeLinkMap($event)"
 ></app-map-link>
 <collection-chooser
+  role="dialog"
+  [attr.aria-label]="'WORKSPACE.SELECT_COLLECTION' | translate"
   class="dialog-right scrollWithBanner"
   *ngIf="addToCollection"
   [@fromRight]="addToCollection"
