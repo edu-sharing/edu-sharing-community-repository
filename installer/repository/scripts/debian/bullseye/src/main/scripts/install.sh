@@ -528,6 +528,11 @@ config_edu_sharing() {
 
 	echo "- update ${eduProps}"
 
+	my_origin="${my_prot_external}://${my_host_external}"
+	[[ $my_port_external != "80" && $my_port_external != "443" ]] && {
+		my_origin="${my_origin}:${my_port_external}"
+	}
+
 	xmlstarlet ed -L \
 		-u '/properties/entry[@key="appid"]' -v "${my_home_appid}" \
 		-u '/properties/entry[@key="authenticationwebservice"]' -v "${my_auth_external}" \
@@ -537,6 +542,7 @@ config_edu_sharing() {
 		-u '/properties/entry[@key="host"]' -v "${my_host_internal}" \
 		-u '/properties/entry[@key="password"]' -v "${my_admin_pass}" \
 		-u '/properties/entry[@key="port"]' -v "${my_port_internal}" \
+		-u '/properties/entry[@key="allow_origin"]' -v "${my_origin},http://localhost:54361" \
 		${eduProps}
 
 	if [[ -n "${my_home_provider}" ]] ; then
