@@ -22,7 +22,7 @@
     <module>common</module>
     <module>fixes</module>
     <module>module</module>
-    <module>rest</module>
+<!--<module>rest</module>-->
   </modules>
 
 </project>

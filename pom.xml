@@ -211,6 +211,7 @@
         <type>amp</type>
       </dependency>
 
+      <!--
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-java-auth</artifactId>
@@ -240,6 +241,7 @@
         <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-java-workflow</artifactId>
         <version>${project.version}</version>
       </dependency>
+      -->
 
       <dependency>
         <groupId>${project.groupId}</groupId>
@@ -257,6 +259,13 @@
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-backend-services-rest-api</artifactId>
         <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-backend-services-rest-client-angular</artifactId>
+        <version>${project.version}</version>
+        <classifier>sources</classifier>
       </dependency>
 
       <dependency>
