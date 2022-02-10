@@ -148,10 +148,6 @@ public class SearchServiceElastic extends SearchServiceImpl {
             return super.searchV2(mds,query,criterias,searchToken);
         }
 
-        String[] searchword = criterias.get("ngsearchword");
-        String ngsearchword = (searchword != null) ? searchword[0] : null;
-
-
         Set<String> authorities = getUserAuthorities();
         String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
 
