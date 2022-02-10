@@ -83,13 +83,18 @@ RUN set -eux \
 ########################################################################################################################
 
 RUN set -eux \
+    && addgroup --gid 1000 appuser \
+    && adduser --uid 1000 --gid 1000 --disabled-password appuser \
+    && adduser www-data appuser
+
+RUN set -eux \
     && mkdir -p $RS_CACHE/config \
     && mkdir -p $RS_CACHE/data \
     && mkdir -p $RS_ROOT/conf/esmain \
     && mkdir -p $RS_ROOT/install/_tmpl \
-	&& chown -R www-data:www-data /etc/apache2 $RS_ROOT $RS_CACHE $PHP_INI_DIR
+	&& chown -R appuser:appuser /etc/apache2 $RS_ROOT $RS_CACHE $PHP_INI_DIR
 
-USER www-data
+USER appuser
 
 ########################################################################################################################
 
