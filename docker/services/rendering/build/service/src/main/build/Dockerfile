@@ -90,8 +90,6 @@ RUN set -eux \
 RUN set -eux \
     && mkdir -p $RS_CACHE/config \
     && mkdir -p $RS_CACHE/data \
-    && mkdir -p $RS_ROOT/conf/esmain \
-    && mkdir -p $RS_ROOT/install/_tmpl \
 	&& chown -R appuser:appuser /etc/apache2 $RS_ROOT $RS_CACHE $PHP_INI_DIR
 
 USER appuser

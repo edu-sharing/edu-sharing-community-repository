@@ -146,8 +146,8 @@ tolerations: []
 
 podSecurityContext:
 
-  runAsUser: 33
-  fsGroup: 33
+  runAsUser: 1000
+  fsGroup: 1000
 
 securityContext:
 
