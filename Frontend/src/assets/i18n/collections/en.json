@@ -107,6 +107,7 @@
     "collections_howToAddContent": "Just click on the \"ADD MATERIAL\" button and use the search engine to find contents for your collection.",
 
     "collectionNew_preview": "preview of the collection",
+    "collectionNew_collectionImage": "Collection image",
     "collectionNew_uploadCollectionImage": "Upload a new collection image",
     "collectionNew_deleteCollectionImage": "Delete the collection image",
     "collectionNew_setColor": "color of the collection:",
