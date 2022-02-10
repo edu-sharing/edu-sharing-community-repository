@@ -130,14 +130,14 @@
               </div>
 
               <div *ngIf="!imageData && (currentCollection.preview && !currentCollection.preview.isIcon)" (keyup.enter)="file.click()" (click)="file.click()" class="card-collection-icon-container">
-                  <img class="blurred-image" [src]="currentCollection.preview.url+'&crop=true&width=350&height=240'">
-                  <img [src]="currentCollection.preview.url+'&crop=true&width=350&height=240'" class="card-image-preview"/>
+                  <img class="blurred-image" [src]="currentCollection.preview.url+'&crop=true&width=350&height=240'" alt="">
+                  <img [src]="currentCollection.preview.url+'&crop=true&width=350&height=240'" class="card-image-preview" [alt]="'collectionNew_collectionImage' | translate"/>
               </div>
 
               <div *ngIf="imageData" class="card-collection-image-container" (keyup.enter)="file.click()" (click)="file.click()">
                   <div class="card-image-container">
-                      <img [src]="imageData" class="blurred-image">
-                      <img [src]="imageData" class="card-image-preview">
+                      <img [src]="imageData" class="blurred-image" alt="">
+                      <img [src]="imageData" class="card-image-preview" [alt]="'collectionNew_collectionImage' | translate">
                   </div>
               </div>
 
