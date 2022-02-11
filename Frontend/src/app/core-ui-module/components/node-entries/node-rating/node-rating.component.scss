@@ -1,0 +1,8 @@
+@import '../../../styles/variables';
+
+.mat-icon-button.mat-primary {
+    color: $textLight;
+    span {
+        padding-left: 8px;
+    }
+}

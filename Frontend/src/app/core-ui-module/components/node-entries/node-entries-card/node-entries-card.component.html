@@ -96,7 +96,11 @@
     <ng-container *ngTemplateOutlet="image"></ng-container>
     <ng-container *ngTemplateOutlet="meta"></ng-container>
   </div>
-  <div class="card-options" *ngIf="entriesService.options">
+  <div class="card-options" *ngIf="entriesService.options || showRatings">
+    <div class="card-rating-area">
+    <es-node-rating [node]="node"></es-node-rating>
+    </div>
+    <div class="card-options-area">
     <es-option-button *ngFor="let option of optionsOnCard()"
                        class="card-options-always"
                        [option]="option"
@@ -111,6 +115,7 @@
     >
       <i esIcon="more_vert"></i>
     </button>
+    </div>
   </div>
 </div>
 <ng-template #image>

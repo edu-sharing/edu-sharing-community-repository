@@ -134,7 +134,7 @@ public class AdminServiceImpl implements AdminService  {
 		Map<String,ToolPermission> toolpermissions=new HashMap<>();
 		// refresh the tp in this case, since may a new one is created meanwhile by the client
 		for(String tp : tpService.getAllToolPermissions(true)) {
-			String nodeId=tpService.getToolPermissionNodeId(tp);
+			String nodeId=tpService.getToolPermissionNodeId(tp, true);
 			List<String> permissionsExplicit = permissionService.getExplicitPermissionsForAuthority(nodeId,authority);
 			List<String> permissions = permissionService.getPermissionsForAuthority(nodeId, authority);
 			ToolPermission status=new ToolPermission();
@@ -194,7 +194,7 @@ public class AdminServiceImpl implements AdminService  {
 		}
 		for(String tp : tpService.getAllAvailableToolPermissions()) {
 			ToolPermission.Status status = toolpermissions.get(tp);
-			String nodeId=tpService.getToolPermissionNodeId(tp);
+			String nodeId=tpService.getToolPermissionNodeId(tp, true);
 			ACL acl = permissionService.getPermissions(nodeId);
 			boolean add=true;
 			List<ACE> newAce=new ArrayList<>();

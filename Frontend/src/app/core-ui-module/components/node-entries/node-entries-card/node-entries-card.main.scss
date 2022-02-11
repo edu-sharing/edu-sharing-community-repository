@@ -15,21 +15,26 @@ $optionBarHeight: 50px;
         position: fixed;
     }
     .card-options {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        padding: 5px 5px 7px 5px;
-        .card-options-spacer {
-            // margin: 0 5px;
-            // border-left: 1px solid #ccc;
-        }
-        es-option-button, button {
-            transition: all $transitionNormal;
-            margin: 0 2px;
-            border-radius: 50%;
-            &:hover,
-            &:focus {
-                background-color: #fff;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-column-gap: 10px;
+        padding: 5px 5px 7px 20px;
+        .card-options-area {
+            display: flex;
+            .card-options-spacer {
+                // margin: 0 5px;
+                // border-left: 1px solid #ccc;
+            }
+
+            es-option-button, button {
+                transition: all $transitionNormal;
+                margin: 0 2px;
+                border-radius: 50%;
+
+                &:hover,
+                &:focus {
+                    background-color: #fff;
+                }
             }
         }
     }

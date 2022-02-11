@@ -1,0 +1,16 @@
+<ng-container *ngIf="hasPermission">
+  <button *ngIf="mode === 'likes'"
+          (click)="toogleLike()"
+          mat-icon-button
+          color="primary"
+          matTooltip="{{'RATING.LIKES' | translate}}">
+    <i [esIcon]="'edu-thumb_up' + (!node.rating.user ? '_off' : '')"></i>
+    <span>{{node.rating.overall.count}}</span>
+  </button>
+  <button *ngIf="mode === 'stars'"
+          mat-icon-button
+          color="primary"
+          matTooltip="{{'RATING.STARS' | translate}}">
+    NOT IMPLEMENTED
+  </button>
+</ng-container>

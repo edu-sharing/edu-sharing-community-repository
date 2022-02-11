@@ -156,7 +156,8 @@
         "TOOLPERMISSION_MEDIACENTER_MANAGE": "Change basic data (Address, Catalogs) from media centers where the given user is admin of",
         "TOOLPERMISSION_VIDEO_AUDIO_CUT": "Video- and audio-files can be cutted when added into collections",
         "TOOLPERMISSION_COLLECTION_CHANGE_OWNER": "Permission to change the ownername of a collection",
-        "TOOLPERMISSION_RATE": "The permission to rate materials",
+        "TOOLPERMISSION_RATE_READ": "The permission to see ratings of materials",
+        "TOOLPERMISSION_RATE_WRITE": "The permission to rate materials (requires TOOLPERMISSION_RATE_READ)",
         "TOOLPERMISSION_CONNECTOR": "Editor \"{{connector}}\" can be used",
         "TOOLPERMISSION_CONNECTOR_SAFE": "Editor \"{{connector}}\" can be used in safe",
         "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" can be viewed & browsed",
@@ -1050,6 +1051,13 @@
     },
     "ROCKETCHAT": {
         "TITLE": "Chat"
+    },
+    "RATING": {
+      "LIKES": "Recommend",
+      "TOAST": {
+        "LIKED": "Recommended material \"{{name}}\". Thank you!",
+        "LIKE_REMOVED": "Removed recommendation for material \"{{name}}\""
+      }
     },
     "NAV": {
         "MAIN": "main",
