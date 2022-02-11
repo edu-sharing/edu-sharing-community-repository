@@ -23,6 +23,8 @@ import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.repo.module.ModuleServiceImpl;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.module.ModuleInstallState;
+import org.alfresco.service.cmr.module.ModuleService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.apache.commons.io.FileUtils;
@@ -1001,12 +1003,9 @@ public class AdminServiceImpl implements AdminService  {
 
 	@Override
 	public Collection<PluginStatus> getPlugins() {
-		Object moduleService = applicationContext.getBean("moduleService");
-		// getAllModules();
-		// @TODO
-		return Arrays.asList(
-				new PluginStatus("Test 1", true),
-				new PluginStatus("Test 2", true)
-		);
+		ModuleService moduleService = (ModuleService) applicationContext.getBean("moduleService");
+		return moduleService.getAllModules().stream().map(m ->
+			new PluginStatus(m.getTitle(), m.getModuleVersionNumber().toString(), m.getInstallState().equals(ModuleInstallState.INSTALLED))
+		).collect(Collectors.toList());
 	}
 }
