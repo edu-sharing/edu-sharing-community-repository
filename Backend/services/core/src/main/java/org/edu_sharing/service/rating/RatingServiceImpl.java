@@ -35,7 +35,7 @@ public class RatingServiceImpl implements RatingService {
     private AuthorityService authorityService;
     private NodeService nodeService;
 
-    public RatingServiceImpl() {
+    public void init(){
         this.nodeService=NodeServiceFactory.getLocalService();
         this.authorityService=AuthorityServiceFactory.getLocalService();
         this.permissionService=PermissionServiceFactory.getLocalService();
