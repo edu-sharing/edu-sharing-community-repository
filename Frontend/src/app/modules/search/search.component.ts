@@ -274,16 +274,6 @@ export class SearchComponent implements AfterViewInit, OnDestroy {
                     false,
                 );
 
-                this.searchService.collectionsColumns = [];
-                this.searchService.collectionsColumns.push(
-                    new ListItem('COLLECTION', 'title'),
-                );
-                this.searchService.collectionsColumns.push(
-                    new ListItem('COLLECTION', 'info'),
-                );
-                this.searchService.collectionsColumns.push(
-                    new ListItem('COLLECTION', 'scope'),
-                );
                 this.connector
                     .hasToolPermission(
                         RestConstants.TOOLPERMISSION_UNCHECKEDCONTENT,
@@ -613,9 +603,11 @@ export class SearchComponent implements AfterViewInit, OnDestroy {
                                 RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
                                 RestConstants.CM_MODIFIED_DATE,
                             ],
+                            propertyFilter: [RestConstants.ALL],
                             sortAscending: [false, true, false],
                         },
-                        RestConstants.CONTENT_TYPE_COLLECTIONS,
+                        // this is now handled via mds queries
+                        RestConstants.CONTENT_TYPE_ALL,
                         this.currentRepository == RestConstants.ALL
                             ? RestConstants.HOME_REPOSITORY
                             : this.currentRepository,
@@ -888,6 +880,11 @@ export class SearchComponent implements AfterViewInit, OnDestroy {
             this.currentMdsSet,
             'search',
         );
+        this.searchService.collectionsColumns = MdsHelper.getColumns(
+            this.translate,
+            this.currentMdsSet,
+            'searchCollections'
+        )
     }
 
     private importNode(
