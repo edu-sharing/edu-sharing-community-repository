@@ -33,7 +33,7 @@ public class LogUsernamesWithSpecialChars extends AbstractJob {
             "-whitespace-", "\\s+",
             "-whitespace2-", "[ \\t\\n\\r\\f]+");
 
-    int pageSize = 5;
+    int pageSize = 100;
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
