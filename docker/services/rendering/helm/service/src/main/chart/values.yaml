@@ -109,6 +109,20 @@ config:
     password: rendering
     patroni: {}
 
+  gdpr:
+    enabled: false
+    modules: []
+    #     - '"audio"'
+    #     - '"video"'
+    urls: []
+  #     - regex: "/.*/"
+  #       name: "external Sources"
+  #       ref: "https://www.excample.com/gdpr"
+
+  plugins: []
+  #   - class: "ESRender_Plugin_...."
+  #     args: ['"arg1"','"arg2"']
+
   repository:
     host: edusharing-repository-service
     port: 8080

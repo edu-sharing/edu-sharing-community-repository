@@ -16,19 +16,19 @@ NAMESPACE="$(kubectl config view --minify --output 'jsonpath={..namespace}')"
 
 root=${EDU_ROOT:-$HOME/.edusharing/helm}
 
-mkdir -p "${root}/config"
-touch "${root}/config/${RELEASE}.yaml"
+mkdir -p "${root}/helm/config"
+touch "${root}/helm/config/${RELEASE}.yaml"
 
-mkdir -p "${root}/context/${CONTEXT}/${NAMESPACE}"
-touch "${root}/context/${CONTEXT}/${RELEASE}.yaml"
-touch "${root}/context/${CONTEXT}/${NAMESPACE}/${RELEASE}.yaml"
+mkdir -p "${root}/helm/context/${CONTEXT}/${NAMESPACE}"
+touch "${root}/helm/context/${CONTEXT}/${RELEASE}.yaml"
+touch "${root}/helm/context/${CONTEXT}/${NAMESPACE}/${RELEASE}.yaml"
 
 OPTIONS+=("--values")
-OPTIONS+=("${root}/config/${RELEASE}.yaml")
+OPTIONS+=("${root}/helm/config/${RELEASE}.yaml")
 OPTIONS+=("--values")
-OPTIONS+=("${root}/context/${CONTEXT}/${RELEASE}.yaml")
+OPTIONS+=("${root}/helm/context/${CONTEXT}/${RELEASE}.yaml")
 OPTIONS+=("--values")
-OPTIONS+=("${root}/context/${CONTEXT}/${NAMESPACE}/${RELEASE}.yaml")
+OPTIONS+=("${root}/helm/context/${CONTEXT}/${NAMESPACE}/${RELEASE}.yaml")
 
 [[ -n $USERNAME && -n $PASSWORD ]] && {
 	OPTIONS+=("--username")

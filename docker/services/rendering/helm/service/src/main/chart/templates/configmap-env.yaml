@@ -15,9 +15,19 @@ data:
   SERVICES_RENDERING_DATABASE_NAME: {{ .Values.config.database.database | quote }}
   SERVICES_RENDERING_DATABASE_PORT: {{ .Values.config.database.port | quote }}
   SERVICES_RENDERING_SERVICE_BIND: {{ if .Values.global.cluster.istio.enabled }}"127.0.0.1"{{ else }}"0.0.0.0"{{ end }}
+  SERVICES_RENDERING_SERVICE_GDPR_ENABLED: {{ .Values.config.gdpr.enabled | quote }}
+  SERVICES_RENDERING_SERVICE_GDPR_MODULES: '{{- join "," .Values.config.gdpr.modules }}'
+  SERVICES_RENDERING_SERVICE_GDPR_URLS: |-
+  {{- range $ununsed, $url := .Values.config.gdpr.urls }}
+  {{ $url.regex | quote }} => ["name" => {{ $url.name | quote }}, "url" => {{ $url.ref | quote }}],
+  {{- end }}
   SERVICES_RENDERING_SERVICE_HOST_EXTERNAL: {{ .Values.ingress.hosts | first | quote }}
   SERVICES_RENDERING_SERVICE_HOST_INTERNAL: {{ include "edusharing_rendering_service.name" . | quote }}
   SERVICES_RENDERING_SERVICE_PATH_EXTERNAL: {{ .Values.ingress.paths | first | quote }}
+  SERVICES_RENDERING_SERVICE_PLUGINS: |-
+  {{- range $ununsed, $plugin := .Values.config.plugins }}
+  $Plugins[] = new {{ $plugin.class }}({{ join "," $plugin.args }});
+  {{- end }}
   SERVICES_RENDERING_SERVICE_PORT_EXTERNAL: {{ if .Values.ingress.tls }}"443"{{ else }}"80"{{ end }}
   SERVICES_RENDERING_SERVICE_PORT_INTERNAL: {{ .Values.service.port.api.internal | quote }}
   SERVICES_RENDERING_SERVICE_PROT_EXTERNAL: {{ if .Values.ingress.tls }}"https"{{ else }}"http"{{ end }}

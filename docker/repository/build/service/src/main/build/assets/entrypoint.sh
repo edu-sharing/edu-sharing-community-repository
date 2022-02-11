@@ -354,12 +354,12 @@ xmlstarlet ed -L \
 		xmlstarlet ed -L \
 			-s '/config/values' -t elem -n 'loginUrl' -v '' \
 			-d '/config/values/loginUrl[position() != 1]' \
-			-u '/config/values/loginUrl' -v '/edu-sharing/shibboleth' \
+			-u '/config/values/loginUrl' -v "${my_path_external}/shibboleth" \
 			-s '/config/values' -t elem -n 'logout' -v '' \
 			-d '/config/values/logout[position() != 1]' \
 			-s '/config/values/logout' -t elem -n 'url' -v '' \
 			-d '/config/values/logout/url[position() != 1]' \
-			-u '/config/values/logout/url' -v '/edu-sharing/saml/logout' \
+			-u '/config/values/logout/url' -v "${my_path_external}/saml/logout" \
 			-s '/config/values/logout' -t elem -n 'destroySession' -v '' \
 			-d '/config/values/logout/destroySession[position() != 1]' \
 			-u '/config/values/logout/destroySession' -v 'false' \

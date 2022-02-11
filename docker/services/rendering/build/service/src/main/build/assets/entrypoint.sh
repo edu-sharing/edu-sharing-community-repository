@@ -14,19 +14,25 @@ my_home_appid="${SERVICES_RENDERING_SERVICE_HOME_APPID:-esrender}"
 my_prot_external="${SERVICES_RENDERING_SERVICE_PROT_EXTERNAL:-http}"
 my_host_external="${SERVICES_RENDERING_SERVICE_HOST_EXTERNAL:-rendering.services.127.0.0.1.nip.io}"
 my_port_external="${SERVICES_RENDERING_SERVICE_PORT_EXTERNAL:-9100}"
-my_path_external="${SERVICES_RENDERING_SERVICE_PATH_EXTERNAL:-$(basename "${RS_ROOT}")}"
-my_base_external="${my_prot_external}://${my_host_external}:${my_port_external}/${my_path_external}"
+my_path_external="${SERVICES_RENDERING_SERVICE_PATH_EXTERNAL:-/esrender}"
+my_base_external="${my_prot_external}://${my_host_external}:${my_port_external}${my_path_external}"
 
 my_prot_internal="${SERVICES_RENDERING_SERVICE_PROT_INTERNAL:-http}"
 my_host_internal="${SERVICES_RENDERING_SERVICE_HOST_INTERNAL:-services-rendering-service}"
 my_port_internal="${SERVICES_RENDERING_SERVICE_PORT_INTERNAL:-8080}"
-my_path_internal="${SERVICES_RENDERING_SERVICE_PATH_INTERNAL:-$(basename "${RS_ROOT}")}"
-my_base_internal="${my_prot_internal}://${my_host_internal}:${my_port_internal}/${my_path_internal}"
+my_path_internal="${SERVICES_RENDERING_SERVICE_PATH_INTERNAL:-/esrender}"
+my_base_internal="${my_prot_internal}://${my_host_internal}:${my_port_internal}${my_path_internal}"
 
 my_proxy_host="${SERVICES_RENDERING_SERVICE_PROXY_HOST:-}"
 my_proxy_port="${SERVICES_RENDERING_SERVICE_PROXY_PORT:-}"
 my_proxy_user="${SERVICES_RENDERING_SERVICE_PROXY_USER:-}"
 my_proxy_pass="${SERVICES_RENDERING_SERVICE_PROXY_PASS:-}"
+
+my_gdpr_enabled="${SERVICES_RENDERING_SERVICE_GDPR_ENABLED:-false}"
+my_gdpr_modules="${SERVICES_RENDERING_SERVICE_GDPR_MODULES:-}"
+my_gdpr_urls="${SERVICES_RENDERING_SERVICE_GDPR_URLS:-}"
+
+my_plugins="${SERVICES_RENDERING_SERVICE_PLUGINS:-}"
 
 cache_cluster="${CACHE_CLUSTER:-false}"
 cache_database="${CACHE_DATABASE:-0}"
@@ -132,7 +138,7 @@ if [[ ! -f "${RS_CACHE}/config/version.json" ]]; then
 		application_cache_save=
 		; path to the ffmpeg binary
 		application_ffmpeg=/usr/bin/ffmpeg
-		
+
 		[database]
 		; driver (mysql or pgsql)
 		db_driver=${rendering_database_driv}
@@ -146,7 +152,7 @@ if [[ ! -f "${RS_CACHE}/config/version.json" ]]; then
 		db_user=${rendering_database_user}
 		; db password
 		db_password=${rendering_database_pass}
-		
+
 		[repository]
 		; url of the repository to fetch properties and content from
 		repository_url=${repository_service_base}
@@ -210,6 +216,13 @@ systemConf="${RS_ROOT}/conf/system.conf.php"
 sed -i -r "s|\$MC_URL.*|\$MC_URL = '${my_base_external}';|" "${systemConf}"
 sed -i -r "s|\$MC_DOCROOT.*|\$MC_DOCROOT = '${RS_ROOT}';|" "${systemConf}"
 sed -i -r "s|\$CC_RENDER_PATH.*|\$CC_RENDER_PATH = '${RS_CACHE}';|" "${systemConf}"
+
+sed -i -r 's|\$DATAPROTECTIONREGULATION_CONFIG.*|\$DATAPROTECTIONREGULATION_CONFIG = ["enabled" => '"${my_gdpr_enabled}"', "modules" => ['"${my_gdpr_modules}"'], "urls" => ['"${my_gdpr_urls}"']];|' "${systemConf}"
+grep -q '\$DATAPROTECTIONREGULATION_CONFIG' "${systemConf}" || echo "\$DATAPROTECTIONREGULATION_CONFIG = [\"enabled\" => ${my_gdpr_enabled}, \"modules\" => [${my_gdpr_modules}], \"urls\" => [${my_gdpr_urls}]];" >> "${systemConf}"
+
+[[ -n $my_plugins ]] && {
+	echo "<?php\n${my_plugins}" > "${RS_ROOT}/conf/plugins.conf.php"
+}
 
 homeApp="${RS_ROOT}/conf/esmain/homeApplication.properties.xml"
 xmlstarlet ed -L \
