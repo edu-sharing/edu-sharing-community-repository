@@ -93,6 +93,12 @@ export class CardComponent implements AfterContentInit, OnDestroy {
      */
     @Input() header = true;
     /**
+     * If set, the card title will be assigned a heading role with the given level.
+     * 
+     * E.g., set to 2 for the equivalent of an `<h2>` element.
+     */
+    @Input() headingLevel: number;
+    /**
      * Jumpmarks for the left side (used for the mds dialog)
      */
     @Input() jumpmarks: CardJumpmark[];

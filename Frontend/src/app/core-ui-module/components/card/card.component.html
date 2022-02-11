@@ -2,6 +2,7 @@
     role="dialog"
     [attr.aria-label]="title"
     [attr.modal]="modal"
+    [attr.aria-modal]="modal === 'always'"
     [attr.width]="width"
     [attr.height]="height"
     [attr.priority]="priority"
@@ -16,7 +17,11 @@
     <mat-card-header *ngIf="header">
       <div *ngIf="avatar" class="avatar" mat-card-avatar><img [src]="avatar" alt="" image-config></div>
       <div *ngIf="icon" class="avatar" mat-card-avatar><i [icon]="icon"></i></div>
-      <mat-card-title [class.no-subtitle]="!subtitle">{{title}}</mat-card-title>
+      <mat-card-title
+        [class.no-subtitle]="!subtitle"
+        [attr.role]="headingLevel ? 'heading' : null"
+        [attr.aria-level]="headingLevel"
+      >{{title}}</mat-card-title>
       <mat-card-subtitle>{{subtitle}}</mat-card-subtitle>
       <div class="cancel">
         <button mat-button *ngIf="isCancelable" (click)="cancel()"><i icon="close" [aria]="true"></i></button>
