@@ -18,6 +18,7 @@
   height: 100%;
   align-items: center;
   z-index: 101;
+  pointer-events: none;
 }
 .noElements{
   display: flex;
