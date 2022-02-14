@@ -101,6 +101,6 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
 
     async ngOnInit() {
         this.showRatings = (await this.configService.get('', 'none').toPromise()) !== 'none' &&
-            (await this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_RATE_READ).toPromise());
+            (await this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_RATE_READ).toPromise())
     }
 }

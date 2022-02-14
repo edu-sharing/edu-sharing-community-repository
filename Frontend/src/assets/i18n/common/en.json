@@ -1054,9 +1054,15 @@
     },
     "RATING": {
       "LIKES": "Recommend",
+      "STARS_RATE": "Rate with {{rating}}",
+      "COUNT_RATINGS": "Rating count",
+      "COUNT_LIKES": "Recommendation count",
+      "DELETE_RATING": "Remove rating",
       "TOAST": {
         "LIKED": "Recommended material \"{{name}}\". Thank you!",
-        "LIKE_REMOVED": "Removed recommendation for material \"{{name}}\""
+        "RATED": "Rated material \"{{name}}\" with {{rating}} stars. Thank you!",
+        "LIKE_REMOVED": "Removed recommendation for material \"{{name}}\"",
+        "RATING_REMOVED": "Removed rating for material \"{{name}}\""
       }
     },
     "NAV": {

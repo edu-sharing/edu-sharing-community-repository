@@ -1122,9 +1122,15 @@
     },
     "RATING": {
       "LIKES": "Empfehlen",
+      "STARS_RATE": "Mit {{rating}} bewerten",
+      "COUNT_RATINGS": "Anzahl Bewertungen",
+      "COUNT_LIKES": "Anzahl Empfehlungen",
+      "DELETE_RATING": "Bewertung entfernen",
       "TOAST": {
         "LIKED": "Material \"{{name}}\" empfohlen. Vielen Dank!",
-        "LIKE_REMOVED": "Empfehlung für Material \"{{name}}\" entfernt"
+        "RATED": "Material \"{{name}}\" wurde mit {{rating}} bewertet. Vielen Dank!",
+        "LIKE_REMOVED": "Empfehlung für Material \"{{name}}\" entfernt",
+        "RATING_REMOVED": "Bewertung für Material \"{{name}}\" entfernt"
       }
     },
     "NAV": {

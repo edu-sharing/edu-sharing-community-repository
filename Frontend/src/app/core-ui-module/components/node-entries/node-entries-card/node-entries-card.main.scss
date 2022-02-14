@@ -19,6 +19,11 @@ $optionBarHeight: 50px;
         grid-template-columns: 1fr auto;
         grid-column-gap: 10px;
         padding: 5px 5px 7px 20px;
+        .card-rating-area {
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
         .card-options-area {
             display: flex;
             .card-options-spacer {

@@ -31,6 +31,7 @@ export class NodeRatingComponent<T extends Node> implements OnInit {
     @Input() node: T;
     mode: RatingMode;
     hasPermission: boolean;
+    hoverStar: number;
     constructor(
         public connector: RestConnectorService,
         public toast: Toast,
@@ -65,6 +66,38 @@ export class NodeRatingComponent<T extends Node> implements OnInit {
             } catch (e) {
                 this.toast.error(e);
             }
+        }
+    }
+
+    getPrimaryRating() {
+        if (this.node.rating.user) {
+            return this.node.rating.user;
+        }
+        return this.node.rating.overall.sum / this.node.rating.overall.count;
+    }
+
+    async setRating(rating: number) {
+        const name = RestHelper.getTitle(this.node);
+        try {
+            await this.ratingService.updateNodeRating(this.node.ref.id, rating).toPromise();
+            this.toast.toast('RATING.TOAST.RATED', {name, rating});
+            this.node.rating.overall.count += (this.node.rating.user ? 0 : 1);
+            this.node.rating.user = rating;
+        } catch (e) {
+            this.toast.error(e);
+        }
+    }
+
+    async deleteRating() {
+        const name = RestHelper.getTitle(this.node);
+        try {
+            await this.ratingService.deleteNodeRating(this.node.ref.id).toPromise();
+            this.toast.toast('RATING.TOAST.RATING_REMOVED', {name});
+            this.node.rating.overall.count--;
+            this.node.rating.overall.sum -= this.node.rating.user;
+            this.node.rating.user = 0;
+        } catch (e) {
+            this.toast.error(e);
         }
     }
 }
