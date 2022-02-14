@@ -288,7 +288,7 @@
         <div *ngFor="let permission of permissionsGroup.concat(permissionsUser)">
           <div class="advancedAuthority"><i class="type material-icons">{{permission.authority.authorityType=='USER' ? "person" : "group"}}</i>{{ permission | permissionName }}</div>
           <div *ngFor="let type of ALL_PERMISSIONS" class="advancedPermission">
-            <mat-checkbox id="{{permission.authority.authorityName+'_'+type}}"
+            <mat-checkbox
                           [checked]="hasImplicitPermission(permission,type)"
                           [disabled]="isImplicitPermission(permission,type)"
                           (change)="setPermission(permission,type,$event)">
