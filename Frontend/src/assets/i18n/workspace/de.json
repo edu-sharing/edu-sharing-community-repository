@@ -99,6 +99,8 @@
             "USAGE_INFO": "{{instance}}: Verwendet in {{type}} {{name}}",
             "USAGE_INDIRECT": "Diese Freigabe ist über eine Sammlungsreferenz erzeugt und kann nicht entfernt werden",
             "DELETED": "wird gelöscht",
+            "TYPE_MENU_LABEL": "Rolle von {{user}} festlegen",
+            "TYPE_MENU_LABEL_NEW": "Rolle für hinzugefügte Personen und Gruppen festlegen",
             "TYPE_VIEWER": "Betrachter",
             "TYPE_VIEWER_DESCRIPTION": "darf sehen",
             "TYPE_COWORKER": "Mitarbeiter",
