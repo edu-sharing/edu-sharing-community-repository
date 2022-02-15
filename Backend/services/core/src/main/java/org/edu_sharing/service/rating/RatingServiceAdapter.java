@@ -45,4 +45,9 @@ public class RatingServiceAdapter implements RatingService {
     public List<String> getAlteredNodeIds(@NotNull Date after) {
         return null;
     }
+
+    @Override
+    public List<RatingHistory> getAccumulatedRatingHistory(String nodeId, Date after) {
+        return null;
+    }
 }

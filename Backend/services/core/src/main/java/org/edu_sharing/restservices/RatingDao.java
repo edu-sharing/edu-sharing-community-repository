@@ -1,7 +1,9 @@
 package org.edu_sharing.restservices;
 
-import org.edu_sharing.service.rating.RatingService;
-import org.edu_sharing.service.rating.RatingServiceFactory;
+import org.edu_sharing.service.rating.*;
+
+import java.util.Date;
+import java.util.List;
 
 public class RatingDao {
 
@@ -22,6 +24,38 @@ public class RatingDao {
 		try{
 			this.ratingService.deleteRating(nodeId);
 		}catch(Exception e){
+			throw DAOException.mapping(e);
+		}
+	}
+	public List<Rating> getRatings(String nodeId, Date after) throws DAOException {
+		try{
+			return this.ratingService.getRatings(nodeId,after);
+		}catch(Exception e) {
+			throw DAOException.mapping(e);
+		}
+	}
+
+
+	public RatingDetails getAccumulatedRating(String nodeId, Date after) throws DAOException {
+		try{
+			return this.ratingService.getAccumulatedRatings(nodeId,after);
+		}catch(Exception e) {
+			throw DAOException.mapping(e);
+		}
+	}
+
+	public List<RatingHistory> getAccumulatedRatingHistory(String nodeId, Date after) throws DAOException {
+		try{
+			return this.ratingService.getAccumulatedRatingHistory(nodeId, after);
+		}catch(Exception e) {
+			throw DAOException.mapping(e);
+		}
+	}
+
+	public List<String> getAlteredNodes(Date after) throws DAOException {
+		try{
+			return this.ratingService.getAlteredNodeIds(after);
+		}catch(Exception e) {
 			throw DAOException.mapping(e);
 		}
 	}

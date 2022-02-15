@@ -157,6 +157,11 @@ public class RatingServiceImpl implements RatingService {
         throw new NotImplementedException();
     }
 
+    @Override
+    public List<RatingHistory> getAccumulatedRatingHistory(String nodeId, Date after) {
+        throw new NotImplementedException();
+    }
+
     private RatingDetails cacheToDetail(RatingsCache cache) {
         RatingDetails details = new RatingDetails();
         details.setAffiliation(cache.getAffiliation());
