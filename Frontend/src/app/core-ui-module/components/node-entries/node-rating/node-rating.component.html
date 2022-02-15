@@ -1,4 +1,4 @@
-<ng-container *ngIf="hasPermission">
+<ng-container *ngIf="hasPermission && node.type === 'ccm:io'">
   <div *ngIf="mode === 'likes'"
        class="likes"
   >
