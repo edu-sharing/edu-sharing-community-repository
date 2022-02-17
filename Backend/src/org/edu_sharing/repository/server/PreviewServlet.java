@@ -449,7 +449,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 	}
 	private DataInputStream postProcessImage(String nodeId,DataInputStream in,HttpServletRequest req){
 		float quality=DEFAULT_QUALITY;
-		
+
 		int width=0,height=0,maxHeight=0,maxWidth=0;
 		boolean crop=false;
 		boolean hasAnyValue=false;
@@ -457,7 +457,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			quality=Integer.parseInt(req.getParameter("quality"))/100.f;
 			hasAnyValue=true;
 		}catch(Throwable t){}
-		
+
 		try{
 			crop=req.getParameter("crop").equals("true");
 			hasAnyValue=true;
@@ -483,7 +483,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			maxWidth=MAX_IMAGE_SIZE;
 			maxHeight=MAX_IMAGE_SIZE;
 		}
-		
+
 		boolean fromCache=false;
 		if(fullsize || isCacheable(width, height,maxWidth,maxHeight)){
 			File file=PreviewCache.getFileForNode(nodeId,fullsize ? -1 : width,height,maxWidth,maxHeight,false);
@@ -501,7 +501,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		height=Math.min(Math.max(height, 0), MAX_IMAGE_SIZE);
 		maxWidth=Math.min(Math.max(maxWidth, 0), MAX_IMAGE_SIZE);
 		maxHeight=Math.min(Math.max(maxHeight, 0), MAX_IMAGE_SIZE);
-		
+
 		try{
 			// cache optimization, if no other tasks, just return the cached preview
 			if(fromCache && Math.abs(quality-DEFAULT_QUALITY)<0.1){
@@ -509,9 +509,9 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				byte[] img=StreamUtils.copyToByteArray(in);
 				return new DataInputStream(new ByteArrayInputStream(img));
 			}
-			
+
 			BufferedImage img=ImageIO.read(in);
-			
+
 			try{
 				float aspect=Float.parseFloat(req.getParameter("aspect"));
 				if(aspect>1){
@@ -562,13 +562,13 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 					g.drawImage(scaled, (int)( -(scaledWidth-cropped.getWidth())/2),0,(int)scaledWidth, cropped.getHeight(), null);
 				}
 				img=cropped;
-				
+
 			}
 			BufferedImage imgOut=new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
 			imgOut.getGraphics().setColor(java.awt.Color.WHITE);
 			imgOut.getGraphics().fillRect(0, 0,imgOut.getWidth(),imgOut.getHeight());
 			imgOut.getGraphics().drawImage(img, 0, 0, null);
-		
+
 			if(!fromCache && (isCacheable(width, height,maxWidth,maxHeight) || fullsize)){
 				// Drop alpha (weird colors in jpg otherwise)
 				ImageIO.write(imgOut, "JPG",PreviewCache.getFileForNode(nodeId,fullsize ? -1 : width, height,maxWidth,maxHeight,true));
@@ -580,15 +580,18 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			ImageWriter writer = ImageIO.getImageWritersByFormatName("jpg").next();
 			ByteArrayOutputStream os=new ByteArrayOutputStream();
 			MemoryCacheImageOutputStream imgOutStream = new MemoryCacheImageOutputStream(os);
-		
+
 			writer.setOutput(imgOutStream);
 			writer.write(null,new IIOImage(imgOut,null,null),jpegParams);
 			imgOutStream.close();
 			in.close();
 			return new DataInputStream(new ByteArrayInputStream(os.toByteArray()));
-			
-		}
-		catch(Throwable t){
+		} catch(OutOfMemoryError e) {
+			throw e;
+		}catch(Throwable t){
+			if(t.getCause() instanceof OutOfMemoryError) {
+				throw (OutOfMemoryError)t.getCause();
+			}
 			return null;
 		}
 		finally {
@@ -627,20 +630,24 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				// DataInputStream(url.openStream());
 				InputStream is=reader.getContentInputStream();
 				DataInputStream in = new DataInputStream(is);
-				if(mimetype.startsWith("image")){
-					DataInputStream tmp = postProcessImage(nodeRef.getId(),in,req);
-					if(tmp != null){
-						in = tmp;
-						mimetype = "image/jpeg";
+				if(mimetype.startsWith("image")) {
+					try {
+						DataInputStream tmp = postProcessImage(nodeRef.getId(), in, req);
+						if (tmp != null) {
+							in = tmp;
+							mimetype = "image/jpeg";
+						} else {
+							// image was broken but stream is consumed, open a new one
+							reader = serviceRegistry.getContentService().getReader(nodeRef,
+									QName.createQName(contentProp));
+							is = reader.getContentInputStream();
+							in = new DataInputStream(is);
+						}
+
+					} catch (OutOfMemoryError e) {
+						logger.debug("Image too large for memory, falling back to icon " + nodeRef);
+						throw e;
 					}
-					else {
-						// image was broken but stream is consumed, open a new one
-						reader = serviceRegistry.getContentService().getReader(nodeRef,
-								QName.createQName(contentProp));
-						is=reader.getContentInputStream();
-						in = new DataInputStream(is);
-					}
-					
 				}
 				
 				resp.setContentType(mimetype);
