@@ -1320,7 +1320,7 @@ public class NodeDao {
 				logger.warn("Error while fetching original node version from " + nodeId + ":" + t.getMessage());
 			}
 		}
-		return (String) nodeProps.get(CCConstants.CM_PROP_VERSIONABLELABEL);
+		return (String) nodeProps.get(CCConstants.LOM_PROP_LIFECYCLE_VERSION);
 	}
 
 	private String getContentUrl() {
