@@ -45,6 +45,8 @@ import { RegisterFormFieldDirective } from './common/ui/mds-editor/widgets/mds-e
   import {SanitizeHTMLPipe} from './common/ui/sanitizeHTML.pipe';
   import {ColorTransformPipe} from "./common/ui/color-transform.pipe";
   import {AccessibilityComponent} from './common/ui/accessibility/accessibility.component';
+import { SkipNavComponent } from './common/ui/skip-nav/skip-nav.component';
+import { SkipTargetDirective } from './common/ui/skip-nav/skip-target.directive';
 
   export const DECLARATIONS = [
       MdsTestComponent,
@@ -67,6 +69,8 @@ import { RegisterFormFieldDirective } from './common/ui/mds-editor/widgets/mds-e
       NodeInfoComponent,
       SmallCollectionComponent,
       MainNavComponent,
+      SkipNavComponent,
+      SkipTargetDirective,
       GlobalContainerComponent,
       RocketchatComponent,
       UserProfileComponent,

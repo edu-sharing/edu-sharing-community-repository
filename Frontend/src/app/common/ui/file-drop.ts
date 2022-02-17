@@ -156,7 +156,7 @@ export class FileDropDirective {
     }
     const transfer = this.getDataTransfer(event);
 
-    if (!transfer.files.length) {
+    if (!this.haveFiles(transfer.types) || !transfer.files.length) {
       return;
     }
 
@@ -230,7 +230,7 @@ export class FileDropDirective {
     }
 
     if (types.indexOf) {
-      return types.indexOf('Files') !== -1;
+      return types.indexOf('text/uri-list') === -1 && types.indexOf('Files') !== -1;
     }
 
     if (types.contains) {

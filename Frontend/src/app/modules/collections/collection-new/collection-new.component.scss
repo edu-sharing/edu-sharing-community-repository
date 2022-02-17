@@ -88,6 +88,9 @@ $imagePath: '../../../../assets/images/collections/';
 :host ::ng-deep{
   .createCollection{
     .collection-item{
+      &.cdk-keyboard-focused {
+        outline-offset: -4px;
+      }
       >.mat-button-wrapper{
         width: 100%;
         justify-content: flex-start;

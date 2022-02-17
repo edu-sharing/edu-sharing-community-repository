@@ -150,7 +150,7 @@ public class SitemapServlet extends HttpServlet{
 
     private Map<String, String[]> getSearchAllCriterias() {
         Map<String, String[]> criterias=new HashMap<>();
-        criterias.put(MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA,new String[]{"*"});
+        criterias.put(MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA,new String[]{""});
         return criterias;
     }
 

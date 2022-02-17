@@ -36,7 +36,11 @@ query = replacer.replaceString(query, "${authority}", AuthenticationUtil.getFull
     }
 
     private static ReplaceInterface luceneReplacer = (str, search, replace) -> str.replace(search, QueryParser.escape(replace));
-    private static ReplaceInterface dslReplacer = (str, search, replace) -> str.replace(search, JSONValue.escape(replace));
+    /**
+     * @TODO: use org\apache\lucene\queryparser\classic\QueryParser from elasticsearch.jar to more compatible version
+     * elasticsearch.jar then must be deployed in alfresco webapp
+     */
+    private static ReplaceInterface dslReplacer = (str, search, replace) -> str.replace(search, JSONValue.escape( QueryParser.escape(replace)));
 
     public static void setUserInfo(Map<String, Serializable> userInfo) {
         QueryUtils.userInfo.set(userInfo);

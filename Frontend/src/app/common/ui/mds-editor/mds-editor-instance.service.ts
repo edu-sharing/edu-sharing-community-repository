@@ -3,6 +3,8 @@ import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subject, from } from 'rxjs';
 import { map, shareReplay, switchMap } from 'rxjs/operators';
 import {
+    ConfigurationHelper,
+    ConfigurationService,
     Node,
     RestConnectorService,
     RestConstants,
@@ -508,6 +510,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         private mdsEditorCommonService: MdsEditorCommonService,
         private restLocator: RestLocatorService,
         private restMdsService: RestMdsService,
+        private configService: ConfigurationService,
         private restConnector: RestConnectorService,
         private searchService: SearchService,
     ) {
@@ -676,7 +679,7 @@ export class MdsEditorInstanceService implements OnDestroy {
 
     async initWithoutNodes(
         groupId: string,
-        mdsId: string = '-default-',
+        mdsId: string = null,
         repository: string = '-home-',
         editorMode: EditorMode = 'search',
         initialValues?: Values,
@@ -684,6 +687,20 @@ export class MdsEditorInstanceService implements OnDestroy {
         this.editorMode = editorMode;
         this.editorBulkMode = { isBulk: false };
         this.values$.next(initialValues);
+        if(mdsId === null) {
+            try {
+                const sets = ConfigurationHelper.filterValidMds(
+                    repository,
+                    (await this.restMdsService.getSets().toPromise()).metadatasets,
+                    this.configService);
+                mdsId = sets[0]?.id;
+            } catch(e) {
+                console.warn('Error while resolving primary mds', e);
+            }
+            if(!mdsId) {
+                mdsId = RestConstants.DEFAULT;
+            }
+        }
         await this.initMds(groupId, mdsId, repository, null, initialValues);
         if(!initialValues) {
             initialValues = {};

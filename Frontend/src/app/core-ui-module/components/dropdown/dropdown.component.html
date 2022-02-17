@@ -5,8 +5,9 @@
   backdropClass="mat-dropdown-menu"
   [xPosition]="position == 'right' ? 'after' : 'before'"
 >
-  <ul role="menu">
-    <li *ngFor="let option of _options; let i = index">
+  <!-- MatMenu has role="menu", so the only meaningful role of descendants is "menuitem" -->
+  <ul role="none">
+    <li *ngFor="let option of _options; let i = index" role="none">
       <button
         mat-menu-item
         class="mat-menu-item collection-item-{{
