@@ -62,7 +62,7 @@ export class BreadcrumbsComponent {
      */
     @Input() set breadcrumbsForId(id: string) {
         if (id == null) return;
-        this.node.getNodeParents(id).subscribe((nodes) => {
+        this.node.getNodeParents(id, false, [RestConstants.ALL]).subscribe(nodes => {
             this.nodes = nodes.nodes.reverse();
         });
     }
