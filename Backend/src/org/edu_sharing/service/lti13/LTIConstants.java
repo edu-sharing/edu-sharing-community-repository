@@ -90,4 +90,8 @@ public class LTIConstants {
 
     public static final String LTI_NONCE = "nonce";
 
+    /***
+     * registration
+     */
+    public static final String LTI_EDU_SHARING_REGISTRATION_TOKEN = "lti_edu_sharing_registration_token";
 }
