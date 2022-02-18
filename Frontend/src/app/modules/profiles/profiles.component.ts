@@ -93,7 +93,9 @@ export class ProfilesComponent {
         this.userEditProfile = profile.editProfile;
         this.toast.closeModalDialog();
         this.userEdit=Helper.deepCopy(this.user);
-        this.user.profile.vcard = new VCard((this.user.profile.vcard as unknown as string));
+        if(!(this.user.profile.vcard instanceof VCard)) {
+            this.user.profile.vcard = new VCard((this.user.profile.vcard as unknown as string));
+        }
         this.userEdit.profile.vcard = this.user.profile.vcard?.copy();
         GlobalContainerComponent.finishPreloading();
         this.iamService.getCurrentUserAsync().then((me)=> {

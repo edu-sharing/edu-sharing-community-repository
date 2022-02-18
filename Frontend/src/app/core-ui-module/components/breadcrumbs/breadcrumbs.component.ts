@@ -1,5 +1,5 @@
 import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
-import { Node, RestNodeService } from '../../../core-module/core.module';
+import { Node, RestNodeService, RestConstants } from '../../../core-module/core.module';
 import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
 import { Params, QueryParamsHandling } from '@angular/router';
 
