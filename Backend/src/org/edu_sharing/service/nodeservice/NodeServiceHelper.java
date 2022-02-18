@@ -148,7 +148,7 @@ public class NodeServiceHelper {
 				return false;
 			}
 			if(((Collection<?>) property).iterator().next() instanceof String) {
-				return ((Collection<?>) property).stream().map((p) -> (String) p).filter(Objects::nonNull).map(String::trim).anyMatch(String::isEmpty);
+				return ((Collection<?>) property).stream().map((p) -> (String) p).filter(Objects::nonNull).map(String::trim).noneMatch(String::isEmpty);
 			} else {
 				// don't know what to do, we assume it has a value if it is NOT a null value
 				return ((Collection<?>) property).stream().anyMatch(Objects::nonNull);
