@@ -978,7 +978,7 @@ export class CollectionsMainComponent {
         );
 
         // load user profile
-        this.iamService.getUser().subscribe(
+        this.iamService.getCurrentUserAsync().then(
             iamUser => {
                 // WIN
 

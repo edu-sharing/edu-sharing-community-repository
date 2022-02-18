@@ -54,6 +54,7 @@ import { MainMenuEntriesService } from '../../services/main-menu-entries.service
 import { GlobalContainerComponent } from '../global-container/global-container.component';
 import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar.component';
 import {MainMenuDropdownComponent} from '../main-menu-dropdown/main-menu-dropdown.component';
+import {BehaviorSubject} from 'rxjs';
 import {MainNavService} from '../../services/main-nav.service';
 
 /**
@@ -988,6 +989,13 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
             s = '0' + s;
         }
         return s;
+    }
+
+    getUserName() {
+        return ConfigurationHelper.getPersonWithConfigDisplayName(
+            this.iam.getCurrentUser(),
+            this.configService,
+        );
     }
 
     ngOnDestroy(): void {

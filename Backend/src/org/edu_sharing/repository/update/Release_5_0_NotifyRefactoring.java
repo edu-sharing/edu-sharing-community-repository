@@ -96,6 +96,10 @@ public class Release_5_0_NotifyRefactoring extends UpdateAbstract {
 		});
 		runner.run();
 		logInfo("Converted a total of "+processed[0]+" nodes");
+		if(!result.get()){
+			logger.error("migration of some nodes caused errors. go to catalina.out for more information. will not delete notify folders");
+			return result.get();
+		}
 		try {
             String notify = new UserEnvironmentTool().getEdu_SharingNotifyFolder();
             NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, notify);

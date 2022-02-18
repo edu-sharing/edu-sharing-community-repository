@@ -52,7 +52,7 @@ public abstract class TrackingServiceDefault implements TrackingService{
     }
 
     @Override
-    public boolean trackActivityOnNode(NodeRef nodeRef,NodeTrackingDetails details, EventType type) {
+    public boolean trackActivityOnNode(NodeRef nodeRef,NodeTrackingDetails details, EventType type, String authorityName) {
         String qname = EVENT_PROPERTY_MAPPING.get(type);
         if(qname == null){
             return false;

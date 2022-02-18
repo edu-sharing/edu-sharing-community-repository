@@ -143,7 +143,7 @@ export class WorkspaceFileUploadSelectComponent  {
     private toast: Toast,
   ){
     this.setState('');
-    this.iamService.getUser().subscribe((user) => {
+    this.iamService.getCurrentUserAsync().then((user) => {
       this.user = user;
     });
   }

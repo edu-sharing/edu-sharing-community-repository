@@ -64,7 +64,7 @@ public class H5PTransformerWorker extends ContentTransformerHelper implements Co
 			}
 		}
 		catch(Throwable t){
-
+			logger.debug(t.getMessage(),t);
 		}
 		throw new AlfrescoRuntimeException("No image found in h5p file");
 	}

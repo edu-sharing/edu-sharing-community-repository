@@ -53,7 +53,7 @@ export class NodeReportComponent  {
             this.isGuest = data.isGuest;
             this.isGuest ? this.form.get('email').enable() : this.form.get('email').disable();
             if (!data.isGuest) {
-                this.iam.getUser().subscribe((user) => {
+                this.iam.getCurrentUserAsync().then((user) => {
                     this.form.get('email').setValue(user.person.profile.email);
                 });
             }

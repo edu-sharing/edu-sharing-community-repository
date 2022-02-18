@@ -8,5 +8,6 @@
     [uploadMultiple]="false"
     [(filesToUpload)]="filesToUpload"
     (onUploadFileSelected)="uploadNodes($event)"
-    (onCloseMetadata)="onDone($event)"
+    (onUploadFilesProcessed)="onDone($event)"
+
 ></workspace-management>
