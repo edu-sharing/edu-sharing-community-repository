@@ -494,7 +494,8 @@ public class LTIApi {
             jsonResponse.put("redirect_uris",ja);
             jsonResponse.put("client_name",homeApp.getAppCaption());
             jsonResponse.put("jwks_uri",homeApp.getClientBaseUrl()+"/rest/lti/v13/jwks");
-            jsonResponse.put("logo_uri",homeApp.getLogo());
+            String logo = homeApp.getClientBaseUrl()+"/assets/images/favicon.ico";
+            jsonResponse.put("logo_uri",logo);
             jsonResponse.put("token_endpoint_auth_method", "private_key_jwt");
             JSONObject ltiDeepLink = new JSONObject();
             ltiDeepLink.put("type","LtiDeepLinkingRequest");
