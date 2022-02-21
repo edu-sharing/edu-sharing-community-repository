@@ -220,9 +220,14 @@ sed -i -r "s|\$CC_RENDER_PATH.*|\$CC_RENDER_PATH = '${RS_CACHE}';|" "${systemCon
 sed -i -r 's|\$DATAPROTECTIONREGULATION_CONFIG.*|\$DATAPROTECTIONREGULATION_CONFIG = ["enabled" => '"${my_gdpr_enabled}"', "modules" => ['"${my_gdpr_modules}"'], "urls" => ['"${my_gdpr_urls}"']];|' "${systemConf}"
 grep -q '\$DATAPROTECTIONREGULATION_CONFIG' "${systemConf}" || echo "\$DATAPROTECTIONREGULATION_CONFIG = [\"enabled\" => ${my_gdpr_enabled}, \"modules\" => [${my_gdpr_modules}], \"urls\" => [${my_gdpr_urls}]];" >> "${systemConf}"
 
-[[ -n $my_plugins ]] && {
-	echo "<?php\n${my_plugins}" > "${RS_ROOT}/conf/plugins.conf.php"
-}
+pluginConf="${RS_ROOT}/conf/plugins.conf.php"
+rm -f "${pluginConf}"
+if [[ -n $my_plugins ]] ; then
+	{
+		echo "<?php"
+		echo "${my_plugins}"
+	} >> "${pluginConf}"
+fi
 
 homeApp="${RS_ROOT}/conf/esmain/homeApplication.properties.xml"
 xmlstarlet ed -L \
