@@ -56,7 +56,7 @@ RUN set -eux \
     && gpg --no-default-keyring --keyring ./adoptopenjdk-keyring.gpg --export --output adoptopenjdk-archive-keyring.gpg \
     && mv adoptopenjdk-archive-keyring.gpg /usr/share/keyrings \
     && rm adoptopenjdk-keyring.gpg public \
-    && echo "deb [signed-by=/usr/share/keyrings/adoptopenjdk-archive-keyring.gpg] https://adoptopenjdk.jfrog.io/adoptopenjdk/deb `lsb_release -cs` main" | tee /etc/apt/sources.list.d/adoptopenjdk.list \
+    && echo "deb [signed-by=/usr/share/keyrings/adoptopenjdk-archive-keyring.gpg] https://artifacts.edu-sharing.com/repository/adoptopenjdk `lsb_release -cs` main" | tee /etc/apt/sources.list.d/adoptopenjdk.list \
     && apt-get update -y \
     && apt-get install -y --no-install-recommends \
         adoptopenjdk-8-hotspot \
@@ -152,10 +152,10 @@ COPY assets/libreoffice libreoffice/
 
 RUN set -eux \
     && wget -q -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
-    && echo "deb http://apt.postgresql.org/pub/repos/apt `lsb_release -cs`-pgdg main" | tee  /etc/apt/sources.list.d/pgdg.list \
+    && echo "deb https://artifacts.edu-sharing.com/repository/postgresql `lsb_release -cs`-pgdg main" | tee  /etc/apt/sources.list.d/postgresql.list \
     && apt-get update -y \
     && apt-get install -y --no-install-recommends \
-        postgresql-${postgresql.version.major}=${postgresql.version.major}.${postgresql.version.minor}-${postgresql.version.patch}* \
+        postgresql-${postgresql.version.major}=${postgresql.version.major}.${postgresql.version.minor}* \
     && pg_dropcluster ${postgresql.version.major} main \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
