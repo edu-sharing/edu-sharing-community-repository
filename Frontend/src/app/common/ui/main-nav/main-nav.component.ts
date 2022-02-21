@@ -578,7 +578,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
 
     isCreateAllowed() {
         // @TODO: May Check for more constrains
-        return (this.create.allowed === true) && !this.connector.getCurrentLogin()?.isGuest && this.queryParams.reurlCreate !== 'false';
+        return (this.create?.allowed === true) && !this.connector.getCurrentLogin()?.isGuest && this.queryParams.reurlCreate !== 'false';
     }
 
     openCreateMenu(x: number, y: number) {
@@ -732,6 +732,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
 
     private updateUserOptions() {
         this.userMenuOptions = [];
+        console.log(this.connector.getCurrentLogin());
         if (!this.connector.getCurrentLogin()?.isGuest && !this.connector.getCurrentLogin()?.currentScope) {
             this.userMenuOptions.push(
                 new OptionItem('EDIT_ACCOUNT', 'assignment_ind', () =>
