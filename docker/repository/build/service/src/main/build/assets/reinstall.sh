@@ -14,3 +14,5 @@ fi
 if [[ -d amps/edu-sharing/1 ]] ; then
 	java -jar bin/alfresco-mmt.jar install amps/edu-sharing/1 tomcat/webapps/edu-sharing -directory -nobackup -force
 fi
+
+libcheck.sh

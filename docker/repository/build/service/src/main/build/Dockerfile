@@ -27,7 +27,7 @@ WORKDIR $ALF_HOME
 RUN set -eux \
     && ln -sf /usr/local/tomcat tomcat
 
-COPY assets/entrypoint.sh assets/reinstall.sh bin/
+COPY assets/entrypoint.sh assets/reinstall.sh assets/libcheck.sh bin/
 
 RUN set -eux \
 	&& find bin -type f -name '*.sh' -exec chmod +x {} \;
