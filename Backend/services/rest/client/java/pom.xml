@@ -37,13 +37,6 @@
               <goal>unpack-dependencies</goal>
             </goals>
             <phase>generate-sources</phase>
-            <configuration>
-              <includeArtifactIds>
-                edu_sharing-community-repository-backend-services-rest-api
-              </includeArtifactIds>
-              <excludes>META-INF/**</excludes>
-              <outputDirectory>${project.build.directory}/api</outputDirectory>
-            </configuration>
           </execution>
         </executions>
       </plugin>

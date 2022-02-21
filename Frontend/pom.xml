@@ -29,13 +29,26 @@
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
+            <id>angular</id>
             <goals>
               <goal>unpack-dependencies</goal>
             </goals>
             <phase>generate-sources</phase>
             <configuration>
-              <includeArtifactIds>edu_sharing-community-repository-backend-services-rest-client-angular</includeArtifactIds>
-              <outputDirectory>src/app/rest</outputDirectory>
+              <includeArtifactIds>edu_sharing-community-repository-backend-services-rest-client-typescript-angular</includeArtifactIds>
+              <outputDirectory>src/app/rest/angular</outputDirectory>
+              <excludes>META-INF/**</excludes>
+            </configuration>
+          </execution>
+          <execution>
+            <id>ng</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <includeArtifactIds>edu_sharing-community-repository-backend-services-rest-client-typescript-ng</includeArtifactIds>
+              <outputDirectory>src/app/rest/ng</outputDirectory>
               <excludes>META-INF/**</excludes>
             </configuration>
           </execution>
@@ -135,7 +148,14 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-repository-backend-services-rest-client-angular</artifactId>
+      <artifactId>edu_sharing-community-repository-backend-services-rest-client-typescript-angular</artifactId>
+      <classifier>sources</classifier>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-backend-services-rest-client-typescript-ng</artifactId>
       <classifier>sources</classifier>
       <scope>provided</scope>
     </dependency>

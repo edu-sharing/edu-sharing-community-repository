@@ -252,7 +252,14 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-services-rest-client-angular</artifactId>
+        <artifactId>edu_sharing-community-repository-backend-services-rest-client-typescript-angular</artifactId>
+        <version>${project.version}</version>
+        <classifier>sources</classifier>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-backend-services-rest-client-typescript-ng</artifactId>
         <version>${project.version}</version>
         <classifier>sources</classifier>
       </dependency>
