@@ -18,11 +18,11 @@ for jlib in * ; do
 done
 
 if [[ -n $duplicates ]] ; then
-  echo "ERROR duplicate libraries found:"
+  echo "ERROR duplicated libraries found:"
   for dupl in $duplicates ; do
     echo "$dupl"
   done
-  #exit 1
+  exit 1
 fi
 
 popd >/dev/null
