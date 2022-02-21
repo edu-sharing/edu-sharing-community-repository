@@ -90,6 +90,7 @@ public class LTIApi {
 
         RepoTools repoTools = new RepoTools();
         try {
+
             ApplicationInfo platform = repoTools.getApplicationInfo(iss, clientId, ltiDeploymentId);
             Tool tool = Config.getTool(platform,req,true);
             // get data from request
@@ -384,14 +385,13 @@ public class LTIApi {
             PublicKey pemPublicKey = signing.getPemPublicKey(homeApp.getPublicKey(), CCConstants.SECURITY_KEY_ALGORITHM);
             RSAPublicKey pub = (RSAPublicKey)pemPublicKey;
             JWKSResult rs = new JWKSResult();
+
+            String kid = homeApp.getLtiKid();
+
             JWKResult JWKResult = new Gson().fromJson(new RSAKey.Builder(pub)
                     .keyUse(KeyUse.SIGNATURE)
                     //.privateKey((RSAPrivateKey)privKey)
-                    //.keyID(UUID.randomUUID().toString())
-                    /**
-                     * @TODO allow more keys, ie for every deployment an own
-                     */
-                    .keyID("1")
+                    .keyID(kid)
                     .build().toPublicJWK().toJSONString(), JWKResult.class);
             JWKResult.setAlg(SignatureAlgorithm.RS256.getValue());
 
@@ -425,6 +425,15 @@ public class LTIApi {
             System.out.println("openidConfiguration:" + openidConfiguration);
             System.out.println("registrationToken:" + registrationToken);
             System.out.println("edu-sharing token:" + eduSharingRegistrationToken);
+
+            //check repo lti kid is available
+            ApplicationInfo homeApp = ApplicationInfoList.getHomeRepository();
+            if(homeApp.getLtiKid() == null){
+                String kid = UUID.randomUUID().toString();
+                Map<String,String> newProps = new HashMap<>();
+                newProps.put(ApplicationInfo.KEY_LTI_KID, kid);
+                AdminServiceFactory.getInstance().updatePropertiesXML(homeApp.getAppFile(),newProps);
+            }
 
             if(eduSharingRegistrationToken == null || eduSharingRegistrationToken.trim().equals("")){
                 throw new Exception("no eduSharingRegistrationToken provided");
@@ -472,8 +481,6 @@ public class LTIApi {
             if(authTokenUrl == null){
                 throw new Exception("no token_endpoint provided");
             }
-
-            ApplicationInfo homeApp = ApplicationInfoList.getHomeRepository();
 
             JSONObject jsonResponse = new JSONObject();
             jsonResponse.put("application_type","web");

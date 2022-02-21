@@ -142,7 +142,8 @@ public class LTIJWTUtil {
 
     public String getDeepLinkingResponseJwt(LTISessionObject ltiSessionObject, Node[] nodes) throws GeneralSecurityException{
         String appId = ltiSessionObject.getEduSharingAppId();
-        Key toolPrivateKey = new Signing().getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM);
+        ApplicationInfo homeApp = ApplicationInfoList.getHomeRepository();
+        Key toolPrivateKey = new Signing().getPemPrivateKey(homeApp.getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM);
 
         ApplicationInfo appInfo = ApplicationInfoList.getApplicationInfos().get(appId);
         if(appInfo == null){
@@ -154,10 +155,7 @@ public class LTIJWTUtil {
         String jwt = Jwts.builder()
                 .setHeaderParam(LTIConstants.TYP, LTIConstants.JWT)
 
-                /**
-                 *  better leave out?
-                 */
-                //.setHeaderParam(LTIConstants.KID, TextConstants.DEFAULT_KID)
+                .setHeaderParam(LTIConstants.KID, homeApp.getLtiKid())
                 .setHeaderParam(LTIConstants.ALG, LTIConstants.RS256)
                 .setIssuer(appInfo.getLtiClientId())  //Client ID
                 .setAudience(ltiSessionObject.getIss())
