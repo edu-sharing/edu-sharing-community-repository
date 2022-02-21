@@ -134,7 +134,7 @@ public class LTIApi {
 
         } catch (Throwable e) {
             logger.error(e.getMessage(),e);
-            return Response.status(Response.Status.OK).entity(getHTML(null,null,e.getMessage())).build();
+            return Response.status(Response.Status.OK).entity(getHTML(null,null,"error:" + e.getMessage())).build();
         }
     }
 
@@ -154,18 +154,24 @@ public class LTIApi {
         }
     }
 
+    private String getHTML(String formTargetUrl, Map<String,String> params, String errorMessage){
+        return this.getHTML(formTargetUrl,params,errorMessage,null);
+    }
     /**
      * @TODO use template engine?
      * @param formTargetUrl
      * @param params
      * @return
      */
-    private String getHTML(String formTargetUrl, Map<String,String> params, String errorMessage){
-        String FORMNAME = "ltiform";
+    private String getHTML(String formTargetUrl, Map<String,String> params, String message, String javascript){
         StringBuilder sb = new StringBuilder();
         sb.append("<html><body>");
-        sb.append("<script type=\"text/javascript\">window.onload=function(){document.forms[\""+FORMNAME+"\"].submit();}</script>");
-        if(errorMessage == null) {
+        if(javascript != null){
+            sb.append("<script type=\"text/javascript\">"+javascript+"</script>");
+        }
+        if(message == null) {
+            String FORMNAME = "ltiform";
+            sb.append("<script type=\"text/javascript\">window.onload=function(){document.forms[\""+FORMNAME+"\"].submit();}</script>");
             sb.append("<form action=\"" + formTargetUrl + "\" method=\"post\" name=\"" + FORMNAME + "\"");
             for (Map.Entry<String, String> entry : params.entrySet()) {
                 sb.append("<input type=\"hidden\" id=\"" + entry.getKey() + "\" name=\"" + entry.getKey() + "\" value=\"" + entry.getValue() + "\" class=\"form-control\"/>");
@@ -173,7 +179,7 @@ public class LTIApi {
             sb.append("<input type=\"submit\" value=\"Submit POST\" class=\"btn btn-primary\">")
                     .append("</form>");
         }else {
-            sb.append("error:"+ errorMessage);
+            sb.append(message);
         }
         sb.append("</body></html>");
         return sb.toString();
@@ -316,13 +322,13 @@ public class LTIApi {
                     }else{
                         String message = "can not handle message type:" + ltiMessageType;
                         logger.error(message);
-                        return Response.status(Response.Status.OK).entity(getHTML(null,null,message)).build();
+                        return Response.status(Response.Status.OK).entity(getHTML(null,null,"error: " + message)).build();
                     }
                 }
             }
         }catch(Exception e){
             logger.error(e.getMessage(),e);
-            return Response.status(Response.Status.OK).entity(getHTML(null,null,e.getMessage())).build();
+            return Response.status(Response.Status.OK).entity(getHTML(null,null,"error: "+ e.getMessage())).build();
         }
 
 
@@ -514,10 +520,15 @@ public class LTIApi {
             String deploymentId = (String)ltiToolConfigInfo.get("deployment_id");
 
             registerPlatform(issuer, clientId, deploymentId, authorizationEndpoint, keySetUrl,null,authTokenUrl);
-            return Response.status(Response.Status.OK).entity(getHTML(null,null,"platform registered")).build();
+            return Response.status(Response.Status.OK).entity(getHTML(
+                    null,
+                    null,
+                    "platform registered<br><button onClick=\"(window.opener || window.parent).postMessage({subject:'org.imsglobal.lti.close'}, '*');\">OK</button>",
+                    null))
+                    .build();
         }catch(Throwable e){
             logger.error(e.getMessage(),e);
-            return Response.status(Response.Status.OK).entity(getHTML(null,null,e.getMessage())).build();
+            return Response.status(Response.Status.OK).entity(getHTML(null,null,"error:" + e.getMessage())).build();
         }finally {
             if(req.getSession() != null) req.getSession().removeAttribute(LTIConstants.LTI_EDU_SHARING_REGISTRATION_TOKEN);
         }
