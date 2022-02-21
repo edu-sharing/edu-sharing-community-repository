@@ -494,9 +494,11 @@ public class LTIApi {
             ltiDeepLink.put("target_link_uri",redirectUrl);
             ltiDeepLink.put("label","add an edu-sharing content object");
             ltiDeepLink.put("label#de","Ein edu-sharing Inhalt hinzufuegen");
+            JSONArray messages = new JSONArray();
+            messages.add(ltiDeepLink);
             JSONObject toolConfig = new JSONObject();
             toolConfig.put("domain",homeApp.getDomain());
-            toolConfig.put("messages",ltiDeepLink);
+            toolConfig.put("messages",messages);
             jsonResponse.put("https://purl.imsglobal.org/spec/lti-tool-configuration",toolConfig);
             //jsonResponse.put("token_endpoint_auth_method","private_key_jwt");
             HttpPost post = new HttpPost();
@@ -511,7 +513,6 @@ public class LTIApi {
 
             String result = new HttpQueryTool().query(null,null,post,false);
 
-            System.out.println("registrationresult:"+result);
             JSONObject registrationResult;
             try {
                 registrationResult = (JSONObject) jsonParser.parse(result);
