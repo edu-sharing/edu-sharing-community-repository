@@ -56,6 +56,7 @@ function getAttributes(html: string, widgetId: string): Attr[] {
     div.innerHTML = html;
     const elements = div.getElementsByTagName(widgetId);
     if (elements.length === 0) {
+        console.warn(html);
         throw new Error('Failed to parse attributes: widget not found in template: ' + widgetId);
     } else if (elements.length > 1) {
         throw new Error(
