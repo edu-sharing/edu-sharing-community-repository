@@ -1,18 +1,12 @@
 package org.edu_sharing.restservices.lti.v13;
 
-import com.nimbusds.jose.jwk.AsymmetricJWK;
-import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.JWKSet;
+import com.google.gson.Gson;
+import com.nimbusds.jose.jwk.*;
 import edu.uoc.elc.lti.tool.Tool;
 import edu.uoc.elc.lti.tool.oidc.LoginRequest;
 import edu.uoc.elc.spring.lti.security.openid.HttpSessionOIDCLaunchSession;
 import edu.uoc.elc.spring.lti.security.openid.LoginRequestFactory;
-import edu.uoc.elc.spring.lti.security.utils.TokenFactory;
-import edu.uoc.elc.spring.lti.tool.ToolFactory;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwt;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -21,52 +15,44 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.log4j.Logger;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
-import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.repository.server.tools.security.Signing;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
+import org.edu_sharing.restservices.lti.v13.model.JWKResult;
+import org.edu_sharing.restservices.lti.v13.model.JWKSResult;
 import org.edu_sharing.restservices.lti.v13.model.RegistrationUrl;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.NodeLTIDeepLink;
-import org.edu_sharing.restservices.shared.Repo;
 import org.edu_sharing.service.admin.AdminServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.lti13.*;
 import org.edu_sharing.service.lti13.model.LTISessionObject;
-import org.edu_sharing.service.lti13.model.LoginInitiationDTO;
 import org.edu_sharing.service.lti13.uoc.Config;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.security.GeneralSecurityException;
+import java.security.PublicKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 
 @Path("/lti/v13")
@@ -372,6 +358,50 @@ public class LTIApi {
         }
     }
 
+    /**
+     * jsonResponse.put("jwks_uri",homeApp.getClientBaseUrl()+"/rest/lti/v13/jwks");
+     *
+     */
+    @GET
+    @Path("/jwks")
+    @Operation(summary = "LTI - returns repository JSON Web Key Sets")
+    @Consumes({ "application/json" })
+    @Produces({"application/json"})
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode="200", description= RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = RegistrationUrl.class))),
+                    @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = String.class)))
+            })
+    public Response jwksUri(){
+        try {
+
+            ApplicationInfo homeApp = ApplicationInfoList.getHomeRepository();
+            Signing signing = new Signing();
+            PublicKey pemPublicKey = signing.getPemPublicKey(homeApp.getPublicKey(), CCConstants.SECURITY_KEY_ALGORITHM);
+            RSAPublicKey pub = (RSAPublicKey)pemPublicKey;
+            JWKSResult rs = new JWKSResult();
+            JWKResult JWKResult = new Gson().fromJson(new RSAKey.Builder(pub)
+                    .keyUse(KeyUse.SIGNATURE)
+                    //.privateKey((RSAPrivateKey)privKey)
+                    //.keyID(UUID.randomUUID().toString())
+                    /**
+                     * @TODO allow more keys, ie for every deployment an own
+                     */
+                    .keyID("1")
+                    .build().toPublicJWK().toJSONString(), JWKResult.class);
+            JWKResult.setAlg(SignatureAlgorithm.RS256.getValue());
+
+            rs.setKeys(Arrays.asList(new JWKResult[]{JWKResult}));
+            return Response.status(Response.Status.OK).entity(rs).build();
+        }catch(Throwable e){
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(e)).build();
+        }
+    }
+
     @GET
     @Path("/registration/initiate/{token}")
     @Operation(summary = "LTI Dynamic Registration - Initiate registration")
@@ -500,10 +530,12 @@ public class LTIApi {
                  * <b>Notice</b>:  Undefined property: stdClass::$id in <b>/var/www/html/moodle/mod/lti/openid-registration.php</b> on line <b>56</b><br />
                  *
                  */
+
                 int start=result.indexOf('{');
                 int end=result.lastIndexOf('}');
                 String json=result.substring(start,end+1);
                 registrationResult = (JSONObject) jsonParser.parse(json);
+                logger.warn("registration result could only be parsed after html cleanup. maybe disable warnings and notices on platform side.");
             }
             String clientId = (String)registrationResult.get("client_id");
             /**
