@@ -53,18 +53,7 @@
     <npm.args.build>run build-dev</npm.args.build>
     <npm.version>7.24.2</npm.version>
 
-    <php.version.major>7</php.version.major>
-    <php.version.minor>4</php.version.minor>
-    <php.version.patch>27</php.version.patch>
-    <php.version>${php.version.major}.${php.version.minor}.${php.version.patch}</php.version>
-
     <postgresql.jdbc.version>42.3.1</postgresql.jdbc.version>
-
-    <postgresql.version.major>13</postgresql.version.major>
-    <postgresql.version.minor>5</postgresql.version.minor>
-    <postgresql.version.patch>0</postgresql.version.patch>
-    <postgresql.version>${postgresql.version.major}.${postgresql.version.minor}.${postgresql.version.patch}
-    </postgresql.version>
 
     <tomcat.version.major>8</tomcat.version.major>
     <tomcat.version.minor>5</tomcat.version.minor>
