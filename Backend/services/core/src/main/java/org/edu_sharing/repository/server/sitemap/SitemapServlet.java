@@ -15,10 +15,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 
-import org.apache.catalina.ha.session.DeltaSession;
 import org.apache.log4j.Logger;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataReader;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.MimeTypes;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -71,9 +70,9 @@ public class SitemapServlet extends HttpServlet{
         SearchToken token=new SearchToken();
         token.setContentType(SearchService.ContentType.FILES);
         token.setMaxResult(0);
-        SearchResultNodeRef resultFiles = search.searchV2(getMds(request), MetadataSetV2.DEFAULT_CLIENT_QUERY, getSearchAllCriterias(), token);
+        SearchResultNodeRef resultFiles = search.search(getMds(request), MetadataSet.DEFAULT_CLIENT_QUERY, getSearchAllCriterias(), token);
         token.setContentType(SearchService.ContentType.COLLECTIONS);
-        SearchResultNodeRef resultCollections = search.searchV2(getMds(request), MetadataSetV2.DEFAULT_CLIENT_QUERY, getSearchAllCriterias(), token);
+        SearchResultNodeRef resultCollections = search.search(getMds(request), MetadataSet.DEFAULT_CLIENT_QUERY, getSearchAllCriterias(), token);
         for(int i=0;i<resultFiles.getNodeCount();i+=NODES_PER_MAP){
             Sitemapindex.Sitemap map = new Sitemapindex.Sitemap();
             map.loc=request.getRequestURL()+"?type=io&from="+i;
@@ -114,7 +113,7 @@ public class SitemapServlet extends HttpServlet{
         SortDefinition sort = new SortDefinition();
         sort.addSortDefinitionEntry(new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CM_PROP_C_CREATED),true));
         token.setSortDefinition(sort);
-        SearchResultNodeRef result = search.searchV2(getMds(request), MetadataSetV2.DEFAULT_CLIENT_QUERY, getSearchAllCriterias(), token);
+        SearchResultNodeRef result = search.search(getMds(request), MetadataSet.DEFAULT_CLIENT_QUERY, getSearchAllCriterias(), token);
         for(org.edu_sharing.service.model.NodeRef ref : result.getData()){
             Urlset.Url url=new Urlset.Url();
             String[] aspects=nodeService.getAspects(ref.getStoreProtocol(),ref.getStoreId(),ref.getNodeId());
@@ -150,18 +149,18 @@ public class SitemapServlet extends HttpServlet{
 
     private Map<String, String[]> getSearchAllCriterias() {
         Map<String, String[]> criterias=new HashMap<>();
-        criterias.put(MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA,new String[]{""});
+        criterias.put(MetadataSet.DEFAULT_CLIENT_QUERY_CRITERIA,new String[]{""});
         return criterias;
     }
 
-    private MetadataSetV2 getMds(HttpServletRequest request)throws Throwable {
+    private MetadataSet getMds(HttpServletRequest request)throws Throwable {
         String locale;
         try {
             locale = request.getLocale().toString();
         }catch(Throwable t){
             locale="de_DE";
         }
-        return MetadataReaderV2.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id, locale);
+        return MetadataReader.getMetadataset(ApplicationInfoList.getHomeRepository(), CCConstants.metadatasetdefault_id, locale);
     }
 
 }
