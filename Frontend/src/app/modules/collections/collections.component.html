@@ -67,7 +67,7 @@
 </mat-tab-group>
 <div class="collections-header-group">
   <actionbar
-    *ngIf="collectionContentTemplateRef"
+    *ngIf="collectionContentTemplateRef && !isRootLevelCollection()"
     #actionbarCollection
     [numberOfAlwaysVisibleOptions]="1"
     [numberOfAlwaysVisibleOptionsMobile]="1"
@@ -214,9 +214,11 @@
         >
           <spinner></spinner>
         </section>
+        <!-- Do not assign the main landmark, when a custom content template was provided. In this
+        case, the wrapping component should provide a fitting landmark.  -->
         <div
-          role="main"
-          [appSkipTarget]="SkipTarget.MainContent"
+          [attr.role]="collectionContentTemplateRef ? null : 'main'"
+          [appSkipTarget]="collectionContentTemplateRef ? null : SkipTarget.MainContent"
           class="collections-master-div"
           [class.collections-master-div-notabs]="!showTabs()"
         >

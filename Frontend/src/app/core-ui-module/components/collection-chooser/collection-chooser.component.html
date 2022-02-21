@@ -1,6 +1,6 @@
 <div class="title">
     <div class="label">{{ title | translate}}</div>
-    <button mat-button (click)="cancel()"><i icon="close"></i></button>
+    <button mat-button (click)="cancel()"><i icon="close" [aria]="true"></i></button>
 </div>
 <div class="content" infinite-scroll [scrollWindow]="false" (scrolled)="loadLatest()">
   <ng-container *ngTemplateOutlet="beforeRecentRef; context: { $implicit: currentRoot }"></ng-container>
@@ -65,7 +65,7 @@
                    (clickRow)="goIntoCollection($event.node)"
                    (doubleClickRow)="goIntoCollection($event)">
             <ng-template #itemContent>
-                <div class="go-into"><button mat-mini-fab [color]="$any('white')"><i icon="arrow_forward"></i></button></div>
+                <div class="go-into"><button aria-hidden="true" tabindex="-1" mat-mini-fab [color]="$any('white')"><i icon="arrow_forward"></i></button></div>
             </ng-template>
         </app-custom-node-list-wrapper>
         <h5 class="noElements" *ngIf="!isLoadingMy && !listMy.length && !currentRoot">{{'COLLECTION_CHOOSER.NO_PERSONAL_COLLECTIONS' | translate }}</h5>

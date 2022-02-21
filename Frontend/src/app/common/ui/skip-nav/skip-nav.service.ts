@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable, Optional } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { SkipNavConfig, SKIP_NAV_CONFIG } from './skip-nav.config';
 
 export enum SkipTarget {
     MainContent = 'MAIN_CONTENT',
@@ -16,14 +17,15 @@ export enum SkipTarget {
 export class SkipNavService {
     private elements: { [target in SkipTarget]?: HTMLElement } = {};
     private availableTargetsSubject = new BehaviorSubject<SkipTarget[]>([]);
+    private readonly config: SkipNavConfig;
 
-    constructor() {}
+    constructor(@Optional() @Inject(SKIP_NAV_CONFIG) config: SkipNavConfig) {
+        this.config = config ?? {};
+    }
 
     register(target: SkipTarget, element: HTMLElement): void {
         if (this.elements[target]) {
-            throw new Error(
-                `Tried to register skip target ${target}, but was already registered.`,
-            );
+            throw new Error(`Tried to register skip target ${target}, but was already registered.`);
         }
         if (!element.hasAttribute('tabindex')) {
             element.addEventListener('blur', (event) =>
@@ -49,7 +51,8 @@ export class SkipNavService {
             if (!element.hasAttribute('tabindex')) {
                 element.setAttribute('tabindex', '-1');
             }
-            element.focus();
+            element.focus({ preventScroll: true });
+            this.scrollIntoView(element);
         }
     }
 
@@ -61,5 +64,24 @@ export class SkipNavService {
             }
         }
         this.availableTargetsSubject.next(availableTargets);
+    }
+
+    private scrollIntoView(element: HTMLElement): void {
+        const top =
+            element.getBoundingClientRect().top + window.pageYOffset - this.getScrollOffset();
+        window.scrollTo({
+            top,
+            behavior: 'smooth',
+        });
+    }
+
+    private getScrollOffset(): number {
+        if (typeof this.config.scrollOffset === 'number') {
+            return this.config.scrollOffset;
+        } else if (typeof this.config.scrollOffset === 'function') {
+            return this.config.scrollOffset();
+        } else {
+            return 0;
+        }
     }
 }

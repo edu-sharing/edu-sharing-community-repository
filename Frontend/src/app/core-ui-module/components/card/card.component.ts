@@ -5,8 +5,10 @@ import {
     ElementRef,
     EventEmitter,
     HostListener,
+    Inject,
     Input,
     OnDestroy,
+    Optional,
     Output,
     ViewChild,
 } from '@angular/core';
@@ -24,6 +26,7 @@ import { UIHelper } from '../../ui-helper';
 import {AuthorityNamePipe} from '../../pipes/authority-name.pipe';
 import {Observable} from 'rxjs/Rx';
 import {BehaviorSubject} from 'rxjs';
+import { CardConfig, CARD_CONFIG } from './card.config';
 
 /**
  * A common edu-sharing modal card
@@ -74,11 +77,27 @@ export class CardComponent implements AfterContentInit, OnDestroy {
      * allowed values: always (default), auto, never
      * auto: Automatically make the dialog modal when viewed on very tiny screens (e.g. mobile), otherwise use non-modal view
      */
-    @Input() modal: 'always' | 'auto' = 'always';
+    @Input() get modal() {
+        return this._modal;
+    }
+    set modal(value) {
+        if (this.config.forceModalAlways) {
+            this._modal = 'always';
+        } else {
+            this._modal = value;
+        }
+    }
+    private _modal: 'always' | 'auto' = 'always';
     /**
      * Should the heading be shown
      */
     @Input() header = true;
+    /**
+     * If set, the card title will be assigned a heading role with the given level.
+     * 
+     * E.g., set to 2 for the equivalent of an `<h2>` element.
+     */
+    @Input() headingLevel: number;
     /**
      * Jumpmarks for the left side (used for the mds dialog)
      */
@@ -170,6 +189,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
 
     private static modalCards: CardComponent[] = [];
 
+    private config: CardConfig;
     private shouldUpdateJumpmarkOnScroll = true;
 
     static getNumberOfOpenCards() {
@@ -177,10 +197,12 @@ export class CardComponent implements AfterContentInit, OnDestroy {
     }
 
     constructor(
+        @Optional() @Inject(CARD_CONFIG) config: CardConfig,
         private uiService: UIService,
         private translate: TranslateService,
         private cardService: CardService,
     ) {
+        this.config = config ?? {};
         CardComponent.modalCards.splice(0, 0, this);
         cardService.setNumberModalCards(CardComponent.modalCards.length);
         document.body.style.overflow = 'hidden';

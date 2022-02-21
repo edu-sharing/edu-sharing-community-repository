@@ -8,19 +8,17 @@
 
   <parent>
     <groupId>org.edu_sharing</groupId>
-    <artifactId>edu_sharing-community-repository</artifactId>
+    <artifactId>edu_sharing-community-repository-backend-services-rest-client</artifactId>
     <version>git</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>edu_sharing-community-repository-frontend-webapp</artifactId>
-  <packaging>war</packaging>
+  <artifactId>edu_sharing-community-repository-backend-services-rest-client-angular</artifactId>
+  <packaging>jar</packaging>
 
-  <name>edu_sharing-community-repository-frontend-webapp</name>
+  <name>edu_sharing-community-repository-backend-services-rest-client-angular</name>
 
   <build>
-
-    <finalName>edu-sharing</finalName>
 
     <plugins>
 
@@ -34,9 +32,11 @@
             </goals>
             <phase>generate-sources</phase>
             <configuration>
-              <includeArtifactIds>edu_sharing-community-repository-backend-services-rest-client-angular</includeArtifactIds>
-              <outputDirectory>src/app/rest</outputDirectory>
+              <includeArtifactIds>
+                edu_sharing-community-repository-backend-services-rest-api
+              </includeArtifactIds>
               <excludes>META-INF/**</excludes>
+              <outputDirectory>${project.build.directory}/api</outputDirectory>
             </configuration>
           </execution>
         </executions>
@@ -82,45 +82,16 @@
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-war-plugin</artifactId>
-        <configuration>
-          <failOnMissingWebXml>false</failOnMissingWebXml>
-          <webResources>
-            <resource>
-              <directory>dist</directory>
-            </resource>
-          </webResources>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-clean-plugin</artifactId>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>src/app/rest</directory>
-            </fileset>
-            <fileset>
-              <directory>dist</directory>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
         <executions>
           <execution>
-            <id>package-sources</id>
             <goals>
               <goal>single</goal>
             </goals>
             <phase>package</phase>
             <configuration>
               <descriptors>
-                <descriptor>sources.xml</descriptor>
+                <descriptor>src/main/assembly/sources.xml</descriptor>
               </descriptors>
             </configuration>
           </execution>
@@ -133,10 +104,53 @@
 
   <dependencies>
 
+    <!-- compile -->
+
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.gsonfire</groupId>
+      <artifactId>gson-fire</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.openapitools</groupId>
+      <artifactId>jackson-databind-nullable</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>logging-interceptor</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>okhttp</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.swagger</groupId>
+      <artifactId>swagger-annotations</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.threeten</groupId>
+      <artifactId>threetenbp</artifactId>
+    </dependency>
+
+    <!-- provided -->
+
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-repository-backend-services-rest-client-angular</artifactId>
-      <classifier>sources</classifier>
+      <artifactId>edu_sharing-community-repository-backend-services-rest-api</artifactId>
       <scope>provided</scope>
     </dependency>
 

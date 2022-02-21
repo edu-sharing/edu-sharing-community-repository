@@ -31,6 +31,7 @@ import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.io.VCardWriter;
 import net.sourceforge.cardme.vcard.VCard;
 import net.sourceforge.cardme.vcard.VCardImpl;
+import net.sourceforge.cardme.vcard.arch.VCardVersion;
 import net.sourceforge.cardme.vcard.exceptions.VCardBuildException;
 import net.sourceforge.cardme.vcard.types.AdrType;
 import net.sourceforge.cardme.vcard.types.ExtendedType;
@@ -105,7 +106,21 @@ public class VCardConverter {
 					vcardMap.put(extended.getKey(),extended.getValue());
 				}
 
+				if(vcard.getVersion() != null && (
+						VCardVersion.V3_0.equals(vcard.getVersion().getVersion()) ||
+								VCardVersion.V4_0.equals(vcard.getVersion().getVersion())
+				)) {
+					vcardMap = new HashMap<>(vcardMap.entrySet()
+							.stream()
+							.collect(Collectors.toMap(
+											e -> e.getKey(),
+											e -> e.getValue().toString().replace("\\\\", "\\").replace("\\,", ",")
+									)
+							));
+					result.add(vcardMap);
+
 				result.add(vcardMap);
+				}
 			}
 		} catch (Exception e) {
 			logger.debug(e.getMessage(),e);

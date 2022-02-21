@@ -85,6 +85,10 @@
       <exclusions>
         <exclusion>
           <groupId>*</groupId>
+          <artifactId>axis</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>*</groupId>
           <artifactId>commons-codec</artifactId>
         </exclusion>
         <exclusion>
@@ -165,6 +169,14 @@
         </exclusion>
         <exclusion>
           <groupId>*</groupId>
+          <artifactId>jakarta.activation-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>jakarta.xml.bind-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>*</groupId>
           <artifactId>javax.inject</artifactId>
         </exclusion>
         <exclusion>
@@ -194,6 +206,10 @@
         <exclusion>
           <groupId>*</groupId>
           <artifactId>serializer</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>stax-api</artifactId>
         </exclusion>
         <exclusion>
           <groupId>io.swagger</groupId>
@@ -237,6 +253,10 @@
       <exclusions>
         <exclusion>
           <groupId>*</groupId>
+          <artifactId>axis</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>*</groupId>
           <artifactId>commons-codec</artifactId>
         </exclusion>
         <exclusion>
@@ -317,6 +337,14 @@
         </exclusion>
         <exclusion>
           <groupId>*</groupId>
+          <artifactId>jakarta.activation-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>jakarta.xml.bind-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>*</groupId>
           <artifactId>javax.inject</artifactId>
         </exclusion>
         <exclusion>
@@ -346,6 +374,10 @@
         <exclusion>
           <groupId>*</groupId>
           <artifactId>serializer</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>stax-api</artifactId>
         </exclusion>
         <exclusion>
           <groupId>io.swagger</groupId>

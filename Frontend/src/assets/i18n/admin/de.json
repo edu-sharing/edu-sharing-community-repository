@@ -22,11 +22,22 @@
         },
         "PLUGINS": {
             "TITLE":  "Erweiterungen",
-            "INFO":  "In dieser Liste werden aktive Erweiterungen für edu-sharing angezeigt. Es handelt sich hierbei um zusätzliche Funktionskomponenten für das Repository.",
+            "INFO":  "In dieser Liste werden Erweiterungen, die aktuell für Alfresco & edu-sharing auf diesem System verfügbar sind, angezeigt. Es handelt sich hierbei um zusätzliche Funktionskomponenten für das Repository.",
             "NO_DESCRIPTION":  "Für dieses Plugin sind keine Details verfügbar",
+            "ENABLED": "Aktiviert",
+            "DISABLED": "Deaktiviert",
             "PLUGIN_DETAILS": {
-                "Test 1": {
-                    "DESCRIPTION": "Beispiel Plugin"
+                "edu_sharing-community-repository-backend-alfresco-module": {
+                    "DESCRIPTION": "Das Core-Modul von edu-sharing. Es erweitert Alfresco um edu-sharing API's und Oberflächen"
+                },
+                "Alfresco Share Services AMP": {
+                    "DESCRIPTION": "Dieses Alfresco-Modul stellt die Alfresco Share-Oberflächen bereit"
+                },
+                "edu_sharing-community-repository-plugin-elastic-backend-alfresco-module": {
+                    "DESCRIPTION": "Das Elasticsearch-Modul transformiert die Objekte inkl. Statistiken und Metadaten in eine spezielle Elasticsearch-Indexstruktur und erlaubt effiziente und sehr detaillierte Suchqueries"
+                },
+                "alfresco-trashcan-cleaner project": {
+                    "DESCRIPTION": "Der Trashcan-Cleaner löscht regelmäßig alte Inhalte im Papierkorb aller Nutzer"
                 }
             },
             "MORE": "Weitere Informationen zu Erweiterungen und wie diese bezogen, konfiguriert und installiert werden können, sind auf der edu-sharing Website zu finden",

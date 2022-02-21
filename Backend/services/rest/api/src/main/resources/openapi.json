@@ -2415,10 +2415,6 @@
             "type": "string"
           }
         },
-        "required": [
-          "id",
-          "name"
-        ],
         "type": "object"
       },
       "Node": {
@@ -3760,6 +3756,12 @@
           "globalGroups": {
             "items": {
               "$ref": "#/components/schemas/SimpleEditGlobalGroups"
+            },
+            "type": "array"
+          },
+          "licenses": {
+            "items": {
+              "type": "string"
             },
             "type": "array"
           },
