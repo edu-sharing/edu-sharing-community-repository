@@ -137,6 +137,7 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>edu_sharing-community-repository-backend-services-rest-client-angular</artifactId>
       <classifier>sources</classifier>
+      <scope>provided</scope>
     </dependency>
 
   </dependencies>
