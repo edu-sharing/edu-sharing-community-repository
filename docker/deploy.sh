@@ -507,19 +507,19 @@ rstart)
 	rstart && note
 	;;
 rdebug)
-	rdebug && note
+	rdebug && info
 	;;
 rdev)
-	rdev && note
+	rdev && info
 	;;
 lstart)
 	lstart && note
 	;;
 ldebug)
-	ldebug && note
+	ldebug && info
 	;;
 ldev)
-	ldev && note
+	ldev && info
 	;;
 reload)
 	reload
