@@ -12,7 +12,8 @@ public abstract class PropertiesGetInterceptorValuespaceMapperAbstract extends P
     /**
      * widget class
      */
-    protected MetadataWidget widget;
+    protected MetadataWidget sourceWidget;
+    protected MetadataWidget targetWidget;
     /**
      * property as defined in CCConstants
      */
@@ -41,10 +42,13 @@ public abstract class PropertiesGetInterceptorValuespaceMapperAbstract extends P
     /**
      * Set the widget
      * the widget will be used to fetch the relation mapping data
+     * The target widget is optional
+     * if it is set, the interceptor will make sure that only valid mappings for the target valuespace are added
      */
-    public void setWidget(MetadataWidget widget) {
-        this.widget = widget;
-        this.relationCache = widget.getValuespaceMappingByRelation(relation);
+    public void setWidget(MetadataWidget sourceWidget, MetadataWidget targetWidget) {
+        this.sourceWidget = sourceWidget;
+        this.targetWidget = targetWidget;
+        this.relationCache = this.sourceWidget.getValuespaceMappingByRelation(relation);
     }
 
     /**
@@ -53,13 +57,13 @@ public abstract class PropertiesGetInterceptorValuespaceMapperAbstract extends P
     @Override
     public Map<String, Object> beforeDeliverProperties(PropertiesContext context) {
         try {
-            if(this.widget == null) {
+            if(this.sourceWidget == null) {
                 return super.beforeDeliverProperties(context);
             }
             if(!this.shouldProcess(context)) {
                 return super.beforeDeliverProperties(context);
             }
-            return this.onMap(context, widget);
+            return this.onMap(context, sourceWidget);
         } catch (Exception ignored) {
         }
         return super.beforeDeliverProperties(context);
@@ -80,10 +84,12 @@ public abstract class PropertiesGetInterceptorValuespaceMapperAbstract extends P
                 MigrateMetadataValuespaceJob.mapValueToTarget(
                         context.getNodeRef(),
                         relationCache,
+                        this.targetWidget.getValues(),
                         mode,
                         map.get(sourceProperty),
                         map.get(targetProperty),
-                        false
+                        false,
+                        null
                 ));
         return map;
     }

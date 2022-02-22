@@ -47,13 +47,18 @@ import org.springframework.security.core.Authentication;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 @JobDescription(description = "Migrate a metadata field to a new valuespace (The new valuespace must already be configured for this field in the mds and must provide related-keys in order to transform)")
 public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams{
+	private MappingCallback mappingCallback;
 	public enum Mode {
 		Merge,
 		Replace
+	}
+	public interface MappingCallback {
+		Serializable onMap(NodeRef nodeRef, String input, boolean reverseMapping);
 	}
 
 
@@ -95,10 +100,15 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 			try {
 				MetadataSet mds = MetadataHelper.getMetadataset(nodeRef);
 				MetadataWidget widget;
-				List<Map<String, Collection<MetadataKey.MetadataKeyRelated>>> mappings;
+				Collection<MetadataKey> targetKeys;
+				List<Map<String, Collection<MetadataKey.MetadataKeyRelated>>> mappings = null;
+				mappingCallback = (MappingCallback)getJobDataMap().get("mappingCallback");
 				try {
-					widget = mds.findWidget(mdsWidgetId);
-					mappings = relations.stream().map(widget::getValuespaceMappingByRelation).collect(Collectors.toList());
+					if(mdsWidgetId != null) {
+						widget = mds.findWidget(mdsWidgetId);
+						mappings = relations.stream().map(widget::getValuespaceMappingByRelation).collect(Collectors.toList());
+					}
+					targetKeys = mds.findWidget(targetProperty).getValues();
 				} catch(IllegalArgumentException e) {
 					logger.warn("Metadataset " + mds.getId() +" does not have widget id " + mdsWidgetId + ", node " + nodeRef);
 					return;
@@ -110,7 +120,11 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 					return;
 				}
 				HashSet<String> mapped = new HashSet<>();
-				mappings.forEach((m) -> mapped.addAll(mapValueToTarget(nodeRef, m, mode, value, target, true)));
+				if(mappings == null) {
+					mapped.addAll(mapValueToTarget(nodeRef, null, targetKeys, mode, value, target, true, mappingCallback));
+				} else {
+					mappings.forEach((m) -> mapped.addAll(mapValueToTarget(nodeRef, m, targetKeys, mode, value, target, true, mappingCallback)));
+				}
 				if(mapped.size() > 0) {
 					logger.info("Mapped " + value + " -> " + StringUtils.join(mapped,", "));
 				}
@@ -142,14 +156,14 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 		runner.run();
 	}
 
-	public static HashSet<String> mapValueToTarget(NodeRef nodeRef, Map<String, Collection<MetadataKey.MetadataKeyRelated>> mapping, Mode mode, Object value, Object targetValue, boolean reverseMapping) {
+	public static HashSet<String> mapValueToTarget(NodeRef nodeRef, Map<String, Collection<MetadataKey.MetadataKeyRelated>> mapping, Collection<MetadataKey> targetKeys, Mode mode, Object value, Object targetValue, boolean reverseMapping, MappingCallback callback) {
 		if(value instanceof String || value instanceof Collection) {
 			if(value instanceof String) {
 				value = Collections.singletonList(value);
 			}
 			ArrayList<String> valueMapped = new ArrayList<>();
 			((Collection<?>) value).stream().forEach((v) -> {
-				Serializable mapped = mapValue(nodeRef, (String) v, mapping, reverseMapping);
+				Serializable mapped = mapValue(nodeRef, (String) v, mapping, targetKeys, reverseMapping, callback);
 				if(mapped != null) {
 					if (mapped instanceof Collection) {
 						valueMapped.addAll((Collection<? extends String>) mapped);
@@ -184,12 +198,16 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 	 * @param value
 	 * @param metadataKeyRelated
 	 * Data structure containting sourceId -> [relation with target id[, relation with target id, ...]]
+	 * @param targetKeys
 	 * @param reverseMapping
 	 * When true: the "value" is supposed to have on of the relation target ids. It will be mapped matching source ids of this link
 	 * When false: The "value" is supposed to be the source id. It will be mapped to target ids of this link. This mode is much faster because of the given data structure
 	 * @return
 	 */
-	private static Serializable mapValue(NodeRef nodeRef, String value, Map<String, Collection<MetadataKey.MetadataKeyRelated>> metadataKeyRelated, boolean reverseMapping) {
+	private static Serializable mapValue(NodeRef nodeRef, String value, Map<String, Collection<MetadataKey.MetadataKeyRelated>> metadataKeyRelated, Collection<MetadataKey> targetKeys, boolean reverseMapping, MappingCallback callback) {
+		if(callback != null) {
+			return callback.onMap(nodeRef, value, reverseMapping);
+		}
 		Collection<String> mappedKeys;
 		Collection<MetadataKey.MetadataKeyRelated> relatedMapped;
 		if (reverseMapping) {
@@ -208,6 +226,12 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 			return null;
 		}
 		//logger.debug("Mapping " + value + " => " + mappedIds + ", node " + nodeRef);
+		if(targetKeys != null) {
+			mappedKeys = mappedKeys.stream().filter((keyId) -> targetKeys.stream().anyMatch(
+					key -> key.getKey().equals(keyId) ||
+							(key.getAlternativeKeys() != null && key.getAlternativeKeys().contains(keyId))
+			)).collect(Collectors.toList());
+		}
 		if(mappedKeys.size() == 1) {
 			return mappedKeys.iterator().next();
 		}

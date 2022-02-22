@@ -33,10 +33,10 @@ public abstract class PropertiesGetInterceptorValuespaceMapperMultiRelationAbstr
     }
 
     @Override
-    public void setWidget(MetadataWidget widget) {
-        super.setWidget(widget);
+    public void setWidget(MetadataWidget sourceWidget, MetadataWidget targetWidget) {
+        super.setWidget(sourceWidget, targetWidget);
         relationCache = new HashMap<>();
-        this.relations.forEach((r) -> relationCache.put(r, widget.getValuespaceMappingByRelation(r)));
+        this.relations.forEach((r) -> relationCache.put(r, sourceWidget.getValuespaceMappingByRelation(r)));
     }
 
     /**
@@ -51,10 +51,12 @@ public abstract class PropertiesGetInterceptorValuespaceMapperMultiRelationAbstr
             HashSet<String> mapped = MigrateMetadataValuespaceJob.mapValueToTarget(
                     context.getNodeRef(),
                     relationCache.get(relation),
+                    targetWidget.getValues(),
                     mode,
                     map.get(sourceProperty),
                     map.get(targetProperty),
-                    false
+                    false,
+                    null
             );
             if(mapped != null && !mapped.isEmpty()) {
                 map.put(targetProperty, mapped);

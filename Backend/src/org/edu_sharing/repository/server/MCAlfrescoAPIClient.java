@@ -3530,6 +3530,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			String name=originalName;
 			if(i>0) {
 				name = NodeServiceHelper.renameNode(name, i);
+				if(i>10) {
+					// fallback
+					name = nodeId;
+				}
 				nodeService.setProperty(new NodeRef(storeRef, nodeId),
 						QName.createQName(CCConstants.CM_NAME),name);
 			}
