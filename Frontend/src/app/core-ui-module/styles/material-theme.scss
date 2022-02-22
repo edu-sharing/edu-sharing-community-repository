@@ -166,6 +166,10 @@ mat-button-toggle-group{
         &.mat-tab-label-active{
             opacity: 0.9;
         }
+        &.mat-tab-disabled {
+            // Disabled styles are already reflected via label color, don't further reduce contrast. 
+            opacity: 1;
+        }
         .tab-icon{
             margin-right: 5px;
         }
