@@ -1315,6 +1315,8 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_IO_NAME_CONFIG_NODE_NAME = "RepositoryConfig";
 
+	public final static String CCM_VALUE_IO_NAME_LTI_REGISTRATION_NODE_NAME = "LTIRegistration";
+
 
 	/**
 	 * this property comes from alfresco when calling queryChildren
