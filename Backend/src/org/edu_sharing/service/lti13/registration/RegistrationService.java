@@ -4,10 +4,13 @@ import com.google.gson.Gson;
 import com.nimbusds.jose.jwk.AsymmetricJWK;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -17,6 +20,7 @@ import org.edu_sharing.service.admin.SystemFolder;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.lti13.RepoTools;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -33,7 +37,13 @@ public class RegistrationService {
 
     Logger logger = Logger.getLogger(RegistrationService.class);
 
+
     public DynamicRegistrationToken generate() throws Throwable{
+        NodeRef systemObject = SystemFolder.getSystemObject(CCConstants.CCM_VALUE_IO_NAME_LTI_REGISTRATION_NODE_NAME);
+        ACL acl = PermissionServiceFactory.getLocalService().getPermissions(systemObject.getId());
+        if(acl.isInherited()) {
+            PermissionServiceFactory.getLocalService().setPermissionInherit(systemObject.getId(), false);
+        }
         DynamicRegistrationTokens systemObjectContent = SystemFolder.getSystemObjectContent(
                         CCConstants.CCM_VALUE_IO_NAME_LTI_REGISTRATION_NODE_NAME,
                 DynamicRegistrationTokens.class);
