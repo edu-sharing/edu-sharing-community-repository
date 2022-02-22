@@ -712,12 +712,24 @@
         <groupId>com.bazaarvoice.jolt</groupId>
         <artifactId>jolt-core</artifactId>
         <version>0.1.5</version>
+        <exclusions>
+          <exclusion>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>*</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
 
       <dependency>
         <groupId>com.bazaarvoice.jolt</groupId>
         <artifactId>json-utils</artifactId>
         <version>0.1.5</version>
+        <exclusions>
+          <exclusion>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>*</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
 
       <dependency>
