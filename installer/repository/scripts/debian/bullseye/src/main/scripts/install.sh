@@ -588,37 +588,37 @@ config_edu_sharing() {
 
 	if [[ -n "${repository_httpclient_disablesni4hosts}" ]] ; then
 		hocon -f ${eduSConf} \
-			set "repository.httpclient.disableSNI4Hosts" "${repository_httpclient_disablesni4hosts}"
+			set "repository.httpclient.disableSNI4Hosts" '"'"${repository_httpclient_disablesni4hosts}"'"'
 	fi
 
 	if [[ -n "${repository_httpclient_proxy_host}" ]] ; then
 		hocon -f ${eduSConf} \
-			set "repository.httpclient.proxy.host" "${repository_httpclient_proxy_host}"
+			set "repository.httpclient.proxy.host" '"'"${repository_httpclient_proxy_host}"'"'
 	fi
 
   if [[ -n "${repository_httpclient_proxy_nonproxyhosts}" ]]  ; then
   	hocon -f ${eduSConf} \
-  		set "repository.httpclient.proxy.nonproxyhosts" "${repository_httpclient_proxy_nonproxyhosts}"
+  		set "repository.httpclient.proxy.nonproxyhosts" '"'"${repository_httpclient_proxy_nonproxyhosts}"'"'
   fi
 
   if [[ -n "${repository_httpclient_proxy_proxyhost}" ]] ; then
   	hocon -f ${eduSConf} \
-  		set "repository.httpclient.proxy.proxyhost" "${repository_httpclient_proxy_proxyhost}"
+  		set "repository.httpclient.proxy.proxyhost" '"'"${repository_httpclient_proxy_proxyhost}"'"'
   fi
 
   if [[ -n "${repository_httpclient_proxy_proxypass}" ]] ; then
   	hocon -f ${eduSConf} \
-  		set "repository.httpclient.proxy.proxypass" "${repository_httpclient_proxy_proxypass}"
+  		set "repository.httpclient.proxy.proxypass" '"'"${repository_httpclient_proxy_proxypass}"'"'
   fi
 
   if [[ -n "${repository_httpclient_proxy_proxyport}" ]] ; then
   	hocon -f ${eduSConf} \
-  		set "repository.httpclient.proxy.proxyport" "${repository_httpclient_proxy_proxyport}"
+  		set "repository.httpclient.proxy.proxyport" '"'"${repository_httpclient_proxy_proxyport}"'"'
   fi
 
   if [[ -n "${repository_httpclient_proxy_proxyuser}" ]] ; then
   	hocon -f ${eduSConf} \
-  		set "repository.httpclient.proxy.proxyuser" "${repository_httpclient_proxy_proxyuser}"
+  		set "repository.httpclient.proxy.proxyuser" '"'"${repository_httpclient_proxy_proxyuser}"'"'
   fi
 
 	######################################################################################################################

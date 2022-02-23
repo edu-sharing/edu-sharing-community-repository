@@ -378,47 +378,47 @@ xmlstarlet ed -L \
 
 [[ -n "${my_http_client_disablesni4hosts}" ]] && {
 	hocon -f ${eduSConf} \
-		set "repository.httpclient.disableSNI4Hosts" "${my_http_client_disablesni4hosts}"
+		set "repository.httpclient.disableSNI4Hosts" '"'"${my_http_client_disablesni4hosts}"'"'
 }
 
 [[ -n "${my_http_client_proxy_host}" ]] && {
 	hocon -f ${eduSConf} \
-		set "repository.httpclient.proxy.host" "${my_http_client_proxy_host}"
+		set "repository.httpclient.proxy.host" '"'"${my_http_client_proxy_host}"'"'
 }
 
 [[ -n "${my_http_client_proxy_nonproxyhosts}" ]] && {
 	export CATALINA_OPTS="-Dhttp.nonProxyHosts=${my_http_client_proxy_nonproxyhosts} $CATALINA_OPTS"
 	export CATALINA_OPTS="-Dhttps.nonProxyHosts=${my_http_client_proxy_nonproxyhosts} $CATALINA_OPTS"
 	hocon -f ${eduSConf} \
-		set "repository.httpclient.proxy.nonproxyhosts" "${my_http_client_proxy_nonproxyhosts}"
+		set "repository.httpclient.proxy.nonproxyhosts" '"'"${my_http_client_proxy_nonproxyhosts}"'"'
 }
 
 [[ -n "${my_http_client_proxy_proxyhost}" ]] && {
 	export CATALINA_OPTS="-Dhttp.proxyHost=${my_http_client_proxy_proxyhost} $CATALINA_OPTS"
 	export CATALINA_OPTS="-Dhttps.proxyHost=${my_http_client_proxy_proxyhost} $CATALINA_OPTS"
 	hocon -f ${eduSConf} \
-		set "repository.httpclient.proxy.proxyhost" "${my_http_client_proxy_proxyhost}"
+		set "repository.httpclient.proxy.proxyhost" '"'"${my_http_client_proxy_proxyhost}"'"'
 }
 
 [[ -n "${my_http_client_proxy_proxypass}" ]] && {
 	export CATALINA_OPTS="-Dhttp.proxyPass=${my_http_client_proxy_proxypass} $CATALINA_OPTS"
 	export CATALINA_OPTS="-Dhttps.proxyPass=${my_http_client_proxy_proxypass} $CATALINA_OPTS"
 	hocon -f ${eduSConf} \
-		set "repository.httpclient.proxy.proxypass" "${my_http_client_proxy_proxypass}"
+		set "repository.httpclient.proxy.proxypass" '"'"${my_http_client_proxy_proxypass}"'"'
 }
 
 [[ -n "${my_http_client_proxy_proxyport}" ]] && {
 	export CATALINA_OPTS="-Dhttp.proxyPort=${my_http_client_proxy_proxyport} $CATALINA_OPTS"
 	export CATALINA_OPTS="-Dhttps.proxyPort=${my_http_client_proxy_proxyport} $CATALINA_OPTS"
 	hocon -f ${eduSConf} \
-		set "repository.httpclient.proxy.proxyport" "${my_http_client_proxy_proxyport}"
+		set "repository.httpclient.proxy.proxyport" '"'"${my_http_client_proxy_proxyport}"'"'
 }
 
 [[ -n "${my_http_client_proxy_proxyuser}" ]] && {
 	export CATALINA_OPTS="-Dhttp.proxyUser=${my_http_client_proxy_proxyuser} $CATALINA_OPTS"
 	export CATALINA_OPTS="-Dhttps.proxyUser=${my_http_client_proxy_proxyuser} $CATALINA_OPTS"
 	hocon -f ${eduSConf} \
-		set "repository.httpclient.proxy.proxyuser" "${my_http_client_proxy_proxyuser}"
+		set "repository.httpclient.proxy.proxyuser" '"'"${my_http_client_proxy_proxyuser}"'"'
 }
 
 ########################################################################################################################
