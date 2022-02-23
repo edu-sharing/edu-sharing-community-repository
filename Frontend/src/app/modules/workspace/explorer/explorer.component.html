@@ -52,7 +52,7 @@
     dropped: drop
   }"
   (sortChange)="setSorting($event)"
-  (clickItem)="select($event)"
+  (clickItem)="clickItem($event)"
   (dblClickItem)="onOpenNode.emit($event.element)"
 >
   <ng-template #empty>
