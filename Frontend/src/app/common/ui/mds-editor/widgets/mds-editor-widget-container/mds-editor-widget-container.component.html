@@ -18,7 +18,9 @@
     *ngIf="!wrapInFormField"
     [attr.role]="wrapInGroup ? 'group' : null"
     [attr.aria-labelledby]="wrapInGroup ? labelId : null"
-    [attr.aria-describedby]="widget?.definition.bottomCaption && !shouldShowError() && wrapInGroup ? descriptionId : null"
+    [attr.aria-describedby]="
+      widget?.definition.bottomCaption && !shouldShowError() && wrapInGroup ? descriptionId : null
+    "
   >
     <ng-container *ngTemplateOutlet="content"></ng-container>
     <p
@@ -46,9 +48,7 @@
   >
     <mat-label [id]="labelId">
       {{ widget.definition.caption }}
-      <span *ngIf="widget.definition.isRequired === 'mandatory'" class="required-marker"
-        >*</span
-      >
+      <span *ngIf="widget.definition.isRequired === 'mandatory'" class="required-marker">*</span>
     </mat-label>
     <ng-container *ngTemplateOutlet="content"></ng-container>
     <mat-hint *ngIf="widget.definition.bottomCaption">
