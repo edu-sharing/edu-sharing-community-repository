@@ -38,7 +38,6 @@ es-powered-by{
     justify-content: flex-end;
     height: 1.25em;
     a{
-      text-transform: uppercase;
       font-size: $fontSizeXSmall;
       &.cdk-keyboard-focused {
         @include setGlobalKeyboardFocus();

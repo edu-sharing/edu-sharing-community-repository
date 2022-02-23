@@ -12,7 +12,6 @@
     font-size: $fontSizeXSmall;
     background-color: $primary;
     color: $textOnPrimary;
-    text-transform: uppercase;
     &:focus {
         // Draw above custom footers and the mobile slide-in menubar when focused.
         z-index: 200;

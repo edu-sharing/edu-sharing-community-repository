@@ -162,7 +162,6 @@ mat-button-toggle-group{
         &.cdk-keyboard-focused{
             @include setGlobalKeyboardFocus('border');
         }
-        text-transform: uppercase;
         &.mat-tab-label-active{
             opacity: 0.9;
         }
@@ -395,7 +394,6 @@ button{
     display: flex !important;
     align-items: center;
     justify-content: center;
-    text-transform: uppercase;
     > i {
         width: 35px;
     }
