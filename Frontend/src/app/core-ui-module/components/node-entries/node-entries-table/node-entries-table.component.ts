@@ -17,6 +17,7 @@ import { NodeEntriesService } from '../../../node-entries.service';
 import { Target } from '../../../option-item';
 import { DropdownComponent } from '../../dropdown/dropdown.component';
 import { ClickSource, InteractionType } from '../../node-entries-wrapper/entries-model';
+import {UIService} from '../../../../core-module/rest/services/ui.service';
 
 @Component({
     selector: 'es-node-entries-table',
@@ -50,6 +51,7 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
                 public entriesService: NodeEntriesService<T>,
                 private applicationRef: ApplicationRef,
                 private toast: Toast,
+                public ui: UIService,
     ) {
     }
 

@@ -116,7 +116,7 @@
     </mat-cell>
   </ng-container>
   <mat-header-row mat-header-row *matHeaderRowDef="getVisibleColumns()"></mat-header-row>
-  <ng-container *ngIf="entriesService.dragDrop?.dragAllowed">
+  <ng-container *ngIf="entriesService.dragDrop?.dragAllowed && !ui.isMobile()">
     <mat-row
       mat-row
       matRipple
@@ -139,7 +139,7 @@
       Test
     </mat-row>
   </ng-container>
-  <ng-container *ngIf="!entriesService.dragDrop?.dragAllowed">
+  <ng-container *ngIf="!(entriesService.dragDrop?.dragAllowed && !ui.isMobile())">
     <mat-row
       mat-row
       matRipple
