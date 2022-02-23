@@ -5,6 +5,7 @@
 // have to load a single css file for Angular Material in your app.
 // Be sure that you only ever include this mixin once!
 @include mat.core();
+// @include mat.strong-focus-indicators();
 
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
@@ -117,6 +118,7 @@ $my-app-theme-custom: map-merge($candy-app-theme, (foreground: $light-theme-fore
 // Alternatively, you can import and @include the theme mixins for each component
 // that you are using.
 @include mat.all-component-themes($my-app-theme-custom);
+// @include mat.strong-focus-indicators-theme($my-app-theme-custom);
 
 /** custom project specifics */
 [matripplecolor=primary] {
@@ -163,6 +165,10 @@ mat-button-toggle-group{
         text-transform: uppercase;
         &.mat-tab-label-active{
             opacity: 0.9;
+        }
+        &.mat-tab-disabled {
+            // Disabled styles are already reflected via label color, don't further reduce contrast. 
+            opacity: 1;
         }
         .tab-icon{
             margin-right: 5px;
@@ -419,6 +425,19 @@ button{
     }
     &:hover:not(.mat-option-disabled), .mat-option:focus:not(.mat-option-disabled){
         background-color: $buttonHoverBackground;
+    }
+    &.mat-focus-indicator.mat-active::before {
+        content: '';
+    } 
+    &.mat-focus-indicator::before {
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        position: absolute;
+        box-sizing: border-box;
+        pointer-events: none;
+        @include setGlobalKeyboardFocus($mode: 'border');
     }
 }
 
