@@ -3534,12 +3534,14 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 					// fallback
 					name = nodeId;
 				}
-				nodeService.setProperty(new NodeRef(storeRef, nodeId),
-						QName.createQName(CCConstants.CM_NAME),name);
 			}
 			if(nodeService.getChildByName(new NodeRef(storeRef, newParentId), ContentModel.ASSOC_CONTAINS, name) != null) {
 				logger.debug("Node " + name +" already exists, retrying...");
 				continue;
+			}
+			if(i>0) {
+				nodeService.setProperty(new NodeRef(storeRef, nodeId),
+						QName.createQName(CCConstants.CM_NAME),name);
 			}
 			try {
 				nodeService.moveNode(
