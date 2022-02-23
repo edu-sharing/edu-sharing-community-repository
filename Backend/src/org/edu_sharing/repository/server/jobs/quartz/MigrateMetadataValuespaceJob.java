@@ -32,6 +32,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.metadataset.v2.MetadataKey;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
@@ -75,8 +76,10 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 	private String targetProperty;
 	@JobFieldDescription(description = "The relation(s) to use (all values will be combined into the result)")
 	private List<MetadataKey.MetadataKeyRelated.Relation> relations;
-	@JobFieldDescription(description = "The mode to use (Merge = Merge any existing target field values with the mapping values, Replace = replace the target field valiues")
+	@JobFieldDescription(description = "The mode to use (Merge = Merge any existing target field values with the mapping values, Replace = replace the target field values")
 	private Mode mode;
+	@JobFieldDescription(description = "Use solr/searchindex. This can improve performance significantly because it only fetches nodes with the sourceProperty set. Make sure your index is up to date")
+	private boolean viaSolr;
 	@JobFieldDescription(description = "Only test and output, but do not modify/store the metadata")
 	private boolean testRun;
 	@JobFieldDescription(description = "Clear/remove the source field content after successful migration")
@@ -91,6 +94,9 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 		runner.setTransaction(NodeRunner.TransactionMode.Local);
 		runner.setKeepModifiedDate(true);
 		runner.setThreaded(false);
+		if(viaSolr) {
+			runner.setLucene("@" + QueryParser.escape(sourceProperty) + ":\"*\"");
+		}
 		runner.setTypes(Arrays.stream(type.split(",")).map(String::trim).map(CCConstants::getValidGlobalName).collect(Collectors.toList()));
 
 		runner.setTask((nodeRef) -> {
