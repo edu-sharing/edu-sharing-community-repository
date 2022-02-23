@@ -3526,7 +3526,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				(String) nodeService.getProperty(
 						new NodeRef(storeRef, nodeId),
 						QName.createQName(CCConstants.CM_NAME));
-		for(int i=0;;i++) {
+		for(int i=0;i<=11;i++) {
 			String name=originalName;
 			if(i>0) {
 				name = NodeServiceHelper.renameNode(name, i);
@@ -3551,11 +3551,12 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				// remove from cache so that the new primary parent will be refreshed
 				Cache repCache = new RepositoryCache();
 				repCache.remove(nodeId);
-				break;
+				return;
 			}catch(DuplicateChildNodeNameException e){
 				// let the loop run
 			}
 		}
+		throw new RuntimeException("Could not move node, creating new node at location " +newParentId + " failed, renaming failed for " + nodeId);
 	}
 
 	/**
