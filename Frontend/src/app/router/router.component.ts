@@ -41,6 +41,7 @@ import { BridgeService } from '../core-bridge-module/bridge.service';
 import {AccessibilityComponent} from '../common/ui/accessibility/accessibility.component';
 import { extensionRoutes } from '../extension/extension-routes';
 import {BehaviorSubject} from 'rxjs';
+import { ViewService } from '../common/services/view.service';
 
 @Component({
     selector: 'es-router',
@@ -96,7 +97,9 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
         private ngZone: NgZone,
         private bridge: BridgeService,
         private injector: Injector,
+        private viewService: ViewService,
     ) {
+        this.viewService.setUp();
         this.injector.get(Router).events.subscribe(event => {
             if (event instanceof NavigationEnd) {
                 RouterComponent.history.value.push(event.url);

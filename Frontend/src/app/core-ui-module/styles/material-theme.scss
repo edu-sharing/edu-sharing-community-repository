@@ -593,3 +593,18 @@ mat-form-field {
         }
     }
 }
+
+@include contrastMode(global) {
+    // We cannot archive sufficient contrast through a Material theme since opacities for color
+    // values are hardcoded in the Material component's theme files --- independently of opacities
+    // given by the theme.
+    .mat-form-field-appearance-outline .mat-form-field-outline:not(.mat-form-field-outline-thick) {
+        color: rgba(black, 0.54);
+    }
+    .cdk-overlay-pane .suggestion-card,
+    .cdk-overlay-pane .mat-autocomplete-panel,
+    .cdk-overlay-pane .mat-menu-panel,
+    .cdk-overlay-pane .mat-tooltip {
+        border: 1px solid rgba(black, 0.54);
+    }
+}
