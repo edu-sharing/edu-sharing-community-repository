@@ -12,7 +12,7 @@ $optionBarHeight: 50px;
     height: 100%;
     grid-template-columns: auto;
     @include contrastMode {
-        border: 1px solid rgba(black, 0.54);
+        border: 1px solid rgba(black, 0.42);
     }
     .dropdown-dummy {
         position: fixed;

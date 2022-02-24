@@ -599,12 +599,12 @@ mat-form-field {
     // values are hardcoded in the Material component's theme files --- independently of opacities
     // given by the theme.
     .mat-form-field-appearance-outline .mat-form-field-outline:not(.mat-form-field-outline-thick) {
-        color: rgba(black, 0.54);
+        color: rgba(black, 0.42);
     }
     .cdk-overlay-pane .suggestion-card,
     .cdk-overlay-pane .mat-autocomplete-panel,
     .cdk-overlay-pane .mat-menu-panel,
     .cdk-overlay-pane .mat-tooltip {
-        border: 1px solid rgba(black, 0.54);
+        outline: 1px solid rgba(black, 0.42);
     }
 }
