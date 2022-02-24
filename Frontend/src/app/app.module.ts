@@ -84,6 +84,7 @@ import { PropertySlugPipe } from './common/ui/mds-editor/shared/property-slug.pi
 import { MdsEditorWidgetSearchSuggestionsComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-search-suggestions/mds-editor-widget-search-suggestions.component';
 import { EduSharingApiModule } from 'ngx-edu-sharing-api';
 import { MdsEditorWidgetVCardComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-vcard/mds-editor-widget-vcard.component';
+import { LtiComponent } from './modules/lti/lti.component';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -158,6 +159,7 @@ import { MdsEditorWidgetVCardComponent } from './common/ui/mds-editor/widgets/md
         LabelPipe,
         PropertySlugPipe,
         MdsEditorWidgetSearchSuggestionsComponent,
+        LtiComponent
     ],
     imports: [
         IMPORTS,

@@ -42,6 +42,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.*;
@@ -424,16 +425,21 @@ public class LTIApi {
             });
             if(throwable != null) throw throwable;
 
-            return Response.status(Response.Status.OK).entity(getHTML(
-                    null,
-                    null,
-                    "platform registered<br><button onClick=\"(window.opener || window.parent).postMessage({subject:'org.imsglobal.lti.close'}, '*');\">OK</button>",
-                    null))
-                    .build();
+           return Response.seeOther(new URI(req.getScheme() +"://"
+                           + req.getServerName()
+                           + "/edu-sharing/components/lti"))
+                   .build();
         }catch(Throwable e){
             logger.error(e.getMessage(),e);
-            return Response.status(Response.Status.OK).entity(getHTML(null,null,"error:" + e.getMessage())).build();
-        }
+           try {
+               return Response.seeOther(new URI(req.getScheme() +"://"
+                       + req.getServerName()
+                       + "/edu-sharing/components/messages/LTI_REG_ERROR/"+e.getMessage()))
+                       .build();
+           } catch (URISyntaxException ex) {
+               return Response.status(Response.Status.OK).entity(getHTML(null,null,"error:" + ex.getMessage())).build();
+           }
+       }
 
     }
 
