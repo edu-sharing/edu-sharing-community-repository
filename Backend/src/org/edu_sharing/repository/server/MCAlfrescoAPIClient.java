@@ -3531,6 +3531,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			if(i>0) {
 				name = NodeServiceHelper.renameNode(name, i);
 				if(i>10) {
+					logger.info("Node " + name +" already exists, falling back to uuid " + nodeId);
 					// fallback
 					name = nodeId;
 				}
@@ -3555,6 +3556,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				repCache.remove(nodeId);
 				return;
 			}catch(DuplicateChildNodeNameException e){
+				logger.warn("Node renaming to " + name + " throwed " + e.getName());
 				// let the loop run
 			}
 		}
