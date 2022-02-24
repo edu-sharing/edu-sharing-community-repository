@@ -48,7 +48,7 @@ export class NodeRatingComponent<T extends Node> implements OnInit {
 
     async toogleLike() {
         const name = RestHelper.getTitle(this.node);
-        if (this.node.rating.user) {
+        if (this.node.rating?.user) {
             try {
                 await this.ratingService.deleteNodeRating(this.node.ref.id).toPromise();
                 this.toast.toast('RATING.TOAST.LIKE_REMOVED', {name});
@@ -70,6 +70,9 @@ export class NodeRatingComponent<T extends Node> implements OnInit {
     }
 
     getPrimaryRating() {
+        if(!this.node.rating) {
+            return 0;
+        }
         if (this.node.rating.user) {
             return this.node.rating.user;
         }
