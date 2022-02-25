@@ -11,7 +11,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.AuthenticationService;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.log4j.Logger;
+import org.apache.log4j.MDC;
 import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
@@ -38,9 +41,47 @@ import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 
 
 public class ContextManagementFilter implements javax.servlet.Filter {
+	public static class B3 {
+		private final String traceId;
+		private final String spanId;
+		private final boolean sampled;
 
+		public B3(HttpServletRequest req) {
+			this.traceId = req.getHeader("X-B3-TraceId");
+			this.spanId = req.getHeader("X-B3-SpanId");
+			this.sampled = "1".equals(req.getHeader("X-B3-Sampled"));
+		}
+
+		public String getTraceId() {
+			return traceId;
+		}
+
+		public String getSpanId() {
+			return spanId;
+		}
+
+		public boolean isSampled() {
+			return sampled;
+		}
+
+		public String toString() {
+			if(traceId != null && spanId != null) {
+				return "TraceId: " + traceId;
+			}
+			return "";
+		}
+
+		public void addToRequest(HttpRequestBase request) {
+			if(traceId != null && spanId != null) {
+				request.setHeader("X-B3-TraceId", traceId);
+				request.setHeader("X-B3-SpanId", spanId);
+				request.setHeader("X-B3-Sampled", String.valueOf(sampled ? 1 : 0));
+			}
+		}
+	}
 	// stores the currently accessing tool type, e.g. CONNECTOR
 	public static ThreadLocal<String> accessToolType = new ThreadLocal<>();
+	public static ThreadLocal<B3> b3 = new ThreadLocal<>();
 
 	Logger logger = Logger.getLogger(ContextManagementFilter.class);
 
@@ -63,6 +104,11 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 		try {
 
 			Context.newInstance((HttpServletRequest)req , (HttpServletResponse)res, context);
+			b3.set(new B3((HttpServletRequest)req));
+			if(b3.get().getTraceId() != null && b3.get().getSpanId() != null) {
+				MDC.put("TraceId", b3.get().getTraceId());
+				MDC.put("SpanId", b3.get().getSpanId());
+			}
 			ScopeAuthenticationServiceFactory.getScopeAuthenticationService().setScopeForCurrentThread();
 
 			try{

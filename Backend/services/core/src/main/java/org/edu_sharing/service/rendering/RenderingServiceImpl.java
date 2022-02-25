@@ -22,6 +22,7 @@ import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationTool;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.rendering.RenderingErrorServlet;
 import org.edu_sharing.repository.server.rendering.RenderingException;
 import org.edu_sharing.repository.server.tools.*;
@@ -121,6 +122,7 @@ public class RenderingServiceImpl implements RenderingService{
 	@Override
 	public String getDetails(String renderingServiceUrl, RenderingServiceData data) throws JsonProcessingException, UnsupportedEncodingException {
 		HttpPost post = new HttpPost(renderingServiceUrl);
+		ContextManagementFilter.b3.get().addToRequest(post);
 		/*
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
