@@ -65,7 +65,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	private final BehaviourFilter policyBehaviourFilter;
 	String repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
 	private ServiceRegistry serviceRegistry = null;
-	private NodeService nodeService = null;
+	protected NodeService nodeService = null;
 	private NodeService nodeServiceAlfresco = null;
 	private VersionService versionService;
 
@@ -214,7 +214,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public String getCompanyHome(){
 		return repositoryHelper.getCompanyHome().getId();
 	}
-	HashMap<String,Object> getToSafeProps(HashMap<String, String[]> props, String nodeType, String[] aspects, String parentId,String templateName) throws Throwable{
+
+	private HashMap<String,Object> getToSafeProps(HashMap<String, String[]> props, String nodeType, String[] aspects, String parentId,String templateName) throws Throwable{
 		String[] metadataSetIdArr = props.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
 		
 		String metadataSetId = (metadataSetIdArr != null && metadataSetIdArr.length > 0) ? metadataSetIdArr[0] : null;
@@ -616,7 +617,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 	}
 	
-	Map<QName, Serializable> transformPropMap(HashMap map) {
+	protected Map<QName, Serializable> transformPropMap(HashMap map) {
 		Map<QName, Serializable> result = new HashMap<QName, Serializable>();
 		for (Object key : map.keySet()) {
 
