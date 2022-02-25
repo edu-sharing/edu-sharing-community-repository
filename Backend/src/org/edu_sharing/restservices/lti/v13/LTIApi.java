@@ -34,6 +34,7 @@ import org.edu_sharing.service.lti13.*;
 import org.edu_sharing.service.lti13.model.LTISessionObject;
 import org.edu_sharing.service.lti13.registration.RegistrationService;
 import org.edu_sharing.service.lti13.uoc.Config;
+import org.springframework.extensions.surf.util.URLEncoder;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -113,7 +114,7 @@ public class LTIApi {
 
         } catch (Throwable e) {
             logger.error(e.getMessage(),e);
-            return Response.status(Response.Status.OK).entity(getHTML(null,null,"error:" + e.getMessage())).build();
+            return processError(req,e,"LTI_ERROR");
         }
     }
 
@@ -301,17 +302,28 @@ public class LTIApi {
                     }else{
                         String message = "can not handle message type:" + ltiMessageType;
                         logger.error(message);
-                        return Response.status(Response.Status.OK).entity(getHTML(null,null,"error: " + message)).build();
+                        throw new Exception(message);
                     }
                 }
             }
         }catch(Exception e){
             logger.error(e.getMessage(),e);
-            return Response.status(Response.Status.OK).entity(getHTML(null,null,"error: "+ e.getMessage())).build();
+            return processError(req,e,"LTI_ERROR");
         }
 
 
         return Response.status(Response.Status.OK).build();
+    }
+
+    private Response processError(HttpServletRequest req, Throwable e, String errorType){
+        try {
+            return Response.seeOther(new URI(req.getScheme() +"://"
+                            + req.getServerName()
+                            + "/edu-sharing/components/messages/"+errorType+"/"+ URLEncoder.encode(e.getMessage())))
+                    .build();
+        } catch (URISyntaxException ex) {
+            return Response.status(Response.Status.OK).entity(getHTML(null,null,"error:" + ex.getMessage())).build();
+        }
     }
 
     @GET
@@ -430,15 +442,8 @@ public class LTIApi {
                            + "/edu-sharing/components/lti"))
                    .build();
         }catch(Throwable e){
-            logger.error(e.getMessage(),e);
-           try {
-               return Response.seeOther(new URI(req.getScheme() +"://"
-                       + req.getServerName()
-                       + "/edu-sharing/components/messages/LTI_REG_ERROR/"+e.getMessage()))
-                       .build();
-           } catch (URISyntaxException ex) {
-               return Response.status(Response.Status.OK).entity(getHTML(null,null,"error:" + ex.getMessage())).build();
-           }
+           logger.error(e.getMessage(),e);
+           return processError(req,e,"LTI_REG_ERROR");
        }
 
     }
