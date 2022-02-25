@@ -32,6 +32,8 @@ import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.NodeLTIDeepLink;
 import org.edu_sharing.service.lti13.*;
 import org.edu_sharing.service.lti13.model.LTISessionObject;
+import org.edu_sharing.service.lti13.registration.DynamicRegistrationToken;
+import org.edu_sharing.service.lti13.registration.DynamicRegistrationTokens;
 import org.edu_sharing.service.lti13.registration.RegistrationService;
 import org.edu_sharing.service.lti13.uoc.Config;
 import org.springframework.extensions.surf.util.URLEncoder;
@@ -456,24 +458,54 @@ public class LTIApi {
     @Produces({"application/json"})
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode="200", description= RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = RegistrationUrl.class))),
+                    @ApiResponse(responseCode="200", description= RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = DynamicRegistrationTokens.class))),
                     @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = String.class)))
             })
-    public Response ltiRegistrationUrl(@Context HttpServletRequest req){
+    public Response ltiRegistrationUrl(@Parameter(description = "if to add a ne url to the list",required=true, schema = @Schema(defaultValue="false" ) ) @QueryParam("generate") boolean generate,
+                                       @Context HttpServletRequest req){
 
         try {
-            RegistrationUrl result = new RegistrationUrl();
-            result.setUrl(new RegistrationService().generate().getUrl());
-            return Response.status(Response.Status.OK).entity(result).build();
+            RegistrationService registrationService = new RegistrationService();
+            if(generate){
+                registrationService.generate();
+            }
+            return Response.status(Response.Status.OK).entity(registrationService.get()).build();
         }catch(Throwable e){
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(e)).build();
         }
     }
 
+    @DELETE
+    @Path("/registration/url/{token}")
+    @Operation(summary = "LTI Dynamic Regitration - delete url")
+    @Consumes({ "application/json" })
+    @Produces({"application/json"})
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode="200", description= RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = DynamicRegistrationTokens.class))),
+                    @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = String.class)))
+            })
+    public Response removeLtiRegistrationUrl(@Parameter(description = "the token of the link you have to remove", required = true) @PathParam("token") String token,
+                                                 @Context HttpServletRequest req){
+
+        try {
+            DynamicRegistrationToken dynamicRegistrationToken = new DynamicRegistrationToken();
+            dynamicRegistrationToken.setToken(token);
+            RegistrationService registrationService = new RegistrationService();
+            registrationService.remove(dynamicRegistrationToken);
+            return Response.status(Response.Status.OK).entity(registrationService.get()).build();
+        }catch(Throwable e){
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(e)).build();
+        }
+    }
 
 
 
