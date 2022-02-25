@@ -4,15 +4,19 @@
   <Appenders>
 
     <Console name="STDOUT" target="SYSTEM_OUT">
-      <PatternLayout pattern=" %d %-5p [%C{3}] [%t] %m%n"/>
+      <PatternLayout pattern=" %d %-5p [%X] [%C{3}] [%t] %m%n"/>
     </Console>
+
+    <Async name="ASYNC">
+      <AppenderRef ref="STDOUT"/>
+    </Async>
 
   </Appenders>
 
   <Loggers>
 
     <Root level="info">
-      <AppenderRef ref="STDOUT"/>
+      <AppenderRef ref="ASYNC"/>
     </Root>
 
     <Logger name="org.hibernate" level="warn"/>
