@@ -3536,7 +3536,8 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 					name = nodeId;
 				}
 			}
-			if(nodeService.getChildByName(new NodeRef(storeRef, newParentId), ContentModel.ASSOC_CONTAINS, name) != null) {
+			if(nodeService.getChildByName(new NodeRef(storeRef, newParentId), ContentModel.ASSOC_CONTAINS, name) != null ||
+					nodeService.getChildByName(NodeServiceHelper.getPrimaryParent(new NodeRef(storeRef, nodeId)), ContentModel.ASSOC_CONTAINS, name) != null) {
 				logger.debug("Node " + name +" already exists, retrying...");
 				continue;
 			}
