@@ -555,6 +555,14 @@
             "CONDITION_TYPE": {
                 "TOOLPERMISSION": "Toolpermission"
             }
-        }
+        },
+      "LTI": {
+        "HEADER": "LTI registration",
+        "DYNAMIC": "LTI dynamic registration",
+        "ADVANCED": "LTI advanced registration",
+        "URL": "Url",
+        "TOKEN" : "Token",
+        "TS" : "Expiry Date"
+      }
     }
 }

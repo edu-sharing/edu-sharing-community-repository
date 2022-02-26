@@ -1,0 +1,27 @@
+<mat-tab-group>
+  <mat-tab label="{{'ADMIN.LTI.DYNAMIC' | translate}}">
+    <table *ngIf="tokens" mat-table [dataSource]="tokens.registrationLinks" class="mat-elevation-z8 demo-table">
+      <!-- url -->
+      <ng-container matColumnDef="token">
+        <th mat-header-cell *matHeaderCellDef> {{'ADMIN.LTI.TOKEN' | translate}} </th>
+        <td mat-cell *matCellDef="let element"> {{element.token}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="url">
+        <th mat-header-cell *matHeaderCellDef> {{'ADMIN.LTI.URL' | translate}} </th>
+        <td mat-cell *matCellDef="let element"> {{element.url}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="tsCreated">
+        <th mat-header-cell *matHeaderCellDef> {{'ADMIN.LTI.TS' | translate}} </th>
+        <td mat-cell *matCellDef="let element"> {{element.tsCreated | date: 'yyyy-MM-dd hh:mm'}}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+
+  </mat-tab>
+  <mat-tab label="{{'ADMIN.LTI.ADVANCED' | translate}}"> LTI advanced conten </mat-tab>
+</mat-tab-group>
