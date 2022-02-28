@@ -280,6 +280,9 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
 
     private getFilteredNodes(filterString: string): TreeNode[] {
         return this.tree.find((node) => {
+            if (!node.caption) {
+                return false;
+            }
             const nodeWords = node.caption.trim().toLowerCase().split(/\s+/);
             const filterWords = filterString.trim().toLowerCase().split(/\s+/);
             return filterWords.every((filterWord) =>

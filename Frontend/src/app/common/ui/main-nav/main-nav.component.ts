@@ -578,7 +578,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
 
     isCreateAllowed() {
         // @TODO: May Check for more constrains
-        return (this.create?.allowed === true) && !this.connector.getCurrentLogin()?.isGuest && this.queryParams.reurlCreate !== 'false';
+        return (this.create?.allowed === true) && !this.connector.getCurrentLogin()?.isGuest && this.queryParams?.reurlCreate !== 'false';
     }
 
     openCreateMenu(x: number, y: number) {
