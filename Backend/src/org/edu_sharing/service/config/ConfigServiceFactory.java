@@ -24,7 +24,9 @@ public class ConfigServiceFactory {
 		return getConfigService().getConfig();
 	}
 	public static String getCurrentContextId(){
-		return getCurrentContextId(Context.getCurrentInstance().getRequest());
+		if(Context.getCurrentInstance()!=null)
+			return getCurrentContextId(Context.getCurrentInstance().getRequest());
+		return null;
 	}
 	public static String getCurrentContextId(HttpServletRequest req){
 		try {

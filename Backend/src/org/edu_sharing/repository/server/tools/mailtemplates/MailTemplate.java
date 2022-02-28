@@ -49,7 +49,12 @@ public class MailTemplate {
 	}
 	public static void sendMail(String receiver, String templateId, Map<String, String> replace) throws Exception {
 		Mail mail = new Mail();
-		ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
+		ServletContext context;
+		try {
+			context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
+		} catch(Throwable t) {
+			context = Context.getGlobalContext();
+		}
 		String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
 		mail.sendMailHtml(
 				context,
