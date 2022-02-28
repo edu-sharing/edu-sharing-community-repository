@@ -29,6 +29,7 @@ import org.json.simple.parser.ParseException;
 import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -133,6 +134,8 @@ public class RegistrationService {
             throw new Exception("no token_endpoint provided");
         }
 
+        List<String> claimsSupported = (List<String>) oidConfig.get("claims_supported");
+
         JSONObject jsonResponse = new JSONObject();
         jsonResponse.put("application_type","web");
         JSONArray respTypes = new JSONArray();
@@ -158,6 +161,7 @@ public class RegistrationService {
         JSONObject toolConfig = new JSONObject();
         toolConfig.put("domain",homeApp.getDomain());
         toolConfig.put("messages",messages);
+        toolConfig.put("claims", claimsSupported);
         jsonResponse.put("https://purl.imsglobal.org/spec/lti-tool-configuration",toolConfig);
         //jsonResponse.put("token_endpoint_auth_method","private_key_jwt");
         HttpPost post = new HttpPost();
