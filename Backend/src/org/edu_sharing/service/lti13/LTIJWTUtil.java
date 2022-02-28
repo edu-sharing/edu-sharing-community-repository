@@ -179,8 +179,8 @@ public class LTIJWTUtil {
             Map<String, Object> deepLink = new HashMap<>();
 
             deepLink.put(LTIConstants.DEEP_LINK_TYPE, LTIConstants.DEEP_LINK_LTIRESOURCELINK);
-            deepLink.put(LTIConstants.DEEP_LINK_TITLE, node.getTitle());
-            deepLink.put(LTIConstants.DEEP_LINK_URL, ApplicationInfoList.getHomeRepository().getClientBaseUrl() + "/components/render/"+node.getRef().getId());
+            deepLink.put(LTIConstants.DEEP_LINK_TITLE, node.getTitle() != null ? node.getTitle() : node.getName());
+            deepLink.put(LTIConstants.DEEP_LINK_URL, ApplicationInfoList.getHomeRepository().getClientBaseUrl() + "/components/render/"+node.getRef().getId()+"?closeOnBack=true");
 
             /**
              * @TODO if h5p add scoreMaximum stuff
