@@ -564,9 +564,9 @@
             }
         },
       "LTI": {
-        "HEADER": "LTI Registrierung",
+        "HEADER": "LTI Plattform Registrierung",
         "DYNAMIC": "LTI Dynamische Registrierung",
-        "ADVANCED": "LTI erweiterte Registrierung",
+        "ADVANCED": "LTI Erweiterte Registrierung",
         "URL": "Url",
         "TOKEN" : "Token",
         "TS" : "Ablaufdatum",

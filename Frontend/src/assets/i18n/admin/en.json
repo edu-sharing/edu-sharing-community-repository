@@ -557,7 +557,7 @@
             }
         },
       "LTI": {
-        "HEADER": "LTI registration",
+        "HEADER": "LTI platform registration",
         "DYNAMIC": "LTI dynamic registration",
         "ADVANCED": "LTI advanced registration",
         "URL": "Url",
