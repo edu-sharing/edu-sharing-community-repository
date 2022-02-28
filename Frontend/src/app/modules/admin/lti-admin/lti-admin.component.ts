@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import {
-    RestMediacenterService
-} from '../../../core-module/rest/services/rest-mediacenter.service';
+
 import { RestLtiService } from '../../../core-module/rest/services/rest-lti.service';
-import { LTIRegistrationTokens } from '../../../core-module/rest/data-object';
+import { LTIRegistrationToken, LTIRegistrationTokens } from '../../../core-module/rest/data-object';
 
 @Component({
   selector: 'es-lti-admin',
@@ -12,12 +10,23 @@ import { LTIRegistrationTokens } from '../../../core-module/rest/data-object';
 })
 export class LtiAdminComponent implements OnInit {
     tokens: LTIRegistrationTokens;
-    displayedColumns: string[] = ['token', 'url', 'tsCreated'];
+    displayedColumns: string[] = ['url', 'tsCreated', 'delete'];
 
   constructor( private ltiService: RestLtiService) { }
 
   ngOnInit(): void {
-      this.ltiService.getTokensCall(false).subscribe((t: LTIRegistrationTokens) => {this.tokens = t; });
+      this.refresh();
   }
 
+    remove(element: LTIRegistrationToken) {
+      console.log('remove called');
+      this.ltiService.removeToken(element.token).subscribe((t: void) => {
+          this.refresh();
+      });
+
+    }
+
+    refresh() {
+        this.ltiService.getTokensCall(false).subscribe((t: LTIRegistrationTokens) => {this.tokens = t; });
+    }
 }
