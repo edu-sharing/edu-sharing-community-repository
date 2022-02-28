@@ -138,4 +138,45 @@ public class MailTemplate {
 			return null;
 		return builder.parse(in);
 	}
+
+	public static void applyNodePropertiesToMap(String prefix, HashMap<String, Object> properties, Map<String, String> map) {
+		properties.forEach((key, value) -> map.put(prefix + CCConstants.getValidLocalName(key), value instanceof Collection ?
+				StringUtils.join((Collection)value, ", ") : value.toString()));
+	}
+
+	public static class UserMail {
+		private final String fullName;
+		private final String firstName;
+		private final String lastName;
+		private final String email;
+
+		public UserMail(String fullName, String firstName, String lastName, String email) {
+			this.fullName = fullName;
+			this.firstName = firstName;
+			this.lastName = lastName;
+			this.email = email;
+		}
+
+		public String getFullName() {
+			return fullName;
+		}
+
+		public String getFirstName() {
+			return firstName;
+		}
+
+		public String getLastName() {
+			return lastName;
+		}
+
+		public String getEmail() {
+			return email;
+		}
+
+		public void applyToMap(String prefix, Map<String, String> map) {
+			map.put(prefix + "fullName", this.fullName);
+			map.put(prefix + "firstName", this.firstName);
+			map.put(prefix + "lastName", this.lastName);
+		}
+	}
 }
