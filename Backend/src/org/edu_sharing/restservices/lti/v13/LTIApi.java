@@ -249,6 +249,17 @@ public class LTIApi {
                      * edu-sharing authentication
                      */
                     String user = jws.getBody().getSubject();
+                    Map<String,String> ext = ( Map<String,String>)jws.getBody().get("https://purl.imsglobal.org/spec/lti/claim/ext",Map.class);
+                    if(ext != null){
+                        if(ext.containsKey("user_username")){
+                            String tmpUser = ext.get("user_username");
+                            if(tmpUser != null && !tmpUser.trim().isEmpty()){
+                                user = tmpUser;
+                            }
+                        }
+                    }
+                    user = user+"@"+jws.getBody().getIssuer();
+
                     String name = jws.getBody().get(LTIConstants.LTI_NAME, String.class);
                     String familyName = jws.getBody().get(LTIConstants.LTI_FAMILY_NAME, String.class);
                     String givenName = jws.getBody().get(LTIConstants.LTI_GIVEN_NAME, String.class);
