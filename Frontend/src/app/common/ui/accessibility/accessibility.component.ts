@@ -1,7 +1,5 @@
-import { Options } from '@angular-slider/ngx-slider';
 import { trigger } from '@angular/animations';
 import { Component, OnInit } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
 import { DialogButton, SessionStorageService } from '../../../core-module/core.module';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { Toast, ToastDuration, ToastType } from '../../../core-ui-module/toast';
@@ -22,21 +20,7 @@ export class AccessibilityComponent implements OnInit {
     toastMode: 'important' | 'all' = null;
     toastDuration: ToastDuration = null;
 
-    sliderOptions: Options = {
-        floor: 0,
-        ceil: ToastDuration.Infinite,
-        animate: true,
-        step: 1,
-        draggableRange: true,
-        minRange: 1,
-        translate: (value) => this.getDuration(value),
-    };
-
-    constructor(
-        private storage: SessionStorageService,
-        private toast: Toast,
-        private translate: TranslateService,
-    ) {}
+    constructor(private storage: SessionStorageService, private toast: Toast) {}
 
     ngOnInit() {}
 
@@ -52,19 +36,6 @@ export class AccessibilityComponent implements OnInit {
             subtype: ToastType.InfoSimple,
         });
         this.visible = false;
-    }
-
-    getDuration(value = this.toastDuration) {
-        const time = Toast.convertDuration(value);
-        if (time) {
-            return this.translate.instant('ACCESSIBILITY.TOAST_DURATION_SECONDS', {
-                seconds: time,
-            });
-        } else {
-            return this.translate.instant('ACCESSIBILITY.TOAST_DURATION_INFINITE', {
-                seconds: time,
-            });
-        }
     }
 
     async show() {
