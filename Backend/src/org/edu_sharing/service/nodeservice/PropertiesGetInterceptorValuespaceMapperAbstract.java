@@ -5,6 +5,7 @@ import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.server.jobs.quartz.MigrateMetadataValuespaceJob;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 public abstract class PropertiesGetInterceptorValuespaceMapperAbstract extends PropertiesGetInterceptorDefault {
@@ -83,7 +84,7 @@ public abstract class PropertiesGetInterceptorValuespaceMapperAbstract extends P
         map.put(targetProperty,
                 MigrateMetadataValuespaceJob.mapValueToTarget(
                         context.getNodeRef(),
-                        relationCache,
+                        Collections.singletonList(relationCache),
                         this.targetWidget.getValues(),
                         mode,
                         map.get(sourceProperty),

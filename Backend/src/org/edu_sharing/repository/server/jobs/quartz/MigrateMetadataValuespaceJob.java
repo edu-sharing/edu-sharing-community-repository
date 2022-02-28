@@ -129,7 +129,7 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 				if(mappings == null) {
 					mapped.addAll(mapValueToTarget(nodeRef, null, targetKeys, mode, value, target, true, mappingCallback));
 				} else {
-					mappings.forEach((m) -> mapped.addAll(mapValueToTarget(nodeRef, m, targetKeys, mode, value, target, true, mappingCallback)));
+					mapped.addAll(mapValueToTarget(nodeRef, mappings, targetKeys, mode, value, target, true, mappingCallback));
 				}
 				if(mapped.size() > 0) {
 					logger.info("Mapped " + value + " -> " + StringUtils.join(mapped,", "));
@@ -162,40 +162,46 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 		runner.run();
 	}
 
-	public static HashSet<String> mapValueToTarget(NodeRef nodeRef, Map<String, Collection<MetadataKey.MetadataKeyRelated>> mapping, Collection<MetadataKey> targetKeys, Mode mode, Object value, Object targetValue, boolean reverseMapping, MappingCallback callback) {
+	public static HashSet<String> mapValueToTarget(NodeRef nodeRef, List<Map<String, Collection<MetadataKey.MetadataKeyRelated>>> mapping, Collection<MetadataKey> targetKeys, Mode mode, Object value, Object targetValue, boolean reverseMapping, MappingCallback callback) {
+		ArrayList<String> valueMapped = new ArrayList<>();
 		if(value instanceof String || value instanceof Collection) {
 			if(value instanceof String) {
 				value = Collections.singletonList(value);
 			}
-			ArrayList<String> valueMapped = new ArrayList<>();
 			((Collection<?>) value).stream().forEach((v) -> {
-				Serializable mapped = mapValue(nodeRef, (String) v, mapping, targetKeys, reverseMapping, callback);
-				if(mapped != null) {
-					if (mapped instanceof Collection) {
-						valueMapped.addAll((Collection<? extends String>) mapped);
-					} else {
-						valueMapped.add((String) mapped);
+				for(Map<String, Collection<MetadataKey.MetadataKeyRelated>> m: mapping) {
+					Serializable mapped = mapValue(nodeRef, (String) v, m, targetKeys, reverseMapping, callback);
+					if (mapped != null) {
+						if (mapped instanceof Collection) {
+							if(((Collection<?>) mapped).isEmpty()) {
+								continue;
+							}
+							valueMapped.addAll((Collection<? extends String>) mapped);
+						} else {
+							valueMapped.add((String) mapped);
+						}
+						return;
 					}
 				}
 			});
-			HashSet<String> target = new HashSet<>();
-			if(mode.equals(Mode.Merge)) {
-				if(targetValue == null) {
-				} else if (targetValue instanceof String) {
-					target.add((String) targetValue);
-				} else if (targetValue instanceof Collection) {
-					target.addAll((Collection<? extends String>) targetValue);
-				}
-				target.addAll(valueMapped);
-			}
-			target.addAll(valueMapped);
-			return target;
+
 		} else if(value == null) {
 
 		} else {
 			logger.error("Unable to map a property of type " + value.getClass() + " via valuespace, node " + nodeRef);
 		}
-		return null;
+		HashSet<String> target = new HashSet<>();
+		if(mode.equals(Mode.Merge)) {
+			if(targetValue == null) {
+			} else if (targetValue instanceof String) {
+				target.add((String) targetValue);
+			} else if (targetValue instanceof Collection) {
+				target.addAll((Collection<? extends String>) targetValue);
+			}
+			target.addAll(valueMapped);
+		}
+		target.addAll(valueMapped);
+		return target;
 	}
 
 	/**

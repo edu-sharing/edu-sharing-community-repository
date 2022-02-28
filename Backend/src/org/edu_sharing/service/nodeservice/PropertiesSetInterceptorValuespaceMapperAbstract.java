@@ -5,6 +5,7 @@ import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.server.jobs.quartz.MigrateMetadataValuespaceJob;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Interceptor that will map from a source to a target property using the relations of a widget
@@ -68,31 +69,16 @@ public class PropertiesSetInterceptorValuespaceMapperAbstract implements Propert
         if(clearSourceProperty) {
             map.put(sourceProperty, null);
         }
-        HashSet<String> result = new HashSet<>();
-        for(MetadataKey.MetadataKeyRelated.Relation relation : relations) {
-            HashSet<String> mapped = MigrateMetadataValuespaceJob.mapValueToTarget(context.getNodeRef(),
-                    relationCache.get(relation),
-                    targetWidget.getValues(),
-                    MigrateMetadataValuespaceJob.Mode.Replace,
-                    value,
-                    map.get(targetProperty),
-                    reverseMapping,
-                    null
-            );
-            if(mapped != null && !mapped.isEmpty()) {
-                if(mode.equals(MigrateMetadataValuespaceJob.Mode.Merge)) {
-                    Object target = map.get(targetProperty);
-                    if(!(target instanceof Collection)) {
-                        target = Collections.singletonList(target);
-                    }
-                    mapped.addAll((Collection<? extends String>) target);
-                }
-                map.put(targetProperty, mapped);
-                return;
-            }
-        }
-        if (mode.equals(MigrateMetadataValuespaceJob.Mode.Replace)) {
-            map.remove(targetProperty);
-        }
+        List<Map<String, Collection<MetadataKey.MetadataKeyRelated>>> mappedList = relations.stream().map((m) -> relationCache.get(m)).collect(Collectors.toList());
+        map.put(targetProperty, MigrateMetadataValuespaceJob.mapValueToTarget(context.getNodeRef(),
+                        mappedList,
+                        targetWidget.getValues(),
+                        mode,
+                        value,
+                        map.get(targetProperty),
+                        reverseMapping,
+                        null
+                )
+        );
     }
 }
