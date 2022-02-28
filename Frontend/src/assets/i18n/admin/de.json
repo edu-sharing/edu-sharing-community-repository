@@ -569,7 +569,18 @@
         "ADVANCED": "LTI erweiterte Registrierung",
         "URL": "Url",
         "TOKEN" : "Token",
-        "TS" : "Ablaufdatum"
+        "TS" : "Ablaufdatum",
+        "GENERATE" : "Token hinzufügen",
+        "DATA" : {
+          "platformId" : "platform Id",
+          "client_id" : "client Id",
+          "deployment_id" : "deployment Id",
+          "authentication_request_url" : "authentication request url",
+          "keyset_url" : "keyset url",
+          "key_id" : "key id",
+          "auth_token_url" : "auth token url",
+          "CREATED" : "Plattform wurde angebunden"
+        }
       }
     }
 }
