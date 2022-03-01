@@ -1145,7 +1145,8 @@
         "COLLECTIONS": "Sammlungshierarchie"
     },
     "SKIP_LINKS": {
-        "MAIN_CONTENT": "Springe zum Hauptinhalt"
+        "MAIN_CONTENT": "Springe zum Hauptinhalt",
+        "ACCESSIBILITY_SETTINGS": "Einstellungen zur Barrierefreiheit"
     },
     "REPOSITORIES": {
         "de_fwu": "FWU",

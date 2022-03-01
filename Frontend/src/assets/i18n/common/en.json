@@ -1077,7 +1077,8 @@
         "COLLECTIONS": "collection hierarchy"
     },
     "SKIP_LINKS": {
-        "MAIN_CONTENT": "Skip to main content"
+        "MAIN_CONTENT": "Skip to main content",
+        "ACCESSIBILITY_SETTINGS": "Accessibility settings"
     },
     "REPOSITORIES": {
     },
