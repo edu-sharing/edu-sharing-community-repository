@@ -8,6 +8,7 @@ import { ToastDuration } from 'src/app/core-ui-module/toast';
 export class AccessibilitySettings {
     toastMode: 'important' | 'all' = 'all';
     toastDuration: ToastDuration = ToastDuration.Seconds_5;
+    contrastMode = false;
 }
 
 @Injectable({

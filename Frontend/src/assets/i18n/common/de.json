@@ -478,6 +478,12 @@
         "TITLE": "Barrierefreiheit",
         "SUBTITLE": "Optionen für barrierefreie Nutzung",
         "ENTRY_MESSAGE": "Um persönliche Bedürfnisse zu berücksichtigen, können nachfolgend einige Einstellungen für die Verwendung unserer Anwendung gesetzt werden.",
+        "CONTRAST_MODE_TITLE": "Kontrast-Modus",
+        "CONTRAST_MODE_MESSAGE": "Im Kontrast-Modus sind Elemente auf der Seite visuell deutlich sichtbar abgegrenzt.",
+        "CONTRAST_MODE_OPTION": {
+            "STANDARD": "Standard-Ansicht",
+            "CONTRAST": "Verstärkter Kontrast"
+        },
         "TOAST_TITLE": "Statusmeldungen",
         "TOAST_MESSAGE": "Statusmeldungen zeigen an, ob das System korrekt arbeitet. Bspw. lässt sich so erkennen, ob ein Inhalt oder Änderungen korrekt gespeichert wurden.",
         "TOAST_TYPE": {

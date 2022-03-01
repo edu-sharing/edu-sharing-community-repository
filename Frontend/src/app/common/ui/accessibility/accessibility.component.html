@@ -11,6 +11,21 @@
 >
   <div class="card-content-padding" *ngIf="settings">
     <p>{{ 'ACCESSIBILITY.ENTRY_MESSAGE' | translate }}</p>
+    <label for="contrastMode">{{ 'ACCESSIBILITY.CONTRAST_MODE_TITLE' | translate }}</label>
+    <p id="contrastModeDescription">{{ 'ACCESSIBILITY.CONTRAST_MODE_MESSAGE' | translate }}</p>
+    <mat-radio-group
+      id="contrastMode"
+      [(ngModel)]="settings.contrastMode"
+      aria-describedby="contrastModeDescription"
+      [disabled]="settings.contrastMode === null"
+    >
+      <mat-radio-button [value]="false">{{
+        'ACCESSIBILITY.CONTRAST_MODE_OPTION.STANDARD' | translate
+      }}</mat-radio-button>
+      <mat-radio-button [value]="true">{{
+        'ACCESSIBILITY.CONTRAST_MODE_OPTION.CONTRAST' | translate
+      }}</mat-radio-button>
+    </mat-radio-group>
     <label for="toastMode">{{ 'ACCESSIBILITY.TOAST_TITLE' | translate }}</label>
     <p id="toastModeDescription">{{ 'ACCESSIBILITY.TOAST_MESSAGE' | translate }}</p>
     <mat-radio-group
