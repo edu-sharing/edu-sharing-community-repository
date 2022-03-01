@@ -9,15 +9,15 @@
   [isCancelable]="true"
   (onCancel)="visible = false"
 >
-  <div class="card-content-padding">
+  <div class="card-content-padding" *ngIf="settings">
     <p>{{ 'ACCESSIBILITY.ENTRY_MESSAGE' | translate }}</p>
     <label for="toastMode">{{ 'ACCESSIBILITY.TOAST_TITLE' | translate }}</label>
     <p id="toastModeDescription">{{ 'ACCESSIBILITY.TOAST_MESSAGE' | translate }}</p>
     <mat-radio-group
       id="toastMode"
-      [(ngModel)]="toastMode"
+      [(ngModel)]="settings.toastMode"
       aria-describedby="toastModeDescription"
-      [disabled]="toastMode === null"
+      [disabled]="settings.toastMode === null"
     >
       <mat-radio-button value="important">{{
         'ACCESSIBILITY.TOAST_TYPE.IMPORTANT' | translate
@@ -30,9 +30,9 @@
     <p id="toastDurationDescription">{{ 'ACCESSIBILITY.TOAST_DURATION_MESSAGE' | translate }}</p>
     <mat-radio-group
       id="toastDuration"
-      [(ngModel)]="toastDuration"
+      [(ngModel)]="settings.toastDuration"
       aria-describedby="toastDurationDescription"
-      [disabled]="toastDuration === null"
+      [disabled]="settings.toastDuration === null"
     >
       <mat-radio-button [value]="TOAST_DURATION.Seconds_3">{{
         'ACCESSIBILITY.TOAST_DURATION_SECONDS' | translate: { seconds: 3 }
@@ -56,7 +56,7 @@
         'ACCESSIBILITY.TOAST_DURATION_INFINITE' | translate
       }}</mat-radio-button> -->
     </mat-radio-group>
-    <p *ngIf="toastDuration == TOAST_DURATION.Infinite">
+    <p *ngIf="settings.toastDuration == TOAST_DURATION.Infinite">
       {{ 'ACCESSIBILITY.TOAST_DURATION_INFINITE_INFO' | translate }}
     </p>
   </div>

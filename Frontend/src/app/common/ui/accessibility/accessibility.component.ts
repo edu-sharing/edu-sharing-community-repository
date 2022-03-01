@@ -1,8 +1,11 @@
 import { trigger } from '@angular/animations';
-import { Component, OnInit } from '@angular/core';
-import { DialogButton, SessionStorageService } from '../../../core-module/core.module';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { DialogButton } from '../../../core-module/core.module';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { Toast, ToastDuration, ToastType } from '../../../core-ui-module/toast';
+import { AccessibilityService, AccessibilitySettings } from './accessibility.service';
 
 @Component({
     selector: 'es-accessibility',
@@ -10,25 +13,33 @@ import { Toast, ToastDuration, ToastType } from '../../../core-ui-module/toast';
     styleUrls: ['accessibility.component.scss'],
     animations: [trigger('fromBottom', UIAnimation.fromBottom(UIAnimation.ANIMATION_TIME_SLOW))],
 })
-export class AccessibilityComponent implements OnInit {
+export class AccessibilityComponent implements OnInit, OnDestroy {
     readonly TOAST_DURATION = ToastDuration;
-    visible = false;
     readonly buttons = DialogButton.getSaveCancel(
         () => this.hide(),
         () => this.save(),
     );
-    toastMode: 'important' | 'all' = null;
-    toastDuration: ToastDuration = null;
+    readonly destroyed$ = new Subject<void>();
+    visible = false;
+    settings: AccessibilitySettings;
 
-    constructor(private storage: SessionStorageService, private toast: Toast) {}
+    constructor(private accessibility: AccessibilityService, private toast: Toast) {}
 
-    ngOnInit() {}
+    ngOnInit() {
+        this.accessibility
+            .observe()
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((settings) => (this.settings = { ...settings }));
+    }
+
+    ngOnDestroy() {
+        this.destroyed$.next();
+        this.destroyed$.complete();
+    }
 
     private async save() {
         this.toast.showProgressDialog();
-        await this.storage.set('accessibility_toastMode', this.toastMode);
-        await this.storage.set('accessibility_toastDuration', this.toastDuration);
-        await this.toast.refresh();
+        await this.accessibility.set(this.settings);
         this.toast.closeModalDialog();
         this.toast.show({
             message: 'ACCESSIBILITY.SAVED',
@@ -39,13 +50,7 @@ export class AccessibilityComponent implements OnInit {
     }
 
     async show() {
-        this.toastMode = null;
-        this.toastDuration = null;
         this.visible = true;
-        this.toastMode = await this.storage.get('accessibility_toastMode', 'all').toPromise();
-        this.toastDuration = await this.storage
-            .get('accessibility_toastDuration', ToastDuration.Seconds_5)
-            .toPromise();
     }
 
     hide() {
