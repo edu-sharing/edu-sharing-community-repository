@@ -9,6 +9,7 @@ export class AccessibilitySettings {
     toastMode: 'important' | 'all' = 'all';
     toastDuration: ToastDuration = ToastDuration.Seconds_5;
     contrastMode = false;
+    indicatorIcons = true;
 }
 
 @Injectable({

@@ -413,12 +413,18 @@
         "CONTRAST_MODE_OPTION": {
             "STANDARD": "Default view",
             "CONTRAST": "Enhanced contrast"
-        },        
+        },
+        "INDICATOR_ICONS_TITLE": "Indicator icons",
+        "INDICATOR_ICONS_MESSAGE": "Communicate meaning using icons. An icon's meaning is displayed when the mouse cursor is hovered above the icon. However, this is not possible using only a keyboard.",
+        "INDICATOR_ICONS_OPTION": {
+            "ICONS": "Show icons",
+            "TEXT_ONLY": "Show text only"
+        },
         "TOAST_TITLE": "Status messages",
         "TOAST_MESSAGE": "Status messages indicate whether the system is working correctly. For example, you can see whether a content or changes have been saved correctly.",
         "TOAST_TYPE": {
-            "IMPORTANT": "Show only important messages.",
-            "ALL": "Show all messages."
+            "IMPORTANT": "Show only important messages",
+            "ALL": "Show all messages"
         },
         "TOAST_DURATION_SECONDS": "{{seconds}} seconds",
         "TOAST_DURATION_INFINITE": "Do not hide.",

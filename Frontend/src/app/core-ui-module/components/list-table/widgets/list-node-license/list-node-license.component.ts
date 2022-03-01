@@ -7,6 +7,7 @@ import { Node } from '../../../../../core-module/rest/data-object';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
+import { AccessibilityService } from 'src/app/common/ui/accessibility/accessibility.service';
 
 @Component({
     selector: 'es-list-node-license',
@@ -35,7 +36,13 @@ export class ListNodeLicenseComponent extends ListWidget {
         }),
     );
 
-    constructor(private nodeHelper: NodeHelperService, private translate: TranslateService) {
+    readonly indicatorIcons$ = this.accessibility.observe('indicatorIcons');
+
+    constructor(
+        private accessibility: AccessibilityService,
+        private nodeHelper: NodeHelperService,
+        private translate: TranslateService,
+    ) {
         super();
     }
 }

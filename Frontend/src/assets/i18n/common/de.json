@@ -484,6 +484,12 @@
             "STANDARD": "Standard-Ansicht",
             "CONTRAST": "Verstärkter Kontrast"
         },
+        "INDICATOR_ICONS_TITLE": "Bedeutungstragende Symbole",
+        "INDICATOR_ICONS_MESSAGE": "Inhalt durch Symbole vermitteln. Die Bedeutung eines Symbols wird angezeigt, wenn der Mauszeiger über das Symbol bewegt wird. Das ist bei reiner Tastatur-Nutzung jedoch nicht möglich.",
+        "INDICATOR_ICONS_OPTION": {
+            "ICONS": "Symbole anzeigen",
+            "TEXT_ONLY": "Nur Text anzeigen"
+        },
         "TOAST_TITLE": "Statusmeldungen",
         "TOAST_MESSAGE": "Statusmeldungen zeigen an, ob das System korrekt arbeitet. Bspw. lässt sich so erkennen, ob ein Inhalt oder Änderungen korrekt gespeichert wurden.",
         "TOAST_TYPE": {

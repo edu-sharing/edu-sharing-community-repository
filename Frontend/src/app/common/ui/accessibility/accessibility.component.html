@@ -11,6 +11,7 @@
 >
   <div class="card-content-padding" *ngIf="settings">
     <p>{{ 'ACCESSIBILITY.ENTRY_MESSAGE' | translate }}</p>
+
     <label for="contrastMode">{{ 'ACCESSIBILITY.CONTRAST_MODE_TITLE' | translate }}</label>
     <p id="contrastModeDescription">{{ 'ACCESSIBILITY.CONTRAST_MODE_MESSAGE' | translate }}</p>
     <mat-radio-group
@@ -26,6 +27,23 @@
         'ACCESSIBILITY.CONTRAST_MODE_OPTION.CONTRAST' | translate
       }}</mat-radio-button>
     </mat-radio-group>
+
+    <label for="indicatorIcons">{{ 'ACCESSIBILITY.INDICATOR_ICONS_TITLE' | translate }}</label>
+    <p id="contrastModeDescription">{{ 'ACCESSIBILITY.INDICATOR_ICONS_MESSAGE' | translate }}</p>
+    <mat-radio-group
+      id="indicatorIcons"
+      [(ngModel)]="settings.indicatorIcons"
+      aria-describedby="contrastModeDescription"
+      [disabled]="settings.indicatorIcons === null"
+    >
+      <mat-radio-button [value]="false">{{
+        'ACCESSIBILITY.INDICATOR_ICONS_OPTION.TEXT_ONLY' | translate
+      }}</mat-radio-button>
+      <mat-radio-button [value]="true">{{
+        'ACCESSIBILITY.INDICATOR_ICONS_OPTION.ICONS' | translate
+      }}</mat-radio-button>
+    </mat-radio-group>
+
     <label for="toastMode">{{ 'ACCESSIBILITY.TOAST_TITLE' | translate }}</label>
     <p id="toastModeDescription">{{ 'ACCESSIBILITY.TOAST_MESSAGE' | translate }}</p>
     <mat-radio-group
@@ -41,6 +59,7 @@
         'ACCESSIBILITY.TOAST_TYPE.ALL' | translate
       }}</mat-radio-button>
     </mat-radio-group>
+
     <label for="toastDuration">{{ 'ACCESSIBILITY.TOAST_DURATION_TITLE' | translate }}</label>
     <p id="toastDurationDescription">{{ 'ACCESSIBILITY.TOAST_DURATION_MESSAGE' | translate }}</p>
     <mat-radio-group
