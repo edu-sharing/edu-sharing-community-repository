@@ -123,6 +123,7 @@ export class AdminComponent {
   static RS_CONFIG_HELP='https://docs.edu-sharing.com/confluence/edp/de/installation-en/installation-of-the-edu-sharing-rendering-service';
   mailTemplates=[
       'invited',
+      'invited_workflow',
       'invited_safe',
       'invited_collection',
       'nodeIssue',
