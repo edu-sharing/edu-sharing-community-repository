@@ -16,12 +16,15 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
+import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.server.tools.*;
+import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.restservices.collection.v1.model.CollectionRelationReference;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.collection.CollectionService;
@@ -1730,7 +1733,7 @@ public class NodeDao {
 				.get(versionLabel) : nodeProps;
 	}
 
-	public void addWorkflowHistory(WorkflowHistory history) throws DAOException{
+	public void addWorkflowHistory(WorkflowHistory history, boolean sendMail) throws DAOException{
 		HashMap<String, Object> properties = getNativeProperties();
 		Object protocol = properties.get(CCConstants.CCM_PROP_WF_PROTOCOL);
 		List<String> data= (List<String>) NodeServiceHelper.getPropertyNative(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
@@ -1755,6 +1758,32 @@ public class NodeDao {
 			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_RECEIVER,receivers);
 			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_STATUS,history.getStatus());
 			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_PROTOCOL,list);
+			if(sendMail) {
+				receivers.forEach((receiver) -> {
+					MailTemplate.UserMail r = MailTemplate.getUserMailData(receiver);
+					EmailValidator mailValidator = EmailValidator.getInstance(true, true);
+					if(mailValidator.isValid(r.getEmail())) {
+						try {
+							MailTemplate.UserMail sender = MailTemplate.getUserMailData(new AuthenticationToolAPI().getCurrentUser());
+							Map<String, String> replace = new HashMap<>();
+							sender.applyToMap("assigner.", replace);
+							replace.put("comment", history.getComment());
+							replace.put("link", MailTemplate.generateContentLink(ApplicationInfoList.getHomeRepository(), nodeId));
+							replace.put("status", I18nAngular.getTranslationAngular("common", "WORKFLOW." + history.getStatus()));
+							r.applyToMap("", replace);
+							MailTemplate.applyNodePropertiesToMap("node.", properties, replace);
+							Mail mail = new Mail();
+							String template = "invited_workflow";
+							String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
+							mail.sendMailHtml(Context.getCurrentInstance().getRequest().getSession().getServletContext(),
+									sender.getFullName(), sender.getEmail(), r.getEmail(), MailTemplate.getSubject(template, currentLocale),
+									MailTemplate.getContent(template, currentLocale, true), replace);
+						} catch (Throwable t) {
+							logger.warn("Mail send failed", t);
+						}
+					}
+				});
+			}
 		}catch (Throwable t) {
 			throw DAOException.mapping(t);
 		}
