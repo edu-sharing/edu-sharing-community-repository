@@ -696,7 +696,8 @@
         "SUGGEST_VALUE_LABEL": "Neuen Wert vorschlagen",
         "SUGGEST_VALUE_SEND": "Vorschlagen",
         "SUGGEST_VALUE_SENT": "Der Vorschlag wurde eingereicht und wird durch die Redaktion geprüft. Der Vorschlag taucht erst auf, wenn er durch die Redaktion aktiviert wurde. Vielen Dank!",
-        "NO_MATCHING_VALUES": "Keine passenden Werte"
+        "NO_MATCHING_VALUES": "Keine passenden Werte",
+        "DELETE_KEY_NOTICE": "löschen mit \"Entf\""
     },
     "SIMPLE_EDIT": {
         "TITLE": "Schnell-Bearbeitung",

@@ -19,7 +19,7 @@
       *ngFor="let value of chipsControl?.value"
       [selectable]="false"
       [removable]="true"
-      [matTooltip]="value.hint"
+      [matTooltip]="value.label + ' (' + ('MDS.DELETE_KEY_NOTICE' | translate) + ')'"
       [class.indeterminate]="(this.indeterminateValues$ | async)?.includes(value.key)"
       (click)="revealInTree(value)"
       (keydown.enter)="revealInTree(value)"
