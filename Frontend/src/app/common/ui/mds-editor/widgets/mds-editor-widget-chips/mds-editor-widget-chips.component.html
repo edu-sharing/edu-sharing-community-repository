@@ -74,6 +74,9 @@
     >
       <span [innerHTML]="value.label | sanitizeHTML | highlight: inputControl.value"></span>
     </mat-option>
+    <mat-option disabled *ngIf="shouldShowNoMatchingValuesNotice | async" aria-live="polite">
+      {{ 'MDS.NO_MATCHING_VALUES' | translate }}
+    </mat-option>
   </mat-autocomplete>
 </es-mds-editor-widget-container>
 
