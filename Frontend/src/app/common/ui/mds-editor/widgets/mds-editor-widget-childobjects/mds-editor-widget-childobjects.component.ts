@@ -17,6 +17,7 @@ import {RestUtilitiesService} from '../../../../../core-module/rest/services/res
 import {Toast} from '../../../../../core-ui-module/toast';
 import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
 import {NodeHelperService} from '../../../../../core-ui-module/node-helper.service';
+import {distinctUntilChanged} from 'rxjs/operators';
 
 
 interface Childobject {
@@ -57,7 +58,9 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
     ) {}
 
     ngOnInit(): void {
-        this.mdsEditorValues.nodes$.filter((n) => n != null).subscribe(async (nodes) => {
+        this.mdsEditorValues.nodes$.pipe(
+            distinctUntilChanged((a ,b) => a?.[0]?.ref?.id === b?.[0]?.ref?.id)
+        ).filter((n) => n != null).subscribe(async (nodes) => {
             if (nodes?.length) {
                 this.children = (await this.nodeApi.getNodeChildobjects(nodes[0].ref.id).toPromise()).nodes.map((n) => {
                     return {
