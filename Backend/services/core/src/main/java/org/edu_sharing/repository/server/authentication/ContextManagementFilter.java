@@ -2,6 +2,7 @@ package org.edu_sharing.repository.server.authentication;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Map;
 
 import javax.servlet.*;
@@ -42,40 +43,40 @@ import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 
 public class ContextManagementFilter implements javax.servlet.Filter {
 	public static class B3 {
-		private final String traceId;
-		private final String spanId;
-		private final boolean sampled;
+		private final HttpServletRequest req;
 
 		public B3(HttpServletRequest req) {
-			this.traceId = req.getHeader("X-B3-TraceId");
-			this.spanId = req.getHeader("X-B3-SpanId");
-			this.sampled = "1".equals(req.getHeader("X-B3-Sampled"));
+			this.req = req;
 		}
 
 		public String getTraceId() {
-			return traceId;
+			return req.getHeader("X-B3-TraceId");
 		}
 
 		public String getSpanId() {
-			return spanId;
+			return req.getHeader("X-B3-SpanId");
 		}
 
 		public boolean isSampled() {
-			return sampled;
+			return "1".equals(req.getHeader("X-B3-Sampled"));
 		}
 
 		public String toString() {
-			if(traceId != null && spanId != null) {
-				return "TraceId: " + traceId;
+			if(getTraceId() != null) {
+				return "TraceId: " + getTraceId();
 			}
 			return "";
 		}
 
 		public void addToRequest(HttpRequestBase request) {
-			if(traceId != null && spanId != null) {
-				request.setHeader("X-B3-TraceId", traceId);
-				request.setHeader("X-B3-SpanId", spanId);
-				request.setHeader("X-B3-Sampled", String.valueOf(sampled ? 1 : 0));
+			for(String header : Collections.list(req.getHeaderNames())) {
+				if(
+						header.toUpperCase().startsWith("X-B3-") ||
+						header.toUpperCase().startsWith("X-OT-") ||
+						header.equalsIgnoreCase("X-Request-Id")
+				) {
+				request.setHeader(header, req.getHeader(header));
+			}
 			}
 		}
 	}
@@ -105,8 +106,10 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 
 			Context.newInstance((HttpServletRequest)req , (HttpServletResponse)res, context);
 			b3.set(new B3((HttpServletRequest)req));
-			if(b3.get().getTraceId() != null && b3.get().getSpanId() != null) {
+			if(b3.get().getTraceId() != null) {
 				MDC.put("TraceId", b3.get().getTraceId());
+			}
+			if(b3.get().getSpanId() != null) {
 				MDC.put("SpanId", b3.get().getSpanId());
 			}
 			ScopeAuthenticationServiceFactory.getScopeAuthenticationService().setScopeForCurrentThread();
