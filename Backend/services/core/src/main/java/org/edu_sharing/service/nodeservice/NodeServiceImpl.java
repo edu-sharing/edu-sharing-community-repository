@@ -59,15 +59,15 @@ import org.springframework.context.ApplicationContext;
 
 public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.NodeService {
 
-	private String appId;
-	private ContentService contentService;
-	private DictionaryService dictionaryService;
-	private final BehaviourFilter policyBehaviourFilter;
-	String repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
-	private ServiceRegistry serviceRegistry = null;
+	protected String appId;
+	protected ContentService contentService;
+	protected DictionaryService dictionaryService;
+	protected final BehaviourFilter policyBehaviourFilter;
+	protected String repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
+	protected ServiceRegistry serviceRegistry = null;
 	protected NodeService nodeService = null;
-	private NodeService nodeServiceAlfresco = null;
-	private VersionService versionService;
+	protected NodeService nodeServiceAlfresco = null;
+	protected VersionService versionService;
 
 	Logger logger = Logger.getLogger(NodeServiceImpl.class);
 
