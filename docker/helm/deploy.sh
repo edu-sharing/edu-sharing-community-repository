@@ -14,7 +14,7 @@ OPTIONS=()
 CONTEXT="$(kubectl config current-context)"
 NAMESPACE="$(kubectl config view --minify --output 'jsonpath={..namespace}')"
 
-root=${EDU_ROOT:-$HOME/.edusharing/helm}
+root=${EDU_ROOT:-$HOME/.edusharing}
 
 mkdir -p "${root}/helm/config"
 touch "${root}/helm/config/${RELEASE}.yaml"
