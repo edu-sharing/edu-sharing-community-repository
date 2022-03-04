@@ -169,8 +169,19 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 				value = Collections.singletonList(value);
 			}
 			((Collection<?>) value).stream().forEach((v) -> {
+				if(callback != null) {
+					Serializable mapped = mapValue(nodeRef, (String) v, null, targetKeys, reverseMapping, callback);
+					if (mapped != null) {
+						if (mapped instanceof Collection) {
+							valueMapped.addAll((Collection<? extends String>) mapped);
+						} else {
+							valueMapped.add((String) mapped);
+						}
+					}
+					return;
+				}
 				for(Map<String, Collection<MetadataKey.MetadataKeyRelated>> m: mapping) {
-					Serializable mapped = mapValue(nodeRef, (String) v, m, targetKeys, reverseMapping, callback);
+					Serializable mapped = mapValue(nodeRef, (String) v, m, targetKeys, reverseMapping, null);
 					if (mapped != null) {
 						if (mapped instanceof Collection) {
 							if(((Collection<?>) mapped).isEmpty()) {
