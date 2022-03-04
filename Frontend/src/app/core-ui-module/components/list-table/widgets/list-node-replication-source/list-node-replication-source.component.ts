@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
-import { RestConstants } from '../../../../../core-module/rest/rest-constants';
-import { ListItem } from '../../../../../core-module/ui/list-item';
-import { ListWidget } from '../list-widget';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { Node } from '../../../../../core-module/rest/data-object';
+import { AccessibilityService } from 'src/app/common/ui/accessibility/accessibility.service';
 import { NodeSourcePipe } from 'src/app/core-ui-module/pipes/node-source.pipe';
+import { Node } from '../../../../../core-module/rest/data-object';
+import { RestConstants } from '../../../../../core-module/rest/rest-constants';
+import { ListItem } from '../../../../../core-module/ui/list-item';
+import { ListWidget } from '../list-widget';
 
 @Component({
     selector: 'es-list-node-replication-source',
@@ -41,7 +42,13 @@ export class ListNodeReplicationSourceComponent extends ListWidget {
         }),
     );
 
-    constructor(private translate: TranslateService, private nodeSource: NodeSourcePipe) {
+    readonly indicatorIcons$ = this.accessibility.observe('indicatorIcons');
+
+    constructor(
+        private accessibility: AccessibilityService,
+        private nodeSource: NodeSourcePipe,
+        private translate: TranslateService,
+    ) {
         super();
     }
 }

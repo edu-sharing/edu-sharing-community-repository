@@ -523,7 +523,7 @@ mat-select.mat-select-icon {
 }
 
 .mat-select-panel, .mat-autocomplete-panel {
-    .mat-option{
+    .mat-option:not(.mat-option-disabled) {
         color: $primary;
     }
     .mat-option.mat-selected:not(.mat-option-multiple){

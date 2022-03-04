@@ -103,7 +103,6 @@ export class ActionbarComponent implements OnChanges {
         if (window.innerWidth < UIConstants.MOBILE_WIDTH) {
             return this.numberOfAlwaysVisibleOptionsMobile;
         }
-        console.log(this.numberOfAlwaysVisibleOptions);
         return this.numberOfAlwaysVisibleOptions;
     }
 

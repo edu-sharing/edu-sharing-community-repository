@@ -24,9 +24,7 @@
       (click)="add(value)"
       (removed)="remove(value)"
       [class.indeterminate]="(indeterminateValues$ | async)?.includes(value.key)"
-      esCheckTextOverflow=".mat-chip-label"
-      #text="esCheckTextOverflow"
-      [matTooltip]="getTooltip(value, text.hasTextOverflow())"
+      [matTooltip]="getTooltip(value)"
     >
       <span class="mat-chip-label">{{ value.label }}</span>
       <mat-icon matChipRemove>cancel</mat-icon>
@@ -73,6 +71,9 @@
       [esRegisterCustomProperty]="{ key: 'tooltip', value: tooltip, object: option }"
     >
       <span [innerHTML]="value.label | sanitizeHTML | highlight: inputControl.value"></span>
+    </mat-option>
+    <mat-option disabled *ngIf="shouldShowNoMatchingValuesNotice | async" aria-live="polite">
+      {{ 'MDS.NO_MATCHING_VALUES' | translate }}
     </mat-option>
   </mat-autocomplete>
 </es-mds-editor-widget-container>
