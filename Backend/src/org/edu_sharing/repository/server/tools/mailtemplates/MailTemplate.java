@@ -143,7 +143,7 @@ public class MailTemplate {
 
 	public static void applyNodePropertiesToMap(String prefix, HashMap<String, Object> properties, Map<String, String> map) {
 		properties.forEach((key, value) -> map.put(prefix + CCConstants.getValidLocalName(key), value instanceof Collection ?
-				StringUtils.join((Collection)value, ", ") : value.toString()));
+				StringUtils.join((Collection)value, ", ") : value == null ? "" : value.toString()));
 	}
 
 	public static class UserMail {
