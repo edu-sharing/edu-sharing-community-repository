@@ -1,5 +1,10 @@
 <div class="group">
-<div class="deleted-info" *ngIf="isDeleted">
+<p *ngIf="isDeleted" class="cdk-visually-hidden" aria-live="polite">
+  {{_permission | permissionName}}
+  {{_permission | permissionName:{field:'secondary'} }}
+  {{'WORKSPACE.SHARE.DELETED' | translate}}
+</p>
+<div class="deleted-info" *ngIf="isDeleted" [attr.aria-hidden]="isDeleted || null">
     <div class="line"><hr></div>
     <div class="info">{{'WORKSPACE.SHARE.DELETED' | translate}}</div>
     <div class="line"><hr></div>
@@ -26,7 +31,7 @@
   <div *ngIf="!invalidPermission" class="permission-type">
     <button
       mat-button
-      [disabled]="readOnly"
+      [disabled]="readOnly || isDeleted"
       (click)="chooseType()"
       role="combobox"
       [attr.aria-label]="'WORKSPACE.SHARE.TYPE_MENU_LABEL' | translate: { user: _permission | permissionName }"
@@ -63,8 +68,8 @@
   </div>
 </div>
 <button class="remove" mat-icon-button (click)="remove()" *ngIf="showDelete" [disabled]="readOnly">
-  <i *ngIf="!inherit && !isDeleted" class="material-icons">cancel</i>
-  <i *ngIf="!inherit && isDeleted" class="material-icons">undo</i>
+  <i *ngIf="!inherit && !isDeleted" class="material-icons" [altText]="'WORKSPACE.SHARE.DELETE' | translate: { entity: _permission | permissionName }">cancel</i>
+  <i *ngIf="!inherit && isDeleted" class="material-icons" [altText]="'WORKSPACE.SHARE.DO_NOT_DELETE' | translate: { entity: _permission | permissionName }">undo</i>
   <i *ngIf="inherit" class="inherit" icon="edu-inherit" matTooltip="{{ 'WORKSPACE.SHARE.INHERIT_HINT' | translate}}"></i>
 </button>
 </div>
