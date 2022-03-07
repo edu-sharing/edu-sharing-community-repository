@@ -81,6 +81,8 @@
             <mat-label>{{'WORKSPACE.SHARE.MESSAGE' | translate}}</mat-label>
             <input matInput id="message" name="message" [(ngModel)]="notifyMessage" placeholder="{{'WORKSPACE.SHARE.MESSAGE_PLACEHOLDER' | translate}}"/>
           </mat-form-field>
+          <!-- TODO: Separate label and description using aria-labelledby and aria-describedby
+          attributes. Supported by MatCheckbox since Angular Material 9.2.x -->
           <mat-checkbox id="notify" [(ngModel)]="notifyUsers">
             <div>{{'WORKSPACE.NOTIFY_TITLE' | translate}}</div>
             <div class="notify-info">{{'WORKSPACE.NOTIFY_INFO' | translate}}</div>
