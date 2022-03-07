@@ -6,7 +6,7 @@ $rowHeight: 58px;
     display: flex;
     flex-direction: column;
     ::ng-deep {
-        mat-cell app-node-url {
+        mat-cell es-node-url {
             width: 100%;
             a {
                 color: #000;
@@ -15,7 +15,7 @@ $rowHeight: 58px;
                 @include setGlobalKeyboardFocus('border');
             }
         }
-        app-list-text {
+        es-list-text {
             white-space: nowrap;
             text-overflow: ellipsis;
             overflow: hidden;

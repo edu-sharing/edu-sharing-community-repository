@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 
 @Component({
-    selector: 'app-mds-editor-embedded',
+    selector: 'es-mds-editor-embedded',
     templateUrl: './mds-editor-embedded.component.html',
     styleUrls: ['./mds-editor-embedded.component.scss'],
 })

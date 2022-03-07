@@ -1,6 +1,6 @@
 @import "../../../../core-ui-module/styles/variables";
 
-info-message{
+es-info-message{
   display: flex;
   width: 100%;
   padding: 10px 20px;
@@ -43,7 +43,7 @@ info-message{
       width: 100%;
       justify-content: space-between;
     }
-    info-message{
+    es-info-message{
       display: block;
     }
     .version {

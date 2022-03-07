@@ -6,7 +6,7 @@ import { DisplayValue, DisplayValues } from '../DisplayValues';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 @Component({
-    selector: 'app-mds-editor-widget-radio-button',
+    selector: 'es-mds-editor-widget-radio-button',
     templateUrl: './mds-editor-widget-radio-button.component.html',
     styleUrls: ['./mds-editor-widget-radio-button.component.scss'],
 })

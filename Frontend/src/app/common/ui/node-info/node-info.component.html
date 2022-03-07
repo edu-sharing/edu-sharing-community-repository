@@ -1,4 +1,4 @@
-<card title="{{'NODE_INFO.TITLE' | translate:{name:_node.name} }}" [node]="_node" (onCancel)="close()" [buttons]="buttons" height="xxlarge" width="xxlarge">
+<es-card title="{{'NODE_INFO.TITLE' | translate:{name:_node.name} }}" [node]="_node" (onCancel)="close()" [buttons]="buttons" height="xxlarge" width="xxlarge">
   <div class="debug-content">
     <div><span>{{'NODE.cm:name' | translate}}</span><span>{{_node.name}}</span></div>
     <div><span>{{'NODE.sys:node-uuid' | translate}}</span><span><a class="clickable" (click)="openNodeWorkspace(_node)">{{_node.ref.id}}</a></span></div>
@@ -11,7 +11,7 @@
     <div><span>{{'DOWNLOAD' | translate}}</span><span><a *ngIf="_node.downloadUrl" [href]="_node.downloadUrl" target="_blank">{{_node.downloadUrl}}</a><div *ngIf="!_node.downloadUrl">-</div></span></div>
     <div *ngIf="_node.preview"><span>{{'WORKSPACE.EDITOR.PREVIEW' | translate}}</span><span><a [href]="_node.preview.url" target="_blank">{{_node.preview.url}}</a></span><span>isIcon: {{_node.preview.isIcon}}</span> <img [src]="_node.preview.url"></div>
     <div><span>{{'NODE_INFO.PERMISSIONS' | translate}}</span>
-      <spinner-small *ngIf="!_permissions"></spinner-small>
+      <es-spinner-small *ngIf="!_permissions"></es-spinner-small>
       <div *ngIf="_permissions">
         <div class="inherited">
           <span>{{'NODE_INFO.PERMISSIONS_INHERITED' | translate}}</span>
@@ -37,19 +37,19 @@
     <div><span>{{'NODE_INFO.CHILDREN' | translate}} ({{_children ? _children.length : 0}})</span>
       <span class="children">
           <div *ngFor="let child of _children">{{child.type}} (<a class="clickable" (click)="openNode(child)">{{child.ref.id}}</a>)</div>
-          <spinner-small *ngIf="!_children"></spinner-small>
+          <es-spinner-small *ngIf="!_children"></es-spinner-small>
           <div *ngIf="_children && !_children.length">{{'NODE_INFO.CHILDREN_NONE' | translate}}</div>
         </span>
       <div><span>{{'NODE_INFO.LOCATION' | translate}}</span><span>
-          <breadcrumbs
+          <es-breadcrumbs
                   [home]="'WORKSPACE.MY_FILES'"
                   [clickable]="true"
                   [breadcrumbsAsNode]="_path"
                   (onClick)="openBreadcrumb($event)"
-          ></breadcrumbs>
+          ></es-breadcrumbs>
         </span>
       </div>
-      <div *ngIf="canEdit()" class="edit"><i icon="edit" (click)="editMode=true"></i></div>
+      <div *ngIf="canEdit()" class="edit"><i esIcon="edit" (click)="editMode=true"></i></div>
       <div><span>{{'NODE_INFO.NODE_PROPERTIES' | translate}}</span>
         <div class="property" *ngFor="let property of _properties">
           <span *ngIf="!editMode">{{property[0]}}</span>
@@ -60,9 +60,9 @@
               <input matInput type="text" *ngIf="editMode" [(ngModel)]="property[1]">
             </mat-form-field>
             <div *ngIf="!saving">
-            <button mat-raised-button color="primary" [disabled]="saving" (click)="saveProperty(property)"><i icon="save"></i></button>
+            <button mat-raised-button color="primary" [disabled]="saving" (click)="saveProperty(property)"><i esIcon="save"></i></button>
             </div>
-            <div *ngIf="saving"><spinner-small></spinner-small></div>
+            <div *ngIf="saving"><es-spinner-small></es-spinner-small></div>
           </div>
         </div>
         <div class="property property-add" *ngIf="editMode">
@@ -75,9 +75,9 @@
             <input matInput type="text" [(ngModel)]="customProperty[1]">
           </mat-form-field>
           <div *ngIf="editMode" class="edit-save">
-            <spinner-small *ngIf="saving"></spinner-small>
+            <es-spinner-small *ngIf="saving"></es-spinner-small>
             <div>
-              <button mat-raised-button color="primary" [disabled]="saving || !customProperty[0]" (click)="addProperty()"><i icon="save"></i> {{'ADD' | translate}}</button>
+              <button mat-raised-button color="primary" [disabled]="saving || !customProperty[0]" (click)="addProperty()"><i esIcon="save"></i> {{'ADD' | translate}}</button>
             </div>
           </div>
         </div>
@@ -86,4 +86,4 @@
       <div><span>{{'NODE_INFO.JSON' | translate}}</span><span class="json">{{_json}}</span></div>
     </div>
   </div>
-</card>
+</es-card>

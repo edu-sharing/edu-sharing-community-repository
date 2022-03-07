@@ -3,12 +3,12 @@ package org.edu_sharing.restservices.shared;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.AnnotationIntrospector.ReferenceProperty.Type;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import java.util.Map;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class Authority {
 
 	public static enum Type {USER, GROUP, OWNER, EVERYONE, GUEST;};
@@ -16,6 +16,7 @@ public class Authority {
 	private String authorityName;
 	private Type authorityType;
 	private Map<String, String[]> properties;
+	boolean editable;
 
 	public Authority(){}
 	public Authority(String authorityName, String authorityType) {
@@ -41,7 +42,7 @@ public class Authority {
 		this.authorityName=authorityName;
 		this.authorityType=authorityType;
 	}
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("authorityName")
 	public String getAuthorityName() {
 		return authorityName;
@@ -53,7 +54,7 @@ public class Authority {
 
 	/**
 	 **/
-	@ApiModelProperty(value = "")
+	@Schema(description = "")
 	@JsonProperty("authorityType")
 	public Type getAuthorityType() {
 		return authorityType;
@@ -72,7 +73,17 @@ public class Authority {
 	public void setProperties(Map<String, String[]> properties) {
 		this.properties = properties;
 	}
-	
+
+	@JsonProperty
+	public void setEditable(boolean editable) {
+		this.editable = editable;
+	}
+
+	public boolean isEditable() {
+		return editable;
+	}
+
+
 	@Override
 	public boolean equals(Object obj) {
 		

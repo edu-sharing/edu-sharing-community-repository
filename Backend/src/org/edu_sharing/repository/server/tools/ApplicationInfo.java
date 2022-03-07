@@ -35,6 +35,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.client.tools.MimeTypes;
 
 public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializable{
@@ -269,7 +271,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	private String searchable = "true";
 	
 	//file that contains metadatasets for the repository
-	private String metadatsetsV2 = null;
+	private String metadatsets = null;
 	
 	//devmode metadatasets will be parsed every time and not cached in RepoFactory
 	private String devmode = null;
@@ -425,7 +427,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		
 		path = properties.getProperty("path");
 
-		metadatsetsV2 = properties.getProperty(KEY_METADATASETS_V2);
+		metadatsets = properties.getProperty(KEY_METADATASETS_V2);
 		
 		devmode = properties.getProperty("devmode");
 
@@ -547,7 +549,19 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	}
 
 	public String getString(String key,String defaultValue){
-		return properties.getProperty(key,defaultValue);
+		return replaceDynamicVariables(properties.getProperty(key,defaultValue));
+	}
+
+	private String replaceDynamicVariables(String data) {
+		if(data == null) return data;
+		String contextDomain = Context.getCurrentInstance() == null ? null : Context.getCurrentInstance().getRequest() == null ? null : Context.getCurrentInstance().getRequest().getServerName();
+		Map<String, String> searchReplace = new HashMap<>();
+		searchReplace.put("${context.id}", NodeCustomizationPolicies.getEduSharingContext());
+		searchReplace.put("${context.domain}", contextDomain);
+		for(Map.Entry<String, String> entry: searchReplace.entrySet()) {
+			data = data.replace(entry.getKey(),entry.getValue()==null ? "" : entry.getValue());
+		}
+		return data;
 	}
 
 	public int getInteger(String key,int defaultValue){
@@ -653,8 +667,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	 * @return the renderServiceUrl
 	 */
 	public String getContentUrl() {
-		
-		return contentUrl;
+		return replaceDynamicVariables(contentUrl);
 	}
 
 	/**
@@ -706,10 +719,10 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	/**
 	 * @return the metadatsetsV2
 	 */
-	public String[] getMetadatsetsV2() {
-		if(metadatsetsV2==null)
+	public String[] getMetadatsets() {
+		if(metadatsets ==null)
 			return new String[]{"mds"};
-		return metadatsetsV2.split(",");
+		return metadatsets.split(",");
 	}
 
 	/**

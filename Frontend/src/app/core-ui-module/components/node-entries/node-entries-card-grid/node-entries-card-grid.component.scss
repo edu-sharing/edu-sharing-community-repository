@@ -29,12 +29,18 @@
         }
     }
 }
+.load-more {
+    display: flex;
+    justify-content: center;
+}
 .card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     grid-column-gap: 20px;
     grid-row-gap: 20px;
     grid-template-rows: auto;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
     > .card-grid-drag-wrapper {
         position: relative;
         .card-grid-drop-allowed-container,
@@ -108,7 +114,7 @@
             }
         }
     }
-    > li.global-options {
+    > .global-options {
         display: grid;
         grid-template-columns: auto;
         grid-template-rows: repeat(auto-fit, minmax(70px, 1fr));
@@ -138,7 +144,7 @@
                 font-size: 32px;
                 margin-bottom: 5px;
             }
-            > label {
+            > .label {
                 cursor: pointer;
                 font-weight: bold;
             }
@@ -150,7 +156,7 @@
 }
 :host ::ng-deep {
     .card-grid {
-        > li.global-options {
+        > .global-options {
             .global-option-btn {
                 .mat-button-wrapper {
                     width: 100%;

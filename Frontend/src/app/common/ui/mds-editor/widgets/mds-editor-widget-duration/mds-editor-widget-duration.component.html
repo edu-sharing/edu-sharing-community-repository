@@ -1,4 +1,4 @@
-<app-mds-editor-widget-container [widget]="widget" [label]="widget.definition.caption" [valueType]="valueType">
+<es-mds-editor-widget-container [widget]="widget" [label]="widget.definition.caption" [valueType]="valueType">
   <div class="duration-group">
     <mat-form-field>
       <mat-label>{{'INPUT_HOURS' | translate}}</mat-label>
@@ -15,4 +15,4 @@
             (valueChange)="update('slider')"
     ></ngx-slider>
   </div>
-</app-mds-editor-widget-container>
+</es-mds-editor-widget-container>

@@ -3,7 +3,7 @@ import {BehaviorSubject, Observable} from 'rxjs';
 import { filter } from "rxjs/operators";
 
 @Component({
-  selector: 'global-container',
+  selector: 'es-global-container',
   templateUrl: 'global-container.component.html',
   styleUrls: ['global-container.component.scss'],
 })

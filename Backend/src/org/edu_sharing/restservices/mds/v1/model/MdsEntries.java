@@ -1,28 +1,22 @@
 package org.edu_sharing.restservices.mds.v1.model;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
 import java.util.List;
 
-import org.edu_sharing.restservices.shared.MdsDesc;
+import org.edu_sharing.metadataset.v2.MetadataSetInfo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@ApiModel(description = "")
+
 public class MdsEntries {
+	@JsonProperty(required = true)
+	private List<MetadataSetInfo> metadatasets;
 
-	private List<MdsDesc> mdss = null;
-
-	/**
-	   **/
-	@ApiModelProperty(required = true, value = "")
-	@JsonProperty("metadatasets")
-	public List<MdsDesc> getMetadatasets() {
-		return mdss;
+	public List<MetadataSetInfo> getMetadatasets() {
+		return metadatasets;
 	}
 
-	public void setMetadatasets(List<MdsDesc> mdsRefs) {
-		this.mdss = mdsRefs;
+	public void setMetadatasets(List<MetadataSetInfo> metadatasets) {
+		this.metadatasets = metadatasets;
 	}
+	
 }

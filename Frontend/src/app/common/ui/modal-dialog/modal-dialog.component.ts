@@ -8,7 +8,7 @@ import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {DialogButton, Node} from "../../../core-module/core.module";
 
 @Component({
-  selector: 'modal-dialog',
+  selector: 'es-modal-dialog',
   templateUrl: 'modal-dialog.component.html',
   styleUrls: ['modal-dialog.component.scss'],
   animations: [

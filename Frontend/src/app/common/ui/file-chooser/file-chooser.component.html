@@ -1,4 +1,4 @@
-<card
+<es-card
   title="{{ title | translate }}"
   [icon]="cardIcon"
   [isCancelable]="isCancelable"
@@ -24,17 +24,17 @@
   >
     <mat-tab *ngFor="let tab of tabs">
       <ng-template mat-tab-label>
-        <i [icon]="tab.homeIcon" class="tab-icon"></i>
+        <i [esIcon]="tab.homeIcon" class="tab-icon"></i>
         <span class="tab-label">{{tab.label | translate}}</span>
       </ng-template>
       <ng-container *ngTemplateOutlet="tabContent; context: tab"></ng-container>
     </mat-tab>
   </mat-tab-group>
-</card>
+</es-card>
 
 <ng-template #tabContent let-homeIcon="homeIcon" let-label="label">
   <div class="tab-content">
-    <breadcrumbs
+    <es-breadcrumbs
       class="breadcrumbFrame"
       *ngIf="!searchMode"
       [createLink]="false"
@@ -42,7 +42,7 @@
       (onClick)="selectBreadcrumb($event)"
       [home]="homeOverride ? homeOverride.label : (label | translate)"
       [homeIcon]="homeOverride ? homeOverride.icon : homeIcon"
-    ></breadcrumbs>
+    ></es-breadcrumbs>
     <div *ngIf="searchMode" class="searchInputFrame">
       <form (ngSubmit)="search()" autocomplete="off">
         <input
@@ -53,7 +53,7 @@
         />
       </form>
     </div>
-    <listTable
+    <es-listTable
       class="listFrame"
       *ngIf="isLoading || list.length"
       [nodes]="list"
@@ -76,7 +76,7 @@
       (clickRow)="selectItem($event.node)"
       (selectionChanged)="onSelectionChanged($event)"
       (loadMore)="loadMore()"
-    ></listTable>
+    ></es-listTable>
     <h5 class="noElements" *ngIf="!isLoading && !list.length && !searchMode">
       {{ 'NO_MORE_ELEMENTS' | translate }}
     </h5>

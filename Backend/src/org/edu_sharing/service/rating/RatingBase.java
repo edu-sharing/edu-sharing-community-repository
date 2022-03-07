@@ -1,6 +1,6 @@
 package org.edu_sharing.service.rating;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -27,7 +27,7 @@ public class RatingBase implements Serializable {
         this.overall = overall;
     }
 
-    @ApiModel
+    @Schema
     public static class RatingData implements Serializable {
         private double sum;
         private long count;

@@ -1,7 +1,7 @@
 package org.edu_sharing.restservices.shared;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,13 +11,13 @@ import java.util.Map.Entry;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class MdsQueryCriteria {
 
 	private String property;
 	private List<String> values;
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("property")
 	public String getProperty() {
 		return property;
@@ -27,7 +27,7 @@ public class MdsQueryCriteria {
 		this.property = property;
 	}
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("values")
 	public List<String> getValues() {
 		return values;

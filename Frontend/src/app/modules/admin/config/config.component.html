@@ -33,7 +33,7 @@
         <ngx-monaco-editor [options]="codeOptions" [(ngModel)]="serverConfig" [ngModelOptions]="{standalone: true}"></ngx-monaco-editor>
         <mat-hint><div>{{'ADMIN.GLOBAL_CONFIG.SERVER_CONFIG_HINT' | translate}}</div></mat-hint>
     </div>
-    <info-message mode="warning">{{'ADMIN.GLOBAL_CONFIG.WARNING' | translate}}</info-message>
+    <es-info-message mode="warning">{{'ADMIN.GLOBAL_CONFIG.WARNING' | translate}}</es-info-message>
     <div class="actions">
         <button mat-raised-button color="primary" (click)="save()">{{'SAVE' | translate}}</button>
     </div>

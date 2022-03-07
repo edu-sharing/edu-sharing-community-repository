@@ -5,11 +5,11 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { map, startWith } from 'rxjs/operators';
+import { first, map, startWith } from 'rxjs/operators';
 import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
 import { MainNavComponent } from '../../common/ui/main-nav/main-nav.component';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
-import { AccessScope, ConfigurationService, DialogButton, LoginResult, RestConnectorService, RestConstants, RestHelper, SessionStorageService } from '../../core-module/core.module';
+import { ConfigurationService, DialogButton, LoginResult, RestConnectorService, RestConstants, RestHelper, SessionStorageService } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
 import { OPEN_URL_MODE, UIConstants } from '../../core-module/ui/ui-constants';
@@ -18,10 +18,11 @@ import { RouterHelper } from '../../core-ui-module/router.helper';
 import { Toast } from '../../core-ui-module/toast';
 import { Translation } from '../../core-ui-module/translation';
 import { UIHelper } from '../../core-ui-module/ui-helper';
+import { LoginInfo, AuthenticationService } from 'ngx-edu-sharing-api';
 
 
 @Component({
-    selector: 'workspace-login',
+    selector: 'es-workspace-login',
     templateUrl: 'login.component.html',
     styleUrls: ['login.component.scss'],
     animations: [
@@ -64,8 +65,10 @@ export class LoginComponent implements OnInit {
         private configService: ConfigurationService,
         private storage: SessionStorageService,
         private route: ActivatedRoute,
-        private bridge: BridgeService
+        private bridge: BridgeService,
+        private authentication: AuthenticationService,
     ) {
+        this.isLoading = true;
         this.updateButtons();
         Translation.initialize(translate, this.configService, this.storage, this.route).subscribe(() => {
             this.configService.getAll().subscribe((data: any) => {
@@ -134,18 +137,21 @@ export class LoginComponent implements OnInit {
                                 RestHelper.goToLogin(this.router, this.configService);
                             }
                             else {
-                                this.connector.hasAccessToScope(RestConstants.SAFE_SCOPE).subscribe((scope: AccessScope) => {
-                                    if (scope.hasAccess) {
-                                        this.username = data.authorityName;
-                                    }
-                                    else {
-                                        this.toast.error(null, 'LOGIN.NO_ACCESS');
-                                        this.router.navigate([UIConstants.ROUTER_PREFIX + 'workspace']);
-                                        // window.history.back();
-                                    }
-                                }, (error: any) => {
-                                    this.toast.error(error);
-                                });
+                                this.authentication
+                                    .hasAccessToScope(RestConstants.SAFE_SCOPE)
+                                    .pipe(first())
+                                    .subscribe((hasAccess) => {
+                                        if (hasAccess) {
+                                            this.username = data.authorityName;
+                                        }
+                                        else {
+                                            this.toast.error(null, 'LOGIN.NO_ACCESS');
+                                            this.router.navigate([UIConstants.ROUTER_PREFIX + 'workspace']);
+                                            // window.history.back();
+                                        }
+                                    }, (error: any) => {
+                                        this.toast.error(error);
+                                    });
                             }
                         }, (error: any) => RestHelper.goToLogin(this.router, this.configService));
                     }
@@ -162,7 +168,6 @@ export class LoginComponent implements OnInit {
             });
 
         });
-        this.isLoading = true;
     }
 
     canRegister(): boolean {
@@ -261,7 +266,7 @@ export class LoginComponent implements OnInit {
         return filtered;
     }
 
-    private goToNext(data: LoginResult) {
+    private goToNext(data: LoginInfo) {
         if (this.next) {
             this.next = Helper.addGetParameter('fromLogin', 'true', this.next);
             RouterHelper.navigateToAbsoluteUrl(this.platformLocation, this.router, this.next);

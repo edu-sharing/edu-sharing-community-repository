@@ -8,7 +8,7 @@ import {RestSearchService} from "../../../core-module/core.module";
 import {OptionItem} from "../../../core-ui-module/option-item";
 
 @Component({
-  selector: 'tasks',
+  selector: 'es-tasks',
   templateUrl: 'tasks.component.html'
 })
 export class TasksMainComponent {

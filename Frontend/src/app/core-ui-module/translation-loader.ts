@@ -1,11 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { TranslateLoader } from '@ngx-translate/core';
+import { ConfigService } from 'ngx-edu-sharing-api';
 import {Observable, Observer, of, concat} from 'rxjs';
-import {tap, switchMap, map, catchError, reduce} from 'rxjs/operators';
+import {tap, switchMap, map, catchError, reduce, first} from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { RestLocatorService } from '../core-module/core.module';
 import { Translation } from './translation';
 import { TranslationSource } from './translation-source';
+import * as rxjs from 'rxjs';
+import {CsvHelper} from '../core-module/csv.helper';
 
 export const TRANSLATION_LIST = [
     'common',
@@ -28,13 +30,13 @@ export const TRANSLATION_LIST = [
 type Dictionary = { [key: string]: string | Dictionary };
 
 export class TranslationLoader implements TranslateLoader {
-    static create(http: HttpClient, locator: RestLocatorService) {
-        return new TranslationLoader(http, locator);
+    static create(http: HttpClient, config: ConfigService) {
+        return new TranslationLoader(http, config);
     }
 
-    constructor(
+    private constructor(
         private http: HttpClient,
-        private locator: RestLocatorService,
+        private config: ConfigService,
         private prefix: string = 'assets/i18n',
         private suffix: string = '.json',
     ) {}
@@ -42,30 +44,38 @@ export class TranslationLoader implements TranslateLoader {
     /**
      * Gets the translations from the server
      */
-    getTranslation(lang: string): Observable<Dictionary> {
+     getTranslation(lang: string): Observable<Dictionary> {
         if (lang === 'none') {
             return of({});
         }
-        return this.getOriginalTranslations(lang).pipe(
-            // Default to empty dictionary if we got nothing
-            map(translations => translations || {}),
-            switchMap(translations =>
-                this.fetchAndApplyOverrides(translations, lang).pipe(
-                    catchError((error, obs) => {
-                        console.error(error);
-                        return of(error);
-                    })
-                )
-            ),
-        );
+        this.config.setLocale(Translation.LANGUAGES[lang]);
+        return rxjs
+            .forkJoin({
+                originalTranslations: this.getOriginalTranslations(lang).pipe(
+                    // Default to empty dictionary if we got nothing
+                    map((translations) => translations || {}),
+                ),
+                translationOverrides: this.config.getTranslationOverrides().pipe(first()),
+            })
+            .pipe(
+                map(({ originalTranslations, translationOverrides }) =>
+                    // FIXME: This will alter the object returned by `getOriginalTranslations`.
+                    this.applyOverrides(originalTranslations, translationOverrides),
+                ),
+                map(translations =>
+                                this.replaceGenderCharacter(translations)
+                ),
+                catchError((error, obs) => {
+                    console.error(error);
+                    return of(error);
+                }),
+            );
     }
 
     private getOriginalTranslations(lang: string): Observable<Dictionary> {
         switch (this.getSource()) {
             case 'repository':
-                return this.locator.getLanguageDefaults(
-                    Translation.LANGUAGES[lang],
-                );
+                return this.config.getDefaultTranslations().pipe(first());
             case 'local':
                 return this.mergeTranslations(this.fetchTranslations(lang));
         }
@@ -114,15 +124,6 @@ export class TranslationLoader implements TranslateLoader {
         ));
     }
 
-    private fetchAndApplyOverrides(
-        translations: Dictionary,
-        lang: string,
-    ): Observable<Dictionary> {
-        return this.locator
-            .getConfigLanguage(Translation.LANGUAGES[lang])
-            .pipe(map(overrides => this.applyOverrides(translations, overrides)));
-    }
-
     /**
      * Applies `overrides` to `translations` and returns `translations`.
      *
@@ -160,6 +161,22 @@ export class TranslationLoader implements TranslateLoader {
                 ref[pathLast] = value;
             }
         }
+        return translations;
+    }
+
+    private replaceGenderCharacter(translations: Dictionary, path: string[] = []) {
+        for(let key of Object.keys(translations)) {
+            if(typeof translations[key] === 'string') {
+                // DO NOT REMOVE (required for csv language dumping)
+                /*console.log(CsvHelper.fromArray(null, [[
+                        path.concat(key).join('.'), translations[key]
+                ]]));*/
+                translations[key] = (translations[key] as string).replace(/{{GENDER_SEPARATOR}}/g, "*");
+            } else {
+                translations[key] = this.replaceGenderCharacter(translations[key] as Dictionary, path.concat(key));
+            }
+        }
+
         return translations;
     }
 }

@@ -16,7 +16,16 @@ import {Translation} from '../../../core-ui-module/translation';
 
 import * as EduData from "../../../core-module/core.module";
 
-import {RestCollectionService, ListItem, DialogButton, RestMediacenterService, RestMdsService, UIService} from "../../../core-module/core.module";
+import {
+    RestCollectionService,
+    ListItem,
+    DialogButton,
+    RestMediacenterService,
+    RestMdsService,
+    UIService,
+    FrameEventsService,
+    EventListener,
+} from '../../../core-module/core.module';
 import {RestNodeService} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
 import {RestHelper} from "../../../core-module/core.module";
@@ -47,16 +56,19 @@ import {ConfigurationHelper} from '../../../core-module/core.module';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 import {MdsEditorWrapperComponent} from '../../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import {Values} from '../../../common/ui/mds-editor/types';
+import {DefaultGroups, OptionItem} from '../../../core-ui-module/option-item';
+import {Observable} from 'rxjs';
+import {PlatformLocation} from '@angular/common';
 
 type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITORIAL_GROUPS';
 
 // component class
 @Component({
-  selector: 'app-collection-new',
+  selector: 'es-collection-new',
   templateUrl: 'collection-new.component.html',
   styleUrls: ['collection-new.component.scss']
 })
-export class CollectionNewComponent {
+export class CollectionNewComponent implements EventListener{
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('mds') mds : MdsEditorWrapperComponent;
   @ViewChild('share') shareRef : WorkspaceShareComponent;
@@ -112,6 +124,8 @@ export class CollectionNewComponent {
   authorFreetext=false;
   authorFreetextAllowed=false;
   mdsSet: string;
+  imageOptions: OptionItem[];
+  imageWindow: Window;
 
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
@@ -121,6 +135,53 @@ export class CollectionNewComponent {
       this.goBack();
       return;
     }
+  }
+    setCollection(collection: EduData.Node) {
+      return new Observable<void>((observer) =>
+        {
+            const id = collection.ref.id;
+            this.nodeService.getNodePermissions(id).subscribe((perm: EduData.NodePermissions) => {
+                this.mdsSet = collection.metadataset;
+                this.editorialGroupsSelected = this.getEditoralGroups(perm.permissions.localPermissions.permissions);
+                this.editorialPublic = perm.permissions.localPermissions?.permissions?.some(
+                    (p: Permission) => p.authority?.authorityName === RestConstants.AUTHORITY_EVERYONE
+                );
+                this.editId = id;
+                this.currentCollection = collection;
+                // cleanup irrelevant data
+                this.currentCollection.rating = null;
+                this.authorFreetext = this.currentCollection.collection.authorFreetext != null;
+                this.originalPermissions = perm.permissions.localPermissions;
+                this.properties = collection.properties;
+                this.newCollectionType = this.getTypeForCollection(this.currentCollection);
+                this.hasCustomScope = false;
+                this.newCollectionStep = this.STEP_GENERAL;
+                if (this.currentCollection.collection.scope === RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC) {
+                    this.currentCollection.collection.scope = RestConstants.COLLECTIONSCOPE_CUSTOM;
+                }
+                observer.next();
+                observer.complete();
+            });
+        });
+    }
+
+    onEvent(event: string, data: any): void {
+      if(event === FrameEventsService.EVENT_APPLY_NODE) {
+          console.log(data);
+          const imageData = data.preview?.data;
+          if(imageData) {
+            this.imageData = imageData;
+            this.updateImageOptions();
+            fetch(this.imageData).then(res => res.blob()).then(blob => {
+                this.imageFile = blob as File;
+            });
+          } else {
+              this.toast.error(
+                  null, 'COLLECTIONS.TOAST.ERROR_IMAGE_APPLY'
+              );
+          }
+        this.imageWindow?.close();
+      }
   }
 
   constructor(
@@ -133,7 +194,9 @@ export class CollectionNewComponent {
       private mediacenterService : RestMediacenterService,
       private route:ActivatedRoute,
       private mdsService:RestMdsService,
+      private eventService:FrameEventsService,
       private router: Router,
+      private platformLocation: PlatformLocation,
       private toast : Toast,
       private bridge : BridgeService,
       private temporaryStorage : TemporaryStorageService,
@@ -142,6 +205,7 @@ export class CollectionNewComponent {
       private sanitizer: DomSanitizer,
       private config : ConfigurationService,
       private translationService:TranslateService) {
+      this.eventService.addListener(this);
     Translation.initialize(this.translationService,this.config,this.storage,this.route).subscribe(()=>{
       this.connector.isLoggedIn().subscribe((data) => {
         this.mdsService.getSets().subscribe((mdsSets) => {
@@ -150,8 +214,15 @@ export class CollectionNewComponent {
 
           this.COLORS=this.config.instant('collections.colors',this.DEFAULT_COLORS);
           if(data.statusCode!=RestConstants.STATUS_CODE_OK){
+            this.toast.error(
+              { message: 'loginData.statusCode was not ok', data },
+              'TOOLPERMISSION_ERROR',
+            );
             UIHelper.getCommonParameters(this.route).subscribe((params)=> {
-              this.router.navigate([UIConstants.ROUTER_PREFIX + "collections",{queryParams:params}]);
+              this.router.navigate(
+                [UIConstants.ROUTER_PREFIX + "collections"],
+                { queryParams: params },
+              );
             });
             return;
           }
@@ -167,55 +238,46 @@ export class CollectionNewComponent {
           this.authorFreetextAllowed=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_CHANGE_OWNER);
 
           this.iamService.getUser().subscribe((user : IamUser) => this.user=user.person);
-          this.route.queryParams.subscribe(params => {
-            this.mainnav=params['mainnav']!='false';
+          this.route.queryParams.subscribe(queryParams => {
+            this.mainnav = queryParams.mainnav !== 'false';
+              this.route.params.subscribe(params => {
+                  // get mode from route and validate input data
+                  let mode = params['mode'];
+                  let id = params['id'];
+                  if(queryParams.collection) {
+                      this.setParent(id,null);
+                      this.setCollection(JSON.parse(queryParams.collection)).subscribe(() => {
+                          this.updateAvailableSteps();
+                          this.isLoading=false;
+                          GlobalContainerComponent.finishPreloading();
+                      });
+                  } else if (mode=="edit") {
+                      this.collectionService.getCollection(id).subscribe((data)=>{
+                          this.nodeService.getNodeMetadata(id,[RestConstants.ALL]).subscribe((node:EduData.NodeWrapper)=>{
+                              this.setCollection(node.node).subscribe(() => {
+                                  this.updateAvailableSteps();
+                                  this.updateImageOptions();
+                                  this.isLoading=false;
+                                  GlobalContainerComponent.finishPreloading();
+                              });
+                          });
+                      });
+                  } else {
+                      if(id==RestConstants.ROOT){
+                          this.setParent(id,null);
+                          return;
+                      }
+                      this.collectionService.getCollection(id).subscribe((data:EduData.CollectionWrapper)=>{
+                          this.setParent(id,data.collection);
+                      },(error:any)=>{
+                          this.setParent(id,null);
+                      });
+                  }
+              });
+
           });
           this.iamService.searchGroups("*",true,RestConstants.GROUP_TYPE_EDITORIAL, '', {count:RestConstants.COUNT_UNLIMITED}).subscribe((data:IamGroups)=>{
             this.editorialGroups=data.groups;
-          });
-          this.route.params.subscribe(params => {
-            // get mode from route and validate input data
-            let mode = params['mode'];
-            let id = params['id'];
-            if (mode=="edit") {
-              this.collectionService.getCollection(id).subscribe((data)=>{
-                this.nodeService.getNodeMetadata(id,[RestConstants.ALL]).subscribe((node:EduData.NodeWrapper)=>{
-                  this.nodeService.getNodePermissions(id).subscribe((perm:EduData.NodePermissions)=>{
-                    this.mdsSet = node.node.metadataset;
-                    this.editorialGroupsSelected=this.getEditoralGroups(perm.permissions.localPermissions.permissions);
-                    this.editorialPublic=perm.permissions.localPermissions?.permissions?.some(
-                        (p: Permission) => p.authority?.authorityName === RestConstants.AUTHORITY_EVERYONE
-                    );;
-                    this.editId=id;
-                    this.currentCollection = data.collection;
-                    // cleanup irrelevant data
-                    this.currentCollection.rating = null;
-                    this.authorFreetext=this.currentCollection.collection.authorFreetext!=null;
-                    this.originalPermissions=perm.permissions.localPermissions;
-                    this.properties=node.node.properties;
-                    this.newCollectionType=this.getTypeForCollection(this.currentCollection);
-                    this.hasCustomScope=false;
-                    this.newCollectionStep = this.STEP_GENERAL;
-                    if(this.currentCollection.collection.scope === RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC) {
-                      this.currentCollection.collection.scope = RestConstants.COLLECTIONSCOPE_CUSTOM;
-                    }
-                    this.updateAvailableSteps();
-                    this.isLoading=false;
-                    GlobalContainerComponent.finishPreloading();
-                  });
-                });
-              });
-            } else {
-              if(id==RestConstants.ROOT){
-                this.setParent(id,null);
-                return;
-              }
-              this.collectionService.getCollection(id).subscribe((data:EduData.CollectionWrapper)=>{
-                this.setParent(id,data.collection);
-              },(error:any)=>{
-                this.setParent(id,null);
-              });
-            }
           });
 
         });
@@ -344,6 +406,7 @@ export class CollectionNewComponent {
         // remember file for upload
         this.imageFile = file;
         this.imageData=this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(file));
+        this.updateImageOptions();
     }
     handleError(error:any){
       if(error.status==RestConstants.DUPLICATE_NODE_RESPONSE){
@@ -637,6 +700,7 @@ export class CollectionNewComponent {
           this.setCollectionType(RestConstants.COLLECTIONTYPE_EDITORIAL);
       }
     this.updateAvailableSteps();
+    this.updateImageOptions();
     this.isLoading=false;
     GlobalContainerComponent.finishPreloading();
   }
@@ -660,6 +724,7 @@ export class CollectionNewComponent {
       this.imageFile = null;
       this.imageFileRef.nativeElement.value = null;
       this.currentCollection.preview = null;
+      this.updateImageOptions();
     }
 
     private updateButtons() {
@@ -692,4 +757,35 @@ export class CollectionNewComponent {
     this.authorFreetext=false;
     this.currentCollection.collection.authorFreetext=null;
   }
+
+    updateImageOptions() {
+        this.imageOptions = [
+            new OptionItem('COLLECTIONS.NEW.IMAGE.UPLOAD', 'file_upload',
+                () => this.imageFileRef.nativeElement.click()
+            ),
+            new OptionItem('COLLECTIONS.NEW.IMAGE.SEARCH', 'search',
+                () => {
+                    this.imageWindow = UIHelper.openSearchWithReurl(this.platformLocation, this.router, 'WINDOW', {queryParams:
+                            {reurlCreate: false, reurlTypes: ['image']}
+                    }) as Window;
+                    /*this.router.navigate([], {
+                        relativeTo: this.route,
+                        queryParams: {
+                            collection: JSON.stringify(this.currentCollection)
+                        }
+                    }).then(() => {
+                    });*/
+                }
+            )
+        ];
+        this.imageOptions[0].group = DefaultGroups.Edit;
+        this.imageOptions[1].group = DefaultGroups.Edit;
+        if(this.imageData || (this.currentCollection.preview && !this.currentCollection.preview.isIcon)) {
+            this.imageOptions.push(new OptionItem('COLLECTIONS.NEW.IMAGE.DELETE', 'delete',
+                () => this.deleteImage())
+            );
+            this.imageOptions[2].group = DefaultGroups.Delete;
+        }
+    }
+
 }

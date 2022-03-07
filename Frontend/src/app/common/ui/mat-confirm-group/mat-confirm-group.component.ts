@@ -8,7 +8,7 @@ import {MatMenu, MatMenuTrigger} from '@angular/material/menu';
 import {MatButton} from '@angular/material/button';
 
 @Component({
-    selector: 'app-mat-confirm-group',
+    selector: 'es-mat-confirm-group',
     templateUrl: 'mat-confirm-group.component.html',
     styleUrls: ['mat-confirm-group.component.scss'],
 })

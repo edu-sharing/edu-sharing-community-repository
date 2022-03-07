@@ -1,7 +1,7 @@
 package org.edu_sharing.restservices.shared;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -20,7 +20,7 @@ import org.edu_sharing.restservices.node.v1.NodeApi;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.edu_sharing.service.foldertemplates.LoggingErrorHandler;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class ErrorResponse {
 	public enum ErrorResponseLogging{
 		strict, // default, log every error, including stacktrace
@@ -52,7 +52,7 @@ public class ErrorResponse {
 	public static Response createResponse(Throwable t,ErrorResponseLogging logging){
 		handleLog(t,logging);
 		// in case alfresco transaction exception, map to causing exception which is the DAO exception
-		if(t instanceof AlfrescoRuntimeException) {
+		if(t instanceof AlfrescoRuntimeException && t.getCause() != null) {
 			t = t.getCause();
 		}
 		if(t instanceof RuntimeException && t.getCause() != null) {
@@ -122,7 +122,7 @@ public class ErrorResponse {
 	
 	/**
 	 **/
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("error")
 	public String getError() {
 		return error;
@@ -132,7 +132,7 @@ public class ErrorResponse {
 		this.error = error;
 	}
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("message")
 	public String getMessage() {
 		return message;
@@ -150,7 +150,7 @@ public class ErrorResponse {
 		this.logLevel = logLevel;
 	}
 
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("stacktraceArray")
 	public String[] getStacktraceArray() {
 		return stacktrace.replace("\r\n","\n").replace("\t","").split("\n");

@@ -150,6 +150,7 @@
 			<type>multivalueFixedBadges</type>
 			<caption>Quelle</caption>
 			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/sources/index.json</valuespace>
 		</widget>
 		<widget>
 			<id>cclom:location</id>

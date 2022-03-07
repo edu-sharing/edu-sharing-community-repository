@@ -332,7 +332,8 @@
 		<widget>
 			<id>cclom:size</id>
 			<caption>lom_prop_size</caption>
-			<type>filesize</type>
+			<type>number</type>
+			<format>bytes</format>
 		</widget>
 		<widget>
 			<id>ccm:educationaltypicalagerange</id>
@@ -461,6 +462,7 @@
               <ccm:wwwurl>
               <cm:name>
               <cclom:title>
+			  <ccm:educationallearningresourcetype>
               <author>
 				]]></html>
 		</template>
@@ -926,6 +928,14 @@
 			</columns>
 		</list>
 		<list>
+			<id>searchCollections</id>
+			<columns>
+				<column>COLLECTION.title</column>
+				<column>COLLECTION.info</column>
+				<column>COLLECTION.scope</column>
+			</columns>
+		</list>
+		<list>
 			<id>collectionReferences</id>
 			<columns>
 				<column>cclom:title</column>
@@ -1017,7 +1027,8 @@
 			</property>
 		</query>
 		<query join="AND"  id="collections">
-			<basequery propertyNull="ngsearchword">@ccm\:collectionlevel0:true OR @ccm\:collection_pinned_status:true</basequery>
+			<basequery>ASPECT:"ccm:collection"</basequery>
+			<basequery propertyNull="ngsearchword">ASPECT:"ccm:collection" AND (@ccm\:collectionlevel0:true OR @ccm\:collection_pinned_status:true)</basequery>
 			<property name="ngsearchword">
 				<statement>(@sys\:node-uuid:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
 				<exactMatching>false</exactMatching>
@@ -1041,6 +1052,7 @@
 			<basequery>ASPECT:"ccm:collection" AND @ccm\:collectionlevel0:true AND NOT @ccm\:collectiontype:"EDITORIAL" AND NOT @ccm\:collectiontype:"MEDIA_CENTER"</basequery>
 		</query>
 		<query join="AND" id="archive" applyBasequery="false">
+			<basequery>ASPECT:"sys:archived"</basequery>
 			<property name="ngsearchword">
 				<statement>@cm\:name:"${value}"</statement>
 			</property>
@@ -1088,7 +1100,7 @@
 		<query join="AND" id="ngsearch">
 			<!--TODO basequery-->
 			<!--basequery>ISNULL:@ccm\:tool_category</basequery-->
-			<basequery>{"bool":{"must":[{"term":{"type":"ccm:io"}},{"term":{"nodeRef.storeRef.protocol":"workspace"}}],"must_not":[{"term":{"aspects":"ccm:metadataPresettingTemplate"}},{"term":{"aspects":"ccm:io_childobject"}},{"wildcard":{"properties.cm:name.keyword":"._*"}},{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}]}}</basequery>
+			<basequery>{"bool":{"must":[{"term":{"nodeRef.storeRef.protocol":"workspace"}}],"must_not":[{"term":{"aspects":"ccm:metadataPresettingTemplate"}},{"term":{"aspects":"ccm:io_childobject"}},{"wildcard":{"properties.cm:name.keyword":"._*"}},{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}]}}</basequery>
 			<property name="ngsearchword">
 				<statement>{"bool":{"should":[
 					{"wildcard":{"properties.cm:name":{"value":"*${value}*", "case_insensitive": true }}},
@@ -1096,7 +1108,7 @@
 					{"wildcard":{"properties.cclom:general_description":{"value":"*${value}*", "case_insensitive": true }}},
 					{"wildcard":{"properties.cclom:general_keyword":{"value":"*${value}*", "case_insensitive": true }}},
 					{"wildcard":{"content.fulltext":{"value":"*${value}*", "case_insensitive": true }}},
-					{"term":{"properties.sys:node-uuid":{"value":"*${value}*", "case_insensitive": true }}}
+					{"wildcard":{"nodeRef.id":{"value":"*${value}*", "case_insensitive": true }}}
 					]}}</statement>
 				<exactMatching>false</exactMatching>
 				<multiple>true</multiple>

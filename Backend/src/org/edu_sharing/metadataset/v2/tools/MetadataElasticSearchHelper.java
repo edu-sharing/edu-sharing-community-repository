@@ -1,16 +1,14 @@
 package org.edu_sharing.metadataset.v2.tools;
 
 import com.sun.star.lang.IllegalArgumentException;
-import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.restservices.mds.v1.model.WidgetV2;
+import org.edu_sharing.restservices.mds.v1.model.MdsWidget;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.elasticsearch.index.query.*;
-import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.aggregations.bucket.terms.IncludeExclude;
 
 import java.security.InvalidParameterException;
 import java.util.*;
@@ -169,8 +167,8 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
      * @return
      * @throws IllegalArgumentException
      */
-    public static List<AggregationBuilder> getAggregations(MetadataSetV2 mds, MetadataQuery query, Map<String,String[]> parameters, List<String> facets, Set<MetadataQueryParameter> excludeOwn, QueryBuilder globalConditions, SearchToken searchToken) throws IllegalArgumentException {
-        MetadataQueries queries = mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_DSL);
+    public static List<AggregationBuilder> getAggregations(MetadataSet mds, MetadataQuery query, Map<String,String[]> parameters, List<String> facets, Set<MetadataQueryParameter> excludeOwn, QueryBuilder globalConditions, SearchToken searchToken) throws IllegalArgumentException {
+        MetadataQueries queries = mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL);
         List<AggregationBuilder> result = new ArrayList<>();
         String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
         for (String facet : facets) {
@@ -188,7 +186,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
 
                 boolean isi18nProp = false;
                 MetadataWidget mdw = mds.findWidget(facet);
-                if(mdw != null && new WidgetV2(mdw).isHasValues()){
+                if(mdw != null && new MdsWidget(mdw).isHasValues()){
                     isi18nProp = true;
                 }
 
@@ -206,9 +204,17 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
             }
 
             result.add(AggregationBuilders.filter(facet, bqb).subAggregation(AggregationBuilders.terms(facet)
-                    .size(searchToken.getFacettesLimit())
-                    .minDocCount(searchToken.getFacettesMinCount())
+                    .size(searchToken.getFacetLimit())
+                    .minDocCount(searchToken.getFacetsMinCount())
                     .field("properties." + facet+".keyword")));
+
+            if(parameters.get(facet) != null && parameters.get(facet).length > 0) {
+                result.add(AggregationBuilders.filter(facet + "_selected", bqb).subAggregation(AggregationBuilders.terms(facet)
+                        .size(parameters.get(facet).length)
+                        .minDocCount(1)
+                        .field("properties." + facet + ".keyword")
+                        .includeExclude(new IncludeExclude(parameters.get(facet), null))));
+            }
 
 
         }

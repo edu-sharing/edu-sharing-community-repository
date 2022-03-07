@@ -7,7 +7,7 @@ public class PersonDeleteOptions implements Serializable {
         none,assign,delete
     }
     public enum FolderDeleteMode {
-        none,assign
+        none,assign,delete
     }
     public boolean cleanupMetadata;
     public HomeFolderOptions homeFolder;
@@ -33,5 +33,11 @@ public class PersonDeleteOptions implements Serializable {
 
     public static class DeleteOption {
         public boolean delete;
+
+        public DeleteOption() {
+        }
+        public DeleteOption(boolean delete) {
+            this.delete = delete;
+        }
     }
 }

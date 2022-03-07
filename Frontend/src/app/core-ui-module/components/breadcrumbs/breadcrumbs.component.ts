@@ -3,14 +3,14 @@ import { Node, RestNodeService } from '../../../core-module/core.module';
 import {DragData, DragNodeTarget, DropData} from '../../directives/drag-nodes/drag-nodes';
 import { Params, QueryParamsHandling } from '@angular/router';
 import {CdkDragDrop, CdkDragEnter, CdkDragExit} from '@angular/cdk/drag-drop';
-import {DropSource} from '../node-entries-wrapper/node-entries-wrapper.component';
 import {DragCursorDirective} from '../../directives/drag-cursor.directive';
+import {DropSource} from '../node-entries-wrapper/entries-model';
 
 /**
  * Breadcrumbs for nodes or collections.
  */
 @Component({
-    selector: 'breadcrumbs',
+    selector: 'es-breadcrumbs',
     templateUrl: 'breadcrumbs.component.html',
     styleUrls: ['breadcrumbs.component.scss'],
 })

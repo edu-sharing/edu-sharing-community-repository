@@ -5,8 +5,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataReader;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
@@ -93,14 +93,14 @@ public class SearchServiceOersiImpl extends SearchServiceAdapter {
   }
 
   @Override
-  public List<? extends Suggestion> getSuggestions(MetadataSetV2 mds, String queryId, String parameterId, String value, List<org.edu_sharing.restservices.shared.MdsQueryCriteria> criteria) {
+  public List<? extends Suggestion> getSuggestions(MetadataSet mds, String queryId, String parameterId, String value, List<org.edu_sharing.restservices.shared.MdsQueryCriteria> criteria) {
     // TODO
     return new ArrayList<>();
   }
 
   @Override
-  public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String, String[]> criteria,
-                                      SearchToken searchToken) throws Throwable {
+  public SearchResultNodeRef search(MetadataSet mds, String query, Map<String, String[]> criteria,
+                                    SearchToken searchToken) throws Throwable {
     OersiSearchResult result = queryExecutor().executeSearch(mds, query, criteria, searchToken.getFrom(), searchToken.getMaxResult());
 
     SearchResultNodeRef searchResultNodeRef = new SearchResultNodeRef();
@@ -262,7 +262,7 @@ public class SearchServiceOersiImpl extends SearchServiceAdapter {
      */
     void endpoint(String host, int port, String scheme, String pathPrefix, String index);
 
-    OersiSearchResult executeSearch(MetadataSetV2 mds, String query, Map<String, String[]> criteria, int from, int size) throws OersiAccessException;
+    OersiSearchResult executeSearch(MetadataSet mds, String query, Map<String, String[]> criteria, int from, int size) throws OersiAccessException;
 
     Map<String, Object> executeRetrieveById(String oersiId) throws OersiAccessException;
   }
@@ -279,7 +279,7 @@ public class SearchServiceOersiImpl extends SearchServiceAdapter {
     }
 
     @Override
-    public OersiSearchResult executeSearch(MetadataSetV2 mds, String query, Map<String, String[]> criteria, int from, int size) throws OersiAccessException {
+    public OersiSearchResult executeSearch(MetadataSet mds, String query, Map<String, String[]> criteria, int from, int size) throws OersiAccessException {
       QueryBuilder queryBuilder = getQuery(mds, query, criteria);
       logger.debug("es query: " + queryBuilder);
 
@@ -309,16 +309,16 @@ public class SearchServiceOersiImpl extends SearchServiceAdapter {
       }
     }
 
-    private QueryBuilder getQuery(MetadataSetV2 mds, String query, Map<String, String[]> criteria) {
+    private QueryBuilder getQuery(MetadataSet mds, String query, Map<String, String[]> criteria) {
       MetadataQuery queryData;
       try {
-        queryData = mds.findQuery(query, MetadataReaderV2.QUERY_SYNTAX_DSL);
+        queryData = mds.findQuery(query, MetadataReader.QUERY_SYNTAX_DSL);
       } catch (IllegalArgumentException e) {
         logger.info("Query " + query + " is not defined within dsl language, switching to default query...");
         return getDefaultQuery(criteria);
       }
       try {
-        return MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_DSL), queryData, criteria);
+        return MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criteria);
       } catch (Throwable e) {
         logger.info("Cannot get elasticsearch query, switching to default query... ", e);
         return getDefaultQuery(criteria);
@@ -331,7 +331,7 @@ public class SearchServiceOersiImpl extends SearchServiceAdapter {
         if (joinedValues.trim().length() == 0) {
           continue;
         }
-        if (MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA.equals(entry.getKey())) {
+        if (MetadataSet.DEFAULT_CLIENT_QUERY_CRITERIA.equals(entry.getKey())) {
           queryBuilder.must(QueryBuilders.multiMatchQuery(joinedValues)
             .field(OERSI_PROPERTY_NAME)
             .field(OERSI_PROPERTY_DESCRIPTION)

@@ -1,7 +1,6 @@
 package org.edu_sharing.repository.server;
 
 import java.util.List;
-import java.util.Map;
 
 import org.edu_sharing.metadataset.v2.SearchCriterias;
 import org.edu_sharing.repository.client.rpc.Result;
@@ -10,16 +9,26 @@ import org.edu_sharing.service.model.NodeRef;
 
 public class SearchResultNodeRef extends Result<List<NodeRef>> {
 
-	List<NodeSearch.Facette> facets = null;
+	List<NodeSearch.Facet> facets = null;
+	List<NodeSearch.Suggest> suggests = null;
+
 	
 	private SearchCriterias searchCriterias = null;
 	
-	public void setFacets(List<NodeSearch.Facette> facets){
+	public void setFacets(List<NodeSearch.Facet> facets){
 		this.facets = facets;
 	}
 
-	public List<NodeSearch.Facette> getFacets() {
+	public List<NodeSearch.Facet> getFacets() {
 		return facets;
+	}
+
+	public void setSuggests(List<NodeSearch.Suggest> suggests) {
+		this.suggests = suggests;
+	}
+
+	public List<NodeSearch.Suggest> getSuggests() {
+		return suggests;
 	}
 
 	public SearchCriterias getSearchCriterias() {

@@ -27,11 +27,11 @@
               "src/styles/main.scss"
             ],
             "scripts": [
-              "src/assets/js/jquery-3.4.1.min.js",
+              "node_modules/jquery/dist/jquery.js",
               "src/assets/js/nouislider.min.js",
               "node_modules/materialize-css/dist/js/materialize.min.js",
               "node_modules/moment/min/moment-with-locales.min.js",
-              "src/assets/js/chart.js"
+              "node_modules/chart.js/dist/Chart.js"
             ],
             "vendorChunk": true,
             "extractLicenses": false,
@@ -91,9 +91,11 @@
             "tsConfig": "tsconfig.spec.json",
             "karmaConfig": "./karma.conf.js",
             "scripts": [
-              "src/assets/js/jquery-3.4.1.min.js",
+              "node_modules/jquery/dist/jquery.js",
               "src/assets/js/nouislider.min.js",
-              "node_modules/materialize-css/dist/js/materialize.min.js"
+              "node_modules/materialize-css/dist/js/materialize.min.js",
+              "node_modules/moment/min/moment-with-locales.min.js",
+              "node_modules/chart.js/dist/Chart.js"
             ],
             "styles": [
               "src/styles/main.scss"
@@ -173,11 +175,11 @@
   "defaultProject": "angular-edusharing",
   "schematics": {
     "@schematics/angular:component": {
-      "prefix": "app",
+      "prefix": "es",
       "style": "scss"
     },
     "@schematics/angular:directive": {
-      "prefix": "app"
+      "prefix": "es"
     }
   }
 }

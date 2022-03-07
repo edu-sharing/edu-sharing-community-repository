@@ -1,7 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { MdsEditorInstanceService } from './mds-editor-instance.service';
-import { EditorMode, Values } from './types';
+import { Values } from './types';
+import {EditorMode} from '../../../core-ui-module/mds-types';
 
 /** Information that require a re-initialization once changed. */
 interface InitInfo {
@@ -18,7 +19,7 @@ interface InitInfo {
 // variables and methods should be kept clean to only include things that should be part of the
 // public interface, i.e.., no internal logic like when to initialize components.
 @Component({
-    selector: 'app-mds-editor',
+    selector: 'es-mds-editor',
     templateUrl: './mds-editor.component.html',
     providers: [MdsEditorInstanceService],
 })

@@ -1,10 +1,5 @@
 package org.edu_sharing.alfresco.fixes;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.copy.CopyServicePolicies;
 import org.alfresco.repo.node.NodeServicePolicies;
@@ -13,16 +8,22 @@ import org.alfresco.repo.node.NodeServicePolicies.OnCreateNodePolicy;
 import org.alfresco.repo.policy.JavaBehaviour;
 import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.service.cmr.lock.NodeLockedException;
-import org.alfresco.service.cmr.repository.*;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataReader;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.restservices.shared.Mds;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class MetadataPresettingPolicy implements
 		NodeServicePolicies.OnCreateNodePolicy,
@@ -188,7 +189,7 @@ public class MetadataPresettingPolicy implements
 			mdsId=mdsProp;
 		}
 		try {
-			MetadataSetV2 mds = MetadataReaderV2.getMetadataset(ApplicationInfoList.getHomeRepository(), mdsId,"default");
+			MetadataSet mds = MetadataReader.getMetadataset(ApplicationInfoList.getHomeRepository(), mdsId,"default");
 			for(MetadataWidget widget : mds.getWidgetsByTemplate("io_template")){
 				QName prop = QName.createQName(CCConstants.getValidGlobalName(widget.getId()));
 				Serializable value = nodeService.getProperty(templateRef, prop);

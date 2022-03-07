@@ -10,7 +10,7 @@ import {OptionItem} from '../../option-item';
 // readers.
 
 @Component({
-    selector: 'app-option-button',
+    selector: 'es-option-button',
     template: `
         <button mat-icon-button
                 color="primary"
@@ -18,7 +18,7 @@ import {OptionItem} from '../../option-item';
                 [class.display-none]="!optionIsShown(option, node)"
                 [disabled]="!optionIsValid(option, node)"
                 (click)="optionIsShown(option, node) ? option.callback(node) : null">
-            <i icon="{{option.icon}}" [aria]="false"></i>
+            <i esIcon="{{option.icon}}" [aria]="false"></i>
         </button>
     `,
 })

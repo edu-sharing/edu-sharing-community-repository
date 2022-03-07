@@ -10,7 +10,7 @@ import { UIHelper } from '../../ui-helper';
  * but can also be used standalone.
  */
 @Component({
-    selector: 'dropdown',
+    selector: 'es-dropdown',
     templateUrl: 'dropdown.component.html',
     styleUrls: ['dropdown.component.scss'],
 })
@@ -63,5 +63,13 @@ export class DropdownComponent {
             return this._options[i].group !== this._options[i - 1].group;
         }
         return false;
+    }
+
+    /** Whether there are any enabled options so we can open the menu. */
+    canShowDropdown(): boolean {
+        // We can only open the dropdown menu, when there is at least one enabled option. Even when
+        // there are options with `showDisabled: true`, showing a menu with no selectable option
+        // causes a11y issues.
+        return this._options?.some((o) => o.isEnabled);
     }
 }

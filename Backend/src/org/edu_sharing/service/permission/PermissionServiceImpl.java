@@ -65,6 +65,8 @@ import org.springframework.context.ApplicationContext;
 
 import com.google.gson.Gson;
 
+import static java.util.stream.Collectors.toList;
+
 public class PermissionServiceImpl implements org.edu_sharing.service.permission.PermissionService {
 
 
@@ -275,56 +277,32 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		// used for sending copy to user
 		String copyMailText = "";
 
-		String senderName = null;
-		String senderFirstName = null, senderLastName = null;
-
 		String user = new AuthenticationToolAPI().getCurrentUser();
-		HashMap<String, String> senderInfo = repoClient.getUserInfo(user);
-		if (senderInfo != null) {
-			senderFirstName = senderInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
-			senderLastName = senderInfo.get(CCConstants.CM_PROP_PERSON_LASTNAME);
-			if (senderFirstName != null && senderLastName != null) {
-				senderName = senderFirstName + " " + senderLastName;
-			} else {
-				senderName = user;
-			}
-		}
+		MailTemplate.UserMail sender = MailTemplate.getUserMailData(user);
 
 		for (String authority : _authPerm.keySet()) {
 			String[] permissions = _authPerm.get(authority);
 			setPermissions(_nodeId, authority, permissions, _inheritPermissions);
 
-			String emailaddress = null;
-			String receiverFirstName = null, receiverLastName = null;
-
+			MailTemplate.UserMail receiver = MailTemplate.getUserMailData(authority);
 			AuthorityType authorityType = AuthorityType.getAuthorityType(authority);
 
 
 			if (AuthorityType.USER.equals(authorityType)) {
-				HashMap<String, String> personInfo = repoClient.getUserInfo(authority);
-
-				if (personInfo != null) {
-					receiverFirstName = personInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
-					receiverLastName = personInfo.get(CCConstants.CM_PROP_PERSON_LASTNAME);
-					emailaddress = personInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
-				}
 				addToRecent(personService.getPerson(authority));
 			}
 			// send group email notifications
 			if(AuthorityType.GROUP.equals(authorityType)){
-				receiverLastName="";
-				receiverFirstName= (String) nodeService.getProperty(authorityService.getAuthorityNodeRef(authority),QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME));
-				emailaddress= (String) nodeService.getProperty(authorityService.getAuthorityNodeRef(authority),QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPEMAIL));
 				addToRecent(authorityService.getAuthorityNodeRef(authority));
 			}
 
 
-			if (mailValidator.isValid(emailaddress) && _sendMail) {
+			if (mailValidator.isValid(receiver.getEmail()) && _sendMail) {
 				Mail mail = new Mail();
 				HashMap<String, Object> props = repoClient.getProperties(_nodeId);
 				String nodeType = (String) props.get(CCConstants.NODETYPE);
 
-				String name = null;
+				String name;
 				if (nodeType.equals(CCConstants.CCM_TYPE_IO)) {
 					name = (String) props.get(CCConstants.LOM_PROP_GENERAL_TITLE);
 					name = (name == null || name.trim().isEmpty()) ? (String) props.get(CCConstants.CM_NAME) : name;
@@ -363,10 +341,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 				ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
 				Map<String, String> replace = new HashMap<>();
-				replace.put("inviterFirstName", senderFirstName.trim());
-				replace.put("inviterLastName", senderLastName.trim());
-				replace.put("firstName", receiverFirstName.trim());
-				replace.put("lastName", receiverLastName.trim());
+				receiver.applyToMap("", replace);
+				sender.applyToMap("inviter.", replace);
+				MailTemplate.applyNodePropertiesToMap("node.", props, replace);
 				replace.put("name", name.trim());
 				replace.put("message", _mailText.trim());
 				replace.put("permissions", permText.trim());
@@ -386,12 +363,12 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					template = "invited_safe";
 				}
 				if(send) {
-					mail.sendMailHtml(context, senderName, senderInfo.get(CCConstants.CM_PROP_PERSON_EMAIL), emailaddress, MailTemplate.getSubject(template, currentLocale),
+					mail.sendMailHtml(context, sender.getFullName(), sender.getEmail(), receiver.getEmail(), MailTemplate.getSubject(template, currentLocale),
 							MailTemplate.getContent(template, currentLocale, true), replace);
 				}
 
 			} else {
-				logger.info("username/authority: " + authority + " has no valid emailaddress:" + emailaddress);
+				logger.info("username/authority: " + authority + " has no valid emailaddress:" + receiver.getEmail());
 			}
 
 		}
@@ -432,7 +409,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			} else {
 				return (String)nodeService.getProperty(n, QName.createQName(CCConstants.CM_PROP_AUTHORITY_NAME));
 			}
-		}).collect(Collectors.toList());
+		}).collect(toList());
 	}
 	@Override
 	public ArrayList<NodeRef> getRecentProperty(String property) {
@@ -858,6 +835,17 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 						continue;
 					}
 
+					if(!AuthorityServiceFactory.getLocalService().isGlobalAdmin()){
+						String fullyAuthenticatedUser = AuthenticationUtil.getFullyAuthenticatedUser();
+						if(fullyAuthenticatedUser != null){
+							String owner = serviceRegistry.getOwnableService().getOwner(nodeRef);
+							if(ace.getAuthority().equals(fullyAuthenticatedUser) && !fullyAuthenticatedUser.equals(owner)){
+								logger.warn("user should not uninvite himself");
+								continue;
+							}
+						}
+					}
+
 					// logger.info("ace.getAuthority():"+ace.getAuthority()+"
 					// ace.getPermission():"+ace.getPermission());
 					if (ace.getAuthority().equals(authority) && ace.getPermission().equals(permission)) {
@@ -873,7 +861,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			return;
 		try {
 			// fetch all groups which are allowed to acces confidential and
-			String nodeId = toolPermission.getToolPermissionNodeId(CCConstants.CCM_VALUE_TOOLPERMISSION_CONFIDENTAL);
+			String nodeId = toolPermission.getToolPermissionNodeId(CCConstants.CCM_VALUE_TOOLPERMISSION_CONFIDENTAL, true);
 			StringBuffer groupPathQuery = new StringBuffer();
 			// user may not has ReadPermissions on ToolPermission, so fetch as admin
 			ACL permissions = AuthenticationUtil.runAsSystem(new RunAsWork<ACL>() {
@@ -1438,6 +1426,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					}
 					history.add(jsonStringACL);
 					nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_HISTORY), new ArrayList(history));
+					fixSharedByMe(nodeRef);
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -1447,6 +1436,96 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			}
 			return null;
 		});
+	}
+
+	private void fixSharedByMe(NodeRef nodeRef){
+
+		try {
+			ArrayList<String> phUsers = (ArrayList<String>) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS));
+			if(phUsers == null || phUsers.size() == 0){
+				return;
+			}
+			List<Notify> notifyList = getNotifyList(nodeRef.getId());
+			Notify predecessor = null;
+			Map<String,List<ACE>> userAddAcesList = new HashMap<>();
+
+			notifyList.sort(Comparator.comparing(Notify::getCreated));
+			/**
+			 * collect user addes ace's
+			 */
+			for(Notify notify : notifyList){
+				logger.info("Notify e:" + notify.getNotifyEvent()
+						+" a:"+notify.getNotifyAction()
+						+" u:"+notify.getNotifyUser()
+						+" c:"+notify.getChange()
+						+" date:"+notify.getCreated());
+				if(CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD.equals(notify.getNotifyAction())){
+					if(predecessor == null){
+						List<ACE> addedAcesForUser = new ArrayList<>(Arrays.asList(notify.getAcl().getAces()));
+						addedAcesForUser = filterACEList(addedAcesForUser,notify.getNotifyUser());
+						userAddAcesList.put(notify.getNotifyUser(),addedAcesForUser);
+						predecessor = notify;
+					}else{
+						List<ACE> notifyAces = new ArrayList(Arrays.asList(notify.getAcl().getAces()));
+						boolean isDiff = notifyAces.removeAll(Arrays.asList(predecessor.getAcl().getAces()));
+						if(isDiff){
+							List<ACE> addedAcesForUser = userAddAcesList.get(notify.getNotifyUser());
+							if(addedAcesForUser == null) addedAcesForUser = new ArrayList<>();
+							addedAcesForUser.addAll(notifyAces);
+							addedAcesForUser = filterACEList(addedAcesForUser,notify.getNotifyUser());
+							userAddAcesList.put(notify.getNotifyUser(),addedAcesForUser);
+						}
+					}
+				}
+			}
+			/**
+			 * find out if current aces still contains at least one user added ace
+			 * if not collect the user in remove list
+			 */
+			Notify currentNotify = notifyList.get(notifyList.size() - 1);
+			Set<String> removePhUsers = new HashSet<>();
+			for(Map.Entry<String, List<ACE>> entry: userAddAcesList.entrySet()){
+				if(entry.getValue() == null || entry.getValue().size() == 0){
+					removePhUsers.add(entry.getKey());
+					continue;
+				}
+				if(currentNotify.getAcl() == null
+						|| currentNotify.getAcl().getAces() == null
+						|| currentNotify.getAcl().getAces().length == 0){
+					removePhUsers.add(entry.getKey());
+					continue;
+				}
+
+				List<ACE> userAddedAces = entry.getValue();
+				List<ACE> remainingUserAddedAces = (List<ACE>)new ArrayList(Arrays.asList(currentNotify.getAcl().getAces()))
+						.stream()
+						.filter(userAddedAces::contains)
+						.collect(toList());
+				if(remainingUserAddedAces == null || remainingUserAddedAces.size() == 0){
+					removePhUsers.add(entry.getKey());
+				}
+			}
+			/**
+			 * remove users that are in ph_users but never added an permission.
+			 * i.e. only did "change permission", "remove permission"
+			 */
+			removePhUsers.addAll(phUsers.stream().filter(u -> !userAddAcesList.keySet().contains(u)).collect(Collectors.toList()));
+
+			/**
+			 * remove users from PH_USERS property
+			 */
+			if(phUsers.removeAll(removePhUsers)){
+				nodeService.setProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_PH_USERS),phUsers);
+			}
+
+		} catch (Throwable e) {
+			logger.error(e.getMessage(),e);
+		}
+	}
+
+	private List<ACE> filterACEList(List<ACE> aces, String user){
+		return aces.stream().filter(ace -> !"ROLE_OWNER".equals(ace.getAuthority()) && !user.equals(ace.getAuthority()))
+				.collect(Collectors.toList());
 	}
 
 	@Override

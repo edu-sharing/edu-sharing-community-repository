@@ -12,7 +12,7 @@ import { map, catchError } from 'rxjs/operators';
 import * as rxjs from 'rxjs';
 
 @Component({
-  selector: 'workspace-file-upload-select',
+  selector: 'es-workspace-file-upload-select',
   templateUrl: 'file-upload-select.component.html',
   styleUrls: ['file-upload-select.component.scss'],
   animations: [
@@ -171,13 +171,8 @@ export class WorkspaceFileUploadSelectComponent  {
         if (node) {
             return this.nodeService.getNodeParents(node.ref.id).pipe(
                 map((parentList) => this.getBreadcrumbsByParentList(parentList)),
-                // FIXME: Hacky workaround. `getNodeParents` fails with 403 when trying to get
-                // parents of the home directory. We rely on any error meaning that this happened.
-                //
-                // TODO: Find a proper way to determine whether `node` is the home directory and
-                // return the breadcrumb config below without calling `getNodeParents`.
                 catchError(() => rxjs.of(this.getBreadcrumbsByParentList({
-                    nodes: [], pagination: null, scope: 'MY_FILES',
+                    nodes: [node], pagination: null, scope: 'UNKNOWN',
                 }))),
             );
         } else {
@@ -199,6 +194,13 @@ export class WorkspaceFileUploadSelectComponent  {
                     nodes,
                     homeLabel: 'WORKSPACE.SHARED_FILES',
                     homeIcon: 'group',
+                };
+
+            case 'UNKNOWN':
+                return {
+                    nodes,
+                    homeLabel: 'WORKSPACE.RESTRICTED_FOLDER',
+                    homeIcon: 'folder',
                 };
             default:
                 console.warn(`Unknown scope "${parentList.scope}"`)

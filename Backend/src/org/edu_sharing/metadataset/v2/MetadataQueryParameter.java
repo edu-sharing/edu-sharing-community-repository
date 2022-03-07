@@ -10,6 +10,7 @@ import java.util.Map;
 public class MetadataQueryParameter implements Serializable {
 	// the used syntax, inherited by the group of queries
 	private final String syntax;
+	private final MetadataSet mds;
 	private String name;
 	private Map<String,String> statements;
 	private boolean multiple;
@@ -22,8 +23,9 @@ public class MetadataQueryParameter implements Serializable {
 	//only DSL
 	private boolean asFilter = true;
 
-	MetadataQueryParameter(String syntax){
+	MetadataQueryParameter(String syntax, MetadataSet mds){
 		this.syntax = syntax;
+		this.mds = mds;
 	}
 
 	public String getSyntax() {
@@ -55,7 +57,7 @@ public class MetadataQueryParameter implements Serializable {
 		return QueryUtils.replaceCommonQueryParams(statement, QueryUtils.replacerFromSyntax(syntax));
 	}
 	private String getDefaultStatement() {
-		if(syntax.equals(MetadataReaderV2.QUERY_SYNTAX_DSL)){
+		if(syntax.equals(MetadataReader.QUERY_SYNTAX_DSL)){
 			//return "{\"wildcard\":{\"properties." + name  +"\":{\"value\":\"${value}\"}}}";
 			try {
 
@@ -70,7 +72,7 @@ public class MetadataQueryParameter implements Serializable {
 			}catch(JSONException e){
 				throw new RuntimeException(e);
 			}
-		} else if(syntax.equals(MetadataReaderV2.QUERY_SYNTAX_LUCENE)) {
+		} else if(syntax.equals(MetadataReader.QUERY_SYNTAX_LUCENE)) {
 			return "@" + name.replace(":", "\\:") + ":\"*${value}*\"";
 		}
 		throw new RuntimeException("Unsupported syntax for query language: " + syntax);
@@ -148,4 +150,8 @@ public class MetadataQueryParameter implements Serializable {
 	public void setAsFilter(boolean asFilter) { this.asFilter = asFilter; }
 
 	public boolean isAsFilter() { return asFilter; }
+
+	public MetadataSet getMds() {
+		return mds;
+	}
 }

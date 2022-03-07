@@ -16,7 +16,7 @@ import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
 
 @Component({
-  selector: 'permissions-main',
+  selector: 'es-permissions-main',
   templateUrl: 'permissions.component.html',
   styleUrls: ['permissions.component.scss'],
   animations: [

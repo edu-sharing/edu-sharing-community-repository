@@ -44,6 +44,10 @@ import {UIAnimation} from '../../core-module/ui/ui-animation';
 import IEditorOptions = monaco.editor.IEditorOptions;
 import {NgxEditorModel} from 'ngx-monaco-editor';
 import {Scope} from '../../core-ui-module/option-item';
+import {AboutService} from 'ngx-edu-sharing-api';
+import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
+import {AuthoritySearchMode} from '../../common/ui/authority-search-input/authority-search-input.component';
+import {PlatformLocation} from '@angular/common';
 
 
 type LuceneData = {
@@ -60,7 +64,7 @@ type LuceneData = {
 }
 
 @Component({
-  selector: 'admin-main',
+  selector: 'es-admin-main',
   templateUrl: 'admin.component.html',
   styleUrls: ['admin.component.scss'],
   animations: [
@@ -68,11 +72,13 @@ type LuceneData = {
   ]
 })
 export class AdminComponent {
+  readonly AuthoritySearchMode = AuthoritySearchMode;
   readonly SCOPES = Scope;
 
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private router: Router,
+              private platformLocation: PlatformLocation,
               private config: ConfigurationService,
               private translate: TranslateService,
               private iamService: RestIamService,
@@ -83,6 +89,7 @@ export class AdminComponent {
               private viewContainerRef : ViewContainerRef,
               private admin : RestAdminService,
               private connector: RestConnectorService,
+              private about: AboutService,
               private node: RestNodeService,
               private searchApi: RestSearchService,
               private organization: RestOrganizationService) {
@@ -116,6 +123,7 @@ export class AdminComponent {
   static RS_CONFIG_HELP='https://docs.edu-sharing.com/confluence/edp/de/installation-en/installation-of-the-edu-sharing-rendering-service';
   mailTemplates=[
       'invited',
+      'invited_workflow',
       'invited_safe',
       'invited_collection',
       'nodeIssue',
@@ -193,7 +201,6 @@ export class AdminComponent {
   currentAppXml: string;
   public editableXmls=[
     {name:'HOMEAPP',file:RestConstants.HOME_APPLICATION_XML},
-    {name:'CCMAIL',file:RestConstants.CCMAIL_APPLICATION_XML},
   ]
   searchResponse: NodeList | NodeListElastic;
   searchColumns: ListItem[]=[];
@@ -209,6 +216,7 @@ export class AdminComponent {
   private loginResult: LoginResult;
   private mediacenters: any[];
   ownAppMode='repository';
+  authenticateAuthority: Authority;
   public startJob() {
     this.storage.set('admin_job',this.job);
     this.globalProgress=true;
@@ -783,7 +791,7 @@ export class AdminComponent {
     }
     reloadJobStatus() {
         this.admin.getJobs().subscribe((jobs)=> {
-            this.jobs=jobs;
+            this.jobs = jobs.filter((j: any) => !!j);
             this.updateJobLogs();
         })
     }
@@ -817,12 +825,12 @@ export class AdminComponent {
         this.systemChecks=[];
 
         // check versions render service
-        this.connector.getAbout().subscribe((about:any)=> {
-            about.version.repository=this.getMajorVersion(about.version.repository);
-            about.version.renderservice=this.getMajorVersion(about.version.renderservice);
+        this.about.getAbout().subscribe((about)=> {
+            const repositoryVersion = this.getMajorVersion(about.version.repository);
+            const renderServiceVersion = this.getMajorVersion(about.version.renderservice);
             this.systemChecks.push({
               name:'RENDERING',
-                status:about.version.repository=='unknown' ? 'WARN' : about.version.repository==about.version.renderservice ? 'OK' : 'FAIL',
+                status:repositoryVersion=='unknown' ? 'WARN' : repositoryVersion==renderServiceVersion ? 'OK' : 'FAIL',
                 translate:about.version,
               callback:()=> {
                   this.setMode('APPLICATIONS');
@@ -876,18 +884,19 @@ export class AdminComponent {
             });
         });
         // check status of nodeReport + mail server
-        this.admin.getApplicationXML(RestConstants.CCMAIL_APPLICATION_XML).subscribe((mail)=> {
+        this.admin.getConfigMerged().subscribe((config)=> {
+            const mail = config.repository.mail;
             if(this.config.instant('nodeReport',false)) {
                 this.systemChecks.push({
                     name:'MAIL_REPORT',
-                    status:mail['mail.report.receiver'] && mail['mail.smtp.server'] ? 'OK' : 'FAIL',
-                    translate:mail
+                    status:mail.report.receiver && mail.server.smtp.host ? 'OK' : 'FAIL',
+                    translate:mail.report
                 });
             }
             this.systemChecks.push({
                 name:'MAIL_SETUP',
-                status:mail['mail.smtp.server'] ? 'OK' : 'FAIL',
-                translate:mail
+                status:mail.server.smtp.host ? 'OK' : 'FAIL',
+                translate:mail.server.smtp
             });
         });
       this.admin.getApplicationXML(RestConstants.HOME_APPLICATION_XML).subscribe((home)=> {
@@ -1013,7 +1022,15 @@ export class AdminComponent {
     this.storage.set('admin_lucene',this.lucene);
     this.globalProgress=true;
     const props=this.lucene.properties.split('\n');
-    this.admin.exportLucene(this.lucene.query, this.lucene.store, props).subscribe((data)=> {
+
+    const authorities=[];
+    if(this.lucene.authorities) {
+      for(const auth of this.lucene.authorities) {
+          authorities.push(auth.authorityName);
+      }
+    }
+
+    this.admin.exportLucene(this.lucene.query, this.lucene.store, props, authorities).subscribe((data)=> {
       const filename='Export-'+DateHelper.formatDate(this.translate,new Date().getTime(),{useRelativeLabels:false});
       this.globalProgress=false;
 
@@ -1184,7 +1201,7 @@ export class AdminComponent {
     }
 
   getOwnAppUrl() {
-    return this.connector.getAbsoluteEdusharingUrl()+'metadata?format='+this.ownAppMode;
+    return this.connector.getAbsoluteEdusharingUrl()+'metadata?format='+this.ownAppMode + '&external=true';
   }
 
   copyOwnApp() {
@@ -1236,9 +1253,12 @@ export class AdminComponent {
       if (param.file) {
         continue;
       }
-      data[param.name] = param.sampleValue ?? '';
+      data[param.name] = param.type === 'boolean' ? param.sampleValue === 'true' : param.sampleValue ?? '';
       if(param.values) {
         data[param.name] = param.values.map((v) => v.name).join('|');
+      }
+      if(param.array) {
+          data[param.name] = [data[param.name]];
       }
       modified = true;
     }
@@ -1247,5 +1267,32 @@ export class AdminComponent {
       this.job.params = JSON.stringify(data, null, 2);
     }
   }
+
+    async authenticateAsUser(force = false) {
+        if (!force) {
+            this.toast.showConfigurableDialog({
+                title: 'ADMIN.TOOLKIT.AUTHENTICATE_AS_USER',
+                message: 'ADMIN.TOOLKIT.AUTHENTICATE_AS_USER_DETAILS',
+                buttons: DialogButton.getOkCancel(
+                    () => this.toast.closeModalDialog(),
+                    () => {
+                        this.toast.closeModalDialog();
+                        this.authenticateAsUser(true);
+                    })
+            });
+            return;
+        }
+        try {
+            await this.admin.switchAuthentication(this.authenticateAuthority.authorityName).toPromise();
+            UIHelper.goToDefaultLocation(
+                this.router,
+                this.platformLocation,
+                this.config,
+                true
+            );
+        } catch (e) {
+
+        }
+    }
 }
 

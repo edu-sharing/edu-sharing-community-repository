@@ -6,7 +6,7 @@
 </div>
 <div class="container">
 <div class="icon">
-  <user-avatar [user]="_permission" size="xsmall"></user-avatar>
+  <es-user-avatar [user]="_permission" size="xsmall"></es-user-avatar>
   <!--<i class="type material-icons">{{_permission.authority.authorityType=='USER' ? "person" : _permission.authority.authorityType=='LINK' ? "link" : "group"}}{{added ? "_add" : "" }}</i>-->
 </div>
 <div class="permissionName">
@@ -34,19 +34,19 @@
       <div *ngIf="!readOnly && !isEveryone" class="select"><i class="material-icons align">keyboard_arrow_down</i></div></div>
     <div *ngIf="_permission.permissions.length==0"></div>
 
-    <workspace-share-choose-type *ngIf="showChooseType" class="typeAdd"
+    <es-workspace-share-choose-type *ngIf="showChooseType" class="typeAdd"
                                  [selected]="_permission.permissions"
                                  [isDirectory]="isDirectory"
                                  [canPublish]="canPublish"
                                  (onCancel)="showChooseType=false"
                                  (onType)="changeType($event)"
-    ></workspace-share-choose-type>
+    ></es-workspace-share-choose-type>
   </div>
 </div>
 <div class="remove" tabindex="0" (keyup.enter)="remove()" (click)="remove()" *ngIf="showDelete" [class.clickable]="!readOnly">
   <i *ngIf="!inherit && !isDeleted" class="material-icons">cancel</i>
   <i *ngIf="!inherit && isDeleted" class="material-icons">undo</i>
-  <i *ngIf="inherit" class="inherit" icon="edu-inherit" matTooltip="{{ 'WORKSPACE.SHARE.INHERIT_HINT' | translate}}"></i>
+  <i *ngIf="inherit" class="inherit" esIcon="edu-inherit" matTooltip="{{ 'WORKSPACE.SHARE.INHERIT_HINT' | translate}}"></i>
 </div>
 </div>
 </div>

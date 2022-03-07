@@ -29,7 +29,7 @@ interface VideoControlsValues {
 }
 
 @Component({
-    selector: 'video-controls',
+    selector: 'es-video-controls',
     templateUrl: 'video-controls.component.html',
     styleUrls: ['video-controls.component.scss'],
     animations: [trigger('fromRight', UIAnimation.fromRight())],

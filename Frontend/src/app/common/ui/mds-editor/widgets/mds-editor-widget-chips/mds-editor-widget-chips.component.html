@@ -1,4 +1,4 @@
-<app-mds-editor-widget-container
+<es-mds-editor-widget-container
   #container
   [injectedView]="this"
   [widget]="widget"
@@ -6,22 +6,25 @@
   [valueType]="valueType"
   [control]="chipsControl"
 >
+  <!-- The aria-describedby attribute is set automatically by MatFormField to the ChipList. We pass
+  it on to the input element. -->
   <mat-chip-list
     #chipList
     [formControl]="chipsControl"
     *ngIf="chipsControl"
-    [attr.aria-labelledby]="container.labelId"
+    [attr.aria-labelledby]="chipsControl.value.length > 0 ? container.labelId : null"
+    esOnAttributeChange="aria-describedby"
+    (attributeChange)="input.setAttribute('aria-describedby', $event)"
   >
     <mat-chip
       *ngFor="let value of chipsControl.value"
       [selectable]="false"
       [removable]="true"
+      (blur)="onBlurInput($event)"
       (click)="add(value)"
       (removed)="remove(value)"
       [class.indeterminate]="(indeterminateValues$ | async)?.includes(value.key)"
-      appCheckTextOverflow=".mat-chip-label"
-      #text="appCheckTextOverflow"
-      [matTooltip]="getTooltip(value, text.hasTextOverflow())"
+      [matTooltip]="getTooltip(value)"
     >
       <span class="mat-chip-label">{{ value.label }}</span>
       <mat-icon matChipRemove>cancel</mat-icon>
@@ -60,17 +63,20 @@
     <mat-option
       *ngFor="let value of autocompleteValues | async"
       [value]="value"
-      appCheckTextOverflow=".mat-option-text"
-      #text="appCheckTextOverflow"
+      esCheckTextOverflow=".mat-option-text"
+      #text="esCheckTextOverflow"
       #tooltip="matTooltip"
       #option="matOption"
       [matTooltip]="text.hasTextOverflow() ? value.label : null"
-      [appRegisterCustomProperty]="{ key: 'tooltip', value: tooltip, object: option }"
+      [esRegisterCustomProperty]="{ key: 'tooltip', value: tooltip, object: option }"
     >
       <span [innerHTML]="value.label | sanitizeHTML | highlight: inputControl.value"></span>
     </mat-option>
+    <mat-option disabled *ngIf="shouldShowNoMatchingValuesNotice | async" aria-live="polite">
+      {{ 'MDS.NO_MATCHING_VALUES' | translate }}
+    </mat-option>
   </mat-autocomplete>
-</app-mds-editor-widget-container>
+</es-mds-editor-widget-container>
 
 <!-- Load styles for mat-select-arrow. -->
 <mat-select hidden style="display: none"></mat-select>

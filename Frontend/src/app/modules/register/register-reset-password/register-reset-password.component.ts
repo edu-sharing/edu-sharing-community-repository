@@ -21,7 +21,7 @@ import {InputPasswordComponent} from '../../../core-ui-module/components/input-p
 import {RestRegisterService} from '../../../core-module/core.module';
 
 @Component({
-  selector: 'app-register-reset-password',
+  selector: 'es-register-reset-password',
   templateUrl: 'register-reset-password.component.html',
   styleUrls: ['register-reset-password.component.scss']
 })

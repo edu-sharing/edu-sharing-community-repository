@@ -14,7 +14,7 @@
             </mat-chip-list>
             <mat-chip-list *ngIf="!(i==history.length-1 || !getWorkflowForId(history[i+1].status).hasReceiver)">
               <mat-chip *ngFor="let receiver of history[i+1].receiver" class="badge">
-                <i class="badgeIconLeft" [icon]="receiver.authorityType=='USER' ? 'person' : 'group'"></i>
+                <i class="badgeIconLeft" [esIcon]="receiver.authorityType=='USER' ? 'person' : 'group'"></i>
                 <div class="mat-chip-group">
                   <span class="primary">{{receiver | authorityName}}</span>
                   <span class="secondary">{{receiver | permissionName:{field:'secondary'} }}</span>
@@ -32,7 +32,7 @@
           </div>
         </div>
         <div class="row arrow">
-          <i icon="keyboard_arrow_right"></i>
+          <i esIcon="keyboard_arrow_right"></i>
         </div>
         <div class="row target">
           <div class="receivers">
@@ -44,7 +44,7 @@
             </mat-chip-list>
             <mat-chip-list *ngIf="getWorkflowForId(history[i].status).hasReceiver && entry.receiver?.length">
               <mat-chip *ngFor="let receiver of entry.receiver" class="badge">
-                <i class="badgeIconLeft" [icon]="receiver.authorityType=='USER' ? 'person' : 'group'"></i>
+                <i class="badgeIconLeft" [esIcon]="receiver.authorityType=='USER' ? 'person' : 'group'"></i>
                 <div class="mat-chip-group">
                   <span class="primary">{{receiver | authorityName}}</span>
                   <span class="secondary">{{receiver | permissionName:{field:'secondary'} }}</span>

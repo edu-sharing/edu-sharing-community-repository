@@ -1,7 +1,6 @@
 export { AboutService } from './services/about.service';
 export { AdminV1Service } from './services/admin-v-1.service';
 export { ArchiveV1Service } from './services/archive-v-1.service';
-export { AuthenticationV1Service } from './services/authentication-v-1.service';
 export { BulkV1Service } from './services/bulk-v-1.service';
 export { ClientutilsV1Service } from './services/clientutils-v-1.service';
 export { CollectionV1Service } from './services/collection-v-1.service';
@@ -9,6 +8,8 @@ export { CommentV1Service } from './services/comment-v-1.service';
 export { ConfigV1Service } from './services/config-v-1.service';
 export { ConnectorV1Service } from './services/connector-v-1.service';
 export { IamV1Service } from './services/iam-v-1.service';
+export { KnowledgeV1Service } from './services/knowledge-v-1.service';
+export { AuthenticationV1Service } from './services/authentication-v-1.service';
 export { MdsV1Service } from './services/mds-v-1.service';
 export { MediacenterV1Service } from './services/mediacenter-v-1.service';
 export { NetworkV1Service } from './services/network-v-1.service';

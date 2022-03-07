@@ -1,5 +1,5 @@
-<global-progress *ngIf="visible && progressType"></global-progress>
-<card *ngIf="visible && !progressType"
+<es-global-progress *ngIf="visible && progressType"></es-global-progress>
+<es-card *ngIf="visible && !progressType"
       title="{{title | translate:messageParameters }}"
       (onCancel)="cancel()"
       [isCancelable]="isCancelable"
@@ -19,4 +19,4 @@
     </mat-form-field>
   </div>
   <mat-progress-bar *ngIf="progressType" [mode]="progressType"></mat-progress-bar>
-</card>
+</es-card>

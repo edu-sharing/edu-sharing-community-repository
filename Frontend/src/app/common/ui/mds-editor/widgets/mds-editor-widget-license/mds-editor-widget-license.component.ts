@@ -15,7 +15,7 @@ import { MdsWidgetValue, Values } from '../../types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 @Component({
-    selector: 'app-mds-editor-widget-license',
+    selector: 'es-mds-editor-widget-license',
     templateUrl: './mds-editor-widget-license.component.html',
     styleUrls: ['./mds-editor-widget-license.component.scss'],
 })
@@ -60,7 +60,7 @@ export class MdsEditorWidgetLicenseComponent
             }
             return license;
         });
-        this.checked = this.widget.getInitialValues().jointValues ?? [];
+        this.checked = this.widget.getInitialValues()?.jointValues ?? [];
     }
 
     async getValues(values: Values) {
@@ -94,7 +94,9 @@ export class MdsEditorWidgetLicenseComponent
         this.mainnav
             .getDialogs()
             .onRefresh.pipe(first())
-            .subscribe((nodes: Node[]) => (this.nodes = nodes));
+            .subscribe((nodes: Node[]) => {
+                this.nodes = nodes;
+                this.mdsEditorValues.updateNodes(this.nodes); });
     }
 
     updateValue(license: License, status: boolean) {

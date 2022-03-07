@@ -4,11 +4,12 @@
   [class.grid-card-virtual]="node.virtual"
   [style.background-color]="nodeHelper.isNodeCollection(node) ? node.collection.color : null"
   (contextmenu)="openContextmenu($event)"
+  (keydown.ContextMenu)="openContextmenu($event)"
 >
   <button
     #menuTrigger="matMenuTrigger"
     mat-button
-    class="dropdown-dummy"
+    class="dropdown-dummy cdk-visually-hidden"
     [style.left.px]="dropdownLeft"
     [style.top.px]="dropdownTop"
     [matMenuTriggerFor]="dropdown.menu"
@@ -23,13 +24,14 @@
     >
       <ng-container *ngIf="nodeHelper.isNodeCollection(node)">
         <i
-          matTooltip="{{'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate}}"
-          [icon]="nodeHelper.getCollectionScopeInfo($any(node)).icon"></i>
+          [matTooltip]="'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate"
+          [altText]="'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate"
+          [esIcon]="nodeHelper.getCollectionScopeInfo($any(node)).icon"></i>
       </ng-container>
       <ng-container *ngIf="!nodeHelper.isNodeCollection(node)">
         <img
-          alt=""
-          [src]="node.iconURL"
+        [src]="node.iconURL"
+          [alt]="node.mediatype ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate) : ''"
           [matTooltip]="node.mediatype ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate) : ''"
         >
       </ng-container>
@@ -38,7 +40,7 @@
       *ngIf="nodeHelper.isNodeCollection(node) && node.collection.pinned"
       class="card-top-bar-flag"
     >
-      <i icon="edu-pin"></i>
+      <i esIcon="edu-pin"></i>
     </div>
     <div class="card-top-bar-empty"></div>
     <div class="card-top-bar-comments"
@@ -46,13 +48,13 @@
       <div
         class="node-comments"
         *ngIf="node.type === 'ccm:io'"
-        (appDistinctClick)="entriesService.clickItem.emit({
+        (esDistinctClick)="entriesService.clickItem.emit({
           element: node,
           source: ClickSource.Comments
        })"
         [matTooltip]="('COMMENTS_MULTIPLE' | translate) + ': ' + node.commentCount"
       >
-        <i icon="comment"></i>
+        <i esIcon="comment"></i>
         <span>{{node.commentCount}}</span>
       </div>
     </div>
@@ -62,7 +64,7 @@
       <div class="childobject-count"
            matTooltip="{{'CHILDOBJECT_COUNT' | translate:{count: node.properties['virtual:childobjectcount'] * 1 + 1} }}"
       >
-        <span>{{node.properties['virtual:childobjectcount'] * 1 + 1}}</span><i icon="filter_none"></i>
+        <span>{{node.properties['virtual:childobjectcount'] * 1 + 1}}</span><i esIcon="filter_none"></i>
       </div>
     </div>
     <div class="card-top-bar-checkbox">
@@ -73,13 +75,13 @@
       ></mat-checkbox>
     </div>
   </div>
-  <app-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
+  <es-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
                 mode="wrapper"
                 [node]="node"
   >
     <ng-container *ngTemplateOutlet="image"></ng-container>
     <ng-container *ngTemplateOutlet="meta"></ng-container>
-  </app-node-url>
+  </es-node-url>
   <div *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink"
        class="clickable"
        (click)="entriesService.clickItem.emit({
@@ -94,20 +96,26 @@
     <ng-container *ngTemplateOutlet="image"></ng-container>
     <ng-container *ngTemplateOutlet="meta"></ng-container>
   </div>
-  <div class="card-options" *ngIf="entriesService.options">
-    <app-option-button *ngFor="let option of optionsOnCard()"
+  <div class="card-options" *ngIf="entriesService.options || showRatings">
+    <div class="card-rating-area">
+    <es-node-rating [node]="node"></es-node-rating>
+    </div>
+    <div class="card-options-area">
+    <es-option-button *ngFor="let option of optionsOnCard()"
                        class="card-options-always"
                        [option]="option"
                        [node]="node"
-    ></app-option-button>
+    ></es-option-button>
     <div class="card-options-spacer"></div>
     <button mat-icon-button
             color="primary"
-            (click)="entriesService.selection.clear(); entriesService.selection.select(node)"
+            (click)="openMenu(node)"
             [matMenuTriggerFor]="dropdown.menu"
+            [attr.aria-label]="'OPTIONS_FOR' | translate: {element: (node | nodeTitle)}"
     >
-      <i icon="more_vert" [aria]="true"></i>
+      <i esIcon="more_vert"></i>
     </button>
+    </div>
   </div>
 </div>
 <ng-template #image>
@@ -127,7 +135,7 @@
     <div *ngIf="nodeHelper.isNodeCollection(node) && node.preview.isIcon"
          class="card-collection-image"
     >
-      <i icon="layers"></i>
+      <i esIcon="layers"></i>
     </div>
   </div>
 </ng-template>
@@ -138,37 +146,37 @@
       class="card-meta-row"
     >
       <ng-container *ngIf="first">
-        <app-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
+        <es-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
                       [node]="node"
                       #link
         >
-          <app-list-base
+          <es-list-base
             [item]="displayPart"
             [node]="node"
-            [showFieldTooltip]="false"
+            [provideLabel]="false"
           >
-          </app-list-base>
-        </app-node-url>
+          </es-list-base>
+        </es-node-url>
         <div *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink"
         >
-          <app-list-base
+          <es-list-base
             [item]="displayPart"
             [node]="node"
-            [showFieldTooltip]="false"
+            [provideLabel]="false"
           >
-          </app-list-base>
+          </es-list-base>
         </div>
       </ng-container>
       <ng-container *ngIf="!first">
         <label>
           {{ (displayPart | appListItemLabel) }}
         </label>
-        <app-list-base
+        <es-list-base
           [item]="displayPart"
           [node]="node"
-          [showFieldTooltip]="false"
+          [provideLabel]="false"
         >
-        </app-list-base>
+        </es-list-base>
       </ng-container>
     </div>
   </div>

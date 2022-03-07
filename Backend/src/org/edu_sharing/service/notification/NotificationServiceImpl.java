@@ -61,8 +61,9 @@ public class NotificationServiceImpl implements NotificationService {
 		replace.put("name", (String)properties.get(CCConstants.CM_NAME));
 		replace.put("id", nodeId);
 		replace.put("link", URLTool.getNgRenderNodeUrl(nodeId,null,true));
+		MailTemplate.applyNodePropertiesToMap("node.", properties, replace);
 		Mail mail=new Mail();
-		String receiver=(String)mail.getProperties().get("mail.report.receiver");
+		String receiver=mail.getConfig().getString("report.receiver");
 		if(receiver==null)
 			throw new IllegalArgumentException("no mail.report.receiver registered in ccmail.properties");
 		ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();

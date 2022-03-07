@@ -8,19 +8,18 @@ import {
 import { HttpClient } from '@angular/common/http';
 import {
     AfterViewInit,
-    Component,
+    Component, ContentChild,
     ElementRef,
     EventEmitter,
     HostListener,
     Input, OnDestroy,
-    Output,
+    Output, TemplateRef,
     ViewChild,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
-    About,
     ConfigurationHelper,
     ConfigurationService, Connector,
     DialogButton,
@@ -56,12 +55,14 @@ import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar
 import {MainMenuDropdownComponent} from '../main-menu-dropdown/main-menu-dropdown.component';
 import {MainNavService} from '../../services/main-nav.service';
 import { SearchFieldComponent } from '../search-field/search-field.component';
+import {About, AboutService} from 'ngx-edu-sharing-api';
+import { ConfigOptionItem, NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
 
 /**
  * The main nav (top bar + menus)
  */
 @Component({
-    selector: 'main-nav',
+    selector: 'es-main-nav',
     templateUrl: 'main-nav.component.html',
     styleUrls: ['main-nav.component.scss'],
     providers: [MainMenuEntriesService],
@@ -117,6 +118,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     @ViewChild('dropdownTriggerDummy') createMenuTrigger: MatMenuTrigger;
     @ViewChild('mainMenuSidebar') mainMenuSidebar: MainMenuSidebarComponent;
     @ViewChild('mainMenuDropdown') mainMenuDropdown: MainMenuDropdownComponent;
+    @ContentChild('createButton') createButtonRef: TemplateRef<any>;
 
     /**
      * Show and enables the search field
@@ -146,7 +148,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
      * "add material" options
      */
     @Input() create: {
-        allowed?: boolean;
+        allowed?: boolean | 'EMIT_EVENT';
         allowBinary?: boolean;
         parent?: Node;
         folder?: boolean;
@@ -158,7 +160,9 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         parent: null,
         folder: false,
     };
+    @Output() onCreateNotAllowed = new EventEmitter<void>();
     @Input() searchQuery: string;
+    private queryParams: Params;
     @Input()
     set currentScope(currentScope: string) {
         this._currentScope = currentScope;
@@ -204,7 +208,6 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     _currentScope: string;
     _showUser = false;
     licenseDialog: boolean;
-    showScrollToTop = false;
     licenseDetails: string;
     mainMenuStyle: 'sidebar' | 'dropdown' = 'sidebar';
 
@@ -234,6 +237,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         private event: FrameEventsService,
         private nodeService: RestNodeService,
         private configService: ConfigurationService,
+        private aboutService: AboutService,
         private uiService: UIService,
         private mainnavService: MainNavService,
         private storage: TemporaryStorageService,
@@ -242,6 +246,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         private router: Router,
         private route: ActivatedRoute,
         private toast: Toast,
+        private nodeHelper: NodeHelperService,
     ) {
         this.mainnavService.registerMainNav(this);
         this.visible = !this.storage.get(
@@ -251,7 +256,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         this.setMenuStyle();
 
         this.connector.setRoute(this.route).subscribe(() => {
-            this.connector.getAbout().subscribe(about => {
+            this.aboutService.getAbout().subscribe(about => {
                 this.about = about;
                 this.connector.isLoggedIn().subscribe((data: LoginResult) => {
                     if (!data.isValidLogin) {
@@ -261,6 +266,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                     }
                     setInterval(() => this.updateTimeout(), 1000);
                     this.route.queryParams.subscribe(async (params: Params) => {
+                        this.queryParams = params;
                         if (params.noNavigation === 'true') {
                             this.canOpen = false;
                         }
@@ -432,8 +438,6 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                     'px';
             }
         }
-        this.showScrollToTop =
-            (window.pageYOffset || document.documentElement.scrollTop) > 400;
     }
 
     setNodeStore(value: boolean) {
@@ -483,10 +487,6 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     async refreshBanner(): Promise<void> {
         await new Promise(resolve => resolve(void 0));
         await this.handleScroll(null);
-    }
-
-    scrollToTop() {
-        UIHelper.scrollSmooth(0);
     }
 
     editProfile() {
@@ -578,7 +578,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
 
     isCreateAllowed() {
         // @TODO: May Check for more constrains
-        return this.create.allowed && !this.connector.getCurrentLogin()?.isGuest;
+        return (this.create?.allowed === true) && !this.connector.getCurrentLogin()?.isGuest && this.queryParams?.reurlCreate !== 'false';
     }
 
     openCreateMenu(x: number, y: number) {
@@ -828,6 +828,13 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                 new OptionItem('LOGOUT', 'undo', () => this.logout()),
             );
         }
+        this.applyUserMenuOverrides(this.userMenuOptions);
+    }
+
+    private applyUserMenuOverrides(options: OptionItem[]): void {
+        this.configService.get('userMenuOverrides').subscribe((overrides) =>
+            this.nodeHelper.applyCustomNodeOptions(overrides, null, null, options)
+        );
     }
 
     private getConfigMenuHelpOptions() {

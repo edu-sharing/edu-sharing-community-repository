@@ -1,6 +1,6 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { MatChip } from '@angular/material/chips';
-import { FacetAggregation, FacetValue } from 'edu-sharing-api';
+import { FacetAggregation, FacetValue } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -8,7 +8,7 @@ import { Widget } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 @Component({
-    selector: 'app-mds-editor-widget-search-suggestions',
+    selector: 'es-mds-editor-widget-search-suggestions',
     templateUrl: './mds-editor-widget-search-suggestions.component.html',
     styleUrls: ['./mds-editor-widget-search-suggestions.component.scss'],
 })

@@ -15,7 +15,7 @@ import {
 import {ConfigEntry} from '../../../core-ui-module/node-helper.service';
 
 @Component({
-    selector: 'app-main-menu-dropdown',
+    selector: 'es-main-menu-dropdown',
     templateUrl: './main-menu-dropdown.component.html',
     styleUrls: ['./main-menu-dropdown.component.scss'],
 })

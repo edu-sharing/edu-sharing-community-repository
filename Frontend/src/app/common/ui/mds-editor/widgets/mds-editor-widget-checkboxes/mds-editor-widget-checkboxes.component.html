@@ -1,4 +1,4 @@
-<app-mds-editor-widget-container
+<es-mds-editor-widget-container
   #container
   [widget]="widget"
   [label]="true"
@@ -12,11 +12,11 @@
       [formControlName]="i"
       [indeterminate]="indeterminateValues[i]"
       (indeterminateChange)="onIndeterminateChange($event, i)"
-      appCheckTextOverflow=".mat-checkbox-label"
-      #text="appCheckTextOverflow"
+      esCheckTextOverflow=".mat-checkbox-label"
+      #text="esCheckTextOverflow"
       [matTooltip]="text.hasTextOverflow() ? values.values[i].label : null"
     >
       {{ values.values[i].label }}
     </mat-checkbox>
   </div>
-</app-mds-editor-widget-container>
+</es-mds-editor-widget-container>

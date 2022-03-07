@@ -10,11 +10,8 @@ import { Observable } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
 
 import { Filter } from '../models/filter';
-import { NodeData } from '../models/node-data';
 import { Statistics } from '../models/statistics';
 import { StatisticsGlobal } from '../models/statistics-global';
-import { Tracking } from '../models/tracking';
-import { TrackingNode } from '../models/tracking-node';
 
 @Injectable({
     providedIn: 'root',
@@ -27,7 +24,7 @@ export class StatisticV1Service extends BaseService {
     /**
      * Path part for operation get
      */
-    static readonly GetPath = '/statistic/v1/facettes/{context}';
+    static readonly GetPath = '/statistic/v1/facets/{context}';
 
     /**
      * Get statistics of repository.
@@ -57,8 +54,8 @@ export class StatisticV1Service extends BaseService {
     }): Observable<StrictHttpResponse<Statistics>> {
         const rb = new RequestBuilder(this.rootUrl, StatisticV1Service.GetPath, 'post');
         if (params) {
-            rb.path('context', params.context, { style: 'simple', explode: false });
-            rb.query('properties', params.properties, { style: 'form', explode: true });
+            rb.path('context', params.context, {});
+            rb.query('properties', params.properties, {});
             rb.body(params.body, 'application/json');
         }
 
@@ -125,12 +122,12 @@ export class StatisticV1Service extends BaseService {
      */
     getGlobalStatistics$Response(params?: {
         /**
-         * primary property to build facettes and count+group values
+         * primary property to build facets and count+group values
          */
         group?: string;
 
         /**
-         * additional properties to build facettes and count+sub-group values
+         * additional properties to build facets and count+sub-group values
          */
         subGroup?: Array<string>;
     }): Observable<StrictHttpResponse<StatisticsGlobal>> {
@@ -140,8 +137,8 @@ export class StatisticV1Service extends BaseService {
             'get',
         );
         if (params) {
-            rb.query('group', params.group, { style: 'form', explode: true });
-            rb.query('subGroup', params.subGroup, { style: 'form', explode: true });
+            rb.query('group', params.group, {});
+            rb.query('subGroup', params.subGroup, {});
         }
 
         return this.http
@@ -171,17 +168,156 @@ export class StatisticV1Service extends BaseService {
      */
     getGlobalStatistics(params?: {
         /**
-         * primary property to build facettes and count+group values
+         * primary property to build facets and count+group values
          */
         group?: string;
 
         /**
-         * additional properties to build facettes and count+sub-group values
+         * additional properties to build facets and count+sub-group values
          */
         subGroup?: Array<string>;
     }): Observable<StatisticsGlobal> {
         return this.getGlobalStatistics$Response(params).pipe(
             map((r: StrictHttpResponse<StatisticsGlobal>) => r.body as StatisticsGlobal),
+        );
+    }
+
+    /**
+     * Path part for operation getNodeData
+     */
+    static readonly GetNodeDataPath = '/statistic/v1/statistics/nodes/node/{id}';
+
+    /**
+     * get the range of nodes which had tracked actions since a given timestamp.
+     *
+     * requires admin
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getNodeData()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getNodeData$Response(params: {
+        /**
+         * node id to fetch data for
+         */
+        id: string;
+
+        /**
+         * date range from
+         */
+        dateFrom: number;
+    }): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(this.rootUrl, StatisticV1Service.GetNodeDataPath, 'get');
+        if (params) {
+            rb.path('id', params.id, {});
+            rb.query('dateFrom', params.dateFrom, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<string>;
+                }),
+            );
+    }
+
+    /**
+     * get the range of nodes which had tracked actions since a given timestamp.
+     *
+     * requires admin
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getNodeData$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getNodeData(params: {
+        /**
+         * node id to fetch data for
+         */
+        id: string;
+
+        /**
+         * date range from
+         */
+        dateFrom: number;
+    }): Observable<string> {
+        return this.getNodeData$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
+        );
+    }
+
+    /**
+     * Path part for operation getNodesAlteredInRange
+     */
+    static readonly GetNodesAlteredInRangePath = '/statistic/v1/statistics/nodes/altered';
+
+    /**
+     * get the range of nodes which had tracked actions since a given timestamp.
+     *
+     * requires admin
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getNodesAlteredInRange()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getNodesAlteredInRange$Response(params: {
+        /**
+         * date range from
+         */
+        dateFrom: number;
+    }): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(
+            this.rootUrl,
+            StatisticV1Service.GetNodesAlteredInRangePath,
+            'get',
+        );
+        if (params) {
+            rb.query('dateFrom', params.dateFrom, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<string>;
+                }),
+            );
+    }
+
+    /**
+     * get the range of nodes which had tracked actions since a given timestamp.
+     *
+     * requires admin
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getNodesAlteredInRange$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getNodesAlteredInRange(params: {
+        /**
+         * date range from
+         */
+        dateFrom: number;
+    }): Observable<string> {
+        return this.getNodesAlteredInRange$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
         );
     }
 
@@ -237,19 +373,19 @@ export class StatisticV1Service extends BaseService {
         body?: {
             [key: string]: string;
         };
-    }): Observable<StrictHttpResponse<Array<TrackingNode>>> {
+    }): Observable<StrictHttpResponse<string>> {
         const rb = new RequestBuilder(
             this.rootUrl,
             StatisticV1Service.GetStatisticsNodePath,
             'post',
         );
         if (params) {
-            rb.query('grouping', params.grouping, { style: 'form', explode: true });
-            rb.query('dateFrom', params.dateFrom, { style: 'form', explode: true });
-            rb.query('dateTo', params.dateTo, { style: 'form', explode: true });
-            rb.query('mediacenter', params.mediacenter, { style: 'form', explode: true });
-            rb.query('additionalFields', params.additionalFields, { style: 'form', explode: true });
-            rb.query('groupField', params.groupField, { style: 'form', explode: true });
+            rb.query('grouping', params.grouping, {});
+            rb.query('dateFrom', params.dateFrom, {});
+            rb.query('dateTo', params.dateTo, {});
+            rb.query('mediacenter', params.mediacenter, {});
+            rb.query('additionalFields', params.additionalFields, {});
+            rb.query('groupField', params.groupField, {});
             rb.body(params.body, 'application/json');
         }
 
@@ -263,7 +399,7 @@ export class StatisticV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Array<TrackingNode>>;
+                    return r as StrictHttpResponse<string>;
                 }),
             );
     }
@@ -315,148 +451,9 @@ export class StatisticV1Service extends BaseService {
         body?: {
             [key: string]: string;
         };
-    }): Observable<Array<TrackingNode>> {
+    }): Observable<string> {
         return this.getStatisticsNode$Response(params).pipe(
-            map((r: StrictHttpResponse<Array<TrackingNode>>) => r.body as Array<TrackingNode>),
-        );
-    }
-
-    /**
-     * Path part for operation getNodesAlteredInRange
-     */
-    static readonly GetNodesAlteredInRangePath = '/statistic/v1/statistics/nodes/altered';
-
-    /**
-     * get the range of nodes which had tracked actions since a given timestamp.
-     *
-     * requires admin
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getNodesAlteredInRange()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getNodesAlteredInRange$Response(params: {
-        /**
-         * date range from
-         */
-        dateFrom: number;
-    }): Observable<StrictHttpResponse<Array<string>>> {
-        const rb = new RequestBuilder(
-            this.rootUrl,
-            StatisticV1Service.GetNodesAlteredInRangePath,
-            'get',
-        );
-        if (params) {
-            rb.query('dateFrom', params.dateFrom, { style: 'form', explode: true });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Array<string>>;
-                }),
-            );
-    }
-
-    /**
-     * get the range of nodes which had tracked actions since a given timestamp.
-     *
-     * requires admin
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getNodesAlteredInRange$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getNodesAlteredInRange(params: {
-        /**
-         * date range from
-         */
-        dateFrom: number;
-    }): Observable<Array<string>> {
-        return this.getNodesAlteredInRange$Response(params).pipe(
-            map((r: StrictHttpResponse<Array<string>>) => r.body as Array<string>),
-        );
-    }
-
-    /**
-     * Path part for operation getNodeData
-     */
-    static readonly GetNodeDataPath = '/statistic/v1/statistics/nodes/node/{id}';
-
-    /**
-     * get the range of nodes which had tracked actions since a given timestamp.
-     *
-     * requires admin
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getNodeData()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getNodeData$Response(params: {
-        /**
-         * node id to fetch data for
-         */
-        id: string;
-
-        /**
-         * date range from
-         */
-        dateFrom: number;
-    }): Observable<StrictHttpResponse<Array<NodeData>>> {
-        const rb = new RequestBuilder(this.rootUrl, StatisticV1Service.GetNodeDataPath, 'get');
-        if (params) {
-            rb.path('id', params.id, { style: 'simple', explode: false });
-            rb.query('dateFrom', params.dateFrom, { style: 'form', explode: true });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Array<NodeData>>;
-                }),
-            );
-    }
-
-    /**
-     * get the range of nodes which had tracked actions since a given timestamp.
-     *
-     * requires admin
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getNodeData$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getNodeData(params: {
-        /**
-         * node id to fetch data for
-         */
-        id: string;
-
-        /**
-         * date range from
-         */
-        dateFrom: number;
-    }): Observable<Array<NodeData>> {
-        return this.getNodeData$Response(params).pipe(
-            map((r: StrictHttpResponse<Array<NodeData>>) => r.body as Array<NodeData>),
+            map((r: StrictHttpResponse<string>) => r.body as string),
         );
     }
 
@@ -512,19 +509,19 @@ export class StatisticV1Service extends BaseService {
         body?: {
             [key: string]: string;
         };
-    }): Observable<StrictHttpResponse<Array<Tracking>>> {
+    }): Observable<StrictHttpResponse<string>> {
         const rb = new RequestBuilder(
             this.rootUrl,
             StatisticV1Service.GetStatisticsUserPath,
             'post',
         );
         if (params) {
-            rb.query('grouping', params.grouping, { style: 'form', explode: true });
-            rb.query('dateFrom', params.dateFrom, { style: 'form', explode: true });
-            rb.query('dateTo', params.dateTo, { style: 'form', explode: true });
-            rb.query('mediacenter', params.mediacenter, { style: 'form', explode: true });
-            rb.query('additionalFields', params.additionalFields, { style: 'form', explode: true });
-            rb.query('groupField', params.groupField, { style: 'form', explode: true });
+            rb.query('grouping', params.grouping, {});
+            rb.query('dateFrom', params.dateFrom, {});
+            rb.query('dateTo', params.dateTo, {});
+            rb.query('mediacenter', params.mediacenter, {});
+            rb.query('additionalFields', params.additionalFields, {});
+            rb.query('groupField', params.groupField, {});
             rb.body(params.body, 'application/json');
         }
 
@@ -538,7 +535,7 @@ export class StatisticV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Array<Tracking>>;
+                    return r as StrictHttpResponse<string>;
                 }),
             );
     }
@@ -590,9 +587,9 @@ export class StatisticV1Service extends BaseService {
         body?: {
             [key: string]: string;
         };
-    }): Observable<Array<Tracking>> {
+    }): Observable<string> {
         return this.getStatisticsUser$Response(params).pipe(
-            map((r: StrictHttpResponse<Array<Tracking>>) => r.body as Array<Tracking>),
+            map((r: StrictHttpResponse<string>) => r.body as string),
         );
     }
 }

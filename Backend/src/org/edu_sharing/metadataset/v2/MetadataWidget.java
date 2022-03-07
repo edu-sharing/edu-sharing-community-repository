@@ -1,12 +1,12 @@
 package org.edu_sharing.metadataset.v2;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MetadataWidget extends MetadataTranslatable{
+
+	private Map<String, MetadataKey> valuesAsMapCache;
 
 	public enum Required{
 		mandatory,
@@ -72,6 +72,15 @@ public class MetadataWidget extends MetadataTranslatable{
 
 	private MetadataCondition condition;
 	private String link;
+	private String suggestionReceiver;
+
+	public void setSuggestionReceiver(String suggestionReceiver) {
+		this.suggestionReceiver = suggestionReceiver;
+	}
+
+	public String getSuggestionReceiver() {
+		return suggestionReceiver;
+	}
 
 	public void setLink(String link) {
 		this.link = link;
@@ -314,12 +323,28 @@ public class MetadataWidget extends MetadataTranslatable{
 	}
 	public Map<String, MetadataKey> getValuesAsMap() {
 		Map<String,MetadataKey> map=new HashMap<>();
-		if(values==null)
+		if(values==null) {
 			return map;
+		}
+		if(valuesAsMapCache != null) {
+			return valuesAsMapCache;
+		}
 		for(MetadataKey value : values){
 			map.put(value.getKey(), value);
+			if(value.getAlternativeKeys() != null) {
+				value.getAlternativeKeys().forEach(
+						(key) -> map.put(key, value)
+				);
+			}
+		}
+		valuesAsMapCache = map;
+		return map;
+	}
+	public Map<String, Collection<MetadataKey.MetadataKeyRelated>> getValuespaceMappingByRelation(MetadataKey.MetadataKeyRelated.Relation relation) {
+		Map<String, Collection<MetadataKey.MetadataKeyRelated>> map=new HashMap<>();
+		for(MetadataKey value : values){
+			map.put(value.getKey(), value.getRelated().stream().filter(r -> r.getRelation().equals(relation)).collect(Collectors.toList()));
 		}
 		return map;
 	}
-
 }

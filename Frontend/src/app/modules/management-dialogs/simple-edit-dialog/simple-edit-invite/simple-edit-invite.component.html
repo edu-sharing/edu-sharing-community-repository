@@ -1,21 +1,21 @@
-<info-message message="SIMPLE_EDIT.INVITE.ERROR_TOOLPERMISSION_MISSING" *ngIf="!tpInvite">
-</info-message>
-<info-message
+<es-info-message message="SIMPLE_EDIT.INVITE.ERROR_TOOLPERMISSION_MISSING" *ngIf="!tpInvite">
+</es-info-message>
+<es-info-message
         message="SIMPLE_EDIT.INVITE.ERROR_PERMISSION_MISSING"
         *ngIf="missingNodePermissions && tpInvite"
 >
-</info-message>
-<info-message message="SIMPLE_EDIT.INVITE.ERROR_MULTIPLE_PARENTS" *ngIf="multipleParents">
+</es-info-message>
+<es-info-message message="SIMPLE_EDIT.INVITE.ERROR_MULTIPLE_PARENTS" *ngIf="multipleParents">
   <div>{{ 'SIMPLE_EDIT.INVITE.ERROR_HELP' | translate }}</div>
-</info-message>
-<info-message message="SIMPLE_EDIT.INVITE.ERROR_INHERIT" *ngIf="inherited && parentAuthorities.length > 0">
+</es-info-message>
+<es-info-message message="SIMPLE_EDIT.INVITE.ERROR_INHERIT" *ngIf="inherited && parentAuthorities.length > 0">
   <div class="parent-authorities">
     <span *ngFor="let authority of parentAuthorities" class="authorities">{{
       authority | authorityName
       }}</span>
   </div>
   <div>{{ 'SIMPLE_EDIT.INVITE.ERROR_HELP' | translate }}</div>
-</info-message>
+</es-info-message>
 
 <div *ngIf="!hasInvalidState()" class="toggles">
   <div class="info field-group">{{ 'SIMPLE_EDIT.INVITE.INFO' | translate }}</div>
@@ -73,12 +73,12 @@
       'SIMPLE_EDIT.INVITE.RECENT_AUTHORITIES' | translate
       }}</label>
     <div class="tiles" aria-labelledby="last-invitations-label">
-      <app-user-tile
+      <es-user-tile
               *ngFor="let authority of recentAuthorities"
               [user]="authority"
               (click)="toggleInvitation(authority)"
               [active]="isInvited(authority)"
-      ></app-user-tile>
+      ></es-user-tile>
     </div>
   </div>
 </div>

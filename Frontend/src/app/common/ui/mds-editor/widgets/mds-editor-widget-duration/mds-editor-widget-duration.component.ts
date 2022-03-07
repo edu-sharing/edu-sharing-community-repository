@@ -3,7 +3,7 @@ import { Options } from '@angular-slider/ngx-slider';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 @Component({
-    selector: 'app-mds-editor-widget-duration',
+    selector: 'es-mds-editor-widget-duration',
     templateUrl: './mds-editor-widget-duration.component.html',
     styleUrls: ['./mds-editor-widget-duration.component.scss'],
 })

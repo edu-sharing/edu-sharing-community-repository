@@ -9,7 +9,7 @@ import { UIAnimation } from '../../../../core-module/ui/ui-animation';
 import { Toast } from '../../../../core-ui-module/toast';
 
 @Component({
-    selector: 'app-simple-edit-metadata',
+    selector: 'es-simple-edit-metadata',
     templateUrl: 'simple-edit-metadata.component.html',
     styleUrls: ['simple-edit-metadata.component.scss'],
     animations: [

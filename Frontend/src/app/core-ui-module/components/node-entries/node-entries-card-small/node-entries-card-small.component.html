@@ -3,21 +3,26 @@
   [class.grid-card-collection]="nodeHelper.isNodeCollection(node)"
   [style.background-color]="nodeHelper.isNodeCollection(node) ? node.collection.color : null"
   (contextmenu)="openContextmenu($event)"
+  (keydown.ContextMenu)="openContextmenu($event)"
 >
-  <app-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
+  <es-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
                 mode="wrapper"
                 [node]="node"
   >
     <ng-container *ngTemplateOutlet="image"></ng-container>
     <ng-container *ngTemplateOutlet="meta"></ng-container>
-  </app-node-url>
+  </es-node-url>
   <ng-container *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink">
     <ng-container *ngTemplateOutlet="image"></ng-container>
     <ng-container *ngTemplateOutlet="meta"></ng-container>
   </ng-container>
 </div>
 <ng-template #image>
-  <div class="card-image-area">
+  <div class="card-image-area"
+       (esDistinctClick)="entriesService.clickItem.emit({
+          element: node,
+          source: ClickSource.Preview
+       })">
     <div class="card-image-backdrop">
       <img
         *ngIf="!(nodeHelper.isNodeCollection(node) && node.preview.isIcon)"
@@ -33,46 +38,51 @@
     <div *ngIf="nodeHelper.isNodeCollection(node) && node.preview.isIcon"
          class="card-collection-image"
     >
-      <i icon="layers"></i>
+      <i esIcon="layers"></i>
     </div>
   </div>
 </ng-template>
 <ng-template #meta>
-  <div class="card-meta">
+  <div class="card-meta"
+       (esDistinctClick)="entriesService.clickItem.emit({
+          element: node,
+          source: ClickSource.Metadata
+       })">
     <div
       *ngFor="let displayPart of entriesService.columns; let first = first;"
       class="card-meta-row"
     >
       <ng-container *ngIf="first">
-        <app-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
+        <es-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
                       [node]="node"
                       #link
         >
-          <app-list-base
+          <es-list-base
             [item]="displayPart"
             [node]="node"
-            [showFieldTooltip]="false"
+            [provideLabel]="false"
           >
-          </app-list-base>
-        </app-node-url>
+          </es-list-base>
+        </es-node-url>
         <div *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink"
         >
-          <app-list-base
+          <es-list-base
             [item]="displayPart"
             [node]="node"
-            [showFieldTooltip]="false"
+            [provideLabel]="false"
           >
-          </app-list-base>
+          </es-list-base>
         </div>
       </ng-container>
       <ng-container *ngIf="!first">
-        <app-list-base
+        <es-list-base
           [item]="displayPart"
           [node]="node"
-          [showFieldTooltip]="false"
+          [provideLabel]="false"
         >
-        </app-list-base>
+        </es-list-base>
       </ng-container>
     </div>
   </div>
+  <ng-container *ngTemplateOutlet="templatesService.actionArea; context: {element: node}"></ng-container>
 </ng-template>

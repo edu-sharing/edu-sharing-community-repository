@@ -1,12 +1,15 @@
+@import '../../../../core-ui-module/styles/variables';
+
 $expandToggleWidthThreshold: 400px;
 
-app-input-fill-progress {
+es-input-fill-progress {
     display: flex;
     min-width: 200px;
     height: 36px;
 }
 
-:host ::ng-deep app-mds-editor-core {
+:host ::ng-deep es-mds-editor-core {
+    --mds-content-padding: 25px;
     .extended-toggle-container {
         position: sticky;
         top: 0;
@@ -20,8 +23,9 @@ app-input-fill-progress {
             background-color: unset;
         }
         .extended-toggle {
-            padding-right: 10px;
-            height: 45px;
+            padding: 0 10px 0 25px;
+            height: 39px;
+            background: linear-gradient(to right,rgba(red($workspaceMetadataBackground),green($workspaceMetadataBackground),blue($workspaceMetadataBackground),0.0001) 0,$workspaceMetadataBackground 15px);
         }
     }
     .heading {
@@ -34,8 +38,5 @@ app-input-fill-progress {
         font-weight: normal;
         // padding: 12px 17px;
         // background-color: #f7f7f7;
-    }
-    .content {
-        margin: 25px;
     }
 }

@@ -31,6 +31,7 @@ import java.util.HashMap;
 
 import javax.servlet.http.HttpSession;
 
+import net.sf.acegisecurity.Authentication;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.AuthenticationException;
@@ -44,6 +45,8 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.service.NotAnAdminException;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
@@ -127,6 +130,16 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
 		
 		boolean isAdmin = mcAlfrescoAPIClient.isAdmin(authInfo.get(CCConstants.AUTH_USERNAME));
 		authInfo.put(CCConstants.AUTH_USER_ISADMIN, new Boolean(isAdmin).toString());
+	}
+
+	public String setUser(String authorityName){
+		if(!AuthorityServiceHelper.isAdmin()) {
+			throw new NotAnAdminException();
+		}
+		if(authenticationComponent.setCurrentUser(authorityName) != null) {
+			return authenticationService.getCurrentTicket();
+		}
+		throw new RuntimeException("Authentication failed for " + authorityName);
 	}
 	
 	@Override

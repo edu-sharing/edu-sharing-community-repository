@@ -1,17 +1,24 @@
-import {DataSource} from '@angular/cdk/collections';
-import {BehaviorSubject, Observable, ReplaySubject} from 'rxjs';
-import {Node, Pagination} from '../../../core-module/rest/data-object';
+import { DataSource } from '@angular/cdk/collections';
+import { BehaviorSubject, Observable } from 'rxjs';
+import * as rxjs from 'rxjs';
+import { Node, Pagination } from '../../../core-module/rest/data-object';
+import { distinctUntilChanged, map, shareReplay } from 'rxjs/operators';
 
 export class NodeDataSource<T extends Node> extends DataSource<T> {
     private dataStream = new BehaviorSubject<T[]>([]);
     private pagination: Pagination;
     public isLoading: boolean;
-    private displayCount: number|null = null;
+    private displayCountSubject = new BehaviorSubject<number | null>(null);
+    private canLoadMore = true;
+    private areAllDisplayed$ = rxjs.combineLatest([this.dataStream, this.displayCountSubject]).pipe(
+        map(([data, displayCount]) => this.getAreAllDisplayed(displayCount, data)),
+        distinctUntilChanged(),
+        shareReplay(1),
+    );
 
     constructor(initialData: T[] = []) {
         super();
         this.setData(initialData);
-
     }
 
     connect(): Observable<T[]> {
@@ -26,9 +33,8 @@ export class NodeDataSource<T extends Node> extends DataSource<T> {
     }
 
     async appendData(appendData: T[], location: 'before' | 'after' = 'after') {
-        console.log('append', appendData);
         let data = this.getData();
-        if(location === 'after') {
+        if (location === 'after') {
             data = data.concat(appendData);
         } else {
             data = appendData.concat(data);
@@ -44,11 +50,11 @@ export class NodeDataSource<T extends Node> extends DataSource<T> {
         this.setData([]);
     }
 
-    async hasMore() {
-        if(!this.pagination) {
+    hasMore() {
+        if (!this.pagination) {
             return undefined;
         }
-        return this.pagination.total < (await this.dataStream.asObservable().toPromise()).length;
+        return this.pagination.total > this.getData()?.length;
     }
 
     getData() {
@@ -60,7 +66,7 @@ export class NodeDataSource<T extends Node> extends DataSource<T> {
     }
 
     getTotal() {
-        return this.pagination.total ?? this.getData()?.length ?? 0;
+        return this.pagination?.total ?? this.getData()?.length ?? 0;
     }
 
     /**
@@ -68,8 +74,12 @@ export class NodeDataSource<T extends Node> extends DataSource<T> {
      * false otherwise
      * useful to trigger visibility of "show/hide more" elements
      */
-    areAllDisplayed() {
-        return this.displayCount === null || this.displayCount === this.getData()?.length;
+    areAllDisplayed(): Observable<boolean> {
+        return this.areAllDisplayed$;
+    }
+
+    private getAreAllDisplayed(displayCount: number | null, data?: T[]): boolean {
+        return displayCount === null || displayCount === data?.length;
     }
 
     /**
@@ -77,17 +87,28 @@ export class NodeDataSource<T extends Node> extends DataSource<T> {
      * will return null if no visiblity constrain limit was set to the underlying rendering component
      */
     getDisplayCount() {
-        return this.displayCount;
+        return this.displayCountSubject.value;
     }
-    setDisplayCount(displayCount: number|null = null) {
-        if(displayCount === null) {
-            this.displayCount = null;
+    setDisplayCount(displayCount: number | null = null) {
+        if (displayCount === null) {
+            this.displayCountSubject.next(null);
         } else {
-            this.displayCount = Math.min(this.getData()?.length, displayCount);
+            this.displayCountSubject.next(Math.min(this.getData()?.length, displayCount));
         }
     }
 
     isFullyLoaded() {
         return this.getTotal() <= this.getData()?.length;
+    }
+
+    /**
+     * set info if this datasource is able to fetch more data from the list
+     * @param _canLoadMore
+     */
+    setCanLoadMore(canLoadMore: boolean) {
+        this.canLoadMore = canLoadMore;
+    }
+    getCanLoadMore() {
+        return this.canLoadMore;
     }
 }

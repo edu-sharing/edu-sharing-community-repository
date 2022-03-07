@@ -8,11 +8,13 @@ import {
     RawValuesDict,
     SearchConfig,
     SearchService,
-} from 'edu-sharing-api';
+} from 'ngx-edu-sharing-api';
 import { BehaviorSubject, combineLatest, EMPTY, Observable, of, ReplaySubject, timer } from 'rxjs';
 import { debounce, filter, map, switchMap, tap } from 'rxjs/operators';
 
 const NUMBER_OF_FACET_SUGGESTIONS = 5;
+
+type MdsInfo = Pick<SearchConfig, 'repository' | 'metadataSet'>;
 
 @Injectable({
     providedIn: 'root',
@@ -21,27 +23,24 @@ export class SearchFieldService {
     /** Properties for which to fetch suggestions. */
     readonly categoriesSubject = new BehaviorSubject<string[]>(null);
     /** Active filters for use by search field. */
-    readonly filters$: Observable<LabeledValuesDict>;
+    readonly filters$: Observable<LabeledValuesDict | null>;
     /** Active suggestions for use by search field. */
     readonly suggestions$: Observable<FacetsDict>;
     /** Emits when the user added or removed filters through the search field. */
     readonly filterValuesChange = new EventEmitter<RawValuesDict>();
 
-    private readonly searchConfigSubject = new BehaviorSubject<Partial<SearchConfig>>({});
+    private readonly mdsInfoSubject = new BehaviorSubject<MdsInfo>(null);
     private readonly enableFiltersAndSuggestionsSubject = new BehaviorSubject(false);
     private readonly filtersSubject = new BehaviorSubject<LabeledValuesDict>({});
     private readonly suggestionsInputStringSubject = new ReplaySubject<string>(1);
     private readonly suggestionsSubject = new BehaviorSubject<FacetsDict>(null);
 
-    readonly mdsInfo$ = this.searchConfigSubject.pipe(
-        filter((config): config is SearchConfig => !!config.repository && !!config.metadataSet),
-    );
+    readonly mdsInfo$ = this.mdsInfoSubject.pipe(filter((config) => config !== null));
     readonly rawFilters$ = this.filtersSubject.pipe(
         map((filters) => this.mdsLabel.getRawValuesDict(filters)),
     );
 
     constructor(private search: SearchService, private mdsLabel: MdsLabelService) {
-        this.searchConfigSubject.subscribe((searchConfig) => this.search.configure(searchConfig));
         this.filters$ = this.enableFiltersAndSuggestionsSubject.pipe(
             switchMap((enabled) => (enabled ? this.filtersSubject : of(null))),
         );
@@ -110,31 +109,15 @@ export class SearchFieldService {
         } else {
             console.warn('Called setFilterValues when mds was not configured.');
         }
-        // Propagate to search service, so the filters will be taken into account for facet
-        // suggestions.
-        this.search.setParams({ filters: values });
     }
 
     /**
-     * Sets the repository to be used for suggestions and value lookups.
+     * Sets the repository and metadata set to be used for suggestions and value lookups.
      *
      * To be called by the component or service controlling the search logic.
      */
-    setRepository(repository: string): void {
-        if (this.searchConfigSubject.value.repository !== repository) {
-            this.searchConfigSubject.next({ ...this.searchConfigSubject.value, repository });
-        }
-    }
-
-    /**
-     * Sets the metadata set to be used for suggestions and value lookups.
-     *
-     * To be called by the component or service controlling the search logic.
-     */
-    setMetadataSet(metadataSet: string): void {
-        if (this.searchConfigSubject.value.metadataSet !== metadataSet) {
-            this.searchConfigSubject.next({ ...this.searchConfigSubject.value, metadataSet });
-        }
+    setMdsInfo(mdsInfo: MdsInfo): void {
+        this.mdsInfoSubject.next(mdsInfo);
     }
 
     private registerSuggestionsSubject(): void {
@@ -164,7 +147,7 @@ export class SearchFieldService {
     }
 
     private getCurrentMdsIdentifier(): MdsIdentifier | null {
-        const { repository, metadataSet } = this.searchConfigSubject.value;
+        const { repository, metadataSet } = this.mdsInfoSubject.value;
         if (repository && metadataSet) {
             return { repository, metadataSet };
         } else {

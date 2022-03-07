@@ -2,7 +2,6 @@ package org.edu_sharing.alfresco.policy;
 
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,7 +36,7 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
+import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
@@ -79,6 +78,9 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 
 	/* Some safe properties they're not necessary in the mds, but the client is allowed to define */
 	public static final String[] SAFE_PROPS = new String[]{
+			CCConstants.CM_NAME,
+			CCConstants.CM_PROP_TITLE,
+			CCConstants.CM_PROP_DESCRIPTION,
 			CCConstants.LOM_PROP_GENERAL_TITLE,
 			CCConstants.LOM_PROP_TECHNICAL_FORMAT,
 			CCConstants.CCM_PROP_IO_WWWURL,
@@ -514,19 +516,26 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 
 		// for async prozessed properties like exif: remove from cache
 		new RepositoryCache().remove(nodeRef.getId());
-		
-		// URL link update
-		String beforeURL = null;
-		String afterURL = null;
-		for (QName qName : before.keySet()) if ("wwwurl".equals(qName.getLocalName())) beforeURL = ""+before.get(qName);
-		for (QName qName : after.keySet()) if ("wwwurl".equals(qName.getLocalName())) afterURL = ""+after.get(qName);
-		if ((afterURL!=null) && (!afterURL.equals(beforeURL))) {
-			
-			logger.info("---> UPDATE/CREATE THUMBNAIL FOR LINK("+afterURL+") ON NODE("+nodeRef.getId()+")");
-			
-			String linktype = (String)after.get(QName.createQName(CCConstants.CCM_PROP_LINKTYPE));
-			if(linktype != null && linktype.equals(CCConstants.CCM_VALUE_LINK_LINKTYPE_USER_GENERATED)) {
-				generateWebsitePreview(nodeRef, afterURL);
+
+		if(
+				!nodeService.hasAspect(nodeService.getPrimaryParent(nodeRef).getParentRef(),
+						QName.createQName(CCConstants.CCM_ASPECT_COLLECTION))
+		) {
+			// URL link update
+			String beforeURL = null;
+			String afterURL = null;
+			for (QName qName : before.keySet())
+				if ("wwwurl".equals(qName.getLocalName())) beforeURL = "" + before.get(qName);
+			for (QName qName : after.keySet())
+				if ("wwwurl".equals(qName.getLocalName())) afterURL = "" + after.get(qName);
+			if ((afterURL != null) && (!afterURL.equals(beforeURL))) {
+
+				logger.info("---> UPDATE/CREATE THUMBNAIL FOR LINK(" + afterURL + ") ON NODE(" + nodeRef.getId() + ")");
+
+				String linktype = (String) after.get(QName.createQName(CCConstants.CCM_PROP_LINKTYPE));
+				if (linktype != null && linktype.equals(CCConstants.CCM_VALUE_LINK_LINKTYPE_USER_GENERATED)) {
+					generateWebsitePreview(nodeRef, afterURL);
+				}
 			}
 		}
 
@@ -541,7 +550,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			}
 			Set<String> props = new HashSet<>(Arrays.asList(SAFE_PROPS));
 			props.addAll(Arrays.asList(LICENSE_PROPS));
-			props.addAll(MetadataReaderV2.getWidgetsByNode(ref,"de_DE").stream().
+			props.addAll(MetadataReader.getWidgetsByNode(ref,"de_DE").stream().
 					map(MetadataWidget::getId).map(CCConstants::getValidGlobalName).
 					collect(Collectors.toList()));
 			for (QName prop : after.keySet()) {
@@ -804,7 +813,6 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 
 	private static byte[] getPreviewFromURLSplash(String httpURL) {
 		Config splash = LightbendConfigLoader.get().getConfig("repository.communication.splash");
-
 		if(splash != null && splash.hasPath("url")) {
 			try {
 				final StringBuilder url = new StringBuilder(splash.getString("url") + "?url=" + java.net.URLEncoder.encode(httpURL, "ISO-8859-1"));
@@ -813,6 +821,8 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 				});
 				HttpClient client = new HttpClient();
 				GetMethod method = new GetMethod(url.toString());
+				int timeout = (int) ((splash.getDouble("wait") + splash.getDouble("timeout")) * 1000);
+				client.getHttpConnectionManager().getParams().setConnectionTimeout(timeout);
 				int statusCode = client.executeMethod(method);
 				if (statusCode == HttpStatus.SC_OK) {
 					return method.getResponseBody();

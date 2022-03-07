@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { MainMenuEntriesService } from '../../services/main-menu-entries.service';
 
 @Component({
-    selector: 'app-main-menu-buttons',
+    selector: 'es-main-menu-buttons',
     templateUrl: './main-menu-buttons.component.html',
     styleUrls: ['./main-menu-buttons.component.scss'],
 })

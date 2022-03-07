@@ -3,7 +3,7 @@ import {TranslateService} from '@ngx-translate/core';
 import {ArchiveRestore, DialogButton, Node} from '../../../../core-module/core.module';
 
 @Component({
-  selector: 'recycle-restore-info',
+  selector: 'es-recycle-restore-info',
   templateUrl: 'restore.component.html',
   styleUrls : ['restore.component.css']
 })

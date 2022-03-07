@@ -67,17 +67,16 @@ import {DomSanitizer} from '@angular/platform-browser';
 import {CollectionChooserComponent} from '../collection-chooser/collection-chooser.component';
 import {NodeTitlePipe} from '../../pipes/node-title.pipe';
 import {NodeUrlComponent} from '../node-url/node-url.component';
+import {SelectionModel} from '@angular/cdk/collections';
 import {
     ListEventInterface,
     ListOptions,
-    ListOptionsConfig,
-    NodeEntriesDisplayType
-} from '../node-entries-wrapper/node-entries-wrapper.component';
-import {SelectionModel} from '@angular/cdk/collections';
+    ListOptionsConfig, NodeEntriesDisplayType
+} from '../node-entries-wrapper/entries-model';
 
 
 @Component({
-    selector: 'listTable',
+    selector: 'es-listTable',
     templateUrl: 'list-table.component.html',
     styleUrls: ['list-table.component.scss'],
     providers: [
@@ -578,14 +577,12 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
             return;
         }
         this.locator.setRoute(this.route).subscribe(() => {
-            this.locator.locateApi().subscribe(() => {
-                this.network
-                    .getRepositories()
-                    .subscribe((data: NetworkRepositories) => {
-                        this.repositories = data.repositories;
-                        this.changeDetectorRef.detectChanges();
-                    });
-            });
+            this.network
+                .getRepositories()
+                .subscribe((data: NetworkRepositories) => {
+                    this.repositories = data.repositories;
+                    this.changeDetectorRef.detectChanges();
+                });
         });
     }
 

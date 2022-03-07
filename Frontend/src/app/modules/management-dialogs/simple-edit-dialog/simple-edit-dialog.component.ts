@@ -14,7 +14,7 @@ import {CardType} from '../../../core-ui-module/components/card/card.component';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 
 @Component({
-  selector: 'app-simple-edit-dialog',
+  selector: 'es-simple-edit-dialog',
   templateUrl: 'simple-edit-dialog.component.html',
   styleUrls: ['simple-edit-dialog.component.scss'],
   animations: [

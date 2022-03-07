@@ -9,7 +9,7 @@ import {
     TemplateRef,
     ViewChild,
 } from '@angular/core';
-import { FacetsDict } from 'edu-sharing-api';
+import { FacetsDict } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -25,7 +25,7 @@ interface InitInfo {
 }
 
 @Component({
-    selector: 'app-search-field-facets',
+    selector: 'es-search-field-facets',
     templateUrl: './search-field-facets.component.html',
     styleUrls: ['./search-field-facets.component.scss'],
     providers: [MdsEditorInstanceService],
@@ -123,5 +123,14 @@ export class SearchFieldFacetsComponent implements OnInit, OnDestroy {
             // Consider resetting the mds instance service here.
             return;
         }
+    }
+
+    isEmpty() {
+        this.mdsEditorInstance.suggestionsSubject.value;
+        if(!this.mdsEditorInstance.suggestionsSubject.value) {
+            return true;
+        }
+        return Object.keys(this.mdsEditorInstance.suggestionsSubject.value)
+            .filter(key => this.mdsEditorInstance.suggestionsSubject.value[key].values.length).length === 0;
     }
 }

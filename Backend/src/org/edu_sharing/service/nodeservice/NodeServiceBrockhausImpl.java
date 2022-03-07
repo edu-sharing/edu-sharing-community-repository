@@ -18,7 +18,6 @@ import java.util.HashMap;
 
 public class NodeServiceBrockhausImpl extends NodeServiceAdapterCached{
 
-	private static LRUMap propertyCache=new LRUMap(1000);
 	private String repositoryId;
 	private Logger logger= Logger.getLogger(NodeServiceBrockhausImpl.class);
 	private String apiKey;

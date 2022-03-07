@@ -7,12 +7,13 @@
     >{{ 'MDS.SHOW_EXTENDED' | translate }}</mat-slide-toggle
   >
 </div>
-<app-mds-editor-view
+<es-mds-editor-view
+  #view
   *ngFor="let view of views"
   class="mds-editor-view-{{ view.id }}"
   [view]="view"
   [core]="this"
-></app-mds-editor-view>
+></es-mds-editor-view>
 <button
   *ngIf="editorMode === 'search'"
   mat-button
@@ -22,8 +23,8 @@
 >
   {{ 'CLEAR_FILTERS' | translate }}
 </button>
-<app-mds-editor-view
+<es-mds-editor-view
   *ngFor="let view of suggestionsViews"
   [view]="view"
   [core]="this"
-></app-mds-editor-view>
+></es-mds-editor-view>

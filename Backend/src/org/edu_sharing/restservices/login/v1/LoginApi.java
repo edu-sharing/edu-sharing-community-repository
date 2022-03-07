@@ -1,12 +1,13 @@
 package org.edu_sharing.restservices.login.v1;
 
-import java.util.*;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
@@ -14,46 +15,46 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions.SessionInfo;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.RestConstants;
+import org.edu_sharing.restservices.login.v1.model.AuthenticationToken;
 import org.edu_sharing.restservices.login.v1.model.Login;
 import org.edu_sharing.restservices.login.v1.model.LoginCredentials;
 import org.edu_sharing.restservices.login.v1.model.ScopeAccess;
-import org.edu_sharing.restservices.login.v1.model.AuthenticationToken;
-import org.edu_sharing.restservices.node.v1.NodeApi;
 import org.edu_sharing.restservices.shared.ErrorResponse;
-import org.edu_sharing.restservices.shared.UserProfile;
 import org.edu_sharing.restservices.shared.UserProfileAppAuth;
 import org.edu_sharing.service.authentication.*;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import org.springframework.context.ApplicationContext;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Path("/authentication/v1")
-@Api(tags = {"AUTHENTICATION v1"})
+@Tag(name="AUTHENTICATION v1")
 @ApiService(value="AUTHENTICATION", major=1, minor=0)
+@Consumes({ "application/json" })
+@Produces({"application/json"})
 public class LoginApi  {
 
 	Logger logger = Logger.getLogger(LoginApi.class);
 
 	@GET       
 	@Path("/validateSession")
-    @ApiOperation(
-    	value = "Validates the Basic Auth Credentials and check if the session is a logged in user", 
-    	notes = "Use the Basic auth header field to transfer the credentials")
+    @Operation(summary = "Validates the Basic Auth Credentials and check if the session is a logged in user", description = "Use the Basic auth header field to transfer the credentials")
     
     @ApiResponses(
     	value = { 
-    		@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Login.class),        
+    		@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Login.class))),        
     	})
 
     public Response login(@Context HttpServletRequest req) {
@@ -93,16 +94,14 @@ public class LoginApi  {
     
     @POST      
    	@Path("/loginToScope")
-       @ApiOperation(
-       	value = "Validates the Basic Auth Credentials and check if the session is a logged in user", 
-       	notes = "Use the Basic auth header field to transfer the credentials")
+       @Operation(summary = "Validates the Basic Auth Credentials and check if the session is a logged in user", description = "Use the Basic auth header field to transfer the credentials")
        
        @ApiResponses(
        	value = { 
-       		@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Login.class),        
+       		@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Login.class))),        
        	})
 
-       public Response loginToScope(@ApiParam(value = "credentials, example: test,test" , required=true ) LoginCredentials credentials,
+       public Response loginToScope(@Parameter(description = "credentials, example: test,test" , required=true ) LoginCredentials credentials,
     		   @Context HttpServletRequest req) {
        		AuthenticationToolAPI authTool = new AuthenticationToolAPI();
        		ScopeAuthenticationService service = ScopeAuthenticationServiceFactory.getScopeAuthenticationService();
@@ -159,18 +158,16 @@ public class LoginApi  {
     
     @GET       
    	@Path("/hasAccessToScope")
-       @ApiOperation(
-       	value = "Returns true if the current user has access to the given scope", 
-       	notes = "")
+       @Operation(summary = "Returns true if the current user has access to the given scope", description = "")
        
        @ApiResponses(
        	value = { 
-           		@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
-           		@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = Void.class),        
+           		@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
+           		@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = Void.class))),        
        	})
 
        public Response hasAccessToScope(
-    		   @ApiParam(value = "scope" , required=true ) @QueryParam("scope") String scope,
+    		   @Parameter(description = "scope" , required=true ) @QueryParam("scope") String scope,
     		   @Context HttpServletRequest req) {
     	try{
        		AuthenticationToolAPI authTool = new AuthenticationToolAPI();
@@ -183,14 +180,12 @@ public class LoginApi  {
        }
     @GET       
    	@Path("/destroySession")
-       @ApiOperation(
-       	value = "Destroys the current session and logout the user", 
-       	notes = "")
+       @Operation(summary = "Destroys the current session and logout the user", description = "")
        
        @ApiResponses(
        	value = { 
-           		@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
-           		@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = Void.class),        
+           		@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
+           		@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = Void.class))),        
        	})
 
        public Response logout(@Context HttpServletRequest req) {
@@ -206,7 +201,7 @@ public class LoginApi  {
        }
        
     @OPTIONS        
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
     public Response options() {
     	
     	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
@@ -217,20 +212,18 @@ public class LoginApi  {
 
 	@POST
 	@Path("/appauth/{userId}")
-	@ApiOperation(
-			value = "authenticate user of an registered application.",
-			notes = "headers must be set: X-Edu-App-Id, X-Edu-App-Sig, X-Edu-App-Signed, X-Edu-App-Ts")
+	@Operation(summary = "authenticate user of an registered application.", description = "headers must be set: X-Edu-App-Id, X-Edu-App-Sig, X-Edu-App-Signed, X-Edu-App-Ts")
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = AuthenticationToken.class),
-					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = AuthenticationToken.class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
-	public Response authenticate(@ApiParam(value = "User Id", required=true ) @PathParam("userId") String userId,
-								 @ApiParam(value = "User Profile", required=false) UserProfileAppAuth userProfile,
+	public Response authenticate(@Parameter(description = "User Id", required=true ) @PathParam("userId") String userId,
+								 @Parameter(description = "User Profile", required=false) UserProfileAppAuth userProfile,
 								 @Context HttpServletRequest req){
 
 		try {
@@ -254,7 +247,7 @@ public class LoginApi  {
 			 * @TODO check if host validation still needed
 			 * @org.edu_sharing.service.authentication.AuthMethodTrustedApplication.authenticate
 			 */
-			ssoDataMap.put(SSOAuthorityMapper.PARAM_APP_IP,verifiedApp.getHost());
+			ssoDataMap.put(SSOAuthorityMapper.PARAM_APP_IP,req.getRemoteAddr());
 
 			if(userProfile != null){
 				String firstNameProp = ssoMapper.getUserAttribute(CCConstants.PROP_USER_FIRSTNAME);

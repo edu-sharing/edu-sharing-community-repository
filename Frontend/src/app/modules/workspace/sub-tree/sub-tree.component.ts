@@ -16,12 +16,12 @@ import {MatMenuTrigger} from '@angular/material/menu';
 import {DropdownComponent} from '../../../core-ui-module/components/dropdown/dropdown.component';
 import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../../core-ui-module/options-helper.service';
 import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
-import {DropSource} from '../../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
 import {CdkDragDrop, CdkDragEnter, CdkDragExit} from '@angular/cdk/drag-drop';
 import {DragCursorDirective} from '../../../core-ui-module/directives/drag-cursor.directive';
+import {DropSource} from '../../../core-ui-module/components/node-entries-wrapper/entries-model';
 
 @Component({
-    selector: 'workspace-sub-tree',
+    selector: 'es-workspace-sub-tree',
     templateUrl: 'sub-tree.component.html',
     styleUrls: ['sub-tree.component.scss'],
     animations: [

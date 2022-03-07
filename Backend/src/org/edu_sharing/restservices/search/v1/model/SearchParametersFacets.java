@@ -1,49 +1,46 @@
 package org.edu_sharing.restservices.search.v1.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 
-import javax.ws.rs.QueryParam;
 import java.util.List;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class SearchParametersFacets {
-    private List<String> facettes;
-    Integer facetMinCount;
-    Integer facetLimit;
+    private List<String> facets;
+    Integer facetMinCount = 5;
+    Integer facetLimit = 10;
     String facetSuggest;
-    private List<MdsQueryCriteria> criterias;
+    private List<MdsQueryCriteria> criteria;
 
-    @ApiModelProperty(required = true, value = "")
-    @JsonProperty("facettes")
-    public List<String> getFacettes() { return facettes;}
-    public void setFacettes(List<String> facettes) { this.facettes = facettes; }
+    @Schema(required = true, description = "")
+    @JsonProperty("facets")
+    public List<String> getFacets() { return facets;}
+    public void setFacets(List<String> facets) { this.facets = facets; }
 
-    @ApiModelProperty(required = true, value = "5")
+    @Schema(required = false, defaultValue = "5")
     @JsonProperty("facetMinCount")
     public Integer getFacetMinCount() { return facetMinCount; }
     public void setFacetMinCount(Integer facetMinCount) { this.facetMinCount = facetMinCount;}
 
-    @ApiModelProperty(required = true, value = "10")
+    @Schema(required = false, defaultValue = "10")
     @JsonProperty("facetLimit")
     public Integer getFacetLimit() { return facetLimit; }
     public void setFacetLimit(Integer facetLimit) { this.facetLimit = facetLimit; }
 
-    @ApiModelProperty(required = false)
+    @Schema(required = false)
     @JsonProperty("facetSuggest")
     public String getFacetSuggest() { return facetSuggest; }
     public void setFacetSuggest(String facetSuggest) { this.facetSuggest = facetSuggest; }
 
-    @ApiModelProperty(required = true, value = "")
-    @JsonProperty("criterias")
-    public List<MdsQueryCriteria> getCriterias() {
-        return criterias;
+    @Schema(required = true, description = "")
+    @JsonProperty("criteria")
+    public List<MdsQueryCriteria> getCriteria() {
+        return criteria;
     }
 
-    public void setCriterias(List<MdsQueryCriteria> criterias) {
-        this.criterias = criterias;
+    public void setCriteria(List<MdsQueryCriteria> criteria) {
+        this.criteria = criteria;
     }
 }

@@ -4,7 +4,7 @@
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "paths": {
-      "edu-sharing-api": [
+      "ngx-edu-sharing-api": [
         "dist/edu-sharing-api/edu-sharing-api",
         "dist/edu-sharing-api"
       ],
@@ -20,7 +20,7 @@
     },
     "declaration": false,
     "experimentalDecorators": true,
-    "lib": ["es2018", "dom"],
+    "lib": ["es2018", "dom", "dom.iterable"],
     "module": "es2020",
     "moduleResolution": "node",
     "outDir": "./dist/out-tsc",

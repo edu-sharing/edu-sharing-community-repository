@@ -5,13 +5,13 @@ import org.edu_sharing.service.admin.model.GlobalGroup;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 import org.edu_sharing.service.organization.GroupSignupMethod;
 
 import java.util.List;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class Group extends Authority {
 
 	private GroupSignupMethod signupMethod;
@@ -19,12 +19,6 @@ public class Group extends Authority {
 	private GroupProfile profile = null;
 	private NodeRef ref = null;
 
-	/**
-	 * editable in context of grouptype and loction(shared nodes)
-	 * 
-	 * @TODO is an prop for the ACE Object, remove when not longer needed
-	 */
-	private boolean editable = true;
 	private List<String> aspects;
 
 	private List<Organization> organizations;
@@ -49,7 +43,7 @@ public class Group extends Authority {
     	
 	}
 
-	@ApiModelProperty(value = "")
+	@Schema(description = "")
 	@JsonProperty("groupName")
 	public String getGroupName() {
 		return groupName;
@@ -60,7 +54,7 @@ public class Group extends Authority {
 	}
 	/**
 	 **/
-	@ApiModelProperty(value = "")
+	@Schema(description = "")
 	@JsonProperty("profile")
 	public GroupProfile getProfile() {
 		return profile;
@@ -69,14 +63,7 @@ public class Group extends Authority {
 	public void setProfile(GroupProfile profile) {
 		this.profile = profile;
 	}
-	
-	public boolean isEditable() {
-		return editable;
-	}
-	
-	public void setEditable(boolean editable) {
-		this.editable = editable;
-	}
+
 	@JsonProperty
 	public NodeRef getRef() {
 		return ref;

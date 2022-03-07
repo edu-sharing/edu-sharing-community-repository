@@ -31,6 +31,9 @@
     &.status-mandatoryForPublish .current-bar {
       background-color: $colorStatusWarning;
     }
+    &.status-recommended .current-bar {
+      background-color: $colorStatusRecommended;
+    }
     &.status-finished .current-bar,
     &.status-optional .current-bar {
       background-color: $colorStatusPositive;

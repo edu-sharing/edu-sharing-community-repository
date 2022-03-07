@@ -1,22 +1,24 @@
 import {RestAdminService} from "../../../core-module/rest/services/rest-admin.service";
 import {Component} from "@angular/core";
-import {DialogButton, RestLocatorService} from "../../../core-module/core.module";
+import {DialogButton} from "../../../core-module/core.module";
 import {Toast} from "../../../core-ui-module/toast";
 import {ModalMessageType} from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import {forkJoin, Observable} from 'rxjs';
+import { ConfigService } from 'ngx-edu-sharing-api';
+import { first } from "rxjs/operators";
 
 // Charts.js
 declare var Chart:any;
 
 @Component({
-  selector: 'app-admin-config',
+  selector: 'es-admin-config',
   templateUrl: 'config.component.html',
   styleUrls: ['config.component.scss']
 })
 export class AdminConfigComponent {
   public static CONFIG_FILE_BASE="edu-sharing.base.conf";
   public static EXTENSION_CONFIG_FILE="edu-sharing.conf";
-  public static SERVER_CONFIG_FILE="edu-sharing.server.conf";
+  public static SERVER_CONFIG_FILE="edu-sharing.server-{{hostname}}.conf";
   public static CONFIG_DEPLOYMENT_FILE="edu-sharing.deployment.conf";
   public static CLIENT_CONFIG_FILE="client.config.xml";
   codeOptionsGlobal = {minimap: {enabled: false}, language: 'json', readOnly: true, automaticLayout: true};
@@ -31,9 +33,9 @@ export class AdminConfigComponent {
 
   constructor(
       private adminService: RestAdminService,
-      private locator: RestLocatorService,
       private toast: Toast,
-  ) {
+      private config: ConfigService,
+    ) {
     this.adminService.getConfigFile(AdminConfigComponent.CLIENT_CONFIG_FILE).subscribe((data)=>{
       this.configClient = data;
       this.adminService.getConfigFile(AdminConfigComponent.CONFIG_FILE_BASE).subscribe((data) => {
@@ -72,7 +74,7 @@ export class AdminConfigComponent {
     ]).subscribe(() => {
       this.adminService.refreshAppInfo().subscribe(() => {
         this.toast.closeModalDialog();
-        this.locator.getConfig().subscribe(() => {
+        this.config.getConfig({ forceUpdate: true }).pipe(first()).subscribe(() => {
               this.toast.closeModalDialog();
               this.toast.toast('ADMIN.GLOBAL_CONFIG.SAVED');
             },error =>

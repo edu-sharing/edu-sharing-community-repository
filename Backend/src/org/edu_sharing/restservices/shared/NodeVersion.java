@@ -7,11 +7,11 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class NodeVersion  {
   
   private NodeVersionRef version = null;
@@ -24,7 +24,7 @@ public class NodeVersion  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty(value = "version")
   public NodeVersionRef getVersion() {
     return version;
@@ -36,7 +36,7 @@ public class NodeVersion  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty(value = "comment")
   public String getComment() {
     return comment;
@@ -48,7 +48,7 @@ public class NodeVersion  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty(value = "modifiedAt")
   public String getModifiedAt() {
     return modifiedAt;
@@ -60,7 +60,7 @@ public class NodeVersion  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty(value = "modifiedBy")
   public Person getModifiedBy() {
     return modifiedBy;
@@ -72,7 +72,7 @@ public class NodeVersion  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @Schema(description = "")
   @JsonProperty(value = "contentUrl")
   public String getContentUrl() {
     return contentUrl;
@@ -83,7 +83,7 @@ public class NodeVersion  {
 
   /**
    **/
-  @ApiModelProperty(value = "")
+  @Schema(description = "")
   @JsonProperty(value = "properties")
   public HashMap<String, String[]> getMetadata() {
     return properties;

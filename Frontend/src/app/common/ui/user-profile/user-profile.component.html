@@ -1,7 +1,7 @@
 <div class="dialog darken">
   <div class="card center-card card-action card-high" *ngIf="user">
     <div class="card-content">
-      <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon="close" [aria]="true"></i></div>
+      <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i esIcon="close" [aria]="true"></i></div>
       <div class="card-title">{{'EDIT_ACCOUNT' | translate }}</div>
       <div class="card-scroll">
         <form #form (ngSubmit)="save()">

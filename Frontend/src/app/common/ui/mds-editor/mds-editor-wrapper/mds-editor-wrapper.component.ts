@@ -2,41 +2,37 @@ import {
     Component,
     EventEmitter,
     Input,
-    OnChanges,
+    OnDestroy,
     OnInit,
     Output,
-    SimpleChanges,
     ViewChild,
 } from '@angular/core';
-import { first } from 'rxjs/operators';
+import { SearchService } from 'ngx-edu-sharing-api';
+import { Subject } from 'rxjs';
+import { first, map, switchMap, takeUntil } from 'rxjs/operators';
 import { Node, RestConstants } from '../../../../core-module/core.module';
+import { EditorMode } from '../../../../core-ui-module/mds-types';
 import { Toast } from '../../../../core-ui-module/toast';
 import { BulkBehavior, MdsComponent } from '../../mds/mds.component';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
-import {
-    EditorMode,
-    EditorType,
-    MdsWidget,
-    FacetValues,
-    UserPresentableError,
-    Values,
-} from '../types';
+import { EditorType, MdsWidget, MdsWidgetValue, UserPresentableError, Values } from '../types';
+import { valuesDictIsEquivalent } from './values-dict-is-equivalent';
 
 /**
- * Wrapper component to select between the legacy `<mds>` component and the Angular-native
- * `<app-mds-editor>`.
+ * Wrapper component to select between the legacy `<es-mds>` component and the Angular-native
+ * `<es-mds-editor>`.
  *
  * Input properties have to be stable after initialization.
  *
- * In case <app-mds-editor> is selected, do some data preprocessing.
+ * In case <es-mds-editor> is selected, do some data preprocessing.
  */
 @Component({
-    selector: 'app-mds-editor-wrapper',
+    selector: 'es-mds-editor-wrapper',
     templateUrl: './mds-editor-wrapper.component.html',
     styleUrls: ['./mds-editor-wrapper.component.scss'],
     providers: [MdsEditorInstanceService],
 })
-export class MdsEditorWrapperComponent implements OnInit, OnChanges {
+export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
     // tslint:disable: no-output-on-prefix  // Keep API compatibility.
 
     // Properties compatible to legacy MdsComponent.
@@ -61,7 +57,6 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     @Input() repository = RestConstants.HOME_REPOSITORY;
     @Input() editorMode: EditorMode;
     @Input() setId: string;
-    @Input() facets: FacetValues;
 
     @Output() extendedChange = new EventEmitter();
     @Output() onCancel = new EventEmitter();
@@ -75,7 +70,21 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     isLoading = true;
     editorType: EditorType;
 
-    constructor(public mdsEditorInstance: MdsEditorInstanceService, private toast: Toast) {}
+    legacySuggestions: { [property: string]: MdsWidgetValue[] };
+    legacySuggestionsRegistered = false;
+
+    private destroyed$ = new Subject<void>();
+    private values: Values;
+
+    constructor(
+        public mdsEditorInstance: MdsEditorInstanceService,
+        private toast: Toast,
+        private search: SearchService,
+    ) {}
+
+    getInstanceService() {
+        return this.mdsEditorInstance;
+    }
 
     ngOnInit(): void {
         // For compatibility reasons, we wait for `loadMds()` to be called before initializing when
@@ -86,12 +95,12 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
         if (this.nodes || this.currentValues) {
             this.init();
         }
+        this.mdsEditorInstance.values.subscribe((values) => (this.values = values));
     }
 
-    ngOnChanges(changes: SimpleChanges): void {
-        if ('facets' in changes) {
-            this.mdsEditorInstance.facets$.next(changes.facets.currentValue);
-        }
+    ngOnDestroy(): void {
+        this.destroyed$.next();
+        this.destroyed$.complete();
     }
 
     /** @deprecated compatibility to legacy `mds` component */
@@ -162,24 +171,40 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
         // In case of `SearchComponent`, `currentValues` is not ready when `loadMds` is called. So
         // we wait tick before initializing.
         setTimeout(() => {
-            this.init().then(() => {
-                switch (this.editorType) {
-                    case 'legacy':
-                        // Wait for mdsRef
-                        setTimeout(() => {
-                            return this.mdsRef.loadMds();
-                        });
-                        return;
-                    case 'angular':
-                        if (onlyLegacy) {
-                            return;
-                        }
-                        this.mdsEditorInstance.mdsDefinition$
-                            .pipe(first((definition) => definition !== null))
-                            .subscribe((definition) => this.onMdsLoaded.emit(definition));
-                }
-            });
+            // Re-inits the MDS if needed, otherwise pretends to do so.
+            if (
+                this.editorType === 'angular' &&
+                this.groupId === this.mdsEditorInstance.groupId &&
+                this.setId === this.mdsEditorInstance.mdsId &&
+                this.repository === this.mdsEditorInstance.repository &&
+                valuesDictIsEquivalent(this.currentValues, this.values)
+            ) {
+                // Don't need to re-init
+                this.loadMdsAfterInit(onlyLegacy);
+            } else {
+                this.init().then(() => {
+                    this.loadMdsAfterInit(onlyLegacy);
+                });
+            }
         });
+    }
+
+    private loadMdsAfterInit(onlyLegacy: boolean): void {
+        switch (this.editorType) {
+            case 'legacy':
+                // Wait for mdsRef
+                setTimeout(() => {
+                    return this.mdsRef.loadMds();
+                });
+                return;
+            case 'angular':
+                if (onlyLegacy) {
+                    return;
+                }
+                this.mdsEditorInstance.mdsDefinition$
+                    .pipe(first((definition) => definition !== null))
+                    .subscribe((definition) => this.onMdsLoaded.emit(definition));
+        }
     }
 
     async onSave(): Promise<void> {
@@ -191,6 +216,13 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
                     this.onDone.emit(this.nodes);
                     return;
                 } else {
+                    console.warn(
+                        "The following widgets are required but don't have a value: ",
+                        this.mdsEditorInstance
+                            .getCompletitonStatus()
+                            .mandatory.fields.filter((f) => !f.isCompleted)
+                            .map((f) => f.widget.definition.id),
+                    );
                     this.mdsEditorInstance.showMissingRequiredWidgets();
                 }
                 return;
@@ -219,6 +251,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
                 this.editorType = await this.mdsEditorInstance.initWithNodes(this.nodes, {
                     groupId: this.groupId,
                     bulkBehavior: this.bulkBehaviour,
+                    editorMode: this.editorMode ?? 'nodes',
                 });
             } else {
                 this.editorType = await this.mdsEditorInstance.initWithoutNodes(
@@ -239,11 +272,41 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
                 );
                 this.editorType = 'legacy';
             }
+            if (this.editorType === 'legacy' && !this.legacySuggestionsRegistered) {
+                this.registerLegacySuggestions();
+                this.legacySuggestionsRegistered = true;
+            }
         } catch (error) {
             this.handleError(error);
         } finally {
             this.isLoading = false;
         }
+    }
+
+    private registerLegacySuggestions(): void {
+        this.mdsEditorInstance
+            .getNeededFacets()
+            .pipe(
+                takeUntil(this.destroyed$),
+                switchMap((neededFacets) => this.search.getFacets(neededFacets)),
+                map((facets) => {
+                    if (facets) {
+                        return Object.entries(facets).reduce(
+                            (acc, [property, facetAggregation]) => {
+                                acc[property] = facetAggregation.values.map(({ value, label }) => ({
+                                    id: value,
+                                    caption: label,
+                                }));
+                                return acc;
+                            },
+                            {} as { [property: string]: MdsWidgetValue[] },
+                        );
+                    } else {
+                        return null;
+                    }
+                }),
+            )
+            .subscribe((facets) => (this.legacySuggestions = facets));
     }
 
     private handleError(error: any): void {

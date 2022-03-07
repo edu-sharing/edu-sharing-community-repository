@@ -71,12 +71,11 @@ import {CardService} from '../../../core-ui-module/card.service';
 import {RouterComponent} from '../../../router/router.component';
 import {RenderHelperService} from '../../../core-ui-module/render-helper.service';
 import {NodeDataSource} from '../../../core-ui-module/components/node-entries-wrapper/node-data-source';
+import { Subject } from 'rxjs';
 
-declare var jQuery:any;
-declare var window: any;
 
 @Component({
-  selector: 'node-render',
+  selector: 'es-node-render',
   templateUrl: 'node-render.component.html',
   styleUrls: ['node-render.component.scss'],
     providers: [OptionsHelperService, {provide: OPTIONS_HELPER_CONFIG, useValue: {
@@ -219,6 +218,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
   public similarNodes: Node[];
   mds: Mds;
   isDestroyed = false;
+  private readonly destroyed$ = new Subject<void>();
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
   @ViewChild('mainNav') mainNavRef : MainNavComponent;
@@ -296,10 +296,15 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
 
 
     showDetails() {
-      const rect=document.getElementById('edusharing_rendering_metadata').getBoundingClientRect();
-      if(window.scrollY<rect.top) {
-          UIHelper.scrollSmooth(rect.top, 1.5);
-      }
+      const element = document.getElementById('edusharing_rendering_metadata');
+      element.setAttribute('tabindex', '-1');
+      element.addEventListener(
+          'blur',
+          (event) => (event.target as HTMLElement).removeAttribute('tabindex'),
+          { once: true },
+      );
+      element.focus({ preventScroll: true });
+      element.scrollIntoView({ behavior: 'smooth' });
     }
     public getPosition() {
       if(!this._node || !this.list)
@@ -321,6 +326,8 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
         (window as any).ngRender = null;
         this.optionsHelper.setListener(null);
         this.isDestroyed = true;
+        this.destroyed$.next();
+        this.destroyed$.complete();
     }
 
   public switchPosition(pos:number) {
@@ -417,7 +424,9 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                 const finish = (set:Mds = null) => {
                     this.similarNodeColumns = MdsHelper.getColumns(this.translate, set, 'search');
                     this.mds = set;
-                    jQuery('#nodeRenderContent').html(data.detailsSnippet);
+                    const nodeRenderContent = jQuery('#nodeRenderContent')
+                    nodeRenderContent.html(data.detailsSnippet);
+                    this.moveInnerStyleToHead(nodeRenderContent);
                     this.postprocessHtml();
                     this.handleProposal();
                     this.addCollections();
@@ -572,6 +581,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
               const downloadAll = new OptionItem('OPTIONS.DOWNLOAD_ALL','archive',()=> {
                   this.downloadSequence();
               });
+              downloadAll.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.NodePublishedCopy];
               downloadAll.group = DefaultGroups.View;
               downloadAll.priority = 35;
               options.splice(1,0,downloadAll);
@@ -592,18 +602,24 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
            this.nodeApi.getNodeMetadata(this._node.parent.id).subscribe(data => {
              this.sequenceParent = data.node;
                this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.sequenceParent.ref.repo).subscribe((data:NodeList)=> {
-                   if(data.nodes.length > 0)
-                    this.sequence = data;
-                    setTimeout(()=>this.setScrollparameters(),100);
+                   if(data.nodes.length > 0) {
+                       this.sequence = data;
+                   } else {
+                       this.sequence = null;
+                   }
+                   setTimeout(()=>this.setScrollparameters(),100);
                    onFinish();
                });
             });
         } else {
             this.sequenceParent = this._node;
             this.nodeApi.getNodeChildobjects(this.sequenceParent.ref.id,this.sequenceParent.ref.repo).subscribe((data:NodeList)=> {
-                if(data.nodes.length > 0)
-                  this.sequence = data;
-                  setTimeout(()=>this.setScrollparameters(),100);
+                if(data.nodes.length > 0) {
+                    this.sequence = data;
+                } else {
+                    this.sequence = null;
+                }
+                setTimeout(()=>this.setScrollparameters(),100);
                 onFinish();
             }, error => {
                     console.error('failed sequence fetching');
@@ -746,5 +762,22 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
         if(this.queryParams.action) {
             window.close();
         }
+    }
+
+    /**
+     * Moves a style element that is a child of `element` to the document head.
+     *
+     * Existing style elements that were previously moved to the document head like this will be
+     * removed.
+     *
+     * The style element will be removed from document head on `ngDestroy`.
+     */
+    private moveInnerStyleToHead(element: JQuery<HTMLElement>): void {
+        const styleAttr = 'data-render-content-style';
+        jQuery('[' + styleAttr + ']').remove();
+        const style = element.find('style');
+        style.attr(styleAttr, '');
+        jQuery(document.head).append(style);
+        this.destroyed$.subscribe(() => style.remove());
     }
 }

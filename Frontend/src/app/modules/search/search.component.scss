@@ -121,7 +121,7 @@ $sidenavTopBaseOffset: $repoTabBarHeight + $toolbarHeight;
     padding: 5px;
 }
 
-sort-dropdown{
+es-sort-dropdown{
     position: absolute;
     right: 250px;
 }
@@ -133,6 +133,15 @@ sort-dropdown{
         display:none!important;
     }
 }
+
+.did-you-mean-suggestion {
+    padding: 0 20px;
+    .did-you-mean-suggestion-link ::ng-deep em {
+        font-style: normal;
+        font-weight: bold;
+    }
+}
+
 .noResults,.noResultsMatched{
     color: $noResultsColor;
     text-align: center;
@@ -296,16 +305,23 @@ a, a:hover, a:visited, a:active, button {
 
 .top {
     position: fixed;
+    // On mobile, the underlying `div` of this container gets hidden by `MainNav` via
+    // `.mobile-move-top`, however, this container remains invisibly on its usual position. This
+    // inhibits mouse clicks on content below the invisible container. To fix this, we disable
+    // pointer events on this container and explicitly enable them again on the underlying `div`
+    // using `pointer-events: auto`.
+    pointer-events: none;
     top: $mainnavHeight+48px;
     z-index: 12;
     width:100%;
     &.no-mainnav{
         top: 48px;
     }
-    actionbar{
+    es-actionbar{
         margin-right: -5px;
     }
     >div {
+        pointer-events: auto; // See above.
         height: $secondaryBarHeight;
         background-color: #fff;
         display: flex;
@@ -314,7 +330,7 @@ a, a:hover, a:visited, a:active, button {
         @include materialShadow();
     }
 }
-small-collection{
+es-small-collection{
     position: absolute;
     top: 0;
     left: $sidenavWidth;
@@ -481,7 +497,7 @@ small-collection{
     clear: both;
 }
 
-app-node-entries-wrapper {
+es-node-entries-wrapper {
     display: block;
     padding: 0 20px;
 }
@@ -523,7 +539,7 @@ app-node-entries-wrapper {
         float:left;
         width:100%;
     }
-    listTable,.noResults{
+    es-listTable,.noResults{
         width:calc(100% + #{$cardWidth + 60px});
         float: left;
         overflow: hidden;
@@ -559,7 +575,7 @@ app-node-entries-wrapper {
     }
 }
 .sidenav-container{
-    app-mds-editor-wrapper {
+    es-mds-editor-wrapper {
         display: block;
         margin-top: 15px;
     }
@@ -626,7 +642,7 @@ div.dialog.darken {
     .sidenav .list > div{
         margin-bottom: 20px;
     }
-    .sidenav-container actionbar {
+    .sidenav-container es-actionbar {
         .action-always-caption {
             display: inline-block !important;
         }
@@ -636,7 +652,7 @@ div.dialog.darken {
             width: 220px;
         }
     }
-    mds {
+    es-mds {
         .mdsEmbeddedGroup {
             float:left;
             width: 100%;
@@ -644,9 +660,9 @@ div.dialog.darken {
             /* margin-bottom: 40px; */
         }
     }
-    app-mds-editor-embedded {
-        app-mds-editor-core {
-            padding: 0 20px;
+    es-mds-editor-embedded {
+        es-mds-editor-core {
+            --mds-editor-horizontal-padding: 20px;
         }
     }
 }
@@ -694,7 +710,7 @@ div.dialog.darken {
             width:max-content;
         }
     }
-    small-collection {
+    es-small-collection {
         left: 0;
         width: 100%;
     }
@@ -739,7 +755,7 @@ div.dialog.darken {
         margin-bottom: $mobileTabNavHeight;
     }
     .sidenav{
-        height: calc(100% - #{$mainnavHeight} - #{$mobileTabNavHeight} - 180px);
+        height: calc(100% - #{$mainnavHeight} - #{$mobileTabNavHeight} - 105px);
     }
     .sidenavNoRepositories{
         height: calc(100% - #{$mainnavHeight} - #{$mobileTabNavHeight} - 65px - 70px);

@@ -1,15 +1,15 @@
-import { Type } from '@angular/core';
-import { MdsWidgetValue } from 'edu-sharing-api';
-import { BulkBehavior } from '../mds/mds.component';
-import { MdsEditorWidgetBase } from './widgets/mds-editor-widget-base';
+import {Type} from '@angular/core';
+import {BulkBehavior} from '../mds/mds.component';
+import {MdsEditorWidgetBase} from './widgets/mds-editor-widget-base';
+
 export {
     MdsDefinition,
     MdsGroup,
+    MdsValue as MdsWidgetValue,
     MdsView,
     MdsWidget,
     MdsWidgetCondition,
-    MdsWidgetValue,
-} from 'edu-sharing-api';
+} from 'ngx-edu-sharing-api';
 
 /** Error with a translatable message that is suitable to be shown to the user. */
 export class UserPresentableError extends Error {
@@ -21,21 +21,6 @@ export class UserPresentableError extends Error {
         this.name = 'UserPresentableError';
     }
 }
-
-/**
- * - `nodes`:
- *   - Supports bulk.
- *   - Returns only changed values.
- * - `search`:
- *   - No bulk.
- *   - All values returned.
- *   - Trees sub-children are auto-selected if root is selected.
- *   - Required errors and -warnings are disabled.
- * - `form`:
- *   - No bulk.
- *   - All values returned.
- */
-export type EditorMode = 'nodes' | 'search' | 'form';
 
 export interface Constraints {
     requiresNode?: boolean;
@@ -71,6 +56,7 @@ export enum MdsType {
     Map = 'map',
     MapRef = 'map_ref',
     IoChildObject = 'io_childobject',
+    Collection = 'collection',
     ToolDefinition = 'tool_definition',
     ToolInstance = 'tool_instance',
     SavedSearch = 'saved_search',
@@ -84,6 +70,7 @@ export enum MdsWidgetType {
     Month = 'month',
     Color = 'color',
     Textarea = 'textarea',
+    VCard = 'vcard',
     Checkbox = 'checkbox',
     RadioHorizontal = 'radioHorizontal',
     RadioVertical = 'radioVertical',
@@ -113,6 +100,7 @@ export enum NativeWidgetType {
     FileUpload = 'fileupload',
     Workflow = 'workflow',
     Author = 'author',
+    Contributor = 'contributor',
 }
 
 export type MdsEditorWidgetComponent = Type<MdsEditorWidgetBase>;
@@ -129,10 +117,6 @@ export interface MdsListColumn {
     id: string;
     showDefault: boolean;
 }
-
-export type MdsWidgetFacetValue = MdsWidgetValue & { count: number };
-
-export type FacetValues = { [property: string]: MdsWidgetFacetValue[] };
 
 export enum RequiredMode {
     Mandatory = 'mandatory',

@@ -137,6 +137,9 @@ public class UsageDao {
 				}
 				return null;
 			});
+			if(usage == null) {
+				throw new DAOMissingException(new IllegalArgumentException(usageId + " is not an usage of " + nodeId));
+			}
 			boolean permission = (ContextManagementFilter.accessTool.get() != null) ? true : permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,
 					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId,
 					CCConstants.PERMISSION_CHANGEPERMISSIONS);
@@ -152,9 +155,6 @@ public class UsageDao {
 			if (!permission) {
 				throw new SecurityException("Can not modify usages on node " + nodeId);
 			}
-			if(usage == null) {
-				throw new IllegalArgumentException(usageId + " is not an usage of " + nodeId);
-			}
 			AuthenticationUtil.runAsSystem(() -> {
 				if (new Usage2Service().deleteUsage(null, null, usage.getLmsId(), usage.getCourseId(), nodeId,
 						usage.getResourceId())) {
@@ -164,7 +164,14 @@ public class UsageDao {
 				}
 			});
 		} catch (Throwable t) {
-			throw DAOException.mapping(t);
+			// unmarshall exception
+			if(t instanceof DAOException) {
+				throw t;
+			} else if(t.getCause() != null) {
+				throw DAOException.mapping(t.getCause().getCause());
+			} else {
+				throw DAOException.mapping(t);
+			}
 		}
 	}
 
@@ -191,9 +198,10 @@ public class UsageDao {
 		}
 	}
 
-	public Set<Usages.CollectionUsage> getUsagesByNodeCollection(String nodeId) throws DAOException {
+	public Collection<Usages.CollectionUsage> getUsagesByNodeCollection(String nodeId) throws DAOException {
 		try {
-			Set<Usages.CollectionUsage> collections = new HashSet<>();
+			//Collection<Usages.CollectionUsage> collections = new HashSet<>();
+			Collection<Usages.CollectionUsage> collections = new ArrayList<>();
 			for (org.edu_sharing.service.usage.Usage usage : new Usage2Service().getUsageByParentNodeId(null, null,
 					nodeId)) {
 				if (usage.getCourseId() == null)
@@ -207,11 +215,21 @@ public class UsageDao {
 				} catch (Throwable t) {
 				}
 			}
-			CollectionServiceFactory.getLocalService().getCollectionProposals(nodeId).forEach((ref) -> {
+			CollectionServiceFactory.getLocalService().getCollectionProposals(nodeId, CCConstants.PROPOSAL_STATUS.PENDING).forEach((ref) -> {
 				Usages.CollectionUsage usage = new Usages.CollectionUsage();
 				try {
 					usage.setCollection(CollectionDao.getCollection(repoDao, ref.getId()).asNode());
-					usage.setCollectionUsageType(Usages.CollectionUsageType.PROPOSAL);
+					usage.setCollectionUsageType(Usages.CollectionUsageType.PROPOSAL_PENDING);
+					collections.add(usage);
+				} catch (DAOException e) {
+					logger.warn("Could not fetch collection: " + e.getMessage(), e);
+				}
+			});
+			CollectionServiceFactory.getLocalService().getCollectionProposals(nodeId, CCConstants.PROPOSAL_STATUS.DECLINED).forEach((ref) -> {
+				Usages.CollectionUsage usage = new Usages.CollectionUsage();
+				try {
+					usage.setCollection(CollectionDao.getCollection(repoDao, ref.getId()).asNode());
+					usage.setCollectionUsageType(Usages.CollectionUsageType.PROPOSAL_DECLINED);
 					collections.add(usage);
 				} catch (DAOException e) {
 					logger.warn("Could not fetch collection: " + e.getMessage(), e);

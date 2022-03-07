@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 public class StatisticEntry {
 	
@@ -13,7 +13,7 @@ public class StatisticEntry {
 	
 	List<StatisticEntity> entities = new ArrayList<StatisticEntity>();
 	
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("property")
 	public String getProperty() {
 		return property;
@@ -23,7 +23,7 @@ public class StatisticEntry {
 		this.property = property;
 	}
 	
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("entities")
 	public List<StatisticEntity> getEntities() {
 		return entities;

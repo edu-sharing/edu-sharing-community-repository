@@ -2,7 +2,7 @@
   https://github.com/angular/components/issues/16209. To avoid that, we put the *ngIf on
   mat-form-field and have a little code duplication. -->
 
-<app-mds-editor-widget-container
+<es-mds-editor-widget-container
   *ngIf="widget.definition.type !== 'textarea'"
   [injectedView]="this"
   [widget]="widget"
@@ -16,11 +16,11 @@
     [type]="widget.definition.type"
     [placeholder]="widget.definition.placeholder"
     [formControl]="formControl"
-    (blur)="onBlur()"
+    (blur)="blur()"
   />
-</app-mds-editor-widget-container>
+</es-mds-editor-widget-container>
 
-<app-mds-editor-widget-container
+<es-mds-editor-widget-container
   *ngIf="widget.definition.type === 'textarea'"
   [widget]="widget"
   [label]="false"
@@ -33,4 +33,4 @@
     [placeholder]="widget.definition.placeholder"
     [formControl]="formControl"
   ></textarea>
-</app-mds-editor-widget-container>
+</es-mds-editor-widget-container>

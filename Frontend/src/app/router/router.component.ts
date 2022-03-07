@@ -41,9 +41,10 @@ import { BridgeService } from '../core-bridge-module/bridge.service';
 import {AccessibilityComponent} from '../common/ui/accessibility/accessibility.component';
 import { extensionRoutes } from '../extension/extension-routes';
 import {BehaviorSubject} from 'rxjs';
+import { AccessibilityService } from '../common/ui/accessibility/accessibility.service';
 
 @Component({
-    selector: 'router',
+    selector: 'es-router',
     templateUrl: 'router.component.html',
     providers: [MainNavService],
 })
@@ -96,6 +97,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
         private ngZone: NgZone,
         private bridge: BridgeService,
         private injector: Injector,
+        private accessibilityService: AccessibilityService,
     ) {
         this.injector.get(Router).events.subscribe(event => {
             if (event instanceof NavigationEnd) {
@@ -111,6 +113,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
 
     ngOnInit(): void {
         this.setUserScale();
+        this.registerContrastMode();
     }
 
     ngDoCheck(): void {
@@ -151,6 +154,17 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
             const viewport: HTMLMetaElement = document.head.querySelector('meta[name="viewport"]');
             viewport.content += ', user-scalable=no';
         }
+    }
+
+    private registerContrastMode(): void {
+        const contrastModeClass = 'es-contrast-mode';
+        this.accessibilityService.observe('contrastMode').subscribe((value) => {
+            if (value) {
+                document.body.classList.add(contrastModeClass);
+            } else {
+                document.body.classList.remove(contrastModeClass);
+            }
+        });
     }
 }
 

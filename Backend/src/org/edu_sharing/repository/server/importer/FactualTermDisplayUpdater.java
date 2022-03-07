@@ -10,7 +10,7 @@ import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -28,7 +28,7 @@ public class FactualTermDisplayUpdater {
 
     Logger logger = Logger.getLogger(FactualTermDisplayUpdater.class);
     String appId = ApplicationInfoList.getHomeRepository().getAppId();
-    MetadataSetV2 mds = null;
+    MetadataSet mds = null;
 
     ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
     ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);

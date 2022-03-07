@@ -59,7 +59,7 @@
 
 
 }
-:host ::ng-deep authority-search-input .mat-form-field-wrapper{
+:host ::ng-deep es-authority-search-input .mat-form-field-wrapper{
     padding-bottom: 0;
 }
 .inputs{
@@ -67,7 +67,7 @@
     align-items: center;
     width:100%;
     margin-bottom: 20px;
-    authority-search-input{
+    es-authority-search-input{
         display: flex;
         width:0;
         flex-grow: 1;
@@ -124,7 +124,7 @@
 @media screen and (max-width: $mobileWidth - $mobileStage*1) {
     .inputs {
         flex-direction: column;
-        authority-search-input {
+        es-authority-search-input {
             width: 100%;
             margin-bottom: 30px;
         }

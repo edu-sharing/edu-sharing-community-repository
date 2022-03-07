@@ -15,7 +15,6 @@ import { NodeEntry } from '../models/node-entry';
 import { SearchParameters } from '../models/search-parameters';
 import { SearchParametersFacets } from '../models/search-parameters-facets';
 import { SearchResultNode } from '../models/search-result-node';
-import { SearchVCard } from '../models/search-v-card';
 
 @Injectable({
     providedIn: 'root',
@@ -23,6 +22,542 @@ import { SearchVCard } from '../models/search-v-card';
 export class SearchV1Service extends BaseService {
     constructor(config: ApiConfiguration, http: HttpClient) {
         super(config, http);
+    }
+
+    /**
+     * Path part for operation getRelevantNodes
+     */
+    static readonly GetRelevantNodesPath = '/search/v1/relevant/{repository}';
+
+    /**
+     * Get relevant nodes for the current user.
+     *
+     *
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getRelevantNodes()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getRelevantNodes$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * property filter for result nodes (or &quot;-all-&quot; for all properties)
+         */
+        propertyFilter?: Array<string>;
+
+        /**
+         * maximum items per page
+         */
+        maxItems?: number;
+
+        /**
+         * skip a number of items
+         */
+        skipCount?: number;
+    }): Observable<StrictHttpResponse<SearchResultNode>> {
+        const rb = new RequestBuilder(this.rootUrl, SearchV1Service.GetRelevantNodesPath, 'get');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.query('propertyFilter', params.propertyFilter, {});
+            rb.query('maxItems', params.maxItems, {});
+            rb.query('skipCount', params.skipCount, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<SearchResultNode>;
+                }),
+            );
+    }
+
+    /**
+     * Get relevant nodes for the current user.
+     *
+     *
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getRelevantNodes$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getRelevantNodes(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * property filter for result nodes (or &quot;-all-&quot; for all properties)
+         */
+        propertyFilter?: Array<string>;
+
+        /**
+         * maximum items per page
+         */
+        maxItems?: number;
+
+        /**
+         * skip a number of items
+         */
+        skipCount?: number;
+    }): Observable<SearchResultNode> {
+        return this.getRelevantNodes$Response(params).pipe(
+            map((r: StrictHttpResponse<SearchResultNode>) => r.body as SearchResultNode),
+        );
+    }
+
+    /**
+     * Path part for operation loadSaveSearch
+     */
+    static readonly LoadSaveSearchPath = '/search/v1/queries/load/{nodeId}';
+
+    /**
+     * Load a saved search query.
+     *
+     * Load a saved search query.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `loadSaveSearch()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    loadSaveSearch$Response(params: {
+        /**
+         * Node id of the search item
+         */
+        nodeId: string;
+
+        /**
+         * Type of element
+         */
+        contentType?:
+            | 'FILES'
+            | 'FOLDERS'
+            | 'FILES_AND_FOLDERS'
+            | 'COLLECTIONS'
+            | 'TOOLPERMISSIONS'
+            | 'ALL';
+
+        /**
+         * maximum items per page
+         */
+        maxItems?: number;
+
+        /**
+         * skip a number of items
+         */
+        skipCount?: number;
+
+        /**
+         * sort properties
+         */
+        sortProperties?: Array<string>;
+
+        /**
+         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+         */
+        sortAscending?: Array<boolean>;
+
+        /**
+         * property filter for result nodes (or &quot;-all-&quot; for all properties)
+         */
+        propertyFilter?: Array<string>;
+
+        /**
+         * facets
+         */
+        body?: Array<string>;
+    }): Observable<StrictHttpResponse<Node>> {
+        const rb = new RequestBuilder(this.rootUrl, SearchV1Service.LoadSaveSearchPath, 'get');
+        if (params) {
+            rb.path('nodeId', params.nodeId, {});
+            rb.query('contentType', params.contentType, {});
+            rb.query('maxItems', params.maxItems, {});
+            rb.query('skipCount', params.skipCount, {});
+            rb.query('sortProperties', params.sortProperties, {});
+            rb.query('sortAscending', params.sortAscending, {});
+            rb.query('propertyFilter', params.propertyFilter, {});
+            rb.body(params.body, 'application/json');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<Node>;
+                }),
+            );
+    }
+
+    /**
+     * Load a saved search query.
+     *
+     * Load a saved search query.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `loadSaveSearch$Response()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    loadSaveSearch(params: {
+        /**
+         * Node id of the search item
+         */
+        nodeId: string;
+
+        /**
+         * Type of element
+         */
+        contentType?:
+            | 'FILES'
+            | 'FOLDERS'
+            | 'FILES_AND_FOLDERS'
+            | 'COLLECTIONS'
+            | 'TOOLPERMISSIONS'
+            | 'ALL';
+
+        /**
+         * maximum items per page
+         */
+        maxItems?: number;
+
+        /**
+         * skip a number of items
+         */
+        skipCount?: number;
+
+        /**
+         * sort properties
+         */
+        sortProperties?: Array<string>;
+
+        /**
+         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+         */
+        sortAscending?: Array<boolean>;
+
+        /**
+         * property filter for result nodes (or &quot;-all-&quot; for all properties)
+         */
+        propertyFilter?: Array<string>;
+
+        /**
+         * facets
+         */
+        body?: Array<string>;
+    }): Observable<Node> {
+        return this.loadSaveSearch$Response(params).pipe(
+            map((r: StrictHttpResponse<Node>) => r.body as Node),
+        );
+    }
+
+    /**
+     * Path part for operation saveSearch
+     */
+    static readonly SaveSearchPath = '/search/v1/queries/{repository}/{metadataset}/{query}/save';
+
+    /**
+     * Save a search query.
+     *
+     * Save a search query.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `saveSearch()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    saveSearch$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of metadataset (or &quot;-default-&quot; for default metadata set)
+         */
+        metadataset: string;
+
+        /**
+         * ID of query
+         */
+        query: string;
+
+        /**
+         * Name of the new search item
+         */
+        name: string;
+
+        /**
+         * Replace if search with the same name exists
+         */
+        replace?: boolean;
+
+        /**
+         * search parameters
+         */
+        body: Array<MdsQueryCriteria>;
+    }): Observable<StrictHttpResponse<NodeEntry>> {
+        const rb = new RequestBuilder(this.rootUrl, SearchV1Service.SaveSearchPath, 'post');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('metadataset', params.metadataset, {});
+            rb.path('query', params.query, {});
+            rb.query('name', params.name, {});
+            rb.query('replace', params.replace, {});
+            rb.body(params.body, 'application/json');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<NodeEntry>;
+                }),
+            );
+    }
+
+    /**
+     * Save a search query.
+     *
+     * Save a search query.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `saveSearch$Response()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    saveSearch(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of metadataset (or &quot;-default-&quot; for default metadata set)
+         */
+        metadataset: string;
+
+        /**
+         * ID of query
+         */
+        query: string;
+
+        /**
+         * Name of the new search item
+         */
+        name: string;
+
+        /**
+         * Replace if search with the same name exists
+         */
+        replace?: boolean;
+
+        /**
+         * search parameters
+         */
+        body: Array<MdsQueryCriteria>;
+    }): Observable<NodeEntry> {
+        return this.saveSearch$Response(params).pipe(
+            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
+        );
+    }
+
+    /**
+     * Path part for operation search
+     */
+    static readonly SearchPath = '/search/v1/queries/{repository}/{metadataset}/{query}';
+
+    /**
+     * Perform queries based on metadata sets.
+     *
+     * Perform queries based on metadata sets.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `search()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    search$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of metadataset (or &quot;-default-&quot; for default metadata set)
+         */
+        metadataset: string;
+
+        /**
+         * ID of query
+         */
+        query: string;
+
+        /**
+         * Type of element
+         */
+        contentType?:
+            | 'FILES'
+            | 'FOLDERS'
+            | 'FILES_AND_FOLDERS'
+            | 'COLLECTIONS'
+            | 'TOOLPERMISSIONS'
+            | 'ALL';
+
+        /**
+         * maximum items per page
+         */
+        maxItems?: number;
+
+        /**
+         * skip a number of items
+         */
+        skipCount?: number;
+
+        /**
+         * sort properties
+         */
+        sortProperties?: Array<string>;
+
+        /**
+         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+         */
+        sortAscending?: Array<boolean>;
+
+        /**
+         * property filter for result nodes (or &quot;-all-&quot; for all properties)
+         */
+        propertyFilter?: Array<string>;
+
+        /**
+         * search parameters
+         */
+        body: SearchParameters;
+    }): Observable<StrictHttpResponse<SearchResultNode>> {
+        const rb = new RequestBuilder(this.rootUrl, SearchV1Service.SearchPath, 'post');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('metadataset', params.metadataset, {});
+            rb.path('query', params.query, {});
+            rb.query('contentType', params.contentType, {});
+            rb.query('maxItems', params.maxItems, {});
+            rb.query('skipCount', params.skipCount, {});
+            rb.query('sortProperties', params.sortProperties, {});
+            rb.query('sortAscending', params.sortAscending, {});
+            rb.query('propertyFilter', params.propertyFilter, {});
+            rb.body(params.body, 'application/json');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<SearchResultNode>;
+                }),
+            );
+    }
+
+    /**
+     * Perform queries based on metadata sets.
+     *
+     * Perform queries based on metadata sets.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `search$Response()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    search(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of metadataset (or &quot;-default-&quot; for default metadata set)
+         */
+        metadataset: string;
+
+        /**
+         * ID of query
+         */
+        query: string;
+
+        /**
+         * Type of element
+         */
+        contentType?:
+            | 'FILES'
+            | 'FOLDERS'
+            | 'FILES_AND_FOLDERS'
+            | 'COLLECTIONS'
+            | 'TOOLPERMISSIONS'
+            | 'ALL';
+
+        /**
+         * maximum items per page
+         */
+        maxItems?: number;
+
+        /**
+         * skip a number of items
+         */
+        skipCount?: number;
+
+        /**
+         * sort properties
+         */
+        sortProperties?: Array<string>;
+
+        /**
+         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
+         */
+        sortAscending?: Array<boolean>;
+
+        /**
+         * property filter for result nodes (or &quot;-all-&quot; for all properties)
+         */
+        propertyFilter?: Array<string>;
+
+        /**
+         * search parameters
+         */
+        body: SearchParameters;
+    }): Observable<SearchResultNode> {
+        return this.search$Response(params).pipe(
+            map((r: StrictHttpResponse<SearchResultNode>) => r.body as SearchResultNode),
+        );
     }
 
     /**
@@ -104,17 +639,17 @@ export class SearchV1Service extends BaseService {
     }): Observable<StrictHttpResponse<SearchResultNode>> {
         const rb = new RequestBuilder(this.rootUrl, SearchV1Service.SearchByPropertyPath, 'get');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.query('contentType', params.contentType, { style: 'form', explode: true });
-            rb.query('combineMode', params.combineMode, { style: 'form', explode: true });
-            rb.query('property', params.property, { style: 'form', explode: true });
-            rb.query('value', params.value, { style: 'form', explode: true });
-            rb.query('comparator', params.comparator, { style: 'form', explode: true });
-            rb.query('maxItems', params.maxItems, { style: 'form', explode: true });
-            rb.query('skipCount', params.skipCount, { style: 'form', explode: true });
-            rb.query('sortProperties', params.sortProperties, { style: 'form', explode: true });
-            rb.query('sortAscending', params.sortAscending, { style: 'form', explode: true });
-            rb.query('propertyFilter', params.propertyFilter, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.query('contentType', params.contentType, {});
+            rb.query('combineMode', params.combineMode, {});
+            rb.query('property', params.property, {});
+            rb.query('value', params.value, {});
+            rb.query('comparator', params.comparator, {});
+            rb.query('maxItems', params.maxItems, {});
+            rb.query('skipCount', params.skipCount, {});
+            rb.query('sortProperties', params.sortProperties, {});
+            rb.query('sortAscending', params.sortAscending, {});
+            rb.query('propertyFilter', params.propertyFilter, {});
         }
 
         return this.http
@@ -210,6 +745,208 @@ export class SearchV1Service extends BaseService {
     }
 
     /**
+     * Path part for operation searchContributor
+     */
+    static readonly SearchContributorPath = '/search/v1/queries/{repository}/contributor';
+
+    /**
+     * Search for contributors.
+     *
+     *
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `searchContributor()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    searchContributor$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * search word
+         */
+        searchWord: string;
+
+        /**
+         * contributor kind
+         */
+        contributorKind: 'PERSON' | 'ORGANIZATION';
+
+        /**
+         * define which authority fields should be searched: [&#x27;firstname&#x27;, &#x27;lastname&#x27;, &#x27;email&#x27;, &#x27;uuid&#x27;, &#x27;url&#x27;]
+         */
+        fields?: Array<string>;
+
+        /**
+         * define which contributor props should be searched: [&#x27;ccm:lifecyclecontributer_author&#x27;, &#x27;ccm:lifecyclecontributer_publisher&#x27;, ..., &#x27;ccm:metadatacontributer_creator&#x27;, &#x27;ccm:metadatacontributer_validator&#x27;]
+         */
+        contributorProperties?: Array<string>;
+    }): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(this.rootUrl, SearchV1Service.SearchContributorPath, 'get');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.query('searchWord', params.searchWord, {});
+            rb.query('contributorKind', params.contributorKind, {});
+            rb.query('fields', params.fields, {});
+            rb.query('contributorProperties', params.contributorProperties, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<string>;
+                }),
+            );
+    }
+
+    /**
+     * Search for contributors.
+     *
+     *
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `searchContributor$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    searchContributor(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * search word
+         */
+        searchWord: string;
+
+        /**
+         * contributor kind
+         */
+        contributorKind: 'PERSON' | 'ORGANIZATION';
+
+        /**
+         * define which authority fields should be searched: [&#x27;firstname&#x27;, &#x27;lastname&#x27;, &#x27;email&#x27;, &#x27;uuid&#x27;, &#x27;url&#x27;]
+         */
+        fields?: Array<string>;
+
+        /**
+         * define which contributor props should be searched: [&#x27;ccm:lifecyclecontributer_author&#x27;, &#x27;ccm:lifecyclecontributer_publisher&#x27;, ..., &#x27;ccm:metadatacontributer_creator&#x27;, &#x27;ccm:metadatacontributer_validator&#x27;]
+         */
+        contributorProperties?: Array<string>;
+    }): Observable<string> {
+        return this.searchContributor$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
+        );
+    }
+
+    /**
+     * Path part for operation searchFacets
+     */
+    static readonly SearchFacetsPath =
+        '/search/v1/queries/{repository}/{metadataset}/{query}/facets';
+
+    /**
+     * Search in facets.
+     *
+     * Perform queries based on metadata sets.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `searchFacets()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    searchFacets$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of metadataset (or &quot;-default-&quot; for default metadata set)
+         */
+        metadataset: string;
+
+        /**
+         * ID of query
+         */
+        query: string;
+
+        /**
+         * facet parameters
+         */
+        body: SearchParametersFacets;
+    }): Observable<StrictHttpResponse<SearchResultNode>> {
+        const rb = new RequestBuilder(this.rootUrl, SearchV1Service.SearchFacetsPath, 'post');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('metadataset', params.metadataset, {});
+            rb.path('query', params.query, {});
+            rb.body(params.body, 'application/json');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<SearchResultNode>;
+                }),
+            );
+    }
+
+    /**
+     * Search in facets.
+     *
+     * Perform queries based on metadata sets.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `searchFacets$Response()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    searchFacets(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of metadataset (or &quot;-default-&quot; for default metadata set)
+         */
+        metadataset: string;
+
+        /**
+         * ID of query
+         */
+        query: string;
+
+        /**
+         * facet parameters
+         */
+        body: SearchParametersFacets;
+    }): Observable<SearchResultNode> {
+        return this.searchFacets$Response(params).pipe(
+            map((r: StrictHttpResponse<SearchResultNode>) => r.body as SearchResultNode),
+        );
+    }
+
+    /**
      * Path part for operation searchFingerprint
      */
     static readonly SearchFingerprintPath = '/search/v1/queries/{repository}/fingerprint/{nodeid}';
@@ -262,13 +999,13 @@ export class SearchV1Service extends BaseService {
     }): Observable<StrictHttpResponse<SearchResultNode>> {
         const rb = new RequestBuilder(this.rootUrl, SearchV1Service.SearchFingerprintPath, 'post');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('nodeid', params.nodeid, { style: 'simple', explode: false });
-            rb.query('maxItems', params.maxItems, { style: 'form', explode: true });
-            rb.query('skipCount', params.skipCount, { style: 'form', explode: true });
-            rb.query('sortProperties', params.sortProperties, { style: 'form', explode: true });
-            rb.query('sortAscending', params.sortAscending, { style: 'form', explode: true });
-            rb.query('propertyFilter', params.propertyFilter, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('nodeid', params.nodeid, {});
+            rb.query('maxItems', params.maxItems, {});
+            rb.query('skipCount', params.skipCount, {});
+            rb.query('sortProperties', params.sortProperties, {});
+            rb.query('sortAscending', params.sortAscending, {});
+            rb.query('propertyFilter', params.propertyFilter, {});
         }
 
         return this.http
@@ -333,747 +1070,6 @@ export class SearchV1Service extends BaseService {
         propertyFilter?: Array<string>;
     }): Observable<SearchResultNode> {
         return this.searchFingerprint$Response(params).pipe(
-            map((r: StrictHttpResponse<SearchResultNode>) => r.body as SearchResultNode),
-        );
-    }
-
-    /**
-     * Path part for operation loadSaveSearch
-     */
-    static readonly LoadSaveSearchPath = '/search/v1/queriesV2/load/{nodeId}';
-
-    /**
-     * Load a saved search query.
-     *
-     * Load a saved search query.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `loadSaveSearch()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    loadSaveSearch$Response(params: {
-        /**
-         * Node id of the search item
-         */
-        nodeId: string;
-
-        /**
-         * Type of element
-         */
-        contentType?:
-            | 'FILES'
-            | 'FOLDERS'
-            | 'FILES_AND_FOLDERS'
-            | 'COLLECTIONS'
-            | 'TOOLPERMISSIONS'
-            | 'ALL';
-
-        /**
-         * maximum items per page
-         */
-        maxItems?: number;
-
-        /**
-         * skip a number of items
-         */
-        skipCount?: number;
-
-        /**
-         * sort properties
-         */
-        sortProperties?: Array<string>;
-
-        /**
-         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
-         */
-        sortAscending?: Array<boolean>;
-
-        /**
-         * property filter for result nodes (or &quot;-all-&quot; for all properties)
-         */
-        propertyFilter?: Array<string>;
-
-        /**
-         * facettes
-         */
-        body?: Array<string>;
-    }): Observable<StrictHttpResponse<Node>> {
-        const rb = new RequestBuilder(this.rootUrl, SearchV1Service.LoadSaveSearchPath, 'get');
-        if (params) {
-            rb.path('nodeId', params.nodeId, { style: 'simple', explode: false });
-            rb.query('contentType', params.contentType, { style: 'form', explode: true });
-            rb.query('maxItems', params.maxItems, { style: 'form', explode: true });
-            rb.query('skipCount', params.skipCount, { style: 'form', explode: true });
-            rb.query('sortProperties', params.sortProperties, { style: 'form', explode: true });
-            rb.query('sortAscending', params.sortAscending, { style: 'form', explode: true });
-            rb.query('propertyFilter', params.propertyFilter, { style: 'form', explode: true });
-            rb.body(params.body, 'application/json');
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Node>;
-                }),
-            );
-    }
-
-    /**
-     * Load a saved search query.
-     *
-     * Load a saved search query.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `loadSaveSearch$Response()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    loadSaveSearch(params: {
-        /**
-         * Node id of the search item
-         */
-        nodeId: string;
-
-        /**
-         * Type of element
-         */
-        contentType?:
-            | 'FILES'
-            | 'FOLDERS'
-            | 'FILES_AND_FOLDERS'
-            | 'COLLECTIONS'
-            | 'TOOLPERMISSIONS'
-            | 'ALL';
-
-        /**
-         * maximum items per page
-         */
-        maxItems?: number;
-
-        /**
-         * skip a number of items
-         */
-        skipCount?: number;
-
-        /**
-         * sort properties
-         */
-        sortProperties?: Array<string>;
-
-        /**
-         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
-         */
-        sortAscending?: Array<boolean>;
-
-        /**
-         * property filter for result nodes (or &quot;-all-&quot; for all properties)
-         */
-        propertyFilter?: Array<string>;
-
-        /**
-         * facettes
-         */
-        body?: Array<string>;
-    }): Observable<Node> {
-        return this.loadSaveSearch$Response(params).pipe(
-            map((r: StrictHttpResponse<Node>) => r.body as Node),
-        );
-    }
-
-    /**
-     * Path part for operation searchContributor
-     */
-    static readonly SearchContributorPath = '/search/v1/queriesV2/{repository}/contributor';
-
-    /**
-     * Search for contributors.
-     *
-     *
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `searchContributor()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    searchContributor$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * search word
-         */
-        searchWord: string;
-
-        /**
-         * contributor kind
-         */
-        contributorKind: 'PERSON' | 'ORGANIZATION';
-
-        /**
-         * define which authority fields should be searched: [&#x27;firstname&#x27;, &#x27;lastname&#x27;, &#x27;email&#x27;, &#x27;uuid&#x27;, &#x27;url&#x27;]
-         */
-        fields?: Array<string>;
-
-        /**
-         * define which contributor props should be searched: [&#x27;ccm:lifecyclecontributer_author&#x27;, &#x27;ccm:lifecyclecontributer_publisher&#x27;, ..., &#x27;ccm:metadatacontributer_creator&#x27;, &#x27;ccm:metadatacontributer_validator&#x27;]
-         */
-        contributorProperties?: Array<string>;
-    }): Observable<StrictHttpResponse<Array<SearchVCard>>> {
-        const rb = new RequestBuilder(this.rootUrl, SearchV1Service.SearchContributorPath, 'get');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.query('searchWord', params.searchWord, { style: 'form', explode: true });
-            rb.query('contributorKind', params.contributorKind, { style: 'form', explode: true });
-            rb.query('fields', params.fields, { style: 'form', explode: true });
-            rb.query('contributorProperties', params.contributorProperties, {
-                style: 'form',
-                explode: true,
-            });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<Array<SearchVCard>>;
-                }),
-            );
-    }
-
-    /**
-     * Search for contributors.
-     *
-     *
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `searchContributor$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    searchContributor(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * search word
-         */
-        searchWord: string;
-
-        /**
-         * contributor kind
-         */
-        contributorKind: 'PERSON' | 'ORGANIZATION';
-
-        /**
-         * define which authority fields should be searched: [&#x27;firstname&#x27;, &#x27;lastname&#x27;, &#x27;email&#x27;, &#x27;uuid&#x27;, &#x27;url&#x27;]
-         */
-        fields?: Array<string>;
-
-        /**
-         * define which contributor props should be searched: [&#x27;ccm:lifecyclecontributer_author&#x27;, &#x27;ccm:lifecyclecontributer_publisher&#x27;, ..., &#x27;ccm:metadatacontributer_creator&#x27;, &#x27;ccm:metadatacontributer_validator&#x27;]
-         */
-        contributorProperties?: Array<string>;
-    }): Observable<Array<SearchVCard>> {
-        return this.searchContributor$Response(params).pipe(
-            map((r: StrictHttpResponse<Array<SearchVCard>>) => r.body as Array<SearchVCard>),
-        );
-    }
-
-    /**
-     * Path part for operation searchV2
-     */
-    static readonly SearchV2Path = '/search/v1/queriesV2/{repository}/{metadataset}/{query}';
-
-    /**
-     * Perform queries based on metadata sets V2.
-     *
-     * Perform queries based on metadata sets V2.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `searchV2()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    searchV2$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of metadataset (or &quot;-default-&quot; for default metadata set)
-         */
-        metadataset: string;
-
-        /**
-         * ID of query
-         */
-        query: string;
-
-        /**
-         * Type of element
-         */
-        contentType?:
-            | 'FILES'
-            | 'FOLDERS'
-            | 'FILES_AND_FOLDERS'
-            | 'COLLECTIONS'
-            | 'TOOLPERMISSIONS'
-            | 'ALL';
-
-        /**
-         * maximum items per page
-         */
-        maxItems?: number;
-
-        /**
-         * skip a number of items
-         */
-        skipCount?: number;
-
-        /**
-         * sort properties
-         */
-        sortProperties?: Array<string>;
-
-        /**
-         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
-         */
-        sortAscending?: Array<boolean>;
-
-        /**
-         * property filter for result nodes (or &quot;-all-&quot; for all properties)
-         */
-        propertyFilter?: Array<string>;
-
-        /**
-         * search parameters
-         */
-        body: SearchParameters;
-    }): Observable<StrictHttpResponse<SearchResultNode>> {
-        const rb = new RequestBuilder(this.rootUrl, SearchV1Service.SearchV2Path, 'post');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('metadataset', params.metadataset, { style: 'simple', explode: false });
-            rb.path('query', params.query, { style: 'simple', explode: false });
-            rb.query('contentType', params.contentType, { style: 'form', explode: true });
-            rb.query('maxItems', params.maxItems, { style: 'form', explode: true });
-            rb.query('skipCount', params.skipCount, { style: 'form', explode: true });
-            rb.query('sortProperties', params.sortProperties, { style: 'form', explode: true });
-            rb.query('sortAscending', params.sortAscending, { style: 'form', explode: true });
-            rb.query('propertyFilter', params.propertyFilter, { style: 'form', explode: true });
-            rb.body(params.body, 'application/json');
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<SearchResultNode>;
-                }),
-            );
-    }
-
-    /**
-     * Perform queries based on metadata sets V2.
-     *
-     * Perform queries based on metadata sets V2.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `searchV2$Response()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    searchV2(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of metadataset (or &quot;-default-&quot; for default metadata set)
-         */
-        metadataset: string;
-
-        /**
-         * ID of query
-         */
-        query: string;
-
-        /**
-         * Type of element
-         */
-        contentType?:
-            | 'FILES'
-            | 'FOLDERS'
-            | 'FILES_AND_FOLDERS'
-            | 'COLLECTIONS'
-            | 'TOOLPERMISSIONS'
-            | 'ALL';
-
-        /**
-         * maximum items per page
-         */
-        maxItems?: number;
-
-        /**
-         * skip a number of items
-         */
-        skipCount?: number;
-
-        /**
-         * sort properties
-         */
-        sortProperties?: Array<string>;
-
-        /**
-         * sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index
-         */
-        sortAscending?: Array<boolean>;
-
-        /**
-         * property filter for result nodes (or &quot;-all-&quot; for all properties)
-         */
-        propertyFilter?: Array<string>;
-
-        /**
-         * search parameters
-         */
-        body: SearchParameters;
-    }): Observable<SearchResultNode> {
-        return this.searchV2$Response(params).pipe(
-            map((r: StrictHttpResponse<SearchResultNode>) => r.body as SearchResultNode),
-        );
-    }
-
-    /**
-     * Path part for operation searchFacets
-     */
-    static readonly SearchFacetsPath =
-        '/search/v1/queriesV2/{repository}/{metadataset}/{query}/facets';
-
-    /**
-     * Search in facets.
-     *
-     * Perform queries based on metadata sets V2.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `searchFacets()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    searchFacets$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of metadataset (or &quot;-default-&quot; for default metadata set)
-         */
-        metadataset: string;
-
-        /**
-         * ID of query
-         */
-        query: string;
-
-        /**
-         * facet parameters
-         */
-        body: SearchParametersFacets;
-    }): Observable<StrictHttpResponse<SearchResultNode>> {
-        const rb = new RequestBuilder(this.rootUrl, SearchV1Service.SearchFacetsPath, 'post');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('metadataset', params.metadataset, { style: 'simple', explode: false });
-            rb.path('query', params.query, { style: 'simple', explode: false });
-            rb.body(params.body, 'application/json');
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<SearchResultNode>;
-                }),
-            );
-    }
-
-    /**
-     * Search in facets.
-     *
-     * Perform queries based on metadata sets V2.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `searchFacets$Response()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    searchFacets(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of metadataset (or &quot;-default-&quot; for default metadata set)
-         */
-        metadataset: string;
-
-        /**
-         * ID of query
-         */
-        query: string;
-
-        /**
-         * facet parameters
-         */
-        body: SearchParametersFacets;
-    }): Observable<SearchResultNode> {
-        return this.searchFacets$Response(params).pipe(
-            map((r: StrictHttpResponse<SearchResultNode>) => r.body as SearchResultNode),
-        );
-    }
-
-    /**
-     * Path part for operation saveSearch
-     */
-    static readonly SaveSearchPath = '/search/v1/queriesV2/{repository}/{metadataset}/{query}/save';
-
-    /**
-     * Save a search query.
-     *
-     * Save a search query.
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `saveSearch()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    saveSearch$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of metadataset (or &quot;-default-&quot; for default metadata set)
-         */
-        metadataset: string;
-
-        /**
-         * ID of query
-         */
-        query: string;
-
-        /**
-         * Name of the new search item
-         */
-        name: string;
-
-        /**
-         * Replace if search with the same name exists
-         */
-        replace?: boolean;
-
-        /**
-         * search parameters
-         */
-        body: Array<MdsQueryCriteria>;
-    }): Observable<StrictHttpResponse<NodeEntry>> {
-        const rb = new RequestBuilder(this.rootUrl, SearchV1Service.SaveSearchPath, 'post');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('metadataset', params.metadataset, { style: 'simple', explode: false });
-            rb.path('query', params.query, { style: 'simple', explode: false });
-            rb.query('name', params.name, { style: 'form', explode: true });
-            rb.query('replace', params.replace, { style: 'form', explode: true });
-            rb.body(params.body, 'application/json');
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<NodeEntry>;
-                }),
-            );
-    }
-
-    /**
-     * Save a search query.
-     *
-     * Save a search query.
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `saveSearch$Response()` instead.
-     *
-     * This method sends `application/json` and handles request body of type `application/json`.
-     */
-    saveSearch(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * ID of metadataset (or &quot;-default-&quot; for default metadata set)
-         */
-        metadataset: string;
-
-        /**
-         * ID of query
-         */
-        query: string;
-
-        /**
-         * Name of the new search item
-         */
-        name: string;
-
-        /**
-         * Replace if search with the same name exists
-         */
-        replace?: boolean;
-
-        /**
-         * search parameters
-         */
-        body: Array<MdsQueryCriteria>;
-    }): Observable<NodeEntry> {
-        return this.saveSearch$Response(params).pipe(
-            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
-        );
-    }
-
-    /**
-     * Path part for operation getRelevantNodes
-     */
-    static readonly GetRelevantNodesPath = '/search/v1/relevant/{repository}';
-
-    /**
-     * Get relevant nodes for the current user.
-     *
-     *
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getRelevantNodes()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getRelevantNodes$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * property filter for result nodes (or &quot;-all-&quot; for all properties)
-         */
-        propertyFilter?: Array<string>;
-
-        /**
-         * maximum items per page
-         */
-        maxItems?: number;
-
-        /**
-         * skip a number of items
-         */
-        skipCount?: number;
-    }): Observable<StrictHttpResponse<SearchResultNode>> {
-        const rb = new RequestBuilder(this.rootUrl, SearchV1Service.GetRelevantNodesPath, 'get');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.query('propertyFilter', params.propertyFilter, { style: 'form', explode: true });
-            rb.query('maxItems', params.maxItems, { style: 'form', explode: true });
-            rb.query('skipCount', params.skipCount, { style: 'form', explode: true });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<SearchResultNode>;
-                }),
-            );
-    }
-
-    /**
-     * Get relevant nodes for the current user.
-     *
-     *
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getRelevantNodes$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    getRelevantNodes(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * property filter for result nodes (or &quot;-all-&quot; for all properties)
-         */
-        propertyFilter?: Array<string>;
-
-        /**
-         * maximum items per page
-         */
-        maxItems?: number;
-
-        /**
-         * skip a number of items
-         */
-        skipCount?: number;
-    }): Observable<SearchResultNode> {
-        return this.getRelevantNodes$Response(params).pipe(
             map((r: StrictHttpResponse<SearchResultNode>) => r.body as SearchResultNode),
         );
     }

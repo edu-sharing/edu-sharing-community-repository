@@ -12,7 +12,7 @@ export type DragDropState<T extends Node> = {
     mode?: DropAction,
 };
 @Directive({
-    selector: '[appDragCursor]',
+    selector: '[esDragCursor]',
 })
 /**
  * directive to control the drag/drop behaviour based on the current state
@@ -51,7 +51,7 @@ export class DragCursorDirective implements OnInit, OnDestroy {
                 document.addEventListener('keydown', this.keyDownListener);
                 document.addEventListener('keyup', this.keyUpListener);
                 this.updateCursor();
-                this.interval = setInterval(() => this.updateCursor(), 1000 / 60);
+                this.interval = window.setInterval(() => this.updateCursor(), 1000 / 60);
             });
         });
 
@@ -61,7 +61,7 @@ export class DragCursorDirective implements OnInit, OnDestroy {
                 document.removeEventListener('keydown', this.keyDownListener);
                 document.removeEventListener('keyup', this.keyUpListener);
                 this.updateCursor();
-                clearInterval(this.interval);
+                window.clearInterval(this.interval);
             });
         });
     }

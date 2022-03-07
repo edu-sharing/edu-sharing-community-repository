@@ -1,5 +1,6 @@
-import {OptionsHelperService} from '../../options-helper.service';
+import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../options-helper.service';
 import {
+    AfterViewInit,
     Component,
     ComponentFactoryResolver,
     ComponentRef,
@@ -8,8 +9,9 @@ import {
     EventEmitter,
     Input,
     NgZone,
-    OnChanges, Output,
-    SimpleChange,
+    OnChanges,
+    Output,
+    SimpleChange, SimpleChanges,
     TemplateRef,
     Type,
     ViewContainerRef
@@ -19,104 +21,45 @@ import {TemporaryStorageService} from '../../../core-module/rest/services/tempor
 import {UIHelper} from '../../ui-helper';
 import {NodeEntriesComponent} from '../node-entries/node-entries.component';
 import {NodeDataSource} from './node-data-source';
-import {List, ListItemSort, Node, SortColumn} from '../../../core-module/rest/data-object';
+import {CollectionReference, Node} from '../../../core-module/rest/data-object';
 import {ListItem} from '../../../core-module/ui/list-item';
-import {CustomOptions, OptionItem, Scope, Target} from '../../option-item';
-import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
+import {OptionItem} from '../../option-item';
 import {MainNavService} from '../../../common/services/main-nav.service';
-import {SelectionModel} from '@angular/cdk/collections';
-import {Sort} from '@angular/material/sort';
-import {DragDropState} from '../../directives/drag-cursor.directive';
-import {DropAction} from '../../directives/drag-nodes/drag-nodes';
+import {
+    FetchEvent,
+    GridConfig,
+    InteractionType,
+    ListDragGropConfig,
+    ListEventInterface,
+    ListOptions,
+    ListOptionsConfig,
+    ListSortConfig,
+    NodeClickEvent,
+    NodeEntriesDisplayType
+} from './entries-model';
+import {NodeHelperService} from '../../node-helper.service';
+import {NodeEntriesTemplatesService} from '../node-entries/node-entries-templates.service';
 
-export type NodeRoot = 'MY_FILES' | 'SHARED_FILES' | 'MY_SHARED_FILES' | 'TO_ME_SHARED_FILES' | 'WORKFLOW_RECEIVE' | 'RECYCLE' | 'ALL_FILES';
-export enum NodeEntriesDisplayType {
-    Table,
-    Grid,
-    SmallGrid
-}
-export enum InteractionType {
-    DefaultActionLink,
-    Emitter,
-    None
-}
-export type ListOptions = { [key in Target]?: OptionItem[]};
-export type ListOptionsConfig = {
-    scope: Scope,
-    actionbar: ActionbarComponent,
-    parent?: Node,
-    customOptions?: CustomOptions,
-};
-export interface ListSortConfig extends Sort {
-    columns: ListItemSort[];
-    allowed?: boolean;
-    customSortingInProgress?: boolean;
-}
-export type DropTarget = Node | NodeRoot;
-export interface DropSource<T extends Node> {
-    element: T[];
-    sourceList: ListEventInterface<T>;
-    mode: DropAction;
-}
-export interface ListDragGropConfig<T extends Node> {
-    dragAllowed: boolean;
-    dropAllowed?: (target: T, source: DropSource<T>) => boolean;
-    dropped?: (target: T, source: DropSource<T>) => void;
-}
-export enum ClickSource {
-    Preview,
-    Icon,
-    Metadata,
-    Comments
-}
-export type NodeClickEvent<T extends Node> = {
-    element: T,
-    source: ClickSource,
-    attribute?: ListItem // only when source === Metadata
-}
-export type FetchEvent = {
-    offset: number,
-    amount?: number;
-}
-export type GridConfig = {
-    maxCols?: number
-}
-export interface ListEventInterface<T extends Node> {
-    updateNodes(nodes: void | T[]): void;
-
-    getDisplayType(): NodeEntriesDisplayType;
-
-    setDisplayType(displayType: NodeEntriesDisplayType): void;
-
-    showReorderColumnsDialog(): void;
-
-    addVirtualNodes(virtual: T[]): void;
-
-    setOptions(options: ListOptions): void;
-
-    /**
-     * activate option (dropdown) generation
-     */
-    initOptionsGenerator(actionbar: ListOptionsConfig): void|Promise<void>;
-
-    getSelection(): SelectionModel<T>;
-}
 @Component({
-    selector: 'app-node-entries-wrapper',
+    selector: 'es-node-entries-wrapper',
     template: `
-        <app-node-entries
+        <es-node-entries
             *ngIf="!customNodeListComponent"
         >
-            <ng-template #title><ng-container *ngTemplateOutlet="titleRef"></ng-container></ng-template>
-            <ng-template #empty><ng-container *ngTemplateOutlet="emptyRef"></ng-container></ng-template>
-        </app-node-entries>`,
+        </es-node-entries>`,
     providers: [
         NodeEntriesService,
+        OptionsHelperService,
+        NodeEntriesTemplatesService,
+        {provide: OPTIONS_HELPER_CONFIG, useValue: {
+                subscribeEvents: false
+        }}
     ]
 })
-export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, ListEventInterface<T> {
+export class NodeEntriesWrapperComponent<T extends Node> implements AfterViewInit, OnChanges, ListEventInterface<T> {
     @ContentChild('title') titleRef: TemplateRef<any>;
     @ContentChild('empty') emptyRef: TemplateRef<any>;
+    @ContentChild('actionArea') actionAreaRef: TemplateRef<any>;
     @Input() dataSource: NodeDataSource<T>;
     @Input() columns: ListItem[];
     @Input() configureColumns: boolean;
@@ -143,7 +86,9 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
         private ngZone: NgZone,
         private entriesService: NodeEntriesService<T>,
         private optionsHelper: OptionsHelperService,
+        private nodeHelperService: NodeHelperService,
         private mainNav: MainNavService,
+        private templatesService: NodeEntriesTemplatesService,
         private elementRef: ElementRef,
     ) {
         // regulary re-bind template since it might have updated without ngChanges trigger
@@ -185,6 +130,8 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
         if (this.componentRef) {
             this.componentRef.instance.changeDetectorRef?.detectChanges();
         }
+        // This might need wrapping with `setTimeout`.
+        this.updateTemplates();
     }
     /**
      * Replaces this wrapper with the configured custom-node-list component.
@@ -232,7 +179,21 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
     }
 
     updateNodes(nodes: void | T[]): void {
-        // @TODO
+        if(!nodes) {
+            return;
+        }
+        this.dataSource.getData().forEach((d) => {
+            let hits = (nodes as T[]).filter((n) => n.ref.id === d.ref.id);
+            if(hits.length === 0) {
+                // handle if the original has changed (for collection refs)
+                hits = (nodes as T[]).filter((n) => n.ref.id === (d as unknown as CollectionReference).originalId);
+            }
+            console.log(d, hits);
+            if(hits.length === 1) {
+                this.nodeHelperService.copyDataToNode(d, hits[0]);
+            }
+        });
+        console.log(nodes);
     }
 
     showReorderColumnsDialog(): void {
@@ -243,7 +204,14 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
             o.virtual = true;
             return o;
         });
-        this.dataSource.appendData(virtual, 'before');
+        virtual.forEach((v) => {
+            const contains = this.dataSource.getData().some((d) => d.ref.id === v.ref.id);
+            if(contains) {
+                this.updateNodes([v]);
+            } else {
+                this.dataSource.appendData([v], 'before');
+            }
+        })
         this.entriesService.selection.clear();
         this.entriesService.selection.select(...virtual);
     }
@@ -268,6 +236,17 @@ export class NodeEntriesWrapperComponent<T extends Node> implements OnChanges, L
             customOptions: config.customOptions,
         });
         this.optionsHelper.refreshComponents();
+    }
+
+    ngAfterViewInit(): void {
+        // Prevent changed-after-checked error
+        Promise.resolve().then(() => this.updateTemplates());
+    }
+
+    private updateTemplates(): void {
+        this.templatesService.title = this.titleRef;
+        this.templatesService.empty = this.emptyRef;
+        this.templatesService.actionArea = this.actionAreaRef;
     }
 }
 

@@ -7,11 +7,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.LogFactory;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.jobs.quartz.AbstractJob;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -50,12 +49,12 @@ public class ImporterJobDDB extends AbstractJob{
 
 		ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfo(ddbFile);
 		ApplicationInfo app=ApplicationInfoList.getRepositoryInfoByRepositoryType(ApplicationInfo.REPOSITORY_TYPE_DDB);
-		MetadataSetV2 mds=MetadataHelper.getMetadataset(app, CCConstants.metadatasetdefault_id);
+		MetadataSet mds=MetadataHelper.getMetadataset(app, CCConstants.metadatasetdefault_id);
 		
 		SearchToken token = new SearchToken();
 		HashMap<String, String[]> criterias = new HashMap<String,String[]>();
-		criterias.put(MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA, new String[] {query});
-		List<NodeRef> ddbObjects = new SearchServiceDDBImpl(app.getAppId()).searchV2(mds,MetadataSetV2.DEFAULT_CLIENT_QUERY,criterias,token).getData();
+		criterias.put(MetadataSet.DEFAULT_CLIENT_QUERY_CRITERIA, new String[] {query});
+		List<NodeRef> ddbObjects = new SearchServiceDDBImpl(app.getAppId()).search(mds, MetadataSet.DEFAULT_CLIENT_QUERY,criterias,token).getData();
 	
 		for(NodeRef node : ddbObjects){
 			HashMap<String, Object> ddbObject = new NodeServiceDDBImpl(app.getAppId()).getProperties(node.getStoreProtocol(), node.getStoreId(), node.getNodeId());

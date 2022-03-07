@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
-import { Node } from '../../core-module/core.module';
-import { ListItem } from '../../core-module/core.module';
+import { SearchConfig, SearchService as SearchApiService } from 'ngx-edu-sharing-api';
 import { BehaviorSubject } from 'rxjs';
-import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
+import { SearchFieldService } from 'src/app/common/ui/search-field/search-field.service';
+import { ListItem, Node } from '../../core-module/core.module';
+import { NodeDataSource } from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
 import {
     ListSortConfig,
     NodeEntriesDisplayType
-} from '../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
+} from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 
 /**
  * Session state for search.component.
@@ -17,14 +18,13 @@ import {
 @Injectable()
 export class SearchService {
     searchTerm: string = '';
-    dataSourceSearchResult: {[key: number]: NodeDataSource<Node>} = [];
+    dataSourceSearchResult: { [key: number]: NodeDataSource<Node> } = [];
     searchResultRepositories: Node[][] = [];
     dataSourceCollections = new NodeDataSource<Node>();
     columns: ListItem[] = [];
     collectionsColumns: ListItem[] = [];
     ignored: Array<string> = [];
     reurl: string;
-    facettes: Array<any> = [];
     autocompleteData: any = [];
     numberofresults: number = 0;
     offset: number = 0;
@@ -45,7 +45,16 @@ export class SearchService {
     sort: ListSortConfig;
     extendedSearchUsed = false;
 
-    constructor() {}
+    private readonly searchConfigSubject = new BehaviorSubject<Partial<SearchConfig>>({});
+
+    constructor(private searchApi: SearchApiService, private searchField: SearchFieldService) {
+        this.searchConfigSubject.pipe().subscribe((config) => {
+            const { repository, metadataSet } = config;
+            if (repository && metadataSet) {
+                this.searchField.setMdsInfo({ repository, metadataSet });
+            }
+        });
+    }
 
     clear() {
         this.searchTerm = '';
@@ -61,6 +70,17 @@ export class SearchService {
         this.dataSourceCollections.reset();
         this.searchResultRepositories = [];
         this.complete = false;
-        this.facettes = [];
+    }
+
+    setRepository(repository: string): void {
+        if (this.searchConfigSubject.value.repository !== repository) {
+            this.searchConfigSubject.next({ ...this.searchConfigSubject.value, repository });
+        }
+    }
+
+    setMetadataSet(metadataSet: string): void {
+        if (this.searchConfigSubject.value.metadataSet !== metadataSet) {
+            this.searchConfigSubject.next({ ...this.searchConfigSubject.value, metadataSet });
+        }
     }
 }

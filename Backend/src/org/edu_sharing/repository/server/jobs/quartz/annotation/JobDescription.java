@@ -9,4 +9,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface JobDescription {
     String description() default "no description present";
+    JobTag[] tags() default {};
+
+    enum JobTag {
+        DeletePersonJob
+    }
 }

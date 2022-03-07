@@ -7,12 +7,12 @@ import { SkipNavService, SkipTarget } from './skip-nav.service';
  * Only one element can be registered for any given `target`.
  */
 @Directive({
-    selector: '[appSkipTarget]',
+    selector: '[esSkipTarget]',
 })
 export class SkipTargetDirective implements OnInit, OnDestroy {
     // Use an alias for a property input that is equal to the component selector.
     // tslint:disable-next-line:no-input-rename
-    @Input('appSkipTarget') target: SkipTarget;
+    @Input('esSkipTarget') target: SkipTarget;
 
     constructor(private elementRef: ElementRef<HTMLElement>, private skipNav: SkipNavService) {}
 

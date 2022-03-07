@@ -27,7 +27,7 @@
             "EXTENSION_CONFIG_TITLE": "Extension configuration file (Override)",
             "EXTENSION_CONFIG_HINT": "You can overwrite values of the standard configuration here. Please note that this file will be replaced on rollout. Changes made to this file must be provided to the edu-sharing dev team",
             "SERVER_CONFIG_TITLE": "Server configuration file (Override)",
-            "SERVER_CONFIG_HINT": "You can overwrite values of the standard configuration here. The changes are for the current server and will not get overriden. This file has the highest priority",
+            "SERVER_CONFIG_HINT": "You can overwrite values of the standard configuration here. The changes are for the current server and will not get overriden. This file has the highest priority. CAUTION! In cluster environments this only overrides the config on the current server.",
 
             "SIZE": "Editor-size",
             "SIZE_MEDIUM": "normal",
@@ -114,7 +114,8 @@
                 "resolve_website_title": "If true, the repository resolves title and metadata when creating links",
                 "url_dynamic": "If true, all generated links (e.g. to previews) are always mapped to the requesting domain of the client. If false, the value is always generated based on client protocol, client port and domain",
                 "allow_origin": "Comma-separated list of all Origin addresses for which CORS access is allowed. An empty value allows CORS from any requesting domain. Example: \"https://example.com\"",
-                "notify_fetch_limit": "Maximum number of Notify objects that can be created when loading the \" Shared by me\" / \" Shared with me\" folder is retrieved. Recommended values are between 200-1000. 0 disables the limit"
+                "notify_fetch_limit": "Maximum number of Notify objects that can be created when loading the \" Shared by me\" / \" Shared with me\" folder is retrieved. Recommended values are between 200-1000. 0 disables the limit",
+                "cookie_attributes": "Flags for the session-cookie, typically \"secure\" so it will only be sent via https. Also same-site behaviour can be configured, e.g. \"SameSite=None\""
             },
             "CCMAIL": {
                 "mail.authtype": "Authentication type on the mail server. Currently either empty (= without authentication) or \"tls\"",
@@ -172,15 +173,15 @@
                 },
                 "MAIL_SETUP": {
                     "TITLE": "Mail server configuration",
-                    "STATUS_OK": "The mail server {{{mail.smtp.server}} is used for sending e-mails",
+                    "STATUS_OK": "The mail server {{{host}} is used for sending e-mails",
                     "STATUS_FAIL": "No mail server has been registered yet",
-                    "SOLUTION": "Browse to the \"Sources\" section and edit the file ccmail.properties.xml. Enter the correct values for your mail system"
+                    "SOLUTION": "Browse to the \"global system configuration\" section and add the mail configuration into the edu-sharing configuration"
                 },
                 "MAIL_REPORT": {
                     "TITLE": "\"Report a Problem\" Feature",
-                    "STATUS_OK": "The function is active, incoming requests are sent to the address {{mail.report.receiver}}.",
+                    "STATUS_OK": "The function is active, incoming requests are sent to the address {{receiver}}.",
                     "STATUS_FAIL": "The function is active, but the configuration is invalid.",
-                    "SOLUTION": "Browse to the \"Sources\" section and edit the file ccmail.properties.xml. Add \"mail.report.receiver\" and enter the e-mail address for incoming requests"
+                    "SOLUTION": "Browse to the \"global system configuration\" section and add the report receiver info into the edu-sharing configuration"
                 },
                 "CORS": {
                     "TITLE": "CORS-Configuration",
@@ -271,7 +272,10 @@
             "UPLOAD_TEMP": "Upload files to temporary directory",
             "CHOOSE_UPLOAD_TEMP": "Select file",
             "UPLOAD_TEMP_START": "Upload",
-            "UPLOAD_TEMP_DONE": "File was stored on the server as {{filename}}"
+            "UPLOAD_TEMP_DONE": "File was stored on the server as {{filename}}",
+            "AUTHENTICATE": "Start session",
+            "AUTHENTICATE_AS_USER": "Start session as user",
+            "AUTHENTICATE_AS_USER_DETAILS": "If you continue the current admin session will be closed and you will be authenticated as the coosen user. You will need to relogin as admin after you've finished your test. Do you want to continue?"
         },
         "BROWSER": {
             "NODE_BROWSER": "Node-Browser",

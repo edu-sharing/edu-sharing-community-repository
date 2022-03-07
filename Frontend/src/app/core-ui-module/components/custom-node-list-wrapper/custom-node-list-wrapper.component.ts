@@ -49,7 +49,7 @@ export interface CustomNodeListWrapperInterface {
  * `CustomNodeListWrapperInterface`, and 3) the configured component.
  */
 @Component({
-    selector: 'app-custom-node-list-wrapper',
+    selector: 'es-custom-node-list-wrapper',
     template: '',
 })
 export class CustomNodeListWrapperComponent implements OnChanges {

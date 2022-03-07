@@ -10,7 +10,7 @@ import {RestConnectorService} from '../../../../core-module/rest/services/rest-c
 import {TranslateService} from '@ngx-translate/core';
 
 @Component({
-    selector: 'app-license-details',
+    selector: 'es-license-details',
     templateUrl: 'license-details.component.html',
     styleUrls: ['license-details.component.scss'],
 })

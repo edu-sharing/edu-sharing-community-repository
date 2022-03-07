@@ -25,7 +25,7 @@ import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 
 
 @Component({
-  selector: 'app-oer',
+  selector: 'es-oer',
   templateUrl: 'oer.component.html',
   styleUrls: ['oer.component.scss'],
   })

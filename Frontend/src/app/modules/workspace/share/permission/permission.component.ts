@@ -3,7 +3,7 @@ import {Permission} from "../../../../core-module/core.module";
 import {RestConstants} from "../../../../core-module/core.module";
 
 @Component({
-  selector: 'workspace-share-permission',
+  selector: 'es-workspace-share-permission',
   templateUrl: 'permission.component.html',
   styleUrls: ['permission.component.scss']
 })

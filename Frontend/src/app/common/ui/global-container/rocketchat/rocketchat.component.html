@@ -3,9 +3,9 @@
         <div class="title">{{'ROCKETCHAT.TITLE' | translate}} <span *ngIf="unread">({{unread}})</span></div>
         <div class="options">
             <mat-spinner *ngIf="!loaded" diameter="20"></mat-spinner>
-            <button mat-button *ngIf="loaded && opened" class="toggle-fullscreen clickable" (click)="fullscreen=!fullscreen"><i [icon]="fullscreen ? 'fullscreen_exit' : 'fullscreen'"></i></button>
-            <button mat-button *ngIf="loaded && opened" class="toggle-close clickable" (click)="opened=!opened;unread=0"><i icon="close"></i></button>
-            <button mat-button *ngIf="loaded && !fullscreen" class="toggle-open clickable" (click)="opened=!opened;unread=0"><i [icon]="opened ? 'remove' : 'launch'"></i></button>
+            <button mat-button *ngIf="loaded && opened" class="toggle-fullscreen clickable" (click)="fullscreen=!fullscreen"><i [esIcon]="fullscreen ? 'fullscreen_exit' : 'fullscreen'"></i></button>
+            <button mat-button *ngIf="loaded && opened" class="toggle-close clickable" (click)="opened=!opened;unread=0"><i esIcon="close"></i></button>
+            <button mat-button *ngIf="loaded && !fullscreen" class="toggle-open clickable" (click)="opened=!opened;unread=0"><i [esIcon]="opened ? 'remove' : 'launch'"></i></button>
         </div>
     </div>
     <iframe #frame [src]="src" [class.opened]="opened"></iframe>

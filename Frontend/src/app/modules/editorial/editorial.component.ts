@@ -45,7 +45,7 @@ import {ListTableComponent} from '../../core-ui-module/components/list-table/lis
 import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 
 @Component({
-    selector: 'app-editorial',
+    selector: 'es-editorial',
     templateUrl: 'editorial.component.html',
     styleUrls: ['editorial.component.scss'],
     animations: [

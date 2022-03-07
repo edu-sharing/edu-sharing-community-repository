@@ -1,0 +1,34 @@
+<es-mds-editor-widget-container
+  [injectedView]="this"
+  [widget]="widget"
+  [label]="false"
+  [valueType]="valueType"
+  [wrapInFormField]="false"
+  [control]="formControl"
+>
+  <form [formGroup]="formControl" (blur)="blur()">
+  <div class="vcard authorPerson">
+    <div class="vcardGroup">
+      <!-- <i esIcon="person"></i> -->
+      <mat-form-field class="mat-form-field-no-padding">
+        <mat-label>{{ 'VCARD.Givenname' | translate }}</mat-label>
+        <input
+          matInput
+          class="vcard_Givenname vcardFirstInput"
+          formControlName="givenname"
+        >
+      </mat-form-field>
+    </div>
+    <div class="vcardGroup">
+      <mat-form-field class="mat-form-field-no-padding">
+        <mat-label>{{ 'VCARD.Surname' | translate }}</mat-label>
+        <input
+          matInput
+          class="vcard_Surname vcardFirstInput"
+          formControlName="surname"
+        />
+      </mat-form-field>
+    </div>
+  </div>
+  </form>
+</es-mds-editor-widget-container>

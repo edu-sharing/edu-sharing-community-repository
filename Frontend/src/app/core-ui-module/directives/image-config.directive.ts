@@ -7,7 +7,7 @@ import {TranslateService} from '@ngx-translate/core';
 import {ConfigurationService} from '../../core-module/core.module';
 
 @Directive({
-    selector: '[image-config]',
+    selector: '[esImage-config]',
 })
 export class ImageConfigDirective {
     private element: ElementRef;

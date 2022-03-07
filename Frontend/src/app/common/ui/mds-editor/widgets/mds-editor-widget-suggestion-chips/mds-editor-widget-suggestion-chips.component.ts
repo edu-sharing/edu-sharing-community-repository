@@ -1,23 +1,28 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { combineLatest, Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { FacetValue } from 'ngx-edu-sharing-api';
+import { SearchService } from 'ngx-edu-sharing-api';
+import { combineLatest, Observable, Subject } from 'rxjs';
+import { map, startWith, takeUntil } from 'rxjs/operators';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
-import { MdsWidgetFacetValue, MdsWidgetValue } from '../../types';
 
 @Component({
-    selector: 'app-mds-editor-widget-suggestion-chips',
+    selector: 'es-mds-editor-widget-suggestion-chips',
     templateUrl: './mds-editor-widget-suggestion-chips.component.html',
     styleUrls: ['./mds-editor-widget-suggestion-chips.component.scss'],
 })
-export class MdsEditorWidgetSuggestionChipsComponent implements OnInit {
+export class MdsEditorWidgetSuggestionChipsComponent implements OnInit, OnDestroy {
     @Input() widget: Widget;
 
-    filteredSuggestions$: Observable<MdsWidgetFacetValue[]>;
+    filteredSuggestions$: Observable<FacetValue[]>;
 
     /** The widget controlling the property that this widget is displaying suggestions for. */
     private primaryWidget: Widget;
+    private destroyed$ = new Subject<void>();
 
-    constructor(private mdsEditorInstance: MdsEditorInstanceService) {}
+    constructor(
+        private mdsEditorInstance: MdsEditorInstanceService,
+        private search: SearchService,
+    ) {}
 
     ngOnInit(): void {
         this.primaryWidget = this.mdsEditorInstance.getPrimaryWidget(this.widget.definition.id);
@@ -33,19 +38,23 @@ export class MdsEditorWidgetSuggestionChipsComponent implements OnInit {
         }
     }
 
-    add(suggestion: MdsWidgetValue): void {
-        this.primaryWidget.addValue.emit(suggestion);
+    ngOnDestroy(): void {
+        this.destroyed$.next();
+        this.destroyed$.complete();
+    }
+
+    add(suggestion: FacetValue): void {
+        this.primaryWidget.addValue.emit({ id: suggestion.value, caption: suggestion.label });
     }
 
     /**
      * Returns an observable of suggestions, excluding the ones already included in the primary
      * widget's value.
      */
-    private getFilteredSuggestions(primaryWidget: Widget): Observable<MdsWidgetFacetValue[]> {
-        // Suggestions, relevant for this widget.
-        const widgetSuggestions$ = this.mdsEditorInstance.facets$.pipe(
-            map((suggestions) => suggestions[this.widget.definition.id]),
-            map((suggestions) => suggestions?.slice(0, 5)),
+    private getFilteredSuggestions(primaryWidget: Widget): Observable<FacetValue[]> {
+        const widgetSuggestions$ = this.search.getFacet(this.widget.definition.id).pipe(
+            takeUntil(this.destroyed$),
+            map((suggestions) => suggestions?.values.slice(0, 5)),
         );
         // Filter `widgetSuggestions$` by primary widget's value.
         return combineLatest([
@@ -54,7 +63,7 @@ export class MdsEditorWidgetSuggestionChipsComponent implements OnInit {
         ]).pipe(
             map(([suggestions, values]) =>
                 suggestions?.filter(
-                    (suggestion) => !values?.some((value) => value === suggestion.id),
+                    (suggestion) => !values?.some((value) => value === suggestion.value),
                 ),
             ),
         );

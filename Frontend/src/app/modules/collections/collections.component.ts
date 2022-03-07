@@ -8,7 +8,6 @@ import {
     TemplateRef,
     ViewChild
 } from '@angular/core';
-import 'rxjs/add/operator/first';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Translation } from '../../core-ui-module/translation';
 import * as EduData from '../../core-module/core.module';
@@ -79,16 +78,18 @@ import {
 import {DataSource} from '@angular/cdk/collections';
 import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
 import {
-    DropSource, DropTarget,
-    ListEventInterface, ListSortConfig, NodeEntriesDisplayType,
     NodeEntriesWrapperComponent
 } from '../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
 import {Sort} from '@angular/material/sort';
 import {first} from 'rxjs/operators';
+import {
+    DropSource, DropTarget,
+    ListEventInterface, ListSortConfig, NodeEntriesDisplayType
+} from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 
 // component class
 @Component({
-    selector: 'app-collections',
+    selector: 'es-collections',
     templateUrl: 'collections.component.html',
     styleUrls: ['collections.component.scss'],
     // provide a new instance so to not get conflicts with other service instances
@@ -116,6 +117,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
     };
     readonly SCOPES = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
 
     @ViewChild('mainNav') mainNavRef: MainNavComponent;
     @ViewChild('actionbarCollection') actionbarCollection: ActionbarComponent;
@@ -775,6 +777,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
                 collection => {
                     // transfere sub collections and content
                     this.dataSourceCollections.setData(collection.collections, collection.pagination);
+                    this.dataSourceCollections.setCanLoadMore(false);
                     if (this.isRootLevelCollection()) {
                         this.finishCollectionLoading(callback);
                         return;
@@ -1045,7 +1048,8 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
     }
 
     hasNonIconPreview(): boolean {
-        return !this.collectionContent?.node?.preview?.isIcon;
+        const preview = this.collectionContent?.node?.preview;
+        return preview && !preview.isIcon;
     }
 
     private renderBreadcrumbs() {
@@ -1402,27 +1406,41 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         };
     }
 
-    createAllowed() {
-        if(this.isRootLevelCollection()) {
-            let allowed = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS);
-            if(this.tabSelected === RestConstants.COLLECTIONSCOPE_MY) {
+    createAllowed(): boolean {
+        if (this.isGuest) {
+            return false;
+        }
+        if (this.isRootLevelCollection()) {
+            let allowed = this.connector.hasToolPermissionInstant(
+                RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS,
+            );
+            if (this.tabSelected === RestConstants.COLLECTIONSCOPE_MY) {
                 return allowed;
             }
             // for anything else, the user must be able to invite everyone
-            allowed = allowed && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES);
-            if(this.tabSelected === RestConstants.COLLECTIONSCOPE_ORGA) {
+            allowed =
+                allowed &&
+                this.connector.hasToolPermissionInstant(
+                    RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES,
+                );
+            if (this.tabSelected === RestConstants.COLLECTIONSCOPE_ORGA) {
                 allowed = false;
-            } else if(this.tabSelected === RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL) {
+            } else if (this.tabSelected === RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL) {
                 allowed = allowed && this.adminMediacenters?.length === 1;
-            } else if(this.tabSelected === RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL) {
-                allowed = allowed && this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_EDITORIAL);
+            } else if (this.tabSelected === RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL) {
+                allowed =
+                    allowed &&
+                    this.connector.hasToolPermissionInstant(
+                        RestConstants.TOOLPERMISSION_COLLECTION_EDITORIAL,
+                    );
             }
             return allowed;
         } else {
-            return !this.isGuest && this.isAllowedToEditCollection();
+            return this.isAllowedToEditCollection();
         }
     }
 }
+
 export interface SortInfo {
     name: 'cm:name' | 'cm:modified' | 'ccm:collection_ordered_position';
     ascending: boolean;

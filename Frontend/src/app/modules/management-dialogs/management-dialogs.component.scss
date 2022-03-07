@@ -1,6 +1,6 @@
 @import "../../core-ui-module/styles/variables";
 
-workspace-lti-tools{
+es-workspace-lti-tools{
   display:inherit!important;
 }
 .delete-block-checkbox{
@@ -44,7 +44,7 @@ workspace-lti-tools{
   }
 }
 :host ::ng-deep {
-  card.qr {
+  .qr-link-card {
     mat-card-content {
       display: flex;
       justify-content: center;

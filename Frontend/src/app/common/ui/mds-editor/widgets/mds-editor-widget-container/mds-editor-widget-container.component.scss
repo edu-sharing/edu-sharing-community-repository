@@ -7,8 +7,12 @@
 }
 
 .ripple-container {
-    margin: -10px -50px;
-    padding: 10px 50px;
+    // Calculate the exact negative margins to prevent horizontal scroll bars.
+    --horizontal-total-padding: calc(
+        var(--mds-content-padding, 0px) + var(--mds-editor-horizontal-padding, 0px)
+    );
+    margin: -10px calc(0px - var(--horizontal-total-padding));
+    padding: 10px var(--horizontal-total-padding);
     & > ::ng-deep .mat-ripple-element {
         background-color: $primaryLight;
         z-index: -1;

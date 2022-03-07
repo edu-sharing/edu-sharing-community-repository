@@ -56,6 +56,7 @@ function getAttributes(html: string, widgetId: string): Attr[] {
     div.innerHTML = html;
     const elements = div.getElementsByTagName(widgetId);
     if (elements.length === 0) {
+        console.warn(html);
         throw new Error('Failed to parse attributes: widget not found in template: ' + widgetId);
     } else if (elements.length > 1) {
         throw new Error(
@@ -99,11 +100,12 @@ function guessPropertyInfo(attribute: Attr, widgetDefinition: MdsWidget): Proper
         ) {
             return { property, type };
         }
+    } else if(!['style', 'class'].includes(attribute.name)) {
+        console.warn(
+            `Encountered unknown attribute in widget definition for ${widgetDefinition.id}:`,
+            attribute,
+        );
     }
-    console.warn(
-        `Encountered unknown attribute in widget definition for ${widgetDefinition.id}:`,
-        attribute,
-    );
     return {
         property: property ?? attribute.name,
         type: 'string',
@@ -118,7 +120,7 @@ function parseValue(value: string, type: Type): boolean | string | number | any;
 function parseValue(value: string, type: Type): boolean | string | number | any {
     switch (type) {
         case 'boolean':
-            return Boolean(value);
+            return value?.toLowerCase() === 'true';
         case 'number':
             return parseInt(value, 10);
         case 'string':

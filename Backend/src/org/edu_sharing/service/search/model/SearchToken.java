@@ -1,12 +1,14 @@
 package org.edu_sharing.service.search.model;
 
 import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataQueries;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
+import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
 import org.edu_sharing.metadataset.v2.SearchCriterias;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -22,7 +24,7 @@ public class SearchToken implements Serializable {
 	
 	String luceneString;
 	
-	List<String> facettes=null;
+	List<String> facets =null;
 
 	String storeProtocol = "workspace";
 	
@@ -42,6 +44,7 @@ public class SearchToken implements Serializable {
 	private MetadataQueries queries;
 	private List<String> permissions;
 	private boolean resolveCollections = false;
+	private boolean returnSuggestion = false;
 
 	public ContentType getContentType(){
 		if(contentType==null)
@@ -52,22 +55,22 @@ public class SearchToken implements Serializable {
 		this.contentType=contentType;
 		updateSearchCriterias(true);
 	}
-	public int getFacettesMinCount() {
-		return facettesMinCount;
+	public int getFacetsMinCount() {
+		return facetsMinCount;
 	}
 
-	public void setFacettesMinCount(int facettesMinCount) {
-		this.facettesMinCount = facettesMinCount;
+	public void setFacetsMinCount(int facetsMinCount) {
+		this.facetsMinCount = facetsMinCount;
 	}
 
 
 	
-	public void setFacettesLimit(int facettesLimit) {
-		this.facettesLimit = facettesLimit;
+	public void setFacetLimit(int facetLimit) {
+		this.facetLimit = facetLimit;
 	}
 
-	private int facettesLimit=50;
-	private int facettesMinCount=4;
+	private int facetLimit =50;
+	private int facetsMinCount =4;
 
 	private SearchCriterias searchCriterias;
 
@@ -151,16 +154,55 @@ public class SearchToken implements Serializable {
 	public void setMaxResult(int maxResult) {
 		this.maxResult = maxResult;
 	}
-	public List<String> getFacettes() {
-		return facettes;
+	public List<String> getFacets() {
+		if(this.query != null && facets != null) {
+			List<String> combined = new ArrayList<>();
+			this.facets.forEach((facet) -> {
+				List<String> sublist = this.query.findParameterByName(facet).getFacets();
+				if(sublist != null) {
+					combined.addAll(sublist);
+				} else {
+					combined.add(facet);
+				}
+			});
+			return combined;
+		}
+		return facets;
 	}
 
-	public void setFacettes(List<String> facettes) {
-		this.facettes = facettes;
+	/**
+	 *
+	 * re aggregates splitted facettes from the current mds query to a single list for the client
+	 */
+	public Map<String, Map<String, Integer>> aggregateFacetes(Map<String, Map<String, Integer>> propsMap) {
+		Map<String, Map<String, Integer>> combined = new HashMap<>();
+		if(this.query != null && facets != null) {
+			List<MetadataQueryParameter> facetParams = this.query.getParameters().stream().filter((p) -> p.getFacets() != null).collect(Collectors.toList());
+			for(Map.Entry<String, Map<String, Integer>> entry : propsMap.entrySet()) {
+				Optional<MetadataQueryParameter> param = facetParams.stream().filter((p) -> p.getFacets().contains(entry.getKey())).findFirst();
+				String key = entry.getKey();
+				if(param.isPresent()) {
+					key = param.get().getName();
+				}
+				if(combined.containsKey(key)) {
+					Map<String, Integer> current = combined.get(key);
+					current.putAll(entry.getValue());
+					combined.put(key, current);
+				} else {
+					combined.put(key, entry.getValue());
+				}
+			}
+			return combined;
+		}
+		return propsMap;
 	}
 
-	public int getFacettesLimit() {
-		return facettesLimit;
+	public void setFacets(List<String> facets) {
+		this.facets = facets;
+	}
+
+	public int getFacetLimit() {
+		return facetLimit;
 	}
 
 	public void setSearchCriterias(SearchCriterias searchCriterias) {
@@ -194,6 +236,9 @@ public class SearchToken implements Serializable {
 		}
 		if(getContentType().equals(ContentType.TOOLPERMISSIONS)){
 			searchCriterias.setContentkind(new String[]{CCConstants.CCM_TYPE_TOOLPERMISSION});
+		}
+		if(getContentType().equals(ContentType.COLLECTION_PROPOSALS)){
+			searchCriterias.setContentkind(new String[]{CCConstants.CCM_TYPE_COLLECTION_PROPOSAL});
 		}
 	}
 	/**
@@ -240,4 +285,8 @@ public class SearchToken implements Serializable {
 	public void setResolveCollections(boolean resolveCollections) {
 		this.resolveCollections = resolveCollections;
 	}
+
+	public boolean isReturnSuggestion() { return returnSuggestion; }
+
+	public void setReturnSuggestion(boolean returnSuggestion) {	this.returnSuggestion = returnSuggestion; }
 }

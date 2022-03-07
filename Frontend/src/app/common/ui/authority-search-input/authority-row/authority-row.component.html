@@ -1,11 +1,11 @@
 <div class="suggestion-content">
-  <user-avatar [user]="authority" size="small"></user-avatar>
+  <es-user-avatar [user]="authority" size="small"></es-user-avatar>
   <div class="text-content">
     <div class="data">
       <div
         class="primary"
-        appCheckTextOverflow
-        #name="appCheckTextOverflow"
+        esCheckTextOverflow
+        #name="esCheckTextOverflow"
         [matTooltip]="name.hasTextOverflow() ? (authority | authorityName) : null"
       >
         {{ authority | authorityName }}
@@ -16,8 +16,8 @@
       <div class="parent-orgs">
         <span
           *ngIf="authority.organizations"
-          appCheckTextOverflow
-          #orgs="appCheckTextOverflow"
+          esCheckTextOverflow
+          #orgs="esCheckTextOverflow"
           #div
           [matTooltip]="orgs.hasTextOverflow() ? div.innerText : null"
         >

@@ -27,6 +27,7 @@ import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -50,11 +51,11 @@ public class MetadataTemplateRenderer {
 	private static final String TEXT_MULTIVALUE_SEPERATOR = "; ";
 	private String userName;
 	private NodeRef nodeRef;
-	private MetadataSetV2 mds;
+	private MetadataSet mds;
 	private Map<String, String[]> properties;
 	private static Logger logger=Logger.getLogger(MetadataTemplateRenderer.class);
 
-	public MetadataTemplateRenderer(MetadataSetV2 mds, NodeRef nodeRef, String userName, String type, List<String> aspects, Map<String, Object> properties) {
+	public MetadataTemplateRenderer(MetadataSet mds, NodeRef nodeRef, String userName, String type, List<String> aspects, Map<String, Object> properties) {
 		this.mds = mds;
 		this.nodeRef = nodeRef;
 		this.userName = userName;
@@ -165,7 +166,12 @@ public class MetadataTemplateRenderer {
 					if (widget.getCaption() != null) {
 						widgetHtml.append("<h3 class='mdsWidgetCaption'>").append(widget.getCaption()).append("</h3>");
 					}
-					widgetHtml.append("<div class='mdsWidgetContent mds_").append(widget.getId().replace(":", "_"));
+					String innerContainerTag = widget.isMultivalue() ? "ul" : "div";
+					widgetHtml
+						.append("<")
+						.append(innerContainerTag)
+						.append(" class='mdsWidgetContent mds_")
+						.append(widget.getId().replace(":", "_"));
 					if (widget.isMultivalue()) {
 						widgetHtml.append(" mdsWidgetMultivalue");
 					}
@@ -281,7 +287,9 @@ public class MetadataTemplateRenderer {
 							value = VCardConverter.getNameForVCard("", vcardData);
 						}
 						if (renderingMode.equals(RenderingMode.HTML)) {
-							widgetHtml.append("<div class='mdsValue' data-value-key='" + rawValue + "'>");
+							widgetHtml
+								.append(widget.isMultivalue() ? "<li " : "<div ")
+								.append("class='mdsValue' data-value-key='" + rawValue + "'>");
 							if (widget.getIcon() != null) {
 								widgetHtml.append(insertIcon(widget.getIcon()));
 							}
@@ -343,7 +351,7 @@ public class MetadataTemplateRenderer {
 							widgetHtml.append("</div>");
 						}
 						if (renderingMode.equals(RenderingMode.HTML)) {
-							widgetHtml.append("</div>");
+							widgetHtml.append(widget.isMultivalue() ? "</li>" : "</div>");
 							if (isLink) {
 								widgetHtml.append("</a>");
 							}
@@ -351,7 +359,8 @@ public class MetadataTemplateRenderer {
 					}
 				}
 				if (renderingMode.equals(RenderingMode.HTML)) {
-					widgetHtml.append("</div></div>");
+					String innerContainerTag = widget.isMultivalue() ? "ul" : "div";
+					widgetHtml.append("</").append(innerContainerTag).append("></div>");
 				}
 				if ((empty || wasEmpty) && widget.isHideIfEmpty()) {
 					widgetHtml = new StringBuffer();
@@ -476,7 +485,7 @@ public class MetadataTemplateRenderer {
 				path = Lists.reverse(path);
 				int j = 0;
 				if (renderingMode.equals(RenderingMode.HTML)) {
-					widgetHtml.append("<div class='mdsValue'>");
+					widgetHtml.append("<li class='mdsValue'>");
 				} else if (renderingMode.equals(RenderingMode.TEXT)) {
 					if(i > 0) {
 						widgetHtml.append(TEXT_MULTIVALUE_SEPERATOR);
@@ -496,7 +505,7 @@ public class MetadataTemplateRenderer {
 					j++;
 				}
 				if (renderingMode.equals(RenderingMode.HTML)) {
-					widgetHtml.append("</div>");
+					widgetHtml.append("</li>");
 				}
 				i++;
 			}
@@ -533,7 +542,7 @@ public class MetadataTemplateRenderer {
 
 				}
 			}
-			if(widget.getType().equals("filesize")){
+			if("number".equals(widget.getType()) && "bytes".equals(widget.getFormat())) {
 				try{
 					value=formatFileSize(Long.parseLong(value));
 				}catch(Throwable t){
@@ -733,11 +742,20 @@ public class MetadataTemplateRenderer {
 	    		field.setAccessible(true);
 	    		if(field.getType().getSimpleName().equalsIgnoreCase("boolean")) {
 	    			field.set(widget, Boolean.parseBoolean(value));
+				} else if(field.getType().isEnum()) {
+					try {
+						field.set(widget, field.getType().getDeclaredMethod("valueOf", String.class).invoke(null, value));
+					} catch(InvocationTargetException e) {
+						if(e.getTargetException() instanceof IllegalArgumentException) {
+							logger.info("enum constant for widget " + widget.getId() +" " + name + "=" + value + " could not be resolved and will be ignored");
+						}
+					}
 				} else {
 					field.set(widget, value);
 				}
 	    	}catch(Throwable t){
-	    		throw new IllegalArgumentException("Invalid attribute found for widget "+widget.getId()+", attribute "+name+" is unknown",t);
+	    		logger.warn("Invalid attribute found for widget "+widget.getId()+", attribute "+name+" is unknown: " + t.getMessage());
+	    		//throw new IllegalArgumentException("Invalid attribute found for widget "+widget.getId()+", attribute "+name+" is unknown",t);
 	    	}
 	      }
 	    return widget;

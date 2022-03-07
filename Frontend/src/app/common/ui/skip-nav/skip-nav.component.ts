@@ -10,18 +10,18 @@ import { SkipNavService, SkipTarget } from './skip-nav.service';
  * around the page, skipping reoccurring elements such as navigation and banners.
  */
 @Component({
-    selector: 'app-skip-nav',
+    selector: 'es-skip-nav',
     templateUrl: './skip-nav.component.html',
     styleUrls: ['./skip-nav.component.scss'],
 })
 export class SkipNavComponent implements OnInit {
     availableTargets: Observable<SkipTarget[]>;
 
-    constructor(private skipNav: SkipNavService) {
+    constructor(private skipNav: SkipNavService) {}
+
+    ngOnInit(): void {
         this.availableTargets = this.skipNav.getAvailableTargets();
     }
-
-    ngOnInit(): void {}
 
     skipTo(target: SkipTarget): void {
         this.skipNav.skipTo(target);

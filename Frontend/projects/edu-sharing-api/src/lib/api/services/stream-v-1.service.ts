@@ -21,96 +21,6 @@ export class StreamV1Service extends BaseService {
     }
 
     /**
-     * Path part for operation canAccess
-     */
-    static readonly CanAccessPath = '/stream/v1/access/{repository}/{node}';
-
-    /**
-     * test.
-     *
-     *
-     *
-     * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `canAccess()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    canAccess$Response(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * The property to aggregate
-         */
-        node: string;
-    }): Observable<
-        StrictHttpResponse<{
-            [key: string]: {};
-        }>
-    > {
-        const rb = new RequestBuilder(this.rootUrl, StreamV1Service.CanAccessPath, 'get');
-        if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('node', params.node, { style: 'simple', explode: false });
-        }
-
-        return this.http
-            .request(
-                rb.build({
-                    responseType: 'json',
-                    accept: 'application/json',
-                }),
-            )
-            .pipe(
-                filter((r: any) => r instanceof HttpResponse),
-                map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<{
-                        [key: string]: {};
-                    }>;
-                }),
-            );
-    }
-
-    /**
-     * test.
-     *
-     *
-     *
-     * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `canAccess$Response()` instead.
-     *
-     * This method doesn't expect any request body.
-     */
-    canAccess(params: {
-        /**
-         * ID of repository (or &quot;-home-&quot; for home repository)
-         */
-        repository: string;
-
-        /**
-         * The property to aggregate
-         */
-        node: string;
-    }): Observable<{
-        [key: string]: {};
-    }> {
-        return this.canAccess$Response(params).pipe(
-            map(
-                (
-                    r: StrictHttpResponse<{
-                        [key: string]: {};
-                    }>,
-                ) =>
-                    r.body as {
-                        [key: string]: {};
-                    },
-            ),
-        );
-    }
-
-    /**
      * Path part for operation addEntry
      */
     static readonly AddEntryPath = '/stream/v1/add/{repository}';
@@ -138,7 +48,7 @@ export class StreamV1Service extends BaseService {
     }): Observable<StrictHttpResponse<StreamEntryInput>> {
         const rb = new RequestBuilder(this.rootUrl, StreamV1Service.AddEntryPath, 'put');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
             rb.body(params.body, 'application/json');
         }
 
@@ -184,6 +94,79 @@ export class StreamV1Service extends BaseService {
     }
 
     /**
+     * Path part for operation canAccess
+     */
+    static readonly CanAccessPath = '/stream/v1/access/{repository}/{node}';
+
+    /**
+     * test.
+     *
+     *
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `canAccess()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    canAccess$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * The property to aggregate
+         */
+        node: string;
+    }): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(this.rootUrl, StreamV1Service.CanAccessPath, 'get');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<string>;
+                }),
+            );
+    }
+
+    /**
+     * test.
+     *
+     *
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `canAccess$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    canAccess(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * The property to aggregate
+         */
+        node: string;
+    }): Observable<string> {
+        return this.canAccess$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
+        );
+    }
+
+    /**
      * Path part for operation deleteEntry
      */
     static readonly DeleteEntryPath = '/stream/v1/delete/{repository}/{entry}';
@@ -208,26 +191,24 @@ export class StreamV1Service extends BaseService {
          * entry id to delete
          */
         entry: string;
-    }): Observable<StrictHttpResponse<void>> {
+    }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, StreamV1Service.DeleteEntryPath, 'delete');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('entry', params.entry, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
+            rb.path('entry', params.entry, {});
         }
 
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
@@ -252,9 +233,9 @@ export class StreamV1Service extends BaseService {
          * entry id to delete
          */
         entry: string;
-    }): Observable<void> {
+    }): Observable<any> {
         return this.deleteEntry$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
@@ -283,15 +264,11 @@ export class StreamV1Service extends BaseService {
          * The property to aggregate
          */
         property: string;
-    }): Observable<
-        StrictHttpResponse<{
-            [key: string]: {};
-        }>
-    > {
+    }): Observable<StrictHttpResponse<string>> {
         const rb = new RequestBuilder(this.rootUrl, StreamV1Service.GetPropertyValuesPath, 'get');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('property', params.property, { style: 'simple', explode: false });
+            rb.path('repository', params.repository, {});
+            rb.path('property', params.property, {});
         }
 
         return this.http
@@ -304,9 +281,7 @@ export class StreamV1Service extends BaseService {
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return r as StrictHttpResponse<{
-                        [key: string]: {};
-                    }>;
+                    return r as StrictHttpResponse<string>;
                 }),
             );
     }
@@ -331,27 +306,16 @@ export class StreamV1Service extends BaseService {
          * The property to aggregate
          */
         property: string;
-    }): Observable<{
-        [key: string]: {};
-    }> {
+    }): Observable<string> {
         return this.getPropertyValues$Response(params).pipe(
-            map(
-                (
-                    r: StrictHttpResponse<{
-                        [key: string]: {};
-                    }>,
-                ) =>
-                    r.body as {
-                        [key: string]: {};
-                    },
-            ),
+            map((r: StrictHttpResponse<string>) => r.body as string),
         );
     }
 
     /**
-     * Path part for operation search_3
+     * Path part for operation search1
      */
-    static readonly Search_3Path = '/stream/v1/search/{repository}';
+    static readonly Search1Path = '/stream/v1/search/{repository}';
 
     /**
      * Get the stream content for the current user with the given status.
@@ -359,11 +323,11 @@ export class StreamV1Service extends BaseService {
      *
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `search_3()` instead.
+     * To access only the response body, use `search1()` instead.
      *
      * This method sends `application/json` and handles request body of type `application/json`.
      */
-    search_3$Response(params: {
+    search1$Response(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
@@ -406,15 +370,15 @@ export class StreamV1Service extends BaseService {
             [key: string]: string;
         };
     }): Observable<StrictHttpResponse<StreamList>> {
-        const rb = new RequestBuilder(this.rootUrl, StreamV1Service.Search_3Path, 'post');
+        const rb = new RequestBuilder(this.rootUrl, StreamV1Service.Search1Path, 'post');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.query('status', params.status, { style: 'form', explode: true });
-            rb.query('query', params.query, { style: 'form', explode: true });
-            rb.query('maxItems', params.maxItems, { style: 'form', explode: true });
-            rb.query('skipCount', params.skipCount, { style: 'form', explode: true });
-            rb.query('sortProperties', params.sortProperties, { style: 'form', explode: true });
-            rb.query('sortAscending', params.sortAscending, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.query('status', params.status, {});
+            rb.query('query', params.query, {});
+            rb.query('maxItems', params.maxItems, {});
+            rb.query('skipCount', params.skipCount, {});
+            rb.query('sortProperties', params.sortProperties, {});
+            rb.query('sortAscending', params.sortAscending, {});
             rb.body(params.body, 'application/json');
         }
 
@@ -439,11 +403,11 @@ export class StreamV1Service extends BaseService {
      *
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `search_3$Response()` instead.
+     * To access the full response (for headers, for example), `search1$Response()` instead.
      *
      * This method sends `application/json` and handles request body of type `application/json`.
      */
-    search_3(params: {
+    search1(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
@@ -486,7 +450,7 @@ export class StreamV1Service extends BaseService {
             [key: string]: string;
         };
     }): Observable<StreamList> {
-        return this.search_3$Response(params).pipe(
+        return this.search1$Response(params).pipe(
             map((r: StrictHttpResponse<StreamList>) => r.body as StreamList),
         );
     }
@@ -526,28 +490,26 @@ export class StreamV1Service extends BaseService {
          * New status for this authority
          */
         status: string;
-    }): Observable<StrictHttpResponse<void>> {
+    }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, StreamV1Service.UpdateEntryPath, 'put');
         if (params) {
-            rb.path('repository', params.repository, { style: 'simple', explode: false });
-            rb.path('entry', params.entry, { style: 'simple', explode: false });
-            rb.query('authority', params.authority, { style: 'form', explode: true });
-            rb.query('status', params.status, { style: 'form', explode: true });
+            rb.path('repository', params.repository, {});
+            rb.path('entry', params.entry, {});
+            rb.query('authority', params.authority, {});
+            rb.query('status', params.status, {});
         }
 
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
@@ -582,9 +544,9 @@ export class StreamV1Service extends BaseService {
          * New status for this authority
          */
         status: string;
-    }): Observable<void> {
+    }): Observable<any> {
         return this.updateEntry$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 }

@@ -9,7 +9,7 @@ import {GlobalContainerComponent} from "../global-container.component";
 import { first } from "rxjs/operators";
 
 @Component({
-  selector: 'rocketchat',
+  selector: 'es-rocketchat',
   templateUrl: 'rocketchat.component.html',
   styleUrls: ['rocketchat.component.scss'],
   animations: [

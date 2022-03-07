@@ -10,7 +10,7 @@ import {CustomOptions, OptionItem} from "../../../core-ui-module/option-item";
 import { MdsType } from '../../../common/ui/mds-editor/types';
 
 @Component({
-  selector: 'workspace-lti-tool-configs',
+  selector: 'es-workspace-lti-tool-configs',
   templateUrl: 'lti-tool-configs.component.html',
   styleUrls: ['lti-tool-configs.component.scss']
 })

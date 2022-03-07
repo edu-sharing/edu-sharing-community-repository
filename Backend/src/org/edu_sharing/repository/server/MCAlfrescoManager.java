@@ -38,10 +38,8 @@ import org.apache.chemistry.opencmis.server.impl.CmisRepositoryContextListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.alfresco.policy.OnUpdatePersonPropertiesPolicy;
-import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
-import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.repository.server.jobs.quartz.JobHandler;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -84,7 +82,7 @@ public class MCAlfrescoManager implements ServletContextListener {
 			ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
 
 			logger.info("load Metadatasets");
-			MetadataReaderV2.refresh();
+			MetadataReader.refresh();
 			
 			//do update this class checks if it is already done
 			AuthenticationToolAPI authTool = new AuthenticationToolAPI();

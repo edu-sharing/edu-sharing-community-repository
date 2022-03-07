@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ValueV2 } from '../api/models';
+import { MdsValue } from '../api/models';
 import { MdsIdentifier, MdsService } from './mds.service';
 
 export interface LabeledValue {
@@ -66,19 +66,39 @@ export class MdsLabelService {
 
     /** Gets a label for a single value. */
     getLabel(mdsId: MdsIdentifier, property: string, value: string): Observable<string> {
-        return this.getValueDefinitions(mdsId, property).pipe(
-            map((definitions) => definitions?.find((d) => d.id === value)?.caption ?? value),
+        return this.findValue(mdsId, property, value).pipe(
+            map((msdValue) => msdValue?.caption ?? value),
         );
     }
 
-    private getValueDefinitions(
+    /** Returns the first mds-value definition for the given id. */
+    findValue(
         mdsId: MdsIdentifier,
         property: string,
-    ): Observable<ValueV2[] | null> {
-        return this.mds
-            .getMetadataSet(mdsId)
-            .pipe(
-                map((mds) => mds.widgets?.find((widget) => widget.id === property)?.values ?? null),
-            );
+        id: string,
+    ): Observable<MdsValue | undefined> {
+        return this.getValueDefinitions(mdsId, property).pipe(
+            map((definitions) =>
+                definitions?.find((value) => value.id === id || value.alternativeIds?.includes(id)),
+            ),
+        );
+    }
+
+    /**
+     * Gets values for a given property from the respective mds widget definitions.
+     */
+    getValueDefinitions(mdsId: MdsIdentifier, property: string): Observable<MdsValue[] | null> {
+        return this.mds.getMetadataSet(mdsId).pipe(
+            map(
+                (mds) =>
+                    mds.widgets?.find(
+                        (widget) =>
+                            widget.id === property &&
+                            // Values are defined on the general widget and not on special
+                            // configurations for specific view.
+                            !widget.template,
+                    )?.values ?? null,
+            ),
+        );
     }
 }

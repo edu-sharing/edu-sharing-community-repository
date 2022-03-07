@@ -1,11 +1,11 @@
-<card title="{{'WORKSPACE.WORKFLOW.TITLE' | translate}}" [node]="nodes" width="large" height="xlarge"
+<es-card title="{{'WORKSPACE.WORKFLOW.TITLE' | translate}}" [node]="nodes" width="large" height="xlarge"
       [buttons]="buttons"
       (onCancel)="cancel()"
 >
-  <spinner *ngIf="loading"></spinner>
+  <es-spinner *ngIf="loading"></es-spinner>
   <div class="workflow-content" *ngIf="!loading">
     <div class="inputs">
-      <authority-search-input
+      <es-authority-search-input
         [disabled]="!status.hasReceiver"
         [globalSearchAllowed]="globalAllowed"
         [groupType]="TYPE_EDITORIAL"
@@ -13,7 +13,7 @@
         (onChooseAuthority)="addSuggestion($event)"
         [placeholder]="'WORKSPACE.WORKFLOW.RECEIVERS'"
         hint="{{'WORKSPACE.WORKFLOW.RECEIVERS_HINT' | translate}}"
-      ></authority-search-input>
+      ></es-authority-search-input>
       <div class="status">
         <button mat-raised-button (click)="chooseStatus=true">
           <i class="align-icon statusIcon" [style.background-color]="status.color">&nbsp;</i> {{'WORKFLOW.'+status.id | translate}}
@@ -40,7 +40,7 @@
             <span class="primary">{{receiver | authorityName}}</span>
             <span class="secondary">{{receiver | permissionName:{field:'secondary'} }}</span>
           </div>
-          <i matChipRemove icon="cancel"></i>
+          <i matChipRemove esIcon="cancel"></i>
         </mat-chip>
       </mat-chip-list>
     </div>
@@ -53,9 +53,9 @@
       {{'WORKSPACE.WORKFLOW.HISTORY' | translate}}
     </div>
   </div>
-  <app-workflow-list [history]="history"></app-workflow-list>
-</card>
-<modal-dialog
+  <es-workflow-list [history]="history"></es-workflow-list>
+</es-card>
+<es-modal-dialog
   [isCancelable]="true"
   [title]="dialogTitle"
   [message]="dialogMessage"
@@ -63,4 +63,4 @@
   [buttons]="dialogButtons"
   [priority]="1"
   (onCancel)="dialogTitle=null"
-></modal-dialog>
+></es-modal-dialog>

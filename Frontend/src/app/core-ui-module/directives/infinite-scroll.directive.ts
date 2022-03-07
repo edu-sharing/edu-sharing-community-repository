@@ -11,7 +11,7 @@ import {
   SimpleChanges
 } from '@angular/core';
 @Directive({
-  selector: '[infiniteScroll], [infinite-scroll], [data-infinite-scroll]'
+  selector: '[esInfiniteScroll], [infinite-scroll], [data-infinite-scroll]'
 })
 export class InfiniteScrollDirective{
   @Output() scrolled = new EventEmitter<void>();

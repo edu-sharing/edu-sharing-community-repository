@@ -1,9 +1,9 @@
 package org.edu_sharing.service.admin;
 
 import java.io.*;
-import java.lang.annotation.Annotation;
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 import java.text.Collator;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Result;
@@ -68,6 +69,8 @@ import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.StreamUtils;
 import org.w3c.dom.Document;
@@ -131,7 +134,7 @@ public class AdminServiceImpl implements AdminService  {
 		Map<String,ToolPermission> toolpermissions=new HashMap<>();
 		// refresh the tp in this case, since may a new one is created meanwhile by the client
 		for(String tp : tpService.getAllToolPermissions(true)) {
-			String nodeId=tpService.getToolPermissionNodeId(tp);
+			String nodeId=tpService.getToolPermissionNodeId(tp, true);
 			List<String> permissionsExplicit = permissionService.getExplicitPermissionsForAuthority(nodeId,authority);
 			List<String> permissions = permissionService.getPermissionsForAuthority(nodeId, authority);
 			ToolPermission status=new ToolPermission();
@@ -191,7 +194,7 @@ public class AdminServiceImpl implements AdminService  {
 		}
 		for(String tp : tpService.getAllAvailableToolPermissions()) {
 			ToolPermission.Status status = toolpermissions.get(tp);
-			String nodeId=tpService.getToolPermissionNodeId(tp);
+			String nodeId=tpService.getToolPermissionNodeId(tp, true);
 			ACL acl = permissionService.getPermissions(nodeId);
 			boolean add=true;
 			List<ACE> newAce=new ArrayList<>();
@@ -769,6 +772,7 @@ public class AdminServiceImpl implements AdminService  {
 	@Override
 	public void updateConfigFile(String filename, String content) throws Throwable {
 		throwIfInvalidConfigFile(filename);
+		filename = mapConfigFile(filename);
 		File file = new File(getCatalinaBase() + "/shared/classes/" + LightbendConfigLoader.PATH_PREFIX + filename);
 		try {
 			Files.copy(file, new File(file.getAbsolutePath() + System.currentTimeMillis() + ".bak"));
@@ -782,8 +786,16 @@ public class AdminServiceImpl implements AdminService  {
 	@Override
 	public String getConfigFile(String filename) throws Throwable {
 		throwIfInvalidConfigFile(filename);
+		filename = mapConfigFile(filename);
 		File file = new File(getCatalinaBase()+"/shared/classes/"+ LightbendConfigLoader.PATH_PREFIX+filename);
 		return FileUtils.readFileToString(file);
+	}
+
+	private String mapConfigFile(String filename) {
+		if(filename.equals(LightbendConfigLoader.SERVER_FILE)) {
+			return LightbendConfigLoader.getServerConfigName();
+		}
+		return filename;
 	}
 
 	@Override
@@ -857,20 +869,41 @@ public class AdminServiceImpl implements AdminService  {
 	}
 
 	@Override
-	public void startJob(String jobClass, HashMap<String,Object> params) throws Exception {
+	public ImmediateJobListener startJob(String jobClass, HashMap<String,Object> params) throws Exception {
 
 		if(params == null) {
-			params = new HashMap<String,Object>();
+			params = new HashMap<>();
 		}
-		params.put(OAIConst.PARAM_USERNAME, getAuthInfo().get(CCConstants.AUTH_USERNAME));
-		params.put(JobHandler.AUTH_INFO_KEY, getAuthInfo());
+		if(!AuthenticationUtil.isRunAsUserTheSystemUser()) {
+			params.put(OAIConst.PARAM_USERNAME, getAuthInfo().get(CCConstants.AUTH_USERNAME));
+			params.put(JobHandler.AUTH_INFO_KEY, getAuthInfo());
+		}
 
 		Class job = Class.forName(jobClass);
 		ImmediateJobListener jobListener = JobHandler.getInstance().startJob(job, params);
 		if(jobListener != null && jobListener.isVetoed()){
 			throw new Exception("job was vetoed by " + jobListener.getVetoBy());
 		}
+		return jobListener;
 
+	}
+
+	@Override
+	public Object startJobSync(String jobClass, HashMap<String,Object> params) throws Throwable {
+		ImmediateJobListener listener = startJob(jobClass, params);
+		while(true) {
+			if(listener.wasExecuted()) {
+				Optional<JobInfo> result = getJobs().stream().filter(job -> job.getStatus().equals(JobInfo.Status.Finished) && job.getJobDetail().getJobClass().getName().equals(jobClass)).max((a, b) -> Long.compare(a.getFinishTime(), b.getFinishTime()));
+				if(!result.isPresent()) {
+					throw new IllegalStateException("Job status not found");
+				}
+				return result.get().getJobDetail().getJobDataMap().get(JobHandler.KEY_RESULT_DATA);
+			}
+			if(listener.isVetoed()) {
+				throw new Exception("job was vetoed by " + listener.getVetoBy());
+			}
+			Thread.sleep(1000);
+		}
 	}
 
 	@Override
@@ -948,30 +981,39 @@ public class AdminServiceImpl implements AdminService  {
 	}
 
 	@Override
-	public List<JobDescription> getJobDescriptions() {
+	public List<JobDescription> getJobDescriptions(boolean fetchAbstractJobs) {
 
 		List<JobDescription> result = new ArrayList<>();
 
 		List<Class> jobClasses = ClassHelper.getSubclasses(AbstractJob.class);
 
 		for(Class clazz : jobClasses){
+			if(!fetchAbstractJobs) {
+				if(Modifier.isAbstract(clazz.getModifiers())) {
+					continue;
+				}
+			}
 			JobDescription desc = new JobDescription();
 			desc.setName(clazz.getName());
 			if(clazz.isAnnotationPresent(org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription.class)) {
 				org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription annotationDesc = (org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription) clazz.getAnnotation(org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription.class);
 				desc.setDescription(annotationDesc.description());
+				desc.setTags(annotationDesc.tags());
 			}
 			desc.setParams(Arrays.stream(clazz.getDeclaredFields()).filter(
 					(f) -> f.isAnnotationPresent(JobFieldDescription.class)
 			).map((f) -> {
 				JobDescription.JobFieldDescription fieldDesc = new JobDescription.JobFieldDescription();
 				fieldDesc.setName(f.getName());
-				fieldDesc.setType(f.getType());
+				boolean isArray = f.getType().isAssignableFrom(Collection.class) || f.getType().equals(List.class);
+				Class<?> type = isArray ? (Class<?>) ((ParameterizedType)f.getGenericType()).getActualTypeArguments()[0] : f.getType();
+				fieldDesc.setType(type);
+				fieldDesc.setIsArray(isArray);
 				fieldDesc.setDescription(f.getAnnotation(JobFieldDescription.class).description());
 				fieldDesc.setSampleValue(f.getAnnotation(JobFieldDescription.class).sampleValue());
 				fieldDesc.setFile(f.getAnnotation(JobFieldDescription.class).file());
-				if(f.getType().isEnum()){
-					fieldDesc.setValues(Arrays.stream(f.getType().getDeclaredFields()).
+				if(type.isEnum()){
+					fieldDesc.setValues(Arrays.stream(type.getDeclaredFields()).
 							filter((v) -> !v.getName().startsWith("$")).
 							map((v) -> {
 						JobDescription.JobFieldDescription value = new JobDescription.JobFieldDescription();
@@ -987,5 +1029,23 @@ public class AdminServiceImpl implements AdminService  {
 			result.add(desc);
 		}
 		return result;
+	}
+
+	@Override
+	public void switchAuthentication(String authorityName) {
+		HttpSession session = Context.getCurrentInstance().getRequest().getSession(true);
+		//session.setMaxInactiveInterval(30);
+		AuthenticationToolAPI authTool = new AuthenticationToolAPI();
+		String ticket = authTool.setUser(authorityName);
+		authTool.storeAuthInfoInSession(
+				authorityName,
+				ticket,
+				CCConstants.AUTH_TYPE_OAUTH,
+				session);
+	}
+
+	@Override
+	public Object getLightbendConfig() {
+		return LightbendConfigLoader.get().root().unwrapped();
 	}
 }

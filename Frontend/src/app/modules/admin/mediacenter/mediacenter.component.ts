@@ -27,7 +27,7 @@ import {MdsEditorWrapperComponent} from '../../../common/ui/mds-editor/mds-edito
 declare var Chart: any;
 
 @Component({
-    selector: 'app-admin-mediacenter',
+    selector: 'es-admin-mediacenter',
     templateUrl: 'mediacenter.component.html',
     styleUrls: ['mediacenter.component.scss']
 })

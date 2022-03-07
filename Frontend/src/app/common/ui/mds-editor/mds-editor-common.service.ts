@@ -75,6 +75,16 @@ export class MdsEditorCommonService {
             .toPromise();
     }
 
+    async saveNodeProperty(
+        node: Node,
+        property: string,
+        values: string[]
+        //versionComment?: string,
+    ): Promise<void> {
+        this.restNode.editNodeProperty(node.ref.id, property, values).toPromise();
+
+    }
+
     /**
      * Gets the relevant MDS ID for the given nodes.
      *
@@ -106,6 +116,9 @@ export class MdsEditorCommonService {
         }
         if (node.aspects?.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) !== -1) {
             nodeGroup = MdsType.IoChildObject;
+        }
+        if (node.aspects?.indexOf(RestConstants.CCM_ASPECT_COLLECTION) !== -1) {
+            nodeGroup = MdsType.Collection;
         }
         if (node.aspects?.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION) !== -1) {
             nodeGroup = MdsType.ToolDefinition;

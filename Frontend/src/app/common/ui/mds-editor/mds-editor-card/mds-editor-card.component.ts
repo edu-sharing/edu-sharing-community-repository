@@ -1,19 +1,20 @@
-import {takeUntil,  delay, map } from 'rxjs/operators';
-import { Component, EventEmitter, Input, OnInit, Output, OnDestroy } from '@angular/core';
+import {takeUntil, delay, map, filter} from 'rxjs/operators';
+import {Component, EventEmitter, Input, OnInit, Output, OnDestroy, ViewChild} from '@angular/core';
 import { DialogButton, Node } from '../../../../core-module/core.module';
 import { CardJumpmark } from '../../../../core-ui-module/components/card/card.component';
 import { Toast } from '../../../../core-ui-module/toast';
 import { FillTypeStatus } from '../../input-fill-progress/input-fill-progress.component';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
-import { ReplaySubject, Observable } from 'rxjs';
+import {ReplaySubject, Observable, combineLatest} from 'rxjs';
+import {MdsEditorCoreComponent} from '../mds-editor-core/mds-editor-core.component';
 
 @Component({
-    selector: 'app-mds-editor-card',
+    selector: 'es-mds-editor-card',
     templateUrl: './mds-editor-card.component.html',
     styleUrls: ['./mds-editor-card.component.scss'],
 })
 export class MdsEditorCardComponent implements OnInit, OnDestroy {
-
+    @ViewChild('core') coreRef: MdsEditorCoreComponent;
     constructor(private mdsEditorInstance: MdsEditorInstanceService, private toast: Toast) {
         this.mdsEditorInstance.isEmbedded = false;
     }
@@ -81,10 +82,15 @@ export class MdsEditorCardComponent implements OnInit, OnDestroy {
     }
 
     private getJumpMarks(): Observable<CardJumpmark[]> {
-        return this.mdsEditorInstance.activeViews.pipe(
-            map((activeViews) =>
-                activeViews.map(
-                    (view) => new CardJumpmark(view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX, view.caption, view.icon),
+        return combineLatest([this.mdsEditorInstance.activeViews, this.mdsEditorInstance.shouldShowExtendedWidgets$]).pipe(
+            map((observed) =>
+                observed[0].map((view) =>
+                    this.coreRef?.viewRef?.filter(v => v.view.id === view.id)?.[0]
+                )
+            ),
+            map((viewRef) =>
+                viewRef.filter((v) => v && !v.isInHiddenState()).map(
+                    (v) => new CardJumpmark(v.view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX, v.view.caption, v.view.icon),
                 ),
             ),
         );

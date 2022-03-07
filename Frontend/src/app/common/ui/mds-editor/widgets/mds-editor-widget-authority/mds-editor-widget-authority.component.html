@@ -1,4 +1,4 @@
-<app-mds-editor-widget-container
+<es-mds-editor-widget-container
   #container
   [injectedView]="this"
   [widget]="widget"
@@ -8,14 +8,14 @@
   [wrapInFormField]="false"
 >
   <div class="input-wrapper">
-    <authority-search-input
+    <es-authority-search-input
       #authoritySearchInputComponent
       [label]="widget.definition.caption"
       [placeholder]="widget.definition.placeholder"
       [globalSearchAllowed]="globalSearchAllowed"
       [showRecent]="false"
       (onChooseAuthority)="add($event)"
-    ></authority-search-input>
+    ></es-authority-search-input>
   </div>
   <mat-chip-list
     #chipList
@@ -30,15 +30,15 @@
       (click)="add(value)"
       (removed)="remove(value)"
       [class.indeterminate]="(indeterminateValues$ | async)?.includes(value.key)"
-      appCheckTextOverflow=".mat-chip-label"
-      #text="appCheckTextOverflow"
+      esCheckTextOverflow=".mat-chip-label"
+      #text="esCheckTextOverflow"
       [matTooltip]="getTooltip(value, text.hasTextOverflow())"
     >
       <span class="mat-chip-label">{{ value.label }}</span>
       <mat-icon matChipRemove>cancel</mat-icon>
     </mat-chip>
   </mat-chip-list>
-</app-mds-editor-widget-container>
+</es-mds-editor-widget-container>
 
 <!-- Load styles for mat-select-arrow. -->
 <mat-select hidden style="display: none"></mat-select>

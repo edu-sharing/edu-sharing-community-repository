@@ -1,6 +1,6 @@
 <mat-tab-group mat-stretch-tabs [(selectedIndex)]="currentTab">
   <mat-tab label="{{'ADMIN.STATISTICS.GROUPED' | translate}}" class="stats-grouped">
-    <h4 class="mat-heading-4 mat-heading-underline"><i icon="history"></i> {{'ADMIN.STATISTICS.GROUPED' | translate}}</h4>
+    <h4 class="mat-heading-4 mat-heading-underline"><i esIcon="history"></i> {{'ADMIN.STATISTICS.GROUPED' | translate}}</h4>
     <div class="modes">
       <mat-form-field>
         <mat-label>{{'ADMIN.STATISTICS.GROUP_BY' | translate}}</mat-label>
@@ -21,12 +21,12 @@
         </div>
       </div>
     </div>
-    <spinner *ngIf="groupedLoading"></spinner>
+    <es-spinner *ngIf="groupedLoading"></es-spinner>
     <h5 class="mat-heading-5" *ngIf="groupedNoData">{{'ADMIN.STATISTICS.NO_DATA' | translate}}</h5>
     <canvas #groupedChart [class.display-none]="groupedLoading || groupedNoData"></canvas>
   </mat-tab>
   <mat-tab label="{{'ADMIN.STATISTICS.CUSTOM_GROUPS' | translate}}" class="stats-custom-groups">
-    <h4 class="mat-heading-4 mat-heading-underline"><i icon="view_list"></i> {{'ADMIN.STATISTICS.CUSTOM_GROUPS' | translate}}</h4>
+    <h4 class="mat-heading-4 mat-heading-underline"><i esIcon="view_list"></i> {{'ADMIN.STATISTICS.CUSTOM_GROUPS' | translate}}</h4>
     <mat-form-field class="groups-template-select">
       <mat-label>{{'ADMIN.STATISTICS.GROUP_TEMPLATE_LABEL' | translate}}</mat-label>
       <mat-select [(ngModel)]="currentTemplate"
@@ -40,7 +40,7 @@
     <div class="groups-button">
       <button mat-button color="primary" (click)="showModes = !showModes">
         {{ 'ADMIN.STATISTICS.GROUPS_ADVANCED' | translate }}
-        <i icon="keyboard_arrow_{{showModes ? 'up' : 'down'}}"></i>
+        <i esIcon="keyboard_arrow_{{showModes ? 'up' : 'down'}}"></i>
       </button>
     </div>
     <div class="modes" *ngIf="showModes" [@dialog]="showModes">
@@ -77,7 +77,7 @@
         <mat-calendar [(selected)]="customGroupEnd" [minDate]="customGroupStart" [maxDate]="today"></mat-calendar>
       </div>
     </div>
-    <spinner *ngIf="customGroupLoading"></spinner>
+    <es-spinner *ngIf="customGroupLoading"></es-spinner>
     <div class="custom-group-data-table">
       <mat-table [dataSource]="customGroupData" [class.mat-table-clickable]="singleMode=='NODES'" *ngIf="customGroupData && !customGroupLoading">
 
@@ -99,7 +99,7 @@
     </div>
   </mat-tab>
   <mat-tab label="{{'ADMIN.STATISTICS.NODES' | translate}}" class="stats-nodes" *ngIf="_mediacenter || nodesPermission">
-    <h4 class="mat-heading-4 mat-heading-underline"><i icon="assessment"></i> {{'ADMIN.STATISTICS.NODES' | translate}}</h4>
+    <h4 class="mat-heading-4 mat-heading-underline"><i esIcon="assessment"></i> {{'ADMIN.STATISTICS.NODES' | translate}}</h4>
     <div class="modes">
       <div class="calendars">
         <div>
@@ -113,7 +113,7 @@
       </div>
     </div>
     <h5 class="mat-heading-5" *ngIf="nodesNoData">{{'ADMIN.STATISTICS.NO_DATA' | translate}}</h5>
-    <listTable *ngIf="!nodesNoData"
+    <es-listTable *ngIf="!nodesNoData"
                [hasIcon]="true"
                [hasHeading]="true"
                [isClickable]="true"
@@ -122,10 +122,10 @@
                [columns]="columns"
                [isLoading]="nodesLoading"
                [nodes]="nodes"
-    ></listTable>
+    ></es-listTable>
   </mat-tab>
   <mat-tab label="{{'ADMIN.STATISTICS.SINGLE' | translate}}" class="stats-single">
-    <h4 class="mat-heading-4 mat-heading-underline"><i icon="view_headline"></i> {{'ADMIN.STATISTICS.SINGLE' | translate}}</h4>
+    <h4 class="mat-heading-4 mat-heading-underline"><i esIcon="view_headline"></i> {{'ADMIN.STATISTICS.SINGLE' | translate}}</h4>
     <div class="modes">
       <div class="group" *ngIf="_mediacenter || (nodesPermission && userPermission)">
         <mat-label>{{'ADMIN.STATISTICS.SINGLE_MODE' | translate}}</mat-label>
@@ -145,7 +145,7 @@
         </div>
       </div>
     </div>
-    <spinner *ngIf="singleLoading"></spinner>
+    <es-spinner *ngIf="singleLoading"></es-spinner>
     <div class="single-data-table ">
       <mat-table [dataSource]="singleData" [class.mat-table-clickable]="singleMode=='NODES'" *ngIf="singleData && !singleLoading">
 
@@ -180,7 +180,7 @@
   </mat-tab>
 </mat-tab-group>
 <div class="export" *ngIf="!groupedLoading && !customGroupLoading && !nodesLoading && !singleLoading">
-  <h4 class="mat-heading-4 mat-heading-underline"><i icon="cloud_download"></i>{{'ADMIN.STATISTICS.EXPORT_LABEL' | translate}}</h4>
+  <h4 class="mat-heading-4 mat-heading-underline"><i esIcon="cloud_download"></i>{{'ADMIN.STATISTICS.EXPORT_LABEL' | translate}}</h4>
   <div>
     <mat-form-field *ngIf="currentTab==2">
       <mat-label>{{'ADMIN.STATISTICS.EXPORT_PROPERTIES' | translate}}</mat-label>

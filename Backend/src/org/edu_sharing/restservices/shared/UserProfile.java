@@ -7,11 +7,11 @@ import org.edu_sharing.repository.client.rpc.User;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class UserProfile  {
   
   private String firstName = null;
@@ -38,7 +38,7 @@ public class UserProfile  {
 
 /**
    **/
-  @ApiModelProperty(value = "")
+  @Schema(description = "")
   @JsonProperty("firstName")
   public String getFirstName() {
     return firstName;
@@ -50,7 +50,7 @@ public class UserProfile  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @Schema(description = "")
   @JsonProperty("lastName")
   public String getLastName() {
     return lastName;
@@ -62,7 +62,7 @@ public class UserProfile  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @Schema(description = "")
   @JsonProperty("email")
   public String getEmail() {
     return email;

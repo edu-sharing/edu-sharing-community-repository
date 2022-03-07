@@ -1,7 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 
 @Component({
-    selector: 'app-mds-editor-widget-error',
+    selector: 'es-mds-editor-widget-error',
     templateUrl: './mds-editor-widget-error.component.html',
     styleUrls: ['./mds-editor-widget-error.component.scss'],
 })

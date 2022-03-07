@@ -6,6 +6,7 @@ import { RestLocatorService } from '../core-module/core.module';
 import { TranslationLoader, TRANSLATION_LIST } from './translation-loader';
 import { Translation } from './translation';
 import { TranslationSource } from './translation-source';
+import { ConfigService } from 'ngx-edu-sharing-api';
 
 class HttpClientStub {
     get(url: string): Observable<any> {
@@ -13,11 +14,11 @@ class HttpClientStub {
     }
 }
 
-class RestLocatorStub {
-    getConfigLanguage(lang: string): Observable<any> {
+class ConfigStub {
+    getCustomTranslations(lang: string): Observable<any> {
         return rxjs.of(null);
     }
-    getLanguageDefaults(lang: string): Observable<any> {
+    getDefaultTranslations(lang: string): Observable<any> {
         return rxjs.of(null);
     }
 }
@@ -25,14 +26,14 @@ class RestLocatorStub {
 describe('TranslationLoader', () => {
     let translationLoader: TranslationLoader;
     let httpClient: HttpClientStub;
-    let locator: RestLocatorStub;
+    let config: ConfigStub;
 
     beforeEach(() => {
         httpClient = new HttpClientStub();
-        locator = new RestLocatorStub();
-        translationLoader = new TranslationLoader(
+        config = new ConfigStub();
+        translationLoader = TranslationLoader.create(
             httpClient as HttpClient,
-            locator as RestLocatorService,
+            config as unknown as ConfigService,
         );
     });
 
@@ -61,12 +62,12 @@ describe('TranslationLoader', () => {
             it('should call nothing for lang=none', async () => {
                 const getSpy = spyOn(httpClient, 'get').and.callThrough();
                 const getConfigLanguageSpy = spyOn(
-                    locator,
-                    'getConfigLanguage',
+                    config,
+                    'getCustomTranslations',
                 ).and.callThrough();
                 const getLanguageDefaultsSpy = spyOn(
-                    locator,
-                    'getLanguageDefaults',
+                    config,
+                    'getDefaultTranslations',
                 ).and.callThrough();
                 await callGetTranslation('none');
                 expect(getSpy.calls.count()).toBe(0);
@@ -86,19 +87,19 @@ describe('TranslationLoader', () => {
                 ]);
             });
 
-            it('should call getConfigLanguage', async () => {
+            it('should call getCustomTranslations', async () => {
                 const getConfigLanguageSpy = spyOn(
-                    locator,
-                    'getConfigLanguage',
+                    config,
+                    'getCustomTranslations',
                 ).and.callThrough();
                 await callGetTranslation('de');
                 expect(getConfigLanguageSpy.calls.count()).toBe(1);
             });
 
-            it('should call getConfigLanguage with correct locale', async () => {
+            it('should call getCustomTranslations with correct locale', async () => {
                 const getConfigLanguageSpy = spyOn(
-                    locator,
-                    'getConfigLanguage',
+                    config,
+                    'getCustomTranslations',
                 ).and.callThrough();
                 await callGetTranslation('de');
                 expect(getConfigLanguageSpy.calls.mostRecent().args).toEqual([
@@ -106,10 +107,10 @@ describe('TranslationLoader', () => {
                 ]);
             });
 
-            it('should not call getLanguageDefaults', async () => {
+            it('should not call getDefaultTranslations', async () => {
                 const getLanguageDefaultsSpy = spyOn(
-                    locator,
-                    'getLanguageDefaults',
+                    config,
+                    'getDefaultTranslations',
                 ).and.callThrough();
                 await callGetTranslation('de');
                 expect(getLanguageDefaultsSpy.calls.count()).toBe(0);
@@ -152,71 +153,71 @@ describe('TranslationLoader', () => {
                 expect(result).toEqual({ prefix: { bar: 'baz' } });
             });
 
-            it('should include translations via getConfigLanguage', async () => {
-                locator.getConfigLanguage = lang => {
+            it('should include translations via getCustomTranslations', async () => {
+                config.getCustomTranslations = lang => {
                     return rxjs.of({ foo: 'bar' });
                 };
                 const result = await callGetTranslation('de');
                 expect(result).toEqual({ foo: 'bar' });
             });
 
-            it('should override translations via getConfigLanguage', async () => {
+            it('should override translations via getCustomTranslations', async () => {
                 httpClient.get = url => {
                     if (url === 'assets/i18n/common/de.json') {
                         return rxjs.of({ foo: 'bar' });
                     }
                     return rxjs.of(null);
                 };
-                locator.getConfigLanguage = lang => {
+                config.getCustomTranslations = lang => {
                     return rxjs.of({ foo: 'baz' });
                 };
                 const result = await callGetTranslation('de');
                 expect(result).toEqual({ foo: 'baz' });
             });
 
-            it('should merge translations via getConfigLanguage', async () => {
+            it('should merge translations via getCustomTranslations', async () => {
                 httpClient.get = url => {
                     if (url === 'assets/i18n/common/de.json') {
                         return rxjs.of({ foo: 'bar' });
                     }
                     return rxjs.of(null);
                 };
-                locator.getConfigLanguage = lang => {
+                config.getCustomTranslations = lang => {
                     return rxjs.of({ bar: 'baz' });
                 };
                 const result = await callGetTranslation('de');
                 expect(result).toEqual({ foo: 'bar', bar: 'baz' });
             });
 
-            it('should override nested translations via getConfigLanguage', async () => {
+            it('should override nested translations via getCustomTranslations', async () => {
                 httpClient.get = url => {
                     if (url === 'assets/i18n/common/de.json') {
                         return rxjs.of({ prefix: { foo: 'bar' } });
                     }
                     return rxjs.of(null);
                 };
-                locator.getConfigLanguage = lang => {
+                config.getCustomTranslations = lang => {
                     return rxjs.of({ prefix: { bar: 'baz' } });
                 };
                 const result = await callGetTranslation('de');
                 expect(result).toEqual({ prefix: { bar: 'baz' } });
             });
 
-            it('should deep-merge translations via getConfigLanguage', async () => {
+            it('should deep-merge translations via getCustomTranslations', async () => {
                 httpClient.get = url => {
                     if (url === 'assets/i18n/common/de.json') {
                         return rxjs.of({ prefix: { foo: 'bar' } });
                     }
                     return rxjs.of(null);
                 };
-                locator.getConfigLanguage = lang => {
+                config.getCustomTranslations = lang => {
                     return rxjs.of({ 'prefix.bar': 'baz' });
                 };
                 const result = await callGetTranslation('de');
                 expect(result).toEqual({ prefix: { foo: 'bar', bar: 'baz' } });
             });
 
-            it('should deep-merge translations via getConfigLanguage (3 levels)', async () => {
+            it('should deep-merge translations via getCustomTranslations (3 levels)', async () => {
                 httpClient.get = url => {
                     if (url === 'assets/i18n/common/de.json') {
                         return rxjs.of({
@@ -225,7 +226,7 @@ describe('TranslationLoader', () => {
                     }
                     return rxjs.of(null);
                 };
-                locator.getConfigLanguage = lang => {
+                config.getCustomTranslations = lang => {
                     return rxjs.of({ 'l1.l2.l3.bar': 'baz' });
                 };
                 const result = await callGetTranslation('de');
@@ -234,14 +235,14 @@ describe('TranslationLoader', () => {
                 });
             });
 
-            it('should create missing levels via getConfigLanguage', async () => {
+            it('should create missing levels via getCustomTranslations', async () => {
                 httpClient.get = url => {
                     if (url === 'assets/i18n/common/de.json') {
                         return rxjs.of({});
                     }
                     return rxjs.of(null);
                 };
-                locator.getConfigLanguage = lang => {
+                config.getCustomTranslations = lang => {
                     return rxjs.of({ 'l1.l2.l3.bar': 'baz' });
                 };
                 const result = await callGetTranslation('de');
@@ -259,12 +260,12 @@ describe('TranslationLoader', () => {
             it('should call nothing for lang=none', async () => {
                 const getSpy = spyOn(httpClient, 'get').and.callThrough();
                 const getConfigLanguageSpy = spyOn(
-                    locator,
-                    'getConfigLanguage',
+                    config,
+                    'getCustomTranslations',
                 ).and.callThrough();
                 const getLanguageDefaultsSpy = spyOn(
-                    locator,
-                    'getLanguageDefaults',
+                    config,
+                    'getDefaultTranslations',
                 ).and.callThrough();
                 await callGetTranslation('none');
                 expect(getSpy.calls.count()).toBe(0);
@@ -278,28 +279,28 @@ describe('TranslationLoader', () => {
                 expect(getSpy.calls.count()).toBe(0);
             });
 
-            it('should call getConfigLanguage', async () => {
+            it('should call getCustomTranslations', async () => {
                 const getConfigLanguageSpy = spyOn(
-                    locator,
-                    'getConfigLanguage',
+                    config,
+                    'getCustomTranslations',
                 ).and.callThrough();
                 await callGetTranslation('de');
                 expect(getConfigLanguageSpy.calls.count()).toBe(1);
             });
 
-            it('should call getLanguageDefaults', async () => {
+            it('should call getDefaultTranslations', async () => {
                 const getLanguageDefaultsSpy = spyOn(
-                    locator,
-                    'getLanguageDefaults',
+                    config,
+                    'getDefaultTranslations',
                 ).and.callThrough();
                 await callGetTranslation('de');
                 expect(getLanguageDefaultsSpy.calls.count()).toBe(1);
             });
 
-            it('should call getLanguageDefaults with correct locale', async () => {
+            it('should call getDefaultTranslations with correct locale', async () => {
                 const getLanguageDefaultsSpy = spyOn(
-                    locator,
-                    'getLanguageDefaults',
+                    config,
+                    'getDefaultTranslations',
                 ).and.callThrough();
                 await callGetTranslation('de');
                 expect(getLanguageDefaultsSpy.calls.mostRecent().args).toEqual([
@@ -307,49 +308,49 @@ describe('TranslationLoader', () => {
                 ]);
             });
 
-            it('should include translations via getLanguageDefaults', async () => {
-                locator.getLanguageDefaults = lang => {
+            it('should include translations via getDefaultTranslations', async () => {
+                config.getDefaultTranslations = lang => {
                     return rxjs.of({ foo: 'bar' });
                 };
                 const result = await callGetTranslation('de');
                 expect(result).toEqual({ foo: 'bar' });
             });
 
-            it('should include translations via getConfigLanguage', async () => {
-                locator.getConfigLanguage = lang => {
+            it('should include translations via getCustomTranslations', async () => {
+                config.getCustomTranslations = lang => {
                     return rxjs.of({ foo: 'bar' });
                 };
                 const result = await callGetTranslation('de');
                 expect(result).toEqual({ foo: 'bar' });
             });
 
-            it('should merge translations via getConfigLanguage', async () => {
-                locator.getLanguageDefaults = lang => {
+            it('should merge translations via getCustomTranslations', async () => {
+                config.getDefaultTranslations = lang => {
                     return rxjs.of({ foo: 'bar' });
                 };
-                locator.getConfigLanguage = lang => {
+                config.getCustomTranslations = lang => {
                     return rxjs.of({ bar: 'baz' });
                 };
                 const result = await callGetTranslation('de');
                 expect(result).toEqual({ foo: 'bar', bar: 'baz' });
             });
 
-            it('should override nested translations via getConfigLanguage', async () => {
-                locator.getLanguageDefaults = lang => {
+            it('should override nested translations via getCustomTranslations', async () => {
+                config.getDefaultTranslations = lang => {
                     return rxjs.of({ prefix: { foo: 'bar' } });
                 };
-                locator.getConfigLanguage = lang => {
+                config.getCustomTranslations = lang => {
                     return rxjs.of({ prefix: { bar: 'baz' } });
                 };
                 const result = await callGetTranslation('de');
                 expect(result).toEqual({ prefix: { bar: 'baz' } });
             });
 
-            it('should deep-merge translations via getConfigLanguage', async () => {
-                locator.getLanguageDefaults = lang => {
+            it('should deep-merge translations via getCustomTranslations', async () => {
+                config.getDefaultTranslations = lang => {
                     return rxjs.of({ prefix: { foo: 'bar' } });
                 };
-                locator.getConfigLanguage = lang => {
+                config.getCustomTranslations = lang => {
                     return rxjs.of({ 'prefix.bar': 'baz' });
                 };
                 const result = await callGetTranslation('de');

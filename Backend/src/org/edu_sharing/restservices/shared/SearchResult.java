@@ -3,22 +3,23 @@ package org.edu_sharing.restservices.shared;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.edu_sharing.restservices.shared.NodeSearch.Facette;
+import org.edu_sharing.restservices.shared.NodeSearch.Facet;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 public class SearchResult<T> {
 
 	private List<T> nodes = new ArrayList<T>();
 	private Pagination pagination = null;
-	private List<Facette> facettes = null;
+	private List<Facet> facets = null;
+	private List<NodeSearch.Suggest> suggests = null;
 	private List<String> ignored;
 
 	/**
 	   **/
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("nodes")
 	public List<T> getNodes() {
 		return nodes;
@@ -30,7 +31,7 @@ public class SearchResult<T> {
 	
 	/**
 	   **/
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty("pagination")
 	public Pagination getPagination() {
 		return pagination;
@@ -42,14 +43,14 @@ public class SearchResult<T> {
 
 	/**
    **/
-	@ApiModelProperty(required = true, value = "")
-	@JsonProperty("facettes")
-	public List<Facette> getFacettes() {
-		return facettes;
+	@Schema(required = true, description = "")
+	@JsonProperty("facets")
+	public List<Facet> getFacets() {
+		return facets;
 	}
 
-	public void setFacettes(List<Facette> facettes) {
-		this.facettes = facettes;
+	public void setFacets(List<Facet> facets) {
+		this.facets = facets;
 	}
 	
 	@JsonProperty("ignored")
@@ -59,7 +60,10 @@ public class SearchResult<T> {
 	public void setIgnored(List<String> ignored) {
 		this.ignored = ignored;
 	}
-	
-	
-	
+
+	public void setSuggests(List<NodeSearch.Suggest> suggests) { this.suggests = suggests; }
+
+	@Schema(required = false, description = "")
+	public List<NodeSearch.Suggest> getSuggests() { return suggests; }
+
 }

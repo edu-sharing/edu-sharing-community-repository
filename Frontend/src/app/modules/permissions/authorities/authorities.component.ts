@@ -41,7 +41,7 @@ import {VCard} from "../../../core-module/ui/VCard";
 import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 
 @Component({
-  selector: 'permissions-authorities',
+  selector: 'es-permissions-authorities',
   templateUrl: 'authorities.component.html',
   styleUrls: ['authorities.component.scss'],
   animations: [

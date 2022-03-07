@@ -23,18 +23,18 @@ import {MatSlideToggle} from '@angular/material/slide-toggle';
  *
  * @example
  * <mat-radio-button value="my-radio-button">
- *   <app-multi-line-label>
+ *   <es-multi-line-label>
  *     <ng-container slot="label">
  *       A radio button
  *     </ng-container>
  *     <ng-container slot="description">
  *       Description for the radio button
  *     </ng-container>
- *   </app-multi-line-label>
+ *   </es-multi-line-label>
  * </mat-radio-button>
  */
 @Component({
-    selector: 'app-multi-line-label',
+    selector: 'es-multi-line-label',
     templateUrl: './multi-line-label.component.html',
     styleUrls: ['./multi-line-label.component.scss'],
 })

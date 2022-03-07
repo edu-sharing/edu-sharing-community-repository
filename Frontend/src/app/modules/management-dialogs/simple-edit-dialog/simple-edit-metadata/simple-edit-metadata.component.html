@@ -1,4 +1,4 @@
-<app-mds-editor-wrapper #mds
+<es-mds-editor-wrapper #mds
     class="mds-simple-editor"
     [embedded]="true"
     [allowReplacing]="!fromUpload"
@@ -7,4 +7,4 @@
     [nodes]="nodes"
     (onMdsLoaded)="isInited.next(true)"
     (onCancel)="onError.emit()"
-></app-mds-editor-wrapper>
+></es-mds-editor-wrapper>

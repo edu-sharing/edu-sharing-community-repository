@@ -1,38 +1,89 @@
 package org.edu_sharing.service.nodeservice;
 
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
-import org.edu_sharing.alfresco.repository.server.authentication.Context;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class PropertiesInterceptorFactory {
+    static Logger logger = Logger.getLogger(PropertiesInterceptorFactory.class);
 
 
-    static PropertiesInterceptor propertiesInterceptor = null;
+    static List<PropertiesGetInterceptor> propertiesGetInterceptors = null;
+    static List<PropertiesSetInterceptor> propertiesSetInterceptors = null;
 
-    public static PropertiesInterceptor getPropertiesInterceptor(){
-        if(propertiesInterceptor == null){
+    public static List<?> getInterceptors(String key) {
+        synchronized (PropertiesInterceptorFactory.class) {
+            try {
+                List<String> className = new ArrayList<>(LightbendConfigLoader.get().getStringList(key));
+                ArrayList<Class<?>> clazz = className.stream().map((String className1) -> {
+                    try {
+                        return Class.forName(className1);
+                    } catch (ClassNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                }).collect(Collectors.toCollection((Supplier<ArrayList>) ArrayList::new));
+                return clazz.stream().map((c) -> {
+                    try {
+                        return c.newInstance();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }).collect(Collectors.toList());
+            } catch (Throwable t) {
+                throw new RuntimeException(t);
+            }
+        }
+    }
+    public static List<? extends PropertiesSetInterceptor> getPropertiesSetInterceptors(){
+        if(propertiesSetInterceptors == null){
             synchronized (PropertiesInterceptorFactory.class){
                 try{
-                    String className = LightbendConfigLoader.get().getString("repository.interceptors.properties");
-                    Class clazz = Class.forName(className);
-                    propertiesInterceptor =  (PropertiesInterceptor) clazz.newInstance();
+                    List<PropertiesSetInterceptor> clazz =
+                            (List<PropertiesSetInterceptor>) getInterceptors("repository.interceptors.properties.set");
+                    if(clazz.size() == 0) {
+                        logger.info("No interceptors for set properties defined, will use default handling");
+                    }
+                    propertiesSetInterceptors = clazz;
                 }catch(Throwable t) {
                     throw new RuntimeException(t);
                 }
             }
         }
-        return propertiesInterceptor;
+        return propertiesSetInterceptors;
+    }
+    public static List<? extends PropertiesGetInterceptor> getPropertiesGetInterceptors(){
+        if(propertiesGetInterceptors == null){
+            synchronized (PropertiesInterceptorFactory.class){
+                try{
+                    List<PropertiesGetInterceptor> clazz =
+                            (List<PropertiesGetInterceptor>) getInterceptors("repository.interceptors.properties.get");
+                    if(clazz.size() == 0) {
+                        logger.info("No interceptors for get properties defined, will use default handling");
+                    }
+                    clazz.add(0, new PropertiesGetInterceptorPermissions());
+
+                    propertiesGetInterceptors = clazz;
+                }catch(Throwable t) {
+                    throw new RuntimeException(t);
+                }
+            }
+        }
+        return propertiesGetInterceptors;
     }
 
     public static void refresh(){
-        propertiesInterceptor = null;
+        propertiesGetInterceptors = null;
+        propertiesSetInterceptors = null;
     }
 
-    public static PropertiesInterceptor.PropertiesContext getPropertiesContext(NodeRef nodeRef, Map<String,Object> properties, List<String> aspects){
-        PropertiesInterceptor.PropertiesContext propertiesContext = new PropertiesInterceptor.PropertiesContext();
+    public static PropertiesGetInterceptor.PropertiesContext getPropertiesContext(NodeRef nodeRef, Map<String,Object> properties, List<String> aspects){
+        PropertiesGetInterceptor.PropertiesContext propertiesContext = new PropertiesGetInterceptor.PropertiesContext();
         propertiesContext.setProperties(properties);
         propertiesContext.setAspects(aspects);
         propertiesContext.setNodeRef(nodeRef);

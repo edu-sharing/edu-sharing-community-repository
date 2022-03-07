@@ -1,4 +1,4 @@
-<card
+<es-card
   title="{{'RECYCLE.RESTORE.NEW_LOCATION_TITLE' | translate }}"
   subtitle="{{'RECYCLE.RESTORE.NEW_LOCATION_SUBTITLE' | translate }}"
   icon="undo"
@@ -25,10 +25,10 @@
       </div>
     </div>
   </div>
-</card>
-<file-chooser *ngIf="showFileChooser"
+</es-card>
+<es-file-chooser *ngIf="showFileChooser"
   [isCancelable]="true"
   [pickDirectory]="true"
   (onChoose)="folderSelected($event)"
   (onCancel)="closeFolder()"
-></file-chooser>
+></es-file-chooser>

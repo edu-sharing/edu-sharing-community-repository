@@ -41,20 +41,7 @@ import java.rmi.RemoteException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.transaction.UserTransaction;
@@ -121,7 +108,7 @@ import org.edu_sharing.alfresco.fixes.VirtualEduGroupFolderTool;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataKey;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.exception.CCException;
@@ -157,9 +144,11 @@ import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
 import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
 import org.edu_sharing.alfresco.service.connector.ConnectorService;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.nodeservice.PropertiesGetInterceptor;
 import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.share.ShareService;
@@ -332,9 +321,9 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		SearchResult result = new SearchResult();
 		Map<String, Map<String, Integer>> countedProps = new HashMap<>();
 		if(srnr.getFacets() != null){
-			for(NodeSearch.Facette f : srnr.getFacets()){
+			for(NodeSearch.Facet f : srnr.getFacets()){
 				Map<String, Integer> values = new HashMap<>();
-				for(NodeSearch.Facette.Value value : f.getValues()){
+				for(NodeSearch.Facet.Value value : f.getValues()){
 					values.put(value.getValue(),value.getCount());
 				}
 				countedProps.put(f.getProperty(),values);
@@ -401,10 +390,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 		// do the facette
 		if (facettes != null && facettes.size() > 0) {
-			List<NodeSearch.Facette> facetsResult = new ArrayList<>();
+			List<NodeSearch.Facet> facetsResult = new ArrayList<>();
 
 			for (String facetteProp : facettes) {
-				NodeSearch.Facette facet = new NodeSearch.Facette();
+				NodeSearch.Facet facet = new NodeSearch.Facet();
 				facet.setProperty(facetteProp);
 				facet.setValues(new ArrayList<>());
 				facetsResult.add(facet);
@@ -430,7 +419,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 					 * --> pair.getSecond() > 0
 					 */
 					if (first != null && !first.trim().equals("") && pair.getSecond() > 0) {
-						NodeSearch.Facette.Value value = new NodeSearch.Facette.Value();
+						NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
 						value.setValue(first);
 						value.setCount(pair.getSecond());
 						facet.getValues().add(value);
@@ -903,7 +892,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		logger.debug("starting");
 
 		// making a copy so that the cached map will not be influenced
-		HashMap<String, Object> propsCopy = new HashMap<String, Object>(getPropertiesCached(nodeRef, true, true, false));
+		final HashMap<String, Object> propsCopy = new HashMap<String, Object>(getPropertiesCached(nodeRef, true, true, false));
 
 		logger.debug("starting extend several props with authentication and permission data");
 
@@ -963,16 +952,18 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			}
 		}
 
+		boolean hasMds = nodeType.equals(CCConstants.CCM_TYPE_IO) || nodeType.equals(CCConstants.CCM_TYPE_COMMENT) || nodeType.equals(CCConstants.CCM_TYPE_COLLECTION_FEEDBACK) || nodeType.equals(CCConstants.CCM_TYPE_MAP) || nodeType.equals(CCConstants.CM_TYPE_FOLDER);
+		String mdsId=CCConstants.metadatasetdefault_id;
+		MetadataSet mds = null;
 		/**
 		 * run over all properties and format the date props with with current
 		 * user locale
 		 */
-		if (nodeType.equals(CCConstants.CCM_TYPE_IO) || nodeType.equals(CCConstants.CCM_TYPE_COMMENT) || nodeType.equals(CCConstants.CCM_TYPE_COLLECTION_FEEDBACK) || nodeType.equals(CCConstants.CCM_TYPE_MAP) || nodeType.equals(CCConstants.CM_TYPE_FOLDER)) {
-			String mdsId=CCConstants.metadatasetdefault_id;
+		if (hasMds) {
 			if(propsCopy.containsKey(CCConstants.CM_PROP_METADATASET_EDU_METADATASET)){
 				mdsId=(String)propsCopy.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
 			}
-			MetadataSetV2 mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(),mdsId);
+			mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(),mdsId);
 			HashMap<String, Object> addAndOverwriteDateMap = new HashMap<String, Object>();
 			for (Map.Entry<String, Object> entry : propsCopy.entrySet()) {
 
@@ -994,20 +985,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 					addAndOverwriteDateMap.put(entry.getKey() + CCConstants.LONG_DATE_SUFFIX, entry.getValue());
 					// put formated
 					addAndOverwriteDateMap.put(entry.getKey(), ValueTool.toMultivalue(formattedValues));
-				}
-				try{
-					MetadataWidget widget = mds.findWidget(CCConstants.getValidLocalName(entry.getKey()));
-					Map<String, MetadataKey> map = widget.getValuesAsMap();
-					if(!map.isEmpty()){
-						String[] keys=ValueTool.getMultivalue((String) entry.getValue());
-						String[] values=new String[keys.length];
-						for(int i=0;i<keys.length;i++)
-							values[i]=map.containsKey(keys[i]) ? map.get(keys[i]).getCaption() : keys[i];
-						addAndOverwriteDateMap.put(entry.getKey() + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(values,CCConstants.MULTIVALUE_SEPARATOR));
-					}
-
-				}catch(Throwable t){
-
 				}
 			}
 
@@ -1151,10 +1128,28 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				return result;
 			}
 		}
+		HashMap<String, Object> propsOutput = propsCopy;
+		// @TODO: remove all of this from/to multivalue
+		ValueTool.getMultivalue(propsOutput);
+		for (PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
+			propsOutput = new HashMap<>(i.beforeDeliverProperties(PropertiesInterceptorFactory.getPropertiesContext(
+					nodeRef,
+					propsOutput,
+					Arrays.asList(aspects))
+			));
+		}
 
-		return (HashMap<String, Object>) PropertiesInterceptorFactory.getPropertiesInterceptor().
-				beforeDeliverProperties(PropertiesInterceptorFactory.getPropertiesContext(nodeRef,propsCopy,
-						Arrays.asList(aspects)));
+		/**
+		 * attach the display name suffix
+		 */
+		if(hasMds) {
+			MetadataHelper.addVirtualDisplaynameProperties(mds, propsOutput);
+		}
+
+		// @TODO: remove all of this from/to multivalue
+		ValueTool.toMultivalue(propsOutput);
+
+		return propsOutput;
 	}
 
 	/**
@@ -1379,9 +1374,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			Date mdate = (Date) propMap.get(QName.createQName(CCConstants.CM_PROP_C_MODIFIED));
 			if (mdate != null) {
 				properties.put(CCConstants.CC_CACHE_MILLISECONDS_KEY, new Long(mdate.getTime()).toString());
-				properties = (HashMap<String, Object>) PropertiesInterceptorFactory.getPropertiesInterceptor().
-						beforeCacheProperties(PropertiesInterceptorFactory.getPropertiesContext(nodeRef,properties,
-								aspects.stream().map(q -> q.toString()).collect(Collectors.toList())));
+				for(PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
+					properties = new HashMap<>(i.beforeCacheProperties(PropertiesInterceptorFactory.getPropertiesContext(nodeRef, properties,
+									aspects.stream().map(QName::toString).collect(Collectors.toList()))));
+				}
 				repCache.put(nodeRef.getId(), properties);
 			}
 		}
@@ -3324,6 +3320,10 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 								user.setEmail((String) personProps.get(ContentModel.PROP_EMAIL));
 								user.setGivenName((String) personProps.get(ContentModel.PROP_FIRSTNAME));
 								user.setSurname((String) personProps.get(ContentModel.PROP_LASTNAME));
+								user.setEditable(
+										AuthorityServiceHelper.isAdmin() ||
+										!Objects.equals(AuthenticationUtil.getFullyAuthenticatedUser(), alfAuthority)
+								);
 
 								String repository = (String) personProps.get(QName.createQName(CCConstants.PROP_USER_REPOSITORYID));
 								if (repository == null || repository.trim().equals("")) repository = appInfo.getAppId();
@@ -3526,10 +3526,22 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				(String) nodeService.getProperty(
 						new NodeRef(storeRef, nodeId),
 						QName.createQName(CCConstants.CM_NAME));
-		for(int i=0;;i++) {
+		for(int i=0;i<=11;i++) {
 			String name=originalName;
 			if(i>0) {
 				name = NodeServiceHelper.renameNode(name, i);
+				if(i>10) {
+					logger.info("Node " + name +" already exists, falling back to uuid " + nodeId);
+					// fallback
+					name = nodeId;
+				}
+			}
+			if(nodeService.getChildByName(new NodeRef(storeRef, newParentId), ContentModel.ASSOC_CONTAINS, name) != null ||
+					nodeService.getChildByName(NodeServiceHelper.getPrimaryParent(new NodeRef(storeRef, nodeId)), ContentModel.ASSOC_CONTAINS, name) != null) {
+				logger.debug("Node " + name +" already exists, retrying...");
+				continue;
+			}
+			if(i>0) {
 				nodeService.setProperty(new NodeRef(storeRef, nodeId),
 						QName.createQName(CCConstants.CM_NAME),name);
 			}
@@ -3543,11 +3555,13 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				// remove from cache so that the new primary parent will be refreshed
 				Cache repCache = new RepositoryCache();
 				repCache.remove(nodeId);
-				break;
+				return;
 			}catch(DuplicateChildNodeNameException e){
+				logger.warn("Node renaming to " + name + " throwed " + e.getName());
 				// let the loop run
 			}
 		}
+		throw new RuntimeException("Could not move node, creating new node at location " +newParentId + " failed, renaming failed for " + nodeId);
 	}
 
 	/**

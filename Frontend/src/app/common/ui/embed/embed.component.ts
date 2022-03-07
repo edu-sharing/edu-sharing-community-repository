@@ -14,11 +14,11 @@ import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {MainNavService} from '../../services/main-nav.service';
 
 @Component({
-    selector: 'mds-embed',
+    selector: 'es-mds-embed',
     encapsulation: ViewEncapsulation.None,
     template: `
-        <app-mds-editor-wrapper #mdsRef [embedded]="true" editorMode="form" [currentValues]="data" [setId]="setId" [groupId]="groupId" *ngIf="component==='mds'"></app-mds-editor-wrapper>
-        <workspace-license #licenseRef [properties]="data" [embedded]="true" *ngIf="component==='license'"></workspace-license>
+        <es-mds-editor-wrapper #mdsRef [embedded]="true" editorMode="form" [currentValues]="data" [setId]="setId" [groupId]="groupId" *ngIf="component==='mds'"></es-mds-editor-wrapper>
+        <es-workspace-license #licenseRef [properties]="data" [embedded]="true" *ngIf="component==='license'"></es-workspace-license>
     `,
     styleUrls: ['embed.component.scss']
 })

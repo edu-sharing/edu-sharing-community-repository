@@ -3,7 +3,7 @@ import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../../core-module/ui/ui-animation";
 
 @Component({
-  selector: 'app-license-source',
+  selector: 'es-license-source',
   templateUrl: 'license-source.component.html',
   styleUrls: ['license-source.component.scss'],
   animations: [

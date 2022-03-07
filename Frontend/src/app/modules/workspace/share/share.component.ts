@@ -40,7 +40,7 @@ import {SharePublishComponent} from './share-publish/share-publish.component';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 
 @Component({
-    selector: 'workspace-share',
+    selector: 'es-workspace-share',
     templateUrl: 'share.component.html',
     styleUrls: ['share.component.scss'],
     animations: [
@@ -317,7 +317,7 @@ export class WorkspaceShareComponent {
                 (data) => {
                     //this.inheritAllowed = !this.isCollection() && data.nodes.length > 1;
                     // changed in 4.1 to keep inherit state of collections
-                    this.inheritAllowed = data.nodes.length > 1;
+                    this.inheritAllowed = data.scope === 'MY_FILES' || data.nodes.length > 1;
                     this.isSharedScope = data.scope === 'SHARED_FILES';
                     this.updateToolpermissions();
                 },

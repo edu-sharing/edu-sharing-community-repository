@@ -10,6 +10,7 @@ import org.alfresco.service.cmr.security.NoSuchPersonException;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -386,6 +387,9 @@ public class PersonDao {
 		return status;
 	}
 	public UserStats getStats() {
+		if(!LightbendConfigCache.getBoolean("repository.statistics.byUser")){
+			return null;
+		}
 		UserStats stats = new UserStats();
 		// run as admin so solr counts all materials and collections
 		return AuthenticationUtil.runAsSystem(new RunAsWork<UserStats>() {
@@ -693,7 +697,12 @@ public class PersonDao {
 		}
 	}
 
-	public void setStatus(PersonLifecycleService.PersonStatus status,boolean notifyMail) {
+	public void setStatus(PersonLifecycleService.PersonStatus status,boolean notifyMail) throws DAOValidationException {
+		if(getAuthorityName().equals(ApplicationInfoList.getHomeRepository().getUsername())) {
+			throw new DAOValidationException(
+					new Exception("Method not allowed for the primary admin")
+			);
+		}
 		String oldStatus= (String) userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS);
 		NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),getNodeId(),CCConstants.CM_PROP_PERSON_ESPERSONSTATUS,status.name());
 		NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),getNodeId(),CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE,new Date());

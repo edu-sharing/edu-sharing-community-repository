@@ -161,7 +161,7 @@ public class DownloadServlet extends HttpServlet{
 		if(location==null)
 			return null;
 		Map<String, String> headers=new HashMap<>();
-		return new HttpQueryTool().getStream(new GetMethod(location));
+		return new HttpQueryTool().getStream(location);
 	}
 	private static String checkAndGetCollectionRef(String nodeId){
 		NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
@@ -263,7 +263,7 @@ public class DownloadServlet extends HttpServlet{
 							String filename = nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),finalNodeId,CCConstants.CM_NAME);
                             String wwwurl = nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),finalNodeId,CCConstants.CCM_PROP_IO_WWWURL);
                             if(wwwurl!=null){
-                                errors.add( filename+": Is a link and can not be downloaded" );
+                                errors.add( filename+": Is a link and can not be downloaded: " + wwwurl);
                                 return null;
                             }
 							InputStream reader = null;

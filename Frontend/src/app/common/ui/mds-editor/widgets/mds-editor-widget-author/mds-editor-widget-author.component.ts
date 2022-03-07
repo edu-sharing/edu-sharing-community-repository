@@ -17,7 +17,7 @@ export interface AuthorData {
 }
 
 @Component({
-    selector: 'app-mds-editor-widget-author',
+    selector: 'es-mds-editor-widget-author',
     templateUrl: './mds-editor-widget-author.component.html',
     styleUrls: ['./mds-editor-widget-author.component.scss'],
 })
@@ -65,19 +65,26 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
         );
     }
 
-    async openContributorDialog() {
-        // update props before switching to contributor to keep local changes
-        this._nodes[0].properties = await this.getValues(this._nodes[0].properties, this._nodes[0]);
-        this.mainNavService.getDialogs().nodeContributor = this._nodes[0];
-        this.mainNavService
-            .getDialogs()
-            .nodeContributorChange.pipe(first())
-            .subscribe((n) => {
-                if(n) {
-                    this.mdsEditorValues.updateNodes([n]);
-                    this.updateValues([n]);
-                }
-            });
+    static async openContributorDialog(mdsEditorInstanceService: MdsEditorInstanceService,
+                                       mainNavService: MainNavService) {
+        return new Promise<Node>(async (resolve) => {
+            // update props before switching to contributor to keep local changes
+            const nodes = mdsEditorInstanceService.nodes$.value;
+            const values = await mdsEditorInstanceService.getValues(nodes[0], false);
+            const node = nodes[0];
+            Object.keys(values).forEach((key) => node.properties[key] = values[key]);
+            // this._nodes[0].properties = await this.getValues(this._nodes[0].properties, this._nodes[0]);
+            mainNavService.getDialogs().nodeContributor = node;
+            mainNavService
+                .getDialogs()
+                .nodeContributorChange.pipe(first())
+                .subscribe((n) => {
+                    if (n) {
+                        mdsEditorInstanceService.updateNodes([n]);
+                        resolve(n);
+                    }
+                });
+        });
     }
 
     setVCardAuthor(author: boolean): void {
@@ -152,5 +159,13 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
                 author: new VCard(this.author.author.toVCardString()),
             };
         }
+    }
+
+    async openContributorDialog() {
+        const updatedNode = await MdsEditorWidgetAuthorComponent.openContributorDialog(
+            this.mdsEditorValues,
+            this.mainNavService,
+        );
+        this.updateValues([updatedNode]);
     }
 }

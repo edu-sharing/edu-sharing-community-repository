@@ -11,57 +11,8 @@ import {PlatformLocation} from '@angular/common';
 // readers.
 
 @Component({
-    selector: 'app-node-url',
-    template: `
-        <ng-template #content><ng-content></ng-content></ng-template>
-        <ng-container *ngIf="mode === 'link'">
-            <a
-                *ngIf="!disabled"
-                #link
-                matRipple
-                matRippleColor="primary"
-                [routerLink]="get('routerLink')"
-                [state]="getState()"
-                [queryParams]="get('queryParams')"
-                queryParamsHandling="merge"
-                cdkMonitorElementFocus
-                [attr.aria-label]="ariaLabel ? listTable?.getPrimaryTitle(node) || node.name : null"
-                [attr.aria-describedby]="ariaDescribedby"
-            >
-                <ng-container *ngTemplateOutlet="content"></ng-container>
-            </a>
-            <span *ngIf="disabled && !alwaysRipple">
-                <ng-container *ngTemplateOutlet="content"></ng-container>
-            </span>
-            <span *ngIf="disabled && alwaysRipple" matRipple matRippleColor="primary">
-                <ng-container *ngTemplateOutlet="content"></ng-container>
-            </span>
-        </ng-container>
-        <ng-container *ngIf="mode === 'wrapper'">
-            <div
-                class="node-url-wrapper"
-                #wrapper
-                matRipple
-                matRippleColor="primary"
-                [matRippleDisabled]="disabled && !alwaysRipple"
-                (click)="clickWrapper($event)"
-            >
-                <ng-container *ngTemplateOutlet="content"></ng-container>
-            </div>
-        </ng-container>
-        <ng-container *ngIf="mode === 'button'">
-            <button
-                [disabled]="disabled"
-                #link
-                matRipple
-                matRippleColor="primary"
-                [matRippleDisabled]="disabled && !alwaysRipple"
-                (click)="buttonClick.emit($event)"
-            >
-                <ng-container *ngTemplateOutlet="content"></ng-container>
-            </button>
-        </ng-container>
-    `,
+    selector: 'es-node-url',
+    templateUrl: 'node-url.component.html',
     styleUrls: ['node-url.component.scss'],
 })
 export class NodeUrlComponent {

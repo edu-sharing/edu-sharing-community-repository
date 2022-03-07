@@ -16,14 +16,10 @@ import java.util.Map;
 
 import javax.xml.soap.SOAPException;
 
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.axis.AxisFault;
 import org.apache.axis.MessageContext;
 import org.apache.axis.message.SOAPHeaderElement;
 import org.apache.log4j.Logger;
-import org.edu_sharing.metadataset.v2.MetadataReaderV2;
-import org.edu_sharing.metadataset.v2.MetadataSetV2;
-import org.edu_sharing.metadataset.v2.tools.MetadataTemplateRenderer;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;

@@ -11,25 +11,38 @@ $optionBarHeight: 50px;
     display: grid;
     height: 100%;
     grid-template-columns: auto;
+    @include contrastMode {
+        border: 1px solid rgba(black, 0.42);
+    }
     .dropdown-dummy {
         position: fixed;
     }
     .card-options {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        padding: 5px 5px 7px 5px;
-        .card-options-spacer {
-            // margin: 0 5px;
-            // border-left: 1px solid #ccc;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-column-gap: 10px;
+        padding: 5px 5px 7px 10px;
+        .card-rating-area {
+            display: flex;
+            align-items: center;
+            height: 100%;
         }
-        app-option-button, button {
-            transition: all $transitionNormal;
-            margin: 0 2px;
-            border-radius: 50%;
-            &:hover,
-            &:focus {
-                background-color: #fff;
+        .card-options-area {
+            display: flex;
+            .card-options-spacer {
+                // margin: 0 5px;
+                // border-left: 1px solid #ccc;
+            }
+
+            es-option-button, button {
+                transition: all $transitionNormal;
+                margin: 0 2px;
+                border-radius: 50%;
+
+                &:hover,
+                &:focus {
+                    background-color: #fff;
+                }
             }
         }
     }
@@ -103,7 +116,20 @@ $optionBarHeight: 50px;
             mat-checkbox {
                 margin-right: -20px;
                 position: relative;
-                top: -1px;
+                top: -1.3px;
+                &.cdk-keyboard-focused ::ng-deep .mat-focus-indicator {
+                    @include removeDefaultFocus();
+                    &::after {
+                        content: '';
+                        position: absolute;
+                        left: 2px;
+                        right: 2px;
+                        top: 2px;
+                        bottom: 2px;
+                        @include setGlobalKeyboardFocus('border');
+                        border-color: white;
+                    }
+                }
             }
         }
         .card-top-bar-empty {
@@ -171,7 +197,7 @@ $optionBarHeight: 50px;
                     color: $textLight;
                     font-size: 85%;
                 }
-                > app-list-base {
+                > es-list-base {
                     color: #000;
                     flex-grow: 1;
                     margin: 5px 0;
@@ -184,7 +210,7 @@ $optionBarHeight: 50px;
                 }
             }
             &:first-child {
-                > app-list-base, > app-node-url {
+                > es-list-base, > es-node-url {
                     width: 100%;
                     color: $textMain;
                     font-size: 120%;
@@ -213,11 +239,11 @@ $optionBarHeight: 50px;
     .grid-card {
         .card-meta-row {
             &:first-child {
-                app-list-base, app-node-url a app-list-base {
+                es-list-base, es-node-url a es-list-base {
                     @include limitLineCount(2, 1.25);
                 }
             }
-            app-node-url {
+            es-node-url {
                 a {
                     color: $textMain;
                     &.cdk-keyboard-focused {
@@ -229,13 +255,13 @@ $optionBarHeight: 50px;
         }
     }
     .card-meta {
-        app-list-base {
-            app-list-node-license {
+        es-list-base {
+            es-list-node-license {
                 img {
                     height: 20px;
                 }
             }
-            app-list-collection-info {
+            es-list-collection-info {
                 display: flex;
                 align-items: center;
                 // justify-content: flex-end;
@@ -246,7 +272,7 @@ $optionBarHeight: 50px;
             }
         }
     }
-    .grid-card-collection app-node-url {
+    .grid-card-collection es-node-url {
         a.cdk-keyboard-focused .card-meta{
             // @TDOO: better focus visibility is required
             background-color: #fff;

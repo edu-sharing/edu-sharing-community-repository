@@ -28,7 +28,12 @@ public class ProviderHelper {
         if(result == null) {
             Class clazz = null;
             try {
-                clazz = Class.forName(appInfo.getString(ApplicationInfo.KEY_REMOTE_PROVIDER, null));
+                String provider = appInfo.getString(ApplicationInfo.KEY_REMOTE_PROVIDER, null);
+                if(provider == null || provider.isEmpty()) {
+                    clazz=LocalProvider.class;
+                } else {
+                    clazz = Class.forName(provider);
+                }
                 result =  (Provider) clazz.getConstructor(new Class[]{String.class}).newInstance(new Object[]{appInfo.getAppId()});
                 synchronized (ProviderHelper.class) {
                     providerCache.put(appInfo.getAppId(), result);

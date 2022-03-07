@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
@@ -54,11 +55,8 @@ public class WpImporter implements Importer{
 	
 		String url = this.endpoint+"tags?post="+postId.toString();
 
-		GetMethod method = new GetMethod(url);
-		method.getParams().setContentCharset("utf-8");
-		
-		
-		String result = new HttpQueryTool().query(url, null, method);
+		HttpGet method = new HttpGet(url);
+		String result = new HttpQueryTool().query(method);
 		
 		List<String> generalKeywords = new ArrayList<String>();
 
@@ -124,11 +122,9 @@ public class WpImporter implements Importer{
 	public void startImport() throws Throwable {
 			
 			String url = this.endpoint + set;
-			
-			GetMethod method = new GetMethod(url);
-			method.getParams().setContentCharset("utf-8");
-			
-			String result = new HttpQueryTool().query(url, null, method);
+
+			HttpGet method = new HttpGet(url);
+			String result = new HttpQueryTool().query(method);
 
 				
 			try{

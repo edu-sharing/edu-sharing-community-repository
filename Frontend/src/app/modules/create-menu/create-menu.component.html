@@ -1,29 +1,29 @@
-<dropdown
+<es-dropdown
     #dropdown
     class="addDesktopMenu"
     [options]="options"
     position="right"
-    ></dropdown>
-<workspace-add-folder *ngIf="addFolderName!=null"
+    ></es-dropdown>
+<es-workspace-add-folder *ngIf="addFolderName!=null"
                       [folder]="addFolderName"
                       [parent]="getParent()"
                       (onCancel)="addFolderName=null"
                       (onFolderAdded)="addFolder($event)"
-></workspace-add-folder>
-<workspace-management #management
+></es-workspace-add-folder>
+<es-workspace-management #management
         [parent]="getParent()"
         [(showUploadSelect)]="showUploadSelect"
         [uploadShowPicker]="showPicker"
         [(filesToUpload)]="filesToUpload"
         (onUploadFileSelected)="uploadFiles($event)"
         (onUploadFilesProcessed)="afterUpload($event)"
-></workspace-management>
-<workspace-create-connector *ngIf="createConnectorName!=null"
+></es-workspace-management>
+<es-workspace-create-connector *ngIf="createConnectorName!=null"
                             [name]="createConnectorName"
                             [connector]="createConnectorType"
                             (onCancel)="createConnectorName=null"
                             (onCreate)="createConnector($event)"
-></workspace-create-connector>
+></es-workspace-create-connector>
 
 <div *ngIf="!(cardHasOpenModals$ | async)" fileDrop [window]="true" (fileOver)="fileIsOver=$event" (onFileDrop)="onFileDrop($event)"></div>
 <div class="dialog darken drop-zone" *ngIf="fileIsOver">

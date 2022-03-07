@@ -1,4 +1,4 @@
-import {forkJoin as observableForkJoin, fromEvent, Subscription} from 'rxjs';
+import {forkJoin as observableForkJoin, fromEvent, of, Subscription} from 'rxjs';
 import {RestNetworkService} from '../core-module/rest/services/rest-network.service';
 import {RestConnectorsService} from '../core-module/rest/services/rest-connectors.service';
 import {RestConstants} from '../core-module/rest/rest-constants';
@@ -32,7 +32,7 @@ import {
 } from '../core-module/rest/services/temporary-storage.service';
 import {BridgeService} from '../core-bridge-module/bridge.service';
 import {MessageType} from '../core-module/ui/message-type';
-import {Inject, Injectable, InjectionToken, OnDestroy, Optional} from '@angular/core';
+import {Inject, Injectable, InjectionToken, Injector, OnDestroy, Optional} from '@angular/core';
 import {CardComponent} from './components/card/card.component';
 import {TranslateService} from '@ngx-translate/core';
 import {RestNodeService} from '../core-module/rest/services/rest-node.service';
@@ -50,11 +50,12 @@ import {HttpClient} from '@angular/common/http';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {DropdownComponent} from './components/dropdown/dropdown.component';
 import {ConfigOptionItem, NodeHelperService} from './node-helper.service';
+import {PlatformLocation} from '@angular/common';
 import {
     ListEventInterface,
     NodeEntriesDisplayType
-} from './components/node-entries-wrapper/node-entries-wrapper.component';
-import {PlatformLocation} from '@angular/common';
+} from './components/node-entries-wrapper/entries-model';
+import {MainNavService} from '../common/services/main-nav.service';
 
 
 export class OptionsHelperConfig {
@@ -149,6 +150,7 @@ export class OptionsHelperService implements OnDestroy {
         private nodeService: RestNodeService,
         private collectionService: RestCollectionService,
         private configService: ConfigurationService,
+        private injector: Injector,
         private storage: TemporaryStorageService,
         private bridge: BridgeService,
         @Optional() @Inject(OPTIONS_HELPER_CONFIG) config: OptionsHelperConfig,
@@ -238,6 +240,13 @@ export class OptionsHelperService implements OnDestroy {
                          list: ListEventInterface<Node> = null,
                          dropdown: DropdownComponent = null) {
         this.mainNav = mainNav;
+        if(!this.mainNav) {
+            this.mainNav = this.injector.get(MainNavService).getMainNav();
+            console.info('no mainnav provided to options helper, will use singleton from service', this.mainNav);
+            if(!this.mainNav) {
+                console.warn('mainnav was not available via singleton service');
+            }
+        }
         this.actionbar = actionbar;
         this.list = list;
         this.dropdown = dropdown;
@@ -319,6 +328,8 @@ export class OptionsHelperService implements OnDestroy {
         let options: OptionItem[] = [];
         if (this.mainNav) {
             options = this.prepareOptions(this.mainNav.management, objects);
+        } else {
+            console.warn('options helper was called without main nav. Can not load default options');
         }
         /*
          // DO NOT DELETE
@@ -527,7 +538,7 @@ export class OptionsHelperService implements OnDestroy {
             management.addProposalsToCollection(this.getObjects(object))
         );
         acceptProposal.customEnabledCallback = ((nodes) =>
-            nodes.every((n) => (n as ProposalNode).accessible)
+                nodes.every((n) => (n as ProposalNode).accessible)
         );
         acceptProposal.elementType = [ElementType.NodeProposal];
         acceptProposal.constrains = [Constrain.User];
@@ -559,12 +570,12 @@ export class OptionsHelperService implements OnDestroy {
             options.push(openFolder);
          */
 
-        const openParentNode = new OptionItem('OPTIONS.SHOW_IN_FOLDER', 'folder', (object) =>
-            this.goToWorkspace(this.getObjects(object)[0])
+        const openParentNode = new OptionItem('OPTIONS.SHOW_IN_FOLDER', 'folder', async (object) =>
+            this.goToWorkspace((await this.getObjectsAsync(object, true))[0])
         );
         openParentNode.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository, Constrain.User];
         openParentNode.toolpermissions = [RestConstants.TOOLPERMISSION_WORKSPACE];
-        openParentNode.scopes = [Scope.Search, Scope.Render];
+        openParentNode.scopes = [Scope.CollectionsReferences, Scope.Search, Scope.Render];
         openParentNode.customEnabledCallback = (nodes) => {
             if (nodes && nodes.length === 1) {
                 openParentNode.customEnabledCallback = null;
@@ -665,7 +676,7 @@ export class OptionsHelperService implements OnDestroy {
             if (nodes) {
                 // do not show variant if it's a licensed material and user doesn't has change permission rights
                 return nodes[0].properties?.[RestConstants.CCM_PROP_RESTRICTED_ACCESS]?.[0] !== 'true' ||
-                        this.nodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS, NodesRightMode.Original);
+                    this.nodeHelper.getNodesRight(nodes, RestConstants.ACCESS_CHANGE_PERMISSIONS, NodesRightMode.Original);
             }
             return true;
         };
@@ -679,23 +690,24 @@ export class OptionsHelperService implements OnDestroy {
         createNodeVariant.group = DefaultGroups.Reuse;
         createNodeVariant.priority = 30;
 
-        const inviteNode = new OptionItem('OPTIONS.INVITE', 'group_add', (object) =>
-            management.nodeShare = this.getObjects(object)
+        const inviteNode = new OptionItem('OPTIONS.INVITE', 'group_add', async (object) =>
+            management.nodeShare = await this.getObjectsAsync(object, true)
         );
         inviteNode.elementType = [ElementType.Node, ElementType.SavedSearch];
         inviteNode.showAsAction = true;
         inviteNode.permissions = [RestConstants.ACCESS_CHANGE_PERMISSIONS];
         inviteNode.permissionsMode = HideMode.Hide;
+        inviteNode.permissionsRightMode = NodesRightMode.Original;
         // inviteNode.key = 'S';
-        inviteNode.constrains = [Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
+        inviteNode.constrains = [Constrain.HomeRepository, Constrain.User];
         inviteNode.toolpermissions = [RestConstants.TOOLPERMISSION_INVITE];
         inviteNode.group = DefaultGroups.Edit;
         inviteNode.priority = 10;
         // invite is not allowed for collections of type editorial
         inviteNode.customShowCallback = ((objects) =>
-                objects[0].collection ?
-                    objects[0].collection.type !== RestConstants.COLLECTIONTYPE_EDITORIAL :
-                    true
+            objects[0].collection ?
+                objects[0].collection.type !== RestConstants.COLLECTIONTYPE_EDITORIAL :
+                objects[0].type !== RestConstants.SYS_TYPE_CONTAINER
         );
 
         const streamNode = new OptionItem('OPTIONS.STREAM', 'event',(object) =>
@@ -806,39 +818,26 @@ export class OptionsHelperService implements OnDestroy {
             }
             return nodes[0].downloadUrl != null;
         };
-        const simpleEditNode = new OptionItem('OPTIONS.EDIT_SIMPLE', 'edu-quick_edit', (object) =>
-            management.nodeSimpleEdit = this.getObjects(object)
+        const simpleEditNode = new OptionItem('OPTIONS.EDIT_SIMPLE', 'edu-quick_edit', async (object) =>
+            management.nodeSimpleEdit = await this.getObjectsAsync(object, true)
         );
-        simpleEditNode.constrains = [Constrain.Files, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
+        simpleEditNode.constrains = [Constrain.Files, Constrain.HomeRepository, Constrain.User];
         simpleEditNode.permissions = [RestConstants.ACCESS_WRITE];
+        simpleEditNode.permissionsRightMode = NodesRightMode.Original;
         simpleEditNode.permissionsMode = HideMode.Disable;
         simpleEditNode.group = DefaultGroups.Edit;
         simpleEditNode.priority = 15;
 
-        const editNode = new OptionItem('OPTIONS.EDIT', 'edit', (object) =>
-            management.nodeMetadata = this.getObjects(object)
+        const editNode = new OptionItem('OPTIONS.EDIT', 'edit', async (object) =>
+            management.nodeMetadata = await this.getObjectsAsync(object, true)
         );
         editNode.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.MapRef];
-        editNode.constrains = [Constrain.FilesAndDirectories, Constrain.NoCollectionReference, Constrain.HomeRepository, Constrain.User];
+        editNode.constrains = [Constrain.FilesAndDirectories, Constrain.HomeRepository, Constrain.User];
         editNode.permissions = [RestConstants.ACCESS_WRITE];
         editNode.permissionsMode = HideMode.Disable;
+        editNode.permissionsRightMode = NodesRightMode.Original;
         editNode.group = DefaultGroups.Edit;
         editNode.priority = 20;
-
-
-        const editNodeOriginal = new OptionItem('OPTIONS.EDIT_ORIGINAL', 'edit', (object) => {
-            this.nodeService.getNodeMetadata(this.getObjects(object)[0].properties[RestConstants.CCM_PROP_IO_ORIGINAL][0]).subscribe((node) => {
-                management.nodeMetadata = [node.node];
-            });
-        });
-        editNodeOriginal.constrains = [Constrain.CollectionReference, Constrain.HomeRepository, Constrain.User];
-        editNodeOriginal.permissions = [RestConstants.ACCESS_WRITE];
-        editNodeOriginal.permissionsRightMode = NodesRightMode.Original;
-        editNodeOriginal.permissionsMode = HideMode.Disable;
-        editNodeOriginal.group = DefaultGroups.Edit;
-        editNodeOriginal.showAsAction = true;
-        editNodeOriginal.priority = 20;
-
 
         const templateNode = new OptionItem('OPTIONS.TEMPLATE', 'assignment_turned_in', (object) =>
             management.nodeTemplate = this.getObjects(object)[0]
@@ -936,7 +935,7 @@ export class OptionsHelperService implements OnDestroy {
             management.nodeDelete = this.getObjects(object);
         });
         unpublishNode.elementType = [ElementType.NodePublishedCopy];
-        unpublishNode.constrains = [Constrain.HomeRepository, Constrain.User];
+        unpublishNode.constrains = [Constrain.HomeRepository, Constrain.NoCollectionReference, Constrain.User];
         unpublishNode.permissions = [RestConstants.PERMISSION_DELETE];
         unpublishNode.permissionsMode = HideMode.Hide;
         unpublishNode.group = DefaultGroups.Delete;
@@ -946,6 +945,7 @@ export class OptionsHelperService implements OnDestroy {
         const removeNodeRef =  new OptionItem('OPTIONS.REMOVE_REF', 'remove_circle_outline', (object) =>
             this.removeFromCollection(this.getObjects(object))
         );
+        removeNodeRef.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         removeNodeRef.constrains = [Constrain.HomeRepository, Constrain.CollectionReference, Constrain.User];
         removeNodeRef.permissions = [RestConstants.PERMISSION_DELETE];
         removeNodeRef.permissionsMode = HideMode.Disable;
@@ -966,20 +966,20 @@ export class OptionsHelperService implements OnDestroy {
         const reportNode = new OptionItem('OPTIONS.NODE_REPORT', 'flag', (node) =>
             management.nodeReport = this.getObjects(node)[0]
         );
+        reportNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         reportNode.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository];
         reportNode.scopes = [Scope.Search, Scope.CollectionsReferences, Scope.Render];
         reportNode.customShowCallback = (() => this.configService.instant('nodeReport', false));
         reportNode.group = DefaultGroups.View;
         reportNode.priority = 60;
 
-        const qrCodeNode = new OptionItem('OPTIONS.QR_CODE', 'edu-qr_code', (node) =>
-            management.qr = {
-                node: this.getObjects(node)[0],
-                data: window.location.href
-            }
-        );
-        qrCodeNode.constrains = [Constrain.Files, Constrain.NoBulk];
-        qrCodeNode.scopes = [Scope.Render];
+        const qrCodeNode = new OptionItem('OPTIONS.QR_CODE', 'edu-qr_code', (node) => {
+            node = this.getObjects(node)[0];
+            const url = this.nodeHelper.getNodeUrl(node);
+            management.qr = { node, data: url };
+        });
+        qrCodeNode.constrains = [Constrain.NoBulk];
+        qrCodeNode.scopes = [Scope.Render, Scope.CollectionsCollection];
         qrCodeNode.group = DefaultGroups.View;
         qrCodeNode.priority = 70;
 
@@ -1142,7 +1142,6 @@ export class OptionsHelperService implements OnDestroy {
         options.push(feedbackCollectionView);
         options.push(simpleEditNode);
         options.push(editNode);
-        options.push(editNodeOriginal);
         // add to collection
         options.push(addNodeToCollection);
         // create variant
@@ -1225,8 +1224,31 @@ export class OptionsHelperService implements OnDestroy {
             UIHelper.goToWorkspace(this.nodeService, this.router, this.connector.getCurrentLogin(), node);
         }
     }
-
-    private getObjects(object: Node | any) {
+    async getObjectsAsync(object: Node | any, resolveOriginals = false) {
+        const nodes = NodeHelperService.getActionbarNodes(this.data.selectedObjects || this.data.activeObjects, object);
+        if(resolveOriginals) {
+            const originals = await observableForkJoin(
+                nodes.map((n) => {
+                    if(n.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1) {
+                        return this.nodeService.getNodeMetadata(n.properties[RestConstants.CCM_PROP_IO_ORIGINAL][0])
+                    } else if(n.type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL) {
+                        return this.nodeService.getNodeMetadata(
+                            RestHelper.removeSpacesStoreRef(
+                                n.properties[RestConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET][0]
+                            )
+                        );
+                    } else {
+                        return of({
+                            node: n
+                        });
+                    }
+                })
+            ).toPromise();
+            return originals.map((o) => o.node);
+        }
+        return nodes;
+    }
+    public getObjects(object: Node | any) {
         return NodeHelperService.getActionbarNodes(this.data.selectedObjects || this.data.activeObjects, object);
     }
 

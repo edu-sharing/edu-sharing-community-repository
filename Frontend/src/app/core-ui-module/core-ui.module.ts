@@ -101,6 +101,9 @@ import {MatSortModule} from '@angular/material/sort';
 import {OverlayModule} from '@angular/cdk/overlay';
 import {ListItemLabelPipe} from './pipes/list-item-label.pipe';
 import {DragCursorDirective} from './directives/drag-cursor.directive';
+import { ConfigService } from 'ngx-edu-sharing-api';
+import { BorderBoxObserverDirective } from './directives/border-box-observer.directive';
+import {NodeRatingComponent} from './components/node-entries/node-rating/node-rating.component';
 
 @NgModule({
     declarations: [
@@ -166,12 +169,14 @@ import {DragCursorDirective} from './directives/drag-cursor.directive';
         NodeEntriesComponent,
         NodeEntriesCardGridComponent,
         NodeEntriesCardComponent,
+        NodeRatingComponent,
         NodeEntriesCardSmallComponent,
         NodeEntriesTableComponent,
         ColumnChooserComponent,
         CheckTextOverflowDirective,
         ListItemLabelPipe,
-        DragCursorDirective
+        DragCursorDirective,
+        BorderBoxObserverDirective,
     ],
     imports: [
         A11yModule,
@@ -198,7 +203,7 @@ import {DragCursorDirective} from './directives/drag-cursor.directive';
             loader: {
                 provide: TranslateLoader,
                 useFactory: TranslationLoader.create,
-                deps: [HttpClient, RestLocatorService],
+                deps: [HttpClient, ConfigService],
             },
             missingTranslationHandler: {
                 provide: MissingTranslationHandler,
@@ -253,6 +258,7 @@ import {DragCursorDirective} from './directives/drag-cursor.directive';
         PermissionNamePipe,
         UrlPipe,
         AuthorityAffiliationPipe,
+        ListItemLabelPipe,
         NodeSourcePipe,
         NodesDragSourceDirective,
         NodesDropTargetDirective,
@@ -265,7 +271,8 @@ import {DragCursorDirective} from './directives/drag-cursor.directive';
         ElementRefDirective,
         NodeEntriesWrapperComponent,
         CheckTextOverflowDirective,
-        DragCursorDirective
+        DragCursorDirective,
+        BorderBoxObserverDirective,
     ],
 })
 export class CoreUiModule {}

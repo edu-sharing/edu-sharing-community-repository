@@ -1,22 +1,31 @@
-import {Component, Input, OnChanges, SimpleChanges, ViewChild} from '@angular/core';
+import {
+    ApplicationRef,
+    Component,
+    Input,
+    OnChanges,
+    OnInit,
+    SimpleChanges,
+    ViewChild
+} from '@angular/core';
 import {NodeEntriesService} from '../../../node-entries.service';
 import {Node} from '../../../../core-module/rest/data-object';
 import {NodeHelperService} from '../../../node-helper.service';
 import {ColorHelper, PreferredColor} from '../../../../core-module/ui/color-helper';
-import {
-    ClickSource,
-    InteractionType
-} from '../../node-entries-wrapper/node-entries-wrapper.component';
 import {OptionItem, Target} from '../../../option-item';
 import {DropdownComponent} from '../../dropdown/dropdown.component';
 import {MatMenuTrigger} from '@angular/material/menu';
+import {ClickSource, InteractionType} from '../../node-entries-wrapper/entries-model';
+import { Toast } from 'src/app/core-ui-module/toast';
+import {ConfigurationService} from '../../../../core-module/rest/services/configuration.service';
+import {RestConnectorService} from '../../../../core-module/rest/services/rest-connector.service';
+import {RestConstants} from '../../../../core-module/rest/rest-constants';
 
 @Component({
-    selector: 'app-node-entries-card',
+    selector: 'es-node-entries-card',
     templateUrl: 'node-entries-card.component.html',
     styleUrls: ['node-entries-card.component.scss']
 })
-export class NodeEntriesCardComponent<T extends Node> implements OnChanges {
+export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnInit {
     readonly InteractionType = InteractionType;
     readonly Target = Target;
     readonly ClickSource = ClickSource;
@@ -26,9 +35,14 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges {
     @Input() node: T;
     dropdownLeft: number;
     dropdownTop: number;
+    showRatings: boolean;
     constructor(
         public entriesService: NodeEntriesService<T>,
         public nodeHelper: NodeHelperService,
+        public applicationRef: ApplicationRef,
+        public connector: RestConnectorService,
+        public configService: ConfigurationService,
+        private toast: Toast,
     ) {
     }
 
@@ -50,19 +64,43 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges {
         // return options.filter((o) => o.showAsAction && o.showCallback(this.node)).slice(0, 3);
     }
 
-    openContextmenu(event: MouseEvent) {
+    openContextmenu(event: MouseEvent | Event) {
         event.stopPropagation();
         event.preventDefault();
-        this.dropdownLeft = event.clientX;
-        this.dropdownTop = event.clientY;
+        if (event instanceof MouseEvent) {
+            ({ clientX: this.dropdownLeft, clientY: this.dropdownTop } = event);
+        } else {
+            ({ x: this.dropdownLeft, y: this.dropdownTop } = (
+                event.target as HTMLElement
+            ).getBoundingClientRect());
+        }
         if (!this.entriesService.selection.selected.includes(this.node)) {
             this.entriesService.selection.clear();
             this.entriesService.selection.select(this.node)
         }
-        this.menuTrigger.openMenu();
+        // Wait for the menu to reflect changed options.
+        setTimeout(() => {
+            if (this.dropdown.canShowDropdown()) {
+                this.menuTrigger.openMenu();
+            } else {
+                this.toast.toast('NO_AVAILABLE_OPTIONS');
+            }
+        });
     }
 
     getVisibleColumns() {
         return this.entriesService.columns.filter((c) => c.visible);
+    }
+
+    async openMenu(node: T) {
+        this.entriesService.selection.clear();
+        this.entriesService.selection.select(node);
+        await this.applicationRef.tick();
+        this.dropdown.menu.focusFirstItem();
+    }
+
+    async ngOnInit() {
+        this.showRatings = (await this.configService.get('', 'none').toPromise()) !== 'none' &&
+            (await this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_RATE_READ).toPromise())
     }
 }

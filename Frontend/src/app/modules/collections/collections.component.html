@@ -1,4 +1,4 @@
-<main-nav
+<es-main-nav
   *ngIf="mainnav"
   #mainNav
   [create]="{
@@ -10,20 +10,20 @@
   [currentScope]="'collections'"
   [searchEnabled]="false"
   (onCreate)="addNodesToCollection($event)"
-></main-nav>
-<tutorial
+></es-main-nav>
+<es-tutorial
   [element]="tutorialElement"
   [heading]="'COLLECTIONS.TUTORIAL_HEADING'"
   [description]="'COLLECTIONS.TUTORIAL_DESCRIPTION'"
   [showSkip]="false"
-></tutorial>
-<infobar
+></es-tutorial>
+<es-infobar
   [title]="infoTitle"
   [message]="infoMessage"
   [buttons]="infoButtons"
   [isCancelable]="true"
   (onCancel)="infoClose()"
-></infobar>
+></es-infobar>
 <mat-tab-group
   role="navigation"
   [attr.aria-label]="'NAV.COLLECTIONS' | translate"
@@ -35,38 +35,38 @@
 >
   <mat-tab *ngIf="!isGuest">
     <ng-template mat-tab-label>
-      <i icon="person" class="tab-icon"></i>
+      <i esIcon="person" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TAB.MY' | translate }}</span>
     </ng-template>
   </mat-tab>
   <mat-tab *ngIf="!isGuest" label="{{ 'COLLECTIONS.TAB.EDU_GROUPS' | translate }}">
     <ng-template mat-tab-label>
-      <i icon="group" class="tab-icon"></i>
+      <i esIcon="group" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TAB.EDU_GROUPS' | translate }}</span>
     </ng-template>
   </mat-tab>
   <mat-tab
     *ngIf="hasEditorial">
     <ng-template mat-tab-label>
-      <i icon="star" class="tab-icon"></i>
+      <i esIcon="star" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TAB.TYPE_EDITORIAL' | translate }}</span>
     </ng-template>
   </mat-tab>
   <mat-tab *ngIf="hasMediacenter">
     <ng-template mat-tab-label>
-      <i icon="business" class="tab-icon"></i>
+      <i esIcon="business" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TAB.TYPE_MEDIA_CENTER' | translate }}</span>
     </ng-template>
   </mat-tab>
   <mat-tab>
     <ng-template mat-tab-label>
-      <i icon="language" class="tab-icon"></i>
+      <i esIcon="language" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TAB.EDU_ALL' | translate }}</span>
     </ng-template>
   </mat-tab>
 </mat-tab-group>
 <div class="collections-header-group">
-  <actionbar
+  <es-actionbar
     *ngIf="collectionContentTemplateRef"
     #actionbarCollection
     [numberOfAlwaysVisibleOptions]="1"
@@ -74,7 +74,7 @@
     appearance="round"
     [style]="'flat'"
     [dropdownPosition]="'right'"
-  ></actionbar>
+  ></es-actionbar>
   <!-- collection header -->
   <ng-container
     [ngTemplateOutlet]="collectionContentTemplateRef ? collectionContentTemplateRef : collectionContentTemplateRefDefault"
@@ -96,7 +96,7 @@
         [class.dark-color]="isBrightColor()"
         [style.background-color]="collectionContent?.node?.collection?.color"
       >
-        <div *ngIf="isLoading" class="collection-loading"><spinner-small></spinner-small></div>
+        <div *ngIf="isLoading" class="collection-loading"><es-spinner-small></es-spinner-small></div>
         <div class="card-collection-image-container"
              [class.card-collection-icon-container]="!hasNonIconPreview()"
              style="width:100%;">
@@ -110,7 +110,7 @@
                 [style.cursor]="isAllowedToEditCollection() ? 'pointer' : 'auto'"
                 (click)="collectionEdit()"
               >
-                <i icon="layers"></i>
+                <i esIcon="layers"></i>
               </div>
             </div>
           </div>
@@ -138,17 +138,17 @@
         </div>
         <div class="collections-header-textarea" [class.collections-header-textarea-bright]="isBrightColor()">
           <div class="collection-option">
-            <actionbar
+            <es-actionbar
               #actionbarCollection
               [numberOfAlwaysVisibleOptions]="1"
               [numberOfAlwaysVisibleOptionsMobile]="1"
               appearance="round"
               [style]="'flat'"
               [dropdownPosition]="'right'"
-            ></actionbar>
+            ></es-actionbar>
           </div>
           <h1
-            appTitle
+            esTitle
             class="collection-new-preview-headline collections-header-texttop"
             style="overflow:hidden;"
           >
@@ -171,7 +171,7 @@
           </div>
 
           <div class="collection-new-preview-infoline">
-            <i icon="person" class="icon-bottom"></i>
+            <i esIcon="person" class="icon-bottom" [altText]="('COLLECTIONS.CREATOR' | translate) + ': '"></i>
             &nbsp;
             <span *ngIf="!collectionContent?.node?.collection?.authorFreetext">{{
               collectionContent.node.owner | authorityName
@@ -182,25 +182,26 @@
           </div>
 
           <div class="collection-new-preview-infoline">
-            <i [icon]="getScopeInfo().icon" class="icon-bottom"></i>
+            <i [esIcon]="getScopeInfo().icon" class="icon-bottom" [altText]="('COLLECTIONS.SHARING_STATE' | translate) + ': '"></i>
             &nbsp;{{ 'COLLECTION.SCOPE.' + getScopeInfo().scopeName | translate }}
           </div>
           <div class="collection-permissions collection-label"></div>
           <div class="collections-metadata">
-            <mds-viewer *ngIf="collectionContent?.node?.properties"
+            <es-mds-viewer *ngIf="collectionContent?.node?.properties"
                         [data]="collectionContent.node.properties"
                         groupId="collection_sidebar"
-            ></mds-viewer>
+                        [headingLevel]="2"
+            ></es-mds-viewer>
           </div>
 
           <ng-container *ngIf="collectionContent?.node?.access?.indexOf('ChangePermissions') !== -1">
-            <div class="collection-permissions collection-label">
+            <h2 class="collection-permissions collection-label">
               {{ 'COLLECTIONS.PERMISSIONS' | translate }}
-            </div>
+            </h2>
             <div class="collection-permissions collection-content">
               <div *ngFor="let permission of permissions">
                 <ng-container *ngIf="permission.authority.authorityType !== 'EVERYONE'">
-                  <user-avatar [user]="permission" size="xsmall"></user-avatar>
+                  <es-user-avatar [user]="permission" size="xsmall"></es-user-avatar>
                   <span>{{(permission.authority.authorityType === 'GROUP' ? permission.group : permission.user) | authorityName }}</span>
                 </ng-container>
               </div>
@@ -214,36 +215,36 @@
           class="collections-loading-div"
           style="padding-top: 24px;text-align: center;"
         >
-          <spinner></spinner>
+          <es-spinner></es-spinner>
         </section>
         <div
+          role="navigation"
+          [attr.aria-label]="'NAV.COLLECTIONS' | translate"
+          class="breadcrumb-space"
+          *ngIf="!isRootLevelCollection() && !isLoading"
+        >
+          <es-breadcrumbs
+            class="collections-breadcrumb"
+            [home]="'COLLECTIONS.TAB.' + tabSelected"
+            [homeRouterLink]="{routerLink: ['.'], queryParams: { scope: tabSelected } }"
+            [breadcrumbsAsNode]="path"
+            [invisibleDescription]="true"
+            (onDrop)="dropOnCollection($event.target, $event.source)"
+          ></es-breadcrumbs>
+        </div>
+        <div
           role="main"
-          appSkipTarget="main-content"
+          esSkipTarget="MAIN_CONTENT"
           class="collections-master-div"
           [class.collections-master-div-notabs]="!showTabs()"
         >
           <h1
             *ngIf="isRootLevelCollection()"
-            appTitle
+            esTitle
             class="cdk-visually-hidden"
           >{{ 'COLLECTIONS.TITLE' | translate }}</h1>
           <!-- breadcrumbs -->
-          <div
-            role="navigation"
-            [attr.aria-label]="'NAV.COLLECTIONS' | translate"
-            class="breadcrumb-space"
-            *ngIf="!isRootLevelCollection() && !isLoading"
-          >
-            <breadcrumbs
-              class="collections-breadcrumb"
-              [home]="'COLLECTIONS.TAB.' + tabSelected"
-              [homeRouterLink]="{routerLink: ['.'], queryParams: { scope: tabSelected } }"
-              [breadcrumbsAsNode]="path"
-              (onDrop)="dropOnCollection($event.target, $event.source)"
-            ></breadcrumbs>
-          </div>
-
-          <button
+          <a
             *ngIf="!isLoading && isGuest"
             mat-button
             color="primary"
@@ -251,16 +252,17 @@
             title="{{ 'COLLECTIONS.TO_SEARCH' | translate }}"
             tabindex="0"
             (click)="navigateToSearch()"
+            [routerLink]="['/' + ROUTER_PREFIX + 'search']"
           >
             {{ 'COLLECTIONS.TO_SEARCH' | translate }}
-            <i icon="arrow_forward"></i>
-          </button>
+            <i esIcon="arrow_forward"></i>
+        </a>
 
           <!-- content (collection cards) if not error -->
 
           <section class="collections-cards-div" *ngIf="!isLoading">
             <!-- COLLECTION CARDS -->
-            <app-node-entries-wrapper
+            <es-node-entries-wrapper
               [dataSource]="dataSourceCollections"
               [columns]="collectionsColumns"
               [displayType]="NodeEntriesDisplayType.SmallGrid"
@@ -309,7 +311,7 @@
                   </ng-container>
                 </div>
               </ng-template>
-            </app-node-entries-wrapper>
+            </es-node-entries-wrapper>
             <!-- when empty at root level -->
           </section>
 
@@ -317,13 +319,13 @@
             *ngIf="!isLoading && collectionProposals?.nodes?.length"
             class="collections-cards-div"
           >
-            <div class="content-header">
+            <div class="content-header heading-group">
               <h2 class="mat-heading-3">
                 {{ 'COLLECTIONS.PROPOSALS.TITLE' | translate }}
               </h2>
             </div>
 
-            <app-custom-node-list-wrapper
+            <es-custom-node-list-wrapper
               [parent]="collectionContent.node"
               [hasHeading]="false"
               [viewType]="1"
@@ -338,18 +340,19 @@
               [nodes]="$any(collectionProposals.nodes)"
               (nodesChange)="collectionProposals.nodes = $any($event)"
               class="no-padding"
-            ></app-custom-node-list-wrapper>
+            ></es-custom-node-list-wrapper>
           </section>
           <section
             class="collections-cards-div"
             *ngIf="!isLoading && isReady && !isRootLevelCollection()"
           >
-            <actionbar
+            <es-actionbar
               #actionbarReferences
               class="actionbarMaterials"
               [numberOfAlwaysVisibleOptions]="1"
-            ></actionbar>
-            <app-node-entries-wrapper
+              [class.display-none]="listReferences.getSelection().isEmpty()"
+            ></es-actionbar>
+            <es-node-entries-wrapper
               #listReferences
               [dataSource]="dataSourceReferences"
               [columns]="referencesColumns"
@@ -382,9 +385,9 @@
                   </h2>
                 </div>
               </ng-template>
-            </app-node-entries-wrapper>
+            </es-node-entries-wrapper>
             <!--
-          <app-custom-node-list-wrapper
+          <es-custom-node-list-wrapper
         #listReferences
             [parent]="collectionContent.node"
             [optionItems]="
@@ -419,7 +422,7 @@
                   "
             (loadMore)="loadMoreReferences()"
             class="no-padding"
-          ></app-custom-node-list-wrapper>
+          ></es-custom-node-list-wrapper>
           -->
             <!-- NO CONTENT NOTICE -->
             <div
@@ -440,23 +443,23 @@
           </section>
         </div>
 
-        <modal-dialog
+        <es-modal-dialog
           [title]="dialogTitle"
           [isCancelable]="dialogCancelable"
           (onCancel)="closeDialog()"
           [message]="dialogMessage"
           [buttons]="dialogButtons"
-        ></modal-dialog>
+        ></es-modal-dialog>
 
-        <workspace-management
+        <es-workspace-management
           [(nodeReport)]="nodeReport"
           [(addToCollection)]="addToOther"
           [(nodeShare)]="collectionShare"
           (onCloseAddToCollection)="closeAddToOther()"
-        ></workspace-management>
+        ></es-workspace-management>
       </div>
     </div>
-    <app-footer [scope]="'collections'"></app-footer>
+    <es-footer [scope]="'collections'"></es-footer>
   </div>
 </div>
 <ng-template #sortTool let-columns="columns" let-sortInfo="sortInfo" let-callback="callback" let-toggleCallback="toggleCallback">
@@ -470,13 +473,13 @@
   >
     {{ ('NODE.' + sortInfo.name) | translate}}
     <i *ngIf="sortInfo.name !== 'ccm:collection_ordered_position'"
-       [icon]="'arrow_' + (sortInfo.ascending ? 'upward' : 'downward')"></i>
+       [esIcon]="'arrow_' + (sortInfo.ascending ? 'upward' : 'downward')"></i>
   </button>
-  <sort-dropdown
+  <es-sort-dropdown
     #sortDropdown
     [columns]="columns"
     [sortBy]="sortInfo.name"
     [sortAscending]="sortInfo.ascending"
     (onSort)="callback.emit($event)"
-  ></sort-dropdown>
+  ></es-sort-dropdown>
 </ng-template>

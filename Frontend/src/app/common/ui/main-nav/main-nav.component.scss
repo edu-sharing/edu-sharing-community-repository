@@ -1,5 +1,15 @@
 @import '../../../core-ui-module/styles/variables';
 @import '../../../core-ui-module/styles/toast';
+
+::ng-deep {
+    .mobile-move-top, .mobile-move-bottom {
+        &:focus-within {
+            // Don't hide any dynamic elements when focused.
+            top: 0 !important;
+        }
+    }
+}
+
 .topBar {
     position: fixed;
     top: 0;
@@ -7,7 +17,7 @@
     width: 100%;
     max-width: 100%;
     z-index: $topBarZIndex;
-    .user div {
+    .user span {
         max-width: 160px;
     }
     > div {
@@ -55,7 +65,7 @@
         height: calc(100% - 68px);
     }
 }
-user-profile {
+es-user-profile {
     display: inherit !important;
 }
 .imprint {
@@ -107,7 +117,7 @@ user-profile {
 .topBarSearch {
     flex: auto;
     margin: 0 20px;
-    app-search-field {
+    es-search-field {
         max-width: 550px;
     }
 }
@@ -208,7 +218,7 @@ user-profile {
     margin: 0px 10px;
     height: 40px;
     align-items: center;
-    div {
+    span {
         overflow: hidden;
         margin-top: 1px;
         word-break: break-all;
@@ -226,29 +236,11 @@ user-profile {
     margin-top: 3px;
 }
 
-#scrollToTop {
-    transition: all $transitionNormal;
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 5;
-    padding: 0 17px;
-    border-radius: 50px 50px 0 0;
-    font-size: $fontSizeXSmall;
-    background-color: $primary;
-    color: $textOnPrimary;
-    text-transform: uppercase;
-    i {
-        font-size: 16px;
-        margin: 0 -5px 0 -10px;
-    }
-}
 .topBar {
     .iconPerson {
         display: none;
     }
-    user-avatar {
+    es-user-avatar {
         margin: 0 7px;
     }
 }
@@ -317,7 +309,7 @@ user-profile {
         display: flex;
         // disable events to "click-through" if menu is hidden
         pointer-events: none;
-        > app-main-menu-bottom {
+        > es-main-menu-bottom {
             // but re-enable them on the real menu again
             pointer-events: auto;
         }
@@ -332,7 +324,7 @@ user-profile {
         .material-icons {
             margin-left: 0;
         }
-        div {
+        span {
             display: none;
         }
         .iconArrow {

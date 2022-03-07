@@ -1,9 +1,9 @@
-<global-progress *ngIf="loading"></global-progress>
-<h1 appTitle class="cdk-visually-hidden">{{ 'SHARING.TITLE' | translate }}</h1>
+<es-global-progress *ngIf="loading"></es-global-progress>
+<h1 esTitle class="cdk-visually-hidden">{{ 'SHARING.TITLE' | translate }}</h1>
 <div *ngIf="!loading && sharingInfo" class="container">
 
     <div class="container-inside">
-        <div class="branding"><img src="assets/images/logo.svg" image-config alt="logo"></div>
+        <div class="branding"><img src="assets/images/logo.svg" esImage-config alt="logo"></div>
         <div class="details" [ngClass]="{'details-opacity' : !(!sharingInfo.password || sharingInfo.passwordMatches)}">
             <div class="details-type">
                 <img class="icon" [src]="sharingInfo.node.iconURL" />
@@ -19,7 +19,7 @@
         </div>
         <div *ngIf="!(!sharingInfo.password || sharingInfo.passwordMatches)" class="password-required">
             <form (ngsubmit)="validatePassword()">
-                <input-password label="{{'SHARING.PASSWORD' | translate}}" [required]="true" id="password" (keydown.enter)="validatePassword()" [(value)]="passwordInput" placeholder="{{'SHARING.PASSWORD_PLACEHOLDER' | translate}}"></input-password>
+                <es-input-password label="{{'SHARING.PASSWORD' | translate}}" [required]="true" inputId="password" (keydown.enter)="validatePassword()" [(value)]="passwordInput" placeholder="{{'SHARING.PASSWORD_PLACEHOLDER' | translate}}"></es-input-password>
                 <button mat-raised-button color="primary" (click)="validatePassword()">{{'SHARING.ENTER_PASSWORD' | translate}}</button>
             </form>
         </div>
@@ -32,7 +32,7 @@
                     </button>
                 </div>
                 <div class="folder">
-                    <listTable
+                    <es-listTable
                             [nodes]="childs"
                             [columns]="columns"
                             [hasIcon]="true"
@@ -45,7 +45,7 @@
                             [isLoading]="loadingChildren"
                             [customOptions]="options"
                             (sortListener)="changeSort($event)"
-                    ></listTable>
+                    ></es-listTable>
                 </div>
 
             </div>
@@ -56,5 +56,5 @@
             </div>
         </div>
     </div>
-    <powered-by mode="color"></powered-by>
+    <es-powered-by mode="color"></es-powered-by>
 </div>

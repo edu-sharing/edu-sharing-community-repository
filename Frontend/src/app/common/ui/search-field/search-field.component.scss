@@ -16,16 +16,6 @@
         padding: 0;
         border: none;
     }
-    .mat-chip-list-wrapper {
-        flex-wrap: nowrap;
-    }
-    .mat-chip {
-        flex-shrink: 0;
-    }
-    .mat-chip-list .mat-chip.mat-standard-chip .mat-chip-remove {
-        color: inherit;
-        opacity: 0.4;
-    }
 }
 
 mat-form-field {
@@ -50,25 +40,34 @@ mat-form-field {
     }
 }
 
-.chips-wrapper {
-    display: flex;
-    overflow-x: auto;
-    // Overlay-ish scroll bar
-    max-height: 40px;
-    overflow-y: hidden;
-    // Firefox
-    scrollbar-width: thin;
-    // Chromium-based
-    &::-webkit-scrollbar {
-        height: 4px;
+.suggestion-active-filter {
+    &.suggestion-active-filter-separator {
+        padding-bottom: 8px;
+        border-bottom: 1px solid $cardSeperatorLineColor;
+        margin-bottom: 8px;
     }
-    &::-webkit-scrollbar-thumb {
-        background-color: $textMediumLight;
+    > label {
+        display: flex;
+        color: $textLight;
+        font-size: $fontSizeSmall;
+        text-transform: uppercase;
+        margin-bottom: 5px;
     }
-    .mat-chip.mat-standard-chip {
-        @each $property, $color in $chip-colors {
-            &.filter-chip-#{$property} {
-                background-color: $color;
+    .chips-wrapper {
+        display: flex;
+        width: 100%;
+        flex-wrap: wrap;
+        .mat-chip.mat-standard-chip {
+            word-break: break-word;
+
+            @each $property, $color in $chip-colors {
+                &.filter-chip-#{$property} {
+                    background-color: $color;
+                }
+            }
+            .mat-chip-remove {
+                color: inherit;
+                opacity: 0.4;
             }
         }
     }
@@ -79,6 +78,17 @@ mat-form-field {
     display: flex;
     align-items: center;
     min-width: 220px;
+    .filter-prefix {
+        font-weight: bold;
+        padding: 5px;
+        width: 24px;
+        font-size: $fontSizeXSmall;
+        text-align: center;
+        border-radius: 50%;
+        background-color: darken($warningMedium, 14%);
+        user-select: none;
+        margin: 0 5px;
+    }
 }
 
 .search-input {
@@ -88,6 +98,9 @@ mat-form-field {
     width: unset;
     min-width: 0;
     flex: 1 0 0;
+    &::placeholder {
+        color: mix($workspaceTopBarInputText, $workspaceTopBarInputBackground, 75%);
+    }
 }
 
 .submit-button {
@@ -111,8 +124,9 @@ mat-form-field {
 }
 
 ::ng-deep .cdk-overlay-container .suggestion-card {
-    app-mds-editor-widget-container {
+    es-mds-editor-widget-container {
         label {
+            font-size: $fontSizeSmall;
             color: $textLight;
             text-transform: uppercase;
         }

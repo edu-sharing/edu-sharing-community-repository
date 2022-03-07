@@ -9,10 +9,10 @@ import {
 } from '@angular/core';
 
 @Directive({
-    selector: '[appOnAttributeChange]',
+    selector: '[esOnAttributeChange]',
 })
 export class OnAttributeChangeDirective implements OnInit, OnDestroy {
-    @Input('appOnAttributeChange') attribute: string;
+    @Input('esOnAttributeChange') attribute: string;
 
     @Output() attributeChange = new EventEmitter<string>();
 

@@ -3,7 +3,7 @@
 <div class="sidebar" *ngIf="show" [@fromLeft]="show" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
   <div class="main">
     <button mat-button class="close" (click)="hide()">
-      <i icon="close" [aria]="true"></i>
+      <i esIcon="close" [aria]="true"></i>
     </button>
     <!-- We should get loginInfo in any case, but it might not be ready from the start. -->
     <div
@@ -19,10 +19,10 @@
       />
       <div *ngIf="iam.getCurrentUser()" class="profile">
         <ng-template #userAvatar>
-            <user-avatar
+            <es-user-avatar
               [user]="iam.getCurrentUser()"
               size="medium"
-            ></user-avatar>
+            ></es-user-avatar>
             <div id="main-menu-sidebar-username" class="username">
               <ng-container *ngIf="iam.getCurrentUser() && !loginInfo.isGuest">{{ iam.getCurrentUser() | authorityName }}</ng-container>
               <ng-container *ngIf="loginInfo.isGuest">{{ 'USER_GUEST' | translate }}</ng-container>
@@ -36,7 +36,7 @@
         ><ng-container *ngTemplateOutlet="userAvatar"></ng-container></a>
       </div>
     </div>
-    <app-main-menu-buttons [currentScope]="currentScope"></app-main-menu-buttons>
+    <es-main-menu-buttons [currentScope]="currentScope"></es-main-menu-buttons>
   </div>
   <div class="license-info">
     <button mat-button class="mat-button-no-uppercase" (click)="onShowLicenses()">

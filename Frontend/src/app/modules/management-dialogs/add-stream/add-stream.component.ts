@@ -19,7 +19,7 @@ import {RestHelper} from "../../../core-module/core.module";
 import {Helper} from "../../../core-module/rest/helper";
 
 @Component({
-  selector: 'add-stream',
+  selector: 'es-add-stream',
   templateUrl: 'add-stream.component.html',
   styleUrls: ['add-stream.component.scss'],
   animations: [

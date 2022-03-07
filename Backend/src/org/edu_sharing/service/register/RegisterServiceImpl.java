@@ -163,7 +163,7 @@ public class RegisterServiceImpl implements RegisterService {
             String currentLocale = new AuthenticationToolAPI().getPrimaryLocale();
             String subject = MailTemplate.getSubject("userRegisterInformation", currentLocale);
             String content = MailTemplate.getContent("userRegisterInformation", currentLocale, true);
-            String receiver=(String)mail.getProperties().get("mail.register.receiver");
+            String receiver=mail.getConfig().getString("register.receiver");
             mail.sendMailHtml(
                     context,
                     receiver,

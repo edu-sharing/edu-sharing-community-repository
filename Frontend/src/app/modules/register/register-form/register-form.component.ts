@@ -13,7 +13,7 @@ import {RestRegisterService} from '../../../core-module/core.module';
 import {FormControl, ValidationErrors, Validators} from '@angular/forms';
 
 @Component({
-  selector: 'app-register-form',
+  selector: 'es-register-form',
   templateUrl: 'register-form.component.html',
   styleUrls: ['register-form.component.scss']
 })

@@ -13,7 +13,7 @@ import {MAT_SNACK_BAR_DATA, MatSnackBar} from '@angular/material/snack-bar';
 import {Toast, ToastDuration, ToastMessage} from '../../toast';
 
 @Component({
-    selector: 'app-toast-message',
+    selector: 'es-toast-message',
     templateUrl: 'toast-message.component.html',
     styleUrls: ['toast-message.component.scss']
 })

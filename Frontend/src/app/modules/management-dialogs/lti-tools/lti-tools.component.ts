@@ -13,7 +13,7 @@ import {trigger} from "@angular/animations";
 import { MdsType } from '../../../common/ui/mds-editor/types';
 
 @Component({
-  selector: 'workspace-lti-tools',
+  selector: 'es-workspace-lti-tools',
   templateUrl: 'lti-tools.component.html',
   styleUrls: ['lti-tools.component.scss'],
   animations: [

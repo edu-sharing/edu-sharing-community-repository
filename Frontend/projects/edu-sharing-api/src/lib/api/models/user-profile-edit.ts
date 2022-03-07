@@ -9,6 +9,7 @@ export interface UserProfileEdit {
     primaryAffiliation?: string;
     sizeQuota?: number;
     skills?: Array<string>;
+    type?: Array<string>;
     types?: Array<string>;
     vcard?: string;
 }

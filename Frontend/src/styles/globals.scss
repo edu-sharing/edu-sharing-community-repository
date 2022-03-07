@@ -193,3 +193,9 @@ mat-label .required-marker {
   }
 
 }
+
+input[type=checkbox]:not(:checked), input[type=checkbox]:checked {
+  &.mat-checkbox-input {
+    left: 50%; // Undo materialize styling and reapply standard material style.
+  }
+}

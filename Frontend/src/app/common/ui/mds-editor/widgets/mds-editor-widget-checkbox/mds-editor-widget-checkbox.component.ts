@@ -3,7 +3,7 @@ import { AbstractControl, FormControl, ValidatorFn } from '@angular/forms';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 @Component({
-    selector: 'app-mds-editor-widget-checkbox',
+    selector: 'es-mds-editor-widget-checkbox',
     templateUrl: './mds-editor-widget-checkbox.component.html',
     styleUrls: ['./mds-editor-widget-checkbox.component.scss'],
 })

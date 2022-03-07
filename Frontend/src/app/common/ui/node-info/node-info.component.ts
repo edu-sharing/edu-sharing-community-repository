@@ -16,7 +16,7 @@ import {Toast} from "../../../core-ui-module/toast";
 
 
 @Component({
-  selector: 'node-info',
+  selector: 'es-node-info',
   templateUrl: 'node-info.component.html',
   styleUrls: ['node-info.component.scss'],
   animations: [

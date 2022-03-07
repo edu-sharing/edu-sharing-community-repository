@@ -1,25 +1,25 @@
 package org.edu_sharing.restservices.shared;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class NodeSearch {
 
-	@ApiModel(description = "")
-	public static class Facette {
+	@Schema(description = "")
+	public static class Facet {
 
-		@ApiModel(description = "")
+		@Schema(description = "")
 		public static class Value {
 
 			private String value = null;
 			private Integer count = null;
 
-			@ApiModelProperty(required = true, value = "")
+			@Schema(required = true, description = "")
 			@JsonProperty(value = "value")
 			public String getValue() {
 				return value;
@@ -29,7 +29,7 @@ public class NodeSearch {
 				this.value = value;
 			}
 
-			@ApiModelProperty(required = true, value = "")
+			@Schema(required = true, description = "")
 			@JsonProperty(value = "count")
 			public Integer getCount() {
 				return count;
@@ -41,10 +41,10 @@ public class NodeSearch {
 		}
 
 		private String property = null;
-		private List<Value> values = null;
+		private List<Value> values = new ArrayList<>();
 		private Long sumOtherDocCount = null;
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty(value = "property")
 		public String getProperty() {
 			return property;
@@ -54,7 +54,7 @@ public class NodeSearch {
 			this.property = property;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty(value = "values")
 		public List<Value> getValues() {
 			return values;
@@ -66,21 +66,55 @@ public class NodeSearch {
 
 		public void setSumOtherDocCount(Long sumOtherDocCount) { this.sumOtherDocCount = sumOtherDocCount; }
 
-		@ApiModelProperty(required = false, value = "")
+		@Schema(required = false, defaultValue = "")
 		@JsonProperty(value = "sumOtherDocCount")
 		public Long getSumOtherDocCount() { return sumOtherDocCount; }
+	}
+
+	public static class Suggest{
+		String text;
+		String highlighted;
+		float score;
+
+		public void setHighlighted(String highlighted) {
+			this.highlighted = highlighted;
+		}
+
+		@Schema(required = true, description = "suggested text")
+		public String getText() {
+			return text;
+		}
+
+		public void setText(String text) {
+			this.text = text;
+		}
+
+		@Schema(required = false, description = "suggested text with corrected words highlighted")
+		public String getHighlighted() {
+			return highlighted;
+		}
+
+		public void setScore(float score) {
+			this.score = score;
+		}
+
+		@Schema(required = true, description = "score of the suggestion")
+		public float getScore() {
+			return score;
+		}
 	}
 	
 	private List<String> ignored = null;
 	private List<NodeRef> result = null;
-	private List<Facette> facettes = null;
+	private List<Facet> facets = null;
+	private List<Suggest> suggests = null;
 	private Integer count = null;
 	private Integer skip = null;
 	private List<Node> nodes = null;
 
 	/**
    **/
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty(value = "result")
 	public List<NodeRef> getResult() {
 		return result;
@@ -101,19 +135,23 @@ public class NodeSearch {
 
 	/**
 	   **/
-	@ApiModelProperty(required = true, value = "")
-	@JsonProperty(value = "facettes")
-	public List<Facette> getFacettes() {
-		return facettes;
+	@Schema(required = true, description = "")
+	@JsonProperty(value = "facets")
+	public List<Facet> getFacets() {
+		return facets;
 	}
 
-	public void setFacettes(List<Facette> facettes) {
-		this.facettes = facettes;
+	public void setFacets(List<Facet> facets) {
+		this.facets = facets;
 	}
+
+	public void setSuggests(List<Suggest> suggests) { this.suggests = suggests; }
+
+	public List<Suggest> getSuggests() { return suggests; }
 
 	/**
    **/
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty(value = "count")
 	public Integer getCount() {
 		return count;
@@ -125,7 +163,7 @@ public class NodeSearch {
 
 	/**
    **/
-	@ApiModelProperty(required = true, value = "")
+	@Schema(required = true, description = "")
 	@JsonProperty(value = "skip")
 	public Integer getSkip() {
 		return skip;

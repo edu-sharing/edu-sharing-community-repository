@@ -10,17 +10,17 @@ import { ConfigurationService } from '../../../core-module/rest/services/configu
 /**
  * Replaces the element's content with an icon.
  *
- * Example: `<i icon="save"></i>`
+ * Example: `<i esIcon="save"></i>`
  *
  * Optionally, a translated `aria-label` can be attached by setting `aria` to a truthy value: `<i
- * icon="save" aria="true"></i>`. Otherwise, `aria-hidden` will be set.
+ * esIcon="save" aria="true"></i>`. Otherwise, `aria-hidden` will be set.
  *
  * For backwards compatibility, the directive is also activated on elements that set
  * `class="material-icons"`. This is mainly to set the `aria-hidden` attribute. Occurrences should
  * be updated to the syntax above.
  */
 @Directive({
-    selector: 'i[icon], i.material-icons',
+    selector: 'i[esIcon], i.material-icons',
 })
 export class IconDirective implements OnInit, OnDestroy {
     private _id: string;
@@ -51,7 +51,7 @@ export class IconDirective implements OnInit, OnDestroy {
         }
     }
 
-    @Input() set icon(id: string) {
+    @Input() set esIcon(id: string) {
         this.setIcon(id);
     }
 

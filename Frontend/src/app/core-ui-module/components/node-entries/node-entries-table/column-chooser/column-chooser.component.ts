@@ -4,7 +4,7 @@ import { CdkOverlayOrigin } from '@angular/cdk/overlay';
 import {ListItem} from '../../../../../core-module/ui/list-item';
 
 @Component({
-    selector: 'app-column-chooser',
+    selector: 'es-column-chooser',
     templateUrl: './column-chooser.component.html',
     styleUrls: ['./column-chooser.component.scss'],
 })

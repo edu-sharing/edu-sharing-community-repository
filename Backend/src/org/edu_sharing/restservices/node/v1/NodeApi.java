@@ -1,54 +1,34 @@
 package org.edu_sharing.restservices.node.v1;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.OPTIONS;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.*;
+import org.edu_sharing.restservices.node.v1.model.SearchResult;
 import org.edu_sharing.restservices.node.v1.model.*;
-import org.edu_sharing.restservices.shared.ACL;
-import org.edu_sharing.restservices.shared.ErrorResponse;
-import org.edu_sharing.restservices.shared.Filter;
-import org.edu_sharing.restservices.shared.Node;
-import org.edu_sharing.restservices.shared.NodeRef;
-import org.edu_sharing.restservices.shared.NodeRemote;
-import org.edu_sharing.restservices.shared.NodeSearch;
-import org.edu_sharing.restservices.shared.Pagination;
-import org.edu_sharing.restservices.shared.User;
-
+import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.clientutils.ClientUtilsService;
 import org.edu_sharing.service.clientutils.WebsiteInformation;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.editlock.LockedException;
 import org.edu_sharing.service.nodeservice.AssocInfo;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.service.repoproxy.RepoProxy;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.search.model.SearchToken;
@@ -57,15 +37,23 @@ import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.share.ShareService;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Path("/node/v1")
-@Api(tags = {"NODE v1"})
+@Tag(name="NODE v1")
 @ApiService(value="NODE", major=1, minor=0)
+@Consumes({ "application/json" })
+@Produces({"application/json"})
 public class NodeApi  {
 
 	
@@ -73,23 +61,21 @@ public class NodeApi  {
 	  @GET
 	    @Path("/nodes/{repository}/{node}/workflow")
 	        
-	    @ApiOperation(
-	    	value = "Get workflow history.", 
-	    	notes = "Get workflow history of node.")
+	    @Operation(summary = "Get workflow history.", description = "Get workflow history of node.")
 	    
 	    @ApiResponses(
 	    	value = { 
-		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = WorkflowHistory[].class),        
-		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+		        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = WorkflowHistory[].class))),        
+		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 		    })
 
 	    public Response getWorkflowHistory(
-	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 			@Context HttpServletRequest req) {
 	    	
 	    	try {
@@ -109,26 +95,24 @@ public class NodeApi  {
 	  @POST
 	    @Path("/nodes/{repository}/{node}/report")
 	        
-	    @ApiOperation(
-	    	value = "Report the node.", 
-	    	notes = "Report a node to notify the admin about an issue)")
+	    @Operation(summary = "Report the node.", description = "Report a node to notify the admin about an issue)")
 	    
 	    @ApiResponses(
 	    	value = { 
-		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
-		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+		        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
+		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 		    })
 
 	    public Response reportNode(
-	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    	@ApiParam(value = "the reason for the report",required=true ) @QueryParam("reason") String reason,
-	    	@ApiParam(value = "mail of reporting user",required=true ) @QueryParam("userEmail") String userEmail,
-	    	@ApiParam(value = "additional user comment",required=false ) @QueryParam("userComment") String userComment,
+	    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    	@Parameter(description = "the reason for the report",required=true ) @QueryParam("reason") String reason,
+	    	@Parameter(description = "mail of reporting user",required=true ) @QueryParam("userEmail") String userEmail,
+	    	@Parameter(description = "additional user comment",required=false ) @QueryParam("userComment") String userComment,
 			@Context HttpServletRequest req) {
 	    	
 	    	try {
@@ -146,24 +130,22 @@ public class NodeApi  {
 	  @PUT
 	    @Path("/nodes/{repository}/{node}/workflow")
 	        
-	    @ApiOperation(
-	    	value = "Add workflow.", 
-	    	notes = "Add workflow entry to node.")
+	    @Operation(summary = "Add workflow.", description = "Add workflow entry to node.")
 	    
 	    @ApiResponses(
 	    	value = { 
-		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
-		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+		        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
+		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 		    })
 
 	    public Response addWorkflowHistory(
-	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    	@ApiParam(value = "The history entry to put (editor and time can be null and will be filled automatically)", required = true) WorkflowHistory entry,
+	    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    	@Parameter(description = "The history entry to put (editor and time can be null and will be filled automatically)", required = true) WorkflowHistory entry,
 			@Context HttpServletRequest req) {
 	    	
 	    	try {
@@ -171,7 +153,7 @@ public class NodeApi  {
 		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 		    	
 		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-		    	nodeDao.addWorkflowHistory(entry);
+		    	nodeDao.addWorkflowHistory(entry, true);
 		    	return Response.status(Response.Status.OK).build();
 		
 	    	} catch (Throwable t) {
@@ -183,24 +165,22 @@ public class NodeApi  {
 	@POST
 	@Path("/nodes/{repository}/{node}/publish")
 
-	@ApiOperation(
-			value = "Publish",
-			notes = "Create a published copy of the current node ")
+	@Operation(summary = "Publish", description = "Create a published copy of the current node ")
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
-					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 
 	public Response publishCopy(
-			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-			@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-			@ApiParam(value = "handle mode, if a handle should be created. Skip this parameter if you don't want an handle",required=false ) @QueryParam("handleMode") HandleMode handleMode,
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+			@Parameter(description = "handle mode, if a handle should be created. Skip this parameter if you don't want an handle",required=false ) @QueryParam("handleMode") HandleMode handleMode,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -220,23 +200,21 @@ public class NodeApi  {
 	@GET
 	@Path("/nodes/{repository}/{node}/publish")
 
-	@ApiOperation(
-			value = "Publish",
-			notes = "Get all published copies of the current node")
+	@Operation(summary = "Publish", description = "Get all published copies of the current node")
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntries.class),
-					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntries.class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 
 	public Response getPublishedCopies(
-			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-			@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -263,24 +241,22 @@ public class NodeApi  {
 	@PUT
 	    @Path("/nodes/{repository}/{node}/aspects")
 	        
-	    @ApiOperation(
-	    	value = "Add aspect to node.", 
-	    	notes = "Add aspect to node.")
+	    @Operation(summary = "Add aspect to node.", description = "Add aspect to node.")
 	    
 	    @ApiResponses(
 	    	value = { 
-		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),        
-		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+		        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),        
+		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 		    })
 
 	    public Response addAspects(
-	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    	@ApiParam(value = "aspect name, e.g. ccm:lomreplication",required=true) List<String> aspects,
+	    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    	@Parameter(description = "aspect name, e.g. ccm:lomreplication",required=true) List<String> aspects,
 			@Context HttpServletRequest req) {
 	    	
 	    	try {
@@ -301,24 +277,22 @@ public class NodeApi  {
     @GET
     @Path("/nodes/{repository}/{node}/metadata")
         
-    @ApiOperation(
-    	value = "Get metadata of node.", 
-    	notes = "Get metadata of node.")
+    @Operation(summary = "Get metadata of node.", description = "Get metadata of node.")
     
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response getMetadata(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-    	@ApiParam(value = "property filter for result nodes (or \"-all-\" for all properties)", defaultValue="-all-" ) @QueryParam("propertyFilter") List<String> propertyFilter,
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+    	@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-")) ) @QueryParam("propertyFilter") List<String> propertyFilter,
 		@Context HttpServletRequest req) {
     	
     	try {
@@ -348,23 +322,21 @@ public class NodeApi  {
     @GET
     @Path("/nodes/{repository}/{node}/lock/unlock")
         
-    @ApiOperation(
-    	value = "unlock node.", 
-    	notes = "unlock node.")
+    @Operation(summary = "unlock node.", description = "unlock node.")
     
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response unlock(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
     	@Context HttpServletRequest req) {
     	
     	try{
@@ -378,23 +350,21 @@ public class NodeApi  {
     @GET
     @Path("/nodes/{repository}/{node}/lock/status")
         
-    @ApiOperation(
-    	value = "locked status of a node.", 
-    	notes = "locked status of a node.")
+    @Operation(summary = "locked status of a node.", description = "locked status of a node.")
     
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeLocked.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeLocked.class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response islocked(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
     	@Context HttpServletRequest req) {
 		try {
 			boolean isLocked = EditLockServiceFactory.getEditLockService().isLockedByAnotherUser(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node));
@@ -411,23 +381,21 @@ public class NodeApi  {
     @GET
     @Path("/nodes/{repository}/{node}/textContent")
         
-    @ApiOperation(
-    	value = "Get the text content of a document.", 
-    	notes = "May fails with 500 if the node can not be read.")
+    @Operation(summary = "Get the text content of a document.", description = "May fails with 500 if the node can not be read.")
     
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeText.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeText.class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response getTextContent(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 		@Context HttpServletRequest req) {
     	
     	try {
@@ -455,25 +423,23 @@ public class NodeApi  {
     @GET
     @Path("/nodes/{repository}/{node}/parents")
         
-    @ApiOperation(
-    	value = "Get parents of node.", 
-    	notes = "Get all parents metadata + own metadata of node. Index 0 is always the current node")
+    @Operation(summary = "Get parents of node.", description = "Get all parents metadata + own metadata of node. Index 0 is always the current node")
     
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = ParentEntries.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = ParentEntries.class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response getParents(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-    	@ApiParam(value = "property filter for result nodes (or \"-all-\" for all properties)") @QueryParam("propertyFilter") List<String> propertyFilter,
-    	@ApiParam(value = "activate to return the full alfresco path, otherwise the path for the user home is resolved") @QueryParam("fullPath") Boolean fullPath,
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+    	@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)") @QueryParam("propertyFilter") List<String> propertyFilter,
+    	@Parameter(description = "activate to return the full alfresco path, otherwise the path for the user home is resolved") @QueryParam("fullPath") Boolean fullPath,
 		@Context HttpServletRequest req) {
     	
     	try {
@@ -491,38 +457,42 @@ public class NodeApi  {
 	    	Node last=nodeDao.asNode();
 	    	parents.add(last);
 	    	String userHome=repoDao.getUserHome();
-	    	List<NodeRef> shared = PersonDao.getPerson(repoDao,PersonDao.ME).asPerson().getSharedFolders();
-	    	boolean collection=last.getMediatype().equals("collection");
-	    	if(fullPath==null)
-	    		fullPath=false;
-	    	while(true){
-	    		if(last==null || last.getParent()==null || last.getParent().getId()==null)
-	    			break;
-	    		if(!fullPath){
-	    			if(last.getParent().getId().equals(userHome)){
-	    				response.setScope("MY_FILES");
-	    				break;
-	    			}
-	    			if((shared!=null && shared.contains(last.getRef()))){
-	    				response.setScope("SHARED_FILES");
-	    				break;
-	    			}
-	    		}
-	    		if(collection && !fullPath){
-					Node finalLast = last;
-					last=AuthenticationUtil.runAsSystem(()-> NodeDao.getNode(repoDao, finalLast.getParent().getId(),filter).asNode());
-					if(!last.getMediatype().equals("collection")){
-	    				response.setScope("COLLECTION");
-	    				break;
-	    			}
-	    		}
-	    		else{
-					last=NodeDao.getNode(repoDao, last.getParent().getId(),filter).asNode();
+			if(last.getRef().getId().equals(userHome)) {
+				response.setNodes(new ArrayList<>());
+				response.setScope("MY_FILES");
+			} else {
+				List<NodeRef> shared = PersonDao.getPerson(repoDao, PersonDao.ME).asPerson().getSharedFolders();
+				boolean collection = last.getMediatype().equals("collection");
+				if (fullPath == null)
+					fullPath = false;
+				while (true) {
+					if (last == null || last.getParent() == null || last.getParent().getId() == null)
+						break;
+					if (!fullPath) {
+						if (last.getParent().getId().equals(userHome)) {
+							response.setScope("MY_FILES");
+							break;
+						}
+						if ((shared != null && shared.contains(last.getRef()))) {
+							response.setScope("SHARED_FILES");
+							break;
+						}
+					}
+					if (collection && !fullPath) {
+						Node finalLast = last;
+						last = AuthenticationUtil.runAsSystem(() -> NodeDao.getNode(repoDao, finalLast.getParent().getId(), filter).asNode());
+						if (!last.getMediatype().equals("collection")) {
+							response.setScope("COLLECTION");
+							break;
+						}
+					} else {
+						last = NodeDao.getNode(repoDao, last.getParent().getId(), filter).asNode();
+					}
+					parents.add(last);
 				}
-	    		parents.add(last);
-	    	}
-	    	
-	    	response.setNodes(parents);
+
+				response.setNodes(parents);
+			}
 	    	return Response.status(Response.Status.OK).entity(response).build();
 	
     	} catch (Throwable t) {
@@ -534,25 +504,23 @@ public class NodeApi  {
     @PUT
     @Path("/nodes/{repository}/{node}/metadata")    
     
-    @ApiOperation(
-    	value = "Change metadata of node.", 
-    	notes = "Change metadata of node.")
+    @Operation(summary = "Change metadata of node.", description = "Change metadata of node.")
     
     @ApiResponses(
     	value = { 
-			@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 		})
 
     public Response changeMetadata(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    @ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    @ApiParam(value = "properties" ,required=true ) HashMap<String, String[]> properties,
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    @Parameter(description = "properties" ,required=true ) HashMap<String, String[]> properties,
 		@Context HttpServletRequest req) {
     	
     	try {
@@ -575,24 +543,22 @@ public class NodeApi  {
 	@GET
 	@Path("/nodes/{repository}/{node}/metadata/template")
 
-	@ApiOperation(
-			value = "Get the metadata template + status for this folder.",
-			notes = "All the given metadata will be inherited to child nodes.")
+	@Operation(summary = "Get the metadata template + status for this folder.", description = "All the given metadata will be inherited to child nodes.")
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
-					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-					@ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 
 	public Response getTemplateMetadata(
-			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-			@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -616,26 +582,24 @@ public class NodeApi  {
 	@PUT
 	@Path("/nodes/{repository}/{node}/metadata/template")
 
-	@ApiOperation(
-			value = "Set the metadata template for this folder.",
-			notes = "All the given metadata will be inherited to child nodes.")
+	@Operation(summary = "Set the metadata template for this folder.", description = "All the given metadata will be inherited to child nodes.")
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
-					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-					@ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 
 	public Response changeTemplateMetadata(
-			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-			@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-			@ApiParam(value = "Is the inherition currently enabled",required=true ) @QueryParam("enable") Boolean enable,
-			@ApiParam(value = "properties" ,required=true ) HashMap<String, String[]> properties,
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+			@Parameter(description = "Is the inherition currently enabled",required=true ) @QueryParam("enable") Boolean enable,
+			@Parameter(description = "properties" ,required=true ) HashMap<String, String[]> properties,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -662,26 +626,24 @@ public class NodeApi  {
 	@POST
     @Path("/nodes/{repository}/{node}/metadata")    
     
-    @ApiOperation(
-    	value = "Change metadata of node (new version).", 
-    	notes = "Change metadata of node (new version).")
+    @Operation(summary = "Change metadata of node (new version).", description = "Change metadata of node (new version).")
     
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),	        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),	        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
     	})
 
     public Response changeMetadataWithVersioning(
-	    @ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    @ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    @ApiParam(value = "comment",required=true) @QueryParam("versionComment") String versionComment,
-	    @ApiParam(value = "properties" ,required=true ) HashMap<String, String[]> properties,
+	    @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    @Parameter(description = "comment",required=true) @QueryParam("versionComment") String versionComment,
+	    @Parameter(description = "properties" ,required=true ) HashMap<String, String[]> properties,
 		@Context HttpServletRequest req) {
     	
     	try {
@@ -705,7 +667,7 @@ public class NodeApi  {
     
     @OPTIONS    
     @Path("/nodes/{repository}/{node}/metadata")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
     public Response options01() {
     	
@@ -715,26 +677,24 @@ public class NodeApi  {
     @DELETE
     @Path("/nodes/{repository}/{node}")    
     
-    @ApiOperation(
-    	value = "Delete node.", 
-    	notes = "Delete node.")
+    @Operation(summary = "Delete node.", description = "Delete node.")
     
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response delete(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-") @PathParam("repository") String repository,
-    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-    	@ApiParam(value = "move the node to recycle",defaultValue="true",required=false) @QueryParam("recycle") Boolean recycle,
-    	@ApiParam(value = "protocol",defaultValue="",required=false) @QueryParam("protocol") String protocol,
-    	@ApiParam(value = "store",defaultValue="",required=false) @QueryParam("store") String store,
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+    	@Parameter(description = "move the node to recycle",schema = @Schema(defaultValue="true"),required=false) @QueryParam("recycle") Boolean recycle,
+    	@Parameter(description = "protocol",schema = @Schema(defaultValue=""),required=false) @QueryParam("protocol") String protocol,
+    	@Parameter(description = "store",schema = @Schema(defaultValue=""),required=false) @QueryParam("store") String store,
 		@Context HttpServletRequest req) {
     	
     	try {
@@ -783,7 +743,7 @@ public class NodeApi  {
     
     @OPTIONS    
     @Path("/nodes/{repository}/{node}")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
     public Response options02() {
     	
@@ -793,30 +753,28 @@ public class NodeApi  {
     @GET
     @Path("/nodes/{repository}/{node}/children")    
     
-    @ApiOperation(
-    	value = "Get children of node.", 
-    	notes = "Get children of node.")
+    @Operation(summary = "Get children of node.", description = "Get children of node.")
     
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntries.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntries.class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response getChildren(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    @ApiParam(value = "ID of parent node (or \"-userhome-\" for home directory of current user, \"-shared_files-\" for shared folders, \"-to_me_shared_files\" for shared files for the user,\"-my_shared_files-\" for files shared by the user, \"-inbox-\" for the inbox, \"-workflow_receive-\" for files assigned by workflow, \"-saved_search-\" for saved searches of the user)",required=true ) @PathParam("node") String node,
-	    @ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue="500" ) @QueryParam("maxItems") Integer maxItems,
-	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0" ) @QueryParam("skipCount") Integer skipCount,
-	    @ApiParam(value = RestConstants.MESSAGE_FILTER) @QueryParam("filter") List<String> filter,
-	    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
-	    @ApiParam(value = "Filter for a specific association. May be empty",required = false,defaultValue = "") @QueryParam("assocName") String assocName,
-	    @ApiParam(value = RestConstants.MESSAGE_PROPERTY_FILTER, defaultValue="-all-" ) @QueryParam("propertyFilter") List<String> propertyFilter,
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    @Parameter(description = "ID of parent node (or \"-userhome-\" for home directory of current user, \"-shared_files-\" for shared folders, \"-to_me_shared_files\" for shared files for the user,\"-my_shared_files-\" for files shared by the user, \"-inbox-\" for the inbox, \"-workflow_receive-\" for files assigned by workflow, \"-saved_search-\" for saved searches of the user)",required=true ) @PathParam("node") String node,
+	    @Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue="500") ) @QueryParam("maxItems") Integer maxItems,
+	    @Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue="0") ) @QueryParam("skipCount") Integer skipCount,
+	    @Parameter(description = RestConstants.MESSAGE_FILTER) @QueryParam("filter") List<String> filter,
+	    @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+	    @Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+	    @Parameter(description = "Filter for a specific association. May be empty", required = false, schema = @Schema(defaultValue="")) @QueryParam("assocName") String assocName,
+	    @Parameter(description = RestConstants.MESSAGE_PROPERTY_FILTER, array = @ArraySchema(schema = @Schema(defaultValue="-all-")) ) @QueryParam("propertyFilter") List<String> propertyFilter,
 		@Context HttpServletRequest req) {
 
     	try {
@@ -891,30 +849,28 @@ public class NodeApi  {
 	@GET
 	@Path("/nodes/{repository}/{node}/assocs")
 
-	@ApiOperation(
-			value = "Get related nodes.",
-			notes = "Get nodes related based on an assoc.")
+	@Operation(summary = "Get related nodes.", description = "Get nodes related based on an assoc.")
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntries.class),
-					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntries.class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 
 	public Response getAssocs(
-			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-			@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-			@ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue="500" ) @QueryParam("maxItems") Integer maxItems,
-			@ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0" ) @QueryParam("skipCount") Integer skipCount,
-			@ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-			@ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
-			@ApiParam(value = "Either where the given node should be the \"SOURCE\" or the \"TARGET\"",required = true) @QueryParam("direction") AssocInfo.Direction direction,
-			@ApiParam(value = "Association name (e.g. ccm:forkio).") @QueryParam("assocName") String assocName,
-			@ApiParam(value = RestConstants.MESSAGE_PROPERTY_FILTER, defaultValue="-all-" ) @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+			@Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue="500") ) @QueryParam("maxItems") Integer maxItems,
+			@Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue="0") ) @QueryParam("skipCount") Integer skipCount,
+			@Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+			@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+			@Parameter(description = "Either where the given node should be the \"SOURCE\" or the \"TARGET\"",required = true) @QueryParam("direction") AssocInfo.Direction direction,
+			@Parameter(description = "Association name (e.g. ccm:forkio).") @QueryParam("assocName") String assocName,
+			@Parameter(description = RestConstants.MESSAGE_PROPERTY_FILTER, array = @ArraySchema(schema = @Schema(defaultValue="-all-")) ) @QueryParam("propertyFilter") List<String> propertyFilter,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -942,24 +898,22 @@ public class NodeApi  {
     @DELETE
     @Path("/nodes/{repository}/{node}/shares/{shareId}")    
     
-    @ApiOperation(
-    	value = "Remove share of a node.", 
-    	notes = "Remove the specified share id")
+    @Operation(summary = "Remove share of a node.", description = "Remove the specified share id")
     
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response removeShare(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    @ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    @ApiParam(value = "share id",required=true ) @PathParam("shareId") String shareId,
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    @Parameter(description = "share id",required=true ) @PathParam("shareId") String shareId,
 		@Context HttpServletRequest req) {
 
     	try {
@@ -978,26 +932,24 @@ public class NodeApi  {
     @POST
     @Path("/nodes/{repository}/{node}/shares/{shareId}")    
     
-    @ApiOperation(
-    	value = "update share of a node.", 
-    	notes = "update the specified share id")
+    @Operation(summary = "update share of a node.", description = "update the specified share id")
     
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeShare.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeShare.class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response updateShare(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    @ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    @ApiParam(value = "share id",required=true ) @PathParam("shareId") String shareId,
-	    @ApiParam(value = "expiry date for this share, leave empty or -1 for unlimited",required=false,defaultValue=""+ShareService.EXPIRY_DATE_UNLIMITED ) @QueryParam("expiryDate") Long expiryDate,
-	    @ApiParam(value = "new password for share, leave empty if you don't want to change it",required=false,defaultValue="") @QueryParam("password") String password,
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    @Parameter(description = "share id",required=true ) @PathParam("shareId") String shareId,
+	    @Parameter(description = "expiry date for this share, leave empty or -1 for unlimited", required = false, schema = @Schema(defaultValue=""+ShareService.EXPIRY_DATE_UNLIMITED )) @QueryParam("expiryDate") Long expiryDate,
+	    @Parameter(description = "new password for share, leave empty if you don't want to change it", required = false, schema = @Schema(defaultValue="")) @QueryParam("password") String password,
 		@Context HttpServletRequest req) {
 
     	try {
@@ -1016,24 +968,22 @@ public class NodeApi  {
     @POST
     @Path("/nodes/{repository}/{node}/import")    
     
-    @ApiOperation(
-    	value = "Import node", 
-    	notes = "Import a node from a foreign repository to the local repository.")
+    @Operation(summary = "Import node", description = "Import a node from a foreign repository to the local repository.")
     
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response importNode(
-    	@ApiParam(value = "The id of the foreign repository",required=true) @PathParam("repository") String repository,
-	    @ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    @ApiParam(value = "Parent node where to store it locally, may also use -userhome- or -inbox-",required=true ) @QueryParam("parent") String parent,
+    	@Parameter(description = "The id of the foreign repository",required=true) @PathParam("repository") String repository,
+	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    @Parameter(description = "Parent node where to store it locally, may also use -userhome- or -inbox-",required=true ) @QueryParam("parent") String parent,
 		@Context HttpServletRequest req) {
 
     	try {
@@ -1061,24 +1011,22 @@ public class NodeApi  {
     @GET
     @Path("/nodes/{repository}/{node}/shares")    
     
-    @ApiOperation(
-    	value = "Get shares of node.", 
-    	notes = "Get list of shares (via mail/token) for a node.")
+    @Operation(summary = "Get shares of node.", description = "Get list of shares (via mail/token) for a node.")
     
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeShare[].class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeShare[].class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response getShares(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    @ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    @ApiParam(value = "Filter for a specific email or use "+ShareService.EMAIL_TYPE_LINK+" for link shares (Optional)",required=false) @QueryParam("email") String email,
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    @Parameter(description = "Filter for a specific email or use "+ShareService.EMAIL_TYPE_LINK+" for link shares (Optional)",required=false) @QueryParam("email") String email,
 		@Context HttpServletRequest req) {
 
     	try {
@@ -1097,25 +1045,23 @@ public class NodeApi  {
     @PUT
     @Path("/nodes/{repository}/{node}/shares")    
     
-    @ApiOperation(
-    	value = "Create a share for a node.", 
-    	notes = "Create a new share for a node")
+    @Operation(summary = "Create a share for a node.", description = "Create a new share for a node")
     
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeShare.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeShare.class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response createShare(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    @ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    @ApiParam(value = "expiry date for this share, leave empty or -1 for unlimited",required=false,defaultValue=""+ShareService.EXPIRY_DATE_UNLIMITED ) @QueryParam("expiryDate") Long expiryDate,
-	    @ApiParam(value = "password for this share, use none to not use a password",required=false,defaultValue="") @QueryParam("password") String password,
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    @Parameter(description = "expiry date for this share, leave empty or -1 for unlimited", required = false, schema = @Schema(defaultValue=""+ShareService.EXPIRY_DATE_UNLIMITED )) @QueryParam("expiryDate") Long expiryDate,
+	    @Parameter(description = "password for this share, use none to not use a password", required = false, schema = @Schema(defaultValue="")) @QueryParam("password") String password,
 		@Context HttpServletRequest req) {
 
     	try {
@@ -1157,30 +1103,28 @@ public class NodeApi  {
 	@POST
     @Path("/nodes/{repository}/{node}/children")    
     
-    @ApiOperation(
-    	value = "Create a new child.", 
-    	notes = "Create a new child.")
+    @Operation(summary = "Create a new child.", description = "Create a new child.")
     
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response createChild(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    @ApiParam(value = RestConstants.MESSAGE_PARENT_NODE+" use -userhome- for userhome or -inbox- for inbox node",required=true ) @PathParam("node") String node,
-	    @ApiParam(value = "type of node",required=true ) @QueryParam("type") String type,
-	    @ApiParam(value = "aspects of node" ) @QueryParam("aspects") List<String> aspects,
-	    @ApiParam(value = "rename if the same node name exists",required=false,defaultValue="false") @QueryParam("renameIfExists") Boolean renameIfExists,
-	    @ApiParam(value = "comment, leave empty = no inital version", required=false ) @QueryParam("versionComment")  String versionComment,
-	    @ApiParam(value = "properties, example: {\"{http://www.alfresco.org/model/content/1.0}name\": [\"test\"]}" , required=true ) HashMap<String, String[]> properties,	    
-	    @ApiParam(value = "Association type, can be empty" , required=false ) @QueryParam("assocType") String assocType,	    
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    @Parameter(description = RestConstants.MESSAGE_PARENT_NODE+" use -userhome- for userhome or -inbox- for inbox node",required=true ) @PathParam("node") String node,
+	    @Parameter(description = "type of node",required=true ) @QueryParam("type") String type,
+	    @Parameter(description = "aspects of node" ) @QueryParam("aspects") List<String> aspects,
+	    @Parameter(description = "rename if the same node name exists", required = false, schema = @Schema(defaultValue="false")) @QueryParam("renameIfExists") Boolean renameIfExists,
+	    @Parameter(description = "comment, leave empty = no inital version", required=false ) @QueryParam("versionComment")  String versionComment,
+	    @Parameter(description = "properties, example: {\"{http://www.alfresco.org/model/content/1.0}name\": [\"test\"]}" , required=true ) HashMap<String, String[]> properties,	    
+	    @Parameter(description = "Association type, can be empty" , required=false ) @QueryParam("assocType") String assocType,	    
 		@Context HttpServletRequest req) {
 
     	try {
@@ -1214,24 +1158,23 @@ public class NodeApi  {
 	@POST
 	@Path("/nodes/{repository}/{node}/xapi")
 
-	@ApiOperation(
-			value = "Store xApi-Conform data for a given node")
+	@Operation(summary = "Store xApi-Conform data for a given node")
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Object.class),
-					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-					@ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Object.class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 
 	public Response storeXApiData(
-			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-			@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-			@ApiParam(value = "xApi conform json data",required=true ) String xApi,
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+			@Parameter(description = "xApi conform json data",required=true ) String xApi,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -1288,7 +1231,7 @@ public class NodeApi  {
 	}
 	@OPTIONS    
     @Path("/nodes/{repository}/{node}/children")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
     public Response options03() {
     	
@@ -1297,25 +1240,23 @@ public class NodeApi  {
 	@POST
 	@Path("/nodes/{repository}/{node}/children/_fork")
 
-	@ApiOperation(
-			value = "Create a copy of a node by creating a forked version (variant)."
-	)
+	@Operation(summary = "Create a copy of a node by creating a forked version (variant).")
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
-					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-					@ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 
 	public Response createForkOfNode(
-			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-			@ApiParam(value = RestConstants.MESSAGE_PARENT_NODE,required=true ) @PathParam("node") String node,
-			@ApiParam(value = RestConstants.MESSAGE_SOURCE_NODE,required=true) @QueryParam("source") String source,
-			@ApiParam(value = "flag for children",required=true) @QueryParam("withChildren") boolean withChildren,
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = RestConstants.MESSAGE_PARENT_NODE,required=true ) @PathParam("node") String node,
+			@Parameter(description = RestConstants.MESSAGE_SOURCE_NODE,required=true) @QueryParam("source") String source,
+			@Parameter(description = "flag for children",required=true) @QueryParam("withChildren") boolean withChildren,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -1341,26 +1282,24 @@ public class NodeApi  {
 	@POST
     @Path("/nodes/{repository}/{node}/children/_copy")    
     
-    @ApiOperation(
-    	value = "Create a new child by copying.", 
-    	notes = "Create a new child by copying.")
+    @Operation(summary = "Create a new child by copying.", description = "Create a new child by copying.")
     
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response createChildByCopying(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    @ApiParam(value = RestConstants.MESSAGE_PARENT_NODE,required=true ) @PathParam("node") String node,
-	    @ApiParam(value = RestConstants.MESSAGE_SOURCE_NODE,required=true) @QueryParam("source") String source,
-	    @ApiParam(value = "flag for children",required=true) @QueryParam("withChildren") boolean withChildren,
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    @Parameter(description = RestConstants.MESSAGE_PARENT_NODE,required=true ) @PathParam("node") String node,
+	    @Parameter(description = RestConstants.MESSAGE_SOURCE_NODE,required=true) @QueryParam("source") String source,
+	    @Parameter(description = "flag for children",required=true) @QueryParam("withChildren") boolean withChildren,
 		@Context HttpServletRequest req) {
     	
     	try {
@@ -1386,7 +1325,7 @@ public class NodeApi  {
     
     @OPTIONS    
     @Path("/nodes/{repository}/{node}/children/_copy")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
     public Response options04() {
     	
@@ -1396,25 +1335,23 @@ public class NodeApi  {
     @POST
     @Path("/nodes/{repository}/{node}/children/_move")    
     
-    @ApiOperation(
-    	value = "Create a new child by moving.", 
-    	notes = "Create a new child by moving.")
+    @Operation(summary = "Create a new child by moving.", description = "Create a new child by moving.")
     
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 409, message = RestConstants.HTTP_409, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response createChildByMoving(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-		@ApiParam(value = RestConstants.MESSAGE_PARENT_NODE,required=true ) @PathParam("node") String node,
-		@ApiParam(value = RestConstants.MESSAGE_SOURCE_NODE,required=true) @QueryParam("source") String source,
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+		@Parameter(description = RestConstants.MESSAGE_PARENT_NODE,required=true ) @PathParam("node") String node,
+		@Parameter(description = RestConstants.MESSAGE_SOURCE_NODE,required=true) @QueryParam("source") String source,
 		@Context HttpServletRequest req) {
     	
     	try {
@@ -1438,7 +1375,7 @@ public class NodeApi  {
         
     @OPTIONS    
     @Path("/nodes/{repository}/{node}/children/_move")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
     public Response options05() {
     	
@@ -1448,25 +1385,23 @@ public class NodeApi  {
     @Path("/nodes/{repository}/{node}/preview")
     @Consumes({ "multipart/form-data" })
     
-    @ApiOperation(
-    	value = "Change preview of node.", 
-    	notes = "Change preview of node.")
+    @Operation(summary = "Change preview of node.", description = "Change preview of node.")
     
     @ApiResponses(
     	value = { 
-        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),        
-        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),        
+        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
     })
 
     public Response changePreview(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    @ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 	    @FormDataParam("image") InputStream inputStream,
-	    @ApiParam(value = "MIME-Type", required=true ) @QueryParam("mimetype")  String mimetype,
+	    @Parameter(description = "MIME-Type", required=true ) @QueryParam("mimetype")  String mimetype,
 		@Context HttpServletRequest req) {
     	
     	try {
@@ -1506,22 +1441,21 @@ public class NodeApi  {
 	@DELETE
 	@Path("/nodes/{repository}/{node}/preview")
 
-	@ApiOperation(
-			value = "Delete preview of node.")
+	@Operation(summary = "Delete preview of node.")
 
 	@ApiResponses(
 			value = {
-					@ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),
-					@ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),
-					@ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),
-					@ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),
-					@ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class),
-					@ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class)
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 			})
 
 	public Response deletePreview(
-			@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-			@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -1544,25 +1478,23 @@ public class NodeApi  {
     @Path("/nodes/{repository}/{node}/content")
     @Consumes({ "multipart/form-data" })
     
-    @ApiOperation(
-    	value = "Change content of node.", 
-    	notes = "Change content of node.")
+    @Operation(summary = "Change content of node.", description = "Change content of node.")
     
     @ApiResponses(
     	value = { 
-        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),        
-        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),        
+        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
     })
 
     public Response changeContent(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    @ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    @ApiParam(value = "comment, leave empty = no new version, otherwise new version is generated", required=false ) @QueryParam("versionComment")  String versionComment,
-	    @ApiParam(value = "MIME-Type", required=true ) @QueryParam("mimetype")  String mimetype,
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    @Parameter(description = "comment, leave empty = no new version, otherwise new version is generated", required=false ) @QueryParam("versionComment")  String versionComment,
+	    @Parameter(description = "MIME-Type", required=true ) @QueryParam("mimetype")  String mimetype,
 	    @FormDataParam("file") InputStream inputStream,
 //	    @FormDataParam("file") FormDataContentDisposition fileDetail,
 		@Context HttpServletRequest req) {
@@ -1609,26 +1541,24 @@ public class NodeApi  {
     @Path("/nodes/{repository}/{node}/textContent")
     @Consumes({ "multipart/form-data" })
     
-    @ApiOperation(
-    	value = "Change content of node as text.", 
-    	notes = "Change content of node as text.")
+    @Operation(summary = "Change content of node as text.", description = "Change content of node as text.")
     
     @ApiResponses(
     	value = { 
-        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),        
-        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),        
+        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
     })
 
     public Response changeContentAsText(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    @ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    @ApiParam(value = "comment, leave empty = no new version, otherwise new version is generated", required=false ) @QueryParam("versionComment")  String versionComment,
-	    @ApiParam(value = "MIME-Type", required=true ) @QueryParam("mimetype")  String mimetype,
-	    @ApiParam(value = "The content data to write (text)", required=true )String text,
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    @Parameter(description = "comment, leave empty = no new version, otherwise new version is generated", required=false ) @QueryParam("versionComment")  String versionComment,
+	    @Parameter(description = "MIME-Type", required=true ) @QueryParam("mimetype")  String mimetype,
+	    @Parameter(description = "The content data to write (text)", required=true )String text,
 		@Context HttpServletRequest req) {
     	
     	try {
@@ -1650,7 +1580,7 @@ public class NodeApi  {
     }
 	@OPTIONS    
 	@Path("/nodes/{repository}/{node}/content")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
 	public Response options06() {
 		
@@ -1660,23 +1590,21 @@ public class NodeApi  {
     @GET
     @Path("/nodes/{repository}/{node}/versions")    
     
-    @ApiOperation(
-    	value = "Get all versions of node.", 
-    	notes = "Get all versions of node.")
+    @Operation(summary = "Get all versions of node.", description = "Get all versions of node.")
     
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeVersionRefEntries.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeVersionRefEntries.class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response getVersions(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 		@Context HttpServletRequest req) {
     
     	try {
@@ -1697,7 +1625,7 @@ public class NodeApi  {
     
 	@OPTIONS    
 	@Path("/nodes/{repository}/{node}/versions")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
 	public Response options07() {
 		
@@ -1707,26 +1635,24 @@ public class NodeApi  {
     @GET
     @Path("/nodes/{repository}/{node}/versions/{major}/{minor}/metadata")    
     
-    @ApiOperation(
-    	value = "Get metadata of node version.", 
-    	notes = "Get metadata of node version.")
+    @Operation(summary = "Get metadata of node version.", description = "Get metadata of node version.")
     
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeVersionEntry.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeVersionEntry.class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response getVersionMetadata(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-    	@ApiParam(value = "major version",required=true ) @PathParam("major") int major,
-    	@ApiParam(value = "minor version",required=true ) @PathParam("minor") int minor,
-    	@ApiParam(value = "property filter for result nodes (or \"-all-\" for all properties)", defaultValue="-all-" ) @QueryParam("propertyFilter") List<String> propertyFilter,
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+    	@Parameter(description = "major version",required=true ) @PathParam("major") int major,
+    	@Parameter(description = "minor version",required=true ) @PathParam("minor") int minor,
+    	@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
 		@Context HttpServletRequest req) {
     
     	try {
@@ -1750,7 +1676,7 @@ public class NodeApi  {
     
 	@OPTIONS    
 	@Path("/nodes/{repository}/{node}/versions/{major}/{minor}/metadata")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
 	public Response options08() {
 		
@@ -1760,25 +1686,23 @@ public class NodeApi  {
     @PUT
     @Path("/nodes/{repository}/{node}/versions/{major}/{minor}/_revert")    
     
-    @ApiOperation(
-    	value = "Revert to node version.", 
-    	notes = "Revert to node version.")
+    @Operation(summary = "Revert to node version.", description = "Revert to node version.")
     
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeEntry.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response revertVersion(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-    	@ApiParam(value = "major version",required=true ) @PathParam("major") int major,
-    	@ApiParam(value = "minor version",required=true ) @PathParam("minor") int minor,
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+    	@Parameter(description = "major version",required=true ) @PathParam("major") int major,
+    	@Parameter(description = "minor version",required=true ) @PathParam("minor") int minor,
 		@Context HttpServletRequest req) {
     
     	try {
@@ -1802,7 +1726,7 @@ public class NodeApi  {
     
 	@OPTIONS    
 	@Path("/nodes/{repository}/{node}/versions/{major}/{minor}/_revert")    
-	@ApiOperation(hidden = true, value = "")
+	@Hidden
 
 	public Response options09() {
 		
@@ -1812,29 +1736,27 @@ public class NodeApi  {
     @POST
     @Path("/nodes/{repository}")    
     
-    @ApiOperation(
-    	value = "Searching nodes.", 
-    	notes = "Searching nodes.")
+    @Operation(summary = "Searching nodes.", description = "Searching nodes.")
     
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = SearchResult.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResult.class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response getNodes(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    @ApiParam(value = "lucene query",required=true) @QueryParam("query") String query,
-	    @ApiParam(value = "facettes") @QueryParam("facettes") List<String> facettes,
-	    @ApiParam(value = RestConstants.MESSAGE_MAX_ITEMS, defaultValue="10") @QueryParam("maxItems") Integer maxItems,
-	    @ApiParam(value = RestConstants.MESSAGE_SKIP_COUNT, defaultValue="0") @QueryParam("skipCount") Integer skipCount,
-	    @ApiParam(value = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-	    @ApiParam(value = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
-	    @ApiParam(value = "property filter for result nodes (or \"-all-\" for all properties)", defaultValue="-all-" ) @QueryParam("propertyFilter") List<String> propertyFilter,
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    @Parameter(description = "lucene query",required=true) @QueryParam("query") String query,
+	    @Parameter(description = "facets") @QueryParam("facets") List<String> facets,
+	    @Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue="10")) @QueryParam("maxItems") Integer maxItems,
+	    @Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
+	    @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+	    @Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+	    @Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-")) ) @QueryParam("propertyFilter") List<String> propertyFilter,
 		@Context HttpServletRequest req) {
 		    
     	try {
@@ -1847,7 +1769,7 @@ public class NodeApi  {
 			searchToken.setLuceneString(query);
 			searchToken.setFrom(skipCount != null ? skipCount : 0);
 			searchToken.setMaxResult(maxItems!= null ? maxItems : 10);
-			searchToken.setFacettes(facettes);
+			searchToken.setFacets(facets);
 			searchToken.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
     		NodeSearch search = NodeDao.search(repoDao,searchToken);
     		List<Node> data = new ArrayList<Node>();
@@ -1863,7 +1785,7 @@ public class NodeApi  {
 	    	SearchResult response = new SearchResult();
 	    	response.setNodes(data);
 	    	response.setPagination(pagination);	    	
-	    	response.setFacettes(search.getFacettes());
+	    	response.setFacets(search.getFacets());
 	    	return Response.status(Response.Status.OK).entity(response).build();
     		
     	} catch (Throwable t) {
@@ -1875,7 +1797,7 @@ public class NodeApi  {
     
 	@OPTIONS    
 	@Path("/nodes/{repository}")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
 	public Response options10() {
 		
@@ -1885,24 +1807,22 @@ public class NodeApi  {
 	@GET
     @Path("/nodes/{repository}/{node}/permissions/{user}")    
     
-    @ApiOperation(
-    	value = "Which permissions has user/group for node.", 
-    	notes = "Check for actual permissions (also when user is in groups) for a specific node")
+    @Operation(summary = "Which permissions has user/group for node.", description = "Check for actual permissions (also when user is in groups) for a specific node")
     
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = String[].class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = String[].class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
  
     public Response hasPermission(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-    	@ApiParam(value = "Authority (user/group) to check (use \"-me-\" for current user",required=true ) @PathParam("user") String authority,
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+    	@Parameter(description = "Authority (user/group) to check (use \"-me-\" for current user",required=true ) @PathParam("user") String authority,
 		@Context HttpServletRequest req) {
     
     	try {
@@ -1925,23 +1845,21 @@ public class NodeApi  {
     @GET
     @Path("/nodes/{repository}/{node}/permissions")    
     
-    @ApiOperation(
-    	value = "Get all permission of node.", 
-    	notes = "Get all permission of node.")
+    @Operation(summary = "Get all permission of node.", description = "Get all permission of node.")
     
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodePermissionEntry.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodePermissionEntry.class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
  
     public Response getPermission(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 		@Context HttpServletRequest req) {
     
     	try {
@@ -1964,23 +1882,21 @@ public class NodeApi  {
     @GET
     @Path("/nodes/{repository}/{node}/notifys")    
     
-    @ApiOperation(
-    	value = "Get notifys (sharing history) of the node.", 
-    	notes = "Ordered by the time of each notify")
+    @Operation(summary = "Get notifys (sharing history) of the node.", description = "Ordered by the time of each notify")
     
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NotifyEntry[].class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NotifyEntry[].class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
  
     public Response getNotifyList(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 		@Context HttpServletRequest req) {
     
     	try {
@@ -1997,27 +1913,25 @@ public class NodeApi  {
     @POST
     @Path("/nodes/{repository}/{node}/permissions")    
     
-    @ApiOperation(
-    	value = "Set local permissions of node.", 
-    	notes = "Set local permissions of node.")
+    @Operation(summary = "Set local permissions of node.", description = "Set local permissions of node.")
     
     @ApiResponses(
     	value = { 
-	        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
-	        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-	        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-	        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-	        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-	        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
     public Response setPermission(
-    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-    	@ApiParam(value = "permissions",required=true ) ACL permissions,
-    	@ApiParam(value = "mailtext",required=false ) @QueryParam("mailtext")  String mailText,
-    	@ApiParam(value = "sendMail",required=true ) @QueryParam("sendMail") Boolean sendMail,
-    	@ApiParam(value = "sendCopy",required=true ) @QueryParam("sendCopy") Boolean sendCopy,
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+    	@Parameter(description = "permissions",required=true ) ACL permissions,
+    	@Parameter(description = "mailtext",required=false ) @QueryParam("mailtext")  String mailText,
+    	@Parameter(description = "sendMail",required=true ) @QueryParam("sendMail") Boolean sendMail,
+    	@Parameter(description = "sendCopy",required=true ) @QueryParam("sendCopy") Boolean sendCopy,
 		@Context HttpServletRequest req) {
     
     	try {
@@ -2054,7 +1968,7 @@ public class NodeApi  {
     
 	@OPTIONS    
 	@Path("/nodes/{repository}/{node}/permissions")
-    @ApiOperation(hidden = true, value = "")
+    @Hidden
 
 	public Response options11() {
 		
@@ -2065,23 +1979,21 @@ public class NodeApi  {
 	  @POST
 	    @Path("/nodes/{repository}/{node}/prepareUsage")    
 	    
-	    @ApiOperation(
-	    	value = "create remote object and get properties.", 
-	    	notes = "create remote object and get properties.")
+	    @Operation(summary = "create remote object and get properties.", description = "create remote object and get properties.")
 	    
 	    @ApiResponses(
 	    	value = { 
-		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = NodeRemote.class),        
-		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+		        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeRemote.class))),        
+		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 		    })
 
 	    public Response prepareUsage(
-	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 	    @Context HttpServletRequest req) {
 	    
 	    	try {
@@ -2120,7 +2032,7 @@ public class NodeApi  {
 	    
 		@OPTIONS    
 		@Path("/nodes/{repository}/{node}/prepareUsage")
-	    @ApiOperation(hidden = true, value = "")
+	    @Hidden
 
 		public Response options12() {
 			
@@ -2131,24 +2043,22 @@ public class NodeApi  {
 		@POST
 	    @Path("/nodes/{repository}/{node}/owner")    
 	    
-	    @ApiOperation(
-	    	value = "Set owner of node.", 
-	    	notes = "Set owner of node.")
+	    @Operation(summary = "Set owner of node.", description = "Set owner of node.")
 	    
 	    @ApiResponses(
 	    	value = { 
-		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
-		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+		        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
+		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 		    })
 
 	    public Response setOwner(
-	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    	@ApiParam(value = "username",required=false ) @QueryParam("username")  String username,
+	    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    	@Parameter(description = "username",required=false ) @QueryParam("username")  String username,
 			@Context HttpServletRequest req) {
 	    
 	    	try {
@@ -2184,25 +2094,23 @@ public class NodeApi  {
 		@POST
 	    @Path("/nodes/{repository}/{node}/property")    
 	    
-	    @ApiOperation(
-	    	value = "Set single property of node.", 
-	    	notes = "When the property is unset (null), it will be removed")
+	    @Operation(summary = "Set single property of node.", description = "When the property is unset (null), it will be removed")
 	    
 	    @ApiResponses(
 	    	value = { 
-		        @ApiResponse(code = 200, message = RestConstants.HTTP_200, response = Void.class),        
-		        @ApiResponse(code = 400, message = RestConstants.HTTP_400, response = ErrorResponse.class),        
-		        @ApiResponse(code = 401, message = RestConstants.HTTP_401, response = ErrorResponse.class),        
-		        @ApiResponse(code = 403, message = RestConstants.HTTP_403, response = ErrorResponse.class),        
-		        @ApiResponse(code = 404, message = RestConstants.HTTP_404, response = ErrorResponse.class), 
-		        @ApiResponse(code = 500, message = RestConstants.HTTP_500, response = ErrorResponse.class) 
+		        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
+		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 		    })
 
 	    public Response setProperty(
-	    	@ApiParam(value = RestConstants.MESSAGE_REPOSITORY_ID,required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
-	    	@ApiParam(value = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    	@ApiParam(value = "property",required=true ) @QueryParam("property")  String property,
-	    	@ApiParam(value = "value",required=false ) @QueryParam("value")  List<String> value,
+	    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    	@Parameter(description = "property",required=true ) @QueryParam("property")  String property,
+	    	@Parameter(description = "value",required=false ) @QueryParam("value")  List<String> value,
 			@Context HttpServletRequest req) {
 	    
 	    	try {

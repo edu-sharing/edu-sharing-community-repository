@@ -1,7 +1,6 @@
 package org.edu_sharing.service.lifecycle;
 
-import org.alfresco.service.cmr.repository.NodeRef;
-
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,13 +16,13 @@ public class PersonDeleteResult {
     public CollectionCounts collections;
     public int comments,ratings,collectionFeedback,stream;
     public static class Counts {
-        private List<Element> elements;
+        private Collection<Element> elements;
 
-        public List<Element> getElements() {
+        public Collection<Element> getElements() {
             return elements;
         }
 
-        public Counts(List<Element> elements){
+        public Counts(Collection<Element> elements){
             this.elements = elements;
         }
     }

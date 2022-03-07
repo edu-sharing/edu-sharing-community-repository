@@ -12,10 +12,12 @@
         "ORDER_COLLECTIONS_INFO": "Viewers of the collection see the contained subcollections in a certain order.",
         "SORT_SLIDER": "Umsortieren",
         "CUSTOM_ORDER":"change element order",
-        "PERMISSIONS": "Invited:",
+        "PERMISSIONS": "Invited",
         "DETAILS": "Collection details",
         "EDITORIAL_PUBLIC": "Publicly visible",
         "EDITORIAL_PUBLIC_INFO": "The editorial collection is for all users and guests visible",
+        "CREATOR": "Creator",
+        "SHARING_STATE": "Sharing state",
         "STEP": {
             "GENERAL": "Title, Image, Description and Color",
             "METADATA": "Additional information",
@@ -83,7 +85,12 @@
             "INVALID_NAME": "The given name is invalid. Please don't use special characters"
         },
         "NEW": {
-            "AUTHOR_FREETEXT": "Name of author"
+            "AUTHOR_FREETEXT": "Name of author",
+          "IMAGE": {
+            "UPLOAD" : "Upload image",
+            "SEARCH" : "Select image from search",
+            "DELETE" : "Delete image"
+          }
         },
         "FEEDBACK_TITLE": "Give feedback for collection",
         "FEEDBACK_VIEW_TITLE": "Given feedback for collection",
@@ -106,8 +113,6 @@
     "collections_howToAddContent": "Just click on the \"ADD MATERIAL\" button and use the search engine to find contents for your collection.",
 
     "collectionNew_preview": "preview of the collection",
-    "collectionNew_uploadCollectionImage": "Upload a new collection image",
-    "collectionNew_deleteCollectionImage": "Delete the collection image",
     "collectionNew_setColor": "color of the collection:",
     "collectionNew_colorIndex": "color {{ index }}",
     "collectionNew_createCollection": "create",

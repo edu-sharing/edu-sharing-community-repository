@@ -5,7 +5,7 @@ import { MdsWidgetType } from '../../types';
 import { DisplayValues } from '../DisplayValues';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 @Component({
-    selector: 'app-mds-editor-widget-checkboxes',
+    selector: 'es-mds-editor-widget-checkboxes',
     templateUrl: './mds-editor-widget-checkboxes.component.html',
     styleUrls: ['./mds-editor-widget-checkboxes.component.scss'],
 })
@@ -19,9 +19,9 @@ export class MdsEditorWidgetCheckboxesComponent extends MdsEditorWidgetBase impl
     ngOnInit(): void {
         this.mode = this.getMode();
         this.values = DisplayValues.fromMdsValues(this.widget.definition.values);
-        const initialValue = this.widget.getInitialValues().jointValues;
+        const initialValue = this.widget.getInitialValues()?.jointValues;
         this.indeterminateValues = this.values.values.map(
-            (value) => !!this.widget.getInitialValues().individualValues?.includes(value.key),
+            (value) => !!this.widget.getInitialValues()?.individualValues?.includes(value.key),
         );
         this.formArray = new FormArray(
             this.values.values.map((value) => new FormControl(initialValue.includes(value.key))),

@@ -13,7 +13,7 @@ import {TranslateService} from "@ngx-translate/core";
 import {ActionbarComponent} from "../../common/ui/actionbar/actionbar.component";
 
 @Component({
-  selector: 'node-list',
+  selector: 'es-node-list',
   templateUrl: 'node-list.component.html',
   styleUrls: ['node-list.component.scss']
   /*encapsulation:ViewEncapsulation.None*/
@@ -51,7 +51,7 @@ export class NodeListComponent {
 }
   @Output() onSelectionChanged = new EventEmitter();
   public hasSearched = false;
-  public selected:Node[] = [];
+  @Input() selected:Node[] = [];
     @Input() fullscreenLoading=false;
 
     // the current node which has an overlay menu open

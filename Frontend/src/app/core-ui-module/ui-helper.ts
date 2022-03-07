@@ -1,14 +1,13 @@
 import {forkJoin as observableForkJoin, Observable, Observer, of} from 'rxjs';
-import {first, catchError} from 'rxjs/operators';
+import {catchError, first} from 'rxjs/operators';
 import {OPEN_URL_MODE, UIConstants} from '../core-module/ui/ui-constants';
 import {ConfigurationService} from '../core-module/rest/services/configuration.service';
 import {TranslateService} from '@ngx-translate/core';
 import {ActivatedRoute, NavigationExtras, Router} from '@angular/router';
 import {
-    Collection, CollectionReference,
+    CollectionReference,
     Connector,
     Filetype,
-    LoginResult,
     MdsInfo,
     Node,
     NodeLock,
@@ -20,14 +19,12 @@ import {RestConstants} from '../core-module/rest/rest-constants';
 import {RestNodeService} from '../core-module/rest/services/rest-node.service';
 import {Toast} from './toast';
 import {RestHelper} from '../core-module/rest/rest-helper';
-import {TemporaryStorageService} from '../core-module/rest/services/temporary-storage.service';
 import {UIService} from '../core-module/rest/services/ui.service';
 import {
     ComponentFactoryResolver,
     ComponentRef,
     ElementRef,
     EmbeddedViewRef,
-    EventEmitter,
     Injector,
     NgZone,
     Type,
@@ -45,11 +42,12 @@ import {PlatformLocation} from '@angular/common';
 import {MessageType} from '../core-module/ui/message-type';
 import {Helper} from '../core-module/rest/helper';
 import {NodeHelperService} from './node-helper.service';
-import { RestIamService } from '../core-module/rest/services/rest-iam.service';
-import { DialogButton } from '../core-module/ui/dialog-button';
-import {ObservedValueOf} from "rxjs/internal/types";
+import {RestIamService} from '../core-module/rest/services/rest-iam.service';
+import {DialogButton} from '../core-module/ui/dialog-button';
+import {LoginInfo} from 'ngx-edu-sharing-api';
 
 export class UIHelper {
+    static COPY_URL_PARAMS = ['mainnav', 'reurl', 'reurlTypes', 'reurlCreate', 'applyDirectories'];
     public static evaluateMediaQuery(type: string, value: number) {
         if (type == UIConstants.MEDIA_QUERY_MAX_WIDTH)
             return value > window.innerWidth;
@@ -236,6 +234,39 @@ export class UIHelper {
         }
     }
     /**
+     * Navigate to the search in reurl (apply) mode
+     * when done, the app will redirect to the current location
+     */
+    public static openSearchWithReurl(
+        platformLocation: PlatformLocation,
+        router: Router,
+        mode: 'REDIRECT' | 'WINDOW',
+        extras: NavigationExtras = {},
+    ) {
+        if(!extras.queryParams) {
+            extras.queryParams = {};
+        }
+        if(mode === 'REDIRECT') {
+            extras.queryParams.reurl = window.location.href;
+        } else {
+            extras.queryParams.reurl = 'WINDOW';
+        }
+        if(mode === 'REDIRECT') {
+            return router.navigate([
+                    UIConstants.ROUTER_PREFIX +
+                    'search'
+                ], extras
+            );
+        } else {
+            return window.open(platformLocation.getBaseHrefFromDOM() + router.createUrlTree([
+                UIConstants.ROUTER_PREFIX + 'search'
+                ], extras).toString(),
+                '_blank',
+                'toolbar=no,scrollbars=yes,resizable=yes'
+            );
+        }
+    }
+    /**
      * Navigate to the workspace
      * @param nodeService instance of NodeService
      * @param router instance of Router
@@ -245,7 +276,7 @@ export class UIHelper {
     public static goToWorkspace(
         nodeService: RestNodeService,
         router: Router,
-        login: LoginResult,
+        login: LoginInfo,
         node: Node,
         extras: NavigationExtras = {},
     ) {
@@ -277,7 +308,7 @@ export class UIHelper {
     public static goToWorkspaceFolder(
         nodeService: RestNodeService,
         router: Router,
-        login: LoginResult,
+        login: LoginInfo,
         folder: string,
         extras: NavigationExtras = {},
     ) {
@@ -775,7 +806,7 @@ export class UIHelper {
         targetElement: Element,
         bindings: { [key: string]: any } = null,
         { delay = 0, replace = true } = {},
-        injector?: Injector, 
+        injector?: Injector,
     ): ComponentRef<T> {
         if (targetElement == null) {
             return null;
@@ -795,6 +826,9 @@ export class UIHelper {
                     instance[key].subscribe((value: any) => binding(value));
                 } else {
                     instance[key] = binding;
+                    // `ngOnChanges` won't be called on the component like this. Consider doing
+                    // something like this:
+                    // https://scm.edu-sharing.com/edu-sharing/projects/oeh-redaktion/ng-meta-widgets/-/blob/1603fb2dedadd3952401385bcbd91a4bd8407643/src/app/app.module.ts#L66-79
                 }
             }
         }
@@ -819,14 +853,13 @@ export class UIHelper {
      * @param route
      */
     static getCommonParameters(route: ActivatedRoute) {
-        const COPY_PARAMS = ['mainnav', 'reurl', 'applyDirectories'];
         return new Observable<any>((observer: Observer<any>) => {
             route.queryParams
                 .pipe().pipe(
                 first())
                 .subscribe(queryParams => {
                     let result: any = {};
-                    COPY_PARAMS.forEach(params => {
+                    UIHelper.COPY_URL_PARAMS.forEach(params => {
                         if (queryParams[params]) {
                             result[params] = queryParams[params];
                         }
@@ -942,5 +975,16 @@ export class UIHelper {
             RestConstants.BASIC_PERMISSIONS.indexOf(p1) >
             RestConstants.BASIC_PERMISSIONS.indexOf(p2)
         );
+    }
+
+    static isParentElementOfElement(target: HTMLElement, possibleParent: HTMLElement) {
+        let e = target;
+        while(e != null) {
+            if(e === possibleParent) {
+                return true;
+            }
+            e = e.parentElement;
+        }
+        return false;
     }
 }

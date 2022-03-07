@@ -2,7 +2,7 @@ import {Component} from "@angular/core";
 import {Collection, Node, RestCollectionService, RestConnectorService} from "../../../core-module/core.module";
 
 @Component({
-  selector: 'app-mds-test',
+  selector: 'es-mds-test',
   templateUrl: './mds-test.component.html',
 })
 export class MdsTestComponent {

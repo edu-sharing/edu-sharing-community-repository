@@ -1,4 +1,4 @@
-<card
+<es-card
   *ngIf="_connector"
   title="{{'CONNECTOR.'+_connector.id+'.TITLE' | translate }}"
   subtitle="{{'CONNECTOR.'+_connector.id+'.NAME' | translate }}"
@@ -25,4 +25,4 @@
       {{'CONNECTOR.'+_connector.id+'.FILENAME' |translate}}: {{_name}}.{{getType().filetype}}
     </div>
   </div>
-</card>
+</es-card>

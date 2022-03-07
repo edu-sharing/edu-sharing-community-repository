@@ -1,18 +1,21 @@
-import { Component, Input } from '@angular/core';
+import {Component, Input, QueryList, ViewChildren} from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CardComponent } from '../../../../core-ui-module/components/card/card.component';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
-import { EditorMode, MdsView } from '../types';
+import { MdsView } from '../types';
+import {EditorMode} from '../../../../core-ui-module/mds-types';
+import {MdsEditorViewComponent} from '../mds-editor-view/mds-editor-view.component';
 
 @Component({
-    selector: 'app-mds-editor-core',
+    selector: 'es-mds-editor-core',
     templateUrl: './mds-editor-core.component.html',
     styleUrls: ['./mds-editor-core.component.scss'],
 })
 export class MdsEditorCoreComponent {
     /** Reference to the card component it is embedded in (if any). */
     @Input('card') card: CardComponent;
+    @ViewChildren('view') viewRef: QueryList<MdsEditorViewComponent>;
 
     views: MdsView[];
     suggestionsViews: MdsView[];

@@ -5,7 +5,7 @@ import {MdsEditorInstanceService} from '../../mds-editor-instance.service';
 import {RestConstants} from '../../../../../core-module/rest/rest-constants';
 
 @Component({
-    selector: 'app-mds-editor-widget-version',
+    selector: 'es-mds-editor-widget-version',
     templateUrl: './mds-editor-widget-version.component.html',
     styleUrls: ['./mds-editor-widget-version.component.scss'],
 })
@@ -28,7 +28,7 @@ export class MdsEditorWidgetVersionComponent implements OnInit, NativeWidgetComp
         this.mdsEditorValues.nodes$.subscribe((nodes) =>
             this.show = nodes.some((n) =>
                 !n?.properties[RestConstants.CCM_PROP_IO_WWWURL]?.[0]
-            )
+            ) && nodes.every((n) => n.type === RestConstants.CCM_TYPE_IO)
         );
     }
 

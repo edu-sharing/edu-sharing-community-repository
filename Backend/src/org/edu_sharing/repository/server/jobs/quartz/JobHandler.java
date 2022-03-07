@@ -28,11 +28,7 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigValue;
@@ -55,14 +51,25 @@ import org.quartz.SchedulerFactory;
 import org.quartz.Trigger;
 import org.quartz.TriggerListener;
 import org.quartz.TriggerUtils;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import javax.xml.xpath.XPathConstants;
+import org.springframework.context.ApplicationContext;
 
 /**
  * @author rudi start jobs, start scheduling of an job, stop scheduling of a job
  */
 public class JobHandler {
 
+	public static final Object KEY_RESULT_DATA = "JOB_RESULT_DATA";
 	private static final int MAX_JOB_LOG_COUNT = 20; // maximal number of jobs to store for history and gui
 	private static List<JobInfo> jobs = new ArrayList<>();
+
+	ApplicationContext eduApplicationContext =
+			org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
+
+	JobClusterLocker jobClusterLocker = (JobClusterLocker)eduApplicationContext.getBean("jobClusterLocker");
 
 	public boolean cancelJob(String jobName) throws SchedulerException {
 		boolean result=quartzScheduler.interrupt(jobName, null);
@@ -77,7 +84,7 @@ public class JobHandler {
 	}
 	public void finishJob(JobDetail jobDetail, JobInfo.Status status) {
 		for(JobInfo job : jobs){
-			if(job.getJobDetail().equals(jobDetail) && job.getStatus().equals(JobInfo.Status.Running)){
+			if(Objects.equals(job.getJobDetail(),(jobDetail)) && job.getStatus().equals(JobInfo.Status.Running)){
 				job.setStatus(status);
 				job.setFinishTime(System.currentTimeMillis());
 				return;
@@ -231,7 +238,16 @@ public class JobHandler {
 							logger.info("a job of class " + jec.getJobInstance().getClass().getName() + " is running. veto = true:");
 						}
 					}
-					
+
+					//check cluster singeltons
+					if(jobExecutionContext.getJobInstance() instanceof JobClusterLocker.ClusterSingelton){
+						boolean aquiredLock = jobClusterLocker.tryLock(jobExecutionContext.getJobInstance().getClass().getName());
+						if(!aquiredLock){
+							veto = true;
+							jobExecutionContext.getJobDetail().getJobDataMap().put(VETO_BY_KEY, "same job is running on another cluster node");
+						}
+					}
+
 					logger.info("TriggerListener.vetoJobExecution returning:" + veto);
 					return veto;
 					
@@ -267,6 +283,10 @@ public class JobHandler {
 					status=((AbstractJob) job).isInterrupted() ? JobInfo.Status.Aborted : JobInfo.Status.Finished;
 				}
 				finishJob(context.getJobDetail(),status);
+
+				if(job instanceof JobClusterLocker.ClusterSingelton){
+					jobClusterLocker.releaseLock(job.getClass().getName());
+				}
 
 			}
 
@@ -449,9 +469,7 @@ public class JobHandler {
 		trigger.setName(triggerName);
 
 		final String jobListenerName = jobName;
-
-		ImmediateJobListener iJobListener = new ImmediateJobListener(jobListenerName);
-
+		
 		JobDetail jobDetail = new JobDetail(jobName, null, jobClass) {
 			@Override
 			public String[] getJobListenerNames() {
@@ -459,6 +477,8 @@ public class JobHandler {
 			}
 		};
 		jobDetail.setJobDataMap(jdm);
+
+		ImmediateJobListener iJobListener = new ImmediateJobListener(jobListenerName);
 
 		quartzScheduler.addJobListener(iJobListener);
 		quartzScheduler.scheduleJob(jobDetail, trigger);

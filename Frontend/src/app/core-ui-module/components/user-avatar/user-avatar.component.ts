@@ -13,7 +13,7 @@ import {AuthorityNamePipe} from "../../pipes/authority-name.pipe";
 import {isAsciiLetter, isDigit} from 'codelyzer/angular/styles/chars';
 
 @Component({
-    selector: 'user-avatar',
+    selector: 'es-user-avatar',
     templateUrl: 'user-avatar.component.html',
     styleUrls: ['user-avatar.component.scss'],
 })

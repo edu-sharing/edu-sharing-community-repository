@@ -161,7 +161,7 @@ $badgeWidth: 250px;
 }
 :host ::ng-deep {
     .list .node-row{
-        app-node-url, app-node-url > *{
+        es-node-url, es-node-url > *{
             display: block;
             width: 100%;
             height: 100%;
@@ -177,22 +177,22 @@ $badgeWidth: 250px;
                 @include setGlobalKeyboardFocus();
             }
             .cardList, .cardSmallList {
-                app-list-option-item >div:focus,
+                es-list-option-item >div:focus,
                 .row:focus,
-                .row app-node-url > *:focus {
+                .row es-node-url > *:focus {
                     @include setGlobalKeyboardFocus();
                 }
             }
             .tableList {
                 .row:focus,
-                .row app-node-url > *:focus {
+                .row es-node-url > *:focus {
                     @include setGlobalKeyboardFocus('border');
                 }
             }
         }
     }
     .headingGroup .heading,
-    .tableList .node-row app-node-url > *{
+    .tableList .node-row es-node-url > *{
         /* fallback for unset/unknown fields */
         > div {
             width: 120px;
@@ -479,7 +479,7 @@ $badgeWidth: 250px;
     border-right-color: $textOnPrimary;
     border-bottom-color: $textOnPrimary;
 }
-:host ::ng-deep .tableList .row > app-node-url > * {
+:host ::ng-deep .tableList .row > es-node-url > * {
     width: 100%;
     border-bottom: 1px solid $textOnPrimary;
     height: $listItemHeight;
@@ -514,7 +514,7 @@ $badgeWidth: 250px;
         .rowInner {
             max-height: 2.5em;
         }
-        ::ng-deep app-list-base {
+        ::ng-deep es-list-base {
             label {
                 display: flex;
                 font-size: $fontSizeXSmall;
@@ -550,7 +550,7 @@ $badgeWidth: 250px;
                 // keep spacing for more options item
                 padding-right: 50px;
             }
-            app-node-url > * {
+            es-node-url > * {
                 display: flex;
                 align-items: center;
                 width: 100%;
@@ -571,11 +571,11 @@ $badgeWidth: 250px;
 }
 :host ::ng-deep {
     .list .nodeCollection .row {
-        app-node-url > * .column{
+        es-node-url > * .column{
             color: #fff !important;
         }
 
-        &.dark-color app-node-url > * .column{
+        &.dark-color es-node-url > * .column{
             color: #000 !important;
         }
     }
@@ -838,7 +838,7 @@ a.rowInner {
     float: left;
     margin: 6px;
     position: relative;
-    app-list-option-item{
+    es-list-option-item{
         height: 0; // size is done via flex-grow
         flex-grow: 1;
     }
@@ -846,7 +846,7 @@ a.rowInner {
 }
 .tableList{
     // limit line height to 2 lines
-    app-list-base {
+    es-list-base {
         @include limitLineCount(2, 1.25);
     }
     .nodeDeleted{
@@ -939,7 +939,7 @@ a.rowInner {
     float: left;
     margin: 6px !important;
     // safari height fix
-    app-list-option-item{
+    es-list-option-item{
         height: 0;
         flex-grow: 1;
     }
@@ -952,7 +952,7 @@ a.rowInner {
         border-bottom: 5px solid $primary;
         // Compensate border-bottom for focus highlight
         overflow: visible;
-        app-node-url {
+        es-node-url {
             height: calc(100% + 5px);
         }
     }
@@ -1033,7 +1033,7 @@ a.rowInner {
     }
 }
 
-// In the workspace, the user can toggle between list and cards view. When list
+// In the es-workspace, the user can toggle between list and cards view. When list
 // view is selected, the list spans the entire container with no padding.
 // However, cards need some padding, so we add some padding when cards view is
 // selected here.
@@ -1294,7 +1294,7 @@ a.rowInner {
     .cardList > .item-container {
         width: 100%;
         height: 160px;
-        > app-list-option-item{
+        > es-list-option-item{
             height: 120px;
         }
         box-shadow: none;

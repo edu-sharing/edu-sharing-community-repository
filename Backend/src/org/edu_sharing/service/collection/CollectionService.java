@@ -90,7 +90,9 @@ public interface CollectionService {
 
     List<org.edu_sharing.service.model.NodeRef> getReferenceObjects(String nodeId);
 
-    String addFeedback(String id, HashMap<String, String[]> feedbackData) throws Throwable;
+	List<NodeRef> getReferenceObjectsSync(String nodeId);
+
+	String addFeedback(String id, HashMap<String, String[]> feedbackData) throws Throwable;
 
 	List<String> getFeedbacks(String id) throws Throwable;
 
@@ -102,6 +104,7 @@ public interface CollectionService {
 	 * fetch the collections which have this node as a pending proposal
 	 * Will only provide collections with appropriate permissions
 	 * @param nodeId The node id to check for
+	 * @param status The status of the proposals to find
 	 */
-    List<NodeRef> getCollectionProposals(String nodeId);
+	List<NodeRef> getCollectionProposals(String nodeId, CCConstants.PROPOSAL_STATUS status);
 }

@@ -6,13 +6,23 @@ $collectionIconPadding: 25px;
 $collectionIconSize: 25px;
 
 @import '../node-entries-card/node-entries-card.main';
+
+.grid-card .card-meta-row ::ng-deep es-node-url {
+    a {
+        &.cdk-keyboard-focused {
+            // Normal focusColor might have insufficient contrast on color-matching background.
+            outline-color: darken($focusColor, 10%);
+        }
+    }
+}
+
 .grid-card {
     &.grid-card-collection {
         // default fallback color
         background-color: $primaryMediumLight;
     }
     .card-meta {
-        background-color: rgba(255,255,255, 0.8);
+        background-color: rgba(255, 255, 255, 0.8);
         // grid-template-columns: 50%;
         padding-bottom: $entriesCardPaddingVertical;
 

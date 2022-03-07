@@ -6,12 +6,10 @@ import { BridgeService } from '../../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
     FrameEventsService,
-    LoginResult,
     RestConnectorService,
     RestConstants,
     UIConstants,
     UIService,
-    AccessScope,
     RestOrganizationService,
     OrganizationOrganizations,
     RestMediacenterService,
@@ -19,6 +17,7 @@ import {
 import { OPEN_URL_MODE } from '../../core-module/ui/ui-constants';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import {ConfigEntry} from '../../core-ui-module/node-helper.service';
+import { LoginInfo, AuthenticationService } from 'ngx-edu-sharing-api';
 
 type Target = { type: 'path'; path: string } | { type: 'url'; url: string; openInNew: boolean };
 
@@ -56,10 +55,10 @@ export class MainMenuEntriesService {
         hideMainMenu?: string[];
         stream?: { enabled: boolean };
     };
-    private loginInfo: LoginResult;
+    private loginInfo: LoginInfo;
 
     // Conditionally initialized on construction.
-    private safeScope: AccessScope;
+    private hasAccessToSafeScope: boolean;
     private organizations: OrganizationOrganizations;
     private mediaCenters: { administrationAccess: boolean }[];
 
@@ -105,7 +104,7 @@ export class MainMenuEntriesService {
             icon: 'lock',
             target: { type: 'path', path: 'workspace/safe' },
             scope: 'safe',
-            isVisible: () => !this.bridge.isRunningCordova() && this.safeScope.hasAccess,
+            isVisible: () => !this.bridge.isRunningCordova() && this.hasAccessToSafeScope,
         },
         {
             name: 'SIDEBAR.PERMISSIONS',
@@ -129,6 +128,7 @@ export class MainMenuEntriesService {
     ];
 
     constructor(
+        private authentication: AuthenticationService,
         private bridge: BridgeService,
         private configuration: ConfigurationService,
         private frameEvents: FrameEventsService,
@@ -159,10 +159,11 @@ export class MainMenuEntriesService {
                 .isLoggedIn()
                 .toPromise()
                 .then(loginInfo => (this.loginInfo = loginInfo)),
-            this.restConnector
+            this.authentication
                 .hasAccessToScope(RestConstants.SAFE_SCOPE)
+                .pipe(first())
                 .toPromise()
-                .then(safeScope => (this.safeScope = safeScope)),
+                .then(hasAccess => (this.hasAccessToSafeScope = hasAccess)),
         ]);
         // The backend will throw some errors when making unauthorized calls, so we only initialize
         // these variables when we will need them.
@@ -307,7 +308,7 @@ export class MainMenuEntriesService {
                     first())
                     .toPromise();
                 const params: Params = {};
-                for (const key of ['reurl', 'applyDirectories']) {
+                for (const key of UIHelper.COPY_URL_PARAMS) {
                     if (currentParams.hasOwnProperty(key)) {
                         params[key] = currentParams[key];
                     }

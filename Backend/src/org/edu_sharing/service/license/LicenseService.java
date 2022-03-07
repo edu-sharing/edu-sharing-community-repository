@@ -29,6 +29,9 @@ public class LicenseService {
 		if (license.equals(CCConstants.COMMON_LICENSE_CC_BY)) {
 			result = CCConstants.COMMON_LICENSE_CC_BY_LINK;
 		}
+		if (license.equals(CCConstants.COMMON_LICENSE_PDM)) {
+			result = CCConstants.COMMON_LICENSE_CC_PDM_LINK;
+		}
 		if (license.equals(CCConstants.COMMON_LICENSE_CC_ZERO)) {
 			result = CCConstants.COMMON_LICENSE_CC_ZERO_LINK;
 		}

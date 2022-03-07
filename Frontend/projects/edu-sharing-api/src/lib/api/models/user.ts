@@ -8,6 +8,7 @@ import { UserStatus } from './user-status';
 export interface User {
     authorityName: string;
     authorityType?: 'USER' | 'GROUP' | 'OWNER' | 'EVERYONE' | 'GUEST';
+    editable?: boolean;
     homeFolder: NodeRef;
     organizations?: Array<Organization>;
     profile?: UserProfile;

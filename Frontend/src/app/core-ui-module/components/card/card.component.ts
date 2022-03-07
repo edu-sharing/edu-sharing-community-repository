@@ -28,7 +28,7 @@ import {Observable, BehaviorSubject} from 'rxjs';
  * A common edu-sharing modal card
  */
 @Component({
-    selector: 'card',
+    selector: 'es-card',
     templateUrl: 'card.component.html',
     styleUrls: ['card.component.scss'],
     animations: [trigger('cardAnimation', UIAnimation.cardAnimation())],

@@ -40,25 +40,23 @@ export class RegisterV1Service extends BaseService {
          * The key for the user to activate
          */
         key: string;
-    }): Observable<StrictHttpResponse<void>> {
+    }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, RegisterV1Service.ActivatePath, 'post');
         if (params) {
-            rb.path('key', params.key, { style: 'simple', explode: false });
+            rb.path('key', params.key, {});
         }
 
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
@@ -78,9 +76,9 @@ export class RegisterV1Service extends BaseService {
          * The key for the user to activate
          */
         key: string;
-    }): Observable<void> {
+    }): Observable<any> {
         return this.activate$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
@@ -107,7 +105,7 @@ export class RegisterV1Service extends BaseService {
     }): Observable<StrictHttpResponse<RegisterExists>> {
         const rb = new RequestBuilder(this.rootUrl, RegisterV1Service.MailExistsPath, 'get');
         if (params) {
-            rb.path('mail', params.mail, { style: 'simple', explode: false });
+            rb.path('mail', params.mail, {});
         }
 
         return this.http
@@ -166,25 +164,23 @@ export class RegisterV1Service extends BaseService {
          * The mail (authority) of the user to recover
          */
         mail: string;
-    }): Observable<StrictHttpResponse<void>> {
+    }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, RegisterV1Service.RecoverPasswordPath, 'post');
         if (params) {
-            rb.path('mail', params.mail, { style: 'simple', explode: false });
+            rb.path('mail', params.mail, {});
         }
 
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
@@ -204,9 +200,9 @@ export class RegisterV1Service extends BaseService {
          * The mail (authority) of the user to recover
          */
         mail: string;
-    }): Observable<void> {
+    }): Observable<any> {
         return this.recoverPassword$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
@@ -227,7 +223,7 @@ export class RegisterV1Service extends BaseService {
      */
     register$Response(params?: {
         body?: RegisterInformation;
-    }): Observable<StrictHttpResponse<void>> {
+    }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, RegisterV1Service.RegisterPath, 'post');
         if (params) {
             rb.body(params.body, 'application/json');
@@ -236,16 +232,14 @@ export class RegisterV1Service extends BaseService {
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
@@ -260,9 +254,9 @@ export class RegisterV1Service extends BaseService {
      *
      * This method sends `application/json` and handles request body of type `application/json`.
      */
-    register(params?: { body?: RegisterInformation }): Observable<void> {
+    register(params?: { body?: RegisterInformation }): Observable<any> {
         return this.register$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
@@ -286,25 +280,23 @@ export class RegisterV1Service extends BaseService {
          * The mail a registration is pending for and should be resend to
          */
         mail: string;
-    }): Observable<StrictHttpResponse<void>> {
+    }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, RegisterV1Service.ResendMailPath, 'post');
         if (params) {
-            rb.path('mail', params.mail, { style: 'simple', explode: false });
+            rb.path('mail', params.mail, {});
         }
 
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
@@ -324,9 +316,9 @@ export class RegisterV1Service extends BaseService {
          * The mail a registration is pending for and should be resend to
          */
         mail: string;
-    }): Observable<void> {
+    }): Observable<any> {
         return this.resendMail$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
@@ -355,26 +347,24 @@ export class RegisterV1Service extends BaseService {
          * The new password for the user
          */
         password: string;
-    }): Observable<StrictHttpResponse<void>> {
+    }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, RegisterV1Service.ResetPasswordPath, 'post');
         if (params) {
-            rb.path('key', params.key, { style: 'simple', explode: false });
-            rb.path('password', params.password, { style: 'simple', explode: false });
+            rb.path('key', params.key, {});
+            rb.path('password', params.password, {});
         }
 
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: '*/*',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
                 filter((r: any) => r instanceof HttpResponse),
                 map((r: HttpResponse<any>) => {
-                    return (r as HttpResponse<any>).clone({
-                        body: undefined,
-                    }) as StrictHttpResponse<void>;
+                    return r as StrictHttpResponse<any>;
                 }),
             );
     }
@@ -399,9 +389,9 @@ export class RegisterV1Service extends BaseService {
          * The new password for the user
          */
         password: string;
-    }): Observable<void> {
+    }): Observable<any> {
         return this.resetPassword$Response(params).pipe(
-            map((r: StrictHttpResponse<void>) => r.body as void),
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 }

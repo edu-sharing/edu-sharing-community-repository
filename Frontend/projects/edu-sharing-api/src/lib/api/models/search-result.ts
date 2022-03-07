@@ -1,10 +1,10 @@
 /* tslint:disable */
 /* eslint-disable */
-import { Facette } from './facette';
+import { Facet } from './facet';
 import { Node } from './node';
 import { Pagination } from './pagination';
 export interface SearchResult {
-    facettes: Array<Facette>;
+    facets: Array<Facet>;
     nodes: Array<Node>;
     pagination: Pagination;
 }

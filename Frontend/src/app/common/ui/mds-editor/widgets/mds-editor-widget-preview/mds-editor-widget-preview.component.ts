@@ -9,7 +9,7 @@ import {RestNodeService} from '../../../../../core-module/rest/services/rest-nod
 import {Node} from '../../../../../core-module/rest/data-object';
 
 @Component({
-    selector: 'app-mds-editor-widget-preview',
+    selector: 'es-mds-editor-widget-preview',
     templateUrl: './mds-editor-widget-preview.component.html',
     styleUrls: ['./mds-editor-widget-preview.component.scss'],
 })

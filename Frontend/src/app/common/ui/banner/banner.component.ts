@@ -6,7 +6,7 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {ConfigurationHelper, ConfigurationService} from '../../../core-module/core.module';
 
 @Component({
-  selector: 'app-banner',
+  selector: 'es-banner',
   templateUrl: 'banner.component.html',
   styleUrls: ['banner.component.scss'],
 })

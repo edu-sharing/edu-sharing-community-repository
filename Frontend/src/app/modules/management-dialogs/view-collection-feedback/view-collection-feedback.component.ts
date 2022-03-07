@@ -19,7 +19,7 @@ import {RestHelper} from "../../../core-module/core.module";
 import {Helper} from "../../../core-module/rest/helper";
 
 @Component({
-  selector: 'app-view-collection-feedback',
+  selector: 'es-view-collection-feedback',
   templateUrl: 'view-collection-feedback.component.html',
   styleUrls: ['view-collection-feedback.component.scss'],
   animations: [

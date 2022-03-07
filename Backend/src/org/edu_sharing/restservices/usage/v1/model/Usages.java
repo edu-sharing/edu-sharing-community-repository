@@ -13,7 +13,7 @@ import org.edu_sharing.restservices.shared.Node;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 public class Usages {
 
@@ -75,7 +75,7 @@ public class Usages {
 		private Date modified;
 
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("appUser")
 		public String getAppUser() {
 			return appUser;
@@ -86,7 +86,7 @@ public class Usages {
 		}
 
 		
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("appUserMail")
 		public String getAppUserMail() {
 			return appUserMail;
@@ -96,7 +96,7 @@ public class Usages {
 			this.appUserMail = appUserMail;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("courseId")
 		public String getCourseId() {
 			return courseId;
@@ -106,7 +106,7 @@ public class Usages {
 			this.courseId = courseId;
 		}
 
-		@ApiModelProperty(required = false, value = "")
+		@Schema(required = false, description = "")
 		@JsonProperty("distinctPersons")
 		public Integer getDistinctPersons() {
 			return distinctPersons;
@@ -125,7 +125,7 @@ public class Usages {
 			this.fromUsed = fromUsed;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("appId")
 		public String getAppId() {
 			return appId;
@@ -135,7 +135,7 @@ public class Usages {
 			this.appId = appId;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("nodeId")
 		public String getNodeId() {
 			return nodeId;
@@ -162,7 +162,7 @@ public class Usages {
 			this.usageCounter = usageCounter;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("parentNodeId")
 		public String getParentNodeId() {
 			return parentNodeId;
@@ -172,7 +172,7 @@ public class Usages {
 			this.parentNodeId = parentNodeId;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("usageVersion")
 		public String getUsageVersion() {
 			return usageVersion;
@@ -182,7 +182,7 @@ public class Usages {
 			this.usageVersion = usageVersion;
 		}
 
-		@ApiModelProperty(required = false, value = "")
+		@Schema(required = false, description = "")
 		@JsonProperty("usageXmlParams")
 		public Parameters getUsageXmlParams() {
 			return usageXmlParams;
@@ -192,7 +192,7 @@ public class Usages {
 			this.usageXmlParams = usageXmlParams;
 		}
 
-		@ApiModelProperty(required = true, value = "")
+		@Schema(required = true, description = "")
 		@JsonProperty("resourceId")
 		public String getResourceId() {
 			return resourceId;
@@ -202,7 +202,7 @@ public class Usages {
 			this.resourceId = resourceId;
 		}
 	    
-		@ApiModelProperty(required = false, value = "")
+		@Schema(required = false, description = "")
 		@JsonProperty("guid")
 		public String getGuid() {
 			return guid;
@@ -327,6 +327,7 @@ public class Usages {
 
 	public enum CollectionUsageType {
 		ACTIVE,
-		PROPOSAL
+		PROPOSAL_PENDING,
+		PROPOSAL_DECLINED,
 	}
 }

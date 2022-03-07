@@ -10,19 +10,22 @@ import {
     ViewChild,
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { FacetsDict, LabeledValue } from 'edu-sharing-api';
+import { MatChip } from '@angular/material/chips';
+import { FacetsDict, LabeledValue } from 'ngx-edu-sharing-api';
 import { Subject } from 'rxjs';
-import { map, takeUntil, tap } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
+import { LabeledValuesDict } from '../../../../../projects/edu-sharing-api/src/lib/wrappers/mds-label.service';
 import { SearchFieldFacetsComponent } from '../mds-editor/search-field-facets/search-field-facets.component';
 import { Values } from '../mds-editor/types';
 import { SearchFieldService } from './search-field.service';
 
 @Component({
-    selector: 'app-search-field',
+    selector: 'es-search-field',
     templateUrl: './search-field.component.html',
     styleUrls: ['./search-field.component.scss'],
 })
 export class SearchFieldComponent implements OnInit, OnDestroy {
+    filtersCount: number;
     @Input()
     set searchString(s: string) {
         this.searchString_ = s;
@@ -48,6 +51,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
     @ViewChild('input') input: ElementRef;
     @ViewChild(CdkConnectedOverlay) private overlay: CdkConnectedOverlay;
     @ViewChild(SearchFieldFacetsComponent) private searchFieldFacets: SearchFieldFacetsComponent;
+    @ViewChild(MatChip) private firstActiveChip: MatChip;
 
     readonly inputControl = new FormControl('');
     readonly filters$ = this.searchField.filters$;
@@ -83,6 +87,12 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
                 this.searchStringChange.emit(inputString);
             }
         });
+        this.filters$
+            .pipe(
+                takeUntil(this.destroyed$),
+                map((filters) => this.getFiltersCount(filters)),
+            )
+            .subscribe((filtersCount) => (this.filtersCount = filtersCount));
         this.suggestions$
             .pipe(
                 takeUntil(this.destroyed$),
@@ -93,7 +103,9 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
                 // We only fetch new suggestions when the user types into the search field. In case
                 // the user dismissed the suggestions overlay earlier (`showOverlay = false`), this
                 // is the time to show it again.
-                this.showOverlay = true;
+                if (this.hasSuggestions) {
+                    this.showOverlay = true;
+                }
             });
     }
 
@@ -131,7 +143,11 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
     }
 
     focusOverlayIfOpen(event: Event): void {
-        if (this.showOverlay && this.hasSuggestions) {
+        if (this.firstActiveChip) {
+            this.firstActiveChip._elementRef.nativeElement.focus();
+            event.stopPropagation();
+            event.preventDefault();
+        } else if (this.showOverlay && this.hasSuggestions) {
             this.searchFieldFacets.focus();
             event.stopPropagation();
             event.preventDefault();
@@ -174,5 +190,19 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
             suggestions &&
             Object.values(suggestions).some((suggestion) => suggestion.values.length > 0)
         );
+    }
+
+    getFiltersCount(filters: LabeledValuesDict | null): number {
+        if (!filters) {
+            return 0;
+        }
+        const mapped = Object.keys(filters)
+            .filter((f) => this.categories$.value.includes(f))
+            .map((k) => filters[k].length);
+        if (!mapped.length) {
+            return 0;
+        } else {
+            return mapped.reduce((a, b) => a + b);
+        }
     }
 }

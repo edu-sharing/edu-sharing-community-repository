@@ -1,12 +1,12 @@
-<ng-container *ngIf="entriesService.displayType === NodeEntriesDisplayType.Table">
-  <div class="table-top" role="heading" aria-level="2"><ng-container *ngTemplateOutlet="titleRef"></ng-container></div>
-  <app-node-entries-table></app-node-entries-table>
-</ng-container>
-<ng-container *ngIf="entriesService.displayType === NodeEntriesDisplayType.SmallGrid || entriesService.displayType === NodeEntriesDisplayType.Grid">
-  <app-node-entries-card-grid [displayType]="entriesService.displayType">
-    <ng-template #title><ng-container *ngTemplateOutlet="titleRef"></ng-container></ng-template>
-  </app-node-entries-card-grid>
-</ng-container>
-<ng-container *ngIf="entriesService.dataSource.isEmpty() && !entriesService.dataSource.isLoading">
-  <ng-container *ngTemplateOutlet="emptyRef"></ng-container>
+<ng-container *ngIf="entriesService.dataSource">
+  <ng-container *ngIf="entriesService.displayType === NodeEntriesDisplayType.Table">
+    <es-node-entries-table></es-node-entries-table>
+  </ng-container>
+  <ng-container *ngIf="entriesService.displayType === NodeEntriesDisplayType.SmallGrid || entriesService.displayType === NodeEntriesDisplayType.Grid">
+    <es-node-entries-card-grid [displayType]="entriesService.displayType">
+    </es-node-entries-card-grid>
+  </ng-container>
+  <ng-container *ngIf="entriesService.dataSource.isEmpty() && !entriesService.dataSource.isLoading">
+    <ng-container *ngTemplateOutlet="templatesService.empty"></ng-container>
+  </ng-container>
 </ng-container>

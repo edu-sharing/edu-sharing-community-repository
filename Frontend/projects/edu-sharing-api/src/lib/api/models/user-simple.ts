@@ -6,6 +6,7 @@ import { UserStatus } from './user-status';
 export interface UserSimple {
     authorityName: string;
     authorityType?: 'USER' | 'GROUP' | 'OWNER' | 'EVERYONE' | 'GUEST';
+    editable?: boolean;
     organizations?: Array<Organization>;
     profile?: UserProfile;
     properties?: {

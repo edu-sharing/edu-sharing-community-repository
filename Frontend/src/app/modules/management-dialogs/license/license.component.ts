@@ -22,7 +22,7 @@ import {UserPresentableError, Values} from '../../../common/ui/mds-editor/types'
 import {ViewInstanceService} from '../../../common/ui/mds-editor/mds-editor-view/view-instance.service';
 
 @Component({
-    selector: 'workspace-license',
+    selector: 'es-workspace-license',
     templateUrl: 'license.component.html',
     styleUrls: ['license.component.scss'],
     providers: [

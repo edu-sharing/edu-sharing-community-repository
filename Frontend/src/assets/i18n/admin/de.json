@@ -29,7 +29,7 @@
             "EXTENSION_CONFIG_TITLE": "Extension-Konfigurationsdatei (Überschreiben)",
             "EXTENSION_CONFIG_HINT": "Sie können hier Werte der Konfiguration überschreiben. Beachten Sie, dass diese Konfiguration beim Rollout überschrieben wird. Die hier erfolgten Änderungen müssen an das edu-sharing Entwicklerteam gegeben werden",
             "SERVER_CONFIG_TITLE": "Server-Konfigurationsdatei (Überschreiben)",
-            "SERVER_CONFIG_HINT": "Sie können hier Werte der Konfiguration überschreiben. Diese Änderungen gelten für den aktuellen Server und werden bei Updates nicht überschrieben. Sie haben die höchste Priorität",
+            "SERVER_CONFIG_HINT": "Sie können hier Werte der Konfiguration überschreiben. Diese Änderungen gelten für den aktuellen Server und werden bei Updates nicht überschrieben. Sie haben die höchste Priorität. ACHTUNG! Im Cluster-Betrieb gelten diese Parameter nur für den aktuellen Cluster-Server!",
 
             "SIZE": "Editor-Größe",
             "SIZE_MEDIUM": "Normal",
@@ -117,7 +117,8 @@
                 "resolve_website_title": "Wenn true, löst das Repository Titel und Metadaten bei der Erstellung von Links auf",
                 "url_dynamic": "Wenn true, werden alle generierten Links (z.B. zu Previews) immer auf die anfragende Domain des Clients gemappt. Wenn false, wird der Wert immer fest anhand clientprotocol, clientport und domain generiert",
                 "allow_origin": "Kommagetrennte Liste aller Origin-Adressen, für die CORS-Zugriffe erlaubt sind. Ein leerer Wert erlaubt CORS von jeder anfragenden Domain. Beispiel: \"https://example.com\"",
-                "notify_fetch_limit": "Maximale Anzahl an Notify-Objekten, die beim Laden der \"Für mich freigegeben\" / \"Von mir freigegeben\" Ordner abgerufen wird. Empfohlene Werte zwischen 200-1000. 0 deaktiviert das Limit"
+                "notify_fetch_limit": "Maximale Anzahl an Notify-Objekten, die beim Laden der \"Für mich freigegeben\" / \"Von mir freigegeben\" Ordner abgerufen wird. Empfohlene Werte zwischen 200-1000. 0 deaktiviert das Limit",
+                "cookie_attributes": "Flags für das Session-Cookie, typischerweise \"secure\", damit es nur über HTTPS gesendet werden darf. Ebenfalls kann auch SameSite damit kontrolliert werden, z.B. \"SameSite=None\""
             },
             "CCMAIL": {
                 "mail.authtype": "Authentifikationstyp am Mail-Server. Aktuell entweder leer (= ohne Authentifizierung) oder \"tls\"",
@@ -175,15 +176,15 @@
                 },
                 "MAIL_SETUP": {
                     "TITLE": "Mailserver-Konfiguration",
-                    "STATUS_OK": "Der Mailserver {{mail.smtp.server}} wird für das Versenden von E-Mails verwendet",
+                    "STATUS_OK": "Der Mailserver {{host}} wird für das Versenden von E-Mails verwendet",
                     "STATUS_FAIL": "Es wurde noch kein Mailserver registriert",
-                    "SOLUTION": "Wechseln Sie in den Bereich \"Quellen\" und bearbeiten Sie die Datei ccmail.properties.xml. Tragen Sie die korrekten Werte für Ihr Mail-System ein"
+                    "SOLUTION": "Wechseln Sie in den Bereich \"Globale Systemkonfiguration\" und ergänzen Sie in der edu-sharing Konfiguration den Mail-Abschnitt"
                 },
                 "MAIL_REPORT": {
                     "TITLE": "Problem-Melden Funktion",
-                    "STATUS_OK": "Die Funktion ist aktiv, eingehende Anfragen werden an die Adresse {{mail.report.receiver}} versendet.",
+                    "STATUS_OK": "Die Funktion ist aktiv, eingehende Anfragen werden an die Adresse {{receiver}} versendet.",
                     "STATUS_FAIL": "Die Funktion ist aktiv, aber die Konfiguration ist ungültig.",
-                    "SOLUTION": "Wechseln Sie in den Bereich \"Quellen\" und bearbeiten Sie die Datei ccmail.properties.xml. Fügen Sie \"mail.report.receiver\" hinzu und tragen Sie die E-Mail-Adresse für eingehende Anfragen ein"
+                    "SOLUTION": "Wechseln Sie in den Bereich \"Globale Systemkonfiguration\" und ergänzen Sie in der edu-sharing Konfiguration den Empfänger im Mail-Abschnitt"
                 },
                 "CORS": {
                     "TITLE": "CORS-Konfiguration",
@@ -274,7 +275,10 @@
             "UPLOAD_TEMP": "Dateien in temporäres Verzeichnis hochladen",
             "CHOOSE_UPLOAD_TEMP": "Datei wählen",
             "UPLOAD_TEMP_START": "Hochladen",
-            "UPLOAD_TEMP_DONE": "Datei wurde unter {{filename}} auf dem Server abgelegt"
+            "UPLOAD_TEMP_DONE": "Datei wurde unter {{filename}} auf dem Server abgelegt",
+            "AUTHENTICATE": "Sitzung starten",
+            "AUTHENTICATE_AS_USER": "Sitzung als Nutzer starten",
+            "AUTHENTICATE_AS_USER_DETAILS": "Wenn sie fortfahren, wird die bestehende Admin-Sitzung beendet und eine Sitzung als der gewählte Nutzer gestartet. Um die Admin-Rechte wieder zu erlangen, müssen Sie sich erneut anmelden. Fortfahren?"
         },
         "BROWSER": {
             "NODE_BROWSER": "Node-Browser",

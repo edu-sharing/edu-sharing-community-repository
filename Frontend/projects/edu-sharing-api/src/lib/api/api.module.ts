@@ -7,7 +7,6 @@ import { ApiConfiguration, ApiConfigurationParams } from './api-configuration';
 import { AboutService } from './services/about.service';
 import { AdminV1Service } from './services/admin-v-1.service';
 import { ArchiveV1Service } from './services/archive-v-1.service';
-import { AuthenticationV1Service } from './services/authentication-v-1.service';
 import { BulkV1Service } from './services/bulk-v-1.service';
 import { ClientutilsV1Service } from './services/clientutils-v-1.service';
 import { CollectionV1Service } from './services/collection-v-1.service';
@@ -15,6 +14,8 @@ import { CommentV1Service } from './services/comment-v-1.service';
 import { ConfigV1Service } from './services/config-v-1.service';
 import { ConnectorV1Service } from './services/connector-v-1.service';
 import { IamV1Service } from './services/iam-v-1.service';
+import { KnowledgeV1Service } from './services/knowledge-v-1.service';
+import { AuthenticationV1Service } from './services/authentication-v-1.service';
 import { MdsV1Service } from './services/mds-v-1.service';
 import { MediacenterV1Service } from './services/mediacenter-v-1.service';
 import { NetworkV1Service } from './services/network-v-1.service';
@@ -35,62 +36,62 @@ import { UsageV1Service } from './services/usage-v-1.service';
  * Module that provides all services and configuration.
  */
 @NgModule({
-  imports: [],
-  exports: [],
-  declarations: [],
-  providers: [
-    AboutService,
-    AdminV1Service,
-    ArchiveV1Service,
-    AuthenticationV1Service,
-    BulkV1Service,
-    ClientutilsV1Service,
-    CollectionV1Service,
-    CommentV1Service,
-    ConfigV1Service,
-    ConnectorV1Service,
-    IamV1Service,
-    MdsV1Service,
-    MediacenterV1Service,
-    NetworkV1Service,
-    NodeV1Service,
-    OrganizationV1Service,
-    RatingV1Service,
-    RegisterV1Service,
-    RenderingV1Service,
-    SearchV1Service,
-    SharingV1Service,
-    StatisticV1Service,
-    StreamV1Service,
-    ToolV1Service,
-    TrackingV1Service,
-    UsageV1Service,
-    ApiConfiguration
-  ],
+    imports: [],
+    exports: [],
+    declarations: [],
+    providers: [
+        AboutService,
+        AdminV1Service,
+        ArchiveV1Service,
+        BulkV1Service,
+        ClientutilsV1Service,
+        CollectionV1Service,
+        CommentV1Service,
+        ConfigV1Service,
+        ConnectorV1Service,
+        IamV1Service,
+        KnowledgeV1Service,
+        AuthenticationV1Service,
+        MdsV1Service,
+        MediacenterV1Service,
+        NetworkV1Service,
+        NodeV1Service,
+        OrganizationV1Service,
+        RatingV1Service,
+        RegisterV1Service,
+        RenderingV1Service,
+        SearchV1Service,
+        SharingV1Service,
+        StatisticV1Service,
+        StreamV1Service,
+        ToolV1Service,
+        TrackingV1Service,
+        UsageV1Service,
+        ApiConfiguration,
+    ],
 })
 export class ApiModule {
-  static forRoot(params: ApiConfigurationParams): ModuleWithProviders<ApiModule> {
-    return {
-      ngModule: ApiModule,
-      providers: [
-        {
-          provide: ApiConfiguration,
-          useValue: params
-        }
-      ]
+    static forRoot(params: ApiConfigurationParams): ModuleWithProviders<ApiModule> {
+        return {
+            ngModule: ApiModule,
+            providers: [
+                {
+                    provide: ApiConfiguration,
+                    useValue: params,
+                },
+            ],
+        };
     }
-  }
 
-  constructor( 
-    @Optional() @SkipSelf() parentModule: ApiModule,
-    @Optional() http: HttpClient
-  ) {
-    if (parentModule) {
-      throw new Error('ApiModule is already loaded. Import in your base AppModule only.');
+    constructor(@Optional() @SkipSelf() parentModule: ApiModule, @Optional() http: HttpClient) {
+        if (parentModule) {
+            throw new Error('ApiModule is already loaded. Import in your base AppModule only.');
+        }
+        if (!http) {
+            throw new Error(
+                'You need to import the HttpClientModule in your AppModule! \n' +
+                    'See also https://github.com/angular/angular/issues/20575',
+            );
+        }
     }
-    if (!http) {
-      throw new Error('You need to import the HttpClientModule in your AppModule! \n' +
-      'See also https://github.com/angular/angular/issues/20575');
-    }
-  }
 }

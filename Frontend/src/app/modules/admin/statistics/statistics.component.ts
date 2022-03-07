@@ -31,7 +31,7 @@ type GroupTemplate = {
 }
 
 @Component({
-    selector: 'app-admin-statistics',
+    selector: 'es-admin-statistics',
     templateUrl: 'statistics.component.html',
     styleUrls: ['statistics.component.scss'],
     animations: [

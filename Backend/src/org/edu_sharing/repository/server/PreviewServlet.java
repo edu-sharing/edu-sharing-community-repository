@@ -5,6 +5,8 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -33,9 +35,11 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.server.tools.ActionObserver;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -150,7 +154,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 						// if its local stored, load the url directly
 						String thumbnail = (String)props.get(CCConstants.CCM_PROP_IO_THUMBNAILURL);
 						if(thumbnail != null && !thumbnail.trim().equals("")){
-							resp.sendRedirect(thumbnail);
+							handleExternalThumbnail(req, resp, thumbnail);
 							return;
 						}
 						if(nodeType.equals(CCConstants.CCM_TYPE_REMOTEOBJECT) || aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)) {
@@ -160,7 +164,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 						if(props != null){
 							thumbnail = (String)props.get(CCConstants.CCM_PROP_IO_THUMBNAILURL);
 							if(thumbnail != null && !thumbnail.trim().equals("")){
-								resp.sendRedirect(thumbnail);
+								handleExternalThumbnail(req, resp, thumbnail);
 								return;
 							}
 						}
@@ -402,8 +406,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		if (getPrevResult.getType().equals(PreviewDetail.TYPE_EXTERNAL)) {
 			String extThumbUrl = getPrevResult.getUrl();
 			if (extThumbUrl != null && !extThumbUrl.trim().equals("")) {
-				resp.sendRedirect(extThumbUrl);
-				return true;
+				return handleExternalThumbnail(req, resp, extThumbUrl);
 			}
 		}
 
@@ -437,6 +440,27 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		}
 		return false;
 	}
+
+	private boolean handleExternalThumbnail(HttpServletRequest req, HttpServletResponse resp, String url) throws IOException {
+		if ("false".equalsIgnoreCase(req.getParameter("allowRedirect")) &&
+				LightbendConfigLoader.get().getStringList("repository.communication.preview.remoteAllowList").stream().anyMatch((reg) -> {
+					Pattern pattern = Pattern.compile(reg);
+					Matcher matched = pattern.matcher(url);
+					return matched.matches();
+				})) {
+			logger.debug("Follow redirect allowed for " + url);
+			try(InputStream is = new HttpQueryTool().getStream(url)) {
+				resp.setHeader("Content-Type", "image/jpeg");
+				StreamUtils.copy(is, resp.getOutputStream());
+				return true;
+			} catch(Throwable t) {
+				logger.info("Fetching preview via http failed for: " + url, t);
+			}
+		}
+		resp.sendRedirect(url);
+		return true;
+	}
+
 	private DataInputStream postProcessImage(String nodeId,DataInputStream in,HttpServletRequest req){
 		float quality=DEFAULT_QUALITY;
 

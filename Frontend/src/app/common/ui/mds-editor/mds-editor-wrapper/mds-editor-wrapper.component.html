@@ -1,4 +1,4 @@
-<mds
+<es-mds
   *ngIf="editorType === 'legacy'"
   [addWidget]="addWidget"
   [allowReplacing]="allowReplacing"
@@ -18,7 +18,7 @@
   [priority]="priority"
   [repository]="repository"
   [setId]="setId"
-  [suggestions]="facets"
+  [suggestions]="legacySuggestions"
   (extendedChange)="extendedChange.emit($event)"
   (onCancel)="onCancel.emit($event)"
   (onDone)="onDone.emit($event)"
@@ -26,17 +26,17 @@
   (openContributor)="openContributor.emit($event)"
   (openLicense)="openLicense.emit($event)"
   (openTemplate)="openTemplate.emit($event)"
-></mds>
+></es-mds>
 
-<app-mds-editor-card
+<es-mds-editor-card
   *ngIf="editorType === 'angular' && !embedded"
   [title]="(customTitle ? customTitle : 'MDS.TITLE') | translate"
   [priority]="priority"
   (cancel)="onCancel.emit()"
   (save)="onSave()"
 >
-</app-mds-editor-card>
+</es-mds-editor-card>
 
-<app-mds-editor-embedded *ngIf="editorType === 'angular' && embedded"></app-mds-editor-embedded>
-<spinner *ngIf="isLoading && embedded"></spinner>
-<global-progress *ngIf="isLoading && !embedded"></global-progress>
+<es-mds-editor-embedded *ngIf="editorType === 'angular' && embedded"></es-mds-editor-embedded>
+<es-spinner *ngIf="isLoading && embedded"></es-spinner>
+<es-global-progress *ngIf="isLoading && !embedded"></es-global-progress>

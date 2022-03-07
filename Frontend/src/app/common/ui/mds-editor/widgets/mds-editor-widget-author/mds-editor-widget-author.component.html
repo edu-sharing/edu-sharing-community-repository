@@ -1,4 +1,4 @@
-<app-mds-editor-widget-container [label]="'MDS.AUTHOR_LABEL' | translate">
+<es-mds-editor-widget-container [label]="'MDS.AUTHOR_LABEL' | translate">
   <mat-tab-group mat-stretch-tabs *ngIf="author" [(selectedIndex)]="authorTab" class="author-tabs">
     <mat-tab label="{{ 'MDS.AUTHOR_FREETEXT' | translate }}">
       <mat-form-field class="authorFreetext">
@@ -22,7 +22,7 @@
       </div>
       <div class="vcard authorPerson">
         <div class="vcardGroup">
-          <!-- <i icon="person"></i> -->
+          <!-- <i esIcon="person"></i> -->
           <mat-form-field class="mat-form-field-no-padding">
             <mat-label>{{ 'VCARD.Givenname' | translate }}</mat-label>
             <input
@@ -54,10 +54,10 @@
           (click)="openContributorDialog()"
           *ngIf="_nodes && _nodes.length == 1 && !ui.isMobile()"
         >
-          {{ 'MDS.CONTRIBUTOR_LINK' | translate }} <i icon="arrow_forward"></i>
+          {{ 'MDS.CONTRIBUTOR_LINK' | translate }} <i esIcon="arrow_forward"></i>
         </button>
       </div>
     </mat-tab>
   </mat-tab-group>
-  <spinner-small *ngIf="!author"></spinner-small>
-</app-mds-editor-widget-container>
+  <es-spinner-small *ngIf="!author"></es-spinner-small>
+</es-mds-editor-widget-container>

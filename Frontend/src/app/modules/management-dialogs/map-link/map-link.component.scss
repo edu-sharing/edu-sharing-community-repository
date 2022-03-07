@@ -2,7 +2,7 @@
 
 
 .card-content-padding{
-  >info-message{
+  >es-info-message{
     display: flex;
     margin-bottom: 20px;
   }
@@ -20,7 +20,7 @@
     width: calc(100% + #{$cardPadding*2});
     .breadcrumb-group{
       display: flex;
-      >breadcrumbs {
+      >es-breadcrumbs {
         flex-grow: 1;
       }
     }

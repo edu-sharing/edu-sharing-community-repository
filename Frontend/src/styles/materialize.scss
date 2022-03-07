@@ -7337,7 +7337,7 @@ input[type=range]:focus::-ms-fill-upper {
 
 /**
  * Patch the gap that appear between the two adjacent div.circle-clipper while the
- * spinner is rotating (appears on Chrome 38, Safari 7.1, and IE 11).
+ * es-spinner is rotating (appears on Chrome 38, Safari 7.1, and IE 11).
  */
 .gap-patch {
   position: absolute;
@@ -7938,7 +7938,7 @@ input[type=range]:focus::-ms-fill-upper {
 }
 
 /**
- * The calendar table of dates
+ * The es-calendar table of dates
  */
 .picker__table {
   text-align: center;

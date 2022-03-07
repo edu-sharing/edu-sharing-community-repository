@@ -6,7 +6,7 @@ import {
 import {ConfigEntry} from '../../../core-ui-module/node-helper.service';
 
 @Component({
-    selector: 'app-main-menu-bottom',
+    selector: 'es-main-menu-bottom',
     templateUrl: './main-menu-bottom.component.html',
     styleUrls: ['./main-menu-bottom.component.scss'],
 })

@@ -31,7 +31,7 @@ class SimpleEditGroupConfig {
 }
 
 @Component({
-  selector: 'app-simple-edit-invite',
+  selector: 'es-simple-edit-invite',
   templateUrl: 'simple-edit-invite.component.html',
   styleUrls: ['simple-edit-invite.component.scss'],
   animations: [

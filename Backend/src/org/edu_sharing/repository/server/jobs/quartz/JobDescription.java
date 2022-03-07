@@ -6,6 +6,7 @@ public class JobDescription {
     String name;
     String description;
     List<JobFieldDescription> params;
+    private org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription.JobTag[] tags;
 
     public String getName() {
         return name;
@@ -31,6 +32,14 @@ public class JobDescription {
         return description;
     }
 
+    public void setTags(org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription.JobTag[] tags) {
+        this.tags = tags;
+    }
+
+    public org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription.JobTag[] getTags() {
+        return tags;
+    }
+
     public static class JobFieldDescription{
         String name;
         Class<?> type;
@@ -38,6 +47,7 @@ public class JobDescription {
         boolean file;
         List<JobFieldDescription> values;
         String sampleValue;
+        private boolean isArray;
 
         public String getName() {
             return name;
@@ -85,6 +95,14 @@ public class JobDescription {
 
         public String getSampleValue() {
             return sampleValue;
+        }
+
+        public void setIsArray(boolean array) {
+            this.isArray = array;
+        }
+
+        public boolean isArray() {
+            return isArray;
         }
     }
 }

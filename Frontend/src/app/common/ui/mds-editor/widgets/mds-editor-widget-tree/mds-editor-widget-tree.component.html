@@ -1,4 +1,4 @@
-<app-mds-editor-widget-container
+<es-mds-editor-widget-container
   #container
   [widget]="widget"
   [label]="false"
@@ -6,18 +6,20 @@
   [control]="chipsControl"
   cdkOverlayOrigin
   #trigger="cdkOverlayOrigin"
+  esBorderBoxObserver
+  #triggerBorderBox="borderBoxObserver"
 >
   <mat-chip-list
     #chipList
     [formControl]="chipsControl"
-    [attr.aria-labelledby]="container.labelId"
+    [attr.aria-labelledby]="chipsControl?.value.length > 0 ? container.labelId : null"
     (click)="$event.stopPropagation(); $event.preventDefault()"
   >
     <mat-chip
       *ngFor="let value of chipsControl?.value"
       [selectable]="false"
       [removable]="true"
-      [matTooltip]="value.hint"
+      [matTooltip]="value.label + ' (' + ('MDS.DELETE_KEY_NOTICE' | translate) + ')'"
       [class.indeterminate]="(this.indeterminateValues$ | async)?.includes(value.key)"
       (click)="revealInTree(value)"
       (keydown.enter)="revealInTree(value)"
@@ -48,14 +50,14 @@
       </button>
     </div>
   </mat-chip-list>
-</app-mds-editor-widget-container>
+</es-mds-editor-widget-container>
 
 <ng-template
   cdkConnectedOverlay
   [cdkConnectedOverlayOrigin]="trigger"
   [cdkConnectedOverlayPositions]="overlayPositions"
   [cdkConnectedOverlayFlexibleDimensions]="true"
-  [cdkConnectedOverlayWidth]="trigger.elementRef.nativeElement.getBoundingClientRect().width"
+  [cdkConnectedOverlayWidth]="triggerBorderBox.width$ | async"
   [cdkConnectedOverlayOpen]="overlayIsVisible"
   (overlayKeydown)="onOverlayKeydown($event)"
 >
@@ -64,7 +66,7 @@
        role="dialog"
        [attr.aria-labelledby]="container.labelId"
   >
-    <app-mds-editor-widget-tree-core
+    <es-mds-editor-widget-tree-core
       cdkTrapFocus
       [cdkTrapFocusAutoCapture]="true"
       #treeRef
@@ -76,7 +78,7 @@
       (close)="closeOverlay()"
       (valuesChange)="onValuesChange($event)"
       (indeterminateValuesChange)="indeterminateValues$.next($event)"
-    ></app-mds-editor-widget-tree-core>
+    ></es-mds-editor-widget-tree-core>
   </div>
 </ng-template>
 

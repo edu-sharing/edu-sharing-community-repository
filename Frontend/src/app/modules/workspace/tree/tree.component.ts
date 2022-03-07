@@ -13,10 +13,10 @@ import {WorkspaceMainComponent} from '../workspace.component';
 import {
     DropSource,
     NodeRoot
-} from '../../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
+} from '../../../core-ui-module/components/node-entries-wrapper/entries-model';
 
 @Component({
-    selector: 'workspace-tree',
+    selector: 'es-workspace-tree',
     templateUrl: 'tree.component.html',
     styleUrls: ['tree.component.scss'],
 })

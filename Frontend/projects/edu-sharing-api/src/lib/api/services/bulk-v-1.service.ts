@@ -27,7 +27,7 @@ export class BulkV1Service extends BaseService {
     /**
      * gets a given node.
      *
-     * Get a given node based on the posted, multiple criterias. Make sure that they'll provide an unique result
+     * Get a given node based on the posted, multiple criteria. Make sure that they'll provide an unique result
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
      * To access only the response body, use `find()` instead.
@@ -65,7 +65,7 @@ export class BulkV1Service extends BaseService {
     /**
      * gets a given node.
      *
-     * Get a given node based on the posted, multiple criterias. Make sure that they'll provide an unique result
+     * Get a given node based on the posted, multiple criteria. Make sure that they'll provide an unique result
      *
      * This method provides access to only to the response body.
      * To access the full response (for headers, for example), `find$Response()` instead.
@@ -140,12 +140,12 @@ export class BulkV1Service extends BaseService {
     }): Observable<StrictHttpResponse<NodeEntry>> {
         const rb = new RequestBuilder(this.rootUrl, BulkV1Service.SyncPath, 'put');
         if (params) {
-            rb.path('group', params.group, { style: 'simple', explode: false });
-            rb.query('match', params.match, { style: 'form', explode: true });
-            rb.query('groupBy', params.groupBy, { style: 'form', explode: true });
-            rb.query('type', params.type, { style: 'form', explode: true });
-            rb.query('aspects', params.aspects, { style: 'form', explode: true });
-            rb.query('resetVersion', params.resetVersion, { style: 'form', explode: true });
+            rb.path('group', params.group, {});
+            rb.query('match', params.match, {});
+            rb.query('groupBy', params.groupBy, {});
+            rb.query('type', params.type, {});
+            rb.query('aspects', params.aspects, {});
+            rb.query('resetVersion', params.resetVersion, {});
             rb.body(params.body, 'application/json');
         }
 

@@ -33,7 +33,7 @@ interface ChildobjectEdit {
     properties: Values;
 }
 @Component({
-    selector: 'app-mds-editor-widget-childobjects',
+    selector: 'es-mds-editor-widget-childobjects',
     templateUrl: './mds-editor-widget-childobjects.component.html',
     styleUrls: ['./mds-editor-widget-childobjects.component.scss'],
 })
@@ -48,6 +48,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
     _edit: ChildobjectEdit;
     _editLicense: ChildobjectEdit;
     childrenDelete: Node[] = [];
+    isSupported: boolean;
     constructor(
         private mdsEditorValues: MdsEditorInstanceService,
         private nodeApi: RestNodeService,
@@ -59,7 +60,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
 
     ngOnInit(): void {
         this.mdsEditorValues.nodes$.pipe(filter((n) => n != null)).subscribe(async (nodes) => {
-            if (nodes?.length) {
+            if (nodes?.length === 1) {
                 this.children = (await this.nodeApi.getNodeChildobjects(nodes[0].ref.id).toPromise()).nodes.map((n) => {
                     return {
                         icon: n.iconURL,
@@ -68,6 +69,9 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
                         properties: n.properties,
                     }
                 });
+                this.isSupported = nodes[0].type === RestConstants.CCM_TYPE_IO;
+            } else {
+                this.isSupported = false;
             }
         });
     }

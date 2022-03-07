@@ -30,7 +30,7 @@ $itemSelectedBackground: $primaryVeryLight !default;
 $itemSelectedTextColor: $primaryMediumDark !default;
 $buttonHoverBackground: rgba(red($primary), green($primary), blue($primary), 0.08) !default;
 $workspaceNewBackground: $itemSelectedBackground !default;
-// the white bar height in search and workspace
+// the white bar height in search and es-workspace
 $secondaryBarHeight: 65px !default;
 $listItemSelectedBackground: #f1f6fa !default;
 $workspaceSelectedBackgroundEffect: linear-gradient(
@@ -73,13 +73,15 @@ $cardSeperatorLineColor: #ccc !default;
 $genericSeperatorLineColor: #ececec !default;
 $inputBorderColor: #9e9e9e !default;
 $commentsActionsSeperatorLineColor: $backgroundColor !default;
-$noResultsColor: #999 !default;
+$noResultsColor: rgba(black, 0.54) !default;
 $darkenColor: rgba(0, 0, 0, 0.75) !default;
 $darkenLightColor: rgba(0, 0, 0, 0.25) !default;
 $colorStatusPositive: #40bf8e !default;
 $colorStatusWarning: $warningMedium !default;
+$colorStatusRecommended: #acd331 !default;
 $colorStatusNeutral: #777 !default;
 $colorStatusNegative: $warning !default;
+$colorStarActive: #ba7c00 !default;
 $focusColor: darken($primaryMediumLight, 10%) !default;
 $placeholderColor: #767676 !default;
 $focusWidth: 2px !default;
@@ -110,7 +112,7 @@ $mobileTabNavHeight: 62px !default;
 $primaryFontFamily: 'open_sansregular' !default;
 
 $default-chip-colors: (
-    'cclom_general_keyword': rgb(214, 214, 214),
+    'cclom_general_keyword': rgb(166, 214, 208),
     'ccm_educationalcontext': rgb(214, 166, 166),
     'ccm_educationallearningresourcetype': rgb(214, 193, 166),
     'ccm_objecttype': rgb(166, 192, 214),

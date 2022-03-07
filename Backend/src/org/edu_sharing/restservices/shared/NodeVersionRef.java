@@ -1,13 +1,13 @@
 package org.edu_sharing.restservices.shared;
 
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.Schema;;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 
-@ApiModel(description = "")
+@Schema(description = "")
 public class NodeVersionRef  {
   
   private NodeRef node = null;
@@ -17,7 +17,7 @@ public class NodeVersionRef  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("node")
   public NodeRef getNode() {
     return node;
@@ -28,7 +28,7 @@ public class NodeVersionRef  {
 
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("major")
   public int getMajor() {
     return major;
@@ -40,7 +40,7 @@ public class NodeVersionRef  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   @JsonProperty("minor")
   public int getMinor() {
     return minor;

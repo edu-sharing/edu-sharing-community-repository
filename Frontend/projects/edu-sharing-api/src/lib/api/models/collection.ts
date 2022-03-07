@@ -16,6 +16,7 @@ export interface Collection {
      * false
      */
     level0: boolean;
+    orderAscending?: boolean;
     orderMode?: string;
     pinned?: boolean;
     scope?: string;

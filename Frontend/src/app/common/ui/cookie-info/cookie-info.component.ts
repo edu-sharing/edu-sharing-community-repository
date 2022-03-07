@@ -5,7 +5,7 @@ import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { CordovaService } from '../../services/cordova.service';
 
 @Component({
-    selector: 'cookie-info',
+    selector: 'es-cookie-info',
     templateUrl: 'cookie-info.component.html',
     styleUrls: ['cookie-info.component.scss'],
     animations: [

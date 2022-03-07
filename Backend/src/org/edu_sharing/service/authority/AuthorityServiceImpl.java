@@ -117,9 +117,13 @@ public class AuthorityServiceImpl implements AuthorityService {
 	@Override
 	public synchronized boolean hasModifyAccessToGroup(String groupName){
     	Set<String> memberships=serviceRegistry.getAuthorityService().getAuthorities();
-    	if(memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS))
+    	if(AuthorityServiceHelper.isAdmin()) {
 			return true;
-    	// Detect the group prefix and decide
+		}
+		if(!LightbendConfigLoader.get().getBoolean("repository.organizations.admins.canManage")) {
+			return false;
+		}
+				// Detect the group prefix and decide
     	String[] split=groupName.split("_");
     	if(split.length<2)
     		return false;
@@ -184,7 +188,12 @@ public class AuthorityServiceImpl implements AuthorityService {
 	}
 	@Override
 	public boolean hasAdminAccessToGroup(String groupName){
-		return hasAdminAccessToGroup(groupName,org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP);
+		if(AuthenticationUtil.isRunAsUserTheSystemUser() || AuthorityServiceHelper.isAdmin()){
+			return true;
+		}
+		return
+				LightbendConfigLoader.get().getBoolean("repository.organizations.admins.canManage") &&
+				hasAdminAccessToGroup(groupName,org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP);
 	}
 	@Override
 	public boolean hasAdminAccessToMediacenter(String groupName){
@@ -197,8 +206,12 @@ public class AuthorityServiceImpl implements AuthorityService {
 	public synchronized boolean hasAdminAccessToOrganization(String orgName){
 		try {
 	    	Set<String> memberships=serviceRegistry.getAuthorityService().getAuthorities();
-			if(memberships.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS))
+			if(AuthorityServiceHelper.isAdmin()) {
 				return true;
+			}
+			if(!LightbendConfigLoader.get().getBoolean("repository.organizations.admins.canManage")) {
+				return false;
+			}
 
 
 			String group=PermissionService.GROUP_PREFIX+AuthorityService.getGroupName(org.edu_sharing.alfresco.service.AuthorityService.ADMINISTRATORS_GROUP,orgName);
@@ -301,7 +314,11 @@ public EduGroup getEduGroup(String authority){
 	}
 	@Override
 	public Set<String> getMemberships(String username) {
-		return serviceRegistry.getAuthorityService().getAuthoritiesForUser(username);
+		if(AuthenticationUtil.getFullyAuthenticatedUser() != null && AuthenticationUtil.getFullyAuthenticatedUser().equals(username)){
+			return serviceRegistry.getAuthorityService().getAuthorities();
+		}else {
+			return serviceRegistry.getAuthorityService().getAuthoritiesForUser(username);
+		}
 	}
 	@Override
 	public String createGroup(String groupName, String displayName,String parentGroup) throws Exception {
@@ -497,6 +514,14 @@ public EduGroup getEduGroup(String authority){
 				String personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
 				//if configured initialize with active status
 				if (personActiveStatus != null) {
+					userInfo.put(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS, personActiveStatus);
+				}
+			}
+
+			if(!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")) {
+				String personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
+				//if configured initialize with active status
+				if (personActiveStatus != null && !personActiveStatus.trim().isEmpty()) {
 					userInfo.put(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS, personActiveStatus);
 				}
 			}
