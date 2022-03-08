@@ -14,6 +14,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.repo.tenant.TenantService;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
@@ -37,6 +38,7 @@ import org.edu_sharing.repository.server.PropertyRequiredException;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
+import org.edu_sharing.repository.server.tools.KeyTool;
 import org.edu_sharing.repository.server.tools.cache.UserCache;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -685,6 +687,25 @@ public EduGroup getEduGroup(String authority){
 		}
 
 		return result;
+	}
+
+	/**
+	 * authority needed for appAuth authentication and read only tasks
+	 */
+	public static final String PROXY_USER = "edu_proxy";
+
+	public void createProxyUser(){
+		PersonService personService = serviceRegistry.getPersonService();
+
+		if(personService.personExists(PROXY_USER)){
+			return;
+		}
+
+		HashMap<QName, Serializable> properties = new HashMap<QName, Serializable>();
+		properties.put(ContentModel.PROP_USERNAME, PROXY_USER);
+		personService.createPerson(properties);
+		serviceRegistry.getAuthenticationService()
+				.createAuthentication(PROXY_USER,new KeyTool().getRandomPassword().toCharArray());
 	}
 
 
