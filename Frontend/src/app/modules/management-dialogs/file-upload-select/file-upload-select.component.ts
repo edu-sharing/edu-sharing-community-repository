@@ -1,5 +1,10 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {ConfigurationService, DialogButton, ParentList} from '../../../core-module/core.module';
+import {
+    ConfigurationService,
+    DialogButton,
+    ParentList,
+    SessionStorageService
+} from '../../../core-module/core.module';
 import {IamUser, Node} from '../../../core-module/core.module';
 import {RestNodeService} from '../../../core-module/core.module';
 import {trigger} from '@angular/animations';
@@ -21,8 +26,10 @@ import * as rxjs from 'rxjs';
   ]
 })
 export class WorkspaceFileUploadSelectComponent  {
-  public disabled= true;
-  public chooseParent= false;
+  public disabled = true;
+  public chooseParent = false;
+  public showSaveParent = false;
+  public saveParent = false;
   @ViewChild('fileSelect') file: ElementRef;
   @ViewChild('link') linkRef: ElementRef;
   /**
@@ -82,8 +89,8 @@ export class WorkspaceFileUploadSelectComponent  {
   public onDrop(fileList: any){
       this.onFileSelected.emit(fileList);
   }
-  public filesSelected(event: any): void {
-    this.onFileSelected.emit(event.target.files);
+  public async filesSelected(event: any) {
+      this.onFileSelected.emit(event.target.files);
   }
   public setLink(){
     if (this.ltiActivated && (!this.ltiConsumerKey || !this.ltiSharedSecret)){
@@ -132,6 +139,7 @@ export class WorkspaceFileUploadSelectComponent  {
     */
   }
   public parentChoosed(event: Node[]) {
+    this.showSaveParent = true;
     this._parent = event[0];
     this.parentChange.emit(this._parent);
     this.chooseParent = false;
@@ -140,6 +148,7 @@ export class WorkspaceFileUploadSelectComponent  {
     private nodeService: RestNodeService,
     private iamService: RestIamService,
     private searchService: RestSearchService,
+    private storageService: SessionStorageService,
     public configService: ConfigurationService,
     private toast: Toast,
   ){
@@ -210,5 +219,15 @@ export class WorkspaceFileUploadSelectComponent  {
                     homeIcon: null,
                 };
         }
+    }
+
+    async setSaveParent(status: boolean) {
+      if(status) {
+          await this.storageService.set('defaultInboxFolder', this._parent.ref.id);
+          this.toast.toast('TOAST.STORAGE_LOCATION_SAVED', {name: this._parent.name});
+      } else {
+          await this.storageService.delete('defaultInboxFolder');
+          this.toast.toast('TOAST.STORAGE_LOCATION_RESET');
+      }
     }
 }

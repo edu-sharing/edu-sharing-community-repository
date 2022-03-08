@@ -126,6 +126,10 @@ mat-form-field{
       text-align: right;
     }
   }
+    > mat-checkbox {
+        display: flex;
+        margin-top: 20px;
+    }
 }
 :host ::ng-deep {
   .location .breadcrumb{
