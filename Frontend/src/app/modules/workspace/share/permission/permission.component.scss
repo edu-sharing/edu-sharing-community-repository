@@ -56,7 +56,7 @@
     flex-grow: 1;
     padding:0 15px;
     &:last-child{
-      padding-right: 40px;
+      padding-right: 60px;
     }
     hr{
       border: none;
@@ -74,7 +74,7 @@
 .group,.container{
   width:100%;
 }
-.readOnly{
+.readOnly button {
   color: $textLight;
 }
 .permission{
@@ -83,13 +83,6 @@
     display: flex;
     justify-content: flex-end;
     padding:0 5px;
-    >div{
-      display:flex;
-      align-items: center;
-      span{
-        padding-left:5px;
-      }
-    }
   }
 }
 .icon{
@@ -103,12 +96,8 @@
 }
 .select{
   width:25px;
-  display: inline-block;
+  display: inline-flex;
   padding:0 2px;
-  i{
-    position: relative;
-    top:3px;
-  }
 }
 .icon,.remove,.inherit{
   min-width: 24px;
