@@ -27,7 +27,7 @@ public class NodeCollectorLucene {
     private final String lucene;
     private Logger logger = Logger.getLogger(NodeCollectorLucene.class);
 
-    int PAGE_SIZE = 100;
+    int PAGE_SIZE = 500;
 
     public NodeCollectorLucene(String lucene, StoreRef storeRef){
         this.lucene = lucene;
