@@ -1181,7 +1181,6 @@ export class OptionsHelperService implements OnDestroy {
         // open in new tab
         options.push(openInNewTabNode);
 
-
         return options;
     }
 
