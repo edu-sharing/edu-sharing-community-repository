@@ -4,6 +4,7 @@
   background-color: $cardLightBackground;
   padding:20px $cardPadding;
   margin-left: $cardPadding*-1;
+  margin-bottom: 1.5em;
   width: calc(100% + #{$cardPadding*2});
   .group {
     display: flex;
