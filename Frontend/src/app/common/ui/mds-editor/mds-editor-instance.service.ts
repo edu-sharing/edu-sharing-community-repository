@@ -527,7 +527,7 @@ export class MdsEditorInstanceService implements OnDestroy {
          * this method will also attach the values a and b to the list
          * @private
          */
-        private mapParentValues(values: string[]) {
+        public mapParentValues(values: string[]) {
             if (!this.definition.values) {
                 return values;
             }

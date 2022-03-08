@@ -15,6 +15,10 @@ import {FormControl, FormGroup} from '@angular/forms';
 import {TranslateService} from '@ngx-translate/core';
 import {Toast} from '../../../../../core-ui-module/toast';
 import {DateHelper} from '../../../../../core-ui-module/DateHelper';
+import {
+    WorkspaceContributorComponent
+} from '../../../../../modules/management-dialogs/contributor/contributor.component';
+import {MatTabGroup} from '@angular/material/tabs';
 
 export interface AuthorData {
     freetext: string;
@@ -31,11 +35,11 @@ export class MdsEditorWidgetVCardComponent extends MdsEditorWidgetBase implement
         requiresNode: true,
         supportsBulk: false,
     };
-    @ViewChild('inputElement') inputElement: ElementRef;
-    @ViewChild('textAreaElement') textAreaElement: ElementRef;
+    @ViewChild(MatTabGroup) tabGroup: MatTabGroup;
     readonly valueType: ValueType = ValueType.String;
 
     formControl: FormGroup;
+    editType: number;
 
     constructor(
         mdsEditorInstance: MdsEditorInstanceService,
@@ -47,32 +51,34 @@ export class MdsEditorWidgetVCardComponent extends MdsEditorWidgetBase implement
 
     ngOnInit(): void {
         let initialValue = this.widget.getInitialValues().jointValues;
-        if(!initialValue) {
+        if (!initialValue) {
             initialValue = [''];
         }
         const vcard = new VCard(initialValue[0]);
+        this.editType = vcard.getType();
         this.formControl = new FormGroup({
             givenname: new FormControl(vcard.givenname),
             surname: new FormControl(vcard.surname),
+            org: new FormControl(vcard.org),
         }, this.getStandardValidators());
         this.formControl.valueChanges.pipe(
             filter((value) => value !== null))
             .subscribe((value) => {
                 vcard.givenname = value.givenname;
                 vcard.surname = value.surname;
+                vcard.org = value.org;
                 let result = initialValue.slice();
-                if(vcard.isValid()) {
+                if (vcard.isValid()) {
                     result[0] = vcard.toVCardString();
                 } else {
                     result = initialValue.slice(1);
                 }
                 this.setValue(result);
             });
+        setTimeout(() => this.tabGroup.realignInkBar());
     }
 
     focus(): void {
-        this.inputElement?.nativeElement?.focus();
-        this.textAreaElement?.nativeElement?.focus();
     }
 
     blur(): void {
