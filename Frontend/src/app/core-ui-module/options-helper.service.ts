@@ -56,6 +56,7 @@ import {
     NodeEntriesDisplayType
 } from './components/node-entries-wrapper/entries-model';
 import {MainNavService} from '../common/services/main-nav.service';
+import {OPEN_URL_MODE} from "../core-module/ui/ui-constants";
 
 
 export class OptionsHelperConfig {
@@ -1128,6 +1129,17 @@ export class OptionsHelperService implements OnDestroy {
         metadataSidebar.group = DefaultGroups.Toggles;
         metadataSidebar.isToggle = true;
 
+        // add new option to open the Node in new tab
+        const openInNewTabNode = new OptionItem('OPTIONS.OPENINNEWTAB', 'open_in_new', (node) => {
+            node = this.getObjects(node)[0];
+            const url = this.nodeHelper.getNodeUrl(node);
+            UIHelper.openUrl(url, this.bridge, OPEN_URL_MODE.Blank)
+        });
+        openInNewTabNode.constrains = [Constrain.Files, Constrain.NoBulk];
+        openInNewTabNode.permissions = [RestConstants.ACCESS_CHANGE_PERMISSIONS];
+        openInNewTabNode.group = DefaultGroups.View;
+        openInNewTabNode.priority = 0;
+
         options.push(applyNode);
         options.push(debugNode);
         options.push(acceptProposal);
@@ -1166,6 +1178,9 @@ export class OptionsHelperService implements OnDestroy {
         options.push(reportNode);
         options.push(toggleViewType);
         options.push(metadataSidebar);
+        // open in new tab
+        options.push(openInNewTabNode);
+
 
         return options;
     }
