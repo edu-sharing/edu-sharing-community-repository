@@ -528,7 +528,7 @@ export class MdsEditorInstanceService implements OnDestroy {
          * @private
          */
         public mapParentValues(values: string[]) {
-            if (!this.definition.values) {
+            if (!this.definition.values || !values) {
                 return values;
             }
             const result = new Set<string>();
