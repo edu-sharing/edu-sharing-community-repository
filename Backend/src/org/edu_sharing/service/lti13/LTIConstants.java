@@ -66,6 +66,8 @@ public class LTIConstants {
     public static final String DEEP_LINK_TYPE = "type";
     public static final String DEEP_LINK_URL = "url";
 
+    public static final String DEEP_LINK_CONTEXT = "https://purl.imsglobal.org/spec/lti/claim/context";
+
 
 
     /**

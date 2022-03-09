@@ -22,6 +22,11 @@ public class LTISessionObject implements Serializable {
 
     String deploymentId;
 
+    /**
+     * i.e. lms courseId
+     */
+    String contextId;
+
     public void setDeepLinkingSettings(Map deepLinkingSettings) {
         this.deepLinkingSettings = deepLinkingSettings;
     }
@@ -66,5 +71,13 @@ public class LTISessionObject implements Serializable {
 
     public void setDeploymentId(String deploymentId) {
         this.deploymentId = deploymentId;
+    }
+
+    public void setContextId(String courseId) {
+        this.contextId = courseId;
+    }
+
+    public String getContextId() {
+        return contextId;
     }
 }

@@ -14,8 +14,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -30,12 +32,17 @@ import org.edu_sharing.restservices.lti.v13.model.RegistrationUrl;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.NodeLTIDeepLink;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.authority.AuthorityServiceImpl;
 import org.edu_sharing.service.lti13.*;
 import org.edu_sharing.service.lti13.model.LTISessionObject;
 import org.edu_sharing.service.lti13.registration.DynamicRegistrationToken;
 import org.edu_sharing.service.lti13.registration.DynamicRegistrationTokens;
 import org.edu_sharing.service.lti13.registration.RegistrationService;
 import org.edu_sharing.service.lti13.uoc.Config;
+import org.edu_sharing.service.usage.Usage;
+import org.edu_sharing.service.usage.Usage2Service;
+import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.surf.util.URLEncoder;
 import org.springframework.util.StringUtils;
 
@@ -57,6 +64,9 @@ import java.util.*;
 public class LTIApi {
 
     Logger logger = Logger.getLogger(LTIApi.class);
+    Usage2Service usageService = new Usage2Service();
+    ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+    AuthenticationComponent authenticationComponent = (AuthenticationComponent)applicationContext.getBean("authenticationComponent");
 
     @POST
     @Path("/oidc/login_initiations")
@@ -245,28 +255,6 @@ public class LTIApi {
                 //Now we validate the JWT token
                 if (jws != null) {
 
-                    /**
-                     * edu-sharing authentication
-                     */
-                    String user = jws.getBody().getSubject();
-                    Map<String,String> ext = ( Map<String,String>)jws.getBody().get("https://purl.imsglobal.org/spec/lti/claim/ext",Map.class);
-                    if(ext != null){
-                        if(ext.containsKey("user_username")){
-                            String tmpUser = ext.get("user_username");
-                            if(tmpUser != null && !tmpUser.trim().isEmpty()){
-                                user = tmpUser;
-                            }
-                        }
-                    }
-                    user = user+"@"+jws.getBody().getIssuer();
-
-                    String name = jws.getBody().get(LTIConstants.LTI_NAME, String.class);
-                    String familyName = jws.getBody().get(LTIConstants.LTI_FAMILY_NAME, String.class);
-                    String givenName = jws.getBody().get(LTIConstants.LTI_GIVEN_NAME, String.class);
-                    String email = jws.getBody().get(LTIConstants.LTI_EMAIL, String.class);
-
-                    String authenticatedUsername = RepoTools.authenticate(req,
-                            RepoTools.mapToSSOMap(user, givenName, familyName, email));
 
 
                     /**
@@ -282,11 +270,48 @@ public class LTIApi {
                             jws.getBody().getAudience(),
                             ltiSessionObject.getDeploymentId()));
 
+                    Map<String,Object> context = jws.getBody().get(LTIConstants.DEEP_LINK_CONTEXT, Map.class);
+                    if(context != null){
+                        String courseId = (String)context.get("id");
+                        if (courseId != null) {
+                            ltiSessionObject.setContextId(courseId);
+                        }
+                    }
+
+
                     /**
                      * @TODO: what happens when user is using the sames session within two browser windows
                      * maybe use list of LTISessionObject's
                      */
                     req.getSession().setAttribute(LTISessionObject.class.getName(),ltiSessionObject);
+
+                    /**
+                     * edu-sharing authentication
+                     */
+                    if(!ltiMessageType.equals(LTIConstants.LTI_MESSAGE_TYPE_DEEP_LINKING) &&
+                            !ApplicationInfoList.getRepositoryInfoById(ltiSessionObject.getEduSharingAppId()).isLtiSyncReaders()){
+                        authenticationComponent.setCurrentUser(AuthorityServiceImpl.PROXY_USER);
+                    }else{
+                        String user = jws.getBody().getSubject();
+                        Map<String,String> ext = ( Map<String,String>)jws.getBody().get("https://purl.imsglobal.org/spec/lti/claim/ext",Map.class);
+                        if(ext != null){
+                            if(ext.containsKey("user_username")){
+                                String tmpUser = ext.get("user_username");
+                                if(tmpUser != null && !tmpUser.trim().isEmpty()){
+                                    user = tmpUser;
+                                }
+                            }
+                        }
+                        user = user+"@"+jws.getBody().getIssuer();
+
+                        String name = jws.getBody().get(LTIConstants.LTI_NAME, String.class);
+                        String familyName = jws.getBody().get(LTIConstants.LTI_FAMILY_NAME, String.class);
+                        String givenName = jws.getBody().get(LTIConstants.LTI_GIVEN_NAME, String.class);
+                        String email = jws.getBody().get(LTIConstants.LTI_EMAIL, String.class);
+
+                        String authenticatedUsername = RepoTools.authenticate(req,
+                                RepoTools.mapToSSOMap(user, givenName, familyName, email));
+                    }
                     if(ltiMessageType.equals(LTIConstants.LTI_MESSAGE_TYPE_DEEP_LINKING)){
                         if(jws.getBody().containsKey(LTIConstants.DEEP_LINKING_SETTINGS)){
                             Map deepLinkingSettings = jws.getBody().get(LTIConstants.DEEP_LINKING_SETTINGS, Map.class);
@@ -310,6 +335,14 @@ public class LTIApi {
                          *   }
                          */
                         String targetLink = jws.getBody().get(LTIConstants.LTI_TARGET_LINK_URI, String.class);
+                        String[] splitted = targetLink.split("/");
+                        String nodeId = splitted[splitted.length -1].split("\\?")[0];
+                        if(ApplicationInfoList.getRepositoryInfoById(ltiSessionObject.getEduSharingAppId()).isLtiUsagesEnabled()){
+                            Usage usage = usageService.getUsage(ltiSessionObject.getEduSharingAppId(), ltiSessionObject.getContextId(), nodeId, null);
+                            if(usage != null){
+                                req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, nodeId);
+                            }
+                        }
                         return Response.seeOther(new URI(targetLink)).build();
                         //return Response.temporaryRedirect(new URI(targetLink)).build();
                     }else{
@@ -367,6 +400,22 @@ public class LTIApi {
 
                 NodeLTIDeepLink dl = new NodeLTIDeepLink((String)ltiSessionObject.getDeepLinkingSettings().get(LTIConstants.DEEP_LINK_RETURN_URL),
                         new LTIJWTUtil().getDeepLinkingResponseJwt(ltiSessionObject, nodes.toArray(new Node[]{})));
+
+                if(ApplicationInfoList.getRepositoryInfoById(ltiSessionObject.getEduSharingAppId()).isLtiUsagesEnabled()){
+                    String user = AuthenticationUtil.getFullyAuthenticatedUser();
+                    for(String nodeId : nodeIds) {
+                        usageService.setUsage(ApplicationInfoList.getHomeRepository().getAppId(),
+                                user,
+                                ltiSessionObject.getEduSharingAppId(),
+                                ltiSessionObject.getContextId(),
+                                nodeId,
+                                (String) AuthorityServiceFactory.getLocalService().getUserInfo(user).get(CCConstants.PROP_USER_EMAIL),
+                                null,null,-1,null,
+                                null, //TODO moodle does not deliver such information
+                                null);
+                    }
+                }
+
                 return Response.ok(dl).build();
             }else{
                 throw new Exception("no active lti session");

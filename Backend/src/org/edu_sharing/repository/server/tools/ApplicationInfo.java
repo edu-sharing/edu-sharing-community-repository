@@ -142,6 +142,11 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	public static final String KEY_LTI_KID = "lti_kid";
 
+	public static final String KEY_LTI_USAGES_ENABLED = "lti_usages_enabled";
+
+	public static final String KEY_LTI_SYNCREADERS = "lti_sync_readers";
+
+
 	/**
 	 * property file vals
 	 */
@@ -358,6 +363,11 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	private String ltiKid;
 
+	private String ltiUsagesEnabled;
+
+	private String ltiSyncReaders;
+
+
 	/**
 	 * der Anfangsteil des alfresco Intergity Pattern:
 	 * (.*[\"\*\\\>\<\?\/\:\|]+.*)|(.*[\.]?.*[\.]+$)|(.*[ ]+$)
@@ -518,6 +528,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		ltiAuthTokenEndpoint = properties.getProperty(KEY_LTI_AUTH_TOKEN_ENDPOINT);
 		ltiKeysetUrl = properties.getProperty(KEY_LTI_KEYSET_URL);
 		ltiKid = properties.getProperty(KEY_LTI_KID);
+		ltiUsagesEnabled = properties.getProperty(KEY_LTI_USAGES_ENABLED);
+		ltiSyncReaders = properties.getProperty(KEY_LTI_SYNCREADERS);
 	}
 	
 	public String getXml() {
@@ -1015,5 +1027,19 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	public String getLtiKeysetUrl() {return ltiKeysetUrl;}
 
 	public String getLtiKid(){return ltiKid;};
+
+	public boolean isLtiUsagesEnabled(){
+		if(this.ltiUsagesEnabled != null){
+			return new Boolean(this.ltiUsagesEnabled);
+		}
+		return true;
+	}
+
+	public boolean isLtiSyncReaders(){
+		if(this.ltiSyncReaders == null){
+			return false;
+		}
+		else return new Boolean(this.ltiSyncReaders);
+	}
 
 }
