@@ -1139,7 +1139,7 @@ export class OptionsHelperService implements OnDestroy {
         openInNewTabNode.scopes = [Scope.Search, Scope.CollectionsReferences, Scope.WorkspaceList];
         // openInNewTabNode.permissions = [RestConstants.ACCESS_CHANGE_PERMISSIONS];
         openInNewTabNode.group = DefaultGroups.View;
-        openInNewTabNode.priority = 0;
+        openInNewTabNode.priority = 80;
 
         options.push(applyNode);
         options.push(debugNode);
