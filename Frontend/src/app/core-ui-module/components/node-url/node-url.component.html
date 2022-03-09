@@ -33,9 +33,21 @@
     matRippleColor="primary"
     [matRippleDisabled]="disabled && !alwaysRipple"
     (click)="clickWrapper($event)"
+    (auxclick)="clickWrapper($event)"
   >
     <ng-container *ngTemplateOutlet="content"></ng-container>
   </div>
+  <!-- An invisible link that will by clicked programmatically by `clickWrapper()`. -->
+  <a
+    #link
+    [routerLink]="get('routerLink')"
+    [state]="getState()"
+    [queryParams]="get('queryParams')"
+    queryParamsHandling="merge"
+    tabindex="-1"
+    aria-hidden="true"
+    class="cdk-visually-hidden"
+  ></a>
 </ng-container>
 <ng-container *ngIf="mode === 'button'">
   <button
