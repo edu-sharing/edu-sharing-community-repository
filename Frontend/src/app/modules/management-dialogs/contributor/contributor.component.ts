@@ -67,8 +67,6 @@ export class WorkspaceContributorComponent  {
   public date : Date;
   buttons: DialogButton[];
   editButtons: DialogButton[];
-  private static TYPE_PERSON = 0;
-  private static TYPE_ORG = 1;
   private fullName = new BehaviorSubject('');
   private orgName = new BehaviorSubject('');
   suggestionPersons$: Observable<VCardResult[]>;
@@ -101,8 +99,8 @@ export class WorkspaceContributorComponent  {
   }
   public resetVCard(){
       this.date = null;
-      this.editType=WorkspaceContributorComponent.TYPE_PERSON;
       this.edit=new VCard();
+      this.editType=this.edit.getType();
       this.editDisabled = false;
   }
   public addVCard(mode = this.editMode) {
@@ -125,7 +123,7 @@ export class WorkspaceContributorComponent  {
     this.editDisabled = !!(vcard.orcid || vcard.gnduri || vcard.ror || vcard.wikidata);
     this.editScopeOld=scope;
     this.editScopeNew=scope;
-    this.editType=vcard.givenname||vcard.surname ? WorkspaceContributorComponent.TYPE_PERSON : WorkspaceContributorComponent.TYPE_ORG;
+    this.editType=vcard.getType();
     if(vcard.uid === this.iamService.getCurrentUserVCard().uid) {
       this.userAuthor = true;
       this.editDisabled = true;
@@ -145,15 +143,15 @@ export class WorkspaceContributorComponent  {
     }
   }
   public saveEdits(){
-    if(this.editType==WorkspaceContributorComponent.TYPE_PERSON && (!this.edit.givenname || !this.edit.surname)){
+    if(this.editType==VCard.TYPE_PERSON && (!this.edit.givenname || !this.edit.surname)){
       this.toast.error(null,'WORKSPACE.CONTRIBUTOR.ERROR_PERSON_NAME');
       return;
     }
-    if(this.editType==WorkspaceContributorComponent.TYPE_ORG && (!this.edit.org)){
+    if(this.editType==VCard.TYPE_ORG && (!this.edit.org)){
       this.toast.error(null,'WORKSPACE.CONTRIBUTOR.ERROR_ORG_NAME');
       return;
     }
-    if(this.editType==WorkspaceContributorComponent.TYPE_ORG){
+    if(this.editType==VCard.TYPE_ORG){
       this.edit.givenname='';
       this.edit.surname='';
       this.edit.title='';

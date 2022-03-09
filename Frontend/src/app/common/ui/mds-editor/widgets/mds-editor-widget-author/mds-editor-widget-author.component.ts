@@ -1,5 +1,5 @@
 import {first, filter} from 'rxjs/operators';
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnInit, ViewChild} from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Node } from '../../../../../core-module/rest/data-object';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
@@ -10,6 +10,7 @@ import { MainNavService } from '../../../../services/main-nav.service';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import { Values } from '../../types';
+import {MatTabGroup} from '@angular/material/tabs';
 
 export interface AuthorData {
     freetext: string;
@@ -26,6 +27,7 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
         requiresNode: false,
         supportsBulk: false,
     };
+    @ViewChild(MatTabGroup) tabGroup: MatTabGroup;
     @Input() showContributorDialog = true;
     _nodes: Node[];
     hasChanges = new BehaviorSubject<boolean>(false);
@@ -56,7 +58,7 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
                 this.updateValues([
                     {properties: values}
                 ] as Node[])
-            })
+            });
     }
     onChange(): void {
         this.hasChanges.next(
@@ -105,6 +107,8 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
         }
         if(this.author.author.isValid()) {
             values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR][0] = this.author.author.toVCardString();
+        } else if(values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR].length === 1) {
+            values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = null;
         } else {
             delete values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR][0];
         }
@@ -158,6 +162,7 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
                 freetext: this.author.freetext,
                 author: new VCard(this.author.author.toVCardString()),
             };
+            setTimeout(() => this.tabGroup.realignInkBar());
         }
     }
 

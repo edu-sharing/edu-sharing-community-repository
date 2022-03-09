@@ -28,7 +28,7 @@
       font-weight: bold;
     }
   }
-  &.widget-type-array {
+  &.widget-type-array, &.widget-type-vcard {
     .array-entry{
       display: inline;
       &:not(:last-child):after{
