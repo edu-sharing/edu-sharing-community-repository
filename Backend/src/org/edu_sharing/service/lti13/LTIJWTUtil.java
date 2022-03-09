@@ -183,6 +183,15 @@ public class LTIJWTUtil {
             deepLink.put(LTIConstants.DEEP_LINK_URL, ApplicationInfoList.getHomeRepository().getClientBaseUrl() + "/components/render/"+node.getRef().getId()+"?closeOnBack=true");
 
             /**
+             * @TODO: works only when user clicks initial on an lti resource an got's a session in edu-sharingF
+             */
+            HashMap<String,String> thumbnail = new HashMap<>();
+            thumbnail.put("url",node.getPreview().getUrl());
+            thumbnail.put("width",""+node.getPreview().getWidth());
+            thumbnail.put("height",""+node.getPreview().getHeight());
+            deepLink.put("icon",thumbnail);
+
+            /**
              * @TODO if h5p add scoreMaximum stuff
              */
             //deepLink.put("lineItem", lineItem());
