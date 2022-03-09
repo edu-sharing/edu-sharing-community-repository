@@ -1,16 +1,15 @@
 import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
-import { AbstractControl, FormControl, ValidatorFn } from '@angular/forms';
+import {AbstractControl, AbstractControlDirective, FormControl, ValidatorFn} from '@angular/forms';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
-import {ContentChange, QuillEditorComponent} from 'ngx-quill';
-import {AngularEditorComponent, AngularEditorConfig} from '@kolkov/angular-editor';
-import {Editor, NgxEditorComponent} from 'ngx-editor';
-import Locals from 'ngx-editor/lib/Locals';
 import {TranslateService} from '@ngx-translate/core';
 import {MdsEditorInstanceService} from '../../mds-editor-instance.service';
 import {EditorComponent} from '@tinymce/tinymce-angular';
 import {EventObj} from '@tinymce/tinymce-angular/editor/Events';
 import {PlatformLocation} from '@angular/common';
 import {Translation} from '../../../../../core-ui-module/translation';
+import {
+    MdsEditorWidgetContainerComponent
+} from '../mds-editor-widget-container/mds-editor-widget-container.component';
 
 @Component({
     selector: 'es-mds-editor-widget-checkbox',
@@ -18,9 +17,10 @@ import {Translation} from '../../../../../core-ui-module/translation';
     styleUrls: ['./mds-editor-widget-tinymce.component.scss'],
 })
 export class MdsEditorWidgetTinyMCE extends MdsEditorWidgetBase implements OnInit, AfterViewInit {
-    @ViewChild('editorComponent') editorComponent: EditorComponent;
+    @ViewChild(EditorComponent) editorComponent: EditorComponent;
+    @ViewChild(MdsEditorWidgetContainerComponent) containerComponent: MdsEditorWidgetContainerComponent;
     readonly valueType: ValueType = ValueType.String;
-    editorConfig = {
+    private editorConfigDefault = {
         branding: false,
         height: 200,
         base_url: this.platformLocation.getBaseHrefFromDOM() + 'tinymce',
@@ -29,16 +29,13 @@ export class MdsEditorWidgetTinyMCE extends MdsEditorWidgetBase implements OnIni
         statusbar: false,
         resize: true,
         plugins: ['link'],
-        style_formats: [
-
-            { title: 'Red header', block: 'h1', styles: { color: '#ff0000' } },
-
-        ],
         toolbar:
             'h1 h2 h3 h4 | bold italic underline | link | alignleft aligncenter alignright alignjustify | removeformat | undo redo',
         language: this.translate.getDefaultLang()
     };
+    editorConfig: Record<string, any>;
     _html = '';
+    dummyControl = new FormControl();
     get html() {
         return this._html;
     }
@@ -69,25 +66,27 @@ export class MdsEditorWidgetTinyMCE extends MdsEditorWidgetBase implements OnIni
     }
 
     focus(): void {
+        this.editorComponent.editor.focus();
         // this.editor.editorElem.focus();
     }
 
     blur(): void {
-        // this.editor.blur();
+        this.editorComponent.editor.blur();
     }
 
     ngAfterViewInit(): void {
         this._html = this.widget.getInitialValues().jointValues[0];
         if(this.widget.definition.configuration) {
-            this.editorConfig = {...this.editorConfig, ...JSON.parse(this.widget.definition.configuration)};
+            this.editorConfig = {...this.editorConfigDefault, ...JSON.parse(this.widget.definition.configuration)};
+        } else {
+            this.editorConfig = this.editorConfigDefault;
         }
-        /*this.editor.modules = {
-            toolbar: [
-                [{ header: 1 }, { header: 2 }],['bold', 'italic', 'underline', 'strike'], ['link']
-            ]
-        };
-        this.editor.content = this.widget.getInitialValues().jointValues[0];
-         */
-        // this.editorComponent.initialValue = this.widget.getInitialValues().jointValues[0];
+        // dirty workaround for tinyMCE
+        setTimeout(() => {
+            this.editorComponent.editor.mode.set(this.dummyControl.disabled ? 'readonly' : 'design')
+            this.dummyControl.registerOnDisabledChange(isDisabled =>
+                this.editorComponent.editor.mode.set(isDisabled ? 'readonly' : 'design')
+            );
+        });
     }
 }

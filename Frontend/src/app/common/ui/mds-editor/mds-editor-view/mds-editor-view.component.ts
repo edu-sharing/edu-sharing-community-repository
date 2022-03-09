@@ -64,7 +64,7 @@ import {MdsEditorWidgetBase} from '../widgets/mds-editor-widget-base';
 import {MdsEditorWidgetVCardComponent} from '../widgets/mds-editor-widget-vcard/mds-editor-widget-vcard.component';
 import {
     MdsEditorWidgetTinyMCE
-} from '../widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-wysiwyg-html.component';
+} from '../widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-tinymce.component';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;

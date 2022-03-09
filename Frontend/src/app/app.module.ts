@@ -87,10 +87,7 @@ import { MdsEditorWidgetVCardComponent } from './common/ui/mds-editor/widgets/md
 import { extensionProviders } from './extension/extension-providers';
 import {
     MdsEditorWidgetTinyMCE
-} from './common/ui/mds-editor/widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-wysiwyg-html.component';
-import {QuillModule} from 'ngx-quill';
-import { AngularEditorModule } from '@kolkov/angular-editor';
-import {NgxEditorModule} from 'ngx-editor';
+} from './common/ui/mds-editor/widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-tinymce.component';
 import {EditorModule} from '@tinymce/tinymce-angular';
 
 
@@ -176,15 +173,7 @@ import {EditorModule} from '@tinymce/tinymce-angular';
         DragDropModule,
         extensionImports,
         ResizableModule,
-        AngularEditorModule,
-        NgxEditorModule,
         EditorModule,
-        QuillModule.forRoot({
-            modules: {
-                syntax: false,
-                toolbar: []
-            }
-        }),
     ],
     providers: [
         PROVIDERS,

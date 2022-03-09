@@ -4,6 +4,7 @@
   [label]="true"
   [wrapInGroup]="true"
   [valueType]="valueType"
+  [control]="dummyControl"
   [wrapInFormField]="false"
 >
   <!--
@@ -28,7 +29,10 @@
     ></ngx-editor>
   </div>-->
   <editor
+    #editor
+    *ngIf="editorConfig"
     [init]="editorConfig"
     [(ngModel)]="html"
+    (onBlur)="onBlur.emit()"
   ></editor>
 </es-mds-editor-widget-container>
