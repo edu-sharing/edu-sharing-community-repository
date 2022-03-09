@@ -85,6 +85,13 @@ import { MdsEditorWidgetSearchSuggestionsComponent } from './common/ui/mds-edito
 import { EduSharingApiModule } from 'ngx-edu-sharing-api';
 import { MdsEditorWidgetVCardComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-vcard/mds-editor-widget-vcard.component';
 import { extensionProviders } from './extension/extension-providers';
+import {
+    MdsEditorWidgetTinyMCE
+} from './common/ui/mds-editor/widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-wysiwyg-html.component';
+import {QuillModule} from 'ngx-quill';
+import { AngularEditorModule } from '@kolkov/angular-editor';
+import {NgxEditorModule} from 'ngx-editor';
+import {EditorModule} from '@tinymce/tinymce-angular';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -141,6 +148,7 @@ import { extensionProviders } from './extension/extension-providers';
         MdsEditorWidgetTreeCoreComponent,
         HighlightPipe,
         MdsEditorWidgetCheckboxComponent,
+        MdsEditorWidgetTinyMCE,
         MdsEditorWidgetRadioButtonComponent,
         MdsEditorWidgetCheckboxesComponent,
         MdsEditorEmbeddedComponent,
@@ -168,6 +176,15 @@ import { extensionProviders } from './extension/extension-providers';
         DragDropModule,
         extensionImports,
         ResizableModule,
+        AngularEditorModule,
+        NgxEditorModule,
+        EditorModule,
+        QuillModule.forRoot({
+            modules: {
+                syntax: false,
+                toolbar: []
+            }
+        }),
     ],
     providers: [
         PROVIDERS,

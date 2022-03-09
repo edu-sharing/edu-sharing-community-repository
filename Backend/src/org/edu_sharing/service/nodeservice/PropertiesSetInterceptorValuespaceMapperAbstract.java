@@ -70,15 +70,18 @@ public class PropertiesSetInterceptorValuespaceMapperAbstract implements Propert
             map.put(sourceProperty, null);
         }
         List<Map<String, Collection<MetadataKey.MetadataKeyRelated>>> mappedList = relations.stream().map((m) -> relationCache.get(m)).collect(Collectors.toList());
-        map.put(targetProperty, MigrateMetadataValuespaceJob.mapValueToTarget(context.getNodeRef(),
-                        mappedList,
-                        targetWidget.getValues(),
-                        mode,
-                        value,
-                        map.get(targetProperty),
-                        reverseMapping,
-                        null
-                )
+        HashSet<String> result = MigrateMetadataValuespaceJob.mapValueToTarget(context.getNodeRef(),
+                mappedList,
+                targetWidget.getValues(),
+                mode,
+                value,
+                map.get(targetProperty),
+                reverseMapping,
+                null
         );
+        if(result.size() == 0) {
+            result = null;
+        }
+        map.put(targetProperty, result);
     }
 }

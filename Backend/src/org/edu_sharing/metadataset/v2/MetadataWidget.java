@@ -7,8 +7,9 @@ import java.util.stream.Collectors;
 public class MetadataWidget extends MetadataTranslatable{
 
 	private Map<String, MetadataKey> valuesAsMapCache;
+	private String configuration;
 
-	public enum Required{
+    public enum Required{
 		mandatory,
 		mandatoryForPublish,
 		recommended,
@@ -290,6 +291,13 @@ public class MetadataWidget extends MetadataTranslatable{
 
 	public TextEscapingPolicy getTextEscapingPolicy() {
 		return textEscapingPolicy;
+	}
+	public void setConfiguration(String configuration) {
+		this.configuration = configuration;
+	}
+
+	public String getConfiguration() {
+		return configuration;
 	}
 
 	public void setInteractionType(InteractionType interactionType) {

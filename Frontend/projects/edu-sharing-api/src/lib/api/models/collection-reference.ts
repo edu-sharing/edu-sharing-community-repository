@@ -38,6 +38,9 @@ export interface CollectionReference {
     };
     rating?: RatingDetails;
     ref: NodeRef;
+    relations?: {
+        [key: string]: Node;
+    };
     remote?: Remote;
     repositoryType?: string;
     size?: string;

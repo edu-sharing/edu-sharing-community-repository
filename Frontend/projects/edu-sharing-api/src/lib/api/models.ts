@@ -67,6 +67,7 @@ export { Config } from './models/config';
 export { ConfigFrontpage } from './models/config-frontpage';
 export { ConfigPrivacy } from './models/config-privacy';
 export { ConfigPublish } from './models/config-publish';
+export { ConfigRating } from './models/config-rating';
 export { ConfigRemote } from './models/config-remote';
 export { ConfigRemoteRocketchat } from './models/config-remote-rocketchat';
 export { ConfigUpload } from './models/config-upload';

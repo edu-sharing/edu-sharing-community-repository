@@ -70,6 +70,7 @@ export enum MdsWidgetType {
     Month = 'month',
     Color = 'color',
     Textarea = 'textarea',
+    TinyMCE = 'tinyMCE',
     VCard = 'vcard',
     Checkbox = 'checkbox',
     RadioHorizontal = 'radioHorizontal',
