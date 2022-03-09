@@ -1136,6 +1136,7 @@ export class OptionsHelperService implements OnDestroy {
             UIHelper.openUrl(url, this.bridge, OPEN_URL_MODE.Blank)
         });
         openInNewTabNode.constrains = [Constrain.Files, Constrain.NoBulk];
+        openInNewTabNode.scopes = [Scope.Search, Scope.CollectionsReferences, Scope.WorkspaceList];
         // openInNewTabNode.permissions = [RestConstants.ACCESS_CHANGE_PERMISSIONS];
         openInNewTabNode.group = DefaultGroups.View;
         openInNewTabNode.priority = 0;
