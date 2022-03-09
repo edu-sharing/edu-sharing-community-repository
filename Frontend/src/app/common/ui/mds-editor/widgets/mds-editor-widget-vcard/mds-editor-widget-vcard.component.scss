@@ -3,7 +3,10 @@
 }
 
 mat-tab-group {
-   .vcard_Org {
-       flex-grow: 1;
-   }
+    .vcard {
+        padding-top: 8px;
+        .vcard_Org {
+            flex-grow: 1;
+        }
+    }
 }
