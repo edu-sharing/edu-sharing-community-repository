@@ -613,7 +613,7 @@
         "LIST_SETTINGS": "Configure List",
         "METADATA_SIDEBAR": "Material details",
         "ACCESSIBILITY": "Accessibility",
-        "OPENINNEWTAB": "Open in new tab"
+        "OPEN_IN_NEW_TAB": "Open in new tab"
     },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Version comment",

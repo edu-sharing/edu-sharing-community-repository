@@ -654,7 +654,7 @@
         "LIST_SETTINGS": "Liste konfigurieren",
         "METADATA_SIDEBAR": "Materialinformationen",
         "ACCESSIBILITY": "Barrierefreiheit",
-        "OPENINNEWTAB": "In neuem Tab öffnen"
+        "OPEN_IN_NEW_TAB": "In neuem Tab öffnen"
     },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Versionskommentar",

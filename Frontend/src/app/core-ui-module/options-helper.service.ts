@@ -1130,7 +1130,7 @@ export class OptionsHelperService implements OnDestroy {
         metadataSidebar.isToggle = true;
 
         // add new option to open the Node in new tab
-        const openInNewTabNode = new OptionItem('OPTIONS.OPENINNEWTAB', 'open_in_new', (node) => {
+        const openInNewTabNode = new OptionItem('OPTIONS.OPEN_IN_NEW_TAB', 'open_in_new', (node) => {
             node = this.getObjects(node)[0];
             const url = this.nodeHelper.getNodeUrl(node);
             UIHelper.openUrl(url, this.bridge, OPEN_URL_MODE.Blank)
