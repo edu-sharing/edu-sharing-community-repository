@@ -929,6 +929,16 @@
             "type" : "string",
             "enum" : [ "Workspace", "Archive" ]
           }
+        }, {
+          "name" : "authorityScope",
+          "in" : "query",
+          "description" : "authority scope to search for",
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
         } ],
         "responses" : {
           "200" : {
@@ -2237,6 +2247,75 @@
               "application/json" : {
                 "schema" : {
                   "type" : "string"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Preconditions are not present.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Authorization failed.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Session user has insufficient rights to perform this operation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Ressources are not found.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Fatal error occured.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/v1/config/merged" : {
+      "get" : {
+        "tags" : [ "ADMIN v1" ],
+        "description" : "Get the fully merged & parsed (lightbend) backend config",
+        "operationId" : "getLightbendConfig",
+        "responses" : {
+          "200" : {
+            "description" : "OK.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object"
                 }
               }
             }
@@ -3868,7 +3947,7 @@
               "schema" : {
                 "type" : "object",
                 "additionalProperties" : {
-                  "type" : "string"
+                  "type" : "object"
                 }
               }
             }
@@ -3924,6 +4003,183 @@
           },
           "409" : {
             "description" : "Duplicate Entity/Node conflict (Node with same name exists)",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Fatal error occured.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/v1/job/{jobClass}/sync" : {
+      "post" : {
+        "tags" : [ "ADMIN v1" ],
+        "summary" : "Start a Job.",
+        "description" : "Start a Job. Wait for the result synchronously",
+        "operationId" : "startJobSync",
+        "parameters" : [ {
+          "name" : "jobClass",
+          "in" : "path",
+          "description" : "jobClass",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "params",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "additionalProperties" : {
+                  "type" : "object"
+                }
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Preconditions are not present.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Authorization failed.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Session user has insufficient rights to perform this operation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Ressources are not found.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Duplicate Entity/Node conflict (Node with same name exists)",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Fatal error occured.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/v1/authenticate/{authorityName}" : {
+      "post" : {
+        "tags" : [ "ADMIN v1" ],
+        "summary" : "switch the session to a known authority name",
+        "operationId" : "switchAuthority",
+        "parameters" : [ {
+          "name" : "authorityName",
+          "in" : "path",
+          "description" : "the authority to use (must be a person)",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.",
+            "content" : {
+              "application/json" : { }
+            }
+          },
+          "400" : {
+            "description" : "Preconditions are not present.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Authorization failed.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Session user has insufficient rights to perform this operation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Ressources are not found.",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -5887,8 +6143,8 @@
           "description" : "status of the proposals to search for",
           "schema" : {
             "type" : "string",
-            "enum" : [ "PENDING", "ACCEPTED", "DECLINED" ],
-            "default" : "PENDING"
+            "default" : "PENDING",
+            "enum" : [ "PENDING", "ACCEPTED", "DECLINED" ]
           }
         }, {
           "name" : "fetchCounts",
@@ -6261,8 +6517,8 @@
           "required" : true,
           "schema" : {
             "type" : "string",
-            "enum" : [ "EDU_ALL", "EDU_GROUPS", "TYPE_EDITORIAL", "TYPE_MEDIA_CENTER", "MY", "RECENT" ],
-            "default" : "MY"
+            "default" : "MY",
+            "enum" : [ "EDU_ALL", "EDU_GROUPS", "TYPE_EDITORIAL", "TYPE_MEDIA_CENTER", "MY", "RECENT" ]
           }
         }, {
           "name" : "fetchCounts",
@@ -11760,6 +12016,16 @@
           "description" : "parent id of the new entry (might be null)",
           "schema" : {
             "type" : "string"
+          }
+        }, {
+          "name" : "nodeId",
+          "in" : "query",
+          "description" : "One or more nodes this suggestion relates to (optional, only for extended mail data)",
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
           }
         } ],
         "responses" : {
@@ -19128,7 +19394,7 @@
           "description" : "Type of element",
           "schema" : {
             "type" : "string",
-            "enum" : [ "FILES", "FOLDERS", "FILES_AND_FOLDERS", "COLLECTIONS", "TOOLPERMISSIONS", "ALL" ]
+            "enum" : [ "FILES", "FOLDERS", "FILES_AND_FOLDERS", "COLLECTIONS", "TOOLPERMISSIONS", "COLLECTION_PROPOSALS", "ALL" ]
           }
         }, {
           "name" : "maxItems",
@@ -19422,7 +19688,7 @@
           "description" : "Type of element",
           "schema" : {
             "type" : "string",
-            "enum" : [ "FILES", "FOLDERS", "FILES_AND_FOLDERS", "COLLECTIONS", "TOOLPERMISSIONS", "ALL" ]
+            "enum" : [ "FILES", "FOLDERS", "FILES_AND_FOLDERS", "COLLECTIONS", "TOOLPERMISSIONS", "COLLECTION_PROPOSALS", "ALL" ]
           }
         }, {
           "name" : "maxItems",
@@ -19570,7 +19836,7 @@
           "description" : "Type of element",
           "schema" : {
             "type" : "string",
-            "enum" : [ "FILES", "FOLDERS", "FILES_AND_FOLDERS", "COLLECTIONS", "TOOLPERMISSIONS", "ALL" ]
+            "enum" : [ "FILES", "FOLDERS", "FILES_AND_FOLDERS", "COLLECTIONS", "TOOLPERMISSIONS", "COLLECTION_PROPOSALS", "ALL" ]
           }
         }, {
           "name" : "combineMode",
@@ -19753,8 +20019,8 @@
           "required" : true,
           "schema" : {
             "type" : "string",
-            "enum" : [ "PERSON", "ORGANIZATION" ],
-            "default" : "PERSON"
+            "default" : "PERSON",
+            "enum" : [ "PERSON", "ORGANIZATION" ]
           }
         }, {
           "name" : "fields",
@@ -23042,6 +23308,12 @@
               "$ref" : "#/components/schemas/Node"
             }
           },
+          "relations" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/Node"
+            }
+          },
           "ref" : {
             "$ref" : "#/components/schemas/NodeRef"
           },
@@ -23285,15 +23557,15 @@
               "type" : "string"
             }
           },
-          "vcard" : {
-            "type" : "string"
-          },
           "type" : {
             "type" : "array",
             "writeOnly" : true,
             "items" : {
               "type" : "string"
             }
+          },
+          "vcard" : {
+            "type" : "string"
           },
           "firstName" : {
             "type" : "string"
@@ -23380,7 +23652,7 @@
         "properties" : {
           "folders" : {
             "type" : "string",
-            "enum" : [ "none", "assign" ]
+            "enum" : [ "none", "assign", "delete" ]
           },
           "privateFiles" : {
             "type" : "string",
@@ -23494,7 +23766,7 @@
         "properties" : {
           "folders" : {
             "type" : "string",
-            "enum" : [ "none", "assign" ]
+            "enum" : [ "none", "assign", "delete" ]
           },
           "privateFiles" : {
             "type" : "string",
@@ -23523,6 +23795,13 @@
             "items" : {
               "$ref" : "#/components/schemas/JobFieldDescription"
             }
+          },
+          "tags" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "enum" : [ "DeletePersonJob" ]
+            }
           }
         }
       },
@@ -23540,6 +23819,13 @@
           },
           "sampleValue" : {
             "type" : "string"
+          },
+          "isArray" : {
+            "type" : "boolean",
+            "writeOnly" : true
+          },
+          "array" : {
+            "type" : "boolean"
           }
         }
       },
@@ -23885,14 +24171,14 @@
               "type" : "string"
             }
           },
+          "empty" : {
+            "type" : "boolean"
+          },
           "wrappedMap" : {
             "type" : "object",
             "additionalProperties" : {
               "type" : "object"
             }
-          },
-          "empty" : {
-            "type" : "boolean"
           }
         },
         "additionalProperties" : {
@@ -23926,14 +24212,14 @@
                   "type" : "string"
                 }
               },
+              "empty" : {
+                "type" : "boolean"
+              },
               "wrappedMap" : {
                 "type" : "object",
                 "additionalProperties" : {
                   "type" : "object"
                 }
-              },
-              "empty" : {
-                "type" : "boolean"
               }
             },
             "additionalProperties" : {
@@ -23951,27 +24237,27 @@
           "key" : {
             "$ref" : "#/components/schemas/Key"
           },
-          "jobListenerNames" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "durable" : {
+          "volatile" : {
             "type" : "boolean"
           },
+          "fullName" : {
+            "type" : "string"
+          },
           "stateful" : {
+            "type" : "boolean"
+          },
+          "durable" : {
             "type" : "boolean"
           },
           "requestsRecovery" : {
             "type" : "boolean",
             "writeOnly" : true
           },
-          "fullName" : {
-            "type" : "string"
-          },
-          "volatile" : {
-            "type" : "boolean"
+          "jobListenerNames" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
           }
         }
       },
@@ -24367,6 +24653,12 @@
               "$ref" : "#/components/schemas/Node"
             }
           },
+          "relations" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/Node"
+            }
+          },
           "proposalCounts" : {
             "type" : "object",
             "additionalProperties" : {
@@ -24505,6 +24797,12 @@
           "usedInCollections" : {
             "type" : "array",
             "items" : {
+              "$ref" : "#/components/schemas/Node"
+            }
+          },
+          "relations" : {
+            "type" : "object",
+            "additionalProperties" : {
               "$ref" : "#/components/schemas/Node"
             }
           },
@@ -24823,6 +25121,15 @@
           },
           "authorMandatory" : {
             "type" : "boolean"
+          }
+        }
+      },
+      "ConfigRating" : {
+        "type" : "object",
+        "properties" : {
+          "mode" : {
+            "type" : "string",
+            "enum" : [ "none", "likes", "stars" ]
           }
         }
       },
@@ -25162,7 +25469,18 @@
         }
       },
       "Rendering" : {
-        "type" : "object"
+        "type" : "object",
+        "properties" : {
+          "showPreview" : {
+            "type" : "boolean"
+          },
+          "showDownloadButton" : {
+            "type" : "boolean"
+          },
+          "prerender" : {
+            "type" : "boolean"
+          }
+        }
       },
       "Services" : {
         "type" : "object",
@@ -25312,6 +25630,12 @@
               "$ref" : "#/components/schemas/ContextMenuEntry"
             }
           },
+          "userMenuOverrides" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ContextMenuEntry"
+            }
+          },
           "allowedLicenses" : {
             "type" : "array",
             "items" : {
@@ -25335,6 +25659,9 @@
           },
           "branding" : {
             "type" : "boolean"
+          },
+          "rating" : {
+            "$ref" : "#/components/schemas/ConfigRating"
           },
           "publishingNotice" : {
             "type" : "boolean"
@@ -25600,15 +25927,15 @@
             "type" : "integer",
             "format" : "int64"
           },
-          "vcard" : {
-            "type" : "string"
-          },
           "type" : {
             "type" : "array",
             "writeOnly" : true,
             "items" : {
               "type" : "string"
             }
+          },
+          "vcard" : {
+            "type" : "string"
           },
           "firstName" : {
             "type" : "string"
@@ -25907,15 +26234,15 @@
               }
             }
           },
-          "vcard" : {
-            "type" : "string"
-          },
           "type" : {
             "type" : "array",
             "writeOnly" : true,
             "items" : {
               "type" : "string"
             }
+          },
+          "vcard" : {
+            "type" : "string"
           },
           "firstName" : {
             "type" : "string"
@@ -26226,16 +26553,16 @@
             "type" : "string",
             "enum" : [ "Input", "None" ]
           },
+          "required" : {
+            "type" : "string",
+            "writeOnly" : true,
+            "enum" : [ "mandatory", "mandatoryForPublish", "recommended", "optional", "ignore" ]
+          },
           "subwidgets" : {
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/MdsSubwidget"
             }
-          },
-          "required" : {
-            "type" : "string",
-            "writeOnly" : true,
-            "enum" : [ "mandatory", "mandatoryForPublish", "recommended", "optional", "ignore" ]
           },
           "id" : {
             "type" : "string"
@@ -26300,13 +26627,13 @@
           "defaultvalue" : {
             "type" : "string"
           },
+          "isExtended" : {
+            "type" : "boolean"
+          },
           "hideIfEmpty" : {
             "type" : "boolean"
           },
           "isSearchable" : {
-            "type" : "boolean"
-          },
-          "isExtended" : {
             "type" : "boolean"
           }
         }
