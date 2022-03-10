@@ -10,6 +10,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.repo.tenant.TenantService;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
@@ -702,15 +703,15 @@ public EduGroup getEduGroup(String authority){
 	public void createProxyUser(){
 		PersonService personService = serviceRegistry.getPersonService();
 
-		if(personService.personExists(PROXY_USER)){
+		if(personService.personExists(CCConstants.PROXY_USER)){
 			return;
 		}
 
 		HashMap<QName, Serializable> properties = new HashMap<QName, Serializable>();
-		properties.put(ContentModel.PROP_USERNAME, PROXY_USER);
+		properties.put(ContentModel.PROP_USERNAME, CCConstants.PROXY_USER);
 		personService.createPerson(properties);
 		serviceRegistry.getAuthenticationService()
-				.createAuthentication(PROXY_USER,new KeyTool().getRandomPassword().toCharArray());
+				.createAuthentication(CCConstants.PROXY_USER,new KeyTool().getRandomPassword().toCharArray());
 	}
 
 

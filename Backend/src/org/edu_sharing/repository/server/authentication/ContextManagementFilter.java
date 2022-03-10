@@ -12,7 +12,6 @@ import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.AuthenticationService;
-import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService;
@@ -29,7 +28,6 @@ import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.service.authentication.ScopeAuthenticationServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.edu_sharing.service.authority.AuthorityServiceImpl;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.alfresco.service.config.model.AvailableMds;
 import org.edu_sharing.service.usage.Usage;
@@ -174,7 +172,7 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 						Usage usage = u2.getUsage(appId, courseId, nodeId, resourceId);
 						if (usage != null) {
 							httpReq.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, nodeId);
-							authenticationComponent.setCurrentUser(AuthorityServiceImpl.PROXY_USER);
+							authenticationComponent.setCurrentUser(CCConstants.PROXY_USER);
 						}
 
 					} catch (Usage2Exception e) {
