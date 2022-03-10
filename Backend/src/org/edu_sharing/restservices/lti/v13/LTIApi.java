@@ -237,6 +237,12 @@ public class LTIApi {
                 throw new IllegalStateException(tool.getReason());
             }
 
+            //check version
+            String ltiVersion = jws.getBody().get(LTIConstants.LTI_VERSION, String.class);
+            if(!LTIConstants.LTI_VERSION_3.equals(ltiVersion)){
+                throw new Exception("lti version:" +ltiVersion +" not allowed");
+            }
+
 
             /*List<String> sessionStates = (List<String>)req.getSession().getAttribute(LTIConstants.LTI_TOOL_SESS_ATT_STATE);
             if(sessionStates == null){
