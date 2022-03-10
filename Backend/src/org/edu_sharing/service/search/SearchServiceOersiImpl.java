@@ -30,6 +30,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -89,7 +90,9 @@ public class SearchServiceOersiImpl extends SearchServiceAdapter {
   }
 
   public Map<String, Object> retrieveNode(String nodeId) throws Exception {
-    return queryExecutor().executeRetrieveById(nodeId);
+    try (OersiQueryExecutor queryExecutor = queryExecutor()) {
+      return queryExecutor.executeRetrieveById(nodeId);
+    }
   }
 
   @Override
@@ -101,7 +104,10 @@ public class SearchServiceOersiImpl extends SearchServiceAdapter {
   @Override
   public SearchResultNodeRef search(MetadataSet mds, String query, Map<String, String[]> criteria,
                                     SearchToken searchToken) throws Throwable {
-    OersiSearchResult result = queryExecutor().executeSearch(mds, query, criteria, searchToken.getFrom(), searchToken.getMaxResult());
+    OersiSearchResult result;
+    try (OersiQueryExecutor queryExecutor = queryExecutor()) {
+      result = queryExecutor.executeSearch(mds, query, criteria, searchToken.getFrom(), searchToken.getMaxResult());
+    }
 
     SearchResultNodeRef searchResultNodeRef = new SearchResultNodeRef();
     List<NodeRef> data = new ArrayList<>();
@@ -256,7 +262,7 @@ public class SearchServiceOersiImpl extends SearchServiceAdapter {
   }
 
   // note: QueryStringExecuter has problems because the query is restricted by the length of the URL -> better use ElasticsearchQuery
-  private interface OersiQueryExecutor {
+  private interface OersiQueryExecutor extends Closeable {
     /**
      * OERSI API endpoint
      */
@@ -276,6 +282,12 @@ public class SearchServiceOersiImpl extends SearchServiceAdapter {
     public void endpoint(String host, int port, String scheme, String pathPrefix, String index) {
       this.client = new RestHighLevelClient(RestClient.builder(new HttpHost(host, port, scheme)).setPathPrefix(pathPrefix));
       this.index = index;
+    }
+    @Override
+    public void close() throws IOException {
+      if (client != null) {
+        client.close();
+      }
     }
 
     @Override
