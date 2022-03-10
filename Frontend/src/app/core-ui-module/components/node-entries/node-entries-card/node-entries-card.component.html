@@ -97,8 +97,15 @@
     *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
     mode="wrapper"
     [node]="node"
+    esFocusState
+    #cardFocusState="esFocusState"
   >
-    <ng-container *ngTemplateOutlet="image"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="
+        image;
+        context: { playAnimation: cardFocusState.hovering || cardFocusState.hasFocus }
+      "
+    ></ng-container>
     <ng-container *ngTemplateOutlet="meta"></ng-container>
   </es-node-url>
   <div
@@ -116,8 +123,15 @@
         source: ClickSource.Metadata
       })
     "
+    esFocusState
+    #cardFocusState="esFocusState"
   >
-    <ng-container *ngTemplateOutlet="image"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="
+        image;
+        context: { playAnimation: cardFocusState.hovering || cardFocusState.hasFocus }
+      "
+    ></ng-container>
     <ng-container *ngTemplateOutlet="meta"></ng-container>
   </div>
   <div class="card-options" *ngIf="entriesService.options || showRatings">
@@ -144,20 +158,13 @@
     </div>
   </div>
 </div>
-<ng-template #image>
+<ng-template #image let-playAnimation="playAnimation">
   <div class="card-image-area">
-    <div class="card-image-backdrop">
-      <img
-        *ngIf="!(nodeHelper.isNodeCollection(node) && node.preview.isIcon)"
-        [src]="node | appNodeImage"
-        alt=""
-      />
-    </div>
-    <img
+    <es-preview-image
       *ngIf="!(nodeHelper.isNodeCollection(node) && node.preview.isIcon)"
-      [src]="node | appNodeImage"
-      alt=""
-    />
+      [node]="node"
+      [playAnimation]="playAnimation"
+    ></es-preview-image>
     <div
       *ngIf="nodeHelper.isNodeCollection(node) && node.preview.isIcon"
       class="card-collection-image"
