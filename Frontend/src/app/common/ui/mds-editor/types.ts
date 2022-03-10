@@ -23,6 +23,7 @@ export class UserPresentableError extends Error {
 }
 
 export interface Constraints {
+    supportsInlineEditing?: boolean;
     requiresNode?: boolean;
     supportsBulk?: boolean;
 }
