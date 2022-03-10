@@ -2,8 +2,6 @@ import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@
 import { Node } from '../../../core-module/rest/data-object';
 import { NodeHelperService } from '../../node-helper.service';
 import { ListTableComponent } from '../list-table/list-table.component';
-import {ActivatedRoute, Router} from '@angular/router';
-import {PlatformLocation} from '@angular/common';
 
 // TODO: Decide if providing focus highlights and ripples with this component is a good idea. When
 // using `app-node-url` for cards, we might need highlights and ripples for the whole card while
@@ -25,7 +23,7 @@ export class NodeUrlComponent {
     /**
      * link: a element
      * button: button element
-     * wrapper: div element with behaviour "like" a link
+     * wrapper: div element with behavior "like" a link
      */
     @Input() mode: 'link' | 'button' | 'wrapper' = 'link';
     @Input() disabled = false;
@@ -41,11 +39,7 @@ export class NodeUrlComponent {
 
     @Output() buttonClick = new EventEmitter<MouseEvent>();
 
-    constructor(
-        private nodeHelper: NodeHelperService,
-        private router: Router,
-        private platformLocation: PlatformLocation,
-    ) {}
+    constructor(private nodeHelper: NodeHelperService) {}
 
     getState() {
         return {
@@ -62,21 +56,33 @@ export class NodeUrlComponent {
     }
 
     clickWrapper(event: MouseEvent) {
-        if(event.ctrlKey) {
-            const url = this.router.serializeUrl(this.router.createUrlTree(
-                [this.platformLocation.getBaseHrefFromDOM() + this.get('routerLink')], {
-                    queryParams: this.get('queryParams'),
-                    queryParamsHandling: 'merge',
-                }));
-            window.open(url);
-        } else {
-            this.router.navigate([this.get('routerLink')], {
-                queryParams: this.get('queryParams'),
-                state: this.getState(),
-                queryParamsHandling: 'merge',
-
-            });
-        }
+        const eventCopy = copyClickEvent(event);
+        this.link.nativeElement.dispatchEvent(eventCopy);
         event.preventDefault();
     }
+}
+
+function copyClickEvent(event: MouseEvent): MouseEvent {
+    // It would seem better to use `event.type` instead of hard-coding 'click', but that doesn't
+    // have the desired effect for non-click events when dispatched.
+    return new MouseEvent('click', getMouseEventProperties(event));
+}
+
+/**
+ * Returns an object with those properties of `event` that are part of its `MouseEvent` prototype.
+ * 
+ * @param event An instance of a class derived from `MouseEvent`
+ */
+function getMouseEventProperties(event: MouseEvent): MouseEventInit {
+    let mouseEvent = event;
+    while (mouseEvent.constructor.name !== MouseEvent.name) {
+        mouseEvent = Object.getPrototypeOf(mouseEvent);
+    }
+    return Object.keys(mouseEvent).reduce((acc, key) => {
+        const value = event[key as keyof MouseEvent];
+        if (value !== null && typeof value !== 'function') {
+            acc[key] = value;
+        }
+        return acc;
+    }, {} as any);
 }
