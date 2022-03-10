@@ -55,6 +55,8 @@ public class GuestCagePolicy implements BeforeCreateNodePolicy, BeforeDeleteAsso
 		
 		
 	}
+
+	static List<String> guestUsers = new ArrayList<>();
 	
 	
 	private void checkGuest() throws GuestPermissionDeniedException{
@@ -63,13 +65,10 @@ public class GuestCagePolicy implements BeforeCreateNodePolicy, BeforeDeleteAsso
 		//System.out.println("guest run as: "+AuthenticationUtil.getRunAsUser());
 		//String currentUser = eduSharingWebappUser.get();
 		//System.out.println("guest current: "+currentUser);
-		List<String> usernames = new ArrayList<>();
-		usernames.add(ApplicationInfoList.getHomeRepository().getGuest_username());
-		usernames.add(CCConstants.PROXY_USER);
 
 
 		if(AuthenticationUtil.getFullyAuthenticatedUser() != null
-				&& usernames.contains(AuthenticationUtil.getFullyAuthenticatedUser())
+				&& guestUsers.contains(AuthenticationUtil.getFullyAuthenticatedUser())
 				&& !AuthenticationUtil.isRunAsUserTheSystemUser()){
 			throw new GuestPermissionDeniedException("guest has no permissions to do that");
 		}
@@ -127,7 +126,18 @@ public class GuestCagePolicy implements BeforeCreateNodePolicy, BeforeDeleteAsso
 	public void setPolicyComponent(PolicyComponent policyComponent) {
 		this.policyComponent = policyComponent;
 	}
-	
-	
 
+	public static List<String> getGuestUsers() {
+
+		if(guestUsers.size() == 0){
+			guestUsers.add(CCConstants.PROXY_USER);
+			guestUsers.add("guest");
+		}
+		String gun = ApplicationInfoList.getHomeRepository().getGuest_username();
+		if(gun != null && !guestUsers.contains(gun)){
+			guestUsers.add(gun);
+		}
+
+		return guestUsers;
+	}
 }
