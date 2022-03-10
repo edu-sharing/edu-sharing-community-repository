@@ -33,7 +33,6 @@ import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.NodeLTIDeepLink;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.edu_sharing.service.authority.AuthorityServiceImpl;
 import org.edu_sharing.service.lti13.*;
 import org.edu_sharing.service.lti13.model.LTISessionObject;
 import org.edu_sharing.service.lti13.registration.DynamicRegistrationToken;
@@ -292,7 +291,7 @@ public class LTIApi {
                             !ApplicationInfoList.getRepositoryInfoById(ltiSessionObject.getEduSharingAppId()).isLtiSyncReaders()){
                         //authenticationComponent.setCurrentUser(AuthorityServiceImpl.PROXY_USER);
                         RepoTools.authenticate(req,
-                                RepoTools.mapToSSOMap(AuthorityServiceImpl.PROXY_USER, null, null, null));
+                                RepoTools.mapToSSOMap(CCConstants.PROXY_USER, null, null, null));
                     }else{
                         String user = jws.getBody().getSubject();
                         Map<String,String> ext = ( Map<String,String>)jws.getBody().get("https://purl.imsglobal.org/spec/lti/claim/ext",Map.class);

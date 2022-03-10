@@ -16,7 +16,11 @@ import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class GuestCagePolicy implements BeforeCreateNodePolicy, BeforeDeleteAssociationPolicy,
 										BeforeDeleteChildAssociationPolicy,BeforeDeleteNodePolicy,BeforeMoveNodePolicy,
@@ -59,9 +63,13 @@ public class GuestCagePolicy implements BeforeCreateNodePolicy, BeforeDeleteAsso
 		//System.out.println("guest run as: "+AuthenticationUtil.getRunAsUser());
 		//String currentUser = eduSharingWebappUser.get();
 		//System.out.println("guest current: "+currentUser);
+		List<String> usernames = new ArrayList<>();
+		usernames.add(ApplicationInfoList.getHomeRepository().getGuest_username());
+		usernames.add(CCConstants.PROXY_USER);
+
 
 		if(AuthenticationUtil.getFullyAuthenticatedUser() != null
-				&& AuthenticationUtil.getFullyAuthenticatedUser().equals(ApplicationInfoList.getHomeRepository().getGuest_username())
+				&& usernames.contains(AuthenticationUtil.getFullyAuthenticatedUser())
 				&& !AuthenticationUtil.isRunAsUserTheSystemUser()){
 			throw new GuestPermissionDeniedException("guest has no permissions to do that");
 		}

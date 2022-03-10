@@ -517,8 +517,12 @@ public class CCConstants {
 			CCConstants.LOM_PROP_TECHNICAL_SIZE
 	);
     public static final String AUTHORITY_DELETED_USER = "DELETED_USER";
+    /**
+     * authority needed for appAuth authentication and read only tasks
+     */
+    public static final String PROXY_USER = "edu_proxy";
 
-	public enum PROPOSAL_STATUS {
+    public enum PROPOSAL_STATUS {
 		PENDING,
 		ACCEPTED,
 		DECLINED
