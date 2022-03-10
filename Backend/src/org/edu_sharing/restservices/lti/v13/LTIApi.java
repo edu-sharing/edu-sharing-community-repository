@@ -290,7 +290,9 @@ public class LTIApi {
                      */
                     if(!ltiMessageType.equals(LTIConstants.LTI_MESSAGE_TYPE_DEEP_LINKING) &&
                             !ApplicationInfoList.getRepositoryInfoById(ltiSessionObject.getEduSharingAppId()).isLtiSyncReaders()){
-                        authenticationComponent.setCurrentUser(AuthorityServiceImpl.PROXY_USER);
+                        //authenticationComponent.setCurrentUser(AuthorityServiceImpl.PROXY_USER);
+                        RepoTools.authenticate(req,
+                                RepoTools.mapToSSOMap(AuthorityServiceImpl.PROXY_USER, null, null, null));
                     }else{
                         String user = jws.getBody().getSubject();
                         Map<String,String> ext = ( Map<String,String>)jws.getBody().get("https://purl.imsglobal.org/spec/lti/claim/ext",Map.class);

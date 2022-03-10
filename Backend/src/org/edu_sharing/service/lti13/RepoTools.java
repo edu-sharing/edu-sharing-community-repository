@@ -100,7 +100,7 @@ public class RepoTools {
         EduAuthentication authService =  (EduAuthentication)eduApplicationContext.getBean("authenticationService");
         authService.authenticateBySSO(SSOAuthorityMapper.SSO_TYPE_LTI,ssoMap);
         String ticket = authService.getCurrentTicket();
-        authTool.storeAuthInfoInSession(userName, ticket,CCConstants.AUTH_TYPE_SHIBBOLETH, req.getSession());
+        authTool.storeAuthInfoInSession(userName, ticket,CCConstants.AUTH_TYPE_LTI, req.getSession());
         return userName;
     }
 

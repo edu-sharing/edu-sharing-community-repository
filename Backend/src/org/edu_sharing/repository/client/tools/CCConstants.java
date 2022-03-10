@@ -117,6 +117,8 @@ public class CCConstants {
 	
 	public final static String AUTH_TYPE_TICKET = "AUTH_TYPE_TICKET";
 
+	public final static String AUTH_TYPE_LTI = "AUTH_TYPE_LTI";
+
 	public final static String AUTH_ACCESS_TOKEN = "AUTH_ACCESS_TOKEN";
 
 	public final static String AUTH_HEADER_EDU_TICKET = "EDU-TICKET";
