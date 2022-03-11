@@ -239,7 +239,8 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 const widgetName = tagName as NativeWidgetType;
                 // Native widgets don't support dynamic conditions yet and don't necessarily have a
                 // `widget` object.
-                if(this.mdsEditorInstance.editorMode === 'inline') {
+                const WidgetComponent = MdsEditorViewComponent.nativeWidgets[widgetName];
+                if(this.mdsEditorInstance.editorMode === 'inline' && !WidgetComponent?.constraints?.supportsInlineEditing) {
                     // native widgets not (yet) supported for inline editing
                     continue;
                 } else {

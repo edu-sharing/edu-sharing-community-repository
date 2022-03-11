@@ -68,6 +68,7 @@
 
     <es-create-menu
       #createMenu
+      [scope]="_currentScope"
       [allowed]="isCreateAllowed()"
       [allowBinary]="create.allowBinary"
       [parent]="create.parent"

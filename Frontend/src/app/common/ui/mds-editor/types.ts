@@ -23,11 +23,12 @@ export class UserPresentableError extends Error {
 }
 
 export interface Constraints {
+    supportsInlineEditing?: boolean;
     requiresNode?: boolean;
     supportsBulk?: boolean;
 }
 
-export type Values = { [property: string]: string[] };
+export type Values = { [property: string]: (string[] | null) };
 
 /** User-selectable Bulk mode per field */
 export type BulkMode = 'no-change' | 'replace';

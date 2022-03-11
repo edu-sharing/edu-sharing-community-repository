@@ -4,7 +4,7 @@
       subtitle="{{'WORKSPACE.ADD_OBJECT_SUBTITLE' | translate }}"
       icon="cloud_upload"
       width="normal"
-      height="large"
+      height="xlarge"
       [buttons]="buttons"
       (onCancel)="cancel()"
 >
@@ -70,6 +70,12 @@
                         <button mat-button color="primary" (click)="chooseParent=true">{{'CHANGE_STORAGE_LOCATION' | translate}}</button>
                     </div>
                 </div>
+              <mat-checkbox
+                *ngIf="showSaveParent"
+                [(ngModel)]="saveParent"
+                (ngModelChange)="setSaveParent($event)"
+              >{{'STORAGE_LOCATION_SAVE' | translate}}
+              </mat-checkbox>
             </div>
         </div>
     </div>

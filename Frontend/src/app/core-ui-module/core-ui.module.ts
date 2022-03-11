@@ -104,6 +104,8 @@ import {DragCursorDirective} from './directives/drag-cursor.directive';
 import { ConfigService } from 'ngx-edu-sharing-api';
 import { BorderBoxObserverDirective } from './directives/border-box-observer.directive';
 import {NodeRatingComponent} from './components/node-entries/node-rating/node-rating.component';
+import { PreviewImageComponent } from './components/node-entries/preview-image/preview-image.component';
+import { FocusStateDirective } from './directives/focus-state.directive';
 
 @NgModule({
     declarations: [
@@ -177,6 +179,8 @@ import {NodeRatingComponent} from './components/node-entries/node-rating/node-ra
         ListItemLabelPipe,
         DragCursorDirective,
         BorderBoxObserverDirective,
+        PreviewImageComponent,
+        FocusStateDirective,
     ],
     imports: [
         A11yModule,

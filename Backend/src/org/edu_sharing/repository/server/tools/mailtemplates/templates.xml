@@ -320,6 +320,12 @@
 			Suggested Value: {{caption}} ({{id}})<br>
 			{{if parentId}}Parent Value: {{parentCaption}} ({{parentId}})<br>
 			{{endif}}
+			{{if link}}
+				<br><br>
+				Suggested for element "{{node.cm:name}}"
+				<br><br>
+				<div class="center"><a class="btn" href="{{link}}">Link to element</a></div>
+			{{endif}}
 		]]>
 		</message>
 	</template>

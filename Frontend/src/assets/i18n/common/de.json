@@ -177,6 +177,7 @@
     "REPLACE": "Ersetzen",
     "CHANGE_STORAGE_LOCATION": "Ändern",
     "STORAGE_LOCATION_UNSET": "Nicht gewählt",
+    "STORAGE_LOCATION_SAVE": "Diesen Speicherort zukünftig als Standard verwenden",
     "SUGGESTION": "Vorschlag",
     "CLICKTOREMOVE": "Klicken zum Entfernen",
     "NO_PERMISSIONS_FOR_SCOPE": "Keine Berechtigungen, um diesen Bereich anzuzeigen",
@@ -789,6 +790,8 @@
         "DOWNLOAD_FINISHED_IOS": "Download von \"{{name}}\" abgeschlossen.\nSie finden das Element in der Dateien-App",
         "DOWNLOAD_FAILED": "Download von \"{{name}}\" fehlgeschlagen.\nÜberprüfen Sie die Internetverbindung und versuchen Sie es erneut",
         "DOWNLOAD_TRY_AGAIN": "Erneut versuchen",
+        "STORAGE_LOCATION_SAVED": "Der Ordner \"{{name}}\" wird zukünftig standardmäßig für Uploads verwendet",
+        "STORAGE_LOCATION_RESET": "Der Standard-Ordner für Uploads wurde zurückgesetzt",
         "API_FORBIDDEN": "Keine Rechte, um auf diesen Inhalt zuzugreifen",
         "API_FORBIDDEN_LOGIN": "Bitte anmelden, um auf diesen Bereich zuzugreifen"
     },

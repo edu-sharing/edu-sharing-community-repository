@@ -172,6 +172,7 @@
     "REPLACE": "Replace",
     "CHANGE_STORAGE_LOCATION": "Select",
     "STORAGE_LOCATION_UNSET": "Not set",
+    "STORAGE_LOCATION_SAVE": "Use this location as default",
     "SUGGESTION": "Suggestion",
     "CLICKTOREMOVE": "Click to remove",
     "NO_PERMISSIONS_FOR_SCOPE": "No permissions to access this environment",
@@ -744,6 +745,8 @@
     },
     "TOAST": {
         "NODE_LOCKED": "The document is currently used by an other user and can not be opened",
+        "STORAGE_LOCATION_SAVED": "The folder \"{{name}}\" will be used as a default location for future uploads",
+        "STORAGE_LOCATION_RESET": "The default folder for uploads has been reset",
         "RENDER_NOT_FOUND": "The requested element is deleted or does not exist",
         "FIELD_REQUIRED": "The field {{ name }} is required",
         "API_FORBIDDEN": "No permissions to access this content",
