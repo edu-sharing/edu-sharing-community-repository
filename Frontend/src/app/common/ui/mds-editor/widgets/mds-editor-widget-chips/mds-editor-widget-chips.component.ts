@@ -5,7 +5,9 @@ import {
     Component,
     ElementRef,
     OnInit,
+    QueryList,
     ViewChild,
+    ViewChildren,
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import {
@@ -13,7 +15,7 @@ import {
     MatAutocompleteSelectedEvent,
     MatAutocompleteTrigger,
 } from '@angular/material/autocomplete';
-import { MatChipInputEvent } from '@angular/material/chips';
+import { MatChip, MatChipInputEvent } from '@angular/material/chips';
 import { MatTooltip } from '@angular/material/tooltip';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
@@ -49,6 +51,7 @@ export class MdsEditorWidgetChipsComponent
     @ViewChild(MatAutocompleteTrigger, { read: MatAutocompleteTrigger })
     trigger: MatAutocompleteTrigger;
     @ViewChild('auto') matAutocomplete: MatAutocomplete;
+    @ViewChildren('chip') chips: QueryList<MatChip>;
 
     readonly valueType: ValueType = ValueType.MultiValue;
     readonly separatorKeysCodes: number[] = [ENTER, COMMA];
@@ -137,6 +140,13 @@ export class MdsEditorWidgetChipsComponent
 
     ngAfterViewInit(): void {
         this.registerAutoCompleteToggleTrigger();
+        // We mark all chips as selected for better screen-reader output. However, since selection
+        // doesn't do anything, we disable toggling the selection.
+        this.chips.changes
+            .pipe(startWith(this.chips))
+            .subscribe((chips: QueryList<MatChip>) =>
+                chips.forEach((chip) => (chip.toggleSelected = () => true)),
+            );
     }
 
     onInputTokenEnd(event: MatChipInputEvent): void {
