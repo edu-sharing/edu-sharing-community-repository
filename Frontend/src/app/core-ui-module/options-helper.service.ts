@@ -16,7 +16,9 @@ import {
 } from './option-item';
 import {UIHelper} from './ui-helper';
 import {UIService} from '../core-module/rest/services/ui.service';
-import {WorkspaceManagementDialogsComponent} from '../modules/management-dialogs/management-dialogs.component';
+import {
+    WorkspaceManagementDialogsComponent
+} from '../modules/management-dialogs/management-dialogs.component';
 import {
     Connector,
     Filetype,
@@ -983,6 +985,18 @@ export class OptionsHelperService implements OnDestroy {
         qrCodeNode.group = DefaultGroups.View;
         qrCodeNode.priority = 70;
 
+        const relationNode = new OptionItem('OPTIONS.RELATIONS', 'fork_right', (node) => {
+            management.nodeRelations = this.getObjects(node)[0];
+        });
+        relationNode.constrains = [Constrain.NoBulk, Constrain.NoCollectionReference, Constrain.User];
+        relationNode.scopes = [Scope.Render];
+        relationNode.permissions = [RestConstants.PERMISSION_WRITE];
+        relationNode.group = DefaultGroups.Edit;
+        relationNode.group = DefaultGroups.Edit;
+        relationNode.group = DefaultGroups.Edit;
+        relationNode.priority = 70;
+
+
         /**
          * if (this.isAllowedToEditCollection()) {
             this.optionsCollection.push(
@@ -1155,6 +1169,7 @@ export class OptionsHelperService implements OnDestroy {
         options.push(downloadNode);
         options.push(downloadMetadataNode);
         options.push(qrCodeNode);
+        options.push(relationNode);
         options.push(linkMap);
         options.push(cutNodes);
         options.push(copyNodes);

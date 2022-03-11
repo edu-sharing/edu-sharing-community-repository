@@ -20,6 +20,9 @@ import {LicenseSourceComponent} from "./license/license-source/license-source.co
 import {LicenseDetailsComponent} from './license/license-details/license-details.component';
 import {MapLinkComponent} from './map-link/map-link.component';
 import {SignupGroupComponent} from './signup-group/signup-group.component';
+import {
+    NodeRelationManagerComponent
+} from './node-relation-manager/node-relation-manager.component';
 
 export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   WorkspaceLicenseComponent,
@@ -33,6 +36,7 @@ export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   WorkspaceFileUploadSelectComponent,
   WorkspaceContributorComponent,
   NodeReportComponent,
+  NodeRelationManagerComponent,
   CommentsListComponent,
   AddStreamComponent,
   NodeVariantComponent,
