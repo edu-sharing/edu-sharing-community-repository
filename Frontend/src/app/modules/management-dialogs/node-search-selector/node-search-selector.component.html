@@ -1,0 +1,43 @@
+<mat-form-field>
+  <mat-label>{{label}}</mat-label>
+  <i esIcon="search" matPrefix></i>
+  <input
+    type="search"
+    matInput
+    #inputElement
+    [matAutocomplete]="autoGroup"
+    name="authoritySearch"
+    [formControl]="input"
+  />
+  <mat-autocomplete
+    #autoGroup="matAutocomplete"
+    class="mat-autocomplete-high"
+    (optionSelected)="setOption($event)"
+  >
+    <mat-option *ngIf="(searchResult$ | async)?.length === 0" [disabled]="true">
+      <div class="no-match">{{'NODE_SEARCH_SELECTOR.NO_MATCHES' | translate}}</div>
+    </mat-option>
+    <mat-option
+      class="node-row-option"
+      *ngFor="let suggestion of searchResult$ | async"
+      [value]="suggestion"
+    >
+      <es-node-row
+        [node]="suggestion"
+        [columns]="columns"
+      ></es-node-row>
+    </mat-option>
+  </mat-autocomplete>
+</mat-form-field>
+<div class="more clickable" *ngIf="mds?.currentWidgets?.length > 0" (click)="showMds = !showMds">
+  <span>{{'NODE_SEARCH_SELECTOR.MORE_FILTERS' | translate}}</span>
+  <button mat-icon-button color="primary" (click)="showMds = !showMds"><i [esIcon]="'keyboard_arrow_' + (showMds ? 'up' : 'down')"></i></button>
+</div>
+<es-mds-editor-wrapper
+  #mds
+  [class.display-none]="!showMds"
+  [embedded]="true"
+  [editorMode]="'search'"
+  [groupId]="groupId"
+  [currentValues]="{}"
+></es-mds-editor-wrapper>

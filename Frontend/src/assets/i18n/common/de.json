@@ -806,6 +806,27 @@
             "NO_PERSON_INVITED": "Keine Personen gewählt"
         }
     },
+    "NODE_SEARCH_SELECTOR": {
+      "MORE_FILTERS": "Erweiterte Suchfilter",
+      "NO_MATCHES": "Keine Elemente entsprechen der Suchanfrage"
+    },
+    "NODE_RELATIONS": {
+      "TITLE": "Beziehungen verwalten",
+        "CREATE_RELATION": "Neue Beziehung erstellen",
+        "RELATION_TYPE_LABEL": "Art der Beziehung",
+        "RELATION_SEARCH_LABEL": "Suchen nach Ziel-Element",
+        "EXISTING_RELATIONS": "Bestehende Beziehungen",
+        "NO_RELATIONS": "Für dieses Element existieren noch keine Beziehungen.",
+        "RESELECT": "Zurücksetzen",
+        "CREATE_CONFIRM": "Beziehung erstellen",
+        "RELATION_TYPE": {
+          "isPartOf": "ist Teil von",
+          "isBasedOn": "basiert auf",
+          "references": "bezieht sich auf",
+          "hasPart": "besitzt Teil",
+          "isBasisFor": "ist basis von"
+        }
+    },
     "VCARD": {
         "Givenname": "Vorname",
         "Surname": "Nachname",

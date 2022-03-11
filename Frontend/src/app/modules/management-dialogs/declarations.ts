@@ -23,6 +23,8 @@ import {SignupGroupComponent} from './signup-group/signup-group.component';
 import {
     NodeRelationManagerComponent
 } from './node-relation-manager/node-relation-manager.component';
+import {NodeSearchSelectorComponent} from './node-search-selector/node-search-selector.component';
+import {NodeRowComponent} from './node-search-selector/node-row/node-row.component';
 
 export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   WorkspaceLicenseComponent,
@@ -38,6 +40,8 @@ export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   NodeReportComponent,
   NodeRelationManagerComponent,
   CommentsListComponent,
+  NodeSearchSelectorComponent,
+  NodeRowComponent,
   AddStreamComponent,
   NodeVariantComponent,
   MapLinkComponent,

@@ -1,5 +1,50 @@
 <es-card
-  (close)="close.emit()"
+  title="{{'NODE_RELATIONS.TITLE' | translate }}"
+  [node]="nodes"
+  [isCancelable]="true"
+  [buttons]="buttons"
+  (onCancel)="onClose.emit()"
   width="large"
-  height="large"
-></es-card>
+  height="xxlarge"
+>
+  <div class="card-content-padding">
+    <h2 class="mat-heading-4">{{'NODE_RELATIONS.CREATE_RELATION' | translate}}</h2>
+    <form #formElement [formGroup]="form">
+      <mat-form-field>
+        <mat-label>{{'NODE_RELATIONS.RELATION_TYPE_LABEL' | translate}}</mat-label>
+        <mat-select formControlName="relation">
+          <mat-option *ngFor="let key of Relations"
+                      [value]="key"
+          >
+            {{('NODE_RELATIONS.RELATION_TYPE.' + key) | translate}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <es-node-search-selector
+        #selector
+        [class.display-none]="target"
+        [groupId]="'search_relation_node'"
+        [queryId]="'search_relation_query'"
+        [columnsIds]="'relationNodes'"
+        [permissions]="permissions"
+        (onSelect)="target = $event"
+        label="{{'NODE_RELATIONS.RELATION_SEARCH_LABEL' | translate}}"
+      ></es-node-search-selector>
+    </form>
+    <div class="relation-result" *ngIf="target">
+      <es-node-row [node]="nodes[0]" [columns]="selector.columns"></es-node-row>
+      <div class="relation-details">
+        <span>{{('NODE_RELATIONS.RELATION_TYPE.' + ($any(RelationsInverted)[form.get('relation').value])) | translate}}</span>
+        <i esIcon="swap_horiz" altText="{{'NODE_RELATIONS.RELATES_TO' | translate}}"></i>
+        <span>{{('NODE_RELATIONS.RELATION_TYPE.' + form.get('relation').value) | translate}}</span>
+      </div>
+      <es-node-row [node]="target" [columns]="selector.columns"></es-node-row>
+    </div>
+    <div class="actions" *ngIf="target">
+      <button mat-button color="primary" (click)="target = null">{{'NODE_RELATIONS.RESELECT' | translate}}</button>
+      <button mat-flat-button color="primary">{{'NODE_RELATIONS.CREATE_CONFIRM' | translate}}</button>
+    </div>
+    <h2 class="mat-heading-4">{{'NODE_RELATIONS.EXISTING_RELATIONS' | translate}}</h2>
+    <div class="relations-none">{{'NODE_RELATIONS.NO_RELATIONS' | translate}}</div>
+  </div>
+</es-card>

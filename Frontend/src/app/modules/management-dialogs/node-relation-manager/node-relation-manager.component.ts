@@ -14,7 +14,7 @@ import {
     DialogButton,
     LoginResult,
     Node,
-    RestConnectorService,
+    RestConnectorService, RestConstants,
     RestIamService,
     RestNodeService,
 } from '../../../core-module/core.module';
@@ -32,6 +32,26 @@ import { Toast } from '../../../core-ui-module/toast';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NodeRelationManagerComponent {
+    readonly Relations = Object.values(Relations);
+    readonly RelationsInverted = {
+        [Relations.isBasedOn]: 'isBasisFor',
+        [Relations.isPartOf]: 'hasPart',
+        [Relations.references]: 'references'
+    };
     @Input() nodes: Node[];
-    @Output() close = new EventEmitter<void>();
+    @Output() onClose = new EventEmitter<void>();
+
+    readonly form = new FormGroup({
+        relation: new FormControl(Relations.isBasedOn, Validators.required),
+    });
+    readonly buttons = DialogButton.getSingleButton('CLOSE',
+        () => this.onClose.emit(),
+        DialogButton.TYPE_CANCEL);
+    permissions = [RestConstants.PERMISSION_WRITE];
+    target: Node;
+}
+export enum Relations {
+    isBasedOn = 'isBasedOn',
+    isPartOf = 'isPartOf',
+    references = 'references'
 }

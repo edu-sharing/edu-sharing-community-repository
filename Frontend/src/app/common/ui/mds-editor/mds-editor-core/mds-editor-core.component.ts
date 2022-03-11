@@ -23,7 +23,7 @@ export class MdsEditorCoreComponent {
     readonly editorMode: EditorMode;
     readonly shouldShowExtendedWidgets$: BehaviorSubject<boolean>;
 
-    constructor(private mdsEditorInstance: MdsEditorInstanceService) {
+    constructor(public mdsEditorInstance: MdsEditorInstanceService) {
         this.shouldShowExtendedWidgets$ = this.mdsEditorInstance.shouldShowExtendedWidgets$;
         this.editorMode = this.mdsEditorInstance.editorMode;
         this.mdsEditorInstance.mdsInitDone.subscribe(() => this.init());

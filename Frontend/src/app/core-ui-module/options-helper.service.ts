@@ -985,14 +985,12 @@ export class OptionsHelperService implements OnDestroy {
         qrCodeNode.group = DefaultGroups.View;
         qrCodeNode.priority = 70;
 
-        const relationNode = new OptionItem('OPTIONS.RELATIONS', 'fork_right', (node) => {
-            management.nodeRelations = this.getObjects(node)[0];
+        const relationNode = new OptionItem('OPTIONS.RELATIONS', 'swap_horiz', (node) => {
+            management.nodeRelations = this.getObjects(node);
         });
         relationNode.constrains = [Constrain.NoBulk, Constrain.NoCollectionReference, Constrain.User];
         relationNode.scopes = [Scope.Render];
         relationNode.permissions = [RestConstants.PERMISSION_WRITE];
-        relationNode.group = DefaultGroups.Edit;
-        relationNode.group = DefaultGroups.Edit;
         relationNode.group = DefaultGroups.Edit;
         relationNode.priority = 70;
 

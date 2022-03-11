@@ -15,7 +15,7 @@
   [core]="this"
 ></es-mds-editor-view>
 <button
-  *ngIf="editorMode === 'search'"
+  *ngIf="editorMode === 'search' && mdsEditorInstance.widgets.value?.length > 0"
   mat-button
   color="primary"
   class="clear-button"

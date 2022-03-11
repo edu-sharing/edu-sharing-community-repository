@@ -1,0 +1,26 @@
+@import "../../../core-ui-module/styles/variables";
+
+mat-form-field {
+    width: 100%;
+}
+.node-row-option {
+    height: auto;
+    line-height: unset;
+}
+.more {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 0 10px 10px 10px;
+    > span {
+        flex-grow: 1;
+    }
+}
+es-mds-editor-wrapper {
+    transition: $transitionNormal all;
+}
+::ng-deep {
+    .clear-button {
+        margin-bottom: 0;
+    }
+}

@@ -736,6 +736,12 @@
 			<html><![CDATA[
 				]]></html>
 		</template>
+		<template>
+			<id>search_relation_node</id>
+			<html><![CDATA[
+				<ccm:taxonid>
+				]]></html>
+		</template>
 	</templates>
 	<groups>
 		<group>
@@ -891,6 +897,13 @@
 				<view>mediacenter_filter</view>
 			</views>
 		</group>
+		<group>
+			<id>search_relation_node</id>
+			<rendering>angular</rendering>
+			<views>
+				<view>search_relation_node</view>
+			</views>
+		</group>
 	</groups>
 	<sorts>
 		<sort>
@@ -957,6 +970,14 @@
 			<columns>
 				<column>displayName</column>
 				<column>groupType</column>
+			</columns>
+		</list>
+		<list>
+			<id>relationNodes</id>
+			<columns>
+				<column>cclom:title</column>
+				<column>cm:modified</column>
+				<column>ccm:commonlicense_key</column>
 			</columns>
 		</list>
 	</lists>
@@ -1090,6 +1111,17 @@
 				<statement>PATH:"${value}//*"</statement>
 				<preprocessor>node_path</preprocessor>
 				<mandatory>false</mandatory>
+			</property>
+		</query>
+		<query join="AND" id="search_relation_query">
+			<property name="ngsearchword">
+				<statement>TYPE:"ccm:io" AND NOT ASPECT:"ccm:collection_io_reference" AND (@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*")</statement>
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+			</property>
+			<property name="ccm:taxonid">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
 			</property>
 		</query>
 	</queries>
