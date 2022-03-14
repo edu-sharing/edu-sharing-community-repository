@@ -22,6 +22,8 @@ import {RestMdsService} from '../../../core-module/rest/services/rest-mds.servic
 import {TranslateService} from '@ngx-translate/core';
 import {ListItem} from '../../../core-module/ui/list-item';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
+import {animate, state, style, transition, trigger} from '@angular/animations';
+import {UIAnimation} from '../../../core-module/ui/ui-animation';
 
 
 @Component({
@@ -29,9 +31,10 @@ import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
     templateUrl: 'node-search-selector.component.html',
     styleUrls: ['node-search-selector.component.scss'],
     animations: [
+        trigger('switchDialog', UIAnimation.switchDialogBoolean())
     ]
 })
-export class NodeSearchSelectorComponent implements AfterViewInit{
+export class NodeSearchSelectorComponent implements AfterViewInit {
     @ContentChild('noPermissions') noPermissionsRef: TemplateRef<any>;
     @ViewChild(MdsEditorWrapperComponent) mdsEditor: MdsEditorWrapperComponent;
     /**
@@ -55,6 +58,10 @@ export class NodeSearchSelectorComponent implements AfterViewInit{
      */
     @Input() permissions: string[] = [];
     /**
+     * additional search criterias that should be added
+     */
+    @Input() criterias: SearchRequestCriteria[] = [];
+    /**
      * count of items to search
      */
     @Input() itemCount = 100;
@@ -64,6 +71,7 @@ export class NodeSearchSelectorComponent implements AfterViewInit{
     columns: ListItem[];
     showMds = false;
     private values: { [p: string]: string[] };
+    hasMds = false;
 
     constructor(
         private searchApi: RestSearchService,
@@ -94,6 +102,7 @@ export class NodeSearchSelectorComponent implements AfterViewInit{
                 ),
             );
         }
+        criterias = criterias.concat(this.criterias);
         const request = {
             maxItems: this.itemCount,
         };
@@ -114,7 +123,7 @@ export class NodeSearchSelectorComponent implements AfterViewInit{
 
     ngAfterViewInit(): void {
         this.mdsService.getSet().subscribe((set) => {
-            this.columns = MdsHelper.getColumns(this.translate, set,this.columnsIds);
+            this.columns = MdsHelper.getColumns(this.translate, set, this.columnsIds);
         });
         this.searchResult$ = combineLatest([
             this.input.valueChanges,
@@ -122,10 +131,16 @@ export class NodeSearchSelectorComponent implements AfterViewInit{
             debounceTime(200),
             switchMap(() => this.searchNodes()),
         );
+        this.mdsEditor.loadMds();
         this.mdsEditor.mdsEditorInstance.values.subscribe((v) => this.values = v);
     }
 
     hasPermissions(suggestion: Node) {
         return this.permissions.every((p) => this.nodeHelper.getNodesRight([suggestion], p, NodesRightMode.Original));
+    }
+
+    onMdsLoaded() {
+        console.log('mds loaded', this.mdsEditor.currentWidgets);
+        this.hasMds = this.mdsEditor.currentWidgets?.length > 0;
     }
 }

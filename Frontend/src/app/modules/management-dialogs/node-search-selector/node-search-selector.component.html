@@ -37,15 +37,19 @@
     </mat-option>
   </mat-autocomplete>
 </mat-form-field>
-<div class="more clickable" *ngIf="mds?.currentWidgets?.length > 0" (click)="showMds = !showMds">
+<div class="more clickable" *ngIf="hasMds" (click)="showMds = !showMds">
   <span>{{'NODE_SEARCH_SELECTOR.MORE_FILTERS' | translate}}</span>
   <button mat-icon-button color="primary" (click)="showMds = !showMds"><i [esIcon]="'keyboard_arrow_' + (showMds ? 'up' : 'down')"></i></button>
 </div>
-<es-mds-editor-wrapper
-  #mds
-  [class.display-none]="!showMds"
-  [embedded]="true"
-  [editorMode]="'search'"
-  [groupId]="groupId"
-  [currentValues]="{}"
-></es-mds-editor-wrapper>
+<div
+  [@switchDialog]="showMds"
+>
+  <es-mds-editor-wrapper
+    #mds
+    [embedded]="true"
+    [editorMode]="'search'"
+    [groupId]="groupId"
+    [currentValues]="{}"
+    (onMdsLoaded)="onMdsLoaded()"
+  ></es-mds-editor-wrapper>
+</div>

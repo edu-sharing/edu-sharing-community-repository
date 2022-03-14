@@ -27,6 +27,7 @@
         [queryId]="'search_relation_query'"
         [columnsIds]="'relationNodes'"
         [permissions]="permissions"
+        [criterias]="getCriterias()"
         (onSelect)="target = $event"
         label="{{'NODE_RELATIONS.RELATION_SEARCH_LABEL' | translate}}"
       >

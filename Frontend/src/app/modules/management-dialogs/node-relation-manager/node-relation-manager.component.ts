@@ -16,7 +16,7 @@ import {
     Node,
     RestConnectorService, RestConstants,
     RestIamService,
-    RestNodeService,
+    RestNodeService, SearchRequestCriteria,
 } from '../../../core-module/core.module';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { Toast } from '../../../core-ui-module/toast';
@@ -57,6 +57,13 @@ export class NodeRelationManagerComponent {
         const tmp = this.target;
         this.target = this._nodes[0];
         this._nodes[0] = tmp;
+    }
+
+    getCriterias(): SearchRequestCriteria[] {
+        return [{
+            property: "sourceNode",
+            values: [this._nodes[0].ref.id]
+        }];
     }
 }
 export enum Relations {
