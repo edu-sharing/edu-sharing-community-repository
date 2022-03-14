@@ -1,6 +1,6 @@
 <es-card
   title="{{'NODE_RELATIONS.TITLE' | translate }}"
-  [node]="nodes"
+  [node]="_nodes"
   [isCancelable]="true"
   [buttons]="buttons"
   (onCancel)="onClose.emit()"
@@ -29,10 +29,15 @@
         [permissions]="permissions"
         (onSelect)="target = $event"
         label="{{'NODE_RELATIONS.RELATION_SEARCH_LABEL' | translate}}"
-      ></es-node-search-selector>
+      >
+        <ng-template #noPermissions>
+          <i esIcon="security"></i>
+          <span>{{'NODE_RELATIONS.NO_PERMISSIONS' | translate}}</span>
+        </ng-template>
+      </es-node-search-selector>
     </form>
     <div class="relation-result" *ngIf="target">
-      <es-node-row [node]="nodes[0]" [columns]="selector.columns"></es-node-row>
+      <es-node-row [node]="_nodes[0]" [columns]="selector.columns"></es-node-row>
       <div class="relation-details">
         <span>{{('NODE_RELATIONS.RELATION_TYPE.' + ($any(RelationsInverted)[form.get('relation').value])) | translate}}</span>
         <i esIcon="swap_horiz" altText="{{'NODE_RELATIONS.RELATES_TO' | translate}}"></i>
@@ -41,8 +46,18 @@
       <es-node-row [node]="target" [columns]="selector.columns"></es-node-row>
     </div>
     <div class="actions" *ngIf="target">
-      <button mat-button color="primary" (click)="target = null">{{'NODE_RELATIONS.RESELECT' | translate}}</button>
-      <button mat-flat-button color="primary">{{'NODE_RELATIONS.CREATE_CONFIRM' | translate}}</button>
+      <button mat-flat-button color="warn" (click)="target = null">
+        <i esIcon="clear" [aria]="false"></i>
+        {{'NODE_RELATIONS.RESELECT' | translate}}
+      </button>
+      <button mat-button color="primary" (click)="swap()">
+        <i esIcon="swap_horiz" [aria]="false"></i>
+        {{'NODE_RELATIONS.SWAP' | translate}}
+      </button>
+      <button mat-flat-button color="primary">
+        <i esIcon="add" [aria]="false"></i>
+        {{'NODE_RELATIONS.CREATE_CONFIRM' | translate}}
+      </button>
     </div>
     <h2 class="mat-heading-4">{{'NODE_RELATIONS.EXISTING_RELATIONS' | translate}}</h2>
     <div class="relations-none">{{'NODE_RELATIONS.NO_RELATIONS' | translate}}</div>

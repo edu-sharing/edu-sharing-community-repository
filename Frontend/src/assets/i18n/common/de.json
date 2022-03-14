@@ -808,7 +808,8 @@
     },
     "NODE_SEARCH_SELECTOR": {
       "MORE_FILTERS": "Erweiterte Suchfilter",
-      "NO_MATCHES": "Keine Elemente entsprechen der Suchanfrage"
+      "NO_MATCHES": "Keine Elemente entsprechen der Suchanfrage",
+      "NO_PERMISSIONS": "Ihre Berechtigungen an diesem Element sind unzureichend"
     },
     "NODE_RELATIONS": {
       "TITLE": "Beziehungen verwalten",
@@ -817,8 +818,10 @@
         "RELATION_SEARCH_LABEL": "Suchen nach Ziel-Element",
         "EXISTING_RELATIONS": "Bestehende Beziehungen",
         "NO_RELATIONS": "Für dieses Element existieren noch keine Beziehungen.",
+        "SWAP": "Umkehren",
         "RESELECT": "Zurücksetzen",
         "CREATE_CONFIRM": "Beziehung erstellen",
+        "NO_PERMISSIONS": "Sie können dieses Element aufgrund unzureichender Rechte nicht in Beziehung setzen",
         "RELATION_TYPE": {
           "isPartOf": "ist Teil von",
           "isBasedOn": "basiert auf",

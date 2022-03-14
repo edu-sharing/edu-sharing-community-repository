@@ -38,7 +38,10 @@ export class NodeRelationManagerComponent {
         [Relations.isPartOf]: 'hasPart',
         [Relations.references]: 'references'
     };
-    @Input() nodes: Node[];
+    _nodes: Node[];
+    @Input() set nodes(nodes: Node[]) {
+        this._nodes = nodes;
+    }
     @Output() onClose = new EventEmitter<void>();
 
     readonly form = new FormGroup({
@@ -49,6 +52,12 @@ export class NodeRelationManagerComponent {
         DialogButton.TYPE_CANCEL);
     permissions = [RestConstants.PERMISSION_WRITE];
     target: Node;
+
+    swap() {
+        const tmp = this.target;
+        this.target = this._nodes[0];
+        this._nodes[0] = tmp;
+    }
 }
 export enum Relations {
     isBasedOn = 'isBasedOn',

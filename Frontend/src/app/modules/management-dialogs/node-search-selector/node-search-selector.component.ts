@@ -1,21 +1,27 @@
-import {AfterViewInit, Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
+import {
+    AfterViewInit,
+    Component,
+    ContentChild,
+    EventEmitter,
+    Input,
+    Output, TemplateRef,
+    ViewChild
+} from '@angular/core';
+import {combineLatest, Observable} from 'rxjs';
 import {FormControl} from '@angular/forms';
 import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
-import {combineAll, debounceTime, map, startWith, switchMap} from 'rxjs/operators';
+import {debounceTime, map, switchMap} from 'rxjs/operators';
 import {RestSearchService} from '../../../core-module/rest/services/rest-search.service';
-import {Node, SearchRequestCriteria} from '../../../core-module/rest/data-object';
+import {Node, NodesRightMode, SearchRequestCriteria} from '../../../core-module/rest/data-object';
 import {RestConstants} from '../../../core-module/rest/rest-constants';
 import {
     MdsEditorWrapperComponent
 } from '../../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
-import {Values} from '../../../common/ui/mds-editor/types';
 import {MdsHelper} from '../../../core-module/rest/mds-helper';
 import {RestMdsService} from '../../../core-module/rest/services/rest-mds.service';
 import {TranslateService} from '@ngx-translate/core';
 import {ListItem} from '../../../core-module/ui/list-item';
-import * as rxjs from 'rxjs';
-
+import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 
 
 @Component({
@@ -26,6 +32,7 @@ import * as rxjs from 'rxjs';
     ]
 })
 export class NodeSearchSelectorComponent implements AfterViewInit{
+    @ContentChild('noPermissions') noPermissionsRef: TemplateRef<any>;
     @ViewChild(MdsEditorWrapperComponent) mdsEditor: MdsEditorWrapperComponent;
     /**
      * group id of the mds set to use the search filters from
@@ -62,6 +69,7 @@ export class NodeSearchSelectorComponent implements AfterViewInit{
         private searchApi: RestSearchService,
         private mdsService: RestMdsService,
         private translate: TranslateService,
+        private nodeHelper: NodeHelperService,
     ) {
     }
 
@@ -115,5 +123,9 @@ export class NodeSearchSelectorComponent implements AfterViewInit{
             switchMap(() => this.searchNodes()),
         );
         this.mdsEditor.mdsEditorInstance.values.subscribe((v) => this.values = v);
+    }
+
+    hasPermissions(suggestion: Node) {
+        return this.permissions.every((p) => this.nodeHelper.getNodesRight([suggestion], p, NodesRightMode.Original));
     }
 }

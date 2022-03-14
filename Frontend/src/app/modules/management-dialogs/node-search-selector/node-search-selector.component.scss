@@ -16,6 +16,21 @@ mat-form-field {
         flex-grow: 1;
     }
 }
+.missing-permissions {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-gap: 10px;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(1px);
+    z-index: 2;
+    background-color: rgba(255,255,255,0.75);
+    color: $textMain;
+    font-weight: bold;
+}
 es-mds-editor-wrapper {
     transition: $transitionNormal all;
 }
