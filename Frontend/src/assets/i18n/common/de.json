@@ -822,6 +822,9 @@
         "RESELECT": "Zurücksetzen",
         "CREATE_CONFIRM": "Beziehung erstellen",
         "NO_PERMISSIONS": "Sie können dieses Element aufgrund unzureichender Rechte nicht in Beziehung setzen",
+        "RELATION_CREATED": "Beziehung erstellt am",
+        "RELATION_CREATOR": "Beziehung erstellt von",
+        "OPEN_NODE": "Element anzeigen",
         "RELATION_TYPE": {
           "isPartOf": "ist Teil von",
           "isBasedOn": "basiert auf",

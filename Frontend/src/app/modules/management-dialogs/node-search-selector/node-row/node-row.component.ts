@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+
+import {Component, ContentChild, EventEmitter, Input, Output, TemplateRef} from '@angular/core';
 import {Group, Node, User} from '../../../../core-module/rest/data-object';
 import {
     ListItem,
@@ -15,6 +16,7 @@ import {MdsHelper} from '../../../../core-module/rest/mds-helper';
     styleUrls: ['node-row.component.scss'],
 })
 export class NodeRowComponent {
+    @ContentChild('customMetadata') customMetadataRef: TemplateRef<any>;
     @Input() node: Node;
     @Input() columns: ListItem[];
 

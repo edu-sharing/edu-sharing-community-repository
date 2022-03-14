@@ -1,29 +1,24 @@
-import { trigger } from '@angular/animations';
-import {
-    ChangeDetectionStrategy,
-    Component,
-    ElementRef,
-    EventEmitter,
-    Input,
-    Output,
-    ViewChild,
-} from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { TranslateService } from '@ngx-translate/core';
+import {trigger} from '@angular/animations';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output,} from '@angular/core';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {
     DialogButton,
-    LoginResult,
+    ListItem,
     Node,
-    RestConnectorService, RestConstants,
-    RestIamService,
-    RestNodeService, SearchRequestCriteria,
+    RestConstants,
+    SearchRequestCriteria,
 } from '../../../core-module/core.module';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import { Toast } from '../../../core-ui-module/toast';
+import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {
     RelationV1Service
 } from '../../../../../projects/edu-sharing-api/src/lib/api/services/relation-v-1.service';
-import { NodeRelation } from 'projects/edu-sharing-api/src/lib/api/models/node-relation';
+import {
+    RelationData
+} from '../../../../../projects/edu-sharing-api/src/lib/api/models/relation-data';
+import {UIHelper} from '../../../core-ui-module/ui-helper';
+import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
+import {BridgeService} from '../../../core-bridge-module/bridge.service';
+import {OPEN_URL_MODE} from '../../../core-module/ui/ui-constants';
 
 @Component({
     selector: 'es-node-relation-manager',
@@ -43,16 +38,38 @@ export class NodeRelationManagerComponent {
         [Relations.references]: 'references'
     };
     _nodes: Node[];
-    relations: NodeRelation;
+    relations: RelationData[];
     @Input() set nodes(nodes: Node[]) {
         this._nodes = nodes;
         this.relationService.getRelations({
             repository: RestConstants.HOME_REPOSITORY,
             node: this._nodes[0].ref.id
         }).subscribe((relations) =>
-            this.relations = relations
+            this.relations = relations.relations
         , (e: any) => {
-            //@ TODO
+            // @TODO
+            this.relations = [
+                {
+                    node: this._nodes[0] as any,
+                    type: 'isPartOf',
+                    timestamp: '' + (new Date().getTime() - Math.random() * 100000000)
+                },
+                {
+                    node: this._nodes[0] as any,
+                    type: 'isPartOf',
+                    timestamp: '' + (new Date().getTime() - Math.random() * 100000000)
+                },
+                {
+                    node: this._nodes[0] as any,
+                    type: 'isBasedOn',
+                    timestamp: '' + (new Date().getTime() - Math.random() * 100000000)
+                },
+                {
+                    node: this._nodes[0] as any,
+                    type: 'references',
+                    timestamp: '' + (new Date().getTime() - Math.random() * 100000000)
+                }
+            ]
         });
     }
     @Output() onClose = new EventEmitter<void>();
@@ -65,11 +82,19 @@ export class NodeRelationManagerComponent {
         DialogButton.TYPE_CANCEL);
     permissions = [RestConstants.PERMISSION_WRITE];
     target: Node;
+    columns = [
+        new ListItem('NODE', RestConstants.LOM_PROP_TITLE)
+    ];
 
     constructor(
         private relationService: RelationV1Service,
-        private toast: Toast,
+        private nodeHelper: NodeHelperService,
+        private bridgeService: BridgeService,
     ) {
+    }
+
+    getRelationKeys() {
+        return [...new Set(this.relations?.map(r => r.type))].sort();
     }
 
 
@@ -84,6 +109,18 @@ export class NodeRelationManagerComponent {
             property: "sourceNode",
             values: [this._nodes[0].ref.id]
         }];
+    }
+
+    getRelations(key: 'isPartOf' | 'isBasedOn' | 'references' | 'hasPart' | 'isBaseFor'): RelationData[] {
+        return this.relations.filter(r => r.type === key).sort((a,b) => a.timestamp.localeCompare(b.timestamp));
+    }
+
+    openNode(node: Node) {
+        UIHelper.openUrl(
+            this.nodeHelper.getNodeUrl(node),
+            this.bridgeService,
+            OPEN_URL_MODE.Blank
+        );
     }
 }
 export enum Relations {

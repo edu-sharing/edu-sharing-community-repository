@@ -61,6 +61,40 @@
       </button>
     </div>
     <h2 class="mat-heading-4">{{'NODE_RELATIONS.EXISTING_RELATIONS' | translate}}</h2>
-    <div class="relations-none">{{'NODE_RELATIONS.NO_RELATIONS' | translate}}</div>
+    <div class="relations-none" *ngIf="!getRelationKeys()">{{'NODE_RELATIONS.NO_RELATIONS' | translate}}</div>
+    <div class="relations-group" *ngFor="let key of getRelationKeys()">
+      <div>
+        <h5 class="mat-heading-5">"{{_nodes[0] | nodeTitle}}" {{('NODE_RELATIONS.RELATION_TYPE.' + key) | translate}}</h5>
+        <div class="relation-nodes">
+          <!--[node]="relation.node" -->
+          <div class="relation-node"
+               *ngFor="let relation of getRelations(key)"
+          >
+            <es-node-row
+              [node]="$any(relation.node)"
+              [columns]="columns"
+            >
+              <ng-template #customMetadata>
+                <div class="info-group">
+                  <label>{{'NODE_RELATIONS.RELATION_CREATED' | translate}}</label>
+                  <span>{{ relation.timestamp | formatDate:{relative: false} }}</span>
+                </div>
+                <div class="info-group">
+                  <label>{{'NODE_RELATIONS.RELATION_CREATOR' | translate}}</label>
+                  <span>{{ relation.creator | authorityName }}</span>
+                </div>
+              </ng-template>
+            </es-node-row>
+            <button
+              mat-icon-button
+              color="primary"
+              (click)="openNode($any(relation.node))"
+              matTooltip="{{'NODE_RELATIONS.OPEN_NODE' | translate}}"
+            ><i esIcon="open_in_new" [aria]="false"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </es-card>

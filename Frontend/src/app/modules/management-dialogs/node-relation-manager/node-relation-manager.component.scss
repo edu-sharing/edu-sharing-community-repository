@@ -45,4 +45,25 @@
         color: $textLight;
         text-align: center;
     }
+    .relations-group {
+        display: grid;
+        grid-gap: 20px;
+        grid-template-rows: repeat(auto-fit, 1fr);
+        .relation-nodes {
+            .relation-node {
+                display: grid;
+                grid-template-columns: 1fr auto;
+                grid-gap: 10px;
+                align-items: center;
+            }
+        }
+    }
+}
+.info-group {
+    display: flex;
+    flex-direction: column;
+    label {
+        font-size: $fontSizeXSmall;
+        color: $textLight;
+    }
 }

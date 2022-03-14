@@ -1,4 +1,4 @@
-<div class="node-row">
+<div class="node-row" *ngIf="node">
   <div class="icon-bg">
     <img
       [src]="node.iconURL"
@@ -19,6 +19,7 @@
         [item]="column"
         [provideLabel]="true"
       ></es-list-text>
+      <ng-container *ngTemplateOutlet="customMetadataRef; context: {node: node}"></ng-container>
     </div>
   </div>
 </div>
