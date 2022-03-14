@@ -657,7 +657,7 @@
         "SUGGEST_VALUE_SEND": "Suggest",
         "SUGGEST_VALUE_SENT": "The suggestion has been submitted and will now be checked by the editorial team. It will appear as soon as it is being activated. Thank you.",
         "NO_MATCHING_VALUES": "No matching values",
-        "DELETE_KEY_NOTICE": "remove with \"Delete\""
+        "DELETE_KEY_NOTICE": "Remove with Delete key"
     },
 
      "SIMPLE_EDIT": {
