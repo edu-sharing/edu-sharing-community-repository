@@ -39,7 +39,9 @@
 </mat-form-field>
 <div class="more clickable" *ngIf="hasMds" (click)="showMds = !showMds">
   <span>{{'NODE_SEARCH_SELECTOR.MORE_FILTERS' | translate}}</span>
-  <button mat-icon-button color="primary" (click)="showMds = !showMds"><i [esIcon]="'keyboard_arrow_' + (showMds ? 'up' : 'down')"></i></button>
+  <button mat-icon-button color="primary" (click)="showMds = !showMds; $event.stopPropagation()">
+    <i [esIcon]="'keyboard_arrow_' + (showMds ? 'up' : 'down')"></i>
+  </button>
 </div>
 <div
   [@switchDialog]="showMds"

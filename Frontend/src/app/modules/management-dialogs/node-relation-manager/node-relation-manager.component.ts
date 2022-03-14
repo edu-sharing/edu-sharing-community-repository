@@ -20,6 +20,10 @@ import {
 } from '../../../core-module/core.module';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { Toast } from '../../../core-ui-module/toast';
+import {
+    RelationV1Service
+} from '../../../../../projects/edu-sharing-api/src/lib/api/services/relation-v-1.service';
+import { NodeRelation } from 'projects/edu-sharing-api/src/lib/api/models/node-relation';
 
 @Component({
     selector: 'es-node-relation-manager',
@@ -39,8 +43,17 @@ export class NodeRelationManagerComponent {
         [Relations.references]: 'references'
     };
     _nodes: Node[];
+    relations: NodeRelation;
     @Input() set nodes(nodes: Node[]) {
         this._nodes = nodes;
+        this.relationService.getRelations({
+            repository: RestConstants.HOME_REPOSITORY,
+            node: this._nodes[0].ref.id
+        }).subscribe((relations) =>
+            this.relations = relations
+        , (e: any) => {
+            //@ TODO
+        });
     }
     @Output() onClose = new EventEmitter<void>();
 
@@ -52,6 +65,13 @@ export class NodeRelationManagerComponent {
         DialogButton.TYPE_CANCEL);
     permissions = [RestConstants.PERMISSION_WRITE];
     target: Node;
+
+    constructor(
+        private relationService: RelationV1Service,
+        private toast: Toast,
+    ) {
+    }
+
 
     swap() {
         const tmp = this.target;

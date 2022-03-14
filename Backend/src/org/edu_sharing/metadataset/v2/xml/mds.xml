@@ -1114,10 +1114,16 @@
 			</property>
 		</query>
 		<query join="AND" id="search_relation_query">
+			<basequery>TYPE:"ccm:io" AND NOT ASPECT:"ccm:collection_io_reference"</basequery>
 			<property name="ngsearchword">
-				<statement>TYPE:"ccm:io" AND NOT ASPECT:"ccm:collection_io_reference" AND (@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*")</statement>
+				<statement>(@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*")</statement>
 				<multiple>true</multiple>
 				<multiplejoin>AND</multiplejoin>
+			</property>
+			<property name="sourceNode">
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+				<statement>TYPE:"ccm:io" AND NOT @sys\:node-uuid:"${value}"</statement>
 			</property>
 			<property name="ccm:taxonid">
 				<multiple>true</multiple>
