@@ -144,12 +144,12 @@
         <es-node-url *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
                       [node]="node"
                       #link
-                      [matTooltip]="node.title"
         >
           <es-list-base
             [item]="displayPart"
             [node]="node"
             [provideLabel]="false"
+            [matTooltip]="node.title"
           >
           </es-list-base>
         </es-node-url>
@@ -159,6 +159,7 @@
             [item]="displayPart"
             [node]="node"
             [provideLabel]="false"
+            [matTooltip]="node.name"
           >
           </es-list-base>
         </div>
