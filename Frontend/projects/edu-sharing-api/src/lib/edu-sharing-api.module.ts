@@ -23,6 +23,8 @@ export class EduSharingApiModule {
             API_INTERCEPTOR_PROVIDER,
         ];
         if (params) {
+            params.rootUrl = params.rootUrl || '/edu-sharing/rest';
+            console.log(params);
             providers.push({
                 provide: ApiConfiguration,
                 useValue: params,

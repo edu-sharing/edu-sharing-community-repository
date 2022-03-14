@@ -1,27 +1,30 @@
 import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import {Observable, throwError} from 'rxjs';
+import {catchError, tap} from 'rxjs/operators';
 import { ApiRequestConfiguration } from './api-request-configuration';
+import {ApiConfiguration} from './api/api-configuration';
 
 @Injectable()
 export class ApiInterceptor implements HttpInterceptor {
-    constructor(private apiRequestConfiguration: ApiRequestConfiguration) {}
-    
+    constructor(
+        private apiRequestConfiguration: ApiRequestConfiguration,
+        private apiConfiguration: ApiConfiguration,
+    ) {}
+
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         // Apply the headers
         req = this.apiRequestConfiguration.apply(req);
 
-        return next.handle(req);
         // Also handle errors globally
-        // .pipe(
-        //     tap(
-        //         (x) => x,
-        //         (err) => {
-        //             // Handle this err
-        //             console.error(`Error performing request, status code = ${err.status}`);
-        //         },
-        //     ),
-        // );
+        return next.handle(req).pipe(
+            catchError(
+                (err) => {
+                    // Handle this error externally
+                    this.apiConfiguration.onError(err);
+                    err.processed = true;
+                    return throwError(err);
+                },
+            ));
     }
 }

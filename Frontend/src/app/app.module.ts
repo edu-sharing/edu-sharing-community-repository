@@ -89,6 +89,8 @@ import {
     MdsEditorWidgetTinyMCE
 } from './common/ui/mds-editor/widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-tinymce.component';
 import {EditorModule} from '@tinymce/tinymce-angular';
+import {ApiConfigurationParams} from '../../projects/edu-sharing-api/src/lib/api/api-configuration';
+import {ErrorHandlerService} from './core-ui-module/error-handler.service';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -168,7 +170,9 @@ import {EditorModule} from '@tinymce/tinymce-angular';
     imports: [
         IMPORTS,
         CommonModule,
-        EduSharingApiModule.forRoot(),
+        EduSharingApiModule.forRoot({
+            onError: (err) => ErrorHandlerService.handleError(err)
+        } as ApiConfigurationParams),
         NgxSliderModule,
         DragDropModule,
         extensionImports,
@@ -181,6 +185,7 @@ import {EditorModule} from '@tinymce/tinymce-angular';
         {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {appearance: 'outline'}},
         {provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: {showDelay: 500}},
         extensionProviders,
+        ErrorHandlerService,
     ],
     exports: [
         DECLARATIONS,

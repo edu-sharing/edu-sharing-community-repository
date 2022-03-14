@@ -42,6 +42,7 @@ import {AccessibilityComponent} from '../common/ui/accessibility/accessibility.c
 import { extensionRoutes } from '../extension/extension-routes';
 import {BehaviorSubject} from 'rxjs';
 import { AccessibilityService } from '../common/ui/accessibility/accessibility.service';
+import {ErrorHandlerService} from '../core-ui-module/error-handler.service';
 
 @Component({
     selector: 'es-router',
@@ -98,6 +99,8 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
         private bridge: BridgeService,
         private injector: Injector,
         private accessibilityService: AccessibilityService,
+        // inject service to be available for other components
+        private errorHandlerService: ErrorHandlerService,
     ) {
         this.injector.get(Router).events.subscribe(event => {
             if (event instanceof NavigationEnd) {

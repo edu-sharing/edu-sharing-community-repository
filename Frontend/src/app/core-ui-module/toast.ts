@@ -13,6 +13,7 @@ import { DateHelper } from './DateHelper';
 import {ToastMessageComponent} from './components/toast-message/toast-message.component';
 import { AccessibilityService } from '../common/ui/accessibility/accessibility.service';
 import { takeUntil } from 'rxjs/operators';
+import {HttpErrorResponse} from '@angular/common/http';
 
 interface CustomAction {
     link: {
@@ -192,6 +193,10 @@ export class Toast implements OnDestroy {
         customAction: CustomAction = null,
         toastMessage: ToastMessage = null,
     ): void {
+        if(errorObject?.processed) {
+            console.warn('Called toast.error() with an already consumed error object');
+            return;
+        }
         const parsingResult = this.parseErrorObject({
             errorObject,
             message,
@@ -521,6 +526,9 @@ export class Toast implements OnDestroy {
             } else {
                 if (!dialogMessage) {
                     dialogMessage = error + '\n\n' + errorInfo;
+                    if(errorObject instanceof HttpErrorResponse && errorObject.url) {
+                        dialogMessage += '\n\nBackend URL: ' + errorObject.url;
+                    }
                 }
                 if (!translationParameters) {
                     translationParameters = {};
