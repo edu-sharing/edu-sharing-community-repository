@@ -4,7 +4,7 @@ import {NativeWidgetComponent} from '../../mds-editor-view/mds-editor-view.compo
 import {MainNavService} from '../../../../services/main-nav.service';
 import {MdsEditorInstanceService} from '../../mds-editor-instance.service';
 import {MdsEditorWidgetAuthorComponent} from '../mds-editor-widget-author/mds-editor-widget-author.component';
-import {NativeWidgetType} from '../../types';
+import {Constraints, NativeWidgetType} from '../../types';
 
 @Component({
     selector: 'es-mds-editor-widget-link',
@@ -12,7 +12,8 @@ import {NativeWidgetType} from '../../types';
     styleUrls: ['./mds-editor-widget-link.component.scss'],
 })
 export class MdsEditorWidgetLinkComponent implements OnInit, NativeWidgetComponent {
-    static readonly constraints = {
+    static readonly constraints: Constraints = {
+        supportsInlineEditing: true,
         requiresNode: true,
         supportsBulk: false,
     };

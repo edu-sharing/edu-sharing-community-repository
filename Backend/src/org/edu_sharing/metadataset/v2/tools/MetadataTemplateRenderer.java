@@ -607,7 +607,7 @@ public class MetadataTemplateRenderer {
 
 	private static String cleanupText(MetadataWidget.TextEscapingPolicy textEscapingPolicy, String untrustedHTML) {
 		if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.htmlBasic)) {
-			PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.LINKS);
+			PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.BLOCKS).and(Sanitizers.LINKS);
 			return policy.sanitize(untrustedHTML);
 		} else if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.all)){
 			return StringEscapeUtils.escapeHtml4(untrustedHTML);

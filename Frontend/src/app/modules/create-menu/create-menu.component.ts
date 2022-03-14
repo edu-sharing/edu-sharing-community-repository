@@ -84,6 +84,7 @@ export class CreateMenuComponent {
      * Allow upload of binary files
      */
     @Input() allowBinary = true;
+    @Input() scope: string;
     private fallbackFolder: Node;
     /**
      * Parent location. If null, the folder picker will be shown

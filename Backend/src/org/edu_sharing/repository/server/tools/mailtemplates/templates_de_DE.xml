@@ -210,6 +210,12 @@
 			Vorgeschlagener Wert: {{caption}} ({{id}})<br>
 			{{if parentId}}Übergerodneter Wert: {{parentCaption}} ({{parentId}})<br>
 			{{endif}}
+			{{if link}}
+				<br><br>
+				Vorgeschlagen für Element "{{node.cm:name}}"
+				<br><br>
+				<div class="center"><a class="btn" href="{{link}}">Link zum Element</a></div>
+			{{endif}}
 		]]>
 		</message>
 	</template>

@@ -149,6 +149,7 @@ export class SearchV1Service extends BaseService {
             | 'FILES_AND_FOLDERS'
             | 'COLLECTIONS'
             | 'TOOLPERMISSIONS'
+            | 'COLLECTION_PROPOSALS'
             | 'ALL';
 
         /**
@@ -233,6 +234,7 @@ export class SearchV1Service extends BaseService {
             | 'FILES_AND_FOLDERS'
             | 'COLLECTIONS'
             | 'TOOLPERMISSIONS'
+            | 'COLLECTION_PROPOSALS'
             | 'ALL';
 
         /**
@@ -427,6 +429,7 @@ export class SearchV1Service extends BaseService {
             | 'FILES_AND_FOLDERS'
             | 'COLLECTIONS'
             | 'TOOLPERMISSIONS'
+            | 'COLLECTION_PROPOSALS'
             | 'ALL';
 
         /**
@@ -523,6 +526,7 @@ export class SearchV1Service extends BaseService {
             | 'FILES_AND_FOLDERS'
             | 'COLLECTIONS'
             | 'TOOLPERMISSIONS'
+            | 'COLLECTION_PROPOSALS'
             | 'ALL';
 
         /**
@@ -590,6 +594,7 @@ export class SearchV1Service extends BaseService {
             | 'FILES_AND_FOLDERS'
             | 'COLLECTIONS'
             | 'TOOLPERMISSIONS'
+            | 'COLLECTION_PROPOSALS'
             | 'ALL';
 
         /**
@@ -692,6 +697,7 @@ export class SearchV1Service extends BaseService {
             | 'FILES_AND_FOLDERS'
             | 'COLLECTIONS'
             | 'TOOLPERMISSIONS'
+            | 'COLLECTION_PROPOSALS'
             | 'ALL';
 
         /**

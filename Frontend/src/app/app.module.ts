@@ -85,6 +85,10 @@ import { MdsEditorWidgetSearchSuggestionsComponent } from './common/ui/mds-edito
 import { EduSharingApiModule } from 'ngx-edu-sharing-api';
 import { MdsEditorWidgetVCardComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-vcard/mds-editor-widget-vcard.component';
 import { extensionProviders } from './extension/extension-providers';
+import {
+    MdsEditorWidgetTinyMCE
+} from './common/ui/mds-editor/widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-tinymce.component';
+import {EditorModule} from '@tinymce/tinymce-angular';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -141,6 +145,7 @@ import { extensionProviders } from './extension/extension-providers';
         MdsEditorWidgetTreeCoreComponent,
         HighlightPipe,
         MdsEditorWidgetCheckboxComponent,
+        MdsEditorWidgetTinyMCE,
         MdsEditorWidgetRadioButtonComponent,
         MdsEditorWidgetCheckboxesComponent,
         MdsEditorEmbeddedComponent,
@@ -168,6 +173,7 @@ import { extensionProviders } from './extension/extension-providers';
         DragDropModule,
         extensionImports,
         ResizableModule,
+        EditorModule,
     ],
     providers: [
         PROVIDERS,

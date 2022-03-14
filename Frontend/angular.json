@@ -20,7 +20,9 @@
             "deployUrl": "/edu-sharing/",
             "assets": [
               { "glob": "**/*", "input": "src/assets/", "output": "/assets/" },
-              { "glob": "**/*", "input": "node_modules/ngx-monaco-editor/assets/monaco", "output": "/assets/monaco/" }
+              { "glob": "**/*", "input": "node_modules/ngx-monaco-editor/assets/monaco", "output": "/assets/monaco/" },
+              { "glob": "**/*", "input": "node_modules/tinymce", "output": "/tinymce/" },
+              { "glob": "**/*", "input": "node_modules/tinymce-i18n/langs5", "output": "/tinymce/langs/" }
             ],
             "styles": [
               "src/app/core-ui-module/styles/core-base.scss",
@@ -31,7 +33,8 @@
               "src/assets/js/nouislider.min.js",
               "node_modules/materialize-css/dist/js/materialize.min.js",
               "node_modules/moment/min/moment-with-locales.min.js",
-              "node_modules/chart.js/dist/Chart.js"
+              "node_modules/chart.js/dist/Chart.js",
+              "node_modules/tinymce/tinymce.min.js"
             ],
             "vendorChunk": true,
             "extractLicenses": false,

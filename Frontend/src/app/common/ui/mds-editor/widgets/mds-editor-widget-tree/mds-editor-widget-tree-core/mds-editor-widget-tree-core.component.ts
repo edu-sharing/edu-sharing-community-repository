@@ -399,6 +399,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
                 widget: this.widget.definition.id,
                 metadataset: this.mdsEditorInstanceService.mdsId,
                 parent: node.parent?.id,
+                nodeId: this.mdsEditorInstanceService.nodes$.value?.map(n => n.ref.id),
                 caption: value
             }).toPromise();
             this.toast.toast('MDS.SUGGEST_VALUE_SENT');

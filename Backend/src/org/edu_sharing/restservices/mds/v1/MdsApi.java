@@ -27,6 +27,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
+import java.util.List;
 
 @Path("/mds/v1")
 @Tag(name="MDS v1")
@@ -183,6 +184,7 @@ public class MdsApi {
 			@Parameter(description = "widget id, e.g. cm:name", required = true) @PathParam("widget") String widget,
 			@Parameter(description = "caption of the new entry (id will be auto-generated)", required = true) @QueryParam("caption") String valueCaption,
 			@Parameter(description = "parent id of the new entry (might be null)", required = false) @QueryParam("parent") String parent,
+			@Parameter(description = "One or more nodes this suggestion relates to (optional, only for extended mail data)", required = false) @QueryParam("nodeId") List<String> nodes,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -194,7 +196,7 @@ public class MdsApi {
 
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			MdsDao mds = MdsDao.getMds(repoDao, mdsId);
-			MdsValue value = mds.suggestValue(widget, valueCaption, parent);
+			MdsValue value = mds.suggestValue(widget, valueCaption, parent, nodes);
 
 			return Response.status(Response.Status.OK).entity(value).build();
 

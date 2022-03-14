@@ -28,6 +28,9 @@ import { ViewInstanceService } from '../../mds-editor-view/view-instance.service
 import { BulkMode, EditorBulkMode, InputStatus } from '../../types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { FormFieldRegistrationService } from './form-field-registration.service';
+import {
+    InteractionType
+} from '../../../../../core-ui-module/components/node-entries-wrapper/entries-model';
 
 @Component({
     selector: 'es-mds-editor-widget-container',
@@ -196,7 +199,8 @@ export class MdsEditorWidgetContainerComponent
         return (
             this.editorBulkMode?.isBulk &&
             this.editorBulkMode?.bulkBehavior === BulkBehavior.Default &&
-            !!this.widget
+            !!this.widget &&
+            this.widget.definition.interactionType !== 'None'
         );
     }
 
