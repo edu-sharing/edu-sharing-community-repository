@@ -698,6 +698,7 @@
         "SUGGEST_VALUE_SEND": "Vorschlagen",
         "SUGGEST_VALUE_SENT": "Der Vorschlag wurde eingereicht und wird durch die Redaktion geprüft. Der Vorschlag taucht erst auf, wenn er durch die Redaktion aktiviert wurde. Vielen Dank!",
         "NO_MATCHING_VALUES": "Keine passenden Werte",
+        "NO_ARBITRARY_VALUES_NOTICE": "Für dieses Feld können Werte nicht frei gewählt werden. Bitte wählen Sie Werte aus der Liste.",
         "DELETE_KEY_NOTICE": "Löschen mit Entf-Taste"
     },
     "SIMPLE_EDIT": {

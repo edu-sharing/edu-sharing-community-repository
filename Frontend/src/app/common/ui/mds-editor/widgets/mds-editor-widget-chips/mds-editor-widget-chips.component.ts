@@ -30,6 +30,7 @@ import {
     switchMap,
     throttleTime,
 } from 'rxjs/operators';
+import { Toast, ToastType } from 'src/app/core-ui-module/toast';
 import { UIHelper } from '../../../../../core-ui-module/ui-helper';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsWidgetType, MdsWidgetValue } from '../../types';
@@ -78,6 +79,7 @@ export class MdsEditorWidgetChipsComponent
         mdsEditorInstance: MdsEditorInstanceService,
         translate: TranslateService,
         private changeDetectorRef: ChangeDetectorRef,
+        private toast: Toast,
     ) {
         super(mdsEditorInstance, translate);
     }
@@ -121,7 +123,7 @@ export class MdsEditorWidgetChipsComponent
                 map(
                     ([autocompleteValues, inputValue]) =>
                         this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges &&
-                        autocompleteValues.length === 0 &&
+                        autocompleteValues?.length === 0 &&
                         inputValue,
                 ),
             );
@@ -151,6 +153,16 @@ export class MdsEditorWidgetChipsComponent
 
     onInputTokenEnd(event: MatChipInputEvent): void {
         if (this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges) {
+            if (event.value) {
+                // If the input field still has a value, the use has not selected on option from the
+                // autocomplete list. In this case, we notify them, that they cannot add arbitrary
+                // values.
+                this.toast.show({
+                    message: 'MDS.NO_ARBITRARY_VALUES_NOTICE',
+                    type: 'info',
+                    subtype: ToastType.InfoSimple,
+                });
+            }
             return;
         }
         const value = (event.value || '').trim();
