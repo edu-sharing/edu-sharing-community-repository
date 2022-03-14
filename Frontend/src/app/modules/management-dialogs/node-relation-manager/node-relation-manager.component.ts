@@ -37,10 +37,12 @@ export class NodeRelationManagerComponent {
         [Relations.isPartOf]: 'hasPart',
         [Relations.references]: 'references'
     };
+    source: Node;
     _nodes: Node[];
     relations: RelationData[];
     @Input() set nodes(nodes: Node[]) {
         this._nodes = nodes;
+        this.source = nodes[0];
         this.relationService.getRelations({
             repository: RestConstants.HOME_REPOSITORY,
             node: this._nodes[0].ref.id
@@ -100,8 +102,8 @@ export class NodeRelationManagerComponent {
 
     swap() {
         const tmp = this.target;
-        this.target = this._nodes[0];
-        this._nodes[0] = tmp;
+        this.target = this.source;
+        this.source = tmp;
     }
 
     getCriterias(): SearchRequestCriteria[] {

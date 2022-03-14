@@ -38,7 +38,7 @@
       </es-node-search-selector>
     </form>
     <div class="relation-result" *ngIf="target">
-      <es-node-row [node]="_nodes[0]" [columns]="selector.columns"></es-node-row>
+      <es-node-row [node]="source" [columns]="selector.columns"></es-node-row>
       <div class="relation-details">
         <span>{{('NODE_RELATIONS.RELATION_TYPE.' + ($any(RelationsInverted)[form.get('relation').value])) | translate}}</span>
         <i esIcon="swap_horiz" altText="{{'NODE_RELATIONS.RELATES_TO' | translate}}"></i>

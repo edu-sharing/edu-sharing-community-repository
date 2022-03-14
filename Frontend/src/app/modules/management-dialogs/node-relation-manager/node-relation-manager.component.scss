@@ -50,6 +50,9 @@
         grid-gap: 20px;
         grid-template-rows: repeat(auto-fit, 1fr);
         .relation-nodes {
+            background-color: $cardLightBackground;
+            margin: 10px 0;
+            padding: 5px 10px;
             .relation-node {
                 display: grid;
                 grid-template-columns: 1fr auto;
