@@ -20,7 +20,7 @@ import {NodeHelperService} from '../../core-ui-module/node-helper.service';
   styleUrls: ['file-upload.component.scss']
 })
 export class FileUploadComponent{
-    filesToUpload: Node[];
+    filesToUpload: FileList;
     loading = true;
     _showUploadSelect: boolean;
 
@@ -58,7 +58,7 @@ export class FileUploadComponent{
        });
    }
 
-    uploadNodes(event: any) {
+    uploadNodes(event: FileList) {
         this._showUploadSelect=false;
         this.filesToUpload=event;
     }
