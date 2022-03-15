@@ -118,6 +118,8 @@
       <permissionGroup name="Feedback" expose="true" allowFullControl="false" />
       <!-- edu-sharing Rate permission -->
       <permissionGroup name="Rate" expose="true" allowFullControl="false" />
+       <!-- edu-sharing Relation permission -->
+       <permissionGroup name="Relation" expose="true" allowFullControl="false" />
       <!-- edu-sharing Deny permission which will have priority to other permissions -->
       <permissionGroup name="Deny"  expose="true" allowFullControl="false" />
       
@@ -144,6 +146,10 @@
        <!-- edu-sharing rate permission -->
        <permission name="_Rate"  expose="false">
            <grantedToGroup permissionGroup="Rate" />
+       </permission>
+       <!-- edu-sharing relation permission -->
+       <permission name="_Relation"  expose="false">
+           <grantedToGroup permissionGroup="Relation" />
        </permission>
 
       <!-- The permission to read properties on a node                                    -->
@@ -345,6 +351,7 @@
           <includePermissionGroup permissionGroup="Consumer" type="cm:cmobject"/>
           <includePermissionGroup permissionGroup="AddChildren" type="sys:base"/>
           <includePermissionGroup permissionGroup="ReadPermissions" type="sys:base" />
+          <includePermissionGroup permissionGroup="Relation" type="sys:base"/>
       </permissionGroup>
       
       <!-- An editor can read and write to the object; they can not create    -->
