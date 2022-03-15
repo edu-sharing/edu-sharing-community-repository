@@ -83,12 +83,16 @@ public class PermissionChecking {
             }
 
             if (arg.getClass().isArray()) {
+                int j = 0;
                 for (Object item : (Object[]) arg) {
-                    checkNodePermissions(item, user, nodePermissionAnnotation.value(), parameter.getName());
+                    checkNodePermissions(item, user, nodePermissionAnnotation.value(), String.format("%s[%s] ", parameter.getName(), j));
+                    j++;
                 }
             } else if (arg instanceof Iterable) {
+                int j = 0;
                 for (Object item : (Iterable<?>) arg) {
-                    checkNodePermissions(item, user, nodePermissionAnnotation.value(), parameter.getName());
+                    checkNodePermissions(item, user, nodePermissionAnnotation.value(), String.format("%s[%s] ", parameter.getName(), j));
+                    j++;
                 }
             } else {
                 checkNodePermissions(arg, user, nodePermissionAnnotation.value(), parameter.getName());
