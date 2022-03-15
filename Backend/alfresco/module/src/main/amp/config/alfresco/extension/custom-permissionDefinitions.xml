@@ -118,6 +118,7 @@
       <permissionGroup name="Feedback" expose="true" allowFullControl="false" />
       <!-- edu-sharing Rate permission -->
       <permissionGroup name="Rate" expose="true" allowFullControl="false" />
+       <permissionGroup name="RateRead" expose="true" allowFullControl="false" />
        <!-- edu-sharing Relation permission -->
        <permissionGroup name="Relation" expose="true" allowFullControl="false" />
       <!-- edu-sharing Deny permission which will have priority to other permissions -->
@@ -146,6 +147,9 @@
        <!-- edu-sharing rate permission -->
        <permission name="_Rate"  expose="false">
            <grantedToGroup permissionGroup="Rate" />
+       </permission>
+       <permission name="_RateRead"  expose="false">
+           <grantedToGroup permissionGroup="RateRead" />
        </permission>
        <!-- edu-sharing relation permission -->
        <permission name="_Relation"  expose="false">
@@ -370,6 +374,7 @@
           <includePermissionGroup type="sys:base" permissionGroup="Comment"/>
           <includePermissionGroup type="sys:base" permissionGroup="Feedback"/>
           <includePermissionGroup type="sys:base" permissionGroup="Rate"/>
+          <includePermissionGroup type="sys:base" permissionGroup="RateRead"/>
       </permissionGroup>
       <!-- edu-sharing a restricted Consumer which can only read metadata of the node -->
       <permissionGroup name="ConsumerMetadata" allowFullControl="false" expose="true" >
