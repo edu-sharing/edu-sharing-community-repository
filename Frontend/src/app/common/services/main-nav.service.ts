@@ -6,7 +6,9 @@ import {ActivatedRoute, Params, Router} from '@angular/router';
 import {AccessibilityComponent} from '../ui/accessibility/accessibility.component';
 import { SkipNavService } from '../ui/skip-nav/skip-nav.service';
 
-@Injectable()
+@Injectable({
+    providedIn: 'root',
+})
 export class MainNavService {
     private mainnav: MainNavComponent;
     private managementDialogs: WorkspaceManagementDialogsComponent;

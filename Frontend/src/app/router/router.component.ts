@@ -47,7 +47,7 @@ import { LtiComponent } from '../modules/lti/lti.component';
 @Component({
     selector: 'es-router',
     templateUrl: 'router.component.html',
-    providers: [MainNavService],
+    providers: [],
 })
 export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
     private static readonly CHECKS_PER_SECOND_WARNING_THRESHOLD = 60;

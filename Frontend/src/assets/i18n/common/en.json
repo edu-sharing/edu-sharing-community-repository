@@ -602,6 +602,7 @@
         "VARIANT": "Create variant",
         "VARIANT_OPEN": "Open as variant",
         "QR_CODE": "QR-Code Link",
+        "EMBED": "Embed",
         "ADD_OBJECT": "Add Material",
         "SEARCH_OBJECT": "Search material",
         "NEW_COLLECTION": "Add collection",
@@ -1098,5 +1099,18 @@
     "BREADCRUMBS": {
         "YOU_ARE_HOME": "You are in the root directory",
         "IN_HOME": "In the root directory"
+    },
+    "EMBED": {
+        "NOT_PUBLIC_WARNING": "This material is not publicly available.",
+        "CODE_LABEL": "Embed code",
+        "HEIGHT": "Height",
+        "WIDTH": "Width",
+        "SIZE_CONSTRAINTS_ERROR_NOTICE": "Please choose a value between {{ min }} and {{ max }}",
+        "VERSION": "Version",
+        "VERSION_OPTION": {
+            "FIXED": "Current version",
+            "NEWEST": "Always the newest version"
+        },
+        "COPIED_TO_CLIPBOARD_NOTICE": "The embed code was copied to the clipboard."
     }
 }
