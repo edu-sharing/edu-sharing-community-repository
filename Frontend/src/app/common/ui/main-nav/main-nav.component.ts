@@ -54,6 +54,7 @@ import { MainMenuEntriesService } from '../../services/main-menu-entries.service
 import { GlobalContainerComponent } from '../global-container/global-container.component';
 import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar.component';
 import {MainMenuDropdownComponent} from '../main-menu-dropdown/main-menu-dropdown.component';
+import {BehaviorSubject} from 'rxjs';
 import {MainNavService} from '../../services/main-nav.service';
 
 /**
@@ -248,7 +249,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         this.connector.setRoute(this.route).subscribe(() => {
             this.connector.getAbout().subscribe(about => {
                 this.about = about;
-                this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+                this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
                     if (!data.isValidLogin) {
                         this.canOpen = data.isGuest;
                         this.checkConfig();
@@ -988,6 +989,13 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
             s = '0' + s;
         }
         return s;
+    }
+
+    getUserName() {
+        return ConfigurationHelper.getPersonWithConfigDisplayName(
+            this.iam.getCurrentUser(),
+            this.configService,
+        );
     }
 
     ngOnDestroy(): void {

@@ -51,6 +51,7 @@ import org.alfresco.service.namespace.RegexQNamePattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.springframework.extensions.surf.util.ParameterCheck;
 
 /**
@@ -373,8 +374,9 @@ public class EduVersion2ServiceImpl extends org.alfresco.repo.version.Version2Se
                     /**
                 	 * edu-sharing FIX don't remove edu-sharing children
                 	 */
-                	if(!typesToKeep.contains(this.nodeService.getType(ref.getChildRef()).toString())
-                    && !this.nodeService.hasAspect(ref.getChildRef(),QName.createQName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT))){ // childobjects in >= 4.2
+                	if(this.nodeService.exists(ref.getChildRef())
+                            && !typesToKeep.contains(this.nodeService.getType(ref.getChildRef()).toString())
+                            && !this.nodeService.hasAspect(ref.getChildRef(),QName.createQName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT))){ // childobjects in >= 4.2
                 		this.nodeService.removeChild(nodeRef, ref.getChildRef());
                 	}
             	}
@@ -435,8 +437,10 @@ public class EduVersion2ServiceImpl extends org.alfresco.repo.version.Version2Se
 			
 			
 			Action action = actionService.createAction("create-thumbnail");
+            action.setExecuteAsynchronously(true);
 			action.setParameterValue("thumbnail-name", CCConstants.CM_VALUE_THUMBNAIL_NAME_imgpreview_png);
-			actionService.executeAction(action, nodeRef);
+            actionService.executeAction(action, nodeRef);
+            new RepositoryCache().remove(nodeRef.getId());
 		}
             
         

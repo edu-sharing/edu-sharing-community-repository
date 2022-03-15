@@ -22,6 +22,7 @@ import {GlobalContainerComponent} from '../../common/ui/global-container/global-
 import {DefaultGroups, OptionGroup, OptionItem} from '../../core-ui-module/option-item';
 import {Observable} from 'rxjs';
 import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
+import {VCard} from '../../core-module/ui/VCard';
 
 @Component({
   selector: 'app-profiles',
@@ -92,9 +93,12 @@ export class ProfilesComponent {
         this.userEditProfile = profile.editProfile;
         this.toast.closeModalDialog();
         this.userEdit=Helper.deepCopy(this.user);
+        if(!(this.user.profile.vcard instanceof VCard)) {
+            this.user.profile.vcard = new VCard((this.user.profile.vcard as unknown as string));
+        }
         this.userEdit.profile.vcard = this.user.profile.vcard?.copy();
         GlobalContainerComponent.finishPreloading();
-        this.iamService.getUser().subscribe((me)=> {
+        this.iamService.getCurrentUserAsync().then((me)=> {
           this.isMe = profile.person.authorityName === me.person.authorityName;
           if(this.isMe && login.isGuest) {
             RestHelper.goToLogin(this.router,this.config);

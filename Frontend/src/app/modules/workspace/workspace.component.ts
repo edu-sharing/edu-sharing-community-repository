@@ -182,7 +182,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     ngOnDestroy(): void {
         this.storage.remove('workspace_clipboard');
         if(this.currentFolder) {
-            this.storage.set(TemporaryStorageService.WORKSPACE_LAST_LOCATION, this.currentFolder.ref.id);
+            this.storage.set(this.getLastLocationStorageId(), this.currentFolder.ref.id);
         }
         // close sidebar, if open
         this.mainNavRef.management.closeSidebar();
@@ -227,7 +227,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     showCreateConnector(connector: Connector) {
         this.createConnectorName = '';
         this.createConnectorType = connector;
-        this.iam.getUser().subscribe((user) => {
+        this.iam.getCurrentUserAsync().then((user) => {
             if (user.person.quota.enabled && user.person.quota.sizeCurrent >= user.person.quota.sizeQuota) {
                 this.toast.showModalDialog('CONNECTOR_QUOTA_REACHED_TITLE', 'CONNECTOR_QUOTA_REACHED_MESSAGE', DialogButton.getOk(() => {
                     this.toast.closeModalDialog();
@@ -411,7 +411,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 if (!needsUpdate) {
                     return;
                 }
-                let lastLocation = this.storage.pop(TemporaryStorageService.WORKSPACE_LAST_LOCATION, null);
+                let lastLocation = this.storage.pop(this.getLastLocationStorageId(), null);
                 if(this.isSafe) {
                     // clear lastLocation, this is another folder than the safe
                     lastLocation = null;
@@ -546,7 +546,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         }
         else {
             this.selectedNodeTree = id;
-            this.node.getNodeParents(id).subscribe((data: NodeList) => {
+            this.node.getNodeParents(id, false, [RestConstants.ALL]).subscribe((data: NodeList) => {
                 if (this.root === 'RECYCLE') {
                     this.path = [];
                 }
@@ -808,7 +808,9 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     }
 
     async prepareActionbar() {
-        this.toMeSharedToggle = await this.session.get('toMeSharedGroup', false).toPromise();
+        this.toMeSharedToggle = await this.session.get('toMeSharedGroup',
+            this.config.instant('workspaceSharedToMeDefaultAll', false)
+            ).toPromise();
         const toggle = new OptionItem('OPTIONS.TOGGLE_SHARED_TO_ME',
             this.toMeSharedToggle ? 'edu-content_shared_me_all' : 'edu-content_shared_me_private',
             () => {
@@ -827,6 +829,10 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             return this.root === 'TO_ME_SHARED_FILES';
         }
         this.customOptions.addOptions = [toggle];
+    }
+
+    private getLastLocationStorageId() {
+        return TemporaryStorageService.WORKSPACE_LAST_LOCATION + (this.isSafe ? RestConstants.SAFE_SCOPE : '');
     }
 
     /**

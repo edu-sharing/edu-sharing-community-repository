@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -237,6 +238,11 @@ public class NodeRunner {
                     }
                 }
             };
+
+            logger.info("before distinct:" + nodes.size());
+            nodes = nodes.stream().distinct().collect(Collectors.toList());
+            logger.info("after distinct:" + nodes.size());
+
             Stream<NodeRef> filteredStream = nodes.stream().filter(callFilter);
             if (threaded) {
                 ExecutorService executor = Executors.newFixedThreadPool(OAIPMHLOMImporter.getThreadCount());

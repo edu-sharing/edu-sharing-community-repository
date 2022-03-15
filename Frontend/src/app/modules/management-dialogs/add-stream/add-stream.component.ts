@@ -55,7 +55,7 @@ export class AddStreamComponent  {
         new DialogButton("CANCEL",DialogButton.TYPE_CANCEL,()=>this.cancel()),
         new DialogButton("SAVE",DialogButton.TYPE_PRIMARY,()=>this.save()),
     ]
-    this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
+    this.connector.isLoggedIn(false).subscribe((data:LoginResult)=>{
 
     });
   }
