@@ -1,7 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
+import { Node } from './node';
 import { RelationData } from './relation-data';
 export interface NodeRelation {
-    node?: string;
+    node?: Node;
     relations?: Array<RelationData>;
 }

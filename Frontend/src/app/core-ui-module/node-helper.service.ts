@@ -36,6 +36,7 @@ import {RestNetworkService} from '../core-module/rest/services/rest-network.serv
 import {SpinnerSmallComponent} from './components/spinner-small/spinner-small.component';
 import {AVAILABLE_LIST_WIDGETS} from './components/list-table/widgets/available-widgets';
 import {NodePersonNamePipe} from './pipes/node-person-name.pipe';
+import {UniversalNode} from '../common/definitions';
 
 export type WorkflowDefinitionStatus = {
     current: WorkflowDefinition
@@ -214,7 +215,7 @@ export class NodeHelperService {
                 const reader = new FileReader();
                 reader.onload = () => {
                     const dataUrl = reader.result;
-                    node.preview.data = dataUrl.toString();
+                    node.preview.data = dataUrl.toString() as any;
                     observer.next(node);
                     observer.complete();
                 };
@@ -606,7 +607,7 @@ export class NodeHelperService {
         return (node.hasOwnProperty('originalId') ? (node as any).originalId!=null : true);
     }
 
-    isNodeCollection(node: Node | any) {
+    isNodeCollection(node: UniversalNode | any) {
         return node.aspects && node.aspects.indexOf(RestConstants.CCM_ASPECT_COLLECTION) !==-1 || node.collection;
     }
 
@@ -662,7 +663,7 @@ export class NodeHelperService {
         return !!o.properties?.[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]?.[0];
     }
 
-    private getNodeLinkInner(node: Node): { routerLink: string; queryParams: Params } {
+    private getNodeLinkInner(node: UniversalNode): { routerLink: string; queryParams: Params } {
         if (!node?.ref) {
             return null;
         } else if (this.isNodeCollection(node)) {
@@ -705,7 +706,7 @@ export class NodeHelperService {
     /**
      * Returns the full URL to a node, including the server origin and base href.
      */
-    getNodeUrl(node: Node): string {
+    getNodeUrl(node: UniversalNode): string {
         const link = this.getNodeLinkInner(node);
         if (link) {
             const urlTree = this.router.createUrlTree([link.routerLink], {

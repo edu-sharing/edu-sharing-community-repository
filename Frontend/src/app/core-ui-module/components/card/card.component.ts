@@ -23,6 +23,7 @@ import { CardService } from '../../card.service';
 import { UIHelper } from '../../ui-helper';
 import {AuthorityNamePipe} from '../../pipes/authority-name.pipe';
 import {Observable, BehaviorSubject} from 'rxjs';
+import {UniversalNode} from '../../../common/definitions';
 
 /**
  * A common edu-sharing modal card
@@ -92,7 +93,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
      * Optional, bind a Node or Node-Array to this element
      * If this is used, the subtitle and avatar is automatically set depending on the given data
      */
-    @Input() set node(node: Node | Node[] | Group) {
+    @Input() set node(node: UniversalNode | UniversalNode[] | Group) {
         if (!node) {
             return;
         }

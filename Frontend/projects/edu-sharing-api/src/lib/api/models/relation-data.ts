@@ -1,8 +1,10 @@
 /* tslint:disable */
 /* eslint-disable */
+import { Node } from './node';
+import { User } from './user';
 export interface RelationData {
-    creator?: string;
-    node?: string;
+    creator?: User;
+    node?: Node;
     timestamp?: string;
-    type?: 'isPartOf' | 'isBasedOn' | 'references' | 'hasPart' | 'isBaseFor';
+    type?: 'isPartOf' | 'isBasedOn' | 'references' | 'hasPart' | 'isBasisFor';
 }

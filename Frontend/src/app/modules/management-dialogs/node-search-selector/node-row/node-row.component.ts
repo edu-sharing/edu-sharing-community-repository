@@ -9,6 +9,7 @@ import {
 } from '../../../../core-module/core.module';
 import {PermissionNamePipe} from '../../../../core-ui-module/pipes/permission-name.pipe';
 import {MdsHelper} from '../../../../core-module/rest/mds-helper';
+import {UniversalNode} from '../../../../common/definitions';
 
 @Component({
     selector: 'es-node-row',
@@ -17,7 +18,7 @@ import {MdsHelper} from '../../../../core-module/rest/mds-helper';
 })
 export class NodeRowComponent {
     @ContentChild('customMetadata') customMetadataRef: TemplateRef<any>;
-    @Input() node: Node;
+    @Input() node: UniversalNode;
     @Input() columns: ListItem[];
 
     constructor(

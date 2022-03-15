@@ -71,7 +71,7 @@
                *ngFor="let relation of getRelations(key)"
           >
             <es-node-row
-              [node]="$any(relation.node)"
+              [node]="relation.node"
               [columns]="columns"
             >
               <ng-template #customMetadata>
@@ -88,7 +88,7 @@
             <button
               mat-icon-button
               color="primary"
-              (click)="openNode($any(relation.node))"
+              (click)="openNode(relation.node)"
               matTooltip="{{'NODE_RELATIONS.OPEN_NODE' | translate}}"
             ><i esIcon="open_in_new" [aria]="false"></i>
             </button>

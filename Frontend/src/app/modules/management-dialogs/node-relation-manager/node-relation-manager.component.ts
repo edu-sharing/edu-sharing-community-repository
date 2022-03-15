@@ -19,6 +19,7 @@ import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 import {BridgeService} from '../../../core-bridge-module/bridge.service';
 import {OPEN_URL_MODE} from '../../../core-module/ui/ui-constants';
+import {UniversalNode} from '../../../common/definitions';
 
 @Component({
     selector: 'es-node-relation-manager',
@@ -37,9 +38,11 @@ export class NodeRelationManagerComponent {
         [Relations.isPartOf]: 'hasPart',
         [Relations.references]: 'references'
     };
-    source: Node;
-    _nodes: Node[];
+    source: UniversalNode;
+    _nodes: UniversalNode[];
     relations: RelationData[];
+    addRelations: RelationData[] = [];
+    deleteRelations: RelationData[] = [];
     @Input() set nodes(nodes: Node[]) {
         this._nodes = nodes;
         this.source = nodes[0];
@@ -52,17 +55,17 @@ export class NodeRelationManagerComponent {
             // @TODO
             this.relations = [
                 {
-                    node: this._nodes[0] as any,
+                    node: this._nodes[0],
                     type: 'isPartOf',
                     timestamp: '' + (new Date().getTime() - Math.random() * 100000000)
                 },
                 {
-                    node: this._nodes[0] as any,
+                    node: this._nodes[0],
                     type: 'isPartOf',
                     timestamp: '' + (new Date().getTime() - Math.random() * 100000000)
                 },
                 {
-                    node: this._nodes[0] as any,
+                    node: this._nodes[0],
                     type: 'isBasedOn',
                     timestamp: '' + (new Date().getTime() - Math.random() * 100000000)
                 },
@@ -83,7 +86,7 @@ export class NodeRelationManagerComponent {
         () => this.onClose.emit(),
         DialogButton.TYPE_CANCEL);
     permissions = [RestConstants.PERMISSION_WRITE];
-    target: Node;
+    target: UniversalNode;
     columns = [
         new ListItem('NODE', RestConstants.LOM_PROP_TITLE)
     ];
@@ -113,11 +116,11 @@ export class NodeRelationManagerComponent {
         }];
     }
 
-    getRelations(key: 'isPartOf' | 'isBasedOn' | 'references' | 'hasPart' | 'isBaseFor'): RelationData[] {
+    getRelations(key: 'isPartOf' | 'isBasedOn' | 'references' | 'hasPart' | 'isBasisFor'): RelationData[] {
         return this.relations.filter(r => r.type === key).sort((a,b) => a.timestamp.localeCompare(b.timestamp));
     }
 
-    openNode(node: Node) {
+    openNode(node: UniversalNode) {
         UIHelper.openUrl(
             this.nodeHelper.getNodeUrl(node),
             this.bridgeService,

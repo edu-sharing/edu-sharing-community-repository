@@ -24240,11 +24240,11 @@
               "type" : "string"
             }
           },
-          "volatile" : {
-            "type" : "boolean"
-          },
           "fullName" : {
             "type" : "string"
+          },
+          "volatile" : {
+            "type" : "boolean"
           }
         }
       },
@@ -24286,10 +24286,10 @@
           "second" : {
             "type" : "object"
           },
-          "name" : {
+          "group" : {
             "type" : "string"
           },
-          "group" : {
+          "name" : {
             "type" : "string"
           }
         }
@@ -26369,10 +26369,10 @@
           "defaultvalue" : {
             "type" : "string"
           },
-          "hideIfEmpty" : {
+          "isExtended" : {
             "type" : "boolean"
           },
-          "isExtended" : {
+          "hideIfEmpty" : {
             "type" : "boolean"
           },
           "isSearchable" : {
@@ -27141,7 +27141,7 @@
         "type" : "object",
         "properties" : {
           "node" : {
-            "type" : "string"
+            "$ref" : "#/components/schemas/Node"
           },
           "relations" : {
             "type" : "array",
@@ -27155,10 +27155,10 @@
         "type" : "object",
         "properties" : {
           "node" : {
-            "type" : "string"
+            "$ref" : "#/components/schemas/Node"
           },
           "creator" : {
-            "type" : "string"
+            "$ref" : "#/components/schemas/User"
           },
           "timestamp" : {
             "type" : "string",
@@ -27166,7 +27166,7 @@
           },
           "type" : {
             "type" : "string",
-            "enum" : [ "isPartOf", "isBasedOn", "references", "hasPart", "isBaseFor" ]
+            "enum" : [ "isPartOf", "isBasedOn", "references", "hasPart", "isBasisFor" ]
           }
         }
       },
