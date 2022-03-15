@@ -89,6 +89,8 @@ import {
     MdsEditorWidgetTinyMCE
 } from './common/ui/mds-editor/widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-tinymce.component';
 import {EditorModule} from '@tinymce/tinymce-angular';
+import { LtiComponent } from './modules/lti/lti.component';
+import { LtiAdminComponent } from './modules/admin/lti-admin/lti-admin.component';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -164,6 +166,8 @@ import {EditorModule} from '@tinymce/tinymce-angular';
         LabelPipe,
         PropertySlugPipe,
         MdsEditorWidgetSearchSuggestionsComponent,
+        LtiComponent,
+        LtiAdminComponent
     ],
     imports: [
         IMPORTS,

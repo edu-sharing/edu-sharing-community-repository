@@ -42,6 +42,7 @@ import {AccessibilityComponent} from '../common/ui/accessibility/accessibility.c
 import { extensionRoutes } from '../extension/extension-routes';
 import {BehaviorSubject} from 'rxjs';
 import { AccessibilityService } from '../common/ui/accessibility/accessibility.service';
+import { LtiComponent } from '../modules/lti/lti.component';
 
 @Component({
     selector: 'es-router',
@@ -247,8 +248,10 @@ export const ROUTES: Routes = [
 
     // messages
     { path: UIConstants.ROUTER_PREFIX + 'messages/:message', component: MessagesComponent },
+    { path: UIConstants.ROUTER_PREFIX + 'messages/:message/:text', component: MessagesComponent },
     // error (same as message)
     { path: UIConstants.ROUTER_PREFIX + 'error/:message', component: MessagesComponent },
+    { path: UIConstants.ROUTER_PREFIX + 'error/:message/:text', component: MessagesComponent },
 
     // link-share
     { path: UIConstants.ROUTER_PREFIX + 'sharing', component: SharingComponent },
@@ -257,6 +260,8 @@ export const ROUTES: Routes = [
 
     // embed
     { path: UIConstants.ROUTER_PREFIX + 'embed/:component', component: EmbedComponent },
+
+    { path: UIConstants.ROUTER_PREFIX + 'lti', component: LtiComponent },
 
     // wildcard 404
     { path: '**', component: MessagesComponent, data: {message: 404} },

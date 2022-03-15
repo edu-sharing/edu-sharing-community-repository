@@ -17,6 +17,9 @@ import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.search.v1.model.SearchParameters;
 import org.edu_sharing.restservices.search.v1.model.SearchParametersFacets;
 import org.edu_sharing.restservices.shared.*;
+import org.edu_sharing.service.lti13.LTIConstants;
+import org.edu_sharing.service.lti13.LTIJWTUtil;
+import org.edu_sharing.service.lti13.model.LTISessionObject;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchService.CombineMode;
@@ -105,7 +108,7 @@ public class SearchApi {
 		    		data = search.getNodes();
 		    		// @TODO: we may need to still call convertToRest to make sure we've latest data from remote repos
 		    	}
-		    	
+
 		    	
 		    	Pagination pagination = new Pagination();
 		    	pagination.setFrom(search.getSkip());
@@ -119,7 +122,7 @@ public class SearchApi {
 		    	response.setPagination(pagination);	    	
 		    	response.setFacets(search.getFacets());
 				response.setSuggests(search.getSuggests());
-		    	
+
 		    	return Response.status(Response.Status.OK).entity(response).build();
 		
 	    	}  catch (Throwable t) {

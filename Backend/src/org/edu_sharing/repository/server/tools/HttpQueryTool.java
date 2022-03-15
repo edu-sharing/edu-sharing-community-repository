@@ -100,6 +100,10 @@ public class HttpQueryTool {
 	private <T extends Object> T execute(String url, Map<String,String> header, HttpUriRequest method, boolean followRedirects, Class<T> type){
 		logger.debug("url:" + url);
 
+		if(url == null && method != null){
+			url = method.getURI().toString();
+		}
+
 		if(method == null){
 			method = new HttpGet(url);
 		}
