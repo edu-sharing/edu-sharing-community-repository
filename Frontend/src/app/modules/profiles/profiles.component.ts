@@ -5,13 +5,13 @@ import {Component, ElementRef, ViewChild} from '@angular/core';
 import {Translation} from '../../core-ui-module/translation';
 import {
     LoginResult,
-    ProfileSettings,
+    ProfileSettings, RestNodeService,
     SessionStorageService, UIConstants,
     UserStats
 } from '../../core-module/core.module';
 import {TranslateService} from '@ngx-translate/core';
 import {DomSanitizer} from '@angular/platform-browser';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute, Params, Router, UrlTree} from '@angular/router';
 import {Toast} from '../../core-ui-module/toast';
 import {RestConnectorService} from '../../core-module/core.module';
 import {ConfigurationService} from '../../core-module/core.module';
@@ -27,6 +27,9 @@ import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {Helper} from '../../core-module/rest/helper';
 import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {DefaultGroups, OptionGroup, OptionItem} from '../../core-ui-module/option-item';
+import {UIHelper} from "../../core-ui-module/ui-helper";
+import {WorkspaceAddFolder} from "../workspace/add-folder/add-folder.component";
+import {any} from "codelyzer/util/function";
 
 @Component({
   selector: 'es-profiles',
@@ -63,7 +66,7 @@ export class ProfilesComponent {
     ];
   }
   private static PASSWORD_MIN_LENGTH = 5;
-  readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
+  readonly ROUTER_PREFIX = '/' + UIConstants.ROUTER_PREFIX;
   public user: User;
   public userStats: UserStats;
   public userEdit: User;
@@ -75,6 +78,7 @@ export class ProfilesComponent {
   public oldPassword='';
   public password='';
   public hasAccessWorkspace=false;
+  public componentType= ComponentType;
   // is editing allowed at all (via global config)
   editProfile: boolean;
   private editProfileUrl: string;
@@ -275,24 +279,29 @@ export class ProfilesComponent {
 
 
     /**
-     * This function will build query and navigate to specific Profile links
+     * This function will build query return the Params for the URL
+     * @returns {Params} params for the URL
+     * @param {ComponentType} type of component to be used, it can be 'workspace' , 'search' or 'collections'
      */
-    public navigateTo(component: string): void {
-        if (component.toLowerCase() === 'search')
-            this.router.navigate([UIConstants.ROUTER_PREFIX, component.toLowerCase()], {
-                queryParams: {
-                    parameters: JSON.stringify({'cm:creator': [this.user.userName],license: ['CC_*']})
-                }
-            });
-        else if (component.toLowerCase() === 'workspace')
-            this.router.navigate([UIConstants.ROUTER_PREFIX, 'search'], {
-                queryParams: {
-                    parameters: JSON.stringify({'cm:creator': [this.user.userName]})
-                }
-            });
-        else if (component.toLowerCase() === 'collections')
-            this.router.navigate([UIConstants.ROUTER_PREFIX, component.toLowerCase()], {queryParams: {scope: 'MY'}});
+    public getQueryParam(component: ComponentType): Params {
+        if (component === 'search') {
+            return {parameters: JSON.stringify({'cm:creator': [this.user.userName], license: ['CC_*']})};
+        } else if (component === 'workspace') {
+            return {parameters: JSON.stringify({'cm:creator': [this.user.userName]})};
+        } else if (component === 'collections') {
+            return {scope: 'MY'};
+        }
+        return {};
     }
 
+}
+
+/**
+ * This enum is used to define the type of components to be used in the statistics section
+ */
+export enum ComponentType {
+    Search = 'search',
+    Workspace = 'workspace',
+    Collections = 'collections',
 }
 
