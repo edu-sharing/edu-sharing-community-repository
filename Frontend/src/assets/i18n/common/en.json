@@ -612,7 +612,8 @@
         "SWITCH_TO_CARDS_VIEW": "Switch to cards view",
         "LIST_SETTINGS": "Configure List",
         "METADATA_SIDEBAR": "Material details",
-        "ACCESSIBILITY": "Accessibility"
+        "ACCESSIBILITY": "Accessibility",
+        "LTI": "Add to LTI Platform"
     },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Version comment",
@@ -657,7 +658,8 @@
         "SUGGEST_VALUE_SEND": "Suggest",
         "SUGGEST_VALUE_SENT": "The suggestion has been submitted and will now be checked by the editorial team. It will appear as soon as it is being activated. Thank you.",
         "NO_MATCHING_VALUES": "No matching values",
-        "DELETE_KEY_NOTICE": "remove with \"Delete\""
+        "NO_ARBITRARY_VALUES_NOTICE": "For this field, you cannot use arbitrary values. Please select values from the list.",
+        "DELETE_KEY_NOTICE": "Remove with Delete key"
     },
 
      "SIMPLE_EDIT": {

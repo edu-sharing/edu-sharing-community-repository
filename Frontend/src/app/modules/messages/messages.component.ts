@@ -17,6 +17,7 @@ import {GlobalContainerComponent} from '../../common/ui/global-container/global-
 export class MessagesComponent {
     public message : string;
     public messageDetail : string;
+    public messageText : string;
     public error : string;
     constructor(private toast: Toast,
                 private route: ActivatedRoute,
@@ -40,6 +41,7 @@ export class MessagesComponent {
     private setMessage(data: Params|Data) {
         this.message = 'MESSAGES.' + data.message;
         this.messageDetail = 'MESSAGES.DETAILS.' + data.message;
+        this.messageText = data.text;
         this.error = data.message;
         if (this.translate.instant(this.message) === this.message) {
             this.message = 'MESSAGES.INVALID';

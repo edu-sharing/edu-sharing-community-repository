@@ -26,6 +26,7 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
@@ -37,6 +38,7 @@ import org.edu_sharing.repository.server.PropertyRequiredException;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
+import org.edu_sharing.repository.server.tools.KeyTool;
 import org.edu_sharing.repository.server.tools.cache.UserCache;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -146,11 +148,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 	@Override
 	public boolean isGuest() {
 		try {
-			ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
-			String guest = appInfo.getGuest_username();
-			if(guest != null && guest.equals(AuthenticationUtil.getFullyAuthenticatedUser())){
-				return true;
-			}
+			return GuestCagePolicy.getGuestUsers().contains(AuthenticationUtil.getFullyAuthenticatedUser());
 		} catch (Throwable e) {
 		}
 		return false;
@@ -685,6 +683,20 @@ public EduGroup getEduGroup(String authority){
 		}
 
 		return result;
+	}
+
+	public void createProxyUser(){
+		PersonService personService = serviceRegistry.getPersonService();
+
+		if(personService.personExists(CCConstants.PROXY_USER)){
+			return;
+		}
+
+		HashMap<QName, Serializable> properties = new HashMap<QName, Serializable>();
+		properties.put(ContentModel.PROP_USERNAME, CCConstants.PROXY_USER);
+		personService.createPerson(properties);
+		serviceRegistry.getAuthenticationService()
+				.createAuthentication(CCConstants.PROXY_USER,new KeyTool().getRandomPassword().toCharArray());
 	}
 
 

@@ -653,7 +653,8 @@
         "SWITCH_TO_CARDS_VIEW": "Zur Kachelansicht wechseln",
         "LIST_SETTINGS": "Liste konfigurieren",
         "METADATA_SIDEBAR": "Materialinformationen",
-        "ACCESSIBILITY": "Barrierefreiheit"
+        "ACCESSIBILITY": "Barrierefreiheit",
+        "LTI": "In LTI Plattform übernehmen"
     },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Versionskommentar",
@@ -698,7 +699,8 @@
         "SUGGEST_VALUE_SEND": "Vorschlagen",
         "SUGGEST_VALUE_SENT": "Der Vorschlag wurde eingereicht und wird durch die Redaktion geprüft. Der Vorschlag taucht erst auf, wenn er durch die Redaktion aktiviert wurde. Vielen Dank!",
         "NO_MATCHING_VALUES": "Keine passenden Werte",
-        "DELETE_KEY_NOTICE": "löschen mit \"Entf\""
+        "NO_ARBITRARY_VALUES_NOTICE": "Für dieses Feld können Werte nicht frei gewählt werden. Bitte wählen Sie Werte aus der Liste.",
+        "DELETE_KEY_NOTICE": "Löschen mit Entf-Taste"
     },
     "SIMPLE_EDIT": {
         "TITLE": "Schnell-Bearbeitung",
