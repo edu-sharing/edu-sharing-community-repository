@@ -1601,7 +1601,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	}
 
 	@Override
-	public List<String> getPermissionsForAuthority(String nodeId, String authorityId) throws Exception {
+	public List<String> getPermissionsForAuthority(String nodeId, String authorityId) throws InsufficientPermissionException {
 		if(!authorityId.equals(AuthenticationUtil.getFullyAuthenticatedUser())){
 			if(!isAdminOrSystem()) {
 				if(!hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,PermissionService.READ_PERMISSIONS)) {
@@ -1634,7 +1634,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	 * @throws Exception
 	 */
 	@Override
-	public List<String> getExplicitPermissionsForAuthority(String nodeId, String authorityId) throws Exception {
+	public List<String> getExplicitPermissionsForAuthority(String nodeId, String authorityId) throws InsufficientPermissionException {
 		if(!authorityId.equals(AuthenticationUtil.getFullyAuthenticatedUser()) && !isAdminOrSystem()){
 			if(!getPermissionsForAuthority(nodeId, AuthenticationUtil.getFullyAuthenticatedUser())
 					.contains(PermissionService.READ_PERMISSIONS)) {

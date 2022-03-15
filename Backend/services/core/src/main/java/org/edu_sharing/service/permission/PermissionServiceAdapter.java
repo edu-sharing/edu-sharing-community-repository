@@ -13,6 +13,7 @@ import org.edu_sharing.repository.client.rpc.Group;
 import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.repository.client.rpc.Result;
 import org.edu_sharing.repository.client.rpc.User;
+import org.edu_sharing.service.InsufficientPermissionException;
 
 public class PermissionServiceAdapter implements PermissionService {
 	
@@ -130,7 +131,7 @@ public class PermissionServiceAdapter implements PermissionService {
 	}
 
 	@Override
-	public List<String> getPermissionsForAuthority(String nodeId, String authorityId) throws Exception {
+	public List<String> getPermissionsForAuthority(String nodeId, String authorityId) throws InsufficientPermissionException {
 		return null;
 	}
 	
@@ -150,7 +151,7 @@ public class PermissionServiceAdapter implements PermissionService {
 		return null;
 	}
 	@Override
-	public List<String> getExplicitPermissionsForAuthority(String nodeId, String authorityId) throws Exception {
+	public List<String> getExplicitPermissionsForAuthority(String nodeId, String authorityId) throws InsufficientPermissionException {
 		// TODO Auto-generated method stub
 		return null;
 	}

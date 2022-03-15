@@ -15,6 +15,7 @@ import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.webservices.alfresco.extension.KeyValue;
 import org.edu_sharing.webservices.alfresco.extension.NativeAlfrescoWrapper;
 import org.edu_sharing.webservices.alfresco.extension.RepositoryNode;
@@ -247,7 +248,7 @@ public class PermissionServiceWSImpl implements PermissionService {
 	}
 
 	@Override
-	public List<String> getPermissionsForAuthority(String nodeId, String authorityId) throws Exception {
+	public List<String> getPermissionsForAuthority(String nodeId, String authorityId) throws InsufficientPermissionException {
 		return null;
 	}
 	
@@ -268,7 +269,7 @@ public class PermissionServiceWSImpl implements PermissionService {
 	}
 
 	@Override
-	public List<String> getExplicitPermissionsForAuthority(String nodeId, String authorityId) throws Exception {
+	public List<String> getExplicitPermissionsForAuthority(String nodeId, String authorityId) throws InsufficientPermissionException {
 		// TODO Auto-generated method stub
 		return null;
 	}
