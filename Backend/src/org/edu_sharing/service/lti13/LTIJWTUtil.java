@@ -5,10 +5,12 @@ import com.nimbusds.jose.jwk.AsymmetricJWK;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import io.jsonwebtoken.*;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.Signing;
@@ -16,6 +18,8 @@ import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.service.lti13.model.LTISessionObject;
 import org.edu_sharing.service.lti13.model.LoginInitiationDTO;
+import org.edu_sharing.service.mime.MimeTypesV2;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -185,11 +189,16 @@ public class LTIJWTUtil {
             /**
              * @TODO: works only when user clicks initial on an lti resource an got's a session in edu-sharingF
              */
-            HashMap<String,String> thumbnail = new HashMap<>();
-            thumbnail.put("url",node.getPreview().getUrl());
-            thumbnail.put("width",""+node.getPreview().getWidth());
-            thumbnail.put("height",""+node.getPreview().getHeight());
-            deepLink.put("icon",thumbnail);
+            try {
+                HashMap<String,String> thumbnail = new HashMap<>();
+                //thumbnail.put("url",node.getPreview().getUrl());
+                thumbnail.put("url",new MimeTypesV2().getIcon(node.getType(),NodeServiceFactory.getLocalService().getProperties(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier() ,node.getRef().getId()) ,node.getAspects()));
+                thumbnail.put("width",""+node.getPreview().getWidth());
+                thumbnail.put("height",""+node.getPreview().getHeight());
+                deepLink.put("icon",thumbnail);
+            } catch (Throwable e) {
+                logger.error(e.getMessage());
+            }
 
             /**
              * @TODO if h5p add scoreMaximum stuff
