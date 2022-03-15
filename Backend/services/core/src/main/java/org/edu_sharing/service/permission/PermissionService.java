@@ -14,6 +14,7 @@ import org.edu_sharing.repository.client.rpc.Notify;
 import org.edu_sharing.repository.client.rpc.Result;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.service.InsufficientPermissionException;
 
 public interface PermissionService {
 	public static final String[] GUEST_PERMISSIONS = new String[]{ org.alfresco.service.cmr.security.PermissionService.READ,CCConstants.PERMISSION_READ_PREVIEW,CCConstants.PERMISSION_READ_ALL};
@@ -94,10 +95,10 @@ public interface PermissionService {
 	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId, String[] permissions);
 	
 	public ACL getPermissions(String nodeId) throws Exception;
-	public List<String> getPermissionsForAuthority(String nodeId,String authorityId) throws Exception;
+	public List<String> getPermissionsForAuthority(String nodeId,String authorityId) throws InsufficientPermissionException;
 
 	void setPermission(String nodeId, String authority, String permission);
 
 
-	List<String> getExplicitPermissionsForAuthority(String nodeId, String authorityId) throws Exception;
+	List<String> getExplicitPermissionsForAuthority(String nodeId, String authorityId) throws InsufficientPermissionException;
 }
