@@ -75,7 +75,7 @@
   </div>
   <ng-container *ngIf="!entriesService.sort?.customSortingInProgress">
     <div
-      *ngIf="!entriesService.dragDrop?.dragAllowed"
+      *ngIf="!(entriesService.dragDrop?.dragAllowed && !ui.isMobile())"
       role="list"
       class="card-grid"
       #grid
@@ -86,7 +86,7 @@
       <ng-container *ngTemplateOutlet="list"></ng-container>
     </div>
     <div
-      *ngIf="entriesService.dragDrop?.dragAllowed"
+      *ngIf="entriesService.dragDrop?.dragAllowed && !ui.isMobile()"
       role="list"
       class="card-grid"
       #grid

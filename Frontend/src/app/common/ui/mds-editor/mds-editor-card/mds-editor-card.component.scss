@@ -1,3 +1,5 @@
+@import '../../../../core-ui-module/styles/variables';
+
 $expandToggleWidthThreshold: 400px;
 
 es-input-fill-progress {
@@ -21,8 +23,9 @@ es-input-fill-progress {
             background-color: unset;
         }
         .extended-toggle {
-            padding-right: 10px;
-            height: 45px;
+            padding: 0 10px 0 25px;
+            height: 39px;
+            background: linear-gradient(to right,rgba(red($workspaceMetadataBackground),green($workspaceMetadataBackground),blue($workspaceMetadataBackground),0.0001) 0,$workspaceMetadataBackground 15px);
         }
     }
     .heading {

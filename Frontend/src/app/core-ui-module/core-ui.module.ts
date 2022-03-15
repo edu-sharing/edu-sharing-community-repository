@@ -103,6 +103,10 @@ import {ListItemLabelPipe} from './pipes/list-item-label.pipe';
 import {DragCursorDirective} from './directives/drag-cursor.directive';
 import { ConfigService } from 'ngx-edu-sharing-api';
 import { BorderBoxObserverDirective } from './directives/border-box-observer.directive';
+import {NodeRatingComponent} from './components/node-entries/node-rating/node-rating.component';
+import { PreviewImageComponent } from './components/node-entries/preview-image/preview-image.component';
+import { FocusStateDirective } from './directives/focus-state.directive';
+import {CommonModule} from '@angular/common';
 
 @NgModule({
     declarations: [
@@ -168,6 +172,7 @@ import { BorderBoxObserverDirective } from './directives/border-box-observer.dir
         NodeEntriesComponent,
         NodeEntriesCardGridComponent,
         NodeEntriesCardComponent,
+        NodeRatingComponent,
         NodeEntriesCardSmallComponent,
         NodeEntriesTableComponent,
         ColumnChooserComponent,
@@ -175,6 +180,8 @@ import { BorderBoxObserverDirective } from './directives/border-box-observer.dir
         ListItemLabelPipe,
         DragCursorDirective,
         BorderBoxObserverDirective,
+        PreviewImageComponent,
+        FocusStateDirective,
     ],
     imports: [
         A11yModule,
@@ -213,6 +220,7 @@ import { BorderBoxObserverDirective } from './directives/border-box-observer.dir
         MatPaginatorModule,
         MatSortModule,
         OverlayModule,
+        CommonModule,
     ],
     providers: [
         Toast,

@@ -154,7 +154,8 @@
         "TOOLPERMISSION_MEDIACENTER_MANAGE": "Ändern der Basisdaten (Anschrift, Kataloge) von Medienzentren, bei welchen der Nutzer Administrator ist",
         "TOOLPERMISSION_VIDEO_AUDIO_CUT": "Video- & Audiodateien dürfen in Sammlungen beliebig zugeschnitten gespeichert werden",
         "TOOLPERMISSION_COLLECTION_CHANGE_OWNER": "Erlaubnis zum Ändern des Ersteller-Namens einer Sammlung",
-        "TOOLPERMISSION_RATE": "Die Berechtigung zum Bewerten von Materialien",
+        "TOOLPERMISSION_RATE_READ": "Die Berechtigung zum ansehen von Bewertungen von Materialien",
+        "TOOLPERMISSION_RATE_WRITE": "Die Berechtigung zum Bewerten von Materialien (benötigt TOOLPERMISSION_RATE_READ)",
         "TOOLPERMISSION_CONNECTOR": "Editor \"{{connector}}\" darf benutzt werden",
         "TOOLPERMISSION_CONNECTOR_SAFE": "Editor \"{{connector}}\" darf im gesicherten Bereich benutzt werden",
         "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" darf angezeigt und durchsucht werden",
@@ -176,6 +177,7 @@
     "REPLACE": "Ersetzen",
     "CHANGE_STORAGE_LOCATION": "Ändern",
     "STORAGE_LOCATION_UNSET": "Nicht gewählt",
+    "STORAGE_LOCATION_SAVE": "Diesen Speicherort zukünftig als Standard verwenden",
     "SUGGESTION": "Vorschlag",
     "CLICKTOREMOVE": "Klicken zum Entfernen",
     "NO_PERMISSIONS_FOR_SCOPE": "Keine Berechtigungen, um diesen Bereich anzuzeigen",
@@ -326,7 +328,7 @@
             "CC_SHARE_ND": "Keine Bearbeitung des Werks erlaubt.",
             "CC_SHARE_SA": "Bearbeitung erlaubt, wenn es unter gleichen Bedingungen weitergegeben wird.",
             "CC_COMMERCIAL_NC": "Keine kommerzielle Verwendung erlaubt.",
-            "CC_0": "Dieses Werk ist gemeinfrei.<br />Keine Attribuierung und Namensnennung notwendig.<br />Kommerzielle Nutzung erlaubt.",
+            "CC_0": "Dieses Werk ist gemeinfrei.<br />Keine Attributierung und Namensnennung notwendig.<br />Kommerzielle Nutzung erlaubt.",
             "COPYRIGHT_FREE": "Das Werk ist kostenfrei zugänglich.<br />Nutzung und Quellenangabe gemäß den allgemeingültigen gesetzlichen Regelungen (UrhG).",
             "COPYRIGHT_LICENSE": "Das Werk darf ausschließlich vom lizenzierten Nutzerkreis gemäß den vertraglichen Bedingungen genutzt werden.<br />Keine Weitergabe an Dritte.<br />Quellenangabe gemäß der üblichen Praxis.",
             "SCHULFUNK": "Zugangsbeschränkte und zeitlich begrenzte Bereitstellung als Schulfunksendung nach §47 UrhG.<br />Keine Weitergabe an Dritte.<br />Quellenangabe gemäß der üblichen Praxis.",
@@ -477,6 +479,18 @@
         "TITLE": "Barrierefreiheit",
         "SUBTITLE": "Optionen für barrierefreie Nutzung",
         "ENTRY_MESSAGE": "Um persönliche Bedürfnisse zu berücksichtigen, können nachfolgend einige Einstellungen für die Verwendung unserer Anwendung gesetzt werden.",
+        "CONTRAST_MODE_TITLE": "Kontrast-Modus",
+        "CONTRAST_MODE_MESSAGE": "Im Kontrast-Modus sind Elemente auf der Seite visuell deutlich sichtbar abgegrenzt.",
+        "CONTRAST_MODE_OPTION": {
+            "STANDARD": "Standard-Ansicht",
+            "CONTRAST": "Verstärkter Kontrast"
+        },
+        "INDICATOR_ICONS_TITLE": "Bedeutungstragende Symbole",
+        "INDICATOR_ICONS_MESSAGE": "Inhalt durch Symbole vermitteln. Die Bedeutung eines Symbols wird angezeigt, wenn der Mauszeiger über das Symbol bewegt wird. Das ist bei reiner Tastatur-Nutzung jedoch nicht möglich.",
+        "INDICATOR_ICONS_OPTION": {
+            "ICONS": "Symbole anzeigen",
+            "TEXT_ONLY": "Nur Text anzeigen"
+        },
         "TOAST_TITLE": "Statusmeldungen",
         "TOAST_MESSAGE": "Statusmeldungen zeigen an, ob das System korrekt arbeitet. Bspw. lässt sich so erkennen, ob ein Inhalt oder Änderungen korrekt gespeichert wurden.",
         "TOAST_TYPE": {
@@ -639,7 +653,8 @@
         "SWITCH_TO_CARDS_VIEW": "Zur Kachelansicht wechseln",
         "LIST_SETTINGS": "Liste konfigurieren",
         "METADATA_SIDEBAR": "Materialinformationen",
-        "ACCESSIBILITY": "Barrierefreiheit"
+        "ACCESSIBILITY": "Barrierefreiheit",
+        "LTI": "In LTI Plattform übernehmen"
     },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Versionskommentar",
@@ -682,7 +697,10 @@
         "OPEN_CLOSE_EXTENDED": "Ansicht auf-/zuklappen",
         "SUGGEST_VALUE_LABEL": "Neuen Wert vorschlagen",
         "SUGGEST_VALUE_SEND": "Vorschlagen",
-        "SUGGEST_VALUE_SENT": "Der Vorschlag wurde eingereicht und wird durch die Redaktion geprüft. Der Vorschlag taucht erst auf, wenn er durch die Redaktion aktiviert wurde. Vielen Dank!"
+        "SUGGEST_VALUE_SENT": "Der Vorschlag wurde eingereicht und wird durch die Redaktion geprüft. Der Vorschlag taucht erst auf, wenn er durch die Redaktion aktiviert wurde. Vielen Dank!",
+        "NO_MATCHING_VALUES": "Keine passenden Werte",
+        "NO_ARBITRARY_VALUES_NOTICE": "Für dieses Feld können Werte nicht frei gewählt werden. Bitte wählen Sie Werte aus der Liste.",
+        "DELETE_KEY_NOTICE": "Löschen mit Entf-Taste"
     },
     "SIMPLE_EDIT": {
         "TITLE": "Schnell-Bearbeitung",
@@ -774,6 +792,8 @@
         "DOWNLOAD_FINISHED_IOS": "Download von \"{{name}}\" abgeschlossen.\nSie finden das Element in der Dateien-App",
         "DOWNLOAD_FAILED": "Download von \"{{name}}\" fehlgeschlagen.\nÜberprüfen Sie die Internetverbindung und versuchen Sie es erneut",
         "DOWNLOAD_TRY_AGAIN": "Erneut versuchen",
+        "STORAGE_LOCATION_SAVED": "Der Ordner \"{{name}}\" wird zukünftig standardmäßig für Uploads verwendet",
+        "STORAGE_LOCATION_RESET": "Der Standard-Ordner für Uploads wurde zurückgesetzt",
         "API_FORBIDDEN": "Keine Rechte, um auf diesen Inhalt zuzugreifen",
         "API_FORBIDDEN_LOGIN": "Bitte anmelden, um auf diesen Bereich zuzugreifen"
     },
@@ -1119,13 +1139,27 @@
     "ROCKETCHAT": {
         "TITLE": "Chat"
     },
+    "RATING": {
+      "LIKES": "Empfehlen",
+      "STARS_RATE": "Mit {{rating}} bewerten",
+      "COUNT_RATINGS": "Anzahl Bewertungen",
+      "COUNT_LIKES": "Anzahl Empfehlungen",
+      "DELETE_RATING": "Bewertung entfernen",
+      "TOAST": {
+        "LIKED": "Material \"{{name}}\" empfohlen. Vielen Dank!",
+        "RATED": "Material \"{{name}}\" wurde mit {{rating}} bewertet. Vielen Dank!",
+        "LIKE_REMOVED": "Empfehlung für Material \"{{name}}\" entfernt",
+        "RATING_REMOVED": "Bewertung für Material \"{{name}}\" entfernt"
+      }
+    },
     "NAV": {
         "MAIN": "Hauptmenü",
         "SKIP": "Sprungmarken",
         "COLLECTIONS": "Sammlungshierarchie"
     },
     "SKIP_LINKS": {
-        "MAIN_CONTENT": "Springe zum Hauptinhalt"
+        "MAIN_CONTENT": "Springe zum Hauptinhalt",
+        "ACCESSIBILITY_SETTINGS": "Einstellungen zur Barrierefreiheit"
     },
     "REPOSITORIES": {
         "de_fwu": "FWU",

@@ -195,6 +195,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             const pattern = condition.pattern ? new RegExp(`^(?:${condition.pattern})$`) : null;
             return this.jointProperty.pipe(
                 map((jointProperty) => {
+                    jointProperty = this.getJointProperty()
                     if (pattern) {
                         return (
                             jointProperty &&
@@ -213,7 +214,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                 this,
                 this.initialValues.jointValues,
             );
-            return changedValues ?? this.initialValues.jointValues;
+            return this.mapParentValues(changedValues ?? this.initialValues.jointValues);
         }
 
         /**
@@ -518,6 +519,28 @@ export class MdsEditorInstanceService implements OnDestroy {
             } else {
                 return node.properties[definition.id];
             }
+        }
+
+        /**
+         * For tree widgets:
+         * in case of a tree with structure "a -> b -> c", and value "c" is checked
+         * this method will also attach the values a and b to the list
+         * @private
+         */
+        public mapParentValues(values: string[]) {
+            if (!this.definition.values || !values) {
+                return values;
+            }
+            const result = new Set<string>();
+            values.forEach((id) => {
+                let v = this.definition.values.find((v) => v.id === id);
+                result.add(id);
+                while (v?.parent) {
+                    result.add(v.parent);
+                    v = this.definition.values.find((v) => v.id === v.parent);
+                }
+            });
+            return Array.from(result);
         }
     };
 

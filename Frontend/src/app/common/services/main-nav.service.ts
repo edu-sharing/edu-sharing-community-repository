@@ -4,6 +4,7 @@ import { MainNavComponent } from '../ui/main-nav/main-nav.component';
 import {CookieInfoComponent} from '../ui/cookie-info/cookie-info.component';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {AccessibilityComponent} from '../ui/accessibility/accessibility.component';
+import { SkipNavService } from '../ui/skip-nav/skip-nav.service';
 
 @Injectable()
 export class MainNavService {
@@ -13,7 +14,8 @@ export class MainNavService {
     private accessibility: AccessibilityComponent;
 
     constructor(private router: Router,
-                private route: ActivatedRoute
+                private route: ActivatedRoute,
+                private skipNav: SkipNavService
     ) {
    }
     getDialogs() {
@@ -34,6 +36,7 @@ export class MainNavService {
     }
     registerAccessibility(accessibility: AccessibilityComponent) {
         this.accessibility = accessibility;
+        this.skipNav.register('ACCESSIBILITY_SETTINGS', () => accessibility.show());
     }
     getMainNav() {
         return this.mainnav;

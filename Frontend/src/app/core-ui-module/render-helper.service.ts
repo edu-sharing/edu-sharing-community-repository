@@ -89,7 +89,7 @@ export class RenderHelperService {
         );
     }
 
-    injectMetadataEditor(node: Node) {
+    injectMetadataEditor(node: Node, groupId = 'io_render') {
         const metadata = document.querySelector('.edusharing_rendering_metadata_body');
         const parent = metadata.parentElement;
         parent.removeChild(metadata);
@@ -99,7 +99,7 @@ export class RenderHelperService {
             MdsEditorWrapperComponent,
             parent,
             {
-                groupId: 'io_render',
+                groupId,
                 nodes: [node],
                 editorMode: 'inline',
                 embedded: true,

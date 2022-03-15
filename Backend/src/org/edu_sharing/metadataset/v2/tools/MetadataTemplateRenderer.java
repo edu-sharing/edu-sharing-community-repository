@@ -10,6 +10,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
@@ -409,7 +410,7 @@ public class MetadataTemplateRenderer {
 			}
 			if( isInsideCollection &&
 				ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK) &&
-				!Objects.equals(ApplicationInfoList.getHomeRepository().getGuest_username(),userName) &&
+				!GuestCagePolicy.getGuestUsers().contains(userName) &&
 				PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),parent,CCConstants.PERMISSION_FEEDBACK) &&
 				!PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),parent,CCConstants.PERMISSION_DELETE)
 			){
@@ -607,7 +608,7 @@ public class MetadataTemplateRenderer {
 
 	private static String cleanupText(MetadataWidget.TextEscapingPolicy textEscapingPolicy, String untrustedHTML) {
 		if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.htmlBasic)) {
-			PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.LINKS);
+			PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.BLOCKS).and(Sanitizers.LINKS);
 			return policy.sanitize(untrustedHTML);
 		} else if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.all)){
 			return StringEscapeUtils.escapeHtml4(untrustedHTML);

@@ -32,6 +32,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.metadataset.v2.MetadataKey;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
@@ -47,13 +48,18 @@ import org.springframework.security.core.Authentication;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 @JobDescription(description = "Migrate a metadata field to a new valuespace (The new valuespace must already be configured for this field in the mds and must provide related-keys in order to transform)")
 public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams{
+	private MappingCallback mappingCallback;
 	public enum Mode {
 		Merge,
 		Replace
+	}
+	public interface MappingCallback {
+		Serializable onMap(NodeRef nodeRef, String input, boolean reverseMapping);
 	}
 
 
@@ -68,10 +74,12 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 	private String sourceProperty;
 	@JobFieldDescription(description = "the target property to store the migrated values, may be the same as sourceProperty", sampleValue = "ccm:taxonid")
 	private String targetProperty;
-	@JobFieldDescription(description = "The relation to use")
-	private MetadataKey.MetadataKeyRelated.Relation relation;
-	@JobFieldDescription(description = "The mode to use (Merge = Merge any existing target field values with the mapping values, Replace = replace the target field valiues")
+	@JobFieldDescription(description = "The relation(s) to use (all values will be combined into the result)")
+	private List<MetadataKey.MetadataKeyRelated.Relation> relations;
+	@JobFieldDescription(description = "The mode to use (Merge = Merge any existing target field values with the mapping values, Replace = replace the target field values")
 	private Mode mode;
+	@JobFieldDescription(description = "Use solr/searchindex. This can improve performance significantly because it only fetches nodes with the sourceProperty set. Make sure your index is up to date")
+	private boolean viaSolr;
 	@JobFieldDescription(description = "Only test and output, but do not modify/store the metadata")
 	private boolean testRun;
 	@JobFieldDescription(description = "Clear/remove the source field content after successful migration")
@@ -86,6 +94,9 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 		runner.setTransaction(NodeRunner.TransactionMode.Local);
 		runner.setKeepModifiedDate(true);
 		runner.setThreaded(false);
+		if(viaSolr) {
+			runner.setLucene("@" + QueryParser.escape(sourceProperty) + ":\"*\"");
+		}
 		runner.setTypes(Arrays.stream(type.split(",")).map(String::trim).map(CCConstants::getValidGlobalName).collect(Collectors.toList()));
 
 		runner.setTask((nodeRef) -> {
@@ -95,12 +106,17 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 			try {
 				MetadataSet mds = MetadataHelper.getMetadataset(nodeRef);
 				MetadataWidget widget;
-				Map<String, Collection<MetadataKey.MetadataKeyRelated>> mapping;
+				Collection<MetadataKey> targetKeys;
+				List<Map<String, Collection<MetadataKey.MetadataKeyRelated>>> mappings = null;
+				mappingCallback = (MappingCallback)getJobDataMap().get("mappingCallback");
 				try {
-					widget = mds.findWidget(mdsWidgetId);
-					mapping = widget.getValuespaceMappingByRelation(relation);
+					if(mdsWidgetId != null) {
+						widget = mds.findWidget(mdsWidgetId);
+						mappings = relations.stream().map(widget::getValuespaceMappingByRelation).collect(Collectors.toList());
+					}
+					targetKeys = mds.findWidget(targetProperty).getValues();
 				} catch(IllegalArgumentException e) {
-					logger.debug("Metadataset " + mds.getId() +" does not have widget id " + mdsWidgetId + ", node " + nodeRef);
+					logger.warn("Metadataset " + mds.getId() +" does not have widget id " + mdsWidgetId + ", node " + nodeRef);
 					return;
 				}
 				Object value = NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.getValidGlobalName(sourceProperty));
@@ -109,12 +125,17 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 					logger.debug("Skipping null value, node " + nodeRef);
 					return;
 				}
-				HashSet<String> mapped = mapValueToTarget(nodeRef, mapping, mode, value, target, true);
-				if(mapped!=null && mapped.size() > 0) {
+				HashSet<String> mapped = new HashSet<>();
+				if(mappings == null) {
+					mapped.addAll(mapValueToTarget(nodeRef, null, targetKeys, mode, value, target, true, mappingCallback));
+				} else {
+					mapped.addAll(mapValueToTarget(nodeRef, mappings, targetKeys, mode, value, target, true, mappingCallback));
+				}
+				if(mapped.size() > 0) {
 					logger.info("Mapped " + value + " -> " + StringUtils.join(mapped,", "));
 				}
 				if(!testRun) {
-					 if(mapped!=null && mapped.size() > 0) {
+					 if(mapped.size() > 0) {
 						NodeServiceHelper.setProperty(nodeRef,
 								CCConstants.getValidGlobalName(targetProperty),
 								mapped
@@ -141,40 +162,57 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 		runner.run();
 	}
 
-	public static HashSet<String> mapValueToTarget(NodeRef nodeRef, Map<String, Collection<MetadataKey.MetadataKeyRelated>> mapping, Mode mode, Object value, Object targetValue, boolean reverseMapping) {
+	public static HashSet<String> mapValueToTarget(NodeRef nodeRef, List<Map<String, Collection<MetadataKey.MetadataKeyRelated>>> mapping, Collection<MetadataKey> targetKeys, Mode mode, Object value, Object targetValue, boolean reverseMapping, MappingCallback callback) {
+		ArrayList<String> valueMapped = new ArrayList<>();
 		if(value instanceof String || value instanceof Collection) {
 			if(value instanceof String) {
 				value = Collections.singletonList(value);
 			}
-			ArrayList<String> valueMapped = new ArrayList<>();
 			((Collection<?>) value).stream().forEach((v) -> {
-				Serializable mapped = mapValue(nodeRef, (String) v, mapping, reverseMapping);
-				if(mapped != null) {
-					if (mapped instanceof Collection) {
-						valueMapped.addAll((Collection<? extends String>) mapped);
-					} else {
-						valueMapped.add((String) mapped);
+				if(callback != null) {
+					Serializable mapped = mapValue(nodeRef, (String) v, null, targetKeys, reverseMapping, callback);
+					if (mapped != null) {
+						if (mapped instanceof Collection) {
+							valueMapped.addAll((Collection<? extends String>) mapped);
+						} else {
+							valueMapped.add((String) mapped);
+						}
+					}
+					return;
+				}
+				for(Map<String, Collection<MetadataKey.MetadataKeyRelated>> m: mapping) {
+					Serializable mapped = mapValue(nodeRef, (String) v, m, targetKeys, reverseMapping, null);
+					if (mapped != null) {
+						if (mapped instanceof Collection) {
+							if(((Collection<?>) mapped).isEmpty()) {
+								continue;
+							}
+							valueMapped.addAll((Collection<? extends String>) mapped);
+						} else {
+							valueMapped.add((String) mapped);
+						}
+						return;
 					}
 				}
 			});
-			HashSet<String> target = new HashSet<>();
-			if(mode.equals(Mode.Merge)) {
-				if(targetValue == null) {
-				} else if (targetValue instanceof String) {
-					target.add((String) targetValue);
-				} else if (targetValue instanceof Collection) {
-					target.addAll((Collection<? extends String>) targetValue);
-				}
-				target.addAll(valueMapped);
-			}
-			target.addAll(valueMapped);
-			return target;
+
 		} else if(value == null) {
 
 		} else {
 			logger.error("Unable to map a property of type " + value.getClass() + " via valuespace, node " + nodeRef);
 		}
-		return null;
+		HashSet<String> target = new HashSet<>();
+		if(mode.equals(Mode.Merge)) {
+			if(targetValue == null) {
+			} else if (targetValue instanceof String) {
+				target.add((String) targetValue);
+			} else if (targetValue instanceof Collection) {
+				target.addAll((Collection<? extends String>) targetValue);
+			}
+			target.addAll(valueMapped);
+		}
+		target.addAll(valueMapped);
+		return target;
 	}
 
 	/**
@@ -183,12 +221,16 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 	 * @param value
 	 * @param metadataKeyRelated
 	 * Data structure containting sourceId -> [relation with target id[, relation with target id, ...]]
+	 * @param targetKeys
 	 * @param reverseMapping
 	 * When true: the "value" is supposed to have on of the relation target ids. It will be mapped matching source ids of this link
 	 * When false: The "value" is supposed to be the source id. It will be mapped to target ids of this link. This mode is much faster because of the given data structure
 	 * @return
 	 */
-	private static Serializable mapValue(NodeRef nodeRef, String value, Map<String, Collection<MetadataKey.MetadataKeyRelated>> metadataKeyRelated, boolean reverseMapping) {
+	private static Serializable mapValue(NodeRef nodeRef, String value, Map<String, Collection<MetadataKey.MetadataKeyRelated>> metadataKeyRelated, Collection<MetadataKey> targetKeys, boolean reverseMapping, MappingCallback callback) {
+		if(callback != null) {
+			return callback.onMap(nodeRef, value, reverseMapping);
+		}
 		Collection<String> mappedKeys;
 		Collection<MetadataKey.MetadataKeyRelated> relatedMapped;
 		if (reverseMapping) {
@@ -207,6 +249,12 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 			return null;
 		}
 		//logger.debug("Mapping " + value + " => " + mappedIds + ", node " + nodeRef);
+		if(targetKeys != null) {
+			mappedKeys = mappedKeys.stream().filter((keyId) -> targetKeys.stream().anyMatch(
+					key -> key.getKey().equals(keyId) ||
+							(key.getAlternativeKeys() != null && key.getAlternativeKeys().contains(keyId))
+			)).collect(Collectors.toList());
+		}
 		if(mappedKeys.size() == 1) {
 			return mappedKeys.iterator().next();
 		}

@@ -153,7 +153,7 @@ public class NodeApi  {
 		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 		    	
 		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-		    	nodeDao.addWorkflowHistory(entry);
+		    	nodeDao.addWorkflowHistory(entry, true);
 		    	return Response.status(Response.Status.OK).build();
 		
 	    	} catch (Throwable t) {

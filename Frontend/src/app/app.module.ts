@@ -84,6 +84,13 @@ import { PropertySlugPipe } from './common/ui/mds-editor/shared/property-slug.pi
 import { MdsEditorWidgetSearchSuggestionsComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-search-suggestions/mds-editor-widget-search-suggestions.component';
 import { EduSharingApiModule } from 'ngx-edu-sharing-api';
 import { MdsEditorWidgetVCardComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-vcard/mds-editor-widget-vcard.component';
+import { extensionProviders } from './extension/extension-providers';
+import {
+    MdsEditorWidgetTinyMCE
+} from './common/ui/mds-editor/widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-tinymce.component';
+import {EditorModule} from '@tinymce/tinymce-angular';
+import { LtiComponent } from './modules/lti/lti.component';
+import { LtiAdminComponent } from './modules/admin/lti-admin/lti-admin.component';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -140,6 +147,7 @@ import { MdsEditorWidgetVCardComponent } from './common/ui/mds-editor/widgets/md
         MdsEditorWidgetTreeCoreComponent,
         HighlightPipe,
         MdsEditorWidgetCheckboxComponent,
+        MdsEditorWidgetTinyMCE,
         MdsEditorWidgetRadioButtonComponent,
         MdsEditorWidgetCheckboxesComponent,
         MdsEditorEmbeddedComponent,
@@ -158,6 +166,8 @@ import { MdsEditorWidgetVCardComponent } from './common/ui/mds-editor/widgets/md
         LabelPipe,
         PropertySlugPipe,
         MdsEditorWidgetSearchSuggestionsComponent,
+        LtiComponent,
+        LtiAdminComponent
     ],
     imports: [
         IMPORTS,
@@ -167,12 +177,14 @@ import { MdsEditorWidgetVCardComponent } from './common/ui/mds-editor/widgets/md
         DragDropModule,
         extensionImports,
         ResizableModule,
+        EditorModule,
     ],
     providers: [
         PROVIDERS,
         PROVIDERS_SEARCH,
         {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {appearance: 'outline'}},
-        {provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: {showDelay: 500}}
+        {provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: {showDelay: 500}},
+        extensionProviders,
     ],
     exports: [
         DECLARATIONS,

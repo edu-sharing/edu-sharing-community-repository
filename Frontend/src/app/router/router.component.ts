@@ -41,6 +41,8 @@ import { BridgeService } from '../core-bridge-module/bridge.service';
 import {AccessibilityComponent} from '../common/ui/accessibility/accessibility.component';
 import { extensionRoutes } from '../extension/extension-routes';
 import {BehaviorSubject} from 'rxjs';
+import { AccessibilityService } from '../common/ui/accessibility/accessibility.service';
+import { LtiComponent } from '../modules/lti/lti.component';
 
 @Component({
     selector: 'es-router',
@@ -96,6 +98,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
         private ngZone: NgZone,
         private bridge: BridgeService,
         private injector: Injector,
+        private accessibilityService: AccessibilityService,
     ) {
         this.injector.get(Router).events.subscribe(event => {
             if (event instanceof NavigationEnd) {
@@ -111,6 +114,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
 
     ngOnInit(): void {
         this.setUserScale();
+        this.registerContrastMode();
     }
 
     ngDoCheck(): void {
@@ -151,6 +155,17 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
             const viewport: HTMLMetaElement = document.head.querySelector('meta[name="viewport"]');
             viewport.content += ', user-scalable=no';
         }
+    }
+
+    private registerContrastMode(): void {
+        const contrastModeClass = 'es-contrast-mode';
+        this.accessibilityService.observe('contrastMode').subscribe((value) => {
+            if (value) {
+                document.body.classList.add(contrastModeClass);
+            } else {
+                document.body.classList.remove(contrastModeClass);
+            }
+        });
     }
 }
 
@@ -233,8 +248,10 @@ export const ROUTES: Routes = [
 
     // messages
     { path: UIConstants.ROUTER_PREFIX + 'messages/:message', component: MessagesComponent },
+    { path: UIConstants.ROUTER_PREFIX + 'messages/:message/:text', component: MessagesComponent },
     // error (same as message)
     { path: UIConstants.ROUTER_PREFIX + 'error/:message', component: MessagesComponent },
+    { path: UIConstants.ROUTER_PREFIX + 'error/:message/:text', component: MessagesComponent },
 
     // link-share
     { path: UIConstants.ROUTER_PREFIX + 'sharing', component: SharingComponent },
@@ -243,6 +260,8 @@ export const ROUTES: Routes = [
 
     // embed
     { path: UIConstants.ROUTER_PREFIX + 'embed/:component', component: EmbedComponent },
+
+    { path: UIConstants.ROUTER_PREFIX + 'lti', component: LtiComponent },
 
     // wildcard 404
     { path: '**', component: MessagesComponent, data: {message: 404} },

@@ -123,6 +123,7 @@ export class AdminComponent {
   static RS_CONFIG_HELP='https://docs.edu-sharing.com/confluence/edp/de/installation-en/installation-of-the-edu-sharing-rendering-service';
   mailTemplates=[
       'invited',
+      'invited_workflow',
       'invited_safe',
       'invited_collection',
       'nodeIssue',
@@ -611,7 +612,7 @@ export class AdminComponent {
     });
   }
 
-  private refreshAppList() {
+  public refreshAppList() {
     this.admin.getApplications().subscribe((data:Application[])=> {
       this.applications = data;
       this.applicationsOpen = {};
@@ -1200,7 +1201,7 @@ export class AdminComponent {
     }
 
   getOwnAppUrl() {
-    return this.connector.getAbsoluteEdusharingUrl()+'metadata?format='+this.ownAppMode;
+    return this.connector.getAbsoluteEdusharingUrl()+'metadata?format='+this.ownAppMode + '&external=true';
   }
 
   copyOwnApp() {
@@ -1252,9 +1253,12 @@ export class AdminComponent {
       if (param.file) {
         continue;
       }
-      data[param.name] = param.sampleValue ?? '';
+      data[param.name] = param.type === 'boolean' ? param.sampleValue === 'true' : param.sampleValue ?? '';
       if(param.values) {
         data[param.name] = param.values.map((v) => v.name).join('|');
+      }
+      if(param.array) {
+          data[param.name] = [data[param.name]];
       }
       modified = true;
     }

@@ -165,6 +165,7 @@ Configure your Git to keep line endings to prevent changes to unmodified files:
 ```sh
 git config core.autocrlf input
 ```
+Run the `npm run generate-api` inside a WSL shell, otherwise the prettier might fail.
 
 ### Code scaffolding
 

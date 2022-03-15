@@ -421,6 +421,9 @@ public class MetadataReader {
 				if(name.equals("bottomCaption")){
 					widget.setBottomCaption(getTranslation(widget,value));
 				}
+				if(name.equals("configuration")){
+					widget.setConfiguration(value);
+				}
 				if(name.equals("unit")){
 					widget.setUnit(getTranslation(widget,value));
 				}

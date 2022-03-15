@@ -49,13 +49,14 @@ export class ToolpermissionManagerComponent {
         RestConstants.TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS,
     ]},
     {name:"DATA_MANAGEMENT",icon:"folder",permissions:[
-        RestConstants.TOOLPERMISSION_WORKSPACE,
-        RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES,
-        RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS,
-        RestConstants.TOOLPERMISSION_CREATE_MAP_LINK,
-        RestConstants.TOOLPERMISSION_UNCHECKEDCONTENT,
+            RestConstants.TOOLPERMISSION_WORKSPACE,
+            RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES,
+            RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS,
+            RestConstants.TOOLPERMISSION_CREATE_MAP_LINK,
+            RestConstants.TOOLPERMISSION_UNCHECKEDCONTENT,
             RestConstants.TOOLPERMISSION_COMMENT_WRITE,
-            RestConstants.TOOLPERMISSION_RATE
+            RestConstants.TOOLPERMISSION_RATE_READ,
+            RestConstants.TOOLPERMISSION_RATE_WRITE
     ]},
     {name:"ACCOUNT_MANAGEMENT",icon:"group",permissions:[
               RestConstants.TOOLPERMISSION_SIGNUP_GROUP,

@@ -105,6 +105,7 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.HasPermissionsWork;
 import org.edu_sharing.alfresco.fixes.VirtualEduGroupFolderTool;
+import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataKey;
@@ -3006,8 +3007,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	
 	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId, String[] permissions) {
 		ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
-		String guestName = appInfo.getGuest_username();
-		boolean guest=guestName!=null && guestName.equals(AuthenticationUtil.getFullyAuthenticatedUser());
+		boolean guest= GuestCagePolicy.getGuestUsers().contains(AuthenticationUtil.getFullyAuthenticatedUser());
 		PermissionService permissionService = serviceRegistry.getPermissionService();
 		HashMap<String, Boolean> result = new HashMap<String, Boolean>();
 		NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol,storeId), nodeId);
@@ -3526,10 +3526,22 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				(String) nodeService.getProperty(
 						new NodeRef(storeRef, nodeId),
 						QName.createQName(CCConstants.CM_NAME));
-		for(int i=0;;i++) {
+		for(int i=0;i<=11;i++) {
 			String name=originalName;
 			if(i>0) {
 				name = NodeServiceHelper.renameNode(name, i);
+				if(i>10) {
+					logger.info("Node " + name +" already exists, falling back to uuid " + nodeId);
+					// fallback
+					name = nodeId;
+				}
+			}
+			if(nodeService.getChildByName(new NodeRef(storeRef, newParentId), ContentModel.ASSOC_CONTAINS, name) != null ||
+					nodeService.getChildByName(NodeServiceHelper.getPrimaryParent(new NodeRef(storeRef, nodeId)), ContentModel.ASSOC_CONTAINS, name) != null) {
+				logger.debug("Node " + name +" already exists, retrying...");
+				continue;
+			}
+			if(i>0) {
 				nodeService.setProperty(new NodeRef(storeRef, nodeId),
 						QName.createQName(CCConstants.CM_NAME),name);
 			}
@@ -3543,11 +3555,13 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				// remove from cache so that the new primary parent will be refreshed
 				Cache repCache = new RepositoryCache();
 				repCache.remove(nodeId);
-				break;
+				return;
 			}catch(DuplicateChildNodeNameException e){
+				logger.warn("Node renaming to " + name + " throwed " + e.getName());
 				// let the loop run
 			}
 		}
+		throw new RuntimeException("Could not move node, creating new node at location " +newParentId + " failed, renaming failed for " + nodeId);
 	}
 
 	/**

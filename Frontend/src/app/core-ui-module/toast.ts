@@ -2,7 +2,7 @@ import {Injectable, Injector, OnDestroy} from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import {BehaviorSubject, Observable, Subscription} from 'rxjs';
+import {BehaviorSubject, Observable, Subject} from 'rxjs';
 import { ModalDialogOptions } from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import { ProgressType } from '../common/ui/modal-dialog/modal-dialog.component';
 import { RestConstants } from '../core-module/rest/rest-constants';
@@ -10,8 +10,9 @@ import { TemporaryStorageService } from '../core-module/rest/services/temporary-
 import { DialogButton } from '../core-module/ui/dialog-button';
 import { UIConstants } from '../core-module/ui/ui-constants';
 import { DateHelper } from './DateHelper';
-import {SessionStorageService} from '../core-module/rest/services/session-storage.service';
 import {ToastMessageComponent} from './components/toast-message/toast-message.component';
+import { AccessibilityService } from '../common/ui/accessibility/accessibility.service';
+import { takeUntil } from 'rxjs/operators';
 
 interface CustomAction {
     link: {
@@ -57,7 +58,6 @@ export class Toast implements OnDestroy {
 
     private isInstanceVisible = false;
     private messageQueue = new BehaviorSubject<ToastMessage[]>([]);
-    private subscription: Subscription;
     private onShowModal: (params: ModalDialogOptions) => void;
     private lastToastMessage: string;
     private lastToastMessageTime: number;
@@ -65,6 +65,7 @@ export class Toast implements OnDestroy {
     private lastToastErrorTime: number;
     private isModalDialogOpenSubject = new BehaviorSubject<boolean>(false);
     private translate: TranslateService;
+    private destroyed = new Subject<void>();
     mode: 'important' | 'all' = null;
     duration: ToastDuration = null;
     static convertDuration(duration: ToastDuration) {
@@ -80,30 +81,33 @@ export class Toast implements OnDestroy {
         private router: Router,
         private snackBar: MatSnackBar,
         private storage: TemporaryStorageService,
+        private accessibility: AccessibilityService,
     ) {
-        this.subscription = this.messageQueue.subscribe((message) => {
+        this.messageQueue.pipe(takeUntil(this.destroyed)).subscribe((message) => {
             if (this.isInstanceVisible) {
                 return;
             }
             this.showNext();
         })
         this.isModalDialogOpen = this.isModalDialogOpenSubject.asObservable();
-        this.refresh();
+        this.accessibility
+            .observe(['toastDuration', 'toastMode'])
+            .pipe(takeUntil(this.destroyed))
+            .subscribe(({ toastDuration, toastMode }) => {
+                // TODO(Christopher, 2022-03-01): Do we need to clear existing toasts here?
+                this.messageQueue.next([]);
+                this.snackBar.dismiss();
+                this.mode = toastMode;
+                this.duration = toastDuration;
+            });
         // Avoid cyclic-dependency error at runtime.
         setTimeout(() => {
             this.translate = this.injector.get(TranslateService);
         });
     }
     ngOnDestroy() {
-        this.subscription.unsubscribe();
-    }
-    async refresh() {
-        this.messageQueue.next([]);
-        this.snackBar.dismiss();
-        this.mode = await this.injector.get(SessionStorageService).
-            get('accessibility_toastMode', 'all').toPromise();
-        this.duration = await this.injector.get(SessionStorageService).
-            get('accessibility_toastDuration', ToastDuration.Seconds_5).toPromise();
+        this.destroyed.next();
+        this.destroyed.complete();
     }
     show(message: ToastMessage) {
         if(message.type === 'info') {

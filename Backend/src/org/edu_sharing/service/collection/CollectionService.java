@@ -90,7 +90,9 @@ public interface CollectionService {
 
     List<org.edu_sharing.service.model.NodeRef> getReferenceObjects(String nodeId);
 
-    String addFeedback(String id, HashMap<String, String[]> feedbackData) throws Throwable;
+	List<NodeRef> getReferenceObjectsSync(String nodeId);
+
+	String addFeedback(String id, HashMap<String, String[]> feedbackData) throws Throwable;
 
 	List<String> getFeedbacks(String id) throws Throwable;
 

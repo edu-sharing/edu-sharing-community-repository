@@ -62,6 +62,9 @@ import { ViewInstanceService } from './view-instance.service';
 import {EditorMode} from '../../../../core-ui-module/mds-types';
 import {MdsEditorWidgetBase} from '../widgets/mds-editor-widget-base';
 import {MdsEditorWidgetVCardComponent} from '../widgets/mds-editor-widget-vcard/mds-editor-widget-vcard.component';
+import {
+    MdsEditorWidgetTinyMCE
+} from '../widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-tinymce.component';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;
@@ -109,6 +112,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         [MdsWidgetType.Month]: MdsEditorWidgetTextComponent,
         [MdsWidgetType.Color]: MdsEditorWidgetTextComponent,
         [MdsWidgetType.Textarea]: MdsEditorWidgetTextComponent,
+        [MdsWidgetType.TinyMCE]: MdsEditorWidgetTinyMCE,
         [MdsWidgetType.VCard]: MdsEditorWidgetVCardComponent,
         [MdsWidgetType.Checkbox]: MdsEditorWidgetCheckboxComponent,
         [MdsWidgetType.RadioHorizontal]: MdsEditorWidgetRadioButtonComponent,
@@ -235,7 +239,8 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 const widgetName = tagName as NativeWidgetType;
                 // Native widgets don't support dynamic conditions yet and don't necessarily have a
                 // `widget` object.
-                if(this.mdsEditorInstance.editorMode === 'inline') {
+                const WidgetComponent = MdsEditorViewComponent.nativeWidgets[widgetName];
+                if(this.mdsEditorInstance.editorMode === 'inline' && !WidgetComponent?.constraints?.supportsInlineEditing) {
                     // native widgets not (yet) supported for inline editing
                     continue;
                 } else {

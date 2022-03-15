@@ -10,23 +10,25 @@
   it on to the input element. -->
   <mat-chip-list
     #chipList
-    [formControl]="chipsControl"
     *ngIf="chipsControl"
     [attr.aria-labelledby]="chipsControl.value.length > 0 ? container.labelId : null"
     esOnAttributeChange="aria-describedby"
     (attributeChange)="input.setAttribute('aria-describedby', $event)"
+    [multiple]="true"
   >
+    <!-- We mark all chips as selected because NVDA will announce "not selected" for each item
+    otherwise. It announces nothing (!) for selected items. -->
     <mat-chip
+      #chip="matChip"
       *ngFor="let value of chipsControl.value"
-      [selectable]="false"
+      [selected]="true"
       [removable]="true"
       (blur)="onBlurInput($event)"
       (click)="add(value)"
       (removed)="remove(value)"
       [class.indeterminate]="(indeterminateValues$ | async)?.includes(value.key)"
-      esCheckTextOverflow=".mat-chip-label"
-      #text="esCheckTextOverflow"
-      [matTooltip]="getTooltip(value, text.hasTextOverflow())"
+      [class.mat-chip-selected]="false"
+      [matTooltip]="getTooltip(value)"
     >
       <span class="mat-chip-label">{{ value.label }}</span>
       <mat-icon matChipRemove>cancel</mat-icon>
@@ -73,6 +75,9 @@
       [esRegisterCustomProperty]="{ key: 'tooltip', value: tooltip, object: option }"
     >
       <span [innerHTML]="value.label | sanitizeHTML | highlight: inputControl.value"></span>
+    </mat-option>
+    <mat-option disabled *ngIf="shouldShowNoMatchingValuesNotice | async" aria-live="polite">
+      {{ 'MDS.NO_MATCHING_VALUES' | translate }}
     </mat-option>
   </mat-autocomplete>
 </es-mds-editor-widget-container>

@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class BulkServiceImpl implements BulkService {
-	private static final String PRIMARY_FOLDER_NAME = "SYNC_OBJ";
+	public static final String PRIMARY_FOLDER_NAME = "SYNC_OBJ";
 	static NodeService nodeServiceAlfresco = (NodeService) AlfAppContextGate.getApplicationContext().getBean("alfrescoDefaultDbNodeService");
 	static ServiceRegistry serviceRegistry = (ServiceRegistry) AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
 	static VersionService versionServiceAlfresco = serviceRegistry.getVersionService();

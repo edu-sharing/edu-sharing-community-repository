@@ -462,6 +462,7 @@
               <ccm:wwwurl>
               <cm:name>
               <cclom:title>
+			  <ccm:educationallearningresourcetype>
               <author>
 				]]></html>
 		</template>
@@ -927,6 +928,14 @@
 			</columns>
 		</list>
 		<list>
+			<id>searchCollections</id>
+			<columns>
+				<column>COLLECTION.title</column>
+				<column>COLLECTION.info</column>
+				<column>COLLECTION.scope</column>
+			</columns>
+		</list>
+		<list>
 			<id>collectionReferences</id>
 			<columns>
 				<column>cclom:title</column>
@@ -1018,7 +1027,8 @@
 			</property>
 		</query>
 		<query join="AND"  id="collections">
-			<basequery propertyNull="ngsearchword">@ccm\:collectionlevel0:true OR @ccm\:collection_pinned_status:true</basequery>
+			<basequery>ASPECT:"ccm:collection"</basequery>
+			<basequery propertyNull="ngsearchword">ASPECT:"ccm:collection" AND (@ccm\:collectionlevel0:true OR @ccm\:collection_pinned_status:true)</basequery>
 			<property name="ngsearchword">
 				<statement>(@sys\:node-uuid:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
 				<exactMatching>false</exactMatching>

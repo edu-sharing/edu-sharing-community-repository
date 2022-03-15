@@ -1,9 +1,13 @@
 @import '../../../../../core-ui-module/styles/variables';
-
 :host {
     display: block;
-    margin-bottom: 1.5em;
-    scroll-margin-top: 50px;
+}
+.widget-container {
+    display: block;
+    &:not(.read-only) {
+        margin-bottom: 1.5em;
+        scroll-margin-top: 50px;
+    }
 }
 
 .ripple-container {

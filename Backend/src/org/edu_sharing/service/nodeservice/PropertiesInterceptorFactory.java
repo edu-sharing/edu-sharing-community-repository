@@ -79,6 +79,7 @@ public class PropertiesInterceptorFactory {
 
     public static void refresh(){
         propertiesGetInterceptors = null;
+        propertiesSetInterceptors = null;
     }
 
     public static PropertiesGetInterceptor.PropertiesContext getPropertiesContext(NodeRef nodeRef, Map<String,Object> properties, List<String> aspects){

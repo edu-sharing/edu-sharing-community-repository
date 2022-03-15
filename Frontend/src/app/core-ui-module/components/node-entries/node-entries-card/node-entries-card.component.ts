@@ -1,4 +1,12 @@
-import {ApplicationRef, Component, Input, OnChanges, SimpleChanges, ViewChild} from '@angular/core';
+import {
+    ApplicationRef,
+    Component,
+    Input,
+    OnChanges,
+    OnInit,
+    SimpleChanges,
+    ViewChild
+} from '@angular/core';
 import {NodeEntriesService} from '../../../node-entries.service';
 import {Node} from '../../../../core-module/rest/data-object';
 import {NodeHelperService} from '../../../node-helper.service';
@@ -8,13 +16,16 @@ import {DropdownComponent} from '../../dropdown/dropdown.component';
 import {MatMenuTrigger} from '@angular/material/menu';
 import {ClickSource, InteractionType} from '../../node-entries-wrapper/entries-model';
 import { Toast } from 'src/app/core-ui-module/toast';
+import {ConfigurationService} from '../../../../core-module/rest/services/configuration.service';
+import {RestConnectorService} from '../../../../core-module/rest/services/rest-connector.service';
+import {RestConstants} from '../../../../core-module/rest/rest-constants';
 
 @Component({
     selector: 'es-node-entries-card',
     templateUrl: 'node-entries-card.component.html',
     styleUrls: ['node-entries-card.component.scss']
 })
-export class NodeEntriesCardComponent<T extends Node> implements OnChanges {
+export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnInit {
     readonly InteractionType = InteractionType;
     readonly Target = Target;
     readonly ClickSource = ClickSource;
@@ -24,10 +35,13 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges {
     @Input() node: T;
     dropdownLeft: number;
     dropdownTop: number;
+    showRatings: boolean;
     constructor(
         public entriesService: NodeEntriesService<T>,
         public nodeHelper: NodeHelperService,
         public applicationRef: ApplicationRef,
+        public connector: RestConnectorService,
+        public configService: ConfigurationService,
         private toast: Toast,
     ) {
     }
@@ -83,5 +97,10 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges {
         this.entriesService.selection.select(node);
         await this.applicationRef.tick();
         this.dropdown.menu.focusFirstItem();
+    }
+
+    async ngOnInit() {
+        this.showRatings = (await this.configService.get('', 'none').toPromise()) !== 'none' &&
+            (await this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_RATE_READ).toPromise())
     }
 }

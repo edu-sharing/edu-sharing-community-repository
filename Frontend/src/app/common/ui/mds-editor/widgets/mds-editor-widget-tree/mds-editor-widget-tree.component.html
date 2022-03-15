@@ -11,16 +11,20 @@
 >
   <mat-chip-list
     #chipList
-    [formControl]="chipsControl"
     [attr.aria-labelledby]="chipsControl?.value.length > 0 ? container.labelId : null"
     (click)="$event.stopPropagation(); $event.preventDefault()"
+    [multiple]="true"
   >
+    <!-- We mark all chips as selected because NVDA will announce "not selected" for each item
+    otherwise. It announces nothing (!) for selected items. Same as MdsEditorWidgetChips. -->
     <mat-chip
+      #chip="matChip"
       *ngFor="let value of chipsControl?.value"
-      [selectable]="false"
+      [selected]="true"
       [removable]="true"
-      [matTooltip]="value.hint"
+      [matTooltip]="value.label + ' (' + ('MDS.DELETE_KEY_NOTICE' | translate) + ')'"
       [class.indeterminate]="(this.indeterminateValues$ | async)?.includes(value.key)"
+      [class.mat-chip-selected]="false"
       (click)="revealInTree(value)"
       (keydown.enter)="revealInTree(value)"
       (removed)="remove(value)"
@@ -61,10 +65,11 @@
   [cdkConnectedOverlayOpen]="overlayIsVisible"
   (overlayKeydown)="onOverlayKeydown($event)"
 >
-  <div *ngIf="overlayIsVisible"
-       class="suggestion-card"
-       role="dialog"
-       [attr.aria-labelledby]="container.labelId"
+  <div
+    *ngIf="overlayIsVisible"
+    class="suggestion-card"
+    role="dialog"
+    [attr.aria-labelledby]="container.labelId"
   >
     <es-mds-editor-widget-tree-core
       cdkTrapFocus

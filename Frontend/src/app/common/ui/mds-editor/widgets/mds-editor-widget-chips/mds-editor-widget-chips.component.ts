@@ -1,14 +1,3 @@
-
-import {
-    throttleTime,
-    debounce,
-    delay,
-    distinctUntilChanged,
-    filter,
-    map,
-    startWith,
-    switchMap,
-} from 'rxjs/operators';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import {
     AfterViewInit,
@@ -16,7 +5,9 @@ import {
     Component,
     ElementRef,
     OnInit,
+    QueryList,
     ViewChild,
+    ViewChildren,
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import {
@@ -24,18 +15,28 @@ import {
     MatAutocompleteSelectedEvent,
     MatAutocompleteTrigger,
 } from '@angular/material/autocomplete';
-import { MatChipInputEvent } from '@angular/material/chips';
+import { MatChip, MatChipInputEvent } from '@angular/material/chips';
 import { MatTooltip } from '@angular/material/tooltip';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, combineLatest, EMPTY, from, Observable, Subject, timer } from 'rxjs';
+import {
+    debounce,
+    delay,
+    distinctUntilChanged,
+    filter,
+    map,
+    startWith,
+    switchMap,
+    throttleTime,
+} from 'rxjs/operators';
+import { Toast, ToastType } from 'src/app/core-ui-module/toast';
+import { UIHelper } from '../../../../../core-ui-module/ui-helper';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsWidgetType, MdsWidgetValue } from '../../types';
 import { DisplayValue } from '../DisplayValues';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
-import {MdsValueList} from '../../../../../core-module/rest/data-object';
-import {UIHelper} from '../../../../../core-ui-module/ui-helper';
-import {MdsEditorWidgetContainerComponent} from '../mds-editor-widget-container/mds-editor-widget-container.component';
+import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
 
 @Component({
     selector: 'es-mds-editor-widget-chips',
@@ -51,12 +52,14 @@ export class MdsEditorWidgetChipsComponent
     @ViewChild(MatAutocompleteTrigger, { read: MatAutocompleteTrigger })
     trigger: MatAutocompleteTrigger;
     @ViewChild('auto') matAutocomplete: MatAutocomplete;
+    @ViewChildren('chip') chips: QueryList<MatChip>;
 
     readonly valueType: ValueType = ValueType.MultiValue;
     readonly separatorKeysCodes: number[] = [ENTER, COMMA];
     inputControl = new FormControl();
     chipsControl: FormControl;
     autocompleteValues: Observable<DisplayValue[]>;
+    shouldShowNoMatchingValuesNotice: Observable<boolean>;
     indeterminateValues$: BehaviorSubject<string[]>;
     showDropdownArrow: boolean;
 
@@ -76,6 +79,7 @@ export class MdsEditorWidgetChipsComponent
         mdsEditorInstance: MdsEditorInstanceService,
         translate: TranslateService,
         private changeDetectorRef: ChangeDetectorRef,
+        private toast: Toast,
     ) {
         super(mdsEditorInstance, translate);
     }
@@ -83,7 +87,7 @@ export class MdsEditorWidgetChipsComponent
     ngOnInit(): void {
         this.chipsControl = new FormControl(
             [
-                ...this.widget.getInitialValues()?.jointValues ?? [],
+                ...(this.widget.getInitialValues()?.jointValues ?? []),
                 ...(this.widget.getInitialValues()?.individualValues ?? []),
             ].map((value) => this.toDisplayValues(value)),
             this.getStandardValidators(),
@@ -112,6 +116,17 @@ export class MdsEditorWidgetChipsComponent
                 filteredValues,
                 this.autocompleteIsInhibited,
             ]).pipe(map(([values, inhibit]) => (inhibit ? null : values)));
+            this.shouldShowNoMatchingValuesNotice = combineLatest([
+                this.autocompleteValues,
+                this.inputControl.valueChanges,
+            ]).pipe(
+                map(
+                    ([autocompleteValues, inputValue]) =>
+                        this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges &&
+                        autocompleteValues?.length === 0 &&
+                        inputValue,
+                ),
+            );
         }
         this.showDropdownArrow =
             this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges &&
@@ -127,10 +142,27 @@ export class MdsEditorWidgetChipsComponent
 
     ngAfterViewInit(): void {
         this.registerAutoCompleteToggleTrigger();
+        // We mark all chips as selected for better screen-reader output. However, since selection
+        // doesn't do anything, we disable toggling the selection.
+        this.chips.changes
+            .pipe(startWith(this.chips))
+            .subscribe((chips: QueryList<MatChip>) =>
+                chips.forEach((chip) => (chip.toggleSelected = () => true)),
+            );
     }
 
     onInputTokenEnd(event: MatChipInputEvent): void {
         if (this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges) {
+            if (event.value) {
+                // If the input field still has a value, the use has not selected on option from the
+                // autocomplete list. In this case, we notify them, that they cannot add arbitrary
+                // values.
+                this.toast.show({
+                    message: 'MDS.NO_ARBITRARY_VALUES_NOTICE',
+                    type: 'info',
+                    subtype: ToastType.InfoSimple,
+                });
+            }
             return;
         }
         const value = (event.value || '').trim();
@@ -157,7 +189,12 @@ export class MdsEditorWidgetChipsComponent
         if (this.trigger.panelOpen) {
             this.autoCompleteToggleTrigger.next('close');
         }
-        if(!UIHelper.isParentElementOfElement(event.relatedTarget as HTMLElement, this.container.nativeElement.nativeElement)) {
+        if (
+            !UIHelper.isParentElementOfElement(
+                event.relatedTarget as HTMLElement,
+                this.container.nativeElement.nativeElement,
+            )
+        ) {
             this.onBlur.emit();
         }
     }
@@ -199,16 +236,17 @@ export class MdsEditorWidgetChipsComponent
         this.removeFromIndeterminateValues(value.key);
     }
 
-    getTooltip(value: DisplayValue, hasTextOverflow: boolean): string | null {
+    getTooltip(value: DisplayValue): string | null {
         const shouldShowIndeterminateNotice =
             this.widget.getStatus() !== 'DISABLED' &&
             this.widget.getIndeterminateValues()?.includes(value.key);
         if (shouldShowIndeterminateNotice) {
-            return this.translate.instant('MDS.INDETERMINATE_NOTICE', { value: value.label });
-        } else if (hasTextOverflow) {
-            return value.label;
+            return (
+                this.translate.instant('MDS.INDETERMINATE_NOTICE', { value: value.label }) +
+                ` (${this.translate.instant('MDS.DELETE_KEY_NOTICE')})`
+            );
         } else {
-            return null;
+            return value.label + ` (${this.translate.instant('MDS.DELETE_KEY_NOTICE')})`;
         }
     }
 
@@ -297,13 +335,14 @@ export class MdsEditorWidgetChipsComponent
     private toDisplayValues(value: MdsWidgetValue | string): DisplayValue {
         if (typeof value === 'string') {
             const knownValue = this.widget.definition.values?.find((v) => v.id === value);
-            if (!knownValue
-                && this.widget.getInitialDisplayValues()) {
-                const ds = this.widget.getInitialDisplayValues().values?.find(v => v.key === value).displayString;
+            if (!knownValue && this.widget.getInitialDisplayValues()) {
+                const ds = this.widget
+                    .getInitialDisplayValues()
+                    .values?.find((v) => v.key === value).displayString;
                 return {
                     key: value,
-                    label:ds
-                }
+                    label: ds,
+                };
             }
             if (knownValue) {
                 value = knownValue;

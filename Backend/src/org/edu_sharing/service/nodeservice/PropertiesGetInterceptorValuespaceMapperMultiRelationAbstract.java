@@ -6,6 +6,7 @@ import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.server.jobs.quartz.MigrateMetadataValuespaceJob;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * this interceptor will map the first relation given in the input list which yields one or more hits
@@ -33,10 +34,10 @@ public abstract class PropertiesGetInterceptorValuespaceMapperMultiRelationAbstr
     }
 
     @Override
-    public void setWidget(MetadataWidget widget) {
-        super.setWidget(widget);
+    public void setWidget(MetadataWidget sourceWidget, MetadataWidget targetWidget) {
+        super.setWidget(sourceWidget, targetWidget);
         relationCache = new HashMap<>();
-        this.relations.forEach((r) -> relationCache.put(r, widget.getValuespaceMappingByRelation(r)));
+        this.relations.forEach((r) -> relationCache.put(r, sourceWidget.getValuespaceMappingByRelation(r)));
     }
 
     /**
@@ -47,19 +48,21 @@ public abstract class PropertiesGetInterceptorValuespaceMapperMultiRelationAbstr
         if(relationCache == null) {
             logger.error("setWidget() was not called");
         }
-        for(MetadataKey.MetadataKeyRelated.Relation relation : relations) {
-            HashSet<String> mapped = MigrateMetadataValuespaceJob.mapValueToTarget(
-                    context.getNodeRef(),
-                    relationCache.get(relation),
-                    mode,
-                    map.get(sourceProperty),
-                    map.get(targetProperty),
-                    false
-            );
-            if(mapped != null && !mapped.isEmpty()) {
-                map.put(targetProperty, mapped);
-                return map;
-            }
+        List<Map<String, Collection<MetadataKey.MetadataKeyRelated>>> mappedList = relations.stream().map((m) -> relationCache.get(m)).collect(Collectors.toList());
+
+        HashSet<String> mapped = MigrateMetadataValuespaceJob.mapValueToTarget(
+                context.getNodeRef(),
+                mappedList,
+                targetWidget.getValues(),
+                mode,
+                map.get(sourceProperty),
+                map.get(targetProperty),
+                false,
+                null
+        );
+        if(mapped != null && !mapped.isEmpty()) {
+            map.put(targetProperty, mapped);
+            return map;
         }
         return map;
     }

@@ -11,7 +11,7 @@ import { UIHelper } from '../../../../../core-ui-module/ui-helper';
 import { MainNavService } from '../../../../services/main-nav.service';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
-import { MdsWidgetValue, Values } from '../../types';
+import {Constraints, MdsWidgetValue, Values} from '../../types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 @Component({
@@ -23,7 +23,8 @@ export class MdsEditorWidgetLicenseComponent
     extends MdsEditorWidgetBase
     implements OnInit, NativeWidgetComponent
 {
-    static readonly constraints = {
+    static readonly constraints: Constraints = {
+        supportsInlineEditing: true,
         requiresNode: false,
         supportsBulk: true,
     };

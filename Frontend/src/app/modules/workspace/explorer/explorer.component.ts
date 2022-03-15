@@ -18,7 +18,7 @@ import {
     RestSearchService,
     SessionStorageService,
     Store,
-    TemporaryStorageService
+    TemporaryStorageService, UIService
 } from '../../../core-module/core.module';
 import {TranslateService} from '@ngx-translate/core';
 import {CustomOptions, Scope} from '../../../core-ui-module/option-item';
@@ -211,6 +211,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         private config : ConfigurationService,
         private search : RestSearchService,
         private toast : Toast,
+        public ui : UIService,
         private nodeApi : RestNodeService) {
         // super(temporaryStorage,['_node','_nodes','sortBy','sortAscending','columns','totalCount','hasMoreToLoad']);
         this.initColumns();
@@ -404,5 +405,13 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
 
     saveColumns(columns: ListItem[]) {
         this.storage.set('workspaceColumns',columns);
+    }
+
+    clickItem(event: NodeClickEvent<Node>) {
+          if(this.ui.isMobile()) {
+              this.onOpenNode.emit(event.element);
+          } else {
+              this.select(event);
+          }
     }
 }

@@ -56,6 +56,7 @@ import {
     NodeEntriesDisplayType
 } from './components/node-entries-wrapper/entries-model';
 import {MainNavService} from '../common/services/main-nav.service';
+import {FormBuilder} from '@angular/forms';
 
 
 export class OptionsHelperConfig {
@@ -653,6 +654,31 @@ export class OptionsHelperService implements OnDestroy {
         addNodeToCollection.group = DefaultGroups.Reuse;
         addNodeToCollection.priority = 10;
 
+        const addNodeToLTIPlatform = new OptionItem('OPTIONS.LTI', 'input', (object) => {
+                const nodes: Node[] = this.getObjects(object);
+                this.nodeHelper.addNodesToLTIPlatform(nodes);
+            }
+        );
+        addNodeToLTIPlatform.elementType = OptionsHelperService.ElementTypesAddToCollection;
+        addNodeToLTIPlatform.showAsAction = true;
+        addNodeToLTIPlatform.showAlways = true;
+        addNodeToLTIPlatform.constrains = [Constrain.Files, Constrain.User, Constrain.LTIMode];
+        addNodeToLTIPlatform.group = DefaultGroups.Primary;
+        addNodeToLTIPlatform.priority = 11;
+        addNodeToLTIPlatform.permissions = [RestConstants.ACCESS_CC_PUBLISH];
+        addNodeToLTIPlatform.customEnabledCallback = (nodes: Node[]) => {
+            const ltiSession = this.connectors.getRestConnector().getCurrentLogin().ltiSession;
+            if (!ltiSession) {
+                return false;
+            }
+            if (!ltiSession.acceptMultiple) {
+                if (this.data.selectedObjects && this.data.selectedObjects.length > 1) {
+                    return false;
+                }
+            }
+            return true;
+        };
+
         const bookmarkNode = new OptionItem('OPTIONS.ADD_NODE_STORE', 'bookmark_border', (object) =>
             this.bookmarkNodes(this.getObjects(object))
         );
@@ -1144,6 +1170,7 @@ export class OptionsHelperService implements OnDestroy {
         options.push(editNode);
         // add to collection
         options.push(addNodeToCollection);
+        options.push(addNodeToLTIPlatform);
         // create variant
         options.push(createNodeVariant);
         options.push(templateNode);
@@ -1359,6 +1386,11 @@ export class OptionsHelperService implements OnDestroy {
             if (this.connectors.getRestConnector().getCurrentLogin() &&
                 this.connectors.getRestConnector().getCurrentLogin().statusCode !== RestConstants.STATUS_CODE_OK) {
                 return Constrain.User;
+            }
+        }
+        if (constrains.indexOf(Constrain.LTIMode) !== -1) {
+            if (!this.connectors.getRestConnector().getCurrentLogin().ltiSession) {
+                return Constrain.LTIMode;
             }
         }
         if (constrains.indexOf(Constrain.NoSelection) !== -1) {
