@@ -825,6 +825,7 @@
         "RELATION_CREATED": "Beziehung erstellt am",
         "RELATION_CREATOR": "Beziehung erstellt von",
         "OPEN_NODE": "Element anzeigen",
+        "REMOVE_RELATION": "Beziehung entfernen",
         "RELATION_TYPE": {
           "isPartOf": "ist Teil von",
           "isBasedOn": "basiert auf",

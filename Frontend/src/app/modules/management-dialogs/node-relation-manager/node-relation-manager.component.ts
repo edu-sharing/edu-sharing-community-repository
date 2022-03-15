@@ -124,6 +124,10 @@ export class NodeRelationManagerComponent {
             OPEN_URL_MODE.Blank
         );
     }
+
+    removeRelation(relation: RelationData) {
+
+    }
 }
 export enum Relations {
     isBasedOn = 'isBasedOn',

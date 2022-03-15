@@ -55,7 +55,7 @@
             padding: 5px 10px;
             .relation-node {
                 display: grid;
-                grid-template-columns: 1fr auto;
+                grid-template-columns: 1fr auto auto;
                 grid-gap: 10px;
                 align-items: center;
             }

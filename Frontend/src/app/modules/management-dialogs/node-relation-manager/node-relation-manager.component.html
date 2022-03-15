@@ -92,6 +92,13 @@
               matTooltip="{{'NODE_RELATIONS.OPEN_NODE' | translate}}"
             ><i esIcon="open_in_new" [aria]="false"></i>
             </button>
+            <button
+              mat-icon-button
+              color="primary"
+              (click)="removeRelation(relation)"
+              matTooltip="{{'NODE_RELATIONS.REMOVE_RELATION' | translate}}"
+            ><i esIcon="delete" [aria]="false"></i>
+            </button>
           </div>
         </div>
       </div>
