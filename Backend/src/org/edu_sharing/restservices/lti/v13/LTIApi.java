@@ -285,12 +285,6 @@ public class LTIApi {
 
 
                     /**
-                     * @TODO: what happens when user is using the sames session within two browser windows
-                     * maybe use list of LTISessionObject's
-                     */
-                    req.getSession().setAttribute(LTISessionObject.class.getName(),ltiSessionObject);
-
-                    /**
                      * edu-sharing authentication
                      */
                     if(!ltiMessageType.equals(LTIConstants.LTI_MESSAGE_TYPE_DEEP_LINKING) &&
@@ -319,6 +313,13 @@ public class LTIApi {
                         String authenticatedUsername = RepoTools.authenticate(req,
                                 RepoTools.mapToSSOMap(user, givenName, familyName, email));
                     }
+
+                    /**
+                     * @TODO: what happens when user is using the sames session within two browser windows
+                     * maybe use list of LTISessionObject's
+                     */
+                    req.getSession().setAttribute(LTISessionObject.class.getName(),ltiSessionObject);
+
                     if(ltiMessageType.equals(LTIConstants.LTI_MESSAGE_TYPE_DEEP_LINKING)){
                         if(jws.getBody().containsKey(LTIConstants.DEEP_LINKING_SETTINGS)){
                             Map deepLinkingSettings = jws.getBody().get(LTIConstants.DEEP_LINKING_SETTINGS, Map.class);
