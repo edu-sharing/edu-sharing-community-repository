@@ -101,7 +101,7 @@ export class LoginComponent implements OnInit {
                     this.connector.isLoggedIn().subscribe(async (data: LoginResult) => {
                         if (data.currentScope) {
                             // just to make sure there is no scope still set // NO: We need a valid session when login to scope!!!
-                            try{
+                            try {
                                 await this.connector.logout().toPromise();
                             } catch(e) {
                                 console.warn(e);
