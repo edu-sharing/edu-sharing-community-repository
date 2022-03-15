@@ -555,6 +555,25 @@
             "CONDITION_TYPE": {
                 "TOOLPERMISSION": "Toolpermission"
             }
+        },
+      "LTI": {
+        "HEADER": "LTI platform registration",
+        "DYNAMIC": "LTI dynamic registration",
+        "ADVANCED": "LTI advanced registration",
+        "URL": "Url",
+        "TOKEN" : "Token",
+        "TS" : "Expiry Date",
+        "GENERATE" : "Add token",
+        "DATA" : {
+          "platformId" : "platform Id",
+          "client_id" : "client Id",
+          "deployment_id" : "deployment Id",
+          "authentication_request_url" : "authentication request url",
+          "keyset_url" : "keyset url",
+          "key_id" : "key id",
+          "auth_token_url" : "auth token url",
+          "CREATED" : "Platform registered"
         }
+      }
     }
 }

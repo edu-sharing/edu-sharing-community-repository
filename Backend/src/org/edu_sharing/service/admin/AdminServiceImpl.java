@@ -2,6 +2,7 @@ package org.edu_sharing.service.admin;
 
 import java.io.*;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.text.Collator;
@@ -79,6 +80,27 @@ import org.w3c.dom.Element;
 import com.google.common.io.Files;
 
 public class AdminServiceImpl implements AdminService  {
+
+	//cause standard properties class does not save the values sorted
+	class SortedProperties extends Properties{
+
+		public SortedProperties() {
+			super();
+		}
+
+		public SortedProperties(Properties initWith) {
+			for (Map.Entry entry : initWith.entrySet()) {
+				this.setProperty((String)entry.getKey(), (String)entry.getValue());
+			}
+		}
+
+		//for sorted xml storing
+		@Override
+		public Set<Object> keySet() {
+			return new TreeSet<Object>(super.keySet());
+		}
+
+	}
 	
 	private static Logger logger = Logger.getLogger(AdminServiceImpl.class);
 	
@@ -419,28 +441,7 @@ public class AdminServiceImpl implements AdminService  {
 	
 	@Override
 	public HashMap<String, String> addApplicationFromStream(InputStream is) throws Exception {
-		
-		//cause standard properties class does not save the values sorted
-		class SortedProperties extends Properties{
-					
-			public SortedProperties() {
-				super();
-			}
-					
-			public SortedProperties(Properties initWith) {
-				for (Map.Entry entry : initWith.entrySet()) {
-					this.setProperty((String)entry.getKey(), (String)entry.getValue());
-				}
-			}
-					
-			//for sorted xml storing
-			@Override
-				public Set<Object> keySet() {
-				return new TreeSet<Object>(super.keySet());
-			}
 
-		}
-				
 		Properties props = new SortedProperties();
 		props.loadFromXML(is);
 		String appId = props.getProperty(ApplicationInfo.KEY_APPID);
@@ -449,66 +450,110 @@ public class AdminServiceImpl implements AdminService  {
 			throw new Exception("no appId found");
 		}
 		
-		String filename = "app-"+appId+".properties.xml";
-		
+		return storeProperties(appId,props);
+	}
+
+	public HashMap<String,String> addApplication(Map<String,String> properties) throws Exception{
+		if(properties == null){
+			throw new Exception("no properties provided");
+		}
+
+		if(!properties.containsKey(ApplicationInfo.KEY_APPID)){
+			throw new Exception("no appid provided");
+		}
+
+		boolean fieldKnown = false;
+		String unknownField = null;
+		for(Map.Entry<String,String> entry : properties.entrySet()){
+			for(Field f : ApplicationInfo.class.getFields()){
+				if (java.lang.reflect.Modifier.isStatic(f.getModifiers())
+						&& f.getName().startsWith("KEY_")){
+					if(entry.getKey().equals(f.get(null))){
+						fieldKnown = true;
+						unknownField = entry.getKey();
+					}
+				}
+			}
+		}
+
+		if(!fieldKnown){
+			throw new Exception("unknown field:" + unknownField);
+		}
+
+		String appId = properties.get(ApplicationInfo.KEY_APPID);
+
+		Properties props = new Properties();
+		for(Map.Entry<String,String> entry : properties.entrySet()){
+			if(entry.getValue() != null) {
+				props.put(entry.getKey(), entry.getValue());
+			}
+		}
+
+		return storeProperties(appId,props);
+	}
+
+	private HashMap<String,String> storeProperties(String appId, Properties props) throws Exception{
+		String fileNamePart = appId.replaceAll("[/:]","");
+		String filename = "app-"+fileNamePart+".properties.xml";
+
 		//check if appID already exists
 		if(ApplicationInfoList.getApplicationInfos().keySet().contains(appId)){
 			throw new Exception("appId is already in registry");
 		}
-		
+
 		//check for mandatory Property type
 		String type = props.getProperty(ApplicationInfo.KEY_TYPE);
 		if(type == null || type.trim().equals("")){
 			throw new Exception("missing type");
 		}
-		
+
 		if(type.equals(ApplicationInfo.TYPE_RENDERSERVICE)){
 			String contentUrl = props.getProperty("contenturl");
 			if(contentUrl == null || contentUrl.trim().equals("")){
 				throw new Exception("a renderservice must have an contenturl");
 			}
-			
+
 		}
-		
+
 		File appFile = new File(getCatalinaBase()+"/shared/classes/"+filename);
 		if(!appFile.exists()){
 			props.storeToXML(new FileOutputStream(appFile), "");
 		}else{
 			throw new Exception("File "+appFile.getPath() + " already exsists");
 		}
-		
-		
+
+
 		String newProperty=getAppPropertiesApplications()+","+filename;
 		changeAppPropertiesApplications(newProperty,new Date()+" added file:"+filename);
-		
-		
+
+
 		if(type.equals(ApplicationInfo.TYPE_RENDERSERVICE)){
-			
+
 			String contentUrl = props.getProperty("contenturl");
 			//String previewUrl = props.getProperty("previewurl");
-			
+
 			//store that in the homeApplication.properties.xml cause every repository has it's own renderservice
 			//and we don't want to config an renderservice of an remote repository
-			
+
 			String homeAppFileName = AdminServiceFactory.HOME_APPLICATION_PROPERTIES;
 			Properties homeAppProps = PropertiesHelper.getProperties(homeAppFileName, PropertiesHelper.XML);
 			homeAppProps = new SortedProperties(homeAppProps);
-			
+
 			String homeAppPath = getCatalinaBase()+"/shared/classes/"+homeAppFileName;
-			
+
 			//backup
 			homeAppProps.storeToXML(new FileOutputStream(new File(homeAppPath+System.currentTimeMillis()+".bak")), " backup of homeApplication.properties.xml");
-			
+
 			homeAppProps.setProperty(ApplicationInfo.KEY_CONTENTURL, contentUrl);
-			//homeAppProps.setProperty(ApplicationInfo.KEY_PREVIEWURL, previewUrl);	
-			
+			//homeAppProps.setProperty(ApplicationInfo.KEY_PREVIEWURL, previewUrl);
+
 			//overwrite
 			homeAppProps.storeToXML(new FileOutputStream(new File(homeAppPath)), " added contenturl and preview url");
 		}
-		
+
 		ApplicationInfoList.refresh();
 		RepoFactory.refresh();
-		
+
 		HashMap<String,String> result = new HashMap<String,String>();
 		for(Object key : props.keySet()){
 			result.put((String)key,props.getProperty((String)key));

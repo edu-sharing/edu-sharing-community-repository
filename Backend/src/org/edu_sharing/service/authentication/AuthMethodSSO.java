@@ -53,7 +53,8 @@ public class AuthMethodSSO implements AuthMethodInterface {
 	public Boolean createUser = false;
 	
 	
-	public static final String[] allowedAuthTypes = {SSOAuthorityMapper.SSO_TYPE_Shibboleth, SSOAuthorityMapper.SSO_TYPE_CAS}; 
+	public static final String[] allowedAuthTypes = {SSOAuthorityMapper.SSO_TYPE_Shibboleth,
+			SSOAuthorityMapper.SSO_TYPE_CAS, SSOAuthorityMapper.SSO_TYPE_LTI};
 	
 	@Override
 	public String authenticate(HashMap<String, String> params) throws AuthenticationException {

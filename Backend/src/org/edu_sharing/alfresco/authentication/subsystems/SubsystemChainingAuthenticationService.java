@@ -16,6 +16,7 @@ import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -72,7 +73,7 @@ public class SubsystemChainingAuthenticationService extends org.alfresco.repo.se
     public void setEsLastLoginToNow(String userName) {
     	NodeRef nodeRefPerson = personService.getPerson(userName,false);
     	// we won't do this for the guest
-        if(userName!=null && userName.equals(ApplicationInfoList.getHomeRepository().getGuest_username()))
+        if(userName!=null && GuestCagePolicy.getGuestUsers().contains(userName))
             return;
         RunAsWork<Void> runAs = new RunAsWork<Void>() {
         	@Override

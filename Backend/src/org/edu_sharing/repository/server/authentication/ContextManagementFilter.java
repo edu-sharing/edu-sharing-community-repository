@@ -8,6 +8,7 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.AuthenticationService;
@@ -35,6 +36,7 @@ import org.edu_sharing.webservices.usage2.Usage2Exception;
 import org.edu_sharing.webservices.util.AuthenticationUtils;
 
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
+import org.springframework.context.ApplicationContext;
 
 
 public class ContextManagementFilter implements javax.servlet.Filter {
@@ -45,6 +47,11 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 	Logger logger = Logger.getLogger(ContextManagementFilter.class);
 
 	ServletContext context;
+
+	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+	ServiceRegistry serviceRegistry = (ServiceRegistry)applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+	AuthenticationService authservice = serviceRegistry.getAuthenticationService();
+	AuthenticationComponent authenticationComponent = (AuthenticationComponent)applicationContext.getBean("authenticationComponent");
 
 	@Override
 	public void destroy() {
@@ -124,8 +131,7 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 			//clean up alfresco security context
 
 			//for native API
-			ServiceRegistry serviceRegistry = (ServiceRegistry) AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
-			AuthenticationService authservice = serviceRegistry.getAuthenticationService();
+
 			try{
 				//its not really necessary cause AuthenticationFilter -> AuthenticationTool calls alfresco authenticationservice.validate which
 				//also calls clearCurrentSecurityContext()
@@ -167,6 +173,7 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 						Usage usage = u2.getUsage(appId, courseId, nodeId, resourceId);
 						if (usage != null) {
 							httpReq.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, nodeId);
+							authenticationComponent.setCurrentUser(CCConstants.PROXY_USER);
 						}
 
 					} catch (Usage2Exception e) {

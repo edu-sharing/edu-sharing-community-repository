@@ -106,6 +106,7 @@ import { BorderBoxObserverDirective } from './directives/border-box-observer.dir
 import {NodeRatingComponent} from './components/node-entries/node-rating/node-rating.component';
 import { PreviewImageComponent } from './components/node-entries/preview-image/preview-image.component';
 import { FocusStateDirective } from './directives/focus-state.directive';
+import {CommonModule} from '@angular/common';
 
 @NgModule({
     declarations: [
@@ -219,6 +220,7 @@ import { FocusStateDirective } from './directives/focus-state.directive';
         MatPaginatorModule,
         MatSortModule,
         OverlayModule,
+        CommonModule,
     ],
     providers: [
         Toast,

@@ -612,7 +612,7 @@ export class AdminComponent {
     });
   }
 
-  private refreshAppList() {
+  public refreshAppList() {
     this.admin.getApplications().subscribe((data:Application[])=> {
       this.applications = data;
       this.applicationsOpen = {};
