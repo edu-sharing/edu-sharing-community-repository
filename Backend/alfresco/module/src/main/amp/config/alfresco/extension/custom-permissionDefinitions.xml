@@ -68,7 +68,7 @@
            <includePermissionGroup type="sys:base" permissionGroup="ReadChildren"/>
       </permissionGroup>
       
-      <!-- edu-sharing Read + read content permission + comment + rate permissions(used by Consumer) -->
+      <!-- edu-sharing Read + read content permission + comment + RateRead + Rate permissions(used by Consumer) -->
 	  <permissionGroup name="ReadAll"  expose="true" allowFullControl="false">
            <includePermissionGroup type="sys:base" permissionGroup="Read"/>
            <includePermissionGroup type="sys:base" permissionGroup="ReadContent"/>
@@ -116,9 +116,10 @@
       <permissionGroup name="Comment" expose="true" allowFullControl="false" />
        <!-- edu-sharing feedback permission (for ccm:collection) -->
       <permissionGroup name="Feedback" expose="true" allowFullControl="false" />
+       <!-- edu-sharing RateRead permission -->
+       <permissionGroup name="RateRead" expose="true" allowFullControl="false" />
       <!-- edu-sharing Rate permission -->
       <permissionGroup name="Rate" expose="true" allowFullControl="false" />
-       <permissionGroup name="RateRead" expose="true" allowFullControl="false" />
        <!-- edu-sharing Relation permission -->
        <permissionGroup name="Relation" expose="true" allowFullControl="false" />
       <!-- edu-sharing Deny permission which will have priority to other permissions -->
@@ -144,12 +145,13 @@
        <permission name="_Feedback"  expose="false">
            <grantedToGroup permissionGroup="Feedback" />
        </permission>
-       <!-- edu-sharing rate permission -->
-       <permission name="_Rate"  expose="false">
-           <grantedToGroup permissionGroup="Rate" />
-       </permission>
+       <!-- edu-sharing RateRead permission -->
        <permission name="_RateRead"  expose="false">
            <grantedToGroup permissionGroup="RateRead" />
+       </permission>
+       <!-- edu-sharing Rate permission -->
+       <permission name="_Rate"  expose="false">
+           <grantedToGroup permissionGroup="Rate" />
        </permission>
        <!-- edu-sharing relation permission -->
        <permission name="_Relation"  expose="false">
@@ -373,8 +375,8 @@
           <includePermissionGroup permissionGroup="ReadAll" type="sys:base" />
           <includePermissionGroup type="sys:base" permissionGroup="Comment"/>
           <includePermissionGroup type="sys:base" permissionGroup="Feedback"/>
-          <includePermissionGroup type="sys:base" permissionGroup="Rate"/>
           <includePermissionGroup type="sys:base" permissionGroup="RateRead"/>
+          <includePermissionGroup type="sys:base" permissionGroup="Rate"/>
       </permissionGroup>
       <!-- edu-sharing a restricted Consumer which can only read metadata of the node -->
       <permissionGroup name="ConsumerMetadata" allowFullControl="false" expose="true" >
