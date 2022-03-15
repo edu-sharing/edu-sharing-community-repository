@@ -34,7 +34,7 @@
          matTooltip="{{'RATING.STARS_RATE' | translate:{rating:rating} }}"></i>
     </button>
     <button
-      *ngIf="!!node.rating.user"
+      *ngIf="!!node.rating?.user"
       mat-icon-button
       color="primary"
       class="delete"
