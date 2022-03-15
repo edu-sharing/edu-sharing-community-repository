@@ -22,12 +22,12 @@
         },
         "PLUGINS": {
             "TITLE":  "Extensions",
-            "INFO":  "This list shows enabled extensions for edu-sharing. These are functional extensions for the repository.",
+            "INFO":  "This list shows extensions for alfresco & edu-sharing. These are functional extensions for the repository.",
             "NO_DESCRIPTION":  "There are no details available for this plugin",
+            "ENABLED": "Active",
+            "DISABLED": "Inactive",
             "PLUGIN_DETAILS": {
-                "Test 1": {
-                    "DESCRIPTION": "Example Plugin"
-                }
+
             },
             "MORE": "More information about how to obtain, confiure and deploy extensions can be found on the edu-sharing website",
             "MORE_LINK": "Go to edu-sharing website"

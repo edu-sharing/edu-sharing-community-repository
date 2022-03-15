@@ -2,6 +2,7 @@ package org.edu_sharing.repository.server.sitemap;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.MimeTypes;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.sitemap.xml.Sitemapindex;
@@ -147,7 +149,7 @@ public class SitemapServlet extends HttpServlet{
 
     private Map<String, String[]> getSearchAllCriterias() {
         Map<String, String[]> criterias=new HashMap<>();
-        criterias.put(MetadataSet.DEFAULT_CLIENT_QUERY_CRITERIA,new String[]{"*"});
+        criterias.put(MetadataSet.DEFAULT_CLIENT_QUERY_CRITERIA,new String[]{""});
         return criterias;
     }
 

@@ -9,13 +9,13 @@
                 </div>
             </div>
             <div class="template-content">
-                <mds #mds
-                [embedded]="true"
+                <app-mds-editor-wrapper #mds
                 [groupId]="'io_template'"
+                [embedded]="true"
+                [editorMode]="'nodes'"
                 [currentValues]="node ? node.properties : {}"
-                [invalidate]="true"
                 [class.display-none]="!enabled"
-                ></mds>
+                ></app-mds-editor-wrapper>
                 <div *ngIf="!enabled" class="template-disabled">
                     <div class="disabled-info"  data-i18n="[html]content.body">
                         {{ 'WORKSPACE.NODE_TEMPLATE.STATUS_DISABLED' | translate}}

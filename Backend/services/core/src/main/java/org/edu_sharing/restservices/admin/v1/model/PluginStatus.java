@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModel;
 
 @ApiModel
 public class PluginStatus {
+    private String version;
     private String name;
     private Boolean enabled;
 
@@ -13,6 +14,14 @@ public class PluginStatus {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     public Boolean getEnabled() {
@@ -25,10 +34,12 @@ public class PluginStatus {
 
     public PluginStatus(
             String name,
+            String version,
             Boolean enabled
     ) {
 
         this.name = name;
+        this.version = version;
         this.enabled = enabled;
     }
 }

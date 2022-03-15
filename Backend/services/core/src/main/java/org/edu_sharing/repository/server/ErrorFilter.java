@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.Optional;
 
 
 public class ErrorFilter implements Filter {
@@ -83,6 +84,17 @@ public class ErrorFilter implements Filter {
 
 	public static void handleError(HttpServletRequest req, HttpServletResponse resp, Throwable t, int statusCode) {
 		try {
+			if(t != null) {
+				boolean isAboutStatusCall = Optional.ofNullable(req.getQueryString())
+						.map(x->x.contains("timeoutSeconds"))
+						.orElse(false);
+
+				if (isAboutStatusCall) {
+					Logger.getLogger(ErrorFilter.class).debug(t.getMessage(), t);
+				} else {
+					Logger.getLogger(ErrorFilter.class).error(t.getMessage(), t);
+				}
+			}
 			resp.reset();
 			ErrorResponse response = new ErrorResponse();
 			response.setError(statusCode + "");
@@ -90,14 +102,6 @@ public class ErrorFilter implements Filter {
 				response.setMessage(t != null ? t.getMessage() : statusCode+"");
 			} else {
 				response.setMessage("LogLevel is > INFO");
-			}
-			if(t != null) {
-				boolean isAboutStatusCall = req.getQueryString().contains("timeoutSeconds");
-				if (isAboutStatusCall) {
-					Logger.getLogger(ErrorFilter.class).debug(t.getMessage(), t);
-				} else {
-					Logger.getLogger(ErrorFilter.class).error(t.getMessage(), t);
-				}
 			}
 			resp.setStatus(statusCode);
 			String accept = req.getHeader("accept");

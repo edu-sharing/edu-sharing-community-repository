@@ -55,7 +55,10 @@
         },
         "PINNING": {
             "TITLE": "Gepinnte Sammlungen",
-            "UPDATED": "Liste gepinnter Sammlungen wurde aktualisiert"
+            "UPDATED": "Liste gepinnter Sammlungen wurde aktualisiert",
+            "POSITION_SLIDER": "Position der Sammlung \"{{ collection }}\" in der Liste",
+            "MOVE_DOWN": "Nach unten verschieben",
+            "MOVE_UP": "Nach oben verschieben"
         },
         "NO_ADD_PERMISSIONS": "Sie besitzen keine Berechtigung um Materialien in diese Sammlung aufzunehmen",
         "ERROR_NOT_FOUND": "Sammlung wurde nicht gefunden",
@@ -104,6 +107,7 @@
     "collections_howToAddContent": "Sie können in der Suchumgebung nach geeigneten Materialien für ihre Sammlung suchen. Klicken sie einfach auf ein geeignetes Material und wählen sie dann die Option 'zu Sammlung hinzufügen' aus.",
 
     "collectionNew_preview": "Vorschau meiner Sammlung",
+    "collectionNew_collectionImage": "Sammlungsbild",
     "collectionNew_uploadCollectionImage": "Ein neues Sammlungsbild hochladen",
     "collectionNew_deleteCollectionImage": "Das Sammlungsbild löschen",
     "collectionNew_setColor": "Farbe für diese Sammlung:",

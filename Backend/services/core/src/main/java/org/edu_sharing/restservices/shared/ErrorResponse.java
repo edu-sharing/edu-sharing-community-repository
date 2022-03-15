@@ -14,6 +14,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.node.v1.NodeApi;
 
@@ -114,9 +115,9 @@ public class ErrorResponse {
 			t.printStackTrace( printWriter );
 			printWriter.flush();
 			if(level.toInt()<=Level.DEBUG_INT)
-				setStacktrace(writer.toString());
+				setStacktrace(ContextManagementFilter.b3.get().toString() + "\n" + writer.toString());
 			else
-				setStacktrace("InvalidLogLevel: Log Level must be at least DEBUG for showing stacktraces");
+				setMessage(ContextManagementFilter.b3.get().toString());
 		}
 	}
 	
@@ -153,7 +154,7 @@ public class ErrorResponse {
 	@Schema(required = true, description = "")
 	@JsonProperty("stacktraceArray")
 	public String[] getStacktraceArray() {
-		return stacktrace.replace("\r\n","\n").replace("\t","").split("\n");
+		return stacktrace != null ? stacktrace.replace("\r\n","\n").replace("\t","").split("\n") : null;
 	}
 	public void setStacktrace(String stacktrace) {
 		this.stacktrace = stacktrace;

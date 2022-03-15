@@ -3077,6 +3077,9 @@
           },
           "name": {
             "type": "string"
+          },
+          "version": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -3760,6 +3763,12 @@
           "globalGroups": {
             "items": {
               "$ref": "#/components/schemas/SimpleEditGlobalGroups"
+            },
+            "type": "array"
+          },
+          "licenses": {
+            "items": {
+              "type": "string"
             },
             "type": "array"
           },

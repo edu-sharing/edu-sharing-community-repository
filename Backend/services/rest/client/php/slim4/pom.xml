@@ -89,9 +89,12 @@
 
   <dependencies>
 
+    <!-- provided -->
+
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>edu_sharing-community-repository-backend-services-rest-api</artifactId>
+      <scope>provided</scope>
     </dependency>
 
   </dependencies>

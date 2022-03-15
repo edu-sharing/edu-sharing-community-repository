@@ -97,14 +97,18 @@
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
+        <artifactId>maven-assembly-plugin</artifactId>
         <executions>
           <execution>
-            <id>attach-sources</id>
             <goals>
-              <goal>jar</goal>
+              <goal>single</goal>
             </goals>
             <phase>package</phase>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/sources.xml</descriptor>
+              </descriptors>
+            </configuration>
           </execution>
         </executions>
       </plugin>

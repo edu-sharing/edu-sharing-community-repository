@@ -55,7 +55,10 @@
         },
         "PINNING": {
             "TITLE": "pinned collections",
-            "UPDATED": "The list of pinned collections has been updated."
+            "UPDATED": "The list of pinned collections has been updated.",
+            "POSITION_SLIDER": "Position of collection \"{{ collection }}\" within the list",
+            "MOVE_DOWN": "Move down",
+            "MOVE_UP": "Move up"
         },
         "NO_ADD_PERMISSIONS": "You have insufficient permissions to add materials to this collection",
         "ERROR_NOT_FOUND": "Collection not found",
@@ -104,6 +107,7 @@
     "collections_howToAddContent": "Just click on the \"ADD MATERIAL\" button and use the search engine to find contents for your collection.",
 
     "collectionNew_preview": "preview of the collection",
+    "collectionNew_collectionImage": "Collection image",
     "collectionNew_uploadCollectionImage": "Upload a new collection image",
     "collectionNew_deleteCollectionImage": "Delete the collection image",
     "collectionNew_setColor": "color of the collection:",

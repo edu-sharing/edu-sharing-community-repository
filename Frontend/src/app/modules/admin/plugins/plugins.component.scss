@@ -5,7 +5,7 @@
     flex-direction: column;
     .plugin-list {
         width: 100%;
-        max-width: 600px;
+        max-width: 800px;
         padding-top: 40px;
         li {
             padding: 10px 0;
@@ -15,9 +15,29 @@
                 color: $textVeryLight;
                 font-size: 40px;
             }
-            .name {
+            .state {
                 font-weight: bold;
-                font-size: $fontSizeXLarge;
+                color: darken($colorStatusNegative, 20%);
+                padding-bottom: 2px;
+                &.state-enabled {
+                    color: darken($colorStatusPositive, 20%);
+                }
+            }
+            .name-wrapper {
+                display: flex;
+                align-items: center;
+                padding-bottom: 2px;
+                .name {
+                    font-weight: bold;
+                    font-size: $fontSizeXLarge;
+                    flex-grow: 1;
+                }
+                .version {
+                    text-align: right;
+                    min-width: 20%;
+                    color: $textLight;
+                    font-size: 90%;
+                }
             }
 
             .description {

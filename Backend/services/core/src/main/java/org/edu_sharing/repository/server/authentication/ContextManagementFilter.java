@@ -2,6 +2,7 @@ package org.edu_sharing.repository.server.authentication;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Map;
 
 import javax.servlet.*;
@@ -11,7 +12,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.AuthenticationService;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.log4j.Logger;
+import org.apache.log4j.MDC;
 import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
@@ -38,9 +42,47 @@ import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 
 
 public class ContextManagementFilter implements javax.servlet.Filter {
+	public static class B3 {
+		private final HttpServletRequest req;
 
+		public B3(HttpServletRequest req) {
+			this.req = req;
+		}
+
+		public String getTraceId() {
+			return req.getHeader("X-B3-TraceId");
+		}
+
+		public String getSpanId() {
+			return req.getHeader("X-B3-SpanId");
+		}
+
+		public boolean isSampled() {
+			return "1".equals(req.getHeader("X-B3-Sampled"));
+		}
+
+		public String toString() {
+			if(getTraceId() != null) {
+				return "TraceId: " + getTraceId();
+			}
+			return "";
+		}
+
+		public void addToRequest(HttpRequestBase request) {
+			for(String header : Collections.list(req.getHeaderNames())) {
+				if(
+						header.toUpperCase().startsWith("X-B3-") ||
+						header.toUpperCase().startsWith("X-OT-") ||
+						header.equalsIgnoreCase("X-Request-Id")
+				) {
+				request.setHeader(header, req.getHeader(header));
+			}
+			}
+		}
+	}
 	// stores the currently accessing tool type, e.g. CONNECTOR
 	public static ThreadLocal<String> accessToolType = new ThreadLocal<>();
+	public static ThreadLocal<B3> b3 = new ThreadLocal<>();
 
 	Logger logger = Logger.getLogger(ContextManagementFilter.class);
 
@@ -63,6 +105,13 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 		try {
 
 			Context.newInstance((HttpServletRequest)req , (HttpServletResponse)res, context);
+			b3.set(new B3((HttpServletRequest)req));
+			if(b3.get().getTraceId() != null) {
+				MDC.put("TraceId", b3.get().getTraceId());
+			}
+			if(b3.get().getSpanId() != null) {
+				MDC.put("SpanId", b3.get().getSpanId());
+			}
 			ScopeAuthenticationServiceFactory.getScopeAuthenticationService().setScopeForCurrentThread();
 
 			try{

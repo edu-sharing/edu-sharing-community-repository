@@ -5,7 +5,15 @@
     <li *ngFor="let p of plugins">
       <i icon="extension"></i>
       <div>
-      <div class="name">{{p.name}}</div>
+        <div class="name-wrapper">
+          <div class="name">{{p.name}}</div>
+          <div class="version">{{p.version}}</div>
+        </div>
+        <div class="state"
+             [class.state-enabled]="p.enabled"
+        >
+          {{('ADMIN.PLUGINS.' + (p.enabled ? 'ENABLED' : 'DISABLED')) | translate }}
+        </div>
       <div class="description">{{('ADMIN.PLUGINS.PLUGIN_DETAILS.'+p.name+'.DESCRIPTION') | translate:{fallback: (
           'ADMIN.PLUGINS.NO_DESCRIPTION' | translate
         )} }}</div>
