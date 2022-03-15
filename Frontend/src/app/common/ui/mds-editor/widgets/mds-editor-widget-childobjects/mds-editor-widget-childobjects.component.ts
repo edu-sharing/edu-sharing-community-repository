@@ -77,8 +77,9 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
         this.hasChanges.next(true);
     }
 
-    addFiles(files: File[]) {
-        for (const file of files) {
+    addFiles(files: FileList) {
+        for (let i = 0; i < files.length; i++) {
+            const file = files.item(i);
             const child: Childobject = {
                 icon: RestHelper.guessMediatypeIconForFile(this.connector, file),
                 name: file.name,
