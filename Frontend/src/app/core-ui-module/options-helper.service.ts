@@ -661,8 +661,9 @@ export class OptionsHelperService implements OnDestroy {
         );
         addNodeToLTIPlatform.elementType = OptionsHelperService.ElementTypesAddToCollection;
         addNodeToLTIPlatform.showAsAction = true;
-        addNodeToLTIPlatform.constrains = [Constrain.Files, Constrain.User, Constrain.LTI];
-        addNodeToLTIPlatform.group = DefaultGroups.Reuse;
+        addNodeToLTIPlatform.showAlways = true;
+        addNodeToLTIPlatform.constrains = [Constrain.Files, Constrain.User, Constrain.LTIMode];
+        addNodeToLTIPlatform.group = DefaultGroups.Primary;
         addNodeToLTIPlatform.priority = 11;
         addNodeToLTIPlatform.permissions = [RestConstants.ACCESS_CC_PUBLISH];
         addNodeToLTIPlatform.customEnabledCallback = (nodes: Node[]) => {
@@ -1387,9 +1388,9 @@ export class OptionsHelperService implements OnDestroy {
                 return Constrain.User;
             }
         }
-        if (constrains.indexOf(Constrain.LTI) !== -1) {
+        if (constrains.indexOf(Constrain.LTIMode) !== -1) {
             if (!this.connectors.getRestConnector().getCurrentLogin().ltiSession) {
-                return Constrain.LTI;
+                return Constrain.LTIMode;
             }
         }
         if (constrains.indexOf(Constrain.NoSelection) !== -1) {
