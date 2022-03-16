@@ -163,6 +163,7 @@ logs() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -175,6 +176,7 @@ ps() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -247,6 +249,7 @@ rstart() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -remote)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote) $(compose_plugins repository -common -remote)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -remote)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common -remote)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -263,6 +266,7 @@ lstart() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -local)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -local) $(compose_plugins repository -common -local)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -local)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common -local)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -275,6 +279,7 @@ stop() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -290,6 +295,7 @@ remove() {
 		COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 		COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
 		COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
+		COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common)"
 
 		echo "Use compose set: $COMPOSE_LIST"
 
@@ -318,6 +324,7 @@ ci() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -local -ci)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -local -ci) $(compose_plugins repository -common -remote -ci)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -local -ci)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common -local -ci)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 

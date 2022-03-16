@@ -291,6 +291,7 @@ logs() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -303,6 +304,7 @@ ps() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -315,6 +317,7 @@ rstart() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -remote)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote) $(compose_plugins repository -common -remote)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -remote)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common -remote)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -331,6 +334,7 @@ rdebug() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -remote -debug)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote -debug) $(compose_plugins repository -common -remote -debug)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -remote -debug)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common -remote -debug)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -360,6 +364,7 @@ rdev() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -remote -debug -dev)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote -debug -dev) $(compose_plugins repository -common -remote -debug -dev)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -remote -debug -dev)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common -remote -debug -dev)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -376,6 +381,7 @@ lstart() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -387,7 +393,8 @@ lstart() {
 ldebug() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -debug)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -debug) $(compose_plugins repository -common -debug)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -debug) $(compose_plugins services/rendering -common -debug)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -debug)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common -debug)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -412,7 +419,8 @@ ldev() {
 
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -debug -dev)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -debug -dev) $(compose_plugins repository -common -debug -dev)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -debug -dev) $(compose_plugins services/rendering -common -debug -dev)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -debug -dev)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common -debug -dev)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -424,7 +432,8 @@ ldev() {
 stop() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -debug)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -debug) $(compose_plugins repository -common -debug)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -debug) $(compose_plugins services/rendering -common -debug)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -debug)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common -debug)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -439,7 +448,8 @@ remove() {
 	y | Y)
 		COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -debug)"
 		COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -debug) $(compose_plugins repository -common -debug)"
-		COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -debug) $(compose_plugins services/rendering -common -debug)"
+		COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -debug)"
+		COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common -debug)"
 
 		echo "Use compose set: $COMPOSE_LIST"
 
@@ -461,6 +471,7 @@ reload() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -494,6 +505,7 @@ ci() {
 	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common -remote)"
 	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
