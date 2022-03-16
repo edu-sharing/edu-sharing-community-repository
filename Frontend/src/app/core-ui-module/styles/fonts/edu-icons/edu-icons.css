@@ -3,8 +3,8 @@
   src:  url('Edu-Icons.eot');
   src:  local('Edu-Icons'),
     url('Edu-Icons.eot?1pib6e#iefix') format('embedded-opentype'),
-    url('Edu-Icons.ttf?1pib6e') format('truetype'),
-    url('Edu-Icons.woff?1pib6e') format('woff');
+    url('Edu-Icons.ttf') format('truetype'),
+    url('Edu-Icons.woff') format('woff');
   font-weight: normal;
   font-style: normal;
 }

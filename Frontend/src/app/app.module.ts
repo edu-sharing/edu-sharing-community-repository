@@ -91,6 +91,7 @@ import {
 import {EditorModule} from '@tinymce/tinymce-angular';
 import { LtiComponent } from './modules/lti/lti.component';
 import { LtiAdminComponent } from './modules/admin/lti-admin/lti-admin.component';
+import { NodeEmbedComponent } from './common/ui/node-embed/node-embed.component';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -167,7 +168,8 @@ import { LtiAdminComponent } from './modules/admin/lti-admin/lti-admin.component
         PropertySlugPipe,
         MdsEditorWidgetSearchSuggestionsComponent,
         LtiComponent,
-        LtiAdminComponent
+        LtiAdminComponent,
+        NodeEmbedComponent,
     ],
     imports: [
         IMPORTS,

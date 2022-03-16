@@ -57,6 +57,7 @@ import {
 } from './components/node-entries-wrapper/entries-model';
 import {MainNavService} from '../common/services/main-nav.service';
 import {FormBuilder} from '@angular/forms';
+import { NodeEmbedService } from '../common/ui/node-embed/node-embed.service';
 
 
 export class OptionsHelperConfig {
@@ -154,6 +155,7 @@ export class OptionsHelperService implements OnDestroy {
         private injector: Injector,
         private storage: TemporaryStorageService,
         private bridge: BridgeService,
+        private nodeEmbed: NodeEmbedService,
         @Optional() @Inject(OPTIONS_HELPER_CONFIG) config: OptionsHelperConfig,
     ) {
         if (config == null) {
@@ -1009,6 +1011,15 @@ export class OptionsHelperService implements OnDestroy {
         qrCodeNode.group = DefaultGroups.View;
         qrCodeNode.priority = 70;
 
+        const embedNode = new OptionItem('OPTIONS.EMBED', 'perm_media', (node) => {
+            node = this.getObjects(node)[0];
+            this.nodeEmbed.open(node);
+        });
+        embedNode.constrains = [Constrain.NoBulk, Constrain.HomeRepository];
+        embedNode.scopes = [Scope.Render];
+        embedNode.group = DefaultGroups.View;
+        embedNode.priority = 80;
+
         /**
          * if (this.isAllowedToEditCollection()) {
             this.optionsCollection.push(
@@ -1182,6 +1193,7 @@ export class OptionsHelperService implements OnDestroy {
         options.push(downloadNode);
         options.push(downloadMetadataNode);
         options.push(qrCodeNode);
+        options.push(embedNode);
         options.push(linkMap);
         options.push(cutNodes);
         options.push(copyNodes);

@@ -643,6 +643,7 @@
         "VARIANT": "Variante anlegen",
         "VARIANT_OPEN": "Als Variante öffnen",
         "QR_CODE": "QR-Code Link",
+        "EMBED": "Einbetten",
         "ADD_OBJECT": "Neues Material",
         "SEARCH_OBJECT": "Material suchen",
         "NEW_COLLECTION": "Neue Sammlung",
@@ -1175,5 +1176,18 @@
     "BREADCRUMBS": {
         "YOU_ARE_HOME": "Sie befinden sich im Stammverzeichnis",
         "IN_HOME": "Im Stammverzeichnis"
+    },
+    "EMBED": {
+        "NOT_PUBLIC_WARNING": "Dieses Material ist nicht öffentlich zugänglich.",
+        "CODE_LABEL": "Einbettungscode",
+        "HEIGHT": "Höhe",
+        "WIDTH": "Breite",
+        "SIZE_CONSTRAINTS_ERROR_NOTICE": "Bitte wählen Sie einen Wert zwischen {{ min }} und {{ max }}",
+        "VERSION": "Version",
+        "VERSION_OPTION": {
+            "FIXED": "Aktuelle Version",
+            "NEWEST": "Immer die neuste Version"
+        },
+        "COPIED_TO_CLIPBOARD_NOTICE": "Der Einbettungscode wurde in die Zwischenablage kopiert."
     }
 }

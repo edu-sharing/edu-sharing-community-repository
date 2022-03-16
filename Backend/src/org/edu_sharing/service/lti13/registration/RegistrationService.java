@@ -239,7 +239,11 @@ public class RegistrationService {
         if(publicKeys == null){
             throw new Exception("no public key found");
         }
-        JWK jwk = (keyId == null) ? publicKeys.getKeys().get(0) :publicKeys.getKeyByKeyId(keyId);
+        JWK jwk = (keyId == null || keyId.trim().isEmpty()) ? publicKeys.getKeys().get(0) : publicKeys.getKeyByKeyId(keyId);
+
+        if(jwk == null){
+            throw new Exception("no public key found for keyId:" + keyId);
+        }
 
         String pubKeyString = "-----BEGIN PUBLIC KEY-----\n"
                 + new String(new Base64().encode(((AsymmetricJWK) jwk).toPublicKey().getEncoded())) + "-----END PUBLIC KEY-----";
