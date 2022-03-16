@@ -12,13 +12,19 @@ Prerequisites
 Install
 -------
 
-1. Start up an instance from remote docker images by calling:
+1. Please login with your credentials (if necessary):
+
+   ```
+   docker login docker.edu-sharing.com ... 
+   ```
+
+2. Start up an instance from remote docker images by calling:
 
    ```
    ./deploy.sh rstart
    ```
 
-2. Request all necessary information by calling:
+3. Request all necessary information by calling:
 
    ```
    ./deploy.sh info
@@ -27,7 +33,7 @@ Install
 Build
 -----
 
-0. Please add following elements to `$HOME/.m2/settings.xml` und add your credentials:
+1. Please add following elements to `$HOME/.m2/settings.xml`:
 
    ```
      <mirrors>
@@ -38,8 +44,20 @@ Build
        </mirror>
      </mirrors>
    ```      
+   
+   and add your credentials (if necessary):
 
-1. Build local docker images by calling:
+   ```
+    <servers>
+      <server>
+        <id>edusharing-remote</id>
+        <username> ... </username>
+        <password> ... </password>
+      </server>
+    </servers>
+   ```      
+
+2. Build local docker images by calling:
 
    ```
    mvn clean install

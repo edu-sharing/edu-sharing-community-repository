@@ -9,13 +9,19 @@ Prerequisites
 Install
 -------
 
-1. Start up an instance from remote docker images by calling:
+1. Please login with your credentials (if necessary):
+
+   ```
+   docker login docker.edu-sharing.com ... 
+   ```
+
+2. Start up an instance from remote docker images by calling:
 
    ```
    ./deploy.sh start
    ```
 
-2. Request all necessary informations by calling:
+3. Request all necessary informations by calling:
 
    ```
    ./deploy.sh info
