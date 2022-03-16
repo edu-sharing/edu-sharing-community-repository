@@ -158,7 +158,7 @@ public class ApplicationInfoList {
 		}
 		logger.debug("appStr"+repStr);
 		//Linked hashMap for keeping insertion order
-		appInfos = new LinkedHashMap<String, ApplicationInfo>();
+		appInfos = (HashMap)Collections.synchronizedMap(new LinkedHashMap<String, ApplicationInfo>());
 		if(repStr != null && repStr.trim().length() > 0){
 			logger.debug("appStr != null && appStr.trim().length() > 0");
 			 String[] repField = repStr.split(",");
