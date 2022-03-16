@@ -65,24 +65,12 @@ export class NodeUrlComponent {
 function copyClickEvent(event: MouseEvent): MouseEvent {
     // It would seem better to use `event.type` instead of hard-coding 'click', but that doesn't
     // have the desired effect for non-click events when dispatched.
-    return new MouseEvent('click', getMouseEventProperties(event));
-}
-
-/**
- * Returns an object with those properties of `event` that are part of its `MouseEvent` prototype.
- * 
- * @param event An instance of a class derived from `MouseEvent`
- */
-function getMouseEventProperties(event: MouseEvent): MouseEventInit {
-    let mouseEvent = event;
-    while (mouseEvent.constructor.name !== MouseEvent.name) {
-        mouseEvent = Object.getPrototypeOf(mouseEvent);
-    }
-    return Object.keys(mouseEvent).reduce((acc, key) => {
-        const value = event[key as keyof MouseEvent];
-        if (value !== null && typeof value !== 'function') {
-            acc[key] = value;
-        }
-        return acc;
-    }, {} as any);
+    return new MouseEvent('click', {
+        cancelable: true,
+        button: event.button,
+        ctrlKey: event.ctrlKey,
+        shiftKey: event.shiftKey,
+        altKey: event.altKey,
+        metaKey: event.metaKey,
+    });
 }
