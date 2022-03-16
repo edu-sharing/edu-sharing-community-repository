@@ -1,6 +1,6 @@
 import {TranslateService} from '@ngx-translate/core';
 import {FormatSizePipe} from './pipes/file-size.pipe';
-import {Observable, Observer} from 'rxjs';
+import {observable, Observable, Observer} from 'rxjs';
 import {Params, Router} from '@angular/router';
 import {Location} from '@angular/common';
 import {DefaultGroups, OptionGroup, OptionItem} from './option-item';
@@ -37,6 +37,9 @@ import {SpinnerSmallComponent} from './components/spinner-small/spinner-small.co
 import {AVAILABLE_LIST_WIDGETS} from './components/list-table/widgets/available-widgets';
 import {NodePersonNamePipe} from './pipes/node-person-name.pipe';
 import {FormBuilder} from '@angular/forms';
+import {SessionStorageService} from '../core-module/rest/services/session-storage.service';
+import {map} from 'rxjs/operators';
+import {RestNodeService} from '../core-module/rest/services/rest-node.service';
 
 export type WorkflowDefinitionStatus = {
     current: WorkflowDefinition
@@ -78,8 +81,10 @@ export class NodeHelperService {
         private bridge: BridgeService,
         private http:HttpClient,
         private connector:RestConnectorService,
+        private nodeService:RestNodeService,
         private toast: Toast,
         private router:Router,
+        private sessionStorage:SessionStorageService,
         private storage:TemporaryStorageService,
         private location: Location,
         private formBuilder: FormBuilder,
@@ -758,6 +763,32 @@ export class NodeHelperService {
         target.properties = source.properties;
         target.name = source.name;
         target.title = source.title;
+    }
+    getDefaultInboxFolder() {
+        return new Observable<Node>((subscriber) => {
+            this.sessionStorage.get('defaultInboxFolder', RestConstants.INBOX).subscribe((id) => {
+                this.nodeService
+                    .getNodeMetadata(id)
+                    .subscribe(node => {
+                        subscriber.next(node.node);
+                        subscriber.complete();
+                    }, error => {
+                        console.warn('error resolving defaultInboxFolder', error);
+                        return this.nodeService
+                            .getNodeMetadata(RestConstants.INBOX)
+                            .pipe(
+                                map(n => n.node)
+                            ).subscribe(subscriber);
+                    });
+            }, (error) => {
+                console.warn('error resolving defaultInboxFolder', error);
+                return this.nodeService
+                    .getNodeMetadata(RestConstants.INBOX)
+                    .pipe(
+                        map(n => n.node)
+                    ).subscribe(subscriber);
+            });
+        });
     }
 }
 
