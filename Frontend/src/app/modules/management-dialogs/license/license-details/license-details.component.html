@@ -3,7 +3,7 @@
   <img *ngIf="type!='MULTI'" class="currentLicenseIcon" src="{{getLicenseIcon()}}">
   <div class="license-additional-data" *ngIf="type=='CC_BY' || type=='CC_BY_SA'">
     <div *ngIf="ccVersion!='4.0'" class="licenseLocale">
-      {{'COUNTRY_CODE.'+ccCountry | translate}}
+      {{'COUNTRY_CODE.'+(ccCountry ? ccCountry : 'INTERNATIONAL') | translate}}
     </div>
     <div class="licenseVersion">
       {{ccVersion}}
