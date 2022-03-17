@@ -274,6 +274,8 @@ public class ToolPermissionBaseService {
         }else{
             permissionService.deletePermissions(result);
         }
+
+        toolPermissionNodeCache.put(toolPermission, result.getId());
         return result;
     }
     public List<String> getAllDefaultAllowedToolpermissions(){
