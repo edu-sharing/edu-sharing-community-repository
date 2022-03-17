@@ -92,6 +92,14 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- runtime -->
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-backend-services-soap-server</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
   </dependencies>
 
 </project>

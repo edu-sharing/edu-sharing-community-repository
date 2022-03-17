@@ -49,9 +49,18 @@
       <artifactId>edu_sharing-community-repository-backend-services-core</artifactId>
     </dependency>
 
+    <!-- provided -->
+
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.restlet.jee</groupId>
       <artifactId>org.restlet.ext.servlet</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <!-- test -->

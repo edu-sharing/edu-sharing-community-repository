@@ -6,7 +6,6 @@ import com.typesafe.config.ConfigParseOptions;
 import com.typesafe.config.ConfigRenderOptions;
 import org.alfresco.repo.cache.SimpleCache;
 import org.apache.log4j.Logger;
-import org.apache.log4j.lf5.util.StreamUtils;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
 
@@ -49,37 +48,7 @@ public class LightbendConfigLoader {
     }
 
     public static String getConfigFileLocation(String configFileName, PropertiesHelper.Config.PathPrefix pathPrefix) {
-        if(Arrays.asList(BASE_FILE, CUSTOM_FILE).contains(configFileName)) {
-            return PropertiesHelper.Config.PATH_CONFIG + pathPrefix + "/" + configFileName;
-        }
-        if(configFileName.equals(DEPLOYMENT_FILE)) {
-            return PropertiesHelper.Config.PATH_CONFIG + pathPrefix + "/" + configFileName;
-        }
-        if(configFileName.equals(OVERRIDE_FILE)) {
-            return PropertiesHelper.Config.PATH_CONFIG + pathPrefix + "/" + getServerConfigName();
-        }
-        if(configFileName.equals(PropertiesHelper.Config.CONFIG_FILENAME)) {
-            return PropertiesHelper.Config.PATH_CONFIG + pathPrefix + "/" + configFileName;
-        }
-
-        throw new RuntimeException("Invalid config filename: " + configFileName);
-    }
-
-    public static String getServerConfigName() {
-        String hostname;
-        try {
-            Process process = Runtime.getRuntime().exec("hostname");
-            process.waitFor();
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            StreamUtils.copy(process.getInputStream(), bos);
-            hostname = new String(bos.toByteArray(), StandardCharsets.UTF_8).trim();
-        } catch(Throwable t) {
-            logger.warn("Could not determine hostname, using \"default\"");
-            hostname = "default";
-        }
-        return OVERRIDE_FILE.replace(
-                "{{hostname}}", hostname
-        );
+        return PropertiesHelper.Config.PATH_CONFIG + pathPrefix + "/" + configFileName;
     }
 
     public static void refresh(){

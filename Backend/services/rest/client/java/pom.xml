@@ -132,53 +132,59 @@
 
   <dependencies>
 
-    <!-- compile -->
-
-    <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>io.gsonfire</groupId>
-      <artifactId>gson-fire</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.openapitools</groupId>
-      <artifactId>jackson-databind-nullable</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>com.squareup.okhttp3</groupId>
-      <artifactId>logging-interceptor</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>com.squareup.okhttp3</groupId>
-      <artifactId>okhttp</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>io.swagger</groupId>
-      <artifactId>swagger-annotations</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.threeten</groupId>
-      <artifactId>threetenbp</artifactId>
-    </dependency>
-
     <!-- provided -->
 
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>edu_sharing-community-repository-backend-services-rest-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>io.gsonfire</groupId>
+      <artifactId>gson-fire</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.openapitools</groupId>
+      <artifactId>jackson-databind-nullable</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>logging-interceptor</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>okhttp</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>io.swagger</groupId>
+      <artifactId>swagger-annotations</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.threeten</groupId>
+      <artifactId>threetenbp</artifactId>
       <scope>provided</scope>
     </dependency>
 

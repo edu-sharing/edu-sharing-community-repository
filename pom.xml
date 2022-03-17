@@ -158,6 +158,12 @@
       </dependency>
 
       <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>2.4</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
         <version>3.11</version>
@@ -425,6 +431,12 @@
       </dependency>
 
       <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>11.0.2</version>
+      </dependency>
+
+      <dependency>
         <groupId>net.handle</groupId>
         <artifactId>handle-client</artifactId>
         <version>9.3.0</version>
@@ -432,7 +444,7 @@
 
       <dependency>
         <groupId>com.hazelcast</groupId>
-        <artifactId>hazelcast-all</artifactId>
+        <artifactId>hazelcast</artifactId>
         <version>3.12</version>
       </dependency>
 
@@ -445,7 +457,13 @@
       <dependency>
         <groupId>com.hazelcast</groupId>
         <artifactId>hazelcast-kubernetes</artifactId>
-        <version>1.5.4</version>
+        <version>1.5.6</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.hazelcast</groupId>
+        <artifactId>hazelcast-spring</artifactId>
+        <version>3.12</version>
       </dependency>
 
       <dependency>
@@ -607,6 +625,12 @@
       </dependency>
 
       <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <version>1.18.22</version>
+      </dependency>
+
+      <dependency>
         <groupId>com.squareup.okhttp3</groupId>
         <artifactId>okhttp</artifactId>
         <version>4.9.1</version>
@@ -637,15 +661,45 @@
       </dependency>
 
       <dependency>
+        <groupId>xalan</groupId>
+        <artifactId>serializer</artifactId>
+        <version>2.7.2</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
         <version>1.7.33</version>
       </dependency>
 
       <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-config</artifactId>
+        <version>3.1.7.RELEASE</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-core</artifactId>
+        <version>3.1.7.RELEASE</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-web</artifactId>
+        <version>3.1.7.RELEASE</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.springframework.security.extensions</groupId>
         <artifactId>spring-security-saml2-core</artifactId>
         <version>1.0.3.RELEASE</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.codehaus.woodstox</groupId>
+        <artifactId>stax2-api</artifactId>
+        <version>3.1.4</version>
       </dependency>
 
       <dependency>
