@@ -67,7 +67,7 @@ export class SimpleEditLicenseComponent {
     private toast : Toast,
   ) {
     // just for init
-    this.iamApi.getUser().subscribe(() => {
+    this.iamApi.getCurrentUserAsync().then(() => {
       if(!this.getESUID()){
         console.warn('Current user has no esuid, detecting owner of license is impossible');
       }

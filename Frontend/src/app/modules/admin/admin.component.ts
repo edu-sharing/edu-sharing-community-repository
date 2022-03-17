@@ -1020,15 +1020,10 @@ export class AdminComponent {
     this.storage.set('admin_lucene',this.lucene);
     this.globalProgress=true;
     const props=this.lucene.properties.split('\n');
-
-    const authorities=[];
-    if(this.lucene.authorities) {
-      for(const auth of this.lucene.authorities) {
-          authorities.push(auth.authorityName);
-      }
-    }
-
-    this.admin.exportLucene(this.lucene.query, this.lucene.store, props, authorities).subscribe((data)=> {
+    this.admin.exportLucene(
+        this.lucene.query, this.lucene.store, props,
+        this.lucene.authorities?.map(a => a.authorityName)
+    ).subscribe((data)=> {
       const filename='Export-'+DateHelper.formatDate(this.translate,new Date().getTime(),{useRelativeLabels:false});
       this.globalProgress=false;
 

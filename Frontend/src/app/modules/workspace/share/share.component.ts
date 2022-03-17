@@ -216,7 +216,7 @@ export class WorkspaceShareComponent {
         };
         this.publishEnabled.permissions = [RestConstants.PERMISSION_CONSUMER, RestConstants.ACCESS_CC_PUBLISH];
 
-        this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+        this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
             this.isSafe = data.currentScope != null;
             this.updateToolpermissions();
         });
@@ -356,7 +356,7 @@ export class WorkspaceShareComponent {
                     });
             }
         }
-        this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+        this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
             this.isAdmin = data.isAdmin;
         });
     }

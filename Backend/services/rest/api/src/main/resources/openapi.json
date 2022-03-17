@@ -4937,6 +4937,9 @@
             },
             "type": "array"
           },
+          "workspaceSharedToMeDefaultAll": {
+            "type": "boolean"
+          },
           "workspaceViewType": {
             "format": "int32",
             "type": "integer"

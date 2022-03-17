@@ -4,7 +4,7 @@
   <Appenders>
 
     <Console name="STDOUT" target="SYSTEM_OUT">
-      <PatternLayout pattern=" %d %-5p [%X] [%C{3}] [%t] %m%n"/>
+      <PatternLayout pattern=" %d %-5p [%X] [%c{3}] [%t] %m%n"/>
     </Console>
 
     <Async name="ASYNC">

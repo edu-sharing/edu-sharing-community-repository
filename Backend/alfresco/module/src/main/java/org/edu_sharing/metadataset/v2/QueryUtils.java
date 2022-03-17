@@ -42,6 +42,8 @@ query = replacer.replaceString(query, "${authority}", AuthenticationUtil.getFull
      */
     private static ReplaceInterface dslReplacer = (str, search, replace) -> str.replace(search, JSONValue.escape( QueryParser.escape(replace)));
 
+    private static ReplaceInterface dslReplacerRaw = (str, search, replace) -> str.replace(search, JSONValue.escape( replace));
+
     public static void setUserInfo(Map<String, Serializable> userInfo) {
         QueryUtils.userInfo.set(userInfo);
     }
@@ -50,14 +52,19 @@ query = replacer.replaceString(query, "${authority}", AuthenticationUtil.getFull
         return userInfo.get();
     }
 
-    public static ReplaceInterface replacerFromSyntax(String syntax) {
+    public static ReplaceInterface replacerFromSyntax(String syntax, boolean raw) {
         if(syntax.equals(MetadataReader.QUERY_SYNTAX_DSL)){
-            return dslReplacer;
+            if(raw) return dslReplacerRaw;
+            else return dslReplacer;
         } else if (syntax.equals(MetadataReader.QUERY_SYNTAX_LUCENE)) {
             return luceneReplacer;
         } else {
             throw new IllegalArgumentException("No replacer for search syntax " + syntax);
         }
+    }
+
+    public static ReplaceInterface replacerFromSyntax(String syntax) {
+        return replacerFromSyntax(syntax,false);
     }
 
     public interface ReplaceInterface {
