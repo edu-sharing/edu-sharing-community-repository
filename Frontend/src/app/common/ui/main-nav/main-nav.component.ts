@@ -13,6 +13,7 @@ import {
     EventEmitter,
     HostListener,
     Input, OnDestroy,
+    OnInit,
     Output, TemplateRef,
     ViewChild,
 } from '@angular/core';
@@ -55,8 +56,10 @@ import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar
 import {MainMenuDropdownComponent} from '../main-menu-dropdown/main-menu-dropdown.component';
 import {MainNavService} from '../../services/main-nav.service';
 import { SearchFieldComponent } from '../search-field/search-field.component';
-import {About, AboutService} from 'ngx-edu-sharing-api';
+import {About, AboutService, AuthenticationService} from 'ngx-edu-sharing-api';
 import { ConfigOptionItem, NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 /**
  * The main nav (top bar + menus)
@@ -107,7 +110,7 @@ import { ConfigOptionItem, NodeHelperService } from 'src/app/core-ui-module/node
         ]),
     ],
 })
-export class MainNavComponent implements AfterViewInit, OnDestroy {
+export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     private static readonly ID_ATTRIBUTE_NAME = 'data-banner-id';
 
     @ViewChild(SearchFieldComponent) searchField: SearchFieldComponent;
@@ -192,7 +195,6 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     createMenuX: number;
     createMenuY: number;
     timeout: string;
-    timeIsValid = false;
     config: any = {};
     nodeStoreAnimation = 0;
     showNodeStore = false;
@@ -211,6 +213,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     licenseDetails: string;
     mainMenuStyle: 'sidebar' | 'dropdown' = 'sidebar';
 
+    private readonly destroyed$ = new Subject();
     private editUrl: string;
     private nodeStoreCount = 0;
     private licenseAgreementNode: Node;
@@ -247,6 +250,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         private route: ActivatedRoute,
         private toast: Toast,
         private nodeHelper: NodeHelperService,
+        private authentication: AuthenticationService,
     ) {
         this.mainnavService.registerMainNav(this);
         this.visible = !this.storage.get(
@@ -264,7 +268,6 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                         this.checkConfig();
                         return;
                     }
-                    setInterval(() => this.updateTimeout(), 1000);
                     this.route.queryParams.subscribe(async (params: Params) => {
                         this.queryParams = params;
                         if (params.noNavigation === 'true') {
@@ -291,6 +294,11 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
             });
         });
         event.addListener(this);
+    }
+
+    ngOnInit(): void {
+        this.registerAutoLogoutDialog();
+        this.registerAutoLogoutTimeout();
     }
 
     ngAfterViewInit() {
@@ -945,9 +953,6 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     private showTimeout() {
         return (
             !this.bridge.isRunningCordova() &&
-            !this.connector.getCurrentLogin()?.isGuest &&
-            this.timeIsValid &&
-            this.timeout !== '' &&
             (this.isSafe() ||
                 this.configService.instant('sessionExpiredDialog', {
                     show: true,
@@ -955,48 +960,56 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         );
     }
 
-    private updateTimeout() {
-        const time =
-            this.connector.logoutTimeout -
-            Math.floor(
-                (new Date().getTime() - this.connector.lastActionTime) / 1000,
-            );
+    /**
+     * Updates the `timeout` property.
+     * 
+     * @param timeUntilLogout time until automatic logout in milliseconds
+     */
+    private updateTimeout(timeUntilLogout: number) {
+        const time = Math.ceil(timeUntilLogout / 1000);
         const min = Math.floor(time / 60);
         const sec = time % 60;
-        this.event.broadcastEvent(
-            FrameEventsService.EVENT_SESSION_TIMEOUT,
-            time,
-        );
         if (time >= 0) {
             this.timeout =
                 this.formatTimeout(min, 2) + ':' + this.formatTimeout(sec, 2);
-            this.timeIsValid = true;
-        } else if (this.showTimeout()) {
-            this.toast.showModalDialog(
-                'WORKSPACE.AUTOLOGOUT',
-                'WORKSPACE.AUTOLOGOUT_INFO',
-                [
-                    new DialogButton(
-                        'WORKSPACE.RELOGIN',
-                        DialogButton.TYPE_PRIMARY,
-                        () => {
-                            RestHelper.goToLogin(
-                                this.router,
-                                this.configService,
-                                this.isSafe() ? RestConstants.SAFE_SCOPE : null,
-                                null,
-                            );
-                            this.toast.closeModalDialog();
-                        },
-                    ),
-                ],
-                false,
-                null,
-                { minutes: Math.round(this.connector.logoutTimeout / 60) },
-            );
-            this.timeout = '';
         } else {
             this.timeout = '';
+        }
+    }
+
+    private registerAutoLogoutTimeout(): void {
+        this.authentication
+            .getTimeUntilAutoLogout(1000)
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((timeUntilLogout) => this.updateTimeout(timeUntilLogout));
+    }
+
+    private registerAutoLogoutDialog(): void {
+        if (this.showTimeout()) {
+            this.authentication.getAutoLogout().pipe(takeUntil(this.destroyed$)).subscribe(() => {
+                this.toast.showModalDialog(
+                    'WORKSPACE.AUTOLOGOUT',
+                    'WORKSPACE.AUTOLOGOUT_INFO',
+                    [
+                        new DialogButton(
+                            'WORKSPACE.RELOGIN',
+                            DialogButton.TYPE_PRIMARY,
+                            () => {
+                                RestHelper.goToLogin(
+                                    this.router,
+                                    this.configService,
+                                    this.isSafe() ? RestConstants.SAFE_SCOPE : null,
+                                    null,
+                                );
+                                this.toast.closeModalDialog();
+                            },
+                        ),
+                    ],
+                    false,
+                    null,
+                    { minutes: Math.round(this.connector.logoutTimeout / 60) },
+                );
+            })
         }
     }
 
@@ -1010,5 +1023,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.mainnavService.registerMainNav(null);
+        this.destroyed$.next();
+        this.destroyed$.complete();
     }
 }
