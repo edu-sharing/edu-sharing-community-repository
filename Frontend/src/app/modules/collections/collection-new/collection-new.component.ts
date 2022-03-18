@@ -339,7 +339,7 @@ export class CollectionNewComponent implements EventListener{
       }
       else{
         this.editPermissionsDummy=new EduData.Node();
-        this.editPermissionsDummy.ref=new NodeRef();
+        this.editPermissionsDummy.ref= {} as NodeRef;
         this.editPermissionsDummy.aspects=[RestConstants.CCM_ASPECT_COLLECTION];
         this.editPermissionsDummy.isDirectory=true;
       }

@@ -11,7 +11,12 @@ export {
     MdsWidgetCondition,
     MetadataSetInfo,
     Node,
+    NodeRef,
     SearchResultNode as SearchResults,
+    Organization,
+    UserProfile,
+    UserQuota,
+    UserStatus,
 } from './api/models';
 import { MdsView } from './api/models';
 

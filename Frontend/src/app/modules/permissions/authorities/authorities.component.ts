@@ -127,7 +127,7 @@ export class PermissionsAuthoritiesComponent {
   @Output() onSelection = new EventEmitter();
   @Output() setTab = new EventEmitter<number>();
   public editMembers: any;
-  memberList: Authority[];
+  memberList: (Authority | User)[];
   selectedMembers: Authority[]= [];
   private memberSugesstions: SuggestItem[];
   private memberListOffset: number;

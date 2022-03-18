@@ -82,7 +82,6 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
 
     cardHasOpenModals$: Observable<boolean>;
     private isRootFolder: boolean;
-    private homeDirectory: string;
     private sharedFolders: Node[] = [];
     path: Node[] = [];
     private parameterNode: Node;
@@ -340,9 +339,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             } catch (e) {
                 console.warn('no connectors found: ' + e.toString());
             }
-            const data = await this.node.getHomeDirectory().toPromise();
             this.globalProgress = false;
-            this.homeDirectory = data.id;
             this.route.queryParams.subscribe((params: Params) => {
                 let needsUpdate = false;
                 if (this.oldParams) {

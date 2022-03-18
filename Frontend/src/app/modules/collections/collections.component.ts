@@ -1295,7 +1295,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         this.collectionContent = {
             node: new Node(),
         };
-        this.collectionContent.node.ref = new NodeRef();
+        this.collectionContent.node.ref = {} as NodeRef;
         this.collectionContent.node.ref.id = id;
         this.collectionContent.node.aspects = [
             RestConstants.CCM_ASPECT_COLLECTION,
