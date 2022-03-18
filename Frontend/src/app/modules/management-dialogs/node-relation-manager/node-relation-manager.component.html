@@ -55,7 +55,10 @@
         <i esIcon="swap_horiz" [aria]="false"></i>
         {{'NODE_RELATIONS.SWAP' | translate}}
       </button>
-      <button mat-flat-button color="primary">
+      <button mat-flat-button
+              color="primary"
+              (click)="createRelation()"
+      >
         <i esIcon="add" [aria]="false"></i>
         {{'NODE_RELATIONS.CREATE_CONFIRM' | translate}}
       </button>
@@ -69,6 +72,7 @@
           <!--[node]="relation.node" -->
           <div class="relation-node"
                *ngFor="let relation of getRelations(key)"
+               [class.added]="addRelations.includes(relation)"
           >
             <es-node-row
               [node]="relation.node"
@@ -95,10 +99,27 @@
             <button
               mat-icon-button
               color="primary"
+              *ngIf="deleteRelations.includes(relation)"
               (click)="removeRelation(relation)"
               matTooltip="{{'NODE_RELATIONS.REMOVE_RELATION' | translate}}"
             ><i esIcon="delete" [aria]="false"></i>
             </button>
+            <div
+              *ngIf="deleteRelations.includes(relation)"
+              class="deleted-overlay">
+              <div class="deleted-info">
+                <div class="line"><hr></div>
+                <div class="info">{{'WORKSPACE.SHARE.DELETED' | translate}}</div>
+                <div class="line"><hr></div>
+              </div>
+              <button
+                mat-icon-button
+                color="primary"
+                (click)="deleteRelations.splice(deleteRelations.indexOf(relation), 1)"
+                matTooltip="{{'NODE_RELATIONS.RESTORE_RELATION' | translate}}"
+              ><i esIcon="undo" [aria]="false"></i>
+              </button>
+            </div>
           </div>
         </div>
       </div>

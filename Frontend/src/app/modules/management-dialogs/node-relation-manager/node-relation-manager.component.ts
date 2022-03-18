@@ -1,5 +1,12 @@
 import {trigger} from '@angular/animations';
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output,} from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    EventEmitter,
+    Input,
+    OnInit,
+    Output,
+} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {
     DialogButton,
@@ -20,6 +27,8 @@ import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 import {BridgeService} from '../../../core-bridge-module/bridge.service';
 import {OPEN_URL_MODE} from '../../../core-module/ui/ui-constants';
 import {UniversalNode} from '../../../common/definitions';
+import { forkJoin } from 'rxjs';
+import {Toast} from '../../../core-ui-module/toast';
 
 @Component({
     selector: 'es-node-relation-manager',
@@ -31,7 +40,7 @@ import {UniversalNode} from '../../../common/definitions';
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NodeRelationManagerComponent {
+export class NodeRelationManagerComponent implements OnInit{
     readonly Relations = Object.values(Relations);
     readonly RelationsInverted = {
         [Relations.isBasedOn]: 'isBasisFor',
@@ -82,9 +91,15 @@ export class NodeRelationManagerComponent {
     readonly form = new FormGroup({
         relation: new FormControl(Relations.isBasedOn, Validators.required),
     });
-    readonly buttons = DialogButton.getSingleButton('CLOSE',
-        () => this.onClose.emit(),
-        DialogButton.TYPE_CANCEL);
+    readonly buttons = [new DialogButton('CLOSE',
+        DialogButton.TYPE_CANCEL,
+        () => this.onClose.emit()
+        ),
+        new DialogButton('SAVE',
+            DialogButton.TYPE_PRIMARY,
+            () => this.save(),
+        )
+    ];
     permissions = [RestConstants.PERMISSION_WRITE];
     target: UniversalNode;
     columns = [
@@ -94,8 +109,13 @@ export class NodeRelationManagerComponent {
     constructor(
         private relationService: RelationV1Service,
         private nodeHelper: NodeHelperService,
+        private toast: Toast,
         private bridgeService: BridgeService,
     ) {
+    }
+
+    ngOnInit() {
+        this.updateButtons();
     }
 
     getRelationKeys() {
@@ -117,7 +137,7 @@ export class NodeRelationManagerComponent {
     }
 
     getRelations(key: 'isPartOf' | 'isBasedOn' | 'references' | 'hasPart' | 'isBasisFor'): RelationData[] {
-        return this.relations.filter(r => r.type === key).sort((a,b) => a.timestamp.localeCompare(b.timestamp));
+        return this.relations.concat(this.addRelations).filter(r => r.type === key).sort((a,b) => a.timestamp.localeCompare(b.timestamp));
     }
 
     openNode(node: UniversalNode) {
@@ -129,7 +149,41 @@ export class NodeRelationManagerComponent {
     }
 
     removeRelation(relation: RelationData) {
+        if(!this.deleteRelations.includes(relation)) {
+            this.deleteRelations.push(relation);
+        }
+        this.updateButtons();
+    }
 
+    private async save() {
+        this.toast.showProgressDialog();
+        try {
+            await forkJoin(this.addRelations.map(r =>
+                this.relationService.createRelation({
+                    repository: RestConstants.HOME_REPOSITORY,
+                    type: r.type as any,
+                    source: this.source.ref.id,
+                    target: r.node.ref.id
+                })
+            )).toPromise();
+            this.onClose.emit();
+        } catch(e) {
+
+        }
+        this.toast.closeModalDialog();
+    }
+
+    private updateButtons() {
+        this.buttons[1].disabled = !this.addRelations.length || !this.deleteRelations.length;
+    }
+
+    createRelation() {
+        this.addRelations.push({
+            node: this.target,
+            type: this.form.get('relation').value
+        });
+        this.form.reset();
+        this.target = null;
     }
 }
 export enum Relations {
