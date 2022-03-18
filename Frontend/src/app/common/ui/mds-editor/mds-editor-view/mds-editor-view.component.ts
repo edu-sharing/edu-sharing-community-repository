@@ -339,7 +339,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         });
     }
 
-    private injectWidget(widget: Widget, element: Element, editorMode = this.mdsEditorInstance.editorMode, mode: 'append' | 'replace' = 'append'): {
+    private injectWidget(widget: Widget, element: Element, editorMode = this.mdsEditorInstance.editorMode, mode: 'append' | 'replace' = 'replace'): {
         htmlElement: HTMLElement,
         instance: MdsEditorWidgetBase,
     } {

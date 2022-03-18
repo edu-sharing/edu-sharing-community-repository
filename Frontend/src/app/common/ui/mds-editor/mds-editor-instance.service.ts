@@ -1212,6 +1212,14 @@ export class MdsEditorInstanceService implements OnDestroy {
         const availableWidgets = mdsDefinition.widgets
             .filter((widget) => views.some((view) => view.html.indexOf(widget.id) !== -1))
             .filter((widget) => this.meetsCondition(widget, nodes, values, false));
+        // add all native widgets so they get parsed properly if they have inline attributes
+        for(const key of Object.keys(NativeWidgetType)) {
+            if(!availableWidgets.find(w => w.id === (NativeWidgetType as any)[key])) {
+                availableWidgets.push({
+                    id: (NativeWidgetType as any)[key],
+                });
+            }
+        }
         const variables = await this.config.getVariables().pipe(first()).toPromise();
         for (const view of views) {
             for (let widgetDefinition of this.getWidgetsForView(availableWidgets, view)) {
