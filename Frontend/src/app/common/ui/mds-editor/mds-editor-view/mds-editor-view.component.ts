@@ -250,7 +250,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 if (widgets.length >= 1) {
                     // Possibly inject multiple widgets to allow dynamic switching via conditions.
                     for (const widget of widgets) {
-                        this.injectWidget(widget, element);
+                        this.injectWidget(widget, element, this.mdsEditorInstance.editorMode, widgets.length === 1 ? 'replace' : 'append');
                     }
                     if(element.parentNode) {
                         // remove the dummy element because it is now replaced with div containers

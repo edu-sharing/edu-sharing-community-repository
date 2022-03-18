@@ -31,6 +31,8 @@ import { FormFieldRegistrationService } from './form-field-registration.service'
 import {
     InteractionType
 } from '../../../../../core-ui-module/components/node-entries-wrapper/entries-model';
+import {UIHelper} from '../../../../../core-ui-module/ui-helper';
+import {UIService} from '../../../../../core-module/rest/services/ui.service';
 
 @Component({
     selector: 'es-mds-editor-widget-container',
@@ -113,6 +115,7 @@ export class MdsEditorWidgetContainerComponent
 
     constructor(
         private elementRef: ElementRef,
+        private uiService: UIService,
         private mdsEditorInstance: MdsEditorInstanceService,
         private cdr: ChangeDetectorRef,
         private formFieldRegistration: FormFieldRegistrationService,
@@ -231,12 +234,14 @@ export class MdsEditorWidgetContainerComponent
                 this.viewInstance.isExpanded$.next(true);
                 setTimeout(() => resolve(null));
             }
-        }).then(() => {
-            this.elementRef.nativeElement.scrollIntoView({
+        }).then(async () => {
+            await this.uiService.scrollSmoothElementToChild(this.elementRef.nativeElement);
+            /*this.elementRef.nativeElement.scrollIntoView({
                 behavior: 'smooth',
                 block: 'start',
-            });
-            this.injectedView?.focus();
+            });*/
+            console.log(this.injectedView, this.widget.definition.id);
+            setTimeout(() => this.injectedView?.focus(), );
         });
     }
 
