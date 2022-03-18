@@ -339,9 +339,12 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         });
     }
 
-    private injectWidget(widget: Widget, element: Element, editorMode = this.mdsEditorInstance.editorMode): MdsEditorWidgetBase {
+    private injectWidget(widget: Widget, element: Element, editorMode = this.mdsEditorInstance.editorMode, mode: 'append' | 'replace' = 'append'): {
+        htmlElement: HTMLElement,
+        instance: MdsEditorWidgetBase,
+    } {
         return this.ngZone.runOutsideAngular<any>(() => {
-            element = replaceElementWithDiv(element, 'append');
+            element = replaceElementWithDiv(element, mode);
             const htmlRef = this.container.nativeElement.querySelector(
                 widget.definition.id.replace(':', '\\:'),
             );
@@ -356,24 +359,27 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                         widgetName: widget.definition.caption,
                         reason: `Widget for type ${widget.definition.type} is not implemented`,
                     },
-                    { replace: false },
+                    {replace: false},
                     this.injector,
                 ).instance;
             } else if (WidgetComponent === null) {
                 return null;
             }
-            return UIHelper.injectAngularComponent(
-                this.factoryResolver,
-                this.containerRef,
-                WidgetComponent,
-                element,
-                {
-                    widget,
-                    view: this,
-                },
-                { replace: false },
-                this.injector,
-            ).instance;
+            return {
+                htmlElement: element,
+                instance: UIHelper.injectAngularComponent(
+                    this.factoryResolver,
+                    this.containerRef,
+                    WidgetComponent,
+                    element,
+                    {
+                        widget,
+                        view: this,
+                    },
+                    {replace: false},
+                    this.injector,
+                ).instance
+            };
         });
     }
 
@@ -426,19 +432,19 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
             mdsWidgetComponent.widget.definition,
             this.view.id
         );
-        const instance = this.injectWidget(
+        const injected = this.injectWidget(
             widget,
             targetElement,
-            'nodes'
-        ) as MdsEditorWidgetBase;
-        targetElement.parentNode.removeChild(targetElement);
+            'nodes',
+            'replace'
+        );
         widget.initWithNodes(this.mdsEditorInstance.nodes$.value);
         // timeout to wait for view inflation and set the focus
         await this.applicationRef.tick();
         setTimeout(() => {
-            instance.focus();
-            instance.onBlur.pipe(first()).subscribe(() => {
-                mdsWidgetComponent.finishEdit(instance);
+            injected.instance.focus();
+            injected.instance.onBlur.pipe(first()).subscribe(() => {
+                mdsWidgetComponent.finishEdit(injected.instance);
             })
         });
     }
