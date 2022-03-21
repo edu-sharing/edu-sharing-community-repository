@@ -2,7 +2,6 @@
   <button
     *ngIf="!$any(widget?.definition)?.button || $any(widget?.definition)?.button === 'mat-button'"
     mat-button color="primary" (click)="onClick()">
-    TEST
     <ng-container *ngTemplateOutlet="link"></ng-container>
   </button>
   <button
