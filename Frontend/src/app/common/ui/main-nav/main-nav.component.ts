@@ -56,7 +56,7 @@ import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar
 import {MainMenuDropdownComponent} from '../main-menu-dropdown/main-menu-dropdown.component';
 import {MainNavService} from '../../services/main-nav.service';
 import { SearchFieldComponent } from '../search-field/search-field.component';
-import {About, AboutService, AuthenticationService} from 'ngx-edu-sharing-api';
+import {About, AboutService, AuthenticationService, User, UserService} from 'ngx-edu-sharing-api';
 import { ConfigOptionItem, NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -212,6 +212,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     licenseDialog: boolean;
     licenseDetails: string;
     mainMenuStyle: 'sidebar' | 'dropdown' = 'sidebar';
+    currentUser: User;
 
     private readonly destroyed$ = new Subject();
     private editUrl: string;
@@ -251,6 +252,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         private toast: Toast,
         private nodeHelper: NodeHelperService,
         private authentication: AuthenticationService,
+        private user: UserService,
     ) {
         this.mainnavService.registerMainNav(this);
         this.visible = !this.storage.get(
@@ -297,6 +299,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        this.registerCurrentUser();
         this.registerAutoLogoutDialog();
         this.registerAutoLogoutTimeout();
     }
@@ -975,6 +978,13 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         } else {
             this.timeout = '';
         }
+    }
+
+    private registerCurrentUser(): void {
+        this.user
+            .getCurrentUser()
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((currentUser) => (this.currentUser = currentUser.person));
     }
 
     private registerAutoLogoutTimeout(): void {

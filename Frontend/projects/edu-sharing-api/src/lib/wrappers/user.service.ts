@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map, startWith, take } from 'rxjs/operators';
-import { UserEntry, User } from '../api/models';
+import * as rxjs from 'rxjs';
+import { Observable, Subject } from 'rxjs';
+import { first, startWith, switchMap, take, tap } from 'rxjs/operators';
+import { User, UserEntry, UserProfileEdit } from '../api/models';
 import { IamV1Service } from '../api/services';
 import { HOME_REPOSITORY, ME } from '../constants';
 import { switchRelay } from '../utils/switch-relay';
@@ -13,6 +14,13 @@ export { UserEntry, User };
     providedIn: 'root',
 })
 export class UserService {
+    /**
+     * Triggers when the profile of the current user is edited.
+     *
+     * Does not trigger if the user is logged in or out.
+     */
+    private readonly currentUserProfileChangesSubject = new Subject<void>();
+    /** The currently logged in user. */
     private readonly currentUser$ = this.createCurrentUser();
 
     constructor(private authentication: AuthenticationService, private iamApi: IamV1Service) {}
@@ -22,7 +30,7 @@ export class UserService {
      *
      * When requesting a user other then `ME`, this method triggers an API request.
      */
-    getUser(userId: string, repository: string): Observable<UserEntry> {
+    getUser(userId: string, repository: string = HOME_REPOSITORY): Observable<UserEntry> {
         if (userId === ME && repository === HOME_REPOSITORY) {
             return this.currentUser$.pipe(take(1));
         } else {
@@ -42,11 +50,35 @@ export class UserService {
         return this.currentUser$;
     }
 
-    private createCurrentUser(): Observable<UserEntry> {
-        return this.authentication.getUserChanges().pipe(
-            startWith(void 0 as void),
-            switchRelay(() => this.getUserInner(ME, HOME_REPOSITORY)),
+    editProfile(
+        userId: string,
+        profile: UserProfileEdit,
+        repository: string = HOME_REPOSITORY,
+    ): Observable<void> {
+        const inner = this.iamApi.changeUserProfile({
+            person: userId,
+            repository,
+            body: profile,
+        });
+        return this.getCurrentUser().pipe(
+            first(),
+            switchMap((userEntry) => {
+                if (userId === ME || userId === userEntry.person.authorityName) {
+                    return inner.pipe(tap(() => this.currentUserProfileChangesSubject.next()));
+                } else {
+                    return inner;
+                }
+            }),
         );
+    }
+
+    private createCurrentUser(): Observable<UserEntry> {
+        return rxjs
+            .merge(this.authentication.getUserChanges(), this.currentUserProfileChangesSubject)
+            .pipe(
+                startWith(void 0 as void),
+                switchRelay(() => this.getUserInner(ME, HOME_REPOSITORY)),
+            );
     }
 
     private getUserInner(userId: string, repository: string): Observable<UserEntry> {
