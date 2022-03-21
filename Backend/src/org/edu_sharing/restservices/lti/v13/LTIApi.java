@@ -52,6 +52,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.*;
@@ -105,9 +106,10 @@ public class LTIApi {
             final URI uri = new URI(loginRequest.getTarget_link_uri());
 			/* commented in local because localhost resolves to 0:0:0:0*/
             String host = uri.getHost();
-			String remoteHost = req.getRemoteHost();
+			String remoteHost = new URI(req.getRequestURL().toString()).getHost();
+
             logger.info("host:" + host + " remoteHost:"+remoteHost);
-            if (!remoteHost.equals("127.0.0.1") && !host.equals(remoteHost)) {
+            if (!host.equals(remoteHost)) {
 				throw new Exception("Bad request target uri host:" + host +" remoteHost:"+remoteHost);
 			}
 
