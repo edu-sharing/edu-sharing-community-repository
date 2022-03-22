@@ -381,16 +381,9 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-frontend-webapp</artifactId>
+        <artifactId>edu_sharing-community-repository-frontend</artifactId>
         <version>${project.version}</version>
         <classifier>sources</classifier>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-frontend-webapp</artifactId>
-        <version>${project.version}</version>
-        <type>war</type>
       </dependency>
 
       <dependency>
@@ -403,13 +396,6 @@
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-repackaged-isoparser</artifactId>
         <version>${bom.repository-repackaged.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-webapp</artifactId>
-        <version>${project.version}</version>
-        <type>war</type>
       </dependency>
 
       <dependency>
@@ -795,7 +781,6 @@
     <module>Backend</module>
     <module>config</module>
     <module>Frontend</module>
-    <module>webapp</module>
   </modules>
 
 </project>
