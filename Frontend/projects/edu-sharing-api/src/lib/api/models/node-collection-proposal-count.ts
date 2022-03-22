@@ -4,6 +4,7 @@ import { Collection } from './collection';
 import { Content } from './content';
 import { License } from './license';
 import { Node } from './node';
+import { NodeLtiDeepLink } from './node-lti-deep-link';
 import { NodeRef } from './node-ref';
 import { Person } from './person';
 import { Preview } from './preview';
@@ -27,6 +28,7 @@ export interface NodeCollectionProposalCount {
     modifiedAt?: string;
     modifiedBy?: Person;
     name: string;
+    nodeLTIDeepLink?: NodeLtiDeepLink;
     owner: Person;
     parent?: NodeRef;
     preview?: Preview;

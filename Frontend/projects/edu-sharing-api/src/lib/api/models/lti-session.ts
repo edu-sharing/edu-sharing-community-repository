@@ -1,9 +1,11 @@
+/* tslint:disable */
+/* eslint-disable */
 export interface LtiSession {
-    acceptMultiple: boolean;
-    deeplinkReturnUrl: string;
-    acceptTypes: string[];
-    acceptPresentationDocumentTargets: string[];
-    canConfirm: boolean;
-    title: string;
-    text: string;
+    acceptMultiple?: boolean;
+    acceptPresentationDocumentTargets?: Array<string>;
+    acceptTypes?: Array<string>;
+    canConfirm?: boolean;
+    deeplinkReturnUrl?: string;
+    text?: string;
+    title?: string;
 }
