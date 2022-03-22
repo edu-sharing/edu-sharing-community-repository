@@ -14,6 +14,7 @@ import { TranslateService } from '@ngx-translate/core';
 import {
     DialogButton, Group,
     Node,
+    Organization,
     RestHelper,
     UIService, UserSimple,
 } from '../../../core-module/core.module';
@@ -92,7 +93,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
      * Optional, bind a Node or Node-Array to this element
      * If this is used, the subtitle and avatar is automatically set depending on the given data
      */
-    @Input() set node(node: Node | Node[] | Group) {
+    @Input() set node(node: Node | Node[] | Group | Organization) {
         if (!node) {
             return;
         }

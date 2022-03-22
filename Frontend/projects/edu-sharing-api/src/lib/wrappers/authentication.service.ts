@@ -159,6 +159,13 @@ export class AuthenticationService {
     }
 
     /**
+     * Emits when the logged-in user changes.
+     */
+    getUserChanges(): Observable<void> {
+        return this.userChanges$;
+    }
+
+    /**
      * Triggers an API request to update login information.
      *
      * This is usually not needed since `login` and `logout` will update login information
