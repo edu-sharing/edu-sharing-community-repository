@@ -344,13 +344,7 @@ export class StreamComponent implements AfterViewInit {
         this.collectionNodes = nodes.nodes;
 
     }
-    private addToStore(nodes: any) {
-        this.globalProgress = true;
-        RestHelper.addToStore(nodes.nodes, this.bridge, this.iam, () => {
-            this.globalProgress = false;
-            this.mainNavRef.refreshNodeStore();
-        });
-    }
+
     public getStreamData(streamStatus: string, sortAscendingCreated: boolean = false) {
         return this.streamService.search1({
             repository: RestConstants.HOME_REPOSITORY,

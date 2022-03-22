@@ -74,40 +74,6 @@ import { takeUntil } from 'rxjs/operators';
         trigger('overlayBottom', UIAnimation.openOverlayBottom()),
         trigger('cardAnimation', UIAnimation.cardAnimation()),
         trigger('fade', UIAnimation.fade()),
-        trigger('nodeStore', [
-            transition(':enter', [
-                animate(
-                    UIAnimation.ANIMATION_TIME_SLOW + 'ms ease-in',
-                    keyframes([
-                        style({
-                            opacity: 0,
-                            top: '0',
-                            transform: 'scale(0.25)',
-                            offset: 0,
-                        }),
-                        style({
-                            opacity: 1,
-                            top: '10px',
-                            transform: 'scale(1)',
-                            offset: 1,
-                        }),
-                    ]),
-                ),
-            ]),
-            transition(':leave', [
-                animate(
-                    UIAnimation.ANIMATION_TIME_SLOW + 'ms ease-in',
-                    keyframes([
-                        style({ opacity: 1, transform: 'scale(1)', offset: 0 }),
-                        style({
-                            opacity: 0,
-                            transform: 'scale(10)',
-                            offset: 1,
-                        }),
-                    ]),
-                ),
-            ]),
-        ]),
     ],
 })
 export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -196,7 +162,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     createMenuY: number;
     timeout: string;
     config: any = {};
-    nodeStoreAnimation = 0;
     showNodeStore = false;
     acceptLicenseAgreement: boolean;
     licenseAgreement: boolean;
@@ -216,7 +181,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private readonly destroyed$ = new Subject();
     private editUrl: string;
-    private nodeStoreCount = 0;
     private licenseAgreementNode: Node;
     private scrollInitialPositions: any[] = [];
     private lastScroll = -1;
@@ -286,7 +250,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                         this.showNodeStore = params.nodeStore === 'true';
                         this._showUser =
                             this._currentScope !== 'login' && this.showUser;
-                        this.refreshNodeStore();
                         this.checkConfig();
                         const user = await this.iam.getUser().toPromise();
                         this.canEditProfile = user.editProfile;
@@ -458,24 +421,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             'nodeStore',
             value,
         );
-    }
-
-    refreshNodeStore() {
-        this.iam
-            .getNodeList(RestConstants.NODE_STORE_LIST)
-            .subscribe((data: NodeList) => {
-                if (
-                    data.nodes.length - this.nodeStoreCount > 0 &&
-                    this.nodeStoreAnimation === -1
-                ) {
-                    this.nodeStoreAnimation =
-                        data.nodes.length - this.nodeStoreCount;
-                }
-                this.nodeStoreCount = data.nodes.length;
-                setTimeout(() => {
-                    this.nodeStoreAnimation = -1;
-                }, 1500);
-            });
     }
 
     onEvent(event: string, data: any) {
