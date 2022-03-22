@@ -1,0 +1,12 @@
+version: '3.7'
+
+services:
+
+  services-rendering:
+    image: "${docker.repository}/${docker.prefix}-deploy-installer-services-rendering-scripts-${os.distribution}-${os.codename}:${docker.tag}"
+    ports:
+      - "${COMMON_BIND_HOST:-127.0.0.1}:${SERVICES_RENDERING_SERVICE_PORT:-9100}:80"
+    volumes:
+      - "./services/rendering/.env:/opt/edu-sharing/.env"
+    depends_on:
+      - repository

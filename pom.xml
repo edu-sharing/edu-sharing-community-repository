@@ -1,8 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -13,22 +10,22 @@
     <relativePath/>
   </parent>
 
-  <artifactId>edu_sharing-community-deploy</artifactId>
+  <artifactId>edu_sharing-projects-community</artifactId>
   <packaging>pom</packaging>
   <version>git</version>
 
-  <name>edu_sharing-community-deploy</name>
+  <name>edu_sharing-projects-community</name>
 
   <scm>
-    <connection>scm:git:https://scm.edu-sharing.com/edu-sharing/community/edu-sharing-community-deploy.git</connection>
-    <developerConnection>scm:git:https://scm.edu-sharing.com/edu-sharing/community/edu-sharing-community-deploy.git
-    </developerConnection>
-    <url>https://scm.edu-sharing.com/edu-sharing/community/edu-sharing-community-deploy.git</url>
+    <connection>scm:git:https://scm.edu-sharing.com/edu-sharing/projects/community/edu-sharing-projects-community.git</connection>
+    <developerConnection>scm:git:https://scm.edu-sharing.com/edu-sharing/projects/community/edu-sharing-projects-community.git</developerConnection>
+    <url>https://scm.edu-sharing.com/edu-sharing/projects/community/edu-sharing-projects-community.git</url>
   </scm>
 
   <properties>
 
-    <bom.version>${project.version}</bom.version>
+    <!-- release-4 -->
+    <bom.bom.version>${project.version}</bom.bom.version>
 
   </properties>
 
@@ -47,7 +44,7 @@
       </activation>
 
       <properties>
-        <bom.version>${project.version}</bom.version>
+        <bom.bom.version>${project.version}</bom.bom.version>
       </properties>
 
     </profile>
@@ -74,7 +71,7 @@
                   <groupId>${project.groupId}</groupId>
                   <artifactId>edu_sharing-community-bom</artifactId>
                   <!--suppress UnresolvedMavenProperty -->
-                  <version>${bom.version}</version>
+                  <version>${bom.bom.version}</version>
                   <type>pom</type>
                 </dependency>
               </artifacts>
@@ -112,14 +109,14 @@
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-bom</artifactId>
-        <version>${bom.version}</version>
+        <version>${bom.bom.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-docker-helm-postgresql</artifactId>
+        <artifactId>edu_sharing-projects-community-deploy-docker-helm-postgresql</artifactId>
         <version>${project.version}</version>
         <type>tar.gz</type>
         <classifier>bin</classifier>
@@ -127,7 +124,7 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-docker-helm-rediscluster</artifactId>
+        <artifactId>edu_sharing-projects-community-deploy-docker-helm-rediscluster</artifactId>
         <version>${project.version}</version>
         <type>tar.gz</type>
         <classifier>bin</classifier>
@@ -135,7 +132,13 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-docker-repository-helm-bundle</artifactId>
+        <artifactId>edu_sharing-projects-community-deploy-docker-repository-compose</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-projects-community-deploy-docker-repository-helm-bundle</artifactId>
         <version>${project.version}</version>
         <type>tar.gz</type>
         <classifier>bin</classifier>
@@ -143,7 +146,7 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-docker-repository-helm-service</artifactId>
+        <artifactId>edu_sharing-projects-community-deploy-docker-repository-helm-service</artifactId>
         <version>${project.version}</version>
         <type>tar.gz</type>
         <classifier>bin</classifier>
@@ -151,7 +154,7 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-docker-repository-helm-solr4</artifactId>
+        <artifactId>edu_sharing-projects-community-deploy-docker-repository-helm-solr4</artifactId>
         <version>${project.version}</version>
         <type>tar.gz</type>
         <classifier>bin</classifier>
@@ -159,19 +162,13 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-docker-services-rendering-compose</artifactId>
+        <artifactId>edu_sharing-projects-community-deploy-docker-services-rendering-compose</artifactId>
         <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-docker-repository-compose</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-docker-services-rendering-helm-bundle</artifactId>
+        <artifactId>edu_sharing-projects-community-deploy-docker-services-rendering-helm-bundle</artifactId>
         <version>${project.version}</version>
         <type>tar.gz</type>
         <classifier>bin</classifier>
@@ -179,7 +176,7 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-docker-services-rendering-helm-service</artifactId>
+        <artifactId>edu_sharing-projects-community-deploy-docker-services-rendering-helm-service</artifactId>
         <version>${project.version}</version>
         <type>tar.gz</type>
         <classifier>bin</classifier>
@@ -187,13 +184,13 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-installer-repository-compose-debian-bullseye</artifactId>
+        <artifactId>edu_sharing-projects-community-deploy-installer-repository-compose-debian-bullseye</artifactId>
         <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-installer-repository-distribution</artifactId>
+        <artifactId>edu_sharing-projects-community-deploy-installer-repository-distribution</artifactId>
         <version>${project.version}</version>
         <type>tar.gz</type>
         <classifier>bin</classifier>
@@ -201,16 +198,74 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-installer-services-rendering-compose-debian-bullseye</artifactId>
+        <artifactId>edu_sharing-projects-community-deploy-installer-services-rendering-compose-debian-bullseye</artifactId>
         <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-deploy-installer-services-rendering-distribution</artifactId>
+        <artifactId>edu_sharing-projects-community-deploy-installer-services-rendering-distribution</artifactId>
         <version>${project.version}</version>
         <type>tar.gz</type>
         <classifier>bin</classifier>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-projects-community-repository-backend-alfresco-module</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-projects-community-repository-backend-alfresco-module</artifactId>
+        <version>${project.version}</version>
+        <type>amp</type>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-projects-community-repository-backend-services-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-projects-community-repository-backend-services-webapp</artifactId>
+        <version>${project.version}</version>
+        <type>war</type>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-projects-community-repository-config-cluster</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-projects-community-repository-config-defaults</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-projects-community-repository-config-node</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-projects-community-repository-frontend</artifactId>
+        <version>${project.version}</version>
+        <type>war</type>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-projects-community-repository-webapp</artifactId>
+        <version>${project.version}</version>
+        <type>war</type>
       </dependency>
 
     </dependencies>
@@ -247,9 +302,7 @@
 
   </repositories>
 
-  <modules>
-    <module>docker</module>
-    <module>installer</module>
+<modules>  <module>deploy</module>
+    <module>repository</module>
   </modules>
-
 </project>

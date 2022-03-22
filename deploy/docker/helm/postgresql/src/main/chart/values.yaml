@@ -1,0 +1,159 @@
+########################################################################################################################
+# GLOBAL
+########################################################################################################################
+
+global:
+
+  cluster:
+
+    istio:
+      enabled: false
+
+    pdb:
+      enabled: false
+
+    storage:
+
+      data:
+        permission: false
+        spec: {}
+
+  image:
+    pullPolicy: Always
+    pullSecrets: []
+
+  patroni:
+    enabled: false
+    name: &nameOverride edusharing-postgresql
+    postgres: "13"
+    replicas: 3
+    synchronous:
+      enabled: true
+      strict: true
+    team: edusharing
+
+########################################################################################################################
+# LOCAL
+########################################################################################################################
+
+nameOverride: *nameOverride
+
+image:
+  registry: ${docker.registry}
+  repository: ${docker.repository}
+  prefix: ${docker.prefix}
+  tag: ${docker.tag}
+
+########################################################################################################################
+
+service:
+
+  port:
+    api: 5432
+
+########################################################################################################################
+
+config:
+
+  database: postgresql
+  username: postgresql
+  password: postgresql
+
+  extra:
+    max_connections: "300"
+
+########################################################################################################################
+
+nodeAffinity: {}
+
+tolerations: []
+
+########################################################################################################################
+
+persistence:
+
+  data:
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi
+
+########################################################################################################################
+
+podSecurityContext:
+
+  runAsUser: 1001
+  fsGroup: 1001
+
+securityContext:
+
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+
+########################################################################################################################
+
+terminationGracePeriod: 120
+
+livenessProbe:
+
+  failureThreshold: 3
+  initialDelaySeconds: 1200
+  periodSeconds: 10
+  timeoutSeconds: 5
+
+readinessProbe:
+
+  failureThreshold: 1
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 5
+
+########################################################################################################################
+
+resources:
+
+  limits:
+    cpu: 200m
+    memory: 1Gi
+  requests:
+    cpu: 200m
+    memory: 1Gi
+
+########################################################################################################################
+
+init:
+
+  permission:
+
+    resources: {}
+
+    securityContext:
+      runAsUser: 0
+
+########################################################################################################################
+
+sidecar:
+
+  metrics:
+
+    enabled: true
+
+    resources:
+      limits:
+        cpu: 100m
+        memory: 100Mi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+
+########################################################################################################################

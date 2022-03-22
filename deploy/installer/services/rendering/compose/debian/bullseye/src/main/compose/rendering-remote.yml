@@ -1,0 +1,6 @@
+version: '3.7'
+
+services:
+
+  services-rendering:
+    image: "${docker.registry}/${docker.repository}/${docker.prefix}-deploy-installer-services-rendering-scripts-${os.distribution}-${os.codename}:${docker.tag}"

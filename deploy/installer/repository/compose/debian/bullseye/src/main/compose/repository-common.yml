@@ -1,0 +1,10 @@
+version: '3.7'
+
+services:
+
+  repository:
+    image: "${docker.repository}/${docker.prefix}-deploy-installer-repository-scripts-${os.distribution}-${os.codename}:${docker.tag}"
+    ports:
+      - "${COMMON_BIND_HOST:-127.0.0.1}:${REPOSITORY_SERVICE_PORT:-8100}:80"
+    volumes:
+      - "./repository/.env:/opt/alfresco/.env"

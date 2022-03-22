@@ -1,0 +1,335 @@
+########################################################################################################################
+# GLOBAL
+########################################################################################################################
+
+global:
+
+  cluster:
+
+    cert:
+      annotations: {}
+
+    domain: cluster.local
+
+    istio:
+      enabled: false
+      gateway:
+        selector:
+          app: istio-ingressgateway
+
+    pdb:
+      enabled: false
+
+    storage:
+
+      data:
+        permission: false
+        spec: {}
+
+      share:
+        permission: false
+        spec: {}
+
+  image:
+    pullPolicy: Always
+    pullSecrets: []
+
+  patroni:
+    enabled: false
+    name: edusharing-repository-postgresql
+    secrets: "credentials.postgresql.acid.zalan.do"
+    team: edusharing
+
+########################################################################################################################
+# LOCAL
+########################################################################################################################
+
+nameOverride: edusharing-repository-service
+
+image:
+  registry: ${docker.registry}
+  repository: ${docker.repository}
+  prefix: ${docker.prefix}
+  tag: ${docker.tag}
+
+########################################################################################################################
+
+replicaCount: 1
+
+autoscaling:
+  enabled: false
+  minReplicas: 3
+  maxReplicas: 5
+  targetCPU: 80
+
+########################################################################################################################
+
+service:
+
+  port:
+    api:
+      internal: 8080
+      external: 8081
+    gossip: 5701
+
+########################################################################################################################
+
+ingress:
+
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/proxy-body-size: "5g"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "15"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "180"
+#    nginx.ingress.kubernetes.io/configuration-snippet: |
+#      location /alfresco/service/api/solr/ {return 403;}
+#      location /alfresco/s/api/solr/ {return 403;}
+#      location /alfresco/wcservice/api/solr/ {return 403;}
+#      location /alfresco/wcs/api/solr/ {return 403;}
+#      location /share/proxy/alfresco/api/solr/ {return 403 ;}
+#      location /share/-default-/proxy/alfresco/api/ {return 403;}
+
+  hosts:
+  - repository.127.0.0.1.nip.io
+
+  tls: []
+#  - secretName: edusharing-repository-tls
+#    hosts:
+#    - repository.127.0.0.1.nip.io
+
+  paths:
+  - /edu-sharing
+  - /alfresco
+  - /share
+
+########################################################################################################################
+
+config:
+
+  admin:
+    password: admin
+
+  cache:
+    cluster: true
+    database: 0
+    host: edusharing-rediscluster
+    port: 6379
+
+  cluster:
+    enabled: ${helm.config.cluster.enabled}
+    backup:
+      count: 0
+      read: false
+
+  connector:
+
+    external:
+      threads: 200
+      timeout: 20000
+
+    internal:
+      threads: 200
+      timeout: -1
+
+  custom:
+    enabled: false
+    services: ""
+
+  database:
+    driver: org.postgresql.Driver
+    host: edusharing-repository-postgresql
+    port: 5432
+    database: repository
+    username: repository
+    password: repository
+    protocol: postgresql
+    options: ""
+    patroni: {}
+
+    pool:
+      max: 80
+      sql: "SELECT 1"
+
+  guest:
+    username: ""
+    password: ""
+
+  home:
+    appid: local
+
+  jvm:
+    debug: false
+    ram:
+      minPercentage: "75.0"
+      maxPercentage: "75.0"
+
+  metrics: true
+
+  http:
+    client:
+      disablesni4host: ""
+      proxy:
+        host: ""
+        nonproxyhosts: []
+        proxyhost: ""
+        proxyport: ""
+        proxyuser: ""
+        proxypass: ""
+    session:
+      timeout: 60
+
+  saml:
+    enabled: false
+#    config: ""
+#    files: {}
+
+  search:
+
+    elastic:
+      enabled: false
+      host: edusharing-repository-search-elastic-index
+      port: 9200
+
+    solr4:
+      host: edusharing-repository-search-solr4
+      port: 8080
+
+  transform:
+
+    server:
+      enabled: false
+      host: edusharing-repository-transform
+      port: 8080
+
+########################################################################################################################
+
+persistence:
+
+  data:
+
+    config:
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi
+
+  share:
+
+    config:
+      create: true
+      spec:
+        accessModes: [ "ReadWriteMany" ]
+        resources:
+          requests:
+            storage: 1Gi
+    data:
+      create: true
+      spec:
+        accessModes: [ "ReadWriteMany" ]
+        resources:
+          requests:
+            storage: 5Gi
+
+########################################################################################################################
+
+nodeAffinity: {}
+podAntiAffinity: "soft"
+
+tolerations: []
+
+########################################################################################################################
+
+podSecurityContext:
+
+  runAsUser: 1000
+  fsGroup: 1000
+
+securityContext:
+
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+
+########################################################################################################################
+
+terminationGracePeriod: 120
+
+livenessProbe:
+
+  failureThreshold: 3
+  initialDelaySeconds: 1200
+  periodSeconds: 10
+  timeoutSeconds: 5
+
+readinessProbe:
+
+  failureThreshold: 1
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 5
+
+########################################################################################################################
+
+resources:
+
+  limits:
+    cpu: 1000m
+    memory: 4Gi
+  requests:
+    cpu: 1000m
+    memory: 4Gi
+
+########################################################################################################################
+
+init:
+
+  permission:
+
+    resources: {}
+
+    securityContext:
+      runAsUser: 0
+
+########################################################################################################################
+
+sidecar:
+
+  transform:
+
+    livenessProbe:
+
+      failureThreshold: 3
+      initialDelaySeconds: 1200
+      periodSeconds: 10
+      timeoutSeconds: 5
+
+    readinessProbe:
+
+      failureThreshold: 1
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 5
+
+    resources:
+
+      limits:
+        cpu: 100m
+        memory: 1Gi
+      requests:
+        cpu: 100m
+        memory: 1Gi
+
+    securityContext:
+
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+
+########################################################################################################################

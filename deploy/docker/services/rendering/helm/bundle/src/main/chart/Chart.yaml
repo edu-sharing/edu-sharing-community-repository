@@ -1,0 +1,27 @@
+apiVersion: v2
+
+name: ${helm.prefix}_services_rendering
+description: ${helm.prefix}_services_rendering
+
+icon: ${helm.chart.icon}
+
+version: ${helm.chart.version}
+appVersion: ${docker.tag}
+kubeVersion: "${helm.kube.version}"
+
+dependencies:
+
+  - name: ${helm.prefix}_postgresql
+    version: ${helm.chart.version}
+    alias: edusharing_services_rendering_postgresql
+    condition: edusharing_services_rendering_postgresql.enabled
+
+  - name: ${helm.prefix}_rediscluster
+    version: ${helm.chart.version}
+    alias: edusharing_services_rendering_rediscluster
+    condition: edusharing_services_rendering_rediscluster.enabled
+
+  - name: ${helm.prefix}_services_rendering
+    version: ${helm.chart.version}
+    alias: edusharing_services_rendering_service
+    condition: edusharing_services_rendering_service.enabled

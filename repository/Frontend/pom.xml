@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.edu_sharing</groupId>
+    <artifactId>edu_sharing-projects-community-repository</artifactId>
+    <version>git</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>edu_sharing-projects-community-repository-frontend</artifactId>
+  <packaging>war</packaging>
+
+  <name>edu_sharing-projects-community-repository-frontend</name>
+
+  <build>
+
+    <finalName>edu-sharing</finalName>
+
+    <plugins>
+
+      <plugin>
+
+        <groupId>com.github.eirslett</groupId>
+        <artifactId>frontend-maven-plugin</artifactId>
+        <configuration>
+          <!--suppress UnresolvedMavenProperty -->
+          <nodeVersion>${node.version}</nodeVersion>
+          <!--suppress UnresolvedMavenProperty -->
+          <npmVersion>${npm.version}</npmVersion>
+        </configuration>
+        <executions>
+          <execution>
+            <id>bootstrap</id>
+            <goals>
+              <goal>install-node-and-npm</goal>
+            </goals>
+            <phase>process-sources</phase>
+          </execution>
+          <execution>
+            <id>install</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <phase>process-sources</phase>
+            <configuration>
+              <arguments>${npm.args.install}</arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>build</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <phase>compile</phase>
+            <configuration>
+              <arguments>${npm.args.build}</arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+
+  </build>
+
+  <profiles>
+
+    <profile>
+
+      <id>frontend.overlay</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <file>
+          <missing>package.json</missing>
+        </file>
+      </activation>
+
+      <build>
+
+        <plugins>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-clean-plugin</artifactId>
+            <configuration>
+              <filesets>
+                <fileset>
+                  <directory>src/generated/ng/dist</directory>
+                </fileset>
+                <fileset>
+                  <directory>src/generated/ng/src</directory>
+                </fileset>
+              </filesets>
+            </configuration>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>unpack-dependencies</goal>
+                </goals>
+                <phase>generate-sources</phase>
+                <configuration>
+                  <includeArtifactIds>edu_sharing-community-repository-frontend</includeArtifactIds>
+                  <outputDirectory>src/generated/ng</outputDirectory>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-resources-plugin</artifactId>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <phase>generate-resources</phase>
+                <configuration>
+                  <resources>
+                    <resource>
+                      <directory>src/main/ng</directory>
+                    </resource>
+                  </resources>
+                  <outputDirectory>src/generated/ng</outputDirectory>
+                  <overwrite>true</overwrite>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>com.github.eirslett</groupId>
+            <artifactId>frontend-maven-plugin</artifactId>
+            <configuration>
+              <workingDirectory>src/generated/ng</workingDirectory>
+            </configuration>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-war-plugin</artifactId>
+            <configuration>
+              <failOnMissingWebXml>false</failOnMissingWebXml>
+              <webResources>
+                <resource>
+                  <directory>src/generated/ng/dist</directory>
+                </resource>
+              </webResources>
+            </configuration>
+          </plugin>
+
+        </plugins>
+
+      </build>
+
+    </profile>
+
+    <profile>
+
+      <id>frontend.native</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <file>
+          <exists>package.json</exists>
+        </file>
+      </activation>
+
+      <build>
+
+        <plugins>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-clean-plugin</artifactId>
+            <configuration>
+              <filesets>
+                <fileset>
+                  <directory>src/app/edu-sharing</directory>
+                </fileset>
+                <fileset>
+                  <directory>dist</directory>
+                </fileset>
+              </filesets>
+            </configuration>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>unpack-dependencies</goal>
+                </goals>
+                <phase>generate-sources</phase>
+                <configuration>
+                  <includeArtifactIds>edu_sharing-community-repository-frontend</includeArtifactIds>
+                  <outputDirectory>src/app/edu-sharing/Frontend</outputDirectory>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-resources-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>before</id>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <phase>generate-resources</phase>
+                <configuration>
+                  <resources>
+                    <resource>
+                      <directory>src/edu-sharing-override</directory>
+                      <filtering>false</filtering>
+                    </resource>
+                  </resources>
+                  <outputDirectory>src/app/edu-sharing/Frontend/src</outputDirectory>
+                  <overwrite>true</overwrite>
+                </configuration>
+              </execution>
+              <execution>
+                <id>after</id>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <phase>process-classes</phase>
+                <configuration>
+                  <resources>
+                    <resource>
+                      <directory>src/app/edu-sharing/Frontend/src/assets/i18n</directory>
+                      <filtering>false</filtering>
+                    </resource>
+                  </resources>
+                  <outputDirectory>dist/assets/i18n</outputDirectory>
+                  <overwrite>true</overwrite>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-war-plugin</artifactId>
+            <configuration>
+              <failOnMissingWebXml>false</failOnMissingWebXml>
+              <webResources>
+                <resource>
+                  <directory>dist</directory>
+                </resource>
+              </webResources>
+            </configuration>
+          </plugin>
+
+        </plugins>
+
+      </build>
+
+    </profile>
+
+  </profiles>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-frontend</artifactId>
+      <classifier>sources</classifier>
+    </dependency>
+
+  </dependencies>
+
+</project>

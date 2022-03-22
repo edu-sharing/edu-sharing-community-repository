@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.edu_sharing</groupId>
+    <artifactId>edu_sharing-projects-community-deploy-docker-repository-build</artifactId>
+    <version>git</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>edu_sharing-projects-community-deploy-docker-repository-build-transform</artifactId>
+  <packaging>jar</packaging>
+
+  <name>edu_sharing-projects-community-deploy-docker-repository-build-transform</name>
+
+  <build>
+
+    <plugins>
+
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>build</id>
+            <goals>
+              <goal>build</goal>
+            </goals>
+            <phase>install</phase>
+          </execution>
+          <execution>
+            <id>push</id>
+            <goals>
+              <goal>push</goal>
+            </goals>
+            <phase>deploy</phase>
+          </execution>
+        </executions>
+        <configuration>
+          <images>
+            <image>
+              <name>${docker.repository}/${docker.prefix}-deploy-docker-repository-build-transform:${docker.tag}</name>
+            </image>
+          </images>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <phase>package</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+
+  </build>
+
+</project>

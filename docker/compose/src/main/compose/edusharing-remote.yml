@@ -1,6 +1,0 @@
-version: '3.7'
-
-services:
-
-  cache:
-    image: "${docker.registry}/${docker.repository}/edu_sharing-community-deploy-docker-build-redis:${docker.tag}"

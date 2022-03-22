@@ -1,0 +1,47 @@
+apiVersion: v2
+
+name: ${helm.prefix}_repository
+description: ${helm.prefix}_repository
+
+icon: ${helm.chart.icon}
+
+version: ${helm.chart.version}
+appVersion: ${docker.tag}
+kubeVersion: "${helm.kube.version}"
+
+dependencies:
+
+  - name: ${helm.prefix}_postgresql
+    version: ${helm.chart.version}
+    alias: edusharing_repository_postgresql
+    condition: edusharing_repository_postgresql.enabled
+
+  - name: ${helm.prefix}_rediscluster
+    version: ${helm.chart.version}
+    alias: edusharing_repository_rediscluster
+    condition: edusharing_repository_rediscluster.enabled
+
+  - name: ${helm.prefix}_repository_search_solr4
+    version: ${helm.chart.version}
+    alias: edusharing_repository_search_solr4
+    condition: edusharing_repository_search_solr4.enabled
+
+  - name: ${helm.prefix}_repository_service
+    version: ${helm.chart.version}
+    alias: edusharing_repository_service
+    condition: edusharing_repository_service.enabled
+
+  ${helm.edusharing_repository_search_elastic_index.line1}
+    ${helm.edusharing_repository_search_elastic_index.line2}
+    ${helm.edusharing_repository_search_elastic_index.line3}
+    ${helm.edusharing_repository_search_elastic_index.line4}
+  
+  ${helm.edusharing_repository_search_elastic_tracker.line1}
+    ${helm.edusharing_repository_search_elastic_tracker.line2}
+    ${helm.edusharing_repository_search_elastic_tracker.line3}
+    ${helm.edusharing_repository_search_elastic_tracker.line4}
+
+  ${helm.edusharing_repository_transform.line1}
+    ${helm.edusharing_repository_transform.line2}
+    ${helm.edusharing_repository_transform.line3}
+    ${helm.edusharing_repository_transform.line4}

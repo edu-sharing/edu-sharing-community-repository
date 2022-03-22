@@ -1,0 +1,154 @@
+########################################################################################################################
+# GLOBAL
+########################################################################################################################
+
+global:
+
+  cluster:
+
+    istio:
+      enabled: false
+
+    pdb:
+      enabled: false
+
+    storage:
+
+      data:
+        permission: false
+        spec: {}
+
+  image:
+    pullPolicy: Always
+    pullSecrets: []
+
+########################################################################################################################
+# LOCAL
+########################################################################################################################
+
+nameOverride: edusharing-rediscluster
+
+image:
+  registry: ${docker.registry}
+  repository: ${docker.repository}
+  prefix: ${docker.prefix}
+  tag: ${docker.tag}
+
+########################################################################################################################
+
+service:
+
+  port:
+    api: 6379
+    gossip: 16379
+
+########################################################################################################################
+
+config:
+
+  cluster:
+    master: 3
+    replicas: 1
+    wait: 30
+
+  extra: {}
+
+########################################################################################################################
+
+nodeAffinity: {}
+podAntiAffinity: "soft"
+
+tolerations: []
+
+########################################################################################################################
+
+persistence:
+
+  data:
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi
+
+########################################################################################################################
+
+podSecurityContext:
+
+  runAsUser: 1001
+  fsGroup: 1001
+#  sysctls:
+#  - name: net.core.somaxconn
+#    value: "10000"
+
+securityContext:
+
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+
+########################################################################################################################
+
+terminationGracePeriod: 120
+
+livenessProbe:
+
+  failureThreshold: 3
+  initialDelaySeconds: 1200
+  periodSeconds: 10
+  timeoutSeconds: 5
+
+readinessProbe:
+
+  failureThreshold: 1
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 5
+
+########################################################################################################################
+
+resources:
+
+  limits:
+    cpu: 100m
+    memory: 1Gi
+  requests:
+    cpu: 100m
+    memory: 1Gi
+
+########################################################################################################################
+
+init:
+
+  permission:
+
+    resources: {}
+
+    securityContext:
+      runAsUser: 0
+
+########################################################################################################################
+
+sidecar:
+
+  metrics:
+
+    enabled: true
+
+    resources:
+      limits:
+        cpu: 100m
+        memory: 100Mi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+
+########################################################################################################################

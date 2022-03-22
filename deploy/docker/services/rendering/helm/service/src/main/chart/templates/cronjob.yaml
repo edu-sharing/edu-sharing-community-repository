@@ -1,0 +1,73 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ include "edusharing_rendering_service.name" . }}-cachecleaner
+  labels: {{ include "edusharing_rendering_service.labels" . | nindent 4 }}
+    app.kubernetes.io/component: cachecleaner
+spec:
+  concurrencyPolicy: Forbid
+  schedule: {{ .Values.job.cachecleaner.schedule | quote }}
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      completions: 1
+      parallelism: 1
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: {{ include "edusharing_rendering_service.name" . }}-job-cachecleaner
+            image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/{{ .Values.image.prefix }}-deploy-docker-services-rendering-build-service:{{ .Values.image.tag }}
+            imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+            args: ["php", "func/classes.new/Helper/cacheCleaner.php"]
+            {{- $patroni := merge .Values.config.database.patroni .Values.global.patroni }}
+            {{- if $patroni.enabled }}
+            env:
+              - name: SERVICES_RENDERING_DATABASE_PASS
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.config.database.username }}.{{ $patroni.name }}.{{ $patroni.secrets }}
+                    key: password
+            {{- end }}
+            envFrom:
+            - configMapRef:
+                name: {{ include "edusharing_rendering_service.name" . }}-env
+            - secretRef:
+                name: {{ include "edusharing_rendering_service.name" . }}-env
+            volumeMounts:
+            - name: share-config
+              mountPath: /var/cache/esrender/config
+            - name: share-data
+              mountPath: /var/cache/esrender/data
+            {{- with .Values.job.cachecleaner.resources }}
+            resources: {{ toYaml . | nindent 14 }}
+            {{- end }}
+            {{- with .Values.job.cachecleaner.securityContext }}
+            securityContext: {{ toYaml . | nindent 14 }}
+            {{- end }}
+          {{- with .Values.global.image.pullSecrets }}
+          imagePullSecrets: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.podSecurityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.tolerations }}
+          tolerations: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.terminationGracePeriod }}
+          terminationGracePeriodSeconds: {{ . }}
+          {{- end }}
+          {{- with .Values.nodeAffinity }}
+          affinity:
+            nodeAffinity: {{ toYaml . | nindent 14 }}
+          {{- end }}
+          volumes:
+          - name: share-config
+            persistentVolumeClaim:
+              claimName: {{ include "edusharing_rendering_service.pvc.share.config" . }}
+          - name: share-data
+            persistentVolumeClaim:
+              claimName: {{ include "edusharing_rendering_service.pvc.share.data" . }}

@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.edu_sharing</groupId>
+    <artifactId>edu_sharing-projects-community-deploy-installer-repository</artifactId>
+    <version>git</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>edu_sharing-projects-community-deploy-installer-repository-distribution</artifactId>
+  <packaging>jar</packaging>
+
+  <name>edu_sharing-projects-community-deploy-installer-repository-distribution</name>
+
+  <build>
+
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>artifacts</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
+                tomcat
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/dist/artifacts</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>amps-alf-0</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-repository-backend-alfresco-module
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/dist/amps/alfresco/0</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>amps-alf-1</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-repository-plugin-elastic-backend-alfresco-module,
+                edu_sharing-community-repository-plugin-mongo-backend-alfresco-module,
+                edu_sharing-enterprise-repository-plugin-cluster-backend-alfresco-module,
+                edu_sharing-enterprise-repository-plugin-remote-backend-alfresco-module,
+                edu_sharing-enterprise-repository-plugin-transform-backend-alfresco-module
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/dist/amps/alfresco/1</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>amps-edu-1</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-repository-plugin-elastic-backend-services-module,
+                edu_sharing-community-repository-plugin-mongo-backend-services-module,
+                edu_sharing-enterprise-repository-plugin-cluster-backend-services-module,
+                edu_sharing-enterprise-repository-plugin-remote-backend-services-module,
+                edu_sharing-enterprise-repository-plugin-transform-backend-services-module
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/dist/amps/edu-sharing/1</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>config-plugin-elastic</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-repository-plugin-elastic-config-defaults,
+                edu_sharing-community-repository-plugin-mongo-config-defaults,
+                edu_sharing-enterprise-repository-plugin-cluster-config-defaults,
+                edu_sharing-enterprise-repository-plugin-remote-config-defaults,
+                edu_sharing-enterprise-repository-plugin-transform-config-defaults
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/dist/tomcat/shared/lib/plugins</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>tomcat-lib</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-repository-backend-tomcat,
+                postgresql
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/dist/tomcat/lib</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>config-defaults</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-projects-community-repository-config-defaults
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/dist/tomcat/shared/lib/defaults</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>config-cluster</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-projects-community-repository-config-cluster
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/dist/tomcat/shared/lib/cluster</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>config-node</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-projects-community-repository-config-node
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/dist/tomcat/shared/lib/node</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>tomcat-webapps-edusharing</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>edu_sharing-projects-community-repository-webapp</includeArtifactIds>
+              <outputDirectory>${project.build.directory}/dist/tomcat/webapps/edu-sharing</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>rest-api</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>edu_sharing-community-repository-backend-services-rest-api</includeArtifactIds>
+              <outputDirectory>${project.build.directory}/dist/rest-api</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/bin.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+
+  </build>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-backend-alfresco-module</artifactId>
+      <type>amp</type>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-backend-services-rest-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-backend-tomcat</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-projects-community-repository-config-cluster</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-projects-community-repository-config-defaults</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-projects-community-repository-config-node</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-projects-community-repository-webapp</artifactId>
+      <type>war</type>
+    </dependency>
+
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.tomcat</groupId>
+      <artifactId>tomcat</artifactId>
+      <type>tar.gz</type>
+    </dependency>
+
+  </dependencies>
+
+  <profiles>
+
+    <profile>
+
+      <id>repository.cluster</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.REPOSITORY_CLUSTER_ENABLED</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <dependencies>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-enterprise-repository-plugin-cluster-backend-alfresco-module</artifactId>
+          <type>amp</type>
+        </dependency>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-enterprise-repository-plugin-cluster-backend-services-module</artifactId>
+          <type>amp</type>
+        </dependency>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-enterprise-repository-plugin-cluster-config-defaults</artifactId>
+        </dependency>
+
+      </dependencies>
+
+    </profile>
+
+    <profile>
+
+      <id>repository.elastic</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.REPOSITORY_ELASTIC_ENABLED</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <dependencies>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-community-repository-plugin-elastic-backend-alfresco-module</artifactId>
+          <type>amp</type>
+        </dependency>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-community-repository-plugin-elastic-backend-services-module</artifactId>
+          <type>amp</type>
+        </dependency>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-community-repository-plugin-elastic-config-defaults</artifactId>
+        </dependency>
+
+      </dependencies>
+
+    </profile>
+
+    <profile>
+
+      <id>repository.mongo</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.REPOSITORY_MONGO_ENABLED</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <dependencies>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-community-repository-plugin-mongo-backend-alfresco-module</artifactId>
+          <type>amp</type>
+        </dependency>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-community-repository-plugin-mongo-backend-services-module</artifactId>
+          <type>amp</type>
+        </dependency>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-community-repository-plugin-mongo-config-defaults</artifactId>
+        </dependency>
+
+      </dependencies>
+
+    </profile>
+
+    <profile>
+
+      <id>repository.remote</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.REPOSITORY_REMOTE_ENABLED</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <dependencies>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-enterprise-repository-plugin-remote-backend-alfresco-module</artifactId>
+          <type>amp</type>
+        </dependency>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-enterprise-repository-plugin-remote-backend-services-module</artifactId>
+          <type>amp</type>
+        </dependency>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-enterprise-repository-plugin-remote-config-defaults</artifactId>
+        </dependency>
+
+      </dependencies>
+
+    </profile>
+
+    <profile>
+
+      <id>repository.transform</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.REPOSITORY_TRANSFORM_ENABLED</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <dependencies>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-enterprise-repository-plugin-transform-backend-alfresco-module</artifactId>
+          <type>amp</type>
+        </dependency>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-enterprise-repository-plugin-transform-backend-services-module</artifactId>
+          <type>amp</type>
+        </dependency>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-enterprise-repository-plugin-transform-config-defaults</artifactId>
+        </dependency>
+
+      </dependencies>
+
+    </profile>
+
+  </profiles>
+
+</project>

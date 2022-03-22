@@ -1,6 +1,0 @@
-version: '3.7'
-
-services:
-
-  repository:
-    image: "${docker.registry}/${docker.repository}/edu_sharing-community-deploy-installer-repository-scripts-${os.distribution}-${os.codename}:${docker.tag}"

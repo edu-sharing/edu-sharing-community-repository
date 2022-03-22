@@ -1,0 +1,10 @@
+apiVersion: v2
+
+name: ${helm.prefix}_repository_service
+description: ${helm.prefix}_repository_service
+
+icon: ${helm.chart.icon}
+
+version: ${helm.chart.version}
+appVersion: ${docker.tag}
+kubeVersion: "${helm.kube.version}"

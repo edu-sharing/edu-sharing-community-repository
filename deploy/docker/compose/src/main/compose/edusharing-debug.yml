@@ -1,0 +1,8 @@
+version: '3.7'
+
+services:
+
+  cache:
+    image: "${docker.repository}/${docker.prefix}-deploy-docker-build-redis:${docker.tag}"
+    ports:
+      - "${COMMON_BIND_HOST:-127.0.0.1}:${CACHE_PORT:-7000}:6379"

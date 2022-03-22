@@ -1,0 +1,10 @@
+version: '3.7'
+
+services:
+
+  cache:
+    image: "${docker.repository}/${docker.prefix}-deploy-docker-build-redis:${docker.tag}"
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+    expose:
+      - 6379

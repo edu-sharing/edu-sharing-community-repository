@@ -1,0 +1,144 @@
+########################################################################################################################
+# GLOBAL
+########################################################################################################################
+
+global:
+
+  cluster:
+
+    istio:
+      enabled: false
+
+    pdb:
+      enabled: false
+
+    storage:
+
+      data:
+        permission: false
+        spec: {}
+
+  image:
+    pullPolicy: Always
+    pullSecrets: []
+
+########################################################################################################################
+# LOCAL
+########################################################################################################################
+
+nameOverride: edusharing-repository-search-solr4
+
+image:
+  registry: ${docker.registry}
+  repository: ${docker.repository}
+  prefix: ${docker.prefix}
+  tag: ${docker.tag}
+
+########################################################################################################################
+
+replicaCount: 1
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 3
+  targetCPU: 80
+
+########################################################################################################################
+
+service:
+
+  port:
+    api: 8080
+
+########################################################################################################################
+
+config:
+
+  jvm:
+    debug: false
+    ram:
+      minPercentage: "75.0"
+      maxPercentage: "75.0"
+
+  metrics: true
+
+  repository:
+    host: edusharing-repository-service
+    port: 8080
+
+########################################################################################################################
+
+nodeAffinity: {}
+podAntiAffinity: "soft"
+
+tolerations: []
+
+########################################################################################################################
+
+persistence:
+
+  data:
+
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi
+
+########################################################################################################################
+
+podSecurityContext:
+
+  runAsUser: 1000
+  fsGroup: 1000
+
+securityContext:
+
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+
+########################################################################################################################
+
+terminationGracePeriod: 120
+
+livenessProbe:
+
+  failureThreshold: 3
+  initialDelaySeconds: 1200
+  periodSeconds: 10
+  timeoutSeconds: 5
+
+readinessProbe:
+
+  failureThreshold: 1
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 5
+
+########################################################################################################################
+
+resources:
+
+  limits:
+    cpu: 500m
+    memory: 2Gi
+  requests:
+    cpu: 500m
+    memory: 2Gi
+
+########################################################################################################################
+
+init:
+
+  permission:
+
+    resources: {}
+
+    securityContext:
+      runAsUser: 0
+
+########################################################################################################################

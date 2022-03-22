@@ -1,0 +1,65 @@
+version: '3.7'
+
+services:
+
+  services-rendering-database:
+    image: "${docker.repository}/${docker.prefix}-deploy-docker-build-postgresql:${docker.tag}"
+    environment:
+      POSTGRESQL_DATABASE: "${SERVICES_RENDERING_DATABASE_NAME:-rendering}"
+      POSTGRESQL_ROOT_PASSWORD: "${SERVICES_RENDERING_DATABASE_PASS:-rendering}"
+      POSTGRESQL_PASSWORD: "${SERVICES_RENDERING_DATABASE_PASS:-rendering}"
+      POSTGRESQL_USER: "${SERVICES_RENDERING_DATABASE_USER:-rendering}"
+    expose:
+      - "5432"
+    volumes:
+      - "services-rendering-database-volume-data:/bitnami/postgresql"
+
+  services-rendering-service:
+    image: "${docker.repository}/${docker.prefix}-deploy-docker-services-rendering-build-service:${docker.tag}"
+    environment:
+      CACHE_CLUSTER: "false"
+      CACHE_DATABASE: "0"
+      CACHE_HOST: cache
+      CACHE_PORT: "6379"
+      SERVICES_RENDERING_DATABASE_DRIV: pgsql
+      SERVICES_RENDERING_DATABASE_HOST: services-rendering-database
+      SERVICES_RENDERING_DATABASE_NAME: "${SERVICES_RENDERING_DATABASE_NAME:-rendering}"
+      SERVICES_RENDERING_DATABASE_PASS: "${SERVICES_RENDERING_DATABASE_PASS:-rendering}"
+      SERVICES_RENDERING_DATABASE_PORT: "5432"
+      SERVICES_RENDERING_DATABASE_USER: "${SERVICES_RENDERING_DATABASE_USER:-rendering}"
+      SERVICES_RENDERING_SERVICE_GDPR_ENABLED: "false"
+      SERVICES_RENDERING_SERVICE_GDPR_MODULES: ""
+      SERVICES_RENDERING_SERVICE_GDPR_URLS: ""
+      SERVICES_RENDERING_SERVICE_HOST_EXTERNAL: "${SERVICES_RENDERING_SERVICE_HOST:-rendering.services.127.0.0.1.nip.io}"
+      SERVICES_RENDERING_SERVICE_HOST_INTERNAL: services-rendering-service
+      SERVICES_RENDERING_SERVICE_PLUGINS: ""
+      SERVICES_RENDERING_SERVICE_PORT_EXTERNAL: "${SERVICES_RENDERING_SERVICE_PORT_HTTP:-9100}"
+      SERVICES_RENDERING_SERVICE_PORT_INTERNAL: "8080"
+      REPOSITORY_SERVICE_HOST: repository-service
+      REPOSITORY_SERVICE_PORT: "8080"
+    expose:
+      - "8080"
+    ports:
+      - "${COMMON_BIND_HOST:-127.0.0.1}:${SERVICES_RENDERING_SERVICE_PORT_HTTP:-9100}:8081"
+    volumes:
+      - "services-rendering-service-volume-config:/var/cache/esrender/config"
+      - "services-rendering-service-volume-data:/var/cache/esrender/data"
+    depends_on:
+      - services-rendering-database
+
+  services-rendering-service-init:
+    image: "${docker.repository}/${docker.prefix}-deploy-docker-services-rendering-build-service:${docker.tag}"
+    entrypoint: ["init.sh"]
+    environment:
+      SERVICES_RENDERING_SERVICE_HOST_INTERNAL: services-rendering-service
+      SERVICES_RENDERING_SERVICE_PORT_INTERNAL: "8080"
+      REPOSITORY_SERVICE_HOST: repository-service
+      REPOSITORY_SERVICE_PORT: "8080"
+      REPOSITORY_SERVICE_ADMIN_PASS: "${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
+    depends_on:
+      - services-rendering-service
+
+volumes:
+  services-rendering-database-volume-data:
+  services-rendering-service-volume-config:
+  services-rendering-service-volume-data:

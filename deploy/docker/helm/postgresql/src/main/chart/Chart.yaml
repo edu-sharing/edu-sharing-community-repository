@@ -1,0 +1,10 @@
+apiVersion: v2
+
+name: ${helm.prefix}_postgresql
+description: ${helm.prefix}_postgresql
+
+icon: ${helm.chart.icon}
+
+version: ${helm.chart.version}
+appVersion: ${docker.tag}
+kubeVersion: "${helm.kube.version}"

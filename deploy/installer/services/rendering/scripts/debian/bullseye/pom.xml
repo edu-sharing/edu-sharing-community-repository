@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.edu_sharing</groupId>
+    <artifactId>edu_sharing-projects-community-deploy-installer-services-rendering-scripts-debian</artifactId>
+    <version>git</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>edu_sharing-projects-community-deploy-installer-services-rendering-scripts-debian-bullseye</artifactId>
+  <packaging>jar</packaging>
+
+  <name>edu_sharing-projects-community-deploy-installer-services-rendering-scripts-debian-bullseye</name>
+
+  <properties>
+    <os.codename>bullseye</os.codename>
+  </properties>
+
+  <build>
+
+    <resources>
+      <resource>
+        <directory>src/main/build</directory>
+        <filtering>true</filtering>
+      </resource>
+      <resource>
+        <directory>src/main/scripts</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <configuration>
+          <outputDirectory>${project.build.directory}/build</outputDirectory>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/bin.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>build</id>
+            <goals>
+              <goal>build</goal>
+            </goals>
+            <phase>install</phase>
+          </execution>
+          <execution>
+            <id>push</id>
+            <goals>
+              <goal>push</goal>
+            </goals>
+            <phase>deploy</phase>
+          </execution>
+        </executions>
+        <configuration>
+          <images>
+            <image>
+              <name>${docker.repository}/${docker.prefix}-deploy-installer-services-rendering-scripts-debian-bullseye:${docker.tag}</name>
+            </image>
+          </images>
+        </configuration>
+      </plugin>
+
+    </plugins>
+
+  </build>
+
+  <dependencies>
+
+    <dependency>
+
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-projects-community-deploy-installer-services-rendering-distribution</artifactId>
+      <type>tar.gz</type>
+      <classifier>bin</classifier>
+      <scope>provided</scope>
+
+    </dependency>
+
+  </dependencies>
+
+</project>

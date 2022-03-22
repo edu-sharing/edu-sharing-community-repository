@@ -1,0 +1,12 @@
+version: '3.7'
+
+services:
+
+  services-rendering-database:
+    image: "${docker.registry}/${docker.repository}/${docker.prefix}-deploy-docker-build-postgresql:${docker.tag}"
+
+  services-rendering-service:
+    image: "${docker.registry}/${docker.repository}/${docker.prefix}-deploy-docker-services-rendering-build-service:${docker.tag}"
+
+  services-rendering-service-init:
+    image: "${docker.registry}/${docker.repository}/${docker.prefix}-deploy-docker-services-rendering-build-service:${docker.tag}"

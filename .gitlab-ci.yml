@@ -30,19 +30,20 @@ test docker:
   stage: test
   artifacts:
     paths:
-      - docker/openapi.json
-      - docker/repository/build/service/target/build/rest-api/openapi.json
+      - deploy/docker/openapi.json
+      - deploy/docker/repository/build/service/target/build/rest-api/openapi.json
     when: always
   before_script:
     - apt-get update -y
+    - apt-get install -y php php-curl php-dom php-gd php-mbstring php-xml php-zip
     - apt-get install -y docker.io docker-compose jq wait-for-it
     - docker info
     - docker version
     - docker login $DOCKER_REGISTRY -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
   script:
     - mkdir -p "$MAVEN_HOME"
-    - cd docker
-    - mvn $MAVEN_CLI -s ../.mvn/settings.xml install
+    - cd deploy/docker
+    - mvn $MAVEN_CLI -s ../../.mvn/settings.xml install
     - . ./deploy.sh ci
     - "until wait-for-it docker:8100 -t 3; do sleep 1; done"
     - "until [[ $(curl -sSf -w '%{http_code}\n' -o /dev/null -H 'Accept: application/json' http://docker:8100/edu-sharing/rest/_about/status/SERVICE?timeoutSeconds=3) -eq 200 ]]; do sleep 1; done"
@@ -58,19 +59,20 @@ test installer:
   stage: test
   artifacts:
     paths:
-      - installer/openapi.json
-      - installer/repository/distribution/target/dist/rest-api/openapi.json
+      - deploy/installer/openapi.json
+      - deploy/installer/repository/distribution/target/dist/rest-api/openapi.json
     when: always
   before_script:
     - apt-get update -y
+    - apt-get install -y php php-curl php-dom php-gd php-mbstring php-xml php-zip
     - apt-get install -y docker.io docker-compose jq wait-for-it
     - docker info
     - docker version
     - docker login $DOCKER_REGISTRY -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
   script:
     - mkdir -p "$MAVEN_HOME"
-    - cd installer
-    - mvn $MAVEN_CLI -s ../.mvn/settings.xml install
+    - cd deploy/installer
+    - mvn $MAVEN_CLI -s ../../.mvn/settings.xml install
     - . ./deploy.sh ci
     - "until wait-for-it docker:8100 -t 3; do sleep 1; done"
     - "until [[ $(curl -sSf -w '%{http_code}\n' -o /dev/null -H 'Accept: application/json' http://docker:8100/edu-sharing/rest/_about/status/SERVICE?timeoutSeconds=3) -eq 200 ]]; do sleep 1; done"
@@ -84,5 +86,8 @@ test installer:
 
 deploy:
   stage: deploy
+  before_script:
+    - apt-get update -y
+    - apt-get install -y php php-curl php-dom php-gd php-mbstring php-xml php-zip
   script:
     - mvn $MAVEN_CLI -s .mvn/settings.xml deploy

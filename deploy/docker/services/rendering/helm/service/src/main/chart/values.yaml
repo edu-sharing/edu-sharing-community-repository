@@ -1,0 +1,263 @@
+########################################################################################################################
+# GLOBAL
+########################################################################################################################
+
+global:
+
+  cluster:
+
+    cert:
+      annotations: {}
+
+    istio:
+      enabled: false
+      gateway:
+        selector:
+          app: istio-ingressgateway
+
+    pdb:
+      enabled: false
+
+    storage:
+
+      share:
+        permission: false
+        spec: {}
+
+  image:
+    pullPolicy: Always
+    pullSecrets: []
+
+  patroni:
+    enabled: false
+    name: edusharing-rendering-postgresql
+    secrets: "credentials.postgresql.acid.zalan.do"
+    team: edusharing
+
+########################################################################################################################
+# LOCAL
+########################################################################################################################
+
+nameOverride: edusharing-services-rendering-service
+
+image:
+  registry: ${docker.registry}
+  repository: ${docker.repository}
+  prefix: ${docker.prefix}
+  tag: ${docker.tag}
+
+########################################################################################################################
+
+replicaCount: 1
+
+autoscaling:
+  enabled: false
+  minReplicas: 3
+  maxReplicas: 5
+  targetCPU: 80
+
+########################################################################################################################
+
+service:
+
+  port:
+    api:
+      internal: 8080
+      external: 8081
+
+########################################################################################################################
+
+ingress:
+
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/proxy-body-size: "5g"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "15"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "180"
+#    nginx.ingress.kubernetes.io/configuration-snippet: |
+#      location /esrender/application/ {return 403;}
+#      location /esrender/conf/ {return 403;}
+
+  hosts:
+  - rendering.services.127.0.0.1.nip.io
+
+  tls: []
+#  - secretName: edusharing-services-rendering-tls
+#    hosts:
+#    - rendering.services.127.0.0.1.nip.io
+
+  paths:
+  - /esrender
+
+########################################################################################################################
+
+config:
+
+  cache:
+    cluster: true
+    database: 0
+    host: edusharing-rediscluster
+    port: 6379
+
+  database:
+    driver: pgsql
+    host: edusharing-rendering-postgresql
+    port: 5432
+    database: rendering
+    username: rendering
+    password: rendering
+    patroni: {}
+
+  gdpr:
+    enabled: false
+    modules: []
+#     - '"audio"'
+#     - '"video"'
+    urls: []
+#     - regex: "/.*/"
+#       name: "external Sources"
+#       ref: "https://www.excample.com/gdpr"
+
+  plugins: []
+#   - class: "ESRender_Plugin_...."
+#     args: ['"arg1"','"arg2"']
+
+  repository:
+    host: edusharing-repository-service
+    port: 8080
+    password: admin
+
+########################################################################################################################
+
+persistence:
+
+  share:
+
+    config:
+      create: true
+      spec:
+        accessModes: [ "ReadWriteMany" ]
+        resources:
+          requests:
+            storage: 1Gi
+    data:
+      create: true
+      spec:
+        accessModes: [ "ReadWriteMany" ]
+        resources:
+          requests:
+            storage: 5Gi
+
+########################################################################################################################
+
+nodeAffinity: {}
+podAntiAffinity: "soft"
+
+tolerations: []
+
+########################################################################################################################
+
+podSecurityContext:
+
+  runAsUser: 1000
+  fsGroup: 1000
+
+securityContext:
+
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+
+########################################################################################################################
+
+terminationGracePeriod: 120
+
+livenessProbe:
+
+  failureThreshold: 3
+  initialDelaySeconds: 1200
+  periodSeconds: 10
+  timeoutSeconds: 5
+
+readinessProbe:
+
+  failureThreshold: 1
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 5
+
+########################################################################################################################
+
+resources:
+
+  limits:
+    cpu: 500m
+    memory: 2Gi
+  requests:
+    cpu: 500m
+    memory: 2Gi
+
+########################################################################################################################
+
+init:
+
+  permission:
+
+    resources: {}
+
+    securityContext:
+      runAsUser: 0
+
+########################################################################################################################
+
+job:
+
+  init:
+
+    resources: {}
+
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+
+  cachecleaner:
+
+    resources: {}
+
+    schedule: "0 * * * *"
+
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+
+########################################################################################################################
+
+sidecar:
+
+  metrics:
+
+    enabled: true
+
+    resources:
+      limits:
+        cpu: 100m
+        memory: 100Mi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+
+########################################################################################################################

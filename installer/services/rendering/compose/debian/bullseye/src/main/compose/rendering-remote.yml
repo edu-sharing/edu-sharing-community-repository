@@ -1,6 +1,0 @@
-version: '3.7'
-
-services:
-
-  services-rendering:
-    image: "${docker.registry}/${docker.repository}/edu_sharing-community-deploy-installer-services-rendering-scripts-${os.distribution}-${os.codename}:${docker.tag}"

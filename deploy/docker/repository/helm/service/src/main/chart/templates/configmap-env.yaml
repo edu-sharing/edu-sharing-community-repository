@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "edusharing_repository_service.name" . }}-env
+  labels: {{ include "edusharing_repository_service.labels" . | nindent 4 }}
+data:
+  CACHE_CLUSTER: {{ .Values.config.cache.cluster | quote }}
+  CACHE_DATABASE: {{ .Values.config.cache.database | quote }}
+  CACHE_HOST: {{ .Values.config.cache.host | quote }}
+  CACHE_PORT: {{ .Values.config.cache.port | quote }}
+  CATALINA_OPTS: >-
+    -XX:MinRAMPercentage={{ .Values.config.jvm.ram.minPercentage }}
+    -XX:MaxRAMPercentage={{ .Values.config.jvm.ram.maxPercentage }}
+    -Dcom.sun.management.jmxremote
+    -Dcom.sun.management.jmxremote.authenticate=false
+    -Dcom.sun.management.jmxremote.port=7199
+    -Dcom.sun.management.jmxremote.ssl=false
+    {{- if .Values.config.cluster.enabled }}
+    -Dcaches.backupCount={{ .Values.config.cluster.backup.count }}
+    -Dcaches.readBackupData={{ .Values.config.cluster.backup.read }}
+    -Dhazelcast.network=kubernetes
+    -Dhazelcast.network.kubernetes.dns={{ printf "%s-headless.%s.svc.%s" (include "edusharing_repository_service.name" .) .Release.Namespace .Values.global.cluster.domain }}
+    -Dhazelcast.shutdownhook.policy=GRACEFUL
+    -Dhazelcast.graceful.shutdown.max.wait={{ .Values.terminationGracePeriod }}
+    {{- end }}
+    {{- if .Values.config.metrics }}
+    -javaagent:/opt/alfresco/tomcat/agent/jmx_prometheus_javaagent.jar=9090:/opt/alfresco/tomcat/agent/jmx-exporter-config.yaml
+    {{- end }}
+  JPDA_ADDRESS: {{ if .Values.global.cluster.istio.enabled }}"127.0.0.1:5005"{{ else }}"0.0.0.0:5005"{{ end }}
+  REPOSITORY_DATABASE_DRIV: {{ .Values.config.database.driver | quote }}
+  REPOSITORY_DATABASE_HOST: {{ .Values.config.database.host | quote }}
+  REPOSITORY_DATABASE_NAME: {{ .Values.config.database.database | quote }}
+  REPOSITORY_DATABASE_OPTS: {{ .Values.config.database.options | quote }}
+  REPOSITORY_DATABASE_POOL_MAX: {{ .Values.config.database.pool.max | quote }}
+  REPOSITORY_DATABASE_POOL_SQL: {{ .Values.config.database.pool.sql | quote }}
+  REPOSITORY_DATABASE_PORT: {{ .Values.config.database.port | quote }}
+  REPOSITORY_DATABASE_PROT: {{ .Values.config.database.protocol | quote }}
+  {{- if .Values.config.search.elastic.enabled }}
+  REPOSITORY_SEARCH_ELASTIC_INDEX_HOST: {{ .Values.config.search.elastic.host | quote }}
+  REPOSITORY_SEARCH_ELASTIC_INDEX_PORT: {{ .Values.config.search.elastic.port | quote }}
+  {{- end }}
+  REPOSITORY_SEARCH_SOLR4_HOST: {{ .Values.config.search.solr4.host | quote }}
+  REPOSITORY_SEARCH_SOLR4_PORT: {{ .Values.config.search.solr4.port | quote }}
+  REPOSITORY_SERVICE_BIND: {{ if .Values.global.cluster.istio.enabled }}"127.0.0.1"{{ else }}"0.0.0.0"{{ end }}
+  REPOSITORY_SERVICE_HOME_APPID: {{ .Values.config.home.appid | quote }}
+  REPOSITORY_SERVICE_HOME_AUTH: {{ if .Values.config.saml.enabled }}"shibboleth"{{ else }}""{{ end }}
+  REPOSITORY_SERVICE_HOST_EXTERNAL: {{ .Values.ingress.hosts | first | quote }}
+  REPOSITORY_SERVICE_HOST_INTERNAL: {{ include "edusharing_repository_service.name" . | quote }}
+  REPOSITORY_SERVICE_HTTP_CLIENT_DISABLE_SNI4HOSTS: {{ .Values.config.http.client.disablesni4host | quote }}
+  REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_HOST: {{ .Values.config.http.client.proxy.host | quote }}
+  REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_NONPROXYHOSTS: '{{- join "|" .Values.config.http.client.proxy.nonproxyhosts }}'
+  REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PROXYHOST: {{ .Values.config.http.client.proxy.proxyhost | quote }}
+  REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PROXYPASS: {{ .Values.config.http.client.proxy.proxypass | quote }}
+  REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PROXYPORT: {{ .Values.config.http.client.proxy.proxyport | quote }}
+  REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PROXYUSER: {{ .Values.config.http.client.proxy.proxyuser | quote }}
+  REPOSITORY_SERVICE_HTTP_SESSION_TIMEOUT: {{ .Values.config.http.session.timeout | quote }}
+  REPOSITORY_SERVICE_PATH_EXTERNAL: {{ .Values.ingress.paths | first | quote }}
+  REPOSITORY_SERVICE_POOL_EXTERNAL: {{ .Values.config.connector.external.threads | quote }}
+  REPOSITORY_SERVICE_POOL_INTERNAL: {{ .Values.config.connector.internal.threads | quote }}
+  REPOSITORY_SERVICE_PORT_EXTERNAL: {{ if .Values.ingress.tls }}"443"{{ else }}"80"{{ end }}
+  REPOSITORY_SERVICE_PORT_INTERNAL: {{ .Values.service.port.api.internal | quote }}
+  REPOSITORY_SERVICE_PROT_EXTERNAL: {{ if .Values.ingress.tls }}"https"{{ else }}"http"{{ end }}
+  REPOSITORY_SERVICE_WAIT_EXTERNAL: {{ .Values.config.connector.external.timeout | quote }}
+  REPOSITORY_SERVICE_WAIT_INTERNAL: {{ .Values.config.connector.internal.timeout | quote }}
+  REPOSITORY_TRANSFORM_BIND: {{ if .Values.config.transform.server.enabled }}""{{ else }}"127.0.0.1"{{ end }}
+  REPOSITORY_TRANSFORM_HOST: {{ if .Values.config.transform.server.enabled }}""{{ else }}"127.0.0.1"{{ end }}
+  REPOSITORY_TRANSFORM_PORT: {{ if .Values.config.transform.server.enabled }}""{{ else }}"8100"{{ end }}
+  REPOSITORY_TRANSFORM_SERVER_HOST: {{ .Values.config.transform.server.host | quote }}
+  REPOSITORY_TRANSFORM_SERVER_PORT: {{ .Values.config.transform.server.port | quote }}

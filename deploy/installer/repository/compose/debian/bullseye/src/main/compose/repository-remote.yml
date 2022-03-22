@@ -1,0 +1,6 @@
+version: '3.7'
+
+services:
+
+  repository:
+    image: "${docker.registry}/${docker.repository}/${docker.prefix}-deploy-installer-repository-scripts-${os.distribution}-${os.codename}:${docker.tag}"

@@ -1,0 +1,47 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "edusharing_rendering_service.name" . }}-init
+  labels: {{ include "edusharing_rendering_service.labels" . | nindent 4 }}
+    app.kubernetes.io/component: init
+spec:
+  completions: 1
+  parallelism: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: {{ include "edusharing_rendering_service.name" . }}-job-init
+        image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/{{ .Values.image.prefix }}-deploy-docker-services-rendering-build-service:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+        command: ["init.sh"]
+        envFrom:
+        - configMapRef:
+            name: {{ include "edusharing_rendering_service.name" . }}-env
+        - secretRef:
+            name: {{ include "edusharing_rendering_service.name" . }}-env
+        {{- with .Values.job.init.resources }}
+        resources: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.job.init.securityContext }}
+        securityContext: {{ toYaml . | nindent 10 }}
+        {{- end }}
+      {{- with .Values.global.image.pullSecrets }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.terminationGracePeriod }}
+      terminationGracePeriodSeconds: {{ . }}
+      {{- end }}
+      {{- with .Values.nodeAffinity }}
+      affinity:
+        nodeAffinity: {{ toYaml . | nindent 10 }}
+      {{- end }}

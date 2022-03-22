@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "edusharing_rendering_service.name" . }}
+  labels: {{ include "edusharing_rendering_service.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector: {{ include "edusharing_rendering_service.labels.instance" . | nindent 4 }}
+  ports:
+  - name: http-api-external
+    port: {{ .Values.service.port.api.external }}
+    targetPort: api-external
+  - name: http-api-internal
+    port: {{ .Values.service.port.api.internal }}
+    targetPort: api-internal
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "edusharing_rendering_service.name" . }}-headless
+  labels: {{ include "edusharing_rendering_service.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector: {{ include "edusharing_rendering_service.labels.instance" . | nindent 4 }}
+  ports:
+  - name: http-api-external
+    port: {{ .Values.service.port.api.external }}
+  - name: http-api-internal
+    port: {{ .Values.service.port.api.internal }}
