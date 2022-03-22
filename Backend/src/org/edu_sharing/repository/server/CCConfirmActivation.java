@@ -42,6 +42,8 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
+
+
 public class CCConfirmActivation extends HttpServlet {
 
 	Logger log = Logger.getLogger(CCConfirmActivation.class);
@@ -61,7 +63,7 @@ public class CCConfirmActivation extends HttpServlet {
 
 		log.info("appId:" + appId + " appUserid" + appUserId + " mail:" + mail + " key:" + key);
 
-		HashMap<String, ApplicationInfo> appInfos = ApplicationInfoList.getApplicationInfos();
+		Map<String, ApplicationInfo> appInfos = ApplicationInfoList.getApplicationInfos();
 		ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
 
 		if (homeRepository == null) {

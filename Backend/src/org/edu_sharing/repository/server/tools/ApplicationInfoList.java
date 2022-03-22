@@ -31,15 +31,13 @@ import java.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.edu_sharing.restservices.RestConstants;
-import org.edu_sharing.service.config.ConfigServiceFactory;
 
 
 public class ApplicationInfoList {
 	
 	private static Log logger = LogFactory.getLog(ApplicationInfoList.class);
 	
-	private static HashMap<String, ApplicationInfo> appInfos = null;
+	private static Map<String, ApplicationInfo> appInfos = null;
 	
 	public static ApplicationInfo getRepositoryInfo(String file){
 		ApplicationInfo result = null;
@@ -133,7 +131,7 @@ public class ApplicationInfoList {
 	 * 
 	 * @return Map with AppId, ApplicationInfo
 	 */
-	public static HashMap<String, ApplicationInfo> getApplicationInfos(){
+	public static Map<String, ApplicationInfo> getApplicationInfos(){
 		logger.debug("Classloader(Thread):"+Thread.currentThread().getContextClassLoader().getClass().getName());
 		logger.debug("Classloader(ApplicationInfoList):"+ApplicationInfoList.class.getClassLoader().getClass().getName());
 		if(appInfos == null){
@@ -158,7 +156,8 @@ public class ApplicationInfoList {
 		}
 		logger.debug("appStr"+repStr);
 		//Linked hashMap for keeping insertion order
-		appInfos = (HashMap)Collections.synchronizedMap(new LinkedHashMap<String, ApplicationInfo>());
+
+		appInfos = Collections.synchronizedMap(new LinkedHashMap());
 		if(repStr != null && repStr.trim().length() > 0){
 			logger.debug("appStr != null && appStr.trim().length() > 0");
 			 String[] repField = repStr.split(",");
