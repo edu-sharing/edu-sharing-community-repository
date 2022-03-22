@@ -49,7 +49,6 @@ export class MdsEditorWidgetLinkComponent extends MdsEditorWidgetBase implements
                 this.linkLabel = 'MDS.CONTRIBUTOR_LINK';
                 break;
         }
-        console.log(this.widget.definition);
     }
 
     async onClick() {
