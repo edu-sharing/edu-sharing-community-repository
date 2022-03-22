@@ -17,6 +17,7 @@ export {
     UserProfile,
     UserQuota,
     UserStatus,
+    Person,
 } from './api/models';
 import { MdsView } from './api/models';
 

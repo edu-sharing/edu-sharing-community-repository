@@ -221,7 +221,7 @@ export class NodeHelperService {
                 const reader = new FileReader();
                 reader.onload = () => {
                     const dataUrl = reader.result;
-                    node.preview.data = dataUrl.toString();
+                    node.preview.data = [dataUrl.toString()];
                     observer.next(node);
                     observer.complete();
                 };
