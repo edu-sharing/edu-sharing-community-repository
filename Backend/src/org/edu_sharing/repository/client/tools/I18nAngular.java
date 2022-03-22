@@ -17,6 +17,7 @@ import java.io.File;
  * Class to load language data from the angular i18n files (json)
  */
 public class I18nAngular {
+    public static final String GENDER_SEPARATOR = "*";
     public static Logger logger=Logger.getLogger(I18nAngular.class);
     public static String getTranslationAngular(String scope,String key){
         return getTranslationAngular(scope,key,new AuthenticationToolAPI().getCurrentLanguage());
@@ -52,7 +53,7 @@ public class I18nAngular {
         try {
             String override=getTranslationFromOverride(key,language);
             if(override!=null)
-                return override;
+                return replaceGenderSeperator(override);
             // Using global instance singe it only is used for file reading
             ServletContext servletContext = Context.getGlobalContext();
             if(servletContext == null) {
@@ -65,12 +66,15 @@ public class I18nAngular {
             for(int i=0;i<list.length-1;i++){
                 object=object.getJSONObject(list[i]);
             }
-            String result=object.getString(list[list.length-1]);
-            return result;
+            return replaceGenderSeperator(object.getString(list[list.length-1]));
         } catch (Exception e) {
             logger.info("No translation in Angular found for " + scope + " " + key + " " + language);
             return key;
         }
+    }
+
+    private static String replaceGenderSeperator(String i18n) {
+        return i18n.replace("{{GENDER_SEPARATOR}}", GENDER_SEPARATOR);
     }
 
     /**
