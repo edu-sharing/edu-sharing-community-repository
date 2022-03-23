@@ -6143,8 +6143,8 @@
           "description" : "status of the proposals to search for",
           "schema" : {
             "type" : "string",
-            "default" : "PENDING",
-            "enum" : [ "PENDING", "ACCEPTED", "DECLINED" ]
+            "enum" : [ "PENDING", "ACCEPTED", "DECLINED" ],
+            "default" : "PENDING"
           }
         }, {
           "name" : "fetchCounts",
@@ -6517,8 +6517,8 @@
           "required" : true,
           "schema" : {
             "type" : "string",
-            "default" : "MY",
-            "enum" : [ "EDU_ALL", "EDU_GROUPS", "TYPE_EDITORIAL", "TYPE_MEDIA_CENTER", "MY", "RECENT" ]
+            "enum" : [ "EDU_ALL", "EDU_GROUPS", "TYPE_EDITORIAL", "TYPE_MEDIA_CENTER", "MY", "RECENT" ],
+            "default" : "MY"
           }
         }, {
           "name" : "fetchCounts",
@@ -11586,6 +11586,919 @@
         }
       }
     },
+    "/lti/v13/generateDeepLinkingResponse" : {
+      "get" : {
+        "tags" : [ "LTI v13" ],
+        "summary" : "generate DeepLinkingResponse",
+        "operationId" : "generateDeepLinkingResponse",
+        "parameters" : [ {
+          "name" : "nodeIds",
+          "in" : "query",
+          "description" : "selected node id's",
+          "required" : true,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NodeLTIDeepLink"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Preconditions are not present.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Authorization failed.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Session user has insufficient rights to perform this operation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Ressources are not found.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Fatal error occured.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lti/v13/jwks" : {
+      "get" : {
+        "tags" : [ "LTI v13" ],
+        "summary" : "LTI - returns repository JSON Web Key Sets",
+        "operationId" : "jwksUri",
+        "responses" : {
+          "200" : {
+            "description" : "OK.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RegistrationUrl"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Preconditions are not present.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Authorization failed.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Session user has insufficient rights to perform this operation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Ressources are not found.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Fatal error occured.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lti/v13/oidc/login_initiations" : {
+      "post" : {
+        "tags" : [ "LTI v13" ],
+        "summary" : "lti authentication process preparation.",
+        "description" : "preflight phase. prepares lti authentication process. checks it issuer is valid",
+        "operationId" : "loginInitiations",
+        "requestBody" : {
+          "content" : {
+            "application/x-www-form-urlencoded" : {
+              "schema" : {
+                "required" : [ "iss", "target_link_uri" ],
+                "type" : "object",
+                "properties" : {
+                  "iss" : {
+                    "type" : "string",
+                    "description" : "Issuer of the request, will be validated"
+                  },
+                  "target_link_uri" : {
+                    "type" : "string",
+                    "description" : "target url of platform at the end of the flow"
+                  },
+                  "client_id" : {
+                    "type" : "string",
+                    "description" : "Id of the issuer"
+                  },
+                  "login_hint" : {
+                    "type" : "string",
+                    "description" : "context information of the platform"
+                  },
+                  "lti_message_hint" : {
+                    "type" : "string",
+                    "description" : "additional context information of the platform"
+                  },
+                  "lti_deployment_id" : {
+                    "type" : "string",
+                    "description" : "A can have multiple deployments in a platform"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Preconditions are not present.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Authorization failed.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Session user has insufficient rights to perform this operation.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Ressources are not found.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Fatal error occured.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lti/v13/lti13" : {
+      "post" : {
+        "tags" : [ "LTI v13" ],
+        "summary" : "lti tool redirect.",
+        "description" : "lti tool redirect",
+        "operationId" : "lti",
+        "requestBody" : {
+          "content" : {
+            "application/x-www-form-urlencoded" : {
+              "schema" : {
+                "required" : [ "id_token", "state" ],
+                "type" : "object",
+                "properties" : {
+                  "id_token" : {
+                    "type" : "string",
+                    "description" : "Issuer of the request, will be validated"
+                  },
+                  "state" : {
+                    "type" : "string",
+                    "description" : "Issuer of the request, will be validated"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Preconditions are not present.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Authorization failed.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Session user has insufficient rights to perform this operation.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Ressources are not found.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Fatal error occured.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lti/v13/registration/dynamic/{token}" : {
+      "get" : {
+        "tags" : [ "LTI v13" ],
+        "summary" : "LTI Dynamic Registration - Initiate registration",
+        "operationId" : "ltiRegistrationDynamic",
+        "parameters" : [ {
+          "name" : "openid_configuration",
+          "in" : "query",
+          "description" : "the endpoint to the open id configuration to be used for this registration",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "registration_token",
+          "in" : "query",
+          "description" : "the registration access token. If present, it must be used as the access token by the tool when making the registration request to the registration endpoint exposed in the openid configuration.",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "token",
+          "in" : "path",
+          "description" : "one time usage token which is autogenerated with the url in edu-sharing admin gui.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Preconditions are not present.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Authorization failed.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Session user has insufficient rights to perform this operation.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Ressources are not found.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Fatal error occured.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lti/v13/registration/url" : {
+      "get" : {
+        "tags" : [ "LTI v13" ],
+        "summary" : "LTI Dynamic Registration - generates url for platform",
+        "operationId" : "ltiRegistrationUrl",
+        "parameters" : [ {
+          "name" : "generate",
+          "in" : "query",
+          "description" : "if to add a ne url to the list",
+          "required" : true,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DynamicRegistrationTokens"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Preconditions are not present.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Authorization failed.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Session user has insufficient rights to perform this operation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Ressources are not found.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Fatal error occured.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lti/v13/lti13/{nodeId}" : {
+      "post" : {
+        "tags" : [ "LTI v13" ],
+        "summary" : "lti tool resource link target.",
+        "description" : "used by some platforms for direct (without oidc login_init) launch requests",
+        "operationId" : "ltiTarget",
+        "parameters" : [ {
+          "name" : "nodeId",
+          "in" : "path",
+          "description" : "edu-sharing node id",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/x-www-form-urlencoded" : {
+              "schema" : {
+                "required" : [ "id_token", "state" ],
+                "type" : "object",
+                "properties" : {
+                  "id_token" : {
+                    "type" : "string",
+                    "description" : "Issuer of the request, will be validated"
+                  },
+                  "state" : {
+                    "type" : "string",
+                    "description" : "Issuer of the request, will be validated"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Preconditions are not present.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Authorization failed.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Session user has insufficient rights to perform this operation.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Ressources are not found.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Fatal error occured.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lti/v13/registration/{type}" : {
+      "post" : {
+        "tags" : [ "LTI v13" ],
+        "summary" : "register LTI platform",
+        "operationId" : "registerByType",
+        "parameters" : [ {
+          "name" : "type",
+          "in" : "path",
+          "description" : "lti platform typ i.e. moodle",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "moodle" ]
+          }
+        }, {
+          "name" : "baseUrl",
+          "in" : "query",
+          "description" : "base url i.e. http://localhost/moodle used as platformId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "client_id",
+          "in" : "query",
+          "description" : "client id",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "deployment_id",
+          "in" : "query",
+          "description" : "deployment id",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.",
+            "content" : {
+              "application/json" : { }
+            }
+          },
+          "400" : {
+            "description" : "Preconditions are not present.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Authorization failed.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Session user has insufficient rights to perform this operation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Ressources are not found.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Fatal error occured.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lti/v13/registration/static" : {
+      "post" : {
+        "tags" : [ "LTI v13" ],
+        "summary" : "register LTI platform",
+        "operationId" : "registerTest",
+        "parameters" : [ {
+          "name" : "platformId",
+          "in" : "query",
+          "description" : "the issuer",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "client_id",
+          "in" : "query",
+          "description" : "client id",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "deployment_id",
+          "in" : "query",
+          "description" : "deployment id",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "authentication_request_url",
+          "in" : "query",
+          "description" : "oidc endpoint, authentication request url",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "keyset_url",
+          "in" : "query",
+          "description" : "jwks endpoint, keyset url",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "key_id",
+          "in" : "query",
+          "description" : "jwks key id",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "auth_token_url",
+          "in" : "query",
+          "description" : "auth token url",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.",
+            "content" : {
+              "application/json" : { }
+            }
+          },
+          "400" : {
+            "description" : "Preconditions are not present.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Authorization failed.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Session user has insufficient rights to perform this operation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Ressources are not found.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Fatal error occured.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lti/v13/registration/url/{token}" : {
+      "delete" : {
+        "tags" : [ "LTI v13" ],
+        "summary" : "LTI Dynamic Regitration - delete url",
+        "operationId" : "removeLtiRegistrationUrl",
+        "parameters" : [ {
+          "name" : "token",
+          "in" : "path",
+          "description" : "the token of the link you have to remove",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DynamicRegistrationTokens"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Preconditions are not present.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Authorization failed.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Session user has insufficient rights to perform this operation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Ressources are not found.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Fatal error occured.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mds/v1/metadatasets/{repository}/{metadataset}" : {
       "get" : {
         "tags" : [ "MDS v1" ],
@@ -12016,6 +12929,16 @@
           "description" : "parent id of the new entry (might be null)",
           "schema" : {
             "type" : "string"
+          }
+        }, {
+          "name" : "nodeId",
+          "in" : "query",
+          "description" : "One or more nodes this suggestion relates to (optional, only for extended mail data)",
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
           }
         } ],
         "responses" : {
@@ -20009,8 +20932,8 @@
           "required" : true,
           "schema" : {
             "type" : "string",
-            "default" : "PERSON",
-            "enum" : [ "PERSON", "ORGANIZATION" ]
+            "enum" : [ "PERSON", "ORGANIZATION" ],
+            "default" : "PERSON"
           }
         }, {
           "name" : "fields",
@@ -23273,6 +24196,9 @@
         "required" : [ "access", "collection", "createdAt", "createdBy", "downloadUrl", "name", "owner", "ref" ],
         "type" : "object",
         "properties" : {
+          "nodeLTIDeepLink" : {
+            "$ref" : "#/components/schemas/NodeLTIDeepLink"
+          },
           "remote" : {
             "$ref" : "#/components/schemas/Remote"
           },
@@ -23383,6 +24309,17 @@
           },
           "owner" : {
             "$ref" : "#/components/schemas/Person"
+          }
+        }
+      },
+      "NodeLTIDeepLink" : {
+        "type" : "object",
+        "properties" : {
+          "ltiDeepLinkReturnUrl" : {
+            "type" : "string"
+          },
+          "jwtDeepLinkResponse" : {
+            "type" : "string"
           }
         }
       },
@@ -23547,15 +24484,15 @@
               "type" : "string"
             }
           },
+          "vcard" : {
+            "type" : "string"
+          },
           "type" : {
             "type" : "array",
             "writeOnly" : true,
             "items" : {
               "type" : "string"
             }
-          },
-          "vcard" : {
-            "type" : "string"
           },
           "firstName" : {
             "type" : "string"
@@ -24161,14 +25098,14 @@
               "type" : "string"
             }
           },
-          "empty" : {
-            "type" : "boolean"
-          },
           "wrappedMap" : {
             "type" : "object",
             "additionalProperties" : {
               "type" : "object"
             }
+          },
+          "empty" : {
+            "type" : "boolean"
           }
         },
         "additionalProperties" : {
@@ -24202,14 +25139,14 @@
                   "type" : "string"
                 }
               },
-              "empty" : {
-                "type" : "boolean"
-              },
               "wrappedMap" : {
                 "type" : "object",
                 "additionalProperties" : {
                   "type" : "object"
                 }
+              },
+              "empty" : {
+                "type" : "boolean"
               }
             },
             "additionalProperties" : {
@@ -24227,16 +25164,10 @@
           "key" : {
             "$ref" : "#/components/schemas/Key"
           },
-          "volatile" : {
+          "durable" : {
             "type" : "boolean"
-          },
-          "fullName" : {
-            "type" : "string"
           },
           "stateful" : {
-            "type" : "boolean"
-          },
-          "durable" : {
             "type" : "boolean"
           },
           "requestsRecovery" : {
@@ -24248,6 +25179,12 @@
             "items" : {
               "type" : "string"
             }
+          },
+          "fullName" : {
+            "type" : "string"
+          },
+          "volatile" : {
+            "type" : "boolean"
           }
         }
       },
@@ -24618,6 +25555,9 @@
         "required" : [ "access", "collection", "createdAt", "createdBy", "downloadUrl", "name", "owner", "ref" ],
         "type" : "object",
         "properties" : {
+          "nodeLTIDeepLink" : {
+            "$ref" : "#/components/schemas/NodeLTIDeepLink"
+          },
           "remote" : {
             "$ref" : "#/components/schemas/Remote"
           },
@@ -24765,6 +25705,9 @@
         "required" : [ "access", "collection", "createdAt", "createdBy", "downloadUrl", "name", "owner", "ref" ],
         "type" : "object",
         "properties" : {
+          "nodeLTIDeepLink" : {
+            "$ref" : "#/components/schemas/NodeLTIDeepLink"
+          },
           "remote" : {
             "$ref" : "#/components/schemas/Remote"
           },
@@ -25917,15 +26860,15 @@
             "type" : "integer",
             "format" : "int64"
           },
+          "vcard" : {
+            "type" : "string"
+          },
           "type" : {
             "type" : "array",
             "writeOnly" : true,
             "items" : {
               "type" : "string"
             }
-          },
-          "vcard" : {
-            "type" : "string"
           },
           "firstName" : {
             "type" : "string"
@@ -26224,15 +27167,15 @@
               }
             }
           },
+          "vcard" : {
+            "type" : "string"
+          },
           "type" : {
             "type" : "array",
             "writeOnly" : true,
             "items" : {
               "type" : "string"
             }
-          },
-          "vcard" : {
-            "type" : "string"
           },
           "firstName" : {
             "type" : "string"
@@ -26247,6 +27190,38 @@
             "type" : "string"
           },
           "about" : {
+            "type" : "string"
+          }
+        }
+      },
+      "LTISession" : {
+        "type" : "object",
+        "properties" : {
+          "acceptMultiple" : {
+            "type" : "boolean"
+          },
+          "deeplinkReturnUrl" : {
+            "type" : "string"
+          },
+          "acceptTypes" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "acceptPresentationDocumentTargets" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "canConfirm" : {
+            "type" : "boolean"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "text" : {
             "type" : "string"
           }
         }
@@ -26266,6 +27241,9 @@
           },
           "isAdmin" : {
             "type" : "boolean"
+          },
+          "ltiSession" : {
+            "$ref" : "#/components/schemas/LTISession"
           },
           "currentScope" : {
             "type" : "string"
@@ -26317,6 +27295,40 @@
           },
           "scope" : {
             "type" : "string"
+          }
+        }
+      },
+      "RegistrationUrl" : {
+        "type" : "object",
+        "properties" : {
+          "url" : {
+            "type" : "string"
+          }
+        }
+      },
+      "DynamicRegistrationToken" : {
+        "type" : "object",
+        "properties" : {
+          "token" : {
+            "type" : "string"
+          },
+          "url" : {
+            "type" : "string"
+          },
+          "tsCreated" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "DynamicRegistrationTokens" : {
+        "type" : "object",
+        "properties" : {
+          "registrationLinks" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DynamicRegistrationToken"
+            }
           }
         }
       },
@@ -26620,13 +27632,13 @@
           "defaultvalue" : {
             "type" : "string"
           },
-          "isSearchable" : {
-            "type" : "boolean"
-          },
           "isExtended" : {
             "type" : "boolean"
           },
           "hideIfEmpty" : {
+            "type" : "boolean"
+          },
+          "isSearchable" : {
             "type" : "boolean"
           }
         }

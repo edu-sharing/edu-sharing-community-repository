@@ -1,13 +1,14 @@
 /* tslint:disable */
 /* eslint-disable */
-import { RemoteAuthDescription } from './remote-auth-description';
 import { LtiSession } from './lti-session';
+import { RemoteAuthDescription } from './remote-auth-description';
 export interface Login {
     authorityName?: string;
     currentScope: string;
     isAdmin: boolean;
     isGuest: boolean;
     isValidLogin: boolean;
+    ltiSession?: LtiSession;
     remoteAuthentications?: {
         [key: string]: RemoteAuthDescription;
     };
@@ -15,5 +16,4 @@ export interface Login {
     statusCode?: string;
     toolPermissions?: Array<string>;
     userHome?: string;
-    ltiSession?: LtiSession;
 }
