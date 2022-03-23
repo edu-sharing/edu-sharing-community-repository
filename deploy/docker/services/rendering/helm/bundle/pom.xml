@@ -35,7 +35,7 @@
               </includeArtifactIds>
               <type>tar.gz</type>
               <classifier>bin</classifier>
-              <outputDirectory>${project.build.directory}/chart/charts/${helm.prefix}_postgresql</outputDirectory>
+              <outputDirectory>${project.build.directory}/chart/charts/${helm.prefix}-postgresql</outputDirectory>
             </configuration>
           </execution>
           <execution>
@@ -50,7 +50,7 @@
               </includeArtifactIds>
               <type>tar.gz</type>
               <classifier>bin</classifier>
-              <outputDirectory>${project.build.directory}/chart/charts/${helm.prefix}_rediscluster</outputDirectory>
+              <outputDirectory>${project.build.directory}/chart/charts/${helm.prefix}-rediscluster</outputDirectory>
             </configuration>
           </execution>
           <execution>
@@ -65,7 +65,7 @@
               </includeArtifactIds>
               <type>tar.gz</type>
               <classifier>bin</classifier>
-              <outputDirectory>${project.build.directory}/chart/charts/${helm.prefix}_services_rendering</outputDirectory>
+              <outputDirectory>${project.build.directory}/chart/charts/${helm.prefix}-services-rendering</outputDirectory>
             </configuration>
           </execution>
         </executions>

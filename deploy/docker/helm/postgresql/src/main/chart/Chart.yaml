@@ -1,7 +1,7 @@
 apiVersion: v2
 
-name: ${helm.prefix}_postgresql
-description: ${helm.prefix}_postgresql
+name: ${helm.prefix}-postgresql
+description: ${helm.prefix}-postgresql
 
 icon: ${helm.chart.icon}
 

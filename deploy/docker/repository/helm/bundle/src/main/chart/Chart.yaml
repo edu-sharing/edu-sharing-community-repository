@@ -1,7 +1,7 @@
 apiVersion: v2
 
-name: ${helm.prefix}_repository
-description: ${helm.prefix}_repository
+name: ${helm.prefix}-repository
+description: ${helm.prefix}-repository
 
 icon: ${helm.chart.icon}
 
@@ -11,22 +11,22 @@ kubeVersion: "${helm.kube.version}"
 
 dependencies:
 
-  - name: ${helm.prefix}_postgresql
+  - name: ${helm.prefix}-postgresql
     version: ${helm.chart.version}
     alias: edusharing_repository_postgresql
     condition: edusharing_repository_postgresql.enabled
 
-  - name: ${helm.prefix}_rediscluster
+  - name: ${helm.prefix}-rediscluster
     version: ${helm.chart.version}
     alias: edusharing_repository_rediscluster
     condition: edusharing_repository_rediscluster.enabled
 
-  - name: ${helm.prefix}_repository_search_solr4
+  - name: ${helm.prefix}-repository-search-solr4
     version: ${helm.chart.version}
     alias: edusharing_repository_search_solr4
     condition: edusharing_repository_search_solr4.enabled
 
-  - name: ${helm.prefix}_repository_service
+  - name: ${helm.prefix}-repository-service
     version: ${helm.chart.version}
     alias: edusharing_repository_service
     condition: edusharing_repository_service.enabled

@@ -11,17 +11,17 @@ kubeVersion: "${helm.kube.version}"
 
 dependencies:
 
-  - name: ${helm.prefix}_rediscluster
+  - name: ${helm.prefix}-rediscluster
     version: ${helm.chart.version}
     alias: edusharing_rediscluster
     condition: edusharing_rediscluster.enabled
 
-  - name: ${helm.prefix}_repository
+  - name: ${helm.prefix}-repository
     version: ${helm.chart.version}
     alias: edusharing_repository
     condition: edusharing_repository.enabled
 
-  - name: ${helm.prefix}_services_rendering
+  - name: ${helm.prefix}-services-rendering
     version: ${helm.chart.version}
     alias: edusharing_services_rendering
     condition: edusharing_services_rendering.enabled

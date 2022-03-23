@@ -1,7 +1,7 @@
 apiVersion: v2
 
-name: ${helm.prefix}_rediscluster
-description: ${helm.prefix}_rediscluster
+name: ${helm.prefix}-rediscluster
+description: ${helm.prefix}-rediscluster
 
 icon: ${helm.chart.icon}
 

@@ -1,7 +1,7 @@
 apiVersion: v2
 
-name: ${helm.prefix}_repository_service
-description: ${helm.prefix}_repository_service
+name: ${helm.prefix}-repository-service
+description: ${helm.prefix}-repository-service
 
 icon: ${helm.chart.icon}
 

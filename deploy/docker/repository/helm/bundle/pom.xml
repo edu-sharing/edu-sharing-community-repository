@@ -63,7 +63,7 @@
               </includeArtifactIds>
               <type>tar.gz</type>
               <classifier>bin</classifier>
-              <outputDirectory>${project.build.directory}/chart/charts/${helm.prefix}_postgresql</outputDirectory>
+              <outputDirectory>${project.build.directory}/chart/charts/${helm.prefix}-postgresql</outputDirectory>
             </configuration>
           </execution>
           <execution>
@@ -78,7 +78,7 @@
               </includeArtifactIds>
               <type>tar.gz</type>
               <classifier>bin</classifier>
-              <outputDirectory>${project.build.directory}/chart/charts/${helm.prefix}_rediscluster
+              <outputDirectory>${project.build.directory}/chart/charts/${helm.prefix}-rediscluster
               </outputDirectory>
             </configuration>
           </execution>
@@ -95,7 +95,7 @@
               <type>tar.gz</type>
               <classifier>bin</classifier>
               <outputDirectory>
-                ${project.build.directory}/chart/charts/edusharing_community_repository_search_elastic_index
+                ${project.build.directory}/chart/charts/edu_sharing-community-repository-plugin-elastic-index
               </outputDirectory>
             </configuration>
           </execution>
@@ -112,7 +112,7 @@
               <type>tar.gz</type>
               <classifier>bin</classifier>
               <outputDirectory>
-                ${project.build.directory}/chart/charts/edusharing_community_repository_search_elastic_tracker
+                ${project.build.directory}/chart/charts/edu_sharing-community-repository-plugin-elastic-tracker
               </outputDirectory>
             </configuration>
           </execution>
@@ -128,7 +128,7 @@
               </includeArtifactIds>
               <type>tar.gz</type>
               <classifier>bin</classifier>
-              <outputDirectory>${project.build.directory}/chart/charts/${helm.prefix}_repository_search_solr4
+              <outputDirectory>${project.build.directory}/chart/charts/${helm.prefix}-repository-search-solr4
               </outputDirectory>
             </configuration>
           </execution>
@@ -144,7 +144,7 @@
               </includeArtifactIds>
               <type>tar.gz</type>
               <classifier>bin</classifier>
-              <outputDirectory>${project.build.directory}/chart/charts/${helm.prefix}_repository_service
+              <outputDirectory>${project.build.directory}/chart/charts/${helm.prefix}-repository-service
               </outputDirectory>
             </configuration>
           </execution>
@@ -160,7 +160,7 @@
               </includeArtifactIds>
               <type>tar.gz</type>
               <classifier>bin</classifier>
-              <outputDirectory>${project.build.directory}/chart/charts/edusharing_enterprise_repository_transform
+              <outputDirectory>${project.build.directory}/chart/charts/edu_sharing-enterprise-repository-plugin-transform
               </outputDirectory>
             </configuration>
           </execution>
@@ -293,7 +293,7 @@
           true
         </helm.edusharing_repository_search_elastic_index.enabled>
         <helm.edusharing_repository_search_elastic_index.line1>
-          - name: edusharing_community_repository_search_elastic_index
+          - name: edu_sharing-community-repository-plugin-elastic-index
         </helm.edusharing_repository_search_elastic_index.line1>
         <helm.edusharing_repository_search_elastic_index.line2>
           version: ${helm.chart.version}
@@ -309,7 +309,7 @@
           true
         </helm.edusharing_repository_search_elastic_tracker.enabled>
         <helm.edusharing_repository_search_elastic_tracker.line1>
-          - name: edusharing_community_repository_search_elastic_tracker
+          - name: edu_sharing-community-repository-plugin-elastic-tracker
         </helm.edusharing_repository_search_elastic_tracker.line1>
         <helm.edusharing_repository_search_elastic_tracker.line2>
           version: ${helm.chart.version}
@@ -359,7 +359,7 @@
 
         <helm.edusharing_repository_transform.enabled>true</helm.edusharing_repository_transform.enabled>
         <helm.edusharing_repository_transform.line1>
-          - name: edusharing_enterprise_repository_transform
+          - name: edu_sharing-enterprise-repository-plugin-transform
         </helm.edusharing_repository_transform.line1>
         <helm.edusharing_repository_transform.line2>
           version: ${helm.chart.version}

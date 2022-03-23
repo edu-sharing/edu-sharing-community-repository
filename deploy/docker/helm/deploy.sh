@@ -48,7 +48,7 @@ OPTIONS+=("${root}/helm/context/${CONTEXT}/${NAMESPACE}/${RELEASE}.yaml")
 	OPTIONS+=("image.pullSecrets[0].password=${PASSWORD}")
 }
 
-file="bundle/target/helm/repo/edusharing_${RELEASE}-${VERSION:-9999.99.99-dev}.tgz"
+file="bundle/target/helm/repo/${RELEASE}-${VERSION:-9999.99.99-dev}.tgz"
 
 if [[ -f $file ]]; then
 
@@ -57,7 +57,7 @@ if [[ -f $file ]]; then
 else
 
 	helm "${COMMAND}" "${RELEASE}" \
-		"edusharing_${RELEASE}" --version "${VERSION:->0.0.0-0}" \
+		"${RELEASE}" --version "${VERSION:->0.0.0-0}" \
 		--repo "https://artifacts.edu-sharing.com/repository/helm/" \
 		"${OPTIONS[@]}"
 

@@ -1,7 +1,7 @@
 apiVersion: v2
 
-name: ${helm.prefix}_services_rendering
-description: ${helm.prefix}_services_rendering
+name: ${helm.prefix}-services-rendering
+description: ${helm.prefix}-services-rendering
 
 icon: ${helm.chart.icon}
 
