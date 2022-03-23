@@ -21,6 +21,7 @@
     <mat-chip
       #chip="matChip"
       *ngFor="let value of chipsControl?.value"
+      [disabled]="chipsControl.disabled"
       [selected]="true"
       [removable]="true"
       [matTooltip]="value.label + ' (' + ('MDS.DELETE_KEY_NOTICE' | translate) + ')'"
@@ -37,6 +38,7 @@
       <input
         autocomplete="off"
         [placeholder]="chipsControl?.value?.length ? null : widget.definition.placeholder"
+        [disabled]="chipsControl.disabled"
         [matChipInputFor]="chipList"
         (click)="openOverlay()"
         cdkMonitorElementFocus

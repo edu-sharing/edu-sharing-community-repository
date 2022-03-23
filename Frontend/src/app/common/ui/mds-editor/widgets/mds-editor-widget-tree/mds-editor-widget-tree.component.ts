@@ -134,6 +134,9 @@ export class MdsEditorWidgetTreeComponent
         this.openOverlay();
     }
     openOverlay(): void {
+        if(this.chipsControl.disabled) {
+            return;
+        }
         if (this.overlayIsVisible) {
             this.treeRef.input.nativeElement.focus();
             return;
