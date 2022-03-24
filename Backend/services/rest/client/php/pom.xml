@@ -14,66 +14,111 @@
   </parent>
 
   <artifactId>edu_sharing-community-repository-backend-services-rest-client-php</artifactId>
-  <packaging>pom</packaging>
+  <packaging>jar</packaging>
 
   <name>edu_sharing-community-repository-backend-services-rest-client-php</name>
 
+  <properties>
+
+    <composer.project>${composer.project.root}</composer.project>
+
+  </properties>
+
   <build>
 
-    <pluginManagement>
+    <plugins>
 
-      <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>generate-sources</phase>
+          </execution>
+        </executions>
+      </plugin>
 
-        <plugin>
-          <groupId>org.openapitools</groupId>
-          <artifactId>openapi-generator-maven-plugin</artifactId>
-          <configuration>
-            <inputSpec>${project.build.directory}/api/openapi.json</inputSpec>
-            <apiPackage>api</apiPackage>
-            <modelPackage>model</modelPackage>
-            <skipValidateSpec>false</skipValidateSpec>
-            <gitUserId>${composer.vendor}</gitUserId>
-            <gitRepoId>${composer.project}</gitRepoId>
-            <artifactVersion>${composer.version}</artifactVersion>
-          </configuration>
-        </plugin>
+      <plugin>
+        <groupId>org.openapitools</groupId>
+        <artifactId>openapi-generator-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <generatorName>php</generatorName>
+              <inputSpec>${project.build.directory}/api/openapi.json</inputSpec>
+              <apiPackage>api</apiPackage>
+              <modelPackage>model</modelPackage>
+              <skipValidateSpec>false</skipValidateSpec>
+              <gitUserId>${composer.vendor}</gitUserId>
+              <gitRepoId>${composer.project}</gitRepoId>
+              <artifactVersion>${composer.version}</artifactVersion>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-assembly-plugin</artifactId>
-          <configuration>
-            <descriptors>
-              <descriptor>src/main/assembly/bin.xml</descriptor>
-            </descriptors>
-            <outputDirectory>${project.build.directory}</outputDirectory>
-            <finalName>${composer.vendor}/${composer.project}-${composer.version}</finalName>
-            <appendAssemblyId>false</appendAssemblyId>
-          </configuration>
-        </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/bin.xml</descriptor>
+              </descriptors>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <finalName>${composer.vendor}/${composer.project}-${composer.version}</finalName>
+              <appendAssemblyId>false</appendAssemblyId>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
-        <plugin>
-          <groupId>org.sonatype.plugins</groupId>
-          <artifactId>maven-upload-plugin</artifactId>
-          <configuration>
-            <file>${project.build.directory}/${composer.vendor}/${composer.project}-${composer.version}.zip</file>
-            <repositoryPath>/packages/upload/${composer.vendor}/${composer.project}/${composer.version}</repositoryPath>
-            <repositoryUrl>${composer.repo.url}</repositoryUrl>
-            <serverId>edusharing-remote</serverId>
-            <ignoreMissingFile>false</ignoreMissingFile>
-          </configuration>
-        </plugin>
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>maven-upload-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>upload-file</goal>
+            </goals>
+            <phase>deploy</phase>
+            <configuration>
+              <file>${project.build.directory}/${composer.vendor}/${composer.project}-${composer.version}.zip</file>
+              <repositoryPath>/packages/upload/${composer.vendor}/${composer.project}/${composer.version}</repositoryPath>
+              <repositoryUrl>${composer.repo.url}</repositoryUrl>
+              <serverId>edusharing-remote</serverId>
+              <ignoreMissingFile>false</ignoreMissingFile>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
-      </plugins>
-
-    </pluginManagement>
+    </plugins>
 
   </build>
 
-  <modules>
-    <module>core</module>
-    <module>laravel</module>
-    <module>lumen</module>
-    <module>slim4</module>
-  </modules>
+  <dependencies>
+
+    <!-- provided -->
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>edu_sharing-community-repository-backend-services-rest-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+  </dependencies>
 
 </project>

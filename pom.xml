@@ -209,31 +209,31 @@
       <!--
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-java-auth</artifactId>
+        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-auth-java</artifactId>
         <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-java-core</artifactId>
+        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-core-java</artifactId>
         <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-java-discovery</artifactId>
+        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-discovery-java</artifactId>
         <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-java-search</artifactId>
+        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-search-java</artifactId>
         <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-java-workflow</artifactId>
+        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-workflow-java</artifactId>
         <version>${project.version}</version>
       </dependency>
       -->
@@ -278,28 +278,7 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-services-rest-client-php-core</artifactId>
-        <version>${project.version}</version>
-        <type>zip</type>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-services-rest-client-php-laravel</artifactId>
-        <version>${project.version}</version>
-        <type>zip</type>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-services-rest-client-php-lumen</artifactId>
-        <version>${project.version}</version>
-        <type>zip</type>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-services-rest-client-php-slim4</artifactId>
+        <artifactId>edu_sharing-community-repository-backend-services-rest-client-php</artifactId>
         <version>${project.version}</version>
         <type>zip</type>
       </dependency>
