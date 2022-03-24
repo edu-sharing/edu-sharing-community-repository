@@ -34,7 +34,7 @@
     <docker.from.tomcat>docker.io/tomcat:${tomcat.version}-jdk8-openjdk-bullseye</docker.from.tomcat>
 
     <helm.kube.version>&gt;= 1.18.0</helm.kube.version>
-    <helm.version>3.7.2</helm.version>
+    <helm.version>3.8.1</helm.version>
 
     <phpredis.version>5.3.6</phpredis.version>
     <prometheus.jmx.version>0.14.0</prometheus.jmx.version>
