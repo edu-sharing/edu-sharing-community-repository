@@ -236,22 +236,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
 
-            QueryBuilder metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL),queryData,criterias,true);
-            QueryBuilder metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL),queryData,criterias,false);
+            QueryBuilder metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL),queryData,criterias,true);
+            QueryBuilder metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL),queryData,criterias,false);
             BoolQueryBuilder queryBuilderGlobalConditions = getGlobalConditions(searchToken);
 
             BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
             BoolQueryBuilder filterBuilder = QueryBuilders.boolQuery().must(metadataQueryBuilderFilter).must(queryBuilderGlobalConditions);
-            if(searchToken.getSearchCriterias().getContentkind() != null && searchToken.getSearchCriterias().getContentkind().length > 0){
-                BoolQueryBuilder criteriasBool = new BoolQueryBuilder();
-                Arrays.stream(searchToken.getSearchCriterias().getContentkind()).forEach((content) ->
-                        criteriasBool.should(
-                                new MatchQueryBuilder("type", CCConstants.getValidLocalName(content)))
-                );
-                queryBuilder = queryBuilder.filter(
-                        criteriasBool
-                );
-            }
+
             queryBuilder = queryBuilder.filter(filterBuilder);
             queryBuilder = queryBuilder.must(metadataQueryBuilderAsQuery);
 

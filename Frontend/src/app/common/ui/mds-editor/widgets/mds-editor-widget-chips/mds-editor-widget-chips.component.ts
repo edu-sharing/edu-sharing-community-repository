@@ -104,6 +104,10 @@ export class MdsEditorWidgetChipsComponent
                 this.translate.instant('WORKSPACE.EDITOR.HINT_ENTER');
             this.changeDetectorRef.detectChanges();
         }
+        if(this.chipsControl.disabled) {
+            this.inputControl.disable();
+        }
+        this.chipsControl.registerOnDisabledChange((d) => d ? this.inputControl.disable() : this.inputControl.enable());
         this.chipsControl.valueChanges
             .pipe(distinctUntilChanged())
             .subscribe((values: DisplayValue[]) => this.setValue(values.map((value) => value.key)));
@@ -203,6 +207,9 @@ export class MdsEditorWidgetChipsComponent
         // There are different strategies for doing this (see
         // https://stackoverflow.com/questions/50491195/open-matautocomplete-with-open-openpanel-method).
         // We rely on the `autoCompleteToggleTrigger` mechanism.
+        if(this.chipsControl.disabled) {
+            return;
+        }
         if (this.trigger.panelOpen) {
             this.autoCompleteToggleTrigger.next('close');
         } else {
