@@ -94,7 +94,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
 
         }
 
-        if(asFilter == true && searchToken.getSearchCriterias().getContentkind() != null && searchToken.getSearchCriterias().getContentkind().length > 0){
+        if(searchToken != null && asFilter == true && searchToken.getSearchCriterias().getContentkind() != null && searchToken.getSearchCriterias().getContentkind().length > 0){
             BoolQueryBuilder criteriasBool = new BoolQueryBuilder();
             Arrays.stream(searchToken.getSearchCriterias().getContentkind()).forEach((content) ->
                     criteriasBool.should(
