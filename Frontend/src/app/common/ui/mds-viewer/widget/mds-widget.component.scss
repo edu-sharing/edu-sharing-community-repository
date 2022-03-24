@@ -13,8 +13,10 @@
     > button {
         margin-left: 10px;
     }
-    transition: $transitionNormal all;
-    padding: 2px 5px;
+    transition: $transitionNormal all;;
+    .widget-wrapper {
+        padding: 2px 5px;
+    }
     .value-wrapper-edit:hover {
         outline: 1px solid $cardSeperatorLineColor;
         cursor: text;
