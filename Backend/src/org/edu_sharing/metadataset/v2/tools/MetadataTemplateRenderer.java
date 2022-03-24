@@ -136,7 +136,7 @@ public class MetadataTemplateRenderer {
 	private String renderTemplate(MetadataTemplate template) throws IllegalArgumentException {
 		String html="";
 		if(renderingMode.equals(RenderingMode.HTML)) {
-			html += "<div class='mdsGroup'>" + "<h2 class='mdsCaption " + template.getId() + "'>" + template.getCaption() + "</h2>" + "<div class='mdsContent'>";
+			html += "<div class='mdsGroup mdsGroup-" + template.getId() + "'>" + "<h2 class='mdsCaption " + template.getId() + "'>" + template.getCaption() + "</h2>" + "<div class='mdsContent'>";
 		}
 		String content=template.getHtml();
 		for(MetadataWidget srcWidget : mds.getWidgets()){
