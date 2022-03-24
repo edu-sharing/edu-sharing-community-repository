@@ -287,6 +287,56 @@
         </property>
       </activation>
 
+      <build>
+
+        <plugins>
+
+          <plugin>
+            <groupId>org.codehaus.gmavenplus</groupId>
+            <artifactId>gmavenplus-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>community-repository-backend-services-rest-client</id>
+                <goals>
+                  <goal>execute</goal>
+                </goals>
+                <phase>generate-sources</phase>
+                <configuration>
+                  <scripts>
+                    <!--suppress UnresolvedMavenProperty -->
+                    <script><![CDATA[
+                      def range = project.properties['org.edu_sharing:edu_sharing-community-repository-plugin-elastic-deploy-docker-helm-index:tar.gz:bin.version']
+                      if (range.contains('-SNAPSHOT')) {
+                        if (range.contains('release-')) {
+                          range = '~' + range.substring(range.indexof('release-')).replace("release-","").replace("-SNAPSHOT","").concat(".0")
+                        } else {
+                          range = '${git.closest.tag.fallback}'
+                        }
+                      }
+                      project.properties.setProperty('org.edu_sharing:edu_sharing-community-repository-plugin-elastic-deploy-docker-helm-index:tar.gz:bin.range', range)
+                    ]]></script>
+                    <!--suppress UnresolvedMavenProperty -->
+                    <script><![CDATA[
+                      def range = project.properties['org.edu_sharing:edu_sharing-community-repository-plugin-elastic-deploy-docker-helm-tracker:tar.gz:bin.version']
+                      if (range.contains('-SNAPSHOT')) {
+                        if (range.contains('release-')) {
+                          range = '~' + range.substring(range.indexof('release-')).replace("release-","").replace("-SNAPSHOT","").concat(".0")
+                        } else {
+                          range = '${git.closest.tag.fallback}'
+                        }
+                      }
+                      project.properties.setProperty('org.edu_sharing:edu_sharing-community-repository-plugin-elastic-deploy-docker-helm-tracker:tar.gz:bin.range', range)
+                    ]]></script>
+                  </scripts>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+        </plugins>
+
+      </build>
+
       <properties>
 
         <helm.edusharing_repository_search_elastic_index.enabled>
@@ -296,7 +346,8 @@
           - name: edu_sharing-community-repository-plugin-elastic-index
         </helm.edusharing_repository_search_elastic_index.line1>
         <helm.edusharing_repository_search_elastic_index.line2>
-          version: ${helm.chart.version}
+          <!--suppress UnresolvedMavenProperty -->
+          version: ${org.edu_sharing:edu_sharing-community-repository-plugin-elastic-deploy-docker-helm-index:tar.gz:bin.range}
         </helm.edusharing_repository_search_elastic_index.line2>
         <helm.edusharing_repository_search_elastic_index.line3>
           alias: edusharing_repository_search_elastic_index
@@ -312,7 +363,8 @@
           - name: edu_sharing-community-repository-plugin-elastic-tracker
         </helm.edusharing_repository_search_elastic_tracker.line1>
         <helm.edusharing_repository_search_elastic_tracker.line2>
-          version: ${helm.chart.version}
+          <!--suppress UnresolvedMavenProperty -->
+          version: ${org.edu_sharing:edu_sharing-community-repository-plugin-elastic-deploy-docker-helm-tracker:tar.gz:bin.range}
         </helm.edusharing_repository_search_elastic_tracker.line2>
         <helm.edusharing_repository_search_elastic_tracker.line3>
           alias: edusharing_repository_search_elastic_tracker
@@ -355,6 +407,44 @@
         </property>
       </activation>
 
+      <build>
+
+        <plugins>
+
+          <plugin>
+            <groupId>org.codehaus.gmavenplus</groupId>
+            <artifactId>gmavenplus-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>community-repository-backend-services-rest-client</id>
+                <goals>
+                  <goal>execute</goal>
+                </goals>
+                <phase>generate-sources</phase>
+                <configuration>
+                  <scripts>
+                    <!--suppress UnresolvedMavenProperty -->
+                    <script><![CDATA[
+                      def range = project.properties['org.edu_sharing:edu_sharing-enterprise-repository-plugin-transform-deploy-docker-helm:tar.gz:bin.version']
+                      if (range.contains('-SNAPSHOT')) {
+                        if (range.contains('release-')) {
+                          range = '~' + range.substring(range.indexof('release-')).replace("release-","").replace("-SNAPSHOT","").concat(".0")
+                        } else {
+                          range = '${git.closest.tag.fallback}'
+                        }
+                      }
+                      project.properties.setProperty('org.edu_sharing:edu_sharing-enterprise-repository-plugin-transform-deploy-docker-helm:tar.gz:bin.range', range)
+                    ]]></script>
+                  </scripts>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+        </plugins>
+
+      </build>
+
       <properties>
 
         <helm.edusharing_repository_transform.enabled>true</helm.edusharing_repository_transform.enabled>
@@ -362,7 +452,8 @@
           - name: edu_sharing-enterprise-repository-plugin-transform
         </helm.edusharing_repository_transform.line1>
         <helm.edusharing_repository_transform.line2>
-          version: ${helm.chart.version}
+          <!--suppress UnresolvedMavenProperty -->
+          version: ${org.edu_sharing:edu_sharing-enterprise-repository-plugin-transform-deploy-docker-helm:tar.gz:bin.range}
         </helm.edusharing_repository_transform.line2>
         <helm.edusharing_repository_transform.line3>
           alias: edusharing_repository_transform
