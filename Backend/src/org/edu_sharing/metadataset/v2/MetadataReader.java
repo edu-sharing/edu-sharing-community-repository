@@ -540,21 +540,23 @@ public class MetadataReader {
 	}
 	private List<MetadataKey> getValuespace(String value,MetadataWidget widget, String valuespaceI18n, String valuespaceI18nPrefix) throws Exception {
 		if(value.startsWith("http://") || value.startsWith("https://")){
-			return getValuespaceExternal(value);
+			return sortValues(widget, getValuespaceExternal(value));
 		}
 		Document docValuespace = builder.parse(getFile(value,Filetype.VALUESPACE));
-		List<MetadataKey> keys=new ArrayList<>();
 		NodeList keysNode=(NodeList)xpath.evaluate("/valuespaces/valuespace[@property='"+widget.getId()+"']/key",docValuespace, XPathConstants.NODESET);
 		if(keysNode.getLength()==0){
 			throw new Exception("No valuespace found in file "+value+": Searching for a node named /valuespaces/valuespace[@property='"+widget.getId()+"']");
 		}
-		List<MetadataKey> list=getValues(keysNode,valuespaceI18n,valuespaceI18nPrefix);
+		return sortValues(widget, getValues(keysNode,valuespaceI18n,valuespaceI18nPrefix));
+	}
+
+	private List<MetadataKey> sortValues(MetadataWidget widget, List<MetadataKey> list) {
 		if(!"default".equals(widget.getValuespaceSort())){
-			Collections.sort(list, (o1, o2) -> {
-				if("caption".equals(widget.getValuespaceSort())){
-					return o1.getCaption().compareTo(o2.getCaption());
+			list.sort((o1, o2) -> {
+				if ("caption".equals(widget.getValuespaceSort())) {
+					return StringUtils.compareIgnoreCase(o1.getCaption(), o2.getCaption());
 				}
-				logger.error("Invalid value for valuespaceSort '"+widget.getValuespaceSort()+"' for widget '"+widget.getId()+"'");
+				logger.error("Invalid value for valuespaceSort '" + widget.getValuespaceSort() + "' for widget '" + widget.getId() + "'");
 				return 0;
 			});
 		}
