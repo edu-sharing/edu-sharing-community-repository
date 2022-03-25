@@ -72,6 +72,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit {
             case 'multivalueFixedBadges':
             case 'multivalueSuggestBadges':
             case 'multivalueBadges':
+            case 'singlevalueTree':
             case 'multivalueTree':
                 return 'array';
             case 'slider':
