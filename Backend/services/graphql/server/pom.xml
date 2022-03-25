@@ -68,6 +68,11 @@
             <artifactId>graphql-java-tools</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+        </dependency>
+
         <!-- provided -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -126,6 +131,10 @@
             <artifactId>edu_sharing-community-repository-backend-services-core</artifactId>
             <scope>provided</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.edu_sharing</groupId>
+            <artifactId>edu_sharing-community-repository-backend-alfresco-module</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>

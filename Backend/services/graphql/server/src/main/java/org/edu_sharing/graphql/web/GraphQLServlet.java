@@ -1,5 +1,6 @@
 package org.edu_sharing.graphql.web;
 
+import graphql.kickstart.execution.GraphQLInvoker;
 import graphql.kickstart.servlet.GraphQLConfiguration;
 import graphql.kickstart.servlet.GraphQLHttpServlet;
 import graphql.schema.GraphQLSchema;
@@ -12,7 +13,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
 public class GraphQLServlet extends GraphQLHttpServlet {
-    @Autowired private GraphQLSchema graphQLSchema;
+    @Autowired private GraphQLConfiguration graphQLConfiguration;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -40,6 +41,6 @@ public class GraphQLServlet extends GraphQLHttpServlet {
 
     @Override
     protected GraphQLConfiguration getConfiguration() {
-        return GraphQLConfiguration.with(graphQLSchema).build();
+        return graphQLConfiguration;
     }
 }

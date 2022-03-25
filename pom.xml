@@ -789,6 +789,22 @@
       </dependency>
 
       <dependency>
+        <groupId>com.graphql-java</groupId>
+        <artifactId>graphql-java-extended-scalars</artifactId>
+        <version>17.0</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.slf4j</groupId>
+            <artifactId>*</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>com.graphql-java</groupId>
+            <artifactId>graphql-java</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
         <groupId>com.graphql-java-kickstart</groupId>
         <artifactId>graphql-java-servlet</artifactId>
         <version>12.0.0</version>
@@ -838,6 +854,12 @@
             <artifactId>*</artifactId>
           </exclusion>
         </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-core</artifactId>
+        <version>1.8.2</version>
       </dependency>
 
       <dependency>
