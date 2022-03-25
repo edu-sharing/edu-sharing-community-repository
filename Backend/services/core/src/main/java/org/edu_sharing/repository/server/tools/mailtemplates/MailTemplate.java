@@ -1,6 +1,7 @@
 package org.edu_sharing.repository.server.tools.mailtemplates;
 
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -28,6 +29,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -134,5 +136,46 @@ public class MailTemplate {
 		}
 		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 		return builder.parse(in);
+	}
+
+	public static void applyNodePropertiesToMap(String prefix, HashMap<String, Object> properties, Map<String, String> map) {
+		properties.forEach((key, value) -> map.put(prefix + CCConstants.getValidLocalName(key), value instanceof Collection ?
+				StringUtils.join((Collection)value, ", ") : value == null ? "" : value.toString()));
+	}
+
+	public static class UserMail {
+		private final String fullName;
+		private final String firstName;
+		private final String lastName;
+		private final String email;
+
+		public UserMail(String fullName, String firstName, String lastName, String email) {
+			this.fullName = fullName;
+			this.firstName = firstName;
+			this.lastName = lastName;
+			this.email = email;
+		}
+
+		public String getFullName() {
+			return fullName;
+		}
+
+		public String getFirstName() {
+			return firstName;
+		}
+
+		public String getLastName() {
+			return lastName;
+		}
+
+		public String getEmail() {
+			return email;
+		}
+
+		public void applyToMap(String prefix, Map<String, String> map) {
+			map.put(prefix + "fullName", this.fullName);
+			map.put(prefix + "firstName", this.firstName);
+			map.put(prefix + "lastName", this.lastName);
+		}
 	}
 }

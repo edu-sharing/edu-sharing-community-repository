@@ -49,4 +49,16 @@
 
     </build>
 
+    <dependencies>
+
+        <!-- runtime -->
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>edu_sharing-community-repository-backend-services-graphql-server</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+    </dependencies>
+
 </project>

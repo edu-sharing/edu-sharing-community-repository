@@ -13,6 +13,7 @@ import { DateHelper } from './DateHelper';
 import {Subscription} from 'rxjs/Subscription';
 import {SessionStorageService} from '../core-module/rest/services/session-storage.service';
 import {ToastMessageComponent} from './components/toast-message/toast-message.component';
+import {RestStateService} from '../core-module/rest/services/rest-state.service';
 
 interface CustomAction {
     link: {
@@ -504,7 +505,7 @@ export class Toast implements OnDestroy {
                 message = 'TOAST.API_FORBIDDEN';
                 dialogTitle = null;
 
-                const login = this.storage.get(TemporaryStorageService.SESSION_INFO);
+                const login = this.injector.get(RestStateService).currentLogin.value;
                 if (login && login.isGuest) {
                     this.toast('TOAST.API_FORBIDDEN_LOGIN');
                     this.goToLogin();

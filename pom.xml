@@ -158,6 +158,12 @@
       </dependency>
 
       <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>2.4</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
         <version>3.11</version>
@@ -203,31 +209,31 @@
       <!--
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-java-auth</artifactId>
+        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-auth-java</artifactId>
         <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-java-core</artifactId>
+        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-core-java</artifactId>
         <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-java-discovery</artifactId>
+        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-discovery-java</artifactId>
         <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-java-search</artifactId>
+        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-search-java</artifactId>
         <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-java-workflow</artifactId>
+        <artifactId>edu_sharing-community-repository-backend-alfresco-rest-client-workflow-java</artifactId>
         <version>${project.version}</version>
       </dependency>
       -->
@@ -272,28 +278,7 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-services-rest-client-php-core</artifactId>
-        <version>${project.version}</version>
-        <type>zip</type>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-services-rest-client-php-laravel</artifactId>
-        <version>${project.version}</version>
-        <type>zip</type>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-services-rest-client-php-lumen</artifactId>
-        <version>${project.version}</version>
-        <type>zip</type>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-services-rest-client-php-slim4</artifactId>
+        <artifactId>edu_sharing-community-repository-backend-services-rest-client-php</artifactId>
         <version>${project.version}</version>
         <type>zip</type>
       </dependency>
@@ -389,16 +374,9 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-frontend-webapp</artifactId>
+        <artifactId>edu_sharing-community-repository-frontend</artifactId>
         <version>${project.version}</version>
         <classifier>sources</classifier>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-frontend-webapp</artifactId>
-        <version>${project.version}</version>
-        <type>war</type>
       </dependency>
 
       <dependency>
@@ -411,13 +389,6 @@
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-repackaged-isoparser</artifactId>
         <version>${bom.repository-repackaged.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-webapp</artifactId>
-        <version>${project.version}</version>
-        <type>war</type>
       </dependency>
 
       <dependency>
@@ -439,6 +410,12 @@
       </dependency>
 
       <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>11.0.2</version>
+      </dependency>
+
+      <dependency>
         <groupId>net.handle</groupId>
         <artifactId>handle-client</artifactId>
         <version>9.3.0</version>
@@ -446,7 +423,7 @@
 
       <dependency>
         <groupId>com.hazelcast</groupId>
-        <artifactId>hazelcast-all</artifactId>
+        <artifactId>hazelcast</artifactId>
         <version>3.12</version>
       </dependency>
 
@@ -459,7 +436,13 @@
       <dependency>
         <groupId>com.hazelcast</groupId>
         <artifactId>hazelcast-kubernetes</artifactId>
-        <version>1.5.4</version>
+        <version>1.5.6</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.hazelcast</groupId>
+        <artifactId>hazelcast-spring</artifactId>
+        <version>3.12</version>
       </dependency>
 
       <dependency>
@@ -639,6 +622,12 @@
       </dependency>
 
       <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <version>1.18.22</version>
+      </dependency>
+
+      <dependency>
         <groupId>com.squareup.okhttp3</groupId>
         <artifactId>okhttp</artifactId>
         <version>4.9.1</version>
@@ -669,15 +658,45 @@
       </dependency>
 
       <dependency>
+        <groupId>xalan</groupId>
+        <artifactId>serializer</artifactId>
+        <version>2.7.2</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
         <version>1.7.33</version>
       </dependency>
 
       <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-config</artifactId>
+        <version>3.1.7.RELEASE</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-core</artifactId>
+        <version>3.1.7.RELEASE</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-web</artifactId>
+        <version>3.1.7.RELEASE</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.springframework.security.extensions</groupId>
         <artifactId>spring-security-saml2-core</artifactId>
         <version>1.0.3.RELEASE</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.codehaus.woodstox</groupId>
+        <artifactId>stax2-api</artifactId>
+        <version>3.1.4</version>
       </dependency>
 
       <dependency>
@@ -864,15 +883,17 @@
       </dependency>
 
       <dependency>
-        <groupId>io.micrometer</groupId>
-        <artifactId>micrometer-core</artifactId>
-        <version>1.8.2</version>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-bom</artifactId>
+        <version>1.5.32</version>
+        <scope>import</scope>
+        <type>pom</type>
       </dependency>
 
       <dependency>
-        <groupId>org.projectlombok</groupId>
-        <artifactId>lombok</artifactId>
-        <version>1.18.22</version>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-core</artifactId>
+        <version>1.8.2</version>
       </dependency>
 
     </dependencies>
@@ -913,7 +934,6 @@
     <module>Backend</module>
     <module>config</module>
     <module>Frontend</module>
-    <module>webapp</module>
   </modules>
 
 </project>

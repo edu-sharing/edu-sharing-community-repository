@@ -467,9 +467,15 @@ export class CordovaService {
     this.setPermanentStorage(RestConstants.CORDOVA_STORAGE_OAUTHTOKENS,null);
     if(parameters)
         parameters='&'+parameters;
-    if(navigator.userAgent.indexOf('ionic / edu-sharing-app')!=-1) {
+    console.log(navigator.userAgent, navigator.userAgent.includes('ionic / edu-sharing-app'));
+    console.log((window as any).device);
+    if(navigator.userAgent.includes('ionic / edu-sharing-app')) {
         // go to ionic local server
-        window.location.replace('http://localhost:54361/?reset=true' + parameters);
+        if(this.isAndroid() && navigator.userAgent.includes('3.0.1')) {
+            window.location.replace('http://localhost/?reset=true' + parameters);
+        } else {
+            window.location.replace('http://localhost:54361/?reset=true' + parameters);
+        }
     }
     else {
         window.location.replace('http://app-registry.edu-sharing.com/ng/?reset=true' + parameters);

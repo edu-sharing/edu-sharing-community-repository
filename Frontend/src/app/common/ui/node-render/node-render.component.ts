@@ -139,7 +139,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
             if(params.node) {
               this.isRoute=true;
               this.list = this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST);
-              this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
+              this.connector.isLoggedIn(false).subscribe((data:LoginResult)=> {
                 this.isSafe=data.currentScope==RestConstants.SAFE_SCOPE;
                 if(params.version) {
                     this.version = params.version;
