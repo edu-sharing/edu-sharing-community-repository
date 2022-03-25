@@ -308,7 +308,7 @@
                       def range = project.properties['org.edu_sharing:edu_sharing-community-repository-plugin-elastic-deploy-docker-helm-index:tar.gz:bin.version']
                       if (range.contains('-SNAPSHOT')) {
                         if (range.contains('release-')) {
-                          range = '~' + range.substring(range.indexof('release-')).replace("release-","").replace("-SNAPSHOT","").concat(".0")
+                          range = '~' + range.substring(range.indexOf('release-')).replace("release-","").replace("-SNAPSHOT","").concat(".0-0")
                         } else {
                           range = '${git.closest.tag.fallback}'
                         }
@@ -320,7 +320,7 @@
                       def range = project.properties['org.edu_sharing:edu_sharing-community-repository-plugin-elastic-deploy-docker-helm-tracker:tar.gz:bin.version']
                       if (range.contains('-SNAPSHOT')) {
                         if (range.contains('release-')) {
-                          range = '~' + range.substring(range.indexof('release-')).replace("release-","").replace("-SNAPSHOT","").concat(".0")
+                          range = '~' + range.substring(range.indexOf('release-')).replace("release-","").replace("-SNAPSHOT","").concat(".0-0")
                         } else {
                           range = '${git.closest.tag.fallback}'
                         }
@@ -428,7 +428,7 @@
                       def range = project.properties['org.edu_sharing:edu_sharing-enterprise-repository-plugin-transform-deploy-docker-helm:tar.gz:bin.version']
                       if (range.contains('-SNAPSHOT')) {
                         if (range.contains('release-')) {
-                          range = '~' + range.substring(range.indexof('release-')).replace("release-","").replace("-SNAPSHOT","").concat(".0")
+                          range = '~' + range.substring(range.indexOf('release-')).replace("release-","").replace("-SNAPSHOT","").concat(".0-0")
                         } else {
                           range = '${git.closest.tag.fallback}'
                         }
