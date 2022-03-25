@@ -34,14 +34,29 @@
             </mat-chip>
           </mat-chip-list>
           <div class="typeButton" *ngIf="getNewInvitedAuthorities().length">
-            <button mat-raised-button *ngIf="currentType.length==0" (click)="chooseType()"><i icon="help_outline"></i> <span>{{'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate}}</span>
-              <i aria-hidden="true" icon="keyboard_arrow_down"></i></button>
-            <button mat-raised-button *ngIf="currentType.indexOf('Consumer')>-1" (click)="chooseType()"><i icon="remove_red_eye"></i> <span>{{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</span>
-              <i aria-hidden="true" icon="keyboard_arrow_down"></i></button>
-            <button mat-raised-button *ngIf="currentType.indexOf('Collaborator')>-1" (click)="chooseType()"><i icon="edit"></i> <span>{{'WORKSPACE.SHARE.TYPE_COWORKER' | translate}}</span>
-              <i aria-hidden="true" icon="keyboard_arrow_down"></i></button>
-            <button mat-raised-button *ngIf="currentType.indexOf('Coordinator')>-1" (click)="chooseType()"><i icon="work"></i> <span>{{'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate}}</span>
-              <i aria-hidden="true" icon="keyboard_arrow_down"></i></button>
+            <button
+              mat-raised-button
+              (click)="chooseType()"
+              role="combobox"
+              [attr.aria-label]="'WORKSPACE.SHARE.TYPE_MENU_LABEL_NEW' | translate"
+              aria-haspopup="true"
+              [attr.aria-expanded]="showChooseType || null"
+              [attr.aria-controls]="showChooseType ? 'es-workspace-share-choose-type-menu' : null"
+            >
+              <ng-container *ngIf="currentType.length==0">
+                <i icon="help_outline"></i> <span>{{'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate}}</span>
+                <i aria-hidden="true" icon="keyboard_arrow_down"></i></ng-container>
+              <ng-container *ngIf="currentType.indexOf('Consumer')>-1">
+                <i icon="remove_red_eye"></i> <span>{{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</span>
+                <i aria-hidden="true" icon="keyboard_arrow_down"></i></ng-container>
+              <ng-container *ngIf="currentType.indexOf('Collaborator')>-1">
+                <i icon="edit"></i> <span>{{'WORKSPACE.SHARE.TYPE_COWORKER' | translate}}</span>
+                <i aria-hidden="true" icon="keyboard_arrow_down"></i></ng-container>
+              <ng-container *ngIf="currentType.indexOf('Coordinator')>-1">
+                <i icon="work"></i> <span>{{'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate}}</span>
+                <i aria-hidden="true" icon="keyboard_arrow_down"></i></ng-container>
+            </button>
+
             <!--<div class="share-type-mobile">-->
             <!--<p *ngIf="currentType.length==0">{{'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate}}</p>-->
             <!--<p *ngIf="currentType.indexOf('Consumer')>-1">{{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</p>-->
@@ -51,6 +66,7 @@
           </div>
 
           <workspace-share-choose-type *ngIf="showChooseType" class="typeAdd"
+                                       [aria-label]="'WORKSPACE.SHARE.TYPE_MENU_LABEL_NEW' | translate"
                                        [selected]="currentType"
                                        [isDirectory]="_nodes[0].isDirectory"
                                        [canPublish]="!isSafe"
@@ -65,6 +81,8 @@
             <mat-label>{{'WORKSPACE.SHARE.MESSAGE' | translate}}</mat-label>
             <input matInput id="message" name="message" [(ngModel)]="notifyMessage" placeholder="{{'WORKSPACE.SHARE.MESSAGE_PLACEHOLDER' | translate}}"/>
           </mat-form-field>
+          <!-- TODO: Separate label and description using aria-labelledby and aria-describedby
+          attributes. Supported by MatCheckbox since Angular Material 9.2.x -->
           <mat-checkbox id="notify" [(ngModel)]="notifyUsers">
             <div>{{'WORKSPACE.NOTIFY_TITLE' | translate}}</div>
             <div class="notify-info">{{'WORKSPACE.NOTIFY_INFO' | translate}}</div>

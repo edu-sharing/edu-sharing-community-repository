@@ -8,21 +8,15 @@
 
   <parent>
     <groupId>org.edu_sharing</groupId>
-    <artifactId>edu_sharing-community-repository-backend-services-rest-client-php</artifactId>
+    <artifactId>edu_sharing-community-repository-backend-services-rest-client-typescript</artifactId>
     <version>git</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>edu_sharing-community-repository-backend-services-rest-client-php-core</artifactId>
+  <artifactId>edu_sharing-community-repository-backend-services-rest-client-typescript-angular</artifactId>
   <packaging>jar</packaging>
 
-  <name>edu_sharing-community-repository-backend-services-rest-client-php-core</name>
-
-  <properties>
-
-    <composer.project>${composer.project.root}-core</composer.project>
-
-  </properties>
+  <name>edu_sharing-community-repository-backend-services-rest-client-typescript-angular</name>
 
   <build>
 
@@ -51,7 +45,9 @@
             </goals>
             <phase>generate-sources</phase>
             <configuration>
-              <generatorName>php</generatorName>
+              <inputSpec>${project.build.directory}/api/openapi.json</inputSpec>
+              <generatorName>typescript-angular</generatorName>
+              <skipValidateSpec>false</skipValidateSpec>
             </configuration>
           </execution>
         </executions>
@@ -66,19 +62,11 @@
               <goal>single</goal>
             </goals>
             <phase>package</phase>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>maven-upload-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>upload-file</goal>
-            </goals>
-            <phase>deploy</phase>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/sources.xml</descriptor>
+              </descriptors>
+            </configuration>
           </execution>
         </executions>
       </plugin>

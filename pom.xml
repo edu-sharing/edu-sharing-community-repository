@@ -39,8 +39,8 @@
     <bom.repository-repackaged.version>${project.version}</bom.repository-repackaged.version>
 
     <elasticsearch.version.major>7</elasticsearch.version.major>
-    <elasticsearch.version.minor>16</elasticsearch.version.minor>
-    <elasticsearch.version.patch>3</elasticsearch.version.patch>
+    <elasticsearch.version.minor>17</elasticsearch.version.minor>
+    <elasticsearch.version.patch>0</elasticsearch.version.patch>
     <elasticsearch.version>
       ${elasticsearch.version.major}.${elasticsearch.version.minor}.${elasticsearch.version.patch}
     </elasticsearch.version>
@@ -53,7 +53,7 @@
     <npm.args.build>run build-dev</npm.args.build>
     <npm.version>7.24.2</npm.version>
 
-    <postgresql.jdbc.version>42.3.1</postgresql.jdbc.version>
+    <postgresql.jdbc.version>42.3.3</postgresql.jdbc.version>
 
     <tomcat.version.major>8</tomcat.version.major>
     <tomcat.version.minor>5</tomcat.version.minor>
@@ -252,7 +252,14 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-services-rest-client-angular</artifactId>
+        <artifactId>edu_sharing-community-repository-backend-services-rest-client-typescript-angular</artifactId>
+        <version>${project.version}</version>
+        <classifier>sources</classifier>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>edu_sharing-community-repository-backend-services-rest-client-typescript-ng</artifactId>
         <version>${project.version}</version>
         <classifier>sources</classifier>
       </dependency>
