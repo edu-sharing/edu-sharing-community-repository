@@ -184,7 +184,7 @@ RUN set -eux \
 
 ########################################################################################################################
 
-COPY scripts/install.sh scripts/.env.base bin/installer/
+COPY scripts/artifact.sh scripts/install.sh scripts/.env.base bin/installer/
 COPY scripts/plugins/installer bin/installer/plugins/
 
 COPY assets/entrypoint.sh bin/

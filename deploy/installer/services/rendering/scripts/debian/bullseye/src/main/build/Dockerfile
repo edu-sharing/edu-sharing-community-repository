@@ -165,7 +165,7 @@ RUN set -eux \
 
 ########################################################################################################################
 
-COPY install.sh .env.base ./
+COPY artifact.sh install.sh .env.base ./
 
 COPY assets/entrypoint.sh assets/apache2-foreground.sh ./
 

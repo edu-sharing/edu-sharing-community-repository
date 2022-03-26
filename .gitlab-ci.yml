@@ -42,14 +42,15 @@ test docker:
     - docker login $DOCKER_REGISTRY -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
   script:
     - mkdir -p "$MAVEN_HOME"
-    - cd deploy/docker
-    - mvn $MAVEN_CLI -s ../../.mvn/settings.xml install
-    - . ./deploy.sh ci
+    - mvn $MAVEN_CLI -s .mvn/settings.xml install
+    - pushd deploy/docker
+    - . deploy.sh ci
     - "until wait-for-it docker:8100 -t 3; do sleep 1; done"
     - "until [[ $(curl -sSf -w '%{http_code}\n' -o /dev/null -H 'Accept: application/json' http://docker:8100/edu-sharing/rest/_about/status/SERVICE?timeoutSeconds=3) -eq 200 ]]; do sleep 1; done"
     - "curl -m 300 -H 'Accept: application/json' --user 'admin:admin' http://docker:8100/edu-sharing/rest/openapi.json | jq -S . > openapi.json"
-    - . ./deploy.sh stop
+    - . deploy.sh stop
     - cmp -s openapi.json repository/build/service/target/build/rest-api/openapi.json || exit 1
+    - popd
   only:
     - schedules
     - tags
@@ -71,14 +72,15 @@ test installer:
     - docker login $DOCKER_REGISTRY -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
   script:
     - mkdir -p "$MAVEN_HOME"
-    - cd deploy/installer
-    - mvn $MAVEN_CLI -s ../../.mvn/settings.xml install
-    - . ./deploy.sh ci
+    - mvn $MAVEN_CLI -s .mvn/settings.xml install
+    - pushd deploy/installer
+    - . deploy.sh ci
     - "until wait-for-it docker:8100 -t 3; do sleep 1; done"
     - "until [[ $(curl -sSf -w '%{http_code}\n' -o /dev/null -H 'Accept: application/json' http://docker:8100/edu-sharing/rest/_about/status/SERVICE?timeoutSeconds=3) -eq 200 ]]; do sleep 1; done"
     - "curl -m 300 -H 'Accept: application/json' --user 'admin:admin' http://docker:8100/edu-sharing/rest/openapi.json | jq -S . > openapi.json"
-    - . ./deploy.sh stop
+    - . deploy.sh stop
     - cmp -s openapi.json repository/distribution/target/dist/rest-api/openapi.json || exit 1
+    - popd
   only:
     - schedules
     - tags
