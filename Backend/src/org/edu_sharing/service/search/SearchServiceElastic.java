@@ -403,7 +403,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
                             if (facetResult.isPresent()) {
                                 if (!facetResult.get().getValues().stream().anyMatch(v -> v.getValue().equals(value))) {
                                     if (selected.get().getValues().stream().anyMatch(v -> value.equals(v.getValue()))) {
-                                        facetResult.get().getValues().addAll(selected.get().getValues());
+                                        facetResult.get().getValues().add(selected.get().getValues().stream()
+                                                .filter(v -> value.equals(v.getValue()))
+                                                .findFirst()
+                                                .get()
+                                        );
                                     }
                                 }
                             } else {
