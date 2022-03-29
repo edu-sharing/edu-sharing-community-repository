@@ -657,7 +657,7 @@ fi
 
 echo "- copy edu-sharing repository distribution"
 
-mvn -q dependency:copy \
+mvn -q -llr dependency:copy \
 	-Dartifact="org.edu_sharing:${ARTIFACT_ID}:${ARTIFACT_VERSION}:tar.gz:bin" \
 	-DoutputDirectory=.
 

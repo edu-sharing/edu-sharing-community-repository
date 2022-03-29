@@ -253,7 +253,7 @@ fi
 
 echo "- copy edu-sharing rendering-service distribution"
 
-mvn -q dependency:copy \
+mvn -q -llr dependency:copy \
 		-Dartifact="org.edu_sharing:${ARTIFACT_ID}:${ARTIFACT_VERSION}:tar.gz:bin" \
 		-DoutputDirectory=.
 

@@ -329,13 +329,12 @@ remove() {
 
 ci() {
 	COMPOSE_LIST1="$(compose_plugins repository -remote)"
-	COMPOSE_LIST2="$(compose_plugins services/rendering -remote)"
 
-  [[ -n $COMPOSE_LIST1 || -n $COMPOSE_LIST2 ]] && {
-		echo "Use compose set: $COMPOSE_LIST1 $COMPOSE_LIST2"
+  [[ -n $COMPOSE_LIST1 ]] && {
+		echo "Use compose set: $COMPOSE_LIST1"
 
 		$COMPOSE_EXEC \
-			$COMPOSE_LIST1 $COMPOSE_LIST2 \
+			$COMPOSE_LIST1 \
 			pull || exit
 	}
 

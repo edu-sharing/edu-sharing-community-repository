@@ -18,6 +18,9 @@ spec:
         prometheus.io/port: "9117"
         prometheus.io/scrape: {{ .Values.sidecar.metrics.enabled | quote }}
         sidecar.istio.io/inject: {{ .Values.global.cluster.istio.enabled | quote }}
+        {{- if .Values.podAnnotations }}
+        {{- toYaml .Values.podAnnotations | nindent 8 }}
+        {{- end }}
     spec:
       initContainers:
       {{- if (default .Values.global.cluster.storage.share.permission .Values.persistence.share.permission) }}

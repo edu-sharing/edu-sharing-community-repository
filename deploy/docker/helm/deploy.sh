@@ -49,7 +49,7 @@ OPTIONS+=("${root}/helm/context/${CONTEXT}/${NAMESPACE}/${RELEASE}.yaml")
 	OPTIONS+=("image.pullSecrets[0].password=${PASSWORD}")
 }
 
-file="target/helm/repo/${CHART}-${VERSION:-9999.99.99-dev}.tgz"
+file="bundle/target/helm/repo/${CHART}-${VERSION:-9999.99.99-dev}.tgz"
 
 if [[ -f $file ]]; then
 

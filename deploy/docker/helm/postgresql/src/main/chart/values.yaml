@@ -81,6 +81,8 @@ persistence:
 
 ########################################################################################################################
 
+podAnnotations: {}
+
 podSecurityContext:
 
   runAsUser: 1001
@@ -129,7 +131,14 @@ init:
 
   permission:
 
-    resources: {}
+    resources:
+
+      limits:
+        cpu: 100m
+        memory: 1Gi
+      requests:
+        cpu: 100m
+        memory: 1Gi
 
     securityContext:
       runAsUser: 0

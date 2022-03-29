@@ -159,6 +159,8 @@ tolerations: []
 
 ########################################################################################################################
 
+podAnnotations: {}
+
 podSecurityContext:
 
   runAsUser: 1000
@@ -207,9 +209,17 @@ init:
 
   permission:
 
-    resources: {}
+    resources:
+
+      limits:
+        cpu: 100m
+        memory: 1Gi
+      requests:
+        cpu: 100m
+        memory: 1Gi
 
     securityContext:
+
       runAsUser: 0
 
 ########################################################################################################################
@@ -218,9 +228,19 @@ job:
 
   init:
 
-    resources: {}
+    podAnnotations: {}
+
+    resources:
+
+      limits:
+        cpu: 100m
+        memory: 1Gi
+      requests:
+        cpu: 100m
+        memory: 1Gi
 
     securityContext:
+
       allowPrivilegeEscalation: false
       capabilities:
         drop:
@@ -228,11 +248,21 @@ job:
 
   cachecleaner:
 
-    resources: {}
+    podAnnotations: {}
+
+    resources:
+
+      limits:
+        cpu: 100m
+        memory: 1Gi
+      requests:
+        cpu: 100m
+        memory: 1Gi
 
     schedule: "0 * * * *"
 
     securityContext:
+
       allowPrivilegeEscalation: false
       capabilities:
         drop:

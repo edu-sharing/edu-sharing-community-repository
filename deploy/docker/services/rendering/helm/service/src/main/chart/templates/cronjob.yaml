@@ -16,6 +16,9 @@ spec:
         metadata:
           annotations:
             sidecar.istio.io/inject: "false"
+            {{- if .Values.job.cachecleaner.podAnnotations }}
+            {{- toYaml .Values.job.cachecleaner.podAnnotations | nindent 12 }}
+            {{- end }}
         spec:
           restartPolicy: OnFailure
           containers:

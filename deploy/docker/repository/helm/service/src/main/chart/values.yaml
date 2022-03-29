@@ -242,6 +242,8 @@ tolerations: []
 
 ########################################################################################################################
 
+podAnnotations: {}
+
 podSecurityContext:
 
   runAsUser: 1000
@@ -290,9 +292,17 @@ init:
 
   permission:
 
-    resources: {}
+    resources:
+
+      limits:
+        cpu: 100m
+        memory: 1Gi
+      requests:
+        cpu: 100m
+        memory: 1Gi
 
     securityContext:
+
       runAsUser: 0
 
 ########################################################################################################################
