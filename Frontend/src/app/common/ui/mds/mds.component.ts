@@ -177,7 +177,6 @@ export class MdsComponent {
                         this.variables = variables;
                         this.loadMdsFinal();
                     },
-                    (error: any) => this.toast.error(error),
                 );
             },
             (error: any) => this.toast.error(error),
@@ -216,11 +215,6 @@ export class MdsComponent {
                     .getMetadataSet({ metadataSet: mdsId })
                     .toPromise();
             } catch (error) {
-                if (error instanceof UserPresentableError) {
-                    this.toast.error(null, error.message);
-                } else {
-                    this.toast.error(error);
-                }
                 this.cancel();
             }
             this._setId = mdsId;

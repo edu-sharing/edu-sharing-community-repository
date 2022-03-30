@@ -78,6 +78,7 @@ export class AdminConfigComponent {
               this.toast.closeModalDialog();
               this.toast.toast('ADMIN.GLOBAL_CONFIG.SAVED');
             },error =>
+                // TODO: check if global error handling displays error twice
                 this.displayError(error)
         );
       }, error => {

@@ -154,8 +154,6 @@ export class LoginComponent implements OnInit {
                                             this.router.navigate([UIConstants.ROUTER_PREFIX + 'workspace']);
                                             // window.history.back();
                                         }
-                                    }, (error: any) => {
-                                        this.toast.error(error);
                                     });
                             }
                         }, (error: any) => RestHelper.goToLogin(this.router, this.configService));

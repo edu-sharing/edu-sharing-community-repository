@@ -1197,9 +1197,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                             count,
                             false
                         );
+                        error.preventDefault();
                         return;
                     }
-                    this.toast.error(error);
                     this.searchRepository(
                         repos,
                         criteria,

@@ -38,9 +38,7 @@ export class NodeStoreService {
                                     nodes.find((node) => node.ref.id === nodeId),
                                 ),
                             });
-                            // TODO: call `preventDefault` when global error handling is merged.
-                            //
-                            // error.preventDefault();
+                            error.preventDefault();
                         }
                     }
                     return rxjs.of(void 0);
