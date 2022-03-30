@@ -21,12 +21,42 @@ Import `EduSharingApiModule` in your app module:
 
 ```ts
 @NgModule({
-    imports: [
-        EduSharingApiModule.forRoot({ rootUrl: environment.eduSharingApiUrl }),
-        // E.g.: rootUrl: 'https://my-edu-sharing-instance.com/edu-sharing/rest
-    ],
+    imports: [EduSharingApiModule.forRoot()],
 })
 export class AppModule {}
+```
+
+## Configuration
+
+| Parameter | Description                                  | Example                                                  |
+| --------- | -------------------------------------------- | -------------------------------------------------------- |
+| rootUrl   | The root URL to the REST API                 | `'https://my-edu-sharing-instance.com/edu-sharing/rest'` |
+| onError   | Default error handler to call on HTTP errors | `(err) => console.error('oh, no!', err)`                 |
+
+Either provide the configuration with `forRoot()`:
+
+```ts
+@NgModule({
+    imports: [
+        EduSharingApiModule.forRoot({ rootUrl: environment.eduSharingApiUrl }),
+    ],
+})
+```
+
+Or provide `EDU_SHARING_API_CONFIG` yourself, which allows you to use dependency injection:
+
+```ts
+@NgModule({
+    providers: [
+        {
+            provide: EDU_SHARING_API_CONFIG,
+            deps: [ErrorHandlerService],
+            useFactory: (errorHandler: ErrorHandlerService) => ({
+                onError: (err) => errorHandler.handleError(err),
+            } as EduSharingApiConfigurationParams),
+        },
+    ],
+})
 ```
 
 ## Usage
@@ -69,6 +99,7 @@ await this.authenticationService.getLoginInfo().toPromise();
 ```
 
 Use `first()` to get an observable that emits once and completes:
+
 ```ts
 import { first } from 'rxjs/operators';
 
@@ -141,8 +172,29 @@ export class FooComponent implements OnInit, OnDestroy {
         this.destroyed$.complete();
     }
 }
-
 ```
+
+## Error Handling
+
+This library allows to define a default error handler `onError`, that will be called on all HTTP
+errors (see [Configuration](#configuration)).
+
+You can choose to prevent this for individual calls by catching the error and calling
+`preventDefault()` on it:
+
+```ts
+this.searchApi.search({ /* ... */ }).subscribe({
+    next: (results) => { /* handle results */ },
+    error: (err) => {
+        /* handle error in a way that makes the default error handler obsolete */
+        err.preventDefault();
+    },
+});
+```
+
+You can also choose to do additional error handling and also run the default error handler by not
+calling `preventDefault()`. In this case, the default error handler is run _after_ the subscribed
+one.
 
 ## Maintaining Ngx Edu-Sharing Api
 
@@ -161,10 +213,13 @@ npm run generate-api
 ```
 
 ### Windows Quirks
+
 Configure your Git to keep line endings to prevent changes to unmodified files:
+
 ```sh
 git config core.autocrlf input
 ```
+
 Run the `npm run generate-api` inside a WSL shell, otherwise the prettier might fail.
 
 ### Code scaffolding

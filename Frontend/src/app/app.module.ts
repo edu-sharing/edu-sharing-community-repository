@@ -80,7 +80,7 @@ import { SearchFieldFacetsComponent } from './common/ui/mds-editor/search-field-
 import { LabelPipe } from './common/ui/mds-editor/shared/label.pipe';
 import { PropertySlugPipe } from './common/ui/mds-editor/shared/property-slug.pipe';
 import { MdsEditorWidgetSearchSuggestionsComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-search-suggestions/mds-editor-widget-search-suggestions.component';
-import { EduSharingApiModule } from 'ngx-edu-sharing-api';
+import { EduSharingApiModule, EDU_SHARING_API_CONFIG } from 'ngx-edu-sharing-api';
 import { MdsEditorWidgetVCardComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-vcard/mds-editor-widget-vcard.component';
 import { extensionProviders } from './extension/extension-providers';
 import {
@@ -90,6 +90,9 @@ import {EditorModule} from '@tinymce/tinymce-angular';
 import { LtiComponent } from './modules/lti/lti.component';
 import { LtiAdminComponent } from './modules/admin/lti-admin/lti-admin.component';
 import { NodeEmbedComponent } from './common/ui/node-embed/node-embed.component';
+import {EduSharingApiConfigurationParams} from 'ngx-edu-sharing-api';
+import {ErrorHandlerService} from './core-ui-module/error-handler.service';
+import { Toast } from './core-ui-module/toast';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -178,11 +181,19 @@ import { NodeEmbedComponent } from './common/ui/node-embed/node-embed.component'
         EditorModule,
     ],
     providers: [
+        {
+            provide: EDU_SHARING_API_CONFIG,
+            deps: [ErrorHandlerService],
+            useFactory: (errorHandler: ErrorHandlerService) => ({
+                onError: (err) => errorHandler.handleError(err),
+            } as EduSharingApiConfigurationParams),
+        },
         PROVIDERS,
         PROVIDERS_SEARCH,
         {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {appearance: 'outline'}},
         {provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: {showDelay: 500}},
         extensionProviders,
+        ErrorHandlerService,
     ],
     exports: [
         DECLARATIONS,

@@ -14,6 +14,7 @@ import {ToastMessageComponent} from './components/toast-message/toast-message.co
 import {RestConnectorService} from '../core-module/core.module';
 import { AccessibilityService } from '../common/ui/accessibility/accessibility.service';
 import { takeUntil } from 'rxjs/operators';
+import {HttpErrorResponse} from '@angular/common/http';
 
 interface CustomAction {
     link: {
@@ -522,6 +523,9 @@ export class Toast implements OnDestroy {
             } else {
                 if (!dialogMessage) {
                     dialogMessage = error + '\n\n' + errorInfo;
+                    if(errorObject instanceof HttpErrorResponse && errorObject.url) {
+                        dialogMessage += '\n\nBackend URL: ' + errorObject.url;
+                    }
                 }
                 if (!translationParameters) {
                     translationParameters = {};

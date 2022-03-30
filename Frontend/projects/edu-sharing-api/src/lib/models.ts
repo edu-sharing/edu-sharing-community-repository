@@ -20,6 +20,9 @@ export {
     UserQuota,
     UserStatus,
 } from './api/models';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MdsView } from './api/models';
 
 export type MdsViewRelation = MdsView['rel'];
+
+export type HttpError = HttpErrorResponse & { preventDefault: () => void };

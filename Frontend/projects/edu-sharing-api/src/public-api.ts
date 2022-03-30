@@ -2,6 +2,10 @@
  * Public API Surface of ngx-edu-sharing-api
  */
 
+export {
+    EduSharingApiConfigurationParams,
+    EDU_SHARING_API_CONFIG,
+} from './lib/edu-sharing-api-configuration';
 export * from './lib/edu-sharing-api.module';
 export * from './lib/models';
 export * from './lib/wrappers/about.service';

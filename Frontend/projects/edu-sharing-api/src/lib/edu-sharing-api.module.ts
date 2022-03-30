@@ -2,7 +2,10 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { forwardRef, ModuleWithProviders, NgModule, Provider } from '@angular/core';
 import { ApiRequestConfiguration } from './api-request-configuration';
 import { ApiInterceptor } from './api.interceptor';
-import { ApiConfiguration, ApiConfigurationParams } from './api/api-configuration';
+import {
+    EduSharingApiConfigurationParams,
+    getConfigProvider,
+} from './edu-sharing-api-configuration';
 
 export const API_INTERCEPTOR_PROVIDER: Provider = {
     provide: HTTP_INTERCEPTORS,
@@ -16,21 +19,23 @@ export const API_INTERCEPTOR_PROVIDER: Provider = {
     exports: [],
 })
 export class EduSharingApiModule {
-    static forRoot(params?: ApiConfigurationParams): ModuleWithProviders<EduSharingApiModule> {
-        const providers: Provider[] = [
-            ApiRequestConfiguration,
-            ApiInterceptor,
-            API_INTERCEPTOR_PROVIDER,
-        ];
-        if (params) {
-            providers.push({
-                provide: ApiConfiguration,
-                useValue: params,
-            });
-        }
+    /**
+     * Gets the edu-sharing-api module to include in your application module.
+     *
+     * Either pass configuration parameters directly to this method, or provide
+     * `EDU_SHARING_API_CONFIG`, which allows you to use dependency injection.
+     */
+    static forRoot(
+        params?: EduSharingApiConfigurationParams,
+    ): ModuleWithProviders<EduSharingApiModule> {
         return {
             ngModule: EduSharingApiModule,
-            providers,
+            providers: [
+                ApiRequestConfiguration,
+                ApiInterceptor,
+                API_INTERCEPTOR_PROVIDER,
+                getConfigProvider(params),
+            ],
         };
     }
 }

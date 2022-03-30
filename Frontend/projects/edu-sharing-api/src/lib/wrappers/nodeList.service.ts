@@ -1,4 +1,3 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { Observable, Subject } from 'rxjs';
@@ -6,6 +5,7 @@ import { catchError, filter, finalize, map, startWith, switchMap, toArray } from
 import { NodeEntries } from '../api/models';
 import { IamV1Service } from '../api/services';
 import { HOME_REPOSITORY, ME } from '../constants';
+import { HttpError } from '../models';
 import { switchRelay } from '../utils/switch-relay';
 import { AuthenticationService } from './authentication.service';
 
@@ -25,7 +25,7 @@ export type NodeListErrorResponses = NodeListErrorResponse[];
 
 interface NodeListErrorResponse {
     nodeId: string;
-    error: HttpErrorResponse;
+    error: HttpError;
 }
 
 /**
