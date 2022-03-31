@@ -1,69 +1,73 @@
-<es-mds-editor-widget-container
-  #container
-  [widget]="widget"
-  [label]="false"
-  [injectedView]="this"
-  [valueType]="valueType"
-  [control]="chipsControl"
+<div
   cdkOverlayOrigin
   #trigger="cdkOverlayOrigin"
   esBorderBoxObserver
+  #box
   #triggerBorderBox="borderBoxObserver"
 >
-  <mat-chip-list
-    #chipList
-    [attr.aria-labelledby]="chipsControl?.value.length > 0 ? container.labelId : null"
-    (click)="$event.stopPropagation(); $event.preventDefault()"
-    [multiple]="true"
+  <es-mds-editor-widget-container
+    #container
+    [widget]="widget"
+    [label]="false"
+    [injectedView]="this"
+    [valueType]="valueType"
+    [control]="chipsControl"
   >
-    <!-- We mark all chips as selected because NVDA will announce "not selected" for each item
-    otherwise. It announces nothing (!) for selected items. Same as MdsEditorWidgetChips. -->
-    <mat-chip
-      #chip="matChip"
-      *ngFor="let value of chipsControl?.value"
-      [disabled]="chipsControl.disabled"
-      [selected]="true"
-      [removable]="true"
-      [matTooltip]="value.label + ' (' + ('MDS.DELETE_KEY_NOTICE' | translate) + ')'"
-      [class.indeterminate]="(this.indeterminateValues$ | async)?.includes(value.key)"
-      [class.mat-chip-selected]="false"
-      (click)="revealInTree(value)"
-      (keydown.enter)="revealInTree(value)"
-      (removed)="remove(value)"
+    <mat-chip-list
+      #chipList
+      [attr.aria-labelledby]="chipsControl?.value.length > 0 ? container.labelId : null"
+      (click)="$event.stopPropagation(); $event.preventDefault()"
+      [multiple]="true"
     >
-      <span class="mat-chip-label">{{ value.label }}</span>
-      <mat-icon matChipRemove>cancel</mat-icon>
-    </mat-chip>
-    <div class="input-wrapper">
-      <input
-        autocomplete="off"
-        [placeholder]="chipsControl?.value?.length ? null : widget.definition.placeholder"
+      <!-- We mark all chips as selected because NVDA will announce "not selected" for each item
+      otherwise. It announces nothing (!) for selected items. Same as MdsEditorWidgetChips. -->
+      <mat-chip
+        #chip="matChip"
+        *ngFor="let value of chipsControl?.value"
         [disabled]="chipsControl.disabled"
-        [matChipInputFor]="chipList"
-        (click)="openOverlay()"
-        cdkMonitorElementFocus
-        (cdkFocusChange)="onInputFocusChange($event)"
-      />
-      <button
-        matSuffix
-        mat-icon-button
-        class="mat-button-select-arrow"
-        cdkMonitorElementFocus
-        (click)="toggleOverlay()"
-        [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
-        (keydown.tab)="chipList._allowFocusEscape()"
+        [selected]="true"
+        [removable]="true"
+        [matTooltip]="value.label + ' (' + ('MDS.DELETE_KEY_NOTICE' | translate) + ')'"
+        [class.indeterminate]="(this.indeterminateValues$ | async)?.includes(value.key)"
+        [class.mat-chip-selected]="false"
+        (click)="revealInTree(value)"
+        (keydown.enter)="revealInTree(value)"
+        (removed)="remove(value)"
       >
-        <span class="mat-select-arrow"></span>
-      </button>
-    </div>
-  </mat-chip-list>
-</es-mds-editor-widget-container>
-
+        <span class="mat-chip-label">{{ value.label }}</span>
+        <mat-icon matChipRemove>cancel</mat-icon>
+      </mat-chip>
+      <div class="input-wrapper">
+        <input
+          autocomplete="off"
+          [placeholder]="chipsControl?.value?.length ? null : widget.definition.placeholder"
+          [disabled]="chipsControl.disabled"
+          [matChipInputFor]="chipList"
+          (click)="openOverlay()"
+          cdkMonitorElementFocus
+          (cdkFocusChange)="onInputFocusChange($event)"
+        />
+        <button
+          matSuffix
+          mat-icon-button
+          class="mat-button-select-arrow"
+          cdkMonitorElementFocus
+          (click)="toggleOverlay()"
+          [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
+          (keydown.tab)="chipList._allowFocusEscape()"
+        >
+          <span class="mat-select-arrow"></span>
+        </button>
+      </div>
+    </mat-chip-list>
+  </es-mds-editor-widget-container>
+</div>
 <ng-template
   cdkConnectedOverlay
   [cdkConnectedOverlayOrigin]="trigger"
   [cdkConnectedOverlayPositions]="overlayPositions"
-  [cdkConnectedOverlayFlexibleDimensions]="true"
+  [cdkConnectedOverlayFlexibleDimensions]="false"
+  [cdkConnectedOverlayMinWidth]="box.getBoundingClientRect().width"
   [cdkConnectedOverlayWidth]="triggerBorderBox.width$ | async"
   [cdkConnectedOverlayOpen]="overlayIsVisible"
   (overlayKeydown)="onOverlayKeydown($event)"

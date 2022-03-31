@@ -21,6 +21,7 @@ import { MdsEditorWidgetTreeCoreComponent } from './mds-editor-widget-tree-core/
 import { Tree } from './tree';
 import { FocusOrigin } from '@angular/cdk/a11y';
 import { MatChip } from '@angular/material/chips';
+import {UIService} from '../../../../../core-module/rest/services/ui.service';
 @Component({
     selector: 'es-mds-editor-widget-tree',
     templateUrl: './mds-editor-widget-tree.component.html',
@@ -49,26 +50,24 @@ export class MdsEditorWidgetTreeComponent
     preventOverlayOpen = false;
     readonly overlayPositions: ConnectedPosition[] = [
         {
-            originX: 'center',
+            originX: 'start',
             originY: 'bottom',
             offsetX: 0,
-            offsetY: -22,
-            overlayX: 'center',
+            offsetY: -34,
+            overlayX: 'start',
             overlayY: 'top',
         },
-        {
-            originX: 'center',
-            originY: 'top',
-            offsetX: 0,
-            offsetY: 0,
-            overlayX: 'center',
-            overlayY: 'bottom',
-        },
+        /*{
+            originX: 'end',
+            originY: 'bottom',
+            overlayX: 'start',
+            overlayY: 'top',
+        },*/
     ];
 
     private destroyed$: ReplaySubject<boolean> = new ReplaySubject(1);
 
-    constructor(mdsEditorInstance: MdsEditorInstanceService, translate: TranslateService) {
+    constructor(mdsEditorInstance: MdsEditorInstanceService, translate: TranslateService, public uiService: UIService) {
         super(mdsEditorInstance, translate);
     }
 
