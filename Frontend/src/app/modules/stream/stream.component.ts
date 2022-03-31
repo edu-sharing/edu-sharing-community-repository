@@ -52,8 +52,7 @@ import {
     ListOptions, ListOptionsConfig, NodeEntriesDisplayType
 } from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 import {SelectionModel} from '@angular/cdk/collections';
-import { StreamEntry } from 'projects/edu-sharing-api/src/lib/api/models';
-import { StreamV1Service } from 'projects/edu-sharing-api/src/lib/api/services';
+import { StreamEntry, StreamV1Service } from 'ngx-edu-sharing-api';
 
 
 @Component({
