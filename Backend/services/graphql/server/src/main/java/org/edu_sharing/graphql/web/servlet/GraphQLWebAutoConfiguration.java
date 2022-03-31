@@ -191,7 +191,9 @@ public class GraphQLWebAutoConfiguration {
         long subscriptionTimeoutMilliseconds = Optional.ofNullable(graphQLServletProperties.getSubscriptionTimeout()) //
                 .orElse(GraphQLServletProperties.DEFAULT_SUBSCRIPTION_TIMEOUT).toMillis();
 
-        return GraphQLConfiguration.with(invocationInputFactory).with(graphQLInvoker)
+        return GraphQLConfiguration
+                .with(invocationInputFactory)
+                .with(graphQLInvoker)
                 .with(graphQLObjectMapper)
                 .with(listeners)
                 .with(subscriptionTimeoutMilliseconds)
