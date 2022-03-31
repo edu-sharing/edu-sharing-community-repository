@@ -146,11 +146,23 @@ public class SearchServiceElastic extends SearchServiceImpl {
         audienceQueryBuilder.should(QueryBuilders.matchQuery("owner", user));
 
         //enhance to collection permissions
+        MatchQueryBuilder collectionTypeProposal = QueryBuilders.matchQuery("collections.relation.type", "ccm:collection_proposal");
         BoolQueryBuilder collectionPermissions = getPermissionsQuery("collections.permissions.read");
         collectionPermissions.should(QueryBuilders.matchQuery("collections.owner", user));
+        collectionPermissions.mustNot(collectionTypeProposal);
+
+        BoolQueryBuilder proposalPermissions = getPermissionsQuery("collections.permissions.Coordinator",getUserAuthorities().stream().filter(a -> !a.equals(CCConstants.AUTHORITY_GROUP_EVERYONE)).collect(Collectors.toSet()));
+        proposalPermissions.should(QueryBuilders.matchQuery("collections.owner", user));
+        proposalPermissions.must(collectionTypeProposal);
+
+        BoolQueryBuilder subPermissions = QueryBuilders.boolQuery().minimumShouldMatch(1)
+                .should(collectionPermissions)
+                .should(proposalPermissions);
+
+
         BoolQueryBuilder audienceQueryBuilderCollections = QueryBuilders.boolQuery()
                 .mustNot(QueryBuilders.termQuery("properties.ccm:restricted_access",true))
-                .must(collectionPermissions);
+                .must(subPermissions);
         audienceQueryBuilder.should(audienceQueryBuilderCollections);
 
         return audienceQueryBuilder;
@@ -403,7 +415,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
                             if (facetResult.isPresent()) {
                                 if (!facetResult.get().getValues().stream().anyMatch(v -> v.getValue().equals(value))) {
                                     if (selected.get().getValues().stream().anyMatch(v -> value.equals(v.getValue()))) {
-                                        facetResult.get().getValues().addAll(selected.get().getValues());
+                                        facetResult.get().getValues().add(selected.get().getValues().stream()
+                                                .filter(v -> value.equals(v.getValue()))
+                                                .findFirst()
+                                                .get()
+                                        );
                                     }
                                 }
                             } else {

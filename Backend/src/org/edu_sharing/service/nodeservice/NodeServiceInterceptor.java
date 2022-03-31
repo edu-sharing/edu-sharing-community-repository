@@ -205,14 +205,15 @@ public class NodeServiceInterceptor implements MethodInterceptor {
         return false;
     }
 
-    private static boolean hasCollectionPermissions(String nodeId){
+    public static boolean hasCollectionPermissions(String nodeId){
         long test = System.currentTimeMillis();
         Provider providerByApp = ProviderHelper.getProviderByApp(ApplicationInfoList.getHomeRepository());
         if(!(providerByApp instanceof ElasticSearchProvider)){
             logger.info("took:"+(System.currentTimeMillis() - test) +"ms");
             return false;
         }
-        if(!CallSourceHelper.getCallSource().equals(CallSourceHelper.CallSource.Render)){
+        if(!CallSourceHelper.getCallSource().equals(CallSourceHelper.CallSource.Render)
+                && !CallSourceHelper.getCallSource().equals(CallSourceHelper.CallSource.Preview)){
             logger.info("took:"+(System.currentTimeMillis() - test) +"ms");
             return false;
         }
