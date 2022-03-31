@@ -6,8 +6,8 @@
   "scripts": {
     "start": "ng serve",
     "start-public": "ng serve --host 0.0.0.0 --disable-host-check",
-    "build": "ng build --configuration production --base-href /edu-sharing/ --delete-output-path false",
-    "build-dev": "ng build --base-href /edu-sharing/",
+    "build": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build --configuration production --base-href /edu-sharing/ --delete-output-path false",
+    "build-dev": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build --base-href /edu-sharing/",
     "lint": "ng lint",
     "test": "ng test",
     "pree2e": "webdriver-manager update",

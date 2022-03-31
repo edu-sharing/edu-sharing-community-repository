@@ -27,4 +27,23 @@ making a public issue. This can help us tracking down the issue first and may pr
 Please provide such concerns via mail to security@edu-sharing.com
 
 Thanks!
+
+
+Dependency Management
+---------------------
+
+Rule of thumb:
+Dependencies of all third party libraries used by edu-sharing will be specified in the alfresco class path under backend/alfresco/module.
+This will prevent dependency conflicts inside the application of edu-sharing and alfresco.
+
+Inside alfresco:
+scope: provided -> if the library comes with the alfresco distribution
+scope: runtime  -> imported for use in edu-sharing but not in alfresco
+scope: compile  -> imported for use in alfresco or edu-sharing
+
+Inside edu-sharing:
+scope: provided -> always for all third party libraries
+scope: compile  -> only edu-sharing internals
+
+![Add dependency decision tree](docs/images/MavenDependencyManagement.jpg)
  
