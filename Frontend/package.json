@@ -17,7 +17,7 @@
     "gitlog": "..\\Edu-Sharing-Internal\\Frontend\\gitlog.sh",
     "start-storybook": "start-storybook -p 4300 -s ./src/assets",
     "build-storybook": "build-storybook -s ./src/assets",
-    "postinstall": "ngcc"
+    "postinstall": "ngcc --async=false"
   },
   "private": true,
   "dependencies": {
