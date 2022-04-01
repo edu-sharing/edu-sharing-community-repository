@@ -6,11 +6,11 @@
   [control]="formControl"
   [wrapInFormField]="false"
 >
-  <!-- TODO: add `[aria-describedby]="container.descriptionId"` after updating to Angular 10 -->
   <mat-checkbox
-    matInput
+    *ngIf="formControl"
     [(indeterminate)]="isIndeterminate"
     [formControl]="formControl"
+    [aria-describedby]="container.descriptionId"
     (indeterminateChange)="onIndeterminateChange($event)"
     >{{ widget.definition.caption }}</mat-checkbox
   >

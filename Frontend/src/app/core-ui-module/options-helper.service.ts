@@ -58,6 +58,7 @@ import {
 import {MainNavService} from '../common/services/main-nav.service';
 import {FormBuilder} from '@angular/forms';
 import { NodeEmbedService } from '../common/ui/node-embed/node-embed.service';
+import { NodeStoreService } from '../modules/search/node-store/node-store.service';
 
 
 export class OptionsHelperConfig {
@@ -156,6 +157,7 @@ export class OptionsHelperService implements OnDestroy {
         private storage: TemporaryStorageService,
         private bridge: BridgeService,
         private nodeEmbed: NodeEmbedService,
+        private nodeStore: NodeStoreService,
         @Optional() @Inject(OPTIONS_HELPER_CONFIG) config: OptionsHelperConfig,
     ) {
         if (config == null) {
@@ -1231,9 +1233,8 @@ export class OptionsHelperService implements OnDestroy {
 
     private bookmarkNodes(nodes: Node[]) {
         this.bridge.showProgressDialog();
-        RestHelper.addToStore(nodes, this.bridge, this.iamService, () => {
-            this.bridge.closeModalDialog();
-            this.mainNav.refreshNodeStore();
+        this.nodeStore.add(nodes).subscribe(() => {
+            this.bridge.closeModalDialog()
         });
     }
 

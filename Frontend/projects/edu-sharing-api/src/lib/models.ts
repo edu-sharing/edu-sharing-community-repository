@@ -12,12 +12,13 @@ export {
     MetadataSetInfo,
     Node,
     NodeRef,
-    SearchResultNode as SearchResults,
     Organization,
+    Person,
+    SearchResultNode as SearchResults,
+    StreamEntry,
     UserProfile,
     UserQuota,
     UserStatus,
-    Person,
 } from './api/models';
 import { MdsView } from './api/models';
 

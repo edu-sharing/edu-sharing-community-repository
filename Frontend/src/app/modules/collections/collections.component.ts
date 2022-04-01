@@ -1343,13 +1343,6 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         });
     }
 
-    private addToStore(nodes: Node[]) {
-        this.toast.showProgressDialog();
-        RestHelper.addToStore(nodes, this.bridge, this.iamService, () => {
-            this.toast.closeModalDialog();
-            this.mainNavRef.refreshNodeStore();
-        });
-    }
     async setCollectionSort(sort: ListSortConfig) {
         this.sortCollections = sort;
         try {

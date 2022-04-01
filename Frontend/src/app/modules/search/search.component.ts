@@ -971,15 +971,6 @@ export class SearchComponent implements AfterViewInit, OnDestroy {
     */
     }
 
-    private addToStore(selection: Node[]) {
-        this.globalProgress = true;
-        RestHelper.addToStore(selection, this.bridge, this.iam, () => {
-            this.globalProgress = false;
-            this.nodeEntriesResults.getSelection().clear();
-            this.mainNavRef.refreshNodeStore();
-        });
-    }
-
     async onMdsReady(mds: any = null) {
         this.currentMdsSet = mds;
         this.updateColumns();

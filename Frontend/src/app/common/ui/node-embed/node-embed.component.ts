@@ -18,6 +18,7 @@ import { Subject } from 'rxjs';
 import { first, startWith } from 'rxjs/operators';
 import { DialogButton, RestHelper } from 'src/app/core-module/core.module';
 import { Toast, ToastType } from 'src/app/core-ui-module/toast';
+import { UIHelper } from 'src/app/core-ui-module/ui-helper';
 import { Node } from '../../../core-module/rest/data-object';
 import { MainNavService } from '../../services/main-nav.service';
 
@@ -124,9 +125,7 @@ export class NodeEmbedComponent implements OnInit, OnDestroy {
     }
 
     private async copy(): Promise<void> {
-        await navigator.clipboard.writeText(this.embedCode);
-        // We focus the textarea, just as a visual hint to what was copied.
-        this.textareaRef.nativeElement.focus();
+        UIHelper.copyElementToClipboard(this.textareaRef.nativeElement);
         this.toast.show({
             message: 'EMBED.COPIED_TO_CLIPBOARD_NOTICE',
             type: 'info',
