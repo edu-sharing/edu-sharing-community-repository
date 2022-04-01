@@ -397,7 +397,6 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                     this.reurl = params.reurl;
                 }
                 this.reurlDirectories = params.applyDirectories === 'true';
-                this.createAllowed = this.root === 'MY_FILES';
                 this.mainnav = params.mainnav === 'false' ? false : true;
 
                 if (params.file) {
@@ -411,6 +410,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 if (!needsUpdate) {
                     return;
                 }
+                this.createAllowed = this.root === 'MY_FILES';
                 let lastLocation = this.storage.pop(this.getLastLocationStorageId(), null);
                 if(this.isSafe) {
                     // clear lastLocation, this is another folder than the safe
