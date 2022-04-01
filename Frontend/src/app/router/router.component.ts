@@ -52,7 +52,7 @@ import { environment } from '../../environments/environment';
     providers: [],
 })
 export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
-    private static readonly CHECKS_PER_SECOND_WARNING_THRESHOLD = 60;
+    private static readonly CHECKS_PER_SECOND_WARNING_THRESHOLD = 0;
     private static readonly CONSECUTIVE_TRANSGRESSION_THRESHOLD = 10;
     private static history = new BehaviorSubject<string[]>([]);
 
