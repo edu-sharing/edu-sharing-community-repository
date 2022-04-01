@@ -204,7 +204,8 @@
           <button
             mat-button
             class="user clickable"
-            #userRef
+            esElementRef
+            #userRef="esElementRef"
             *ngIf="currentUser && _showUser"
             [matMenuTriggerFor]="userDropdown.menu"
             title="{{ 'USERMENU' | translate }}"
