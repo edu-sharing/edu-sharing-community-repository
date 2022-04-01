@@ -13,7 +13,9 @@ import {
     UIConstants
 } from '../../../core-module/core.module';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import { LoginInfo } from 'ngx-edu-sharing-api';
+import {LoginInfo, User, UserService} from 'ngx-edu-sharing-api';
+import {takeUntil} from 'rxjs/operators';
+import {Subject} from 'rxjs';
 
 @Component({
     selector: 'es-main-menu-sidebar',
@@ -27,6 +29,8 @@ import { LoginInfo } from 'ngx-edu-sharing-api';
 export class MainMenuSidebarComponent implements OnInit {
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     readonly ME = RestConstants.ME;
+    private readonly destroyed$ = new Subject();
+
     @Input() currentScope: string;
 
     @Output() showLicenses = new EventEmitter<void>();
@@ -36,12 +40,21 @@ export class MainMenuSidebarComponent implements OnInit {
 
     // Global state, set on init
     loginInfo: LoginInfo;
+    currentUser: User;
 
     constructor(
         private configService: ConfigurationService,
         private connector: RestConnectorService,
         public iam: RestIamService,
-    ) {}
+        public user: UserService,
+    ) {
+        this.user
+            .getCurrentUser()
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe(async (currentUser) => {
+                this.currentUser = currentUser.person;
+            });
+    }
 
     // Public methods, meant for invocation from outside this component.
 
@@ -55,7 +68,7 @@ export class MainMenuSidebarComponent implements OnInit {
     // Internal methods, should only be called by this component.
 
     async ngOnInit() {
-        this.loginInfo = await this.connector.isLoggedIn().toPromise();
+        this.loginInfo = await this.connector.isLoggedIn(false).toPromise();
     }
 
     /**
@@ -81,5 +94,10 @@ export class MainMenuSidebarComponent implements OnInit {
     onShowLicenses() {
         this.hide();
         this.showLicenses.emit();
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed$.next();
+        this.destroyed$.complete();
     }
 }

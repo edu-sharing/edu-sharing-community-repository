@@ -113,7 +113,7 @@ public class ApplicationInfoList {
 	 * 
 	 * @return Map with AppId, ApplicationInfo
 	 */
-	public static HashMap<String, ApplicationInfo> getApplicationInfos(){
+	public static Map<String, ApplicationInfo> getApplicationInfos(){
 		if(appInfos.getKeys().size() == 0){
 			logger.debug("appInfos size is 0");
 			initAppInfos();
@@ -127,7 +127,7 @@ public class ApplicationInfoList {
 		HashMap<String, ApplicationInfo> result = new HashMap<>();
 		appInfos.getKeys().forEach(appId -> result.put(appId,appInfos.get(appId)));
 
-		return result;
+		return Collections.synchronizedMap(result);
 	}
 	
 	/**

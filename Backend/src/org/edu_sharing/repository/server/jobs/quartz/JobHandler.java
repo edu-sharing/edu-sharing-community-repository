@@ -66,10 +66,9 @@ public class JobHandler {
 	private static final int MAX_JOB_LOG_COUNT = 20; // maximal number of jobs to store for history and gui
 	private static List<JobInfo> jobs = new ArrayList<>();
 
-	ApplicationContext eduApplicationContext =
-			org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
+	ApplicationContext eduApplicationContext = null;
 
-	JobClusterLocker jobClusterLocker = (JobClusterLocker)eduApplicationContext.getBean("jobClusterLocker");
+	JobClusterLocker jobClusterLocker = null;
 
 	public boolean cancelJob(String jobName) throws SchedulerException {
 		boolean result=quartzScheduler.interrupt(jobName, null);
@@ -185,6 +184,16 @@ public class JobHandler {
 	 * Singelton
 	 */
 	protected JobHandler() throws Exception {
+		init(org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext());
+	}
+
+	protected JobHandler(ApplicationContext applicationContext) throws Exception {
+		init(applicationContext);
+	}
+
+	private void init(ApplicationContext applicationContext) throws Exception{
+		this.eduApplicationContext = applicationContext;
+		this.jobClusterLocker = (JobClusterLocker)eduApplicationContext.getBean("jobClusterLocker");
 		SchedulerFactory schedFact = new org.quartz.impl.StdSchedulerFactory();
 		quartzScheduler = schedFact.getScheduler();
 		quartzScheduler.addGlobalTriggerListener(new TriggerListener() {
@@ -209,9 +218,9 @@ public class JobHandler {
 			public boolean vetoJobExecution(Trigger trigger, JobExecutionContext jobExecutionContext) {
 				logger.info("TriggerListener.vetoJobExecution called");
 				try {
-					
-					
-					
+
+
+
 					/**
 					 * don't veto
 					 * Allow jobs to run independend of other jobs
@@ -220,7 +229,7 @@ public class JobHandler {
 					if(allJobs == null || allJobs.length == 0) {
 						return false;
 					}
-					
+
 					/**
 					 * veto if there is another job running
 					 */
@@ -250,7 +259,7 @@ public class JobHandler {
 
 					logger.info("TriggerListener.vetoJobExecution returning:" + veto);
 					return veto;
-					
+
 				} catch (Exception e) {
 					e.printStackTrace();
 					return false;
@@ -308,6 +317,10 @@ public class JobHandler {
 				if (job instanceof AbstractJob) {
 					((AbstractJob) job).setStarted(false);
 				}
+				if(context.getJobDetail() != null && context.getJobDetail().getJobDataMap() != null){
+					String vetoBy = (String)context.getJobDetail().getJobDataMap().get(JobHandler.VETO_BY_KEY);
+					Logger.getLogger(context.getJobDetail().getJobClass()).info("Job was vetoed by "+vetoBy);
+				}
 			}
 
 			@Override
@@ -320,7 +333,6 @@ public class JobHandler {
 		quartzScheduler.startDelayed(10);
 
 		refresh();
-
 	}
 
 	public synchronized void refresh() {
@@ -532,6 +544,13 @@ public class JobHandler {
 	public static JobHandler getInstance() throws Exception {
 		if (instance == null) {
 			instance = new JobHandler();
+		}
+		return instance;
+	}
+
+	public static JobHandler getInstance(ApplicationContext applicationContext) throws Exception {
+		if (instance == null) {
+			instance = new JobHandler(applicationContext);
 		}
 		return instance;
 	}

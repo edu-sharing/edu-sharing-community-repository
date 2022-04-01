@@ -22,7 +22,7 @@ import { first } from "rxjs/operators";
 export class RocketchatComponent implements EventListener {
     onEvent(event: string, data: any): void {
         if(event == FrameEventsService.EVENT_USER_LOGGED_IN || event == FrameEventsService.EVENT_USER_LOGGED_OUT)
-            this.initalize(true)
+            this.initalize()
     }
     @ViewChild('frame') frame:ElementRef;
     @HostListener('document:keydown', ['$event'])
@@ -49,7 +49,7 @@ export class RocketchatComponent implements EventListener {
         private events: FrameEventsService
     ){
         this.events.addSelfListener(this);
-        this.initalize(false);
+        this.initalize();
         this.ngZone.runOutsideAngular(() => {
             window.addEventListener('message', (event: any) => {
                 if (event.source !== window.self) {
@@ -74,7 +74,7 @@ export class RocketchatComponent implements EventListener {
         return this.sanitizer.bypassSecurityTrustResourceUrl(this._data.url+'/channel/general');
     }
 
-    private async initalize(forceRenew = false) {
+    private async initalize() {
         this._data = null;
         this.src = null;
         this.opened = await this.configuration.get('remote.rocketchat.shouldOpen', false).toPromise();
@@ -83,7 +83,7 @@ export class RocketchatComponent implements EventListener {
             GlobalContainerComponent.subscribePreloading().pipe(first()).subscribe(() => this.initalize());
             return;
         }
-        const login = await this.connector.isLoggedIn(forceRenew).toPromise();
+        const login = await this.connector.isLoggedIn(false).toPromise();
         if (login.remoteAuthentications && login.remoteAuthentications.ROCKETCHAT) {
             this._data = login.remoteAuthentications.ROCKETCHAT;
             this.src = this.getFrameUrl();

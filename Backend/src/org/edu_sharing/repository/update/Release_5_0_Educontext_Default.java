@@ -74,6 +74,9 @@ public class Release_5_0_Educontext_Default extends UpdateAbstract {
 		AtomicBoolean result = new AtomicBoolean(true);
 		runner.setFilter((ref)->{
 			try {
+				if(ref == null){
+					return false;
+				}
 				if (!nodeService.exists(ref)) {
 					return false;
 				}
@@ -88,7 +91,7 @@ public class Release_5_0_Educontext_Default extends UpdateAbstract {
 				} else
 					return true;
 			}catch(Throwable e){
-				logger.error("error filtering node:" + ref +" " + e.getMessage());
+				logger.error("error filtering node:" + ref +" " + e.getMessage(),e);
 				result.set(false);
 				return false;
 			}
@@ -105,7 +108,7 @@ public class Release_5_0_Educontext_Default extends UpdateAbstract {
 				processed[0]++;
 			}catch(Throwable e){
 				result.set(false);
-				logger.error("error processing node:" + ref +" " + e.getMessage());
+				logger.error("error processing node:" + ref +" " + e.getMessage(),e);
 			}
 		});
         runner.run();

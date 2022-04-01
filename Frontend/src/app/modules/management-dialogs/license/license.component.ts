@@ -137,7 +137,7 @@ export class WorkspaceLicenseComponent  {
         private nodeApi : RestNodeService) {
         this.translateLicenceCountries(this.constantCountries);
         this.updateButtons();
-        this.iamApi.getUser().subscribe(() => {});
+        this.iamApi.getCurrentUserAsync().then(() => {});
     }
     @ViewChild('selectLicense') selectLicense : ElementRef;
     @ViewChild('author') author : MdsEditorWidgetAuthorComponent;

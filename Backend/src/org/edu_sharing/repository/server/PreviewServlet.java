@@ -449,9 +449,18 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 					return matched.matches();
 				})) {
 			logger.debug("Follow redirect allowed for " + url);
-			try(InputStream is = new HttpQueryTool().getStream(url)) {
-				resp.setHeader("Content-Type", "image/jpeg");
-				StreamUtils.copy(is, resp.getOutputStream());
+			try{
+				new HttpQueryTool().queryStream(url, new HttpQueryTool.Callback<Void>() {
+					@Override
+					public void handle(InputStream httpResult) {
+						resp.setHeader("Content-Type", "image/jpeg");
+						try {
+							StreamUtils.copy(httpResult, resp.getOutputStream());
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+					}
+				});
 				return true;
 			} catch(Throwable t) {
 				logger.info("Fetching preview via http failed for: " + url, t);
@@ -600,9 +609,12 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			imgOutStream.close();
 			in.close();
 			return new DataInputStream(new ByteArrayInputStream(os.toByteArray()));
-
-		}
-		catch(Throwable t){
+		} catch(OutOfMemoryError e) {
+			throw e;
+		}catch(Throwable t){
+			if(t.getCause() instanceof OutOfMemoryError) {
+				throw (OutOfMemoryError)t.getCause();
+			}
 			return null;
 		}
 		finally {
@@ -641,13 +653,13 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				// DataInputStream(url.openStream());
 				InputStream is=reader.getContentInputStream();
 				DataInputStream in = new DataInputStream(is);
-				if(mimetype.startsWith("image")){
-					DataInputStream tmp = postProcessImage(nodeRef.getId(),in,req);
-					if(tmp != null){
-						in = tmp;
-						mimetype = "image/jpeg";
-					}
-					else {
+				if(mimetype.startsWith("image")) {
+					try {
+						DataInputStream tmp = postProcessImage(nodeRef.getId(), in, req);
+						if (tmp != null) {
+							in = tmp;
+							mimetype = "image/jpeg";
+						} else {
 						// image was broken but stream is consumed, open a new one
 						reader = serviceRegistry.getContentService().getReader(nodeRef,
 								QName.createQName(contentProp));
@@ -655,6 +667,10 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 						in = new DataInputStream(is);
 					}
 
+					} catch (OutOfMemoryError e) {
+						logger.debug("Image too large for memory, falling back to icon " + nodeRef);
+						throw e;
+					}
 				}
 				// fix to proper mimetype (usually comes at "image/svg xml" which is not valid)
 				if(mimetype.startsWith("image/svg")){

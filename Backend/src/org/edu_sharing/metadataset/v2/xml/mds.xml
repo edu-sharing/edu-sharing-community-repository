@@ -468,8 +468,6 @@
 		</template>
 		<template>
 			<id>node_general_template</id>
-			<caption>dialog_upload_tab_basic</caption>
-			<icon>description</icon>
 			<html><![CDATA[
 			  <ccm:educationallearningresourcetype>
               <cclom:general_keyword>
@@ -1104,7 +1102,7 @@
 			<property name="ngsearchword">
 				<statement>{"bool":{"should":[
 					{"wildcard":{"properties.cm:name":{"value":"*${value}*", "case_insensitive": true }}},
-					{"wildcard":{"properties.cclom:title":{"value":"*${value}*", "case_insensitive": true }}},
+					{"wildcard":{"properties.cclom:title.keyword":{"value":"*${value}*", "case_insensitive": true }}},
 					{"wildcard":{"properties.cclom:general_description":{"value":"*${value}*", "case_insensitive": true }}},
 					{"wildcard":{"properties.cclom:general_keyword":{"value":"*${value}*", "case_insensitive": true }}},
 					{"wildcard":{"content.fulltext":{"value":"*${value}*", "case_insensitive": true }}},

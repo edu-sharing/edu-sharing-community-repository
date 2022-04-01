@@ -54,12 +54,13 @@ import { MainMenuEntriesService } from '../../services/main-menu-entries.service
 import { GlobalContainerComponent } from '../global-container/global-container.component';
 import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar.component';
 import {MainMenuDropdownComponent} from '../main-menu-dropdown/main-menu-dropdown.component';
+import {BehaviorSubject} from 'rxjs';
 import {MainNavService} from '../../services/main-nav.service';
 import { SearchFieldComponent } from '../search-field/search-field.component';
 import {About, AboutService, AuthenticationService, User, UserService} from 'ngx-edu-sharing-api';
 import { ConfigOptionItem, NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import {first, takeUntil} from 'rxjs/operators';
 
 /**
  * The main nav (top bar + menus)
@@ -264,7 +265,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.connector.setRoute(this.route).subscribe(() => {
             this.aboutService.getAbout().subscribe(about => {
                 this.about = about;
-                this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+                this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
                     if (!data.isValidLogin) {
                         this.canOpen = data.isGuest;
                         this.checkConfig();
@@ -965,7 +966,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
 
     /**
      * Updates the `timeout` property.
-     * 
+     *
      * @param timeUntilLogout time until automatic logout in milliseconds
      */
     private updateTimeout(timeUntilLogout: number) {
@@ -984,7 +985,14 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.user
             .getCurrentUser()
             .pipe(takeUntil(this.destroyed$))
-            .subscribe((currentUser) => (this.currentUser = currentUser.person));
+            .subscribe(async (currentUser) => {
+                const login = await this.authentication.getLoginInfo().pipe(first()).toPromise();
+                if(login.isGuest) {
+                    this.currentUser = null;
+                } else {
+                    this.currentUser = currentUser.person
+                }
+            });
     }
 
     private registerAutoLogoutTimeout(): void {

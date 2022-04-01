@@ -156,7 +156,7 @@ export class MainMenuEntriesService {
                 .toPromise()
                 .then(config => (this.config = config)),
             this.restConnector
-                .isLoggedIn()
+                .isLoggedIn(false)
                 .toPromise()
                 .then(loginInfo => (this.loginInfo = loginInfo)),
             this.authentication

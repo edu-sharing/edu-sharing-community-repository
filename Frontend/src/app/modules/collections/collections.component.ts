@@ -1068,7 +1068,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         );
 
         // load user profile
-        this.iamService.getUser().subscribe(
+        this.iamService.getCurrentUserAsync().then(
             iamUser => {
                 // WIN
 

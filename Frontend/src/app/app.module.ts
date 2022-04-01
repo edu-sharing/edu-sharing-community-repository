@@ -62,8 +62,6 @@ import {MdsEditorWidgetDurationComponent} from './common/ui/mds-editor/widgets/m
 import {MdsEditorWidgetLicenseComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-license/mds-editor-widget-license.component';
 import { MdsEditorEmbeddedComponent } from './common/ui/mds-editor/mds-editor-embedded/mds-editor-embedded.component';
 import { MdsEditorWidgetSuggestionChipsComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-suggestion-chips/mds-editor-widget-suggestion-chips.component';
-import { SkipTargetDirective } from './common/ui/skip-nav/skip-target.directive';
-import { SkipNavComponent } from './common/ui/skip-nav/skip-nav.component';
 import {MdsEditorWidgetFileUploadComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-file-upload/mds-editor-widget-file-upload.component';
 import {CommonModule} from '@angular/common';
 import { MultiLineLabelComponent } from './common/ui/multi-line-label/multi-line-label.component';
@@ -153,8 +151,6 @@ import { NodeEmbedComponent } from './common/ui/node-embed/node-embed.component'
         MdsEditorWidgetCheckboxesComponent,
         MdsEditorEmbeddedComponent,
         MdsEditorWidgetSuggestionChipsComponent,
-        SkipTargetDirective,
-        SkipNavComponent,
         MultiLineLabelComponent,
         RegisterCustomPropertyDirective,
         OnAttributeChangeDirective,

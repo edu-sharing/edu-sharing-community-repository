@@ -124,6 +124,9 @@
         >button {
           border-radius: 50%;
           height: 66px;
+          &.cdk-keyboard-focused {
+            outline-offset: -2px;
+          }
         }
       }
       .avatar {

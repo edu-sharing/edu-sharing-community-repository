@@ -172,7 +172,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     ngOnDestroy(): void {
         this.storage.remove('workspace_clipboard');
         if(this.currentFolder) {
-            this.storage.set(TemporaryStorageService.WORKSPACE_LAST_LOCATION, this.currentFolder.ref.id);
+            this.storage.set(this.getLastLocationStorageId(), this.currentFolder.ref.id);
         }
         // close sidebar, if open
         this.mainNavRef.management.closeSidebar();
@@ -370,7 +370,6 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                     this.reurl = params.reurl;
                 }
                 this.reurlDirectories = params.applyDirectories === 'true';
-                this.createAllowed = this.root === 'MY_FILES';
                 this.mainnav = params.mainnav === 'false' ? false : true;
 
                 if (params.file) {
@@ -384,7 +383,8 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 if (!needsUpdate) {
                     return;
                 }
-                let lastLocation = this.storage.pop(TemporaryStorageService.WORKSPACE_LAST_LOCATION, null);
+                this.createAllowed = this.root === 'MY_FILES';
+                let lastLocation = this.storage.pop(this.getLastLocationStorageId(), null);
                 if(this.isSafe) {
                     // clear lastLocation, this is another folder than the safe
                     lastLocation = null;
@@ -517,7 +517,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         }
         else {
             this.selectedNodeTree = id;
-            this.node.getNodeParents(id).subscribe((data: NodeList) => {
+            this.node.getNodeParents(id, false, [RestConstants.ALL]).subscribe((data: NodeList) => {
                 if (this.root === 'RECYCLE') {
                     this.path = [];
                     this.createAllowed = false;
@@ -764,7 +764,9 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     }
 
     async prepareActionbar() {
-        this.toMeSharedToggle = await this.session.get('toMeSharedGroup', false).toPromise();
+        this.toMeSharedToggle = await this.session.get('toMeSharedGroup',
+            this.config.instant('workspaceSharedToMeDefaultAll', false)
+            ).toPromise();
         const toggle = new OptionItem('OPTIONS.TOGGLE_SHARED_TO_ME',
             this.toMeSharedToggle ? 'edu-content_shared_me_all' : 'edu-content_shared_me_private',
             () => {
@@ -783,6 +785,10 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             return this.root === 'TO_ME_SHARED_FILES';
         }
         this.customOptions.addOptions = [toggle];
+    }
+
+    private getLastLocationStorageId() {
+        return TemporaryStorageService.WORKSPACE_LAST_LOCATION + (this.isSafe ? RestConstants.SAFE_SCOPE : '');
     }
 
     setDisplayType(displayType: NodeEntriesDisplayType, refreshRoute = true) {

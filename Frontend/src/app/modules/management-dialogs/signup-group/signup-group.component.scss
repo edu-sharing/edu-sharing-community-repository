@@ -18,6 +18,13 @@
     width: 100%;
     border-radius: 0;
     padding:0 $cardPadding;
+    &.is-member {
+        app-authority-row {
+            opacity: 0.75;
+            filter: grayscale(100%);
+            backdrop-filter: grayscale(100%);
+        }
+    }
     &.selected{
       background: $listItemSelectedBackgroundEffect;
     }

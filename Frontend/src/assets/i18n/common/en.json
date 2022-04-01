@@ -1,3 +1,4 @@
+
 {
     "CHOOSEENVIRONMENT": "Choose environment",
     "YES": "yes",
@@ -798,6 +799,7 @@
         "CONFIRM_GROUP": "You will join the following group:",
         "GROUP_PASSWORD": "Enter group password",
         "SIGNUP": "Join",
+        "ALREADY_MEMBER": "You're already a member",
         "SIGNUP_TYPE": {
             "simple": "Access possible without restrictions",
             "password": "Access only with password",

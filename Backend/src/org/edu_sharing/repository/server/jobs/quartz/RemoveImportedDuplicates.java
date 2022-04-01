@@ -9,6 +9,7 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -41,9 +42,9 @@ public class RemoveImportedDuplicates extends AbstractJob{
         String startFolder = (String)jobExecutionContext.getJobDetail().getJobDataMap().get(PARAM_START_FOLDER);
         Boolean execute = new Boolean((String)jobExecutionContext.getJobDetail().getJobDataMap().get(PARAM_EXECUTE));
         AuthenticationUtil.runAsSystem(() -> {
-                excecute(startFolder,execute);
-                return null;
-            }
+                    excecute(startFolder,execute);
+                    return null;
+                }
         );
     }
 
@@ -64,35 +65,53 @@ public class RemoveImportedDuplicates extends AbstractJob{
         logger.info("found "+ duplicates.size() +" duplicates in import folder  " + startFolder );
 
         for(Map.Entry<String, List<NodeRef>> entry : duplicates.entrySet()){
-            logger.info(entry.getKey() + ": found duplicates: " + entry.getValue().stream().map(Object::toString).collect(Collectors.joining(",")));
-            NodeRef oldestNodeRef = null;
-            Date oldest = null;
+            logger.info(
+                    entry.getKey() + ": found duplicates: "  +
+                    nodeService.getProperty(
+                            entry.getValue().get(0),
+                            QName.createQName(CCConstants.CM_NAME)
+                    ) + entry.getValue().stream().map(NodeRef::getId).collect(Collectors.joining(","))
+            );
+            HashMap<NodeRef, Integer> result = new HashMap<>();
             for(NodeRef nodeRef : entry.getValue()){
-                Date created = (Date)nodeService.getProperty(nodeRef,ContentModel.PROP_CREATED);
-                if(oldest == null || oldest.getTime() > created.getTime()) {
-                    oldest = (Date) nodeService.getProperty(nodeRef, ContentModel.PROP_CREATED);
-                    oldestNodeRef = nodeRef;
+                int isInUse = 0;
+                List<ChildAssociationRef> children = nodeService.getChildAssocs(nodeRef, new HashSet(Arrays.asList(new QName[]{
+                        QName.createQName(CCConstants.CCM_TYPE_USAGE)})));
+                if(children != null && children.size() > 0){
+                    // logger.error(entry.getKey() + ": can not remove " + nodeRef + " cause of usages " + children);
+                    isInUse += children.size();
                 }
+                List<String> curriculum = (List<String>)nodeService.getProperty(nodeRef,QName.createQName(CCConstants.getValidGlobalName("ccm:curriculum")));
+                if(curriculum != null && curriculum.size() > 0){
+                    // logger.error(entry.getKey() + ": can not remove " + nodeRef + " cause of ccm:curriculum: " + String.join(",",curriculum));
+                    isInUse++;
+                }
+                result.put(nodeRef, isInUse);
+            }
+            List<NodeRef> toDelete = result.entrySet().stream().filter((e) -> e.getValue() == 0).
+                    map((e) -> e.getKey()).collect(Collectors.toList());
+            if(toDelete.size() == result.size()) {
+                logger.info(entry.getKey() + ": None of all " + toDelete.size() + " nodes have usages, will delete all but latest");
+                toDelete.sort((a, b) ->
+                        ((Date)nodeService.getProperty(b, QName.createQName(CCConstants.CM_PROP_C_MODIFIED))).
+                        compareTo((Date)nodeService.getProperty(a, QName.createQName(CCConstants.CM_PROP_C_MODIFIED)))
+                );
+                toDelete.remove(0);
+            } else if (toDelete.size() == result.size() - 1) {
+                logger.info(entry.getKey() + ": Exactly one node has usages, will delete all but this one");
+            } else {
+                logger.error(entry.getKey() + ": " + (result.size() - toDelete.size()) + " nodes have usages, won't delete anything. Please manually check:");
+                result.forEach((key, value) -> logger.log(value > 0 ? Level.WARN : Level.INFO, entry.getKey() + ": Node id " + key + ", hasUsages: " + value));
+                toDelete.clear();
             }
 
-            List<ChildAssociationRef> children = nodeService.getChildAssocs(oldestNodeRef, new HashSet(Arrays.asList(new QName[]{
-                    QName.createQName(CCConstants.CCM_TYPE_USAGE)})));
-            if(children != null && children.size() > 0){
-                logger.error(entry.getKey() + ": can not remove " + oldestNodeRef + " cause of usages " + children);
-                continue;
-            }
-            List<String> curriculum = (List<String>)nodeService.getProperty(oldestNodeRef,QName.createQName(CCConstants.getValidGlobalName("ccm:curriculum")));
-            if(curriculum != null && curriculum.size() > 0){
-                logger.error(entry.getKey() + ": can not remove " + oldestNodeRef + " cause of ccm:curriculum: " + String.join(",",curriculum));
-                continue;
-            }
-            logger.info(entry.getKey()+": would delete oldest:" + oldestNodeRef);
-            if(execute){
-                NodeRef fNodeRef = oldestNodeRef;
-                nodeService.addAspect(fNodeRef, ContentModel.ASPECT_TEMPORARY, null);
-                nodeService.deleteNode(fNodeRef);
-
-            }
+            toDelete.forEach((ref) -> {
+                logger.info(entry.getKey()+": delete node:" + ref);
+                if(execute) {
+                    nodeService.addAspect(ref, ContentModel.ASPECT_TEMPORARY, null);
+                    nodeService.deleteNode(ref);
+                }
+            });
         }
     }
 }
