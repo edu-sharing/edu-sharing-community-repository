@@ -43,6 +43,8 @@ import { extensionRoutes } from '../extension/extension-routes';
 import {BehaviorSubject} from 'rxjs';
 import { AccessibilityService } from '../common/ui/accessibility/accessibility.service';
 import { LtiComponent } from '../modules/lti/lti.component';
+import { printCurrentTaskInfo } from './track-change-detection';
+import { environment } from '../../environments/environment';
 
 @Component({
     selector: 'es-router',
@@ -119,6 +121,9 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
 
     ngDoCheck(): void {
         this.numberOfChecks++;
+        if (environment.traceChangeDetection) {
+            printCurrentTaskInfo('doCheck');
+        }
     }
 
     ngAfterViewInit(): void {
