@@ -29,10 +29,12 @@ export class InfiniteScrollDirective implements OnInit, OnDestroy {
   constructor(private element: ElementRef, private zone: NgZone) {}
 
   ngOnInit(): void {
-    const handleScroll = (event: any) => this.handleOnScroll(event);
-    const eventTarget = this.scrollWindow ? window : this.element.nativeElement;
-    eventTarget.addEventListener('scroll', handleScroll);
-    this.destroyed$.subscribe(() => eventTarget.removeEventListener('scroll', handleScroll));
+    this.zone.runOutsideAngular(() => {
+      const handleScroll = (event: any) => this.handleOnScroll(event);
+      const eventTarget = this.scrollWindow ? window : this.element.nativeElement;
+      eventTarget.addEventListener('scroll', handleScroll);
+      this.destroyed$.subscribe(() => eventTarget.removeEventListener('scroll', handleScroll));
+    });
   }
 
   ngOnDestroy(): void {
@@ -55,7 +57,7 @@ export class InfiniteScrollDirective implements OnInit, OnDestroy {
         if(time - this.lastEvent < this.infiniteScrollThrottle)
           return;
         this.lastEvent=time;
-        this.scrolled.emit();
+        this.emitScrolled();
       }
       this.lastScroll=scroll;
     }
@@ -68,10 +70,14 @@ export class InfiniteScrollDirective implements OnInit, OnDestroy {
           if(time - this.lastEvent < this.infiniteScrollThrottle)
               return;
           this.lastEvent=time;
-          this.scrolled.emit();
-      }
+          this.emitScrolled();
+        }
       this.lastScroll=scroll;
     }
     //console.log(window.pageYOffset);
+  }
+
+  private emitScrolled(): void {
+    this.zone.run(() => this.scrolled.emit());
   }
 }
