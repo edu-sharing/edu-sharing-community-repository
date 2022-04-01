@@ -1,10 +1,11 @@
 import { trigger } from '@angular/animations';
-import { Component, HostListener } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { Subject } from 'rxjs';
 import { UIAnimation } from 'src/app/core-module/ui/ui-animation';
 
 /**
  * Shows a small button on the bottom of the screen that scrolls to the page top.
- * 
+ *
  * Place after all visible content for correct keyboard focus order.
  */
 @Component({
@@ -13,14 +14,31 @@ import { UIAnimation } from 'src/app/core-module/ui/ui-animation';
     styleUrls: ['./scroll-to-top-button.component.scss'],
     animations: [trigger('fade', UIAnimation.fade())],
 })
-export class ScrollToTopButtonComponent {
+export class ScrollToTopButtonComponent implements OnInit, OnDestroy {
     showScrollToTop = false;
 
-    constructor() {}
+    private readonly destroyed$ = new Subject<void>();
 
-    @HostListener('window:scroll')
-    handleScroll() {
-        this.showScrollToTop = (window.pageYOffset || document.documentElement.scrollTop) > 400;
+    constructor(private ngZone: NgZone) {}
+
+    ngOnInit() {
+        this.ngZone.runOutsideAngular(() => {
+            const handleScroll = () => this.handleScroll();
+            window.addEventListener('scroll', handleScroll);
+            this.destroyed$.subscribe(() => window.removeEventListener('scroll', handleScroll));
+        });
+    }
+
+    ngOnDestroy() {
+        this.destroyed$.next();
+        this.destroyed$.complete();
+    }
+
+    private handleScroll() {
+        const showScrollTop = (window.pageYOffset || document.documentElement.scrollTop) > 400;
+        if (showScrollTop !== this.showScrollToTop) {
+            this.ngZone.run(() => (this.showScrollToTop = showScrollTop));
+        }
     }
 
     scrollToTop() {
