@@ -12,7 +12,7 @@ import {
     ElementRef,
     EventEmitter,
     HostListener,
-    Input, OnDestroy,
+    Input, NgZone, OnDestroy,
     OnInit,
     Output, TemplateRef,
     ViewChild,
@@ -218,6 +218,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         private nodeHelper: NodeHelperService,
         private authentication: AuthenticationService,
         private user: UserService,
+        private ngZone: NgZone,
     ) {
         this.mainnavService.registerMainNav(this);
         this.visible = !this.storage.get(
@@ -266,6 +267,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.registerCurrentUser();
         this.registerAutoLogoutDialog();
         this.registerAutoLogoutTimeout();
+        this.registerHandleScroll();
     }
 
     ngAfterViewInit() {
@@ -277,9 +279,19 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.updateUserOptions();
     }
 
-    @HostListener('window:scroll', ['$event'])
-    @HostListener('window:touchmove', ['$event'])
-    async handleScroll(event: any) {
+    private registerHandleScroll(): void {
+        const handleScroll = (event: any) => this.handleScroll(event);
+        this.ngZone.runOutsideAngular(() => {
+            window.addEventListener('scroll', handleScroll);
+            window.addEventListener('touchmove', handleScroll);
+            this.destroyed$.subscribe(() => {
+                window.removeEventListener('scroll', handleScroll);
+                window.removeEventListener('touchmove', handleScroll);
+            })
+        });
+    }
+
+    private async handleScroll(event: any) {
         if (
             this.storage.get(
                 TemporaryStorageService.OPTION_DISABLE_SCROLL_LAYOUT,
