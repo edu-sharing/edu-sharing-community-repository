@@ -1,4 +1,4 @@
-import {Component, HostListener, OnDestroy, ViewChild} from '@angular/core';
+import {Component, HostListener, NgZone, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {TranslateService} from '@ngx-translate/core';
 import {Translation} from '../../core-ui-module/translation';
 import {
@@ -50,7 +50,7 @@ import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component'
 import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {WorkspaceExplorerComponent} from './explorer/explorer.component';
 import {CardService} from '../../core-ui-module/card.service';
-import {Observable} from 'rxjs';
+import {Observable, Subject} from 'rxjs';
 import {delay} from 'rxjs/operators';
 import {ListTableComponent} from '../../core-ui-module/components/list-table/list-table.component';
 import {SkipTarget} from '../../common/ui/skip-nav/skip-nav.service';
@@ -73,7 +73,7 @@ import {
         trigger('fromRight', UIAnimation.fromRight())
     ]
 })
-export class WorkspaceMainComponent implements EventListener, OnDestroy {
+export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy {
     @ViewChild('explorer') explorer: WorkspaceExplorerComponent;
     @ViewChild('actionbar') actionbarRef: ActionbarComponent;
     private static VALID_ROOTS = ['MY_FILES', 'SHARED_FILES', 'MY_SHARED_FILES', 'TO_ME_SHARED_FILES', 'WORKFLOW_RECEIVE', 'RECYCLE'];
@@ -133,14 +133,14 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     displayType: NodeEntriesDisplayType  = null;
     private reurlDirectories: boolean;
     reorderDialog: boolean;
+    private readonly destroyed$ = new Subject<void>();
     @HostListener('window:beforeunload', ['$event'])
     beforeunloadHandler(event: any) {
         if (this.isSafe) {
             this.connector.logout().toPromise();
         }
     }
-    @HostListener('window:scroll', ['$event'])
-    handleScroll(event: Event) {
+    private handleScroll(event: Event) {
         const scroll = (window.pageYOffset || document.documentElement.scrollTop);
         if (scroll > 0) {
             this.storage.set('workspace_scroll', scroll);
@@ -169,7 +169,14 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             this.refresh();
         }
     }
+
+    ngOnInit(): void {
+        this.registerScroll();
+    }
+
     ngOnDestroy(): void {
+        this.destroyed$.next();
+        this.destroyed$.complete();
         this.storage.remove('workspace_clipboard');
         if(this.currentFolder) {
             this.storage.set(this.getLastLocationStorageId(), this.currentFolder.ref.id);
@@ -200,6 +207,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         private connector: RestConnectorService,
         private cordova: CordovaService,
         private card: CardService,
+        private ngZone: NgZone,
     ) {
         this.event.addListener(this);
         Translation.initialize(translate, this.config, this.session, this.route).subscribe(() => {
@@ -208,6 +216,14 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         this.connector.setRoute(this.route);
         this.globalProgress = true;
         this.cardHasOpenModals$ = card.hasOpenModals.pipe(delay(0));
+    }
+
+    private registerScroll(): void {
+        this.ngZone.runOutsideAngular(() => {
+            const handleScroll = (event: Event) => this.handleScroll(event);
+            window.addEventListener('scroll', handleScroll);
+            this.destroyed$.subscribe(() => window.removeEventListener('scroll', handleScroll));
+        })
     }
 
     private hideDialog(): void {

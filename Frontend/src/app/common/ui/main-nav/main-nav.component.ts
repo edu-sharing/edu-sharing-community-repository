@@ -12,7 +12,7 @@ import {
     ElementRef,
     EventEmitter,
     HostListener,
-    Input, OnDestroy,
+    Input, NgZone, OnDestroy,
     OnInit,
     Output, TemplateRef,
     ViewChild,
@@ -54,13 +54,13 @@ import { MainMenuEntriesService } from '../../services/main-menu-entries.service
 import { GlobalContainerComponent } from '../global-container/global-container.component';
 import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar.component';
 import {MainMenuDropdownComponent} from '../main-menu-dropdown/main-menu-dropdown.component';
-import {BehaviorSubject} from 'rxjs';
+import {Observable} from 'rxjs';
 import {MainNavService} from '../../services/main-nav.service';
 import { SearchFieldComponent } from '../search-field/search-field.component';
 import {About, AboutService, AuthenticationService, User, UserService} from 'ngx-edu-sharing-api';
 import { ConfigOptionItem, NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
 import { Subject } from 'rxjs';
-import {first, takeUntil} from 'rxjs/operators';
+import {first, map, takeUntil} from 'rxjs/operators';
 
 /**
  * The main nav (top bar + menus)
@@ -161,7 +161,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     visible = false;
     createMenuX: number;
     createMenuY: number;
-    timeout: string;
+    autoLogoutTimeout$: Observable<string>;
     config: any = {};
     showNodeStore = false;
     acceptLicenseAgreement: boolean;
@@ -218,6 +218,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         private nodeHelper: NodeHelperService,
         private authentication: AuthenticationService,
         private user: UserService,
+        private ngZone: NgZone,
     ) {
         this.mainnavService.registerMainNav(this);
         this.visible = !this.storage.get(
@@ -266,6 +267,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.registerCurrentUser();
         this.registerAutoLogoutDialog();
         this.registerAutoLogoutTimeout();
+        this.registerHandleScroll();
     }
 
     ngAfterViewInit() {
@@ -277,9 +279,19 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.updateUserOptions();
     }
 
-    @HostListener('window:scroll', ['$event'])
-    @HostListener('window:touchmove', ['$event'])
-    async handleScroll(event: any) {
+    private registerHandleScroll(): void {
+        const handleScroll = (event: any) => this.handleScroll(event);
+        this.ngZone.runOutsideAngular(() => {
+            window.addEventListener('scroll', handleScroll);
+            window.addEventListener('touchmove', handleScroll);
+            this.destroyed$.subscribe(() => {
+                window.removeEventListener('scroll', handleScroll);
+                window.removeEventListener('touchmove', handleScroll);
+            })
+        });
+    }
+
+    private async handleScroll(event: any) {
         if (
             this.storage.get(
                 TemporaryStorageService.OPTION_DISABLE_SCROLL_LAYOUT,
@@ -909,20 +921,14 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         );
     }
 
-    /**
-     * Updates the `timeout` property.
-     *
-     * @param timeUntilLogout time until automatic logout in milliseconds
-     */
-    private updateTimeout(timeUntilLogout: number) {
+    private getTimeoutString(timeUntilLogout: number): string {
         const time = Math.ceil(timeUntilLogout / 1000);
         const min = Math.floor(time / 60);
         const sec = time % 60;
         if (time >= 0) {
-            this.timeout =
-                this.formatTimeout(min, 2) + ':' + this.formatTimeout(sec, 2);
+            return this.formatTimeout(min, 2) + ':' + this.formatTimeout(sec, 2);
         } else {
-            this.timeout = '';
+            return '';
         }
     }
 
@@ -941,10 +947,10 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private registerAutoLogoutTimeout(): void {
-        this.authentication
-            .getTimeUntilAutoLogout(1000)
-            .pipe(takeUntil(this.destroyed$))
-            .subscribe((timeUntilLogout) => this.updateTimeout(timeUntilLogout));
+        this.autoLogoutTimeout$ = this.authentication.getTimeUntilAutoLogout(1000).pipe(
+            takeUntil(this.destroyed$),
+            map((timeUntilLogout) => this.getTimeoutString(timeUntilLogout)),
+        );
     }
 
     private registerAutoLogoutDialog(): void {

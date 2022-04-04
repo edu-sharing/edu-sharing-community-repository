@@ -122,10 +122,12 @@
             </button>
           </ng-container>
         </div>
-      <div class="timeout" *ngIf="isSafe() && timeout && !mainMenuSidebar?.show">
-        <i esIcon="av_timer"></i>
-          {{ timeout }}
-        </div>
+        <ng-container *ngIf="isSafe() && !mainMenuSidebar?.show">
+          <div class="timeout" *ngIf="autoLogoutTimeout$ | async as timeout">
+            <i esIcon="av_timer"></i>
+            {{ timeout }}
+          </div>
+        </ng-container>
         <div class="add-material">
           <ng-container *ngTemplateOutlet="createButtonRef"></ng-container>
           <ng-container *ngIf="!createButtonRef">
@@ -204,7 +206,8 @@
           <button
             mat-button
             class="user clickable"
-            #userRef
+            esElementRef
+            #userRef="esElementRef"
             *ngIf="currentUser && _showUser"
             [matMenuTriggerFor]="userDropdown.menu"
             title="{{ 'USERMENU' | translate }}"
