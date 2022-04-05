@@ -46,7 +46,7 @@ export class MainMenuSidebarComponent implements OnInit {
         private configService: ConfigurationService,
         private connector: RestConnectorService,
         public iam: RestIamService,
-        public user: UserService,
+        private user: UserService,
     ) {
         this.user
             .getCurrentUser()
