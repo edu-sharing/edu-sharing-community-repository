@@ -586,6 +586,7 @@
         <div class="heading"><i class="material-icons">person</i><span>{{'ADMIN.TOOLKIT.AUTHENTICATE_AS_USER' | translate}}</span></div>
         <es-authority-search-input
           [mode]="AuthoritySearchMode.Users"
+          [globalSearchAllowed]="true"
           label="{{'ADMIN.TOOLKIT.AUTHENTICATE_AS_USER' | translate}}"
           [showRecent]="false"
           (onChooseAuthority)="authenticateAuthority = $event"></es-authority-search-input>
