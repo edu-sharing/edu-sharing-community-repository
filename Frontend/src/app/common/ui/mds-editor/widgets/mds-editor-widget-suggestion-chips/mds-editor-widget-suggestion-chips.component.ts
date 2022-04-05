@@ -1,6 +1,5 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { FacetValue } from 'ngx-edu-sharing-api';
-import { SearchService } from 'ngx-edu-sharing-api';
+import { FacetValue, SearchService } from 'ngx-edu-sharing-api';
 import { combineLatest, Observable, Subject } from 'rxjs';
 import { map, startWith, takeUntil } from 'rxjs/operators';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
