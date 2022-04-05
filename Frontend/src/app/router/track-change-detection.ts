@@ -26,7 +26,7 @@ const FILTER_REGEXP: RegExp[] = [
     /LongStackTrace/,
     /Observable._zoneSubscribe/,
     /polyfills.js:/,
-    /vendor.js:/,
+    /(<anonymous>)/,
 ];
 
 interface Frame {
@@ -35,31 +35,57 @@ interface Frame {
     };
 }
 
-function filterFrames(stack: string) {
-    return stack
-        .split(NEWLINE)
-        .filter((frame) => !FILTER_REGEXP.some((reg) => reg.test(frame)))
-        .join(NEWLINE);
+function concatStacks(frames: Frame[] = []): string[] {
+    const stacks = frames
+        .filter((frame) => frame.error.stack)
+        .map((frame) => frame.error.stack)
+        .map((stack) => stack.split(NEWLINE));
+    return [].concat(...stacks);
+}
+
+function filterFrames(stack: string[]): string[] {
+    return stack.filter((frame) => !FILTER_REGEXP.some((reg) => reg.test(frame)));
+}
+
+function isVendor(frame: string): boolean {
+    return /vendor.js:/.test(frame);
 }
 
 // Adapted from https://stackoverflow.com/a/54943260
-function renderLongStackTrace(frames: Frame[]): string {
-    if (!frames) {
-        return 'no frames';
-    }
-    return frames
-        .filter((frame) => frame.error.stack)
-        .map((frame: any) => filterFrames(frame.error.stack))
-        .join(NEWLINE);
+function getLongStackTrace(frames: Frame[]): string[] {
+    const stack = concatStacks(frames);
+    return filterFrames(stack);
 }
 
-function getFirstRelevantFrame(frames: Frame[]): string {
-    return frames?.[0].error.stack
-        .split(NEWLINE)
-        .find((frame) => !FILTER_REGEXP.some((reg) => reg.test(frame)));
+function getStackTraceLog(stack: string[], maxVendorLines: number, maxLines: number): string[] {
+    let vendorLines = 0;
+    let lines = 0;
+    let message = '';
+    let format: string[] = [];
+    for (const frame of stack) {
+        if (isVendor(frame)) {
+            if (vendorLines < maxVendorLines) {
+                message += `\n%c${frame}`;
+                format.push('');
+                vendorLines++;
+            } else {
+                continue;
+            }
+        } else {
+            message += `\n%c${frame}`;
+            format.push('font-weight: bold');
+        }
+        lines++;
+        if (lines >= maxLines) {
+            break;
+        }
+    }
+    return [message, ...format];
 }
 
 export function printCurrentTaskInfo(prefix: string): void {
     const frames: Frame[] = (Zone.currentTask?.data as any)?.__creationTrace__;
-    console.log(prefix, Zone.currentTask?.source, getFirstRelevantFrame(frames));
+    const stack = getLongStackTrace(frames);
+    const [message, ...format] = getStackTraceLog(stack, 2, 5);
+    console.log(prefix + ' ' + Zone.currentTask?.source + message, ...format);
 }
