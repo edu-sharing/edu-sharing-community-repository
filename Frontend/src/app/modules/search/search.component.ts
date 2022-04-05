@@ -1440,7 +1440,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                         if (this.oldParams[key] === param[key]) {
                             continue;
                         }
-                        if (key === UIConstants.QUERY_PARAM_LIST_VIEW_TYPE) {
+                        if (key === UIConstants.QUERY_PARAM_LIST_VIEW_TYPE || key === 'nodeStore') {
                             continue;
                         }
                         reinit = true;
