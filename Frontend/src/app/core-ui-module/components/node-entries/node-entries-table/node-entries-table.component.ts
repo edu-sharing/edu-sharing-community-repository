@@ -18,13 +18,14 @@ import { Target } from '../../../option-item';
 import { DropdownComponent } from '../../dropdown/dropdown.component';
 import { ClickSource, InteractionType } from '../../node-entries-wrapper/entries-model';
 import {UIService} from '../../../../core-module/rest/services/ui.service';
+import {NodeEntriesDataType} from '../node-entries.component';
 
 @Component({
     selector: 'es-node-entries-table',
     templateUrl: './node-entries-table.component.html',
     styleUrls: ['./node-entries-table.component.scss'],
 })
-export class NodeEntriesTableComponent<T extends Node> implements OnChanges, AfterViewInit {
+export class NodeEntriesTableComponent<T extends NodeEntriesDataType> implements OnChanges, AfterViewInit {
     readonly InteractionType = InteractionType;
     readonly ClickSource = ClickSource;
     readonly Target = Target;
@@ -127,7 +128,12 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
          */
     }
     getVisibleColumns() {
-        return ['select', 'icon'].concat(
+        const columns = [];
+        if(this.entriesService.checkbox) {
+            columns.push('select');
+        }
+        columns.push('icon');
+        return columns.concat(
             this.entriesService.columns.filter((c) => c.visible).map((c) => c.name)
         ).concat(
             ['actions']
@@ -181,7 +187,7 @@ export class NodeEntriesTableComponent<T extends Node> implements OnChanges, Aft
 
     dragEnter = (index: number, drag: CdkDrag, drop: CdkDropList) => {
         const target = this.entriesService.dataSource.getData()[index];
-        const allowed = this.entriesService.dragDrop.dropAllowed?.(target, {
+        const allowed = this.entriesService.dragDrop.dropAllowed?.(target as Node, {
             element: [this.dragSource],
             sourceList: this.entriesService.list,
             mode: DragCursorDirective.dragState.mode

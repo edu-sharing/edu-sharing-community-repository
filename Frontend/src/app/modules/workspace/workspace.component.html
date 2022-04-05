@@ -89,8 +89,8 @@
                       [actionbar]="actionbar"
                       (onSearchGlobal)="searchGlobal($event)"
                       (onDrop)="handleDrop($event)"
-                      (onViewNode)="openNode($event, false)"
-                      (onOpenNode)="openNode($event, false)"
+                      (onViewNode)="openNode($any($event), false)"
+                      (onOpenNode)="openNode($any($event), false)"
                       (onReset)="resetWorkspace()"
 ></es-workspace-explorer>
 

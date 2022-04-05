@@ -8,7 +8,7 @@ import {
     TemplateRef
 } from '@angular/core';
 import {NodeEntriesService} from '../../node-entries.service';
-import {Node} from '../../../core-module/rest/data-object';
+import {GenericAuthority, Node} from '../../../core-module/rest/data-object';
 import {KeyEvents} from '../../../core-module/ui/key-events';
 import {UIService} from '../../../core-module/rest/services/ui.service';
 import {NodeEntriesDisplayType} from '../node-entries-wrapper/entries-model';
@@ -20,7 +20,7 @@ import {NodeEntriesTemplatesService} from './node-entries-templates.service';
     styleUrls: ['node-entries.component.scss'],
 
 })
-export class NodeEntriesComponent<T extends Node> implements OnChanges {
+export class NodeEntriesComponent<T extends NodeEntriesDataType> implements OnChanges {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
 
     @HostListener('document:keydown', ['$event'])
@@ -52,3 +52,4 @@ export class NodeEntriesComponent<T extends Node> implements OnChanges {
     ngOnChanges(changes: SimpleChanges): void {
     }
 }
+export type NodeEntriesDataType = Node | GenericAuthority;

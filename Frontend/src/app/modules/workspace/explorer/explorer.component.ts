@@ -38,6 +38,9 @@ import {
     NodeClickEvent, NodeEntriesDisplayType,
     NodeRoot
 } from '../../../core-ui-module/components/node-entries-wrapper/entries-model';
+import {
+    NodeEntriesDataType
+} from '../../../core-ui-module/components/node-entries/node-entries.component';
 
 @Component({
     selector: 'es-workspace-explorer',
@@ -102,10 +105,10 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     @Input() set searchQuery(query : any) {
         this.setSearchQuery(query);
     }
-    @Output() onOpenNode=new EventEmitter<Node>();
+    @Output() onOpenNode=new EventEmitter<NodeEntriesDataType>();
     @Output() onViewNode=new EventEmitter();
     @Output() onSelectionChanged=new EventEmitter();
-    @Output() onSelectNode=new EventEmitter<Node>();
+    @Output() onSelectNode=new EventEmitter<NodeEntriesDataType>();
     @Output() onSearchGlobal=new EventEmitter();
     @Output() onDrop=new EventEmitter<{target: DropTarget, source: DropSource<Node>}>();
     @Output() onReset=new EventEmitter();
@@ -387,11 +390,11 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         });
     }
 
-    select(event: NodeClickEvent<Node>) {
+    select(event: NodeClickEvent<NodeEntriesDataType>) {
         if(!(this.nodeEntries.getSelection().selected.length === 1 && this.nodeEntries.getSelection().selected[0] === event.element)) {
             this.nodeEntries.getSelection().clear();
         }
-        this.nodeEntries.getSelection().toggle(event.element);
+        this.nodeEntries.getSelection().toggle(event.element as Node);
     }
 
     private async initOptions() {
@@ -407,7 +410,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         this.storage.set('workspaceColumns',columns);
     }
 
-    clickItem(event: NodeClickEvent<Node>) {
+    clickItem(event: NodeClickEvent<NodeEntriesDataType>) {
           if(this.ui.isMobile()) {
               this.onOpenNode.emit(event.element);
           } else {

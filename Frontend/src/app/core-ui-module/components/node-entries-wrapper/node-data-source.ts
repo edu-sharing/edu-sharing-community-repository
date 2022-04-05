@@ -1,10 +1,10 @@
 import { DataSource } from '@angular/cdk/collections';
 import { BehaviorSubject, Observable } from 'rxjs';
 import * as rxjs from 'rxjs';
-import { Node, Pagination } from '../../../core-module/rest/data-object';
+import {GenericAuthority, Node, Pagination} from '../../../core-module/rest/data-object';
 import { distinctUntilChanged, map, shareReplay } from 'rxjs/operators';
 
-export class NodeDataSource<T extends Node> extends DataSource<T> {
+export class NodeDataSource<T extends Node|GenericAuthority> extends DataSource<T> {
     private dataStream = new BehaviorSubject<T[]>([]);
     private pagination: Pagination;
     public isLoading: boolean;
