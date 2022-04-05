@@ -12,7 +12,7 @@ import {
 import {TranslateService} from '@ngx-translate/core';
 import {SessionStorageService} from '../../core-module/core.module';
 import {RestConnectorService} from '../../core-module/core.module';
-import {Component, ViewChild, ElementRef, ViewContainerRef, ComponentFactoryResolver} from '@angular/core';
+import {Component, ViewChild, ElementRef, ViewContainerRef, ComponentFactoryResolver, OnDestroy} from '@angular/core';
 import {
     LoginResult,
     ServerUpdate,
@@ -71,7 +71,7 @@ type LuceneData = {
     trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))
   ]
 })
-export class AdminComponent {
+export class AdminComponent implements OnDestroy {
   readonly AuthoritySearchMode = AuthoritySearchMode;
   readonly SCOPES = Scope;
 
@@ -217,6 +217,12 @@ export class AdminComponent {
   private mediacenters: any[];
   ownAppMode='repository';
   authenticateAuthority: Authority;
+  private readonly onDestroyTasks: Array<() => void> = [];
+
+  ngOnDestroy(): void {
+    this.onDestroyTasks.forEach((task) => task());
+  }
+
   public startJob() {
     this.storage.set('admin_job',this.job);
     this.globalProgress=true;
@@ -1166,10 +1172,11 @@ export class AdminComponent {
               this.availableJobs = jobs;
               this.prepareJobClasses();
             });
-            setInterval(() => {
+            const interval = setInterval(() => {
                 if (this.mode == 'JOBS')
                     this.reloadJobStatus();
             }, 10000);
+            this.onDestroyTasks.push(() => clearInterval(interval));
             this.admin.getOAIClasses().subscribe((classes: string[]) => {
                 this.oaiClasses = classes;
                 this.storage.get('admin_oai').subscribe((data: any) => {
