@@ -226,7 +226,7 @@
       <h4 class="mat-heading-4 mat-heading-underline">
         <span>{{'ADMIN.LTI.HEADER' | translate }}</span>
       </h4>
-      <es-lti-admin [adminComponent]="this"></es-lti-admin>
+      <es-lti-admin (onRefreshAppList)="refreshAppList()"></es-lti-admin>
       <h4 class="mat-heading-4 mat-heading-underline">
         <span>{{'ADMIN.APPLICATIONS.LIST' | translate }}</span>
       </h4>

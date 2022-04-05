@@ -1,9 +1,11 @@
-import { Component, Input, OnInit } from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 
 import { RestLtiService } from '../../../core-module/rest/services/rest-lti.service';
 import { LTIRegistrationToken, LTIRegistrationTokens } from '../../../core-module/rest/data-object';
 import { Toast } from '../../../core-ui-module/toast';
 import { AdminComponent } from '../admin.component';
+import {UIHelper} from '../../../core-ui-module/ui-helper';
+import {DialogButton} from '../../../core-module/ui/dialog-button';
 
 @Component({
   selector: 'es-lti-admin',
@@ -12,14 +14,13 @@ import { AdminComponent } from '../admin.component';
 })
 export class LtiAdminComponent implements OnInit {
 
-    @Input()
-    adminComponent: AdminComponent;
+    @Output() onRefreshAppList = new EventEmitter<void>();
 
     /**
      * dynamic
      */
     tokens: LTIRegistrationTokens;
-    displayedColumns: string[] = ['url', 'tsCreated', 'delete'];
+    displayedColumns: string[] = ['url', 'tsCreated', 'copy', 'delete'];
 
     /**
      * advanced
@@ -40,11 +41,21 @@ export class LtiAdminComponent implements OnInit {
   }
 
     remove(element: LTIRegistrationToken) {
-      console.log('remove called');
-      this.ltiService.removeToken(element.token).subscribe((t: void) => {
-          this.refresh();
+      this.toast.showConfigurableDialog({
+          title: 'ADMIN.LTI.REMOVE_TITLE',
+          message: 'ADMIN.LTI.REMOVE_MESSAGE',
+          messageParameters: element,
+          buttons: [
+              new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.toast.closeModalDialog()),
+              new DialogButton('ADMIN.APPLICATIONS.REMOVE', DialogButton.TYPE_DANGER, () => {
+                  this.ltiService.removeToken(element.token).subscribe((t: void) => {
+                      this.refresh();
+                  });
+                  this.toast.closeModalDialog()
+              })
+          ],
+          isCancelable: true,
       });
-
     }
 
     refresh() {
@@ -52,7 +63,10 @@ export class LtiAdminComponent implements OnInit {
     }
 
     generate() {
-        this.ltiService.getTokensCall(true).subscribe((t: LTIRegistrationTokens) => {this.tokens = t; });
+        this.ltiService.getTokensCall(true).subscribe((t: LTIRegistrationTokens) => {
+            this.tokens = t;
+            this.copyUrl(this.tokens.registrationLinks[this.tokens.registrationLinks.length - 1]);
+        });
     }
 
     saveAdvanced() {
@@ -60,9 +74,15 @@ export class LtiAdminComponent implements OnInit {
             this.authenticationRequestUrl, this.keysetUrl, this.keyId, this.authTokenUrl).subscribe( (t: void) => {
             this.toast.toast('ADMIN.LTI.DATA.CREATED', null);
             this.toast.closeModalDialog();
-            this.adminComponent.refreshAppList();
+            this.onRefreshAppList.emit();
         }, (error: any) => {
             this.toast.error(error);
-            this.toast.closeModalDialog(); } );
+            this.toast.closeModalDialog();
+        });
+    }
+
+    copyUrl(element: LTIRegistrationToken) {
+        UIHelper.copyToClipboard(element.url);
+        this.toast.toast('ADMIN.APPLICATIONS.COPIED_CLIPBOARD');
     }
 }
