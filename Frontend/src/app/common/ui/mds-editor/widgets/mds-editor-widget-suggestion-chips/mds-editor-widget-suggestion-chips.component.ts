@@ -51,7 +51,7 @@ export class MdsEditorWidgetSuggestionChipsComponent implements OnInit, OnDestro
      * widget's value.
      */
     private getFilteredSuggestions(primaryWidget: Widget): Observable<FacetValue[]> {
-        const widgetSuggestions$ = this.search.getFacet(this.widget.definition.id).pipe(
+        const widgetSuggestions$ = this.search.observeFacet(this.widget.definition.id).pipe(
             takeUntil(this.destroyed$),
             map((suggestions) => suggestions?.values.slice(0, 5)),
         );

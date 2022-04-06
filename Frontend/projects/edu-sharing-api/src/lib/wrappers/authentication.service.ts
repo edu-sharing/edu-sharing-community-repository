@@ -151,7 +151,7 @@ export class AuthenticationService {
      *
      * The observable is updated on any login action.
      */
-    getLoginInfo(): Observable<LoginInfo> {
+    observeLoginInfo(): Observable<LoginInfo> {
         if (this.loginActionTrigger.value === null) {
             this.loginActionTrigger.next({ kind: 'initial' });
         }
@@ -161,7 +161,7 @@ export class AuthenticationService {
     /**
      * Emits when the logged-in user changes.
      */
-    getUserChanges(): Observable<void> {
+    observeUserChanges(): Observable<void> {
         return this.userChanges$;
     }
 
@@ -181,7 +181,7 @@ export class AuthenticationService {
      *
      * The observable is updated when the user logs in or out.
      */
-    hasAccessToScope(scope: string): Observable<boolean> {
+    observeHasAccessToScope(scope: string): Observable<boolean> {
         if (!this.accessToScopeObservables[scope]) {
             this.accessToScopeObservables[scope] = this.createHasAccessToScope(scope);
         }
@@ -191,14 +191,14 @@ export class AuthenticationService {
     /**
      * Fires when the user was logged out by the backend due to inactivity.
      */
-    getAutoLogout(): Observable<void> {
+    observeAutoLogout(): Observable<void> {
         return this.autoLogoutSubject;
     }
 
     /**
      * Returns the time of automatic logout due to inactivity by the backend.
      */
-    getAutoLogoutTime(): Observable<Date | null> {
+    observeAutoLogoutTime(): Observable<Date | null> {
         return this.autoLogoutTimeSubject;
     }
 
@@ -207,7 +207,7 @@ export class AuthenticationService {
      *
      * @param interval how often to emit the updated value in milliseconds
      */
-    getTimeUntilAutoLogout(interval: number): Observable<number | null> {
+    observeTimeUntilAutoLogout(interval: number): Observable<number | null> {
         let lastEmittedValue: number | null = null;
         return this.autoLogoutTimeSubject.pipe(
             switchMap((autoLogoutTime) =>

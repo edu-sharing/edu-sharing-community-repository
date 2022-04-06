@@ -57,7 +57,7 @@ export class ConfigService {
      *
      * The observable will update on changes.
      */
-    getConfig({ forceUpdate = false } = {}): Observable<ClientConfig | null> {
+    observeConfig({ forceUpdate = false } = {}): Observable<ClientConfig | null> {
         if (forceUpdate) {
             this.updateTrigger.next();
         }
@@ -69,7 +69,7 @@ export class ConfigService {
      *
      * The observable will update on changes.
      */
-    getVariables(): Observable<Variables | null> {
+    observeVariables(): Observable<Variables | null> {
         return this.variables$;
     }
 
@@ -94,7 +94,7 @@ export class ConfigService {
      *
      * @returns a nested dictionary of default translations
      */
-    getDefaultTranslations(): Observable<TranslationsDict> {
+    observeDefaultTranslations(): Observable<TranslationsDict> {
         return this.defaultTranslations$;
     }
 
@@ -105,7 +105,7 @@ export class ConfigService {
      *
      * @returns a flat dictionary of translation overrides, key parts separated by "."
      */
-    getTranslationOverrides(): Observable<{ [key: string]: string } | null> {
+    observeTranslationOverrides(): Observable<{ [key: string]: string } | null> {
         return this.translationOverrides$;
     }
 }

@@ -46,7 +46,7 @@ export class UserService {
      * Subscribing to the observable does not necessarily trigger an API request, when we already
      * have fetched the data.
      */
-    getCurrentUser(): Observable<UserEntry> {
+    observeCurrentUser(): Observable<UserEntry> {
         return this.currentUser$;
     }
 
@@ -60,7 +60,7 @@ export class UserService {
             repository,
             body: profile,
         });
-        return this.getCurrentUser().pipe(
+        return this.observeCurrentUser().pipe(
             first(),
             switchMap((userEntry) => {
                 if (userId === ME || userId === userEntry.person.authorityName) {
@@ -74,7 +74,7 @@ export class UserService {
 
     private createCurrentUser(): Observable<UserEntry> {
         return rxjs
-            .merge(this.authentication.getUserChanges(), this.currentUserProfileChangesSubject)
+            .merge(this.authentication.observeUserChanges(), this.currentUserProfileChangesSubject)
             .pipe(
                 startWith(void 0 as void),
                 switchRelay(() => this.getUserInner(ME, HOME_REPOSITORY)),

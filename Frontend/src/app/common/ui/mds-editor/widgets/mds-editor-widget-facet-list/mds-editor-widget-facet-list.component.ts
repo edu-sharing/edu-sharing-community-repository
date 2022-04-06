@@ -60,7 +60,7 @@ export class MdsEditorWidgetFacetListComponent
 
     private registerFacetValuesSubject(): void {
         this.search
-            .getFacet(this.widget.definition.id, { includeActiveFilters: true })
+            .observeFacet(this.widget.definition.id, { includeActiveFilters: true })
             .pipe(takeUntil(this.destroyed$))
             .subscribe((facetAggregation) => this.facetAggregationSubject.next(facetAggregation));
     }

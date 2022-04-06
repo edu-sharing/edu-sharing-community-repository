@@ -934,10 +934,10 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private registerCurrentUser(): void {
         this.user
-            .getCurrentUser()
+            .observeCurrentUser()
             .pipe(takeUntil(this.destroyed$))
             .subscribe(async (currentUser) => {
-                const login = await this.authentication.getLoginInfo().pipe(first()).toPromise();
+                const login = await this.authentication.observeLoginInfo().pipe(first()).toPromise();
                 if(login.isGuest) {
                     this.currentUser = null;
                 } else {
@@ -947,7 +947,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private registerAutoLogoutTimeout(): void {
-        this.autoLogoutTimeout$ = this.authentication.getTimeUntilAutoLogout(1000).pipe(
+        this.autoLogoutTimeout$ = this.authentication.observeTimeUntilAutoLogout(1000).pipe(
             takeUntil(this.destroyed$),
             map((timeUntilLogout) => this.getTimeoutString(timeUntilLogout)),
         );
@@ -955,7 +955,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private registerAutoLogoutDialog(): void {
         if (this.showTimeout()) {
-            this.authentication.getAutoLogout().pipe(takeUntil(this.destroyed$)).subscribe(() => {
+            this.authentication.observeAutoLogout().pipe(takeUntil(this.destroyed$)).subscribe(() => {
                 this.toast.showModalDialog(
                     'WORKSPACE.AUTOLOGOUT',
                     'WORKSPACE.AUTOLOGOUT_INFO',

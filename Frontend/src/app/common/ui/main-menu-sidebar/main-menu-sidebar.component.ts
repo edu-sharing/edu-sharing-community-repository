@@ -49,7 +49,7 @@ export class MainMenuSidebarComponent implements OnInit {
         private user: UserService,
     ) {
         this.user
-            .getCurrentUser()
+            .observeCurrentUser()
             .pipe(takeUntil(this.destroyed$))
             .subscribe(async (currentUser) => {
                 this.currentUser = currentUser.person;

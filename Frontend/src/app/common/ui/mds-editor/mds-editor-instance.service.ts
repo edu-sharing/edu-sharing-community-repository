@@ -1237,7 +1237,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                 });
             }
         }
-        const variables = await this.config.getVariables().pipe(first()).toPromise();
+        const variables = await this.config.observeVariables().pipe(first()).toPromise();
         for (const view of views) {
             for (let widgetDefinition of this.getWidgetsForView(availableWidgets, view)) {
                 widgetDefinition = parseAttributes(view.html, widgetDefinition);

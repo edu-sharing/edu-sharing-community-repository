@@ -143,7 +143,7 @@ export class LoginComponent implements OnInit {
                             }
                             else {
                                 this.authentication
-                                    .hasAccessToScope(RestConstants.SAFE_SCOPE)
+                                    .observeHasAccessToScope(RestConstants.SAFE_SCOPE)
                                     .pipe(first())
                                     .subscribe((hasAccess) => {
                                         if (hasAccess) {

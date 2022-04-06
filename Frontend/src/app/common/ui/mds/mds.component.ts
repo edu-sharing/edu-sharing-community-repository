@@ -171,7 +171,7 @@ export class MdsComponent {
         this.isLoading = true;
         this.mdsService.getSet(this._setId, this._repository).subscribe(
             (data: any) => {
-                this.config.getVariables().pipe(first()).subscribe(
+                this.config.observeVariables().pipe(first()).subscribe(
                     (variables) => {
                         this.mds = data;
                         this.variables = variables;
@@ -3218,7 +3218,7 @@ export class MdsComponent {
     }
 
     private loadConfig() {
-        this.config.getVariables().pipe(first()).subscribe((variables) => {
+        this.config.observeVariables().pipe(first()).subscribe((variables) => {
             this.variables = variables;
             const node = this.currentNodes[0];
             for (const property in node.properties) {

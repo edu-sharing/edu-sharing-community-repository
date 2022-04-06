@@ -74,7 +74,7 @@ export class AdminConfigComponent {
     ]).subscribe(() => {
       this.adminService.refreshAppInfo().subscribe(() => {
         this.toast.closeModalDialog();
-        this.config.getConfig({ forceUpdate: true }).pipe(first()).subscribe(() => {
+        this.config.observeConfig({ forceUpdate: true }).pipe(first()).subscribe(() => {
               this.toast.closeModalDialog();
               this.toast.toast('ADMIN.GLOBAL_CONFIG.SAVED');
             },error =>

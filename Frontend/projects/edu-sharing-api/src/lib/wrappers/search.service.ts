@@ -151,7 +151,10 @@ export class SearchService {
      * @param includeActiveFilters - whether to always include active filters in the facet
      * list---even if the facet does not have any results (`count` is 0).
      */
-    getFacets(properties: string[], { includeActiveFilters = false } = {}): Observable<FacetsDict> {
+    observeFacets(
+        properties: string[],
+        { includeActiveFilters = false } = {},
+    ): Observable<FacetsDict> {
         return this.facetsSubject.pipe(
             onSubscription({
                 onSubscribe: () => this.subscribeFacets(properties),
@@ -164,22 +167,24 @@ export class SearchService {
     }
 
     /**
-     * Like `getFacets`, but gets facets for a single property.
+     * Like `observeFacets`, but gets facets for a single property.
      *
      * Might still return `null` when the requested facet was not part of the last search request
-     * (see `getFacets`).
+     * (see `observeFacets`).
      */
-    getFacet(
+    observeFacet(
         property: string,
-        options?: Parameters<SearchService['getFacets']>[1],
+        options?: Parameters<SearchService['observeFacets']>[1],
     ): Observable<FacetAggregation | null> {
-        return this.getFacets([property], options).pipe(map((facets) => facets[property] ?? null));
+        return this.observeFacets([property], options).pipe(
+            map((facets) => facets[property] ?? null),
+        );
     }
 
     /**
      * Loads more facets of the given property.
      *
-     * Updates the observable returned by `getFacets`.
+     * Updates the observable returned by `observeFacets`.
      *
      * @param size number of new items to load.
      */
@@ -222,7 +227,7 @@ export class SearchService {
      * @param minimumScore The minimum score assigned my ElasticSearch for a suggestion to be
      * returned. If no suggestion meets the minimum score, `null` is returned.
      */
-    getDidYouMeanSuggestion(minimumScore = 0): Observable<DidYouMeanSuggestion | null> {
+    observeDidYouMeanSuggestion(minimumScore = 0): Observable<DidYouMeanSuggestion | null> {
         return this.didYouMeanSuggestionsSubject.pipe(
             onSubscription({
                 onSubscribe: () => this.didYouMeanSuggestionsSubscribers++,

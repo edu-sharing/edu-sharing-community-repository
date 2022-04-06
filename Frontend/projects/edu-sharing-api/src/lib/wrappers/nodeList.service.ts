@@ -5,7 +5,7 @@ import { catchError, filter, finalize, map, startWith, switchMap, toArray } from
 import { NodeEntries } from '../api/models';
 import { IamV1Service } from '../api/services';
 import { HOME_REPOSITORY, ME } from '../constants';
-import { HttpError } from '../models';
+import { ApiErrorResponse } from '../models';
 import { switchRelay } from '../utils/switch-relay';
 import { AuthenticationService } from './authentication.service';
 
@@ -25,7 +25,7 @@ export type NodeListErrorResponses = NodeListErrorResponse[];
 
 interface NodeListErrorResponse {
     nodeId: string;
-    error: HttpError;
+    error: ApiErrorResponse;
 }
 
 /**
@@ -51,11 +51,11 @@ export class NodeListService {
      *
      * The observable updates on changes to the list or when the logged in user changes.
      */
-    getNodeList(
+    observeNodeList(
         listId: string,
         options: Partial<GetNodeListOptions> = {},
     ): Observable<NodeEntries> {
-        const params: Parameters<NodeListService['getNodeList']> = [listId, options];
+        const params: Parameters<NodeListService['observeNodeList']> = [listId, options];
         const paramsString = JSON.stringify(params);
         if (!this.nodeListObservables[paramsString]) {
             this.nodeListObservables[paramsString] = this.createGetNodeList(params);
@@ -118,8 +118,6 @@ export class NodeListService {
 
     /**
      * Removes the given `nodeIds` from the list with `listIds`.
-     *
-     * @throws `HttpErrorResponse`
      */
     removeFromNodeList(
         listId: string,
@@ -156,7 +154,7 @@ export class NodeListService {
     /**
      * Creates a shared observable for `getNodeList` for the given params.
      */
-    private createGetNodeList([listId, options]: Parameters<NodeListService['getNodeList']>) {
+    private createGetNodeList([listId, options]: Parameters<NodeListService['observeNodeList']>) {
         const { userId, repository, propertyFilter, sortPolicies } = {
             ...new GetNodeListOptions(),
             ...options,
@@ -169,7 +167,7 @@ export class NodeListService {
             ...mapSortPolicies(sortPolicies),
         });
         const nodeListNeedsRefresh$ = rxjs.merge(
-            this.authentication.getUserChanges(),
+            this.authentication.observeUserChanges(),
             this.nodeListChangesSubject.pipe(filter((id) => id === listId)),
         );
         return nodeListNeedsRefresh$.pipe(
