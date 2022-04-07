@@ -110,6 +110,10 @@ public class RegistrationService {
             throw new Exception("eduSharing registration token already used");
         }
 
+        if(openidConfiguration == null){
+            throw new Exception("no openidConfiguration present");
+        }
+
 
         String platformConfiguration = new HttpQueryTool().query(openidConfiguration);
         JSONParser jsonParser = new JSONParser();
