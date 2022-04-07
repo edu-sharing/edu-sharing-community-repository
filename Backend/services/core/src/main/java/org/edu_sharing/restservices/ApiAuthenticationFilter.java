@@ -137,21 +137,36 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 
 		boolean noAuthenticationNeeded=false;
 		for(String endpoint : AUTHLESS_ENDPOINTS){
-			if(httpReq.getPathInfo().startsWith(endpoint)){
+			String pathInfo = httpReq.getPathInfo();
+			if(pathInfo == null){
+				continue;
+			}
+
+			if(pathInfo.startsWith(endpoint)){
 				noAuthenticationNeeded=true;
 				break;
 			}
 		}
 		boolean adminRequired=false;
 		for(String endpoint : ADMIN_ENDPOINTS){
-			if(httpReq.getPathInfo().startsWith(endpoint)){
+			String pathInfo = httpReq.getPathInfo();
+			if(pathInfo == null){
+				continue;
+			}
+
+			if(pathInfo.startsWith(endpoint)){
 				adminRequired=true;
 				break;
 			}
 		}
 
 		for(String endpoint : DISABLED_ENDPOINTS){
-			if(httpReq.getPathInfo().startsWith(endpoint)){
+			String pathInfo = httpReq.getPathInfo();
+			if(pathInfo == null){
+				continue;
+			}
+
+			if(pathInfo.startsWith(endpoint)){
 				httpResp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				httpResp.flushBuffer();
 				httpResp.getWriter().print("This endpoint is disabled via config");
@@ -166,9 +181,12 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 			return;
 		}
 		// ignore the auth for the login
-		if(validatedAuth == null && !noAuthenticationNeeded){
-			if(httpReq.getPathInfo().equals("/openapi.json"))
-				httpResp.setHeader("WWW-Authenticate", "BASIC realm=\""+ "Edu-Sharing Rest API" +"\"");
+		if(validatedAuth == null && !noAuthenticationNeeded) {
+			String pathInfo = httpReq.getPathInfo();
+			if (pathInfo != null && pathInfo.equals("/openapi.json")) {
+				httpResp.setHeader("WWW-Authenticate", "BASIC realm=\"" + "Edu-Sharing Rest API" + "\"");
+			}
+
 			httpResp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			httpResp.flushBuffer();
 			return;
