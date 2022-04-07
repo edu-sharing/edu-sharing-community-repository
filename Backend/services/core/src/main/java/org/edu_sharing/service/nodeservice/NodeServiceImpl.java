@@ -1173,7 +1173,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return nodes.stream().map(NodeRef::getId).collect(Collectors.toList());
 	}
 
-	private String getPreviewUrl(String storeProtocol, String storeId, String nodeId, String version) {
+	@Override
+	public String getPreviewUrl(String storeProtocol, String storeId, String nodeId, String version) {
 		String previewURL = URLTool.getBaseUrl(true);
 		previewURL += "/preview?nodeId="+nodeId+"&storeProtocol="+storeProtocol+"&storeId="+storeId+"&dontcache="+System.currentTimeMillis();
 		if(version!=null){
@@ -1225,7 +1226,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				enable);
 
 	}
-	private ContentReader getContentReader(String storeProtocol, String storeId, String nodeId,String version,String contentProp){
+	@Override
+	public ContentReader getContentReader(String storeProtocol, String storeId, String nodeId, String version, String contentProp){
 		NodeRef nodeRef=new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);
 		if(version==null) {
 			ContentReader cr = contentService.getReader(nodeRef, QName.createQName(contentProp));
