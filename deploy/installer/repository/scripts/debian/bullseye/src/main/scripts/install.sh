@@ -135,6 +135,14 @@ repository_httpclient_proxy_proxyport="${REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PR
 repository_httpclient_proxy_proxyuser="${REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PROXYUSER:-}"
 repository_httpclient_proxy_proxypass="${REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PROXYPASS:-}"
 
+repository_httpserver_csp_connect="${REPOSITORY_SERVICE_HTTP_SERVER_CSP_CONNECT:-}"
+repository_httpserver_csp_default="${REPOSITORY_SERVICE_HTTP_SERVER_CSP_DEFAULT:-}"
+repository_httpserver_csp_font="${REPOSITORY_SERVICE_HTTP_SERVER_CSP_FONT:-}"
+repository_httpserver_csp_img="${REPOSITORY_SERVICE_HTTP_SERVER_CSP_IMG:-}"
+repository_httpserver_csp_script="${REPOSITORY_SERVICE_HTTP_SERVER_CSP_SCRIPT:-}"
+
+repository_httpserver_session_timeout="${REPOSITORY_SERVICE_HTTP_SERVER_SESSION_TIMEOUT:-60}"
+
 repository_search_solr4_host="${REPOSITORY_SEARCH_SOLR4_HOST:-"127.0.0.1"}"
 repository_search_solr4_port="${REPOSITORY_SEARCH_SOLR4_PORT:-8080}"
 
@@ -207,9 +215,6 @@ info() {
   echo "    Public:            ${my_base_external}"
   echo "    Home provider:     ${REPOSITORY_SERVICE_HOME_PROVIDER}"
   echo ""
-
-	if [[ -n $rendering_proxy_host ]] ; then
-	echo "#########################################################################"
   echo ""
   echo "httpclient:"
   echo ""
@@ -224,7 +229,29 @@ info() {
   echo "    Proxy User:          ${repository_httpclient_proxy_proxyuser}"
   echo "    Proxy Password:      ${repository_httpclient_proxy_proxypass}"
   echo ""
-	fi
+  echo "httpserver:"
+  echo ""
+  echo "  csp:"
+  echo ""
+  echo "    connect:             ${repository_httpserver_csp_connect}"
+  echo "    default:             ${repository_httpserver_csp_default}"
+  echo "    font:                ${repository_httpserver_csp_font}"
+  echo "    img:                 ${repository_httpserver_csp_img}"
+  echo "    script:              ${repository_httpserver_csp_script}"
+  echo ""
+  echo "  session:"
+  echo ""
+  echo "    timeout:             ${repository_httpserver_session_timeout}"
+  echo ""
+
+  if [[ -n $repository_contentstore || -n $repository_contentstore_deleted ]] ; then
+  echo ""
+  echo "persistent data:"
+  echo ""
+  echo "  contentstore:        ${repository_contentstore}"
+  echo "  contentstore.delete: ${repository_contentstore_deleted}"
+  echo ""
+  fi
 
   echo "#########################################################################"
   echo ""
@@ -240,17 +267,6 @@ info() {
   echo "  Host:                ${repository_transform_host}"
   echo "  Port:                ${repository_transform_port}"
   echo ""
-
-
-  if [[ -n $repository_contentstore || -n $repository_contentstore_deleted ]] ; then
-  echo "#########################################################################"
-  echo ""
-  echo "persistent data:"
-  echo ""
-  echo "  contentstore:        ${repository_contentstore}"
-  echo "  contentstore.delete: ${repository_contentstore_deleted}"
-  echo ""
-  fi
 
   ######################################################################################################################
 
@@ -384,6 +400,7 @@ config_edu_sharing() {
 		-i '$ajp' -t attr -n "port" -v "8009" \
 		-i '$ajp' -t attr -n "secretRequired" -v "false" \
 		-d '/Server/Service[@name="Catalina"]/Connector[@port="8443"]' \
+		-i '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]' -t attr -n 'hostConfigClass' -v 'org.edu_sharing.catalina.startup.OrderedHostConfig' \
 		${catServe}
 
 	if [[ ! -f ${setEnvSh} ]] ; then
@@ -625,6 +642,40 @@ config_edu_sharing() {
   	hocon -f ${eduSConf} \
   		set "repository.httpclient.proxy.proxyuser" '"'"${repository_httpclient_proxy_proxyuser}"'"'
   fi
+
+	echo "- update ${eduSConf}"
+
+  if [[ -n "${repository_httpserver_csp_connect}" ]] ; then
+  	hocon -f ${eduSConf} \
+  		set "angular.headers.Content-Security-Policy.connect-src" '"'"${repository_httpserver_csp_connect}"'"'
+  fi
+
+  if [[ -n "${repository_httpserver_csp_default}" ]] ; then
+  	hocon -f ${eduSConf} \
+  		set "angular.headers.Content-Security-Policy.default-src" '"'"${repository_httpserver_csp_default}"'"'
+  fi
+
+  if [[ -n "${repository_httpserver_csp_font}" ]] ; then
+  	hocon -f ${eduSConf} \
+  		set "angular.headers.Content-Security-Policy.font-src" '"'"${repository_httpserver_csp_font}"'"'
+  fi
+
+  if [[ -n "${repository_httpserver_csp_img}" ]] ; then
+  	hocon -f ${eduSConf} \
+  		set "angular.headers.Content-Security-Policy.img-src" '"'"${repository_httpserver_csp_img}"'"'
+  fi
+
+  if [[ -n "${repository_httpserver_csp_script}" ]] ; then
+  	hocon -f ${eduSConf} \
+  		set "angular.headers.Content-Security-Policy.script-src" '"'"${repository_httpserver_csp_script}"'"'
+  fi
+
+	echo "- update ${eduWebXm}"
+
+	xmlstarlet ed -L \
+		-N x="http://java.sun.com/xml/ns/javaee" \
+		-u '/x:web-app/x:session-config/x:session-timeout' -v "${repository_httpserver_session_timeout}" \
+		${eduWebXm}
 
 	######################################################################################################################
 

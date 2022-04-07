@@ -120,6 +120,15 @@ config:
 #       name: "external Sources"
 #       ref: "https://www.excample.com/gdpr"
 
+  http:
+    client:
+      proxy:
+        nonproxyhosts: []
+        proxyhost: ""
+        proxyport: ""
+        proxyuser: ""
+        proxypass: ""
+
   plugins: []
 #   - class: "ESRender_Plugin_...."
 #     args: ['"arg1"','"arg2"']

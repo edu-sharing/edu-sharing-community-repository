@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "edusharing_repository_service.name" . }}-env
-  labels: {{ include "edusharing_repository_service.labels" . | nindent 4 }}
+  labels: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
 data:
   CACHE_CLUSTER: {{ .Values.config.cache.cluster | quote }}
   CACHE_DATABASE: {{ .Values.config.cache.database | quote }}
@@ -53,7 +53,12 @@ data:
   REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PROXYPASS: {{ .Values.config.http.client.proxy.proxypass | quote }}
   REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PROXYPORT: {{ .Values.config.http.client.proxy.proxyport | quote }}
   REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PROXYUSER: {{ .Values.config.http.client.proxy.proxyuser | quote }}
-  REPOSITORY_SERVICE_HTTP_SESSION_TIMEOUT: {{ .Values.config.http.session.timeout | quote }}
+  REPOSITORY_SERVICE_HTTP_SERVER_CSP_CONNECT: {{ .Values.config.http.server.csp.connect | quote }}
+  REPOSITORY_SERVICE_HTTP_SERVER_CSP_DEFAULT: {{ .Values.config.http.server.csp.default | quote }}
+  REPOSITORY_SERVICE_HTTP_SERVER_CSP_FONT: {{ .Values.config.http.server.csp.font | quote }}
+  REPOSITORY_SERVICE_HTTP_SERVER_CSP_IMG: {{ .Values.config.http.server.csp.img | quote }}
+  REPOSITORY_SERVICE_HTTP_SERVER_CSP_SCRIPT: {{ .Values.config.http.server.csp.script | quote }}
+  REPOSITORY_SERVICE_HTTP_SERVER_SESSION_TIMEOUT: {{ .Values.config.http.server.session.timeout | quote }}
   REPOSITORY_SERVICE_PATH_EXTERNAL: {{ .Values.ingress.paths | first | quote }}
   REPOSITORY_SERVICE_POOL_EXTERNAL: {{ .Values.config.connector.external.threads | quote }}
   REPOSITORY_SERVICE_POOL_INTERNAL: {{ .Values.config.connector.internal.threads | quote }}

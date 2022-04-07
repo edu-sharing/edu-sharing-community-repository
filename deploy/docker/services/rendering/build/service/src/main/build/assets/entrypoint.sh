@@ -23,6 +23,7 @@ my_port_internal="${SERVICES_RENDERING_SERVICE_PORT_INTERNAL:-8080}"
 my_path_internal="${SERVICES_RENDERING_SERVICE_PATH_INTERNAL:-/esrender}"
 my_base_internal="${my_prot_internal}://${my_host_internal}:${my_port_internal}${my_path_internal}"
 
+my_proxy_nonh="${SERVICES_RENDERING_SERVICE_PROXY_NONPROXYHOSTS:-}"
 my_proxy_host="${SERVICES_RENDERING_SERVICE_PROXY_HOST:-}"
 my_proxy_port="${SERVICES_RENDERING_SERVICE_PROXY_PORT:-}"
 my_proxy_user="${SERVICES_RENDERING_SERVICE_PROXY_USER:-}"
@@ -196,17 +197,6 @@ fi
 
 yes | php admin/cli/update.php
 
-proxyConf="${RS_ROOT}/conf/proxy.conf.php"
-if [[ -n $my_proxy_host ]] ; then
-	cp -f "${RS_ROOT}/conf/proxy.conf.php.example" "${proxyConf}"
-	sed -i -r "s|define\('HTTP_PROXY_HOST',.*);|define('HTTP_PROXY_HOST', '$my_proxy_host');|" "${proxyConf}"
-	sed -i -r "s|define\('HTTP_PROXY_PORT',.*);|define('HTTP_PROXY_PORT', '$my_proxy_port');|" "${proxyConf}"
-	sed -i -r "s|define\('HTTP_PROXY_USER',.*);|define('HTTP_PROXY_USER', '$my_proxy_user');|" "${proxyConf}"
-	sed -i -r "s|define\('HTTP_PROXY_PASS',.*);|define('HTTP_PROXY_PASS', '$my_proxy_pass');|" "${proxyConf}"
-else
-	rm -f "${proxyConf}"
-fi
-
 dbConf="${RS_ROOT}/conf/db.conf.php"
 sed -i -r "s|\$dsn.*|\$dsn = \"${rendering_database_driv}:host=${rendering_database_host};port=${rendering_database_port};dbname=${rendering_database_name}\";|" "${dbConf}"
 sed -i -r "s|\$dbuser.*|\$dbuser = \"${rendering_database_user}\";|" "${dbConf}"
@@ -220,6 +210,23 @@ sed -i -r "s|\$CC_RENDER_PATH.*|\$CC_RENDER_PATH = '${RS_CACHE}';|" "${systemCon
 sed -i -r 's|\$DATAPROTECTIONREGULATION_CONFIG.*|\$DATAPROTECTIONREGULATION_CONFIG = ["enabled" => '"${my_gdpr_enabled}"', "modules" => ['"${my_gdpr_modules}"'], "urls" => ['"${my_gdpr_urls}"']];|' "${systemConf}"
 grep -q '\$DATAPROTECTIONREGULATION_CONFIG' "${systemConf}" || echo "\$DATAPROTECTIONREGULATION_CONFIG = [\"enabled\" => ${my_gdpr_enabled}, \"modules\" => [${my_gdpr_modules}], \"urls\" => [${my_gdpr_urls}]];" >> "${systemConf}"
 
+proxyConf="${RS_ROOT}/conf/proxy.conf.php"
+rm -f "${proxyConf}"
+if [[ -n $my_proxy_host ]] ; then
+	my_proxy_auth=""
+	if [[ -n $my_proxy_user ]] ; then
+		my_proxy_auth="${my_proxy_user}:${my_proxy_pass}@"
+	fi
+	{
+		echo "<?php"
+		echo "\$PROXY_CONFIG = ["
+    echo "  \"http.nonproxyhosts\" => [${my_proxy_nonh}],"
+    echo "  \"http.proxy\"         => \"http://${my_proxy_auth}${my_proxy_host}:${my_proxy_port}\","
+    echo "  \"https.proxy\"        => \"http://${my_proxy_auth}${my_proxy_host}:${my_proxy_port}\""
+		echo "];"
+	} >> "${proxyConf}"
+fi
+
 pluginConf="${RS_ROOT}/conf/plugins.conf.php"
 rm -f "${pluginConf}"
 if [[ -n $my_plugins ]] ; then
@@ -228,6 +235,7 @@ if [[ -n $my_plugins ]] ; then
 		echo "${my_plugins}"
 	} >> "${pluginConf}"
 fi
+sed -i -r "s|ESRender_Plugin_|$Plugins[] = new ESRender_Plugin_|g" "${pluginConf}"
 
 homeApp="${RS_ROOT}/conf/esmain/homeApplication.properties.xml"
 xmlstarlet ed -L \

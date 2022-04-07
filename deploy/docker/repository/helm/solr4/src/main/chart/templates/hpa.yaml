@@ -3,7 +3,7 @@ apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "edusharing_repository_search_solr4.name" . }}
-  labels: {{ include "edusharing_repository_search_solr4.labels" . | nindent 4 }}
+  labels: {{ include "edusharing_repository_search_solr4.labels.app" . | nindent 4 }}
 spec:
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}

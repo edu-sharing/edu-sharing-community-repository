@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "edusharing_rendering_service.name" . }}-env
-  labels: {{ include "edusharing_rendering_service.labels" . | nindent 4 }}
+  labels: {{ include "edusharing_rendering_service.labels.app" . | nindent 4 }}
 data:
   CACHE_CLUSTER: {{ .Values.config.cache.cluster | quote }}
   CACHE_DATABASE: {{ .Values.config.cache.database | quote }}
@@ -26,8 +26,13 @@ data:
   SERVICES_RENDERING_SERVICE_PATH_EXTERNAL: {{ .Values.ingress.paths | first | quote }}
   SERVICES_RENDERING_SERVICE_PLUGINS: |-
   {{- range $ununsed, $plugin := .Values.config.plugins }}
-    $Plugins[] = new {{ $plugin.class }}({{ join "," $plugin.args }});
+    {{ $plugin.class }}([{{ range $k, $v := $plugin.args }}{{ $k | quote }} => {{ if kindIs "string" $v }}{{ $v | quote }}{{ else }}{{ $v }}{{ end }},{{ end }}]);
   {{- end }}
   SERVICES_RENDERING_SERVICE_PORT_EXTERNAL: {{ if .Values.ingress.tls }}"443"{{ else }}"80"{{ end }}
   SERVICES_RENDERING_SERVICE_PORT_INTERNAL: {{ .Values.service.port.api.internal | quote }}
   SERVICES_RENDERING_SERVICE_PROT_EXTERNAL: {{ if .Values.ingress.tls }}"https"{{ else }}"http"{{ end }}
+  SERVICES_RENDERING_SERVICE_PROXY_NONPROXYHOSTS: '{{- join "," .Values.config.http.client.proxy.nonproxyhosts }}'
+  SERVICES_RENDERING_SERVICE_PROXY_HOST: {{ .Values.config.http.client.proxy.proxyhost | quote }}
+  SERVICES_RENDERING_SERVICE_PROXY_PORT: {{ .Values.config.http.client.proxy.proxyport | quote }}
+  SERVICES_RENDERING_SERVICE_PROXY_USER: {{ .Values.config.http.client.proxy.proxyuser | quote }}
+  SERVICES_RENDERING_SERVICE_PROXY_PASS: {{ .Values.config.http.client.proxy.proxypass | quote }}

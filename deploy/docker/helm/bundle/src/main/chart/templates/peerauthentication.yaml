@@ -4,7 +4,7 @@ apiVersion: security.istio.io/v1beta1
 kind: PeerAuthentication
 metadata:
   name: {{ include "edusharing.name" . }}
-  labels: {{ include "edusharing.labels" . | nindent 4 }}
+  labels: {{ include "edusharing.labels.app" . | nindent 4 }}
 spec:
   mtls:
     mode: DISABLE

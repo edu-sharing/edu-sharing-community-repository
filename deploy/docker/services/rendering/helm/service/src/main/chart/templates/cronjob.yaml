@@ -2,7 +2,7 @@ apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
   name: {{ include "edusharing_rendering_service.name" . }}-cachecleaner
-  labels: {{ include "edusharing_rendering_service.labels" . | nindent 4 }}
+  labels: {{ include "edusharing_rendering_service.labels.app" . | nindent 4 }}
     app.kubernetes.io/component: cachecleaner
 spec:
   concurrencyPolicy: Forbid

@@ -2,16 +2,16 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "edusharing_repository_search_solr4.name" . }}
-  labels: {{ include "edusharing_repository_search_solr4.labels" . | nindent 4 }}
+  labels: {{ include "edusharing_repository_search_solr4.labels.app" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
-    matchLabels: {{ include "edusharing_repository_search_solr4.labels.instance" . | nindent 6 }}
+    matchLabels: {{ include "edusharing_repository_search_solr4.labels.app" . | nindent 6 }}
   serviceName: {{ include "edusharing_repository_search_solr4.name" . }}-headless
   template:
     metadata:
       name: {{ include "edusharing_repository_search_solr4.name" . }}
-      labels: {{ include "edusharing_repository_search_solr4.labels" . | nindent 8 }}
+      labels: {{ include "edusharing_repository_search_solr4.labels.app" . | nindent 8 }}
       annotations:
         checksum/configmap-env: {{ include (print .Template.BasePath "/configmap-env.yaml") . | sha256sum | trunc 63 }}
         prometheus.io/path: "/metrics"
@@ -107,19 +107,19 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
           - topologyKey: kubernetes.io/hostname
             labelSelector:
-              matchLabels: {{ include "edusharing_repository_search_solr4.labels.instance" . | nindent 16 }}
+              matchLabels: {{ include "edusharing_repository_search_solr4.labels.app" . | nindent 16 }}
           {{- else if eq .Values.podAntiAffinity "soft" }}
           preferredDuringSchedulingIgnoredDuringExecution:
           - weight: 1
             podAffinityTerm:
               topologyKey: kubernetes.io/hostname
               labelSelector:
-                matchLabels: {{ include "edusharing_repository_search_solr4.labels.instance" . | nindent 18 }}
+                matchLabels: {{ include "edusharing_repository_search_solr4.labels.app" . | nindent 18 }}
           {{- end }}
         {{- end }}
       {{- end }}
   volumeClaimTemplates:
   - metadata:
       name: data
-      labels: {{ include "edusharing_repository_search_solr4.labels" . | nindent 8 }}
+      labels: {{ include "edusharing_repository_search_solr4.labels.app" . | nindent 8 }}
     spec: {{ merge .Values.persistence.data.spec .Values.global.cluster.storage.data.spec | toYaml | nindent 6 }}

@@ -2,10 +2,10 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "edusharing_repository_service.name" . }}
-  labels: {{ include "edusharing_repository_service.labels" . | nindent 4 }}
+  labels: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
 spec:
   type: ClusterIP
-  selector: {{ include "edusharing_repository_service.labels.instance" . | nindent 4 }}
+  selector: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
   ports:
   - name: http-api-external
     port: {{ .Values.service.port.api.external }}
@@ -18,11 +18,11 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "edusharing_repository_service.name" . }}-headless
-  labels: {{ include "edusharing_repository_service.labels" . | nindent 4 }}
+  labels: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
 spec:
   type: ClusterIP
   clusterIP: None
-  selector: {{ include "edusharing_repository_service.labels.instance" . | nindent 4 }}
+  selector: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
   ports:
   - name: http-api-external
     port: {{ .Values.service.port.api.external }}

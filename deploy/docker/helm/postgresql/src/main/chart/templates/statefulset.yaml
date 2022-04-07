@@ -3,16 +3,16 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "edusharing_postgresql.name" . }}
-  labels: {{ include "edusharing_postgresql.labels" . | nindent 4 }}
+  labels: {{ include "edusharing_postgresql.labels.app" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
-    matchLabels: {{ include "edusharing_postgresql.labels.instance" . | nindent 6 }}
+    matchLabels: {{ include "edusharing_postgresql.labels.app" . | nindent 6 }}
   serviceName: {{ include "edusharing_postgresql.name" . }}-headless
   template:
     metadata:
       name: {{ include "edusharing_postgresql.name" . }}
-      labels: {{ include "edusharing_postgresql.labels" . | nindent 8 }}
+      labels: {{ include "edusharing_postgresql.labels.app" . | nindent 8 }}
       annotations:
         checksum/configmap-env: {{ include (print .Template.BasePath "/configmap-env.yaml") . | sha256sum | trunc 63 }}
         checksum/configmap-file: {{ include (print .Template.BasePath "/configmap-file.yaml") . | sha256sum | trunc 63 }}
@@ -133,6 +133,6 @@ spec:
   volumeClaimTemplates:
   - metadata:
       name: data
-      labels: {{ include "edusharing_postgresql.labels" . | nindent 8 }}
+      labels: {{ include "edusharing_postgresql.labels.app" . | nindent 8 }}
     spec: {{ merge .Values.persistence.data.spec .Values.global.cluster.storage.data.spec | toYaml | nindent 6 }}
 {{- end }}

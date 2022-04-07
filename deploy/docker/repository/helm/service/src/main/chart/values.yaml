@@ -177,8 +177,15 @@ config:
         proxyport: ""
         proxyuser: ""
         proxypass: ""
-    session:
-      timeout: 60
+    server:
+      csp:
+        connect: ""
+        default: ""
+        font: ""
+        img: ""
+        script: ""
+      session:
+        timeout: 60
 
   saml:
     enabled: false

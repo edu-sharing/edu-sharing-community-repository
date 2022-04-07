@@ -3,7 +3,7 @@ apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "edusharing_rendering_service.name" . }}
-  labels: {{ include "edusharing_rendering_service.labels" . | nindent 4 }}
+  labels: {{ include "edusharing_rendering_service.labels.app" . | nindent 4 }}
 spec:
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}

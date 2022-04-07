@@ -7,7 +7,7 @@ apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   name: {{ include "edusharing_repository_service.name" . }}
-  labels: {{ include "edusharing_repository_service.labels" . | nindent 4 }}
+  labels: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
   {{- with merge .Values.ingress.annotations .Values.global.cluster.cert.annotations }}
   annotations: {{ toYaml . | nindent 4 }}
   {{- end }}

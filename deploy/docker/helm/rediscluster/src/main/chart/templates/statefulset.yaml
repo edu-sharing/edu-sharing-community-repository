@@ -2,17 +2,17 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "edusharing_rediscluster.name" . }}
-  labels: {{ include "edusharing_rediscluster.labels" . | nindent 4 }}
+  labels: {{ include "edusharing_rediscluster.labels.app" . | nindent 4 }}
 spec:
   podManagementPolicy: Parallel
   replicas: {{ include "edusharing_rediscluster.replicas" . }}
   selector:
-    matchLabels: {{ include "edusharing_rediscluster.labels.instance" . | nindent 6 }}
+    matchLabels: {{ include "edusharing_rediscluster.labels.app" . | nindent 6 }}
   serviceName: {{ include "edusharing_rediscluster.name" . }}-headless
   template:
     metadata:
       name: {{ include "edusharing_rediscluster.name" . }}
-      labels: {{ include "edusharing_rediscluster.labels" . | nindent 8 }}
+      labels: {{ include "edusharing_rediscluster.labels.app" . | nindent 8 }}
       annotations:
         checksum/configmap-env: {{ include (print .Template.BasePath "/configmap-env.yaml") . | sha256sum | trunc 63 }}
         checksum/configmap-file: {{ include (print .Template.BasePath "/configmap-file.yaml") . | sha256sum | trunc 63 }}
@@ -145,14 +145,14 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
           - topologyKey: kubernetes.io/hostname
             labelSelector:
-              matchLabels: {{ include "edusharing_rediscluster.labels.instance" . | nindent 16 }}
+              matchLabels: {{ include "edusharing_rediscluster.labels.app" . | nindent 16 }}
           {{- else if eq .Values.podAntiAffinity "soft" }}
           preferredDuringSchedulingIgnoredDuringExecution:
           - weight: 1
             podAffinityTerm:
               topologyKey: kubernetes.io/hostname
               labelSelector:
-                matchLabels: {{ include "edusharing_rediscluster.labels.instance" . | nindent 18 }}
+                matchLabels: {{ include "edusharing_rediscluster.labels.app" . | nindent 18 }}
           {{- end }}
         {{- end }}
       {{- end }}
@@ -163,5 +163,5 @@ spec:
   volumeClaimTemplates:
   - metadata:
       name: data
-      labels: {{ include "edusharing_rediscluster.labels" . | nindent 8 }}
+      labels: {{ include "edusharing_rediscluster.labels.app" . | nindent 8 }}
     spec: {{ merge .Values.persistence.data.spec .Values.global.cluster.storage.data.spec | toYaml | nindent 6 }}

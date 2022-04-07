@@ -3,7 +3,7 @@ apiVersion: acid.zalan.do/v1
 kind: postgresql
 metadata:
   name: {{ .Values.global.patroni.name }}
-  labels: {{ include "edusharing_postgresql.labels" . | nindent 4 }}
+  labels: {{ include "edusharing_postgresql.labels.app" . | nindent 4 }}
 spec:
   databases:
     {{ .Values.config.database }}: {{ .Values.config.username | quote }}

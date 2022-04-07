@@ -4,7 +4,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "edusharing_repository_service.name" . }}-saml-files
-  labels: {{ include "edusharing_repository_service.labels" . | nindent 4 }}
+  labels: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
 binaryData: {{ toYaml .Values.config.saml.files | nindent 2 }}
 {{- end }}
 {{- end }}

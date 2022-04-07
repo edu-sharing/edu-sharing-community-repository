@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ include "edusharing_rendering_service.name" . }}-init
-  labels: {{ include "edusharing_rendering_service.labels" . | nindent 4 }}
+  labels: {{ include "edusharing_rendering_service.labels.app" . | nindent 4 }}
     app.kubernetes.io/component: init
 spec:
   completions: 1

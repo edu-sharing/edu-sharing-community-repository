@@ -118,10 +118,13 @@ fi
 repository_user="admin"
 repository_password="${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
 
+rendering_proxy_nonproxyhosts="${SERVICES_RENDERING_SERVICE_PROXY_NONPROXYHOSTS:-}"
 rendering_proxy_host="${SERVICES_RENDERING_SERVICE_PROXY_HOST:-}"
 rendering_proxy_port="${SERVICES_RENDERING_SERVICE_PROXY_PORT:-}"
 rendering_proxy_user="${SERVICES_RENDERING_SERVICE_PROXY_USER:-}"
 rendering_proxy_pass="${SERVICES_RENDERING_SERVICE_PROXY_PASS:-}"
+
+rendering_plugins="${SERVICES_RENDERING_SERVICE_PLUGINS:-}"
 
 ########################################################################################################################
 
@@ -200,6 +203,7 @@ info() {
   echo ""
   echo "proxy:"
   echo ""
+  echo "  Nonproxyhosts:  ${rendering_proxy_nonproxyhosts}"
   echo "  Host:           ${rendering_proxy_host}"
   echo "  Port:           ${rendering_proxy_port}"
   echo "  User:           ${rendering_proxy_user}"
@@ -379,14 +383,34 @@ fi
 proxyConf="${RS_ROOT}/conf/proxy.conf.php"
 if [[ -n $rendering_proxy_host ]] ; then
 	echo "- update $proxyConf"
-	cp -f "${RS_ROOT}/conf/proxy.conf.php.example" "${proxyConf}"
-	sed -i -r "s|define\('HTTP_PROXY_HOST',.*);|define('HTTP_PROXY_HOST', '$rendering_proxy_host');|" "${proxyConf}"
-	sed -i -r "s|define\('HTTP_PROXY_PORT',.*);|define('HTTP_PROXY_PORT', '$rendering_proxy_port');|" "${proxyConf}"
-	sed -i -r "s|define\('HTTP_PROXY_USER',.*);|define('HTTP_PROXY_USER', '$rendering_proxy_user');|" "${proxyConf}"
-	sed -i -r "s|define\('HTTP_PROXY_PASS',.*);|define('HTTP_PROXY_PASS', '$rendering_proxy_pass');|" "${proxyConf}"
+	rendering_proxy_auth=""
+	if [[ -n $$rendering_proxy_user ]] ; then
+		rendering_proxy_auth="${$rendering_proxy_user}:${$rendering_proxy_pass}@"
+	fi
+	{
+		echo "<?php"
+		echo "\$PROXY_CONFIG = ["
+    echo "  \"http.nonproxyhosts\" => [${rendering_proxy_nonproxyhosts}],"
+    echo "  \"http.proxy\"         => \"http://${$rendering_proxy_auth}${rendering_proxy_host}:${rendering_proxy_port}\","
+    echo "  \"https.proxy\"        => \"http://${rendering_proxy_auth}${rendering_proxy_host}:${rendering_proxy_port}\""
+		echo "];"
+	} >> "${proxyConf}"
 else
 	echo "- remove $proxyConf"
 	rm -f "${proxyConf}"
+fi
+
+pluginConf="${RS_ROOT}/conf/plugins.conf.php"
+if [[ -n $rendering_plugins ]] ; then
+	echo "- update $pluginConf"
+	{
+		echo "<?php"
+		echo "${rendering_plugins}"
+	} >> "${pluginConf}"
+	sed -i -r "s|ESRender_Plugin_|$Plugins[] = new ESRender_Plugin_|g" "${pluginConf}"
+else
+	echo "- remove $pluginConf"
+	rm -f "${pluginConf}"
 fi
 
 dbConf="${RS_ROOT}/conf/db.conf.php"
