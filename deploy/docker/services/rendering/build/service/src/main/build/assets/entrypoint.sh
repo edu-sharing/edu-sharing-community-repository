@@ -234,8 +234,8 @@ if [[ -n $my_plugins ]] ; then
 		echo "<?php"
 		echo "${my_plugins}"
 	} >> "${pluginConf}"
+	sed -i -r "s|ESRender_Plugin_|\$Plugins[] = new ESRender_Plugin_|g" "${pluginConf}"
 fi
-sed -i -r "s|ESRender_Plugin_|$Plugins[] = new ESRender_Plugin_|g" "${pluginConf}"
 
 homeApp="${RS_ROOT}/conf/esmain/homeApplication.properties.xml"
 xmlstarlet ed -L \

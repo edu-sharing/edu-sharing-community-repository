@@ -407,7 +407,7 @@ if [[ -n $rendering_plugins ]] ; then
 		echo "<?php"
 		echo "${rendering_plugins}"
 	} >> "${pluginConf}"
-	sed -i -r "s|ESRender_Plugin_|$Plugins[] = new ESRender_Plugin_|g" "${pluginConf}"
+	sed -i -r "s|ESRender_Plugin_|\$Plugins[] = new ESRender_Plugin_|g" "${pluginConf}"
 else
 	echo "- remove $pluginConf"
 	rm -f "${pluginConf}"
