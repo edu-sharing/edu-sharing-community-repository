@@ -534,7 +534,13 @@
       //const host =  window.location.protocol + "//" + window.location.host + "/edu-sharing/graphql";
       GraphQLPlayground.init(root, {
         // you can add more options here
-        endpoint: window.location.origin + '/edu-sharing/graphql',
+        "endpoint": window.location.origin + '/edu-sharing/graphql',
+        "settings": {
+          "request.credentials": "include",
+          "request.globalHeaders": {
+            "Content-Type": "application/json; charset=utf-8"
+          }
+        }
       })
     })
   </script>
