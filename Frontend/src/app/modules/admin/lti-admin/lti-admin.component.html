@@ -7,7 +7,7 @@
       <table *ngIf="tokens" mat-table [dataSource]="tokens.registrationLinks">
         <ng-container matColumnDef="url">
           <th mat-header-cell *matHeaderCellDef> {{'ADMIN.LTI.URL' | translate}} </th>
-          <td [ngStyle]="{'text-decoration': element.expired ? 'line-through' : 'none' }" mat-cell *matCellDef="let element"> {{element.url}} </td>
+          <td [ngStyle]="{'text-decoration': !element.valid ? 'line-through' : 'none' }" mat-cell *matCellDef="let element"> {{element.url}} </td>
         </ng-container>
 
         <ng-container matColumnDef="tsExpiry">
@@ -48,31 +48,31 @@
       <div class="base-fields">
         <mat-form-field floatLabel="always">
           <mat-label>{{'ADMIN.LTI.DATA.platformId' | translate}}</mat-label>
-          <input matInput [(ngModel)]="platformId" placeholder="my_lms_id">
+          <input matInput [(ngModel)]="platformId" placeholder="https://localhost.localdomain/moodle">
         </mat-form-field>
         <mat-form-field floatLabel="always">
           <mat-label>{{'ADMIN.LTI.DATA.client_id' | translate}}</mat-label>
-          <input matInput [(ngModel)]="clientId">
+          <input matInput [(ngModel)]="clientId" placeholder="LTEi6jcz3NltiFA">
         </mat-form-field>
         <mat-form-field floatLabel="always">
           <mat-label>{{'ADMIN.LTI.DATA.deployment_id' | translate}}</mat-label>
-          <input matInput [(ngModel)]="deploymentId">
+          <input matInput [(ngModel)]="deploymentId" placeholder="2">
         </mat-form-field>
         <mat-form-field floatLabel="always">
           <mat-label>{{'ADMIN.LTI.DATA.authentication_request_url' | translate}}</mat-label>
-          <input matInput [(ngModel)]="authenticationRequestUrl">
+          <input matInput [(ngModel)]="authenticationRequestUrl" placeholder="https://localhost.localdomain/moodle/mod/lti/auth.php">
         </mat-form-field>
         <mat-form-field floatLabel="always">
           <mat-label>{{'ADMIN.LTI.DATA.keyset_url' | translate}}</mat-label>
-          <input matInput [(ngModel)]="keysetUrl">
+          <input matInput [(ngModel)]="keysetUrl" placeholder="https://localhost.localdomain/moodle/mod/lti/certs.php">
         </mat-form-field>
         <mat-form-field floatLabel="always">
           <mat-label>{{'ADMIN.LTI.DATA.key_id' | translate}}</mat-label>
-          <input matInput [(ngModel)]="keyId">
+          <input matInput [(ngModel)]="keyId" placeholder="e079a4884780ac1dfd16">
         </mat-form-field>
         <mat-form-field floatLabel="always">
           <mat-label>{{'ADMIN.LTI.DATA.auth_token_url' | translate}}</mat-label>
-          <input matInput [(ngModel)]="authTokenUrl">
+          <input matInput [(ngModel)]="authTokenUrl" placeholder='https://localhost.localdomain/moodle/mod/lti/token.php'>
         </mat-form-field>
       </div>
       <button mat-raised-button color="primary" (click)="saveAdvanced()">{{'ADMIN.LTI.SAVE' | translate}}</button>

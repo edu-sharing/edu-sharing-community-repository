@@ -2,13 +2,15 @@ package org.edu_sharing.service.lti13.registration;
 
 import java.util.Objects;
 
+import static org.edu_sharing.service.lti13.registration.RegistrationService.DYNAMIC_REGISTRATION_TOKEN_EXPIRY;
+
 public class DynamicRegistrationToken {
     String token;
     String url;
     String registeredAppId;
     long tsCreated;
     long tsExpiry;
-    boolean expired=false;
+    boolean valid = true;
 
     public String getUrl() {
         return url;
@@ -42,12 +44,23 @@ public class DynamicRegistrationToken {
 
     public String getRegisteredAppId() {return registeredAppId;}
 
-    public void setExpired(boolean expired) {
-        this.expired = expired;
+    public void setValid(boolean valid) {
+        this.valid = valid;
     }
 
-    public boolean isExpired() {
-        return expired;
+    public boolean isValid() {
+        validate();
+        return valid;
+    }
+
+    public void validate(){
+        this.setTsExpiry(tsCreated + DYNAMIC_REGISTRATION_TOKEN_EXPIRY);
+        if(System.currentTimeMillis() > this.getTsExpiry()){
+            this.setValid(false);
+        }
+        if(this.getRegisteredAppId() != null && !this.getRegisteredAppId().trim().isEmpty()){
+            this.setValid(false);
+        }
     }
 
     @Override

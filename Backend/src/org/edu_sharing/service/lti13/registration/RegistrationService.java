@@ -65,11 +65,7 @@ public class RegistrationService {
                 CCConstants.CCM_VALUE_IO_NAME_LTI_REGISTRATION_NODE_NAME,
                 DynamicRegistrationTokens.class);
         for(DynamicRegistrationToken t : drts.getRegistrationLinks()){
-            long created = t.getTsCreated();
-            t.setTsExpiry(created + DYNAMIC_REGISTRATION_TOKEN_EXPIRY);
-            if(System.currentTimeMillis() > t.getTsExpiry()){
-                t.setExpired(true);
-            }
+            t.validate();
         }
         return drts;
     }
@@ -108,6 +104,10 @@ public class RegistrationService {
         if((System.currentTimeMillis() - foundToken.getTsCreated()) > DYNAMIC_REGISTRATION_TOKEN_EXPIRY ){
             //remove(foundToken);
             throw new Exception("eduSharing registration token expired");
+        }
+
+        if(!foundToken.isValid()){
+            throw new Exception("eduSharing registration token already used");
         }
 
 
@@ -221,7 +221,6 @@ public class RegistrationService {
         String deploymentId = (String)ltiToolConfigInfo.get("deployment_id");
 
         registerPlatform(issuer, clientId, deploymentId, authorizationEndpoint, keySetUrl,null,authTokenUrl, foundToken);
-        remove(foundToken);
     }
 
     public void registerPlatform(String platformId,
@@ -248,6 +247,7 @@ public class RegistrationService {
         properties.put(ApplicationInfo.KEY_LTI_OIDC_ENDPOINT, authenticationRequestUrl);
         properties.put(ApplicationInfo.KEY_LTI_AUTH_TOKEN_ENDPOINT,authTokenUrl);
         properties.put(ApplicationInfo.KEY_LTI_KEYSET_URL,keysetUrl);
+        if(keyId != null) properties.put(ApplicationInfo.KEY_LTI_KID,keyId);
 
         JWKSet publicKeys = JWKSet.load(new URL(keysetUrl));
         if(publicKeys == null){
