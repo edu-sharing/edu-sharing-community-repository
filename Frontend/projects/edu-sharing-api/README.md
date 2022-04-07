@@ -83,19 +83,48 @@ export class EduSharingService {
 }
 ```
 
+If not stated otherwise, methods will throw errors of type `ApiErrorResponse` (see [Error Handling](#error-handling)).
+
+### `Observable`s
+This library uses `Observable`s as return types. There are methods that
+- trigger a request and return the result with an `Observable`.  
+  This is the behavior of most methods re-exported from `./lib/api/services` and some wrapped
+  methods.  
+  Names of these methods usually start wit `get` (except re-exported).  
+  Example: `search.getPage()`.
+- trigger a request but yield no result.  
+  This is the behavior of some methods re-exported from `./lib/api/services` and some wrapped
+  methods.  
+  Names of these methods usually don't have a prefix and are named as an action.  
+  Example: `search.loadMoreFacets()`.  
+  :warning: Do not forget to subscribe to the returned `Observable` anyway!
+- return a cached result with an `Observable`.  
+  Names of these methods usually start wit `get`.  
+  This is only done when we know it is safe to return old values. You can use these methods like
+  normal API methods, but we safe some requests.  
+  Example: `about.getAbout()`.
+- return a result each time its value changes.  
+  Names of these methods start wit `observe`.  
+  We provide these methods when we have a way of knowing when to refetch information. You can just
+  subscribe for as long as you need updated information and not care about requests.  
+  Example: `search.observeFacets()`.  
+  :warning: Do not forget to unsubscribe when you don't need the values anymore!  
+  :warning: These `Observable`s will never complete!
+
+
 ### Things to Keep in Mind When Using This Library
 
-> Most observables emit more then once.
+> `Observable`s returned by methods starting with `observe` emit more then once.
 
 ```ts
-this.authenticationService.getLoginInfo().subscribe((loginInfo) => {
+this.authenticationService.observeLoginInfo().subscribe((loginInfo) => {
     // This will be called multiple times!
 });
 ```
 
 ```ts
 // This will never resolve!
-await this.authenticationService.getLoginInfo().toPromise();
+await this.authenticationService.observeLoginInfo().toPromise();
 ```
 
 Use `first()` to get an observable that emits once and completes:
@@ -104,7 +133,7 @@ Use `first()` to get an observable that emits once and completes:
 import { first } from 'rxjs/operators';
 
 this.authenticationService
-    .getLoginInfo()
+    .observeLoginInfo()
     .pipe(first())
     .subscribe((loginInfo) => {
         // This will be called only once.
@@ -114,7 +143,7 @@ this.authenticationService
 > Subscribe to observables even if you are not interested in the result.
 
 ```ts
-this.authenticationService.login(username, password).subscribe();
+this.searchService.loadMoreFacets(facet, size).subscribe();
 ```
 
 > Do not alter objects returned by this library.
@@ -140,8 +169,8 @@ this.aboutService.getAbout().subscribe((about) => {
 });
 ```
 
-> Do not forget to unsubscribe from observables when using inside components or locally scoped
-> services.
+> Do not forget to unsubscribe from `Observable`s returned by methods starting with `observe` when
+> using inside components or locally scoped services.
 
 ```ts
 import { Component, OnDestroy, OnInit } from '@angular/core';
@@ -161,7 +190,7 @@ export class FooComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.searchService
-            .getFacets(['ccm:foo', 'ccm:bar'])
+            .observeFacets(['ccm:foo', 'ccm:bar'])
             // Unsubscribe when the component is destroyed.
             .pipe(takeUntil(this.destroyed$))
             .subscribe((facets) => (this.facets = facets));
@@ -185,7 +214,7 @@ You can choose to prevent this for individual calls by catching the error and ca
 ```ts
 this.searchApi.search({ /* ... */ }).subscribe({
     next: (results) => { /* handle results */ },
-    error: (err) => {
+    error: (err: ApiErrorResponse) => {
         /* handle error in a way that makes the default error handler obsolete */
         err.preventDefault();
     },
@@ -197,6 +226,15 @@ calling `preventDefault()`. In this case, the default error handler is run _afte
 one.
 
 ## Maintaining Ngx Edu-Sharing Api
+
+### Adding New Methods
+
+The preferred way of adding methods is to provide wrappers that care about caching and updating
+values.
+
+When wrappers would not provide much benefit, you can also re-export methods from
+`./lib/api/services` in `public-api.ts`. When doing this, take care not to expose any API endpoints
+which other wrappers rely on controlling themselves for consistent state.
 
 ### Update And Generate Edu-Sharing API Code
 
