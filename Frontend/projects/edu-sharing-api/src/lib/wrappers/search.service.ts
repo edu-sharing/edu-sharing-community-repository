@@ -188,7 +188,7 @@ export class SearchService {
      *
      * @param size number of new items to load.
      */
-    loadMoreFacets(property: string, size: number): Promise<void> {
+    loadMoreFacets(property: string, size: number): Observable<void> {
         const searchParams = this.getSearchParams();
         const currentFacetSize = this.facetsSubject.value[property].values.length;
         return this.searchV1
@@ -212,8 +212,7 @@ export class SearchService {
                     this.facetsSubject.next({ ...this.facetsSubject.value, [property]: facet }),
                 ),
                 map(() => {}),
-            )
-            .toPromise();
+            );
     }
 
     /**
