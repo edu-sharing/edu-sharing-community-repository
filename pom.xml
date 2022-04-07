@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.edu_sharing</groupId>
     <artifactId>edu_sharing-super-pom</artifactId>
-    <version>develop-SNAPSHOT</version>
+    <version>3</version>
     <relativePath/>
   </parent>
 
@@ -25,7 +25,7 @@
   <properties>
 
     <!-- release-4 -->
-    <bom.bom.version>${project.version}</bom.bom.version>
+    <bom.bom.version>7.0.0-RC4</bom.bom.version>
 
   </properties>
 
