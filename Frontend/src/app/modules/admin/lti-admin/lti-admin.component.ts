@@ -20,7 +20,7 @@ export class LtiAdminComponent implements OnInit {
      * dynamic
      */
     tokens: LTIRegistrationTokens;
-    displayedColumns: string[] = ['url', 'tsCreated', 'copy', 'delete'];
+    displayedColumns: string[] = ['url', 'tsExpiry', 'registeredAppId', 'copy', 'delete'];
 
     /**
      * advanced

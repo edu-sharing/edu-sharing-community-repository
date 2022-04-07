@@ -7,13 +7,20 @@
       <table *ngIf="tokens" mat-table [dataSource]="tokens.registrationLinks">
         <ng-container matColumnDef="url">
           <th mat-header-cell *matHeaderCellDef> {{'ADMIN.LTI.URL' | translate}} </th>
-          <td mat-cell *matCellDef="let element"> {{element.url}} </td>
+          <td [ngStyle]="{'text-decoration': element.expired ? 'line-through' : 'none' }" mat-cell *matCellDef="let element"> {{element.url}} </td>
         </ng-container>
 
-        <ng-container matColumnDef="tsCreated">
+        <ng-container matColumnDef="tsExpiry">
           <th mat-header-cell *matHeaderCellDef> {{'ADMIN.LTI.TS' | translate}} </th>
-          <td mat-cell *matCellDef="let element"> {{element.tsCreated | formatDate:{useRelativeLabels:false, time:true} }}</td>
+          <td mat-cell *matCellDef="let element"> {{element.tsExpiry | formatDate:{useRelativeLabels:false, time:true} }}</td>
         </ng-container>
+
+
+        <ng-container matColumnDef="registeredAppId">
+          <th mat-header-cell *matHeaderCellDef> {{'ADMIN.APPLICATIONS.ID' | translate}} </th>
+          <td mat-cell *matCellDef="let element"> {{(!element.registeredAppId) ? '-' : element.registeredAppId}}</td>
+        </ng-container>
+
         <ng-container matColumnDef="copy">
           <th mat-header-cell *matHeaderCellDef> </th>
           <td mat-cell *matCellDef="let element">

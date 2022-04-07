@@ -569,6 +569,7 @@
         "REMOVE_MESSAGE": "Do you really want to delete the token with the url \"{{url}}\"?\n\nExisting links may become unavailable due to this process.",
         "DYNAMIC_INFO": "With the dynamic lti registration you can interconnect edu-sharing with other, lti compatible systems. Click \"Generate Token\" to generate a new url token.\n\nInsert it into your lti-compatible system (e.g. moodle). The external system will be automatically connected afterwards.",
         "MANUAL_INFO": "If your lti-compatible system does not support the dynamic registration or in case it doesn't work, you may use the manual registration below.\n\nAfter choosing \"Save\", the given data will be used in order to prepare a connection.",
+        "EXPIRED": "expired",
         "DATA" : {
           "platformId" : "Platform Id",
           "client_id" : "Client Id",

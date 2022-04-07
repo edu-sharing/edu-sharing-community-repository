@@ -5,7 +5,10 @@ import java.util.Objects;
 public class DynamicRegistrationToken {
     String token;
     String url;
+    String registeredAppId;
     long tsCreated;
+    long tsExpiry;
+    boolean expired=false;
 
     public String getUrl() {
         return url;
@@ -31,6 +34,22 @@ public class DynamicRegistrationToken {
         this.token = token;
     }
 
+    public void setTsExpiry(long l) {tsExpiry = l;}
+
+    public long getTsExpiry() {return tsExpiry;}
+
+    public void setRegisteredAppId(String registeredAppId) {this.registeredAppId = registeredAppId;}
+
+    public String getRegisteredAppId() {return registeredAppId;}
+
+    public void setExpired(boolean expired) {
+        this.expired = expired;
+    }
+
+    public boolean isExpired() {
+        return expired;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -43,4 +62,6 @@ public class DynamicRegistrationToken {
     public int hashCode() {
         return Objects.hash(token);
     }
+
+
 }
