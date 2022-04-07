@@ -146,6 +146,12 @@
       </dependency>
 
       <dependency>
+        <groupId>org.aspectj</groupId>
+        <artifactId>aspectjweaver</artifactId>
+        <version>1.8.9</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.apache.axis</groupId>
         <artifactId>axis</artifactId>
         <version>1.4</version>
@@ -900,6 +906,12 @@
         <groupId>io.micrometer</groupId>
         <artifactId>micrometer-core</artifactId>
         <version>1.8.2</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-aspects</artifactId>
+        <version>3.2.17.RELEASE</version>
       </dependency>
 
     </dependencies>
