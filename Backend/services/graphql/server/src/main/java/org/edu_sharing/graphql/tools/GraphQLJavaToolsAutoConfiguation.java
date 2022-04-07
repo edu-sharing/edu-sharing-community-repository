@@ -1,5 +1,6 @@
 package org.edu_sharing.graphql.tools;
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import graphql.analysis.MaxQueryDepthInstrumentation;
 import graphql.kickstart.tools.*;
 import graphql.kickstart.tools.proxy.ProxyHandler;
@@ -20,6 +21,14 @@ import java.util.Optional;
 @Slf4j
 @Configuration
 public class GraphQLJavaToolsAutoConfiguation {
+
+    @Bean
+    ObjectMapperConfigurer objectMapperConfigurer() {
+        return ((mapper, context) -> {
+            mapper.registerModule(new JavaTimeModule());
+        });
+    }
+
 
     @Bean
     public SchemaStringProvider schemaStringProvider(ApplicationContext applicationContext){
@@ -63,13 +72,14 @@ public class GraphQLJavaToolsAutoConfiguation {
     @Bean
     public SchemaParser schemaParser(
             List<GraphQLResolver<?>> resolvers,
-            SchemaStringProvider schemaStringProvider) throws IOException {
+            SchemaStringProvider schemaStringProvider,
+            SchemaParserOptions.Builder optionsBuilder) throws IOException {
 
         SchemaParserBuilder builder = new SchemaParserBuilder();
 
         List<String> schemaStrings = schemaStringProvider.schemaStrings();
         schemaStrings.forEach(builder::schemaString);
-
+        builder.options(optionsBuilder.build());
         Optional.ofNullable(scalars).ifPresent(builder::scalars);
         Optional.ofNullable(dictionarySet).ifPresent(dictionary -> dictionary.forEach(schemaParserDictionary -> builder.dictionary(schemaParserDictionary.getDictionary())));
         Optional.ofNullable(directives).ifPresent(directive->directive.forEach(it -> builder.directive(it.getName(), it.getDirective())));
