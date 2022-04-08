@@ -16,7 +16,7 @@ import {
 import { ApiRequestConfiguration } from '../api-request-configuration';
 import * as apiModels from '../api/models';
 import { AuthenticationV1Service as AuthenticationApiService } from '../api/services';
-import { switchRelay } from '../utils/switch-relay';
+import { switchReplay } from '../utils/switch-replay';
 
 export type LoginInfo = apiModels.Login;
 
@@ -380,7 +380,7 @@ export class AuthenticationService {
         // needed.
         const inner$ = this.userChanges$.pipe(
             startWith(void 0 as void),
-            switchRelay(() => this.authentication.hasAccessToScope({ scope })),
+            switchReplay(() => this.authentication.hasAccessToScope({ scope })),
             map((response: { hasAccess: boolean }) => response.hasAccess),
         );
         // Do not resolve the observable for new subscribers while a login request is in-flight.

@@ -6,7 +6,7 @@ import { NodeEntries } from '../api/models';
 import { IamV1Service } from '../api/services';
 import { HOME_REPOSITORY, ME } from '../constants';
 import { ApiErrorResponse } from '../models';
-import { switchRelay } from '../utils/switch-relay';
+import { switchReplay } from '../utils/switch-replay';
 import { AuthenticationService } from './authentication.service';
 
 export interface SortPolicy {
@@ -172,7 +172,7 @@ export class NodeListService {
         );
         return nodeListNeedsRefresh$.pipe(
             startWith(void 0 as void),
-            switchRelay(() => getNodeList$),
+            switchReplay(() => getNodeList$),
         );
     }
 }

@@ -10,13 +10,16 @@ import { delay, first, shareReplay, switchMap, tap } from 'rxjs/operators';
  * of the projected observable once it emits. After that, everyone gets shared updates on newly
  * emitted values once they become available (like a normal `switchMap`-`shareReplay` combination).
  */
-export function switchRelay<T, R>(project: (value: T, index: number) => Observable<R>) {
+export function switchReplay<T, R>(project: (value: T, index: number) => Observable<R>) {
     const inFlightSubject = new BehaviorSubject(false);
     return (source$: Observable<T>) => {
         const inner$ = source$.pipe(
             tap(() => inFlightSubject.next(true)),
             switchMap((value, index) => project(value, index)),
-            tap(() => inFlightSubject.next(false)),
+            tap({
+                next: () => inFlightSubject.next(false),
+                error: () => inFlightSubject.next(false),
+            }),
             shareReplay(1),
         );
         return inFlightSubject.pipe(

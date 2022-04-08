@@ -5,7 +5,7 @@ import { first, startWith, switchMap, take, tap } from 'rxjs/operators';
 import { User, UserEntry, UserProfileEdit } from '../api/models';
 import { IamV1Service } from '../api/services';
 import { HOME_REPOSITORY, ME } from '../constants';
-import { switchRelay } from '../utils/switch-relay';
+import { switchReplay } from '../utils/switch-replay';
 import { AuthenticationService } from './authentication.service';
 
 export { UserEntry, User };
@@ -77,7 +77,7 @@ export class UserService {
             .merge(this.authentication.observeUserChanges(), this.currentUserProfileChangesSubject)
             .pipe(
                 startWith(void 0 as void),
-                switchRelay(() => this.getUserInner(ME, HOME_REPOSITORY)),
+                switchReplay(() => this.getUserInner(ME, HOME_REPOSITORY)),
             );
     }
 
