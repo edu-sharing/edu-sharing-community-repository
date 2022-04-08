@@ -287,6 +287,15 @@ public class NodeDao {
 		}
 	}
 
+	public static NodeSearch getMetadata(RepositoryDao repoDao, List<String> nodeIds, Filter filter) throws DAOException {
+		SearchService searchService = SearchServiceFactory.getSearchService(repoDao.getId());
+		try{
+			return transform(repoDao,searchService.getMetadata(nodeIds),filter);
+		} catch (Throwable e) {
+			throw DAOException.mapping(e);
+		}
+	}
+
 	public static NodeSearch transform(RepositoryDao repoDao, SearchResultNodeRef search){
 		return transform(repoDao,search,null);
 	}

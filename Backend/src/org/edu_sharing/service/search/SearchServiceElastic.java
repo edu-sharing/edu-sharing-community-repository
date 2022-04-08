@@ -170,7 +170,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
     public SearchResultNodeRef searchFacets(MetadataSet mds, String query, Map<String,String[]> criterias, SearchToken searchToken) throws Throwable {
         List<NodeSearch.Facet> facetsResult = new ArrayList<>();
-        BoolQueryBuilder globalConditions = getGlobalConditions(searchToken);
+        BoolQueryBuilder globalConditions = getGlobalConditions(searchToken.getAuthorityScope(),searchToken.getPermissions());
 
         MetadataQuery queryData = mds.findQuery(query, MetadataReader.QUERY_SYNTAX_DSL);
         Set<MetadataQueryParameter> excludeOwnFacets = MetadataElasticSearchHelper.getExcludeOwnFacets(queryData, new HashMap<>(), searchToken.getFacets());
@@ -246,7 +246,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
             QueryBuilder metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL),queryData,criterias,true);
             QueryBuilder metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL),queryData,criterias,false);
-            BoolQueryBuilder queryBuilderGlobalConditions = getGlobalConditions(searchToken);
+            BoolQueryBuilder queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(),searchToken.getPermissions());
 
             BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
             BoolQueryBuilder filterBuilder = QueryBuilders.boolQuery().must(metadataQueryBuilderFilter).must(queryBuilderGlobalConditions);
@@ -490,16 +490,17 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
     /**
      * permissions, scope ...
-     * @param searchToken
+     * @param authorityScope
+     * @param permissions
      * @return
      */
-    private BoolQueryBuilder getGlobalConditions(SearchToken searchToken) {
-        BoolQueryBuilder queryBuilderGlobalConditions = (searchToken.getAuthorityScope() != null && searchToken.getAuthorityScope().size() > 0)
-                ? getPermissionsQuery("permissions.read",new HashSet<>(searchToken.getAuthorityScope()))
+    private BoolQueryBuilder getGlobalConditions(List<String> authorityScope, List<String> permissions) {
+        BoolQueryBuilder queryBuilderGlobalConditions = (authorityScope != null && authorityScope.size() > 0)
+                ? getPermissionsQuery("permissions.read",new HashSet<>(authorityScope))
                 : getReadPermissionsQuery();
         queryBuilderGlobalConditions = queryBuilderGlobalConditions.must(QueryBuilders.matchQuery("nodeRef.storeRef.protocol", "workspace"));
-        if(searchToken.getPermissions() != null){
-            for(String permission : searchToken.getPermissions()){
+        if(permissions != null){
+            for(String permission : permissions){
                 queryBuilderGlobalConditions = QueryBuilders.boolQuery().must(queryBuilderGlobalConditions).must(getPermissionsQuery("permissions." + permission));
             }
         }
@@ -973,6 +974,44 @@ public class SearchServiceElastic extends SearchServiceImpl {
              }
              client = new RestHighLevelClient(RestClient.builder(getConfiguredHosts()));
         }
+    }
+
+
+    public SearchResultNodeRef getMetadata(List<String> nodeIds) throws IOException{
+
+        SearchResultNodeRef sr = new SearchResultNodeRef();
+        List<NodeRef> data = new ArrayList<>();
+        sr.setData(data);
+
+        SearchRequest searchRequest = new SearchRequest("workspace");
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        BoolQueryBuilder queryBuilder = getGlobalConditions(null,null);
+        BoolQueryBuilder qbNodeIds = QueryBuilders.boolQuery().minimumShouldMatch(1);
+        queryBuilder.must(qbNodeIds);
+
+        for(String nodeId : nodeIds) {
+            qbNodeIds.should(QueryBuilders.termQuery("nodeRef.id",nodeId));
+        }
+
+        searchSourceBuilder.query(queryBuilder);
+
+        searchSourceBuilder.from(0);
+        searchSourceBuilder.size(nodeIds.size());
+        searchSourceBuilder.trackTotalHits(true);
+        searchRequest.source(searchSourceBuilder);
+
+        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+
+        logger.info("query: "+searchSourceBuilder.toString());
+        SearchHits hits = searchResponse.getHits();
+        logger.info("result count: "+hits.getTotalHits());
+
+        for (SearchHit hit : hits) {
+            data.add(transformSearchHit(getUserAuthorities(), AuthenticationUtil.getFullyAuthenticatedUser(), hit,true));
+        }
+        sr.setStartIDX(0);
+        sr.setNodeCount( (int)hits.getTotalHits().value);
+        return sr;
     }
 
 
