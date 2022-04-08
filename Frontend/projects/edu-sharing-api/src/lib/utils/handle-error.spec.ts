@@ -1,5 +1,6 @@
 import * as rxjs from 'rxjs';
 import { handleError } from './handle-error';
+import { switchReplay } from './switch-replay';
 
 describe('handleError', () => {
     let defaultErrorHandler: jasmine.Spy;
@@ -66,5 +67,53 @@ describe('handleError', () => {
             },
         });
         expect(defaultErrorHandler).not.toHaveBeenCalled();
+    });
+
+    it('should be called with switchReplay', (done) => {
+        const source = rxjs.throwError({ message: 'foo' }).pipe(handleError(defaultErrorHandler));
+        const trigger = rxjs.of(void 0);
+        const observable = trigger.pipe(switchReplay(() => source));
+        observable.subscribe({
+            error: () => {
+                setTimeout(() => {
+                    expect(defaultErrorHandler).toHaveBeenCalled();
+                    done();
+                });
+            },
+        });
+    });
+
+    it('should prevent default with switchReplay', (done) => {
+        const source = rxjs.throwError({ message: 'foo' }).pipe(handleError(defaultErrorHandler));
+        const trigger = rxjs.of(void 0);
+        const observable = trigger.pipe(switchReplay(() => source));
+        observable.subscribe({
+            error: (err) => {
+                err.preventDefault();
+                setTimeout(() => {
+                    expect(defaultErrorHandler).not.toHaveBeenCalled();
+                    done();
+                });
+            },
+        });
+    });
+
+    it('should prevent default with switchReplay with multiple subscribers', (done) => {
+        const source = rxjs.throwError({ message: 'foo' }).pipe(handleError(defaultErrorHandler));
+        const trigger = rxjs.of(void 0);
+        const observable = trigger.pipe(switchReplay(() => source));
+        observable.subscribe({
+            error: (err) => {
+                err.preventDefault();
+            },
+        });
+        observable.subscribe({
+            error: () => {
+                setTimeout(() => {
+                    expect(defaultErrorHandler).not.toHaveBeenCalled();
+                    done();
+                });
+            },
+        });
     });
 });
