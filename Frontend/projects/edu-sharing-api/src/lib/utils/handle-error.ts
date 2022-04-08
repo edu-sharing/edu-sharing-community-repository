@@ -1,5 +1,6 @@
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
+import { delay } from 'rxjs/operators';
 
 /**
  * Adds a default error handler to the observable.
@@ -41,9 +42,15 @@ export function handleError<T>(
                         });
                     }
                     subscriber.error(err);
-                    if (!err.defaultPrevented) {
-                        defaultErrorHandler(err);
-                    }
+                    rxjs.of(null)
+                        // Wait two ticks in case `handleError` was used in combination with
+                        // `switchReplay`, which takes a tick to forward errors.
+                        .pipe(delay(0), delay(0))
+                        .subscribe(() => {
+                            if (!err.defaultPrevented) {
+                                defaultErrorHandler(err);
+                            }
+                        });
                 },
             });
         });
