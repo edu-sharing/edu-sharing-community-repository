@@ -48,6 +48,7 @@ export class NodeDataSource<T extends Node|GenericAuthority> extends DataSource<
 
     reset() {
         this.setData([]);
+        this.setCanLoadMore(true);
     }
 
     hasMore() {

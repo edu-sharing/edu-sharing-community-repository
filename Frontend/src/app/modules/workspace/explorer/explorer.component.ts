@@ -50,6 +50,92 @@ import {
 export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterViewInit {
     public readonly SCOPES = Scope;
     readonly InteractionType = InteractionType;
+
+    public static getColumns(connector: RestConnectorService, customColumns:ListItem[] = [],configColumns:string[] = []) {
+        let defaultColumns:ListItem[]=[];
+        defaultColumns.push(new ListItem('NODE', RestConstants.CM_NAME));
+        defaultColumns.push(new ListItem('NODE', RestConstants.CM_CREATOR));
+        defaultColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
+        if(connector.getCurrentLogin() ? connector.getCurrentLogin().isAdmin : false) {
+            defaultColumns.push(new ListItem('NODE', RestConstants.NODE_ID));
+
+            const repsource = new ListItem('NODE', RestConstants.CCM_PROP_REPLICATIONSOURCEID);
+            repsource.visible = false;
+            defaultColumns.push(repsource);
+        }
+        const title = new ListItem('NODE', RestConstants.LOM_PROP_TITLE);
+        title.visible = false;
+        const size = new ListItem('NODE', RestConstants.SIZE);
+        size.visible = false;
+        const created = new ListItem('NODE', RestConstants.CM_PROP_C_CREATED);
+        created.visible = false;
+        const mediatype = new ListItem('NODE', RestConstants.MEDIATYPE);
+        mediatype.visible = false;
+        const keywords = new ListItem('NODE', RestConstants.LOM_PROP_GENERAL_KEYWORD);
+        keywords.visible = false;
+        const dimensions = new ListItem('NODE', RestConstants.DIMENSIONS);
+        dimensions.visible = false;
+        const version = new ListItem('NODE', RestConstants.LOM_PROP_LIFECYCLE_VERSION);
+        version.visible = false;
+        const usage = new ListItem('NODE', RestConstants.VIRTUAL_PROP_USAGECOUNT);
+        usage.visible = false;
+        const license = new ListItem('NODE', RestConstants.CCM_PROP_LICENSE);
+        license.visible = false;
+        const wfStatus = new ListItem('NODE', RestConstants.CCM_PROP_WF_STATUS);
+        wfStatus.visible = false;
+        defaultColumns.push(title);
+        defaultColumns.push(size);
+        defaultColumns.push(created);
+        defaultColumns.push(mediatype);
+        defaultColumns.push(keywords);
+        defaultColumns.push(dimensions);
+        defaultColumns.push(version);
+        defaultColumns.push(usage);
+        defaultColumns.push(license);
+        defaultColumns.push(wfStatus);
+
+        if(Array.isArray(configColumns)) {
+            const configList:ListItem[]=[];
+            for(const col of defaultColumns) {
+                if(configColumns.indexOf(col.name)!=-1) {
+                    col.visible=true;
+                    configList.push(col);
+                }
+            }
+            for(const col of defaultColumns) {
+                if(configColumns.indexOf(col.name)==-1) {
+                    col.visible=false;
+                    configList.push(col);
+                }
+            }
+            // sort as defined inside config
+            configList.sort((a, b) => {
+                let pos1 = configColumns.indexOf(a.name);
+                let pos2 = configColumns.indexOf(b.name);
+                if(pos1 === -1) pos1 = configColumns.length;
+                if(pos2 === -1) pos2 = configColumns.length;
+                return pos1 - pos2;
+            });
+            defaultColumns=configList;
+        }
+        if(Array.isArray(customColumns)) {
+            for(const column of defaultColumns) {
+                let add=true;
+                for(const column2 of customColumns) {
+                    if(column.name === column2.name) {
+                        add = false;
+                        break;
+                    }
+                }
+                if(add) {
+                    customColumns.push(column);
+                }
+            }
+            return customColumns;
+        }
+        return defaultColumns;
+    }
+
     @ViewChild('list') list: ListTableComponent;
     @ViewChild(NodeEntriesWrapperComponent) nodeEntries: NodeEntriesWrapperComponent<Node>;
     public _dataSource: NodeDataSource<Node>;
@@ -223,89 +309,6 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     async ngAfterViewInit() {
         await this.initOptions();
     }
-    public getColumns(customColumns:any[],configColumns:string[]) {
-        let defaultColumns:ListItem[]=[];
-        defaultColumns.push(new ListItem('NODE', RestConstants.CM_NAME));
-        defaultColumns.push(new ListItem('NODE', RestConstants.CM_CREATOR));
-        defaultColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
-        if(this.connector.getCurrentLogin() ? this.connector.getCurrentLogin().isAdmin : false) {
-            defaultColumns.push(new ListItem('NODE', RestConstants.NODE_ID));
-
-            const repsource = new ListItem('NODE', RestConstants.CCM_PROP_REPLICATIONSOURCEID);
-            repsource.visible = false;
-            defaultColumns.push(repsource);
-        }
-        const title = new ListItem('NODE', RestConstants.LOM_PROP_TITLE);
-        title.visible = false;
-        const size = new ListItem('NODE', RestConstants.SIZE);
-        size.visible = false;
-        const created = new ListItem('NODE', RestConstants.CM_PROP_C_CREATED);
-        created.visible = false;
-        const mediatype = new ListItem('NODE', RestConstants.MEDIATYPE);
-        mediatype.visible = false;
-        const keywords = new ListItem('NODE', RestConstants.LOM_PROP_GENERAL_KEYWORD);
-        keywords.visible = false;
-        const dimensions = new ListItem('NODE', RestConstants.DIMENSIONS);
-        dimensions.visible = false;
-        const version = new ListItem('NODE', RestConstants.LOM_PROP_LIFECYCLE_VERSION);
-        version.visible = false;
-        const usage = new ListItem('NODE', RestConstants.VIRTUAL_PROP_USAGECOUNT);
-        usage.visible = false;
-        const license = new ListItem('NODE', RestConstants.CCM_PROP_LICENSE);
-        license.visible = false;
-        const wfStatus = new ListItem('NODE', RestConstants.CCM_PROP_WF_STATUS);
-        wfStatus.visible = false;
-        defaultColumns.push(title);
-        defaultColumns.push(size);
-        defaultColumns.push(created);
-        defaultColumns.push(mediatype);
-        defaultColumns.push(keywords);
-        defaultColumns.push(dimensions);
-        defaultColumns.push(version);
-        defaultColumns.push(usage);
-        defaultColumns.push(license);
-        defaultColumns.push(wfStatus);
-
-        if(Array.isArray(configColumns)) {
-            const configList:ListItem[]=[];
-            for(const col of defaultColumns) {
-                if(configColumns.indexOf(col.name)!=-1) {
-                    col.visible=true;
-                    configList.push(col);
-                }
-            }
-            for(const col of defaultColumns) {
-                if(configColumns.indexOf(col.name)==-1) {
-                    col.visible=false;
-                    configList.push(col);
-                }
-            }
-            // sort as defined inside config
-            configList.sort((a, b) => {
-                let pos1 = configColumns.indexOf(a.name);
-                let pos2 = configColumns.indexOf(b.name);
-                if(pos1 === -1) pos1 = configColumns.length;
-                if(pos2 === -1) pos2 = configColumns.length;
-                return pos1 - pos2;
-            });
-            defaultColumns=configList;
-        }
-        if(Array.isArray(customColumns)) {
-            for(const column of defaultColumns) {
-                let add=true;
-                for(const column2 of customColumns) {
-                    if(column.name==column2.name) {
-                        add=false;
-                        break;
-                    }
-                }
-                if(add)
-                    customColumns.push(column);
-            }
-            return customColumns;
-        }
-        return defaultColumns;
-    }
     public setSorting(config: ListSortConfig) {
         this.sort = config;
         this.storage.set(SessionStorageService.KEY_WORKSPACE_SORT + this._root, {
@@ -385,7 +388,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     initColumns() {
         this.config.get('workspaceColumns').subscribe((data:string[])=> {
             this.storage.get('workspaceColumns').subscribe((columns:any[])=> {
-                this.columns = this.getColumns(columns, data);
+                this.columns = WorkspaceExplorerComponent.getColumns(this.connector, columns, data);
             });
         });
     }
