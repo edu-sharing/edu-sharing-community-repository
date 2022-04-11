@@ -4,6 +4,7 @@ import { distinctUntilChanged, map, shareReplay, startWith, switchMap } from 'rx
 import { ApiRequestConfiguration } from '../api-request-configuration';
 import * as apiModels from '../api/models';
 import { ConfigV1Service } from '../api/services';
+import { switchReplay } from '../utils/switch-replay';
 
 export type ClientConfig = apiModels.Values;
 export type Variables = apiModels.Variables['current'];
@@ -23,15 +24,13 @@ export class ConfigService {
 
     private readonly config$ = this.updateTrigger.pipe(
         startWith(void 0 as void),
-        switchMap(() => this.configV1.getConfig1()),
+        switchReplay(() => this.configV1.getConfig1()),
         map((config) => config.current ?? null),
-        shareReplay(1),
     );
     private readonly variables$ = this.updateTrigger.pipe(
         startWith(void 0 as void),
-        switchMap(() => this.configV1.getVariables()),
+        switchReplay(() => this.configV1.getVariables()),
         map((variables) => variables.current ?? null),
-        shareReplay(1),
     );
     private readonly defaultTranslations$ = this.localeSubject.pipe(
         distinctUntilChanged(),

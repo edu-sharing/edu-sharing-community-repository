@@ -1,11 +1,11 @@
-import { RestAdminService } from '../../../core-module/rest/services/rest-admin.service';
 import { Component } from '@angular/core';
-import { DialogButton } from '../../../core-module/core.module';
-import { Toast } from '../../../core-ui-module/toast';
-import { ModalMessageType } from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
-import { forkJoin, Observable } from 'rxjs';
 import { ConfigService } from 'ngx-edu-sharing-api';
+import { forkJoin } from 'rxjs';
 import { first } from 'rxjs/operators';
+import { ModalMessageType } from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
+import { DialogButton } from '../../../core-module/core.module';
+import { RestAdminService } from '../../../core-module/rest/services/rest-admin.service';
+import { Toast } from '../../../core-ui-module/toast';
 
 // Charts.js
 declare var Chart: any;
@@ -67,6 +67,7 @@ export class AdminConfigComponent {
                     });
             });
     }
+
     displayError(error: any) {
         console.warn(error);
         this.toast.closeModalDialog();
@@ -83,6 +84,7 @@ export class AdminConfigComponent {
             ],
         });
     }
+
     save() {
         this.toast.showProgressDialog();
         forkJoin([
@@ -110,9 +112,10 @@ export class AdminConfigComponent {
                                 this.toast.closeModalDialog();
                                 this.toast.toast('ADMIN.GLOBAL_CONFIG.SAVED');
                             },
-                            (error) =>
-                                // TODO: check if global error handling displays error twice
-                                this.displayError(error),
+                            (error) => {
+                                this.displayError(error);
+                                error.preventDefault();
+                            },
                         );
                 },
                 (error) => {
