@@ -1,3 +1,4 @@
+import { ApiErrorResponse } from '../models';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { delay } from 'rxjs/operators';
@@ -34,7 +35,7 @@ export function handleError<T>(
             source$.subscribe({
                 next: (value) => subscriber.next(value),
                 complete: () => subscriber.complete(),
-                error: (err) => {
+                error: (err: ApiErrorResponse) => {
                     if (!err.preventDefault) {
                         err.preventDefault = () => (defaultPrevented = true);
                         Object.defineProperty(err, 'defaultPrevented', {

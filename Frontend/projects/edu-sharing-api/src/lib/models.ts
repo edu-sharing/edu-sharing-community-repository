@@ -25,4 +25,7 @@ import { MdsView } from './api/models';
 
 export type MdsViewRelation = MdsView['rel'];
 
-export type ApiErrorResponse = HttpErrorResponse & { preventDefault: () => void };
+export type ApiErrorResponse = HttpErrorResponse & {
+    readonly defaultPrevented: boolean;
+    preventDefault: () => void;
+};
