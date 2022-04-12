@@ -18,13 +18,17 @@ public class QueryUtils {
         if(query==null)
             return query;
         try {
-
-            for(Map.Entry<String, Serializable> prop : getUserInfo().entrySet()){
-                if(prop.getValue()==null) {
-                    continue;
+            Map<String, Serializable> info = getUserInfo();
+            if(info != null) {
+                for (Map.Entry<String, Serializable> prop : info.entrySet()) {
+                    if (prop.getValue() == null) {
+                        continue;
+                    }
+                    query = replacer.replaceString(query, "${user." + CCConstants.getValidLocalName(prop.getKey()) + "}",
+                            prop.getValue().toString());
                 }
-                query = replacer.replaceString(query, "${user."+CCConstants.getValidLocalName(prop.getKey())+"}",
-                        prop.getValue().toString());
+            } else {
+                logger.debug("User Info was empty, will not replace any user data in search query");
             }
         } catch (Exception e) {
             logger.warn("Could not replace user data in search query, search might fail",e);
