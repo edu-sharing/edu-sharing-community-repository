@@ -1,5 +1,7 @@
+import { HttpRequest } from '@angular/common/http';
 import { Injectable, InjectionToken, Optional, Provider } from '@angular/core';
 import { ApiConfiguration } from './api/api-configuration';
+import { ApiErrorResponse } from './models';
 
 export const EDU_SHARING_API_CONFIG = new InjectionToken<EduSharingApiConfigurationParams>(
     'EDU_SHARING_API_CONFIG',
@@ -13,7 +15,7 @@ export class EduSharingApiConfiguration extends ApiConfiguration {
         return { ...new EduSharingApiConfiguration(), ...params };
     }
 
-    onError?: (error: any) => void;
+    onError?: (error: ApiErrorResponse, req: HttpRequest<unknown>) => void;
 }
 
 export type EduSharingApiConfigurationParams = Partial<EduSharingApiConfiguration>;

@@ -24,7 +24,7 @@ export class ApiInterceptor implements HttpInterceptor {
     
             return next.handle(req).pipe(
                 // Handle errors globally
-                handleError((err) => this.configuration.onError?.(err)),
+                handleError((err) => this.configuration.onError?.(err, req)),
             );
         } else {
             return next.handle(req);

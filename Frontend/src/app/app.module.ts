@@ -185,7 +185,7 @@ import { Toast } from './core-ui-module/toast';
             provide: EDU_SHARING_API_CONFIG,
             deps: [ErrorHandlerService],
             useFactory: (errorHandler: ErrorHandlerService) => ({
-                onError: (err) => errorHandler.handleError(err),
+                onError: (err, req) => errorHandler.handleError(err, req),
             } as EduSharingApiConfigurationParams),
         },
         PROVIDERS,
