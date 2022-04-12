@@ -934,14 +934,13 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private registerCurrentUser(): void {
         this.user
-            .observeCurrentUser()
+            .observeCurrentUserInfo()
             .pipe(takeUntil(this.destroyed$))
-            .subscribe(async (currentUser) => {
-                const login = await this.authentication.observeLoginInfo().pipe(first()).toPromise();
-                if(login.isGuest) {
+            .subscribe(async ({ user, loginInfo }) => {
+                if(loginInfo.isGuest) {
                     this.currentUser = null;
                 } else {
-                    this.currentUser = currentUser.person
+                    this.currentUser = user.person
                 }
             });
     }
