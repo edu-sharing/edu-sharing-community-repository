@@ -40,6 +40,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -81,6 +82,10 @@ public class MigrationJob extends AbstractJob {
     String protocolFile = tempDir + "/" + "MigrationJob.txt";
     private Client client;
     private String url;
+
+    List<String> cleanAuthorityDisplayname = LightbendConfigLoader.get().hasPath("migrationjob.cleanAuthorityDisplayname")
+            ? LightbendConfigLoader.get().getStringList("migrationjob.cleanAuthorityDisplayname")
+            : new ArrayList<>();
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -350,8 +355,13 @@ public class MigrationJob extends AbstractJob {
 
     private String getIdmMappingEduGroup(String authorityName, String authorityNameDN) throws UnsupportedEncodingException {
 
-        String cleanedAuthorityName = authorityNameDN.replace("Hamburg - ", "");
-        cleanedAuthorityName = cleanedAuthorityName.replace("BSB - ", "");
+        //String cleanedAuthorityName = authorityNameDN.replace("Hamburg - ", "");
+        //cleanedAuthorityName = cleanedAuthorityName.replace("BSB - ", "");
+        String cleanedAuthorityName = new String(authorityNameDN);
+        for(String clean : cleanAuthorityDisplayname){
+            cleanedAuthorityName = cleanedAuthorityName.replace(clean,"");
+        }
+
 
         WebTarget webTargetEduGroup = client
                 .target("http://localhost:8085/migration/mappingSchool?schoolName="
