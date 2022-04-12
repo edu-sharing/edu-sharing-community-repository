@@ -60,7 +60,7 @@ import { SearchFieldComponent } from '../search-field/search-field.component';
 import {About, AboutService, AuthenticationService, User, UserService} from 'ngx-edu-sharing-api';
 import { ConfigOptionItem, NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
 import { Subject } from 'rxjs';
-import {first, map, takeUntil} from 'rxjs/operators';
+import {first, map, take, takeUntil} from 'rxjs/operators';
 
 /**
  * The main nav (top bar + menus)
@@ -490,15 +490,18 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.startTutorial();
     }
 
-    async startTutorial() {
-        if (this.connector.getCurrentLogin().statusCode === RestConstants.STATUS_CODE_OK) {
-            const user = await this.iam.getCurrentUserAsync();
-            if (user.editProfile && this.configService.instant('editProfile', false)) {
+    startTutorial() {
+        this.user.observeCurrentUserInfo().pipe(take(1)).subscribe(({user, loginInfo}) => {
+            if (
+                loginInfo.statusCode === RestConstants.STATUS_CODE_OK &&
+                user.editProfile &&
+                this.configService.instant('editProfile', false)
+            ) {
                 this.uiService.waitForComponent(this, 'userRef').subscribe(() => {
                     this.tutorialElement = this.userRef;
                 });
             }
-        }
+        })
     }
 
     setFixMobileElements(fix: boolean) {
