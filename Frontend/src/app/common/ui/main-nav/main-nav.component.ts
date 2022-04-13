@@ -966,13 +966,15 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                             'WORKSPACE.RELOGIN',
                             DialogButton.TYPE_PRIMARY,
                             () => {
-                                RestHelper.goToLogin(
-                                    this.router,
-                                    this.configService,
-                                    this.isSafe() ? RestConstants.SAFE_SCOPE : null,
-                                    null,
-                                );
-                                this.toast.closeModalDialog();
+                                this.authentication.forceLoginInfoRefresh().subscribe(() => {
+                                    RestHelper.goToLogin(
+                                        this.router,
+                                        this.configService,
+                                        this.isSafe() ? RestConstants.SAFE_SCOPE : null,
+                                        null,
+                                    );
+                                    this.toast.closeModalDialog();
+                                });
                             },
                         ),
                     ],
