@@ -6,6 +6,7 @@ public class Contributor{
     String lastname;
     String email;
     String vcard;
+    String org;
 
     public String getProperty() {
         return property;
@@ -37,6 +38,14 @@ public class Contributor{
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public void setOrg(String org) {
+        this.org = org;
+    }
+
+    public String getOrg() {
+        return org;
     }
 
     public String getVcard() {

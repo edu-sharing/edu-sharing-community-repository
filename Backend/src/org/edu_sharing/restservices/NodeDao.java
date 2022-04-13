@@ -105,7 +105,7 @@ public class NodeDao {
 	private final String ownerUsername;
 	private final Map<NodeRefImpl.Relation, NodeDao> relations = new HashMap<>();
 	private CollectionRef collectionRef;
-	private final List<Contributor> contributors;
+	private final List<Contributor> contributors = new ArrayList<>();
 	/*
 	whether this node dao is supposed to fetch collection counts (more expensive when true)
 	 */
@@ -569,7 +569,35 @@ public class NodeDao {
 			}
 			this.previewData = nodeRef.getPreview();
 
-			this.contributors = nodeRef.getContributors();
+			if(nodeRef.getContributors() != null ){
+				this.contributors.addAll(nodeRef.getContributors());
+			}
+			//when nodeservice or solr was used
+			if(this.contributors.size() == 0){
+				for(String prop : this.nodeProps.keySet()){
+					String key = CCConstants.getValidLocalName(prop);
+					if(key == null) continue;
+					if(key.matches("ccm:[a-zA-Z]*contributer_[a-zA-Z_-]*")){
+						String value = (String) this.nodeProps.get(prop);
+						for(String v : ValueTool.getMultivalue(value)){
+							ArrayList<HashMap<String, Object>> vcds = VCardConverter.vcardToHashMap(v);
+							if(vcds.size() > 0){
+								Contributor contributor = new Contributor();
+								HashMap<String, Object> vcd = vcds.get(0);
+								contributor.setFirstname((String)vcd.get(CCConstants.VCARD_GIVENNAME));
+								contributor.setLastname((String)vcd.get(CCConstants.VCARD_SURNAME));
+								contributor.setProperty(key);
+								contributor.setEmail(CCConstants.VCARD_EMAIL);
+								contributor.setOrg((String)vcd.get(CCConstants.VCARD_ORG));
+								contributor.setVcard(v);
+								this.contributors.add(contributor);
+							}
+						}
+
+					}
+				}
+
+			}
 
 			if(nodeProps.containsKey(CCConstants.NODETYPE)){
 				this.type = (String) nodeProps.get(CCConstants.NODETYPE);

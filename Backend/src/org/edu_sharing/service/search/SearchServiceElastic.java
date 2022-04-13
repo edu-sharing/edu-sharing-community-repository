@@ -736,6 +736,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             contributorResult.setEmail((String)c.get("email"));
             contributorResult.setFirstname((String)c.get("firstname"));
             contributorResult.setLastname((String)c.get("lastname"));
+            contributorResult.setOrg((String)c.get("org"));
             contributorResult.setVcard((String)c.get("vcard"));
             contributorsResult.add(contributorResult);
         }
