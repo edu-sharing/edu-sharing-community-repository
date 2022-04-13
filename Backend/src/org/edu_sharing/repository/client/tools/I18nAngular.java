@@ -49,7 +49,7 @@ public class I18nAngular {
      * @param language
      * @return
      */
-    public static String getTranslationAngular(String scope,String key,String language){
+    private static String getTranslationAngular(String scope,String key,String language){
         try {
             String override=getTranslationFromOverride(key,language);
             if(override!=null)

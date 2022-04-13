@@ -288,7 +288,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
             .getNeededFacets()
             .pipe(
                 takeUntil(this.destroyed$),
-                switchMap((neededFacets) => this.search.getFacets(neededFacets)),
+                switchMap((neededFacets) => this.search.observeFacets(neededFacets)),
                 map((facets) => {
                     if (facets) {
                         return Object.entries(facets).reduce(

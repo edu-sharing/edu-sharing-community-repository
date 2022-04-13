@@ -509,7 +509,7 @@ export class UIHelper {
                     if (win) win.close();
                     return;
                 }
-                iam.getUser().subscribe(
+                iam.getCurrentUserAsync().then(
                     user => {
                         if (
                             user.person.quota.enabled &&

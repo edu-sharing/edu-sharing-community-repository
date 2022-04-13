@@ -468,8 +468,6 @@
 		</template>
 		<template>
 			<id>node_general_template</id>
-			<caption>dialog_upload_tab_basic</caption>
-			<icon>description</icon>
 			<html><![CDATA[
 			  <ccm:educationallearningresourcetype>
               <cclom:general_keyword>
@@ -1100,11 +1098,20 @@
 		<query join="AND" id="ngsearch">
 			<!--TODO basequery-->
 			<!--basequery>ISNULL:@ccm\:tool_category</basequery-->
-			<basequery>{"bool":{"must":[{"term":{"nodeRef.storeRef.protocol":"workspace"}}],"must_not":[{"term":{"aspects":"ccm:metadataPresettingTemplate"}},{"term":{"aspects":"ccm:io_childobject"}},{"wildcard":{"properties.cm:name.keyword":"._*"}},{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}]}}</basequery>
+			<basequery>
+				{"bool":
+				{"must":[{"term":{"nodeRef.storeRef.protocol":"workspace"}}],
+				 "must_not":[{"term":{"aspects":"ccm:metadataPresettingTemplate"}},
+							 {"term":{"aspects":"ccm:io_childobject"}},
+							 {"wildcard":{"properties.cm:name.keyword":"._*"}},
+							 {"term":{"aspects":"ccm:collection_io_reference"}},
+				             {"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}]
+				}
+				}</basequery>
 			<property name="ngsearchword">
 				<statement>{"bool":{"should":[
 					{"wildcard":{"properties.cm:name":{"value":"*${value}*", "case_insensitive": true }}},
-					{"wildcard":{"properties.cclom:title":{"value":"*${value}*", "case_insensitive": true }}},
+					{"wildcard":{"properties.cclom:title.keyword":{"value":"*${value}*", "case_insensitive": true }}},
 					{"wildcard":{"properties.cclom:general_description":{"value":"*${value}*", "case_insensitive": true }}},
 					{"wildcard":{"properties.cclom:general_keyword":{"value":"*${value}*", "case_insensitive": true }}},
 					{"wildcard":{"content.fulltext":{"value":"*${value}*", "case_insensitive": true }}},

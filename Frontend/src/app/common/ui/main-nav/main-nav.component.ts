@@ -12,7 +12,7 @@ import {
     ElementRef,
     EventEmitter,
     HostListener,
-    Input, OnDestroy,
+    Input, NgZone, OnDestroy,
     OnInit,
     Output, TemplateRef,
     ViewChild,
@@ -54,12 +54,13 @@ import { MainMenuEntriesService } from '../../services/main-menu-entries.service
 import { GlobalContainerComponent } from '../global-container/global-container.component';
 import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar.component';
 import {MainMenuDropdownComponent} from '../main-menu-dropdown/main-menu-dropdown.component';
+import {Observable} from 'rxjs';
 import {MainNavService} from '../../services/main-nav.service';
 import { SearchFieldComponent } from '../search-field/search-field.component';
 import {About, AboutService, AuthenticationService, User, UserService} from 'ngx-edu-sharing-api';
 import { ConfigOptionItem, NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import {first, map, take, takeUntil} from 'rxjs/operators';
 
 /**
  * The main nav (top bar + menus)
@@ -74,40 +75,6 @@ import { takeUntil } from 'rxjs/operators';
         trigger('overlayBottom', UIAnimation.openOverlayBottom()),
         trigger('cardAnimation', UIAnimation.cardAnimation()),
         trigger('fade', UIAnimation.fade()),
-        trigger('nodeStore', [
-            transition(':enter', [
-                animate(
-                    UIAnimation.ANIMATION_TIME_SLOW + 'ms ease-in',
-                    keyframes([
-                        style({
-                            opacity: 0,
-                            top: '0',
-                            transform: 'scale(0.25)',
-                            offset: 0,
-                        }),
-                        style({
-                            opacity: 1,
-                            top: '10px',
-                            transform: 'scale(1)',
-                            offset: 1,
-                        }),
-                    ]),
-                ),
-            ]),
-            transition(':leave', [
-                animate(
-                    UIAnimation.ANIMATION_TIME_SLOW + 'ms ease-in',
-                    keyframes([
-                        style({ opacity: 1, transform: 'scale(1)', offset: 0 }),
-                        style({
-                            opacity: 0,
-                            transform: 'scale(10)',
-                            offset: 1,
-                        }),
-                    ]),
-                ),
-            ]),
-        ]),
     ],
 })
 export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -194,9 +161,8 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     visible = false;
     createMenuX: number;
     createMenuY: number;
-    timeout: string;
+    autoLogoutTimeout$: Observable<string>;
     config: any = {};
-    nodeStoreAnimation = 0;
     showNodeStore = false;
     acceptLicenseAgreement: boolean;
     licenseAgreement: boolean;
@@ -216,7 +182,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private readonly destroyed$ = new Subject();
     private editUrl: string;
-    private nodeStoreCount = 0;
     private licenseAgreementNode: Node;
     private scrollInitialPositions: any[] = [];
     private lastScroll = -1;
@@ -253,6 +218,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         private nodeHelper: NodeHelperService,
         private authentication: AuthenticationService,
         private user: UserService,
+        private ngZone: NgZone,
     ) {
         this.mainnavService.registerMainNav(this);
         this.visible = !this.storage.get(
@@ -264,7 +230,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.connector.setRoute(this.route).subscribe(() => {
             this.aboutService.getAbout().subscribe(about => {
                 this.about = about;
-                this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+                this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
                     if (!data.isValidLogin) {
                         this.canOpen = data.isGuest;
                         this.checkConfig();
@@ -286,7 +252,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                         this.showNodeStore = params.nodeStore === 'true';
                         this._showUser =
                             this._currentScope !== 'login' && this.showUser;
-                        this.refreshNodeStore();
                         this.checkConfig();
                         const user = await this.iam.getUser().toPromise();
                         this.canEditProfile = user.editProfile;
@@ -302,6 +267,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.registerCurrentUser();
         this.registerAutoLogoutDialog();
         this.registerAutoLogoutTimeout();
+        this.registerHandleScroll();
     }
 
     ngAfterViewInit() {
@@ -313,9 +279,19 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.updateUserOptions();
     }
 
-    @HostListener('window:scroll', ['$event'])
-    @HostListener('window:touchmove', ['$event'])
-    async handleScroll(event: any) {
+    private registerHandleScroll(): void {
+        const handleScroll = (event: any) => this.handleScroll(event);
+        this.ngZone.runOutsideAngular(() => {
+            window.addEventListener('scroll', handleScroll);
+            window.addEventListener('touchmove', handleScroll);
+            this.destroyed$.subscribe(() => {
+                window.removeEventListener('scroll', handleScroll);
+                window.removeEventListener('touchmove', handleScroll);
+            })
+        });
+    }
+
+    private async handleScroll(event: any) {
         if (
             this.storage.get(
                 TemporaryStorageService.OPTION_DISABLE_SCROLL_LAYOUT,
@@ -460,24 +436,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         );
     }
 
-    refreshNodeStore() {
-        this.iam
-            .getNodeList(RestConstants.NODE_STORE_LIST)
-            .subscribe((data: NodeList) => {
-                if (
-                    data.nodes.length - this.nodeStoreCount > 0 &&
-                    this.nodeStoreAnimation === -1
-                ) {
-                    this.nodeStoreAnimation =
-                        data.nodes.length - this.nodeStoreCount;
-                }
-                this.nodeStoreCount = data.nodes.length;
-                setTimeout(() => {
-                    this.nodeStoreAnimation = -1;
-                }, 1500);
-            });
-    }
-
     onEvent(event: string, data: any) {
         if (event === FrameEventsService.EVENT_PARENT_SEARCH) {
             this.doSearch(data, false);
@@ -532,15 +490,18 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.startTutorial();
     }
 
-    async startTutorial() {
-        if (this.connector.getCurrentLogin().statusCode === RestConstants.STATUS_CODE_OK) {
-            const user = await this.iam.getCurrentUserAsync();
-            if (user.editProfile && this.configService.instant('editProfile', false)) {
+    startTutorial() {
+        this.user.observeCurrentUserInfo().pipe(take(1)).subscribe(({user, loginInfo}) => {
+            if (
+                loginInfo.statusCode === RestConstants.STATUS_CODE_OK &&
+                user.editProfile &&
+                this.configService.instant('editProfile', false)
+            ) {
                 this.uiService.waitForComponent(this, 'userRef').subscribe(() => {
                     this.tutorialElement = this.userRef;
                 });
             }
-        }
+        })
     }
 
     setFixMobileElements(fix: boolean) {
@@ -963,40 +924,40 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         );
     }
 
-    /**
-     * Updates the `timeout` property.
-     * 
-     * @param timeUntilLogout time until automatic logout in milliseconds
-     */
-    private updateTimeout(timeUntilLogout: number) {
+    private getTimeoutString(timeUntilLogout: number): string {
         const time = Math.ceil(timeUntilLogout / 1000);
         const min = Math.floor(time / 60);
         const sec = time % 60;
         if (time >= 0) {
-            this.timeout =
-                this.formatTimeout(min, 2) + ':' + this.formatTimeout(sec, 2);
+            return this.formatTimeout(min, 2) + ':' + this.formatTimeout(sec, 2);
         } else {
-            this.timeout = '';
+            return '';
         }
     }
 
     private registerCurrentUser(): void {
         this.user
-            .getCurrentUser()
+            .observeCurrentUserInfo()
             .pipe(takeUntil(this.destroyed$))
-            .subscribe((currentUser) => (this.currentUser = currentUser.person));
+            .subscribe(async ({ user, loginInfo }) => {
+                if(loginInfo.isGuest) {
+                    this.currentUser = null;
+                } else {
+                    this.currentUser = user.person
+                }
+            });
     }
 
     private registerAutoLogoutTimeout(): void {
-        this.authentication
-            .getTimeUntilAutoLogout(1000)
-            .pipe(takeUntil(this.destroyed$))
-            .subscribe((timeUntilLogout) => this.updateTimeout(timeUntilLogout));
+        this.autoLogoutTimeout$ = this.authentication.observeTimeUntilAutoLogout(1000).pipe(
+            takeUntil(this.destroyed$),
+            map((timeUntilLogout) => this.getTimeoutString(timeUntilLogout)),
+        );
     }
 
     private registerAutoLogoutDialog(): void {
         if (this.showTimeout()) {
-            this.authentication.getAutoLogout().pipe(takeUntil(this.destroyed$)).subscribe(() => {
+            this.authentication.observeAutoLogout().pipe(takeUntil(this.destroyed$)).subscribe(() => {
                 this.toast.showModalDialog(
                     'WORKSPACE.AUTOLOGOUT',
                     'WORKSPACE.AUTOLOGOUT_INFO',
@@ -1005,13 +966,15 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                             'WORKSPACE.RELOGIN',
                             DialogButton.TYPE_PRIMARY,
                             () => {
-                                RestHelper.goToLogin(
-                                    this.router,
-                                    this.configService,
-                                    this.isSafe() ? RestConstants.SAFE_SCOPE : null,
-                                    null,
-                                );
-                                this.toast.closeModalDialog();
+                                this.authentication.forceLoginInfoRefresh().subscribe(() => {
+                                    RestHelper.goToLogin(
+                                        this.router,
+                                        this.configService,
+                                        this.isSafe() ? RestConstants.SAFE_SCOPE : null,
+                                        null,
+                                    );
+                                    this.toast.closeModalDialog();
+                                });
                             },
                         ),
                     ],

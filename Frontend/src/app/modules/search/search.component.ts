@@ -4,7 +4,7 @@ import {
     AfterViewInit,
     Component,
     ElementRef,
-    HostListener,
+    NgZone,
     OnDestroy,
     OnInit,
     ViewChild
@@ -86,7 +86,7 @@ import {InteractionType, ListSortConfig, NodeEntriesDisplayType} from '../../cor
     providers: [WindowRefService],
     animations: [trigger('fromLeft', UIAnimation.fromLeft())],
 })
-export class SearchComponent implements AfterViewInit, OnDestroy {
+export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly SCOPES = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
@@ -187,7 +187,7 @@ export class SearchComponent implements AfterViewInit, OnDestroy {
         // Prevent changed-after-checked error
         .pipe(delay(0));
     readonly didYouMeanSuggestion$ = this.searchApi
-        .getDidYouMeanSuggestion()
+        .observeDidYouMeanSuggestion()
         .pipe(shareReplay(1));
 
     constructor(
@@ -216,9 +216,14 @@ export class SearchComponent implements AfterViewInit, OnDestroy {
         private temporaryStorageService: TemporaryStorageService,
         private searchField: SearchFieldService,
         private searchApi: SearchApiService,
+        private ngZone: NgZone,
     ) {
         // Subscribe early to make sure the suggestions are requested with search requests.
         this.didYouMeanSuggestion$.pipe(takeUntil(this.destroyed$)).subscribe();
+    }
+
+    ngOnInit(): void {
+        this.registerScrollHandler();
     }
 
     ngAfterViewInit() {
@@ -351,10 +356,21 @@ export class SearchComponent implements AfterViewInit, OnDestroy {
         this.destroyed$.complete();
     }
 
-    @HostListener('window:scroll', ['$event'])
-    @HostListener('window:touchmove', ['$event'])
-    @HostListener('window:resize', ['$event'])
-    handleScroll(event: Event = null) {
+    registerScrollHandler(): void {
+        this.ngZone.runOutsideAngular(() => {
+            const handleScroll = (event: Event) => this.handleScroll(event);
+            window.addEventListener("scroll", handleScroll);
+            window.addEventListener("touchmove", handleScroll);
+            window.addEventListener("resize", handleScroll);
+            this.destroyed$.subscribe(() => {
+                window.removeEventListener("scroll", handleScroll);
+                window.removeEventListener("touchmove", handleScroll);
+                window.removeEventListener("resize", handleScroll);
+            });
+        });
+    }
+
+    private handleScroll(event: Event = null) {
         // calculate height of filter part individually
         // required since banners, footer etc. can cause wrong heights and overflows
         this.searchService.offset =
@@ -971,15 +987,6 @@ export class SearchComponent implements AfterViewInit, OnDestroy {
     */
     }
 
-    private addToStore(selection: Node[]) {
-        this.globalProgress = true;
-        RestHelper.addToStore(selection, this.bridge, this.iam, () => {
-            this.globalProgress = false;
-            this.nodeEntriesResults.getSelection().clear();
-            this.mainNavRef.refreshNodeStore();
-        });
-    }
-
     async onMdsReady(mds: any = null) {
         this.currentMdsSet = mds;
         this.updateColumns();
@@ -1190,9 +1197,9 @@ export class SearchComponent implements AfterViewInit, OnDestroy {
                             count,
                             false
                         );
+                        error.preventDefault();
                         return;
                     }
-                    this.toast.error(error);
                     this.searchRepository(
                         repos,
                         criteria,
@@ -1433,7 +1440,7 @@ export class SearchComponent implements AfterViewInit, OnDestroy {
                         if (this.oldParams[key] === param[key]) {
                             continue;
                         }
-                        if (key === UIConstants.QUERY_PARAM_LIST_VIEW_TYPE) {
+                        if (key === UIConstants.QUERY_PARAM_LIST_VIEW_TYPE || key === 'nodeStore') {
                             continue;
                         }
                         reinit = true;

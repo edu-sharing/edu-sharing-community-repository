@@ -27,7 +27,7 @@ export class PermissionsMainComponent {
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   public tab : number;
   public searchQuery: string;
-  selected: Organization[];
+  selected: Organization;
   public isAdmin = false;
   public disabled = false;
   public isLoading = true;

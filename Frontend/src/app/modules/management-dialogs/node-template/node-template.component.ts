@@ -10,7 +10,7 @@ import {DateHelper} from "../../../core-ui-module/DateHelper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
-
+import {MdsEditorWrapperComponent} from '../../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 @Component({
   selector: 'es-node-template',
   templateUrl: 'node-template.component.html',
@@ -21,7 +21,8 @@ import {MdsComponent} from "../../../common/ui/mds/mds.component";
   ]
 })
 export class NodeTemplateComponent  {
-    @ViewChild('mds') mdsRef : MdsComponent;
+
+    @ViewChild('mds') mdsRef : MdsEditorWrapperComponent;
     loading : boolean;
     _nodeId: string;
     node: Node;
@@ -55,8 +56,8 @@ export class NodeTemplateComponent  {
   ){
     this.updateButtons();
   }
-  save(){
-    let data = this.enabled ? this.mdsRef.getValues() : {};
+  async save(){
+    const data = this.enabled ? (await this.mdsRef.getValues()) : {};
     this.loading=true;
     this.updateButtons();
     this.nodeService.setNodeTemplate(this._nodeId,this.enabled,data).subscribe(()=>{

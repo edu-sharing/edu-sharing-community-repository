@@ -704,37 +704,40 @@ export class NodeHelperService {
         return !!o.properties?.[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]?.[0];
     }
 
-    private getNodeLinkInner(node: Node): { routerLink: string; queryParams: Params } {
+    getNodeLink(mode: 'routerLink' | 'queryParams', node: Node) {
         if (!node?.ref) {
             return null;
-        } else if (this.isNodeCollection(node)) {
-            return {
+        }
+        let data: { routerLink: string; queryParams: Params } = null;
+        if (this.isNodeCollection(node)) {
+            data = {
                 routerLink: UIConstants.ROUTER_PREFIX + 'collections',
                 queryParams: { id: node.ref.id },
             };
-        } else if (node.isDirectory) {
-            return {
-                routerLink: UIConstants.ROUTER_PREFIX + 'workspace',
-                queryParams: { id: node.ref.id },
-            };
         } else {
-            const fromHome = RestNetworkService.isFromHomeRepo(node);
-            return {
-                routerLink: UIConstants.ROUTER_PREFIX + 'render/' + node.ref.id,
-                queryParams: {
-                    repository: fromHome ? null : node.ref.repo,
-                    proposal: (node as ProposalNode).proposal?.ref.id,
-                    proposalCollection: (node as ProposalNode).proposalCollection?.ref.id,
-                },
-            };
+            if (node.isDirectory) {
+                let path;
+                if (node.properties?.[RestConstants.CCM_PROP_EDUSCOPENAME]?.[0] === RestConstants.SAFE_SCOPE) {
+                    path = UIConstants.ROUTER_PREFIX + 'workspace/safe';
+                } else {
+                    path = UIConstants.ROUTER_PREFIX + 'workspace';
+                }
+                data = {
+                    routerLink: path,
+                    queryParams: { id: node.ref.id },
+                };
+            } else if (node.ref) {
+                const fromHome = RestNetworkService.isFromHomeRepo(node);
+                data = {
+                    routerLink: UIConstants.ROUTER_PREFIX + 'render/' + node.ref.id,
+                    queryParams: {
+                        repository: fromHome ? null : node.ref.repo,
+                        proposal: (node as ProposalNode).proposal?.ref.id,
+                        proposalCollection: (node as ProposalNode).proposalCollection?.ref.id,
+                    },
+                };
+            }
         }
-    }
-
-    getNodeLink(mode: "routerLink" | "queryParams", node: Node) {
-        if (!node) {
-            return null;
-        }
-        let data = this.getNodeLinkInner(node)
         if (data === null) {
             return '';
         }
@@ -748,10 +751,10 @@ export class NodeHelperService {
      * Returns the full URL to a node, including the server origin and base href.
      */
     getNodeUrl(node: Node): string {
-        const link = this.getNodeLinkInner(node);
+        const link = this.getNodeLink('queryParams', node);
         if (link) {
-            const urlTree = this.router.createUrlTree([link.routerLink], {
-                queryParams: link.queryParams,
+            const urlTree = this.router.createUrlTree([this.getNodeLink('routerLink', node)], {
+                queryParams: this.getNodeLink('queryParams', node) as Params
             });
             return location.origin + this.location.prepareExternalUrl(urlTree.toString());
         } else {

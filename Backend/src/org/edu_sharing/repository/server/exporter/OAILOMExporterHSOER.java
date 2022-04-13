@@ -427,9 +427,13 @@ public class OAILOMExporterHSOER extends OAILOMExporter {
                                 Element taxon = createAndAppendElement("taxon", taxonPath);
                                 createAndAppendElement("id", taxon,id);
                                 Element entry = createAndAppendElement("entry", taxon);
-                                Element string = createAndAppendElement("string", entry,values.get(id).getCaption());
-                                //<string language="de">Sachkunde</string>
-                                string.setAttribute(xmlLanguageAttribute, "de");
+                                if(values != null && values.get(id) != null) {
+                                    Element string = createAndAppendElement("string", entry, values.get(id).getCaption());
+                                    //<string language="de">Sachkunde</string>
+                                    string.setAttribute(xmlLanguageAttribute, "de");
+                                }else{
+                                    logger.error("no value (caption) found for: "+id);
+                                }
                             }
                         }
                     }

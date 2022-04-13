@@ -51,7 +51,7 @@ public class ValueTool {
 	public static HashMap<String, Object> getMultivalue(HashMap<String, Object> data){
 		for(Map.Entry<String, Object> entry : data.entrySet()) {
 			if(entry.getValue() instanceof String) {
-				List<String> list = Arrays.asList(StringUtils.split((String) entry.getValue(), CCConstants.MULTIVALUE_SEPARATOR));
+				List<String> list = Arrays.asList(StringUtils.splitByWholeSeparator((String) entry.getValue(), CCConstants.MULTIVALUE_SEPARATOR));
 				if(list.size() > 1) {
 					data.put(entry.getKey(), list);
 				}

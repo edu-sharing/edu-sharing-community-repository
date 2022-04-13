@@ -55,6 +55,7 @@
           (click)="toggleOverlay()"
           [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
           (keydown.tab)="chipList._allowFocusEscape()"
+          [disabled]="chipsControl.disabled"
         >
           <span class="mat-select-arrow"></span>
         </button>

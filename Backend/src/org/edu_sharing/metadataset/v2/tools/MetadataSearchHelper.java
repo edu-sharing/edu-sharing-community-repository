@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.metadataset.v2.*;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
@@ -194,7 +195,7 @@ public class MetadataSearchHelper {
 		if(!ApplicationInfoList.getHomeRepository().getAppId().equals(repoId)) {
 			return SearchServiceFactory.getSearchService(repoId).getSuggestions(mds, queryId, parameterId, value, criterias);
 		}
-		
+
 		/**
 		 * local repo
 		 */

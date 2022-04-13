@@ -83,6 +83,9 @@ public class ErrorFilter implements Filter {
 
 	public static void handleError(HttpServletRequest req, HttpServletResponse resp, Throwable t, int statusCode) {
 		try {
+			if(t != null) {
+				Logger.getLogger(ErrorFilter.class).error(t.getMessage(), t);
+			}
 			resp.reset();
 			ErrorResponse response = new ErrorResponse();
 			response.setError(statusCode + "");
@@ -90,9 +93,6 @@ public class ErrorFilter implements Filter {
 				response.setMessage(t != null ? t.getMessage() : statusCode+"");
 			} else {
 				response.setMessage("LogLevel is > INFO");
-			}
-			if(t != null) {
-				Logger.getLogger(ErrorFilter.class).error(t.getMessage(), t);
 			}
 			resp.setStatus(statusCode);
 			String accept = req.getHeader("accept");

@@ -166,6 +166,7 @@ export enum Scope {
   WorkspaceList = 'WorkspaceList',
   WorkspaceTree = 'WorkspaceTree',
   Oer = 'Oer',
+  UserManagement = 'UserManagement',
   Stream = 'Stream',
   CreateMenu = 'CreateMenu',
   Admin = 'Admin', // Admin Tools / Debugging

@@ -58,6 +58,9 @@ import {
 import {MainNavService} from '../common/services/main-nav.service';
 import {FormBuilder} from '@angular/forms';
 import { NodeEmbedService } from '../common/ui/node-embed/node-embed.service';
+import { NodeStoreService } from '../modules/search/node-store/node-store.service';
+import {NodeEntriesDataType} from './components/node-entries/node-entries.component';
+import {isArray} from 'rxjs/internal/util/isArray';
 
 
 export class OptionsHelperConfig {
@@ -75,7 +78,7 @@ export class OptionsHelperService implements OnDestroy {
     private localSubscripitionDown: Subscription;
     private appleCmd: boolean;
     private globalOptions: OptionItem[];
-    private list: ListEventInterface<Node>;
+    private list: ListEventInterface<NodeEntriesDataType>;
     private subscriptions: Subscription[] = [];
     private mainNav: MainNavComponent;
     private actionbar: ActionbarComponent;
@@ -156,6 +159,7 @@ export class OptionsHelperService implements OnDestroy {
         private storage: TemporaryStorageService,
         private bridge: BridgeService,
         private nodeEmbed: NodeEmbedService,
+        private nodeStore: NodeStoreService,
         @Optional() @Inject(OPTIONS_HELPER_CONFIG) config: OptionsHelperConfig,
     ) {
         if (config == null) {
@@ -240,7 +244,7 @@ export class OptionsHelperService implements OnDestroy {
     }
     async initComponents(mainNav: MainNavComponent,
                          actionbar: ActionbarComponent = null,
-                         list: ListEventInterface<Node> = null,
+                         list: ListEventInterface<NodeEntriesDataType> = null,
                          dropdown: DropdownComponent = null) {
         this.mainNav = mainNav;
         if(!this.mainNav) {
@@ -1231,9 +1235,8 @@ export class OptionsHelperService implements OnDestroy {
 
     private bookmarkNodes(nodes: Node[]) {
         this.bridge.showProgressDialog();
-        RestHelper.addToStore(nodes, this.bridge, this.iamService, () => {
-            this.bridge.closeModalDialog();
-            this.mainNav.refreshNodeStore();
+        this.nodeStore.add(nodes).subscribe(() => {
+            this.bridge.closeModalDialog()
         });
     }
 
@@ -1298,7 +1301,7 @@ export class OptionsHelperService implements OnDestroy {
         if (!this.data.customOptions.useDefaultOptions) {
             options = [];
         }
-        if (this.data.customOptions.supportedOptions && this.data.customOptions.supportedOptions.length > 0) {
+        if (this.data.customOptions.supportedOptions && isArray(this.data.customOptions.supportedOptions)) {
             options = options.filter((o) => this.data.customOptions.supportedOptions.indexOf(o.name) !== -1);
         } else if (this.data.customOptions.removeOptions) {
             for (const option of this.data.customOptions.removeOptions) {

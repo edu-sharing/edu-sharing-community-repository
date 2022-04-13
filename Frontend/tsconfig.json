@@ -8,6 +8,18 @@
         "dist/edu-sharing-api/edu-sharing-api",
         "dist/edu-sharing-api"
       ],
+      // Prevent imports from `projects` directory.
+      //
+      // Don't directly import modules from `projects`, but instead build project modules
+      // separately, so they can be included by their paths from `dist` (see above).
+      //
+      // ```
+      // import { Node } from 'projects/edu-sharing-api/src/lib/api/models'; // Don't do this!
+      // import { Node } from 'ngx-edu-sharing-api'; // Yes!
+      // ```
+      "projects/*": [
+        "",
+      ],
       "@angular/*": [
         "./node_modules/@angular/*"
       ],

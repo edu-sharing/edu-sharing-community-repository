@@ -1,14 +1,19 @@
 import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { Observable, Subject } from 'rxjs';
-import { first, startWith, switchMap, take, tap } from 'rxjs/operators';
+import { first, map, startWith, switchMap, take, tap } from 'rxjs/operators';
 import { User, UserEntry, UserProfileEdit } from '../api/models';
 import { IamV1Service } from '../api/services';
 import { HOME_REPOSITORY, ME } from '../constants';
-import { switchRelay } from '../utils/switch-relay';
-import { AuthenticationService } from './authentication.service';
+import { switchReplay } from '../utils/switch-replay';
+import { AuthenticationService, LoginInfo } from './authentication.service';
 
 export { UserEntry, User };
+
+export interface CurrentUserInfo {
+    user: UserEntry;
+    loginInfo: LoginInfo;
+}
 
 @Injectable({
     providedIn: 'root',
@@ -46,8 +51,24 @@ export class UserService {
      * Subscribing to the observable does not necessarily trigger an API request, when we already
      * have fetched the data.
      */
-    getCurrentUser(): Observable<UserEntry> {
+    observeCurrentUser(): Observable<UserEntry> {
         return this.currentUser$;
+    }
+
+    /**
+     * Like `observeCurrentUser`, but also includes `loginInfo`.
+     */
+    observeCurrentUserInfo(): Observable<CurrentUserInfo> {
+        return this.currentUser$.pipe(
+            // Usually updated `loginInfo` will trigger an update of `currentUser`, so we should be
+            // fine just taking whatever value `loginInfo` has at the time `currentUser` changes.
+            switchMap((user) =>
+                this.authentication.observeLoginInfo().pipe(
+                    take(1),
+                    map((loginInfo) => ({ user, loginInfo })),
+                ),
+            ),
+        );
     }
 
     editProfile(
@@ -60,7 +81,7 @@ export class UserService {
             repository,
             body: profile,
         });
-        return this.getCurrentUser().pipe(
+        return this.observeCurrentUser().pipe(
             first(),
             switchMap((userEntry) => {
                 if (userId === ME || userId === userEntry.person.authorityName) {
@@ -74,10 +95,10 @@ export class UserService {
 
     private createCurrentUser(): Observable<UserEntry> {
         return rxjs
-            .merge(this.authentication.getUserChanges(), this.currentUserProfileChangesSubject)
+            .merge(this.authentication.observeUserChanges(), this.currentUserProfileChangesSubject)
             .pipe(
                 startWith(void 0 as void),
-                switchRelay(() => this.getUserInner(ME, HOME_REPOSITORY)),
+                switchReplay(() => this.getUserInner(ME, HOME_REPOSITORY)),
             );
     }
 

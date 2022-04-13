@@ -1,3 +1,4 @@
+
 {
     "CHOOSEENVIRONMENT": "Choose environment",
     "YES": "yes",
@@ -798,6 +799,7 @@
         "CONFIRM_GROUP": "You will join the following group:",
         "GROUP_PASSWORD": "Enter group password",
         "SIGNUP": "Join",
+        "ALREADY_MEMBER": "You're already a member",
         "SIGNUP_TYPE": {
             "simple": "Access possible without restrictions",
             "password": "Access only with password",
@@ -1113,5 +1115,10 @@
             "NEWEST": "Always the newest version"
         },
         "COPIED_TO_CLIPBOARD_NOTICE": "The embed code was copied to the clipboard."
+    },
+    "API_ERROR": {
+        "RELOAD_NOTICE_TITLE": "The page has to be reloaded",
+        "RELOAD_NOTICE": "Something went wrong when loading important information. Please reload the page.",
+        "RELOAD_BUTTON_LABEL": "Reload page"
     }
 }

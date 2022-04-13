@@ -43,6 +43,8 @@ import { extensionRoutes } from '../extension/extension-routes';
 import {BehaviorSubject} from 'rxjs';
 import { AccessibilityService } from '../common/ui/accessibility/accessibility.service';
 import { LtiComponent } from '../modules/lti/lti.component';
+import { printCurrentTaskInfo } from './track-change-detection';
+import { environment } from '../../environments/environment';
 
 @Component({
     selector: 'es-router',
@@ -50,7 +52,7 @@ import { LtiComponent } from '../modules/lti/lti.component';
     providers: [],
 })
 export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
-    private static readonly CHECKS_PER_SECOND_WARNING_THRESHOLD = 60;
+    private static readonly CHECKS_PER_SECOND_WARNING_THRESHOLD = 0;
     private static readonly CONSECUTIVE_TRANSGRESSION_THRESHOLD = 10;
     private static history = new BehaviorSubject<string[]>([]);
 
@@ -119,6 +121,9 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
 
     ngDoCheck(): void {
         this.numberOfChecks++;
+        if (environment.traceChangeDetection) {
+            printCurrentTaskInfo('doCheck');
+        }
     }
 
     ngAfterViewInit(): void {

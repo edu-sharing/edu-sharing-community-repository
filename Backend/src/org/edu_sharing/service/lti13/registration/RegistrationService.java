@@ -38,6 +38,8 @@ public class RegistrationService {
 
     Logger logger = Logger.getLogger(RegistrationService.class);
 
+    public static final long DYNAMIC_REGISTRATION_TOKEN_EXPIRY = TimeUnit.DAYS.toMillis(1);
+
 
     public DynamicRegistrationToken generate() throws Throwable{
         NodeRef systemObject = SystemFolder.getSystemObject(CCConstants.CCM_VALUE_IO_NAME_LTI_REGISTRATION_NODE_NAME);
@@ -59,9 +61,13 @@ public class RegistrationService {
     }
 
     public DynamicRegistrationTokens get(){
-        return SystemFolder.getSystemObjectContent(
+        DynamicRegistrationTokens drts = SystemFolder.getSystemObjectContent(
                 CCConstants.CCM_VALUE_IO_NAME_LTI_REGISTRATION_NODE_NAME,
                 DynamicRegistrationTokens.class);
+        for(DynamicRegistrationToken t : drts.getRegistrationLinks()){
+            t.validate();
+        }
+        return drts;
     }
 
     public void write(DynamicRegistrationTokens toWrite) throws Throwable{
@@ -89,20 +95,23 @@ public class RegistrationService {
             throw new Exception("no eduSharingRegistrationToken provided");
         }
 
-        DynamicRegistrationToken dynamicRegistrationToken = new DynamicRegistrationToken();
-        dynamicRegistrationToken.setToken(eduSharingRegistrationToken);
 
-        if(!get().getRegistrationLinks().contains(dynamicRegistrationToken)){
+        DynamicRegistrationToken foundToken = get().get(eduSharingRegistrationToken);
+        if(foundToken == null){
             throw new Exception("eduSharing registration token provided is invalid");
         }
 
-        DynamicRegistrationToken foundToken = get().getRegistrationLinks().stream()
-                .filter(d -> d.equals(dynamicRegistrationToken))
-                .findFirst().get();
-
-        if((System.currentTimeMillis() - foundToken.getTsCreated()) > TimeUnit.DAYS.toMillis(1) ){
-            remove(foundToken);
+        if((System.currentTimeMillis() - foundToken.getTsCreated()) > DYNAMIC_REGISTRATION_TOKEN_EXPIRY ){
+            //remove(foundToken);
             throw new Exception("eduSharing registration token expired");
+        }
+
+        if(!foundToken.isValid()){
+            throw new Exception("eduSharing registration token already used");
+        }
+
+        if(openidConfiguration == null){
+            throw new Exception("no openidConfiguration present");
         }
 
 
@@ -215,18 +224,26 @@ public class RegistrationService {
         JSONObject ltiToolConfigInfo = (JSONObject)registrationResult.get("https://purl.imsglobal.org/spec/lti-tool-configuration");
         String deploymentId = (String)ltiToolConfigInfo.get("deployment_id");
 
-        registerPlatform(issuer, clientId, deploymentId, authorizationEndpoint, keySetUrl,null,authTokenUrl);
-        remove(foundToken);
+        registerPlatform(issuer, clientId, deploymentId, authorizationEndpoint, keySetUrl,null,authTokenUrl, foundToken);
     }
 
+    public void registerPlatform(String platformId,
+                                 String clientId, String deploymentId,
+                                 String authenticationRequestUrl,
+                                 String keysetUrl,
+                                 String keyId,
+                                 String authTokenUrl) throws Exception{
+        registerPlatform(platformId, clientId, deploymentId, authenticationRequestUrl, keysetUrl, keyId, authTokenUrl,null);
+    }
     public void registerPlatform(String platformId,
                                   String clientId, String deploymentId,
                                   String authenticationRequestUrl,
                                   String keysetUrl,
                                   String keyId,
-                                  String authTokenUrl) throws Exception{
+                                  String authTokenUrl, DynamicRegistrationToken token) throws Exception{
         HashMap<String,String> properties = new HashMap<>();
-        properties.put(ApplicationInfo.KEY_APPID, new RepoTools().getAppId(platformId,clientId,deploymentId));
+        String appId = new RepoTools().getAppId(platformId,clientId,deploymentId);
+        properties.put(ApplicationInfo.KEY_APPID, appId);
         properties.put(ApplicationInfo.KEY_TYPE, "lti");
         properties.put(ApplicationInfo.KEY_LTI_DEPLOYMENT_ID, deploymentId);
         properties.put(ApplicationInfo.KEY_LTI_ISS, platformId);
@@ -234,6 +251,7 @@ public class RegistrationService {
         properties.put(ApplicationInfo.KEY_LTI_OIDC_ENDPOINT, authenticationRequestUrl);
         properties.put(ApplicationInfo.KEY_LTI_AUTH_TOKEN_ENDPOINT,authTokenUrl);
         properties.put(ApplicationInfo.KEY_LTI_KEYSET_URL,keysetUrl);
+        if(keyId != null) properties.put(ApplicationInfo.KEY_LTI_KID,keyId);
 
         JWKSet publicKeys = JWKSet.load(new URL(keysetUrl));
         if(publicKeys == null){
@@ -249,7 +267,14 @@ public class RegistrationService {
                 + new String(new Base64().encode(((AsymmetricJWK) jwk).toPublicKey().getEncoded())) + "-----END PUBLIC KEY-----";
         properties.put(ApplicationInfo.KEY_PUBLIC_KEY, pubKeyString);
         AdminServiceFactory.getInstance().addApplication(properties);
+
+        token.setRegisteredAppId(appId);
+        DynamicRegistrationTokens dynamicRegistrationTokens = get();
+        dynamicRegistrationTokens.update(token);
+        try {
+            write(dynamicRegistrationTokens);
+        } catch (Throwable e) {
+            logger.error(e.getMessage(),e);
+        }
     }
-
-
 }

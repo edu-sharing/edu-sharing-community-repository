@@ -44,8 +44,10 @@
   import {SanitizeHTMLPipe} from './common/ui/sanitizeHTML.pipe';
   import {ColorTransformPipe} from "./common/ui/color-transform.pipe";
   import {AccessibilityComponent} from './common/ui/accessibility/accessibility.component';
+  import { SkipNavComponent } from './common/ui/skip-nav/skip-nav.component';
+  import { SkipTargetDirective } from './common/ui/skip-nav/skip-target.directive';
   import {MatConfirmGroupComponent} from './common/ui/mat-confirm-group/mat-confirm-group.component';
-import { ScrollToTopButtonComponent } from './common/ui/scroll-to-top-button/scroll-to-top-button.component';
+  import { ScrollToTopButtonComponent } from './common/ui/scroll-to-top-button/scroll-to-top-button.component';
 
   export const DECLARATIONS = [
       MdsTestComponent,
@@ -68,6 +70,8 @@ import { ScrollToTopButtonComponent } from './common/ui/scroll-to-top-button/scr
       SmallCollectionComponent,
       MainNavComponent,
       ScrollToTopButtonComponent,
+      SkipNavComponent,
+      SkipTargetDirective,
       GlobalContainerComponent,
       RocketchatComponent,
       UserProfileComponent,

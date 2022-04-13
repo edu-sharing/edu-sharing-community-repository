@@ -70,6 +70,7 @@
     </mat-header-cell>
     <mat-cell *matCellDef="let node">
       <button mat-icon-button
+              *ngIf="entriesService.options?.[Target.List]?.length"
               color="primary"
               (click)="openMenu(node)"
               [matMenuTriggerFor]="dropdown.menu"
@@ -81,12 +82,12 @@
   <!-- Data Columns -->
   <ng-container *ngFor="let column of entriesService.columns;let first=first" [matColumnDef]="column.name">
     <ng-container *ngIf="entriesService.sort?.allowed && isSortable(column)">
-      <mat-header-cell *matHeaderCellDef mat-sort-header>{{ column | appListItemLabel }}</mat-header-cell>
+      <mat-header-cell *matHeaderCellDef mat-sort-header [class.mat-column-primary]="first">{{ column | appListItemLabel }}</mat-header-cell>
     </ng-container>
     <ng-container *ngIf="!(entriesService.sort?.allowed && isSortable(column))">
-      <mat-header-cell *matHeaderCellDef>{{ column | appListItemLabel }}</mat-header-cell>
+      <mat-header-cell *matHeaderCellDef [class.mat-column-primary]="first">{{ column | appListItemLabel }}</mat-header-cell>
     </ng-container>
-    <mat-cell *matCellDef="let node" #cell>
+    <mat-cell *matCellDef="let node" #cell [class.mat-column-primary]="first">
       <ng-container *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
       >
         <es-node-url
@@ -131,7 +132,7 @@
       [class.mat-row-drop-blocked]="getDragState()?.element === node && !getDragState().dropAllowed"
       [class.mat-row-selected]="entriesService.selection.isSelected(node)"
       [class.mat-row-virtual]="node.virtual"
-      [class.mat-row-virtual-seperator]="node.virtual && !last && !entriesService.dataSource.getData()[i+1].virtual"
+      [class.mat-row-virtual-seperator]="node.virtual && !last && !$any(entriesService.dataSource.getData()[i+1]).virtual"
       *matRowDef="let node; let i=index; let last=last; columns: getVisibleColumns()"
       (contextmenu)="onRowContextMenu({ event: $event, node: node })"
       (keydown.ContextMenu)="onRowContextMenu({ event: $event, node: node })"
@@ -146,7 +147,7 @@
       class="mat-row"
       [class.mat-row-selected]="entriesService.selection.isSelected(node)"
       [class.mat-row-virtual]="node.virtual"
-      [class.mat-row-virtual-seperator]="node.virtual && !last && !entriesService.dataSource.getData()[i+1].virtual"
+      [class.mat-row-virtual-seperator]="node.virtual && !last && !$any(entriesService.dataSource.getData()[i+1]).virtual"
       *matRowDef="let node; let i=index; let last=last; columns: getVisibleColumns()"
       (contextmenu)="onRowContextMenu({ event: $event, node: node })"
       (keydown.ContextMenu)="onRowContextMenu({ event: $event, node: node })"
@@ -177,9 +178,12 @@ available. -->
 <ng-template #icon let-node="node">
   <div class="icon-bg">
     <img
+      *ngIf="node.iconURL"
       [src]="node.iconURL"
       [alt]="node.mediatype ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate) : ''"
       [matTooltip]="node.mediatype ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate) : ''"
     >
+    <i *ngIf="!node.iconURL"
+    [esIcon]="node.authorityType ? node.authorityType === 'GROUP' ? 'group' : 'person' : null"></i>
   </div>
 </ng-template>

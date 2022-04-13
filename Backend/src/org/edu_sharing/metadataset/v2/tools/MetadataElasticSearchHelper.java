@@ -144,9 +144,13 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
 
         if (value.startsWith("\"") && value.endsWith("\"") || parameter.isExactMatching()) {
             //String statement = parameter.getStatement(value).replace("${value}", QueryParser.escape(value));
-            return QueryUtils.replacerFromSyntax(parameter.getSyntax()).replaceString(
+            String statement = QueryUtils.replacerFromSyntax(parameter.getSyntax()).replaceString(
                     parameter.getStatement(value),
                     "${value}", value);
+            statement = QueryUtils.replacerFromSyntax(parameter.getSyntax(),true).replaceString(
+                    statement,
+                    "${valueRaw}", value);
+            return statement;
         }
 
         String[] words = value.split(" ");
@@ -156,6 +160,9 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
             String statement = QueryUtils.replacerFromSyntax(parameter.getSyntax()).replaceString(
                     parameter.getStatement(value),
                     "${value}", word);
+            statement = QueryUtils.replacerFromSyntax(parameter.getSyntax(),true).replaceString(
+                    statement,
+                    "${valueRaw}", value);
             boolQuery = boolQuery.must(QueryBuilders.wrapperQuery(statement));
 
         }

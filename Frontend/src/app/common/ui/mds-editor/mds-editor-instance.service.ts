@@ -24,6 +24,8 @@ import {
     tap
 } from 'rxjs/operators';
 import {
+    ConfigurationHelper,
+    ConfigurationService,
     MdsValueList,
     Node,
     RestConnectorService,
@@ -647,6 +649,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         private mdsEditorCommonService: MdsEditorCommonService,
         private mdsService: MdsService,
         private restMdsService: RestMdsService,
+        private configService: ConfigurationService,
         private restConnector: RestConnectorService,
         private searchService: SearchService,
         private config: ConfigService,
@@ -845,7 +848,7 @@ export class MdsEditorInstanceService implements OnDestroy {
 
     async initWithoutNodes(
         groupId: string,
-        mdsId: string = '-default-',
+        mdsId: string = null,
         repository: string = '-home-',
         editorMode: EditorMode = 'search',
         initialValues: Values = {},
@@ -853,6 +856,20 @@ export class MdsEditorInstanceService implements OnDestroy {
         this.editorMode = editorMode;
         this.editorBulkMode = { isBulk: false };
         this.values$.next(initialValues);
+        if(mdsId === null) {
+            try {
+                const sets = ConfigurationHelper.filterValidMds(
+                    repository,
+                    (await this.restMdsService.getSets().toPromise()).metadatasets,
+                    this.configService);
+                mdsId = sets[0]?.id;
+            } catch(e) {
+                console.warn('Error while resolving primary mds', e);
+            }
+            if(!mdsId) {
+                mdsId = RestConstants.DEFAULT;
+            }
+        }
         const hasInitialized = await this.initMds(groupId, mdsId, repository, null, initialValues);
         if (!hasInitialized) {
             return null;
@@ -1220,7 +1237,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                 });
             }
         }
-        const variables = await this.config.getVariables().pipe(first()).toPromise();
+        const variables = await this.config.observeVariables().pipe(first()).toPromise();
         for (const view of views) {
             for (let widgetDefinition of this.getWidgetsForView(availableWidgets, view)) {
                 widgetDefinition = parseAttributes(view.html, widgetDefinition);

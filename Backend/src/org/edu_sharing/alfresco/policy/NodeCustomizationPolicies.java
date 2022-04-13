@@ -451,7 +451,8 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		try{
 			policyBehaviourFilter.disableBehaviour(eduNodeRef);
 			QName type = nodeService.getType(eduNodeRef);
-			if(CCConstants.EDUCONTEXT_TYPES.contains(type.toString())){
+			// do not add the context for references / they will copy it from their original
+			if(CCConstants.EDUCONTEXT_TYPES.contains(type.toString()) && !nodeService.hasAspect(eduNodeRef, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
 				String context = getEduSharingContext();
 				nodeService.setProperty(
 						eduNodeRef,

@@ -34,6 +34,7 @@ import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.springframework.context.ApplicationContext;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
+import org.springframework.security.core.Authentication;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -386,18 +387,22 @@ public class GroupDao {
 	}
 
 	public void setSignup(GroupSignupDetails details) {
-		if(details.getSignupMethod() == null){
-			NodeServiceHelper.removeProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD);
-			NodeServiceHelper.removeAspect(ref, CCConstants.CCM_ASPECT_GROUP_SIGNUP);
-		} else {
-			NodeServiceHelper.addAspect(ref, CCConstants.CCM_ASPECT_GROUP_SIGNUP);
-			NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD, details.getSignupMethod().toString());
-			if(details.getSignupPassword() != null && !details.getSignupPassword().isEmpty()) {
-				NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_PASSWORD,
-						DigestUtils.sha1Hex(details.getSignupPassword())
-				);
+		checkAdminAccess();
+		AuthenticationUtil.runAsSystem(() -> {
+			if (details.getSignupMethod() == null) {
+				NodeServiceHelper.removeProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD);
+				NodeServiceHelper.removeAspect(ref, CCConstants.CCM_ASPECT_GROUP_SIGNUP);
+			} else {
+				NodeServiceHelper.addAspect(ref, CCConstants.CCM_ASPECT_GROUP_SIGNUP);
+				NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD, details.getSignupMethod().toString());
+				if (details.getSignupPassword() != null && !details.getSignupPassword().isEmpty()) {
+					NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_PASSWORD,
+							DigestUtils.sha1Hex(details.getSignupPassword())
+					);
+				}
 			}
-		}
+			return null;
+		});
 	}
 
 	public GroupSignupResult signupUser(String password) throws DAOException {
