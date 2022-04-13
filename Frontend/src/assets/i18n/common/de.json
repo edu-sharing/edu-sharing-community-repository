@@ -260,7 +260,7 @@
         "ccm:collection_ordered_position": "Benutzerdefiniert",
         "ccm:educationallearningresourcetype": "Medienart",
         "ccm:replicationsourceid": "Original-ID",
-        "ccm:educationalcontext": "Bildungsbereich",
+        "ccm:educationalcontext": "Bildungsstufe",
         "ccm:lifecyclecontributer_publisher": "Herausgeber",
         "ccm:lifecyclecontributer_publisherFN": "",
         "ccm:eaf_sequence_title": "Serientitel",
