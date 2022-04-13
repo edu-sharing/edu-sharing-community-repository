@@ -11,6 +11,7 @@ export {
     MdsWidgetCondition,
     MetadataSetInfo,
     Node,
+    NodeEntries,
     NodeRef,
     Organization,
     Person,
