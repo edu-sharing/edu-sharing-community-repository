@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.restservices.shared.Contributor;
 
 public class NodeRefImpl implements NodeRef {
 
@@ -55,6 +56,8 @@ public class NodeRefImpl implements NodeRef {
 	private List<String> aspects;
 
 	String owner;
+
+	List<Contributor> contributors;
 
 	public NodeRefImpl(){
 		
@@ -176,5 +179,15 @@ public class NodeRefImpl implements NodeRef {
 	@Override
 	public void setRelations(Map<Relation, NodeRef> relations) {
 		this.relations = relations;
+	}
+
+	@Override
+	public void setContributors(List<Contributor> contributors) {
+		this.contributors = contributors;
+	}
+
+	@Override
+	public List<Contributor> getContributors() {
+		return contributors;
 	}
 }

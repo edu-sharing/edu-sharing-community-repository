@@ -25,6 +25,7 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.restservices.shared.Contributor;
 import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.model.CollectionRef;
@@ -726,6 +727,19 @@ public class SearchServiceElastic extends SearchServiceImpl {
             );
         }
 
+        List<Contributor> contributorsResult = new ArrayList<>();
+        List contributors = (List)sourceAsMap.get("contributor");
+        for(Object contributor : contributors){
+            Map c  = (Map)contributor;
+            Contributor contributorResult = new Contributor();
+            contributorResult.setProperty((String)c.get("property"));
+            contributorResult.setEmail((String)c.get("email"));
+            contributorResult.setFirstname((String)c.get("firstname"));
+            contributorResult.setLastname((String)c.get("lastname"));
+            contributorResult.setVcard((String)c.get("vcard"));
+            contributorsResult.add(contributorResult);
+        }
+        eduNodeRef.setContributors(contributorsResult);
 
         HashMap<String, Boolean> permissions = new HashMap<>();
         permissions.put(CCConstants.PERMISSION_READ, true);

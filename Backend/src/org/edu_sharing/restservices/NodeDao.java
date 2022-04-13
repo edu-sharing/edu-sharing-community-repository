@@ -105,6 +105,7 @@ public class NodeDao {
 	private final String ownerUsername;
 	private final Map<NodeRefImpl.Relation, NodeDao> relations = new HashMap<>();
 	private CollectionRef collectionRef;
+	private final List<Contributor> contributors;
 	/*
 	whether this node dao is supposed to fetch collection counts (more expensive when true)
 	 */
@@ -567,6 +568,8 @@ public class NodeDao {
 				this.collectionRef = (CollectionRef)nodeRef;
 			}
 			this.previewData = nodeRef.getPreview();
+
+			this.contributors = nodeRef.getContributors();
 
 			if(nodeProps.containsKey(CCConstants.NODETYPE)){
 				this.type = (String) nodeProps.get(CCConstants.NODETYPE);
@@ -1152,6 +1155,8 @@ public class NodeDao {
 		data.setCommentCount(getCommentCount());
 		data.setLicense(getLicense());
 		data.setSize(getSize(data));
+
+		data.setContributors(contributors);
 
 		data.setRating(getRating());
 		try {
