@@ -1508,7 +1508,11 @@ export class MdsEditorInstanceService implements OnDestroy {
             widget.definition.id,
             widget.getValue()
         );
-        nodes[0].properties[widget.definition.id] = widget.getValue();
+        if(widget.getValue()?.length) {
+            nodes[0].properties[widget.definition.id] = widget.getValue();
+        } else {
+            delete nodes[0].properties[widget.definition.id];
+        }
         this.nodes$.next(nodes);
     }
 }
