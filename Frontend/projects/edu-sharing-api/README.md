@@ -26,6 +26,52 @@ Import `EduSharingApiModule` in your app module:
 export class AppModule {}
 ```
 
+### Using a Development Version of Ngx Edu-Sharing Api
+
+-   Build the library as described in [Build](#build).
+-   In `dist/edu-sharing-api`, run
+    ```sh
+    npm link
+    ```
+-   In the project directory where you want to use Ngx Edu-Sharing Api, run
+    ```sh
+    npm link npx-edu-sharing-api
+    ```
+
+You might need to add the following paths to the `tsconfig.json` of your project:
+
+```json
+{
+    "compilerOptions": {
+        "paths": {
+            "rxjs": ["./node_modules/rxjs"],
+            "rxjs/*": ["./node_modules/rxjs/*"],
+            "@angular/*": ["./node_modules/@angular/*"]
+        }
+    }
+}
+```
+
+Also, in your `angular.json` you will have to set
+
+```json
+{
+    "projects": {
+        "<your-project>": {
+            "architect": {
+                "build": {
+                    "configurations": {
+                        "development": {
+                            "preserveSymlinks": true
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
 ## Configuration
 
 | Parameter | Description                                  | Example                                                  |
@@ -86,31 +132,32 @@ export class EduSharingService {
 If not stated otherwise, methods will throw errors of type `ApiErrorResponse` (see [Error Handling](#error-handling)).
 
 ### `Observable`s
-This library uses `Observable`s as return types. There are methods that
-- trigger a request and return the result with an `Observable`.  
-  This is the behavior of most methods re-exported from `./lib/api/services` and some wrapped
-  methods.  
-  Names of these methods usually start wit `get` (except re-exported).  
-  Example: `search.getPage()`.
-- trigger a request but yield no result.  
-  This is the behavior of some methods re-exported from `./lib/api/services` and some wrapped
-  methods.  
-  Names of these methods usually don't have a prefix and are named as an action.  
-  Example: `search.loadMoreFacets()`.  
-  :warning: Do not forget to subscribe to the returned `Observable` anyway!
-- return a cached result with an `Observable`.  
-  Names of these methods usually start wit `get`.  
-  This is only done when we know it is safe to return old values. You can use these methods like
-  normal API methods, but we safe some requests.  
-  Example: `about.getAbout()`.
-- return a result each time its value changes.  
-  Names of these methods start wit `observe`.  
-  We provide these methods when we have a way of knowing when to refetch information. You can just
-  subscribe for as long as you need updated information and not care about requests.  
-  Example: `search.observeFacets()`.  
-  :warning: Do not forget to unsubscribe when you don't need the values anymore!  
-  :warning: These `Observable`s will never complete!
 
+This library uses `Observable`s as return types. There are methods that
+
+-   trigger a request and return the result with an `Observable`.  
+    This is the behavior of most methods re-exported from `./lib/api/services` and some wrapped
+    methods.  
+    Names of these methods usually start wit `get` (except re-exported).  
+    Example: `search.getPage()`.
+-   trigger a request but yield no result.  
+    This is the behavior of some methods re-exported from `./lib/api/services` and some wrapped
+    methods.  
+    Names of these methods usually don't have a prefix and are named as an action.  
+    Example: `search.loadMoreFacets()`.  
+    :warning: Do not forget to subscribe to the returned `Observable` anyway!
+-   return a cached result with an `Observable`.  
+    Names of these methods usually start wit `get`.  
+    This is only done when we know it is safe to return old values. You can use these methods like
+    normal API methods, but we safe some requests.  
+    Example: `about.getAbout()`.
+-   return a result each time its value changes.  
+    Names of these methods start wit `observe`.  
+    We provide these methods when we have a way of knowing when to refetch information. You can just
+    subscribe for as long as you need updated information and not care about requests.  
+    Example: `search.observeFacets()`.  
+    :warning: Do not forget to unsubscribe when you don't need the values anymore!  
+    :warning: These `Observable`s will never complete!
 
 ### Things to Keep in Mind When Using This Library
 
@@ -203,7 +250,7 @@ export class FooComponent implements OnInit, OnDestroy {
 }
 ```
 
-## Error Handling
+### Error Handling
 
 This library allows to define a default error handler `onError`, that will be called on all HTTP
 errors (see [Configuration](#configuration)).
@@ -212,13 +259,19 @@ You can choose to prevent this for individual calls by catching the error and ca
 `preventDefault()` on it:
 
 ```ts
-this.searchApi.search({ /* ... */ }).subscribe({
-    next: (results) => { /* handle results */ },
-    error: (err: ApiErrorResponse) => {
-        /* handle error in a way that makes the default error handler obsolete */
-        err.preventDefault();
-    },
-});
+this.searchApi
+    .search({
+        /* ... */
+    })
+    .subscribe({
+        next: (results) => {
+            /* handle results */
+        },
+        error: (err: ApiErrorResponse) => {
+            /* handle error in a way that makes the default error handler obsolete */
+            err.preventDefault();
+        },
+    });
 ```
 
 You can also choose to do additional error handling and also run the default error handler by not
