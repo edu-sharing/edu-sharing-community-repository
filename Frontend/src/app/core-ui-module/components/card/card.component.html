@@ -7,6 +7,7 @@
     [attr.priority]="priority"
     [cdkTrapFocus]="modal=='always'"
     [cdkTrapFocusAutoCapture]="captureFocus"
+    (keydown)="handleEvent($event)"
 >
   <mat-card
       [class.card-no-buttons]="!(_buttons && _buttons.length)"

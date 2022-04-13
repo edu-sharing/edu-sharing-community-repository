@@ -24,6 +24,7 @@ import { CardService } from '../../card.service';
 import { UIHelper } from '../../ui-helper';
 import {AuthorityNamePipe} from '../../pipes/authority-name.pipe';
 import {Observable, BehaviorSubject} from 'rxjs';
+import {KeyEvents} from '../../../core-module/ui/key-events';
 
 /**
  * A common edu-sharing modal card
@@ -232,12 +233,18 @@ export class CardComponent implements AfterContentInit, OnDestroy {
         }
     }
 
-    handleEvent(event: any) {
+    handleEvent(event: KeyboardEvent) {
         if (event.key === 'Escape') {
             event.stopPropagation();
             event.preventDefault();
             this.cancel();
             return true;
+        }
+        if(this.modal === 'always') {
+            if(KeyEvents.isChildEvent(event, this.cardContainer)) {
+                event.stopPropagation();
+                return true;
+            }
         }
         return false;
     }
