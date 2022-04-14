@@ -163,7 +163,7 @@ export class TutorialComponent {
                 this.rgbColor[1] +
                 ',' +
                 this.rgbColor[2] +
-                ',0.3) ' +
+                ',0.9) ' +
                 (size + TutorialComponent.PADDING_TOLERANCE / 2) +
                 'px,' +
                 'rgba(' +
