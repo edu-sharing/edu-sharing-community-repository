@@ -143,7 +143,7 @@ export class LoginComponent implements OnInit {
                             }
                             else {
                                 this.authentication
-                                    .hasAccessToScope(RestConstants.SAFE_SCOPE)
+                                    .observeHasAccessToScope(RestConstants.SAFE_SCOPE)
                                     .pipe(first())
                                     .subscribe((hasAccess) => {
                                         if (hasAccess) {
@@ -154,8 +154,6 @@ export class LoginComponent implements OnInit {
                                             this.router.navigate([UIConstants.ROUTER_PREFIX + 'workspace']);
                                             // window.history.back();
                                         }
-                                    }, (error: any) => {
-                                        this.toast.error(error);
                                     });
                             }
                         }, (error: any) => RestHelper.goToLogin(this.router, this.configService));

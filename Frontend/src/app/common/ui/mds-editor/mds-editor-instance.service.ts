@@ -1237,7 +1237,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                 });
             }
         }
-        const variables = await this.config.getVariables().pipe(first()).toPromise();
+        const variables = await this.config.observeVariables().pipe(first()).toPromise();
         for (const view of views) {
             for (let widgetDefinition of this.getWidgetsForView(availableWidgets, view)) {
                 widgetDefinition = parseAttributes(view.html, widgetDefinition);
@@ -1525,7 +1525,11 @@ export class MdsEditorInstanceService implements OnDestroy {
             widget.definition.id,
             widget.getValue()
         );
-        nodes[0].properties[widget.definition.id] = widget.getValue();
+        if(widget.getValue()?.length) {
+            nodes[0].properties[widget.definition.id] = widget.getValue();
+        } else {
+            delete nodes[0].properties[widget.definition.id];
+        }
         this.nodes$.next(nodes);
     }
 }

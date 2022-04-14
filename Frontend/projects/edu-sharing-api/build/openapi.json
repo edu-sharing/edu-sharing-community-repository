@@ -20179,6 +20179,106 @@
         }
       }
     },
+    "/search/v1/metadata/{repository}" : {
+      "get" : {
+        "tags" : [ "SEARCH v1" ],
+        "summary" : "get nodes with metadata and collections",
+        "operationId" : "getMetdata",
+        "parameters" : [ {
+          "name" : "repository",
+          "in" : "path",
+          "description" : "ID of repository (or \"-home-\" for home repository)",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "default" : "-home-"
+          }
+        }, {
+          "name" : "nodeIds",
+          "in" : "query",
+          "description" : "nodeIds",
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }, {
+          "name" : "propertyFilter",
+          "in" : "query",
+          "description" : "property filter for result nodes (or \"-all-\" for all properties)",
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "default" : "-all-"
+            }
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NodeEntries"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Preconditions are not present.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Authorization failed.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Session user has insufficient rights to perform this operation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Ressources are not found.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Fatal error occured.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/search/v1/relevant/{repository}" : {
       "get" : {
         "tags" : [ "SEARCH v1" ],
@@ -25164,15 +25264,15 @@
           "key" : {
             "$ref" : "#/components/schemas/Key"
           },
+          "requestsRecovery" : {
+            "type" : "boolean",
+            "writeOnly" : true
+          },
           "durable" : {
             "type" : "boolean"
           },
           "stateful" : {
             "type" : "boolean"
-          },
-          "requestsRecovery" : {
-            "type" : "boolean",
-            "writeOnly" : true
           },
           "jobListenerNames" : {
             "type" : "array",
@@ -26440,6 +26540,12 @@
           },
           "organizationFilter" : {
             "type" : "string"
+          },
+          "licenses" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
           }
         }
       },
@@ -26541,6 +26647,9 @@
             "items" : {
               "type" : "string"
             }
+          },
+          "workspaceSharedToMeDefaultAll" : {
+            "type" : "boolean"
           },
           "hideMainMenu" : {
             "type" : "array",
@@ -27315,9 +27424,19 @@
           "url" : {
             "type" : "string"
           },
+          "registeredAppId" : {
+            "type" : "string"
+          },
           "tsCreated" : {
             "type" : "integer",
             "format" : "int64"
+          },
+          "tsExpiry" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "valid" : {
+            "type" : "boolean"
           }
         }
       },

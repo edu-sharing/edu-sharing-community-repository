@@ -1115,5 +1115,10 @@
             "NEWEST": "Always the newest version"
         },
         "COPIED_TO_CLIPBOARD_NOTICE": "The embed code was copied to the clipboard."
+    },
+    "API_ERROR": {
+        "RELOAD_NOTICE_TITLE": "The page has to be reloaded",
+        "RELOAD_NOTICE": "Something went wrong when loading important information. Please reload the page.",
+        "RELOAD_BUTTON_LABEL": "Reload page"
     }
 }

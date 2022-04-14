@@ -112,7 +112,7 @@ export class SearchNodeStoreComponent implements OnInit {
         this.sortPolicySubject
             .pipe(
                 switchMap((sortPolicy) =>
-                    this.nodeList.getNodeList(RestConstants.NODE_STORE_LIST, {
+                    this.nodeList.observeNodeList(RestConstants.NODE_STORE_LIST, {
                         propertyFilter: [RestConstants.ALL],
                         sortPolicies: [sortPolicy],
                     }),

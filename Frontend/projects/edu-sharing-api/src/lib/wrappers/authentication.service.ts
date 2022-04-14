@@ -16,7 +16,7 @@ import {
 import { ApiRequestConfiguration } from '../api-request-configuration';
 import * as apiModels from '../api/models';
 import { AuthenticationV1Service as AuthenticationApiService } from '../api/services';
-import { switchRelay } from '../utils/switch-relay';
+import { switchReplay } from '../utils/switch-replay';
 
 export type LoginInfo = apiModels.Login;
 
@@ -84,10 +84,7 @@ export class AuthenticationService {
      * The observable will replay the last state as long as there is no request in-flight which will
      * update the information once completed.
      */
-    private readonly loginInfo$ = this.loginActionResponseSubject.pipe(
-        filter((response): response is LoginActionResponse => response !== null),
-        map((response) => response.loginInfo),
-    );
+    private readonly loginInfo$ = this.createLoginInfo();
     /** Emits when the logged-in user changes. */
     private readonly userChanges$ = this.createUserChanges();
     /**
@@ -110,6 +107,11 @@ export class AuthenticationService {
      * Fires when an API request was reported that was not performed by this module.
      */
     private readonly outsideApiRequest = new Subject<void>();
+    /**
+     * The login information are possible invalid, but we don't want to fetch them without user
+     * interaction to not reset the auto-logout timeout.'
+     */
+    private loginInfoNeedRefresh = false;
 
     constructor(
         private authentication: AuthenticationApiService,
@@ -151,7 +153,7 @@ export class AuthenticationService {
      *
      * The observable is updated on any login action.
      */
-    getLoginInfo(): Observable<LoginInfo> {
+    observeLoginInfo(): Observable<LoginInfo> {
         if (this.loginActionTrigger.value === null) {
             this.loginActionTrigger.next({ kind: 'initial' });
         }
@@ -161,7 +163,7 @@ export class AuthenticationService {
     /**
      * Emits when the logged-in user changes.
      */
-    getUserChanges(): Observable<void> {
+    observeUserChanges(): Observable<void> {
         return this.userChanges$;
     }
 
@@ -181,7 +183,7 @@ export class AuthenticationService {
      *
      * The observable is updated when the user logs in or out.
      */
-    hasAccessToScope(scope: string): Observable<boolean> {
+    observeHasAccessToScope(scope: string): Observable<boolean> {
         if (!this.accessToScopeObservables[scope]) {
             this.accessToScopeObservables[scope] = this.createHasAccessToScope(scope);
         }
@@ -191,14 +193,14 @@ export class AuthenticationService {
     /**
      * Fires when the user was logged out by the backend due to inactivity.
      */
-    getAutoLogout(): Observable<void> {
+    observeAutoLogout(): Observable<void> {
         return this.autoLogoutSubject;
     }
 
     /**
      * Returns the time of automatic logout due to inactivity by the backend.
      */
-    getAutoLogoutTime(): Observable<Date | null> {
+    observeAutoLogoutTime(): Observable<Date | null> {
         return this.autoLogoutTimeSubject;
     }
 
@@ -207,7 +209,7 @@ export class AuthenticationService {
      *
      * @param interval how often to emit the updated value in milliseconds
      */
-    getTimeUntilAutoLogout(interval: number): Observable<number | null> {
+    observeTimeUntilAutoLogout(interval: number): Observable<number | null> {
         let lastEmittedValue: number | null = null;
         return this.autoLogoutTimeSubject.pipe(
             switchMap((autoLogoutTime) =>
@@ -265,6 +267,7 @@ export class AuthenticationService {
                 this.autoLogoutTimeSubject.next(null);
                 this.autoLogoutSubject.next();
             });
+        this.autoLogoutSubject.subscribe(() => (this.loginInfoNeedRefresh = true));
     }
 
     /**
@@ -282,6 +285,22 @@ export class AuthenticationService {
         } else {
             return null;
         }
+    }
+
+    private createLoginInfo(): Observable<LoginInfo> {
+        return rxjs.of(void 0).pipe(
+            tap(() => {
+                // Reed `loginInfoNeedRefresh` on subscriptions to `loginInfo$` since new
+                // subscriptions should only happen on user interaction.
+                if (this.loginInfoNeedRefresh) {
+                    this.loginActionTrigger.next({ kind: 'forceRefresh' });
+                    this.loginInfoNeedRefresh = false;
+                }
+            }),
+            switchMap(() => this.loginActionResponseSubject),
+            filter((response): response is LoginActionResponse => response !== null),
+            map((response) => response.loginInfo),
+        );
     }
 
     private handleLoginAction(action: LoginAction): Observable<LoginInfo> {
@@ -380,7 +399,7 @@ export class AuthenticationService {
         // needed.
         const inner$ = this.userChanges$.pipe(
             startWith(void 0 as void),
-            switchRelay(() => this.authentication.hasAccessToScope({ scope })),
+            switchReplay(() => this.authentication.hasAccessToScope({ scope })),
             map((response: { hasAccess: boolean }) => response.hasAccess),
         );
         // Do not resolve the observable for new subscribers while a login request is in-flight.

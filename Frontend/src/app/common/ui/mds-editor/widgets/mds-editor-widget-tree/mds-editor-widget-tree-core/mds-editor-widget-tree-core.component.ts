@@ -404,7 +404,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
             }).toPromise();
             this.toast.toast('MDS.SUGGEST_VALUE_SENT');
         } catch (e) {
-            this.toast.error(e);
+            // Do nothing
         }
         this.suggesting = false;
     }

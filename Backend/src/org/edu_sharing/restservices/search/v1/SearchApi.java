@@ -13,6 +13,7 @@ import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.restservices.*;
+import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.search.v1.model.SearchParameters;
 import org.edu_sharing.restservices.search.v1.model.SearchParametersFacets;
@@ -492,6 +493,48 @@ public class SearchApi {
 
 		}  catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
+		}
+
+	}
+
+	@GET
+	@Path("/metadata/{repository}")
+	@Consumes({ "application/json" })
+	@Operation(summary = "get nodes with metadata and collections")
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntries.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+	public Response getMetdata(
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = "nodeIds") @QueryParam("nodeIds") List<String> nodeIds,
+			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Context HttpServletRequest req) {
+
+		try {
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+
+			Filter filter = new Filter(propertyFilter);
+			NodeSearch search = NodeDao.getMetadata(repoDao, nodeIds, filter);
+
+			List<Node> data = null;//new ArrayList<Node>();
+			if(search.getNodes().size() < search.getResult().size()){
+				//searched repo deliveres only nodeRefs by query time
+				data = NodeDao.convertToRest(repoDao, search.getResult(), null, null);
+			}else{
+				//searched repo delivered properties by query time
+				data = search.getNodes();
+				// @TODO: we may need to still call convertToRest to make sure we've latest data from remote repos
+			}
+			NodeEntries response = new NodeEntries();
+			response.setNodes(data);
+
+			return Response.status(Response.Status.OK).entity(response).build();
+
+		} catch (DAOException e) {
+			return ErrorResponse.createResponse(e);
 		}
 
 	}

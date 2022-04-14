@@ -89,5 +89,6 @@ export interface Values {
     whatsNewUrl?: string;
     workflow?: ConfigWorkflow;
     workspaceColumns?: Array<string>;
+    workspaceSharedToMeDefaultAll?: boolean;
     workspaceViewType?: number;
 }

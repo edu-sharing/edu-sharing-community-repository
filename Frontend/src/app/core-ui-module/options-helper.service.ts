@@ -1372,7 +1372,7 @@ export class OptionsHelperService implements OnDestroy {
             }
         }
         if (constrains.indexOf(Constrain.Collections) !== -1) {
-            if (objects.some((o) => !o.isDirectory || !o.collection)) {
+            if (objects.some((o) => !(o.collection && o.aspects?.includes(RestConstants.CCM_ASPECT_COLLECTION)))) {
                 return Constrain.Collections;
             }
         }

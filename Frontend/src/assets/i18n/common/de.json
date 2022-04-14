@@ -260,7 +260,7 @@
         "ccm:collection_ordered_position": "Benutzerdefiniert",
         "ccm:educationallearningresourcetype": "Medienart",
         "ccm:replicationsourceid": "Original-ID",
-        "ccm:educationalcontext": "Bildungsbereich",
+        "ccm:educationalcontext": "Bildungsstufe",
         "ccm:lifecyclecontributer_publisher": "Herausgeber",
         "ccm:lifecyclecontributer_publisherFN": "",
         "ccm:eaf_sequence_title": "Serientitel",
@@ -1191,5 +1191,10 @@
             "NEWEST": "Immer die neuste Version"
         },
         "COPIED_TO_CLIPBOARD_NOTICE": "Der Einbettungscode wurde in die Zwischenablage kopiert."
+    },
+    "API_ERROR": {
+        "RELOAD_NOTICE_TITLE": "Seite muss neugeladen werden",
+        "RELOAD_NOTICE": "Beim Laden von wichtigen Informationen ist etwas schief gegangen. Bitte laden Sie die Seite neu.",
+        "RELOAD_BUTTON_LABEL": "Seite neuladen"
     }
 }

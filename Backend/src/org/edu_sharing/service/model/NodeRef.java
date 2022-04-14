@@ -1,5 +1,7 @@
 package org.edu_sharing.service.model;
 
+import org.edu_sharing.restservices.shared.Contributor;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +15,10 @@ public interface NodeRef {
 	Map<NodeRefImpl.Relation, NodeRef> getRelations();
 
 	void setRelations(Map<NodeRefImpl.Relation, NodeRef> relations);
+
+	void setContributors(List<Contributor> contributors);
+
+	List<Contributor> getContributors();
 
 	interface Preview{
 		String getMimetype();

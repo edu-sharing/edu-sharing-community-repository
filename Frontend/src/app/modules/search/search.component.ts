@@ -187,7 +187,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         // Prevent changed-after-checked error
         .pipe(delay(0));
     readonly didYouMeanSuggestion$ = this.searchApi
-        .getDidYouMeanSuggestion()
+        .observeDidYouMeanSuggestion()
         .pipe(shareReplay(1));
 
     constructor(
@@ -1197,9 +1197,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                             count,
                             false
                         );
+                        error.preventDefault();
                         return;
                     }
-                    this.toast.error(error);
                     this.searchRepository(
                         repos,
                         criteria,

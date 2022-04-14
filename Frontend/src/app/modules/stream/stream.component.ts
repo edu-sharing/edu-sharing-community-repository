@@ -101,7 +101,7 @@ export class StreamComponent implements AfterViewInit {
             // this.updateDataFromJSON(STREAM_STATUS.OPEN);
             this.streams = this.streams.filter((n) => n.id !== node.id);
             this.toast.toast('STREAM.TOAST.MARKED');
-        }, error => console.log(error));
+        });
     });
 
     removeOption = new OptionItem('STREAM.OBJECT.OPTION.REMOVE', 'delete', (node: any) => {
@@ -194,7 +194,7 @@ export class StreamComponent implements AfterViewInit {
     }
 
     seen(id: any) {
-        this.updateStatus(id, STREAM_STATUS.READ).subscribe(data => this.getStreamDataByStatus(STREAM_STATUS.OPEN) , error => console.log(error));
+        this.updateStatus(id, STREAM_STATUS.READ).subscribe(data => this.getStreamDataByStatus(STREAM_STATUS.OPEN));
     }
     init() {
         this.streams = [];
@@ -215,7 +215,7 @@ export class StreamComponent implements AfterViewInit {
         this.getStreamData(curStat, sortWay).subscribe((data) => {
             this.streams = this.streams.concat(data.stream);
             this.updateMenu();
-        }, error => console.log(error));
+        });
     }
 
     toggleMenuOptions() {
@@ -311,7 +311,7 @@ export class StreamComponent implements AfterViewInit {
             this.isLoading = false;
             this.updateMenu();
             this.scrollToDown();
-        }, error => console.log(error));
+        });
         // }
 
     }

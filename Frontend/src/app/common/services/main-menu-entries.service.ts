@@ -160,7 +160,7 @@ export class MainMenuEntriesService {
                 .toPromise()
                 .then(loginInfo => (this.loginInfo = loginInfo)),
             this.authentication
-                .hasAccessToScope(RestConstants.SAFE_SCOPE)
+                .observeHasAccessToScope(RestConstants.SAFE_SCOPE)
                 .pipe(first())
                 .toPromise()
                 .then(hasAccess => (this.hasAccessToSafeScope = hasAccess)),

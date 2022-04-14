@@ -171,13 +171,12 @@ export class MdsComponent {
         this.isLoading = true;
         this.mdsService.getSet(this._setId, this._repository).subscribe(
             (data: any) => {
-                this.config.getVariables().pipe(first()).subscribe(
+                this.config.observeVariables().pipe(first()).subscribe(
                     (variables) => {
                         this.mds = data;
                         this.variables = variables;
                         this.loadMdsFinal();
                     },
-                    (error: any) => this.toast.error(error),
                 );
             },
             (error: any) => this.toast.error(error),
@@ -216,11 +215,6 @@ export class MdsComponent {
                     .getMetadataSet({ metadataSet: mdsId })
                     .toPromise();
             } catch (error) {
-                if (error instanceof UserPresentableError) {
-                    this.toast.error(null, error.message);
-                } else {
-                    this.toast.error(error);
-                }
                 this.cancel();
             }
             this._setId = mdsId;
@@ -3224,7 +3218,7 @@ export class MdsComponent {
     }
 
     private loadConfig() {
-        this.config.getVariables().pipe(first()).subscribe((variables) => {
+        this.config.observeVariables().pipe(first()).subscribe((variables) => {
             this.variables = variables;
             const node = this.currentNodes[0];
             for (const property in node.properties) {
