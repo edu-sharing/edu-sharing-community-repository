@@ -84,10 +84,7 @@ export class AuthenticationService {
      * The observable will replay the last state as long as there is no request in-flight which will
      * update the information once completed.
      */
-    private readonly loginInfo$ = this.loginActionResponseSubject.pipe(
-        filter((response): response is LoginActionResponse => response !== null),
-        map((response) => response.loginInfo),
-    );
+    private readonly loginInfo$ = this.createLoginInfo();
     /** Emits when the logged-in user changes. */
     private readonly userChanges$ = this.createUserChanges();
     /**
@@ -110,6 +107,11 @@ export class AuthenticationService {
      * Fires when an API request was reported that was not performed by this module.
      */
     private readonly outsideApiRequest = new Subject<void>();
+    /**
+     * The login information are possible invalid, but we don't want to fetch them without user
+     * interaction to not reset the auto-logout timeout.'
+     */
+    private loginInfoNeedRefresh = false;
 
     constructor(
         private authentication: AuthenticationApiService,
@@ -265,6 +267,7 @@ export class AuthenticationService {
                 this.autoLogoutTimeSubject.next(null);
                 this.autoLogoutSubject.next();
             });
+        this.autoLogoutSubject.subscribe(() => (this.loginInfoNeedRefresh = true));
     }
 
     /**
@@ -282,6 +285,22 @@ export class AuthenticationService {
         } else {
             return null;
         }
+    }
+
+    private createLoginInfo(): Observable<LoginInfo> {
+        return rxjs.of(void 0).pipe(
+            tap(() => {
+                // Reed `loginInfoNeedRefresh` on subscriptions to `loginInfo$` since new
+                // subscriptions should only happen on user interaction.
+                if (this.loginInfoNeedRefresh) {
+                    this.loginActionTrigger.next({ kind: 'forceRefresh' });
+                    this.loginInfoNeedRefresh = false;
+                }
+            }),
+            switchMap(() => this.loginActionResponseSubject),
+            filter((response): response is LoginActionResponse => response !== null),
+            map((response) => response.loginInfo),
+        );
     }
 
     private handleLoginAction(action: LoginAction): Observable<LoginInfo> {
