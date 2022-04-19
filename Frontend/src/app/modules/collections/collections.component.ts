@@ -1068,7 +1068,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         );
 
         // load user profile
-        this.iamService.getUser().subscribe(
+        this.iamService.getCurrentUserAsync().then(
             iamUser => {
                 // WIN
 
@@ -1295,7 +1295,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         this.collectionContent = {
             node: new Node(),
         };
-        this.collectionContent.node.ref = new NodeRef();
+        this.collectionContent.node.ref = {} as NodeRef;
         this.collectionContent.node.ref.id = id;
         this.collectionContent.node.aspects = [
             RestConstants.CCM_ASPECT_COLLECTION,
@@ -1343,13 +1343,6 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         });
     }
 
-    private addToStore(nodes: Node[]) {
-        this.toast.showProgressDialog();
-        RestHelper.addToStore(nodes, this.bridge, this.iamService, () => {
-            this.toast.closeModalDialog();
-            this.mainNavRef.refreshNodeStore();
-        });
-    }
     async setCollectionSort(sort: ListSortConfig) {
         this.sortCollections = sort;
         try {

@@ -11,10 +11,9 @@ import {
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatChip } from '@angular/material/chips';
-import { FacetsDict, LabeledValue } from 'ngx-edu-sharing-api';
+import { FacetsDict, LabeledValue, LabeledValuesDict } from 'ngx-edu-sharing-api';
 import { Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
-import { LabeledValuesDict } from '../../../../../projects/edu-sharing-api/src/lib/wrappers/mds-label.service';
 import { SearchFieldFacetsComponent } from '../mds-editor/search-field-facets/search-field-facets.component';
 import { Values } from '../mds-editor/types';
 import { SearchFieldService } from './search-field.service';

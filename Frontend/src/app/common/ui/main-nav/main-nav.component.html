@@ -122,10 +122,12 @@
             </button>
           </ng-container>
         </div>
-      <div class="timeout" *ngIf="isSafe() && timeout && !mainMenuSidebar?.show">
-        <i esIcon="av_timer"></i>
-          {{ timeout }}
-        </div>
+        <ng-container *ngIf="isSafe() && !mainMenuSidebar?.show">
+          <div class="timeout" *ngIf="autoLogoutTimeout$ | async as timeout">
+            <i esIcon="av_timer"></i>
+            {{ timeout }}
+          </div>
+        </ng-container>
         <div class="add-material">
           <ng-container *ngTemplateOutlet="createButtonRef"></ng-container>
           <ng-container *ngIf="!createButtonRef">
@@ -195,7 +197,7 @@
               >{{ 'PRIVACY_INFORMATION' | translate }}</a
             >
           </div>
-          <button mat-icon-button *ngIf="iam.getCurrentUser() && showChat()" class="rocketchat" (click)="openChat()">
+          <button mat-icon-button *ngIf="currentUser && showChat()" class="rocketchat" (click)="openChat()">
             <i esIcon="message"></i>
             <div class="mat-button-badge" [class.rocketchat-count-none]="getChatCount() == 0">
               {{ getChatCount() }}
@@ -204,13 +206,14 @@
           <button
             mat-button
             class="user clickable"
-            #userRef
-            *ngIf="iam.getCurrentUser() && _showUser"
+            esElementRef
+            #userRef="esElementRef"
+            *ngIf="currentUser && _showUser"
             [matMenuTriggerFor]="userDropdown.menu"
             title="{{ 'USERMENU' | translate }}"
           >
-            <es-user-avatar [user]="iam.getCurrentUser()" [size]="'xsmall'"></es-user-avatar>
-            <span *ngIf="!connector.getCurrentLogin()?.isGuest">{{ iam.getCurrentUser() | authorityName }}</span>
+            <es-user-avatar [user]="currentUser" [size]="'xsmall'"></es-user-avatar>
+            <span *ngIf="!connector.getCurrentLogin()?.isGuest">{{ currentUser | authorityName }}</span>
             <span *ngIf="connector.getCurrentLogin()?.isGuest">{{ 'USER_GUEST' | translate }}</span>
             <i aria-hidden="true" class="material-icons barIcon iconArrow">keyboard_arrow_down</i>
             <!-- <i class="material-icons barIcon iconPerson">account_circle</i>-->

@@ -260,7 +260,7 @@
         "ccm:collection_ordered_position": "Benutzerdefiniert",
         "ccm:educationallearningresourcetype": "Medienart",
         "ccm:replicationsourceid": "Original-ID",
-        "ccm:educationalcontext": "Bildungsbereich",
+        "ccm:educationalcontext": "Bildungsstufe",
         "ccm:lifecyclecontributer_publisher": "Herausgeber",
         "ccm:lifecyclecontributer_publisherFN": "",
         "ccm:eaf_sequence_title": "Serientitel",
@@ -643,6 +643,7 @@
         "VARIANT": "Variante anlegen",
         "VARIANT_OPEN": "Als Variante öffnen",
         "QR_CODE": "QR-Code Link",
+        "EMBED": "Einbetten",
         "ADD_OBJECT": "Neues Material",
         "SEARCH_OBJECT": "Material suchen",
         "NEW_COLLECTION": "Neue Sammlung",
@@ -662,11 +663,12 @@
         "DIFFERENT_VALUES": "(Verschiedene Werte)",
         "HAS_CHANGES": "geändert",
         "TITLE": "Infos bearbeiten",
-        "SHOW_EXTENDED": "Erweitere Infos anzeigen",
+        "SHOW_EXTENDED_FALSE": "Erweitere Infos ausgeblendet",
+        "SHOW_EXTENDED_TRUE": "Erweitere Infos eingeblendet",
         "SHOW_EXTENDED_SEARCH": "Weitere Filter anzeigen",
-        "AUTHOR_LABEL": "Urheber-Angaben",
-        "AUTHOR_FREETEXT": "Freie Urheber-Angabe",
-        "AUTHOR_FREETEXT_PLACEHOLDER": "Wer sind die Urheber des Werks? Wie sollen sie genannt werden?",
+        "AUTHOR_LABEL": "Urheber{{GENDER_SEPARATOR}}in-Angabe",
+        "AUTHOR_FREETEXT": "Freie Urheber{{GENDER_SEPARATOR}}in-Angabe",
+        "AUTHOR_FREETEXT_PLACEHOLDER": "Wer sind die Urheber{{GENDER_SEPARATOR}}innen des Werks? Wie sollen sie genannt werden?",
         "AUTHOR_PERSON": "Autor{{GENDER_SEPARATOR}}innen & Beteiligte",
         "AUTHOR_UNSET": "<keine Angabe>",
         "LICENSE": "Lizenz",
@@ -861,6 +863,7 @@
         "CONFIRM_GROUP": "Sie werden der folgenden Gruppe beitreten:",
         "GROUP_PASSWORD": "Gruppen-Passwort eingeben",
         "SIGNUP": "Beitreten",
+        "ALREADY_MEMBER": "Sie sind bereits Mitglied",
         "SIGNUP_TYPE": {
             "simple": "Zutritt ohne Beschränkung möglich",
             "password": "Zutritt nur mit Passwort möglich",
@@ -1175,5 +1178,23 @@
     "BREADCRUMBS": {
         "YOU_ARE_HOME": "Sie befinden sich im Stammverzeichnis",
         "IN_HOME": "Im Stammverzeichnis"
+    },
+    "EMBED": {
+        "NOT_PUBLIC_WARNING": "Dieses Material ist nicht öffentlich zugänglich.",
+        "CODE_LABEL": "Einbettungscode",
+        "HEIGHT": "Höhe",
+        "WIDTH": "Breite",
+        "SIZE_CONSTRAINTS_ERROR_NOTICE": "Bitte wählen Sie einen Wert zwischen {{ min }} und {{ max }}",
+        "VERSION": "Version",
+        "VERSION_OPTION": {
+            "FIXED": "Aktuelle Version",
+            "NEWEST": "Immer die neuste Version"
+        },
+        "COPIED_TO_CLIPBOARD_NOTICE": "Der Einbettungscode wurde in die Zwischenablage kopiert."
+    },
+    "API_ERROR": {
+        "RELOAD_NOTICE_TITLE": "Seite muss neugeladen werden",
+        "RELOAD_NOTICE": "Beim Laden von wichtigen Informationen ist etwas schief gegangen. Bitte laden Sie die Seite neu.",
+        "RELOAD_BUTTON_LABEL": "Seite neuladen"
     }
 }

@@ -148,36 +148,6 @@ es-user-profile {
             background-color: $colorStatusNeutral;
         }
     }
-
-    .nodeStore {
-        margin-right: 4px;
-        position: relative;
-        top: 6px;
-        > i {
-            color: $primaryMediumLight;
-        }
-    }
-    .nodeStoreCount {
-        background-color: #fff;
-        color: $primary;
-        right: 5px;
-    }
-    .nodeStoreAnimation {
-        position: absolute;
-        left: -5px;
-        background-color: $toastLeft;
-        border-radius: 50%;
-        color: $workspaceTopBarFontColor;
-        font-weight: bold;
-        font-size: 11pt;
-        text-align: center;
-        width: 35px;
-        height: 35px;
-        padding-top: 7px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
     .timeout {
         background-color: $toastLeftError;
         color: white;
@@ -294,7 +264,6 @@ es-user-profile {
         .rocketchat {
             display: flex;
         }
-        .nodeStore,
         .help,
         .imprint {
             display: none;

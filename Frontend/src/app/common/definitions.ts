@@ -1,5 +1,5 @@
 import {Node as NodeLegacy} from '../core-module/rest/data-object';
-import { Node } from 'projects/edu-sharing-api/src/lib/api/models';
+import { Node } from 'ngx-edu-sharing-api';
 
 /**
  * universal node object which can be from the new/mapped API or legacy defined data-object

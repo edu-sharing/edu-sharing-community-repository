@@ -184,11 +184,9 @@ public class LTIJWTUtil {
 
             deepLink.put(LTIConstants.DEEP_LINK_TYPE, LTIConstants.DEEP_LINK_LTIRESOURCELINK);
             deepLink.put(LTIConstants.DEEP_LINK_TITLE, node.getTitle() != null ? node.getTitle() : node.getName());
-            deepLink.put(LTIConstants.DEEP_LINK_URL, ApplicationInfoList.getHomeRepository().getClientBaseUrl() + "/components/render/"+node.getRef().getId()+"?closeOnBack=true");
+            //deepLink.put(LTIConstants.DEEP_LINK_URL, ApplicationInfoList.getHomeRepository().getClientBaseUrl() + "/components/render/"+node.getRef().getId()+"?closeOnBack=true");
+            deepLink.put(LTIConstants.DEEP_LINK_URL, ApplicationInfoList.getHomeRepository().getClientBaseUrl() + "/rest/lti/v13/"+LTIConstants.LTI_TOOL_REDIRECTURL_PATH+"/"+node.getRef().getId());
 
-            /**
-             * @TODO: works only when user clicks initial on an lti resource an got's a session in edu-sharingF
-             */
             try {
                 HashMap<String,String> thumbnail = new HashMap<>();
                 //thumbnail.put("url",node.getPreview().getUrl());

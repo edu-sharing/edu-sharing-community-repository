@@ -9,22 +9,22 @@
     <div
       *ngIf="loginInfo"
       class="top"
-      style.background-color="{{ (iam.getCurrentUser() ? iam.getCurrentUser() : null) | authorityColor }}"
+      style.background-color="{{ (currentUser || null) | authorityColor }}"
     >
       <div class="profile-gradient"></div>
       <img
-        *ngIf="iam.getCurrentUser() && iam.getCurrentUser().profile.avatar"
+        *ngIf="currentUser?.profile?.avatar"
         class="blurred-image"
-        [src]="iam.getCurrentUser().profile.avatar + '&crop=true&width=200&height=200'"
+        [src]="currentUser.profile.avatar + '&crop=true&width=200&height=200'"
       />
-      <div *ngIf="iam.getCurrentUser()" class="profile">
+      <div *ngIf="currentUser" class="profile">
         <ng-template #userAvatar>
             <es-user-avatar
-              [user]="iam.getCurrentUser()"
+              [user]="currentUser"
               size="medium"
             ></es-user-avatar>
             <div id="main-menu-sidebar-username" class="username">
-              <ng-container *ngIf="iam.getCurrentUser() && !loginInfo.isGuest">{{ iam.getCurrentUser() | authorityName }}</ng-container>
+              <ng-container *ngIf="currentUser && !loginInfo.isGuest">{{ currentUser | authorityName }}</ng-container>
               <ng-container *ngIf="loginInfo.isGuest">{{ 'USER_GUEST' | translate }}</ng-container>
             </div>
         </ng-template>

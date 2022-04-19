@@ -67,7 +67,7 @@
 </mat-tab-group>
 <div class="collections-header-group">
   <es-actionbar
-    *ngIf="collectionContentTemplateRef"
+    *ngIf="collectionContentTemplateRef && !isRootLevelCollection()"
     #actionbarCollection
     [numberOfAlwaysVisibleOptions]="1"
     [numberOfAlwaysVisibleOptionsMobile]="1"

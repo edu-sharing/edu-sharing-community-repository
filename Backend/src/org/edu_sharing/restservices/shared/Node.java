@@ -44,6 +44,7 @@ public class Node {
 	private RatingDetails rating;
 	private List<Node> usedInCollections = new ArrayList<>();
 	private Map<NodeRefImpl.Relation, Node> relations;
+	private List<Contributor> contributors;
 
 	/**
    **/
@@ -399,5 +400,13 @@ public class Node {
 
 	public NodeLTIDeepLink getNodeLTIDeepLink() {
 		return nodeLTIDeepLink;
+	}
+
+	public void setContributors(List<Contributor> contributors) {
+		this.contributors = contributors;
+	}
+
+	public List<Contributor> getContributors() {
+		return contributors;
 	}
 }

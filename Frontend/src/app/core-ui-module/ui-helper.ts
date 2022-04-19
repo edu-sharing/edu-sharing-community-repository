@@ -509,7 +509,7 @@ export class UIHelper {
                     if (win) win.close();
                     return;
                 }
-                iam.getUser().subscribe(
+                iam.getCurrentUserAsync().then(
                     user => {
                         if (
                             user.person.quota.enabled &&
@@ -565,122 +565,6 @@ export class UIHelper {
                 if (win) win.close();
             },
         );
-    }
-
-    /**
-     * smoothly scroll to the given y offset
-     * @param {y} number
-     * @param {smoothness} lower numbers indicate less smoothness, higher more smoothness
-     */
-    static scrollSmooth(y: number = 0, smoothness = 1) {
-        let mode = window.scrollY >= y;
-        let divider = 3 * smoothness;
-        let minSpeed = 7 / smoothness;
-        let lastY = y;
-        let interval = setInterval(() => {
-            let yDiff = window.scrollY - lastY;
-            lastY = window.scrollY;
-            if (window.scrollY > y && mode && yDiff) {
-                window.scrollBy(
-                    0,
-                    -Math.max((window.scrollY - y) / divider, minSpeed),
-                );
-            } else if (window.scrollY < y && !mode && yDiff) {
-                window.scrollBy(
-                    0,
-                    Math.max((y - window.scrollY) / divider, minSpeed),
-                );
-            } else {
-                clearInterval(interval);
-            }
-        }, 16);
-    }
-    /**
-     * smoothly scroll to the given y offset inside an element (use offsetTop on the child to determine this position)
-     * @param {y} number
-     * @param {smoothness} lower numbers indicate less smoothness, higher more smoothness
-     */
-    static scrollSmoothElement(
-        pos: number = 0,
-        element: Element,
-        smoothness = 1,
-        axis = 'y',
-    ) {
-        return new Promise<void>(resolve => {
-            let currentPos =
-                axis == 'x' ? element.scrollLeft : element.scrollTop;
-            if (element.getAttribute('data-is-scrolling') == 'true') {
-                return;
-            }
-            let mode = currentPos > pos;
-            let divider = 3 * smoothness;
-            let minSpeed = 7 / smoothness;
-            let lastPos = pos;
-            let maxPos =
-                axis == 'x'
-                    ? element.scrollWidth - element.clientWidth
-                    : element.scrollHeight - element.clientHeight;
-            let limitReached = false;
-            if (mode && pos <= 0) {
-                pos = 0;
-                limitReached = true;
-            }
-            if (!mode && pos >= maxPos) {
-                pos = maxPos;
-                limitReached = true;
-            }
-            let interval = setInterval(() => {
-                let currentPos =
-                    axis == 'x' ? element.scrollLeft : element.scrollTop;
-                let posDiff = currentPos - lastPos;
-                lastPos = currentPos;
-                let finished = true;
-                if (currentPos > pos) {
-                    currentPos -= Math.max(
-                        (currentPos - pos) / divider,
-                        minSpeed,
-                    );
-                    finished = currentPos <= pos;
-                } else if (currentPos < pos && !mode) {
-                    currentPos += Math.max(
-                        (pos - currentPos) / divider,
-                        minSpeed,
-                    );
-                    finished = currentPos >= pos;
-                }
-                if (axis == 'x') element.scrollLeft = currentPos;
-                else element.scrollTop = currentPos;
-                if (finished) {
-                    clearInterval(interval);
-                    element.removeAttribute('data-is-scrolling');
-                    resolve();
-                }
-            }, 16);
-            element.setAttribute('data-is-scrolling', 'true');
-        });
-    }
-
-    /**
-     * smoothly scroll to the given child inside an element (The child will be placed around the first 1/3 of the parent's top)
-     * @param child
-     * @param element
-     * @param smoothness
-     */
-    static scrollSmoothElementToChild(
-        child: Element,
-        element: Element,
-        smoothness = 1,
-    ) {
-        // y equals to the top of the child + any scrolling of the parent - the top of the parent
-        let y =
-            child.getBoundingClientRect().top +
-            element.scrollTop -
-            element.getBoundingClientRect().top;
-        // move the focused element to 1/3 at the top of the container
-        y +=
-            child.getBoundingClientRect().height / 2 -
-            element.getBoundingClientRect().height / 3;
-        this.scrollSmoothElement(y, element, smoothness);
     }
 
     static setFocusOnCard() {

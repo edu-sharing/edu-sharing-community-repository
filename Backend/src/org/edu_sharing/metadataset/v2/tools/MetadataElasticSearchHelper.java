@@ -2,6 +2,7 @@ package org.edu_sharing.metadataset.v2.tools;
 
 import com.sun.star.lang.IllegalArgumentException;
 import org.edu_sharing.metadataset.v2.*;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.restservices.mds.v1.model.MdsWidget;
 import org.edu_sharing.service.search.model.SearchToken;
@@ -15,11 +16,11 @@ import java.util.*;
 
 public class MetadataElasticSearchHelper extends MetadataSearchHelper {
 
-    public static QueryBuilder getElasticSearchQuery(MetadataQueries queries,MetadataQuery query, Map<String,String[]> parameters) throws IllegalArgumentException {
-        return getElasticSearchQuery(queries,query,parameters,true);
+    public static QueryBuilder getElasticSearchQuery(SearchToken searchToken, MetadataQueries queries,MetadataQuery query, Map<String,String[]> parameters) throws IllegalArgumentException {
+        return getElasticSearchQuery(searchToken, queries,query,parameters,true);
     }
 
-    public static QueryBuilder getElasticSearchQuery(MetadataQueries queries,MetadataQuery query, Map<String,String[]> parameters, Boolean asFilter) throws IllegalArgumentException {
+    public static QueryBuilder getElasticSearchQuery(SearchToken searchToken, MetadataQueries queries,MetadataQuery query, Map<String,String[]> parameters, Boolean asFilter) throws IllegalArgumentException {
 
         /**
          * @TODO basequery
@@ -92,6 +93,22 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
             }
 
         }
+
+        if(asFilter == true
+                && searchToken != null
+                && searchToken.getSearchCriterias() != null
+                && searchToken.getSearchCriterias().getContentkind() != null
+                && searchToken.getSearchCriterias().getContentkind().length > 0){
+            BoolQueryBuilder criteriasBool = new BoolQueryBuilder();
+            Arrays.stream(searchToken.getSearchCriterias().getContentkind()).forEach((content) ->
+                    criteriasBool.should(
+                            new MatchQueryBuilder("type", CCConstants.getValidLocalName(content)))
+            );
+            result = result.filter(
+                    criteriasBool
+            );
+        }
+
         return result;
     }
 
@@ -127,9 +144,13 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
 
         if (value.startsWith("\"") && value.endsWith("\"") || parameter.isExactMatching()) {
             //String statement = parameter.getStatement(value).replace("${value}", QueryParser.escape(value));
-            return QueryUtils.replacerFromSyntax(parameter.getSyntax()).replaceString(
+            String statement = QueryUtils.replacerFromSyntax(parameter.getSyntax()).replaceString(
                     parameter.getStatement(value),
                     "${value}", value);
+            statement = QueryUtils.replacerFromSyntax(parameter.getSyntax(),true).replaceString(
+                    statement,
+                    "${valueRaw}", value);
+            return statement;
         }
 
         String[] words = value.split(" ");
@@ -139,6 +160,9 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
             String statement = QueryUtils.replacerFromSyntax(parameter.getSyntax()).replaceString(
                     parameter.getStatement(value),
                     "${value}", word);
+            statement = QueryUtils.replacerFromSyntax(parameter.getSyntax(),true).replaceString(
+                    statement,
+                    "${valueRaw}", value);
             boolQuery = boolQuery.must(QueryBuilders.wrapperQuery(statement));
 
         }
@@ -178,8 +202,8 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                 tmp.remove(facet);
             }
 
-            QueryBuilder qbFilter = getElasticSearchQuery(queries, query, tmp, true);
-            QueryBuilder qbNoFilter = getElasticSearchQuery(queries, query, tmp, false);
+            QueryBuilder qbFilter = getElasticSearchQuery(searchToken, queries, query, tmp, true);
+            QueryBuilder qbNoFilter = getElasticSearchQuery(searchToken, queries, query, tmp, false);
             BoolQueryBuilder bqb = QueryBuilders.boolQuery();
             bqb = bqb.must(qbFilter).must(qbNoFilter).must(globalConditions);
             if(searchToken.getQueryString() != null && !searchToken.getQueryString().trim().isEmpty()){

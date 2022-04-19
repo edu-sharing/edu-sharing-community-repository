@@ -22,12 +22,12 @@ export class FocusStateDirective {
         this.hasFocus = false;
     }
 
-    @HostListener('mouseover')
+    @HostListener('mouseenter')
     onMouseOver() {
         this.hovering = true;
     }
 
-    @HostListener('mouseout')
+    @HostListener('mouseleave')
     onMouseOut() {
         this.hovering = false;
     }

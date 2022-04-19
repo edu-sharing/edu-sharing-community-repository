@@ -31,6 +31,10 @@ export class MdsEditorWidgetDurationComponent extends MdsEditorWidgetBase implem
         console.log(this.widget.definition, this.sliderOptions);
         this.updateInput();
         this.widget.observeIsDisabled().subscribe((isDisabled) => {
+            this.sliderOptions = {
+                ...this.sliderOptions,
+                disabled: isDisabled,
+            };
             if (isDisabled) {
                 this.setStatus('DISABLED');
             } else {

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { SearchConfig, SearchService as SearchApiService } from 'ngx-edu-sharing-api';
+import { SearchConfig } from 'ngx-edu-sharing-api';
 import { BehaviorSubject } from 'rxjs';
 import { SearchFieldService } from 'src/app/common/ui/search-field/search-field.service';
 import { ListItem, Node } from '../../core-module/core.module';
@@ -47,7 +47,7 @@ export class SearchService {
 
     private readonly searchConfigSubject = new BehaviorSubject<Partial<SearchConfig>>({});
 
-    constructor(private searchApi: SearchApiService, private searchField: SearchFieldService) {
+    constructor(private searchField: SearchFieldService) {
         this.searchConfigSubject.pipe().subscribe((config) => {
             const { repository, metadataSet } = config;
             if (repository && metadataSet) {

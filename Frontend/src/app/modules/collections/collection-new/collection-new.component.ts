@@ -237,7 +237,7 @@ export class CollectionNewComponent implements EventListener{
           });
           this.authorFreetextAllowed=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_CHANGE_OWNER);
 
-          this.iamService.getUser().subscribe((user : IamUser) => this.user=user.person);
+          this.iamService.getCurrentUserAsync().then((user : IamUser) => this.user=user.person);
           this.route.queryParams.subscribe(queryParams => {
             this.mainnav = queryParams.mainnav !== 'false';
               this.route.params.subscribe(params => {
@@ -339,7 +339,7 @@ export class CollectionNewComponent implements EventListener{
       }
       else{
         this.editPermissionsDummy=new EduData.Node();
-        this.editPermissionsDummy.ref=new NodeRef();
+        this.editPermissionsDummy.ref= {} as NodeRef;
         this.editPermissionsDummy.aspects=[RestConstants.CCM_ASPECT_COLLECTION];
         this.editPermissionsDummy.isDirectory=true;
       }

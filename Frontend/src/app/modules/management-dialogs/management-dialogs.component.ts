@@ -175,7 +175,7 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() onRefresh=new EventEmitter<Node[]|void>();
   @Output() onUploadFilesProcessed=new EventEmitter<Node[]>();
   @Output() onCloseMetadata=new EventEmitter();
-  @Output() onUploadFileSelected=new EventEmitter();
+  @Output() onUploadFileSelected=new EventEmitter<FileList>();
   @Output() onUpdateLicense=new EventEmitter();
   @Output() onCloseAddToCollection=new EventEmitter();
   @Output() onStoredAddToCollection=new EventEmitter<{collection: Node, references: CollectionReference[]}>();
@@ -393,7 +393,7 @@ export class WorkspaceManagementDialogsComponent  {
   public refresh(){
     this.onRefresh.emit();
   }
- public uploadFile(event:any){
+ public uploadFile(event: FileList){
    this.onUploadFileSelected.emit(event);
  }
   createUrlLink(link : LinkData) {
@@ -686,6 +686,7 @@ export class WorkspaceManagementDialogsComponent  {
             this.onUploadFilesProcessed.emit(nodes);
         } else if(!saved && this.nodeDeleteOnCancel) {
             this.deleteNodes(this._nodeSimpleEdit);
+            this.onUploadFilesProcessed.emit(null);
         }
         if (nodes) {
             this.onRefresh.emit(nodes);

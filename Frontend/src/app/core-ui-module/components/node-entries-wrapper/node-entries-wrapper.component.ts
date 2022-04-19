@@ -19,9 +19,14 @@ import {
 import {NodeEntriesService} from '../../node-entries.service';
 import {TemporaryStorageService} from '../../../core-module/rest/services/temporary-storage.service';
 import {UIHelper} from '../../ui-helper';
-import {NodeEntriesComponent} from '../node-entries/node-entries.component';
+import {NodeEntriesComponent, NodeEntriesDataType} from '../node-entries/node-entries.component';
 import {NodeDataSource} from './node-data-source';
-import {CollectionReference, Node} from '../../../core-module/rest/data-object';
+import {
+    CollectionReference,
+    GenericAuthority,
+    Node,
+    User
+} from '../../../core-module/rest/data-object';
 import {ListItem} from '../../../core-module/ui/list-item';
 import {OptionItem} from '../../option-item';
 import {MainNavService} from '../../../common/services/main-nav.service';
@@ -56,13 +61,14 @@ import {NodeEntriesTemplatesService} from '../node-entries/node-entries-template
         }}
     ]
 })
-export class NodeEntriesWrapperComponent<T extends Node> implements AfterViewInit, OnChanges, ListEventInterface<T> {
+export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType> implements AfterViewInit, OnChanges, ListEventInterface<T> {
     @ContentChild('title') titleRef: TemplateRef<any>;
     @ContentChild('empty') emptyRef: TemplateRef<any>;
     @ContentChild('actionArea') actionAreaRef: TemplateRef<any>;
     @Input() dataSource: NodeDataSource<T>;
     @Input() columns: ListItem[];
     @Input() configureColumns: boolean;
+    @Input() checkbox = true;
     @Output() columnsChange = new EventEmitter<ListItem[]>();
     @Input() globalOptions: OptionItem[];
     @Input() displayType = NodeEntriesDisplayType.Grid;
@@ -114,6 +120,7 @@ export class NodeEntriesWrapperComponent<T extends Node> implements AfterViewIni
         this.entriesService.dataSource = this.dataSource;
         this.entriesService.columns = this.columns;
         this.entriesService.configureColumns = this.configureColumns;
+        this.entriesService.checkbox = this.checkbox;
         this.entriesService.columnsChange = this.columnsChange;
         this.entriesService.displayType = this.displayType;
         this.entriesService.elementInteractionType = this.elementInteractionType;
@@ -183,14 +190,14 @@ export class NodeEntriesWrapperComponent<T extends Node> implements AfterViewIni
             return;
         }
         this.dataSource.getData().forEach((d) => {
-            let hits = (nodes as T[]).filter((n) => n.ref.id === d.ref.id);
+            let hits = (nodes as T[]).filter((n) => (n as Node).ref.id === (d as Node).ref.id);
             if(hits.length === 0) {
                 // handle if the original has changed (for collection refs)
-                hits = (nodes as T[]).filter((n) => n.ref.id === (d as unknown as CollectionReference).originalId);
+                hits = (nodes as T[]).filter((n) => (n as Node).ref.id === (d as unknown as CollectionReference).originalId);
             }
             console.log(d, hits);
             if(hits.length === 1) {
-                this.nodeHelperService.copyDataToNode(d, hits[0]);
+                this.nodeHelperService.copyDataToNode(d as Node, hits[0] as Node);
             }
         });
         console.log(nodes);
@@ -201,11 +208,14 @@ export class NodeEntriesWrapperComponent<T extends Node> implements AfterViewIni
 
     addVirtualNodes(virtual: T[]): void {
         virtual = virtual.map((o) => {
-            o.virtual = true;
+            (o as Node).virtual = true;
             return o;
         });
         virtual.forEach((v) => {
-            const contains = this.dataSource.getData().some((d) => d.ref.id === v.ref.id);
+            const contains = this.dataSource.getData().some((d) =>
+                (d as Node).ref ? (d as Node).ref?.id === (v as Node).ref?.id :
+                (d as User).authorityName === (v as User).authorityName
+            );
             if(contains) {
                 this.updateNodes([v]);
             } else {

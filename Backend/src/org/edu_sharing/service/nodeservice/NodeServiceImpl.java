@@ -583,7 +583,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		this.updateNodeNative(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId, _props);
 	}
 
-	public void updateNodeNative(StoreRef store, String nodeId, HashMap<String, ?> _props) {
+	public void updateNodeNative(StoreRef store, String nodeId, Map<String, ?> _props) {
 
 		try {
 			NodeRef nodeRef = new NodeRef(store, nodeId);
@@ -645,7 +645,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 	}
 	
-	Map<QName, Serializable> transformPropMap(HashMap map) {
+	Map<QName, Serializable> transformPropMap(Map map) {
 		Map<QName, Serializable> result = new HashMap<QName, Serializable>();
 		for (Object key : map.keySet()) {
 
@@ -1381,7 +1381,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 
 		if(!propertyDefinition.isMultiValued() && value instanceof Collection){
-			value = (Serializable)((Collection)value).stream().iterator().next();
+			if(((Collection)value).stream().iterator().hasNext()) {
+				value = (Serializable) ((Collection) value).stream().iterator().next();
+			} else {
+				value = null;
+			}
 		}
 
 		Map<String, Object> properties = null;
@@ -1409,6 +1413,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				}
 		}
 		if(properties != null) {
+			updateNodeNative(nodeRef.getStoreRef(), nodeRef.getId(), properties);
 			nodeService.setProperties(nodeRef, properties.entrySet().stream().collect(
 					HashMap::new,
 					(m,entry)-> m.put(QName.createQName(entry.getKey()), (Serializable) entry.getValue()),

@@ -7,13 +7,16 @@ import {
   NgZone,
   OnChanges,
   OnDestroy,
+  OnInit,
   Output,
   SimpleChanges
 } from '@angular/core';
+import { Subject } from 'rxjs';
+
 @Directive({
   selector: '[esInfiniteScroll], [infinite-scroll], [data-infinite-scroll]'
 })
-export class InfiniteScrollDirective{
+export class InfiniteScrollDirective implements OnInit, OnDestroy {
   @Output() scrolled = new EventEmitter<void>();
 
   @Input() infiniteScrollDistance: number = 1.5;
@@ -21,19 +24,22 @@ export class InfiniteScrollDirective{
   @Input() scrollWindow: boolean = true;
   private lastEvent = 0;
   private lastScroll = 0;
+  private destroyed$ = new Subject<void>();
 
-  constructor(private element: ElementRef, private zone: NgZone) {
-    setTimeout(()=> {
-        if (this.scrollWindow) {
-            window.addEventListener('scroll', (event: any) => {
-                this.handleOnScroll(event);
-            });
-        } else {
-            this.element.nativeElement.addEventListener('scroll', (event: any) => {
-                this.handleOnScroll(event);
-            });
-        }
+  constructor(private element: ElementRef, private zone: NgZone) {}
+
+  ngOnInit(): void {
+    this.zone.runOutsideAngular(() => {
+      const handleScroll = (event: any) => this.handleOnScroll(event);
+      const eventTarget = this.scrollWindow ? window : this.element.nativeElement;
+      eventTarget.addEventListener('scroll', handleScroll);
+      this.destroyed$.subscribe(() => eventTarget.removeEventListener('scroll', handleScroll));
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroyed$.next();
+    this.destroyed$.complete();
   }
 
   handleOnScroll(event:any) {
@@ -51,7 +57,7 @@ export class InfiniteScrollDirective{
         if(time - this.lastEvent < this.infiniteScrollThrottle)
           return;
         this.lastEvent=time;
-        this.scrolled.emit();
+        this.emitScrolled();
       }
       this.lastScroll=scroll;
     }
@@ -64,10 +70,14 @@ export class InfiniteScrollDirective{
           if(time - this.lastEvent < this.infiniteScrollThrottle)
               return;
           this.lastEvent=time;
-          this.scrolled.emit();
-      }
+          this.emitScrolled();
+        }
       this.lastScroll=scroll;
     }
     //console.log(window.pageYOffset);
+  }
+
+  private emitScrolled(): void {
+    this.zone.run(() => this.scrolled.emit());
   }
 }

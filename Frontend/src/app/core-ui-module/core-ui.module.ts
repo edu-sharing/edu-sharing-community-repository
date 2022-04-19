@@ -279,6 +279,7 @@ import {CommonModule} from '@angular/common';
         CheckTextOverflowDirective,
         DragCursorDirective,
         BorderBoxObserverDirective,
+        NodeEntriesTableComponent,
     ],
 })
 export class CoreUiModule {}

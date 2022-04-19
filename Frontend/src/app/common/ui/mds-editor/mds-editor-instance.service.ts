@@ -24,6 +24,8 @@ import {
     tap
 } from 'rxjs/operators';
 import {
+    ConfigurationHelper,
+    ConfigurationService,
     MdsValueList,
     Node,
     RestConnectorService,
@@ -647,6 +649,7 @@ export class MdsEditorInstanceService implements OnDestroy {
         private mdsEditorCommonService: MdsEditorCommonService,
         private mdsService: MdsService,
         private restMdsService: RestMdsService,
+        private configService: ConfigurationService,
         private restConnector: RestConnectorService,
         private searchService: SearchService,
         private config: ConfigService,
@@ -845,7 +848,7 @@ export class MdsEditorInstanceService implements OnDestroy {
 
     async initWithoutNodes(
         groupId: string,
-        mdsId: string = '-default-',
+        mdsId: string = null,
         repository: string = '-home-',
         editorMode: EditorMode = 'search',
         initialValues: Values = {},
@@ -853,6 +856,20 @@ export class MdsEditorInstanceService implements OnDestroy {
         this.editorMode = editorMode;
         this.editorBulkMode = { isBulk: false };
         this.values$.next(initialValues);
+        if(mdsId === null) {
+            try {
+                const sets = ConfigurationHelper.filterValidMds(
+                    repository,
+                    (await this.restMdsService.getSets().toPromise()).metadatasets,
+                    this.configService);
+                mdsId = sets[0]?.id;
+            } catch(e) {
+                console.warn('Error while resolving primary mds', e);
+            }
+            if(!mdsId) {
+                mdsId = RestConstants.DEFAULT;
+            }
+        }
         const hasInitialized = await this.initMds(groupId, mdsId, repository, null, initialValues);
         if (!hasInitialized) {
             return null;
@@ -1212,7 +1229,15 @@ export class MdsEditorInstanceService implements OnDestroy {
         const availableWidgets = mdsDefinition.widgets
             .filter((widget) => views.some((view) => view.html.indexOf(widget.id) !== -1))
             .filter((widget) => this.meetsCondition(widget, nodes, values, false));
-        const variables = await this.config.getVariables().pipe(first()).toPromise();
+        // add all native widgets so they get parsed properly if they have inline attributes
+        for(const key of Object.keys(NativeWidgetType)) {
+            if(!availableWidgets.find(w => w.id === (NativeWidgetType as any)[key])) {
+                availableWidgets.push({
+                    id: (NativeWidgetType as any)[key],
+                });
+            }
+        }
+        const variables = await this.config.observeVariables().pipe(first()).toPromise();
         for (const view of views) {
             for (let widgetDefinition of this.getWidgetsForView(availableWidgets, view)) {
                 widgetDefinition = parseAttributes(view.html, widgetDefinition);
@@ -1500,7 +1525,11 @@ export class MdsEditorInstanceService implements OnDestroy {
             widget.definition.id,
             widget.getValue()
         );
-        nodes[0].properties[widget.definition.id] = widget.getValue();
+        if(widget.getValue()?.length) {
+            nodes[0].properties[widget.definition.id] = widget.getValue();
+        } else {
+            delete nodes[0].properties[widget.definition.id];
+        }
         this.nodes$.next(nodes);
     }
 }

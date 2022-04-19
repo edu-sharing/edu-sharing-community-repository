@@ -52,6 +52,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.*;
@@ -103,18 +104,26 @@ public class LTIApi {
                 this.logger.info("OIDC launch received with " + loginRequest.toString());
             }
             final URI uri = new URI(loginRequest.getTarget_link_uri());
-			/* commented in local because localhost resolves to 0:0:0:0
-			if (!uri.getHost().equals(request.getRemoteHost())) {
-				throw new ServletException("Bad request");
+			/* commented in local because localhost resolves to 0:0:0:0*/
+            String host = uri.getHost();
+			String remoteHost = new URI(req.getRequestURL().toString()).getHost();
+
+            logger.info("host:" + host + " remoteHost:"+remoteHost);
+            if (!host.equals(remoteHost)) {
+				throw new Exception("Bad request target uri host:" + host +" remoteHost:"+remoteHost);
 			}
-			*/
+
 
             // do the redirection
             String authRequest = tool.getOidcAuthUrl(loginRequest);
 
             /**
              * fix: when it's an LtiResourceLinkRequest moodle sends rendering url (/edu-sharing/components/render)
-             * as targetUrl. edu.uoc.elc.lti.tool.Tool take this url for redirect_url which is wrong
+             * as targetUrl. edu.uoc.elc.lti.tool.Tool take this url for redirect_url which is wrong.
+             * moodle validates redirect url against config redirecturl which would fail with nodeId
+             *
+             * we can not detect if it will be an ResourceLink or Deeplink call here.
+             * This fix is only for ResourceLink calls. Deeplinks use the same redirect url so this is ok here.
              */
             authRequest = UrlTool.removeParam(authRequest,"redirect_uri");
             authRequest = UrlTool.setParam(authRequest,"redirect_uri",ApplicationInfoList.getHomeRepository().getClientBaseUrl()+"/rest/lti/v13/" + LTIConstants.LTI_TOOL_REDIRECTURL_PATH);
@@ -178,7 +187,7 @@ public class LTIApi {
 
 
     @POST
-    @Path("/" + LTIConstants.LTI_TOOL_REDIRECTURL_PATH)
+    @Path("/" + LTIConstants.LTI_TOOL_REDIRECTURL_PATH  )
     @Operation(summary = "lti tool redirect.", description = "lti tool redirect")
 
     @Consumes({ "application/x-www-form-urlencoded" })
@@ -195,53 +204,90 @@ public class LTIApi {
                         @Parameter(description = "Issuer of the request, will be validated",required=true) @FormParam("state") String state,
                         @Context HttpServletRequest req){
         logger.info("id_token:"+idToken +" state:"+state);
-
-
         try{
-            if(state == null) {
-                throw new IllegalStateException("no state param provided");
-            }
+            return ltiLaunch(idToken, state, req, null);
+        }catch(Exception e){
+            logger.error(e.getMessage(),e);
+            return processError(req,e,"LTI_ERROR");
+        }
+    }
 
-            if (idToken == null) {
-                String message = "The request is not a LTI request, so no credentials at all. Returning current credentials";
-                this.logger.error(message);
-                throw new IllegalStateException(message);
-            }
+    @POST
+    @Path("/" + LTIConstants.LTI_TOOL_REDIRECTURL_PATH +"/{nodeId}"  )
+    @Operation(summary = "lti tool resource link target.", description = "used by some platforms for direct (without oidc login_init) launch requests")
 
-            /**
-             * get claims cause we need clientId,deploymentId,iss for applicationinfo of plattform to instance tool
-             * token will be validated with public key of the platform app
-             * @TODO use keyset url
-             */
-            LTIJWTUtil ltijwtUtil = new LTIJWTUtil();
-            Jws<Claims> jws = ltijwtUtil.validateJWT(idToken);
+    @Consumes({ "application/x-www-form-urlencoded" })
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class)))
+            })
+    public Response ltiTarget(@Parameter(description = "Issuer of the request, will be validated",required=true) @FormParam("id_token") String idToken,
+                        @Parameter(description = "Issuer of the request, will be validated",required=true) @FormParam("state") String state,
+                        @Parameter(description = "edu-sharing node id",required = true) @PathParam("nodeId") String nodeId,
+                        @Context HttpServletRequest req){
+        logger.info("id_token:"+idToken +" state:"+state +" nodeId:" + nodeId);
+        try{
+            return ltiLaunch(idToken, state, req, nodeId);
+        }catch(Exception e){
+            logger.error(e.getMessage(),e);
+            return processError(req,e,"LTI_ERROR");
+        }
+    }
 
-            /**
-             * validate nonce
-             */
-            String nonce = jws.getBody().get("nonce", String.class);
-            String sessionNonce = new HttpSessionOIDCLaunchSession(req).getNonce();
-            if(!nonce.equals(sessionNonce)){
-                throw new IllegalStateException("nonce is invalid");
-            }
+    private Response ltiLaunch(String idToken, String state, HttpServletRequest req, String nodeId) throws Exception {
+        if(state == null) {
+            throw new IllegalStateException("no state param provided");
+        }
 
-            Tool tool = Config.getTool(ltijwtUtil.getPlatform(),req,false);
+        if (idToken == null || !StringUtils.hasText(idToken)) {
+            String message = "The request is not a LTI request, so no credentials at all. Returning current credentials";
+            this.logger.error(message);
+            throw new IllegalStateException(message);
+        }
 
-            /**
-             * Launch validation: validates authentication response, and specific message(deeplink,....) validation
-             * https://www.imsglobal.org/spec/security/v1p0/#authentication-response-validation
-             */
-            tool.validate(idToken, state);
-            if (!tool.isValid()) {
-                logger.error(tool.getReason());
-                throw new IllegalStateException(tool.getReason());
-            }
+        /**
+         * get claims cause we need clientId,deploymentId,iss for applicationinfo of plattform to instance tool
+         * token will be validated with public key of the platform app
+         * @TODO use keyset url
+         */
+        LTIJWTUtil ltijwtUtil = new LTIJWTUtil();
+        Jws<Claims> jws = ltijwtUtil.validateJWT(idToken);
 
-            //check version
-            String ltiVersion = jws.getBody().get(LTIConstants.LTI_VERSION, String.class);
-            if(!LTIConstants.LTI_VERSION_3.equals(ltiVersion)){
-                throw new Exception("lti version:" +ltiVersion +" not allowed");
-            }
+        if (jws == null) {
+            throw new IllegalStateException("jws is null");
+        }
+
+        /**
+         * validate nonce
+         */
+        String nonce = jws.getBody().get("nonce", String.class);
+        String sessionNonce = new HttpSessionOIDCLaunchSession(req).getNonce();
+        if(!nonce.equals(sessionNonce)){
+            throw new IllegalStateException("nonce is invalid");
+        }
+
+        Tool tool = Config.getTool(ltijwtUtil.getPlatform(), req,false);
+
+        /**
+         * Launch validation: validates authentication response, and specific message(deeplink,....) validation
+         * https://www.imsglobal.org/spec/security/v1p0/#authentication-response-validation
+         */
+        tool.validate(idToken, state);
+        if (!tool.isValid()) {
+            logger.error(tool.getReason());
+            throw new IllegalStateException(tool.getReason());
+        }
+
+        //check version
+        String ltiVersion = jws.getBody().get(LTIConstants.LTI_VERSION, String.class);
+        if(!LTIConstants.LTI_VERSION_3.equals(ltiVersion)){
+            throw new Exception("lti version:" +ltiVersion +" not allowed");
+        }
 
 
             /*List<String> sessionStates = (List<String>)req.getSession().getAttribute(LTIConstants.LTI_TOOL_SESS_ATT_STATE);
@@ -253,120 +299,113 @@ public class LTIApi {
                 throw new IllegalStateException("LTI request doesn't contains the expected state");
             }*/
 
+        //Now we validate the JWT token
 
 
+        /**
+         * safe to session for later usage
+         */
+        String ltiMessageType = jws.getBody().get(LTIConstants.LTI_MESSAGE_TYPE,String.class);
+        LTISessionObject ltiSessionObject = new LTISessionObject();
+        ltiSessionObject.setDeploymentId(jws.getBody().get(LTIConstants.LTI_DEPLOYMENT_ID,String.class));
+        ltiSessionObject.setIss(jws.getBody().get(LTIConstants.LTI_PARAM_ISS,String.class));
+        ltiSessionObject.setNonce(jws.getBody().get(LTIConstants.LTI_NONCE,String.class));
+        ltiSessionObject.setMessageType(ltiMessageType);
+        ltiSessionObject.setEduSharingAppId(new RepoTools().getAppId(ltiSessionObject.getIss(),
+                jws.getBody().getAudience(),
+                ltiSessionObject.getDeploymentId()));
 
-            if(StringUtils.hasText(idToken)){
-                //Now we validate the JWT token
-                if (jws != null) {
-
-
-
-                    /**
-                     * safe to session for later usage
-                     */
-                    String ltiMessageType = jws.getBody().get(LTIConstants.LTI_MESSAGE_TYPE,String.class);
-                    LTISessionObject ltiSessionObject = new LTISessionObject();
-                    ltiSessionObject.setDeploymentId(jws.getBody().get(LTIConstants.LTI_DEPLOYMENT_ID,String.class));
-                    ltiSessionObject.setIss(jws.getBody().get(LTIConstants.LTI_PARAM_ISS,String.class));
-                    ltiSessionObject.setNonce(jws.getBody().get(LTIConstants.LTI_NONCE,String.class));
-                    ltiSessionObject.setMessageType(ltiMessageType);
-                    ltiSessionObject.setEduSharingAppId(new RepoTools().getAppId(ltiSessionObject.getIss(),
-                            jws.getBody().getAudience(),
-                            ltiSessionObject.getDeploymentId()));
-
-                    Map<String,Object> context = jws.getBody().get(LTIConstants.DEEP_LINK_CONTEXT, Map.class);
-                    if(context != null){
-                        String courseId = (String)context.get("id");
-                        if (courseId != null) {
-                            ltiSessionObject.setContextId(courseId);
-                        }
-                    }
-
-
-                    /**
-                     * edu-sharing authentication
-                     */
-                    if(!ltiMessageType.equals(LTIConstants.LTI_MESSAGE_TYPE_DEEP_LINKING) &&
-                            !ApplicationInfoList.getRepositoryInfoById(ltiSessionObject.getEduSharingAppId()).isLtiSyncReaders()){
-                        //authenticationComponent.setCurrentUser(AuthorityServiceImpl.PROXY_USER);
-                        RepoTools.authenticate(req,
-                                RepoTools.mapToSSOMap(CCConstants.PROXY_USER, null, null, null));
-                    }else{
-                        String user = jws.getBody().getSubject();
-                        Map<String,String> ext = ( Map<String,String>)jws.getBody().get("https://purl.imsglobal.org/spec/lti/claim/ext",Map.class);
-                        if(ext != null){
-                            if(ext.containsKey("user_username")){
-                                String tmpUser = ext.get("user_username");
-                                if(tmpUser != null && !tmpUser.trim().isEmpty()){
-                                    user = tmpUser;
-                                }
-                            }
-                        }
-                        user = user+"@"+jws.getBody().getIssuer();
-
-                        String name = jws.getBody().get(LTIConstants.LTI_NAME, String.class);
-                        String familyName = jws.getBody().get(LTIConstants.LTI_FAMILY_NAME, String.class);
-                        String givenName = jws.getBody().get(LTIConstants.LTI_GIVEN_NAME, String.class);
-                        String email = jws.getBody().get(LTIConstants.LTI_EMAIL, String.class);
-
-                        String authenticatedUsername = RepoTools.authenticate(req,
-                                RepoTools.mapToSSOMap(user, givenName, familyName, email));
-                    }
-
-                    /**
-                     * @TODO: what happens when user is using the sames session within two browser windows
-                     * maybe use list of LTISessionObject's
-                     */
-                    req.getSession().setAttribute(LTISessionObject.class.getName(),ltiSessionObject);
-
-                    if(ltiMessageType.equals(LTIConstants.LTI_MESSAGE_TYPE_DEEP_LINKING)){
-                        if(jws.getBody().containsKey(LTIConstants.DEEP_LINKING_SETTINGS)){
-                            Map deepLinkingSettings = jws.getBody().get(LTIConstants.DEEP_LINKING_SETTINGS, Map.class);
-                            ltiSessionObject.setDeepLinkingSettings(deepLinkingSettings);
-                        }
-                        /**
-                         * @TODO check if this kind of redirect works
-                         */
-
-                        //return Response.status(302).location(new URI(ApplicationInfoList.getHomeRepository().getClientBaseUrl()+"/edu-sharing/components/search")).build();
-                        return Response.seeOther(new URI(ApplicationInfoList.getHomeRepository().getClientBaseUrl()+"/components/search")).build();
-                        //return Response.temporaryRedirect(new URI("/edu-sharing/components/search")).build();
-                    }else if(ltiMessageType.equals(LTIConstants.LTI_MESSAGE_TYPE_RESOURCE_LINK)){
-                        //rendering stuff
-                        /**
-                         * @TODO check for launch_presentation
-                         * "https://purl.imsglobal.org/spec/lti/claim/launch_presentation": {
-                         *     "locale": "en",
-                         *     "document_target": "iframe",
-                         *     "return_url": "http://localhost/moodle/mod/lti/return.php?course=2&launch_container=3&instanceid=1&sesskey=q6noraEPlA"
-                         *   }
-                         */
-                        String targetLink = jws.getBody().get(LTIConstants.LTI_TARGET_LINK_URI, String.class);
-                        String[] splitted = targetLink.split("/");
-                        String nodeId = splitted[splitted.length -1].split("\\?")[0];
-                        if(ApplicationInfoList.getRepositoryInfoById(ltiSessionObject.getEduSharingAppId()).isLtiUsagesEnabled()){
-                            Usage usage = usageService.getUsage(ltiSessionObject.getEduSharingAppId(), ltiSessionObject.getContextId(), nodeId, null);
-                            if(usage != null){
-                                req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, nodeId);
-                            }
-                        }
-                        return Response.seeOther(new URI(targetLink)).build();
-                        //return Response.temporaryRedirect(new URI(targetLink)).build();
-                    }else{
-                        String message = "can not handle message type:" + ltiMessageType;
-                        logger.error(message);
-                        throw new Exception(message);
-                    }
-                }
+        Map<String,Object> context = jws.getBody().get(LTIConstants.DEEP_LINK_CONTEXT, Map.class);
+        if(context != null){
+            String courseId = (String)context.get("id");
+            if (courseId != null) {
+                ltiSessionObject.setContextId(courseId);
             }
-        }catch(Exception e){
-            logger.error(e.getMessage(),e);
-            return processError(req,e,"LTI_ERROR");
         }
 
 
-        return Response.status(Response.Status.OK).build();
+        /**
+         * edu-sharing authentication
+         */
+        if(!ltiMessageType.equals(LTIConstants.LTI_MESSAGE_TYPE_DEEP_LINKING) &&
+                !ApplicationInfoList.getRepositoryInfoById(ltiSessionObject.getEduSharingAppId()).isLtiSyncReaders()){
+            //authenticationComponent.setCurrentUser(AuthorityServiceImpl.PROXY_USER);
+            RepoTools.authenticate(req,
+                    RepoTools.mapToSSOMap(CCConstants.PROXY_USER, null, null, null));
+        }else{
+            String user = jws.getBody().getSubject();
+            Map<String,String> ext = ( Map<String,String>)jws.getBody().get("https://purl.imsglobal.org/spec/lti/claim/ext",Map.class);
+            if(ext != null){
+                if(ext.containsKey("user_username")){
+                    String tmpUser = ext.get("user_username");
+                    if(tmpUser != null && !tmpUser.trim().isEmpty()){
+                        user = tmpUser;
+                    }
+                }
+            }
+            user = user+"@"+jws.getBody().getIssuer();
+
+            String name = jws.getBody().get(LTIConstants.LTI_NAME, String.class);
+            String familyName = jws.getBody().get(LTIConstants.LTI_FAMILY_NAME, String.class);
+            String givenName = jws.getBody().get(LTIConstants.LTI_GIVEN_NAME, String.class);
+            String email = jws.getBody().get(LTIConstants.LTI_EMAIL, String.class);
+
+            String authenticatedUsername = RepoTools.authenticate(req,
+                    RepoTools.mapToSSOMap(user, givenName, familyName, email));
+        }
+
+        /**
+         * @TODO: what happens when user is using the sames session within two browser windows
+         * maybe use list of LTISessionObject's
+         */
+        req.getSession().setAttribute(LTISessionObject.class.getName(),ltiSessionObject);
+
+        if(ltiMessageType.equals(LTIConstants.LTI_MESSAGE_TYPE_DEEP_LINKING)){
+            if(jws.getBody().containsKey(LTIConstants.DEEP_LINKING_SETTINGS)){
+                Map deepLinkingSettings = jws.getBody().get(LTIConstants.DEEP_LINKING_SETTINGS, Map.class);
+                ltiSessionObject.setDeepLinkingSettings(deepLinkingSettings);
+            }
+            /**
+             * @TODO check if this kind of redirect works
+             */
+
+            //return Response.status(302).location(new URI(ApplicationInfoList.getHomeRepository().getClientBaseUrl()+"/edu-sharing/components/search")).build();
+            return Response.seeOther(new URI(ApplicationInfoList.getHomeRepository().getClientBaseUrl()+"/components/search")).build();
+            //return Response.temporaryRedirect(new URI("/edu-sharing/components/search")).build();
+        }else if(ltiMessageType.equals(LTIConstants.LTI_MESSAGE_TYPE_RESOURCE_LINK)){
+            //rendering stuff
+            /**
+             * @TODO check for launch_presentation
+             * "https://purl.imsglobal.org/spec/lti/claim/launch_presentation": {
+             *     "locale": "en",
+             *     "document_target": "iframe",
+             *     "return_url": "http://localhost/moodle/mod/lti/return.php?course=2&launch_container=3&instanceid=1&sesskey=q6noraEPlA"
+             *   }
+             */
+
+            /**
+             * moodle uses redirect url which does not contain a nodeid
+             */
+            if(nodeId == null){
+                String ltiTargetLink = jws.getBody().get(LTIConstants.LTI_TARGET_LINK_URI, String.class);
+                String[] splitted = ltiTargetLink.split("/");
+                nodeId = splitted[splitted.length -1].split("\\?")[0];
+            }
+            String targetLink = ApplicationInfoList.getHomeRepository().getClientBaseUrl() + "/components/render/"+ nodeId +"?closeOnBack=true";
+
+            if(ApplicationInfoList.getRepositoryInfoById(ltiSessionObject.getEduSharingAppId()).isLtiUsagesEnabled()){
+                Usage usage = usageService.getUsage(ltiSessionObject.getEduSharingAppId(), ltiSessionObject.getContextId(), nodeId, null);
+                if(usage != null){
+                    req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, nodeId);
+                }
+            }
+            return Response.seeOther(new URI(targetLink)).build();
+            //return Response.temporaryRedirect(new URI(targetLink)).build();
+        }else{
+            String message = "can not handle message type:" + ltiMessageType;
+            logger.error(message);
+            throw new Exception(message);
+        }
     }
 
     private Response processError(HttpServletRequest req, Throwable e, String errorType){

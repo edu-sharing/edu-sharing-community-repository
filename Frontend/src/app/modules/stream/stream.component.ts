@@ -52,8 +52,7 @@ import {
     ListOptions, ListOptionsConfig, NodeEntriesDisplayType
 } from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 import {SelectionModel} from '@angular/cdk/collections';
-import { StreamEntry } from 'projects/edu-sharing-api/src/lib/api/models';
-import { StreamV1Service } from 'projects/edu-sharing-api/src/lib/api/services';
+import { StreamEntry, StreamV1Service } from 'ngx-edu-sharing-api';
 
 
 @Component({
@@ -102,7 +101,7 @@ export class StreamComponent implements AfterViewInit {
             // this.updateDataFromJSON(STREAM_STATUS.OPEN);
             this.streams = this.streams.filter((n) => n.id !== node.id);
             this.toast.toast('STREAM.TOAST.MARKED');
-        }, error => console.log(error));
+        });
     });
 
     removeOption = new OptionItem('STREAM.OBJECT.OPTION.REMOVE', 'delete', (node: any) => {
@@ -195,7 +194,7 @@ export class StreamComponent implements AfterViewInit {
     }
 
     seen(id: any) {
-        this.updateStatus(id, STREAM_STATUS.READ).subscribe(data => this.getStreamDataByStatus(STREAM_STATUS.OPEN) , error => console.log(error));
+        this.updateStatus(id, STREAM_STATUS.READ).subscribe(data => this.getStreamDataByStatus(STREAM_STATUS.OPEN));
     }
     init() {
         this.streams = [];
@@ -216,7 +215,7 @@ export class StreamComponent implements AfterViewInit {
         this.getStreamData(curStat, sortWay).subscribe((data) => {
             this.streams = this.streams.concat(data.stream);
             this.updateMenu();
-        }, error => console.log(error));
+        });
     }
 
     toggleMenuOptions() {
@@ -312,7 +311,7 @@ export class StreamComponent implements AfterViewInit {
             this.isLoading = false;
             this.updateMenu();
             this.scrollToDown();
-        }, error => console.log(error));
+        });
         // }
 
     }
@@ -345,13 +344,7 @@ export class StreamComponent implements AfterViewInit {
         this.collectionNodes = nodes.nodes;
 
     }
-    private addToStore(nodes: any) {
-        this.globalProgress = true;
-        RestHelper.addToStore(nodes.nodes, this.bridge, this.iam, () => {
-            this.globalProgress = false;
-            this.mainNavRef.refreshNodeStore();
-        });
-    }
+
     public getStreamData(streamStatus: string, sortAscendingCreated: boolean = false) {
         return this.streamService.search1({
             repository: RestConstants.HOME_REPOSITORY,

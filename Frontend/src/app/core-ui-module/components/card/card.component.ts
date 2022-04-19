@@ -14,6 +14,7 @@ import { TranslateService } from '@ngx-translate/core';
 import {
     DialogButton, Group,
     Node,
+    Organization,
     RestHelper,
     UIService, UserSimple,
 } from '../../../core-module/core.module';
@@ -92,7 +93,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
      * Optional, bind a Node or Node-Array to this element
      * If this is used, the subtitle and avatar is automatically set depending on the given data
      */
-    @Input() set node(node: Node | Node[] | Group) {
+    @Input() set node(node: Node | Node[] | Group | Organization) {
         if (!node) {
             return;
         }
@@ -216,7 +217,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
             this.cardContainer &&
             this.cardContainer.nativeElement
         ) {
-            UIHelper.scrollSmoothElementToChild(
+            this.uiService.scrollSmoothElementToChild(
                 document.activeElement,
                 this.cardContainer.nativeElement,
             );
@@ -271,7 +272,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
         this.jumpmarkActive = jumpmark;
         this.shouldUpdateJumpmarkOnScroll = false;
         this.onScrollToJumpmark.emit(jumpmark);
-        await UIHelper.scrollSmoothElement(pos, this.cardContainer.nativeElement, 0.5);
+        await this.uiService.scrollSmoothElement(pos, this.cardContainer.nativeElement, 0.5);
         // Leave a little time for the last scroll event to propagate before enabling updates again.
         window.setTimeout(() => (this.shouldUpdateJumpmarkOnScroll = true), 20);
     }

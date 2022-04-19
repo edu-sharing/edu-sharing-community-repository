@@ -1,59 +1,81 @@
-<mat-tab-group>
+<mat-tab-group mat-stretch-tabs>
   <mat-tab label="{{'ADMIN.LTI.DYNAMIC' | translate}}">
-    <table *ngIf="tokens" mat-table [dataSource]="tokens.registrationLinks" class="mat-elevation-z8 demo-table">
-      <ng-container matColumnDef="url">
-        <th mat-header-cell *matHeaderCellDef> {{'ADMIN.LTI.URL' | translate}} </th>
-        <td mat-cell *matCellDef="let element"> {{element.url}} </td>
-      </ng-container>
+    <div class="lti-wrapper">
+      <es-info-message mode="info">
+        <span class="info-message">{{'ADMIN.LTI.DYNAMIC_INFO' | translate}}</span>
+      </es-info-message>
+      <table *ngIf="tokens" mat-table [dataSource]="tokens.registrationLinks">
+        <ng-container matColumnDef="url">
+          <th mat-header-cell *matHeaderCellDef> {{'ADMIN.LTI.URL' | translate}} </th>
+          <td [ngStyle]="{'text-decoration': !element.valid ? 'line-through' : 'none' }" mat-cell *matCellDef="let element"> {{element.url}} </td>
+        </ng-container>
 
-      <ng-container matColumnDef="tsCreated">
-        <th mat-header-cell *matHeaderCellDef> {{'ADMIN.LTI.TS' | translate}} </th>
-        <td mat-cell *matCellDef="let element"> {{element.tsCreated | date: 'yyyy-MM-dd hh:mm'}}</td>
-      </ng-container>
+        <ng-container matColumnDef="tsExpiry">
+          <th mat-header-cell *matHeaderCellDef> {{'ADMIN.LTI.TS' | translate}} </th>
+          <td mat-cell *matCellDef="let element"> {{element.tsExpiry | formatDate:{useRelativeLabels:false, time:true} }}</td>
+        </ng-container>
 
-      <ng-container matColumnDef="delete">
-        <th mat-header-cell *matHeaderCellDef> </th>
-        <td mat-cell *matCellDef="let element">
-          <div class="delete"><button mat-icon-button color="primary" (click)="remove(element)"><i esIcon="delete" class="clickable"></i></button></div>
-        </td>
-      </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
-    <button mat-raised-button (click)="generate()"><i esIcon="add"></i>{{'ADMIN.LTI.GENERATE' | translate}}</button>
+        <ng-container matColumnDef="registeredAppId">
+          <th mat-header-cell *matHeaderCellDef> {{'ADMIN.APPLICATIONS.ID' | translate}} </th>
+          <td mat-cell *matCellDef="let element"> {{(!element.registeredAppId) ? '-' : element.registeredAppId}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="copy">
+          <th mat-header-cell *matHeaderCellDef> </th>
+          <td mat-cell *matCellDef="let element">
+            <div class="copy"><button mat-icon-button color="primary" (click)="copyUrl(element)"><i esIcon="content_copy"></i></button></div>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="delete">
+          <th mat-header-cell *matHeaderCellDef> </th>
+          <td mat-cell *matCellDef="let element">
+            <div class="delete"><button mat-icon-button color="primary" (click)="remove(element)"><i esIcon="delete"></i></button></div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+      <button mat-flat-button color="primary" (click)="generate()"><i esIcon="add"></i>{{'ADMIN.LTI.GENERATE' | translate}}</button>
+    </div>
   </mat-tab>
   <mat-tab label="{{'ADMIN.LTI.ADVANCED' | translate}}">
-    <div class="base-fields">
-      <mat-form-field>
-        <mat-label>{{'ADMIN.LTI.DATA.platformId' | translate}}</mat-label>
-        <input matInput [(ngModel)]="platformId">
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>{{'ADMIN.LTI.DATA.client_id' | translate}}</mat-label>
-        <input matInput [(ngModel)]="clientId">
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>{{'ADMIN.LTI.DATA.deployment_id' | translate}}</mat-label>
-        <input matInput [(ngModel)]="deploymentId">
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>{{'ADMIN.LTI.DATA.authentication_request_url' | translate}}</mat-label>
-        <input matInput [(ngModel)]="authenticationRequestUrl">
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>{{'ADMIN.LTI.DATA.keyset_url' | translate}}</mat-label>
-        <input matInput [(ngModel)]="keysetUrl">
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>{{'ADMIN.LTI.DATA.key_id' | translate}}</mat-label>
-        <input matInput [(ngModel)]="keyId">
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>{{'ADMIN.LTI.DATA.auth_token_url' | translate}}</mat-label>
-        <input matInput [(ngModel)]="authTokenUrl">
-      </mat-form-field>
+    <div class="lti-wrapper">
+      <es-info-message mode="info">
+        <span class="info-message">{{'ADMIN.LTI.MANUAL_INFO' | translate}}</span>
+      </es-info-message>
+      <div class="base-fields">
+        <mat-form-field floatLabel="always">
+          <mat-label>{{'ADMIN.LTI.DATA.platformId' | translate}}</mat-label>
+          <input matInput [(ngModel)]="platformId" placeholder="https://localhost.localdomain/moodle">
+        </mat-form-field>
+        <mat-form-field floatLabel="always">
+          <mat-label>{{'ADMIN.LTI.DATA.client_id' | translate}}</mat-label>
+          <input matInput [(ngModel)]="clientId" placeholder="LTEi6jcz3NltiFA">
+        </mat-form-field>
+        <mat-form-field floatLabel="always">
+          <mat-label>{{'ADMIN.LTI.DATA.deployment_id' | translate}}</mat-label>
+          <input matInput [(ngModel)]="deploymentId" placeholder="2">
+        </mat-form-field>
+        <mat-form-field floatLabel="always">
+          <mat-label>{{'ADMIN.LTI.DATA.authentication_request_url' | translate}}</mat-label>
+          <input matInput [(ngModel)]="authenticationRequestUrl" placeholder="https://localhost.localdomain/moodle/mod/lti/auth.php">
+        </mat-form-field>
+        <mat-form-field floatLabel="always">
+          <mat-label>{{'ADMIN.LTI.DATA.keyset_url' | translate}}</mat-label>
+          <input matInput [(ngModel)]="keysetUrl" placeholder="https://localhost.localdomain/moodle/mod/lti/certs.php">
+        </mat-form-field>
+        <mat-form-field floatLabel="always">
+          <mat-label>{{'ADMIN.LTI.DATA.key_id' | translate}}</mat-label>
+          <input matInput [(ngModel)]="keyId" placeholder="e079a4884780ac1dfd16">
+        </mat-form-field>
+        <mat-form-field floatLabel="always">
+          <mat-label>{{'ADMIN.LTI.DATA.auth_token_url' | translate}}</mat-label>
+          <input matInput [(ngModel)]="authTokenUrl" placeholder='https://localhost.localdomain/moodle/mod/lti/token.php'>
+        </mat-form-field>
+      </div>
+      <button mat-raised-button color="primary" (click)="saveAdvanced()">{{'ADMIN.LTI.SAVE' | translate}}</button>
     </div>
-    <button mat-raised-button color="primary" (click)="saveAdvanced()">{{'ADMIN.MEDIACENTER.SAVE' | translate}}</button>
   </mat-tab>
 </mat-tab-group>

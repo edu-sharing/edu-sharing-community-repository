@@ -111,4 +111,9 @@ public class SearchServiceAdapter implements SearchService {
 	public Set<SearchVCard> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind contributorKind) throws IOException {
 		return new HashSet<>();
 	}
+
+	@Override
+	public SearchResultNodeRef getMetadata(List<String> nodeIds) throws IOException {
+		return null;
+	}
 }

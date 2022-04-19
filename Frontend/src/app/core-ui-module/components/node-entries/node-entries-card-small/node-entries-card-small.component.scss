@@ -17,6 +17,7 @@ $collectionIconSize: 25px;
 }
 
 .grid-card {
+    cursor: pointer;
     &.grid-card-collection {
         // default fallback color
         background-color: $primaryMediumLight;

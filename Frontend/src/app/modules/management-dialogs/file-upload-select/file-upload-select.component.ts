@@ -77,7 +77,7 @@ export class WorkspaceFileUploadSelectComponent  {
   }
   @Output() parentChange = new EventEmitter();
   @Output() onCancel= new EventEmitter();
-  @Output() onFileSelected= new EventEmitter();
+  @Output() onFileSelected= new EventEmitter<FileList>();
   @Output() onLinkSelected= new EventEmitter<LinkData>();
 
   public cancel(){
@@ -86,7 +86,7 @@ export class WorkspaceFileUploadSelectComponent  {
   public selectFile(){
     this.file.nativeElement.click();
   }
-  public onDrop(fileList: any){
+  public onDrop(fileList: FileList){
       this.onFileSelected.emit(fileList);
   }
   public async filesSelected(event: any) {
@@ -153,7 +153,7 @@ export class WorkspaceFileUploadSelectComponent  {
     private toast: Toast,
   ){
     this.setState('');
-    this.iamService.getUser().subscribe((user) => {
+    this.iamService.getCurrentUserAsync().then((user) => {
       this.user = user;
     });
   }

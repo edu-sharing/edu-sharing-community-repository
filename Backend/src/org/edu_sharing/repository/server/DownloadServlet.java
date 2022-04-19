@@ -16,7 +16,6 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.util.TempFileProvider;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -134,7 +133,22 @@ public class DownloadServlet extends HttpServlet{
 			}
 			if(is==null || is.available()==0){
 				if(mode.equals(Mode.passthrough)) {
-					is = getStreamFromLocation(nodeId);
+					Throwable throwable = handleStreamFromLocation(nodeId, new HttpQueryTool.Callback<Throwable>() {
+						@Override
+						public void handle(InputStream is) {
+							try {
+								setHeaders(resp, name);
+								//resp.setHeader("Content-Length",""+is.available());
+								StreamUtils.copy(is, bufferOut);
+							} catch (Throwable e) {
+								this.setResult(e);
+							}
+						}
+					});
+					if(throwable != null){
+						throw throwable;
+					}
+					return;
 				}
 				else if(mode.equals(Mode.redirect)){
 					resp.sendRedirect(nodeService.getProperty(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(),CCConstants.LOM_PROP_TECHNICAL_LOCATION));
@@ -156,12 +170,12 @@ public class DownloadServlet extends HttpServlet{
 	 * @param nodeId
 	 * @return
 	 */
-	private InputStream getStreamFromLocation(String nodeId) {
+	private Throwable handleStreamFromLocation(String nodeId,HttpQueryTool.Callback<Throwable> callback) {
 		String location = NodeServiceHelper.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), CCConstants.LOM_PROP_TECHNICAL_LOCATION);
 		if(location==null)
 			return null;
-		Map<String, String> headers=new HashMap<>();
-		return new HttpQueryTool().getStream(location);
+		new HttpQueryTool().queryStream(location,callback);
+		return callback.getResult();
 	}
 	private static String checkAndGetCollectionRef(String nodeId){
 		NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);

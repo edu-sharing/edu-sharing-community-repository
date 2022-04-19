@@ -2,11 +2,18 @@
   <div class="duration-group">
     <mat-form-field>
       <mat-label>{{'INPUT_HOURS' | translate}}</mat-label>
-      <input matInput type="number" min="0" [max]="sliderOptions.ceil/60 - 1" [(ngModel)]="hours" (ngModelChange)="update('input')">
+      <input matInput type="number" min="0"
+             [disabled]="sliderOptions.disabled"
+             [max]="sliderOptions.ceil/60 - 1"
+             [(ngModel)]="hours"
+             (ngModelChange)="update('input')">
     </mat-form-field>
     <mat-form-field>
       <mat-label>{{'INPUT_MINUTES' | translate}}</mat-label>
-      <input matInput type="number" min="0" max="59" [(ngModel)]="minutes" (ngModelChange)="update('input')">
+      <input matInput type="number" min="0" max="59"
+             [disabled]="sliderOptions.disabled"
+             [(ngModel)]="minutes"
+             (ngModelChange)="update('input')">
     </mat-form-field>
     <ngx-slider
             class="ngx-slider-small"

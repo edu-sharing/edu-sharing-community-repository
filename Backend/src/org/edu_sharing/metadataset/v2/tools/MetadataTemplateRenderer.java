@@ -136,7 +136,7 @@ public class MetadataTemplateRenderer {
 	private String renderTemplate(MetadataTemplate template) throws IllegalArgumentException {
 		String html="";
 		if(renderingMode.equals(RenderingMode.HTML)) {
-			html += "<div class='mdsGroup'>" + "<h2 class='mdsCaption " + template.getId() + "'>" + template.getCaption() + "</h2>" + "<div class='mdsContent'>";
+			html += "<div class='mdsGroup mdsGroup-" + template.getId() + "'>" + "<h2 class='mdsCaption " + template.getId() + "'>" + template.getCaption() + "</h2>" + "<div class='mdsContent'>";
 		}
 		String content=template.getHtml();
 		for(MetadataWidget srcWidget : mds.getWidgets()){
@@ -191,6 +191,7 @@ public class MetadataTemplateRenderer {
 					empty = renderCollectionFeedback(widget, widgetHtml);
 					wasEmpty = empty;
 				} else {
+					int i = 0;
 					for (String value : values) {
 						String rawValue = value;
 						HashMap<String, Object> vcardData = null;
@@ -278,7 +279,7 @@ public class MetadataTemplateRenderer {
 						}
 						if (value == null || value.trim().isEmpty())
 							continue;
-						value = renderWidgetValue(widget, value);
+						value = renderWidgetValue(widget, value, i);
 						boolean isLink = false;
 						// do not use global link for vcard, they handle links seperately
 						if (!widget.getType().equals("vcard") && widget.getLink() != null && !widget.getLink().isEmpty() && renderingMode.equals(RenderingMode.HTML)) {
@@ -357,6 +358,7 @@ public class MetadataTemplateRenderer {
 								widgetHtml.append("</a>");
 							}
 						}
+						i++;
 					}
 				}
 				if (renderingMode.equals(RenderingMode.HTML)) {
@@ -452,7 +454,7 @@ public class MetadataTemplateRenderer {
 				widgetHtml.append("<div class='mdsValue'>");
 				for (MetadataWidget.Subwidget subwidget : widget.getSubwidgets()) {
 					try {
-						widgetHtml.append(renderWidgetValue(mds.findWidget(subwidget.getId()), properties.get(subwidget.getId())[i])).append(" ");
+						widgetHtml.append(renderWidgetValue(mds.findWidget(subwidget.getId()), properties.get(subwidget.getId())[i], i)).append(" ");
 					} catch (IndexOutOfBoundsException | NullPointerException e) {
 						logger.warn("Sub widget " + subwidget.getId() + " can not be rendered (main widget " + widget.getId() + "): The array values of the sub widgets do not match up", e);
 					}
@@ -513,11 +515,11 @@ public class MetadataTemplateRenderer {
 		}
 		return empty;
 	}
-	private String renderWidgetValue(MetadataWidget widget,String value){
+	private String renderWidgetValue(MetadataWidget widget,String value, int index){
 		if(widget.getType()!=null){
 			if(widget.getType().equals("date")){
 				try{
-					Date dateValue = new DateTool().getDate(value);
+					Date dateValue = new DateTool().getDate(properties.get(widget.getId() + CCConstants.LONG_DATE_SUFFIX)[index]);
 					if(widget.getFormat()!=null && !widget.getFormat().isEmpty()){
 						value=new SimpleDateFormat(widget.getFormat()).format(dateValue);
 					}

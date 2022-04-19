@@ -13,10 +13,11 @@
                     *ngFor="let g of groups"
                     (click)="select(g)"
                     [class.selected]="g===group"
+                    [class.is-member]="isMemberOf(g)"
             >
         <es-authority-row
                 [authority]="g"
-                secondaryTitle="{{'SIGNUP_GROUP.SIGNUP_TYPE.' + g.signupMethod | translate}}"
+                [secondaryTitle]="(isMemberOf(g) ? 'SIGNUP_GROUP.ALREADY_MEMBER' : ('SIGNUP_GROUP.SIGNUP_TYPE.' + g.signupMethod)) | translate"
         ></es-authority-row>
             </button>
         </ng-container>

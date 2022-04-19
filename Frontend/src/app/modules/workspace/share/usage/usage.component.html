@@ -2,7 +2,7 @@
     <div class="container">
         <div class="icon"><i class="type material-icons">{{getIcon()}}</i></div>
         <div class="name">
-            <span class="primary">{{('WORKSPACE.SHARE.USAGE_TYPE.'+name.toUpperCase()) | translate}} ({{usages.length}})</span>
+            <span class="primary">{{('WORKSPACE.SHARE.USAGE_TYPE.'+name.toUpperCase()) | translate:{fallback:name} }} ({{usages.length}})</span>
             <i class="material-icons clickable toggle" (click)="showAll=!showAll">{{showAll ? 'keyboard_arrow_down' : 'keyboard_arrow_right'}}</i>
         </div>
         <!--<div class="remove clickable" tabindex="0" (keyup.enter)="removeAll()" (click)="removeAll()" [class.opacity-invisible]="!showDelete">

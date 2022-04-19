@@ -4,6 +4,7 @@ import { distinctUntilChanged, map, shareReplay, startWith, switchMap } from 'rx
 import { ApiRequestConfiguration } from '../api-request-configuration';
 import * as apiModels from '../api/models';
 import { ConfigV1Service } from '../api/services';
+import { switchReplay } from '../utils/switch-replay';
 
 export type ClientConfig = apiModels.Values;
 export type Variables = apiModels.Variables['current'];
@@ -23,15 +24,13 @@ export class ConfigService {
 
     private readonly config$ = this.updateTrigger.pipe(
         startWith(void 0 as void),
-        switchMap(() => this.configV1.getConfig1()),
+        switchReplay(() => this.configV1.getConfig1()),
         map((config) => config.current ?? null),
-        shareReplay(1),
     );
     private readonly variables$ = this.updateTrigger.pipe(
         startWith(void 0 as void),
-        switchMap(() => this.configV1.getVariables()),
+        switchReplay(() => this.configV1.getVariables()),
         map((variables) => variables.current ?? null),
-        shareReplay(1),
     );
     private readonly defaultTranslations$ = this.localeSubject.pipe(
         distinctUntilChanged(),
@@ -57,7 +56,7 @@ export class ConfigService {
      *
      * The observable will update on changes.
      */
-    getConfig({ forceUpdate = false } = {}): Observable<ClientConfig | null> {
+    observeConfig({ forceUpdate = false } = {}): Observable<ClientConfig | null> {
         if (forceUpdate) {
             this.updateTrigger.next();
         }
@@ -69,7 +68,7 @@ export class ConfigService {
      *
      * The observable will update on changes.
      */
-    getVariables(): Observable<Variables | null> {
+    observeVariables(): Observable<Variables | null> {
         return this.variables$;
     }
 
@@ -94,7 +93,7 @@ export class ConfigService {
      *
      * @returns a nested dictionary of default translations
      */
-    getDefaultTranslations(): Observable<TranslationsDict> {
+    observeDefaultTranslations(): Observable<TranslationsDict> {
         return this.defaultTranslations$;
     }
 
@@ -105,7 +104,7 @@ export class ConfigService {
      *
      * @returns a flat dictionary of translation overrides, key parts separated by "."
      */
-    getTranslationOverrides(): Observable<{ [key: string]: string } | null> {
+    observeTranslationOverrides(): Observable<{ [key: string]: string } | null> {
         return this.translationOverrides$;
     }
 }

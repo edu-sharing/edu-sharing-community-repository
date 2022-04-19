@@ -55,7 +55,7 @@ export class TranslationLoader implements TranslateLoader {
                     // Default to empty dictionary if we got nothing
                     map((translations) => translations || {}),
                 ),
-                translationOverrides: this.config.getTranslationOverrides().pipe(first()),
+                translationOverrides: this.config.observeTranslationOverrides().pipe(first()),
             })
             .pipe(
                 map(({ originalTranslations, translationOverrides }) =>
@@ -75,7 +75,7 @@ export class TranslationLoader implements TranslateLoader {
     private getOriginalTranslations(lang: string): Observable<Dictionary> {
         switch (this.getSource()) {
             case 'repository':
-                return this.config.getDefaultTranslations().pipe(first());
+                return this.config.observeDefaultTranslations().pipe(first());
             case 'local':
                 return this.mergeTranslations(this.fetchTranslations(lang));
         }

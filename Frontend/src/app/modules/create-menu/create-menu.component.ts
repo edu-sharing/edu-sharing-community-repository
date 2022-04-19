@@ -148,27 +148,9 @@ export class CreateMenuComponent {
         });
         this.connector.isLoggedIn(false).subscribe((login) => {
             if(login.statusCode === RestConstants.STATUS_CODE_OK) {
-                this.sessionStorage.get('defaultInboxFolder', RestConstants.INBOX).subscribe((id) => {
-                    this.nodeService
-                        .getNodeMetadata(id)
-                        .subscribe(node => {
-                            this.fallbackFolder = node.node;
-                        }, error => {
-                            console.warn('error resolving defaultInboxFolder', error);
-                            this.nodeService
-                                .getNodeMetadata(RestConstants.INBOX)
-                                .subscribe(node => {
-                                    this.fallbackFolder = node.node;
-                                });
-                        });
-                }, (error)=> {
-                    console.warn('error resolving defaultInboxFolder', error);
-                    this.nodeService
-                        .getNodeMetadata(RestConstants.INBOX)
-                        .subscribe(node => {
-                            this.fallbackFolder = node.node;
-                        });
-                });
+                this.nodeHelper.getDefaultInboxFolder().subscribe((n) =>
+                    this.fallbackFolder = n
+                );
             }
         });
         this.cardHasOpenModals$ = cardService.hasOpenModals.pipe(delay(0));

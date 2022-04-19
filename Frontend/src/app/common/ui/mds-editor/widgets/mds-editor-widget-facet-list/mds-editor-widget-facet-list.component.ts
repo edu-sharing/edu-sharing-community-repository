@@ -3,7 +3,7 @@ import { FormArray, FormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { FacetAggregation, FacetValue, SearchService } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { filter, takeUntil } from 'rxjs/operators';
+import { filter, finalize, takeUntil } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
@@ -55,12 +55,13 @@ export class MdsEditorWidgetFacetListComponent
         this.isLoading = true;
         this.search
             .loadMoreFacets(this.widget.definition.id, 10)
-            .finally(() => (this.isLoading = false));
+            .pipe(finalize(() => (this.isLoading = false)))
+            .subscribe();
     }
 
     private registerFacetValuesSubject(): void {
         this.search
-            .getFacet(this.widget.definition.id, { includeActiveFilters: true })
+            .observeFacet(this.widget.definition.id, { includeActiveFilters: true })
             .pipe(takeUntil(this.destroyed$))
             .subscribe((facetAggregation) => this.facetAggregationSubject.next(facetAggregation));
     }

@@ -129,7 +129,7 @@ public class PersonDao {
 	private final RepositoryDao repoDao;
 	
 	private final Map<String, Serializable> userInfo;
-	private final String homeFolderId;
+	private String homeFolderId;
 	private final List<String> sharedFolderIds = new ArrayList<String>();
 
 	private NodeService nodeService;
@@ -150,7 +150,6 @@ public class PersonDao {
 			this.repoDao = repoDao;
 
 			this.userInfo = authorityService.getUserInfo(userName);
-			this.homeFolderId = baseClient.getHomeFolderID(userName);
 
 			try{
 
@@ -556,7 +555,13 @@ public class PersonDao {
 		return (String[])this.userInfo.get(CCConstants.CM_PROP_PERSON_SKILLS);
 	}
 	public String getHomeFolder() {
-		
+		if(this.homeFolderId == null) {
+			try {
+				this.homeFolderId = baseClient.getHomeFolderID(getUserName());
+			}catch(Throwable t) {
+				throw new RuntimeException(t);
+			}
+		}
 		return this.homeFolderId;
 	}
 

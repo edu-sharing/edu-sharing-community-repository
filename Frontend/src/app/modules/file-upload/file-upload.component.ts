@@ -39,6 +39,7 @@ export class FileUploadComponent{
    constructor(
        private translate : TranslateService,
        private nodeHelper: NodeHelperService,
+       private connector: RestConnectorService,
        private configService : ConfigurationService,
        private storage : SessionStorageService,
        private temporaryStorage : TemporaryStorageService,
@@ -47,27 +48,31 @@ export class FileUploadComponent{
        private node : RestNodeService,
    ){
        Translation.initialize(this.translate,this.configService,this.storage,this.route).subscribe(()=> {
-           this.node.getNodeMetadata(RestConstants.USERHOME).subscribe((node)=>{
-               this.parent=node.node;
-               this.route.queryParams.subscribe((params)=>{
-                   this.reurl=params['reurl'];
-               });
-               this._showUploadSelect=true;
-               this.loading=false;
+           this.connector.isLoggedIn(false).subscribe((login) => {
+               if(login.statusCode === RestConstants.STATUS_CODE_OK) {
+                   this.nodeHelper.getDefaultInboxFolder().subscribe((n) => {
+                       this.parent = n;
+                       this.route.queryParams.subscribe((params)=>{
+                           this.reurl=params['reurl'];
+                       });
+                       this._showUploadSelect=true;
+                       this.loading=false;
+                   });
+               }
            });
        });
    }
 
-    uploadNodes(event: any) {
+    uploadNodes(event: FileList) {
         this._showUploadSelect=false;
         this.filesToUpload=event;
     }
-    onDone(node: Node){
+    onDone(node: Node[]){
        if(node==null){
            // canceled;
            this._showUploadSelect=true;
            return;
        }
-       this.nodeHelper.addNodeToLms(node,this.reurl);
+       this.nodeHelper.addNodeToLms(node[0],this.reurl);
     }
 }

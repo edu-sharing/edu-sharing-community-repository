@@ -83,7 +83,7 @@ export class ActionbarHelperService{
             return this.nodeHelper.allFiles(n) && n && n.length==1  && n[0].aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE)==-1 && RestNetworkService.allFromHomeRepo(n) && !this.connector.getCurrentLogin().isGuest;
         };
         option.enabledCallback = (node: Node) => {
-            return node.size > 0 && node.downloadUrl !== null;
+            return parseInt(node.size) > 0 && node.downloadUrl !== null;
         };
     }
     if (type === 'QR_CODE'){

@@ -51,7 +51,7 @@ import {
     RestToolService,
     RestUsageService,
     SessionStorageService,
-    TemporaryStorageService
+    TemporaryStorageService, UIService
 } from '../../../core-module/core.module';
 import {MdsHelper} from '../../../core-module/rest/mds-helper';
 import {ListTableComponent} from '../../../core-ui-module/components/list-table/list-table.component';
@@ -96,6 +96,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     }
     constructor(
       private translate : TranslateService,
+      private uiService : UIService,
       private tracking : RestTrackingService,
       private nodeHelper: NodeHelperService,
       private renderHelper: RenderHelperService,
@@ -152,7 +153,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                 } else {
                     this.list = this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST);
                 }
-              this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
+              this.connector.isLoggedIn(false).subscribe((data:LoginResult)=> {
                 this.isSafe=data.currentScope==RestConstants.SAFE_SCOPE;
                 if(params.version) {
                     this.version = params.version;
@@ -632,7 +633,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     scroll(direction: string) {
         const element = this.sequencediv.nativeElement;
         const width=window.innerWidth/2;
-        UIHelper.scrollSmoothElement(element.scrollLeft + (direction=='left' ? -width : width),element,2,'x').then((limit)=> {
+        this.uiService.scrollSmoothElement(element.scrollLeft + (direction=='left' ? -width : width),element,2,'x').then((limit)=> {
             this.setScrollparameters();
         });
     }
@@ -667,7 +668,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     }
 
     public switchNode(event : any) {
-        UIHelper.scrollSmooth();
+        this.uiService.scrollSmooth();
         this.node = event.node;
     }
 
