@@ -97,13 +97,13 @@ describe('TranslationLoader', () => {
                 expect(getConfigLanguageSpy.calls.count()).toBe(1);
             });
 
-            it('should call observeTranslationOverrides with correct locale', async () => {
-                const getConfigLanguageSpy = spyOn(
+            it('should call setLocale with correct locale', async () => {
+                const setLocaleSpy = spyOn(
                     config,
-                    'observeTranslationOverrides',
+                    'setLocale',
                 ).and.callThrough();
                 await callGetTranslation('de');
-                expect(getConfigLanguageSpy.calls.mostRecent().args).toEqual([
+                expect(setLocaleSpy.calls.mostRecent().args).toEqual([
                     'de_DE',
                 ]);
             });
@@ -298,13 +298,13 @@ describe('TranslationLoader', () => {
                 expect(getLanguageDefaultsSpy.calls.count()).toBe(1);
             });
 
-            it('should call observeDefaultTranslations with correct locale', async () => {
-                const getLanguageDefaultsSpy = spyOn(
+            it('should call setLocale with correct locale', async () => {
+                const setLocaleSpy = spyOn(
                     config,
-                    'observeDefaultTranslations',
+                    'setLocale',
                 ).and.callThrough();
                 await callGetTranslation('de');
-                expect(getLanguageDefaultsSpy.calls.mostRecent().args).toEqual([
+                expect(setLocaleSpy.calls.mostRecent().args).toEqual([
                     'de_DE',
                 ]);
             });
