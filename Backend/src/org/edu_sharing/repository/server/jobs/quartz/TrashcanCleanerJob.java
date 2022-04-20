@@ -15,13 +15,18 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 
+@JobDescription(description = "Cleanup trashcan ")
 public class TrashcanCleanerJob extends AbstractJob {
 
 	protected static final int DEFAULT_DAYS_TO_KEEP = -1;
 	protected static final int DEFAULT_DELETE_BATCH_COUNT = 1000;
 
+	@JobFieldDescription(description = "Days which should NOT be deleted, e.g. 30  -> keep the last 30 days (-1 -> Cleaning trashcan will be skipped )", sampleValue = "-1")
 	public int DAYS_TO_KEEP;
+	@JobFieldDescription(description = "How much nodes per run, e.g. 1000 ", sampleValue = "1000")
 	public int BATCH_COUNT;
 
 	@Override
