@@ -366,7 +366,7 @@ public class AdminApi {
 
 	@PUT
 	@Path("/applications/{xml}")
-
+	@Consumes({ "multipart/form-data" })
 	@Operation(summary = "edit any properties xml (like homeApplication.properties.xml)", description = "if the key exists, it will be overwritten. Otherwise, it will be created. You only need to transfer keys you want to edit")
 
 	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
