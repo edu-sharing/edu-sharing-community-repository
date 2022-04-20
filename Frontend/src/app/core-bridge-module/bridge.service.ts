@@ -7,7 +7,7 @@ import {MessageType} from "../core-module/ui/message-type";
 import {ModalDialogOptions} from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import {ProgressType} from '../common/ui/modal-dialog/modal-dialog.component';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class BridgeService {
     constructor(private injector : Injector,private cordova : CordovaService) {
 
