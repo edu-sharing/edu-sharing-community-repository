@@ -83,30 +83,39 @@
       </div>
       <div class="statsBackground">
         <div class="stats">
-          <div>
+          <a class="stat-link"
+             [class.disabled]="!canActivateLinks()"
+             [routerLink]="[ROUTER_PREFIX, componentType.Search]"
+             [queryParams]="getQueryParam(componentType.Workspace)">
             <div class="stat">
               {{'PROFILES.STATS.MATERIALS' | translate}}
             </div>
             <div class="value">
               {{ userStats?.nodeCount ?? '-' }}
             </div>
-          </div>
-          <div>
+          </a>
+          <a class="stat-link"
+             [class.disabled]="!canActivateLinks()"
+             [routerLink]="[ROUTER_PREFIX, componentType.Collections]"
+             [queryParams]="getQueryParam(componentType.Collections)">
             <div class="stat">
               {{'PROFILES.STATS.COLLECTIONS' | translate}}
             </div>
             <div class="value">
               {{ userStats?.collectionCount ?? '-' }}
             </div>
-          </div>
-          <div>
+          </a>
+          <a class="stat-link"
+             [class.disabled]="!canActivateLinks()"
+             [routerLink]="[ROUTER_PREFIX, componentType.Search]"
+             [queryParams]="getQueryParam(componentType.Search)">
             <div class="stat">
               {{'PROFILES.STATS.MATERIALS_CC' | translate}}
             </div>
             <div class="value">
               {{ userStats?.nodeCountCC ?? '-' }}
             </div>
-          </div>
+          </a>
         </div>
       </div>
       <div class="about">

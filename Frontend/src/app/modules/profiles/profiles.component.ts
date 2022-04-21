@@ -3,10 +3,10 @@ import {forkJoin as observableForkJoin, Observable} from 'rxjs';
 
 import {Component, ElementRef, ViewChild} from '@angular/core';
 import {Translation} from '../../core-ui-module/translation';
-import {ProfileSettings, SessionStorageService, UserStats} from '../../core-module/core.module';
+import {ProfileSettings,SessionStorageService,UIConstants,UserStats} from '../../core-module/core.module';
 import {TranslateService} from '@ngx-translate/core';
 import {DomSanitizer} from '@angular/platform-browser';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute, Params, Router, UrlTree} from '@angular/router';
 import {Toast} from '../../core-ui-module/toast';
 import {RestConnectorService} from '../../core-module/core.module';
 import {ConfigurationService} from '../../core-module/core.module';
@@ -23,6 +23,8 @@ import {Helper} from '../../core-module/rest/helper';
 import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {DefaultGroups, OptionGroup, OptionItem} from '../../core-ui-module/option-item';
 import {VCard} from '../../core-module/ui/VCard';
+import {LoginInfo} from 'ngx-edu-sharing-api';
+
 
 @Component({
   selector: 'es-profiles',
@@ -46,6 +48,7 @@ export class ProfilesComponent {
       route.params.subscribe((params)=> {
         this.editProfileUrl=this.config.instant('editProfileUrl');
         this.editProfile=this.config.instant('editProfile',true);
+        this.activateLinks = this.config.instant('activateProfileLinks', false);
         this.loadUser(params.authority);
         this.getProfileSetting(params.authority);
       });
@@ -58,6 +61,7 @@ export class ProfilesComponent {
     ];
   }
   private static PASSWORD_MIN_LENGTH = 5;
+  readonly ROUTER_PREFIX = '/' + UIConstants.ROUTER_PREFIX;
   public user: User;
   public userStats: UserStats;
   public userEdit: User;
@@ -68,9 +72,12 @@ export class ProfilesComponent {
   public editAbout = false;
   public oldPassword='';
   public password='';
+  public hasAccessWorkspace=false;
+  public componentType= ComponentType;
   // is editing allowed at all (via global config)
   editProfile: boolean;
   private editProfileUrl: string;
+  private activateLinks = false;
   avatarImage: any;
   profileSettings: ProfileSettings;
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
@@ -99,6 +106,7 @@ export class ProfilesComponent {
         GlobalContainerComponent.finishPreloading();
         this.iamService.getCurrentUserAsync().then((me)=> {
           this.isMe = profile.person.authorityName === me.person.authorityName;
+          this.canAccessWorkspace(login);
           if(this.isMe && login.isGuest) {
             RestHelper.goToLogin(this.router,this.config);
           }
@@ -246,5 +254,52 @@ export class ProfilesComponent {
   savePersistentIds() {
     this.saveEdits();
   }
+
+    /**
+     * Check if USER has permissions to activate the Links in statistics section
+     */
+    public canActivateLinks(): boolean {
+        return this.isMe && this.hasAccessWorkspace && this.activateLinks;
+    }
+
+    /**
+     * check if current user have access to workspace
+     * @param login params that contain all userPermission
+     */
+    private canAccessWorkspace(login: LoginInfo): void {
+        this.hasAccessWorkspace = (
+            login.toolPermissions &&
+            login.toolPermissions.indexOf(
+                RestConstants.TOOLPERMISSION_WORKSPACE,
+            ) !== -1
+        );
+    }
+
+
+    /**
+     * This function will build query return the Params for the URL
+     * @returns {Params} params for the URL
+     * @param {ComponentType} type of component to be used, it can be 'workspace' , 'search' or 'collections'
+     */
+    public getQueryParam(component: ComponentType): Params {
+        if (component === 'search') {
+            return {parameters: JSON.stringify({'cm:creator': [this.user.userName], license: ['CC_*']})};
+        } else if (component === 'workspace') {
+            return {parameters: JSON.stringify({'cm:creator': [this.user.userName]})};
+        } else if (component === 'collections') {
+            return {scope: 'MY'};
+        }
+        return {};
+    }
+
+}
+
+/**
+ * This enum is used to define the type of components to be used in the statistics section
+ */
+export enum ComponentType {
+    Search = 'search',
+    Workspace = 'workspace',
+    Collections = 'collections',
 }
 

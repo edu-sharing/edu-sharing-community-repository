@@ -233,11 +233,14 @@ $path:'../../../assets/images/';
     }
 
     .stats {
-      padding-top: 20px;
-      padding-bottom: 10px;
-      display: flex;
-      text-align: center;
-      flex-direction: row;
+        padding-top: 20px;
+        padding-bottom: 10px;
+        display: flex;
+        text-align: center;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-content: stretch;
+        justify-content: space-around;
 
       > div {
         display: flex;
@@ -255,9 +258,24 @@ $path:'../../../assets/images/';
         color: $textLight;
       }
 
-      .value {
-        font-size: 30pt;
-      }
+        a.disabled {
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+
+        .value {
+            font-size: 30pt;
+            color: $textLight;
+        }
+
+        .stat-link {
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .stat-link:hover {
+            background-color: $buttonHoverBackground;
+        }
     }
 
     .authorityName {
