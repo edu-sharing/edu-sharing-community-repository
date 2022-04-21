@@ -3,7 +3,7 @@ import {forkJoin as observableForkJoin, Observable} from 'rxjs';
 
 import {Component, ElementRef, ViewChild} from '@angular/core';
 import {Translation} from '../../core-ui-module/translation';
-import {ProfileSettings,SessionStorageService,UserStats} from '../../core-module/core.module';
+import {ProfileSettings,SessionStorageService,UIConstants,UserStats} from '../../core-module/core.module';
 import {TranslateService} from '@ngx-translate/core';
 import {DomSanitizer} from '@angular/platform-browser';
 import {ActivatedRoute, Params, Router, UrlTree} from '@angular/router';
@@ -23,6 +23,8 @@ import {Helper} from '../../core-module/rest/helper';
 import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {DefaultGroups, OptionGroup, OptionItem} from '../../core-ui-module/option-item';
 import {VCard} from '../../core-module/ui/VCard';
+import {LoginInfo} from 'ngx-edu-sharing-api';
+
 
 @Component({
   selector: 'es-profiles',
@@ -264,7 +266,7 @@ export class ProfilesComponent {
      * check if current user have access to workspace
      * @param login params that contain all userPermission
      */
-    private canAccessWorkspace(login: LoginResult): void {
+    private canAccessWorkspace(login: LoginInfo): void {
         this.hasAccessWorkspace = (
             login.toolPermissions &&
             login.toolPermissions.indexOf(
