@@ -729,18 +729,21 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         List<Contributor> contributorsResult = new ArrayList<>();
         List contributors = (List)sourceAsMap.get("contributor");
-        for(Object contributor : contributors){
-            Map c  = (Map)contributor;
-            Contributor contributorResult = new Contributor();
-            contributorResult.setProperty((String)c.get("property"));
-            contributorResult.setEmail((String)c.get("email"));
-            contributorResult.setFirstname((String)c.get("firstname"));
-            contributorResult.setLastname((String)c.get("lastname"));
-            contributorResult.setOrg((String)c.get("org"));
-            contributorResult.setVcard((String)c.get("vcard"));
-            contributorsResult.add(contributorResult);
+        if(contributors != null) {
+            for (Object contributor : contributors) {
+                Map c = (Map) contributor;
+                Contributor contributorResult = new Contributor();
+                contributorResult.setProperty((String) c.get("property"));
+                contributorResult.setEmail((String) c.get("email"));
+                contributorResult.setFirstname((String) c.get("firstname"));
+                contributorResult.setLastname((String) c.get("lastname"));
+                contributorResult.setOrg((String) c.get("org"));
+                contributorResult.setVcard((String) c.get("vcard"));
+                contributorsResult.add(contributorResult);
+            }
         }
         eduNodeRef.setContributors(contributorsResult);
+
 
         HashMap<String, Boolean> permissions = new HashMap<>();
         permissions.put(CCConstants.PERMISSION_READ, true);

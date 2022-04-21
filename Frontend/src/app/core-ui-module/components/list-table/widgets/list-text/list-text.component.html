@@ -134,7 +134,7 @@
     >
       {{
       $any(getNode()).properties
-        ? $any(getNode()).properties[item.name + '_DISPLAYNAME']
+        ? $any(getNode()).properties[item.name + '_DISPLAYNAME']?.join('')
           ? $any(getNode()).properties[item.name + '_DISPLAYNAME'].join(', ')
           : $any(getNode()).properties[item.name]?.join(', ')
         : ''

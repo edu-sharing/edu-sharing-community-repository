@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AuthenticationService } from 'ngx-edu-sharing-api';
 import { Observable, of } from 'rxjs';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import {
@@ -16,6 +17,7 @@ import { MainMenuEntriesService } from './main-menu-entries.service';
 // FIXME: some tests fail with a timeout
 describe('MainMenuEntriesService', () => {
     let service: MainMenuEntriesService;
+    let authenticationStub: AuthenticationService;
     let configurationStub: { getAll: () => Observable<any> };
     let restConnectorStub: {
         isLoggedIn: () => Observable<{
@@ -37,6 +39,9 @@ describe('MainMenuEntriesService', () => {
     };
 
     beforeEach(() => {
+        authenticationStub = {
+            observeHasAccessToScope: (scope: string) => of(true),
+        } as unknown as AuthenticationService;
         configurationStub = {
             getAll: () => of({}),
         };
@@ -59,6 +64,10 @@ describe('MainMenuEntriesService', () => {
         TestBed.configureTestingModule({
             providers: [
                 MainMenuEntriesService,
+                {
+                    provide: AuthenticationService,
+                    useValue: authenticationStub,
+                },
                 {
                     provide: BridgeService,
                     useValue: {},
