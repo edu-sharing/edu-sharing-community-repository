@@ -226,11 +226,11 @@ export class CardComponent implements AfterContentInit, OnDestroy {
     }
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
-        for (const card of CardComponent.modalCards) {
+        /*for (const card of CardComponent.modalCards) {
             if (card.handleEvent(event)) {
                 return;
             }
-        }
+        }*/
     }
 
     handleEvent(event: KeyboardEvent) {
@@ -246,7 +246,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
                 return true;
             }
         }
-        return false;
+        return true;
     }
 
     click(btn: DialogButton) {
