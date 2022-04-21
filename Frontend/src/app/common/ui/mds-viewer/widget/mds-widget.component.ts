@@ -170,7 +170,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit {
     formatNumber() {
         return this.getNodeValue().map((v) => {
             if (this.widget.definition.format === 'bytes') {
-                return new FormatSizePipe().transform(v);
+                return new FormatSizePipe(this.translate).transform(v);
             }
             return v;
         });

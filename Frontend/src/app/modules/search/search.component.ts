@@ -41,7 +41,6 @@ import {
     RestSearchService,
     SearchList,
     SearchRequestCriteria,
-    SessionStorageService,
     TemporaryStorageService,
     UIService
 } from '../../core-module/core.module';
@@ -58,7 +57,7 @@ import {
     Scope
 } from '../../core-ui-module/option-item';
 import {Toast} from '../../core-ui-module/toast';
-import {Translation} from '../../core-ui-module/translation';
+import { TranslationsService } from '../../translations/translations.service';
 import {UIHelper} from '../../core-ui-module/ui-helper';
 import {SearchService} from './search.service';
 import {WindowRefService} from './window-ref.service';
@@ -204,6 +203,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         private nodeApi: RestNodeService,
         private toast: Toast,
         private translate: TranslateService,
+        private translations: TranslationsService,
         private activatedRoute: ActivatedRoute,
         private winRef: WindowRefService,
         public searchService: SearchService,
@@ -211,7 +211,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         private config: ConfigurationService,
         private uiService: UIService,
         private optionsHelper: OptionsHelperService,
-        private storage: SessionStorageService,
         private network: RestNetworkService,
         private temporaryStorageService: TemporaryStorageService,
         private searchField: SearchFieldService,
@@ -246,12 +245,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
            onDisplayTypeChange: (type) => this.setDisplayType(type)
         });
         this.connector.setRoute(this.activatedRoute).subscribe(() => {
-            Translation.initialize(
-                this.translate,
-                this.config,
-                this.storage,
-                this.activatedRoute,
-            ).subscribe(() => {
+            this.translations.waitForInit().subscribe(() => {
                 if (this.setSidenavSettings()) {
                     // auto, never, always
                     let sidenavMode = this.config.instant(

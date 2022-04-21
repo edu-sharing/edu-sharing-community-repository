@@ -1,9 +1,8 @@
 import {Component, ElementRef, HostListener, ViewChild, OnInit, OnDestroy} from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { Translation } from '../../core-ui-module/translation';
+import { TranslationsService } from '../../translations/translations.service';
 import {
     ClipboardObject,
-    ConfigurationService,
     Connector,
     ConnectorList, DialogButton,
     EventListener,
@@ -25,12 +24,11 @@ import {
     RestMdsService,
     RestNodeService,
     RestToolService,
-    SessionStorageService,
     TemporaryStorageService,
     UIService,
     Version
 } from '../../core-module/core.module';
-import { ActivatedRoute, Params, Router } from '@angular/router';
+import { Params, Router } from '@angular/router';
 import {OptionItem, Scope} from '../../core-ui-module/option-item';
 import { Toast } from '../../core-ui-module/toast';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
@@ -65,17 +63,14 @@ export class EditorialComponent {
     constructor(
         private toast: Toast,
         private bridge: BridgeService,
-        private route: ActivatedRoute,
         private router: Router,
         private http: HttpClient,
-        private translate: TranslateService,
+        private translations: TranslationsService,
         private storage: TemporaryStorageService,
-        private config: ConfigurationService,
         private connectors: RestConnectorsService,
         private actionbar: ActionbarHelperService,
         private collectionApi: RestCollectionService,
         private toolService: RestToolService,
-        private session: SessionStorageService,
         private iam: RestIamService,
         private mds: RestMdsService,
         private nodeService: RestNodeService,
@@ -92,7 +87,7 @@ export class EditorialComponent {
             new ListItem('NODE', RestConstants.CM_MODIFIED_DATE),
             new ListItem('NODE', RestConstants.CM_CREATOR),
         ]
-        Translation.initialize(translate, this.config, this.session, this.route).subscribe(() => {
+        this.translations.waitForInit().subscribe(() => {
             this.initialize();
             GlobalContainerComponent.finishPreloading();
         });

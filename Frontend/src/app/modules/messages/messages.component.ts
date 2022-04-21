@@ -1,9 +1,7 @@
-import {Translation} from '../../core-ui-module/translation';
+import { TranslationsService } from '../../translations/translations.service';
 import {ActivatedRoute, Data, Params, Router} from '@angular/router';
 import {Toast} from '../../core-ui-module/toast';
-import {ConfigurationService} from '../../core-module/core.module';
 import {TranslateService} from '@ngx-translate/core';
-import {SessionStorageService} from '../../core-module/core.module';
 import {RestConnectorService} from '../../core-module/core.module';
 import {Component, ViewChild, ElementRef} from '@angular/core';
 import {RouterComponent} from '../../router/router.component';
@@ -22,10 +20,10 @@ export class MessagesComponent {
     constructor(private toast: Toast,
                 private route: ActivatedRoute,
                 private router: Router,
-                private config: ConfigurationService,
                 private translate: TranslateService,
-                private storage : SessionStorageService) {
-        Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
+                private translations: TranslationsService,
+    ) {
+        this.translations.waitForInit().subscribe(() => {
             this.route.params.subscribe(async (data: Params) => {
                 this.setMessage(data);
                 this.route.data.subscribe((routeData) => {

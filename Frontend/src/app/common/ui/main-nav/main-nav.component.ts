@@ -46,7 +46,7 @@ import {
 } from '../../../core-module/ui/ui-constants';
 import { OptionItem, OptionGroup } from '../../../core-ui-module/option-item';
 import { Toast } from '../../../core-ui-module/toast';
-import { Translation } from '../../../core-ui-module/translation';
+import { TranslationsService } from '../../../translations/translations.service';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { CreateMenuComponent } from '../../../modules/create-menu/create-menu.component';
 import { WorkspaceManagementDialogsComponent } from '../../../modules/management-dialogs/management-dialogs.component';
@@ -219,6 +219,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         private authentication: AuthenticationService,
         private user: UserService,
         private ngZone: NgZone,
+        private translations: TranslationsService,
     ) {
         this.mainnavService.registerMainNav(this);
         this.visible = !this.storage.get(
@@ -664,7 +665,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                 let nodeId: string = null;
                 for (const node of this.config.licenseAgreement.nodeId) {
                     if (node.language == null) nodeId = node.value;
-                    if (node.language === Translation.getLanguage()) {
+                    if (node.language === this.translations.getLanguage()) {
                         nodeId = node.value;
                         break;
                     }

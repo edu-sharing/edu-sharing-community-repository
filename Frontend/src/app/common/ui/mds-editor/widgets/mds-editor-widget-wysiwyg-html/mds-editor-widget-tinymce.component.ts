@@ -6,7 +6,6 @@ import {MdsEditorInstanceService} from '../../mds-editor-instance.service';
 import {EditorComponent} from '@tinymce/tinymce-angular';
 import {EventObj} from '@tinymce/tinymce-angular/editor/Events';
 import {PlatformLocation} from '@angular/common';
-import {Translation} from '../../../../../core-ui-module/translation';
 import {
     MdsEditorWidgetContainerComponent
 } from '../mds-editor-widget-container/mds-editor-widget-container.component';

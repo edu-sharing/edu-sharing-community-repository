@@ -4,7 +4,6 @@ import {RestConstants} from "../../../core-module/core.module";
 import {NodeWrapper,Node} from "../../../core-module/core.module";
 import {VCard} from "../../../core-module/ui/VCard";
 import {Toast} from "../../../core-ui-module/toast";
-import {Translation} from "../../../core-ui-module/translation";
 import {TranslateService} from "@ngx-translate/core";
 import {DateHelper} from "../../../core-ui-module/DateHelper";
 import {trigger} from "@angular/animations";

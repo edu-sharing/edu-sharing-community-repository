@@ -45,6 +45,7 @@ import { AccessibilityService } from '../common/ui/accessibility/accessibility.s
 import { LtiComponent } from '../modules/lti/lti.component';
 import { printCurrentTaskInfo } from './track-change-detection';
 import { environment } from '../../environments/environment';
+import { TranslationsService } from '../translations/translations.service';
 
 @Component({
     selector: 'es-router',
@@ -101,6 +102,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
         private bridge: BridgeService,
         private injector: Injector,
         private accessibilityService: AccessibilityService,
+        private translations: TranslationsService,
     ) {
         this.injector.get(Router).events.subscribe(event => {
             if (event instanceof NavigationEnd) {
@@ -115,6 +117,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
     }
 
     ngOnInit(): void {
+        this.translations.initialize();
         this.setUserScale();
         this.registerContrastMode();
     }

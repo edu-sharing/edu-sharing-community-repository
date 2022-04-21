@@ -1,6 +1,6 @@
 import {Component, HostListener, NgZone, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {TranslateService} from '@ngx-translate/core';
-import {Translation} from '../../core-ui-module/translation';
+import { TranslationsService } from '../../translations/translations.service';
 import {
     ClipboardObject,
     ConfigurationService,
@@ -192,6 +192,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         private http: HttpClient,
         private nodeHelper: NodeHelperService,
         private translate: TranslateService,
+        private translations: TranslationsService,
         private storage: TemporaryStorageService,
         private config: ConfigurationService,
         private connectors: RestConnectorsService,
@@ -210,7 +211,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         private ngZone: NgZone,
     ) {
         this.event.addListener(this);
-        Translation.initialize(translate, this.config, this.session, this.route).subscribe(() => {
+        this.translations.waitForInit().subscribe(() => {
             this.initialize();
         });
         this.connector.setRoute(this.route);

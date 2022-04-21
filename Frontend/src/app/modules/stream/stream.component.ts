@@ -1,10 +1,8 @@
 import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Params, Router, RoutesRecognized} from '@angular/router';
-import {TranslateService} from '@ngx-translate/core';
-import {Translation} from '../../core-ui-module/translation';
+import { TranslationsService } from '../../translations/translations.service';
 import * as EduData from '../../core-module/core.module'; //
 import {
-    ConfigurationService,
     Connector,
     ConnectorList,
     Filetype,
@@ -20,7 +18,6 @@ import {
     RestIamService,
     RestNodeService,
     RestSearchService,
-    SessionStorageService,
     STREAM_STATUS,
     TemporaryStorageService
 } from '../../core-module/core.module'; //
@@ -134,17 +131,15 @@ export class StreamComponent implements AfterViewInit {
         private optionsHelper: OptionsHelperService,
         private iam: RestIamService,
         private storage: TemporaryStorageService,
-        private session: SessionStorageService,
         private toast: Toast,
         private bridge: BridgeService,
         private nodeHelper: NodeHelperService,
         private actionbarHelperService: ActionbarHelperService,
         private collectionService: RestCollectionService,
-        private config: ConfigurationService,
-        private translate: TranslateService) {
-        Translation.initialize(translate, this.config, this.session, this.route).subscribe(() => {
+        private translations: TranslationsService) {
+        this.translations.waitForInit().subscribe(() => {
             this.connector.isLoggedIn().subscribe(data => {
-                this.dateToDisplay = moment().locale(translate.currentLang).format('dddd, DD. MMMM YYYY');
+                this.dateToDisplay = moment().locale(this.translations.getLanguage()).format('dddd, DD. MMMM YYYY');
                 this.createAllowed = data.statusCode == RestConstants.STATUS_CODE_OK;
                 GlobalContainerComponent.finishPreloading();
             });

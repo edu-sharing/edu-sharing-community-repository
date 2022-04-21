@@ -1,7 +1,6 @@
 
 import {TranslateService} from "@ngx-translate/core";
 import { isNumeric } from "../common/ui/isNumeric";
-import {Translation} from "./translation";
 
 export class FormatOptions {
     showDate?=true;
@@ -114,7 +113,7 @@ export class DateHelper{
       //return dateFormat+time;
       let str=prefix;
       if(addDate) {
-        if(Translation.getLanguage()=="en"){
+        if (translation.currentLang === "en") {
           str += dateObject.getFullYear()+"-"+DateHelper.fillDate(dateObject.getMonth()+1)+"-"+DateHelper.fillDate(dateObject.getDate());
         }
         else {

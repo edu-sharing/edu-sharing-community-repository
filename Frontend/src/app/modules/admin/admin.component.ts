@@ -1,4 +1,4 @@
-import {Translation} from '../../core-ui-module/translation';
+import { TranslationsService } from '../../translations/translations.service';
 import {UIHelper} from '../../core-ui-module/ui-helper';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Toast} from '../../core-ui-module/toast';
@@ -81,6 +81,7 @@ export class AdminComponent implements OnDestroy {
               private platformLocation: PlatformLocation,
               private config: ConfigurationService,
               private translate: TranslateService,
+              private translations: TranslationsService,
               private iamService: RestIamService,
               private storage : SessionStorageService,
               private networkService : RestNetworkService,
@@ -97,7 +98,7 @@ export class AdminComponent implements OnDestroy {
       this.searchColumns.push(new ListItem('NODE', RestConstants.CM_NAME));
       this.searchColumns.push(new ListItem('NODE', RestConstants.NODE_ID));
       this.searchColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
-      Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
+      this.translations.waitForInit().subscribe(() => {
           GlobalContainerComponent.finishPreloading();
           this.warningButtons=[
               new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=> {window.history.back()}),

@@ -1,7 +1,6 @@
 import {Component, Input, EventEmitter, Output, ViewChild} from '@angular/core';
 import { RestNodeService } from '../../../core-module/core.module';
 import { TranslateService } from '@ngx-translate/core';
-import { Translation } from '../../../core-ui-module/translation';
 import { RestConstants } from '../../../core-module/core.module';
 import { Node, NodeList } from '../../../core-module/core.module';
 import { TemporaryStorageService } from '../../../core-module/core.module';

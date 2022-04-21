@@ -1,12 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { fakeAsync, tick } from '@angular/core/testing';
+import { ConfigService } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
-import { RestLocatorService } from '../core-module/core.module';
+import { TranslationsService } from './translations.service';
 import { TranslationLoader, TRANSLATION_LIST } from './translation-loader';
-import { Translation } from './translation';
 import { TranslationSource } from './translation-source';
-import { ConfigService } from 'ngx-edu-sharing-api';
 
 class HttpClientStub {
     get(url: string): Observable<any> {
@@ -40,11 +39,11 @@ describe('TranslationLoader', () => {
 
     describe('getTranslation', () => {
         function callGetTranslation(lang: string) {
-            return new Promise(resolve => {
+            return new Promise((resolve) => {
                 fakeAsync(() => {
                     translationLoader
                         .getTranslation(lang)
-                        .subscribe(result => resolve(result), fail);
+                        .subscribe((result) => resolve(result), fail);
                     tick(100);
                 })();
             });
@@ -57,7 +56,7 @@ describe('TranslationLoader', () => {
 
         describe('Source = Local', () => {
             beforeEach(() => {
-                Translation.setSource(TranslationSource.Local);
+                (translationLoader as any).source = TranslationSource.Local;
             });
 
             it('should call nothing for lang=none', async () => {
@@ -80,12 +79,8 @@ describe('TranslationLoader', () => {
                 const getSpy = spyOn(httpClient, 'get').and.callThrough();
                 await callGetTranslation('de');
                 expect(getSpy.calls.count()).toBe(TRANSLATION_LIST.length);
-                expect(getSpy.calls.first().args).toEqual([
-                    'assets/i18n/common/de.json',
-                ]);
-                expect(getSpy.calls.mostRecent().args).toEqual([
-                    'assets/i18n/override/de.json',
-                ]);
+                expect(getSpy.calls.first().args).toEqual(['assets/i18n/common/de.json']);
+                expect(getSpy.calls.mostRecent().args).toEqual(['assets/i18n/override/de.json']);
             });
 
             it('should call observeTranslationOverrides', async () => {
@@ -98,14 +93,9 @@ describe('TranslationLoader', () => {
             });
 
             it('should call setLocale with correct locale', async () => {
-                const setLocaleSpy = spyOn(
-                    config,
-                    'setLocale',
-                ).and.callThrough();
+                const setLocaleSpy = spyOn(config, 'setLocale').and.callThrough();
                 await callGetTranslation('de');
-                expect(setLocaleSpy.calls.mostRecent().args).toEqual([
-                    'de_DE',
-                ]);
+                expect(setLocaleSpy.calls.mostRecent().args).toEqual(['de_DE']);
             });
 
             it('should not call observeDefaultTranslations', async () => {
@@ -118,7 +108,7 @@ describe('TranslationLoader', () => {
             });
 
             it('should include translations via http', async () => {
-                httpClient.get = url => {
+                httpClient.get = (url) => {
                     if (url === 'assets/i18n/common/de.json') {
                         return rxjs.of({ foo: 'bar' });
                     }
@@ -129,7 +119,7 @@ describe('TranslationLoader', () => {
             });
 
             it('should merge translations via http', async () => {
-                httpClient.get = url => {
+                httpClient.get = (url) => {
                     if (url === 'assets/i18n/common/de.json') {
                         return rxjs.of({ foo: 'bar' });
                     } else if (url === 'assets/i18n/admin/de.json') {
@@ -142,7 +132,7 @@ describe('TranslationLoader', () => {
             });
 
             it('should override nested translations via http', async () => {
-                httpClient.get = url => {
+                httpClient.get = (url) => {
                     if (url === 'assets/i18n/common/de.json') {
                         return rxjs.of({ prefix: { foo: 'bar' } });
                     } else if (url === 'assets/i18n/admin/de.json') {
@@ -155,7 +145,7 @@ describe('TranslationLoader', () => {
             });
 
             it('should include translations via observeTranslationOverrides', async () => {
-                config.observeTranslationOverrides = lang => {
+                config.observeTranslationOverrides = (lang) => {
                     return rxjs.of({ foo: 'bar' });
                 };
                 const result = await callGetTranslation('de');
@@ -163,13 +153,13 @@ describe('TranslationLoader', () => {
             });
 
             it('should override translations via observeTranslationOverrides', async () => {
-                httpClient.get = url => {
+                httpClient.get = (url) => {
                     if (url === 'assets/i18n/common/de.json') {
                         return rxjs.of({ foo: 'bar' });
                     }
                     return rxjs.of(null);
                 };
-                config.observeTranslationOverrides = lang => {
+                config.observeTranslationOverrides = (lang) => {
                     return rxjs.of({ foo: 'baz' });
                 };
                 const result = await callGetTranslation('de');
@@ -177,13 +167,13 @@ describe('TranslationLoader', () => {
             });
 
             it('should merge translations via observeTranslationOverrides', async () => {
-                httpClient.get = url => {
+                httpClient.get = (url) => {
                     if (url === 'assets/i18n/common/de.json') {
                         return rxjs.of({ foo: 'bar' });
                     }
                     return rxjs.of(null);
                 };
-                config.observeTranslationOverrides = lang => {
+                config.observeTranslationOverrides = (lang) => {
                     return rxjs.of({ bar: 'baz' });
                 };
                 const result = await callGetTranslation('de');
@@ -191,13 +181,13 @@ describe('TranslationLoader', () => {
             });
 
             it('should override nested translations via observeTranslationOverrides', async () => {
-                httpClient.get = url => {
+                httpClient.get = (url) => {
                     if (url === 'assets/i18n/common/de.json') {
                         return rxjs.of({ prefix: { foo: 'bar' } });
                     }
                     return rxjs.of(null);
                 };
-                config.observeTranslationOverrides = lang => {
+                config.observeTranslationOverrides = (lang) => {
                     return rxjs.of({ prefix: { bar: 'baz' } });
                 };
                 const result = await callGetTranslation('de');
@@ -205,13 +195,13 @@ describe('TranslationLoader', () => {
             });
 
             it('should deep-merge translations via observeTranslationOverrides', async () => {
-                httpClient.get = url => {
+                httpClient.get = (url) => {
                     if (url === 'assets/i18n/common/de.json') {
                         return rxjs.of({ prefix: { foo: 'bar' } });
                     }
                     return rxjs.of(null);
                 };
-                config.observeTranslationOverrides = lang => {
+                config.observeTranslationOverrides = (lang) => {
                     return rxjs.of({ 'prefix.bar': 'baz' });
                 };
                 const result = await callGetTranslation('de');
@@ -219,7 +209,7 @@ describe('TranslationLoader', () => {
             });
 
             it('should deep-merge translations via observeTranslationOverrides (3 levels)', async () => {
-                httpClient.get = url => {
+                httpClient.get = (url) => {
                     if (url === 'assets/i18n/common/de.json') {
                         return rxjs.of({
                             l1: { l2: { l3: { foo: 'bar' } } },
@@ -227,7 +217,7 @@ describe('TranslationLoader', () => {
                     }
                     return rxjs.of(null);
                 };
-                config.observeTranslationOverrides = lang => {
+                config.observeTranslationOverrides = (lang) => {
                     return rxjs.of({ 'l1.l2.l3.bar': 'baz' });
                 };
                 const result = await callGetTranslation('de');
@@ -237,13 +227,13 @@ describe('TranslationLoader', () => {
             });
 
             it('should create missing levels via observeTranslationOverrides', async () => {
-                httpClient.get = url => {
+                httpClient.get = (url) => {
                     if (url === 'assets/i18n/common/de.json') {
                         return rxjs.of({});
                     }
                     return rxjs.of(null);
                 };
-                config.observeTranslationOverrides = lang => {
+                config.observeTranslationOverrides = (lang) => {
                     return rxjs.of({ 'l1.l2.l3.bar': 'baz' });
                 };
                 const result = await callGetTranslation('de');
@@ -255,7 +245,7 @@ describe('TranslationLoader', () => {
 
         describe('Source = Repository', () => {
             beforeEach(() => {
-                Translation.setSource(TranslationSource.Repository);
+                (translationLoader as any).source = TranslationSource.Repository;
             });
 
             it('should call nothing for lang=none', async () => {
@@ -299,18 +289,13 @@ describe('TranslationLoader', () => {
             });
 
             it('should call setLocale with correct locale', async () => {
-                const setLocaleSpy = spyOn(
-                    config,
-                    'setLocale',
-                ).and.callThrough();
+                const setLocaleSpy = spyOn(config, 'setLocale').and.callThrough();
                 await callGetTranslation('de');
-                expect(setLocaleSpy.calls.mostRecent().args).toEqual([
-                    'de_DE',
-                ]);
+                expect(setLocaleSpy.calls.mostRecent().args).toEqual(['de_DE']);
             });
 
             it('should include translations via observeDefaultTranslations', async () => {
-                config.observeDefaultTranslations = lang => {
+                config.observeDefaultTranslations = (lang) => {
                     return rxjs.of({ foo: 'bar' });
                 };
                 const result = await callGetTranslation('de');
@@ -318,7 +303,7 @@ describe('TranslationLoader', () => {
             });
 
             it('should include translations via observeTranslationOverrides', async () => {
-                config.observeTranslationOverrides = lang => {
+                config.observeTranslationOverrides = (lang) => {
                     return rxjs.of({ foo: 'bar' });
                 };
                 const result = await callGetTranslation('de');
@@ -326,10 +311,10 @@ describe('TranslationLoader', () => {
             });
 
             it('should merge translations via observeTranslationOverrides', async () => {
-                config.observeDefaultTranslations = lang => {
+                config.observeDefaultTranslations = (lang) => {
                     return rxjs.of({ foo: 'bar' });
                 };
-                config.observeTranslationOverrides = lang => {
+                config.observeTranslationOverrides = (lang) => {
                     return rxjs.of({ bar: 'baz' });
                 };
                 const result = await callGetTranslation('de');
@@ -337,10 +322,10 @@ describe('TranslationLoader', () => {
             });
 
             it('should override nested translations via observeTranslationOverrides', async () => {
-                config.observeDefaultTranslations = lang => {
+                config.observeDefaultTranslations = (lang) => {
                     return rxjs.of({ prefix: { foo: 'bar' } });
                 };
-                config.observeTranslationOverrides = lang => {
+                config.observeTranslationOverrides = (lang) => {
                     return rxjs.of({ prefix: { bar: 'baz' } });
                 };
                 const result = await callGetTranslation('de');
@@ -348,10 +333,10 @@ describe('TranslationLoader', () => {
             });
 
             it('should deep-merge translations via observeTranslationOverrides', async () => {
-                config.observeDefaultTranslations = lang => {
+                config.observeDefaultTranslations = (lang) => {
                     return rxjs.of({ prefix: { foo: 'bar' } });
                 };
-                config.observeTranslationOverrides = lang => {
+                config.observeTranslationOverrides = (lang) => {
                     return rxjs.of({ 'prefix.bar': 'baz' });
                 };
                 const result = await callGetTranslation('de');

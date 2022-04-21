@@ -1,8 +1,7 @@
 
 import {Component, ViewChild, HostListener, ElementRef} from '@angular/core';
 import {Router, ActivatedRoute, Params} from '@angular/router';
-import {TranslateService} from '@ngx-translate/core';
-import {Translation} from '../../core-ui-module/translation';
+import { TranslationsService } from '../../translations/translations.service';
 import {ListItem, RestSearchService} from '../../core-module/core.module';
 import {RestNodeService} from '../../core-module/core.module';
 import {RestConstants} from '../../core-module/core.module';
@@ -11,7 +10,6 @@ import {Node, NodeList, LoginResult, SharingInfo, Person} from '../../core-modul
 import {CustomOptions, OptionItem} from '../../core-ui-module/option-item';
 import {TemporaryStorageService} from '../../core-module/core.module';
 import {ConfigurationService} from '../../core-module/core.module';
-import {SessionStorageService} from '../../core-module/core.module';
 import {UIConstants} from '../../core-module/ui/ui-constants';
 import {RestMdsService} from '../../core-module/core.module';
 import {RestHelper} from '../../core-module/core.module';
@@ -53,15 +51,14 @@ export class SharingComponent {
     private nodeService: RestNodeService,
     private sharingService:RestSharingService,
     private storage : TemporaryStorageService,
-    private session : SessionStorageService,
     private toast : Toast,
     private config : ConfigurationService,
-    private translate : TranslateService) {
+    private translations: TranslationsService) {
       this.columns.push(new ListItem('NODE',RestConstants.CM_NAME));
       this.columns.push(new ListItem('NODE',RestConstants.CM_MODIFIED_DATE));
       this.columns.push(new ListItem('NODE',RestConstants.SIZE));
       this.options.addOptions.push(new OptionItem('SHARING.DOWNLOAD','cloud_download',(node:Node)=>this.download(node)));
-      Translation.initialize(translate,this.config,this.session,this.route).subscribe(()=> {
+      this.translations.waitForInit().subscribe(()=> {
           this.route.queryParams.subscribe((params)=> {
              this.params=params;
              this.sharingService.getInfo(params.nodeId,params.token).subscribe((result)=> {

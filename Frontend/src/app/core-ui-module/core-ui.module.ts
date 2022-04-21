@@ -1,5 +1,4 @@
 import { A11yModule } from '@angular/cdk/a11y';
-import { HttpClient } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -18,9 +17,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
-import { MissingTranslationHandler, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
-import { RestLocatorService } from '../core-module/rest/services/rest-locator.service';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
 import { CardComponent } from './components/card/card.component';
 import { CollectionChooserComponent } from './components/collection-chooser/collection-chooser.component';
@@ -71,8 +68,6 @@ import { ReplaceCharsPipe } from './pipes/replace-chars.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { UrlPipe } from './pipes/url.pipe';
 import { Toast } from './toast';
-import { FallbackTranslationHandler } from './translation';
-import { TranslationLoader } from './translation-loader';
 import {VCardNamePipe} from './pipes/vcard-name.pipe';
 import {ImageConfigDirective} from './directives/image-config.directive';
 import {ErrorProcessingService} from './error.processing';
@@ -101,12 +96,11 @@ import {MatSortModule} from '@angular/material/sort';
 import {OverlayModule} from '@angular/cdk/overlay';
 import {ListItemLabelPipe} from './pipes/list-item-label.pipe';
 import {DragCursorDirective} from './directives/drag-cursor.directive';
-import { ConfigService } from 'ngx-edu-sharing-api';
 import { BorderBoxObserverDirective } from './directives/border-box-observer.directive';
 import {NodeRatingComponent} from './components/node-entries/node-rating/node-rating.component';
 import { PreviewImageComponent } from './components/node-entries/preview-image/preview-image.component';
 import { FocusStateDirective } from './directives/focus-state.directive';
-import {CommonModule} from '@angular/common';
+import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
     declarations: [
@@ -184,6 +178,7 @@ import {CommonModule} from '@angular/common';
         FocusStateDirective,
     ],
     imports: [
+        SharedModule,
         A11yModule,
         BrowserModule,
         BrowserAnimationsModule,
@@ -204,23 +199,11 @@ import {CommonModule} from '@angular/common';
         MatTooltipModule,
         NgxSliderModule,
         RouterModule,
-        TranslateModule.forRoot({
-            loader: {
-                provide: TranslateLoader,
-                useFactory: TranslationLoader.create,
-                deps: [HttpClient, ConfigService],
-            },
-            missingTranslationHandler: {
-                provide: MissingTranslationHandler,
-                useClass: FallbackTranslationHandler,
-            },
-        }),
         MatSlideToggleModule,
         MatTableModule,
         MatPaginatorModule,
         MatSortModule,
         OverlayModule,
-        CommonModule,
     ],
     providers: [
         Toast,
@@ -229,7 +212,7 @@ import {CommonModule} from '@angular/common';
         RenderHelperService,
         OptionsHelperService],
     exports: [
-        TranslateModule,
+        SharedModule,
         ListTableComponent,
         NodeEntriesComponent,
         SpinnerComponent,
