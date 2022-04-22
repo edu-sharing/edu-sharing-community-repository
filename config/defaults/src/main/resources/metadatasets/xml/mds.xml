@@ -4,6 +4,7 @@
 	<widgets>
 		<widget>
 			<id>cm:name</id>
+			<id rel="graphql">info.filename</id>
 			<caption>cm_name</caption>
 			<placeholder>cm_name_placeholder</placeholder>
 			<bottomCaption>cm_name_bottom</bottomCaption>
@@ -13,6 +14,7 @@
 		</widget>
 		<widget>
 			<id>cclom:title</id>
+			<id rel="graphql">lom.general.title</id>
 			<caption>cm_title</caption>
 			<placeholder>cm_title_placeholder</placeholder>
 			<bottomCaption>cm_title_bottom</bottomCaption>
@@ -22,6 +24,7 @@
 		</widget>
 		<widget>
 			<id>cclom:title</id>
+			<id rel="graphql">lom.general.title</id>
 			<caption>cm_title_wwwurl</caption>
 			<placeholder>cm_title_placeholder</placeholder>
 			<type>text</type>
@@ -37,6 +40,7 @@
 		</widget>
 		<widget>
 			<id>ccm:wwwurl</id>
+			<id rel="graphql">info.url</id>
 			<caption>cm_wwwurl</caption>
 			<placeholder>cm_wwwurl_placeholder</placeholder>
 			<type>text</type>
@@ -45,6 +49,7 @@
 		</widget>
 		<widget>
 			<id>cclom:general_description</id>
+			<id rel="graphql">lom.general.description</id>
 			<type>textarea</type>
 			<caption>lom_prop_educational_description</caption>
 			<placeholder>lom_prop_educational_description_placeholder</placeholder>
@@ -52,12 +57,14 @@
 		</widget>
 		<widget>
 			<id>cm:description</id>
+			<id rel="graphql">lom.general.description</id>
 			<type>text</type>
 			<caption>lom_prop_educational_description</caption>
 			<placeholder>lom_prop_educational_description_placeholder</placeholder>
 		</widget>
 		<widget>
 			<id>cclom:general_keyword</id>
+			<id rel="graphql">lom.general.keyword</id>
 			<type>multivalueSuggestBadges</type>
 			<caption>lom_prop_general_keyword</caption>
 			<placeholder>lom_prop_general_keyword_placeholder</placeholder>
@@ -66,12 +73,14 @@
 		</widget>
 		<widget>
 			<id>cclom:general_keyword</id>
+			<id rel="graphql">lom.general.keyword</id>
 			<template>search_suggestions</template>
 			<type>multivalueSuggestBadges</type>
 			<caption>lom_prop_general_keyword_tagcloud</caption>
 		</widget>
 		<widget>
 			<id>cclom:general_keyword</id>
+			<id rel="graphql">lom.general.keyword</id>
 			<type>multivalueSuggestBadges</type>
 			<caption>lom_prop_general_keyword</caption>
 			<template>search</template>
@@ -94,6 +103,7 @@
 		</widget>
 		<widget>
 			<id>ccm:restricted_access</id>
+			<id rel="graphql">Rights.restrictedAccess</id>
 			<type>checkbox</type>
 			<caption>cb_restricted_access</caption>
 			<bottomCaption>cb_restricted_access_info</bottomCaption>
