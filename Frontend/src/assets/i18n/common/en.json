@@ -617,6 +617,12 @@
         "ACCESSIBILITY": "Accessibility",
         "LTI": "Add to LTI Platform"
     },
+    "LTI" : {
+      "REGISTERED": {
+        "TITLE": "LTI platform registered",
+        "DESCRIPTION": "edu-sharing ist now connected with your system. You may now include contents via LTI."
+      }
+    },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Version comment",
     "MDS": {

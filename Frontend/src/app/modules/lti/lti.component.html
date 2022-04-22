@@ -1,7 +1,12 @@
+<es-main-nav></es-main-nav>
 <es-card
-  title='platform registered'
+  title="{{'LTI.REGISTERED.TITLE' | translate}}"
   [buttons]="dialogButtons"
   [isCancelable]="false"
+  height="auto"
   modal="always"
 >
+  <div class="card-content-padding">
+    {{'LTI.REGISTERED.DESCRIPTION' | translate}}
+  </div>
 </es-card>

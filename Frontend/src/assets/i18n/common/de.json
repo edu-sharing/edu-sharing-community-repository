@@ -657,6 +657,12 @@
         "ACCESSIBILITY": "Barrierefreiheit",
         "LTI": "In LTI Plattform übernehmen"
     },
+    "LTI" : {
+      "REGISTERED": {
+        "TITLE": "LTI-Plattform registriert",
+        "DESCRIPTION": "edu-sharing ist nun mit ihren System verbunden und Inhalte können per LTI eingebunden werden."
+      }
+    },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Versionskommentar",
     "MDS": {
