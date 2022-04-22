@@ -46,7 +46,6 @@ import {TemporaryStorageService} from "../../../core-module/core.module";
 import {RegisterResetPasswordComponent} from "../../register/register-reset-password/register-reset-password.component";
 import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 import {UIHelper} from "../../../core-ui-module/ui-helper";
-import {GlobalContainerComponent} from "../../../common/ui/global-container/global-container.component";
 import {AuthorityNamePipe} from "../../../core-ui-module/pipes/authority-name.pipe";
 import {BridgeService} from '../../../core-bridge-module/bridge.service';
 import {WorkspaceShareComponent} from "../../workspace/share/share.component";
@@ -58,6 +57,7 @@ import {Values} from '../../../common/ui/mds-editor/types';
 import {DefaultGroups, OptionItem} from '../../../core-ui-module/option-item';
 import {Observable} from 'rxjs';
 import {PlatformLocation} from '@angular/common';
+import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
 
 type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITORIAL_GROUPS';
 
@@ -116,6 +116,7 @@ export class CollectionNewComponent implements EventListener{
   private parentCollection: EduData.Node;
   private originalPermissions: LocalPermissions;
   private permissionsInfo: any;
+  private loadingTask = this.loadingScreen.addLoadingTask();
 
   @ViewChild('file') imageFileRef : ElementRef;
   @ViewChild('authorFreetextInput') authorFreetextInput : ElementRef<HTMLInputElement>;
@@ -203,7 +204,9 @@ export class CollectionNewComponent implements EventListener{
       private sanitizer: DomSanitizer,
       private config : ConfigurationService,
       private translations: TranslationsService,
-      private translationService:TranslateService) {
+      private translationService:TranslateService,
+      private loadingScreen: LoadingScreenService,
+    ) {
       this.eventService.addListener(this);
     this.translations.waitForInit().subscribe(()=>{
       this.connector.isLoggedIn().subscribe((data) => {
@@ -248,7 +251,9 @@ export class CollectionNewComponent implements EventListener{
                       this.setCollection(JSON.parse(queryParams.collection)).subscribe(() => {
                           this.updateAvailableSteps();
                           this.isLoading=false;
-                          GlobalContainerComponent.finishPreloading();
+                          if (!this.loadingTask.isDone) {
+                            this.loadingTask.done();
+                          }
                       });
                   } else if (mode=="edit") {
                       this.collectionService.getCollection(id).subscribe((data)=>{
@@ -257,7 +262,9 @@ export class CollectionNewComponent implements EventListener{
                                   this.updateAvailableSteps();
                                   this.updateImageOptions();
                                   this.isLoading=false;
-                                  GlobalContainerComponent.finishPreloading();
+                                  if (!this.loadingTask.isDone) {
+                                    this.loadingTask.done();
+                                  }
                               });
                           });
                       });
@@ -701,7 +708,9 @@ export class CollectionNewComponent implements EventListener{
     this.updateAvailableSteps();
     this.updateImageOptions();
     this.isLoading=false;
-    GlobalContainerComponent.finishPreloading();
+    if (!this.loadingTask.isDone) {
+      this.loadingTask.done();
+    }
   }
 
   private save4(collection: EduData.Node) {

@@ -61,7 +61,6 @@ import { MdsHelper } from '../../core-module/rest/mds-helper';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { HttpClient } from '@angular/common/http';
-import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
 import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../core-ui-module/options-helper.service';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 import {DropAction, DropData} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
@@ -85,6 +84,7 @@ import {
     DropSource, DropTarget,
     ListEventInterface, ListSortConfig, NodeEntriesDisplayType
 } from '../../core-ui-module/components/node-entries-wrapper/entries-model';
+import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 
 // component class
 @Component({
@@ -310,6 +310,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
     private _collectionShare: Node;
     private feedbacks: CollectionFeedback[];
     private params: Params;
+    private loadingTask = this.loadingScreen.addLoadingTask();
 
     // inject services
     constructor(
@@ -338,6 +339,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         private config: ConfigurationService,
         private translationService: TranslateService,
         private translations: TranslationsService,
+        private loadingScreen: LoadingScreenService,
     ) {
         this.sortCollectionColumns[this.sortCollectionColumns.length - 1].mode = 'ascending';
         // this.collectionSortEmitter.subscribe((sort: SortEvent) => this.setCollectionSort(sort));
@@ -743,7 +745,9 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         }
         this.isLoading = true;
         this.collectionProposals = null;
-        GlobalContainerComponent.finishPreloading();
+        if (!this.loadingTask.isDone) {
+            this.loadingTask.done();
+        }
 
         // set correct scope
         const request: RequestObject = Helper.deepCopy(
@@ -1010,7 +1014,9 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
                         this.toast.error(error);
                     }
                     this.isLoading = false;
-                    GlobalContainerComponent.finishPreloading();
+                    if (!this.loadingTask.isDone) {
+                        this.loadingTask.done();
+                    }
                 },
             );
         }

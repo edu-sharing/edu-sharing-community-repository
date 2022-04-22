@@ -58,7 +58,6 @@ export class OerComponent implements OnDestroy{
     private translations: TranslationsService,
     private translate : TranslateService) {
       this.translations.waitForInit().subscribe(()=> {
-        GlobalContainerComponent.finishPreloading();
           for(let i=0;i<this.TYPE_COUNT;i++) {
               this.columns.push([]);
               this.updateOptions(i)

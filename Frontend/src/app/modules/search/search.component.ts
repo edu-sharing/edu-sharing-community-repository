@@ -12,7 +12,6 @@ import {
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
 import {ActionbarHelperService} from '../../common/services/actionbar-helper';
-import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {MdsEditorWrapperComponent} from '../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
@@ -77,6 +76,7 @@ import { SearchFieldService } from 'src/app/common/ui/search-field/search-field.
 import { MdsService, MetadataSetInfo, SearchResults, SearchService as SearchApiService } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import {InteractionType, ListSortConfig, NodeEntriesDisplayType} from '../../core-ui-module/components/node-entries-wrapper/entries-model';
+import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 
 @Component({
     selector: 'es-search',
@@ -188,6 +188,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly didYouMeanSuggestion$ = this.searchApi
         .observeDidYouMeanSuggestion()
         .pipe(shareReplay(1));
+    private loadingTask = this.loadingScreen.addLoadingTask();
 
     constructor(
         private router: Router,
@@ -216,6 +217,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         private searchField: SearchFieldService,
         private searchApi: SearchApiService,
         private ngZone: NgZone,
+        private loadingScreen: LoadingScreenService,
     ) {
         // Subscribe early to make sure the suggestions are requested with search requests.
         this.didYouMeanSuggestion$.pipe(takeUntil(this.destroyed$)).subscribe();
@@ -1449,7 +1451,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
                 this.searchService.init();
                 this.mainNavRef.refreshBanner();
-                GlobalContainerComponent.finishPreloading();
+                if (!this.loadingTask.isDone) {
+                    this.loadingTask.done();
+                }
                 this.hasCheckbox = true;
                 this.searchService.reurl = null;
                 if (param.displayType != null) {
