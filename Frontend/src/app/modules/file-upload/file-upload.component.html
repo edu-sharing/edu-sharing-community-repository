@@ -4,6 +4,7 @@
 <es-workspace-management
     [parent]="parent"
     [(showUploadSelect)]="showUploadSelect"
+    (onUploadSelectCanceled)="cancel()"
     [uploadShowPicker]="true"
     [uploadMultiple]="false"
     [(filesToUpload)]="filesToUpload"

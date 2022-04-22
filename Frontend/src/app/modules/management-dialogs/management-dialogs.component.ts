@@ -170,6 +170,7 @@ export class WorkspaceManagementDialogsComponent  {
     @Output() nodeSidebarChange = new EventEmitter<Node>();
     @Input() showUploadSelect=false;
   @Output() showUploadSelectChange = new EventEmitter();
+  @Output() onUploadSelectCanceled = new EventEmitter();
   @Output() onClose=new EventEmitter();
   @Output() onCreate=new EventEmitter();
   @Output() onRefresh=new EventEmitter<Node[]|void>();
@@ -413,6 +414,10 @@ export class WorkspaceManagementDialogsComponent  {
    this.showUploadSelect=false
    this.showUploadSelectChange.emit(false);
  }
+  public cancelUploadSelect(){
+    this.closeUploadSelect();
+    this.onUploadSelectCanceled.emit(false);
+  }
  public closeContributor(node: Node){
      if(this.editorPending){
          this.editorPending=false;

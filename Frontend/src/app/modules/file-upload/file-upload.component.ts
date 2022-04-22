@@ -25,10 +25,6 @@ export class FileUploadComponent{
     _showUploadSelect: boolean;
 
     set showUploadSelect(showUploadSelect: boolean){
-        if(!showUploadSelect){
-            //@TODO: Tell the LMS to close?
-            window.close();
-        }
         this._showUploadSelect=showUploadSelect;
     }
     get showUploadSelect(){
@@ -43,6 +39,7 @@ export class FileUploadComponent{
        private configService : ConfigurationService,
        private storage : SessionStorageService,
        private temporaryStorage : TemporaryStorageService,
+       private events : FrameEventsService,
        private router : Router,
        private route : ActivatedRoute,
        private node : RestNodeService,
@@ -68,11 +65,17 @@ export class FileUploadComponent{
         this.filesToUpload=event;
     }
     onDone(node: Node[]){
-       if(node==null){
-           // canceled;
-           this._showUploadSelect=true;
-           return;
-       }
-       this.nodeHelper.addNodeToLms(node[0],this.reurl);
+        if(node==null){
+            // canceled;
+            this._showUploadSelect=true;
+            return;
+        }
+        this.nodeHelper.addNodeToLms(node[0],this.reurl);
+        window.close();
+    }
+
+    cancel() {
+        this.events.broadcastEvent(FrameEventsService.EVENT_UPLOAD_CANCELED);
+        window.close();
     }
 }
