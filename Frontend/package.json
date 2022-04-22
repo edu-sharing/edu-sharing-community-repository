@@ -42,7 +42,7 @@
     "@angular/platform-browser": "~12.2.16",
     "@angular/platform-browser-dynamic": "~12.2.16",
     "@angular/router": "~12.2.16",
-    "@ngx-translate/core": "~11.0.1",
+    "@ngx-translate/core": "^13.0.0",
     "@storybook/addon-actions": "^5.3.14",
     "@storybook/addon-knobs": "^5.3.14",
     "@tinymce/tinymce-angular": "^4.2.4",

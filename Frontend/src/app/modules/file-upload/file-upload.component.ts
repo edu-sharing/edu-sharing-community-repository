@@ -4,12 +4,10 @@ import {Router, Route, Params, ActivatedRoute, UrlSerializer} from '@angular/rou
 import {OAuthResult, LoginResult, AccessScope, Node} from '../../core-module/core.module';
 import {RouterComponent} from '../../router/router.component';
 import {TranslateService} from '@ngx-translate/core';
-import {Translation} from '../../core-ui-module/translation';
+import { TranslationsService } from '../../translations/translations.service';
 import {RestConnectorService} from '../../core-module/core.module';
 import {RestConstants} from '../../core-module/core.module';
-import {ConfigurationService} from '../../core-module/core.module';
 import {FrameEventsService} from '../../core-module/core.module';
-import {SessionStorageService} from '../../core-module/core.module';
 import {RestNodeService} from '../../core-module/core.module';
 import {TemporaryStorageService} from '../../core-module/core.module';
 import {NodeHelperService} from '../../core-ui-module/node-helper.service';
@@ -33,18 +31,16 @@ export class FileUploadComponent{
     parent: Node;
     private reurl: string;
    constructor(
-       private translate : TranslateService,
+       private translations: TranslationsService,
        private nodeHelper: NodeHelperService,
        private connector: RestConnectorService,
-       private configService : ConfigurationService,
-       private storage : SessionStorageService,
        private temporaryStorage : TemporaryStorageService,
        private events : FrameEventsService,
        private router : Router,
        private route : ActivatedRoute,
        private node : RestNodeService,
    ){
-       Translation.initialize(this.translate,this.configService,this.storage,this.route).subscribe(()=> {
+       this.translations.waitForInit().subscribe(()=> {
            this.connector.isLoggedIn(false).subscribe((login) => {
                if(login.statusCode === RestConstants.STATUS_CODE_OK) {
                    this.nodeHelper.getDefaultInboxFolder().subscribe((n) => {

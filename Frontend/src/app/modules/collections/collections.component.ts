@@ -9,7 +9,7 @@ import {
     ViewChild
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { Translation } from '../../core-ui-module/translation';
+import { TranslationsService } from '../../translations/translations.service';
 import * as EduData from '../../core-module/core.module';
 import {
     Collection,
@@ -30,7 +30,6 @@ import {
     RestMdsService,
     RestNodeService,
     RestOrganizationService,
-    SessionStorageService,
     TemporaryStorageService,
     UIService,
     CollectionReference,
@@ -328,7 +327,6 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         private iamService: RestIamService,
         private mdsService: RestMdsService,
         private actionbar: ActionbarHelperService,
-        private storage: SessionStorageService,
         private connector: RestConnectorService,
         private route: ActivatedRoute,
         private uiService: UIService,
@@ -339,6 +337,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         private bridge: BridgeService,
         private config: ConfigurationService,
         private translationService: TranslateService,
+        private translations: TranslationsService,
     ) {
         this.sortCollectionColumns[this.sortCollectionColumns.length - 1].mode = 'ascending';
         // this.collectionSortEmitter.subscribe((sort: SortEvent) => this.setCollectionSort(sort));
@@ -349,12 +348,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         this.collectionsColumns.push(new ListItem('COLLECTION', 'info'));
         this.collectionsColumns.push(new ListItem('COLLECTION', 'scope'));
         this.setCollectionId(RestConstants.ROOT);
-        Translation.initialize(
-            this.translationService,
-            this.config,
-            this.storage,
-            this.route,
-        ).subscribe(() => {
+        this.translations.waitForInit().subscribe(() => {
             this.connector.isLoggedIn().subscribe(
                 (data: LoginResult) => {
                     if (data.isValidLogin && data.currentScope == null) {

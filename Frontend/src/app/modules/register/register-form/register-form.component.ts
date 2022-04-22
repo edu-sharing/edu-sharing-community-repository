@@ -1,13 +1,11 @@
 import {Component, EventEmitter, Output} from '@angular/core';
 import {Toast} from '../../../core-ui-module/toast';
-import {Router, ActivatedRoute, UrlSerializer} from '@angular/router';
+import {Router, UrlSerializer} from '@angular/router';
 import {RegisterInformation} from '../../../core-module/core.module';
-import {TranslateService} from '@ngx-translate/core';
-import {Translation} from '../../../core-ui-module/translation';
+import { TranslationsService } from '../../../translations/translations.service';
 import {RestConnectorService} from '../../../core-module/core.module';
 import {ConfigurationService} from '../../../core-module/core.module';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
-import {SessionStorageService} from '../../../core-module/core.module';
 import {PlatformLocation} from '@angular/common';
 import {RestRegisterService} from '../../../core-module/core.module';
 import {FormControl, ValidationErrors, Validators} from '@angular/forms';
@@ -72,12 +70,10 @@ export class RegisterFormComponent{
               private urlSerializer:UrlSerializer,
               private router:Router,
               private registerService:RestRegisterService,
-              private translate:TranslateService,
+              private translations: TranslationsService,
               private configService:ConfigurationService,
-              private storage : SessionStorageService,
-              private route : ActivatedRoute,
             ){
-    Translation.initialize(translate,this.configService,this.storage,this.route).subscribe(()=> {
+    this.translations.waitForInit().subscribe(()=> {
         this.privacyUrl = this.configService.instant("privacyInformationUrl");
         this.requiredFields = this.configService.instant('register.requiredFields',['firstName']);
     });

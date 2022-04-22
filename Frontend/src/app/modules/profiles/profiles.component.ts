@@ -2,9 +2,8 @@
 import {forkJoin as observableForkJoin, Observable} from 'rxjs';
 
 import {Component, ElementRef, ViewChild} from '@angular/core';
-import {Translation} from '../../core-ui-module/translation';
-import {ProfileSettings, SessionStorageService, UserStats} from '../../core-module/core.module';
-import {TranslateService} from '@ngx-translate/core';
+import { TranslationsService } from '../../translations/translations.service';
+import {ProfileSettings, UserStats} from '../../core-module/core.module';
 import {DomSanitizer} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Toast} from '../../core-ui-module/toast';
@@ -36,13 +35,12 @@ export class ProfilesComponent {
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private connector: RestConnectorService,
-              private translate: TranslateService,
+              private translations: TranslationsService,
               private router: Router,
               private config: ConfigurationService,
               private sanitizer: DomSanitizer,
-              private storage : SessionStorageService,
               private iamService: RestIamService) {
-    Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
+    this.translations.waitForInit().subscribe(() => {
       route.params.subscribe((params)=> {
         this.editProfileUrl=this.config.instant('editProfileUrl');
         this.editProfile=this.config.instant('editProfile',true);

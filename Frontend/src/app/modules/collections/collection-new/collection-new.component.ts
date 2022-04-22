@@ -12,7 +12,7 @@ import {
 
 import {Router, Params, ActivatedRoute} from "@angular/router";
 
-import {Translation} from '../../../core-ui-module/translation';
+import { TranslationsService } from '../../../translations/translations.service';
 
 import * as EduData from "../../../core-module/core.module";
 
@@ -37,7 +37,6 @@ import {LocalPermissions} from "../../../core-module/core.module";
 import {Collection} from "../../../core-module/core.module";
 import {RestConnectorService} from "../../../core-module/core.module";
 import {ConfigurationService} from "../../../core-module/core.module";
-import {SessionStorageService} from "../../../core-module/core.module";
 import {UIConstants} from "../../../core-module/ui/ui-constants";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
 import {TranslateService} from "@ngx-translate/core";
@@ -200,13 +199,13 @@ export class CollectionNewComponent implements EventListener{
       private toast : Toast,
       private bridge : BridgeService,
       private temporaryStorage : TemporaryStorageService,
-      private storage : SessionStorageService,
       private zone: NgZone,
       private sanitizer: DomSanitizer,
       private config : ConfigurationService,
+      private translations: TranslationsService,
       private translationService:TranslateService) {
       this.eventService.addListener(this);
-    Translation.initialize(this.translationService,this.config,this.storage,this.route).subscribe(()=>{
+    this.translations.waitForInit().subscribe(()=>{
       this.connector.isLoggedIn().subscribe((data) => {
         this.mdsService.getSets().subscribe((mdsSets) => {
           const sets = ConfigurationHelper.filterValidMds(RestConstants.HOME_REPOSITORY, mdsSets.metadatasets, this.config);

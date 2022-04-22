@@ -16,7 +16,7 @@ import {
 import {Toast} from '../../../core-ui-module/toast';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
-import {Translation} from '../../../core-ui-module/translation';
+import { TranslationsService } from '../../../translations/translations.service';
 import {DefaultGroups, ElementType, OptionGroup, OptionItem, Scope, Target} from '../../../core-ui-module/option-item';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
@@ -50,7 +50,6 @@ import {
     RestSearchService,
     RestToolService,
     RestUsageService,
-    SessionStorageService,
     TemporaryStorageService, UIService
 } from '../../../core-module/core.module';
 import {MdsHelper} from '../../../core-module/rest/mds-helper';
@@ -96,6 +95,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     }
     constructor(
       private translate : TranslateService,
+      private translations : TranslationsService,
       private uiService : UIService,
       private tracking : RestTrackingService,
       private nodeHelper: NodeHelperService,
@@ -119,7 +119,6 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
       private toast : Toast,
       private cd: ChangeDetectorRef,
       private config : ConfigurationService,
-      private storage : SessionStorageService,
       private route : ActivatedRoute,
       private networkService : RestNetworkService,
       private _ngZone: NgZone,
@@ -132,7 +131,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
       this.frame.addListener(this);
       this.renderHelper.setViewContainerRef(viewContainerRef);
 
-        Translation.initialize(translate,config,storage,route).subscribe(()=> {
+        this.translations.waitForInit().subscribe(()=> {
         this.banner = ConfigurationHelper.getBanner(this.config);
         this.connector.setRoute(this.route);
         this.networkService.prepareCache();

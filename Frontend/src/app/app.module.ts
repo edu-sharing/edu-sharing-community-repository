@@ -93,6 +93,7 @@ import { NodeEmbedComponent } from './common/ui/node-embed/node-embed.component'
 import {EduSharingApiConfigurationParams} from 'ngx-edu-sharing-api';
 import {ErrorHandlerService} from './core-ui-module/error-handler.service';
 import { Toast } from './core-ui-module/toast';
+import { TranslationsModule } from './translations/translations.module';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -174,6 +175,7 @@ import { Toast } from './core-ui-module/toast';
         IMPORTS,
         CommonModule,
         EduSharingApiModule.forRoot(),
+        TranslationsModule.forRoot(),
         NgxSliderModule,
         DragDropModule,
         extensionImports,

@@ -2,7 +2,7 @@
 import {Component, ViewChild, HostListener, ElementRef, OnDestroy} from '@angular/core';
 import {Router, ActivatedRoute, Params} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
-import {Translation} from '../../core-ui-module/translation';
+import { TranslationsService } from '../../translations/translations.service';
 import {ListItem, RestSearchService} from '../../core-module/core.module';
 import {RestNodeService} from '../../core-module/core.module';
 import {RestConstants} from '../../core-module/core.module';
@@ -10,8 +10,6 @@ import {RestConnectorService} from '../../core-module/core.module';
 import {Node, NodeList, LoginResult} from '../../core-module/core.module';
 import {OptionItem, Scope} from '../../core-ui-module/option-item';
 import {TemporaryStorageService} from '../../core-module/core.module';
-import {ConfigurationService} from '../../core-module/core.module';
-import {SessionStorageService} from '../../core-module/core.module';
 import {UIConstants} from '../../core-module/ui/ui-constants';
 import {RestMdsService} from '../../core-module/core.module';
 import {RestHelper} from '../../core-module/core.module';
@@ -57,10 +55,9 @@ export class OerComponent implements OnDestroy{
     private searchService: RestSearchService,
     private mdsService:RestMdsService,
     private storage : TemporaryStorageService,
-    private session : SessionStorageService,
-    private config : ConfigurationService,
+    private translations: TranslationsService,
     private translate : TranslateService) {
-      Translation.initialize(translate,this.config,this.session,this.route).subscribe(()=> {
+      this.translations.waitForInit().subscribe(()=> {
         GlobalContainerComponent.finishPreloading();
           for(let i=0;i<this.TYPE_COUNT;i++) {
               this.columns.push([]);

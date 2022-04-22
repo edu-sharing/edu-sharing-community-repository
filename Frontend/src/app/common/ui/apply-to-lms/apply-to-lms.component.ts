@@ -12,8 +12,7 @@ import {Toast} from '../../../core-ui-module/toast';
 import {SearchService} from '../../../modules/search/search.service';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 import {UIConstants} from '../../../core-module/ui/ui-constants';
-import {Translation} from '../../../core-ui-module/translation';
-import {TranslateService} from '@ngx-translate/core';
+import { TranslationsService } from '../../../translations/translations.service';
 import {RestLocatorService} from '../../../core-module/core.module';
 import {RouterHelper} from '../../../core-ui-module/router.helper';
 import {PlatformLocation} from '@angular/common';
@@ -37,11 +36,9 @@ export class ApplyToLmsComponent {
     private nodeApi : RestNodeService,
     private toast : Toast,
     private events : FrameEventsService,
-    private translate : TranslateService,
-    private config : ConfigurationService,
+    private translations : TranslationsService,
     private temporaryStorage : TemporaryStorageService,
     private nodeHelper: NodeHelperService,
-    private storage : SessionStorageService,
     private router : Router,
     private platformLocation : PlatformLocation,
     private route : ActivatedRoute,
@@ -61,7 +58,7 @@ export class ApplyToLmsComponent {
               this.node = data.node;
               this.forward();
             },(error:any)=> {
-              Translation.initialize(this.translate,this.config,this.storage,this.route).subscribe(()=> {
+              this.translations.waitForInit().subscribe(()=> {
                 this.toast.error(error);
               });
             }
