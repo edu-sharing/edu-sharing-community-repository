@@ -545,6 +545,7 @@ export class OptionsHelperService implements OnDestroy {
         editConnectorNode.customShowCallback = (nodes) => {
             return this.connectors.connectorSupportsEdit(nodes ? nodes[0] : null) != null;
         }
+        editConnectorNode.elementType = [ElementType.Node, ElementType.NodeChild];
         editConnectorNode.group = DefaultGroups.View;
         editConnectorNode.priority = 20;
         editConnectorNode.showAsAction = true;
