@@ -9,7 +9,7 @@ import {DialogButton} from '../../../core-module/core.module';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {trigger} from '@angular/animations';
 import {ProgressType} from '../modal-dialog/modal-dialog.component';
-import {CardType} from '../../../core-ui-module/components/card/card.component';
+import {CardType} from '../../../shared/components/card/card.component';
 import {MessageType} from '../../../core-module/ui/message-type';
 
 @Component({

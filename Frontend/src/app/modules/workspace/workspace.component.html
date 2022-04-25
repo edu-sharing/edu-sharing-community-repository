@@ -1,6 +1,6 @@
 <div class="frame" cdkDropListGroup>
 
-  <es-main-nav
+  <!-- <es-main-nav
     #mainNav
     [title]="isSafe ? 'WORKSPACE.TITLE_SAFE' : 'WORKSPACE.TITLE'"
     [currentScope]="isSafe ? 'safe' : 'workspace'"
@@ -14,7 +14,7 @@
     (onSearch)="doSearch($event)"
   >
 
-  </es-main-nav>
+  </es-main-nav> -->
 <div *ngIf="isBlocked" class="isBlocked">{{'NO_PERMISSIONS_FOR_SCOPE'|translate}}</div>
 <div *ngIf="!isBlocked" [class.hide]="globalProgress">
 
@@ -85,7 +85,6 @@
                       [(reorderDialog)]="reorderDialog"
                       [preventKeyevents]="cardHasOpenModals$ | async"
                       [dataSource]="dataSource"
-                      [mainNav]="mainNav"
                       [actionbar]="actionbar"
                       (onSearchGlobal)="searchGlobal($event)"
                       (onDrop)="handleDrop($event)"

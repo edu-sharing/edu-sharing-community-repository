@@ -34,7 +34,6 @@ import {
     OPTIONS_HELPER_CONFIG,
 } from '../../options-helper.service';
 import { ActionbarComponent } from '../../../common/ui/actionbar/actionbar.component';
-import { MainNavComponent } from '../../../common/ui/main-nav/main-nav.component';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
@@ -73,7 +72,7 @@ import {
     ListOptions,
     ListOptionsConfig, NodeEntriesDisplayType
 } from '../node-entries-wrapper/entries-model';
-import { MainNavService } from '../../../common/services/main-nav.service';
+import { MainNavService } from '../../../main/navigation/main-nav.service';
 
 
 @Component({
@@ -292,11 +291,6 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
      */
     @Input() viewType = ListTableComponent.VIEW_TYPE_LIST;
 
-    /**
-     * Link to the MainNavComponent
-     * Required to refresh particular events when triggered, e.g. a node was bookmarked
-     */
-    @Input() mainNav: MainNavComponent;
     /**
      * link to the actionbar component that is in use
      */

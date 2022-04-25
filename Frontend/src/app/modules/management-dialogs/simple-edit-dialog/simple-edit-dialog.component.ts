@@ -10,7 +10,7 @@ import {SimpleEditMetadataComponent} from './simple-edit-metadata/simple-edit-me
 import {SimpleEditInviteComponent} from './simple-edit-invite/simple-edit-invite.component';
 import {SimpleEditLicenseComponent} from './simple-edit-license/simple-edit-license.component';
 import {forkJoin, Observable} from 'rxjs';
-import {CardType} from '../../../core-ui-module/components/card/card.component';
+import {CardType} from '../../../shared/components/card/card.component';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 
 @Component({

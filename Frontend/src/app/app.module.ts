@@ -31,9 +31,6 @@ import {ButtonsTestComponent} from './common/test/buttons/buttons-test.component
 import {InputsTestComponent} from './common/test/inputs/inputs-test.component';
 import {UserAvatarTestComponent} from './common/test/user-avatar/user-avatar-test.component';
 import {ModalTestComponent} from './common/test/modal/modal-test.component';
-import { MainMenuSidebarComponent } from './common/ui/main-menu-sidebar/main-menu-sidebar.component';
-import { MainMenuBottomComponent } from './common/ui/main-menu-bottom/main-menu-bottom.component';
-import { MainMenuDropdownComponent } from './common/ui/main-menu-dropdown/main-menu-dropdown.component';
 import { LuceneTemplateMemoryComponent } from './modules/admin/lucene-template-memory/lucene-template-memory.component';
 import { MdsEditorWrapperComponent } from './common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { MdsEditorCardComponent } from './common/ui/mds-editor/mds-editor-card/mds-editor-card.component';
@@ -72,9 +69,7 @@ import { MdsEditorWidgetAuthorityComponent } from './common/ui/mds-editor/widget
 import { extensionDeclarations } from './extension/extension-declarations';
 import { extensionImports } from './extension/extension-imports';
 import {ResizableModule} from 'angular-resizable-element';
-import { MainMenuButtonsComponent } from './common/ui/main-menu-buttons/main-menu-buttons.component';
 import { MdsEditorWidgetFacetListComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-facet-list/mds-editor-widget-facet-list.component';
-import { SearchFieldComponent } from './common/ui/search-field/search-field.component';
 import { MdsEditorComponent } from './common/ui/mds-editor/mds-editor.component';
 import { SearchFieldFacetsComponent } from './common/ui/mds-editor/search-field-facets/search-field-facets.component';
 import { LabelPipe } from './common/ui/mds-editor/shared/label.pipe';
@@ -95,6 +90,7 @@ import {ErrorHandlerService} from './core-ui-module/error-handler.service';
 import { Toast } from './core-ui-module/toast';
 import { TranslationsModule } from './translations/translations.module';
 import { MainModule } from './main/main.module';
+import { SharedModule } from './shared/shared.module';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -123,9 +119,6 @@ import { MainModule } from './main/main.module';
         DECLARATIONS_SHARING,
         DECLARATIONS_SHARE_APP,
         DECLARATIONS_SERVICES,
-        MainMenuSidebarComponent,
-        MainMenuBottomComponent,
-        MainMenuDropdownComponent,
         LuceneTemplateMemoryComponent,
         MdsEditorWrapperComponent,
         MdsEditorCardComponent,
@@ -160,9 +153,7 @@ import { MainModule } from './main/main.module';
         RegisterCustomPropertyDirective,
         OnAttributeChangeDirective,
         extensionDeclarations,
-        MainMenuButtonsComponent,
         MdsEditorWidgetFacetListComponent,
-        SearchFieldComponent,
         MdsEditorComponent,
         SearchFieldFacetsComponent,
         LabelPipe,
@@ -174,7 +165,7 @@ import { MainModule } from './main/main.module';
     ],
     imports: [
         IMPORTS,
-        CommonModule,
+        SharedModule,
         MainModule,
         EduSharingApiModule.forRoot(),
         TranslationsModule.forRoot(),

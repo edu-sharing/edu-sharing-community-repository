@@ -33,7 +33,7 @@ import {
 import {BridgeService} from '../core-bridge-module/bridge.service';
 import {MessageType} from '../core-module/ui/message-type';
 import {Inject, Injectable, InjectionToken, Injector, OnDestroy, Optional} from '@angular/core';
-import {CardComponent} from './components/card/card.component';
+import {CardComponent} from '../shared/components/card/card.component';
 import {TranslateService} from '@ngx-translate/core';
 import {RestNodeService} from '../core-module/rest/services/rest-node.service';
 import {
@@ -47,19 +47,19 @@ import {
 import {Toast} from './toast';
 import {HttpClient} from '@angular/common/http';
 import {ActivatedRoute, Params, Router} from '@angular/router';
-import {DropdownComponent} from './components/dropdown/dropdown.component';
+import {DropdownComponent} from '../shared/components/dropdown/dropdown.component';
 import {ConfigOptionItem, NodeHelperService} from './node-helper.service';
 import {PlatformLocation} from '@angular/common';
 import {
     ListEventInterface,
     NodeEntriesDisplayType
 } from './components/node-entries-wrapper/entries-model';
-import {MainNavService} from '../common/services/main-nav.service';
 import {FormBuilder} from '@angular/forms';
 import { NodeEmbedService } from '../common/ui/node-embed/node-embed.service';
 import { NodeStoreService } from '../modules/search/node-store/node-store.service';
 import {NodeEntriesDataType} from './components/node-entries/node-entries.component';
 import {isArray} from 'rxjs/internal/util/isArray';
+import { MainNavService } from '../main/navigation/main-nav.service';
 
 
 export class OptionsHelperConfig {

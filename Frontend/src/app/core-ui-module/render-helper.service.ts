@@ -11,7 +11,7 @@ import { CommentsListComponent } from '../modules/management-dialogs/node-commen
 import { NodeEntriesDisplayType } from './components/node-entries-wrapper/entries-model';
 import { NodeDataSource } from './components/node-entries-wrapper/node-data-source';
 import { NodeEntriesWrapperComponent } from './components/node-entries-wrapper/node-entries-wrapper.component';
-import { SpinnerComponent } from './components/spinner/spinner.component';
+import { SpinnerComponent } from '../shared/components/spinner/spinner.component';
 import { UIHelper } from './ui-helper';
 
 @Injectable()

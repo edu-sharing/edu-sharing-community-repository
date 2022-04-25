@@ -34,7 +34,7 @@ import {RestSearchService} from '../../core-module/core.module';
 import {RestHelper} from '../../core-module/core.module';
 import {Observable, Observer} from 'rxjs';
 import {RestNetworkService} from '../../core-module/core.module';
-import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {MainNavComponent} from '../../main/navigation/main-nav/main-nav.component';
 import {CustomHelper} from '../../common/custom-helper';
 import {DateHelper} from '../../core-ui-module/DateHelper';
 import {CsvHelper} from '../../core-module/csv.helper';
@@ -44,7 +44,7 @@ import IEditorOptions = monaco.editor.IEditorOptions;
 import {NgxEditorModel} from 'ngx-monaco-editor';
 import {Scope} from '../../core-ui-module/option-item';
 import {AboutService} from 'ngx-edu-sharing-api';
-import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
+import { SkipTarget } from '../../main/navigation/skip-nav/skip-nav.service';
 import {AuthoritySearchMode} from '../../common/ui/authority-search-input/authority-search-input.component';
 import {PlatformLocation} from '@angular/common';
 

@@ -13,7 +13,7 @@ import {TemporaryStorageService} from '../../core-module/core.module';
 import {UIConstants} from '../../core-module/ui/ui-constants';
 import {RestMdsService} from '../../core-module/core.module';
 import {RestHelper} from '../../core-module/core.module';
-import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {MainNavComponent} from '../../main/navigation/main-nav/main-nav.component';
 import {MdsHelper} from '../../core-module/rest/mds-helper';
 import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {Helper} from '../../core-module/rest/helper';

@@ -44,9 +44,9 @@ import {ColorHelper, PreferredColor} from '../../../core-module/ui/color-helper'
 import {DomSanitizer} from "@angular/platform-browser";
 import {TemporaryStorageService} from "../../../core-module/core.module";
 import {RegisterResetPasswordComponent} from "../../register/register-reset-password/register-reset-password.component";
-import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
+import {MainNavComponent} from '../../../main/navigation/main-nav/main-nav.component';
 import {UIHelper} from "../../../core-ui-module/ui-helper";
-import {AuthorityNamePipe} from "../../../core-ui-module/pipes/authority-name.pipe";
+import {AuthorityNamePipe} from "../../../shared/pipes/authority-name.pipe";
 import {BridgeService} from '../../../core-bridge-module/bridge.service';
 import {WorkspaceShareComponent} from "../../workspace/share/share.component";
 import {MdsMetadatasets} from '../../../core-module/core.module';

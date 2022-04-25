@@ -1,7 +1,7 @@
 <div id="eduSearchWrapper" (window:resize)="onResize()">
   <es-tutorial [element]="tutorialElement" [heading]="'SEARCH.TUTORIAL_HEADING'" [description]="'SEARCH.TUTORIAL_DESCRIPTION'" [showSkip]="false"
   ></es-tutorial>
-  <es-main-nav #mainNav
+  <!-- <es-main-nav #mainNav
     [hidden]="!mainnav"
     [title]="'SEARCH.TITLE'"
     [currentScope]="'search'"
@@ -14,7 +14,7 @@
     [(searchQuery)]="searchService.searchTerm"
     (onSearch)="applyParameters('mainnav')"
     (onCreate)="list.addVirtualNodes($event)"
-  ></es-main-nav>
+  ></es-main-nav> -->
 
   <div class="rowRepositories scrollWithBanner"
        [class.no-mainnav]="!mainnav"

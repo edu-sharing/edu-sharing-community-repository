@@ -29,7 +29,6 @@ import {
 } from '../../../core-module/rest/data-object';
 import {ListItem} from '../../../core-module/ui/list-item';
 import {OptionItem} from '../../option-item';
-import {MainNavService} from '../../../common/services/main-nav.service';
 import {
     FetchEvent,
     GridConfig,
@@ -44,6 +43,7 @@ import {
 } from './entries-model';
 import {NodeHelperService} from '../../node-helper.service';
 import {NodeEntriesTemplatesService} from '../node-entries/node-entries-templates.service';
+import { MainNavService } from '../../../main/navigation/main-nav.service';
 
 @Component({
     selector: 'es-node-entries-wrapper',

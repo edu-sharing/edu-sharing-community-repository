@@ -7,7 +7,6 @@ import {
     OnInit,
     HostListener, Injector, EventEmitter
 } from '@angular/core';
-import { MainNavService } from '../common/services/main-nav.service';
 import { MdsTestComponent } from '../common/test/mds-test/mds-test.component';
 import { ApplyToLmsComponent } from '../common/ui/apply-to-lms/apply-to-lms.component';
 import { EmbedComponent } from '../common/ui/embed/embed.component';
@@ -47,6 +46,7 @@ import { printCurrentTaskInfo } from './track-change-detection';
 import { environment } from '../../environments/environment';
 import { TranslationsService } from '../translations/translations.service';
 import { LoadingScreenService } from '../main/loading-screen/loading-screen.service';
+import { MainNavService } from '../main/navigation/main-nav.service';
 
 @Component({
     selector: 'es-router',

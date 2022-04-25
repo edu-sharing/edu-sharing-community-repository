@@ -1,9 +1,9 @@
-<es-main-nav
+<!-- <es-main-nav
   #mainNav
   [title]="'ADMIN.TITLE'"
   [currentScope]="'admin'"
   [searchEnabled]="false"
-></es-main-nav>
+></es-main-nav> -->
 <es-modal-dialog
   [title]="showWarning ? 'ADMIN.WARNING_TITLE' : null"
   [message]="'ADMIN.WARNING_INFO'"
@@ -770,7 +770,6 @@
                    [viewType]="0"
                    [columns]="searchColumns"
                    [scope]="SCOPES.Admin"
-                   [mainNav]="mainNav"
                    [actionbar]="actionbarComponent"
                    [hasHeading]="true"
                    [nodes]="searchResponse.nodes"

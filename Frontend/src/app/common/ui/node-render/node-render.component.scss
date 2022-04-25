@@ -33,10 +33,10 @@ a, a:hover, a:visited, a:active {
   font-size: 30px;
   color:#fff;
 }
+::ng-deep .topBar-render {
+  display: none!important;
+}
 :host ::ng-deep{
-  .topBar-render{
-    display: none!important;
-  }
   a.edusharing_rendering_content{
     background-color: $primary;
     // `&.cdk-keyboard-focused` would be better, but we cannot trivially apply the

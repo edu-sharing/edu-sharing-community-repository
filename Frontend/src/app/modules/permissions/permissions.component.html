@@ -1,12 +1,12 @@
 <ng-container *ngIf="!disabled || isAdmin">
-  <es-main-nav #mainNav
+  <!-- <es-main-nav #mainNav
             [title]="'PERMISSIONS.TITLE'"
             [currentScope]="'permissions'"
             [searchEnabled]="tab!=3"
             [searchQuery]="searchQuery"
             [searchPlaceholder]="'PERMISSIONS.SEARCH_'+TABS[tab]"
             (onSearch)="doSearch($event.query)"
-  ></es-main-nav>
+  ></es-main-nav> -->
   <div
     role="main"
     esSkipTarget="MAIN_CONTENT"
@@ -22,7 +22,6 @@
       <mat-tab label="{{'PERMISSIONS.TAB.ORG' | translate}}">
         <ng-template matTabContent>
           <es-permissions-authorities
-                  [mainNav]="mainNav"
                   [mode]="'ORG'"
                   [searchQuery]="searchQuery"
                   (onSelection)="selected = $event ? $any($event[0]) : null"
@@ -32,7 +31,6 @@
       <mat-tab label="{{'PERMISSIONS.TAB.GROUP' | translate}}{{selected ? ' ('+selected.profile.displayName+')' : ''}}" *ngIf="selected || isAdmin">
         <ng-template matTabContent>
           <es-permissions-authorities
-                  [mainNav]="mainNav"
                   [mode]="'GROUP'"
                   [searchQuery]="searchQuery"
                   [org]="selected"
@@ -44,7 +42,6 @@
       <mat-tab label="{{'PERMISSIONS.TAB.USER' | translate}}{{selected ? ' ('+selected.profile.displayName+')' : ''}}" *ngIf="selected || isAdmin">
         <ng-template matTabContent>
           <es-permissions-authorities
-                  [mainNav]="mainNav"
                   [mode]="'USER'"
                   [searchQuery]="searchQuery"
                   [org]="selected"

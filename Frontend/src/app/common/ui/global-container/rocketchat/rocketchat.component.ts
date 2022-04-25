@@ -1,7 +1,7 @@
 import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostListener, Input, NgZone, Output, ViewChild} from "@angular/core";
 import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
 import {trigger} from "@angular/animations";
-import {MainNavComponent} from "../../main-nav/main-nav.component";
+import {MainNavComponent} from "../../../../main/navigation/main-nav/main-nav.component";
 import {EventListener,FrameEventsService} from "../../../../core-module/rest/services/frame-events.service";
 import {UIAnimation} from "../../../../core-module/ui/ui-animation";
 import {ConfigurationService, RestConnectorService} from '../../../../core-module/core.module';

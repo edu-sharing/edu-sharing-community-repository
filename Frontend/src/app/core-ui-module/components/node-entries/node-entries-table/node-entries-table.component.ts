@@ -15,7 +15,7 @@ import { ListItem } from '../../../../core-module/ui/list-item';
 import { DragCursorDirective } from '../../../directives/drag-cursor.directive';
 import { NodeEntriesService } from '../../../node-entries.service';
 import { Target } from '../../../option-item';
-import { DropdownComponent } from '../../dropdown/dropdown.component';
+import { DropdownComponent } from '../../../../shared/components/dropdown/dropdown.component';
 import { ClickSource, InteractionType } from '../../node-entries-wrapper/entries-model';
 import {UIService} from '../../../../core-module/rest/services/ui.service';
 import {NodeEntriesDataType} from '../node-entries.component';

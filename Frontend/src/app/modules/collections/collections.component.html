@@ -1,4 +1,4 @@
-<es-main-nav
+<!-- <es-main-nav
   *ngIf="mainnav"
   #mainNav
   [create]="{
@@ -10,7 +10,7 @@
   [currentScope]="'collections'"
   [searchEnabled]="false"
   (onCreate)="addNodesToCollection($event)"
-></es-main-nav>
+></es-main-nav> -->
 <es-tutorial
   [element]="tutorialElement"
   [heading]="'COLLECTIONS.TUTORIAL_HEADING'"
@@ -332,7 +332,6 @@
               [dragDrop]="false"
               [hasIcon]="true"
               [columns]="proposalColumns"
-              [mainNav]="mainNavRef"
               [scope]="SCOPES.CollectionsReferences"
               [isClickable]="true"
               (clickRow)="onContentClick($event.node)"

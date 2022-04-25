@@ -25,7 +25,7 @@ import {CustomOptions, Scope} from '../../../core-ui-module/option-item';
 import {Toast} from '../../../core-ui-module/toast';
 import {Helper} from '../../../core-module/rest/helper';
 import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
-import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
+import {MainNavComponent} from '../../../main/navigation/main-nav/main-nav.component';
 import {ListTableComponent} from '../../../core-ui-module/components/list-table/list-table.component';
 import {DragNodeTarget, DropData} from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
 import {compareNumbers} from '@angular/compiler-cli/src/diagnostics/typescript_version';
@@ -157,7 +157,6 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     @Input() reorderDialog = false;
     @Output() reorderDialogChange = new EventEmitter<boolean>();
     @Input() preventKeyevents:boolean;
-    @Input() mainNav:MainNavComponent;
     @Input() actionbar:ActionbarComponent;
 
     totalCount: number;

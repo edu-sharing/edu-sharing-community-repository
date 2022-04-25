@@ -54,7 +54,7 @@ import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 import { TranslateService } from '@ngx-translate/core';
 import { Location } from '@angular/common';
 import { Helper } from '../../core-module/rest/helper';
-import { MainNavComponent } from '../../common/ui/main-nav/main-nav.component';
+import { MainNavComponent } from '../../main/navigation/main-nav/main-nav.component';
 import {ColorHelper, PreferredColor} from '../../core-module/ui/color-helper';
 import { ActionbarHelperService } from '../../common/services/actionbar-helper';
 import { MdsHelper } from '../../core-module/rest/mds-helper';
@@ -64,7 +64,6 @@ import { HttpClient } from '@angular/common/http';
 import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../core-ui-module/options-helper.service';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 import {DropAction, DropData} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
-import {MainNavService} from '../../common/services/main-nav.service';
 import {
     ManagementEvent,
     ManagementEventType
@@ -85,6 +84,7 @@ import {
     ListEventInterface, ListSortConfig, NodeEntriesDisplayType
 } from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
+import { MainNavService } from '../../main/navigation/main-nav.service';
 
 // component class
 @Component({
@@ -118,7 +118,6 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
 
-    @ViewChild('mainNav') mainNavRef: MainNavComponent;
     @ViewChild('actionbarCollection') actionbarCollection: ActionbarComponent;
     @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
     @ViewChild('listCollections') listCollections: ListTableComponent;
@@ -182,7 +181,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         'OPTIONS.ADD_OBJECT',
         'cloud_upload',
         () => {
-            this.mainNavRef.createMenu.showUploadSelect = true
+            this.mainNavService.getMainNav().topBar.createMenu.showUploadSelect = true
         },
     );
     collectionProposals: AbstractList<ProposalNode>;
@@ -1309,9 +1308,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         this.collectionContentOriginal = Helper.deepCopy(
             this.collectionContent,
         );
-        if (this.mainNavRef) {
-            this.mainNavRef.refreshBanner();
-        }
+        this.mainNavService.getMainNav()?.refreshBanner();
 
         // Cannot trivially reference the add button for the tutorial with
         // current implementation of generic options.

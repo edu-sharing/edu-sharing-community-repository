@@ -44,7 +44,7 @@ import {ActionbarHelperService} from '../../common/services/actionbar-helper';
 import {Helper} from '../../core-module/rest/helper';
 import {CordovaService} from '../../common/services/cordova.service';
 import {HttpClient} from '@angular/common/http';
-import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {MainNavComponent} from '../../main/navigation/main-nav/main-nav.component';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {WorkspaceExplorerComponent} from './explorer/explorer.component';
@@ -52,7 +52,7 @@ import {CardService} from '../../core-ui-module/card.service';
 import {Observable, Subject} from 'rxjs';
 import {delay} from 'rxjs/operators';
 import {ListTableComponent} from '../../core-ui-module/components/list-table/list-table.component';
-import {SkipTarget} from '../../common/ui/skip-nav/skip-nav.service';
+import {SkipTarget} from '../../main/navigation/skip-nav/skip-nav.service';
 import {DragNodeTarget} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
 import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
 import {
@@ -60,7 +60,7 @@ import {
     NodeRoot
 } from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
-import { MainNavService } from '../../common/services/main-nav.service';
+import { MainNavService } from '../../main/navigation/main-nav.service';
 
 @Component({
     selector: 'es-workspace-main',

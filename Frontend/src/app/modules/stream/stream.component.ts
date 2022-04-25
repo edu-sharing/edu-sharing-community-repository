@@ -37,7 +37,7 @@ import {trigger} from '@angular/animations';
 import {CordovaService} from '../../common/services/cordova.service';
 import * as moment from 'moment';
 import {ActionbarHelperService} from '../../common/services/actionbar-helper';
-import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {MainNavComponent} from '../../main/navigation/main-nav/main-nav.component';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 import {filter, pairwise} from 'rxjs/operators';

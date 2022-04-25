@@ -12,7 +12,7 @@ import {
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
 import {ActionbarHelperService} from '../../common/services/actionbar-helper';
-import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {MainNavComponent} from '../../main/navigation/main-nav/main-nav.component';
 import {MdsEditorWrapperComponent} from '../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {
@@ -72,12 +72,12 @@ import {
 } from '../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
 import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
-import { SearchFieldService } from 'src/app/common/ui/search-field/search-field.service';
+import { SearchFieldService } from 'src/app/main/navigation/search-field/search-field.service';
 import { MdsService, MetadataSetInfo, SearchResults, SearchService as SearchApiService } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import {InteractionType, ListSortConfig, NodeEntriesDisplayType} from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
-import { MainNavService } from '../../common/services/main-nav.service';
+import { MainNavService } from '../../main/navigation/main-nav.service';
 
 @Component({
     selector: 'es-search',

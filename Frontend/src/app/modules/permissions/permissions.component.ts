@@ -10,7 +10,7 @@ import {RestConnectorService} from "../../core-module/core.module";
 import {RestOrganizationService} from "../../core-module/core.module";
 import {ConfigurationService} from "../../core-module/core.module";
 import {RestHelper} from "../../core-module/core.module";
-import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {MainNavComponent} from '../../main/navigation/main-nav/main-nav.component';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 
 @Component({

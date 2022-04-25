@@ -13,7 +13,7 @@ import {RestHelper} from "../../core-module/core.module";
 import {UIConstants} from "../../core-module/ui/ui-constants";
 import {RestConstants} from "../../core-module/core.module";
 import {HttpClient} from '@angular/common/http';
-import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {MainNavComponent} from '../../main/navigation/main-nav/main-nav.component';
 import { map } from 'rxjs/operators';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 

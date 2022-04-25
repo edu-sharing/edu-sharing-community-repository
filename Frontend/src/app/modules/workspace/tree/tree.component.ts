@@ -8,7 +8,7 @@ import {
 import { Helper } from '../../../core-module/rest/helper';
 import { OptionItem } from '../../../core-ui-module/option-item';
 import { DropData, DragData } from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
-import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
+import {MainNavComponent} from '../../../main/navigation/main-nav/main-nav.component';
 import {WorkspaceMainComponent} from '../workspace.component';
 import {
     DropSource,
