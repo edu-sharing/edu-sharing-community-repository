@@ -60,6 +60,7 @@ import {
     NodeRoot
 } from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
+import { MainNavService } from '../../common/services/main-nav.service';
 
 @Component({
     selector: 'es-workspace-main',
@@ -183,7 +184,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             this.storage.set(this.getLastLocationStorageId(), this.currentFolder.ref.id);
         }
         // close sidebar, if open
-        this.mainNavRef.management.closeSidebar();
+        this.mainNavService.getDialogs().closeSidebar();
     }
     constructor(
         private toast: Toast,
@@ -211,6 +212,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         private card: CardService,
         private ngZone: NgZone,
         private loadingScreen: LoadingScreenService,
+        private mainNavService: MainNavService,
     ) {
         this.event.addListener(this);
         this.translations.waitForInit().subscribe(() => {
@@ -395,7 +397,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
                     this.node.getNodeMetadata(params.file, [RestConstants.ALL]).subscribe((paramNode) => {
                         this.setSelection([paramNode.node]);
                         this.parameterNode = paramNode.node;
-                        this.mainNavRef.management.nodeSidebar = paramNode.node;
+                        this.mainNavService.getDialogs().nodeSidebar = paramNode.node;
                     });
                 }
 
@@ -420,7 +422,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         });
     }
     public resetWorkspace() {
-        if (this.mainNavRef.management.nodeSidebar && this.parameterNode) {
+        if (this.mainNavService.getDialogs().nodeSidebar && this.parameterNode) {
             this.setSelection([this.parameterNode]);
         }
     }
@@ -514,7 +516,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         this.closeMetadata();
     }
     private closeMetadata() {
-        this.mainNavRef.management.closeSidebar();
+        this.mainNavService.getDialogs().closeSidebar();
     }
     private openDirectory(id: string) {
         this.routeTo(this.root, id);
@@ -841,5 +843,9 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
                     new DialogButton('CLOSE', DialogButton.TYPE_CANCEL, () => this.toast.closeModalDialog()),
                 ]
             });
+    }
+
+    onDeleteNodes(nodes: Node[]): void {
+        this.mainNavService.getDialogs().nodeDelete = nodes;
     }
 }

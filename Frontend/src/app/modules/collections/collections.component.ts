@@ -990,8 +990,8 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
 
                     this.refreshContent(callback);
                     if(this.feedbackAllowed() && this.params.feedback === 'true') {
-                        this.mainNavRef.management.collectionWriteFeedback = collection;
-                        this.mainNavRef.management.collectionWriteFeedbackChange.pipe(first()).subscribe(() => {
+                        this.mainNavService.getDialogs().collectionWriteFeedback = collection;
+                        this.mainNavService.getDialogs().collectionWriteFeedbackChange.pipe(first()).subscribe(() => {
                             if(this.params.feedbackClose === 'true') {
                                 window.close();
                             }
@@ -1063,7 +1063,6 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
 
     private initialize() {
         this.optionsService.clearComponents(
-            this.mainNavRef,
             this.actionbarReferences,
         );
 
@@ -1282,7 +1281,6 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
             activeObjects: [this.collectionContent.node],
         });
         this.optionsService.initComponents(
-            this.mainNavRef,
             this.actionbarCollection,
             this.listReferences,
         );

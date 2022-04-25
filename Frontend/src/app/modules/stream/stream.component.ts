@@ -175,7 +175,7 @@ export class StreamComponent implements AfterViewInit {
     }
 
     async ngAfterViewInit() {
-        await this.optionsHelper.initComponents(this.mainNavRef);
+        await this.optionsHelper.initComponents();
     }
 
     setStreamMode() {

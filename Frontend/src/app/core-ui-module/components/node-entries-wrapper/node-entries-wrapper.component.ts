@@ -236,7 +236,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType> implemen
     }
 
     async initOptionsGenerator(config: ListOptionsConfig) {
-        await this.optionsHelper.initComponents(this.mainNav.getMainNav(), config.actionbar, this);
+        await this.optionsHelper.initComponents(config.actionbar, this);
         this.optionsHelper.setData({
             scope: config.scope,
             activeObjects: this.entriesService.selection.selected,

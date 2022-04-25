@@ -1,34 +1,33 @@
-import {
-    animate,
-    keyframes,
-    style,
-    transition,
-    trigger,
-} from '@angular/animations';
+import { trigger } from '@angular/animations';
 import { HttpClient } from '@angular/common/http';
 import {
     AfterViewInit,
-    Component, ContentChild,
+    Component,
+    ContentChild,
     ElementRef,
     EventEmitter,
     HostListener,
-    Input, NgZone, OnDestroy,
+    Input,
+    NgZone,
+    OnDestroy,
     OnInit,
-    Output, TemplateRef,
+    Output,
+    TemplateRef,
     ViewChild,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { ActivatedRoute, Params, Router } from '@angular/router';
+import { About, AboutService, AuthenticationService, User, UserService } from 'ngx-edu-sharing-api';
+import { Observable, Subject } from 'rxjs';
+import { map, take, takeUntil } from 'rxjs/operators';
+import { NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
-    ConfigurationHelper,
-    ConfigurationService, Connector,
+    ConfigurationService,
     DialogButton,
     FrameEventsService,
-    IamUser,
     LoginResult,
     Node,
-    NodeList,
     NodeTextContent,
     NodeWrapper,
     RestConnectorService,
@@ -37,30 +36,22 @@ import {
     RestIamService,
     RestNodeService,
     SessionStorageService,
-    TemporaryStorageService, UIService,
+    TemporaryStorageService,
+    UIService,
 } from '../../../core-module/core.module';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import {
-    OPEN_URL_MODE,
-    UIConstants,
-} from '../../../core-module/ui/ui-constants';
-import { OptionItem, OptionGroup } from '../../../core-ui-module/option-item';
+import { OPEN_URL_MODE, UIConstants } from '../../../core-module/ui/ui-constants';
+import { OptionGroup, OptionItem } from '../../../core-ui-module/option-item';
 import { Toast } from '../../../core-ui-module/toast';
-import { TranslationsService } from '../../../translations/translations.service';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { CreateMenuComponent } from '../../../modules/create-menu/create-menu.component';
-import { WorkspaceManagementDialogsComponent } from '../../../modules/management-dialogs/management-dialogs.component';
+import { TranslationsService } from '../../../translations/translations.service';
 import { MainMenuEntriesService } from '../../services/main-menu-entries.service';
+import { MainNavService } from '../../services/main-nav.service';
 import { GlobalContainerComponent } from '../global-container/global-container.component';
+import { MainMenuDropdownComponent } from '../main-menu-dropdown/main-menu-dropdown.component';
 import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar.component';
-import {MainMenuDropdownComponent} from '../main-menu-dropdown/main-menu-dropdown.component';
-import {Observable} from 'rxjs';
-import {MainNavService} from '../../services/main-nav.service';
 import { SearchFieldComponent } from '../search-field/search-field.component';
-import {About, AboutService, AuthenticationService, User, UserService} from 'ngx-edu-sharing-api';
-import { ConfigOptionItem, NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
-import { Subject } from 'rxjs';
-import {first, map, take, takeUntil} from 'rxjs/operators';
 
 /**
  * The main nav (top bar + menus)
@@ -130,16 +121,11 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         parent: null,
         folder: false,
     };
-    @Output() onCreateNotAllowed = new EventEmitter<void>();
     @Input() searchQuery: string;
-    private queryParams: Params;
     @Input()
     set currentScope(currentScope: string) {
         this._currentScope = currentScope;
-        this.event.broadcastEvent(
-            FrameEventsService.EVENT_VIEW_OPENED,
-            currentScope,
-        );
+        this.event.broadcastEvent(FrameEventsService.EVENT_VIEW_OPENED, currentScope);
     }
     get currentScope() {
         return this._currentScope;
@@ -149,6 +135,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
      * If create is allowed, this event will fire the new nodes
      */
     @Output() onCreate = new EventEmitter<Node[]>();
+    @Output() onCreateNotAllowed = new EventEmitter<void>();
     /**
      * Called when a search event happened, emits the search string and additional event info.
      */
@@ -180,7 +167,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     mainMenuStyle: 'sidebar' | 'dropdown' = 'sidebar';
     currentUser: User;
 
-    private readonly destroyed$ = new Subject();
+    private readonly destroyed$ = new Subject<void>();
     private editUrl: string;
     private licenseAgreementNode: Node;
     private scrollInitialPositions: any[] = [];
@@ -189,15 +176,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     private elementsBottomY = 0;
     private fixScrollElements = false;
     private about: About;
-
-
-    /**
-     * @Deprecated
-     * Use the mainanv service getDialogs directly
-     */
-    get management() {
-        return this.mainnavService.getDialogs();
-    }
+    private queryParams: Params;
 
     constructor(
         public iam: RestIamService,
@@ -222,14 +201,11 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         private translations: TranslationsService,
     ) {
         this.mainnavService.registerMainNav(this);
-        this.visible = !this.storage.get(
-            TemporaryStorageService.OPTION_HIDE_MAINNAV,
-            false,
-        );
+        this.visible = !this.storage.get(TemporaryStorageService.OPTION_HIDE_MAINNAV, false);
         this.setMenuStyle();
 
         this.connector.setRoute(this.route).subscribe(() => {
-            this.aboutService.getAbout().subscribe(about => {
+            this.aboutService.getAbout().subscribe((about) => {
                 this.about = about;
                 this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
                     if (!data.isValidLogin) {
@@ -242,17 +218,16 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                         if (params.noNavigation === 'true') {
                             this.canOpen = false;
                         }
-                        if(params.connector) {
+                        if (params.connector) {
                             this.createMenu?.showCreateConnector(
                                 this.createMenu?.connectorList?.filter(
-                                    (c) => c.id === params.connector
-                                )[0]
+                                    (c) => c.id === params.connector,
+                                )[0],
                             );
                         }
 
                         this.showNodeStore = params.nodeStore === 'true';
-                        this._showUser =
-                            this._currentScope !== 'login' && this.showUser;
+                        this._showUser = this._currentScope !== 'login' && this.showUser;
                         this.checkConfig();
                         const user = await this.iam.getUser().toPromise();
                         this.canEditProfile = user.editProfile;
@@ -275,6 +250,12 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.refreshBanner();
     }
 
+    ngOnDestroy(): void {
+        this.mainnavService.registerMainNav(null);
+        this.destroyed$.next();
+        this.destroyed$.complete();
+    }
+
     @HostListener('window:resize')
     onResize(event: any) {
         this.updateUserOptions();
@@ -288,17 +269,12 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             this.destroyed$.subscribe(() => {
                 window.removeEventListener('scroll', handleScroll);
                 window.removeEventListener('touchmove', handleScroll);
-            })
+            });
         });
     }
 
     private async handleScroll(event: any) {
-        if (
-            this.storage.get(
-                TemporaryStorageService.OPTION_DISABLE_SCROLL_LAYOUT,
-                false,
-            )
-        ) {
+        if (this.storage.get(TemporaryStorageService.OPTION_DISABLE_SCROLL_LAYOUT, false)) {
             return;
         }
         // FIXME: These classes don't work properly when resizing the view causes the banner to
@@ -309,12 +285,8 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         // - Some updates happen only after the page is reloaded.
         //
         // Interim states are visually broken.
-        const elementsScroll = document.getElementsByClassName(
-            'scrollWithBanner',
-        );
-        const elementsAlign = document.getElementsByClassName(
-            'alignWithBanner',
-        );
+        const elementsScroll = document.getElementsByClassName('scrollWithBanner');
+        const elementsAlign = document.getElementsByClassName('alignWithBanner');
         const elements: any = [];
         for (let i = 0; i < elementsScroll.length; i++) {
             elements.push(elementsScroll[i]);
@@ -334,34 +306,23 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             }
             // Give the browser layout engine some time to remove the values, otherwise the elements
             // will have not their initial positions
-            await new Promise(resolve => resolve(void 0));
+            await new Promise((resolve) => resolve(void 0));
             for (let i = 0; i < elements.length; i++) {
                 const element: any = elements[i];
                 element.style.transition = null;
-                if (
-                    !element.getAttribute(
-                        MainNavComponent.ID_ATTRIBUTE_NAME,
-                    )
-                ) {
-                    element.setAttribute(
-                        MainNavComponent.ID_ATTRIBUTE_NAME,
-                        Math.random(),
-                    );
+                if (!element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)) {
+                    element.setAttribute(MainNavComponent.ID_ATTRIBUTE_NAME, Math.random());
                 }
                 if (
                     this.scrollInitialPositions[
-                        element.getAttribute(
-                            MainNavComponent.ID_ATTRIBUTE_NAME,
-                        )
+                        element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)
                     ]
                 )
                     continue;
                 // getComputedStyle does report wrong values in search sidenav
                 this.scrollInitialPositions[
                     element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)
-                ] = window
-                    .getComputedStyle(element)
-                    .getPropertyValue('top');
+                ] = window.getComputedStyle(element).getPropertyValue('top');
             }
             this.posScrollElements(event, elements);
         } else {
@@ -372,10 +333,9 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
 
     toggleMenuSidebar() {
         if (this.canOpen) {
-
-            if(this.mainMenuSidebar) {
+            if (this.mainMenuSidebar) {
                 this.mainMenuSidebar.toggle();
-            } else if(this.mainMenuDropdown) {
+            } else if (this.mainMenuDropdown) {
                 this.mainMenuDropdown.dropdown.menuTrigger.openMenu();
             }
         }
@@ -384,13 +344,10 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     posScrollElements(event: Event, elements: any[]) {
         let y = 0;
         try {
-            const rect = document
-                .getElementsByTagName('header')[0]
-                .getBoundingClientRect();
+            const rect = document.getElementsByTagName('header')[0].getBoundingClientRect();
             y = rect.bottom - rect.top;
             // Set min height + a small increase of height to prevent flickering in chrome
-            document.documentElement.style.minHeight =
-                'calc(100% + ' + (y + 10) + 'px)';
+            document.documentElement.style.minHeight = 'calc(100% + ' + (y + 10) + 'px)';
         } catch (e) {}
         for (let i = 0; i < elements.length; i++) {
             const element: any = elements[i];
@@ -404,21 +361,18 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                 if (event == null) {
                     element.style.top = y + 'px';
                 }
-            } else if (
-                (window.pageYOffset || document.documentElement.scrollTop) > y
-            ) {
+            } else if ((window.pageYOffset || document.documentElement.scrollTop) > y) {
                 element.style.position = 'fixed';
-                element.style.top = this.scrollInitialPositions[
-                    element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)
-                ];
+                element.style.top =
+                    this.scrollInitialPositions[
+                        element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)
+                    ];
             } else {
                 element.style.position = 'absolute';
                 element.style.top =
                     Number.parseInt(
                         this.scrollInitialPositions[
-                            element.getAttribute(
-                                MainNavComponent.ID_ATTRIBUTE_NAME,
-                            )
+                            element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)
                         ],
                         10,
                     ) +
@@ -429,12 +383,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     setNodeStore(value: boolean) {
-        UIHelper.changeQueryParameter(
-            this.router,
-            this.route,
-            'nodeStore',
-            value,
-        );
+        UIHelper.changeQueryParameter(this.router, this.route, 'nodeStore', value);
     }
 
     onEvent(event: string, data: any) {
@@ -448,14 +397,11 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     openProfile() {
-        this.router.navigate([
-            UIConstants.ROUTER_PREFIX + 'profiles',
-            RestConstants.ME,
-        ]);
+        this.router.navigate([UIConstants.ROUTER_PREFIX + 'profiles', RestConstants.ME]);
     }
 
     async refreshBanner(): Promise<void> {
-        await new Promise(resolve => resolve(void 0));
+        await new Promise((resolve) => resolve(void 0));
         await this.handleScroll(null);
     }
 
@@ -472,19 +418,13 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     getIconSource() {
-        return this.configService.instant(
-            'mainnav.icon.url',
-            'assets/images/edu-white.svg',
-        );
+        return this.configService.instant('mainnav.icon.url', 'assets/images/edu-white.svg');
     }
 
     saveLicenseAgreement() {
         this.licenseAgreement = false;
         if (this.licenseAgreementNode) {
-            this.session.set(
-                'licenseAgreement',
-                this.licenseAgreementNode.content.version,
-            );
+            this.session.set('licenseAgreement', this.licenseAgreementNode.content.version);
         } else {
             this.session.set('licenseAgreement', '0.0');
         }
@@ -492,17 +432,20 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     startTutorial() {
-        this.user.observeCurrentUserInfo().pipe(take(1)).subscribe(({user, loginInfo}) => {
-            if (
-                loginInfo.statusCode === RestConstants.STATUS_CODE_OK &&
-                user.editProfile &&
-                this.configService.instant('editProfile', false)
-            ) {
-                this.uiService.waitForComponent(this, 'userRef').subscribe(() => {
-                    this.tutorialElement = this.userRef;
-                });
-            }
-        })
+        this.user
+            .observeCurrentUserInfo()
+            .pipe(take(1))
+            .subscribe(({ user, loginInfo }) => {
+                if (
+                    loginInfo.statusCode === RestConstants.STATUS_CODE_OK &&
+                    user.editProfile &&
+                    this.configService.instant('editProfile', false)
+                ) {
+                    this.uiService.waitForComponent(this, 'userRef').subscribe(() => {
+                        this.tutorialElement = this.userRef;
+                    });
+                }
+            });
     }
 
     setFixMobileElements(fix: boolean) {
@@ -513,23 +456,20 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     isSafe() {
         return (
             this.connector.getCurrentLogin() &&
-            this.connector.getCurrentLogin().currentScope ===
-                RestConstants.SAFE_SCOPE
+            this.connector.getCurrentLogin().currentScope === RestConstants.SAFE_SCOPE
         );
     }
 
     showLicenses() {
         this.licenseDialog = true;
-        this.http
-            .get('assets/licenses/en.html', { responseType: 'text' })
-            .subscribe(
-                text => {
-                    this.licenseDetails = text as any;
-                },
-                error => {
-                    console.error(error);
-                },
-            );
+        this.http.get('assets/licenses/en.html', { responseType: 'text' }).subscribe(
+            (text) => {
+                this.licenseDetails = text as any;
+            },
+            (error) => {
+                console.error(error);
+            },
+        );
     }
 
     showChat() {
@@ -547,7 +487,11 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
 
     isCreateAllowed() {
         // @TODO: May Check for more constrains
-        return (this.create?.allowed === true) && !this.connector.getCurrentLogin()?.isGuest && this.queryParams?.reurlCreate !== 'false';
+        return (
+            this.create?.allowed === true &&
+            !this.connector.getCurrentLogin()?.isGuest &&
+            this.queryParams?.reurlCreate !== 'false'
+        );
     }
 
     openCreateMenu(x: number, y: number) {
@@ -577,25 +521,15 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         );
     }
 
-    doSearch(
-        value = this.searchQuery,
-        broadcast = true,
-    ) {
+    doSearch(value = this.searchQuery, broadcast = true) {
         if (broadcast) {
-            this.event.broadcastEvent(
-                FrameEventsService.EVENT_GLOBAL_SEARCH,
-                value,
-            );
+            this.event.broadcastEvent(FrameEventsService.EVENT_GLOBAL_SEARCH, value);
         }
         this.onSearch.emit({ query: value, cleared: false });
     }
 
     openImprint() {
-        UIHelper.openUrl(
-            this.config.imprintUrl,
-            this.bridge,
-            OPEN_URL_MODE.BlankSystemBrowser,
-        );
+        UIHelper.openUrl(this.config.imprintUrl, this.bridge, OPEN_URL_MODE.BlankSystemBrowser);
     }
 
     openPrivacy() {
@@ -654,65 +588,66 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             this.startTutorial();
             return;
         }
-        this.session
-            .get('licenseAgreement', false)
-            .subscribe((version: string) => {
-                this.licenseAgreementHTML = null;
-                let nodeId: string = null;
-                for (const node of this.config.licenseAgreement.nodeId) {
-                    if (node.language == null) nodeId = node.value;
-                    if (node.language === this.translations.getLanguage()) {
-                        nodeId = node.value;
-                        break;
-                    }
+        this.session.get('licenseAgreement', false).subscribe((version: string) => {
+            this.licenseAgreementHTML = null;
+            let nodeId: string = null;
+            for (const node of this.config.licenseAgreement.nodeId) {
+                if (node.language == null) nodeId = node.value;
+                if (node.language === this.translations.getLanguage()) {
+                    nodeId = node.value;
+                    break;
                 }
-                this.nodeService.getNodeMetadata(nodeId).subscribe(
-                    (data: NodeWrapper) => {
-                        this.licenseAgreementNode = data.node;
-                        if (version === data.node.content.version) {
-                            this.startTutorial();
-                            return;
-                        }
-                        this.licenseAgreement = true;
-                        this.nodeService.getNodeTextContent(nodeId).subscribe(
-                            (data: NodeTextContent) => {
-                                this.licenseAgreementHTML = data.html
-                                    ? data.html
-                                    : data.raw
-                                    ? data.raw
-                                    : data.text;
-                            },
-                            (error: any) => {
-                                this.licenseAgreementHTML = `Error loading content for license agreement node '${nodeId}'`;
-                            },
-                        );
-                    },
-                    (error: any) => {
-                        if (version === '0.0') {
-                            this.startTutorial();
-                            return;
-                        }
-                        this.licenseAgreement = true;
-                        this.licenseAgreementHTML = `Error loading metadata for license agreement node '${nodeId}'`;
-                    },
-                );
-            });
+            }
+            this.nodeService.getNodeMetadata(nodeId).subscribe(
+                (data: NodeWrapper) => {
+                    this.licenseAgreementNode = data.node;
+                    if (version === data.node.content.version) {
+                        this.startTutorial();
+                        return;
+                    }
+                    this.licenseAgreement = true;
+                    this.nodeService.getNodeTextContent(nodeId).subscribe(
+                        (data: NodeTextContent) => {
+                            this.licenseAgreementHTML = data.html
+                                ? data.html
+                                : data.raw
+                                ? data.raw
+                                : data.text;
+                        },
+                        (error: any) => {
+                            this.licenseAgreementHTML = `Error loading content for license agreement node '${nodeId}'`;
+                        },
+                    );
+                },
+                (error: any) => {
+                    if (version === '0.0') {
+                        this.startTutorial();
+                        return;
+                    }
+                    this.licenseAgreement = true;
+                    this.licenseAgreementHTML = `Error loading metadata for license agreement node '${nodeId}'`;
+                },
+            );
+        });
     }
 
     private updateUserOptions() {
         this.userMenuOptions = [];
-        if (!this.connector.getCurrentLogin()?.isGuest && !this.connector.getCurrentLogin()?.currentScope) {
+        if (
+            !this.connector.getCurrentLogin()?.isGuest &&
+            !this.connector.getCurrentLogin()?.currentScope
+        ) {
             this.userMenuOptions.push(
-                new OptionItem('EDIT_ACCOUNT', 'assignment_ind', () =>
-                    this.openProfile(),
-                ),
+                new OptionItem('EDIT_ACCOUNT', 'assignment_ind', () => this.openProfile()),
             );
-            if(this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_SIGNUP_GROUP)) {
+            if (
+                this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_SIGNUP_GROUP)
+            ) {
                 this.userMenuOptions.push(
                     new OptionItem('SIGNUP_GROUP.TITLE', 'group_add', () => {
-                        this.management.signupGroup = true;
-                        this.management.signupGroupChange.emit(true);
-                    })
+                        this.mainnavService.getDialogs().signupGroup = true;
+                        this.mainnavService.getDialogs().signupGroupChange.emit(true);
+                    }),
                 );
             }
         }
@@ -720,18 +655,12 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             if (this.config.loginOptions) {
                 for (const login of this.config.loginOptions) {
                     this.userMenuOptions.push(
-                        new OptionItem(
-                            login.name,
-                            '',
-                            () => (window.location.href = login.url),
-                        ),
+                        new OptionItem(login.name, '', () => (window.location.href = login.url)),
                     );
                 }
             } else {
                 this.userMenuOptions.push(
-                    new OptionItem('SIDEBAR.LOGIN', 'person', () =>
-                        this.login(true),
-                    ),
+                    new OptionItem('SIDEBAR.LOGIN', 'person', () => this.login(true)),
                 );
             }
         }
@@ -741,12 +670,10 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             this._currentScope === 'stream' ||
             this._currentScope === 'collections'
         ) {*/
-            const boomarkOption = new OptionItem(
-                'SEARCH.NODE_STORE.TITLE',
-                'bookmark_border',
-                () => this.setNodeStore(true),
-            );
-            this.userMenuOptions.push(boomarkOption);
+        const boomarkOption = new OptionItem('SEARCH.NODE_STORE.TITLE', 'bookmark_border', () =>
+            this.setNodeStore(true),
+        );
+        this.userMenuOptions.push(boomarkOption);
         // }
         const accessibilityOptions = new OptionItem(
             'OPTIONS.ACCESSIBILITY',
@@ -761,29 +688,23 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         const infoGroup = new OptionGroup('info', 20);
         if (this.config.imprintUrl) {
-            const option = new OptionItem('IMPRINT', 'info_outline', () =>
-                this.openImprint(),
-            );
+            const option = new OptionItem('IMPRINT', 'info_outline', () => this.openImprint());
             option.group = infoGroup;
             option.mediaQueryType = UIConstants.MEDIA_QUERY_MAX_WIDTH;
             option.mediaQueryValue = UIConstants.MOBILE_TAB_SWITCH_WIDTH;
             this.userMenuOptions.push(option);
         }
         if (this.config.privacyInformationUrl) {
-            const option = new OptionItem(
-                'PRIVACY_INFORMATION',
-                'verified_user',
-                () => this.openPrivacy(),
+            const option = new OptionItem('PRIVACY_INFORMATION', 'verified_user', () =>
+                this.openPrivacy(),
             );
             option.group = infoGroup;
             option.mediaQueryType = UIConstants.MEDIA_QUERY_MAX_WIDTH;
             option.mediaQueryValue = UIConstants.MOBILE_TAB_SWITCH_WIDTH;
             this.userMenuOptions.push(option);
         }
-        const option = new OptionItem(
-            'LICENSE_INFORMATION',
-            'lightbulb_outline',
-            () => this.showLicenses(),
+        const option = new OptionItem('LICENSE_INFORMATION', 'lightbulb_outline', () =>
+            this.showLicenses(),
         );
         option.group = infoGroup;
         if (this.mainMenuStyle === 'sidebar') {
@@ -793,24 +714,22 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.userMenuOptions.push(option);
 
         if (!this.connector.getCurrentLogin()?.isGuest) {
-            this.userMenuOptions.push(
-                new OptionItem('LOGOUT', 'undo', () => this.logout()),
-            );
+            this.userMenuOptions.push(new OptionItem('LOGOUT', 'undo', () => this.logout()));
         }
         this.applyUserMenuOverrides(this.userMenuOptions);
     }
 
     private applyUserMenuOverrides(options: OptionItem[]): void {
-        this.configService.get('userMenuOverrides').subscribe((overrides) =>
-            this.nodeHelper.applyCustomNodeOptions(overrides, null, null, options)
-        );
+        this.configService
+            .get('userMenuOverrides')
+            .subscribe((overrides) =>
+                this.nodeHelper.applyCustomNodeOptions(overrides, null, null, options),
+            );
     }
 
     private getConfigMenuHelpOptions() {
         if (!this.config.helpMenuOptions) {
-            console.warn(
-                'config does not contain helpMenuOptions, will not display any options',
-            );
+            console.warn('config does not contain helpMenuOptions, will not display any options');
             return [];
         }
         const versionParts = this.about.version.repository.split('.');
@@ -843,12 +762,8 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             this.lastScroll = scrollY;
             return;
         }
-        const elementsTop: any = document.getElementsByClassName(
-            'mobile-move-top',
-        );
-        const elementsBottom: any = document.getElementsByClassName(
-            'mobile-move-bottom',
-        );
+        const elementsTop: any = document.getElementsByClassName('mobile-move-top');
+        const elementsBottom: any = document.getElementsByClassName('mobile-move-bottom');
         let top = -1;
         let bottom = -1;
         for (let i = 0; i < elementsTop.length; i++) {
@@ -937,10 +852,10 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             .observeCurrentUserInfo()
             .pipe(takeUntil(this.destroyed$))
             .subscribe(async ({ user, loginInfo }) => {
-                if(loginInfo.isGuest) {
+                if (loginInfo.isGuest) {
                     this.currentUser = null;
                 } else {
-                    this.currentUser = user.person
+                    this.currentUser = user.person;
                 }
             });
     }
@@ -954,15 +869,15 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private registerAutoLogoutDialog(): void {
         if (this.showTimeout()) {
-            this.authentication.observeAutoLogout().pipe(takeUntil(this.destroyed$)).subscribe(() => {
-                this.toast.showModalDialog(
-                    'WORKSPACE.AUTOLOGOUT',
-                    'WORKSPACE.AUTOLOGOUT_INFO',
-                    [
-                        new DialogButton(
-                            'WORKSPACE.RELOGIN',
-                            DialogButton.TYPE_PRIMARY,
-                            () => {
+            this.authentication
+                .observeAutoLogout()
+                .pipe(takeUntil(this.destroyed$))
+                .subscribe(() => {
+                    this.toast.showModalDialog(
+                        'WORKSPACE.AUTOLOGOUT',
+                        'WORKSPACE.AUTOLOGOUT_INFO',
+                        [
+                            new DialogButton('WORKSPACE.RELOGIN', DialogButton.TYPE_PRIMARY, () => {
                                 RestHelper.goToLogin(
                                     this.router,
                                     this.configService,
@@ -970,14 +885,13 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                                     null,
                                 );
                                 this.toast.closeModalDialog();
-                            },
-                        ),
-                    ],
-                    false,
-                    null,
-                    { minutes: Math.round(this.connector.logoutTimeout / 60) },
-                );
-            })
+                            }),
+                        ],
+                        false,
+                        null,
+                        { minutes: Math.round(this.connector.logoutTimeout / 60) },
+                    );
+                });
         }
     }
 
@@ -987,11 +901,5 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             s = '0' + s;
         }
         return s;
-    }
-
-    ngOnDestroy(): void {
-        this.mainnavService.registerMainNav(null);
-        this.destroyed$.next();
-        this.destroyed$.complete();
     }
 }

@@ -73,6 +73,7 @@ import {
     ListOptions,
     ListOptionsConfig, NodeEntriesDisplayType
 } from '../node-entries-wrapper/entries-model';
+import { MainNavService } from '../../../common/services/main-nav.service';
 
 
 @Component({
@@ -529,6 +530,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         private bridge: BridgeService,
         private frame: FrameEventsService,
         private renderer: Renderer2,
+        private mainnavService: MainNavService,
     ) {
         this.nodeHelper.setViewContainerRef(this.viewContainerRef);
         this.reorderButtons = DialogButton.getSaveCancel(
@@ -560,7 +562,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
     }
 
     ngAfterViewInit(): void {
-        this.optionsHelper.initComponents(this.mainNav, this.actionbar, this);
+        this.optionsHelper.initComponents(this.actionbar, this);
     }
 
     setViewType(viewType: number) {
@@ -853,8 +855,8 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
             } else {
                 this.setSelectionToSingleNode(node);
             }
-            if (this.mainNav && this.mainNav.management.nodeSidebar) {
-                this.mainNav.management.nodeSidebar = node;
+            if (this.mainnavService.getDialogs().nodeSidebar) {
+                this.mainnavService.getDialogs().nodeSidebar = node;
             }
         }
         event.event.stopPropagation();
@@ -1379,7 +1381,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
      * Switch to new @NodeEntriesComponent
      */
     async initOptionsGenerator(config: ListOptionsConfig) {
-        await this.optionsHelper.initComponents(this.mainNav, this.actionbar, this);
+        await this.optionsHelper.initComponents(this.actionbar, this);
         this.optionsHelper.refreshComponents();
     }
 

@@ -41,7 +41,7 @@
                   (onDrop)="handleDrop($event)"
                   (onSetRoot)="setRoot($event)"
                   (onOpenNode)="openNode($event)"
-                  (onDeleteNodes)="mainNav.management.nodeDelete=$event"
+                  (onDeleteNodes)="onDeleteNodes($event)"
   ></es-workspace-tree>
   <es-user-quota *ngIf="user.person.quota.enabled" [quota]="user.person.quota"></es-user-quota>
   </div>

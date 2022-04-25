@@ -77,6 +77,7 @@ import { MdsService, MetadataSetInfo, SearchResults, SearchService as SearchApiS
 import * as rxjs from 'rxjs';
 import {InteractionType, ListSortConfig, NodeEntriesDisplayType} from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
+import { MainNavService } from '../../common/services/main-nav.service';
 
 @Component({
     selector: 'es-search',
@@ -218,6 +219,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         private searchApi: SearchApiService,
         private ngZone: NgZone,
         private loadingScreen: LoadingScreenService,
+        private mainNavService: MainNavService,
     ) {
         // Subscribe early to make sure the suggestions are requested with search requests.
         this.didYouMeanSuggestion$.pipe(takeUntil(this.destroyed$)).subscribe();
@@ -1461,7 +1463,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 }
                 if (param.addToCollection) {
                     const addTo = new OptionItem('SEARCH.ADD_INTO_COLLECTION_SHORT','layers', (node) => {
-                        this.mainNavRef.management.addToCollectionList(this.addToCollection,
+                        this.mainNavService.getDialogs().addToCollectionList(this.addToCollection,
                             ActionbarHelperService.getNodes(this.getSelection(),node), true, () => {
                                 this.switchToCollections(this.addToCollection.ref.id);
                             });

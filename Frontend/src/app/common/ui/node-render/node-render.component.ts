@@ -352,7 +352,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     if(this.isLoading) {
         return;
     }
-    this.optionsHelper.clearComponents(this.mainNavRef, this.actionbar);
+    this.optionsHelper.clearComponents(this.actionbar);
     this.isLoading=true;
     this.node=this._nodeId;
   }
@@ -403,7 +403,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
   private loadRenderData() {
     const loadingTask = this.loadingScreen.addLoadingTask();
       this.isLoading=true;
-      this.optionsHelper.clearComponents(this.mainNavRef, this.actionbar);
+      this.optionsHelper.clearComponents(this.actionbar);
     if(this.isBuildingPage) {
         setTimeout(()=>this.loadRenderData(),50);
         return;
@@ -558,7 +558,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                 addOptions: this.currentOptions
             },
         });
-        this.optionsHelper.initComponents(this.mainNavRef, this.actionbar);
+        this.optionsHelper.initComponents(this.actionbar);
         this.optionsHelper.setListener({
             onRefresh: (node) => {
                 this.refresh();

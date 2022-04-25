@@ -44,7 +44,6 @@ import {
     RestHelper,
     RestIamService
 } from '../core-module/core.module';
-import {MainNavComponent} from '../common/ui/main-nav/main-nav.component';
 import {Toast} from './toast';
 import {HttpClient} from '@angular/common/http';
 import {ActivatedRoute, Params, Router} from '@angular/router';
@@ -80,7 +79,7 @@ export class OptionsHelperService implements OnDestroy {
     private globalOptions: OptionItem[];
     private list: ListEventInterface<NodeEntriesDataType>;
     private subscriptions: Subscription[] = [];
-    private mainNav: MainNavComponent;
+    private mainNavService: MainNavService;
     private actionbar: ActionbarComponent;
     private dropdown: DropdownComponent;
     private queryParams: Params;
@@ -228,12 +227,10 @@ export class OptionsHelperService implements OnDestroy {
     }
     /**
      * shortcut to simply disable all options on the given compoennts
-     * @param mainNav
      * @param actionbar
      * @param list
      */
-    clearComponents(mainNav: MainNavComponent,
-                    actionbar: ActionbarComponent,
+    clearComponents(actionbar: ActionbarComponent,
                     list: ListEventInterface<Node> = null) {
         if (list) {
             list.setOptions(null);
@@ -242,17 +239,12 @@ export class OptionsHelperService implements OnDestroy {
             actionbar.options = [];
         }
     }
-    async initComponents(mainNav: MainNavComponent,
-                         actionbar: ActionbarComponent = null,
+    async initComponents(actionbar: ActionbarComponent = null,
                          list: ListEventInterface<NodeEntriesDataType> = null,
                          dropdown: DropdownComponent = null) {
-        this.mainNav = mainNav;
-        if(!this.mainNav) {
-            this.mainNav = this.injector.get(MainNavService).getMainNav();
-            console.info('no mainnav provided to options helper, will use singleton from service', this.mainNav);
-            if(!this.mainNav) {
-                console.warn('mainnav was not available via singleton service');
-            }
+        this.mainNavService = this.injector.get(MainNavService);
+        if(!this.mainNavService.getMainNav()) {
+            console.warn('mainnav was not available via singleton service');
         }
         this.actionbar = actionbar;
         this.list = list;
@@ -274,14 +266,14 @@ export class OptionsHelperService implements OnDestroy {
             this.subscriptions.forEach((s) => s.unsubscribe());
             this.subscriptions = [];
         }
-        if (this.mainNav) {
-            this.subscriptions.push(this.mainNav.management.onRefresh.subscribe((nodes: void | Node[]) => {
+        if (this.mainNavService?.getMainNav()) {
+            this.subscriptions.push(this.mainNavService.getDialogs().onRefresh.subscribe((nodes: void | Node[]) => {
                 this.listener?.onRefresh(nodes);
                 if (this.list) {
                     this.list.updateNodes(nodes);
                 }
             }));
-            this.subscriptions.push(this.mainNav.management?.onDelete?.subscribe(
+            this.subscriptions.push(this.mainNavService.getDialogs()?.onDelete?.subscribe(
                 (result: { objects: any; count: number; error: boolean; }) => this.listener?.onDelete(result)
             ));
         }
@@ -333,8 +325,8 @@ export class OptionsHelperService implements OnDestroy {
             }
         }
         let options: OptionItem[] = [];
-        if (this.mainNav) {
-            options = this.prepareOptions(this.mainNav.management, objects);
+        if (this.mainNavService?.getMainNav()) {
+            options = this.prepareOptions(this.mainNavService.getDialogs(), objects);
         } else {
             console.warn('options helper was called without main nav. Can not load default options');
         }
