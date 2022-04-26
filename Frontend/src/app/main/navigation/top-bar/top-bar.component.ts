@@ -1,6 +1,7 @@
 import {
     Component,
     ContentChild,
+    ElementRef,
     EventEmitter,
     Input,
     Output,
@@ -60,6 +61,7 @@ export class TopBarComponent {
         // FIXME: Required values should be passed as inputs.
         public connector: RestConnectorService,
         private configService: ConfigurationService,
+        public elementRef: ElementRef,
     ) {}
 
     getIconSource() {

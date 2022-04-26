@@ -4,6 +4,7 @@ import {
     EventEmitter,
     HostListener,
     Input,
+    OnDestroy,
     OnInit,
     Output
 } from '@angular/core';
@@ -26,7 +27,7 @@ import {Subject} from 'rxjs';
         trigger('fromLeft', UIAnimation.fromLeft()),
     ],
 })
-export class MainMenuSidebarComponent implements OnInit {
+export class MainMenuSidebarComponent implements OnInit, OnDestroy {
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     readonly ME = RestConstants.ME;
     private readonly destroyed$ = new Subject();
@@ -38,13 +39,10 @@ export class MainMenuSidebarComponent implements OnInit {
     // Internal state
     show = false;
 
-    // Global state, set on init
     loginInfo: LoginInfo;
     currentUser: User;
 
     constructor(
-        private configService: ConfigurationService,
-        private connector: RestConnectorService,
         public iam: RestIamService,
         private user: UserService,
     ) {
@@ -67,8 +65,13 @@ export class MainMenuSidebarComponent implements OnInit {
 
     // Internal methods, should only be called by this component.
 
-    async ngOnInit() {
-        this.loginInfo = await this.connector.isLoggedIn(false).toPromise();
+    ngOnInit() {
+        this.user
+            .observeCurrentUserInfo()
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe(({ loginInfo, user }) => {
+                (this.loginInfo = loginInfo), (this.currentUser = user.person);
+            });
     }
 
     /**

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MainMenuEntriesService } from '../main-menu-entries.service';
 
 @Component({
@@ -8,6 +8,7 @@ import { MainMenuEntriesService } from '../main-menu-entries.service';
 })
 export class MainMenuButtonsComponent implements OnInit {
     @Input() currentScope: string;
+    @Output() entryClicked = new EventEmitter<void>();
 
     readonly entries$ = this.mainMenuEntries.entries$;
 

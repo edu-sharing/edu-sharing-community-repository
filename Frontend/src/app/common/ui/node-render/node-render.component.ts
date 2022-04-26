@@ -9,6 +9,7 @@ import {
     Input,
     NgZone,
     OnDestroy,
+    OnInit,
     Output,
     ViewChild,
     ViewContainerRef
@@ -87,7 +88,7 @@ import { MainNavService } from '../../../main/navigation/main-nav.service';
 })
 
 
-export class NodeRenderComponent implements EventListener, OnDestroy {
+export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
     @Input() set node(node: Node|string) {
       const id=(node as Node).ref ? (node as Node).ref.id : (node as string);
       jQuery('#nodeRenderContent').html('');
@@ -173,6 +174,13 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
 
       });
       this.frame.broadcastEvent(FrameEventsService.EVENT_VIEW_OPENED,'node-render');
+    }
+
+    ngOnInit(): void {
+      this.mainNavService.setMainNavConfig({
+        show: false,
+        currentScope: 'render',
+      })
     }
 
 

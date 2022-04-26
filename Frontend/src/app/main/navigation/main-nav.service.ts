@@ -19,17 +19,21 @@ export class MainNavCreateConfig {
 
 export class MainNavConfig {
     /**
+     * Show or hide the complete navigation
+     */
+    show? = true;
+    /**
      * Show and enables the search field
      */
     searchEnabled?: boolean;
     /**
      * Shows the current location
      */
-    showScope = true;
+    showScope? = true;
     /**
      * Shows and enables the user menu
      */
-    showUser = true;
+    showUser? = true;
     /**
      * The placeholder text for the search field, will be translated
      */
@@ -37,15 +41,15 @@ export class MainNavConfig {
     /**
      * When true, the sidebar can be clicked to open the menu
      */
-    canOpen = true;
+    canOpen? = true;
     /**
      * The title on the left side, will be translated
      */
-    title: string;
+    title?: string;
     /**
      * "add material" options
      */
-    create: MainNavCreateConfig = new MainNavCreateConfig();
+    create?: MainNavCreateConfig = new MainNavCreateConfig();
     searchQuery?: string;
     currentScope: string;
 

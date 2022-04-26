@@ -58,6 +58,7 @@ import {DefaultGroups, OptionItem} from '../../../core-ui-module/option-item';
 import {Observable} from 'rxjs';
 import {PlatformLocation} from '@angular/common';
 import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
+import { MainNavService } from '../../../main/navigation/main-nav.service';
 
 type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITORIAL_GROUPS';
 
@@ -67,8 +68,7 @@ type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITO
   templateUrl: 'collection-new.component.html',
   styleUrls: ['collection-new.component.scss']
 })
-export class CollectionNewComponent implements EventListener{
-  @ViewChild('mainNav') mainNavRef: MainNavComponent;
+export class CollectionNewComponent implements EventListener, OnInit {
   @ViewChild('mds') mds : MdsEditorWrapperComponent;
   @ViewChild('share') shareRef : WorkspaceShareComponent;
   public hasCustomScope: boolean;
@@ -206,6 +206,7 @@ export class CollectionNewComponent implements EventListener{
       private translations: TranslationsService,
       private translationService:TranslateService,
       private loadingScreen: LoadingScreenService,
+      private mainNav: MainNavService,
     ) {
       this.eventService.addListener(this);
     this.translations.waitForInit().subscribe(()=>{
@@ -289,6 +290,14 @@ export class CollectionNewComponent implements EventListener{
         });
       });
     });
+  }
+
+  ngOnInit(): void {
+    this.mainNav.setMainNavConfig({
+      title: 'COLLECTIONS.TITLE',
+      currentScope: 'collections',
+      searchEnabled: false,
+    })
   }
 
     getShareStatus(){

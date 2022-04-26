@@ -1,4 +1,4 @@
-import {Component, ViewChild, ElementRef} from '@angular/core';
+import {Component, ViewChild, ElementRef, OnInit} from '@angular/core';
 import { TranslationsService } from '../../translations/translations.service';
 import {
     NodeRef, IamUser, NodeWrapper, Node, Version, NodeVersions, LoginResult,
@@ -10,7 +10,7 @@ import {RestConnectorService} from "../../core-module/core.module";
 import {RestOrganizationService} from "../../core-module/core.module";
 import {ConfigurationService} from "../../core-module/core.module";
 import {RestHelper} from "../../core-module/core.module";
-import {MainNavComponent} from '../../main/navigation/main-nav/main-nav.component';
+import { MainNavService } from '../../main/navigation/main-nav.service';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 
 @Component({
@@ -21,9 +21,8 @@ import { LoadingScreenService } from '../../main/loading-screen/loading-screen.s
 
   ]
 })
-export class PermissionsMainComponent {
-  @ViewChild('mainNav') mainNavRef: MainNavComponent;
-  public tab : number;
+export class PermissionsMainComponent implements OnInit {
+  public tab : number = 0;
   public searchQuery: string;
   selected: Organization;
   public isAdmin = false;
@@ -36,6 +35,7 @@ export class PermissionsMainComponent {
               private translations: TranslationsService,
               private organization: RestOrganizationService,
               private loadingScreen: LoadingScreenService,
+              private mainNav: MainNavService,
               private connector: RestConnectorService) {
     const loadingTask = this.loadingScreen.addLoadingTask();
     this.translations.waitForInit().subscribe(()=>{
@@ -44,7 +44,6 @@ export class PermissionsMainComponent {
                 this.organization.getOrganizations().subscribe((data: OrganizationOrganizations) => {
                     this.isAdmin = data.canCreate;
                 });
-                this.tab=0;
             }
             else{
                 this.goToLogin();
@@ -62,6 +61,27 @@ export class PermissionsMainComponent {
 
   }
 
+  ngOnInit(): void {
+    this.registerMainNav();
+  }
+
+  private registerMainNav(): void {
+    this.mainNav.setMainNavConfig({
+      title: 'PERMISSIONS.TITLE',
+      currentScope: 'permissions',
+      onSearch: (query) => this.doSearch(query),
+    });
+    this.updateMainNav();
+  }
+
+  private updateMainNav(): void {
+    this.mainNav.patchMainNavConfig({
+      searchEnabled: this.tab !== 3,
+      searchQuery: this.searchQuery,
+      searchPlaceholder: 'PERMISSIONS.SEARCH_' + this.TABS[this.tab],
+    })
+  }
+
   public doSearch(event: string) {
     this.searchQuery = event;
   }
@@ -70,15 +90,16 @@ export class PermissionsMainComponent {
     if (tab != 0 && !this.selected && !this.isAdmin) {
       this.toast.error(null, "PERMISSIONS.SELECT_ORGANIZATION");
       this.tab = 0;
+    } else if (tab === this.tab) {
       return;
+    } else {
+      if (tab === 0) {
+        this.selected = null;
+      }
+      this.searchQuery = null;
+      this.tab = tab;
     }
-    if (tab === this.tab)
-      return;
-    if (tab === 0) {
-      this.selected = null;
-    }
-    this.searchQuery = null;
-    this.tab = tab;
+    this.updateMainNav();
   }
 
   private goToLogin() {

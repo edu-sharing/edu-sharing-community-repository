@@ -1,7 +1,8 @@
-import {first} from 'rxjs/operators';
+import {first, map, shareReplay, switchMap} from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { AsyncSubject, Observable } from 'rxjs';
+import * as rxjs from 'rxjs';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
@@ -47,9 +48,7 @@ interface EntryDefinition {
 export class MainMenuEntriesService {
     entries$: Observable<ConfigEntry[]>;
 
-    private entries = new AsyncSubject<ConfigEntry[]>();
-
-    // Initialized on construction.
+    // Initialized on update.
     private config: {
         menuEntries?: CustomEntryDefinition[];
         hideMainMenu?: string[];
@@ -57,7 +56,7 @@ export class MainMenuEntriesService {
     };
     private loginInfo: LoginInfo;
 
-    // Conditionally initialized on construction.
+    // Conditionally initialized on update.
     private hasAccessToSafeScope: boolean;
     private organizations: OrganizationOrganizations;
     private mediaCenters: { administrationAccess: boolean }[];
@@ -139,13 +138,11 @@ export class MainMenuEntriesService {
         private router: Router,
         private ui: UIService,
     ) {
-        this.entries$ = this.entries.asObservable();
-        this.init();
-    }
-
-    private async init() {
-        await this.initInformation();
-        this.initEntries();
+        this.entries$ = this.authentication.observeLoginInfo().pipe(
+            switchMap(() => rxjs.from(this.initInformation())),
+            map(() => this.createEntries()),
+            shareReplay(1),
+        )
     }
 
     private async initInformation() {
@@ -183,15 +180,14 @@ export class MainMenuEntriesService {
         }
     }
 
-    private initEntries() {
+    private createEntries(): ConfigEntry[] {
         let entries: ConfigEntry[] = [];
         if (this.loginInfo.isValidLogin) {
             entries = this.generateEntries();
             entries = this.filterHiddenEntries(entries);
         }
         entries = this.insertCustomEntries(entries);
-        this.entries.next(entries);
-        this.entries.complete();
+        return entries;
     }
 
     private generateEntries(): ConfigEntry[] {

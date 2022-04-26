@@ -1,20 +1,5 @@
 <div class="frame" cdkDropListGroup>
 
-  <!-- <es-main-nav
-    #mainNav
-    [title]="isSafe ? 'WORKSPACE.TITLE_SAFE' : 'WORKSPACE.TITLE'"
-    [currentScope]="isSafe ? 'safe' : 'workspace'"
-    [searchEnabled]="!isBlocked"
-    [create]="{allowed: createAllowed, allowBinary: allowBinary, parent: currentFolder, folder: true}"
-    (onCreate)="explorer.nodeEntries.addVirtualNodes($event)"
-    (onCreateNotAllowed)="createNotAllowed()"
-    [searchPlaceholder]="isSafe ? 'WORKSPACE.SAFE_SEARCH' : 'WORKSPACE.SEARCH' "
-    [canOpen]="mainnav"
-    [searchQuery]="searchQuery ? searchQuery.query : null"
-    (onSearch)="doSearch($event)"
-  >
-
-  </es-main-nav> -->
 <div *ngIf="isBlocked" class="isBlocked">{{'NO_PERMISSIONS_FOR_SCOPE'|translate}}</div>
 <div *ngIf="!isBlocked" [class.hide]="globalProgress">
 
@@ -33,7 +18,6 @@
                   [class.tree-quota]="user.person.quota.enabled"
                   [current]="currentFolder ? currentFolder.ref.id : null"
                   [path]="path"
-                  [mainNav]="mainNavRef"
                   [selectedNode]="selectedNodeTree"
                   [root]="root"
                   [workspace]="this"

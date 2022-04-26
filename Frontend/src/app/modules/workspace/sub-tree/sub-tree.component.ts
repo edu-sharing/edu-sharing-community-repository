@@ -43,7 +43,6 @@ export class WorkspaceSubTreeComponent {
     dropdownTop: string;
 
     @Input() openPath: string[][] = [];
-    @Input() mainNav: MainNavComponent;
     @Input() set reload(reload: Boolean) {
         if (reload) {
             this.refresh();

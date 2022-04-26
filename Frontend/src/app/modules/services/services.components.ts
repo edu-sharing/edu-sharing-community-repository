@@ -1,5 +1,5 @@
 
-import {Component, ViewChild, HostListener, ElementRef} from '@angular/core';
+import {Component, ViewChild, HostListener, ElementRef, OnInit} from '@angular/core';
 import {Router, Params} from '@angular/router';
 import { TranslationsService } from '../../translations/translations.service';
 import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
@@ -13,7 +13,7 @@ import {RestHelper} from "../../core-module/core.module";
 import {UIConstants} from "../../core-module/ui/ui-constants";
 import {RestConstants} from "../../core-module/core.module";
 import {HttpClient} from '@angular/common/http';
-import {MainNavComponent} from '../../main/navigation/main-nav/main-nav.component';
+import { MainNavService } from '../../main/navigation/main-nav.service';
 import { map } from 'rxjs/operators';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 
@@ -23,8 +23,7 @@ import { LoadingScreenService } from '../../main/loading-screen/loading-screen.s
     templateUrl: 'services.component.html',
     styleUrls: ['services.component.scss'],
 })
-export class ServicesComponent {
-    @ViewChild('mainNav') mainNavRef: MainNavComponent;
+export class ServicesComponent implements OnInit {
     serviceUrl:string;
     registeredServices:Service[] = [];
     stats: any = {};
@@ -42,6 +41,7 @@ export class ServicesComponent {
         private sanitizer: DomSanitizer,
         private configService:ConfigurationService,
         private loadingScreen: LoadingScreenService,
+        private mainNav: MainNavService,
         private network : RestNetworkService) {
         const loadingTask = this.loadingScreen.addLoadingTask()
         this.translations.waitForInit().subscribe(() => {
@@ -55,6 +55,13 @@ export class ServicesComponent {
 
     }
 
+    ngOnInit(): void {
+        this.mainNav.setMainNavConfig({
+            title: 'SERVICES.TITLE',
+            currentScope: 'services',
+            searchEnabled: false,
+        })
+    }
 
     public registerService() {
         this.getJSON().subscribe(

@@ -175,7 +175,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
 
     onInputBlur(event: FocusEvent): void {
         this.inputHasFocus = false;
-        if (!this.overlay.overlayRef?.overlayElement.contains(event.relatedTarget as HTMLElement)) {
+        if (!this.overlay?.overlayRef?.overlayElement.contains(event.relatedTarget as HTMLElement)) {
             this.showOverlay = false;
         }
     }

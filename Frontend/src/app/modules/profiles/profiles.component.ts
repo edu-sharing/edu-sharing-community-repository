@@ -1,7 +1,7 @@
 
 import {forkJoin as observableForkJoin, Observable} from 'rxjs';
 
-import {Component, ElementRef, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import { TranslationsService } from '../../translations/translations.service';
 import {ProfileSettings, UserStats} from '../../core-module/core.module';
 import {DomSanitizer} from '@angular/platform-browser';
@@ -22,6 +22,7 @@ import {Helper} from '../../core-module/rest/helper';
 import {DefaultGroups, OptionGroup, OptionItem} from '../../core-ui-module/option-item';
 import {VCard} from '../../core-module/ui/VCard';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
+import { MainNavService } from '../../main/navigation/main-nav.service';
 
 @Component({
   selector: 'es-profiles',
@@ -31,10 +32,11 @@ import { LoadingScreenService } from '../../main/loading-screen/loading-screen.s
     trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))
   ]
 })
-export class ProfilesComponent {
+export class ProfilesComponent implements OnInit {
   private loadingTask = this.loadingScreen.addLoadingTask();
   constructor(private toast: Toast,
               private route: ActivatedRoute,
+              private mainNav: MainNavService,
               private connector: RestConnectorService,
               private translations: TranslationsService,
               private router: Router,
@@ -73,13 +75,21 @@ export class ProfilesComponent {
   private editProfileUrl: string;
   avatarImage: any;
   profileSettings: ProfileSettings;
-  @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('avatar') avatarElement : ElementRef;
   // can the particular user profile (based on the source) be edited?
   userEditProfile: boolean;
   actions: OptionItem[];
   private editAction: OptionItem;
   showPersistentIds = false;
+
+  ngOnInit(): void {
+    this.mainNav.setMainNavConfig({
+      title: 'PROFILES.TITLE_NAV',
+      currentScope: 'profiles',
+      searchEnabled: false
+    })
+  }
+
   public loadUser(authority:string) {
     this.toast.showProgressDialog();
     this.connector.isLoggedIn().subscribe((login)=> {

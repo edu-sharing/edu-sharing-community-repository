@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import {
     AfterViewInit,
     ChangeDetectionStrategy,
+    ChangeDetectorRef,
     Component,
     ElementRef,
     HostListener,
@@ -11,11 +12,18 @@ import {
     OnInit,
     ViewChild,
 } from '@angular/core';
-import { MatMenuTrigger } from '@angular/material/menu';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { About, AboutService, AuthenticationService, User, UserService } from 'ngx-edu-sharing-api';
+import {
+    About,
+    AboutService,
+    AuthenticationService,
+    CurrentUserInfo,
+    User,
+    UserService,
+} from 'ngx-edu-sharing-api';
+import * as rxjs from 'rxjs';
 import { Observable, ReplaySubject, Subject } from 'rxjs';
-import { filter, map, switchMap, take, takeUntil, tap } from 'rxjs/operators';
+import { map, take, takeUntil, tap, delay } from 'rxjs/operators';
 import { NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
 import { GlobalContainerComponent } from '../../../common/ui/global-container/global-container.component';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
@@ -23,7 +31,6 @@ import {
     ConfigurationService,
     DialogButton,
     FrameEventsService,
-    LoginResult,
     Node,
     NodeTextContent,
     NodeWrapper,
@@ -61,7 +68,7 @@ import { TopBarComponent } from '../top-bar/top-bar.component';
         trigger('cardAnimation', UIAnimation.cardAnimation()),
         trigger('fade', UIAnimation.fade()),
     ],
-    changeDetection: ChangeDetectionStrategy.OnPush,
+    // changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     private static readonly ID_ATTRIBUTE_NAME = 'data-banner-id';
@@ -71,7 +78,9 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('userRef') userRef: ElementRef;
     @ViewChild('tabNav') tabNav: ElementRef;
 
-    visible = false;
+    private shouldAlwaysHide = this.storage.get(TemporaryStorageService.OPTION_HIDE_MAINNAV, false);
+    
+    visible = !this.shouldAlwaysHide;
     autoLogoutTimeout$: Observable<string>;
     config: any = {};
     showNodeStore = false;
@@ -126,6 +135,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         private user: UserService,
         private ngZone: NgZone,
         private translations: TranslationsService,
+        private changeDetectorRef: ChangeDetectorRef,
     ) {}
 
     ngOnInit(): void {
@@ -154,7 +164,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private init(): void {
         this.mainNavService.registerMainNav(this);
-        this.visible = !this.storage.get(TemporaryStorageService.OPTION_HIDE_MAINNAV, false);
         this.setMenuStyle();
 
         this.connector.setRoute(this.route).subscribe(() => {
@@ -168,50 +177,67 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private registerMainNavConfig() {
-        this.mainNavService
-            .observeMainNavConfig()
-            .pipe(
-                takeUntil(this.destroyed$),
-                // Update `this.mainNavConfig` as soon as possible
-                tap((config) => (this.mainNavConfig = config)),
-                // Wait for `initDone` before calling `updateConfig`
-                switchMap((config) => this.initDone$.pipe(map(() => config))),
-            )
-            .subscribe((config) => this.updateConfig(config));
+        const mainNavConfig$ = this.mainNavService.observeMainNavConfig().pipe(
+            // Update `this.mainNavConfig` as soon as possible
+            tap((config) => (this.mainNavConfig = config)),
+        );
+        rxjs.combineLatest([
+            mainNavConfig$,
+            this.user
+                .observeCurrentUserInfo()
+                // .pipe(tap((userInfo) => console.log('userInfo', userInfo))),
+                ,
+            this.route.queryParams,
+            this.initDone$,
+        ])
+            .pipe(takeUntil(this.destroyed$), delay(0))
+            .subscribe(([mainNavConfig, userInfo, queryParams]) => {
+                this.updateConfig(mainNavConfig, userInfo, queryParams);
+                this.changeDetectorRef.detectChanges();
+            });
     }
 
-    private updateConfig(mainNavConfig: MainNavConfig): void {
-        // FIXME: most of this does not depend on mainNavConfig and could be updated on its own
-        // account.
+    private updateConfig(
+        mainNavConfig: MainNavConfig,
+        userInfo: CurrentUserInfo,
+        queryParams: Params,
+    ): void {
+        this.visible = this.getIsVisible(mainNavConfig, queryParams);
         this.canOpen = mainNavConfig.canOpen;
         this.searchQuery = mainNavConfig.searchQuery;
-        this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
-            if (!data.isValidLogin) {
-                this.canOpen = data.isGuest;
-                this.checkConfig();
-                return;
-            }
-            this.route.queryParams.subscribe(async (params: Params) => {
-                this.queryParams = params;
-                if (params.noNavigation === 'true') {
-                    this.canOpen = false;
-                }
-                if (params.connector) {
-                    this.topBar.createMenu?.showCreateConnector(
-                        this.topBar.createMenu?.connectorList?.filter(
-                            (c) => c.id === params.connector,
-                        )[0],
-                    );
-                }
+        if (!userInfo.loginInfo.isValidLogin) {
+            this.canOpen = userInfo.loginInfo.isGuest;
+            this.checkConfig();
+            return;
+        }
+        this.queryParams = queryParams;
+        if (queryParams.noNavigation === 'true') {
+            this.canOpen = false;
+        }
+        if (queryParams.connector) {
+            this.topBar.createMenu?.showCreateConnector(
+                this.topBar.createMenu?.connectorList?.filter(
+                    (c) => c.id === queryParams.connector,
+                )[0],
+            );
+        }
+        this.showNodeStore = queryParams.nodeStore === 'true';
+        this.showUser = mainNavConfig.currentScope !== 'login' && mainNavConfig.showUser;
+        this.checkConfig();
+        this.canEditProfile = userInfo.user.editProfile;
+    }
 
-                this.showNodeStore = params.nodeStore === 'true';
-                this.showUser = mainNavConfig.currentScope !== 'login' && mainNavConfig.showUser;
-                this.checkConfig();
-                const user = await this.iam.getUser().toPromise();
-                this.canEditProfile = user.editProfile;
-                this.configService.getAll().subscribe(() => {});
-            });
-        });
+    private getIsVisible(mainNavConfig: MainNavConfig, queryParams: Params): boolean {
+        if (this.shouldAlwaysHide || !this.mainNavConfig.show) {
+            return false;
+        } else if (
+            queryParams.mainnav === 'false' &&
+            ['login', 'search', 'collections'].includes(mainNavConfig.currentScope)
+        ) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     private registerHandleScroll(): void {

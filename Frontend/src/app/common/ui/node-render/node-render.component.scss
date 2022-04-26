@@ -33,9 +33,6 @@ a, a:hover, a:visited, a:active {
   font-size: 30px;
   color:#fff;
 }
-::ng-deep .topBar-render {
-  display: none!important;
-}
 :host ::ng-deep{
   a.edusharing_rendering_content{
     background-color: $primary;

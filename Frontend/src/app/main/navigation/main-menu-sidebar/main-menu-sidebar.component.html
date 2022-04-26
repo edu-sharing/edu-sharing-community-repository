@@ -33,10 +33,11 @@
           [routerLink]="['/' + ROUTER_PREFIX + 'profiles', ME]"
           [attr.aria-label]="'PROFILES.TITLE_NAV' | translate"
           aria-describedby="main-menu-sidebar-username"
+          (click)="hide()"
         ><ng-container *ngTemplateOutlet="userAvatar"></ng-container></a>
       </div>
     </div>
-    <es-main-menu-buttons [currentScope]="currentScope"></es-main-menu-buttons>
+    <es-main-menu-buttons [currentScope]="currentScope" (entryClicked)="hide()"></es-main-menu-buttons>
   </div>
   <div class="license-info">
     <button mat-button class="mat-button-no-uppercase" (click)="onShowLicenses()">

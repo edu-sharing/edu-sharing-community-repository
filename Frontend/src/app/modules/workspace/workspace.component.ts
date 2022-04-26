@@ -49,7 +49,8 @@ import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component'
 import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {WorkspaceExplorerComponent} from './explorer/explorer.component';
 import {CardService} from '../../core-ui-module/card.service';
-import {Observable, Subject} from 'rxjs';
+import {BehaviorSubject, Observable, Subject} from 'rxjs';
+import * as rxjs from 'rxjs';
 import {delay} from 'rxjs/operators';
 import {ListTableComponent} from '../../core-ui-module/components/list-table/list-table.component';
 import {SkipTarget} from '../../main/navigation/skip-nav/skip-nav.service';
@@ -90,22 +91,47 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
 
     showSelectRoot = false;
 
-    public allowBinary = true;
+    private allowBinarySubject = new BehaviorSubject(true);
+    get allowBinary() {
+        return this.allowBinarySubject.value;
+    }
+    set allowBinary(value) {
+        this.allowBinarySubject.next(value);
+    }
+    private createAllowedSubject = new BehaviorSubject<boolean | 'EMIT_EVENT'>(null);
+    get createAllowed(): boolean | 'EMIT_EVENT' {
+        return this.createAllowedSubject.value;
+    }
+    set createAllowed(value: boolean | 'EMIT_EVENT') {
+        this.createAllowedSubject.next(value);
+    }
+    private currentFolderSubject = new BehaviorSubject<Node>(null);
+    get currentFolder(): Node {
+        return this.currentFolderSubject.value;
+    }
+    set currentFolder(value: Node) {
+        this.currentFolderSubject.next(value);
+    }
+    private searchQuerySubject = new BehaviorSubject<{ node: Node; query: string; }>(null);
+    public get searchQuery(): { node: Node; query: string; } {
+        return this.searchQuerySubject.value;
+    }
+    public set searchQuery(value: { node: Node; query: string; }) {
+        this.searchQuerySubject.next(value);
+    }
+
+
     public globalProgress = false;
     public editNodeDeleteOnCancel = false;
     private createMds: string;
     private nodeDisplayedVersion: string;
-    createAllowed: boolean | 'EMIT_EVENT';
     notAllowedReason: string;
-    currentFolder: Node;
     user: IamUser;
-    public searchQuery: any;
     public isSafe = false;
     isLoggedIn = false;
     public addNodesToCollection: Node[];
     public addNodesStream: Node[];
     public variantNode: Node;
-    @ViewChild('mainNav') mainNavRef: MainNavComponent;
     private connectorList: Connector[];
     private currentNode: Node;
     public mainnav = true;
@@ -174,6 +200,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
 
     ngOnInit(): void {
         this.registerScroll();
+        this.registerUpdateMainNav();
     }
 
     ngOnDestroy(): void {
@@ -222,6 +249,54 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         this.globalProgress = true;
         this.cardHasOpenModals$ = card.hasOpenModals.pipe(delay(0));
     }
+
+    /**
+     * Needs the following member variables to be initialized:
+     * - isSafe
+     * - isBlocked
+     * - mainnav
+     */
+     private initMainNav(): void {
+        this.mainNavService.setMainNavConfig({
+            title: this.isSafe ? 'WORKSPACE.TITLE_SAFE' : 'WORKSPACE.TITLE',
+            currentScope: this.isSafe ? 'safe' : 'workspace',
+            searchEnabled: !this.isBlocked,
+            create: {
+                allowed: this.createAllowed,
+                allowBinary: this.allowBinary,
+                parent: this.currentFolder,
+                folder: true,
+            },
+            onCreate: (nodes) => this.explorer.nodeEntries.addVirtualNodes(nodes),
+            onCreateNotAllowed: () => this.createNotAllowed(),
+            searchPlaceholder: this.isSafe ? 'WORKSPACE.SAFE_SEARCH' : 'WORKSPACE.SEARCH',
+            canOpen: this.mainnav,
+            searchQuery: this.searchQuery?.query,
+            onSearch: (query, cleared) => this.doSearch({ query, cleared }),
+        });
+    }
+
+    private registerUpdateMainNav(): void {
+        rxjs.combineLatest([
+            this.createAllowedSubject,
+            this.allowBinarySubject,
+            this.currentFolderSubject,
+        ]).subscribe(([createAllowed, allowBinary, currentFolder]) =>
+            this.mainNavService.patchMainNavConfig({
+                create: {
+                    allowed: createAllowed,
+                    allowBinary: allowBinary,
+                    parent: currentFolder,
+                    folder: true,
+                },
+            }),
+        );
+        this.searchQuerySubject.subscribe((searchQuery) =>
+            this.mainNavService.patchMainNavConfig({
+                searchQuery: searchQuery?.query,
+            }),
+        );
+    }    
 
     private registerScroll(): void {
         this.ngZone.runOutsideAngular(() => {
@@ -393,6 +468,8 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
                 this.reurlDirectories = params.applyDirectories === 'true';
                 this.mainnav = params.mainnav === 'false' ? false : true;
 
+                this.initMainNav();
+
                 if (params.file) {
                     this.node.getNodeMetadata(params.file, [RestConstants.ALL]).subscribe((paramNode) => {
                         this.setSelection([paramNode.node]);
@@ -510,7 +587,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         this.setFixMobileNav();
     }
     private setFixMobileNav() {
-        this.mainNavRef.setFixMobileElements(this.explorer.nodeEntries.getSelection().selected?.length > 0);
+        this.mainNavService.getMainNav().setFixMobileElements(this.explorer.nodeEntries.getSelection().selected?.length > 0);
     }
     private updateLicense() {
         this.closeMetadata();

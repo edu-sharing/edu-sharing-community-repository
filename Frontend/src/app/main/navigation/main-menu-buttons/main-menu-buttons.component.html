@@ -4,7 +4,7 @@
   color="primary"
   class="entry mat-button-no-uppercase"
   [class.selected]="currentScope === entry.scope"
-  (click)="entry.open()"
+  (click)="entry.open(); entryClicked.emit()"
   [class.collection-item-separate]="entry.isSeparate"
   [class.clickable]="!entry.isDisabled"
   [class.disabled]="entry.isDisabled"

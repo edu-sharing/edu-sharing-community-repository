@@ -1,10 +1,11 @@
-import {forkJoin as observableForkJoin,  Observable } from 'rxjs';
+import {forkJoin as observableForkJoin,  Observable, Subject } from 'rxjs';
 import {
     AfterViewInit,
     Component,
     ContentChild,
     ElementRef,
     EventEmitter, OnDestroy,
+    OnInit,
     TemplateRef,
     ViewChild
 } from '@angular/core';
@@ -95,7 +96,7 @@ import { MainNavService } from '../../main/navigation/main-nav.service';
     providers: [OptionsHelperService, {provide: OPTIONS_HELPER_CONFIG, useValue: {
             subscribeEvents: false
         }}]})
-export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
+export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestroy {
     static INDEX_MAPPING = [
         RestConstants.COLLECTIONSCOPE_MY,
         RestConstants.COLLECTIONSCOPE_ORGA,
@@ -215,6 +216,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
     // FIXME: `collectionShare` is expected to be of type `Node[]` by `workspace-management` but is
     // of type `Node` here.
     private adminMediacenters: Mediacenter[];
+    private mainNavUpdateTrigger = new Subject<void>();
     set collectionShare(collectionShare: Node[]) {
         this._collectionShare = collectionShare as any as Node;
         this.refreshAll();
@@ -356,6 +358,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
                         this.addMaterialBinaryOptionItem.isEnabled = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES);
                         this.createSubCollectionOptionItem.isEnabled = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS);
                         this.isGuest = data.isGuest;
+                        this.mainNavUpdateTrigger.next();
                         this.mediacenterService.getMediacenters().subscribe((mediacenters) => {
                             this.adminMediacenters = mediacenters.filter((m)=>m.administrationAccess);
                         });
@@ -413,12 +416,33 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         });
     }
 
+    ngOnInit(): void {
+        this.registerMainNav();
+    }
 
     ngOnDestroy() {
         this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE, this.dataSourceReferences);
     }
 
     ngAfterViewInit() {
+    }
+
+    private registerMainNav(): void {
+        this.mainNavService.setMainNavConfig({
+            title: 'COLLECTIONS.TITLE',
+            currentScope: 'collections',
+            searchEnabled: false,
+            onCreate: (nodes) => this.addNodesToCollection(nodes),
+        })
+        this.mainNavUpdateTrigger.subscribe(() => {
+            this.mainNavService.patchMainNavConfig({
+                create: {
+                    allowed: this.createAllowed(),
+                    allowBinary: !this.isRootLevelCollection() && this.isAllowedToEditCollection(),
+                    parent: this.collectionContent?.node ?? null,
+                }
+            });
+        })
     }
 
     isMobile() {
@@ -984,6 +1008,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
                     );
                     this.sortReferences.direction = refAscending ? 'asc' : 'desc';
                     this.collectionContent.node = collection;
+                    this.mainNavUpdateTrigger.next();
 
                     this.renderBreadcrumbs();
 
@@ -1140,6 +1165,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
                             FrameEventsService.EVENT_INVALIDATE_HEIGHT,
                         );
                     });
+                    this.mainNavUpdateTrigger.next();
                     // }
                 });
             },
@@ -1297,6 +1323,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         this.collectionContent.node.aspects = [
             RestConstants.CCM_ASPECT_COLLECTION,
         ];
+        this.mainNavUpdateTrigger.next();
     }
 
     private getCollectionId() {
