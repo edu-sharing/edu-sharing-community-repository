@@ -18,7 +18,7 @@ import {RestUtilitiesService} from "../../core-module/core.module";
 import {RestNodeService} from "../../core-module/core.module";
 import {RestCollectionService} from "../../core-module/core.module";
 import {RestHelper} from "../../core-module/core.module";
-import {CordovaService} from "../../common/services/cordova.service";
+import {CordovaService, OnBackBehaviour} from '../../common/services/cordova.service';
 import {DateHelper} from "../../core-ui-module/DateHelper";
 import {RestConnectorsService} from "../../core-module/core.module";
 import {FrameEventsService} from "../../core-module/core.module";
@@ -61,6 +61,8 @@ export class ShareAppComponent {
               private collectionApi: RestCollectionService,
               private cordova : CordovaService,
               private connector: RestConnectorService) {
+      // when the user finished sharing and navigates back he must return to the origin app
+      this.cordova.setOnBackBehaviour(OnBackBehaviour.closeApp);
       this.columns.push(new ListItem("COLLECTION", 'title'));
       this.columns.push(new ListItem("COLLECTION", 'info'));
       this.columns.push(new ListItem("COLLECTION", 'scope'));
