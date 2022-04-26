@@ -3,9 +3,6 @@
   <es-banner [scope]="_currentScope" (onUpdate)="refreshBanner()"></es-banner>
 
   <div role="navigation" [attr.aria-label]="'NAV.MAIN' | translate">
-    <div class="preload" *ngIf="getPreloading()">
-      <img src="assets/images/edu-sharing-loading-animation.svg" esImage-config alt="" />
-    </div>
     <es-user-profile *ngIf="showProfile" (onCancel)="showProfile = false"></es-user-profile>
 
     <es-card

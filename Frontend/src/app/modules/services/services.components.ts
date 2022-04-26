@@ -14,8 +14,8 @@ import {UIConstants} from "../../core-module/ui/ui-constants";
 import {RestConstants} from "../../core-module/core.module";
 import {HttpClient} from '@angular/common/http';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
-import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
 import { map } from 'rxjs/operators';
+import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 
 
 @Component({
@@ -41,11 +41,13 @@ export class ServicesComponent {
         private http:HttpClient,
         private sanitizer: DomSanitizer,
         private configService:ConfigurationService,
+        private loadingScreen: LoadingScreenService,
         private network : RestNetworkService) {
+        const loadingTask = this.loadingScreen.addLoadingTask()
         this.translations.waitForInit().subscribe(() => {
             this.configService.getAll().subscribe((data: any) => {
                 this.refreshServiceList();
-                GlobalContainerComponent.finishPreloading();
+                loadingTask.done();
             });
         });
 

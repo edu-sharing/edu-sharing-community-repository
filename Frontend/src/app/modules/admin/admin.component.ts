@@ -36,7 +36,6 @@ import {Observable, Observer} from 'rxjs';
 import {RestNetworkService} from '../../core-module/core.module';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {CustomHelper} from '../../common/custom-helper';
-import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {DateHelper} from '../../core-ui-module/DateHelper';
 import {CsvHelper} from '../../core-module/csv.helper';
 import {trigger} from '@angular/animations';
@@ -99,7 +98,6 @@ export class AdminComponent implements OnDestroy {
       this.searchColumns.push(new ListItem('NODE', RestConstants.NODE_ID));
       this.searchColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
       this.translations.waitForInit().subscribe(() => {
-          GlobalContainerComponent.finishPreloading();
           this.warningButtons=[
               new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=> {window.history.back()}),
               new DialogButton('ADMIN.UNDERSTAND',DialogButton.TYPE_PRIMARY,()=> {this.showWarning=false})

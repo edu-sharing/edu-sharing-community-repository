@@ -154,7 +154,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 						// if its local stored, load the url directly
 						String thumbnail = (String)props.get(CCConstants.CCM_PROP_IO_THUMBNAILURL);
 						if(thumbnail != null && !thumbnail.trim().equals("")){
-							handleExternalThumbnail(req, resp, thumbnail);
+							handleExternalThumbnail(nodeId,req, resp, thumbnail);
 							return;
 						}
 						if(nodeType.equals(CCConstants.CCM_TYPE_REMOTEOBJECT) || aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)) {
@@ -164,7 +164,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 						if(props != null){
 							thumbnail = (String)props.get(CCConstants.CCM_PROP_IO_THUMBNAILURL);
 							if(thumbnail != null && !thumbnail.trim().equals("")){
-								handleExternalThumbnail(req, resp, thumbnail);
+								handleExternalThumbnail(nodeId,req, resp, thumbnail);
 								return;
 							}
 						}
@@ -406,7 +406,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		if (getPrevResult.getType().equals(PreviewDetail.TYPE_EXTERNAL)) {
 			String extThumbUrl = getPrevResult.getUrl();
 			if (extThumbUrl != null && !extThumbUrl.trim().equals("")) {
-				return handleExternalThumbnail(req, resp, extThumbUrl);
+				return handleExternalThumbnail(nodeId,req, resp, extThumbUrl);
 			}
 		}
 
@@ -441,7 +441,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		return false;
 	}
 
-	private boolean handleExternalThumbnail(HttpServletRequest req, HttpServletResponse resp, String url) throws IOException {
+	private boolean handleExternalThumbnail(String nodeId, HttpServletRequest req, HttpServletResponse resp, String url) throws IOException {
 		if ("false".equalsIgnoreCase(req.getParameter("allowRedirect")) &&
 				LightbendConfigLoader.get().getStringList("repository.communication.preview.remoteAllowList").stream().anyMatch((reg) -> {
 					Pattern pattern = Pattern.compile(reg);
@@ -455,7 +455,8 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 					public void handle(InputStream httpResult) {
 						resp.setHeader("Content-Type", "image/jpeg");
 						try {
-							StreamUtils.copy(httpResult, resp.getOutputStream());
+							DataInputStream extImgTransformed = postProcessImage(nodeId, new DataInputStream(httpResult), req);
+							StreamUtils.copy(extImgTransformed, resp.getOutputStream());
 						} catch (IOException e) {
 							throw new RuntimeException(e);
 						}
@@ -629,7 +630,6 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 
 			@Override
 			public Boolean doWork() throws Exception {
-				ServletOutputStream op = resp.getOutputStream();
 				ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef,
 						QName.createQName(contentProp));
 
@@ -648,7 +648,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				//
 				// Stream to the requester.
 				//
-				byte[] bbuf = new byte[1024];
+
 				// DataInputStream in = new
 				// DataInputStream(url.openStream());
 				InputStream is=reader.getContentInputStream();
@@ -672,27 +672,33 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 						throw e;
 					}
 				}
-				// fix to proper mimetype (usually comes at "image/svg xml" which is not valid)
-				if(mimetype.startsWith("image/svg")){
-					mimetype = "image/svg+xml";
-				}
-				resp.setContentType(mimetype);
-
-				resp.setContentLength((int) in.available());
-
-
-				while ((in != null) && ((length = in.read(bbuf)) != -1)) {
-					op.write(bbuf, 0, length);
-				}
-
-				in.close();
-
-				op.flush();
-				op.close();
+				deliverImage(mimetype, in, resp);
 				return true;
 			}
 		});
 
+	}
+
+	private void deliverImage(String mimetype, DataInputStream in, HttpServletResponse resp) throws IOException {
+		ServletOutputStream op = resp.getOutputStream();
+		int length;
+		// fix to proper mimetype (usually comes at "image/svg xml" which is not valid)
+		if(mimetype.startsWith("image/svg")){
+			mimetype = "image/svg+xml";
+		}
+		resp.setContentType(mimetype);
+
+		resp.setContentLength((int) in.available());
+
+		byte[] bbuf = new byte[1024];
+		while ((in != null) && ((length = in.read(bbuf)) != -1)) {
+			op.write(bbuf, 0, length);
+		}
+
+		in.close();
+
+		op.flush();
+		op.close();
 	}
 
 

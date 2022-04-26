@@ -40,7 +40,6 @@ import {BridgeService} from '../../core-bridge-module/bridge.service';
 import { CardService } from '../../core-ui-module/card.service';
 import { Observable } from 'rxjs';
 import {ListTableComponent} from '../../core-ui-module/components/list-table/list-table.component';
-import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 
 @Component({
     selector: 'es-editorial',
@@ -89,7 +88,6 @@ export class EditorialComponent {
         ]
         this.translations.waitForInit().subscribe(() => {
             this.initialize();
-            GlobalContainerComponent.finishPreloading();
         });
     }
 

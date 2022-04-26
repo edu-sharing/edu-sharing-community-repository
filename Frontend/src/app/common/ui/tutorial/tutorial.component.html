@@ -19,13 +19,15 @@
     <div class="buttons">
       <button
         cdkMonitorElementFocus
-        class="btn-flat waves-effect waves-light"
+        mat-button
+        color="primary"
+        class="skip"
         *ngIf="showSkip"
         (click)="skip()"
       >
         {{ 'SKIP' | translate }}
       </button>
-      <button cdkMonitorElementFocus class="btn waves-effect waves-light" (click)="next()">
+      <button cdkMonitorElementFocus mat-flat-button color="primary" (click)="next()" class="next">
         {{ 'NEXT' | translate }}
       </button>
     </div>

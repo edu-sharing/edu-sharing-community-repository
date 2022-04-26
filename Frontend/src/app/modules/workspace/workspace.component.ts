@@ -45,7 +45,6 @@ import {Helper} from '../../core-module/rest/helper';
 import {CordovaService} from '../../common/services/cordova.service';
 import {HttpClient} from '@angular/common/http';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
-import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {WorkspaceExplorerComponent} from './explorer/explorer.component';
@@ -60,6 +59,7 @@ import {
     DropSource, DropTarget, NodeEntriesDisplayType,
     NodeRoot
 } from '../../core-ui-module/components/node-entries-wrapper/entries-model';
+import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 
 @Component({
     selector: 'es-workspace-main',
@@ -134,6 +134,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     private reurlDirectories: boolean;
     reorderDialog: boolean;
     private readonly destroyed$ = new Subject<void>();
+    private loadingTask = this.loadingScreen.addLoadingTask();
     @HostListener('window:beforeunload', ['$event'])
     beforeunloadHandler(event: any) {
         if (this.isSafe) {
@@ -209,6 +210,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         private cordova: CordovaService,
         private card: CardService,
         private ngZone: NgZone,
+        private loadingScreen: LoadingScreenService,
     ) {
         this.event.addListener(this);
         this.translations.waitForInit().subscribe(() => {
@@ -751,7 +753,9 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     }
 
     private updateNodeByParams(params: any, node: Node | any) {
-        GlobalContainerComponent.finishPreloading();
+        if (!this.loadingTask.isDone) {
+            this.loadingTask.done();
+        }
         if (params?.query) {
             this.doSearchFromRoute(params, node);
         }

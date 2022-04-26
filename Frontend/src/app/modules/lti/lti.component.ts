@@ -1,9 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { DialogButton } from '../../core-module/ui/dialog-button';
-import {
-    GlobalContainerComponent
-} from '../../common/ui/global-container/global-container.component';
-import {TranslationsService} from '../../translations/translations.service';
 
 @Component({
   selector: 'app-lti',
@@ -12,12 +8,7 @@ import {TranslationsService} from '../../translations/translations.service';
 })
 export class LtiComponent implements OnInit {
     public dialogButtons: DialogButton[] = [];
-  constructor(
-      private translations: TranslationsService,
-  ) {
-      this.translations.waitForInit().subscribe(() => {
-          GlobalContainerComponent.finishPreloading();
-      });
+  constructor() {
       this.dialogButtons = DialogButton.getOk(() => {
           (window.opener || window.parent).postMessage({subject: 'org.imsglobal.lti.close'}, '*');
       });
