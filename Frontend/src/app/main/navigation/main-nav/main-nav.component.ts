@@ -48,6 +48,7 @@ import { OPEN_URL_MODE, UIConstants } from '../../../core-module/ui/ui-constants
 import { OptionGroup, OptionItem } from '../../../core-ui-module/option-item';
 import { Toast } from '../../../core-ui-module/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
+import { NodeStoreService } from '../../../modules/search/node-store/node-store.service';
 import { TranslationsService } from '../../../translations/translations.service';
 import { MainMenuEntriesService } from '../main-menu-entries.service';
 import { MainNavConfig, MainNavService } from '../main-nav.service';
@@ -79,11 +80,11 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('tabNav') tabNav: ElementRef;
 
     private shouldAlwaysHide = this.storage.get(TemporaryStorageService.OPTION_HIDE_MAINNAV, false);
-    
+
     visible = !this.shouldAlwaysHide;
     autoLogoutTimeout$: Observable<string>;
     config: any = {};
-    showNodeStore = false;
+    isNodeStoreOpen = false;
     acceptLicenseAgreement: boolean;
     licenseAgreement: boolean;
     licenseAgreementHTML: string;
@@ -136,6 +137,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         private ngZone: NgZone,
         private translations: TranslationsService,
         private changeDetectorRef: ChangeDetectorRef,
+        private nodeStore: NodeStoreService,
     ) {}
 
     ngOnInit(): void {
@@ -183,10 +185,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         );
         rxjs.combineLatest([
             mainNavConfig$,
-            this.user
-                .observeCurrentUserInfo()
-                // .pipe(tap((userInfo) => console.log('userInfo', userInfo))),
-                ,
+            this.user.observeCurrentUserInfo(),
             this.route.queryParams,
             this.initDone$,
         ])
@@ -221,10 +220,23 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                 )[0],
             );
         }
-        this.showNodeStore = queryParams.nodeStore === 'true';
+        if (queryParams.nodeStore === 'true') {
+            this.openNodeStore();
+        }
         this.showUser = mainNavConfig.currentScope !== 'login' && mainNavConfig.showUser;
         this.checkConfig();
         this.canEditProfile = userInfo.user.editProfile;
+    }
+
+    private openNodeStore(): void {
+        if (this.isNodeStoreOpen) {
+            return;
+        }
+        this.isNodeStoreOpen = true;
+        this.nodeStore.open(() => {
+            this.isNodeStoreOpen = false;
+            this.setNodeStore(false);
+        });
     }
 
     private getIsVisible(mainNavConfig: MainNavConfig, queryParams: Params): boolean {
