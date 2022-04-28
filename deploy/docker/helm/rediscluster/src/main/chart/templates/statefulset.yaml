@@ -80,8 +80,12 @@ spec:
           subPath: redis-default.conf
         {{- with .Values.livenessProbe }}
         livenessProbe:
-          tcpSocket:
-            port: api
+          exec:
+            command:
+              - "/bin/bash"
+              - "-ec"
+              - |
+                [[ $(redis-cli ping) == "PONG" || $(redis-cli ping | head -n1 | awk '{print $1;}') =~ ^LOADING$|^MASTERDOWN$ ]] || exit 1
           failureThreshold: {{ .failureThreshold }}
           initialDelaySeconds: {{ .initialDelaySeconds }}
           periodSeconds: {{ .periodSeconds }}
@@ -94,7 +98,7 @@ spec:
             - "/bin/bash"
             - "-ec"
             - |
-              [[ $(redis-cli ping) == "PONG" ]] || exit 1
+              [[ $(redis-cli ping) == "PONG" && $(redis-cli CLUSTER INFO | grep cluster_state | tr -d '[:space:]') == "cluster_state:ok" ]] || exit 1
           failureThreshold: {{ .failureThreshold }}
           initialDelaySeconds: {{ .initialDelaySeconds }}
           periodSeconds: {{ .periodSeconds }}
