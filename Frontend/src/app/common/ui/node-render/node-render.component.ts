@@ -71,6 +71,7 @@ import {RouterComponent} from '../../../router/router.component';
 import {RenderHelperService} from '../../../core-ui-module/render-helper.service';
 import {NodeDataSource} from '../../../core-ui-module/components/node-entries-wrapper/node-data-source';
 import { Subject } from 'rxjs';
+import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
 
 
 @Component({
@@ -125,6 +126,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
       private router : Router,
       private platformLocation : PlatformLocation,
       private optionsHelper : OptionsHelperService,
+      private loadingScreen: LoadingScreenService,
       private temporaryStorageService: TemporaryStorageService) {
       (window as any).nodeRenderComponentRef = {component: this, zone: _ngZone};
       (window as any).ngRender = {setDownloadUrl:(url:string)=> {this.setDownloadUrl(url)}};
@@ -399,6 +401,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     this.addDownloadButton(download);
   }
   private loadRenderData() {
+    const loadingTask = this.loadingScreen.addLoadingTask();
       this.isLoading=true;
       this.optionsHelper.clearComponents(this.mainNavRef, this.actionbar);
     if(this.isBuildingPage) {
@@ -447,7 +450,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                 });
             }
             this.isLoading = false;
-            GlobalContainerComponent.finishPreloading();
+            loadingTask.done();
         },(error)=> {
             console.log(error.error.error);
             if(error?.error?.error === 'org.edu_sharing.restservices.DAOMissingException') {
@@ -461,7 +464,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                 this.toast.error(error);
             }
             this.isLoading = false;
-            GlobalContainerComponent.finishPreloading();
+            loadingTask.done();
         })
   }
     onDelete(event:any) {

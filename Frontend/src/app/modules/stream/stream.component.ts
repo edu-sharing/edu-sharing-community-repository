@@ -39,7 +39,6 @@ import * as moment from 'moment';
 import {ActionbarHelperService} from '../../common/services/actionbar-helper';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
-import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 import {filter, pairwise} from 'rxjs/operators';
 import {OptionsHelperService} from '../../core-ui-module/options-helper.service';
@@ -50,6 +49,7 @@ import {
 } from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 import {SelectionModel} from '@angular/cdk/collections';
 import { StreamEntry, StreamV1Service } from 'ngx-edu-sharing-api';
+import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 
 
 @Component({
@@ -136,12 +136,14 @@ export class StreamComponent implements AfterViewInit {
         private nodeHelper: NodeHelperService,
         private actionbarHelperService: ActionbarHelperService,
         private collectionService: RestCollectionService,
+        private loadingScreen: LoadingScreenService,
         private translations: TranslationsService) {
+        const loadingTask = this.loadingScreen.addLoadingTask();
         this.translations.waitForInit().subscribe(() => {
             this.connector.isLoggedIn().subscribe(data => {
                 this.dateToDisplay = moment().locale(this.translations.getLanguage()).format('dddd, DD. MMMM YYYY');
                 this.createAllowed = data.statusCode == RestConstants.STATUS_CODE_OK;
-                GlobalContainerComponent.finishPreloading();
+                loadingTask.done();
             });
             this.connectors.list().subscribe(list => {
                 this.connectorList = list;

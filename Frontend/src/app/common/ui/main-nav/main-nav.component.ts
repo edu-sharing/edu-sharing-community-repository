@@ -545,10 +545,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         GlobalContainerComponent.instance.rocketchat.unread = 0;
     }
 
-    getPreloading() {
-        return GlobalContainerComponent.getPreloading();
-    }
-
     isCreateAllowed() {
         // @TODO: May Check for more constrains
         return (this.create?.allowed === true) && !this.connector.getCurrentLogin()?.isGuest && this.queryParams?.reurlCreate !== 'false';

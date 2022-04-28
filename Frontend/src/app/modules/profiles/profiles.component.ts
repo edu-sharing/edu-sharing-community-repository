@@ -19,9 +19,9 @@ import {RestConstants} from '../../core-module/core.module';
 import {RestHelper} from '../../core-module/core.module';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {Helper} from '../../core-module/rest/helper';
-import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {DefaultGroups, OptionGroup, OptionItem} from '../../core-ui-module/option-item';
 import {VCard} from '../../core-module/ui/VCard';
+import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 
 @Component({
   selector: 'es-profiles',
@@ -32,6 +32,7 @@ import {VCard} from '../../core-module/ui/VCard';
   ]
 })
 export class ProfilesComponent {
+  private loadingTask = this.loadingScreen.addLoadingTask();
   constructor(private toast: Toast,
               private route: ActivatedRoute,
               private connector: RestConnectorService,
@@ -39,6 +40,7 @@ export class ProfilesComponent {
               private router: Router,
               private config: ConfigurationService,
               private sanitizer: DomSanitizer,
+              private loadingScreen: LoadingScreenService,
               private iamService: RestIamService) {
     this.translations.waitForInit().subscribe(() => {
       route.params.subscribe((params)=> {
@@ -94,7 +96,9 @@ export class ProfilesComponent {
             this.user.profile.vcard = new VCard((this.user.profile.vcard as unknown as string));
         }
         this.userEdit.profile.vcard = this.user.profile.vcard?.copy();
-        GlobalContainerComponent.finishPreloading();
+        if (!this.loadingTask.isDone) {
+            this.loadingTask.done();
+        }
         this.iamService.getCurrentUserAsync().then((me)=> {
           this.isMe = profile.person.authorityName === me.person.authorityName;
           if(this.isMe && login.isGuest) {
@@ -104,7 +108,9 @@ export class ProfilesComponent {
         });
       }, (error: any) => {
         this.toast.closeModalDialog();
-        GlobalContainerComponent.finishPreloading();
+        if (!this.loadingTask.isDone) {
+            this.loadingTask.done();
+        }
         this.toast.error(null, 'PROFILES.LOAD_ERROR');
       });
     });

@@ -5,7 +5,6 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { first, map, startWith } from 'rxjs/operators';
-import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
 import { MainNavComponent } from '../../common/ui/main-nav/main-nav.component';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { ConfigurationService, DialogButton, LoginResult, RestConnectorService, RestConstants, RestHelper } from '../../core-module/core.module';
@@ -18,6 +17,7 @@ import { Toast } from '../../core-ui-module/toast';
 import { TranslationsService } from '../../translations/translations.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { LoginInfo, AuthenticationService } from 'ngx-edu-sharing-api';
+import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 
 
 @Component({
@@ -65,7 +65,9 @@ export class LoginComponent implements OnInit {
         private route: ActivatedRoute,
         private bridge: BridgeService,
         private authentication: AuthenticationService,
+        private loadingScreen: LoadingScreenService,
     ) {
+        const loadingTask = this.loadingScreen.addLoadingTask();
         this.isLoading = true;
         this.updateButtons();
         this.translations.waitForInit().subscribe(() => {
@@ -129,7 +131,7 @@ export class LoginComponent implements OnInit {
                             return;
                         }
                         this.isLoading = false;
-                        GlobalContainerComponent.finishPreloading();
+                        loadingTask.done();
                     });
                     this.isSafeLogin=this.scope==RestConstants.SAFE_SCOPE;
                     this.next = params.next;

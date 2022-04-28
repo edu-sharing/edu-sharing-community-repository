@@ -11,7 +11,7 @@ import {RestOrganizationService} from "../../core-module/core.module";
 import {ConfigurationService} from "../../core-module/core.module";
 import {RestHelper} from "../../core-module/core.module";
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
-import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
+import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 
 @Component({
   selector: 'es-permissions-main',
@@ -35,7 +35,9 @@ export class PermissionsMainComponent {
               private config: ConfigurationService,
               private translations: TranslationsService,
               private organization: RestOrganizationService,
+              private loadingScreen: LoadingScreenService,
               private connector: RestConnectorService) {
+    const loadingTask = this.loadingScreen.addLoadingTask();
     this.translations.waitForInit().subscribe(()=>{
         this.connector.isLoggedIn().subscribe((data: LoginResult) => {
             if(data.isValidLogin && !data.isGuest && !data.currentScope){
@@ -48,7 +50,7 @@ export class PermissionsMainComponent {
                 this.goToLogin();
             }
             this.isLoading = false;
-            GlobalContainerComponent.finishPreloading();
+            loadingTask.done();
         }, (error: any) => this.goToLogin());
         this.config.get("hideMainMenu").subscribe((data:string[])=>{
             if(data && data.indexOf("permissions")!=-1){

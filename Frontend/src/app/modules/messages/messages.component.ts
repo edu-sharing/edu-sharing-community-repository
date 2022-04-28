@@ -6,7 +6,6 @@ import {RestConnectorService} from '../../core-module/core.module';
 import {Component, ViewChild, ElementRef} from '@angular/core';
 import {RouterComponent} from '../../router/router.component';
 import {UIConstants} from '../../core-module/ui/ui-constants';
-import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 @Component({
     selector: 'es-messages-main',
     templateUrl: 'messages.component.html',
@@ -31,7 +30,6 @@ export class MessagesComponent {
                         this.setMessage(routeData);
                     }
                 })
-                GlobalContainerComponent.finishPreloading();
             })
         });
     }
