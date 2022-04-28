@@ -68,7 +68,7 @@
   [cdkConnectedOverlayOrigin]="trigger"
   [cdkConnectedOverlayPositions]="overlayPositions"
   [cdkConnectedOverlayFlexibleDimensions]="false"
-  [cdkConnectedOverlayMinWidth]="box.getBoundingClientRect().width"
+  [cdkConnectedOverlayMinWidth]="overlayIsVisible ? box.getBoundingClientRect().width : 0"
   [cdkConnectedOverlayWidth]="triggerBorderBox.width$ | async"
   [cdkConnectedOverlayOpen]="overlayIsVisible"
   (overlayKeydown)="onOverlayKeydown($event)"
