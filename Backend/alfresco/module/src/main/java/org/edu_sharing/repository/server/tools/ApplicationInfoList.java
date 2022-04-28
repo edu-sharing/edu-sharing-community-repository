@@ -44,7 +44,8 @@ public class ApplicationInfoList {
 	private static Log logger = LogFactory.getLog(ApplicationInfoList.class);
 	
 	private static SimpleCache<String, ApplicationInfo> appInfos =  (SimpleCache<String, ApplicationInfo>) AlfAppContextGate.getApplicationContext().getBean("eduSharingApplicationInfoCache");
-	
+	private static ApplicationInfo appInfoHome;
+
 	public static ApplicationInfo getRepositoryInfo(String file){
 		return getApplicationInfoByProperty(file, ApplicationInfoProperty.APPFILE);
 	}
@@ -165,6 +166,9 @@ public class ApplicationInfoList {
 				logger.debug("put:"+appFile+" "+repInfo);
 				synchronized(appInfos) {
 					appInfos.put(repInfo.getAppId(), repInfo);
+					if(repInfo.ishomeNode()) {
+						appInfoHome = repInfo;
+					}
 				}
 			}catch(Exception e){
 				e.printStackTrace();
@@ -191,9 +195,11 @@ public class ApplicationInfoList {
 	}
 	
 	public static ApplicationInfo getHomeRepository(){
-		ApplicationInfo homeRepository = getApplicationInfoByProperty(null, ApplicationInfoProperty.HOME);
-		if(homeRepository == null) logger.error("no home repository found. check your application files");
-		return homeRepository;
+		if(appInfos.getKeys().isEmpty()) {
+			initAppInfos();
+		}
+		if(appInfoHome == null) logger.error("no home repository found. check your application files");
+		return appInfoHome;
 	}
 	public static ApplicationInfo getHomeRepositoryObeyConfig(String[] allowedRepos){
 
