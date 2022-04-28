@@ -38,7 +38,11 @@
                 },
                 "alfresco-trashcan-cleaner project": {
                     "DESCRIPTION": "Der Trashcan-Cleaner löscht regelmäßig alte Inhalte im Papierkorb aller Nutzer"
+                },
+                "edu_sharing-enterprise-repository-plugin-transform-backend-alfresco-module": {
+                    "DESCRIPTION": "Dieses Plugin trennt die Transformationsfunktionen (Screenshot & Volltext-Generierung von Dokumenten via LibreOffice) vom Repository-Server und erlaubt eine bessere, stabilere Verteilung der Workload"
                 }
+
             },
             "MORE": "Weitere Informationen zu Erweiterungen und wie diese bezogen, konfiguriert und installiert werden können, sind auf der edu-sharing Website zu finden",
             "MORE_LINK": "Zur edu-sharing Webseite"
