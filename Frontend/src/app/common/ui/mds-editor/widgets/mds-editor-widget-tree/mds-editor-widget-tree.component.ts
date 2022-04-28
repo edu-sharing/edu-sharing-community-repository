@@ -1,9 +1,18 @@
 import { CdkConnectedOverlay, ConnectedPosition, OverlayRef } from '@angular/cdk/overlay';
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    ElementRef,
+    OnDestroy,
+    OnInit,
+    QueryList,
+    ViewChild,
+    ViewChildren,
+} from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, fromEvent, ReplaySubject } from 'rxjs';
-import { filter, takeUntil } from 'rxjs/operators';
+import { filter, startWith, takeUntil } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsWidgetType } from '../../types';
 import { DisplayValue } from '../DisplayValues';
@@ -11,17 +20,23 @@ import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { MdsEditorWidgetTreeCoreComponent } from './mds-editor-widget-tree-core/mds-editor-widget-tree-core.component';
 import { Tree } from './tree';
 import { FocusOrigin } from '@angular/cdk/a11y';
+import { MatChip } from '@angular/material/chips';
+import {UIService} from '../../../../../core-module/rest/services/ui.service';
 @Component({
     selector: 'es-mds-editor-widget-tree',
     templateUrl: './mds-editor-widget-tree.component.html',
     styleUrls: ['./mds-editor-widget-tree.component.scss'],
 })
-export class MdsEditorWidgetTreeComponent extends MdsEditorWidgetBase implements OnInit, OnDestroy {
+export class MdsEditorWidgetTreeComponent
+    extends MdsEditorWidgetBase
+    implements OnInit, AfterViewInit, OnDestroy
+{
     @ViewChild(CdkConnectedOverlay) overlay: CdkConnectedOverlay;
     @ViewChild('chipList', { read: ElementRef }) chipList: ElementRef<HTMLElement>;
     @ViewChild('treeRef') treeRef: MdsEditorWidgetTreeCoreComponent;
     @ViewChild(MdsEditorWidgetTreeCoreComponent)
     treeCoreComponent: MdsEditorWidgetTreeCoreComponent;
+    @ViewChildren('chip') chips: QueryList<MatChip>;
 
     valueType: ValueType;
     tree: Tree;
@@ -35,26 +50,24 @@ export class MdsEditorWidgetTreeComponent extends MdsEditorWidgetBase implements
     preventOverlayOpen = false;
     readonly overlayPositions: ConnectedPosition[] = [
         {
-            originX: 'center',
+            originX: 'start',
             originY: 'bottom',
             offsetX: 0,
-            offsetY: -22,
-            overlayX: 'center',
+            offsetY: -34,
+            overlayX: 'start',
             overlayY: 'top',
         },
-        {
-            originX: 'center',
-            originY: 'top',
-            offsetX: 0,
-            offsetY: 0,
-            overlayX: 'center',
-            overlayY: 'bottom',
-        },
+        /*{
+            originX: 'end',
+            originY: 'bottom',
+            overlayX: 'start',
+            overlayY: 'top',
+        },*/
     ];
 
     private destroyed$: ReplaySubject<boolean> = new ReplaySubject(1);
 
-    constructor(mdsEditorInstance: MdsEditorInstanceService, translate: TranslateService) {
+    constructor(mdsEditorInstance: MdsEditorInstanceService, translate: TranslateService, public uiService: UIService) {
         super(mdsEditorInstance, translate);
     }
 
@@ -73,7 +86,7 @@ export class MdsEditorWidgetTreeComponent extends MdsEditorWidgetBase implements
         );
         this.chipsControl = new FormControl(
             [
-                ...this.widget.getInitialValues()?.jointValues ?? [],
+                ...(this.widget.getInitialValues()?.jointValues ?? []),
                 ...(this.widget.getInitialValues()?.individualValues ?? []),
             ].map((value) => this.tree.idToDisplayValue(value)),
             this.getStandardValidators(),
@@ -87,6 +100,16 @@ export class MdsEditorWidgetTreeComponent extends MdsEditorWidgetBase implements
         this.indeterminateValues$.subscribe((indeterminateValues) =>
             this.widget.setIndeterminateValues(indeterminateValues),
         );
+    }
+
+    ngAfterViewInit(): void {
+        // We mark all chips as selected for better screen-reader output. However, since selection
+        // doesn't do anything, we disable toggling the selection.
+        this.chips.changes
+            .pipe(startWith(this.chips))
+            .subscribe((chips: QueryList<MatChip>) =>
+                chips.forEach((chip) => (chip.toggleSelected = () => true)),
+            );
     }
 
     ngOnDestroy() {
@@ -110,6 +133,9 @@ export class MdsEditorWidgetTreeComponent extends MdsEditorWidgetBase implements
         this.openOverlay();
     }
     openOverlay(): void {
+        if(this.chipsControl.disabled) {
+            return;
+        }
         if (this.overlayIsVisible) {
             this.treeRef.input.nativeElement.focus();
             return;

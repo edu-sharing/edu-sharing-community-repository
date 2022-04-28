@@ -70,7 +70,7 @@ export class NodeReportComponent {
         this.connector.isLoggedIn().subscribe((data: LoginResult) => {
             if (!data.isGuest) {
                 this.form.get('email').disable();
-                this.iam.getUser().subscribe((user) => {
+                this.iam.getCurrentUserAsync().then((user) => {
                     this.form.patchValue({ email: user.person.profile.email });
                 });
             }

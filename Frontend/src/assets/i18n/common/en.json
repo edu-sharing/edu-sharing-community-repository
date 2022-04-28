@@ -1,3 +1,4 @@
+
 {
     "CHOOSEENVIRONMENT": "Choose environment",
     "YES": "yes",
@@ -602,6 +603,7 @@
         "VARIANT": "Create variant",
         "VARIANT_OPEN": "Open as variant",
         "QR_CODE": "QR-Code Link",
+        "EMBED": "Embed",
         "ADD_OBJECT": "Add Material",
         "SEARCH_OBJECT": "Search material",
         "NEW_COLLECTION": "Add collection",
@@ -612,7 +614,14 @@
         "SWITCH_TO_CARDS_VIEW": "Switch to cards view",
         "LIST_SETTINGS": "Configure List",
         "METADATA_SIDEBAR": "Material details",
-        "ACCESSIBILITY": "Accessibility"
+        "ACCESSIBILITY": "Accessibility",
+        "LTI": "Add to LTI Platform"
+    },
+    "LTI" : {
+      "REGISTERED": {
+        "TITLE": "LTI platform registered",
+        "DESCRIPTION": "edu-sharing ist now connected with your system. You may now include contents via LTI."
+      }
     },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Version comment",
@@ -620,7 +629,8 @@
         "DIFFERENT_VALUES": "(Different values)",
         "HAS_CHANGES": "changed",
         "TITLE": "Edit info",
-        "SHOW_EXTENDED": "Show extended info",
+        "SHOW_EXTENDED_FALSE": "extended info hidden",
+        "SHOW_EXTENDED_TRUE": "extended info shown",
         "SHOW_EXTENDED_SEARCH": "Show more filters",
         "AUTHOR_LABEL": "About the Author",
         "AUTHOR_FREETEXT": "General Author information",
@@ -657,7 +667,8 @@
         "SUGGEST_VALUE_SEND": "Suggest",
         "SUGGEST_VALUE_SENT": "The suggestion has been submitted and will now be checked by the editorial team. It will appear as soon as it is being activated. Thank you.",
         "NO_MATCHING_VALUES": "No matching values",
-        "DELETE_KEY_NOTICE": "remove with \"Delete\""
+        "NO_ARBITRARY_VALUES_NOTICE": "For this field, you cannot use arbitrary values. Please select values from the list.",
+        "DELETE_KEY_NOTICE": "Remove with Delete key"
     },
 
      "SIMPLE_EDIT": {
@@ -794,6 +805,7 @@
         "CONFIRM_GROUP": "You will join the following group:",
         "GROUP_PASSWORD": "Enter group password",
         "SIGNUP": "Join",
+        "ALREADY_MEMBER": "You're already a member",
         "SIGNUP_TYPE": {
             "simple": "Access possible without restrictions",
             "password": "Access only with password",
@@ -1096,5 +1108,23 @@
     "BREADCRUMBS": {
         "YOU_ARE_HOME": "You are in the root directory",
         "IN_HOME": "In the root directory"
+    },
+    "EMBED": {
+        "NOT_PUBLIC_WARNING": "This material is not publicly available.",
+        "CODE_LABEL": "Embed code",
+        "HEIGHT": "Height",
+        "WIDTH": "Width",
+        "SIZE_CONSTRAINTS_ERROR_NOTICE": "Please choose a value between {{ min }} and {{ max }}",
+        "VERSION": "Version",
+        "VERSION_OPTION": {
+            "FIXED": "Current version",
+            "NEWEST": "Always the newest version"
+        },
+        "COPIED_TO_CLIPBOARD_NOTICE": "The embed code was copied to the clipboard."
+    },
+    "API_ERROR": {
+        "RELOAD_NOTICE_TITLE": "The page has to be reloaded",
+        "RELOAD_NOTICE": "Something went wrong when loading important information. Please reload the page.",
+        "RELOAD_BUTTON_LABEL": "Reload page"
     }
 }

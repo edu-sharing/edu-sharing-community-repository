@@ -2,12 +2,12 @@ import {Injectable, Injector} from '@angular/core';
 import {Toast} from "../core-ui-module/toast";
 import {CordovaService} from "../common/services/cordova.service";
 import {DialogButton} from "../core-module/core.module";
-import {Translation} from "../core-ui-module/translation";
+import { TranslationsService } from '../translations/translations.service';
 import {MessageType} from "../core-module/ui/message-type";
 import {ModalDialogOptions} from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import {ProgressType} from '../common/ui/modal-dialog/modal-dialog.component';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class BridgeService {
     constructor(private injector : Injector,private cordova : CordovaService) {
 
@@ -36,6 +36,6 @@ export class BridgeService {
     }
 
     getISOLanguage() {
-        return Translation.getISOLanguage();
+        return this.injector.get(TranslationsService).getISOLanguage();
     }
 }

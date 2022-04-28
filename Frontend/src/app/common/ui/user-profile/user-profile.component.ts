@@ -43,7 +43,7 @@ export class UserProfileComponent{
   @Output() onCancel = new EventEmitter();
 
   constructor(private iam : RestIamService,private toast:Toast) {
-    this.iam.getUser().subscribe((data:IamUser)=>{
+    this.iam.getCurrentUserAsync().then((data:IamUser)=>{
       this.user=data.person;
     });
   }

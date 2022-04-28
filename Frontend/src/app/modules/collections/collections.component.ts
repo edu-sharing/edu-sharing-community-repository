@@ -9,7 +9,7 @@ import {
     ViewChild
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { Translation } from '../../core-ui-module/translation';
+import { TranslationsService } from '../../translations/translations.service';
 import * as EduData from '../../core-module/core.module';
 import {
     Collection,
@@ -30,7 +30,6 @@ import {
     RestMdsService,
     RestNodeService,
     RestOrganizationService,
-    SessionStorageService,
     TemporaryStorageService,
     UIService,
     CollectionReference,
@@ -62,7 +61,6 @@ import { MdsHelper } from '../../core-module/rest/mds-helper';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { HttpClient } from '@angular/common/http';
-import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
 import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../core-ui-module/options-helper.service';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 import {DropAction, DropData} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
@@ -86,6 +84,7 @@ import {
     DropSource, DropTarget,
     ListEventInterface, ListSortConfig, NodeEntriesDisplayType
 } from '../../core-ui-module/components/node-entries-wrapper/entries-model';
+import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 
 // component class
 @Component({
@@ -311,6 +310,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
     private _collectionShare: Node;
     private feedbacks: CollectionFeedback[];
     private params: Params;
+    private loadingTask = this.loadingScreen.addLoadingTask();
 
     // inject services
     constructor(
@@ -328,7 +328,6 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         private iamService: RestIamService,
         private mdsService: RestMdsService,
         private actionbar: ActionbarHelperService,
-        private storage: SessionStorageService,
         private connector: RestConnectorService,
         private route: ActivatedRoute,
         private uiService: UIService,
@@ -339,6 +338,8 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         private bridge: BridgeService,
         private config: ConfigurationService,
         private translationService: TranslateService,
+        private translations: TranslationsService,
+        private loadingScreen: LoadingScreenService,
     ) {
         this.sortCollectionColumns[this.sortCollectionColumns.length - 1].mode = 'ascending';
         // this.collectionSortEmitter.subscribe((sort: SortEvent) => this.setCollectionSort(sort));
@@ -349,12 +350,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         this.collectionsColumns.push(new ListItem('COLLECTION', 'info'));
         this.collectionsColumns.push(new ListItem('COLLECTION', 'scope'));
         this.setCollectionId(RestConstants.ROOT);
-        Translation.initialize(
-            this.translationService,
-            this.config,
-            this.storage,
-            this.route,
-        ).subscribe(() => {
+        this.translations.waitForInit().subscribe(() => {
             this.connector.isLoggedIn().subscribe(
                 (data: LoginResult) => {
                     if (data.isValidLogin && data.currentScope == null) {
@@ -749,7 +745,9 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         }
         this.isLoading = true;
         this.collectionProposals = null;
-        GlobalContainerComponent.finishPreloading();
+        if (!this.loadingTask.isDone) {
+            this.loadingTask.done();
+        }
 
         // set correct scope
         const request: RequestObject = Helper.deepCopy(
@@ -1016,7 +1014,9 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
                         this.toast.error(error);
                     }
                     this.isLoading = false;
-                    GlobalContainerComponent.finishPreloading();
+                    if (!this.loadingTask.isDone) {
+                        this.loadingTask.done();
+                    }
                 },
             );
         }
@@ -1068,7 +1068,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         );
 
         // load user profile
-        this.iamService.getUser().subscribe(
+        this.iamService.getCurrentUserAsync().then(
             iamUser => {
                 // WIN
 
@@ -1295,7 +1295,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         this.collectionContent = {
             node: new Node(),
         };
-        this.collectionContent.node.ref = new NodeRef();
+        this.collectionContent.node.ref = {} as NodeRef;
         this.collectionContent.node.ref.id = id;
         this.collectionContent.node.aspects = [
             RestConstants.CCM_ASPECT_COLLECTION,
@@ -1343,13 +1343,6 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         });
     }
 
-    private addToStore(nodes: Node[]) {
-        this.toast.showProgressDialog();
-        RestHelper.addToStore(nodes, this.bridge, this.iamService, () => {
-            this.toast.closeModalDialog();
-            this.mainNavRef.refreshNodeStore();
-        });
-    }
     async setCollectionSort(sort: ListSortConfig) {
         this.sortCollections = sort;
         try {

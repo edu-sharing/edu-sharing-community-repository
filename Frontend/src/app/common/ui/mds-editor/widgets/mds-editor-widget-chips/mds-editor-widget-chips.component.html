@@ -10,30 +10,37 @@
   it on to the input element. -->
   <mat-chip-list
     #chipList
-    [formControl]="chipsControl"
     *ngIf="chipsControl"
     [attr.aria-labelledby]="chipsControl.value.length > 0 ? container.labelId : null"
     esOnAttributeChange="aria-describedby"
     (attributeChange)="input.setAttribute('aria-describedby', $event)"
+    [multiple]="true"
   >
+    <!-- We mark all chips as selected because NVDA will announce "not selected" for each item
+    otherwise. It announces nothing (!) for selected items. -->
     <mat-chip
+      #chip="matChip"
       *ngFor="let value of chipsControl.value"
-      [selectable]="false"
+      [selected]="true"
       [removable]="true"
+      [disabled]="chipsControl.disabled"
       (blur)="onBlurInput($event)"
       (click)="add(value)"
       (removed)="remove(value)"
       [class.indeterminate]="(indeterminateValues$ | async)?.includes(value.key)"
+      [class.mat-chip-selected]="false"
       [matTooltip]="getTooltip(value)"
     >
       <span class="mat-chip-label">{{ value.label }}</span>
       <mat-icon matChipRemove>cancel</mat-icon>
     </mat-chip>
     <div class="input-wrapper">
+      <!-- TODO: disabled is required since formControl does not fully disable the field?! -->
       <input
         #input
         #trigger="matAutocompleteTrigger"
         autocomplete="off"
+        [disabled]="chipsControl.disabled"
         [formControl]="inputControl"
         [matAutocomplete]="auto"
         [placeholder]="chipsControl.value?.length ? null : widget.definition.placeholder"
@@ -50,6 +57,7 @@
         (click)="toggleAutoCompletePanel()"
         [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
         (keydown.tab)="chipList._allowFocusEscape()"
+        [disabled]="chipsControl.disabled"
       >
         <span class="mat-select-arrow"></span>
       </button>

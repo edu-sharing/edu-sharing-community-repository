@@ -21,7 +21,7 @@ import { Tree, TreeNode } from '../tree';
 import {Toast} from '../../../../../../core-ui-module/toast';
 import {Helper} from '../../../../../../core-module/rest/helper';
 import {RestConstants} from '../../../../../../core-module/rest/rest-constants';
-import { MdsV1Service } from 'projects/edu-sharing-api/src/lib/api/services';
+import { MdsV1Service } from 'ngx-edu-sharing-api';
 
 let nextUniqueId = 0;
 
@@ -404,7 +404,7 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
             }).toPromise();
             this.toast.toast('MDS.SUGGEST_VALUE_SENT');
         } catch (e) {
-            this.toast.error(e);
+            // Do nothing
         }
         this.suggesting = false;
     }

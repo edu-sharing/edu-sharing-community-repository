@@ -7,6 +7,7 @@ import {UIAnimation} from "../../../../core-module/ui/ui-animation";
 import {ConfigurationService, RestConnectorService} from '../../../../core-module/core.module';
 import {GlobalContainerComponent} from "../global-container.component";
 import { first } from "rxjs/operators";
+import { LoadingScreenService } from "../../../../main/loading-screen/loading-screen.service";
 
 @Component({
   selector: 'es-rocketchat',
@@ -22,7 +23,7 @@ import { first } from "rxjs/operators";
 export class RocketchatComponent implements EventListener {
     onEvent(event: string, data: any): void {
         if(event == FrameEventsService.EVENT_USER_LOGGED_IN || event == FrameEventsService.EVENT_USER_LOGGED_OUT)
-            this.initalize(true)
+            this.initalize()
     }
     @ViewChild('frame') frame:ElementRef;
     @HostListener('document:keydown', ['$event'])
@@ -46,10 +47,11 @@ export class RocketchatComponent implements EventListener {
         private configuration: ConfigurationService,
         private ngZone: NgZone,
         private changes: ChangeDetectorRef,
-        private events: FrameEventsService
+        private events: FrameEventsService,
+        private loadingScreen: LoadingScreenService,
     ){
         this.events.addSelfListener(this);
-        this.initalize(false);
+        this.initalize();
         this.ngZone.runOutsideAngular(() => {
             window.addEventListener('message', (event: any) => {
                 if (event.source !== window.self) {
@@ -74,16 +76,16 @@ export class RocketchatComponent implements EventListener {
         return this.sanitizer.bypassSecurityTrustResourceUrl(this._data.url+'/channel/general');
     }
 
-    private async initalize(forceRenew = false) {
+    private async initalize() {
         this._data = null;
         this.src = null;
         this.opened = await this.configuration.get('remote.rocketchat.shouldOpen', false).toPromise();
         this.fullscreen = false;
-        if (GlobalContainerComponent.getPreloading()) {
-            GlobalContainerComponent.subscribePreloading().pipe(first()).subscribe(() => this.initalize());
+        if (this.loadingScreen.getIsLoading()) {
+            this.loadingScreen.observeIsLoading().pipe(first(isLoading => !isLoading)).subscribe(() => this.initalize());
             return;
         }
-        const login = await this.connector.isLoggedIn(forceRenew).toPromise();
+        const login = await this.connector.isLoggedIn(false).toPromise();
         if (login.remoteAuthentications && login.remoteAuthentications.ROCKETCHAT) {
             this._data = login.remoteAuthentications.ROCKETCHAT;
             this.src = this.getFrameUrl();

@@ -330,7 +330,7 @@ public class SearchServiceOersiImpl extends SearchServiceAdapter {
         return getDefaultQuery(criteria);
       }
       try {
-        return MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criteria);
+        return MetadataElasticSearchHelper.getElasticSearchQuery(null,mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criteria);
       } catch (Throwable e) {
         logger.info("Cannot get elasticsearch query, switching to default query... ", e);
         return getDefaultQuery(criteria);

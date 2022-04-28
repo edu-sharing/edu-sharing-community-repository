@@ -79,7 +79,7 @@ public class BulkEditNodesJob extends AbstractJob{
 	private String property;
 	@JobFieldDescription(description = "Value to replace target property with")
 	private Serializable value;
-	@JobFieldDescription(description = "property to copy value from, if mode == Copy", sampleValue = "cclom:title")
+	@JobFieldDescription(description = "property to copy value from, if mode == Replace", sampleValue = "cclom:title")
 	private String copy;
 	@JobFieldDescription(description = "token to replace, if mode == ReplaceToken")
 	private String searchToken;

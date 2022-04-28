@@ -1,10 +1,8 @@
 import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Params, Router, RoutesRecognized} from '@angular/router';
-import {TranslateService} from '@ngx-translate/core';
-import {Translation} from '../../core-ui-module/translation';
+import { TranslationsService } from '../../translations/translations.service';
 import * as EduData from '../../core-module/core.module'; //
 import {
-    ConfigurationService,
     Connector,
     ConnectorList,
     Filetype,
@@ -20,7 +18,6 @@ import {
     RestIamService,
     RestNodeService,
     RestSearchService,
-    SessionStorageService,
     STREAM_STATUS,
     TemporaryStorageService
 } from '../../core-module/core.module'; //
@@ -42,7 +39,6 @@ import * as moment from 'moment';
 import {ActionbarHelperService} from '../../common/services/actionbar-helper';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
-import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 import {filter, pairwise} from 'rxjs/operators';
 import {OptionsHelperService} from '../../core-ui-module/options-helper.service';
@@ -52,8 +48,8 @@ import {
     ListOptions, ListOptionsConfig, NodeEntriesDisplayType
 } from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 import {SelectionModel} from '@angular/cdk/collections';
-import { StreamEntry } from 'projects/edu-sharing-api/src/lib/api/models';
-import { StreamV1Service } from 'projects/edu-sharing-api/src/lib/api/services';
+import { StreamEntry, StreamV1Service } from 'ngx-edu-sharing-api';
+import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 
 
 @Component({
@@ -102,7 +98,7 @@ export class StreamComponent implements AfterViewInit {
             // this.updateDataFromJSON(STREAM_STATUS.OPEN);
             this.streams = this.streams.filter((n) => n.id !== node.id);
             this.toast.toast('STREAM.TOAST.MARKED');
-        }, error => console.log(error));
+        });
     });
 
     removeOption = new OptionItem('STREAM.OBJECT.OPTION.REMOVE', 'delete', (node: any) => {
@@ -135,19 +131,19 @@ export class StreamComponent implements AfterViewInit {
         private optionsHelper: OptionsHelperService,
         private iam: RestIamService,
         private storage: TemporaryStorageService,
-        private session: SessionStorageService,
         private toast: Toast,
         private bridge: BridgeService,
         private nodeHelper: NodeHelperService,
         private actionbarHelperService: ActionbarHelperService,
         private collectionService: RestCollectionService,
-        private config: ConfigurationService,
-        private translate: TranslateService) {
-        Translation.initialize(translate, this.config, this.session, this.route).subscribe(() => {
+        private loadingScreen: LoadingScreenService,
+        private translations: TranslationsService) {
+        const loadingTask = this.loadingScreen.addLoadingTask();
+        this.translations.waitForInit().subscribe(() => {
             this.connector.isLoggedIn().subscribe(data => {
-                this.dateToDisplay = moment().locale(translate.currentLang).format('dddd, DD. MMMM YYYY');
+                this.dateToDisplay = moment().locale(this.translations.getLanguage()).format('dddd, DD. MMMM YYYY');
                 this.createAllowed = data.statusCode == RestConstants.STATUS_CODE_OK;
-                GlobalContainerComponent.finishPreloading();
+                loadingTask.done();
             });
             this.connectors.list().subscribe(list => {
                 this.connectorList = list;
@@ -195,7 +191,7 @@ export class StreamComponent implements AfterViewInit {
     }
 
     seen(id: any) {
-        this.updateStatus(id, STREAM_STATUS.READ).subscribe(data => this.getStreamDataByStatus(STREAM_STATUS.OPEN) , error => console.log(error));
+        this.updateStatus(id, STREAM_STATUS.READ).subscribe(data => this.getStreamDataByStatus(STREAM_STATUS.OPEN));
     }
     init() {
         this.streams = [];
@@ -216,7 +212,7 @@ export class StreamComponent implements AfterViewInit {
         this.getStreamData(curStat, sortWay).subscribe((data) => {
             this.streams = this.streams.concat(data.stream);
             this.updateMenu();
-        }, error => console.log(error));
+        });
     }
 
     toggleMenuOptions() {
@@ -312,7 +308,7 @@ export class StreamComponent implements AfterViewInit {
             this.isLoading = false;
             this.updateMenu();
             this.scrollToDown();
-        }, error => console.log(error));
+        });
         // }
 
     }
@@ -345,13 +341,7 @@ export class StreamComponent implements AfterViewInit {
         this.collectionNodes = nodes.nodes;
 
     }
-    private addToStore(nodes: any) {
-        this.globalProgress = true;
-        RestHelper.addToStore(nodes.nodes, this.bridge, this.iam, () => {
-            this.globalProgress = false;
-            this.mainNavRef.refreshNodeStore();
-        });
-    }
+
     public getStreamData(streamStatus: string, sortAscendingCreated: boolean = false) {
         return this.streamService.search1({
             repository: RestConstants.HOME_REPOSITORY,

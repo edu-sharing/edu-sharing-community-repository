@@ -13,9 +13,13 @@
     > button {
         margin-left: 10px;
     }
-    .value-wrapper-edit:hover {
+    transition: $transitionNormal all;;
+    .widget-wrapper {
         padding: 2px 5px;
+    }
+    .value-wrapper-edit:hover {
         outline: 1px solid $cardSeperatorLineColor;
+        cursor: text;
     }
 }
 .widget-data{

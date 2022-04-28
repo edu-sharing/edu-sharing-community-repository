@@ -117,6 +117,8 @@ public class CCConstants {
 	
 	public final static String AUTH_TYPE_TICKET = "AUTH_TYPE_TICKET";
 
+	public final static String AUTH_TYPE_LTI = "AUTH_TYPE_LTI";
+
 	public final static String AUTH_ACCESS_TOKEN = "AUTH_ACCESS_TOKEN";
 
 	public final static String AUTH_HEADER_EDU_TICKET = "EDU-TICKET";
@@ -515,8 +517,12 @@ public class CCConstants {
 			CCConstants.LOM_PROP_TECHNICAL_SIZE
 	);
     public static final String AUTHORITY_DELETED_USER = "DELETED_USER";
+    /**
+     * authority needed for appAuth authentication and read only tasks
+     */
+    public static final String PROXY_USER = "edu_proxy";
 
-	public enum PROPOSAL_STATUS {
+    public enum PROPOSAL_STATUS {
 		PENDING,
 		ACCEPTED,
 		DECLINED
@@ -1315,6 +1321,8 @@ public class CCConstants {
 
 
 	public final static String CCM_VALUE_IO_NAME_CONFIG_NODE_NAME = "RepositoryConfig";
+
+	public final static String CCM_VALUE_IO_NAME_LTI_REGISTRATION_NODE_NAME = "LTIRegistration";
 
 
 	/**

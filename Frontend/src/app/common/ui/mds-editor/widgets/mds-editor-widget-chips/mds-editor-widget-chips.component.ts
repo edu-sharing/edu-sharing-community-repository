@@ -5,7 +5,9 @@ import {
     Component,
     ElementRef,
     OnInit,
+    QueryList,
     ViewChild,
+    ViewChildren,
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import {
@@ -13,7 +15,7 @@ import {
     MatAutocompleteSelectedEvent,
     MatAutocompleteTrigger,
 } from '@angular/material/autocomplete';
-import { MatChipInputEvent } from '@angular/material/chips';
+import { MatChip, MatChipInputEvent } from '@angular/material/chips';
 import { MatTooltip } from '@angular/material/tooltip';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
@@ -28,6 +30,7 @@ import {
     switchMap,
     throttleTime,
 } from 'rxjs/operators';
+import { Toast, ToastType } from 'src/app/core-ui-module/toast';
 import { UIHelper } from '../../../../../core-ui-module/ui-helper';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsWidgetType, MdsWidgetValue } from '../../types';
@@ -49,6 +52,7 @@ export class MdsEditorWidgetChipsComponent
     @ViewChild(MatAutocompleteTrigger, { read: MatAutocompleteTrigger })
     trigger: MatAutocompleteTrigger;
     @ViewChild('auto') matAutocomplete: MatAutocomplete;
+    @ViewChildren('chip') chips: QueryList<MatChip>;
 
     readonly valueType: ValueType = ValueType.MultiValue;
     readonly separatorKeysCodes: number[] = [ENTER, COMMA];
@@ -75,6 +79,7 @@ export class MdsEditorWidgetChipsComponent
         mdsEditorInstance: MdsEditorInstanceService,
         translate: TranslateService,
         private changeDetectorRef: ChangeDetectorRef,
+        private toast: Toast,
     ) {
         super(mdsEditorInstance, translate);
     }
@@ -99,6 +104,10 @@ export class MdsEditorWidgetChipsComponent
                 this.translate.instant('WORKSPACE.EDITOR.HINT_ENTER');
             this.changeDetectorRef.detectChanges();
         }
+        if(this.chipsControl.disabled) {
+            this.inputControl.disable();
+        }
+        this.chipsControl.registerOnDisabledChange((d) => d ? this.inputControl.disable() : this.inputControl.enable());
         this.chipsControl.valueChanges
             .pipe(distinctUntilChanged())
             .subscribe((values: DisplayValue[]) => this.setValue(values.map((value) => value.key)));
@@ -118,7 +127,7 @@ export class MdsEditorWidgetChipsComponent
                 map(
                     ([autocompleteValues, inputValue]) =>
                         this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges &&
-                        autocompleteValues.length === 0 &&
+                        autocompleteValues?.length === 0 &&
                         inputValue,
                 ),
             );
@@ -137,10 +146,27 @@ export class MdsEditorWidgetChipsComponent
 
     ngAfterViewInit(): void {
         this.registerAutoCompleteToggleTrigger();
+        // We mark all chips as selected for better screen-reader output. However, since selection
+        // doesn't do anything, we disable toggling the selection.
+        this.chips.changes
+            .pipe(startWith(this.chips))
+            .subscribe((chips: QueryList<MatChip>) =>
+                chips.forEach((chip) => (chip.toggleSelected = () => true)),
+            );
     }
 
     onInputTokenEnd(event: MatChipInputEvent): void {
         if (this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges) {
+            if (event.value) {
+                // If the input field still has a value, the use has not selected on option from the
+                // autocomplete list. In this case, we notify them, that they cannot add arbitrary
+                // values.
+                this.toast.show({
+                    message: 'MDS.NO_ARBITRARY_VALUES_NOTICE',
+                    type: 'info',
+                    subtype: ToastType.InfoSimple,
+                });
+            }
             return;
         }
         const value = (event.value || '').trim();
@@ -181,6 +207,9 @@ export class MdsEditorWidgetChipsComponent
         // There are different strategies for doing this (see
         // https://stackoverflow.com/questions/50491195/open-matautocomplete-with-open-openpanel-method).
         // We rely on the `autoCompleteToggleTrigger` mechanism.
+        if(this.chipsControl.disabled) {
+            return;
+        }
         if (this.trigger.panelOpen) {
             this.autoCompleteToggleTrigger.next('close');
         } else {

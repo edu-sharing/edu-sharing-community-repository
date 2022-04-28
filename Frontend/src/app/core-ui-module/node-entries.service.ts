@@ -1,8 +1,6 @@
 import { SelectionModel } from '@angular/cdk/collections';
 import { EventEmitter, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { filter } from 'rxjs/operators';
-import { Node } from '../core-module/rest/data-object';
 import { UIService } from '../core-module/rest/services/ui.service';
 import { ListItem } from '../core-module/ui/list-item';
 import {
@@ -18,9 +16,10 @@ import {
 } from './components/node-entries-wrapper/entries-model';
 import { NodeDataSource } from './components/node-entries-wrapper/node-data-source';
 import { OptionItem } from './option-item';
+import {NodeEntriesDataType} from './components/node-entries/node-entries.component';
 
 @Injectable()
-export class NodeEntriesService<T extends Node> {
+export class NodeEntriesService<T extends NodeEntriesDataType> {
     list: ListEventInterface<T>;
     readonly dataSource$ = new BehaviorSubject<NodeDataSource<T> | null>(null);
     get dataSource(): NodeDataSource<T> {
@@ -36,6 +35,7 @@ export class NodeEntriesService<T extends Node> {
     selection = new SelectionModel<T>(true, []);
     elementInteractionType: InteractionType;
     options: ListOptions;
+    checkbox: boolean;
     globalOptions: OptionItem[];
     sort: ListSortConfig;
     sortChange: EventEmitter<ListSortConfig>;

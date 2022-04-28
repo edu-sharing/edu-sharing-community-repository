@@ -26,7 +26,7 @@ export class PreviewImageComponent<T extends Node> {
     constructor() {}
 
     onImageLoad(event: Event): void {
-        if (this.node.mimetype.startsWith('video')) {
+        if (this.node.mimetype?.startsWith('video')) {
             const image = event.target as HTMLImageElement;
             this.showCanvas = true;
             setTimeout(() => {

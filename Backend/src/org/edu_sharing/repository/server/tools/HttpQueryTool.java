@@ -1,6 +1,7 @@
 package org.edu_sharing.repository.server.tools;
 
 import com.typesafe.config.Config;
+import jdk.nashorn.internal.codegen.CompilerConstants;
 import org.alfresco.repo.cache.SimpleCache;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -94,11 +95,15 @@ public class HttpQueryTool {
 
 	public String query(String url, Map<String,String> header, HttpUriRequest method, boolean followRedirects) {
 
-		return execute(url, header, method, followRedirects, String.class);
+		return execute(url, header, method, followRedirects, null);
 	}
 
-	private <T extends Object> T execute(String url, Map<String,String> header, HttpUriRequest method, boolean followRedirects, Class<T> type){
+	private String execute(String url, Map<String,String> header, HttpUriRequest method, boolean followRedirects, Callback callback){
 		logger.debug("url:" + url);
+
+		if(url == null && method != null){
+			url = method.getURI().toString();
+		}
 
 		if(method == null){
 			method = new HttpGet(url);
@@ -141,25 +146,20 @@ public class HttpQueryTool {
 					if(returnCode >= 400){
 						String rsStrg = null;
 						if (result != null) {
-							rsStrg = EntityUtils.toString(result);
+							rsStrg = EntityUtils.toString(result,"UTF-8");
 						}
 						throw new HttpException(returnCode,rsStrg);
 					}
 
-					if(type == String.class){
-						return (T)EntityUtils.toString(result);
-					}else if(type == InputStream.class){
-						//@TODO: prevent memory allocation
-						return (T)new ByteArrayInputStream(EntityUtils.toByteArray(result));
+					if(callback == null){
+						return EntityUtils.toString(result,"UTF-8");
 					}else{
-						throw new RuntimeException("unsupported return type:"+type);
+						callback.handle(result.getContent());
+						return null;
 					}
 				}finally {
 					response.close();
 				}
-
-
-
 			}finally {
 				response.close();
 			}
@@ -175,8 +175,8 @@ public class HttpQueryTool {
 		}
 	}
 
-	public InputStream getStream(String url) {
-		return execute(url, null, null, true, InputStream.class);
+	public void queryStream(String url, Callback callback) {
+		execute(url, null, null, true, callback);
 	}
 
 
@@ -281,5 +281,24 @@ public class HttpQueryTool {
 
 	public static void invalidateProxySettings(){
 		configCache.remove(CACHE_KEY);
+	}
+
+	public static abstract class Callback<T extends Object>{
+		T result;
+
+		/**
+		 * do not store InputStream here cause it would be closed after handle method is called
+		 * you can store exceptions or other informations about inputstream handling here
+		 * @param result
+		 */
+		public void setResult(T result){
+			this.result = result;
+		}
+
+		public T getResult() {
+			return result;
+		}
+
+		public abstract void handle(InputStream httpResult);
 	}
 }

@@ -42,15 +42,19 @@ import {AccessibilityComponent} from '../common/ui/accessibility/accessibility.c
 import { extensionRoutes } from '../extension/extension-routes';
 import {BehaviorSubject} from 'rxjs';
 import { AccessibilityService } from '../common/ui/accessibility/accessibility.service';
-import {ErrorHandlerService} from '../core-ui-module/error-handler.service';
+import { LtiComponent } from '../modules/lti/lti.component';
+import { printCurrentTaskInfo } from './track-change-detection';
+import { environment } from '../../environments/environment';
+import { TranslationsService } from '../translations/translations.service';
+import { LoadingScreenService } from '../main/loading-screen/loading-screen.service';
 
 @Component({
     selector: 'es-router',
     templateUrl: 'router.component.html',
-    providers: [MainNavService],
+    providers: [],
 })
 export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
-    private static readonly CHECKS_PER_SECOND_WARNING_THRESHOLD = 60;
+    private static readonly CHECKS_PER_SECOND_WARNING_THRESHOLD = 0;
     private static readonly CONSECUTIVE_TRANSGRESSION_THRESHOLD = 10;
     private static history = new BehaviorSubject<string[]>([]);
 
@@ -99,8 +103,8 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
         private bridge: BridgeService,
         private injector: Injector,
         private accessibilityService: AccessibilityService,
-        // inject service to be available for other components
-        private errorHandlerService: ErrorHandlerService,
+        private translations: TranslationsService,
+        private loadingScreen: LoadingScreenService,
     ) {
         this.injector.get(Router).events.subscribe(event => {
             if (event instanceof NavigationEnd) {
@@ -115,12 +119,18 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
     }
 
     ngOnInit(): void {
+        this.translations.initialize().pipe(
+            this.loadingScreen.showUntilFinished(),
+        ).subscribe();
         this.setUserScale();
         this.registerContrastMode();
     }
 
     ngDoCheck(): void {
         this.numberOfChecks++;
+        if (environment.traceChangeDetection) {
+            printCurrentTaskInfo('doCheck');
+        }
     }
 
     ngAfterViewInit(): void {
@@ -250,8 +260,10 @@ export const ROUTES: Routes = [
 
     // messages
     { path: UIConstants.ROUTER_PREFIX + 'messages/:message', component: MessagesComponent },
+    { path: UIConstants.ROUTER_PREFIX + 'messages/:message/:text', component: MessagesComponent },
     // error (same as message)
     { path: UIConstants.ROUTER_PREFIX + 'error/:message', component: MessagesComponent },
+    { path: UIConstants.ROUTER_PREFIX + 'error/:message/:text', component: MessagesComponent },
 
     // link-share
     { path: UIConstants.ROUTER_PREFIX + 'sharing', component: SharingComponent },
@@ -260,6 +272,8 @@ export const ROUTES: Routes = [
 
     // embed
     { path: UIConstants.ROUTER_PREFIX + 'embed/:component', component: EmbedComponent },
+
+    { path: UIConstants.ROUTER_PREFIX + 'lti', component: LtiComponent },
 
     // wildcard 404
     { path: '**', component: MessagesComponent, data: {message: 404} },

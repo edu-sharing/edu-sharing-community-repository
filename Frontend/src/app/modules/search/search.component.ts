@@ -4,7 +4,7 @@ import {
     AfterViewInit,
     Component,
     ElementRef,
-    HostListener,
+    NgZone,
     OnDestroy,
     OnInit,
     ViewChild
@@ -12,7 +12,6 @@ import {
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
 import {ActionbarHelperService} from '../../common/services/actionbar-helper';
-import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {MdsEditorWrapperComponent} from '../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
@@ -41,7 +40,6 @@ import {
     RestSearchService,
     SearchList,
     SearchRequestCriteria,
-    SessionStorageService,
     TemporaryStorageService,
     UIService
 } from '../../core-module/core.module';
@@ -58,7 +56,7 @@ import {
     Scope
 } from '../../core-ui-module/option-item';
 import {Toast} from '../../core-ui-module/toast';
-import {Translation} from '../../core-ui-module/translation';
+import { TranslationsService } from '../../translations/translations.service';
 import {UIHelper} from '../../core-ui-module/ui-helper';
 import {SearchService} from './search.service';
 import {WindowRefService} from './window-ref.service';
@@ -78,6 +76,7 @@ import { SearchFieldService } from 'src/app/common/ui/search-field/search-field.
 import { MdsService, MetadataSetInfo, SearchResults, SearchService as SearchApiService } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import {InteractionType, ListSortConfig, NodeEntriesDisplayType} from '../../core-ui-module/components/node-entries-wrapper/entries-model';
+import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 
 @Component({
     selector: 'es-search',
@@ -86,7 +85,7 @@ import {InteractionType, ListSortConfig, NodeEntriesDisplayType} from '../../cor
     providers: [WindowRefService],
     animations: [trigger('fromLeft', UIAnimation.fromLeft())],
 })
-export class SearchComponent implements AfterViewInit, OnDestroy {
+export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly SCOPES = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
@@ -187,8 +186,9 @@ export class SearchComponent implements AfterViewInit, OnDestroy {
         // Prevent changed-after-checked error
         .pipe(delay(0));
     readonly didYouMeanSuggestion$ = this.searchApi
-        .getDidYouMeanSuggestion()
+        .observeDidYouMeanSuggestion()
         .pipe(shareReplay(1));
+    private loadingTask = this.loadingScreen.addLoadingTask();
 
     constructor(
         private router: Router,
@@ -204,6 +204,7 @@ export class SearchComponent implements AfterViewInit, OnDestroy {
         private nodeApi: RestNodeService,
         private toast: Toast,
         private translate: TranslateService,
+        private translations: TranslationsService,
         private activatedRoute: ActivatedRoute,
         private winRef: WindowRefService,
         public searchService: SearchService,
@@ -211,14 +212,19 @@ export class SearchComponent implements AfterViewInit, OnDestroy {
         private config: ConfigurationService,
         private uiService: UIService,
         private optionsHelper: OptionsHelperService,
-        private storage: SessionStorageService,
         private network: RestNetworkService,
         private temporaryStorageService: TemporaryStorageService,
         private searchField: SearchFieldService,
         private searchApi: SearchApiService,
+        private ngZone: NgZone,
+        private loadingScreen: LoadingScreenService,
     ) {
         // Subscribe early to make sure the suggestions are requested with search requests.
         this.didYouMeanSuggestion$.pipe(takeUntil(this.destroyed$)).subscribe();
+    }
+
+    ngOnInit(): void {
+        this.registerScrollHandler();
     }
 
     ngAfterViewInit() {
@@ -241,12 +247,7 @@ export class SearchComponent implements AfterViewInit, OnDestroy {
            onDisplayTypeChange: (type) => this.setDisplayType(type)
         });
         this.connector.setRoute(this.activatedRoute).subscribe(() => {
-            Translation.initialize(
-                this.translate,
-                this.config,
-                this.storage,
-                this.activatedRoute,
-            ).subscribe(() => {
+            this.translations.waitForInit().subscribe(() => {
                 if (this.setSidenavSettings()) {
                     // auto, never, always
                     let sidenavMode = this.config.instant(
@@ -351,10 +352,21 @@ export class SearchComponent implements AfterViewInit, OnDestroy {
         this.destroyed$.complete();
     }
 
-    @HostListener('window:scroll', ['$event'])
-    @HostListener('window:touchmove', ['$event'])
-    @HostListener('window:resize', ['$event'])
-    handleScroll(event: Event = null) {
+    registerScrollHandler(): void {
+        this.ngZone.runOutsideAngular(() => {
+            const handleScroll = (event: Event) => this.handleScroll(event);
+            window.addEventListener("scroll", handleScroll);
+            window.addEventListener("touchmove", handleScroll);
+            window.addEventListener("resize", handleScroll);
+            this.destroyed$.subscribe(() => {
+                window.removeEventListener("scroll", handleScroll);
+                window.removeEventListener("touchmove", handleScroll);
+                window.removeEventListener("resize", handleScroll);
+            });
+        });
+    }
+
+    private handleScroll(event: Event = null) {
         // calculate height of filter part individually
         // required since banners, footer etc. can cause wrong heights and overflows
         this.searchService.offset =
@@ -971,15 +983,6 @@ export class SearchComponent implements AfterViewInit, OnDestroy {
     */
     }
 
-    private addToStore(selection: Node[]) {
-        this.globalProgress = true;
-        RestHelper.addToStore(selection, this.bridge, this.iam, () => {
-            this.globalProgress = false;
-            this.nodeEntriesResults.getSelection().clear();
-            this.mainNavRef.refreshNodeStore();
-        });
-    }
-
     async onMdsReady(mds: any = null) {
         this.currentMdsSet = mds;
         this.updateColumns();
@@ -1190,9 +1193,9 @@ export class SearchComponent implements AfterViewInit, OnDestroy {
                             count,
                             false
                         );
+                        error.preventDefault();
                         return;
                     }
-                    this.toast.error(error);
                     this.searchRepository(
                         repos,
                         criteria,
@@ -1433,7 +1436,7 @@ export class SearchComponent implements AfterViewInit, OnDestroy {
                         if (this.oldParams[key] === param[key]) {
                             continue;
                         }
-                        if (key === UIConstants.QUERY_PARAM_LIST_VIEW_TYPE) {
+                        if (key === UIConstants.QUERY_PARAM_LIST_VIEW_TYPE || key === 'nodeStore') {
                             continue;
                         }
                         reinit = true;
@@ -1448,7 +1451,9 @@ export class SearchComponent implements AfterViewInit, OnDestroy {
 
                 this.searchService.init();
                 this.mainNavRef.refreshBanner();
-                GlobalContainerComponent.finishPreloading();
+                if (!this.loadingTask.isDone) {
+                    this.loadingTask.done();
+                }
                 this.hasCheckbox = true;
                 this.searchService.reurl = null;
                 if (param.displayType != null) {

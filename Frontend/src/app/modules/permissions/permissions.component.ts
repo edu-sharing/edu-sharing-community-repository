@@ -1,19 +1,17 @@
 import {Component, ViewChild, ElementRef} from '@angular/core';
-import {TranslateService} from "@ngx-translate/core";
-import {Translation} from "../../core-ui-module/translation";
+import { TranslationsService } from '../../translations/translations.service';
 import {
     NodeRef, IamUser, NodeWrapper, Node, Version, NodeVersions, LoginResult,
     IamGroups, Group, OrganizationOrganizations, Organization
 } from "../../core-module/core.module";
-import {Router, Params, ActivatedRoute, Routes} from "@angular/router";
+import {Router, Params, Routes} from "@angular/router";
 import {Toast} from "../../core-ui-module/toast";
 import {RestConnectorService} from "../../core-module/core.module";
 import {RestOrganizationService} from "../../core-module/core.module";
 import {ConfigurationService} from "../../core-module/core.module";
-import {SessionStorageService} from "../../core-module/core.module";
 import {RestHelper} from "../../core-module/core.module";
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
-import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
+import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 
 @Component({
   selector: 'es-permissions-main',
@@ -27,20 +25,20 @@ export class PermissionsMainComponent {
   @ViewChild('mainNav') mainNavRef: MainNavComponent;
   public tab : number;
   public searchQuery: string;
-  selected: Organization[];
+  selected: Organization;
   public isAdmin = false;
   public disabled = false;
   public isLoading = true;
   TABS = ["ORG","GROUP","USER","DELETE"];
   constructor(private toast: Toast,
-              private route: ActivatedRoute,
               private router: Router,
               private config: ConfigurationService,
-              private translate: TranslateService,
-              private storage : SessionStorageService,
+              private translations: TranslationsService,
               private organization: RestOrganizationService,
+              private loadingScreen: LoadingScreenService,
               private connector: RestConnectorService) {
-    Translation.initialize(translate,this.config,this.storage,this.route).subscribe(()=>{
+    const loadingTask = this.loadingScreen.addLoadingTask();
+    this.translations.waitForInit().subscribe(()=>{
         this.connector.isLoggedIn().subscribe((data: LoginResult) => {
             if(data.isValidLogin && !data.isGuest && !data.currentScope){
                 this.organization.getOrganizations().subscribe((data: OrganizationOrganizations) => {
@@ -52,7 +50,7 @@ export class PermissionsMainComponent {
                 this.goToLogin();
             }
             this.isLoading = false;
-            GlobalContainerComponent.finishPreloading();
+            loadingTask.done();
         }, (error: any) => this.goToLogin());
         this.config.get("hideMainMenu").subscribe((data:string[])=>{
             if(data && data.indexOf("permissions")!=-1){

@@ -166,6 +166,7 @@ export enum Scope {
   WorkspaceList = 'WorkspaceList',
   WorkspaceTree = 'WorkspaceTree',
   Oer = 'Oer',
+  UserManagement = 'UserManagement',
   Stream = 'Stream',
   CreateMenu = 'CreateMenu',
   Admin = 'Admin', // Admin Tools / Debugging
@@ -217,6 +218,7 @@ export enum Constrain {
   HomeRepository, // Only visible when the nodes are from the local (home) repository
   User, // Only visible when a user is present and logged in
   ReurlMode, // Only visible when a reurl is present (called to pick object from lms)
+  LTIMode,  // Only visible when a lti session is present (called to pick object from lti platform)
 }
 export enum KeyCombination {
   CtrlOrAppleCmd

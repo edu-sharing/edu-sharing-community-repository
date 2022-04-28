@@ -62,8 +62,6 @@ import {MdsEditorWidgetDurationComponent} from './common/ui/mds-editor/widgets/m
 import {MdsEditorWidgetLicenseComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-license/mds-editor-widget-license.component';
 import { MdsEditorEmbeddedComponent } from './common/ui/mds-editor/mds-editor-embedded/mds-editor-embedded.component';
 import { MdsEditorWidgetSuggestionChipsComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-suggestion-chips/mds-editor-widget-suggestion-chips.component';
-import { SkipTargetDirective } from './common/ui/skip-nav/skip-target.directive';
-import { SkipNavComponent } from './common/ui/skip-nav/skip-nav.component';
 import {MdsEditorWidgetFileUploadComponent} from './common/ui/mds-editor/widgets/mds-editor-widget-file-upload/mds-editor-widget-file-upload.component';
 import {CommonModule} from '@angular/common';
 import { MultiLineLabelComponent } from './common/ui/multi-line-label/multi-line-label.component';
@@ -82,7 +80,7 @@ import { SearchFieldFacetsComponent } from './common/ui/mds-editor/search-field-
 import { LabelPipe } from './common/ui/mds-editor/shared/label.pipe';
 import { PropertySlugPipe } from './common/ui/mds-editor/shared/property-slug.pipe';
 import { MdsEditorWidgetSearchSuggestionsComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-search-suggestions/mds-editor-widget-search-suggestions.component';
-import { EduSharingApiModule } from 'ngx-edu-sharing-api';
+import { EduSharingApiModule, EDU_SHARING_API_CONFIG } from 'ngx-edu-sharing-api';
 import { MdsEditorWidgetVCardComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-vcard/mds-editor-widget-vcard.component';
 import { extensionProviders } from './extension/extension-providers';
 import {
@@ -91,6 +89,14 @@ import {
 import {EditorModule} from '@tinymce/tinymce-angular';
 import {ApiConfigurationParams} from '../../projects/edu-sharing-api/src/lib/api/api-configuration';
 import {ErrorHandlerService} from './core-ui-module/error-handler.service';
+import { LtiComponent } from './modules/lti/lti.component';
+import { LtiAdminComponent } from './modules/admin/lti-admin/lti-admin.component';
+import { NodeEmbedComponent } from './common/ui/node-embed/node-embed.component';
+import {EduSharingApiConfigurationParams} from 'ngx-edu-sharing-api';
+import {ErrorHandlerService} from './core-ui-module/error-handler.service';
+import { Toast } from './core-ui-module/toast';
+import { TranslationsModule } from './translations/translations.module';
+import { MainModule } from './main/main.module';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
@@ -152,8 +158,6 @@ import {ErrorHandlerService} from './core-ui-module/error-handler.service';
         MdsEditorWidgetCheckboxesComponent,
         MdsEditorEmbeddedComponent,
         MdsEditorWidgetSuggestionChipsComponent,
-        SkipTargetDirective,
-        SkipNavComponent,
         MultiLineLabelComponent,
         RegisterCustomPropertyDirective,
         OnAttributeChangeDirective,
@@ -166,13 +170,16 @@ import {ErrorHandlerService} from './core-ui-module/error-handler.service';
         LabelPipe,
         PropertySlugPipe,
         MdsEditorWidgetSearchSuggestionsComponent,
+        LtiComponent,
+        LtiAdminComponent,
+        NodeEmbedComponent,
     ],
     imports: [
         IMPORTS,
         CommonModule,
-        EduSharingApiModule.forRoot({
-            onError: (err) => ErrorHandlerService.handleError(err)
-        } as ApiConfigurationParams),
+        MainModule,
+        EduSharingApiModule.forRoot(),
+        TranslationsModule.forRoot(),
         NgxSliderModule,
         DragDropModule,
         extensionImports,
@@ -180,6 +187,13 @@ import {ErrorHandlerService} from './core-ui-module/error-handler.service';
         EditorModule,
     ],
     providers: [
+        {
+            provide: EDU_SHARING_API_CONFIG,
+            deps: [ErrorHandlerService],
+            useFactory: (errorHandler: ErrorHandlerService) => ({
+                onError: (err, req) => errorHandler.handleError(err, req),
+            } as EduSharingApiConfigurationParams),
+        },
         PROVIDERS,
         PROVIDERS_SEARCH,
         {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {appearance: 'outline'}},

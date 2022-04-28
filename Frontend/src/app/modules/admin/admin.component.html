@@ -219,9 +219,14 @@
             <input matInput type="text" name="ownAppUrl" [ngModel]="getOwnAppUrl()" readonly>
             <mat-hint>{{'ADMIN.APPLICATIONS.OWN_URL_HINT' | translate}}</mat-hint>
           </mat-form-field>
-          <div><button mat-raised-button (click)="copyOwnApp()">{{'ADMIN.APPLICATIONS.COPY' | translate}}</button></div>
+          <button mat-raised-button (click)="copyOwnApp()">{{'ADMIN.APPLICATIONS.COPY' | translate}}</button></div>
+          <div>
         </div>
       </form>
+      <h4 class="mat-heading-4 mat-heading-underline">
+        <span>{{'ADMIN.LTI.HEADER' | translate }}</span>
+      </h4>
+      <es-lti-admin (onRefreshAppList)="refreshAppList()"></es-lti-admin>
       <h4 class="mat-heading-4 mat-heading-underline">
         <span>{{'ADMIN.APPLICATIONS.LIST' | translate }}</span>
       </h4>
@@ -581,6 +586,7 @@
         <div class="heading"><i class="material-icons">person</i><span>{{'ADMIN.TOOLKIT.AUTHENTICATE_AS_USER' | translate}}</span></div>
         <es-authority-search-input
           [mode]="AuthoritySearchMode.Users"
+          [globalSearchAllowed]="true"
           label="{{'ADMIN.TOOLKIT.AUTHENTICATE_AS_USER' | translate}}"
           [showRecent]="false"
           (onChooseAuthority)="authenticateAuthority = $event"></es-authority-search-input>

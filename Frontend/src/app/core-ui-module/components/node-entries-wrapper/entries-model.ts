@@ -5,6 +5,7 @@ import {CustomOptions, OptionItem, Scope, Target} from '../../option-item';
 import {ListItem} from '../../../core-module/ui/list-item';
 import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
 import {SelectionModel} from '@angular/cdk/collections';
+import {NodeEntriesDataType} from '../node-entries/node-entries.component';
 
 export type NodeRoot =
     'MY_FILES'
@@ -22,7 +23,9 @@ export enum NodeEntriesDisplayType {
 }
 
 export enum InteractionType {
+    // create router link
     DefaultActionLink,
+    // emit an event
     Emitter,
     None
 }
@@ -43,16 +46,16 @@ export interface ListSortConfig extends Sort {
 
 export type DropTarget = Node | NodeRoot;
 
-export interface DropSource<T extends Node> {
+export interface DropSource<T extends NodeEntriesDataType> {
     element: T[];
     sourceList: ListEventInterface<T>;
     mode: DropAction;
 }
 
-export interface ListDragGropConfig<T extends Node> {
+export interface ListDragGropConfig<T extends NodeEntriesDataType> {
     dragAllowed: boolean;
-    dropAllowed?: (target: T, source: DropSource<T>) => boolean;
-    dropped?: (target: T, source: DropSource<T>) => void;
+    dropAllowed?: (target: DropTarget, source: DropSource<NodeEntriesDataType>) => boolean;
+    dropped?: (target: DropTarget, source: DropSource<NodeEntriesDataType>) => void;
 }
 
 export enum ClickSource {
@@ -62,7 +65,7 @@ export enum ClickSource {
     Comments
 }
 
-export type NodeClickEvent<T extends Node> = {
+export type NodeClickEvent<T extends NodeEntriesDataType> = {
     element: T,
     source: ClickSource,
     attribute?: ListItem // only when source === Metadata
@@ -75,7 +78,7 @@ export type GridConfig = {
     maxRows?: number
 }
 
-export interface ListEventInterface<T extends Node> {
+export interface ListEventInterface<T extends NodeEntriesDataType> {
     updateNodes(nodes: void | T[]): void;
 
     getDisplayType(): NodeEntriesDisplayType;

@@ -2,11 +2,10 @@ import { PlatformLocation } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import {ActivatedRoute, Params, Router, UrlSerializer} from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
-import {ConfigurationService, DialogButton, RestConnectorService, RestHelper, SessionStorageService, UIService} from '../../core-module/core.module';
+import { TranslationsService } from '../../translations/translations.service';
+import {ConfigurationService, DialogButton, RestConnectorService, RestHelper, UIService} from '../../core-module/core.module';
 import { UIConstants } from '../../core-module/ui/ui-constants';
 import { Toast } from '../../core-ui-module/toast';
-import { Translation } from '../../core-ui-module/translation';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { RegisterDoneComponent } from './register-done/register-done.component';
 import { RegisterFormComponent } from './register-form/register-form.component';
@@ -49,12 +48,11 @@ export class RegisterComponent {
         private platformLocation: PlatformLocation,
         private urlSerializer: UrlSerializer,
         private router: Router,
-        private translate: TranslateService,
+        private translations: TranslationsService,
         private uiService: UIService,
         private configService: ConfigurationService,
         private changes: ChangeDetectorRef,
         private title: Title,
-        private storage: SessionStorageService,
         private route: ActivatedRoute,
     ) {
         this.updateButtons();
@@ -74,7 +72,7 @@ export class RegisterComponent {
             }
         });
 
-        Translation.initialize(this.translate, this.configService, this.storage, this.route).subscribe(() => {
+        this.translations.waitForInit().subscribe(() => {
             this.isLoading = false;
             this.changes.detectChanges();
             if(['request', 'reset-password', 'done-reset'].indexOf(this.params.status) !== -1) {

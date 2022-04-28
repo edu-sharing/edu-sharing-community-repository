@@ -1,5 +1,5 @@
 <es-mds-editor-widget-container
-  *ngIf="widget.definition.type !== 'textarea' && !editWrapper.innerText.trim()"
+  *ngIf="!editWrapper.innerText.trim()"
   [injectedView]="this"
   [widget]="widget"
   [label]="false"

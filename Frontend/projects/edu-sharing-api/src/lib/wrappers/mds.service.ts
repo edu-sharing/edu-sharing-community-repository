@@ -2,10 +2,8 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { MdsV1Service } from '../api/services';
-import { MdsDefinition, MdsView, MetadataSetInfo, MdsSort } from '../models';
-
-const DEFAULT = '-default-';
-const HOME_REPOSITORY = '-home-';
+import { DEFAULT, HOME_REPOSITORY } from '../constants';
+import { MdsDefinition, MdsSort, MdsView, MetadataSetInfo } from '../models';
 
 export interface MdsIdentifier {
     repository: string;

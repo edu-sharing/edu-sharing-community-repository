@@ -4,7 +4,6 @@ import {RestConstants} from "../../../core-module/core.module";
 import {NodeWrapper,Node} from "../../../core-module/core.module";
 import {VCard} from "../../../core-module/ui/VCard";
 import {Toast} from "../../../core-ui-module/toast";
-import {Translation} from "../../../core-ui-module/translation";
 import {TranslateService} from "@ngx-translate/core";
 import {DateHelper} from "../../../core-ui-module/DateHelper";
 import {trigger} from "@angular/animations";
@@ -116,31 +115,31 @@ export class WorkspaceContributorComponent  {
       this.date=new Date();
       //setTimeout(()=>this.datepicker.toggle());
   }
-  public editVCard(mode:string,vcard : VCard,scope:string){
-    this.editMode=mode;
-    this.editOriginal=vcard;
-    this.edit=vcard.copy();
-    this.editDisabled = !!(vcard.orcid || vcard.gnduri || vcard.ror || vcard.wikidata);
-    this.editScopeOld=scope;
-    this.editScopeNew=scope;
-    this.editType=vcard.getType();
-    if(vcard.uid === this.iamService.getCurrentUserVCard().uid) {
-      this.userAuthor = true;
-      this.editDisabled = true;
-    }
-    this.date=null;
-    let contributeDate=vcard.contributeDate;
-    if(contributeDate) {
-      //this.date.formatted=contributeDate;
-      //this.dateOptions.initialDate=new Date(contributeDate);
-      this.date=new Date(contributeDate);
-      /*
-      let split=contributeDate.split("-");
-      if(split.length==3){
-        this.dateOptions.initialDate=new Date(parseInt(split[0]),parseInt(split[1]),parseInt(split[2]),0,0,0,0);
+  public async editVCard(mode: string, vcard: VCard, scope: string) {
+      this.editMode = mode;
+      this.editOriginal = vcard;
+      this.edit = vcard.copy();
+      this.editDisabled = !!(vcard.orcid || vcard.gnduri || vcard.ror || vcard.wikidata);
+      this.editScopeOld = scope;
+      this.editScopeNew = scope;
+      this.editType = vcard.getType();
+      if (vcard.uid === (await this.iamService.getCurrentUserVCard()).uid) {
+          this.userAuthor = true;
+          this.editDisabled = true;
       }
-      */
-    }
+      this.date = null;
+      let contributeDate = vcard.contributeDate;
+      if (contributeDate) {
+          //this.date.formatted=contributeDate;
+          //this.dateOptions.initialDate=new Date(contributeDate);
+          this.date = new Date(contributeDate);
+          /*
+          let split=contributeDate.split("-");
+          if(split.length==3){
+            this.dateOptions.initialDate=new Date(parseInt(split[0]),parseInt(split[1]),parseInt(split[2]),0,0,0,0);
+          }
+          */
+      }
   }
   public saveEdits(){
     if(this.editType==VCard.TYPE_PERSON && (!this.edit.givenname || !this.edit.surname)){
@@ -247,19 +246,18 @@ export class WorkspaceContributorComponent  {
   }
 
   useVCardSuggestion(event: MatAutocompleteSelectedEvent) {
-    console.log(event);
     this.edit = event.option.value.copy();
     this.editDisabled = true;
   }
 
-  setVCardAuthor(set: boolean) {
-    if(set) {
-      this.edit = this.iamService.getCurrentUserVCard();
-      this.userAuthor = true;
-      this.editDisabled = true;
-    } else {
-      this.resetVCard();
-    }
+  async setVCardAuthor(set: boolean) {
+      if (set) {
+          this.edit = await this.iamService.getCurrentUserVCard();
+          this.userAuthor = true;
+          this.editDisabled = true;
+      } else {
+          this.resetVCard();
+      }
 
   }
 }

@@ -20,31 +20,10 @@ public class RepositoryConfigFactory {
     private static Logger logger=Logger.getLogger(RepositoryConfigFactory.class);
 
     private static NodeRef getConfigNode() throws Throwable {
-        String folder = ToolPermissionServiceFactory.getInstance().getEdu_SharingSystemFolderBase().getId();
-        NodeService nodeService= NodeServiceFactory.getLocalService();
-        String node=nodeService.findNodeByName(folder, CCConstants.CCM_VALUE_IO_NAME_CONFIG_NODE_NAME);
-        if(node==null){
-            HashMap<String, Object> props=new HashMap<>();
-            props.put(CCConstants.CM_NAME,CCConstants.CCM_VALUE_IO_NAME_CONFIG_NODE_NAME);
-            node=nodeService.createNodeBasic(folder,CCConstants.CCM_TYPE_IO,props);
-        }
-        return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,node);
+        return SystemFolder.getSystemObject(CCConstants.CCM_VALUE_IO_NAME_CONFIG_NODE_NAME);
     }
     public static RepositoryConfig getConfig(){
-        return AuthenticationUtil.runAsSystem(()-> {
-            try {
-                NodeRef node = getConfigNode();
-                InputStream content = NodeServiceHelper.getContent(node);
-                if (content == null) {
-                    // init an empty config
-                    return new RepositoryConfig();
-                }
-                return new Gson().fromJson(new InputStreamReader(content), RepositoryConfig.class);
-            } catch (Throwable t) {
-                logger.warn(t.getMessage(),t);
-                return new RepositoryConfig();
-            }
-        });
+        return SystemFolder.getSystemObjectContent(CCConstants.CCM_VALUE_IO_NAME_CONFIG_NODE_NAME, RepositoryConfig.class);
     }
     public static void setConfig(RepositoryConfig config){
         try {

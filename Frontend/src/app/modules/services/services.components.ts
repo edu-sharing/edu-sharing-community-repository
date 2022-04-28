@@ -1,11 +1,9 @@
 
 import {Component, ViewChild, HostListener, ElementRef} from '@angular/core';
-import {Router, ActivatedRoute, Params} from '@angular/router';
-import {TranslateService} from "@ngx-translate/core";
-import {Translation} from "../../core-ui-module/translation";
+import {Router, Params} from '@angular/router';
+import { TranslationsService } from '../../translations/translations.service';
 import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
 import {ConfigurationService} from "../../core-module/core.module";
-import {SessionStorageService} from "../../core-module/core.module";
 import {RestNetworkService} from "../../core-module/core.module";
 import {Toast} from "../../core-ui-module/toast";
 import {Observable} from "rxjs";
@@ -16,8 +14,8 @@ import {UIConstants} from "../../core-module/ui/ui-constants";
 import {RestConstants} from "../../core-module/core.module";
 import {HttpClient} from '@angular/common/http';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
-import {GlobalContainerComponent} from "../../common/ui/global-container/global-container.component";
 import { map } from 'rxjs/operators';
+import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 
 
 @Component({
@@ -39,18 +37,17 @@ export class ServicesComponent {
     constructor(
         private router : Router,
         private toast: Toast,
-        private route : ActivatedRoute,
-        private config : ConfigurationService,
-        private session : SessionStorageService,
-        private translate : TranslateService,
+        private translations: TranslationsService,
         private http:HttpClient,
         private sanitizer: DomSanitizer,
         private configService:ConfigurationService,
+        private loadingScreen: LoadingScreenService,
         private network : RestNetworkService) {
-        Translation.initialize(translate, this.config, this.session, this.route).subscribe(() => {
+        const loadingTask = this.loadingScreen.addLoadingTask()
+        this.translations.waitForInit().subscribe(() => {
             this.configService.getAll().subscribe((data: any) => {
                 this.refreshServiceList();
-                GlobalContainerComponent.finishPreloading();
+                loadingTask.done();
             });
         });
 

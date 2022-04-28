@@ -10,6 +10,7 @@ export { ConnectorV1Service } from './services/connector-v-1.service';
 export { IamV1Service } from './services/iam-v-1.service';
 export { KnowledgeV1Service } from './services/knowledge-v-1.service';
 export { AuthenticationV1Service } from './services/authentication-v-1.service';
+export { LtiV13Service } from './services/lti-v-13.service';
 export { MdsV1Service } from './services/mds-v-1.service';
 export { MediacenterV1Service } from './services/mediacenter-v-1.service';
 export { NetworkV1Service } from './services/network-v-1.service';

@@ -12,7 +12,7 @@ import {
 
 import {Router, Params, ActivatedRoute} from "@angular/router";
 
-import {Translation} from '../../../core-ui-module/translation';
+import { TranslationsService } from '../../../translations/translations.service';
 
 import * as EduData from "../../../core-module/core.module";
 
@@ -37,7 +37,6 @@ import {LocalPermissions} from "../../../core-module/core.module";
 import {Collection} from "../../../core-module/core.module";
 import {RestConnectorService} from "../../../core-module/core.module";
 import {ConfigurationService} from "../../../core-module/core.module";
-import {SessionStorageService} from "../../../core-module/core.module";
 import {UIConstants} from "../../../core-module/ui/ui-constants";
 import {MdsComponent} from "../../../common/ui/mds/mds.component";
 import {TranslateService} from "@ngx-translate/core";
@@ -47,7 +46,6 @@ import {TemporaryStorageService} from "../../../core-module/core.module";
 import {RegisterResetPasswordComponent} from "../../register/register-reset-password/register-reset-password.component";
 import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 import {UIHelper} from "../../../core-ui-module/ui-helper";
-import {GlobalContainerComponent} from "../../../common/ui/global-container/global-container.component";
 import {AuthorityNamePipe} from "../../../core-ui-module/pipes/authority-name.pipe";
 import {BridgeService} from '../../../core-bridge-module/bridge.service';
 import {WorkspaceShareComponent} from "../../workspace/share/share.component";
@@ -59,6 +57,7 @@ import {Values} from '../../../common/ui/mds-editor/types';
 import {DefaultGroups, OptionItem} from '../../../core-ui-module/option-item';
 import {Observable} from 'rxjs';
 import {PlatformLocation} from '@angular/common';
+import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
 
 type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITORIAL_GROUPS';
 
@@ -117,6 +116,7 @@ export class CollectionNewComponent implements EventListener{
   private parentCollection: EduData.Node;
   private originalPermissions: LocalPermissions;
   private permissionsInfo: any;
+  private loadingTask = this.loadingScreen.addLoadingTask();
 
   @ViewChild('file') imageFileRef : ElementRef;
   @ViewChild('authorFreetextInput') authorFreetextInput : ElementRef<HTMLInputElement>;
@@ -200,13 +200,15 @@ export class CollectionNewComponent implements EventListener{
       private toast : Toast,
       private bridge : BridgeService,
       private temporaryStorage : TemporaryStorageService,
-      private storage : SessionStorageService,
       private zone: NgZone,
       private sanitizer: DomSanitizer,
       private config : ConfigurationService,
-      private translationService:TranslateService) {
+      private translations: TranslationsService,
+      private translationService:TranslateService,
+      private loadingScreen: LoadingScreenService,
+    ) {
       this.eventService.addListener(this);
-    Translation.initialize(this.translationService,this.config,this.storage,this.route).subscribe(()=>{
+    this.translations.waitForInit().subscribe(()=>{
       this.connector.isLoggedIn().subscribe((data) => {
         this.mdsService.getSets().subscribe((mdsSets) => {
           const sets = ConfigurationHelper.filterValidMds(RestConstants.HOME_REPOSITORY, mdsSets.metadatasets, this.config);
@@ -237,7 +239,7 @@ export class CollectionNewComponent implements EventListener{
           });
           this.authorFreetextAllowed=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_CHANGE_OWNER);
 
-          this.iamService.getUser().subscribe((user : IamUser) => this.user=user.person);
+          this.iamService.getCurrentUserAsync().then((user : IamUser) => this.user=user.person);
           this.route.queryParams.subscribe(queryParams => {
             this.mainnav = queryParams.mainnav !== 'false';
               this.route.params.subscribe(params => {
@@ -249,7 +251,9 @@ export class CollectionNewComponent implements EventListener{
                       this.setCollection(JSON.parse(queryParams.collection)).subscribe(() => {
                           this.updateAvailableSteps();
                           this.isLoading=false;
-                          GlobalContainerComponent.finishPreloading();
+                          if (!this.loadingTask.isDone) {
+                            this.loadingTask.done();
+                          }
                       });
                   } else if (mode=="edit") {
                       this.collectionService.getCollection(id).subscribe((data)=>{
@@ -258,7 +262,9 @@ export class CollectionNewComponent implements EventListener{
                                   this.updateAvailableSteps();
                                   this.updateImageOptions();
                                   this.isLoading=false;
-                                  GlobalContainerComponent.finishPreloading();
+                                  if (!this.loadingTask.isDone) {
+                                    this.loadingTask.done();
+                                  }
                               });
                           });
                       });
@@ -339,7 +345,7 @@ export class CollectionNewComponent implements EventListener{
       }
       else{
         this.editPermissionsDummy=new EduData.Node();
-        this.editPermissionsDummy.ref=new NodeRef();
+        this.editPermissionsDummy.ref= {} as NodeRef;
         this.editPermissionsDummy.aspects=[RestConstants.CCM_ASPECT_COLLECTION];
         this.editPermissionsDummy.isDirectory=true;
       }
@@ -702,7 +708,9 @@ export class CollectionNewComponent implements EventListener{
     this.updateAvailableSteps();
     this.updateImageOptions();
     this.isLoading=false;
-    GlobalContainerComponent.finishPreloading();
+    if (!this.loadingTask.isDone) {
+      this.loadingTask.done();
+    }
   }
 
   private save4(collection: EduData.Node) {

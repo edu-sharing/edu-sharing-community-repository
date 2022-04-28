@@ -30,7 +30,7 @@ mat-header-cell,
 mat-cell {
     margin: 0 3px;
     // do not fix the "primary/title" column
-    &:not(:nth-child(3)) {
+    &:not(.mat-column-primary) {
         flex: 0 $defaultColumnWidth;
     }
     &.mat-column-select {
@@ -94,6 +94,10 @@ mat-cell {
         > img {
             width: 18px;
             height: auto;
+        }
+        > i {
+            color: #666;
+            font-size: 18px;
         }
     }
 }

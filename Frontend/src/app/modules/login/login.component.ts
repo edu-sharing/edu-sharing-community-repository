@@ -4,21 +4,20 @@ import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
 import { first, map, startWith } from 'rxjs/operators';
-import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
 import { MainNavComponent } from '../../common/ui/main-nav/main-nav.component';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
-import { ConfigurationService, DialogButton, LoginResult, RestConnectorService, RestConstants, RestHelper, SessionStorageService } from '../../core-module/core.module';
+import { ConfigurationService, DialogButton, LoginResult, RestConnectorService, RestConstants, RestHelper } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
 import { OPEN_URL_MODE, UIConstants } from '../../core-module/ui/ui-constants';
 import { InputPasswordComponent } from '../../core-ui-module/components/input-password/input-password.component';
 import { RouterHelper } from '../../core-ui-module/router.helper';
 import { Toast } from '../../core-ui-module/toast';
-import { Translation } from '../../core-ui-module/translation';
+import { TranslationsService } from '../../translations/translations.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { LoginInfo, AuthenticationService } from 'ngx-edu-sharing-api';
+import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 
 
 @Component({
@@ -61,16 +60,17 @@ export class LoginComponent implements OnInit {
         private platformLocation: PlatformLocation,
         private router: Router,
         private http: HttpClient,
-        private translate: TranslateService,
+        private translations: TranslationsService,
         private configService: ConfigurationService,
-        private storage: SessionStorageService,
         private route: ActivatedRoute,
         private bridge: BridgeService,
         private authentication: AuthenticationService,
+        private loadingScreen: LoadingScreenService,
     ) {
+        const loadingTask = this.loadingScreen.addLoadingTask();
         this.isLoading = true;
         this.updateButtons();
-        Translation.initialize(translate, this.configService, this.storage, this.route).subscribe(() => {
+        this.translations.waitForInit().subscribe(() => {
             this.configService.getAll().subscribe((data: any) => {
                 this.config = data;
                 if (!this.config.register) {
@@ -85,25 +85,30 @@ export class LoginComponent implements OnInit {
                         this.username = params.username;
                     }
 
-                    setTimeout(() => {
-                        if (this.username && this.passwordInput) {
-                            this.passwordInput.nativeInput.nativeElement.focus();
-                        }
-                        else if (this.usernameInput) {
-                            this.usernameInput.nativeElement.focus();
-                        }
+                    this.connector.onAllRequestsReady().subscribe(() => {
+                        setTimeout(() => {
+                            if (this.username && this.passwordInput) {
+                                this.passwordInput.nativeInput.nativeElement.focus();
+                            }
+                            else if (this.usernameInput) {
+                                this.usernameInput.nativeElement.focus();
+                            }
+                        }, 100);
                     });
                     this.scope = params.scope;
                     if (!this.scope) {
                         this.scope = null;
                     }
-                    this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+                    this.connector.isLoggedIn().subscribe(async (data: LoginResult) => {
                         if (data.currentScope) {
                             // just to make sure there is no scope still set // NO: We need a valid session when login to scope!!!
-                            this.connector.logout().subscribe(() => { });
+                            try {
+                                await this.connector.logout().toPromise();
+                            } catch(e) {
+                                console.warn(e);
+                            }
                             data.statusCode = null;
-                        }
-                        else if (data.currentScope === this.scope) {
+                        } else if (data.currentScope === this.scope) {
                             if (data.statusCode === RestConstants.STATUS_CODE_OK && params.local !== 'true') {
                                 this.goToNext(data);
                             }
@@ -126,19 +131,19 @@ export class LoginComponent implements OnInit {
                             return;
                         }
                         this.isLoading = false;
-                        GlobalContainerComponent.finishPreloading();
+                        loadingTask.done();
                     });
                     this.isSafeLogin=this.scope==RestConstants.SAFE_SCOPE;
                     this.next = params.next;
                     this.mainnav = params.mainnav !== 'false';
                     if (this.scope === RestConstants.SAFE_SCOPE) {
-                        this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+                        this.connector.isLoggedIn(true).subscribe((data: LoginResult) => {
                             if (data.statusCode !== RestConstants.STATUS_CODE_OK) {
                                 RestHelper.goToLogin(this.router, this.configService);
                             }
                             else {
                                 this.authentication
-                                    .hasAccessToScope(RestConstants.SAFE_SCOPE)
+                                    .observeHasAccessToScope(RestConstants.SAFE_SCOPE)
                                     .pipe(first())
                                     .subscribe((hasAccess) => {
                                         if (hasAccess) {
@@ -149,8 +154,6 @@ export class LoginComponent implements OnInit {
                                             this.router.navigate([UIConstants.ROUTER_PREFIX + 'workspace']);
                                             // window.history.back();
                                         }
-                                    }, (error: any) => {
-                                        this.toast.error(error);
                                     });
                             }
                         }, (error: any) => RestHelper.goToLogin(this.router, this.configService));

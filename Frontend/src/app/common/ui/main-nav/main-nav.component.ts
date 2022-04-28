@@ -12,7 +12,8 @@ import {
     ElementRef,
     EventEmitter,
     HostListener,
-    Input, OnDestroy,
+    Input, NgZone, OnDestroy,
+    OnInit,
     Output, TemplateRef,
     ViewChild,
 } from '@angular/core';
@@ -45,7 +46,7 @@ import {
 } from '../../../core-module/ui/ui-constants';
 import { OptionItem, OptionGroup } from '../../../core-ui-module/option-item';
 import { Toast } from '../../../core-ui-module/toast';
-import { Translation } from '../../../core-ui-module/translation';
+import { TranslationsService } from '../../../translations/translations.service';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { CreateMenuComponent } from '../../../modules/create-menu/create-menu.component';
 import { WorkspaceManagementDialogsComponent } from '../../../modules/management-dialogs/management-dialogs.component';
@@ -53,10 +54,13 @@ import { MainMenuEntriesService } from '../../services/main-menu-entries.service
 import { GlobalContainerComponent } from '../global-container/global-container.component';
 import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar.component';
 import {MainMenuDropdownComponent} from '../main-menu-dropdown/main-menu-dropdown.component';
+import {Observable} from 'rxjs';
 import {MainNavService} from '../../services/main-nav.service';
 import { SearchFieldComponent } from '../search-field/search-field.component';
-import {About, AboutService} from 'ngx-edu-sharing-api';
+import {About, AboutService, AuthenticationService, User, UserService} from 'ngx-edu-sharing-api';
 import { ConfigOptionItem, NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
+import { Subject } from 'rxjs';
+import {first, map, take, takeUntil} from 'rxjs/operators';
 
 /**
  * The main nav (top bar + menus)
@@ -71,43 +75,9 @@ import { ConfigOptionItem, NodeHelperService } from 'src/app/core-ui-module/node
         trigger('overlayBottom', UIAnimation.openOverlayBottom()),
         trigger('cardAnimation', UIAnimation.cardAnimation()),
         trigger('fade', UIAnimation.fade()),
-        trigger('nodeStore', [
-            transition(':enter', [
-                animate(
-                    UIAnimation.ANIMATION_TIME_SLOW + 'ms ease-in',
-                    keyframes([
-                        style({
-                            opacity: 0,
-                            top: '0',
-                            transform: 'scale(0.25)',
-                            offset: 0,
-                        }),
-                        style({
-                            opacity: 1,
-                            top: '10px',
-                            transform: 'scale(1)',
-                            offset: 1,
-                        }),
-                    ]),
-                ),
-            ]),
-            transition(':leave', [
-                animate(
-                    UIAnimation.ANIMATION_TIME_SLOW + 'ms ease-in',
-                    keyframes([
-                        style({ opacity: 1, transform: 'scale(1)', offset: 0 }),
-                        style({
-                            opacity: 0,
-                            transform: 'scale(10)',
-                            offset: 1,
-                        }),
-                    ]),
-                ),
-            ]),
-        ]),
     ],
 })
-export class MainNavComponent implements AfterViewInit, OnDestroy {
+export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     private static readonly ID_ATTRIBUTE_NAME = 'data-banner-id';
 
     @ViewChild(SearchFieldComponent) searchField: SearchFieldComponent;
@@ -191,10 +161,8 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     visible = false;
     createMenuX: number;
     createMenuY: number;
-    timeout: string;
-    timeIsValid = false;
+    autoLogoutTimeout$: Observable<string>;
     config: any = {};
-    nodeStoreAnimation = 0;
     showNodeStore = false;
     acceptLicenseAgreement: boolean;
     licenseAgreement: boolean;
@@ -210,9 +178,10 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     licenseDialog: boolean;
     licenseDetails: string;
     mainMenuStyle: 'sidebar' | 'dropdown' = 'sidebar';
+    currentUser: User;
 
+    private readonly destroyed$ = new Subject();
     private editUrl: string;
-    private nodeStoreCount = 0;
     private licenseAgreementNode: Node;
     private scrollInitialPositions: any[] = [];
     private lastScroll = -1;
@@ -247,6 +216,10 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         private route: ActivatedRoute,
         private toast: Toast,
         private nodeHelper: NodeHelperService,
+        private authentication: AuthenticationService,
+        private user: UserService,
+        private ngZone: NgZone,
+        private translations: TranslationsService,
     ) {
         this.mainnavService.registerMainNav(this);
         this.visible = !this.storage.get(
@@ -258,13 +231,12 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         this.connector.setRoute(this.route).subscribe(() => {
             this.aboutService.getAbout().subscribe(about => {
                 this.about = about;
-                this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+                this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
                     if (!data.isValidLogin) {
                         this.canOpen = data.isGuest;
                         this.checkConfig();
                         return;
                     }
-                    setInterval(() => this.updateTimeout(), 1000);
                     this.route.queryParams.subscribe(async (params: Params) => {
                         this.queryParams = params;
                         if (params.noNavigation === 'true') {
@@ -281,7 +253,6 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                         this.showNodeStore = params.nodeStore === 'true';
                         this._showUser =
                             this._currentScope !== 'login' && this.showUser;
-                        this.refreshNodeStore();
                         this.checkConfig();
                         const user = await this.iam.getUser().toPromise();
                         this.canEditProfile = user.editProfile;
@@ -293,6 +264,13 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         event.addListener(this);
     }
 
+    ngOnInit(): void {
+        this.registerCurrentUser();
+        this.registerAutoLogoutDialog();
+        this.registerAutoLogoutTimeout();
+        this.registerHandleScroll();
+    }
+
     ngAfterViewInit() {
         this.refreshBanner();
     }
@@ -302,9 +280,19 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         this.updateUserOptions();
     }
 
-    @HostListener('window:scroll', ['$event'])
-    @HostListener('window:touchmove', ['$event'])
-    async handleScroll(event: any) {
+    private registerHandleScroll(): void {
+        const handleScroll = (event: any) => this.handleScroll(event);
+        this.ngZone.runOutsideAngular(() => {
+            window.addEventListener('scroll', handleScroll);
+            window.addEventListener('touchmove', handleScroll);
+            this.destroyed$.subscribe(() => {
+                window.removeEventListener('scroll', handleScroll);
+                window.removeEventListener('touchmove', handleScroll);
+            })
+        });
+    }
+
+    private async handleScroll(event: any) {
         if (
             this.storage.get(
                 TemporaryStorageService.OPTION_DISABLE_SCROLL_LAYOUT,
@@ -449,24 +437,6 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         );
     }
 
-    refreshNodeStore() {
-        this.iam
-            .getNodeList(RestConstants.NODE_STORE_LIST)
-            .subscribe((data: NodeList) => {
-                if (
-                    data.nodes.length - this.nodeStoreCount > 0 &&
-                    this.nodeStoreAnimation === -1
-                ) {
-                    this.nodeStoreAnimation =
-                        data.nodes.length - this.nodeStoreCount;
-                }
-                this.nodeStoreCount = data.nodes.length;
-                setTimeout(() => {
-                    this.nodeStoreAnimation = -1;
-                }, 1500);
-            });
-    }
-
     onEvent(event: string, data: any) {
         if (event === FrameEventsService.EVENT_PARENT_SEARCH) {
             this.doSearch(data, false);
@@ -521,15 +491,18 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         this.startTutorial();
     }
 
-    async startTutorial() {
-        if (this.connector.getCurrentLogin().statusCode === RestConstants.STATUS_CODE_OK) {
-            const user = await this.iam.getCurrentUserAsync();
-            if (user.editProfile && this.configService.instant('editProfile', false)) {
+    startTutorial() {
+        this.user.observeCurrentUserInfo().pipe(take(1)).subscribe(({user, loginInfo}) => {
+            if (
+                loginInfo.statusCode === RestConstants.STATUS_CODE_OK &&
+                user.editProfile &&
+                this.configService.instant('editProfile', false)
+            ) {
                 this.uiService.waitForComponent(this, 'userRef').subscribe(() => {
                     this.tutorialElement = this.userRef;
                 });
             }
-        }
+        })
     }
 
     setFixMobileElements(fix: boolean) {
@@ -570,10 +543,6 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     openChat() {
         GlobalContainerComponent.instance.rocketchat.opened = true;
         GlobalContainerComponent.instance.rocketchat.unread = 0;
-    }
-
-    getPreloading() {
-        return GlobalContainerComponent.getPreloading();
     }
 
     isCreateAllowed() {
@@ -692,7 +661,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                 let nodeId: string = null;
                 for (const node of this.config.licenseAgreement.nodeId) {
                     if (node.language == null) nodeId = node.value;
-                    if (node.language === Translation.getLanguage()) {
+                    if (node.language === this.translations.getLanguage()) {
                         nodeId = node.value;
                         break;
                     }
@@ -945,9 +914,6 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     private showTimeout() {
         return (
             !this.bridge.isRunningCordova() &&
-            !this.connector.getCurrentLogin()?.isGuest &&
-            this.timeIsValid &&
-            this.timeout !== '' &&
             (this.isSafe() ||
                 this.configService.instant('sessionExpiredDialog', {
                     show: true,
@@ -955,48 +921,63 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
         );
     }
 
-    private updateTimeout() {
-        const time =
-            this.connector.logoutTimeout -
-            Math.floor(
-                (new Date().getTime() - this.connector.lastActionTime) / 1000,
-            );
+    private getTimeoutString(timeUntilLogout: number): string {
+        const time = Math.ceil(timeUntilLogout / 1000);
         const min = Math.floor(time / 60);
         const sec = time % 60;
-        this.event.broadcastEvent(
-            FrameEventsService.EVENT_SESSION_TIMEOUT,
-            time,
-        );
         if (time >= 0) {
-            this.timeout =
-                this.formatTimeout(min, 2) + ':' + this.formatTimeout(sec, 2);
-            this.timeIsValid = true;
-        } else if (this.showTimeout()) {
-            this.toast.showModalDialog(
-                'WORKSPACE.AUTOLOGOUT',
-                'WORKSPACE.AUTOLOGOUT_INFO',
-                [
-                    new DialogButton(
-                        'WORKSPACE.RELOGIN',
-                        DialogButton.TYPE_PRIMARY,
-                        () => {
-                            RestHelper.goToLogin(
-                                this.router,
-                                this.configService,
-                                this.isSafe() ? RestConstants.SAFE_SCOPE : null,
-                                null,
-                            );
-                            this.toast.closeModalDialog();
-                        },
-                    ),
-                ],
-                false,
-                null,
-                { minutes: Math.round(this.connector.logoutTimeout / 60) },
-            );
-            this.timeout = '';
+            return this.formatTimeout(min, 2) + ':' + this.formatTimeout(sec, 2);
         } else {
-            this.timeout = '';
+            return '';
+        }
+    }
+
+    private registerCurrentUser(): void {
+        this.user
+            .observeCurrentUserInfo()
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe(async ({ user, loginInfo }) => {
+                if(loginInfo.isGuest) {
+                    this.currentUser = null;
+                } else {
+                    this.currentUser = user.person
+                }
+            });
+    }
+
+    private registerAutoLogoutTimeout(): void {
+        this.autoLogoutTimeout$ = this.authentication.observeTimeUntilAutoLogout(1000).pipe(
+            takeUntil(this.destroyed$),
+            map((timeUntilLogout) => this.getTimeoutString(timeUntilLogout)),
+        );
+    }
+
+    private registerAutoLogoutDialog(): void {
+        if (this.showTimeout()) {
+            this.authentication.observeAutoLogout().pipe(takeUntil(this.destroyed$)).subscribe(() => {
+                this.toast.showModalDialog(
+                    'WORKSPACE.AUTOLOGOUT',
+                    'WORKSPACE.AUTOLOGOUT_INFO',
+                    [
+                        new DialogButton(
+                            'WORKSPACE.RELOGIN',
+                            DialogButton.TYPE_PRIMARY,
+                            () => {
+                                RestHelper.goToLogin(
+                                    this.router,
+                                    this.configService,
+                                    this.isSafe() ? RestConstants.SAFE_SCOPE : null,
+                                    null,
+                                );
+                                this.toast.closeModalDialog();
+                            },
+                        ),
+                    ],
+                    false,
+                    null,
+                    { minutes: Math.round(this.connector.logoutTimeout / 60) },
+                );
+            })
         }
     }
 
@@ -1010,5 +991,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.mainnavService.registerMainNav(null);
+        this.destroyed$.next();
+        this.destroyed$.complete();
     }
 }

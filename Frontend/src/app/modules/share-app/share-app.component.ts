@@ -1,8 +1,8 @@
-import {Translation} from "../../core-ui-module/translation";
+import { TranslationsService } from "../../translations/translations.service";
 import {UIHelper} from "../../core-ui-module/ui-helper";
 import {ActivatedRoute, Router} from "@angular/router";
 import {Toast} from "../../core-ui-module/toast";
-import {ConfigurationService, ListItem, RestConnectorService, SessionStorageService} from "../../core-module/core.module";
+import {ListItem, RestConnectorService} from "../../core-module/core.module";
 import {DomSanitizer, Title} from "@angular/platform-browser";
 import {TranslateService} from "@ngx-translate/core";
 import {Component, ViewChild, ElementRef, ApplicationRef} from "@angular/core";
@@ -18,7 +18,7 @@ import {RestUtilitiesService} from "../../core-module/core.module";
 import {RestNodeService} from "../../core-module/core.module";
 import {RestCollectionService} from "../../core-module/core.module";
 import {RestHelper} from "../../core-module/core.module";
-import {CordovaService} from "../../common/services/cordova.service";
+import {CordovaService, OnBackBehaviour} from '../../common/services/cordova.service';
 import {DateHelper} from "../../core-ui-module/DateHelper";
 import {RestConnectorsService} from "../../core-module/core.module";
 import {FrameEventsService} from "../../core-module/core.module";
@@ -57,11 +57,12 @@ export class ShareAppComponent {
               private events: FrameEventsService,
               private utilities: RestUtilitiesService,
               private translate: TranslateService,
+              private translations: TranslationsService,
               private collectionApi: RestCollectionService,
-              private storage : SessionStorageService,
               private cordova : CordovaService,
-              private config : ConfigurationService,
               private connector: RestConnectorService) {
+      // when the user finished sharing and navigates back he must return to the origin app
+      this.cordova.setOnBackBehaviour(OnBackBehaviour.closeApp);
       this.columns.push(new ListItem("COLLECTION", 'title'));
       this.columns.push(new ListItem("COLLECTION", 'info'));
       this.columns.push(new ListItem("COLLECTION", 'scope'));
@@ -82,8 +83,15 @@ export class ShareAppComponent {
           return "file-txt";
       if(this.mimetype=="application/pdf")
           return "file-pdf";
-      if(this.mimetype)
-          return "file-"+this.mimetype.split("/")[0];
+      if(this.mimetype) {
+          let type = this.mimetype.split("/");
+          if(this.translate.instant('MEDIATYPE.' + type) === 'MEDIATYPE.' + type) {
+              type = null;
+          }
+          if(type != null) {
+              return "file-" + type
+          }
+      }
       return "file";
     }
     saveInternal(callback:Function){
@@ -157,7 +165,7 @@ export class ShareAppComponent {
         return {status:true};
     }
     private init() {
-        Translation.initialize(this.translate, this.config, this.storage, this.route).subscribe(() => {
+        this.translations.waitForInit().subscribe(() => {
             this.route.queryParams.subscribe((params:any)=>{
                 this.uri=params['uri'];
                 this.mimetype=params['mimetype'];

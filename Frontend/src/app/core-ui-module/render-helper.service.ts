@@ -107,6 +107,7 @@ export class RenderHelperService {
         );
         // enforce to render all widgets, since rendering does not support extended state
         component.instance.getInstanceService().shouldShowExtendedWidgets$.next(true);
+        return component;
     }
 
     private getCollectionsContainingNode(node: Node): Observable<Node[]> {

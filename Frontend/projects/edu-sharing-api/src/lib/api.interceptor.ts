@@ -1,30 +1,33 @@
 import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import {Observable, throwError} from 'rxjs';
-import {catchError, tap} from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { ApiRequestConfiguration } from './api-request-configuration';
-import {ApiConfiguration} from './api/api-configuration';
+import { EduSharingApiConfiguration } from './edu-sharing-api-configuration';
+import { handleError } from './utils/handle-error';
 
 @Injectable()
 export class ApiInterceptor implements HttpInterceptor {
     constructor(
         private apiRequestConfiguration: ApiRequestConfiguration,
-        private apiConfiguration: ApiConfiguration,
+        private configuration: EduSharingApiConfiguration,
     ) {}
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-        // Apply the headers
-        req = this.apiRequestConfiguration.apply(req);
+        // We filter for requests that actually target the API since this interceptor will be called
+        // on all HTTP requests by the application, not limited to this library. (See notes in
+        // `edu-sharing-api.module.ts`.)
+        const isApiRequest = req.url.startsWith(this.configuration.rootUrl);
+        // console.log('intercept', req, isApiRequest)
+        if (isApiRequest) {
+            // Apply the headers
+            req = this.apiRequestConfiguration.apply(req);
 
-        // Also handle errors globally
-        return next.handle(req).pipe(
-            catchError(
-                (err) => {
-                    // Handle this error externally
-                    this.apiConfiguration.onError(err);
-                    err.processed = true;
-                    return throwError(err);
-                },
-            ));
+            return next.handle(req).pipe(
+                // Handle errors globally
+                handleError((err) => this.configuration.onError?.(err, req)),
+            );
+        } else {
+            return next.handle(req);
+        }
     }
 }

@@ -69,10 +69,10 @@ export class CommentsListComponent  {
     private commentsApi : RestCommentsService,
     private toast : Toast,
     private nodeApi : RestNodeService) {
-    this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
+    this.connector.isLoggedIn(false).subscribe((data:LoginResult)=>{
       this.isGuest=data.isGuest;
       if(!data.isGuest){
-        this.iam.getUser().subscribe((data)=>{
+        this.iam.getCurrentUserAsync().then((data)=>{
           this.user=data.person;
           this.hasPermission = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COMMENT_WRITE);
         });

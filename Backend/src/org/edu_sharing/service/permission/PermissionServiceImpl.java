@@ -32,6 +32,7 @@ import org.alfresco.util.ISO9075;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
+import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfresco.service.handleservice.HandleService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
@@ -1029,10 +1030,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	}
 
 	private void filterGuestAuthority(StringBuffer searchQuery) {
-		String guest=ApplicationInfoList.getHomeRepository().getGuest_username();
-		if(guest!=null && !guest.trim().isEmpty()){
-			searchQuery.append(" AND NOT @cm\\:userName:\""+ QueryParser.escape(guest)+"\""
-							 + " AND NOT @cm\\:userName:\"guest\"");
+		for(String guest : GuestCagePolicy.getGuestUsers()){
+			searchQuery.append(" AND NOT @cm\\:userName:\""+ QueryParser.escape(guest)+"\"");
 		}
 	}
 
@@ -1544,9 +1543,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	@Override
 	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId,
 			String[] permissions) {
-		ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
-		String guestName = appInfo.getGuest_username();
-		boolean guest = guestName != null && guestName.equals(AuthenticationUtil.getFullyAuthenticatedUser());
+		boolean guest = GuestCagePolicy.getGuestUsers().contains(AuthenticationUtil.getFullyAuthenticatedUser());
 		PermissionService permissionService = serviceRegistry.getPermissionService();
 		HashMap<String, Boolean> result = new HashMap<String, Boolean>();
 		NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);

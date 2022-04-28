@@ -14,6 +14,7 @@ import { TranslateService } from '@ngx-translate/core';
 import {
     DialogButton, Group,
     Node,
+    Organization,
     RestHelper,
     UIService, UserSimple,
 } from '../../../core-module/core.module';
@@ -24,6 +25,7 @@ import { UIHelper } from '../../ui-helper';
 import {AuthorityNamePipe} from '../../pipes/authority-name.pipe';
 import {Observable, BehaviorSubject} from 'rxjs';
 import {UniversalNode} from '../../../common/definitions';
+import {KeyEvents} from '../../../core-module/ui/key-events';
 
 /**
  * A common edu-sharing modal card
@@ -93,7 +95,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
      * Optional, bind a Node or Node-Array to this element
      * If this is used, the subtitle and avatar is automatically set depending on the given data
      */
-    @Input() set node(node: UniversalNode | UniversalNode[] | Group) {
+    @Input() set node(node: UniversalNode | UniversalNode[] | Group | Organization) {
         if (!node) {
             return;
         }
@@ -217,7 +219,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
             this.cardContainer &&
             this.cardContainer.nativeElement
         ) {
-            UIHelper.scrollSmoothElementToChild(
+            this.uiService.scrollSmoothElementToChild(
                 document.activeElement,
                 this.cardContainer.nativeElement,
             );
@@ -225,21 +227,27 @@ export class CardComponent implements AfterContentInit, OnDestroy {
     }
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
-        for (const card of CardComponent.modalCards) {
+        /*for (const card of CardComponent.modalCards) {
             if (card.handleEvent(event)) {
                 return;
             }
-        }
+        }*/
     }
 
-    handleEvent(event: any) {
+    handleEvent(event: KeyboardEvent) {
         if (event.key === 'Escape') {
             event.stopPropagation();
             event.preventDefault();
             this.cancel();
             return true;
         }
-        return false;
+        if(this.modal === 'always') {
+            if(KeyEvents.isChildEvent(event, this.cardContainer)) {
+                event.stopPropagation();
+                return true;
+            }
+        }
+        return true;
     }
 
     click(btn: DialogButton) {
@@ -272,7 +280,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
         this.jumpmarkActive = jumpmark;
         this.shouldUpdateJumpmarkOnScroll = false;
         this.onScrollToJumpmark.emit(jumpmark);
-        await UIHelper.scrollSmoothElement(pos, this.cardContainer.nativeElement, 0.5);
+        await this.uiService.scrollSmoothElement(pos, this.cardContainer.nativeElement, 0.5);
         // Leave a little time for the last scroll event to propagate before enabling updates again.
         window.setTimeout(() => (this.shouldUpdateJumpmarkOnScroll = true), 20);
     }

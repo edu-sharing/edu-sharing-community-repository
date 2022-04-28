@@ -1,4 +1,4 @@
-import {Translation} from '../../core-ui-module/translation';
+import { TranslationsService } from '../../translations/translations.service';
 import {UIHelper} from '../../core-ui-module/ui-helper';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Toast} from '../../core-ui-module/toast';
@@ -12,7 +12,7 @@ import {
 import {TranslateService} from '@ngx-translate/core';
 import {SessionStorageService} from '../../core-module/core.module';
 import {RestConnectorService} from '../../core-module/core.module';
-import {Component, ViewChild, ElementRef, ViewContainerRef, ComponentFactoryResolver} from '@angular/core';
+import {Component, ViewChild, ElementRef, ViewContainerRef, ComponentFactoryResolver, OnDestroy} from '@angular/core';
 import {
     LoginResult,
     ServerUpdate,
@@ -36,7 +36,6 @@ import {Observable, Observer} from 'rxjs';
 import {RestNetworkService} from '../../core-module/core.module';
 import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
 import {CustomHelper} from '../../common/custom-helper';
-import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {DateHelper} from '../../core-ui-module/DateHelper';
 import {CsvHelper} from '../../core-module/csv.helper';
 import {trigger} from '@angular/animations';
@@ -71,7 +70,7 @@ type LuceneData = {
     trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))
   ]
 })
-export class AdminComponent {
+export class AdminComponent implements OnDestroy {
   readonly AuthoritySearchMode = AuthoritySearchMode;
   readonly SCOPES = Scope;
 
@@ -81,6 +80,7 @@ export class AdminComponent {
               private platformLocation: PlatformLocation,
               private config: ConfigurationService,
               private translate: TranslateService,
+              private translations: TranslationsService,
               private iamService: RestIamService,
               private storage : SessionStorageService,
               private networkService : RestNetworkService,
@@ -97,8 +97,7 @@ export class AdminComponent {
       this.searchColumns.push(new ListItem('NODE', RestConstants.CM_NAME));
       this.searchColumns.push(new ListItem('NODE', RestConstants.NODE_ID));
       this.searchColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
-      Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
-          GlobalContainerComponent.finishPreloading();
+      this.translations.waitForInit().subscribe(() => {
           this.warningButtons=[
               new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=> {window.history.back()}),
               new DialogButton('ADMIN.UNDERSTAND',DialogButton.TYPE_PRIMARY,()=> {this.showWarning=false})
@@ -217,6 +216,12 @@ export class AdminComponent {
   private mediacenters: any[];
   ownAppMode='repository';
   authenticateAuthority: Authority;
+  private readonly onDestroyTasks: Array<() => void> = [];
+
+  ngOnDestroy(): void {
+    this.onDestroyTasks.forEach((task) => task());
+  }
+
   public startJob() {
     this.storage.set('admin_job',this.job);
     this.globalProgress=true;
@@ -612,7 +617,7 @@ export class AdminComponent {
     });
   }
 
-  private refreshAppList() {
+  public refreshAppList() {
     this.admin.getApplications().subscribe((data:Application[])=> {
       this.applications = data;
       this.applicationsOpen = {};
@@ -1022,15 +1027,10 @@ export class AdminComponent {
     this.storage.set('admin_lucene',this.lucene);
     this.globalProgress=true;
     const props=this.lucene.properties.split('\n');
-
-    const authorities=[];
-    if(this.lucene.authorities) {
-      for(const auth of this.lucene.authorities) {
-          authorities.push(auth.authorityName);
-      }
-    }
-
-    this.admin.exportLucene(this.lucene.query, this.lucene.store, props, authorities).subscribe((data)=> {
+    this.admin.exportLucene(
+        this.lucene.query, this.lucene.store, props,
+        this.lucene.authorities?.map(a => a.authorityName)
+    ).subscribe((data)=> {
       const filename='Export-'+DateHelper.formatDate(this.translate,new Date().getTime(),{useRelativeLabels:false});
       this.globalProgress=false;
 
@@ -1171,10 +1171,11 @@ export class AdminComponent {
               this.availableJobs = jobs;
               this.prepareJobClasses();
             });
-            setInterval(() => {
+            const interval = setInterval(() => {
                 if (this.mode == 'JOBS')
                     this.reloadJobStatus();
             }, 10000);
+            this.onDestroyTasks.push(() => clearInterval(interval));
             this.admin.getOAIClasses().subscribe((classes: string[]) => {
                 this.oaiClasses = classes;
                 this.storage.get('admin_oai').subscribe((data: any) => {

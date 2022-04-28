@@ -43,18 +43,23 @@
 }
 
 .searchInputFrame{
-    padding-top: 0;
+    padding-top: 10px;
     padding-bottom: 0;
+    height: auto;
     display: flex;
     align-items: center;
     form {
         flex-grow: 1;
     }
-    input {
-        border: 1px solid #eee;
-        margin: 0;
-        padding: 0 10px;
-        width: calc(100% - 25px);
+    mat-form-field {
+        display: flex;
+        flex-grow: 1;
+        padding:0 10px;
+        ::ng-deep {
+            .mat-form-field-wrapper {
+                width: 100%;
+            }
+        }
     }
 }
 
@@ -71,14 +76,8 @@
     padding-top: 20px;
 }
 
-:host ::ng-deep {
-    // This is the element with the `infinite-scroll` directive, so we need to set `overflow: auto`
-    // here.
-    .fileChooserList {
-        padding-top: 10px;
-        overflow-y: auto;
-        width: 100%;
-        background: none;
-        position: relative;
-    }
+.fileChooserList {
+    padding-top: 10px;
+    overflow-y: auto;
+    width: 100%;
 }

@@ -89,9 +89,9 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
         });
     }
 
-    setVCardAuthor(author: boolean): void {
+    async setVCardAuthor(author: boolean) {
         if (author) {
-            this.author.author = this.iamApi.getCurrentUserVCard();
+            this.author.author = await this.iamApi.getCurrentUserVCard();
         } else {
             this.author.author = new VCard();
         }
@@ -114,7 +114,7 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
         }
         return values;
     }
-    private updateValues(nodes: Node[]) {
+    private async updateValues(nodes: Node[]) {
         this._nodes = nodes;
         if (nodes?.length) {
             let freetext = Array.from(
@@ -145,7 +145,7 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
             }
             this.userAuthor =
                 authorVCard?.uid &&
-                authorVCard?.uid === this.iamApi.getCurrentUserVCard().uid;
+                authorVCard?.uid === (await this.iamApi.getCurrentUserVCard()).uid;
             this.author = {
                 freetext: freetext?.[0] ?? '',
                 author: authorVCard,

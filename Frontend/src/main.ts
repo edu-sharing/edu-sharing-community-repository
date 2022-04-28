@@ -9,4 +9,8 @@ if (environment.production) {
   enableProdMode();
 }
 
+if (environment.traceChangeDetection) {
+  (Error as any).stackTraceLimit = Infinity;
+}
+
 platformBrowserDynamic().bootstrapModule(AppModule);

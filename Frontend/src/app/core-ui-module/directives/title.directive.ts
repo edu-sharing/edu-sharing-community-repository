@@ -10,8 +10,8 @@ import {
 import { Title } from '@angular/platform-browser';
 import { combineLatest, forkJoin, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { TranslationsService } from '../../translations/translations.service';
 import { ConfigurationService } from '../../core-module/core.module';
-import { Translation } from '../translation';
 
 /**
  * Uses the element's text content to update the document title.
@@ -50,6 +50,7 @@ export class TitleDirective implements OnInit, OnChanges, OnDestroy {
     constructor(
         private elementRef: ElementRef,
         private documentTitle: Title,
+        private translations: TranslationsService,
         configuration: ConfigurationService,
     ) {
         this.mutationObserver = new MutationObserver(() => this.updatePageHeading());
@@ -66,7 +67,7 @@ export class TitleDirective implements OnInit, OnChanges, OnDestroy {
                 siteTitle: configuration.get('siteTitle', 'edu-sharing'),
             }),
             this.pageTitle,
-            Translation.waitForInit(), // Prevent initial flicker of the untranslated heading
+            this.translations.waitForInit(), // Prevent initial flicker of the untranslated heading
         ]).subscribe(([config, pageTitle]) => this.updateTitle(config, pageTitle));
     }
 

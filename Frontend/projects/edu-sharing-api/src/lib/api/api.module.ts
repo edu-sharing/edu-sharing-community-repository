@@ -16,6 +16,7 @@ import { ConnectorV1Service } from './services/connector-v-1.service';
 import { IamV1Service } from './services/iam-v-1.service';
 import { KnowledgeV1Service } from './services/knowledge-v-1.service';
 import { AuthenticationV1Service } from './services/authentication-v-1.service';
+import { LtiV13Service } from './services/lti-v-13.service';
 import { MdsV1Service } from './services/mds-v-1.service';
 import { MediacenterV1Service } from './services/mediacenter-v-1.service';
 import { NetworkV1Service } from './services/network-v-1.service';
@@ -53,6 +54,7 @@ import { UsageV1Service } from './services/usage-v-1.service';
         IamV1Service,
         KnowledgeV1Service,
         AuthenticationV1Service,
+        LtiV13Service,
         MdsV1Service,
         MediacenterV1Service,
         NetworkV1Service,

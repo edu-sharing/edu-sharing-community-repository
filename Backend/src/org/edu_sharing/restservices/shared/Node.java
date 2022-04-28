@@ -15,6 +15,7 @@ public class Node {
 
 	private NodeRef ref = null;
 	private NodeRef parent = null;
+	private NodeLTIDeepLink nodeLTIDeepLink = null;
 	private Remote remote = null;
 	private String type = null;
 	private List<String> aspects = new ArrayList<String>();
@@ -43,6 +44,7 @@ public class Node {
 	private RatingDetails rating;
 	private List<Node> usedInCollections = new ArrayList<>();
 	private Map<NodeRefImpl.Relation, Node> relations;
+	private List<Contributor> contributors;
 
 	/**
    **/
@@ -391,4 +393,20 @@ public class Node {
     public Map<NodeRefImpl.Relation, Node> getRelations() {
         return relations;
     }
+
+	public void setNodeLTIDeepLink(NodeLTIDeepLink nodeLTIDeepLink) {
+		this.nodeLTIDeepLink = nodeLTIDeepLink;
+	}
+
+	public NodeLTIDeepLink getNodeLTIDeepLink() {
+		return nodeLTIDeepLink;
+	}
+
+	public void setContributors(List<Contributor> contributors) {
+		this.contributors = contributors;
+	}
+
+	public List<Contributor> getContributors() {
+		return contributors;
+	}
 }

@@ -154,7 +154,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 						// if its local stored, load the url directly
 						String thumbnail = (String)props.get(CCConstants.CCM_PROP_IO_THUMBNAILURL);
 						if(thumbnail != null && !thumbnail.trim().equals("")){
-							handleExternalThumbnail(req, resp, thumbnail);
+							handleExternalThumbnail(nodeId,req, resp, thumbnail);
 							return;
 						}
 						if(nodeType.equals(CCConstants.CCM_TYPE_REMOTEOBJECT) || aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)) {
@@ -164,7 +164,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 						if(props != null){
 							thumbnail = (String)props.get(CCConstants.CCM_PROP_IO_THUMBNAILURL);
 							if(thumbnail != null && !thumbnail.trim().equals("")){
-								handleExternalThumbnail(req, resp, thumbnail);
+								handleExternalThumbnail(nodeId,req, resp, thumbnail);
 								return;
 							}
 						}
@@ -406,7 +406,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		if (getPrevResult.getType().equals(PreviewDetail.TYPE_EXTERNAL)) {
 			String extThumbUrl = getPrevResult.getUrl();
 			if (extThumbUrl != null && !extThumbUrl.trim().equals("")) {
-				return handleExternalThumbnail(req, resp, extThumbUrl);
+				return handleExternalThumbnail(nodeId,req, resp, extThumbUrl);
 			}
 		}
 
@@ -441,7 +441,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		return false;
 	}
 
-	private boolean handleExternalThumbnail(HttpServletRequest req, HttpServletResponse resp, String url) throws IOException {
+	private boolean handleExternalThumbnail(String nodeId, HttpServletRequest req, HttpServletResponse resp, String url) throws IOException {
 		if ("false".equalsIgnoreCase(req.getParameter("allowRedirect")) &&
 				LightbendConfigLoader.get().getStringList("repository.communication.preview.remoteAllowList").stream().anyMatch((reg) -> {
 					Pattern pattern = Pattern.compile(reg);
@@ -449,9 +449,19 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 					return matched.matches();
 				})) {
 			logger.debug("Follow redirect allowed for " + url);
-			try(InputStream is = new HttpQueryTool().getStream(url)) {
-				resp.setHeader("Content-Type", "image/jpeg");
-				StreamUtils.copy(is, resp.getOutputStream());
+			try{
+				new HttpQueryTool().queryStream(url, new HttpQueryTool.Callback<Void>() {
+					@Override
+					public void handle(InputStream httpResult) {
+						resp.setHeader("Content-Type", "image/jpeg");
+						try {
+							DataInputStream extImgTransformed = postProcessImage(nodeId, new DataInputStream(httpResult), req);
+							StreamUtils.copy(extImgTransformed, resp.getOutputStream());
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+					}
+				});
 				return true;
 			} catch(Throwable t) {
 				logger.info("Fetching preview via http failed for: " + url, t);
@@ -600,9 +610,12 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			imgOutStream.close();
 			in.close();
 			return new DataInputStream(new ByteArrayInputStream(os.toByteArray()));
-
-		}
-		catch(Throwable t){
+		} catch(OutOfMemoryError e) {
+			throw e;
+		}catch(Throwable t){
+			if(t.getCause() instanceof OutOfMemoryError) {
+				throw (OutOfMemoryError)t.getCause();
+			}
 			return null;
 		}
 		finally {
@@ -617,7 +630,6 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 
 			@Override
 			public Boolean doWork() throws Exception {
-				ServletOutputStream op = resp.getOutputStream();
 				ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef,
 						QName.createQName(contentProp));
 
@@ -636,18 +648,18 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				//
 				// Stream to the requester.
 				//
-				byte[] bbuf = new byte[1024];
+
 				// DataInputStream in = new
 				// DataInputStream(url.openStream());
 				InputStream is=reader.getContentInputStream();
 				DataInputStream in = new DataInputStream(is);
-				if(mimetype.startsWith("image")){
-					DataInputStream tmp = postProcessImage(nodeRef.getId(),in,req);
-					if(tmp != null){
-						in = tmp;
-						mimetype = "image/jpeg";
-					}
-					else {
+				if(mimetype.startsWith("image")) {
+					try {
+						DataInputStream tmp = postProcessImage(nodeRef.getId(), in, req);
+						if (tmp != null) {
+							in = tmp;
+							mimetype = "image/jpeg";
+						} else {
 						// image was broken but stream is consumed, open a new one
 						reader = serviceRegistry.getContentService().getReader(nodeRef,
 								QName.createQName(contentProp));
@@ -655,28 +667,38 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 						in = new DataInputStream(is);
 					}
 
+					} catch (OutOfMemoryError e) {
+						logger.debug("Image too large for memory, falling back to icon " + nodeRef);
+						throw e;
+					}
 				}
-				// fix to proper mimetype (usually comes at "image/svg xml" which is not valid)
-				if(mimetype.startsWith("image/svg")){
-					mimetype = "image/svg+xml";
-				}
-				resp.setContentType(mimetype);
-
-				resp.setContentLength((int) in.available());
-
-
-				while ((in != null) && ((length = in.read(bbuf)) != -1)) {
-					op.write(bbuf, 0, length);
-				}
-
-				in.close();
-
-				op.flush();
-				op.close();
+				deliverImage(mimetype, in, resp);
 				return true;
 			}
 		});
 
+	}
+
+	private void deliverImage(String mimetype, DataInputStream in, HttpServletResponse resp) throws IOException {
+		ServletOutputStream op = resp.getOutputStream();
+		int length;
+		// fix to proper mimetype (usually comes at "image/svg xml" which is not valid)
+		if(mimetype.startsWith("image/svg")){
+			mimetype = "image/svg+xml";
+		}
+		resp.setContentType(mimetype);
+
+		resp.setContentLength((int) in.available());
+
+		byte[] bbuf = new byte[1024];
+		while ((in != null) && ((length = in.read(bbuf)) != -1)) {
+			op.write(bbuf, 0, length);
+		}
+
+		in.close();
+
+		op.flush();
+		op.close();
 	}
 
 

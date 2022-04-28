@@ -72,6 +72,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit {
             case 'multivalueFixedBadges':
             case 'multivalueSuggestBadges':
             case 'multivalueBadges':
+            case 'singlevalueTree':
             case 'multivalueTree':
                 return 'array';
             case 'slider':
@@ -150,7 +151,14 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit {
     formatDate() {
         return this.getNodeValue().map((v) => {
             if (this.widget.definition.format) {
-                return new DatePipe(null).transform(v, this.widget.definition.format);
+                try {
+                    return new DatePipe(null).transform(v, this.widget.definition.format);
+                } catch (e) {
+                    console.warn('Could not format date', e, this.widget.definition);
+                    return DateHelper.formatDate(this.translate, v, {
+                        showAlwaysTime: true,
+                    });
+                }
             } else {
                 return DateHelper.formatDate(this.translate, v, {
                     showAlwaysTime: true,
@@ -162,7 +170,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit {
     formatNumber() {
         return this.getNodeValue().map((v) => {
             if (this.widget.definition.format === 'bytes') {
-                return new FormatSizePipe().transform(v);
+                return new FormatSizePipe(this.translate).transform(v);
             }
             return v;
         });

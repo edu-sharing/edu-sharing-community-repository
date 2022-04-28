@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable } from '@angular/core';
 import { HttpRequest } from '@angular/common/http';
-import {ApiConfiguration} from './api/api-configuration';
+import { ApiConfiguration } from './api/api-configuration';
 
 /**
  * Configuration for the performed HTTP requests
@@ -10,9 +10,10 @@ export class ApiRequestConfiguration {
     private authForNextRequest: string | null = null;
     private locale: string | null = null;
 
-    constructor(private apiConfiguration: ApiConfiguration) {
+    /** Emits each time, an API request is performed. */
+    readonly apiRequest = new EventEmitter<void>();
 
-    }
+    constructor(private apiConfiguration: ApiConfiguration) {}
 
     setLocale(locale: string): void {
         this.locale = locale;
@@ -26,9 +27,10 @@ export class ApiRequestConfiguration {
     apply(req: HttpRequest<any>): HttpRequest<any> {
         const headers: { [name: string]: string | string[] } = {};
         const isAPICall = req.url.startsWith(this.apiConfiguration.rootUrl);
-        if(!isAPICall) {
+        if (!isAPICall) {
             return req;
         }
+        this.apiRequest.emit();
         if (this.locale) {
             headers.locale = this.locale;
         }

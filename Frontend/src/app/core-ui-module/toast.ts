@@ -11,6 +11,7 @@ import { DialogButton } from '../core-module/ui/dialog-button';
 import { UIConstants } from '../core-module/ui/ui-constants';
 import { DateHelper } from './DateHelper';
 import {ToastMessageComponent} from './components/toast-message/toast-message.component';
+import {RestConnectorService} from '../core-module/core.module';
 import { AccessibilityService } from '../common/ui/accessibility/accessibility.service';
 import { takeUntil } from 'rxjs/operators';
 import {HttpErrorResponse} from '@angular/common/http';
@@ -514,7 +515,7 @@ export class Toast implements OnDestroy {
                 message = 'TOAST.API_FORBIDDEN';
                 dialogTitle = null;
 
-                const login = this.storage.get(TemporaryStorageService.SESSION_INFO);
+                const login = this.injector.get(RestConnectorService).getCurrentLogin();
                 if (login && login.isGuest) {
                     this.toast('TOAST.API_FORBIDDEN_LOGIN');
                     this.goToLogin();

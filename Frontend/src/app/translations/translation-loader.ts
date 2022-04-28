@@ -1,13 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { TranslateLoader } from '@ngx-translate/core';
 import { ConfigService } from 'ngx-edu-sharing-api';
-import {Observable, Observer, of, concat} from 'rxjs';
-import {tap, switchMap, map, catchError, reduce, first} from 'rxjs/operators';
-import { environment } from '../../environments/environment';
-import { Translation } from './translation';
-import { TranslationSource } from './translation-source';
 import * as rxjs from 'rxjs';
-import {CsvHelper} from '../core-module/csv.helper';
+import { concat, Observable, of } from 'rxjs';
+import { catchError, first, map, reduce } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
+import { LANGUAGES } from './languages';
+import { TranslationSource } from './translation-source';
 
 export const TRANSLATION_LIST = [
     'common',
@@ -41,30 +40,32 @@ export class TranslationLoader implements TranslateLoader {
         private suffix: string = '.json',
     ) {}
 
+    // If you need to configure this, define an injectable configuration object. See
+    // https://angular.io/guide/dependency-injection-providers#injecting-a-configuration-object.
+    private readonly source: TranslationSource = TranslationSource.Auto;
+
     /**
      * Gets the translations from the server
      */
-     getTranslation(lang: string): Observable<Dictionary> {
+    getTranslation(lang: string): Observable<Dictionary> {
         if (lang === 'none') {
             return of({});
         }
-        this.config.setLocale(Translation.LANGUAGES[lang]);
+        this.config.setLocale(LANGUAGES[lang]);
         return rxjs
             .forkJoin({
                 originalTranslations: this.getOriginalTranslations(lang).pipe(
                     // Default to empty dictionary if we got nothing
                     map((translations) => translations || {}),
                 ),
-                translationOverrides: this.config.getTranslationOverrides().pipe(first()),
+                translationOverrides: this.config.observeTranslationOverrides().pipe(first()),
             })
             .pipe(
                 map(({ originalTranslations, translationOverrides }) =>
                     // FIXME: This will alter the object returned by `getOriginalTranslations`.
                     this.applyOverrides(originalTranslations, translationOverrides),
                 ),
-                map(translations =>
-                                this.replaceGenderCharacter(translations)
-                ),
+                map((translations) => this.replaceGenderCharacter(translations)),
                 catchError((error, obs) => {
                     console.error(error);
                     return of(error);
@@ -75,7 +76,7 @@ export class TranslationLoader implements TranslateLoader {
     private getOriginalTranslations(lang: string): Observable<Dictionary> {
         switch (this.getSource()) {
             case 'repository':
-                return this.config.getDefaultTranslations().pipe(first());
+                return this.config.observeDefaultTranslations().pipe(first());
             case 'local':
                 return this.mergeTranslations(this.fetchTranslations(lang));
         }
@@ -83,9 +84,8 @@ export class TranslationLoader implements TranslateLoader {
 
     private getSource(): 'repository' | 'local' {
         if (
-            (environment.production &&
-                Translation.getSource() === TranslationSource.Auto) ||
-            Translation.getSource() === TranslationSource.Repository
+            (environment.production && this.source === TranslationSource.Auto) ||
+            this.source === TranslationSource.Repository
         ) {
             return 'repository';
         } else {
@@ -99,29 +99,25 @@ export class TranslationLoader implements TranslateLoader {
      */
     private fetchTranslations(lang: string): Observable<Dictionary>[] {
         return TRANSLATION_LIST.map(
-            translation =>
-                `${this.prefix}/${translation}/${lang}${this.suffix}`,
-        ).map(url => this.http.get(url) as Observable<Dictionary>);
+            (translation) => `${this.prefix}/${translation}/${lang}${this.suffix}`,
+        ).map((url) => this.http.get(url) as Observable<Dictionary>);
     }
 
     /**
      * Takes an array as returned by `fetchTranslations` and converts it to an
      * Observable that yields a single Dictionary object.
      */
-    private mergeTranslations(
-        translations: Observable<Dictionary>[],
-    ): Observable<Dictionary> {
-        return concat(...translations).pipe(reduce(
-            (acc: Dictionary, value: Dictionary) => {
+    private mergeTranslations(translations: Observable<Dictionary>[]): Observable<Dictionary> {
+        return concat(...translations).pipe(
+            reduce((acc: Dictionary, value: Dictionary) => {
                 for (const prop in value) {
                     if (value.hasOwnProperty(prop)) {
                         acc[prop] = value[prop];
                     }
                 }
                 return acc;
-            },
-            {},
-        ));
+            }, {}),
+        );
     }
 
     /**
@@ -152,9 +148,7 @@ export class TranslationLoader implements TranslateLoader {
                     }
                     const refItem = ref[item];
                     if (typeof refItem === 'string') {
-                        throw new Error(
-                            'Trying to override leave with sub tree: ' + path,
-                        );
+                        throw new Error('Trying to override leave with sub tree: ' + path);
                     }
                     ref = refItem;
                 }
@@ -165,15 +159,21 @@ export class TranslationLoader implements TranslateLoader {
     }
 
     private replaceGenderCharacter(translations: Dictionary, path: string[] = []) {
-        for(let key of Object.keys(translations)) {
-            if(typeof translations[key] === 'string') {
+        for (let key of Object.keys(translations)) {
+            if (typeof translations[key] === 'string') {
                 // DO NOT REMOVE (required for csv language dumping)
                 /*console.log(CsvHelper.fromArray(null, [[
                         path.concat(key).join('.'), translations[key]
                 ]]));*/
-                translations[key] = (translations[key] as string).replace(/{{GENDER_SEPARATOR}}/g, "*");
+                translations[key] = (translations[key] as string).replace(
+                    /{{GENDER_SEPARATOR}}/g,
+                    '*',
+                );
             } else {
-                translations[key] = this.replaceGenderCharacter(translations[key] as Dictionary, path.concat(key));
+                translations[key] = this.replaceGenderCharacter(
+                    translations[key] as Dictionary,
+                    path.concat(key),
+                );
             }
         }
 

@@ -6,7 +6,7 @@ import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
 import {
     Authority,
     AuthorityProfile,
-    Group, GroupProfile, RestConnectorService,
+    Group, GroupProfile, Organization, RestConnectorService,
     RestConstants,
     RestIamService,
     RestOrganizationService, User,
@@ -218,7 +218,7 @@ export class AuthoritySearchInputComponent {
         );
     }
 
-    private convertData(authorities: AuthorityProfile[] | Group[] | User[]): SuggestItem[] {
+    private convertData(authorities: Organization[] | AuthorityProfile[] | Group[] | User[]): SuggestItem[] {
         const result: SuggestItem[] = [];
         for (const user of authorities) {
             const group = (user.profile as GroupProfile).displayName != null;

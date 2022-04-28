@@ -73,36 +73,34 @@
       hint="{{'PERMISSIONS.ORG_SIGNUP_PASSWORD_HINT' | translate}}"></es-input-password>
   </div>
 </es-card>
-<es-card *ngIf="groupSignupList"
+<es-card *ngIf="groupSignupListShown"
       title="{{'PERMISSIONS.ORG_SIGNUP_LIST' | translate }}"
       height="large"
       [node]="groupSignup"
       [isCancelable]="true"
       [buttons]="signupListButtons"
-      (onCancel)="groupSignupList = null"
+      (onCancel)="groupSignupListShown = false"
 >
   <div class="card-content-padding org-signup-list">
     <div class="actionbar">
-      <es-actionbar #signupActionbar
-               [numberOfAlwaysVisibleOptions]="1"
-               [numberOfAlwaysVisibleOptionsMobile]="1"></es-actionbar>
+      <es-actionbar #actionbarSignup
+                    [numberOfAlwaysVisibleOptions]="1"
+                    [numberOfAlwaysVisibleOptionsMobile]="1"></es-actionbar>
     </div>
-    <h3 class="mat-heading-3" *ngIf="!groupSignupList?.length">
-      {{'PERMISSIONS.ORG_SIGNUP_LIST_EMPTY' | translate}}
-    </h3>
-    <es-listTable
-            *ngIf="groupSignupList?.length"
-            [columns]="addMemberColumns"
-            [actionbar]="signupActionbar"
-            [customOptions]="signupActions"
-            [selectedNodes]="$any(groupSignupSelected)"
-            (selectionChanged)="groupSignupSelected = $event"
-            [hasCheckbox]="true"
-            [selectOnClick]="true"
-            [hasHeading]="true"
-            [hasIcon]="true"
-            icon="person"
-            [nodes]="$any(groupSignupList)"></es-listTable>
+    <es-node-entries-wrapper
+      #signupList
+      [displayType]="DisplayType.Table"
+      [elementInteractionType]="InteractionType.Emitter"
+      [columns]="addMemberColumns"
+      [dataSource]="groupSignupList"
+      (clickItem)="selectOnClick(signupList, $event)"
+    >
+      <ng-template #empty>
+        <h5 class="mat-heading-5">
+          {{'PERMISSIONS.ORG_SIGNUP_LIST_EMPTY' | translate}}
+        </h5>
+      </ng-template>
+    </es-node-entries-wrapper>
   </div>
 
 </es-card>
@@ -209,8 +207,8 @@
         </div>
 </es-card>
 <es-card *ngIf="editGroups || editMembers || addMembers"
-      title="{{(addMembers ? 'PERMISSIONS.ADD_MEMBER_TO_GROUP' : editMembers=='ALL' ? 'PERMISSIONS.EDIT_ORG_MEMBERS' : editMembers ? 'PERMISSIONS.EDIT_MEMBERS' : 'PERMISSIONS.EDIT_MEMBER_GROUPS') | translate }}"
-      [subtitle]="addMembers ? addMembers.profile.displayName : editMembers ? editMembers.profile.displayName : editGroups.authorityName"
+      title="{{(addMembers ? 'PERMISSIONS.ADD_MEMBER_TO_GROUP' : editMembers === 'ALL' ? 'PERMISSIONS.EDIT_ORG_MEMBERS' : editMembers ? 'PERMISSIONS.EDIT_MEMBERS' : 'PERMISSIONS.EDIT_MEMBER_GROUPS') | translate }}"
+      [subtitle]="addMembers ? $any(addMembers).profile.displayName : editMembers ? $any(editMembers).profile.displayName : editGroups.authorityName"
       icon="person_add"
       width="xlarge"
       height="xlarge"
@@ -228,21 +226,15 @@
           <es-actionbar class="memberItem memberActionBar" *ngIf="editMembers || editGroups" #actionbarMember
           ></es-actionbar>
         </div>
-        <div class="currentMembers" *ngIf="editMembers">{{ 'PERMISSIONS.CURRENT_MEMBERS' |translate:{group:editMembers.profile ? editMembers.profile.displayName : org.profile.displayName} }}</div>
-        <es-listTable
-          [columns]="editGroups ? editGroupColumns : addMemberColumns"
-          [nodes]="$any(memberList)"
-          [hasCheckbox]="true"
-          [icon]="editGroups ? 'group' : 'person'"
-          [hasIcon]="true"
-          [actionbar]="actionbarMember"
-          [customOptions]="memberOptions"
-          [selectedNodes]="$any(selectedMembers)"
-          [hasHeading]="true"
-          [selectOnClick]="true"
-          [isClickable]="true"
-          (selectionChanged)="updateSelectedMembers($event)"
-       ></es-listTable>
+        <div class="currentMembers" *ngIf="editMembers">{{ 'PERMISSIONS.CURRENT_MEMBERS' |translate:{group:$any(editMembers).profile ? $any(editMembers).profile.displayName : org.profile.displayName} }}</div>
+      <es-node-entries-wrapper
+        #memberAdd
+        [columns]="editGroups ? editGroupColumns : addMemberColumns"
+        [dataSource]="memberList"
+        [displayType]="DisplayType.Table"
+        [elementInteractionType]="InteractionType.Emitter"
+        (clickItem)="selectOnClick(memberAdd, $event)"
+      ></es-node-entries-wrapper>
     </div>
 </es-card>
 <!-- <div *ngIf="addTo" [@fade]="addTo" class="dialog darken"></div> -->
@@ -253,44 +245,46 @@
       [mode]="'GROUP'"
       [org]="org"
       [embedded]="true"
-      (onSelection)="addToSelection=$event"
+      (onSelection)="addToSelection = $event"
     ></es-permissions-authorities>
   </div>
   <div class="btns">
-      <a class="waves-effect waves-light btn" [class.disabled]="addToSelection==null" tabindex="0" (click)="addToSelect()" (keyup.enter)="addToSelect()">{{'PERMISSIONS.ADD_TO' | translate }}</a>
-      <a class="btn-flat" tabindex="0" (click)="cancelAddTo()" (keyup.enter)="cancelAddTo()">{{'CANCEL' | translate }}</a>
+    <button mat-button color="primary"
+            (click)="cancelAddTo()"
+    >{{'CANCEL' | translate }}</button>
+    <button mat-flat-button color="primary"
+            [disabled]="!addToSelection?.length"
+            (click)="addToSelect()"
+    >{{'PERMISSIONS.ADD_TO' | translate }}</button>
   </div>
 </div>
 <div *ngIf="embedded" class="searchEmbedded">
   <form (ngSubmit)="searchQuery=embeddedQuery">
     <mat-form-field>
-      <mat-label>{{'PERMISSIONS.SEARCH_USER' | translate}}</mat-label>
+      <mat-label>{{'PERMISSIONS.SEARCH_' + this._mode | translate}}</mat-label>
       <input matInput type="search" [(ngModel)]="embeddedQuery" name="embeddedSearch">
     </mat-form-field>
   </form>
 </div>
-<es-listTable class="list" infinite-scroll (scrolled)="loadAuthorities()" [scrollWindow]="false" [class.listEmbedded]="embedded"
-  #listRef
-  [mainNav]="mainNav"
-  (loadMore)="loadAuthorities()"
-  [columns]="columns"
-  [nodes]="list"
-  [hasCheckbox]="_mode!='ORG'"
-  [sortBy]="sortBy"
-  [actionbar]="actionbar"
-  [isLoading]="loading"
-  [isClickable]="true"
-  [selectedNodes]="$any(selected)"
-  [hasMore]="hasMore"
-  (selectionChanged)="selection($event)"
-  [sortAscending]="sortAscending"
-  [hasHeading]="true"
-  [selectOnClick]="true"
-  [hasIcon]="true"
-  [customOptions]="options"
-  [icon]="_mode=='USER' ? 'person' : (_mode=='ORG' ? 'work' : 'group')"
-  (sortListener)="changeSort($event)"
-  ></es-listTable>
-<h5 class="noElements" *ngIf="!loading && (!list || !list.length) && !_searchQuery">{{'PERMISSIONS.NO_ELEMENTS' | translate}}</h5>
-<h5 class="noElements" *ngIf="!loading && (!list || !list.length) && _searchQuery!='' && searchQuery!=null">{{'PERMISSIONS.NO_ELEMENTS_SEARCH' | translate}}</h5>
-<es-global-progress *ngIf="globalProgress"></es-global-progress>
+<es-node-entries-wrapper class="list"
+                         #mainList
+                         infinite-scroll
+                         (scrolled)="loadAuthorities()"
+                         [scrollWindow]="false"
+                         [class.listEmbedded]="embedded"
+                         [displayType]="DisplayType.Table"
+                         [elementInteractionType]="InteractionType.Emitter"
+                         [columns]="columns"
+                         [configureColumns]="!embedded"
+                         [dataSource]="dataSource"
+                         (fetchData)="loadAuthorities($event)"
+                         (clickItem)="onClick($event)"
+                         [checkbox]="_mode!='ORG'"
+                         [sort]="sortConfig"
+                         (sortChange)="changeSort($event)"
+>
+  <ng-template #empty>
+    <h5 class="noElements" *ngIf="!_searchQuery">{{'PERMISSIONS.NO_ELEMENTS' | translate}}</h5>
+    <h5 class="noElements" *ngIf="!!_searchQuery">{{'PERMISSIONS.NO_ELEMENTS_SEARCH' | translate}}</h5>
+  </ng-template>
+</es-node-entries-wrapper>

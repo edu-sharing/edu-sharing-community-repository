@@ -11,8 +11,6 @@ import {
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { Translation } from '../../../core-ui-module/translation';
-import { ActivatedRoute } from '@angular/router';
 import { Toast } from '../../../core-ui-module/toast';
 import { VCard } from '../../../core-module/ui/VCard';
 import { Helper } from '../../../core-module/rest/helper';
@@ -21,7 +19,6 @@ import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 import { trigger } from '@angular/animations';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import {
-    ConfigurationService,
     Node,
     NodeList,
     DialogButton,
@@ -35,7 +32,6 @@ import {
     RestNodeService,
     RestSearchService,
     RestToolService,
-    SessionStorageService,
     UIService,
     RestUtilitiesService,
 } from '../../../core-module/core.module';
@@ -171,13 +167,12 @@ export class MdsComponent {
         this.isLoading = true;
         this.mdsService.getSet(this._setId, this._repository).subscribe(
             (data: any) => {
-                this.config.getVariables().pipe(first()).subscribe(
+                this.config.observeVariables().pipe(first()).subscribe(
                     (variables) => {
                         this.mds = data;
                         this.variables = variables;
                         this.loadMdsFinal();
                     },
-                    (error: any) => this.toast.error(error),
                 );
             },
             (error: any) => this.toast.error(error),
@@ -216,11 +211,6 @@ export class MdsComponent {
                     .getMetadataSet({ metadataSet: mdsId })
                     .toPromise();
             } catch (error) {
-                if (error instanceof UserPresentableError) {
-                    this.toast.error(null, error.message);
-                } else {
-                    this.toast.error(error);
-                }
                 this.cancel();
             }
             this._setId = mdsId;
@@ -287,14 +277,12 @@ export class MdsComponent {
         private mdsService: RestMdsService,
         private newMdsService: MdsService,
         private translate: TranslateService,
-        private route: ActivatedRoute,
         private uiService: UIService,
         private node: RestNodeService,
         private tools: RestToolService,
         private utilities: RestUtilitiesService,
         private toast: Toast,
         private locator: RestLocatorService,
-        private storage: SessionStorageService,
         private connector: RestConnectorService,
         private sanitizer: DomSanitizer,
         private config: ConfigService,
@@ -302,7 +290,6 @@ export class MdsComponent {
         private nodeHelper: NodeHelperService,
         private _ngZone: NgZone,
     ) {
-        //Translation.initialize(this.translate,this.config,this.storage,this.route);
         (window as any)['mdsComponentRef_' + this.mdsId] = { component: this, zone: _ngZone };
     }
 
@@ -3224,7 +3211,7 @@ export class MdsComponent {
     }
 
     private loadConfig() {
-        this.config.getVariables().pipe(first()).subscribe((variables) => {
+        this.config.observeVariables().pipe(first()).subscribe((variables) => {
             this.variables = variables;
             const node = this.currentNodes[0];
             for (const property in node.properties) {
