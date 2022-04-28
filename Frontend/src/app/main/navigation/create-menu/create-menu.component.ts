@@ -51,6 +51,7 @@ import { Toast } from '../../../core-ui-module/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { WorkspaceManagementDialogsComponent } from '../../../modules/management-dialogs/management-dialogs.component';
 import { delay } from "rxjs/operators";
+import { DialogRef, ManagementDialogsService } from '../../../modules/management-dialogs/management-dialogs.service';
 
 @Component({
     selector: 'es-create-menu',
@@ -107,8 +108,8 @@ export class CreateMenuComponent {
     _parent: Node = null;
     addFolderName: string = null;
 
-    showUploadSelect = false;
-    filesToUpload: FileList;
+    uploadSelectDialogRef: DialogRef<FileList>;
+    uploadDialogRef: DialogRef<Node[]>;
     connectorList: Connector[];
     fileIsOver = false;
     showPicker: boolean;
@@ -137,6 +138,7 @@ export class CreateMenuComponent {
         private nodeHelper: NodeHelperService,
         private event: FrameEventsService,
         private cardService: CardService,
+        private dialogs: ManagementDialogsService,
     ) {
         this.route.queryParams.subscribe(params => {
             this.params = params;
@@ -243,7 +245,7 @@ export class CreateMenuComponent {
             const upload = new OptionItem(
                 'OPTIONS.ADD_OBJECT',
                 'cloud_upload',
-                () => this.showUploadSelect = true,
+                () => this.openUploadSelect(),
             );
             upload.elementType = [ElementType.Unknown];
             upload.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES];
@@ -310,6 +312,19 @@ export class CreateMenuComponent {
         });
     }
 
+    openUploadSelect(): void {
+        this.uploadSelectDialogRef = this.dialogs.openUploadSelect({
+            parent: this.getParent(),
+            showPicker: this.showPicker,
+        });
+        this.uploadSelectDialogRef.afterClosed().subscribe((files) => {
+            if (files) {
+                this.uploadFiles(files);
+            }
+            this.uploadSelectDialogRef = null;
+        });
+    }
+
     public hasUsableOptions() {
         return this.options.some((o) => o.isEnabled);
     }
@@ -372,7 +387,7 @@ export class CreateMenuComponent {
             // }
             return;
         }
-        if (this.filesToUpload) {
+        if (this.uploadDialogRef) {
             this.toast.error(null, 'WORKSPACE.TOAST.ONGOING_UPLOAD');
             return;
         }
@@ -380,8 +395,19 @@ export class CreateMenuComponent {
             this.toast.toolpermissionError(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES);
             return;
         }
-        this.showUploadSelect = false;
-        this.filesToUpload = files;
+        this.uploadSelectDialogRef?.close();
+        this.openUpload(files);
+    }
+
+    private openUpload(files: FileList): void {
+        this.uploadDialogRef = this.dialogs.openUpload({
+            parent: this.getParent(),
+            files,
+        });
+        this.uploadDialogRef.afterClosed().subscribe((nodes) => {
+            this.afterUpload(nodes);
+            this.uploadDialogRef = null;
+        });
     }
 
     afterUpload(nodes: Node[]) {
@@ -436,7 +462,7 @@ export class CreateMenuComponent {
                     return blob;
                 };
                 list.length = 1;
-                this.filesToUpload = list;
+                this.openUpload(list);
             },
             (error: any) => {
                 console.warn(error);
@@ -511,7 +537,7 @@ export class CreateMenuComponent {
     }
 
     isAllowed() {
-        return this.allowed && !this.filesToUpload &&
+        return this.allowed && !this.uploadDialogRef &&
             this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES);
     }
 }

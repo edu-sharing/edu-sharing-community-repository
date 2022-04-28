@@ -82,6 +82,7 @@
       [showUser]="showUser"
       [title]="mainNavConfig.title"
       [userMenuOptions]="userMenuOptions"
+      (created)="mainNavConfig.onCreate && mainNavConfig.onCreate($event)"
       (createNotAllowed)="mainNavConfig.onCreateNotAllowed && mainNavConfig.onCreateNotAllowed()"
       (openChat)="openChat()"
       (openImprint)="openImprint()"

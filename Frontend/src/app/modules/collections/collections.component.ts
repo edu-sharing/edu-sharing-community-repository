@@ -182,7 +182,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
         'OPTIONS.ADD_OBJECT',
         'cloud_upload',
         () => {
-            this.mainNavService.getMainNav().topBar.createMenu.showUploadSelect = true
+            this.mainNavService.getMainNav().topBar.createMenu.openUploadSelect();
         },
     );
     collectionProposals: AbstractList<ProposalNode>;

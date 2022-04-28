@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute, Params, Router } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { AccessibilityComponent } from '../../common/ui/accessibility/accessibility.component';
 import { CookieInfoComponent } from '../../common/ui/cookie-info/cookie-info.component';
 import { FrameEventsService, Node } from '../../core-module/core.module';
 import { MainNavComponent } from '../../main/navigation/main-nav/main-nav.component';
-import { WorkspaceManagementDialogsComponent } from '../../modules/management-dialogs/management-dialogs.component';
+import { ManagementDialogsService } from '../../modules/management-dialogs/management-dialogs.service';
 import { SkipNavService } from './skip-nav/skip-nav.service';
 
 export class MainNavCreateConfig {
@@ -70,20 +69,18 @@ export class MainNavConfig {
 })
 export class MainNavService {
     private mainnav: MainNavComponent;
-    private managementDialogs: WorkspaceManagementDialogsComponent;
     private cookieInfo: CookieInfoComponent;
     private accessibility: AccessibilityComponent;
     private mainNavConfigSubject = new BehaviorSubject<MainNavConfig>(new MainNavConfig());
 
     constructor(
+        private dialogs: ManagementDialogsService,
         private event: FrameEventsService,
-        private route: ActivatedRoute,
-        private router: Router,
         private skipNav: SkipNavService,
     ) {}
 
     getDialogs() {
-        return this.managementDialogs;
+        return this.dialogs.getDialogsComponent();
     }
 
     getCookieInfo() {
@@ -92,11 +89,6 @@ export class MainNavService {
 
     getAccessibility() {
         return this.accessibility;
-    }
-
-    registerDialogs(managementDialogs: WorkspaceManagementDialogsComponent) {
-        this.managementDialogs = managementDialogs;
-        this.subscribeChanges();
     }
 
     registerCookieInfo(cookieInfo: CookieInfoComponent) {
@@ -139,20 +131,5 @@ export class MainNavService {
 
     observeMainNavConfig(): Observable<MainNavConfig> {
         return this.mainNavConfigSubject.asObservable();
-    }
-
-    private subscribeChanges() {
-        this.managementDialogs.signupGroupChange.subscribe((value: boolean) => {
-            this.router.navigate([], {
-                relativeTo: this.route,
-                queryParamsHandling: 'merge',
-                queryParams: {
-                    signupGroup: value || null,
-                },
-            });
-        });
-        this.route.queryParams.subscribe((params: Params) => {
-            this.managementDialogs.signupGroup = params.signupGroup;
-        });
     }
 }
