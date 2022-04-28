@@ -107,18 +107,19 @@ RUN set -eux \
     && echo "deb https://artifacts.edu-sharing.com/repository/php $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list \
     && apt-get update -y \
     && apt-get install -y --no-install-recommends \
-      php${PHP_VERSION}=${php.version}* \
-      php${PHP_VERSION}-common=${php.version}* \
-      php${PHP_VERSION}-curl=${php.version}* \
+      php${PHP_VERSION}=${PHP_VERSION}* \
+      php${PHP_VERSION}-common=${PHP_VERSION}* \
+      php${PHP_VERSION}-curl=${PHP_VERSION}* \
       php${PHP_VERSION}-dom \
       php${PHP_VERSION}-exif \
-      php${PHP_VERSION}-gd=${php.version}* \
-      php${PHP_VERSION}-mbstring=${php.version}* \
+      php${PHP_VERSION}-gd=${PHP_VERSION}* \
+      php${PHP_VERSION}-mbstring=${PHP_VERSION}* \
       php${PHP_VERSION}-pdo \
       php${PHP_VERSION}-pdo-pgsql \
-      php${PHP_VERSION}-pgsql=${php.version}* \
-      php${PHP_VERSION}-soap=${php.version}* \
-      php${PHP_VERSION}-zip=${php.version}* \
+      php${PHP_VERSION}-pgsql=${PHP_VERSION}* \
+      php${PHP_VERSION}-soap=${PHP_VERSION}* \
+      php${PHP_VERSION}-xml=${PHP_VERSION}* \
+      php${PHP_VERSION}-zip=${PHP_VERSION}* \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
 
