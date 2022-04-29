@@ -10,6 +10,8 @@ spec:
   endpoints:
   - path: "/metrics"
     port: http-metrics
+    interval: {{ .Values.global.metrics.scrape.interval }}
+    scrapeTimeout: {{ .Values.global.metrics.scrape.timeout }}
   selector:
     matchLabels: {{ include "edusharing_repository_service.labels.app" . | nindent 6 }}
       app.kubernetes.io/component: "metrics"
