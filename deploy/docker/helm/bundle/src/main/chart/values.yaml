@@ -13,8 +13,9 @@ global:
     prometheus:
       enabled: false
       retention: 1w
-      scrapeInterval: 10s
-      scrapeTimeout: 10s
+    scrape:
+      interval: 10s
+      timeout: 10s
     servicemonitor:
       enabled: false
 

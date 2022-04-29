@@ -11,9 +11,9 @@ spec:
     name: {{ include "edusharing.name" . }}-prometheus
     key:  additionalScrapeConfigs
   {{- end }}
-  retention: {{ .Values.global.prometheus.retention }}
-  scrapeInterval: {{ .Values.global.prometheus.scrapeInterval }}
-  scrapeTimeout: {{ .Values.global.prometheus.scrapeTimeout }}
+  retention: {{ .Values.global.metrics.prometheus.retention }}
+  scrapeInterval: {{ .Values.global.metrics.scrape.interval }}
+  scrapeTimeout: {{ .Values.global.metrics.scrape.timeout }}
   serviceAccountName: {{ include "edusharing.name" . }}-prometheus
   serviceMonitorSelector: {}
 {{- end }}

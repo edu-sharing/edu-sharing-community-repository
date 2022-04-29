@@ -35,6 +35,9 @@ global:
     pullSecrets: []
 
   metrics:
+    scrape:
+      interval: 10s
+      timeout: 10s
     servicemonitor:
       enabled: false
 
