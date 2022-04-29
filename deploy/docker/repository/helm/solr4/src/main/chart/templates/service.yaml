@@ -23,3 +23,19 @@ spec:
   ports:
   - name: http-api
     port: {{ .Values.service.port.api }}
+{{- if and .Values.global.metrics.servicemonitor.enabled .Values.config.metrics }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "edusharing_repository_search_solr4.name" . }}-metrics
+  labels: {{ include "edusharing_repository_search_solr4.labels.app" . | nindent 4 }}
+    app.kubernetes.io/component: "metrics"
+spec:
+  type: ClusterIP
+  selector: {{ include "edusharing_repository_search_solr4.labels.app" . | nindent 4 }}
+  ports:
+    - name: http-metrics
+      port: {{ .Values.service.port.metrics }}
+      targetPort: metrics
+{{- end }}

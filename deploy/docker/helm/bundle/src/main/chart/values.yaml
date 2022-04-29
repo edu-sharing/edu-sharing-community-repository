@@ -9,11 +9,14 @@ global:
     istio:
       enabled: false
 
-  prometheus:
-    enabled: false
-    retention: 1w
-    scrapeInterval: 10s
-    scrapeTimeout: 10s
+  metrics:
+    prometheus:
+      enabled: false
+      retention: 1w
+      scrapeInterval: 10s
+      scrapeTimeout: 10s
+    servicemonitor:
+      enabled: false
 
 ########################################################################################################################
 # LOCAL

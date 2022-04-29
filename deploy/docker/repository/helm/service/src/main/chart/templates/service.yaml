@@ -30,3 +30,19 @@ spec:
     port: {{ .Values.service.port.api.internal }}
   - name: tcp-gossip
     port: {{ .Values.service.port.gossip }}
+{{- if and .Values.global.metrics.servicemonitor.enabled .Values.config.metrics }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "edusharing_repository_service.name" . }}-metrics
+  labels: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
+    app.kubernetes.io/component: "metrics"
+spec:
+  type: ClusterIP
+  selector: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
+  ports:
+    - name: http-metrics
+      port: {{ .Values.service.port.metrics }}
+      targetPort: metrics
+{{- end }}

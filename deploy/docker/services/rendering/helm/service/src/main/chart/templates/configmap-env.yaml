@@ -16,7 +16,7 @@ data:
   SERVICES_RENDERING_DATABASE_PORT: {{ .Values.config.database.port | quote }}
   SERVICES_RENDERING_SERVICE_BIND: {{ if .Values.global.cluster.istio.enabled }}"127.0.0.1"{{ else }}"0.0.0.0"{{ end }}
   SERVICES_RENDERING_SERVICE_GDPR_ENABLED: {{ .Values.config.gdpr.enabled | quote }}
-  SERVICES_RENDERING_SERVICE_GDPR_MODULES: '{{- join "," .Values.config.gdpr.modules }}'
+  SERVICES_RENDERING_SERVICE_GDPR_MODULES: '"{{- join "\",\"" .Values.config.gdpr.modules }}"'
   SERVICES_RENDERING_SERVICE_GDPR_URLS: |-
   {{- range $ununsed, $url := .Values.config.gdpr.urls }}
     {{ $url.regex | quote }} => ["name" => {{ $url.name | quote }}, "url" => {{ $url.ref | quote }}],
@@ -31,7 +31,7 @@ data:
   SERVICES_RENDERING_SERVICE_PORT_EXTERNAL: {{ if .Values.ingress.tls }}"443"{{ else }}"80"{{ end }}
   SERVICES_RENDERING_SERVICE_PORT_INTERNAL: {{ .Values.service.port.api.internal | quote }}
   SERVICES_RENDERING_SERVICE_PROT_EXTERNAL: {{ if .Values.ingress.tls }}"https"{{ else }}"http"{{ end }}
-  SERVICES_RENDERING_SERVICE_PROXY_NONPROXYHOSTS: '{{- join "," .Values.config.http.client.proxy.nonproxyhosts }}'
+  SERVICES_RENDERING_SERVICE_PROXY_NONPROXYHOSTS: '"{{- join "\",\"" .Values.config.http.client.proxy.nonproxyhosts }}"'
   SERVICES_RENDERING_SERVICE_PROXY_HOST: {{ .Values.config.http.client.proxy.proxyhost | quote }}
   SERVICES_RENDERING_SERVICE_PROXY_PORT: {{ .Values.config.http.client.proxy.proxyport | quote }}
   SERVICES_RENDERING_SERVICE_PROXY_USER: {{ .Values.config.http.client.proxy.proxyuser | quote }}
