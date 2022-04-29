@@ -9,12 +9,4 @@ import { Component, ViewChild } from '@angular/core';
  * Global components (always visible regardless of route
  */
 export class GlobalContainerComponent {
-    static instance: GlobalContainerComponent;
-
-    @ViewChild('rocketchat') rocketchat: any; // using any to bypass Circular Dependency issues
-
-    constructor() {
-        GlobalContainerComponent.instance = this;
-    }
-
 }

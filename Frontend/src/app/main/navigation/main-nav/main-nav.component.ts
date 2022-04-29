@@ -25,7 +25,7 @@ import * as rxjs from 'rxjs';
 import { Observable, ReplaySubject, Subject } from 'rxjs';
 import { map, take, takeUntil, tap, delay } from 'rxjs/operators';
 import { NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
-import { GlobalContainerComponent } from '../../../common/ui/global-container/global-container.component';
+import { RocketChatService } from '../../../common/ui/global-container/rocketchat/rocket-chat.service';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
@@ -138,6 +138,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         private translations: TranslationsService,
         private changeDetectorRef: ChangeDetectorRef,
         private nodeStore: NodeStoreService,
+        private rocketChat: RocketChatService,
     ) {}
 
     ngOnInit(): void {
@@ -450,16 +451,16 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     showChat() {
-        return GlobalContainerComponent.instance?.rocketchat?._data;
+        return this.rocketChat._data;
     }
 
     getChatCount() {
-        return GlobalContainerComponent.instance?.rocketchat?.unread;
+        return this.rocketChat.unread;
     }
 
     openChat() {
-        GlobalContainerComponent.instance.rocketchat.opened = true;
-        GlobalContainerComponent.instance.rocketchat.unread = 0;
+       this.rocketChat.opened = true;
+       this.rocketChat.unread = 0;
     }
 
     isCreateAllowed() {
