@@ -136,7 +136,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         private user: UserService,
         private ngZone: NgZone,
         private translations: TranslationsService,
-        private changeDetectorRef: ChangeDetectorRef,
+        // private changeDetectorRef: ChangeDetectorRef,
         private nodeStore: NodeStoreService,
         private rocketChat: RocketChatService,
     ) {}
@@ -193,7 +193,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             .pipe(takeUntil(this.destroyed$), delay(0))
             .subscribe(([mainNavConfig, userInfo, queryParams]) => {
                 this.updateConfig(mainNavConfig, userInfo, queryParams);
-                this.changeDetectorRef.detectChanges();
+                // this.changeDetectorRef.detectChanges();
             });
     }
 
