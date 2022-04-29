@@ -1,0 +1,20 @@
+{{- if and .Values.global.metrics.servicemonitor.enabled .Values.config.metrics }}
+{{- if .Capabilities.APIVersions.Has "monitoring.coreos.com/v1" }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "edusharing_repository_search_solr4.name" . }}
+  labels: {{ include "edusharing_repository_search_solr4.labels.app" . | nindent 4 }}
+    app.kubernetes.io/component: "metrics"
+spec:
+  endpoints:
+  - path: "/metrics"
+    port: http-metrics
+  selector:
+    matchLabels: {{ include "edusharing_repository_search_solr4.labels.app" . | nindent 6 }}
+      app.kubernetes.io/component: "metrics"
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
+{{- end }}
+{{- end }}

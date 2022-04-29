@@ -26,9 +26,11 @@ spec:
         {{- end }}
         {{- end }}
         checksum/secret-env: {{ include (print .Template.BasePath "/secret-env.yaml") . | sha256sum | trunc 63 }}
+        {{- if not .Values.global.metrics.servicemonitor.enabled }}
         prometheus.io/path: "/metrics"
         prometheus.io/port: "9090"
         prometheus.io/scrape: {{ .Values.config.metrics | quote }}
+        {{- end }}
         sidecar.istio.io/inject: {{ .Values.global.cluster.istio.enabled | quote }}
         {{- if .Values.podAnnotations }}
         {{- toYaml .Values.podAnnotations | nindent 8 }}
@@ -88,6 +90,10 @@ spec:
           containerPort: 8081
         - name: gossip
           containerPort: 5701
+        {{- if .Values.config.metrics }}
+        - name: metrics
+          containerPort: 9090
+        {{- end }}
         volumeMounts:
         - name: data
           mountPath: /usr/local/tomcat/shared/classes/config/node

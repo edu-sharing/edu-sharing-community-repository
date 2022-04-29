@@ -22,6 +22,10 @@ global:
     pullPolicy: Always
     pullSecrets: []
 
+  metrics:
+    servicemonitor:
+      enabled: false
+
   patroni:
     enabled: false
     name: &nameOverride edusharing-postgresql
@@ -50,6 +54,7 @@ service:
 
   port:
     api: 5432
+    metrics: 9114
 
 ########################################################################################################################
 

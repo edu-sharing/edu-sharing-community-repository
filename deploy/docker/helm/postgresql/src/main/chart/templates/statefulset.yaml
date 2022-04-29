@@ -17,9 +17,11 @@ spec:
         checksum/configmap-env: {{ include (print .Template.BasePath "/configmap-env.yaml") . | sha256sum | trunc 63 }}
         checksum/configmap-file: {{ include (print .Template.BasePath "/configmap-file.yaml") . | sha256sum | trunc 63 }}
         checksum/secret-env: {{ include (print .Template.BasePath "/secret-env.yaml") . | sha256sum | trunc 63 }}
+        {{- if not .Values.global.metrics.servicemonitor.enabled }}
         prometheus.io/path: "/metrics"
         prometheus.io/port: "9114"
         prometheus.io/scrape: {{ .Values.sidecar.metrics.enabled | quote }}
+        {{- end }}
         sidecar.istio.io/inject: {{ .Values.global.cluster.istio.enabled | quote }}
         {{- if .Values.podAnnotations }}
         {{- toYaml .Values.podAnnotations | nindent 8 }}
@@ -103,6 +105,9 @@ spec:
         env:
         - name: DATA_SOURCE_NAME
           value: postgresql://{{ .Values.config.username }}:{{ .Values.config.password }}@127.0.0.1:5432/{{ .Values.config.database }}?sslmode=disable
+        ports:
+        - name: metrics
+          containerPort: 9114
         {{- with .Values.sidecar.metrics.resources }}
         resources: {{ toYaml . | nindent 10 }}
         {{- end }}

@@ -28,6 +28,10 @@ global:
     pullPolicy: Always
     pullSecrets: []
 
+  metrics:
+    servicemonitor:
+      enabled: false
+
   patroni:
     enabled: false
     name: edusharing-rendering-postgresql
@@ -64,6 +68,7 @@ service:
     api:
       internal: 8080
       external: 8081
+    metrics: 9117
 
 ########################################################################################################################
 

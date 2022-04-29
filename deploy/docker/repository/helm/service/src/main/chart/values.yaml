@@ -34,6 +34,10 @@ global:
     pullPolicy: Always
     pullSecrets: []
 
+  metrics:
+    servicemonitor:
+      enabled: false
+
   patroni:
     enabled: false
     name: edusharing-repository-postgresql
@@ -71,6 +75,7 @@ service:
       internal: 8080
       external: 8081
     gossip: 5701
+    metrics: 9090
 
 ########################################################################################################################
 
