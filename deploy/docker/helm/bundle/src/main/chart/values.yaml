@@ -28,7 +28,7 @@ nameOverride: edusharing
 image:
   pullSecrets: []
 #  - name: registry
-#    server: registry.docker.edu-sharing.com
+#    server: docker.edu-sharing.com
 #    username: someone
 #    password: secret
 

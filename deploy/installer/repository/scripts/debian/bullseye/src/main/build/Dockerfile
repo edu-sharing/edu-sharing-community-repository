@@ -4,7 +4,7 @@
 #                                                                                                                      #
 ########################################################################################################################
 
-FROM docker.io/${os.distribution}:${os.codename}
+FROM ${docker.registry}/mirror/docker.io/${os.distribution}:${os.codename}
 
 RUN set -eux \
     && ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
