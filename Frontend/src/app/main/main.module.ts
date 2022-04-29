@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { extensionDeclarationsMap } from '../extension/extension-declarations-map';
 import { SharedModule } from '../shared/shared.module';
 import { LoadingScreenComponent } from './loading-screen/loading-screen.component';
 import { WorkspaceAddFolder } from './navigation/add-folder/add-folder.component';
@@ -31,6 +32,7 @@ import { UserProfileComponent } from './navigation/user-profile/user-profile.com
         UserProfileComponent,
         SearchFieldComponent,
         WorkspaceAddFolder,
+        extensionDeclarationsMap['MainModule'] || [],
     ],
     imports: [SharedModule],
     exports: [MainNavComponent],
