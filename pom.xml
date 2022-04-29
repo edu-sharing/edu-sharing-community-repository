@@ -38,13 +38,6 @@
     <!-- release-1 -->
     <bom.repository-repackaged.version>7.0.0-RC1</bom.repository-repackaged.version>
 
-    <elasticsearch.version.major>7</elasticsearch.version.major>
-    <elasticsearch.version.minor>17</elasticsearch.version.minor>
-    <elasticsearch.version.patch>0</elasticsearch.version.patch>
-    <elasticsearch.version>
-      ${elasticsearch.version.major}.${elasticsearch.version.minor}.${elasticsearch.version.patch}
-    </elasticsearch.version>
-
     <java.version.range>[1.8.0, 9)</java.version.range>
 
     <node.version>v14.18.1</node.version>
