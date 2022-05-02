@@ -103,7 +103,7 @@
 		</widget>
 		<widget>
 			<id>ccm:restricted_access</id>
-			<id rel="graphql">Rights.restrictedAccess</id>
+			<id rel="graphql">lom.rights.restrictedAccess</id>
 			<type>checkbox</type>
 			<caption>cb_restricted_access</caption>
 			<bottomCaption>cb_restricted_access_info</bottomCaption>
