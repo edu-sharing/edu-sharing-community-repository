@@ -1377,7 +1377,15 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 	@Override
 	public NodeRef getOriginalNode(String nodeId) {
-		//TODO we need a usefull implementation here!
+		// Handle io references (i.e. collection refs)
+		if(hasAspect(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
+			nodeId = getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
+		}
+		// handle copied nodes
+		String original = getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL);
+		if(original != null) {
+			nodeId = original;
+		}
 		return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
 	}
 }

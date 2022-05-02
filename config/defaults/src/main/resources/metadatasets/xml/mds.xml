@@ -714,6 +714,12 @@
 			<html><![CDATA[
 				]]></html>
 		</template>
+		<template>
+			<id>search_relation_node</id>
+			<html><![CDATA[
+				]]></html>
+		</template>
+
 	</templates>
 	<groups>
 		<group>
@@ -813,6 +819,13 @@
 			<rendering>angular</rendering>
 			<views>
 				<view>node_map</view>
+			</views>
+		</group>
+		<group>
+			<id>search_relation_node</id>
+			<rendering>angular</rendering>
+			<views>
+				<view>search_relation_node</view>
 			</views>
 		</group>
 		<group>
@@ -921,6 +934,14 @@
 				<column>groupType</column>
 			</columns>
 		</list>
+		<list>
+			<id>relationNodes</id>
+			<columns>
+				<column>cclom:title</column>
+				<column>cm:creator</column>
+				<column>cm:created</column>
+			</columns>
+		</list>
 	</lists>
 	<queries>
 		<basequery>-TYPE:"ccm:toolpermission" AND NOT ASPECT:"ccm:metadataPresettingTemplate" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*" AND NOT PATH:"/sys\:system/sys\:people//*" AND NOT PATH:"/app:company_home/ccm:Edu_Sharing_System/*" AND -ASPECT:"ccm:io_childobject"</basequery>
@@ -1025,6 +1046,15 @@
 			<basequery>TYPE:"ccm:saved_search"</basequery>
 			<property name="ngsearchword">
 				<statement>(@cm\:name:"*${value}*" OR @cclom\:title:"*${value}*")</statement>
+			</property>
+		</query>
+		<query join="AND" id="search_relation_query" applyBasequery="true">
+			<basequery>TYPE:"ccm:io"</basequery>
+			<property name="ngsearchword">
+				<statement>(@sys\:node-uuid:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*")</statement>
+			</property>
+			<property name="sourceNode">
+				<statement>TYPE:"ccm:io" AND NOT @sys\:node-uuid:"${value}"</statement>
 			</property>
 		</query>
 		<query join="AND"  id="tools">
