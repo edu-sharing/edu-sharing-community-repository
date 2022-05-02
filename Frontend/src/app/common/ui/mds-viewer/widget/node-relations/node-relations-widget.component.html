@@ -1,0 +1,35 @@
+<div class="node-relations-widget">
+  <es-spinner *ngIf="loading"></es-spinner>
+  <ng-container *ngIf="!loading">
+    <div class="empty" *ngIf="!relations.length">
+      {{'NODE_RELATIONS.NO_RELATIONS' | translate}}
+    </div>
+    <div class="relations-group" *ngFor="let key of getRelationKeys()">
+      <h5 class="mat-heading-5">{{('NODE_RELATIONS.RELATION_TYPE.' + key) | translate}}</h5>
+      <div class="relation-nodes">
+        <es-node-url class="relation-node"
+                     [node]="relation.node"
+                     [queryParams]="{closeOnBack: true}"
+                     target="_BLANK"
+             *ngFor="let relation of getRelations(key)"
+        >
+          <es-node-row
+            [node]="relation.node"
+            [columns]="columns"
+          >
+            <ng-template #customMetadata>
+              <div class="info-group">
+                <label>{{'NODE_RELATIONS.RELATION_CREATED' | translate}}</label>
+                <span>{{ relation.timestamp | formatDate:{relative: false} }}</span>
+              </div>
+              <div class="info-group">
+                <label>{{'NODE_RELATIONS.RELATION_CREATOR' | translate}}</label>
+                <span>{{ relation.creator | authorityName }}</span>
+              </div>
+            </ng-template>
+          </es-node-row>
+          </es-node-url>
+        </div>
+      </div>
+  </ng-container>
+</div>

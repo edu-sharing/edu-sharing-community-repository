@@ -3,7 +3,7 @@
   [node]="_nodes"
   [isCancelable]="true"
   [buttons]="buttons"
-  (onCancel)="onClose.emit()"
+  (onCancel)="close.emit()"
   width="large"
   height="xxlarge"
 >
@@ -38,13 +38,13 @@
       </es-node-search-selector>
     </form>
     <div class="relation-result" *ngIf="target">
-      <es-node-row [node]="source" [columns]="selector.columns"></es-node-row>
+      <es-node-row [node]="swapRelation ? target : source" [columns]="selector.columns"></es-node-row>
       <div class="relation-details">
         <span>{{('NODE_RELATIONS.RELATION_TYPE.' + ($any(RelationsInverted)[form.get('relation').value])) | translate}}</span>
         <i esIcon="swap_horiz" altText="{{'NODE_RELATIONS.RELATES_TO' | translate}}"></i>
         <span>{{('NODE_RELATIONS.RELATION_TYPE.' + form.get('relation').value) | translate}}</span>
       </div>
-      <es-node-row [node]="target" [columns]="selector.columns"></es-node-row>
+      <es-node-row [node]="swapRelation ? source : target" [columns]="selector.columns"></es-node-row>
     </div>
     <div class="actions" *ngIf="target">
       <button mat-flat-button color="warn" (click)="target = null">
@@ -57,6 +57,7 @@
       </button>
       <button mat-flat-button
               color="primary"
+              [disabled]="!form.valid"
               (click)="createRelation()"
       >
         <i esIcon="add" [aria]="false"></i>
@@ -64,7 +65,8 @@
       </button>
     </div>
     <h2 class="mat-heading-4">{{'NODE_RELATIONS.EXISTING_RELATIONS' | translate}}</h2>
-    <div class="relations-none" *ngIf="!getRelationKeys()">{{'NODE_RELATIONS.NO_RELATIONS' | translate}}</div>
+    <es-spinner *ngIf="!getRelationKeys().length && loading"></es-spinner>
+    <div class="relations-none" *ngIf="!getRelationKeys().length && !loading">{{'NODE_RELATIONS.NO_RELATIONS' | translate}}</div>
     <div class="relations-group" *ngFor="let key of getRelationKeys()">
       <div>
         <h5 class="mat-heading-5">"{{_nodes[0] | nodeTitle}}" {{('NODE_RELATIONS.RELATION_TYPE.' + key) | translate}}</h5>
@@ -99,7 +101,7 @@
             <button
               mat-icon-button
               color="primary"
-              *ngIf="deleteRelations.includes(relation)"
+              *ngIf="!deleteRelations.includes(relation)"
               (click)="removeRelation(relation)"
               matTooltip="{{'NODE_RELATIONS.REMOVE_RELATION' | translate}}"
             ><i esIcon="delete" [aria]="false"></i>

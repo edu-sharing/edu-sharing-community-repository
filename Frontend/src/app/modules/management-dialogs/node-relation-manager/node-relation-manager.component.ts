@@ -18,7 +18,8 @@ import {
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {
     RelationService,
-    RelationData
+    RelationData,
+    UserService
 } from 'ngx-edu-sharing-api';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
@@ -27,6 +28,7 @@ import {OPEN_URL_MODE} from '../../../core-module/ui/ui-constants';
 import {UniversalNode} from '../../../common/definitions';
 import { forkJoin } from 'rxjs';
 import {Toast} from '../../../core-ui-module/toast';
+import {first} from 'rxjs/internal/operators';
 
 @Component({
     selector: 'es-node-relation-manager',
@@ -50,47 +52,27 @@ export class NodeRelationManagerComponent implements OnInit{
     relations: RelationData[];
     addRelations: RelationData[] = [];
     deleteRelations: RelationData[] = [];
+    swapRelation: boolean;
     @Input() set nodes(nodes: Node[]) {
         this._nodes = nodes;
         this.source = nodes[0];
         this.relationService.getRelations(
             this._nodes[0].ref.id
-        ).subscribe((relations) =>
-                this.relations = relations.relations
-            , (e: any) => {
-                // @TODO
-                this.relations = [
-                    {
-                        node: this._nodes[0],
-                        type: 'isPartOf',
-                        timestamp: '' + (new Date().getTime() - Math.random() * 100000000)
-                    },
-                    {
-                        node: this._nodes[0],
-                        type: 'isPartOf',
-                        timestamp: '' + (new Date().getTime() - Math.random() * 100000000)
-                    },
-                    {
-                        node: this._nodes[0],
-                        type: 'isBasedOn',
-                        timestamp: '' + (new Date().getTime() - Math.random() * 100000000)
-                    },
-                    {
-                        node: this._nodes[0] as any,
-                        type: 'references',
-                        timestamp: '' + (new Date().getTime() - Math.random() * 100000000)
-                    }
-                ]
+        ).subscribe((relations) => {
+            this.relations = relations.relations;
+            this.loading = false;
+        },e => {
+               this.close.emit(false);
             });
     }
-    @Output() onClose = new EventEmitter<void>();
+    @Output() close = new EventEmitter<boolean>();
 
     readonly form = new FormGroup({
         relation: new FormControl(Relations.isBasedOn, Validators.required),
     });
     readonly buttons = [new DialogButton('CLOSE',
         DialogButton.TYPE_CANCEL,
-        () => this.onClose.emit()
+        () => this.close.emit(false)
     ),
         new DialogButton('SAVE',
             DialogButton.TYPE_PRIMARY,
@@ -102,10 +84,12 @@ export class NodeRelationManagerComponent implements OnInit{
     columns = [
         new ListItem('NODE', RestConstants.LOM_PROP_TITLE)
     ];
+    loading = true;
 
     constructor(
         private relationService: RelationService,
         private nodeHelper: NodeHelperService,
+        private userService: UserService,
         private toast: Toast,
         private bridgeService: BridgeService,
     ) {
@@ -116,14 +100,15 @@ export class NodeRelationManagerComponent implements OnInit{
     }
 
     getRelationKeys() {
-        return [...new Set(this.relations?.map(r => r.type))].sort();
+        return [...new Set(this.addRelations.concat(this.relations || [])?.map(r => r.type))].sort();
     }
 
 
     swap() {
-        const tmp = this.target;
+        this.swapRelation = !this.swapRelation;
+        /*const tmp = this.target;
         this.target = this.source;
-        this.source = tmp;
+        this.source = tmp;*/
     }
 
     getCriterias(): SearchRequestCriteria[] {
@@ -132,9 +117,16 @@ export class NodeRelationManagerComponent implements OnInit{
             values: [this._nodes[0].ref.id]
         }];
     }
+    getAllExistingRelations() {
+        return this.getAllRelations().filter((r) => !this.deleteRelations.includes(r));
+    }
+
+    getAllRelations() {
+        return this.relations.concat(this.addRelations);
+    }
 
     getRelations(key: 'isPartOf' | 'isBasedOn' | 'references' | 'hasPart' | 'isBasisFor'): RelationData[] {
-        return this.relations.concat(this.addRelations).filter(r => r.type === key).sort((a,b) => a.timestamp.localeCompare(b.timestamp));
+        return this.getAllRelations().filter(r => r.type === key).sort((a,b) => a.timestamp > b.timestamp ? 1 : -1);
     }
 
     openNode(node: UniversalNode) {
@@ -151,42 +143,80 @@ export class NodeRelationManagerComponent implements OnInit{
         }
         this.updateButtons();
     }
-
+    resolveRelationSendData(r: RelationData) {
+        const inverted = this.isInverted(r);
+        let source = this.source.ref.id;
+        let target = r.node.ref.id;
+        let type: string = r.type;
+        if(inverted) {
+            source = r.node.ref.id;
+            target = this.source.ref.id;
+            type = inverted;
+        }
+        return {
+            source,
+            target,
+            type
+        }
+    }
     private async save() {
         this.toast.showProgressDialog();
         try {
-            await forkJoin(this.addRelations.map(r =>
-                this.relationService.createRelation(
-                    this.source.ref.id,
-                    r.node.ref.id,
-                    r.type as any
+            await forkJoin(this.addRelations.map(r => {
+                const data = this.resolveRelationSendData(r);
+                return this.relationService.createRelation(
+                    data.source,
+                    data.target,
+                    data.type as any
                 )
-            )).toPromise();
-            await forkJoin(this.deleteRelations.map(r =>
-                this.relationService.deleteRelation(
-                    this.source.ref.id,
-                    r.node.ref.id,
-                    r.type as any
+            })).toPromise();
+            await forkJoin(this.deleteRelations.map(r => {
+                const data = this.resolveRelationSendData(r);
+                return this.relationService.deleteRelation(
+                    data.source,
+                    data.target,
+                    data.type as any
                 )
-            )).toPromise();
-            this.onClose.emit();
+            })).toPromise();
+            this.close.emit(true);
         } catch(e) {
-
         }
         this.toast.closeModalDialog();
     }
 
     private updateButtons() {
-        this.buttons[1].disabled = !this.addRelations.length || !this.deleteRelations.length;
+        this.buttons[1].disabled = !this.addRelations.length && !this.deleteRelations.length;
     }
+    getCurrentType() {
 
-    createRelation() {
+    }
+    async createRelation() {
+        let type = this.form.get('relation').value;
+        if(this.swapRelation) {
+            type = (this.RelationsInverted as any)[type];
+        }
+        if(this.getAllExistingRelations().find((r) =>
+            r.node.ref.id === this.target.ref.id && r.type === type
+        )) {
+            this.toast.error(null, 'NODE_RELATIONS.RELATION_EXISTS');
+            return;
+        }
         this.addRelations.push({
             node: this.target,
-            type: this.form.get('relation').value
+            type,
+            // @TODO: check if api model is invalid
+            timestamp: new Date().getTime() as any,
+            creator: (await this.userService.observeCurrentUser().pipe(first()).toPromise()).person
         });
         this.form.reset();
+        this.form.setValue({relation: Relations.isBasedOn});
+        this.swapRelation = false;
+        this.updateButtons();
         this.target = null;
+    }
+
+    private isInverted(r: RelationData) {
+        return Object.keys(this.RelationsInverted).find(k => (this.RelationsInverted as any)[k] === r.type && k !== r.type)
     }
 }
 export enum Relations {

@@ -680,9 +680,12 @@ export class WorkspaceManagementDialogsComponent  {
         this.nodeSidebarChange.emit(null);
     }
 
-    closeRelations() {
+    closeRelations(changed: boolean) {
         this.nodeRelations = null;
         this.nodeRelationsChange.emit(null);
+        if(changed) {
+            this.onRefresh.emit();
+        }
     }
 
     displayNode(node: Node) {

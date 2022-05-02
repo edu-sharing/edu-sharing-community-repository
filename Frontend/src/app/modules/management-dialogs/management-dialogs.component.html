@@ -28,7 +28,7 @@
 ></es-workspace-metadata>
 <es-node-relation-manager *ngIf="nodeRelations"
                        [nodes]="nodeRelations"
-                       (onClose)="closeRelations()"
+                       (close)="closeRelations($event)"
 ></es-node-relation-manager>
 <es-mds
         *ngIf="collectionWriteFeedback"

@@ -40,6 +40,9 @@
   import {AccessibilityComponent} from './common/ui/accessibility/accessibility.component';
   import {MatConfirmGroupComponent} from './common/ui/mat-confirm-group/mat-confirm-group.component';
   import { ScrollToTopButtonComponent } from './common/ui/scroll-to-top-button/scroll-to-top-button.component';
+  import {
+    MdsNodeRelationsWidgetComponent
+} from './common/ui/mds-viewer/widget/node-relations/node-relations-widget.component';
 
   export const DECLARATIONS = [
       MdsTestComponent,
@@ -66,6 +69,7 @@
       MdsComponent,
       MdsViewerComponent,
       MdsWidgetComponent,
+      MdsNodeRelationsWidgetComponent,
       RouterComponent,
       ModalDialogComponent,
       InfobarComponent,

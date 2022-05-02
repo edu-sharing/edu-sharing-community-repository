@@ -19,7 +19,12 @@ export class NodeUrlComponent {
     @Input() listTable: ListTableComponent;
     @Input() node: Node;
     @Input() nodes: Node[];
+    @Input() target: string;
     @Input() scope: string;
+    /**
+     * custom query params to include
+     */
+    @Input() queryParams: {[key: string]: string|number|boolean} = {};
     /**
      * link: a element
      * button: button element
@@ -48,7 +53,11 @@ export class NodeUrlComponent {
     }
 
     get(mode: 'routerLink' | 'queryParams'): any {
-        return this.nodeHelper.getNodeLink(mode, this.node);
+        const result: any = this.nodeHelper.getNodeLink(mode, this.node);
+        if(mode === 'queryParams' && this.queryParams) {
+            Object.keys(this.queryParams).forEach((k) => result[k] = this.queryParams[k]);
+        }
+        return result;
     }
 
     focus(): void {
