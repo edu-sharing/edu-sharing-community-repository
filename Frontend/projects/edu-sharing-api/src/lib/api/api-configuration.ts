@@ -8,9 +8,8 @@ import { Injectable } from '@angular/core';
 @Injectable({
     providedIn: 'root',
 })
-export class ApiConfiguration implements ApiConfigurationParams{
+export class ApiConfiguration {
     rootUrl: string = '/edu-sharing/rest';
-    onError = (error: any) => ({});
 }
 
 /**
@@ -18,5 +17,4 @@ export class ApiConfiguration implements ApiConfigurationParams{
  */
 export interface ApiConfigurationParams {
     rootUrl?: string;
-    onError?: (error: any) => void
 }

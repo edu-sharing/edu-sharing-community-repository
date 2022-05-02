@@ -17,11 +17,9 @@ import {
 } from '../../../core-module/core.module';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {
-    RelationV1Service
-} from '../../../../../projects/edu-sharing-api/src/lib/api/services/relation-v-1.service';
-import {
+    RelationService,
     RelationData
-} from '../../../../../projects/edu-sharing-api/src/lib/api/models/relation-data';
+} from 'ngx-edu-sharing-api';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 import {BridgeService} from '../../../core-bridge-module/bridge.service';
@@ -55,36 +53,35 @@ export class NodeRelationManagerComponent implements OnInit{
     @Input() set nodes(nodes: Node[]) {
         this._nodes = nodes;
         this.source = nodes[0];
-        this.relationService.getRelations({
-            repository: RestConstants.HOME_REPOSITORY,
-            node: this._nodes[0].ref.id
-        }).subscribe((relations) =>
-            this.relations = relations.relations
-        , (e: any) => {
-            // @TODO
-            this.relations = [
-                {
-                    node: this._nodes[0],
-                    type: 'isPartOf',
-                    timestamp: '' + (new Date().getTime() - Math.random() * 100000000)
-                },
-                {
-                    node: this._nodes[0],
-                    type: 'isPartOf',
-                    timestamp: '' + (new Date().getTime() - Math.random() * 100000000)
-                },
-                {
-                    node: this._nodes[0],
-                    type: 'isBasedOn',
-                    timestamp: '' + (new Date().getTime() - Math.random() * 100000000)
-                },
-                {
-                    node: this._nodes[0] as any,
-                    type: 'references',
-                    timestamp: '' + (new Date().getTime() - Math.random() * 100000000)
-                }
-            ]
-        });
+        this.relationService.getRelations(
+            this._nodes[0].ref.id
+        ).subscribe((relations) =>
+                this.relations = relations.relations
+            , (e: any) => {
+                // @TODO
+                this.relations = [
+                    {
+                        node: this._nodes[0],
+                        type: 'isPartOf',
+                        timestamp: '' + (new Date().getTime() - Math.random() * 100000000)
+                    },
+                    {
+                        node: this._nodes[0],
+                        type: 'isPartOf',
+                        timestamp: '' + (new Date().getTime() - Math.random() * 100000000)
+                    },
+                    {
+                        node: this._nodes[0],
+                        type: 'isBasedOn',
+                        timestamp: '' + (new Date().getTime() - Math.random() * 100000000)
+                    },
+                    {
+                        node: this._nodes[0] as any,
+                        type: 'references',
+                        timestamp: '' + (new Date().getTime() - Math.random() * 100000000)
+                    }
+                ]
+            });
     }
     @Output() onClose = new EventEmitter<void>();
 
@@ -94,7 +91,7 @@ export class NodeRelationManagerComponent implements OnInit{
     readonly buttons = [new DialogButton('CLOSE',
         DialogButton.TYPE_CANCEL,
         () => this.onClose.emit()
-        ),
+    ),
         new DialogButton('SAVE',
             DialogButton.TYPE_PRIMARY,
             () => this.save(),
@@ -107,7 +104,7 @@ export class NodeRelationManagerComponent implements OnInit{
     ];
 
     constructor(
-        private relationService: RelationV1Service,
+        private relationService: RelationService,
         private nodeHelper: NodeHelperService,
         private toast: Toast,
         private bridgeService: BridgeService,
@@ -159,12 +156,18 @@ export class NodeRelationManagerComponent implements OnInit{
         this.toast.showProgressDialog();
         try {
             await forkJoin(this.addRelations.map(r =>
-                this.relationService.createRelation({
-                    repository: RestConstants.HOME_REPOSITORY,
-                    type: r.type as any,
-                    source: this.source.ref.id,
-                    target: r.node.ref.id
-                })
+                this.relationService.createRelation(
+                    this.source.ref.id,
+                    r.node.ref.id,
+                    r.type as any
+                )
+            )).toPromise();
+            await forkJoin(this.deleteRelations.map(r =>
+                this.relationService.deleteRelation(
+                    this.source.ref.id,
+                    r.node.ref.id,
+                    r.type as any
+                )
             )).toPromise();
             this.onClose.emit();
         } catch(e) {

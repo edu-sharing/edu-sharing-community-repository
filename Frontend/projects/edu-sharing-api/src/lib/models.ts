@@ -15,6 +15,7 @@ export {
     NodeRef,
     Organization,
     Person,
+    RelationData,
     SearchResultNode as SearchResults,
     StreamEntry,
     UserProfile,

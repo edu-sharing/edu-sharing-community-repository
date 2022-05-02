@@ -87,8 +87,6 @@ import {
     MdsEditorWidgetTinyMCE
 } from './common/ui/mds-editor/widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-tinymce.component';
 import {EditorModule} from '@tinymce/tinymce-angular';
-import {ApiConfigurationParams} from '../../projects/edu-sharing-api/src/lib/api/api-configuration';
-import {ErrorHandlerService} from './core-ui-module/error-handler.service';
 import { LtiComponent } from './modules/lti/lti.component';
 import { LtiAdminComponent } from './modules/admin/lti-admin/lti-admin.component';
 import { NodeEmbedComponent } from './common/ui/node-embed/node-embed.component';

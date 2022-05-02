@@ -17,6 +17,7 @@ export * from './lib/wrappers/node.service';
 export * from './lib/wrappers/nodeList.service';
 export * from './lib/wrappers/search.service';
 export * from './lib/wrappers/user.service';
+export * from './lib/wrappers/relation.service';
 
 // Unwrapped API services.
 //
