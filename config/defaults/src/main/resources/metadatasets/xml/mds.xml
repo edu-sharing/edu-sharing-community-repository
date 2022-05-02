@@ -645,10 +645,18 @@
 		</template>
 		<template>
 			<id>node_collections_render</id>
-			<caption>dialog_upload_tab_collections</caption>
+			<caption>dialog_upload_tab_relations</caption>
 			<hideIfEmpty>true</hideIfEmpty>
 			<html><![CDATA[
 					<collections>
+				]]></html>
+		</template>
+		<template>
+			<id>node_relations_render</id>
+			<caption>dialog_upload_tab_collections</caption>
+			<hideIfEmpty>true</hideIfEmpty>
+			<html><![CDATA[
+					<nodeRelations>
 				]]></html>
 		</template>
 		<template>
@@ -797,6 +805,7 @@
 				<view>node_general_render</view>
 				<view>node_contributor_render</view>
 				<view>node_collections_render</view>
+				<view>node_relations_render</view>
 				<view>node_comments_render</view>
 			</views>
 		</group>
