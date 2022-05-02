@@ -645,7 +645,7 @@
 		</template>
 		<template>
 			<id>node_collections_render</id>
-			<caption>dialog_upload_tab_relations</caption>
+			<caption>dialog_upload_tab_collections</caption>
 			<hideIfEmpty>true</hideIfEmpty>
 			<html><![CDATA[
 					<collections>
@@ -653,7 +653,7 @@
 		</template>
 		<template>
 			<id>node_relations_render</id>
-			<caption>dialog_upload_tab_collections</caption>
+			<caption>dialog_upload_tab_relations</caption>
 			<hideIfEmpty>true</hideIfEmpty>
 			<html><![CDATA[
 					<nodeRelations>
