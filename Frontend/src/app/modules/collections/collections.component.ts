@@ -1,10 +1,11 @@
-import {forkJoin as observableForkJoin,  Observable } from 'rxjs';
+import {forkJoin as observableForkJoin,  Observable, Subject } from 'rxjs';
 import {
     AfterViewInit,
     Component,
     ContentChild,
     ElementRef,
     EventEmitter, OnDestroy,
+    OnInit,
     TemplateRef,
     ViewChild
 } from '@angular/core';
@@ -54,7 +55,7 @@ import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 import { TranslateService } from '@ngx-translate/core';
 import { Location } from '@angular/common';
 import { Helper } from '../../core-module/rest/helper';
-import { MainNavComponent } from '../../common/ui/main-nav/main-nav.component';
+import { MainNavComponent } from '../../main/navigation/main-nav/main-nav.component';
 import {ColorHelper, PreferredColor} from '../../core-module/ui/color-helper';
 import { ActionbarHelperService } from '../../common/services/actionbar-helper';
 import { MdsHelper } from '../../core-module/rest/mds-helper';
@@ -64,7 +65,6 @@ import { HttpClient } from '@angular/common/http';
 import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../core-ui-module/options-helper.service';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 import {DropAction, DropData} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
-import {MainNavService} from '../../common/services/main-nav.service';
 import {
     ManagementEvent,
     ManagementEventType
@@ -85,6 +85,7 @@ import {
     ListEventInterface, ListSortConfig, NodeEntriesDisplayType
 } from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
+import { MainNavService } from '../../main/navigation/main-nav.service';
 
 // component class
 @Component({
@@ -95,7 +96,7 @@ import { LoadingScreenService } from '../../main/loading-screen/loading-screen.s
     providers: [OptionsHelperService, {provide: OPTIONS_HELPER_CONFIG, useValue: {
             subscribeEvents: false
         }}]})
-export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
+export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestroy {
     static INDEX_MAPPING = [
         RestConstants.COLLECTIONSCOPE_MY,
         RestConstants.COLLECTIONSCOPE_ORGA,
@@ -118,7 +119,6 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
 
-    @ViewChild('mainNav') mainNavRef: MainNavComponent;
     @ViewChild('actionbarCollection') actionbarCollection: ActionbarComponent;
     @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
     @ViewChild('listCollections') listCollections: ListTableComponent;
@@ -182,7 +182,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         'OPTIONS.ADD_OBJECT',
         'cloud_upload',
         () => {
-            this.mainNavRef.createMenu.showUploadSelect = true
+            this.mainNavService.getMainNav().topBar.createMenu.openUploadSelect();
         },
     );
     collectionProposals: AbstractList<ProposalNode>;
@@ -216,6 +216,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
     // FIXME: `collectionShare` is expected to be of type `Node[]` by `workspace-management` but is
     // of type `Node` here.
     private adminMediacenters: Mediacenter[];
+    private mainNavUpdateTrigger = new Subject<void>();
     set collectionShare(collectionShare: Node[]) {
         this._collectionShare = collectionShare as any as Node;
         this.refreshAll();
@@ -357,6 +358,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
                         this.addMaterialBinaryOptionItem.isEnabled = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES);
                         this.createSubCollectionOptionItem.isEnabled = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS);
                         this.isGuest = data.isGuest;
+                        this.mainNavUpdateTrigger.next();
                         this.mediacenterService.getMediacenters().subscribe((mediacenters) => {
                             this.adminMediacenters = mediacenters.filter((m)=>m.administrationAccess);
                         });
@@ -414,12 +416,33 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         });
     }
 
+    ngOnInit(): void {
+        this.registerMainNav();
+    }
 
     ngOnDestroy() {
         this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE, this.dataSourceReferences);
     }
 
     ngAfterViewInit() {
+    }
+
+    private registerMainNav(): void {
+        this.mainNavService.setMainNavConfig({
+            title: 'COLLECTIONS.TITLE',
+            currentScope: 'collections',
+            searchEnabled: false,
+            onCreate: (nodes) => this.addNodesToCollection(nodes),
+        })
+        this.mainNavUpdateTrigger.subscribe(() => {
+            this.mainNavService.patchMainNavConfig({
+                create: {
+                    allowed: this.createAllowed(),
+                    allowBinary: !this.isRootLevelCollection() && this.isAllowedToEditCollection(),
+                    parent: this.collectionContent?.node ?? null,
+                }
+            });
+        })
     }
 
     isMobile() {
@@ -985,13 +1008,14 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
                     );
                     this.sortReferences.direction = refAscending ? 'asc' : 'desc';
                     this.collectionContent.node = collection;
+                    this.mainNavUpdateTrigger.next();
 
                     this.renderBreadcrumbs();
 
                     this.refreshContent(callback);
                     if(this.feedbackAllowed() && this.params.feedback === 'true') {
-                        this.mainNavRef.management.collectionWriteFeedback = collection;
-                        this.mainNavRef.management.collectionWriteFeedbackChange.pipe(first()).subscribe(() => {
+                        this.mainNavService.getDialogs().collectionWriteFeedback = collection;
+                        this.mainNavService.getDialogs().collectionWriteFeedbackChange.pipe(first()).subscribe(() => {
                             if(this.params.feedbackClose === 'true') {
                                 window.close();
                             }
@@ -1063,7 +1087,6 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
 
     private initialize() {
         this.optionsService.clearComponents(
-            this.mainNavRef,
             this.actionbarReferences,
         );
 
@@ -1142,6 +1165,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
                             FrameEventsService.EVENT_INVALIDATE_HEIGHT,
                         );
                     });
+                    this.mainNavUpdateTrigger.next();
                     // }
                 });
             },
@@ -1282,7 +1306,6 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
             activeObjects: [this.collectionContent.node],
         });
         this.optionsService.initComponents(
-            this.mainNavRef,
             this.actionbarCollection,
             this.listReferences,
         );
@@ -1300,6 +1323,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         this.collectionContent.node.aspects = [
             RestConstants.CCM_ASPECT_COLLECTION,
         ];
+        this.mainNavUpdateTrigger.next();
     }
 
     private getCollectionId() {
@@ -1311,9 +1335,7 @@ export class CollectionsMainComponent implements AfterViewInit, OnDestroy {
         this.collectionContentOriginal = Helper.deepCopy(
             this.collectionContent,
         );
-        if (this.mainNavRef) {
-            this.mainNavRef.refreshBanner();
-        }
+        this.mainNavService.getMainNav()?.refreshBanner();
 
         // Cannot trivially reference the add button for the tutorial with
         // current implementation of generic options.

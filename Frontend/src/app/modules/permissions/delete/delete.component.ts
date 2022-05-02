@@ -5,7 +5,7 @@ import {
 } from '../../../core-module/core.module';
 import {Toast} from '../../../core-ui-module/toast';
 import {TranslateService} from '@ngx-translate/core';
-import {AuthorityNamePipe} from '../../../core-ui-module/pipes/authority-name.pipe';
+import {AuthorityNamePipe} from '../../../shared/pipes/authority-name.pipe';
 import {Helper} from '../../../core-module/rest/helper';
 import { AuthoritySearchMode } from '../../../common/ui/authority-search-input/authority-search-input.component';
 

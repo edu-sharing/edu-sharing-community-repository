@@ -24,7 +24,7 @@ import {DisplayValue, DisplayValues} from '../DisplayValues';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import {AuthoritySearchInputComponent} from '../../../authority-search-input/authority-search-input.component';
 import {Authority, AuthorityProfile, Group} from '../../../../../core-module/rest/data-object';
-import {AuthorityNamePipe} from '../../../../../core-ui-module/pipes/authority-name.pipe';
+import {AuthorityNamePipe} from '../../../../../shared/pipes/authority-name.pipe';
 import {AuthorityAffiliationPipe} from '../../../../../core-ui-module/pipes/authority-affiliation.pipe';
 import { waitForAsync } from '@angular/core/testing';
 import {RestConnectorService} from '../../../../../core-module/rest/services/rest-connector.service';

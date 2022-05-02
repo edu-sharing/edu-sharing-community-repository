@@ -1,7 +1,7 @@
 import {takeUntil, delay, map, filter} from 'rxjs/operators';
 import {Component, EventEmitter, Input, OnInit, Output, OnDestroy, ViewChild} from '@angular/core';
 import { DialogButton, Node } from '../../../../core-module/core.module';
-import { CardJumpmark } from '../../../../core-ui-module/components/card/card.component';
+import { CardJumpmark } from '../../../../shared/components/card/card.component';
 import { Toast } from '../../../../core-ui-module/toast';
 import { FillTypeStatus } from '../../input-fill-progress/input-fill-progress.component';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';

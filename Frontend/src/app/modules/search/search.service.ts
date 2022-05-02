@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { SearchConfig } from 'ngx-edu-sharing-api';
 import { BehaviorSubject } from 'rxjs';
-import { SearchFieldService } from 'src/app/common/ui/search-field/search-field.service';
+import { SearchFieldService } from 'src/app/main/navigation/search-field/search-field.service';
 import { ListItem, Node } from '../../core-module/core.module';
 import { NodeDataSource } from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
 import {
@@ -17,7 +17,13 @@ import {
  */
 @Injectable()
 export class SearchService {
-    searchTerm: string = '';
+    searchTermSubject = new BehaviorSubject<string>('');
+    get searchTerm(): string {
+        return this.searchTermSubject.value;
+    }
+    set searchTerm(value: string) {
+        this.searchTermSubject.next(value);
+    }
     dataSourceSearchResult: { [key: number]: NodeDataSource<Node> } = [];
     searchResultRepositories: Node[][] = [];
     dataSourceCollections = new NodeDataSource<Node>();

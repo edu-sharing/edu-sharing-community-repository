@@ -5,7 +5,6 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { first, map, startWith } from 'rxjs/operators';
-import { MainNavComponent } from '../../common/ui/main-nav/main-nav.component';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { ConfigurationService, DialogButton, LoginResult, RestConnectorService, RestConstants, RestHelper } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
@@ -18,6 +17,7 @@ import { TranslationsService } from '../../translations/translations.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { LoginInfo, AuthenticationService } from 'ngx-edu-sharing-api';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
+import { MainNavService } from '../../main/navigation/main-nav.service';
 
 
 @Component({
@@ -31,7 +31,6 @@ import { LoadingScreenService } from '../../main/loading-screen/loading-screen.s
 export class LoginComponent implements OnInit {
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     @ViewChild('loginForm') loginForm: ElementRef;
-    @ViewChild('mainNav') mainNavRef: MainNavComponent;
     @ViewChild('passwordInput') passwordInput: InputPasswordComponent;
     @ViewChild('usernameInput') usernameInput: ElementRef;
 
@@ -44,7 +43,6 @@ export class LoginComponent implements OnInit {
     filteredProviders: any;
     isLoading = true;
     loginUrl: any;
-    mainnav = true;
     password = '';
     providerControl = new FormControl();
     showProviders = false;
@@ -66,6 +64,7 @@ export class LoginComponent implements OnInit {
         private bridge: BridgeService,
         private authentication: AuthenticationService,
         private loadingScreen: LoadingScreenService,
+        private mainNav: MainNavService,
     ) {
         const loadingTask = this.loadingScreen.addLoadingTask();
         this.isLoading = true;
@@ -135,7 +134,6 @@ export class LoginComponent implements OnInit {
                     });
                     this.isSafeLogin=this.scope==RestConstants.SAFE_SCOPE;
                     this.next = params.next;
-                    this.mainnav = params.mainnav !== 'false';
                     if (this.scope === RestConstants.SAFE_SCOPE) {
                         this.connector.isLoggedIn(true).subscribe((data: LoginResult) => {
                             if (data.statusCode !== RestConstants.STATUS_CODE_OK) {
@@ -233,6 +231,11 @@ export class LoginComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.mainNav.setMainNavConfig({
+            currentScope: 'login',
+            title: 'SIDEBAR.LOGIN',
+            searchEnabled: false,
+        });
     }
 
     openLoginUrl() {

@@ -1,0 +1,15 @@
+<button
+  *ngFor="let entry of entries$ | async"
+  mat-button
+  color="primary"
+  class="entry mat-button-no-uppercase"
+  [class.selected]="currentScope === entry.scope"
+  (click)="entry.open(); entryClicked.emit()"
+  [class.collection-item-separate]="entry.isSeparate"
+  [class.clickable]="!entry.isDisabled"
+  [class.disabled]="entry.isDisabled"
+  title="{{ 'GOTO' | translate }} {{ entry.name | translate }}"
+>
+  <i *ngIf="entry.icon" class="material-icons align-icon">{{ entry.icon }}</i>
+  <span>{{ entry.name | translate }}</span>
+</button>

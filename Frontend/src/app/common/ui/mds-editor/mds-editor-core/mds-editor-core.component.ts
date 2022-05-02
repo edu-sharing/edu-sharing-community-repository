@@ -1,7 +1,7 @@
 import {Component, Input, QueryList, ViewChildren} from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { CardComponent } from '../../../../core-ui-module/components/card/card.component';
+import { CardComponent } from '../../../../shared/components/card/card.component';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 import { MdsView } from '../types';
 import {EditorMode} from '../../../../core-ui-module/mds-types';

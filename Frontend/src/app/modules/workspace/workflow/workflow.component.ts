@@ -19,7 +19,7 @@ import {
     WorkflowEntry,
 } from '../../../core-module/core.module';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import { AuthorityNamePipe } from '../../../core-ui-module/pipes/authority-name.pipe';
+import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
 import { Toast } from '../../../core-ui-module/toast';
 import {
     NodeHelperService,

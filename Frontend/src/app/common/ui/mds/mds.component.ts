@@ -35,7 +35,7 @@ import {
     UIService,
     RestUtilitiesService,
 } from '../../../core-module/core.module';
-import { CardJumpmark } from '../../../core-ui-module/components/card/card.component';
+import { CardJumpmark } from '../../../shared/components/card/card.component';
 import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { MdsType, UserPresentableError, MdsDefinition } from '../mds-editor/types';
 import { MdsEditorCommonService } from '../mds-editor/mds-editor-common.service';

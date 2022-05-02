@@ -7,7 +7,6 @@ import {
     OnInit,
     HostListener, Injector, EventEmitter
 } from '@angular/core';
-import { MainNavService } from '../common/services/main-nav.service';
 import { MdsTestComponent } from '../common/test/mds-test/mds-test.component';
 import { ApplyToLmsComponent } from '../common/ui/apply-to-lms/apply-to-lms.component';
 import { EmbedComponent } from '../common/ui/embed/embed.component';
@@ -47,6 +46,8 @@ import { printCurrentTaskInfo } from './track-change-detection';
 import { environment } from '../../environments/environment';
 import { TranslationsService } from '../translations/translations.service';
 import { LoadingScreenService } from '../main/loading-screen/loading-screen.service';
+import { MainNavService } from '../main/navigation/main-nav.service';
+import { ManagementDialogsService } from '../modules/management-dialogs/management-dialogs.service';
 
 @Component({
     selector: 'es-router',
@@ -99,6 +100,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
 
     constructor(
         private mainNavService: MainNavService,
+        private dialogs: ManagementDialogsService,
         private ngZone: NgZone,
         private bridge: BridgeService,
         private injector: Injector,
@@ -134,7 +136,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.mainNavService.registerDialogs(this.management);
+        this.dialogs.registerDialogsComponent(this.management);
         this.mainNavService.registerCookieInfo(this.cookie);
         this.mainNavService.registerAccessibility(this.accessibility);
     }

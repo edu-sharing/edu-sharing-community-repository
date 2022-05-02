@@ -60,7 +60,6 @@ import {ActionbarHelperService} from '../../../common/services/actionbar-helper'
 import {CsvHelper} from '../../../core-module/csv.helper';
 import {ListItemType} from '../../../core-module/ui/list-item';
 import {VCard} from '../../../core-module/ui/VCard';
-import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 import {
     NodeDataSource
 } from '../../../core-ui-module/components/node-entries-wrapper/node-data-source';
@@ -228,7 +227,6 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         }
     }
 
-    @Input() mainNav: MainNavComponent;
     dataSource = new NodeDataSource<GenericAuthority>();
 
     @Input() set mode(mode: ListItemType) {

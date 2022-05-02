@@ -7,7 +7,7 @@ import {Toast} from "../../../core-ui-module/toast";
 import {RestConstants} from "../../../core-module/rest/rest-constants";
 import {MdsEditorWrapperComponent} from '../mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
-import {MainNavService} from '../../services/main-nav.service';
+import { MainNavService } from '../../../main/navigation/main-nav.service';
 
 @Component({
     selector: 'es-mds-embed',

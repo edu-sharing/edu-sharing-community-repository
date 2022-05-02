@@ -10,7 +10,6 @@ import {RestIamService} from '../../../../../core-module/rest/services/rest-iam.
 import {NativeWidgetComponent} from '../../mds-editor-view/mds-editor-view.component';
 import {Helper} from '../../../../../core-module/rest/helper';
 import {Values} from '../../types';
-import {MainNavService} from '../../../../services/main-nav.service';
 import {RestNodeService} from '../../../../../core-module/rest/services/rest-node.service';
 import {RestHelper} from '../../../../../core-module/rest/rest-helper';
 import {RestConnectorService} from '../../../../../core-module/rest/services/rest-connector.service';

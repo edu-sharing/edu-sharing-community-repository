@@ -8,7 +8,7 @@ import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { RestConnectorService } from '../../../../../core-module/rest/services/rest-connector.service';
 import { NodeHelperService } from '../../../../../core-ui-module/node-helper.service';
 import { UIHelper } from '../../../../../core-ui-module/ui-helper';
-import { MainNavService } from '../../../../services/main-nav.service';
+import { MainNavService } from '../../../../../main/navigation/main-nav.service';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import {Constraints, MdsWidgetValue, Values} from '../../types';

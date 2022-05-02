@@ -1,0 +1,148 @@
+<es-create-menu
+#createMenu
+[scope]="currentScope"
+[allowed]="isCreateAllowed"
+[allowBinary]="create.allowBinary"
+[parent]="create.parent"
+[folder]="create.folder"
+(onCreate)="created.emit($event)"
+></es-create-menu>
+
+<div class="mobile-move-top2">
+  <div class="menuButtonOuter" [ngSwitch]="mainMenuStyle">
+    <ng-container *ngSwitchCase="'dropdown'">
+      <es-main-menu-dropdown
+        #mainMenuDropdown
+        [currentScope]="currentScope"
+      ></es-main-menu-dropdown>
+      <button
+        *ngIf="showScope"
+        mat-button
+        [matMenuTriggerFor]="mainMenuDropdown.dropdown.menu"
+        [disabled]="!canOpen"
+        class="menuButton mat-button-no-uppercase"
+        [class.clickable]="canOpen"
+        title="{{ 'CHOOSEENVIRONMENT' | translate }}"
+      >
+        <img class="material-icons eduImage" [src]="getIconSource()" alt="" />
+        <span>{{ title | translate }}</span>
+        <i aria-hidden="true" class="material-icons barIcon">keyboard_arrow_down</i>
+      </button>
+    </ng-container>
+    <ng-container *ngSwitchCase="'sidebar'">
+      <es-main-menu-sidebar
+        #mainMenuSidebar
+        [currentScope]="currentScope"
+        (showLicenses)="showLicenses.emit()"
+      ></es-main-menu-sidebar>
+      <button
+        *ngIf="showScope"
+        mat-button
+        (click)="mainMenuSidebar.toggle()"
+        [disabled]="!canOpen"
+        class="menuButton mat-button-no-uppercase"
+        [class.clickable]="canOpen"
+        title="{{ 'CHOOSEENVIRONMENT' | translate }}"
+      >
+        <img class="material-icons eduImage" [src]="getIconSource()" alt="" />
+        <span>{{ title | translate }}</span>
+        <i aria-hidden="true" class="material-icons barIcon">keyboard_arrow_right</i>
+      </button>
+    </ng-container>
+  </div>
+  <ng-container *ngIf="isSafe && !mainMenuSidebar?.show">
+    <div class="timeout" *ngIf="autoLogoutTimeout$ | async as timeout">
+      <i esIcon="av_timer"></i>
+      {{ timeout }}
+    </div>
+  </ng-container>
+  <div class="add-material">
+    <ng-container *ngTemplateOutlet="createButtonRef"></ng-container>
+    <ng-container *ngIf="!createButtonRef">
+      <button
+        mat-button
+        class="addDesktop mat-button-no-uppercase"
+        *ngIf="!connector.getCurrentLogin()?.isGuest && isCreateAllowed"
+        [disabled]="!isCreateAllowed || !createMenu.hasUsableOptions()"
+        #dropdownTrigger="matMenuTrigger"
+        (menuOpened)="createMenu.updateOptions()"
+        [matMenuTriggerFor]="createMenu.dropdown ? createMenu.dropdown.menu : null"
+        [attr.aria-label]="'WORKSPACE.ADD' | translate"
+      >
+        <i esIcon="add"></i> <span>{{ 'WORKSPACE.ADD' | translate }}</span>
+      </button>
+      <button
+        mat-button
+        class="addDesktop mat-button-no-uppercase"
+        *ngIf="!connector.getCurrentLogin()?.isGuest && create.allowed === 'EMIT_EVENT'"
+        (click)="createNotAllowed.emit()"
+        [attr.aria-label]="'WORKSPACE.ADD' | translate"
+      >
+        <i esIcon="add"></i> <span>{{ 'WORKSPACE.ADD' | translate }}</span>
+      </button>
+      <button
+        class="create-dummy"
+        *ngIf="isCreateAllowed"
+        [style.left]="createMenuX + 'px'"
+        [style.top]="createMenuY + 'px'"
+        #dropdownTriggerDummy="matMenuTrigger"
+        [matMenuTriggerFor]="createMenu.dropdown ? createMenu.dropdown.menu : null"
+        tabindex="-1"
+        aria-hidden="true"
+      ></button>
+    </ng-container>
+  </div>
+  <div class="topBarSearch" [class.noScope]="!showScope">
+    <div class="scopeNameMobile" *ngIf="!searchEnabled">{{ title | translate }}</div>
+    <ng-content select="[data-selector-search-field]"></ng-content>
+  </div>
+  <div class="topbar-search-right">
+    <div class="imprint" *ngIf="config.imprintUrl || config.privacyInformationUrl">
+      <a
+        cdkMonitorElementFocus
+        tabindex="0"
+        class="clickable"
+        *ngIf="config.imprintUrl"
+        (click)="openImprint.emit()"
+        (keyup.enter)="openImprint.emit()"
+        >{{ 'IMPRINT' | translate }}</a
+      >
+      <a
+        cdkMonitorElementFocus
+        tabindex="0"
+        class="clickable"
+        *ngIf="config.privacyInformationUrl"
+        (click)="openPrivacy.emit()"
+        (keyup.enter)="openPrivacy.emit()"
+        >{{ 'PRIVACY_INFORMATION' | translate }}</a
+      >
+    </div>
+    <button
+      mat-icon-button
+      *ngIf="currentUser && showChat"
+      class="rocketchat"
+      (click)="openChat.emit()"
+    >
+      <i esIcon="message"></i>
+      <div class="mat-button-badge" [class.rocketchat-count-none]="chatCount === 0">
+        {{ chatCount }}
+      </div>
+    </button>
+    <button
+      mat-button
+      class="user clickable"
+      esElementRef
+      #userRef="esElementRef"
+      *ngIf="currentUser && showUser"
+      [matMenuTriggerFor]="userDropdown.menu"
+      title="{{ 'USERMENU' | translate }}"
+    >
+      <es-user-avatar [user]="currentUser" [size]="'xsmall'"></es-user-avatar>
+      <span *ngIf="!connector.getCurrentLogin()?.isGuest">{{ currentUser | authorityName }}</span>
+      <span *ngIf="connector.getCurrentLogin()?.isGuest">{{ 'USER_GUEST' | translate }}</span>
+      <i aria-hidden="true" class="material-icons barIcon iconArrow">keyboard_arrow_down</i>
+      <!-- <i class="material-icons barIcon iconPerson">account_circle</i>-->
+    </button>
+    <es-dropdown #userDropdown class="userMenu" [options]="userMenuOptions"></es-dropdown>
+  </div>
+</div>

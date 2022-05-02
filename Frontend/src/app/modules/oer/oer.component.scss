@@ -1,10 +1,9 @@
 @import "../../core-ui-module/styles/variables";
 
-:host ::ng-deep {
-  .topBar > div{
+::ng-deep .topBar-oer {
+  > div{
     background: transparent !important;
   }
-
   .topBarSearch form input {
     background-color: rgba(255, 255, 255, 1) !important;
   }
@@ -14,10 +13,6 @@
   .topBarSearch form input,
   .topBarSearch form i {
     color: #505050 !important;
-  }
-  .topBar {
-    position: relative !important;
-    top: -75px !important;
   }
   .userMenu {
     position: absolute !important;
@@ -50,9 +45,6 @@
     .user {
       width: auto;
     }
-    .heading{
-      display: none;
-    }
   }
   @media screen and (max-width: ($mobileWidth+$mobileStage*2)) {
     .topbar-search-right{
@@ -68,6 +60,13 @@
     }
   }
 }
+
+@media screen and (max-width: ($mobileWidth+$mobileStage*3)) {
+  .heading{
+    display: none;
+  }
+}
+
 .heading{
   position: absolute;
   z-index: 2;

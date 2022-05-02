@@ -12,7 +12,7 @@ import {
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
 import {ActionbarHelperService} from '../../common/services/actionbar-helper';
-import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {MainNavComponent} from '../../main/navigation/main-nav/main-nav.component';
 import {MdsEditorWrapperComponent} from '../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {
@@ -63,7 +63,7 @@ import {WindowRefService} from './window-ref.service';
 import {MdsDefinition, Values} from '../../common/ui/mds-editor/types';
 import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 import {FormControl} from '@angular/forms';
-import {BehaviorSubject, ReplaySubject, combineLatest, Observable} from 'rxjs';
+import {BehaviorSubject, ReplaySubject, combineLatest, Observable, Subject} from 'rxjs';
 import {delay, distinctUntilChanged, first, map, shareReplay, switchMap, takeUntil, tap} from 'rxjs/operators';
 import {MatTabGroup} from '@angular/material/tabs';
 import {OptionsHelperService} from '../../core-ui-module/options-helper.service';
@@ -72,11 +72,12 @@ import {
 } from '../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
 import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
-import { SearchFieldService } from 'src/app/common/ui/search-field/search-field.service';
+import { SearchFieldService } from 'src/app/main/navigation/search-field/search-field.service';
 import { MdsService, MetadataSetInfo, SearchResults, SearchService as SearchApiService } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import {InteractionType, ListSortConfig, NodeEntriesDisplayType} from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
+import { MainNavService } from '../../main/navigation/main-nav.service';
 
 @Component({
     selector: 'es-search',
@@ -93,7 +94,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('mdsMobile') mdsMobileRef: MdsEditorWrapperComponent;
     @ViewChild('mdsDesktop') mdsDesktopRef: MdsEditorWrapperComponent;
     @ViewChild('list') list: ListTableComponent;
-    @ViewChild('mainNav') mainNavRef: MainNavComponent;
     @ViewChild('extendedSearch') extendedSearch: ElementRef;
     @ViewChild('toolbar') toolbar: any;
     @ViewChild('extendedSearchTabGroup') extendedSearchTabGroup: MatTabGroup;
@@ -116,7 +116,13 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     nodeReport: Node;
     nodeVariant: Node;
-    currentRepository: string = RestConstants.HOME_REPOSITORY;
+    private currentRepositorySubject = new BehaviorSubject<string>(RestConstants.HOME_REPOSITORY);
+    get currentRepository(): string {
+        return this.currentRepositorySubject.value;
+    }
+    set currentRepository(value: string) {
+        this.currentRepositorySubject.next(value);
+    }
     currentRepositoryObject: Repository;
     applyMode = false;
     hasCheckbox = false;
@@ -129,7 +135,13 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     queryId = RestConstants.DEFAULT_QUERY_NAME;
     groupResults = false;
     actionOptions: OptionItem[] = [];
-    allRepositories: Repository[];
+    private allRepositoriesSubject = new BehaviorSubject<Repository[]>(null);
+    get allRepositories(): Repository[] {
+        return this.allRepositoriesSubject.value;
+    }
+    set allRepositories(value: Repository[]) {
+        this.allRepositoriesSubject.next(value);
+    }
     repositories: Repository[];
     globalProgress = false;
     addNodesToCollection: Node[];
@@ -218,6 +230,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         private searchApi: SearchApiService,
         private ngZone: NgZone,
         private loadingScreen: LoadingScreenService,
+        private mainNavService: MainNavService,
     ) {
         // Subscribe early to make sure the suggestions are requested with search requests.
         this.didYouMeanSuggestion$.pipe(takeUntil(this.destroyed$)).subscribe();
@@ -225,11 +238,12 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     ngOnInit(): void {
         this.registerScrollHandler();
+        this.registerMainNav();
     }
 
     ngAfterViewInit() {
         setTimeout(() => {
-            this.tutorialElement = this.mainNavRef.searchField.input;
+            this.tutorialElement = this.mainNavService.getMainNav().searchField.input;
             this.handleScroll();
         });
         this.searchService.clear();
@@ -350,6 +364,38 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE, this.searchService.dataSourceSearchResult[0]);
         this.destroyed$.next();
         this.destroyed$.complete();
+    }
+
+    private registerMainNav(): void {
+        this.initMainNav();
+        rxjs.combineLatest([this.currentRepositorySubject, this.allRepositoriesSubject]).subscribe(
+            () =>
+                this.mainNavService.patchMainNavConfig({
+                    create: { allowed: this.isHomeRepository(), allowBinary: true },
+                }),
+        );
+        this.searchService.searchTermSubject
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((searchTerm) =>
+                this.mainNavService.patchMainNavConfig({ searchQuery: searchTerm }),
+            );
+
+    }
+
+    private initMainNav(): void {
+        this.mainNavService.setMainNavConfig({
+            title: 'SEARCH.TITLE',
+            currentScope: 'search',
+            searchEnabled: true,
+            searchPlaceholder: 'SEARCH.SEARCH_STUFF',
+            canOpen: true,
+            // Why do we need this, when the top bar is hidden anyway?
+            // showScope: this.mainnav,
+            // showUser: this.mainnav,
+            searchQueryChange: searchQuery => this.searchService.searchTerm = searchQuery,
+            onSearch: () => this.applyParameters('mainnav'),
+            onCreate: (nodes) => this.list.addVirtualNodes(nodes),
+        });
     }
 
     registerScrollHandler(): void {
@@ -993,8 +1039,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.currentValues = await this.getMdsValues();
             }
         }
-        if (this.mainNavRef && !this.bannerInitalized) {
-            await this.mainNavRef.refreshBanner();
+        if (this.mainNavService.getMainNav() && !this.bannerInitalized) {
+            await this.mainNavService.getMainNav().refreshBanner();
             this.handleScroll();
             this.bannerInitalized = true;
         }
@@ -1450,7 +1496,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 }
 
                 this.searchService.init();
-                this.mainNavRef.refreshBanner();
+                this.mainNavService.getMainNav().refreshBanner();
                 if (!this.loadingTask.isDone) {
                     this.loadingTask.done();
                 }
@@ -1461,7 +1507,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 }
                 if (param.addToCollection) {
                     const addTo = new OptionItem('SEARCH.ADD_INTO_COLLECTION_SHORT','layers', (node) => {
-                        this.mainNavRef.management.addToCollectionList(this.addToCollection,
+                        this.mainNavService.getDialogs().addToCollectionList(this.addToCollection,
                             ActionbarHelperService.getNodes(this.getSelection(),node), true, () => {
                                 this.switchToCollections(this.addToCollection.ref.id);
                             });
@@ -1637,7 +1683,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private setFixMobileNav() {
-        this.mainNavRef.setFixMobileElements(
+        this.mainNavService.getMainNav().setFixMobileElements(
             this.searchService.sidenavOpened ||
                 (this.getSelection()?.length > 0),
         );

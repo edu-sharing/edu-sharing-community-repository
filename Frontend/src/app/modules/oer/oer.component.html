@@ -1,18 +1,10 @@
 <div>
-<div class="header">
+<div class="header"
+(esBorderBoxObserver)="setMainNavOffset($event.height - 75)"
+>
   <img src="assets/images/layout/oer_bg.jpg" esImage-config alt="">
   <div class="headerGradient"></div>
 </div>
-  <es-main-nav
-          #mainNav
-          [title]="'SEARCH.TITLE'"
-          [currentScope]="'oer'"
-          [searchEnabled]="true"
-          [searchPlaceholder]="'OER.SEARCH'"
-          [canOpen]="true"
-          [searchQuery]="currentQuery"
-          (onSearch)="routeSearch($event.query)"
-  ></es-main-nav>
 <div class="heading">
   <h1 esTitle>{{'OER.HEADING_TITLE' | translate}}</h1>
   <h2>{{'OER.HEADING_DESCRIPTION' | translate}}</h2>
@@ -35,7 +27,6 @@
     [hasHeading]="false"
     [isClickable]="true"
     [createLink]="true"
-    [mainNav]="mainNavRef"
     [scope]="SCOPES.Oer"
     [viewType]="2"
     [scrollWindow]="true"
@@ -55,7 +46,6 @@
       [nodes]="nodes[MATERIALS]"
       [columns]="columns[MATERIALS]"
       [hasIcon]="true"
-      [mainNav]="mainNavRef"
       [scope]="SCOPES.Oer"
       [hasCheckbox]="false"
       [hasHeading]="false"
@@ -79,7 +69,6 @@
                [nodes]="nodes[TOOLS]"
                [columns]="columns[TOOLS]"
                [hasIcon]="true"
-               [mainNav]="mainNavRef"
                [scope]="SCOPES.Oer"
                [hasCheckbox]="false"
                [hasHeading]="false"
