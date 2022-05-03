@@ -62,7 +62,7 @@
                 grid-template-columns: 1fr auto auto;
                 grid-gap: 10px;
                 align-items: center;
-                padding: 5px 0 5px 10px;
+                padding: 5px 10px;
 
                 &.added {
                     border-radius: 25px;
@@ -71,6 +71,7 @@
                 > .deleted-overlay {
                     display: grid;
                     grid-gap: 20px;
+                    padding: 5px 10px;
                     grid-template-columns: 1fr auto;
                     align-items: center;
                     position: absolute;

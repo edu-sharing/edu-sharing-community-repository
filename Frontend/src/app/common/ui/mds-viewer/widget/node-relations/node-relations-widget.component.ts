@@ -24,9 +24,11 @@ import {RestHelper} from '../../../../../core-module/rest/rest-helper';
 import {Node} from '../../../../../core-module/rest/data-object';
 import {
     RelationService,
+    NodeService,
     RelationData
 } from 'ngx-edu-sharing-api';
 import {ListItem} from '../../../../../core-module/ui/list-item';
+import {forkJoin as observableForkJoin} from 'rxjs';
 
 @Component({
     selector: 'es-mds-node-relations-widget',
@@ -40,10 +42,12 @@ export class MdsNodeRelationsWidgetComponent implements OnInit, OnChanges {
     columns = [
         new ListItem('NODE', RestConstants.LOM_PROP_TITLE)
     ];
+    versions: Node[];
 
     constructor(
         private translate: TranslateService,
         private relationService: RelationService,
+        private nodeService: NodeService,
     ) {
     }
 
@@ -54,12 +58,16 @@ export class MdsNodeRelationsWidgetComponent implements OnInit, OnChanges {
     ngOnChanges(changes?: SimpleChanges) {
         console.log(this.node);
         if (this.node) {
-            this.relationService.getRelations(this.node.ref.id).subscribe(
-                ({relations}) => {
-                    this.relations = relations;
+            observableForkJoin([
+                this.relationService.getRelations(this.node.ref.id),
+                this.nodeService.getPublishedCopies(this.node.ref.id)
+            ]).subscribe(
+                (result) => {
+                    this.relations = result[0].relations;
+                    this.versions = result[1].nodes.reverse();
                     this.loading = false;
                 }
-            );
+            )
         }
     }
 
@@ -71,5 +79,13 @@ export class MdsNodeRelationsWidgetComponent implements OnInit, OnChanges {
     getRelations(key: string) {
         return this.relations.filter(r => r.type === key);
 
+    }
+
+    isCurrentVersion(version: Node) {
+        // collection refs always refer to the latest version
+        if(this.node.aspects.includes(RestConstants.CCM_ASPECT_IO_REFERENCE)) {
+            return this.versions.indexOf(version) === 0;
+        }
+        return this.node.properties[RestConstants.LOM_PROP_LIFECYCLE_VERSION]?.[0] === version.properties[RestConstants.LOM_PROP_LIFECYCLE_VERSION]?.[0];
     }
 }

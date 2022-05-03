@@ -20,6 +20,15 @@ export class NodeService {
             })
             .pipe(map((nodeEntry) => nodeEntry.node));
     }
+    getPublishedCopies(id: string,
+                       { repository = HOME_REPOSITORY } = {},
+    ) {
+        return this.nodeV1
+            .getPublishedCopies({
+                repository,
+                node: id,
+            });
+    }
 
     /**
      * Fetches the metadata as indexed for search.

@@ -12,21 +12,18 @@ import {
     DialogButton,
     ListItem,
     Node,
+    NodesRightMode,
     RestConstants,
     SearchRequestCriteria,
 } from '../../../core-module/core.module';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
-import {
-    RelationService,
-    RelationData,
-    UserService
-} from 'ngx-edu-sharing-api';
+import {RelationData, RelationService, UserService} from 'ngx-edu-sharing-api';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 import {BridgeService} from '../../../core-bridge-module/bridge.service';
 import {OPEN_URL_MODE} from '../../../core-module/ui/ui-constants';
 import {UniversalNode} from '../../../common/definitions';
-import { forkJoin } from 'rxjs';
+import {forkJoin} from 'rxjs';
 import {Toast} from '../../../core-ui-module/toast';
 import {first} from 'rxjs/internal/operators';
 
@@ -54,6 +51,10 @@ export class NodeRelationManagerComponent implements OnInit{
     deleteRelations: RelationData[] = [];
     swapRelation: boolean;
     @Input() set nodes(nodes: Node[]) {
+        console.log(nodes);
+        if(nodes?.length > 1) {
+            throw new Error('relation manager does currently not support bulk features');
+        }
         this._nodes = nodes;
         this.source = nodes[0];
         this.relationService.getRelations(
@@ -217,6 +218,19 @@ export class NodeRelationManagerComponent implements OnInit{
 
     private isInverted(r: RelationData) {
         return Object.keys(this.RelationsInverted).find(k => (this.RelationsInverted as any)[k] === r.type && k !== r.type)
+    }
+
+    isPublishedCopy() {
+        return !!this._nodes[0].properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]?.[0];
+    }
+
+    isSwappable() {
+        const relation = this.form.get('relation').value;
+        return !((this.RelationsInverted as any)[relation] === relation);
+    }
+
+    canModify(relation: RelationData) {
+        return this.nodeHelper.getNodesRight([relation.node], RestConstants.PERMISSION_WRITE, NodesRightMode.Original);
     }
 }
 export enum Relations {

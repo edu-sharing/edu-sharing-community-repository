@@ -56,12 +56,11 @@ import {
     ListEventInterface,
     NodeEntriesDisplayType
 } from './components/node-entries-wrapper/entries-model';
-import {FormBuilder} from '@angular/forms';
-import { NodeEmbedService } from '../common/ui/node-embed/node-embed.service';
-import { NodeStoreService } from '../modules/search/node-store/node-store.service';
+import {NodeEmbedService} from '../common/ui/node-embed/node-embed.service';
+import {NodeStoreService} from '../modules/search/node-store/node-store.service';
 import {NodeEntriesDataType} from './components/node-entries/node-entries.component';
 import {isArray} from 'rxjs/internal/util/isArray';
-import { MainNavService } from '../main/navigation/main-nav.service';
+import {MainNavService} from '../main/navigation/main-nav.service';
 
 
 export class OptionsHelperConfig {
@@ -1021,8 +1020,10 @@ export class OptionsHelperService implements OnDestroy {
         const relationNode = new OptionItem('OPTIONS.RELATIONS', 'swap_horiz', async (node) => {
             management.nodeRelations = await this.getObjectsAsync(node, true);
         });
-        relationNode.constrains = [Constrain.NoBulk, Constrain.NoCollectionReference, Constrain.User];
+        relationNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
+        relationNode.constrains = [Constrain.NoBulk, Constrain.User];
         relationNode.scopes = [Scope.Render];
+        relationNode.toolpermissions = [RestConstants.TOOLPERMISSION_MANAGE_RELATIONS];
         relationNode.permissions = [RestConstants.PERMISSION_WRITE];
         relationNode.permissionsRightMode = NodesRightMode.Original;
         relationNode.group = DefaultGroups.Edit;
@@ -1278,12 +1279,16 @@ export class OptionsHelperService implements OnDestroy {
             const originals = await observableForkJoin(
                 nodes.map((n) => {
                     if(n.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1) {
-                        return this.nodeService.getNodeMetadata(n.properties[RestConstants.CCM_PROP_IO_ORIGINAL][0])
+                        return this.nodeService.getNodeMetadata(
+                            n.properties[RestConstants.CCM_PROP_IO_ORIGINAL][0],
+                            [RestConstants.ALL]
+                        )
                     } else if(n.type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL) {
                         return this.nodeService.getNodeMetadata(
                             RestHelper.removeSpacesStoreRef(
-                                n.properties[RestConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET][0]
-                            )
+                                n.properties[RestConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET][0],
+                            ),
+                            [RestConstants.ALL]
                         );
                     } else {
                         return of({

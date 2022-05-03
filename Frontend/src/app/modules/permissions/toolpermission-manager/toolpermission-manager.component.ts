@@ -45,6 +45,7 @@ export class ToolpermissionManagerComponent {
             RestConstants.TOOLPERMISSION_LICENSE,
             RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES,
             RestConstants.TOOLPERMISSION_PUBLISH_COPY,
+            RestConstants.TOOLPERMISSION_MANAGE_RELATIONS,
             RestConstants.TOOLPERMISSION_HANDLESERVICE,
         RestConstants.TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS,
     ]},
