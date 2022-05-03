@@ -1063,7 +1063,7 @@
 				<statement>(@sys\:node-uuid:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*")</statement>
 			</property>
 			<property name="sourceNode">
-				<statement>TYPE:"ccm:io" AND NOT @sys\:node-uuid:"${value}"</statement>
+				<statement>TYPE:"ccm:io" AND NOT @sys\:node-uuid:"${value}" AND NOT @ccm\:published_original:"${value}"</statement>
 			</property>
 		</query>
 		<query join="AND"  id="tools">

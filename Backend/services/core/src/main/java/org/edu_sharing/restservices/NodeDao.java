@@ -124,6 +124,40 @@ public class NodeDao {
 		}
 		return nodeDao;
 	}
+
+	/**
+	 * find any "existing" node
+	 * this means that if an original node is delivered, you might get a published copy if the original is deleted
+	 * @param repoDao the repo, this method will only return published copies for the home repo, not for remotes!
+	 * @param nodeId
+	 * @return
+	 * @throws DAOException
+	 */
+	public static NodeDao getAnyExistingNode(RepositoryDao repoDao, String nodeId)
+			throws DAOException {
+		if(repoDao.isHomeRepo()) {
+			if(!NodeServiceHelper.exists(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId))){
+				// try to fetch a published copy
+				SortDefinition sort = new SortDefinition();
+				sort.addSortDefinitionEntry(new SortDefinition.SortDefinitionEntry(
+						CCConstants.getValidLocalName(CCConstants.LOM_PROP_LIFECYCLE_VERSION), false
+				));
+				List<org.alfresco.service.cmr.repository.NodeRef> list = NodeServiceFactory.getLocalService().getPublishedCopies(nodeId).stream().map(
+						id -> new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, id)
+				).collect(Collectors.toList());
+				if(!list.isEmpty()) {
+					list = NodeServiceFactory.getLocalService().sortNodeRefList(list,
+							null,
+							sort
+					);
+					nodeId = list.get(0).getId();
+				} else {
+					throw new DAOMissingException(new IllegalArgumentException("No remaining node found for id " + nodeId));
+				}
+			}
+		}
+		return getNode(repoDao, nodeId, Filter.createShowAllFilter());
+	}
 	public static NodeDao getNode(RepositoryDao repoDao, String nodeId)
 			throws DAOException {
 		return getNode(repoDao, nodeId, Filter.createShowAllFilter());

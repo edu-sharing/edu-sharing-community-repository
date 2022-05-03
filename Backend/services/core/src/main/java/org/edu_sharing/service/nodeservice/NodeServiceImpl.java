@@ -1166,6 +1166,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 	@Override
 	public List<String> getPublishedCopies(String nodeId) {
+		nodeId = this.getOriginalNode(nodeId).getId();
 		Map<String, Object> filters = new HashMap<>();
 		filters.put(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
 		List<NodeRef> nodes = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO, filters);
@@ -1375,16 +1376,28 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return new NodeFrontpage().getNodesForCurrentUserAndConfig();
 	}
 
+
+	/**
+	 * maps to the original node id for:
+	 * collection refs
+	 * published copies
+	 * @param nodeId the source node to map
+	 * @return the mapped node ref
+	 */
 	@Override
 	public NodeRef getOriginalNode(String nodeId) {
+		if(!nodeService.exists(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId))) {
+			return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+		}
 		// Handle io references (i.e. collection refs)
+		// use the nodeServiceAlfresco since the nodeRef might be null if original was deleted
 		if(hasAspect(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
-			nodeId = getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.CCM_PROP_IO_ORIGINAL);
+			nodeId = (String) nodeServiceAlfresco.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL));
 		}
 		// handle copied nodes
-		String original = getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL);
+		NodeRef original = ((NodeRef)nodeServiceAlfresco.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), QName.createQName(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL)));
 		if(original != null) {
-			nodeId = original;
+			nodeId = original.getId();
 		}
 		return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
 	}

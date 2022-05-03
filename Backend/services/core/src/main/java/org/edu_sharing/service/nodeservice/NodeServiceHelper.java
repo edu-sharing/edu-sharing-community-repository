@@ -458,6 +458,10 @@ public class NodeServiceHelper {
 		NodeServiceHelper.setProperty(targetNode, property, NodeServiceHelper.getProperty(sourceNode, property));
 	}
 
+	public static boolean exists(NodeRef node) {
+		return NodeServiceFactory.getLocalService().exists(node.getStoreRef().getProtocol(), node.getStoreRef().getIdentifier(), node.getId());
+	}
+
 	/**
 	 * add virtual properties
 	 * @return

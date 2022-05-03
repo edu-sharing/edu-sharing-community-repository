@@ -50,7 +50,7 @@ public class RelationApi {
             relationDao.createRelation(source, target, type);
             return Response.status(Response.Status.OK).build();
         }catch (Throwable t) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+            return ErrorResponse.createResponse(t);
         }
     }
 
@@ -77,7 +77,7 @@ public class RelationApi {
             relationDao.deleteRelation(source, target, type);
             return Response.status(Response.Status.OK).build();
         }catch (Throwable t) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+            return ErrorResponse.createResponse(t);
         }
     }
 
@@ -102,7 +102,7 @@ public class RelationApi {
             NodeRelation nodeRelation = relationDao.getRelations(node);
             return Response.ok().entity(nodeRelation).build();
         }catch (Throwable t) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+            return ErrorResponse.createResponse(t);
         }
     }
 }

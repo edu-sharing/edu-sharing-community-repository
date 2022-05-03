@@ -1,5 +1,6 @@
 package org.edu_sharing.restservices;
 
+import org.apache.log4j.Logger;
 import org.edu_sharing.restservices.shared.NodeRelation;
 import org.edu_sharing.restservices.shared.RelationData;
 import org.edu_sharing.restservices.shared.User;
@@ -12,7 +13,7 @@ import org.edu_sharing.service.relations.InputRelationType;
 import javax.management.relation.Relation;
 
 public class RelationDao {
-
+    private static Logger logger = Logger.getLogger(NodeDao.class);
     private final AuthorityService authorityService;
     private final RelationService relationService;
     private final RepositoryDao repoDao;
@@ -43,17 +44,19 @@ public class RelationDao {
         try {
             org.edu_sharing.service.relations.NodeRelation nodeRelation = this.relationService.getRelations(sourceNodeId);
             NodeRelation.NodeRelationBuilder nodeRelationBuilder = NodeRelation.builder();
-            nodeRelationBuilder.node(NodeDao.getNode(repoDao, nodeRelation.getNode()).asNode());
+            nodeRelationBuilder.node(NodeDao.getAnyExistingNode(repoDao, nodeRelation.getNode()).asNode());
             for (org.edu_sharing.service.relations.RelationData relationData : nodeRelation.getRelations()) {
                 try {
                     nodeRelationBuilder.relation(
                             RelationData.builder()
-                                    .node(NodeDao.getNode(repoDao, relationData.getNode()).asNode())
+                                    // use getAnyExistingNode in case the original id it refers to has been deleted
+                                    .node(NodeDao.getAnyExistingNode(repoDao, relationData.getNode()).asNode())
                                     .creator(new User(authorityService.getUser(relationData.getCreator())))
                                     .timestamp(relationData.getTimestamp())
                                     .type(relationData.getType())
                                     .build());
-                } catch (DAOException ignored) {
+                } catch (DAOException e) {
+                    logger.warn("Relation node not found and no published id is available for " + relationData.getNode() + ": " + e.getMessage());
                     // don't add relations if the related node doesn't exist
                 }
             }
