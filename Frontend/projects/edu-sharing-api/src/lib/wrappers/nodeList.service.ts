@@ -97,19 +97,8 @@ export class NodeListService {
         );
         // TODO: replace `concat` / `toArray` with `forkJoin` when the backend can handle
         // simultaneous requests.
-        return rxjs.concat(...observables).pipe(
-            toArray(), // Replace until here.
+        return rxjs.forkJoin(...observables).pipe(
             // return rxjs.forkJoin(observables).pipe(
-            switchMap((responses) => {
-                if (responses.every((response) => 'success' in response)) {
-                    return rxjs.of(void 0);
-                } else {
-                    const errors = responses.filter(
-                        (response): response is NodeListErrorResponse => 'error' in response,
-                    );
-                    return rxjs.throwError(errors);
-                }
-            }),
             // Use `finalize` instead of `tap` since even if individual nodes failed to be
             // added, others might still have gone through.
             finalize(() => this.nodeListChangesSubject.next(listId)),
