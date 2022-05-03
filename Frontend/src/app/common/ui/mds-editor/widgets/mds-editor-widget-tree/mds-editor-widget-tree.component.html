@@ -72,6 +72,7 @@
   [cdkConnectedOverlayWidth]="triggerBorderBox.width$ | async"
   [cdkConnectedOverlayOpen]="overlayIsVisible"
   (overlayKeydown)="onOverlayKeydown($event)"
+  (overlayOutsideClick)="closeOverlay()"
 >
   <div
     *ngIf="overlayIsVisible"

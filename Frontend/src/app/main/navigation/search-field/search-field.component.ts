@@ -134,12 +134,14 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
         this.searchField.removeFilter(property, filter);
     }
 
-    onOutsideClick(event: MouseEvent): void {
-        const clickTarget = event.target as HTMLElement;
-        if (!(this.overlay.origin.elementRef.nativeElement as HTMLElement).contains(clickTarget)) {
-            this.showOverlay = false;
-        }
-    }
+    // Can probably be replaced by using `@Output() overlayOutsideClick` of the overlay.
+
+    // onOutsideClick(event: MouseEvent): void {
+    //     const clickTarget = event.target as HTMLElement;
+    //     if (!(this.overlay.origin.elementRef.nativeElement as HTMLElement).contains(clickTarget)) {
+    //         this.showOverlay = false;
+    //     }
+    // }
 
     focusOverlayIfOpen(event: Event): void {
         if (this.firstActiveChip) {

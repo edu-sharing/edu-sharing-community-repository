@@ -26,7 +26,7 @@ import {DECLARATIONS_FILE_UPLOAD} from './modules/file-upload/declarations';
 import {CommentsListComponent} from "./modules/management-dialogs/node-comments/comments-list/comments-list.component";
 import {MdsWidgetComponent} from "./common/ui/mds-viewer/widget/mds-widget.component";
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from "@angular/material/form-field";
-import { MAT_TOOLTIP_DEFAULT_OPTIONS } from "@angular/material/tooltip";
+import { MatTooltipDefaultOptions, MAT_TOOLTIP_DEFAULT_OPTIONS } from "@angular/material/tooltip";
 import {ButtonsTestComponent} from './common/test/buttons/buttons-test.component';
 import {InputsTestComponent} from './common/test/inputs/inputs-test.component';
 import {UserAvatarTestComponent} from './common/test/user-avatar/user-avatar-test.component';
@@ -95,6 +95,12 @@ import { SharedModule } from './shared/shared.module';
 
 // http://blog.angular-university.io/angular2-ngmodule/
 // -> Making modules more readable using the spread operator
+
+const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
+    showDelay: 500,
+    hideDelay: 0,
+    touchendHideDelay: 0,
+}
 
 
 @NgModule({
@@ -186,7 +192,7 @@ import { SharedModule } from './shared/shared.module';
         PROVIDERS,
         PROVIDERS_SEARCH,
         {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {appearance: 'outline'}},
-        {provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: {showDelay: 500}},
+        {provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: matTooltipDefaultOptions},
         extensionProviders,
         ErrorHandlerService,
     ],

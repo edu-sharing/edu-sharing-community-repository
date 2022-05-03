@@ -1,4 +1,4 @@
-import { CdkConnectedOverlay, ConnectedPosition, OverlayRef } from '@angular/cdk/overlay';
+import { CdkConnectedOverlay, ConnectedPosition } from '@angular/cdk/overlay';
 import {
     AfterViewInit,
     Component,
@@ -148,13 +148,6 @@ export class MdsEditorWidgetTreeComponent
             return;
         }
         this.overlayIsVisible = true;
-        // Wait for overlay
-        setTimeout(() => {
-            overlayClickOutside(
-                this.overlay.overlayRef,
-                this.overlay.origin.elementRef.nativeElement,
-            ).subscribe(() => this.closeOverlay());
-        });
     }
 
     closeOverlay(): void {
@@ -175,9 +168,6 @@ export class MdsEditorWidgetTreeComponent
     }
 
     onOverlayKeydown(event: KeyboardEvent) {
-        const targetInsideHost = this.overlay.origin.elementRef.nativeElement.contains(
-            event.target,
-        );
         if (event.key === 'Escape') {
             event.stopPropagation();
             this.closeOverlay();
@@ -216,20 +206,4 @@ export class MdsEditorWidgetTreeComponent
     onValuesChange(values: DisplayValue[]): void {
         this.chipsControl.setValue(values);
     }
-}
-
-// Adapted from
-// https://netbasal.com/advanced-angular-implementing-a-reusable-autocomplete-component-9908c2f04f5
-// TODO: replace with built-in event after upgrade to Angular 10.
-function overlayClickOutside(overlayRef: OverlayRef, origin: HTMLElement) {
-    return fromEvent<MouseEvent>(document, 'mousedown').pipe(
-        filter((event) => {
-            const clickTarget = event.target as HTMLElement;
-            const notOrigin = !origin.contains(clickTarget);
-            const notOverlay =
-                !!overlayRef && overlayRef.overlayElement.contains(clickTarget) === false;
-            return notOrigin && notOverlay;
-        }),
-        takeUntil(overlayRef.detachments()),
-    );
 }
