@@ -84,6 +84,10 @@ export class MdsNodeRelationsWidgetComponent implements OnInit, OnChanges {
     isCurrentVersion(version: Node) {
         // collection refs always refer to the latest version
         if(this.node.aspects.includes(RestConstants.CCM_ASPECT_IO_REFERENCE)) {
+            const publishedVersion = this.versions.find((v) => v.ref.id === this.node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]?.[0]);
+            if(publishedVersion) {
+                return publishedVersion === version
+            }
             return this.versions.indexOf(version) === 0;
         }
         return this.node.properties[RestConstants.LOM_PROP_LIFECYCLE_VERSION]?.[0] === version.properties[RestConstants.LOM_PROP_LIFECYCLE_VERSION]?.[0];
