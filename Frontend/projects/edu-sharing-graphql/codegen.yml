@@ -1,0 +1,12 @@
+overwrite: true
+# Modify this to the url where your backend exposes the graphql description
+schema: "build/**/*.graphql"
+# documents: "src/**/*.graphql"
+generates:
+  src/generated/graphql.ts:
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+  #./schema.json:
+  #  plugins:
+  #    - "introspection"
