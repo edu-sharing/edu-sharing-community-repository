@@ -27,6 +27,12 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
         requiresNode: false,
         supportsBulk: false,
     };
+    static readonly graphqlIds = [
+        'lom.lifecycle.contribute.role',
+        'lom.lifecycle.contribute.content',
+        'lom.rights.author',
+
+    ];
     @ViewChild(MatTabGroup) tabGroup: MatTabGroup;
     @Input() showContributorDialog = true;
     _nodes: Node[];
@@ -99,6 +105,10 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
     }
 
     async getValues(values: Values, node: Node = null): Promise<Values> {
+        if(this.mdsEditorValues.graphqlMetadata$.value) {
+            // @TODO: map data to graphql
+            return {};
+        }
         values[RestConstants.CCM_PROP_AUTHOR_FREETEXT] = [this.author.freetext];
         // copy current value from node, replace only first entry (if it has multiple authors)
         values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = node?.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR];

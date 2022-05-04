@@ -1,0 +1,4 @@
+type Directory {
+    type: String
+    hasTemplate: Boolean
+}

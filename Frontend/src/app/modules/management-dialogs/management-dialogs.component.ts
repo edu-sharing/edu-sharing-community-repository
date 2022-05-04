@@ -149,6 +149,7 @@ export class WorkspaceManagementDialogsComponent  {
     @Input() nodeVariant : Node;
     @Output() nodeVariantChange = new EventEmitter();
     @Input() set nodeMetadata (nodeMetadata : Node[]){
+      this._nodeIds = nodeMetadata.map(n => n.ref.id);
       this._nodeMetadata = nodeMetadata;
       this._nodeFromUpload = false;
   }
@@ -182,6 +183,7 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() onStoredAddToCollection=new EventEmitter<{collection: Node, references: CollectionReference[]}>();
   _nodeDelete: Node[];
   _nodeMetadata: Node[];
+  _nodeIds: string[];
   _nodeSimpleEdit: Node[];
   _nodeFromUpload = false;
   nodeDeleteTitle: string;
@@ -471,6 +473,7 @@ export class WorkspaceManagementDialogsComponent  {
       }
     this.setNodeDeleteOnCancel(false);
     this._nodeMetadata=null;
+    this._nodeIds=null;
     this.nodeMetadataChange.emit(null);
     this.createMetadata=null;
     this.onCloseMetadata.emit(nodes);

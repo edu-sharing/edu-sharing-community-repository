@@ -8,6 +8,7 @@ import {
     RestNodeService,
 } from '../../../core-module/core.module';
 import { MdsDefinition, MdsType, Values } from './types';
+import {Metadata} from 'ngx-edu-sharing-graphql';
 
 /** Error with a translatable message that is suitable to be shown to the user. */
 export class UserPresentableError extends Error {
@@ -90,24 +91,52 @@ export class MdsEditorCommonService {
      *
      * Throws with a translatable error message if the given nodes cannot be handled by an MDS.
      */
-    getMdsId(nodes: Node[]): string {
-        const types = nodes.map((node) => node.type);
+    getMdsId(nodes: Node[]|Metadata[]): string {
+        const types = nodes.map((node) => (node as Node).type || (node as Metadata).nodeType);
         if (!areAllEqual(types)) {
             throw new UserPresentableError('MDS.ERROR_INVALID_TYPE_COMBINATION');
         }
-        const requestedMdsIds = nodes.map((node) => node.metadataset || RestConstants.DEFAULT);
+        const requestedMdsIds = nodes.map((node) => (node as Node).metadataset || (node as Metadata).info.metadataSet || RestConstants.DEFAULT);
         if (!areAllEqual(requestedMdsIds)) {
             throw new UserPresentableError('MDS.ERROR_INVALID_MDS_COMBINATION');
         }
-        if (
-            nodes.filter((n) => !!n.properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]).length >
-            0
+        if (nodes[0] instanceof Node &&
+            (nodes as Node[]).filter(
+                (n) => !!n.properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]).length >0
         ) {
             throw new UserPresentableError('MDS.ERROR_ELEMENT_TYPE_UNSUPPORTED');
         }
         return requestedMdsIds[0];
     }
-
+    getGroupIdGraphql(nodes: Metadata[]): MdsType {
+        const node = nodes[0];
+        let nodeGroup: MdsType = node.nodeType === RestConstants.CCM_TYPE_MAP ? MdsType.Map : MdsType.Io;
+        if (node.info.objectType?.id === 'folder-link') {
+            nodeGroup = MdsType.MapRef;
+        }
+        if (node.info.aspects?.indexOf(RestConstants.CCM_ASPECT_IO_CHILDOBJECT) !== -1) {
+            nodeGroup = MdsType.IoChildObject;
+        }
+        if (node.info.aspects?.indexOf(RestConstants.CCM_ASPECT_COLLECTION) !== -1) {
+            nodeGroup = MdsType.Collection;
+        }
+        if (node.info.aspects?.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION) !== -1) {
+            nodeGroup = MdsType.ToolDefinition;
+        }
+        if (node.nodeType === RestConstants.CCM_TYPE_TOOL_INSTANCE) {
+            nodeGroup = MdsType.ToolInstance;
+        }
+        if (node.nodeType === RestConstants.CCM_TYPE_SAVED_SEARCH) {
+            nodeGroup = MdsType.SavedSearch;
+        }
+        if (nodes.length > 1) {
+            if (nodeGroup !== MdsType.Io) {
+                throw new UserPresentableError('MDS.ERROR_INVALID_TYPE_BULK');
+            }
+            nodeGroup = MdsType.IoBulk;
+        }
+        return nodeGroup;
+    }
     getGroupId(nodes: Node[]): MdsType {
         const node = nodes[0];
         let nodeGroup: MdsType = node.isDirectory ? MdsType.Map : MdsType.Io;

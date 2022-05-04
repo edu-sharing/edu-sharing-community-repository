@@ -13,6 +13,7 @@ import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import {Constraints, MdsWidgetValue, Values} from '../../types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import {Lom} from 'ngx-edu-sharing-graphql';
 
 @Component({
     selector: 'es-mds-editor-widget-license',
@@ -28,6 +29,12 @@ export class MdsEditorWidgetLicenseComponent
         requiresNode: false,
         supportsBulk: true,
     };
+    static readonly graphqlIds = [
+        'lom.rights.description',
+        'lom.rights.version',
+        'lom.rights.internal',
+        'lom.rights.locale'
+    ];
     readonly valueType: ValueType = ValueType.MultiValue;
     hasChanges = new BehaviorSubject<boolean>(false);
 

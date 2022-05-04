@@ -33,9 +33,9 @@ import {
     MdsEditorWidgetComponent,
     MdsView,
     MdsWidget,
-    MdsWidgetType,
+    MdsWidgetType, NativeWidgets,
     NativeWidgetType,
-    Values,
+    Values, WidgetComponents,
 } from '../types';
 import { replaceElementWithDiv } from '../util/replace-element-with-div';
 import { MdsEditorWidgetAuthorComponent } from '../widgets/mds-editor-widget-author/mds-editor-widget-author.component';
@@ -74,8 +74,10 @@ export interface NativeWidgetComponent {
     focus?: () => void;
 }
 
-type NativeWidgetClass = {
+export type NativeWidgetClass = {
     constraints: Constraints;
+    // ids of fields in dot-notation this widget requires for displaying the node data
+    graphqlIds?: string[];
 } & Type<NativeWidgetComponent>;
 
 @Component({
@@ -88,51 +90,6 @@ type NativeWidgetClass = {
     providers: [ViewInstanceService],
 })
 export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
-    private static readonly nativeWidgets: {
-        [widgetType in NativeWidgetType]: NativeWidgetClass;
-    } = {
-        preview: MdsEditorWidgetPreviewComponent,
-        author: MdsEditorWidgetAuthorComponent,
-        version: MdsEditorWidgetVersionComponent,
-        childobjects: MdsEditorWidgetChildobjectsComponent,
-        maptemplate: MdsEditorWidgetLinkComponent,
-        contributor: MdsEditorWidgetLinkComponent,
-        license: MdsEditorWidgetLicenseComponent,
-        fileupload: MdsEditorWidgetFileUploadComponent,
-        workflow: null as null,
-    };
-
-    private static readonly widgetComponents: {
-        [type in MdsWidgetType]: MdsEditorWidgetComponent;
-    } = {
-        [MdsWidgetType.Text]: MdsEditorWidgetTextComponent,
-        [MdsWidgetType.Number]: MdsEditorWidgetTextComponent,
-        [MdsWidgetType.Email]: MdsEditorWidgetTextComponent,
-        [MdsWidgetType.Date]: MdsEditorWidgetTextComponent,
-        [MdsWidgetType.Month]: MdsEditorWidgetTextComponent,
-        [MdsWidgetType.Color]: MdsEditorWidgetTextComponent,
-        [MdsWidgetType.Textarea]: MdsEditorWidgetTextComponent,
-        [MdsWidgetType.TinyMCE]: MdsEditorWidgetTinyMCE,
-        [MdsWidgetType.VCard]: MdsEditorWidgetVCardComponent,
-        [MdsWidgetType.Checkbox]: MdsEditorWidgetCheckboxComponent,
-        [MdsWidgetType.RadioHorizontal]: MdsEditorWidgetRadioButtonComponent,
-        [MdsWidgetType.RadioVertical]: MdsEditorWidgetRadioButtonComponent,
-        [MdsWidgetType.CheckboxHorizontal]: MdsEditorWidgetCheckboxesComponent,
-        [MdsWidgetType.CheckboxVertical]: MdsEditorWidgetCheckboxesComponent,
-        [MdsWidgetType.MultiValueBadges]: MdsEditorWidgetChipsComponent,
-        [MdsWidgetType.MultiValueSuggestBadges]: MdsEditorWidgetChipsComponent,
-        [MdsWidgetType.MultiValueFixedBadges]: MdsEditorWidgetChipsComponent,
-        [MdsWidgetType.MultiValueAuthorityBadges]: MdsEditorWidgetAuthorityComponent,
-        [MdsWidgetType.Singleoption]: MdsEditorWidgetSelectComponent,
-        [MdsWidgetType.Slider]: MdsEditorWidgetSliderComponent,
-        [MdsWidgetType.Range]: MdsEditorWidgetSliderComponent,
-        [MdsWidgetType.Duration]: MdsEditorWidgetDurationComponent,
-        [MdsWidgetType.SingleValueTree]: MdsEditorWidgetTreeComponent,
-        [MdsWidgetType.MultiValueTree]: MdsEditorWidgetTreeComponent,
-        [MdsWidgetType.DefaultValue]: null,
-        [MdsWidgetType.FacetList]: MdsEditorWidgetFacetListComponent,
-    };
-
     private static readonly suggestionWidgetComponents: {
         [type in MdsWidgetType]?: Type<object>;
     } = {
@@ -239,7 +196,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 const widgetName = tagName as NativeWidgetType;
                 // Native widgets don't support dynamic conditions yet and don't necessarily have a
                 // `widget` object.
-                const WidgetComponent = MdsEditorViewComponent.nativeWidgets[widgetName];
+                const WidgetComponent = NativeWidgets[widgetName];
                 if(this.mdsEditorInstance.editorMode === 'inline' && !WidgetComponent?.constraints?.supportsInlineEditing) {
                     // native widgets not (yet) supported for inline editing
                     continue;
@@ -290,7 +247,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         element: Element,
     ): void {
         element = replaceElementWithDiv(element);
-        const WidgetComponent = MdsEditorViewComponent.nativeWidgets[widgetName];
+        const WidgetComponent = NativeWidgets[widgetName];
         if (!WidgetComponent) {
             UIHelper.injectAngularComponent(
                 this.factoryResolver,
@@ -397,13 +354,13 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
             }
             return MdsWidgetComponent;
         } else {
-            return MdsEditorViewComponent.widgetComponents[widget.definition.type as MdsWidgetType];
+            return WidgetComponents[widget.definition.type as MdsWidgetType];
         }
     }
 
     private violatesConstraints(constraints: Constraints): string | null {
         if (constraints.requiresNode === true) {
-            if (!this.mdsEditorInstance.nodes$.value) {
+            if (!this.mdsEditorInstance.nodes$.value && !this.mdsEditorInstance.graphqlMetadata$.value) {
                 return 'Only supported if a node object is available';
             }
         }

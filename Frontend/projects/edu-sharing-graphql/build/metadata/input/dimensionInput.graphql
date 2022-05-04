@@ -1,0 +1,4 @@
+input DimensionInput {
+    height: Float!
+    width: Float!
+}

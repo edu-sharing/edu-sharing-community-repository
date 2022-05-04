@@ -6,7 +6,7 @@
   </div>
   <img [src]="src" />
   <div class="button-group">
-    <button mat-fab [color]="$any('white')" (click)="file ? file = null : delete = true; updateSrc()" *ngIf="!delete && (file || node.preview.type === 'TYPE_USERDEFINED')"><i esIcon="delete"></i></button>
+    <button mat-fab [color]="$any('white')" (click)="file ? file = null : delete = true; updateSrc()" *ngIf="!delete && (file || getType() === 'TYPE_USERDEFINED')"><i esIcon="delete"></i></button>
     <button mat-fab [color]="$any('white')" (click)="fileInput.click()"><i esIcon="file_upload"></i></button>
   </div>
 </div>

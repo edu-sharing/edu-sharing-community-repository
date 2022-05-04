@@ -3,6 +3,7 @@ import {NativeWidgetComponent} from '../../mds-editor-view/mds-editor-view.compo
 import {BehaviorSubject} from 'rxjs';
 import {MdsEditorInstanceService} from '../../mds-editor-instance.service';
 import {RestConstants} from '../../../../../core-module/rest/rest-constants';
+import {filter} from 'rxjs/operators';
 
 @Component({
     selector: 'es-mds-editor-widget-version',
@@ -14,6 +15,10 @@ export class MdsEditorWidgetVersionComponent implements OnInit, NativeWidgetComp
         requiresNode: true,
         supportsBulk: false,
     };
+    static readonly graphqlIds = [
+        'version.version',
+        'version.comment',
+    ];
     hasChanges = new BehaviorSubject<boolean>(false);
 
     comment: string;
@@ -25,7 +30,9 @@ export class MdsEditorWidgetVersionComponent implements OnInit, NativeWidgetComp
     ) {}
 
     ngOnInit(): void {
-        this.mdsEditorValues.nodes$.subscribe((nodes) =>
+        this.mdsEditorValues.nodes$.pipe(
+            filter((nodes) => !!nodes)
+        ).subscribe((nodes) =>
             this.show = nodes.some((n) =>
                 !n?.properties[RestConstants.CCM_PROP_IO_WWWURL]?.[0]
             ) && nodes.every((n) => n.type === RestConstants.CCM_TYPE_IO)

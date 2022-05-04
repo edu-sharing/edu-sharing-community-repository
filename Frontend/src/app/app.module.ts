@@ -81,6 +81,7 @@ import { LabelPipe } from './common/ui/mds-editor/shared/label.pipe';
 import { PropertySlugPipe } from './common/ui/mds-editor/shared/property-slug.pipe';
 import { MdsEditorWidgetSearchSuggestionsComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-search-suggestions/mds-editor-widget-search-suggestions.component';
 import { EduSharingApiModule, EDU_SHARING_API_CONFIG } from 'ngx-edu-sharing-api';
+import { EduSharingGraphqlModule } from 'ngx-edu-sharing-graphql';
 import { MdsEditorWidgetVCardComponent } from './common/ui/mds-editor/widgets/mds-editor-widget-vcard/mds-editor-widget-vcard.component';
 import { extensionProviders } from './extension/extension-providers';
 import {
@@ -95,11 +96,13 @@ import {ErrorHandlerService} from './core-ui-module/error-handler.service';
 import { Toast } from './core-ui-module/toast';
 import { TranslationsModule } from './translations/translations.module';
 import { MainModule } from './main/main.module';
+import {ApolloClientOptions, InMemoryCache} from '@apollo/client';
+import {HttpLink} from 'apollo-angular/http';
+import {APOLLO_OPTIONS, ApolloModule} from 'apollo-angular';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/
 // -> Making modules more readable using the spread operator
-
 
 @NgModule({
     declarations: [
@@ -174,9 +177,11 @@ import { MainModule } from './main/main.module';
     ],
     imports: [
         IMPORTS,
+        ApolloModule,
         CommonModule,
         MainModule,
         EduSharingApiModule.forRoot(),
+        EduSharingGraphqlModule,
         TranslationsModule.forRoot(),
         NgxSliderModule,
         DragDropModule,
@@ -191,6 +196,16 @@ import { MainModule } from './main/main.module';
             useFactory: (errorHandler: ErrorHandlerService) => ({
                 onError: (err, req) => errorHandler.handleError(err, req),
             } as EduSharingApiConfigurationParams),
+        },
+        {
+            provide: APOLLO_OPTIONS,
+            useFactory: (httpLink: HttpLink) => {
+                return {
+                    link: httpLink.create({ uri: '/edu-sharing/graphql' }),
+                    cache: new InMemoryCache(),
+                };
+            },
+            deps: [HttpLink],
         },
         PROVIDERS,
         PROVIDERS_SEARCH,

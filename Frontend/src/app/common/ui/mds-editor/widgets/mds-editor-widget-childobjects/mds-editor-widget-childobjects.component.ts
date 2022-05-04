@@ -43,6 +43,9 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
         requiresNode: true,
         supportsBulk: false,
     };
+    static readonly graphqlIds: string[] = [
+
+    ];
     hasChanges = new BehaviorSubject<boolean>(false);
     children: Childobject[] = [];
     add = false;

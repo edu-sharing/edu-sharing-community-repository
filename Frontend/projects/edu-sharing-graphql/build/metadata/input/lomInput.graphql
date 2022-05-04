@@ -1,0 +1,10 @@
+input LomInput {
+    general: GeneralInput
+    lifecycle: LifecycleInput
+    metaMetadata: MetaMetadataInput
+    technical: TechnicalInput
+    educational: [EducationalInput!]
+    rights: RightsInput
+    classification: [ClassificationInput!]
+    editorial: [EditorialInput!]
+}

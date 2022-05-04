@@ -8,6 +8,10 @@
         "dist/edu-sharing-api/edu-sharing-api",
         "dist/edu-sharing-api"
       ],
+      "ngx-edu-sharing-graphql": [
+        "dist/edu-sharing-graphql/edu-sharing-graphql",
+        "dist/edu-sharing-graphql"
+      ],
       // Prevent imports from `projects` directory.
       //
       // Don't directly import modules from `projects`, but instead build project modules

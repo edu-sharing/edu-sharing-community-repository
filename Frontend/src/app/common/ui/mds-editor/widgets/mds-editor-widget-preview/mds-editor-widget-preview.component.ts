@@ -7,7 +7,7 @@ import {FileChangeEvent} from '@angular/compiler-cli/src/perform_watch';
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import {RestNodeService} from '../../../../../core-module/rest/services/rest-node.service';
 import {Node} from '../../../../../core-module/rest/data-object';
-
+import {Metadata} from 'ngx-edu-sharing-graphql';
 @Component({
     selector: 'es-mds-editor-widget-preview',
     templateUrl: './mds-editor-widget-preview.component.html',
@@ -18,11 +18,18 @@ export class MdsEditorWidgetPreviewComponent implements OnInit, NativeWidgetComp
         requiresNode: true,
         supportsBulk: false,
     };
+    static readonly graphqlIds = [
+        'info.preview.url',
+        'info.preview.data',
+        'info.preview.mimetype',
+        'info.preview.type',
+    ];
     hasChanges = new BehaviorSubject<boolean>(false);
     src: SafeResourceUrl | string;
     nodeSrc: string;
     file: File;
     node: Node;
+    metadata: Metadata;
     delete = false;
     constructor(
         private mdsEditorValues: MdsEditorInstanceService,
@@ -35,6 +42,22 @@ export class MdsEditorWidgetPreviewComponent implements OnInit, NativeWidgetComp
             if (nodes?.length === 1) {
                 this.nodeSrc = nodes[0].preview.url + '&crop=true&width=400&height=300&dontcache=:cache';
                 this.node = nodes[0];
+                this.updateSrc();
+                // we need to reload the image since we don't know if the image (e.g. video file) is still being processed
+                // FIXME: this will run forever!
+                setInterval(() => {
+                    if(this.file) {
+                        return;
+                    }
+                    this.updateSrc();
+                }, 5000);
+            }
+        });
+        this.mdsEditorValues.graphqlMetadata$.subscribe((metadata) => {
+            if (metadata?.length === 1) {
+                console.log(metadata);
+                this.nodeSrc = metadata[0].info.preview.url + '&crop=true&width=400&height=300&dontcache=:cache';
+                this.metadata = metadata[0];
                 this.updateSrc();
                 // we need to reload the image since we don't know if the image (e.g. video file) is still being processed
                 // FIXME: this will run forever!
@@ -70,5 +93,9 @@ export class MdsEditorWidgetPreviewComponent implements OnInit, NativeWidgetComp
         }
         return observableForkJoin(nodes.map((n) => this.nodeService.uploadNodePreview(n.ref.id, this.file))).pipe(
                 map(() => nodes)).toPromise();
+    }
+
+    getType() {
+        return this.node?.preview?.type || this.metadata?.info?.preview?.type;
     }
 }

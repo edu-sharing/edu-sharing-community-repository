@@ -172,8 +172,8 @@
                       (onCancel)="ltiObject=null"
                       (onCreate)="createLtiNodeObject($event)"
 ></es-workspace-create-lti>
-<es-mds-editor-wrapper *ngIf="_nodeMetadata || createMetadata"
-     [nodes]="_nodeMetadata"
+<es-mds-editor-wrapper *ngIf="_nodeIds || createMetadata"
+     [graphqlIds]="_nodeIds"
      [create]="createMetadata"
      [parentNode]="metadataParent"
      [bulkBehaviour]="_nodeFromUpload ? BulkBehaviour.Replace : BulkBehaviour.Default"

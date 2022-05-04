@@ -36,7 +36,8 @@ export class LicenseDetailsComponent implements OnChanges {
     }
     ngOnChanges(changes: SimpleChanges) {
         // Set the `draggable` attribute when this directive is active.
-        if (changes.nodes) {
+        if (changes.nodes?.currentValue) {
+            console.log(changes.nodes);
             this.readLicense();
         }
     }
@@ -88,8 +89,12 @@ export class LicenseDetailsComponent implements OnChanges {
     private getValueForAll(prop:string,fallbackNotIdentical:any='',fallbackIsEmpty=fallbackNotIdentical) {
         if(this.properties) {
             return this.properties[prop] ? this.properties[prop][0] : fallbackIsEmpty;
+        } else if(this.nodes) {
+            return this.nodeHelper.getValueForAll(this.nodes, prop, fallbackNotIdentical, fallbackIsEmpty, false);
+        } else {
+            // console.warn('license has no data to display');
+            return fallbackIsEmpty;
         }
-        return this.nodeHelper.getValueForAll(this.nodes, prop, fallbackNotIdentical, fallbackIsEmpty, false);
     }
     getLicenseIcon() {
         return this.nodeHelper.getLicenseIconByString(this.getLicenseProperty());

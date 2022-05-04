@@ -1,0 +1,4 @@
+type Dimension {
+    height: Float!
+    width: Float!
+}
