@@ -56,6 +56,10 @@ export class MdsEditorWidgetChipsComponent
 
     readonly valueType: ValueType = ValueType.MultiValue;
     readonly separatorKeysCodes: number[] = [ENTER, COMMA];
+    // TODO: We use `listControl` only for the disabled state right now. However, `listControl`
+    // should probably be the main `formControl` and `chipsControl` could probably be refactored
+    // into a simple data type.
+    listControl = new FormControl();
     inputControl = new FormControl();
     chipsControl: FormControl;
     autocompleteValues: Observable<DisplayValue[]>;
@@ -105,9 +109,9 @@ export class MdsEditorWidgetChipsComponent
             this.changeDetectorRef.detectChanges();
         }
         if(this.chipsControl.disabled) {
-            this.inputControl.disable();
+            this.listControl.disable();
         }
-        this.chipsControl.registerOnDisabledChange((d) => d ? this.inputControl.disable() : this.inputControl.enable());
+        this.chipsControl.registerOnDisabledChange((d) => d ? this.listControl.disable() : this.listControl.enable());
         this.chipsControl.valueChanges
             .pipe(distinctUntilChanged())
             .subscribe((values: DisplayValue[]) => this.setValue(values.map((value) => value.key)));
