@@ -97,7 +97,6 @@ export class PermissionsDeleteComponent implements OnInit {
     async ngOnInit() {
         this.jobs = (await this.admin.getAllJobs().toPromise())
             .filter((j) => j.tags?.includes('DeletePersonJob'));
-        console.log(this.jobs);
     }
 
   /**
