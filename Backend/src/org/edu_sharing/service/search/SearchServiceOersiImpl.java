@@ -82,7 +82,7 @@ public class SearchServiceOersiImpl extends SearchServiceAdapter {
   public SearchServiceOersiImpl(String appId) {
     ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
     this.repositoryId = appInfo.getAppId();
-    this.oersiHost = appInfo.getString(ApplicationInfo.KEY_HOST, "oersi.de");
+    this.oersiHost = appInfo.getString(ApplicationInfo.KEY_HOST, "oersi.org");
     this.oersiPort = Integer.parseInt(appInfo.getString(ApplicationInfo.KEY_PORT, "443"));
     this.oersiScheme = appInfo.getString(ApplicationInfo.KEY_PROTOCOL, "https");
     this.oersiPathPrefix = appInfo.getString("pathprefix", "/resources/api-internal/search");
