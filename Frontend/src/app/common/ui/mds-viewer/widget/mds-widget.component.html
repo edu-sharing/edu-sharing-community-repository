@@ -36,21 +36,21 @@
           <div *ngIf="getBasicType() == 'number'">{{ formatNumber() }}</div>
           <div *ngIf="getBasicType() == 'date'">{{ formatDate() }}</div>
           <div *ngIf="getBasicType() == 'array'">
-            <div class="array-entry" *ngFor="let v of getNodeValue()">{{ v }}</div>
+            <div class="array-entry" *ngFor="let v of value">{{ v }}</div>
           </div>
           <div *ngIf="getBasicType() == 'vcard'">
-            <div class="array-entry" *ngFor="let v of getNodeValue()">{{ v | vcardName }}</div>
+            <div class="array-entry" *ngFor="let v of value">{{ v | vcardName }}</div>
           </div>
           <div *ngIf="getBasicType() == 'slider'">
-            <span class="slider-value">{{ getNodeValue() }}</span
+            <span class="slider-value">{{ value }}</span
             ><span> / </span><span class="slider-max">{{ widget.definition.max }}</span>
           </div>
           <div *ngIf="getBasicType() == 'duration'">
-            <span class="duration-value">{{ getNodeValue()[0] | appMdsDuration }}</span>
+            <span class="duration-value">{{ value[0] | appMdsDuration }}</span>
           </div>
           <div *ngIf="getBasicType() == 'range'">
-            <span class="slider-value">{{ getNodeValue()[0] }}</span
-            >-<span class="slider-value">{{ getNodeValue()[1] }}</span>
+            <span class="slider-value">{{ value[0] }}</span
+            >-<span class="slider-value">{{ value[1] }}</span>
           </div>
           <div *ngIf="getBasicType() == 'unknown'">
             The widget type {{ widget.definition.type }} is currently not supported via angular

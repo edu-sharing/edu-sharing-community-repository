@@ -1,5 +1,13 @@
 import { DatePipe } from '@angular/common';
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import {
+    Component,
+    ElementRef,
+    Input,
+    OnChanges,
+    OnInit,
+    SimpleChanges,
+    ViewChild
+} from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { DateHelper } from '../../../../core-ui-module/DateHelper';
 import { FormatSizePipe } from '../../../../core-ui-module/pipes/file-size.pipe';
@@ -17,7 +25,7 @@ import {RestConstants} from '../../../../core-module/rest/rest-constants';
     templateUrl: 'mds-widget.component.html',
     styleUrls: ['mds-widget.component.scss'],
 })
-export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit {
+export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, OnChanges {
     private static readonly inlineEditing: MdsWidgetType[] = [
         MdsWidgetType.Text,
         MdsWidgetType.Number,
@@ -42,6 +50,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit {
         return this.viewInstance.headingLevel;
     }
 
+    value: string[] = undefined;
     private temporaryValue: string[] = undefined;
 
     constructor(
@@ -52,7 +61,14 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit {
         super(mdsEditorInstance, translate);
     }
 
-    ngOnInit(): void {}
+    ngOnChanges(changes: SimpleChanges): void {
+        this.value = this.getNodeValue();
+    }
+
+
+    ngOnInit() {
+        this.value = this.getNodeValue();
+    }
 
     getBasicType() {
         switch (this.widget.definition.type) {
@@ -91,7 +107,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit {
         );
     }
 
-    getNodeValue() {
+    private getNodeValue() {
         if (this.temporaryValue !== undefined) {
             return this.getValue(this.temporaryValue);
         }
@@ -142,14 +158,14 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit {
 
     isEmpty() {
         return (
-            this.getNodeValue()?.every((v) => !v) ||
-            this.getNodeValue()?.length === 0 ||
-            !this.getNodeValue()
+            this.value?.every((v) => !v) ||
+            this.value?.length === 0 ||
+            !this.value
         );
     }
 
     formatDate() {
-        return this.getNodeValue().map((v) => {
+        return this.value.map((v) => {
             if (this.widget.definition.format) {
                 try {
                     return new DatePipe(null).transform(v, this.widget.definition.format);
@@ -168,7 +184,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit {
     }
 
     formatNumber() {
-        return this.getNodeValue().map((v) => {
+        return this.value.map((v) => {
             if (this.widget.definition.format === 'bytes') {
                 return new FormatSizePipe(this.translate).transform(v);
             }
@@ -177,7 +193,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit {
     }
 
     formatText() {
-        return this.getNodeValue().map((v) => {
+        return this.value.map((v) => {
             if (this.widget.definition.format) {
                 return this.widget.definition.format.replace('${value}', v);
             }
@@ -188,6 +204,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit {
     async finishEdit(instance: MdsEditorWidgetBase) {
         await this.mdsEditorInstance.saveWidgetValue(instance.widget);
         this.temporaryValue = instance.widget.getValue();
+        this.value = this.getNodeValue();
         this.editWrapper.nativeElement.children[0].innerHTML = null;
     }
 
