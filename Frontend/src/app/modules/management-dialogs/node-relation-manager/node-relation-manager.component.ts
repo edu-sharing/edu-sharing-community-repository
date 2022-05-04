@@ -73,7 +73,7 @@ export class NodeRelationManagerComponent implements OnInit{
     });
     readonly buttons = [new DialogButton('CLOSE',
         DialogButton.TYPE_CANCEL,
-        () => this.close.emit(false)
+        () => this.cancel()
     ),
         new DialogButton('SAVE',
             DialogButton.TYPE_PRIMARY,
@@ -231,6 +231,31 @@ export class NodeRelationManagerComponent implements OnInit{
 
     canModify(relation: RelationData) {
         return this.nodeHelper.getNodesRight([relation.node], RestConstants.PERMISSION_WRITE, NodesRightMode.Original);
+    }
+
+    private cancel() {
+        if (this.hasChanges()) {
+            this.toast.showModalDialog(
+                'MDS.CONFIRM_DISCARD_TITLE',
+                'MDS.CONFIRM_DISCARD_MESSAGE',
+                [
+                    new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => {
+                        this.toast.closeModalDialog();
+                    }),
+                    new DialogButton('DISCARD', DialogButton.TYPE_PRIMARY, () => {
+                        this.close.emit();
+                        this.toast.closeModalDialog();
+                    }),
+                ],
+                true,
+            );
+        } else {
+            this.close.emit();
+        }
+    }
+
+    private hasChanges() {
+        return this.addRelations?.length || this.deleteRelations?.length;
     }
 }
 export enum Relations {

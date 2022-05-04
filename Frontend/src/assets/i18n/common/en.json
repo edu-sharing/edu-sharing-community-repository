@@ -163,7 +163,8 @@
         "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" can be viewed & browsed",
         "TOOLPERMISSION_CREATE_MAP_LINK": "Create folders that link to other folders",
         "TOOLPERMISSION_SIGNUP_GROUP": "Signup to an organisation/group (only applies to organisation/groups which are configured for signup)",
-        "TOOLPERMISSION_COLLECTION_PROPOSAL": "Allow the user to propose materials for collection where he/she doesn't has write permissions for"
+        "TOOLPERMISSION_COLLECTION_PROPOSAL": "Allow the user to propose materials for collection where he/she doesn't has write permissions for",
+        "TOOLPERMISSION_MANAGE_RELATIONS": "Manage and create relations between materials"
     },
     "NO_WRITE_PERMISSIONS": "No permissions",
     "NODE_SEARCH": "Search elements...",

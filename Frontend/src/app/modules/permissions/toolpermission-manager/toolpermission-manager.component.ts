@@ -170,16 +170,16 @@ export class ToolpermissionManagerComponent {
     if(this.deny[key]){
       return ToolpermissionManagerComponent.STATUS_DENIED;
     }
-    if(this.allow[key] && this.permissions[key].effective!=ToolpermissionManagerComponent.STATUS_DENIED){
+    if(this.allow[key] && this.permissions[key]?.effective!=ToolpermissionManagerComponent.STATUS_DENIED){
       return ToolpermissionManagerComponent.STATUS_ALLOWED;
     }
-    if(!this.denyInit[key] && this.permissions[key].effective==ToolpermissionManagerComponent.STATUS_DENIED){
+    if(!this.denyInit[key] && this.permissions[key]?.effective==ToolpermissionManagerComponent.STATUS_DENIED){
       return ToolpermissionManagerComponent.STATUS_DENIED;
     }
     if(this.allow[key]!=this.allowInit[key] || this.deny[key]!=this.denyInit[key]) {
       return ToolpermissionManagerComponent.STATUS_UNKNOWN;
     }
-    return this.permissions[key].effective;
+    return this.permissions[key]?.effective;
   }
   isImplicit(key:string) {
     if(this._authority.authorityType==RestConstants.AUTHORITY_TYPE_EVERYONE){

@@ -161,7 +161,8 @@
         "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" darf angezeigt und durchsucht werden",
         "TOOLPERMISSION_CREATE_MAP_LINK": "Ordner anlegen, welche auf andere Ordner verweisen/verlinken",
         "TOOLPERMISSION_SIGNUP_GROUP": "Zu einer Organisation/Gruppe einschreiben (gilt nur für seperat dafür freigegebene Organisationen/Gruppen)",
-        "TOOLPERMISSION_COLLECTION_PROPOSAL": "Vorschlagen von Materialien für Sammlungen, für welche der Nutzer keine Schreibrechte hat"
+        "TOOLPERMISSION_COLLECTION_PROPOSAL": "Vorschlagen von Materialien für Sammlungen, für welche der Nutzer keine Schreibrechte hat",
+        "TOOLPERMISSION_MANAGE_RELATIONS": "Verwalten und erstellen von Beziehungen zwischen Elementen"
     },
     "NO_WRITE_PERMISSIONS": "Keine Rechte für diesen Vorgang",
     "NODE_SEARCH": "Elemente suchen...",
