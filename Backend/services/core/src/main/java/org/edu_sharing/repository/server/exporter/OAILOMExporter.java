@@ -28,6 +28,10 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
+import org.edu_sharing.service.relations.NodeRelation;
+import org.edu_sharing.service.relations.RelationData;
+import org.edu_sharing.service.relations.RelationService;
+import org.edu_sharing.service.relations.RelationServiceFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.surf.util.ISO8601DateFormat;
 import org.w3c.dom.Document;
@@ -35,6 +39,7 @@ import org.w3c.dom.Element;
 
 public class OAILOMExporter {
 
+	private final RelationService relationService;
 	Logger logger = Logger.getLogger(OAILOMExporter.class);
 
 	ServiceRegistry serviceRegistry = null;
@@ -56,13 +61,7 @@ public class OAILOMExporter {
 		ApplicationContext context = AlfAppContextGate.getApplicationContext();
 		serviceRegistry = (ServiceRegistry) context.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		nodeService = serviceRegistry.getNodeService();
-
-
-		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-
-		// root element record
-		doc = docBuilder.newDocument();
+		relationService = RelationServiceFactory.getLocalService();
 	}
 	public void export(String outputDir, String ioId) {
 		nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, ioId);
@@ -78,33 +77,41 @@ public class OAILOMExporter {
 	}
 	public void write(OutputStream os,String ioId) {
 		nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, ioId);
-
-		List<String> language = (List<String>)nodeService.getProperty(nodeRef,QName.createQName(CCConstants.LOM_PROP_GENERAL_LANGUAGE));
-		nodeLanguage = (language != null && language.size() > 0) ? Locale.forLanguageTag(language.get(0).trim()) : Locale.getDefault();
-		if(nodeLanguage == null) nodeLanguage = Locale.getDefault();
-
 		QName type = nodeService.getType(nodeRef);
 
 		if (!type.equals(QName.createQName(CCConstants.CCM_TYPE_IO))) {
 			logger.error("this was not an io");
 			return;
 		}
-		
+
+
+		//formatted output
+		try{
+			createDocument(ioId);
+			XMLSerializer serializer = new XMLSerializer(os, new OutputFormat(doc,"UTF-8", true));
+			serializer.serialize(doc);
+		}catch(Exception e){
+			logger.error(e.getMessage(),e);
+		}
+
+	}
+
+	public Document createDocument(String ioId) throws ParserConfigurationException {
+		nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, ioId);
+		// root element record
+		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+		doc = docBuilder.newDocument();
+		List<String> language = (List<String>)nodeService.getProperty(nodeRef,QName.createQName(CCConstants.LOM_PROP_GENERAL_LANGUAGE));
+		nodeLanguage = (language != null && language.size() > 0) ? Locale.forLanguageTag(language.get(0).trim()) : Locale.getDefault();
+		if(nodeLanguage == null) nodeLanguage = Locale.getDefault();
 		Element lom = doc.createElement("lom");
 		doc.appendChild(lom);
 
 		createNameSpace(lom);
 
 		construction(lom);
-
-		//formatted output
-		try{
-			XMLSerializer serializer = new XMLSerializer(os, new OutputFormat(doc,"UTF-8", true));
-			serializer.serialize(doc);
-		}catch(IOException e){
-			logger.error(e.getMessage(),e);
-		}
-
+		return doc;
 	}
 
 	public void createNameSpace(Element lom) {
@@ -220,7 +227,26 @@ public class OAILOMExporter {
 		createEducational(lom);
 		createRights(lom);
 		createThumbnail(lom);
+		createRelation(lom);
 		createClassification(lom);
+	}
+
+	private void createRelation(Element lom) {
+		try {
+			NodeRelation relations = relationService.getRelations(nodeRef.getId());
+			if(!relations.getRelations().isEmpty()) {
+				for(RelationData rd : relations.getRelations()) {
+					Element relation = createAndAppendElement("relation", lom);
+					Element kind = createAndAppendElement("kind", relation);
+					createAndAppendElement("source", kind,"LOM-DEv1.0");
+					createAndAppendElement("value", kind,rd.getType().toString());
+					Element resource = createAndAppendElement("resource", relation);
+					Element description = createAndAppendElement("description", resource);
+					Element string = createAndAppendElement("string", description, URLTool.getNgRenderNodeUrl(rd.getNode(), null));
+					string.setAttribute(xmlLanguageAttribute, "en");
+				}
+			}
+		}catch (Throwable ignored) {}
 	}
 
 	public void createStructure(Element general) {
