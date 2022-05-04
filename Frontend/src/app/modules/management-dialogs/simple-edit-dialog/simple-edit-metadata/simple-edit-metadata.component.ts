@@ -2,11 +2,11 @@ import { trigger } from '@angular/animations';
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { BehaviorSubject, forkJoin, from, Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { MdsEditorWrapperComponent } from '../../../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
-import { BulkBehavior } from '../../../../common/ui/mds/mds.component';
 import { Node, RestConstants, RestNodeService } from '../../../../core-module/core.module';
 import { UIAnimation } from '../../../../core-module/ui/ui-animation';
 import { Toast } from '../../../../core-ui-module/toast';
+import { MdsEditorWrapperComponent } from '../../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import { BulkBehavior } from '../../../../features/mds/types/types';
 
 @Component({
     selector: 'es-simple-edit-metadata',

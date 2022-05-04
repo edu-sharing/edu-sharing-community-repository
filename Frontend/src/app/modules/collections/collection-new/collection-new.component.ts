@@ -38,7 +38,7 @@ import {Collection} from "../../../core-module/core.module";
 import {RestConnectorService} from "../../../core-module/core.module";
 import {ConfigurationService} from "../../../core-module/core.module";
 import {UIConstants} from "../../../core-module/ui/ui-constants";
-import {MdsComponent} from "../../../common/ui/mds/mds.component";
+import {MdsComponent} from "../../../features/mds/legacy/mds/mds.component";
 import {TranslateService} from "@ngx-translate/core";
 import {ColorHelper, PreferredColor} from '../../../core-module/ui/color-helper';
 import {DomSanitizer} from "@angular/platform-browser";
@@ -52,13 +52,13 @@ import {WorkspaceShareComponent} from "../../workspace/share/share.component";
 import {MdsMetadatasets} from '../../../core-module/core.module';
 import {ConfigurationHelper} from '../../../core-module/core.module';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
-import {MdsEditorWrapperComponent} from '../../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
-import {Values} from '../../../common/ui/mds-editor/types';
 import {DefaultGroups, OptionItem} from '../../../core-ui-module/option-item';
 import {Observable} from 'rxjs';
 import {PlatformLocation} from '@angular/common';
 import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
+import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import { Values } from '../../../features/mds/types/types';
 
 type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITORIAL_GROUPS';
 

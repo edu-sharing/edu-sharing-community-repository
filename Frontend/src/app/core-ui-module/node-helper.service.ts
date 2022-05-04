@@ -33,7 +33,7 @@ import {RestHelper} from '../core-module/rest/rest-helper';
 import {RestConnectorService} from '../core-module/rest/services/rest-connector.service';
 import {ListItem} from '../core-module/ui/list-item';
 import {RestNetworkService} from '../core-module/rest/services/rest-network.service';
-import {SpinnerSmallComponent} from './components/spinner-small/spinner-small.component';
+import {SpinnerSmallComponent} from '../shared/components/spinner-small/spinner-small.component';
 import {AVAILABLE_LIST_WIDGETS} from './components/list-table/widgets/available-widgets';
 import {NodePersonNamePipe} from './pipes/node-person-name.pipe';
 import {FormBuilder} from '@angular/forms';

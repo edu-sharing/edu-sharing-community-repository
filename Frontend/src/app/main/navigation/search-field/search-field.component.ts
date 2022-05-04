@@ -14,8 +14,8 @@ import { MatChip } from '@angular/material/chips';
 import { FacetsDict, LabeledValue, LabeledValuesDict } from 'ngx-edu-sharing-api';
 import { Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
-import { SearchFieldFacetsComponent } from '../../../common/ui/mds-editor/search-field-facets/search-field-facets.component';
-import { Values } from '../../../common/ui/mds-editor/types';
+import { SearchFieldFacetsComponent } from '../../../features/mds/mds-editor/search-field-facets/search-field-facets.component';
+import { Values } from '../../../features/mds/types/types';
 import { SearchFieldService } from './search-field.service';
 
 @Component({

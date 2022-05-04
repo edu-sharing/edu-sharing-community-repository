@@ -13,7 +13,6 @@ import {ActivatedRoute, Params, Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
 import {ActionbarHelperService} from '../../common/services/actionbar-helper';
 import {MainNavComponent} from '../../main/navigation/main-nav/main-nav.component';
-import {MdsEditorWrapperComponent} from '../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {
     CollectionWrapper,
@@ -60,7 +59,6 @@ import { TranslationsService } from '../../translations/translations.service';
 import {UIHelper} from '../../core-ui-module/ui-helper';
 import {SearchService} from './search.service';
 import {WindowRefService} from './window-ref.service';
-import {MdsDefinition, Values} from '../../common/ui/mds-editor/types';
 import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 import {FormControl} from '@angular/forms';
 import {BehaviorSubject, ReplaySubject, combineLatest, Observable, Subject} from 'rxjs';
@@ -73,11 +71,13 @@ import {
 import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 import { SearchFieldService } from 'src/app/main/navigation/search-field/search-field.service';
-import { MdsService, MetadataSetInfo, SearchResults, SearchService as SearchApiService } from 'ngx-edu-sharing-api';
+import { MdsDefinition, MdsService, MetadataSetInfo, SearchResults, SearchService as SearchApiService } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import {InteractionType, ListSortConfig, NodeEntriesDisplayType} from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
+import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import { Values } from '../../features/mds/types/types';
 
 @Component({
     selector: 'es-search',
