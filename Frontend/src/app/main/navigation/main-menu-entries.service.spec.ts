@@ -41,6 +41,7 @@ describe('MainMenuEntriesService', () => {
     beforeEach(() => {
         authenticationStub = {
             observeHasAccessToScope: (scope: string) => of(true),
+            observeLoginInfo: () => of({}),
         } as unknown as AuthenticationService;
         configurationStub = {
             getAll: () => of({}),
