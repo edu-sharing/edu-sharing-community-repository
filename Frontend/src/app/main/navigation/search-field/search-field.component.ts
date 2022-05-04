@@ -198,7 +198,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
             return 0;
         }
         const mapped = Object.keys(filters)
-            .filter((f) => this.categories$.value.includes(f))
+            .filter((f) => this.categories$.value?.includes(f))
             .map((k) => filters[k].length);
         if (!mapped.length) {
             return 0;
