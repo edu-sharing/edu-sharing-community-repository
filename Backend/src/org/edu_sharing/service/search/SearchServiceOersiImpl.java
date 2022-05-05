@@ -2,7 +2,9 @@ package org.edu_sharing.service.search;
 
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpHost;
+import org.apache.http.message.BasicHeader;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
 import org.edu_sharing.metadataset.v2.MetadataReader;
@@ -21,6 +23,7 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.Operator;
@@ -280,7 +283,10 @@ public class SearchServiceOersiImpl extends SearchServiceAdapter {
 
     @Override
     public void endpoint(String host, int port, String scheme, String pathPrefix, String index) {
-      this.client = new RestHighLevelClient(RestClient.builder(new HttpHost(host, port, scheme)).setPathPrefix(pathPrefix));
+      RestClientBuilder builder = RestClient.builder(new HttpHost(host, port, scheme));
+      builder.setPathPrefix(pathPrefix);
+      builder.setDefaultHeaders(new Header[] {new BasicHeader("Host", host)});
+      this.client = new RestHighLevelClient(builder);
       this.index = index;
     }
     @Override
