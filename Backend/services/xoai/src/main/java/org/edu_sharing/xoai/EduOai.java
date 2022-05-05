@@ -5,6 +5,7 @@ import org.dspace.xoai.dataprovider.DataProvider;
 import org.dspace.xoai.dataprovider.exceptions.OAIException;
 import org.dspace.xoai.dataprovider.handlers.results.ListSetsResult;
 import org.dspace.xoai.dataprovider.model.Context;
+import org.dspace.xoai.dataprovider.model.MetadataFormat;
 import org.dspace.xoai.dataprovider.model.Set;
 import org.dspace.xoai.dataprovider.parameters.OAIRequest;
 import org.dspace.xoai.dataprovider.repository.Repository;
