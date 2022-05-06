@@ -205,7 +205,7 @@ export class WorkspaceManagementDialogsComponent  {
      * @node: Reference to the node (for header title)
      * @data: The string to display inside the qr code (e.g. an url)
      */
-  @Input() qr: {node: Node, data: string};
+//   @Input() qr: {node: Node, data: string};
 
     /**
      * @Deprecated, the components should use toast service directly

@@ -6,7 +6,6 @@ import {
     ElementRef,
     HostBinding,
     Inject,
-    InjectionToken,
     NgZone,
     OnDestroy,
     OnInit,
@@ -19,28 +18,25 @@ import { first, startWith } from 'rxjs/operators';
 import { DialogButton, RestHelper } from 'src/app/core-module/core.module';
 import { Toast, ToastType } from 'src/app/core-ui-module/toast';
 import { UIHelper } from 'src/app/core-ui-module/ui-helper';
-import { Node } from '../../../core-module/rest/data-object';
-import { MainNavService } from '../../../main/navigation/main-nav.service';
+import { Node } from '../../../../core-module/rest/data-object';
+import { MainNavService } from '../../../../main/navigation/main-nav.service';
+import { CardDialogState } from '../../card-dialog/card-dialog-config';
+import { CARD_DIALOG_DATA, CARD_DIALOG_STATE } from '../../card-dialog/card-dialog.service';
 
-export interface NodeEmbedConfig {
+export interface NodeEmbedDialogData {
     node: Node;
-    onClose: () => void;
 }
-
-export const NODE_EMBED_CONFIG = new InjectionToken<NodeEmbedConfig>('Node Embed Config');
 
 /**
  * Dialog to generate an embed snippet for a node.
- *
- * Use via `NodeEmbedService`.
  */
 @Component({
-    selector: 'es-node-embed',
-    templateUrl: './node-embed.component.html',
-    styleUrls: ['./node-embed.component.scss'],
+    selector: 'es-node-embed-dialog',
+    templateUrl: './node-embed-dialog.component.html',
+    styleUrls: ['./node-embed-dialog.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NodeEmbedComponent implements OnInit, OnDestroy {
+export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
     @HostBinding('hidden') hidden: string | null = null;
     @ViewChild('textarea') textareaRef: ElementRef<HTMLTextAreaElement>;
 
@@ -72,7 +68,8 @@ export class NodeEmbedComponent implements OnInit, OnDestroy {
     private readonly destroyed$ = new Subject<void>();
 
     constructor(
-        @Inject(NODE_EMBED_CONFIG) public config: NodeEmbedConfig,
+        @Inject(CARD_DIALOG_DATA) public data: NodeEmbedDialogData,
+        @Inject(CARD_DIALOG_STATE) private dialogState: CardDialogState,
         private changeDetectorRef: ChangeDetectorRef,
         private location: Location,
         private mainNav: MainNavService,
@@ -82,6 +79,7 @@ export class NodeEmbedComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit(): void {
+        this.dialogState.patchCardConfig({ buttons: this.buttons });
         this.registerFormChanges();
         this.registerNotPublicWarning();
     }
@@ -95,7 +93,7 @@ export class NodeEmbedComponent implements OnInit, OnDestroy {
         // We cannot show the invite dialog on top of this dialog, since this dialog is attached via
         // a `cdkOverlay`, so instead, we just hide this dialog until the invite dialog is closed.
         this.hidden = 'true';
-        this.mainNav.getDialogs().nodeShare = [this.config.node];
+        this.mainNav.getDialogs().nodeShare = [this.data.node];
         this.mainNav
             .getDialogs()
             .nodeShareChange.pipe(first((value) => !value))
@@ -134,7 +132,7 @@ export class NodeEmbedComponent implements OnInit, OnDestroy {
     }
 
     private getEmbedCode(values: any): string {
-        const node = this.config.node;
+        const node = this.data.node;
         // We use `createElement` to have attributes sanitized. Note that occurrences of `&` in the
         // attribute `src` are rightfully escaped to `&amp;`.
         const iFrame = document.createElement('iframe');

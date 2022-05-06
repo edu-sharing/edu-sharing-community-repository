@@ -54,6 +54,7 @@ import { AuthorityNamePipe } from './pipes/authority-name.pipe';
 import { BitwisePipe } from './pipes/bitwise.pipe';
 import { OptionTooltipPipe } from './pipes/option-tooltip.pipe';
 import { ReplaceCharsPipe } from './pipes/replace-chars.pipe';
+import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { VCardNamePipe } from './pipes/vcard-name.pipe';
 
 @NgModule({
@@ -90,6 +91,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         UserAvatarComponent,
         VCardNamePipe,
         WorkspaceCreateConnector,
+        SafeHtmlPipe,
     ],
     imports: [
         A11yModule,
@@ -130,6 +132,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         LinkComponent,
         MatAutocompleteModule,
         MatButtonModule,
+        MatCardModule,
         MatCheckboxModule,
         MatChipsModule,
         MatFormFieldModule,
@@ -163,6 +166,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         UserAvatarComponent,
         VCardNamePipe,
         WorkspaceCreateConnector,
+        SafeHtmlPipe,
     ],
 })
 export class SharedModule {}

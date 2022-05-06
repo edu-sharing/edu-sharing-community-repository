@@ -49,7 +49,6 @@ import { NodeImageSizePipe } from './pipes/node-image-size.pipe';
 import { NodePersonNamePipe } from './pipes/node-person-name.pipe';
 import { NodeSourcePipe } from './pipes/node-source.pipe';
 import { PermissionNamePipe } from './pipes/permission-name.pipe';
-import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { UrlPipe } from './pipes/url.pipe';
 import { Toast } from './toast';
 import {ImageConfigDirective} from './directives/image-config.directive';
@@ -116,7 +115,6 @@ import { SharedModule } from '../shared/shared.module';
         NodesDragSourceDirective,
         NodesDropTargetDirective,
         ImageConfigDirective,
-        SafeHtmlPipe,
         ListOptionItemComponent,
         DistinctClickDirective,
         DurationPipe,
@@ -197,7 +195,6 @@ import { SharedModule } from '../shared/shared.module';
         ListTextComponent,
         NodeTitlePipe,
         TitleDirective,
-        SafeHtmlPipe,
         NodeEntriesWrapperComponent,
         DragCursorDirective,
         NodeEntriesTableComponent,

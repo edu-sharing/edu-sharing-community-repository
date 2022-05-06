@@ -116,8 +116,7 @@ a, a:hover, a:visited, a:active {
 
 #nodeRenderContentWrapper {
   background: #ebebeb;
-  position: absolute;
-  top:$mainnavHeight;
+  margin-top: $mainnavHeight;
   width:100%;
 }
 

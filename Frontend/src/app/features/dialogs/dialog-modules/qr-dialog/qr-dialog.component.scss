@@ -1,0 +1,32 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 0;
+}
+
+qrcode {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+
+    & ::ng-deep > .qrcode {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+
+        > img {
+            width: 100%;
+            // ff scrollbar issue 100%, use calc
+            height: calc(100% - 5px);
+            min-height: 0;
+            object-fit: contain;
+            image-rendering: pixelated;
+        }
+    }
+}
