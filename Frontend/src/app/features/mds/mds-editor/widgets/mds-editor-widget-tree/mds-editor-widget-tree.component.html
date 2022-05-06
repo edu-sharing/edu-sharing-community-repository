@@ -13,19 +13,27 @@
     [valueType]="valueType"
     [control]="chipsControl"
   >
+    <!-- We use `chipsControl` as `formControl` of the chips list. This serves different purposes:
+    - The `formControl` of the chips list controls which chips are *selected*. Thus, by using
+      `chipsControl`, which controls *all* chips, we automatically mark all chips as selected (see
+      below for the reason).
+    - The chips list is the element controlling the form. By attaching `chipsControl` we:
+      - get correct value readings for the required-state
+      - pass the disabled state to chips and the input.
+    -->
     <mat-chip-list
       #chipList
       [attr.aria-labelledby]="chipsControl?.value.length > 0 ? container.labelId : null"
       (click)="$event.stopPropagation(); $event.preventDefault()"
       [multiple]="true"
+      [formControl]="chipsControl"
     >
       <!-- We mark all chips as selected because NVDA will announce "not selected" for each item
       otherwise. It announces nothing (!) for selected items. Same as MdsEditorWidgetChips. -->
       <mat-chip
         #chip="matChip"
         *ngFor="let value of chipsControl?.value"
-        [disabled]="chipsControl.disabled"
-        [selected]="true"
+        [value]="value"
         [removable]="true"
         [matTooltip]="value.label + ' (' + ('MDS.DELETE_KEY_NOTICE' | translate) + ')'"
         [class.indeterminate]="(this.indeterminateValues$ | async)?.includes(value.key)"
@@ -41,7 +49,6 @@
         <input
           autocomplete="off"
           [placeholder]="chipsControl?.value?.length ? null : widget.definition.placeholder"
-          [disabled]="chipsControl.disabled"
           [matChipInputFor]="chipList"
           (click)="openOverlay()"
           cdkMonitorElementFocus

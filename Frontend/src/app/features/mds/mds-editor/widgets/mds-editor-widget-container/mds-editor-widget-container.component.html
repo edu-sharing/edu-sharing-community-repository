@@ -11,7 +11,7 @@
       <mat-slide-toggle
         *ngIf="shouldShowBulkEditToggle()"
         (change)="onBulkEditToggleChange($event)"
-      >{{ 'MDS.BULK_EDIT' | translate }}</mat-slide-toggle
+        >{{ 'MDS.BULK_EDIT' | translate }}</mat-slide-toggle
       >
     </div>
 
@@ -20,8 +20,8 @@
       [attr.role]="wrapInGroup ? 'group' : null"
       [attr.aria-labelledby]="wrapInGroup ? labelId : null"
       [attr.aria-describedby]="
-      widget?.definition.bottomCaption && !shouldShowError() && wrapInGroup ? descriptionId : null
-    "
+        widget?.definition.bottomCaption && !shouldShowError() && wrapInGroup ? descriptionId : null
+      "
     >
       <ng-container *ngTemplateOutlet="content"></ng-container>
       <p
@@ -46,10 +46,18 @@
       [floatLabel]="widget.definition.placeholder ? 'always' : 'auto'"
       class="widget-form-field-{{ widget.definition.id.replace(':', '-') }}"
       [class.warn]="missingRequired === 'mandatoryForPublish'"
+      [hideRequiredMarker]="true"
     >
       <mat-label [id]="labelId">
         {{ widget.definition.caption }}
-        <span *ngIf="widget.definition.isRequired === 'mandatory'" class="required-marker">*</span>
+        <!-- We use our own required marker to show it even on disabled controls for bulk editing.
+        -->
+        <span
+          *ngIf="widget.definition.isRequired === 'mandatory'"
+          class="required-marker"
+          aria-hidden="true"
+          >*</span
+        >
       </mat-label>
       <ng-container *ngTemplateOutlet="content"></ng-container>
       <mat-hint *ngIf="widget.definition.bottomCaption">

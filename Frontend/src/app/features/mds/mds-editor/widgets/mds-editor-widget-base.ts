@@ -57,6 +57,9 @@ export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {
     ): ValidatorFn[] {
         const validators: ValidatorFn[] = [];
         const widgetDefinition = this.widget.definition;
+        // Marking both `Mandatory` and `MandatoryForPublish` fields as required is needed for the
+        // hint texts to be shown when revealing unfilled fields or leaving the field without
+        // entering a value.
         if (
             this.mdsEditorInstance.editorMode !== 'search' &&
             (widgetDefinition.isRequired === RequiredMode.Mandatory ||
