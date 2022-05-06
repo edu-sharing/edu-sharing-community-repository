@@ -18,8 +18,6 @@
     "test": "ng test",
     "test:edu-sharing-frontend": "ng test angular-edusharing",
     "test:edu-sharing-api": "ng test edu-sharing-api",
-    "pree2e": "webdriver-manager update",
-    "e2e": "protractor",
     "docs": "typedoc --mode file --experimentalDecorators --excludePrivate --ignoreCompilerErrors --target 'ES6' --module 'commonjs' --out docs src",
     "print-licenses": "node licenses.js",
     "gitlog": "..\\Edu-Sharing-Internal\\Frontend\\gitlog.sh",
@@ -96,7 +94,6 @@
     "ng-packagr": "^13.3.1",
     "ts-node": "~8.6.2",
     "typedoc": "^0.16.9",
-    "typescript": "~4.6.4",
-    "webdriver-manager": "12.1.7"
+    "typescript": "~4.6.4"
   }
 }
