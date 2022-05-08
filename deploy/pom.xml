@@ -21,9 +21,9 @@
     <docker.prefix>edu_sharing-projects-community</docker.prefix>
     <helm.prefix>edu_sharing-projects-community</helm.prefix>
 
-    <php.version.major>7</php.version.major>
-    <php.version.minor>4</php.version.minor>
-    <php.version.patch>28</php.version.patch>
+    <php.version.major>8</php.version.major>
+    <php.version.minor>1</php.version.minor>
+    <php.version.patch>5</php.version.patch>
     <php.version>${php.version.major}.${php.version.minor}.${php.version.patch}</php.version>
 
     <postgresql.version.major>13</postgresql.version.major>
