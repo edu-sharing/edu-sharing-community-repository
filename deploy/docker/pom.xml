@@ -17,51 +17,45 @@
 
   <properties>
 
-    <docker.from.apache.exporter>${docker.registry}/mirror/docker.io/bitnami/apache-exporter:0.10.1</docker.from.apache.exporter>
+    <docker.from.apache.exporter>
+      ${docker.registry}/mirror/docker.io/bitnami/apache-exporter:0.10.1
+    </docker.from.apache.exporter>
     <!--suppress UnresolvedMavenProperty -->
-    <docker.from.apache.server>${docker.registry}/mirror/docker.io/php:${php.version}-apache-bullseye</docker.from.apache.server>
-    <docker.from.minideb>${docker.registry}/mirror/docker.io/bitnami/minideb:bullseye</docker.from.minideb>
-    <docker.from.openjdk>${docker.registry}/mirror/docker.io/openjdk:8-jdk-bullseye</docker.from.openjdk>
-    <docker.from.postgresql.exporter>${docker.registry}/mirror/quay.io/prometheuscommunity/postgres-exporter:v0.10.0
+    <docker.from.apache.server>
+      ${docker.registry}/mirror/docker.io/php:${php.version}-apache-bullseye
+    </docker.from.apache.server>
+    <docker.from.minideb>
+      ${docker.registry}/mirror/docker.io/bitnami/minideb:bullseye
+    </docker.from.minideb>
+    <docker.from.openjdk>
+      ${docker.registry}/mirror/docker.io/openjdk:8-jdk-bullseye
+    </docker.from.openjdk>
+    <docker.from.postgresql.exporter>
+      ${docker.registry}/mirror/quay.io/prometheuscommunity/postgres-exporter:v0.10.0
     </docker.from.postgresql.exporter>
     <!--suppress UnresolvedMavenProperty -->
-    <docker.from.postgresql.server>${docker.registry}/mirror/docker.io/bitnami/postgresql:${postgresql.version}
+    <docker.from.postgresql.server>
+      ${docker.registry}/mirror/docker.io/bitnami/postgresql:${postgresql.version}
     </docker.from.postgresql.server>
-    <docker.from.redis.exporter>${docker.registry}/mirror/docker.io/bitnami/redis-exporter:1.32.0</docker.from.redis.exporter>
-    <docker.from.redis.server>${docker.registry}/mirror/docker.io/bitnami/redis:6.2.6</docker.from.redis.server>
-    <docker.from.rediscluster.server>${docker.registry}/mirror/docker.io/bitnami/redis-cluster:6.2.6</docker.from.rediscluster.server>
+    <docker.from.redis.exporter>
+      ${docker.registry}/mirror/docker.io/bitnami/redis-exporter:1.32.0
+    </docker.from.redis.exporter>
+    <docker.from.redis.server>
+      ${docker.registry}/mirror/docker.io/bitnami/redis:6.2.6
+    </docker.from.redis.server>
+    <docker.from.rediscluster.server>
+      ${docker.registry}/mirror/docker.io/bitnami/redis-cluster:6.2.6
+    </docker.from.rediscluster.server>
     <!--suppress UnresolvedMavenProperty -->
-    <docker.from.tomcat>${docker.registry}/mirror/docker.io/tomcat:${tomcat.version}-jdk8-openjdk-bullseye</docker.from.tomcat>
+    <docker.from.tomcat>
+      ${docker.registry}/mirror/docker.io/tomcat:${tomcat.version}-jdk8-openjdk-bullseye
+    </docker.from.tomcat>
 
-    <helm.kube.version>&gt;= 1.18.0</helm.kube.version>
-    <helm.version>3.8.1</helm.version>
-
-    <phpredis.version>5.3.6</phpredis.version>
+    <phpredis.version>5.3.7</phpredis.version>
     <prometheus.jmx.version>0.14.0</prometheus.jmx.version>
-    <redisson.version>3.16.8</redisson.version>
+    <redisson.version>3.17.1</redisson.version>
 
   </properties>
-
-  <build>
-
-    <pluginManagement>
-
-      <plugins>
-
-        <plugin>
-          <groupId>io.kokuwa.maven</groupId>
-          <artifactId>helm-maven-plugin</artifactId>
-          <configuration>
-            <!--suppress UnresolvedMavenProperty -->
-            <helmVersion>${helm.version}</helmVersion>
-          </configuration>
-        </plugin>
-
-      </plugins>
-
-    </pluginManagement>
-
-  </build>
 
 <modules>  <module>build</module>
     <module>compose</module>
