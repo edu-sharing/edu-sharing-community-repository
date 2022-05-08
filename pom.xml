@@ -36,7 +36,7 @@
     <alfresco.share.version>5.2.f</alfresco.share.version>
 
     <!-- release-1 -->
-    <bom.repository-repackaged.version>7.0.0-RC1</bom.repository-repackaged.version>
+    <bom.repository-repackaged.version>7.0.0-RC2</bom.repository-repackaged.version>
 
     <java.version.range>[1.8.0, 9)</java.version.range>
 
