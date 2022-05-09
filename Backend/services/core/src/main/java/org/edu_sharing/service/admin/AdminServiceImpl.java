@@ -590,12 +590,15 @@ public class AdminServiceImpl implements AdminService  {
 			String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
 			String subject = MailTemplate.getSubject(template, currentLocale);
 			String content = MailTemplate.getContent(template, currentLocale, true);
+			HashMap<String, String> dummy = new HashMap<>();
+			dummy.put("link", URLTool.getNgComponentsUrl(true) + "admin");
+			dummy.put("link.static", URLTool.getNgComponentsUrl(false) + "admin");
 			Mail mail = new Mail();
 			ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
 			mail.sendMailHtml(
 					context,
 					receiver,
-					subject, content, null);
+					subject, content, dummy);
 		}catch(Throwable t){
 			throw new RuntimeException(t);
 		}
