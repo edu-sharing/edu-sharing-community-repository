@@ -78,7 +78,7 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
         }
         String synonyms = null;
         if(synonymCollection.size() > 0) {
-            synonymCollection = synonymCollection.stream().map(s -> JSONValue.escape(s)).collect(Collectors.toSet());
+            synonymCollection = synonymCollection.stream().map(s -> s.replace("\"","\\\"")).collect(Collectors.toSet());
             synonyms = synonymCollection.stream().collect(Collectors.joining("\",\"", "\"", "\""));
             synonyms = "{"+synonyms+"}";
         }
