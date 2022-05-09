@@ -84,25 +84,30 @@ export class LoginComponent implements OnInit {
                         this.username = params.username;
                     }
 
-                    setTimeout(() => {
-                        if (this.username && this.passwordInput) {
-                            this.passwordInput.nativeInput.nativeElement.focus();
-                        }
-                        else if (this.usernameInput) {
-                            this.usernameInput.nativeElement.focus();
-                        }
+                    this.connector.onAllRequestsReady().subscribe(() => {
+                        setTimeout(() => {
+                            if (this.username && this.passwordInput) {
+                                this.passwordInput.nativeInput.nativeElement.focus();
+                            }
+                            else if (this.usernameInput) {
+                                this.usernameInput.nativeElement.focus();
+                            }
+                        }, 100);
                     });
                     this.scope = params.scope;
                     if (!this.scope) {
                         this.scope = null;
                     }
-                    this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+                    this.connector.isLoggedIn().subscribe(async (data: LoginResult) => {
                         if (data.currentScope) {
                             // just to make sure there is no scope still set // NO: We need a valid session when login to scope!!!
-                            this.connector.logout().subscribe(() => { });
+                            try {
+                                await this.connector.logout().toPromise();
+                            } catch(e) {
+                                console.warn(e);
+                            }
                             data.statusCode = null;
-                        }
-                        else if (data.currentScope === this.scope) {
+                        } else if (data.currentScope === this.scope) {
                             if (data.statusCode === RestConstants.STATUS_CODE_OK && params.local !== 'true') {
                                 this.goToNext(data);
                             }
@@ -131,7 +136,7 @@ export class LoginComponent implements OnInit {
                     this.next = params.next;
                     this.mainnav = params.mainnav !== 'false';
                     if (this.scope === RestConstants.SAFE_SCOPE) {
-                        this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+                        this.connector.isLoggedIn(true).subscribe((data: LoginResult) => {
                             if (data.statusCode !== RestConstants.STATUS_CODE_OK) {
                                 RestHelper.goToLogin(this.router, this.configService);
                             }

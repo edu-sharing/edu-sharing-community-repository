@@ -1,6 +1,10 @@
 package org.edu_sharing.service.permission;
 
+import com.google.common.collect.Lists;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityService;
@@ -34,21 +38,21 @@ class PermissionCheckingTest {
     ToolPermissionService toolPermissionService;
 
     @Test
-    void SuccessPermissionTest() throws InsufficientPermissionException {
+    void singleNode_SuccessPermissionTest() throws InsufficientPermissionException {
         // given
         String authority = "Muster";
         String nodeA = "1";
-        String nodeB = "2";
+        NodeRef nodeB = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, "2");
         List<String> nodePermissions = Arrays.asList("someNodePermission", "someMoreNodePermission", "otherNodePermission");
         String toolPermission = "someToolPermission";
 
         Mockito.when(authorityService.isGuest()).thenReturn(false);
         Mockito.when(toolPermissionService.hasToolPermission(toolPermission)).thenReturn(true);
         Mockito.when(permissionService.getPermissionsForAuthority(nodeA, authority)).thenReturn(nodePermissions);
-        Mockito.when(permissionService.getPermissionsForAuthority(nodeB, authority)).thenReturn(nodePermissions);
+        Mockito.when(permissionService.getPermissionsForAuthority(nodeB.getId(), authority)).thenReturn(nodePermissions);
 
 
-        MyClass target = new MyClass();
+        TestClass target = new TestClass();
         AspectJProxyFactory factory = new AspectJProxyFactory(target);
         PermissionChecking aspect = new PermissionChecking();
         aspect.setPermissionService(permissionService);
@@ -56,11 +60,111 @@ class PermissionCheckingTest {
         aspect.setToolPermissionService(toolPermissionService);
         factory.addAspect(aspect);
 
-        MyClass proxy = factory.getProxy();
+        TestClass proxy = factory.getProxy();
         try (MockedStatic<AuthenticationUtil> authenticationUtilMockedStatic = Mockito.mockStatic(AuthenticationUtil.class)) {
             authenticationUtilMockedStatic.when(AuthenticationUtil::getFullyAuthenticatedUser).thenReturn(authority);
             // when then
-            proxy.SomeMethod(nodeA, nodeB);
+            proxy.permissionTestMethod(nodeA,null, nodeB);
+        }
+    }
+
+    @Test
+    void multiNode_Array_SuccessPermissionTest() throws InsufficientPermissionException {
+        // given
+        String authority = "Muster";
+        Object[] nodes = {
+                "1",
+                new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,"2"),
+                new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,"3")};
+        List<String> nodePermissions = Arrays.asList("someNodePermission", "someMoreNodePermission", "otherNodePermission");
+        String toolPermission = "someToolPermission";
+
+        Mockito.when(authorityService.isGuest()).thenReturn(false);
+        Mockito.when(toolPermissionService.hasToolPermission(toolPermission)).thenReturn(true);
+        for (Object node : nodes) {
+            if(node instanceof String) {
+                Mockito.when(permissionService.getPermissionsForAuthority((String) node, authority)).thenReturn(nodePermissions);
+            }else {
+                Mockito.when(permissionService.getPermissionsForAuthority(((NodeRef)node).getId(), authority)).thenReturn(nodePermissions);
+            }
+        }
+
+        TestClass target = new TestClass();
+        AspectJProxyFactory factory = new AspectJProxyFactory(target);
+        PermissionChecking aspect = new PermissionChecking();
+        aspect.setPermissionService(permissionService);
+        aspect.setAuthorityService(authorityService);
+        aspect.setToolPermissionService(toolPermissionService);
+        factory.addAspect(aspect);
+
+        TestClass proxy = factory.getProxy();
+        try (MockedStatic<AuthenticationUtil> authenticationUtilMockedStatic = Mockito.mockStatic(AuthenticationUtil.class)) {
+            authenticationUtilMockedStatic.when(AuthenticationUtil::getFullyAuthenticatedUser).thenReturn(authority);
+            // when then
+            proxy.permissionTestMethod(nodes);
+        }
+    }
+
+    @Test
+    void multiNode_List_SuccessPermissionTest() throws InsufficientPermissionException {
+        // given
+        String authority = "Muster";
+        List<Object> nodes =Arrays.asList("1", new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,"2"), new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,"3"));
+        List<String> nodePermissions = Arrays.asList("someNodePermission", "someMoreNodePermission", "otherNodePermission");
+        String toolPermission = "someToolPermission";
+
+        Mockito.when(authorityService.isGuest()).thenReturn(false);
+        Mockito.when(toolPermissionService.hasToolPermission(toolPermission)).thenReturn(true);
+        for (Object node : nodes) {
+            if(node instanceof String) {
+                Mockito.when(permissionService.getPermissionsForAuthority((String)node, authority)).thenReturn(nodePermissions);
+            }else {
+                Mockito.when(permissionService.getPermissionsForAuthority(((NodeRef)node).getId(), authority)).thenReturn(nodePermissions);
+            }
+        }
+
+        TestClass target = new TestClass();
+        AspectJProxyFactory factory = new AspectJProxyFactory(target);
+        PermissionChecking aspect = new PermissionChecking();
+        aspect.setPermissionService(permissionService);
+        aspect.setAuthorityService(authorityService);
+        aspect.setToolPermissionService(toolPermissionService);
+        factory.addAspect(aspect);
+
+        TestClass proxy = factory.getProxy();
+        try (MockedStatic<AuthenticationUtil> authenticationUtilMockedStatic = Mockito.mockStatic(AuthenticationUtil.class)) {
+            authenticationUtilMockedStatic.when(AuthenticationUtil::getFullyAuthenticatedUser).thenReturn(authority);
+            // when then
+            proxy.permissionTestMethod(nodes);
+        }
+    }
+
+    @Test
+    void invalidArgumentException() {
+        // given
+        String authority = "Muster";
+        Object nodeA = 102316;
+        NodeRef nodeB = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,"2");
+        String toolPermission = "someToolPermission";
+
+        Mockito.when(authorityService.isGuest()).thenReturn(false);
+        Mockito.when(toolPermissionService.hasToolPermission(toolPermission)).thenReturn(true);
+
+
+        TestClass target = new TestClass();
+        AspectJProxyFactory factory = new AspectJProxyFactory(target);
+        PermissionChecking aspect = new PermissionChecking();
+        aspect.setPermissionService(permissionService);
+        aspect.setAuthorityService(authorityService);
+        aspect.setToolPermissionService(toolPermissionService);
+        factory.addAspect(aspect);
+
+        TestClass proxy = factory.getProxy();
+
+        try (MockedStatic<AuthenticationUtil> authenticationUtilMockedStatic = Mockito.mockStatic(AuthenticationUtil.class)) {
+            authenticationUtilMockedStatic.when(AuthenticationUtil::getFullyAuthenticatedUser).thenReturn(authority);
+            // when then
+            Assertions.assertThrows(InvalidArgumentException.class , () -> proxy.permissionTestMethod(nodeA, null, nodeB));
         }
     }
 
@@ -69,11 +173,11 @@ class PermissionCheckingTest {
         // given
         String authority = "Muster";
         String nodeA = "1";
-        String nodeB = "2";
+        NodeRef nodeB = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,"2");
 
         Mockito.when(authorityService.isGuest()).thenReturn(true);
 
-        MyClass target = new MyClass();
+        TestClass target = new TestClass();
         AspectJProxyFactory factory = new AspectJProxyFactory(target);
         PermissionChecking aspect = new PermissionChecking();
         aspect.setPermissionService(permissionService);
@@ -81,13 +185,13 @@ class PermissionCheckingTest {
         aspect.setToolPermissionService(toolPermissionService);
         factory.addAspect(aspect);
 
-        MyClass proxy = factory.getProxy();
+        TestClass proxy = factory.getProxy();
 
 
         try (MockedStatic<AuthenticationUtil> authenticationUtilMockedStatic = Mockito.mockStatic(AuthenticationUtil.class)) {
             authenticationUtilMockedStatic.when(AuthenticationUtil::getFullyAuthenticatedUser).thenReturn(authority);
             // when then
-            Assertions.assertThrows(GuestCagePolicy.GuestPermissionDeniedException.class , () -> proxy.SomeMethod(nodeA, nodeB));
+            Assertions.assertThrows(GuestCagePolicy.GuestPermissionDeniedException.class , () -> proxy.permissionTestMethod(nodeA, null, nodeB));
         }
     }
 
@@ -96,14 +200,14 @@ class PermissionCheckingTest {
         // given
         String authority = "Muster";
         String nodeA = "1";
-        String nodeB = "2";
+        NodeRef nodeB = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,"2");
         String toolPermission = "someToolPermission";
 
         Mockito.when(authorityService.isGuest()).thenReturn(false);
         Mockito.when(toolPermissionService.hasToolPermission(toolPermission)).thenReturn(false);
 
 
-        MyClass target = new MyClass();
+        TestClass target = new TestClass();
         AspectJProxyFactory factory = new AspectJProxyFactory(target);
         PermissionChecking aspect = new PermissionChecking();
         aspect.setPermissionService(permissionService);
@@ -111,22 +215,22 @@ class PermissionCheckingTest {
         aspect.setToolPermissionService(toolPermissionService);
         factory.addAspect(aspect);
 
-        MyClass proxy = factory.getProxy();
+        TestClass proxy = factory.getProxy();
 
 
         try (MockedStatic<AuthenticationUtil> authenticationUtilMockedStatic = Mockito.mockStatic(AuthenticationUtil.class)) {
             authenticationUtilMockedStatic.when(AuthenticationUtil::getFullyAuthenticatedUser).thenReturn(authority);
             // when then
-            Assertions.assertThrows(InsufficientPermissionException.class , () -> proxy.SomeMethod(nodeA, nodeB));
+            Assertions.assertThrows(InsufficientPermissionException.class , () -> proxy.permissionTestMethod(nodeA, null, nodeB));
         }
     }
 
     @Test
-    void failedNodePermission_NodeATest() throws InsufficientPermissionException {
+    void singleNodeA_failedNodePermissionTest() throws InsufficientPermissionException {
         // given
         String authority = "Muster";
         String nodeA = "1";
-        String nodeB = "2";
+        NodeRef nodeB = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,"2");
         List<String> nodePermissionsNodeA = Collections.singletonList("otherNodePermission");
         String toolPermission = "someToolPermission";
 
@@ -135,7 +239,7 @@ class PermissionCheckingTest {
         Mockito.when(permissionService.getPermissionsForAuthority(nodeA, authority)).thenReturn(nodePermissionsNodeA);
 
 
-        MyClass target = new MyClass();
+        TestClass target = new TestClass();
         AspectJProxyFactory factory = new AspectJProxyFactory(target);
         PermissionChecking aspect = new PermissionChecking();
         aspect.setPermissionService(permissionService);
@@ -143,21 +247,21 @@ class PermissionCheckingTest {
         aspect.setToolPermissionService(toolPermissionService);
         factory.addAspect(aspect);
 
-        MyClass proxy = factory.getProxy();
+        TestClass proxy = factory.getProxy();
 
         try (MockedStatic<AuthenticationUtil> authenticationUtilMockedStatic = Mockito.mockStatic(AuthenticationUtil.class)) {
             authenticationUtilMockedStatic.when(AuthenticationUtil::getFullyAuthenticatedUser).thenReturn(authority);
             // when then
-            Assertions.assertThrows(InsufficientPermissionException.class , () -> proxy.SomeMethod(nodeA, nodeB));
+            Assertions.assertThrows(InsufficientPermissionException.class , () -> proxy.permissionTestMethod(nodeA, null, nodeB));
         }
     }
 
     @Test
-    void failedNodePermission_NodeBTest() throws InsufficientPermissionException {
+    void singleNodeB_failedNodePermissionTest() throws InsufficientPermissionException {
         // given
         String authority = "Muster";
         String nodeA = "1";
-        String nodeB = "2";
+        NodeRef nodeB = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,"2");
         List<String> nodePermissionsNodeA = Arrays.asList("someNodePermission", "someMoreNodePermission", "otherNodePermission");
         List<String> nodePermissionsNodeB = new ArrayList<>();
         String toolPermission = "someToolPermission";
@@ -165,10 +269,10 @@ class PermissionCheckingTest {
         Mockito.when(authorityService.isGuest()).thenReturn(false);
         Mockito.when(toolPermissionService.hasToolPermission(toolPermission)).thenReturn(true);
         Mockito.when(permissionService.getPermissionsForAuthority(nodeA, authority)).thenReturn(nodePermissionsNodeA);
-        Mockito.when(permissionService.getPermissionsForAuthority(nodeB, authority)).thenReturn(nodePermissionsNodeB);
+        Mockito.when(permissionService.getPermissionsForAuthority(nodeB.getId(), authority)).thenReturn(nodePermissionsNodeB);
 
 
-        MyClass target = new MyClass();
+        TestClass target = new TestClass();
         AspectJProxyFactory factory = new AspectJProxyFactory(target);
         PermissionChecking aspect = new PermissionChecking();
         aspect.setPermissionService(permissionService);
@@ -176,21 +280,165 @@ class PermissionCheckingTest {
         aspect.setToolPermissionService(toolPermissionService);
         factory.addAspect(aspect);
 
-        MyClass proxy = factory.getProxy();
+        TestClass proxy = factory.getProxy();
 
         try (MockedStatic<AuthenticationUtil> authenticationUtilMockedStatic = Mockito.mockStatic(AuthenticationUtil.class)) {
             authenticationUtilMockedStatic.when(AuthenticationUtil::getFullyAuthenticatedUser).thenReturn(authority);
             // when then
-            Assertions.assertThrows(InsufficientPermissionException.class, () -> proxy.SomeMethod(nodeA, nodeB));
+            Assertions.assertThrows(InsufficientPermissionException.class, () -> proxy.permissionTestMethod(nodeA, null, nodeB));
+        }
+    }
+
+    @Test
+    void multiNode1_List_failedNodePermissionTest() throws InsufficientPermissionException {
+        // given
+        String authority = "Muster";
+        List<Object> nodes =Arrays.asList("1",
+                new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,"2"),
+                new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,"3"));
+        String toolPermission = "someToolPermission";
+
+        Mockito.when(authorityService.isGuest()).thenReturn(false);
+        Mockito.when(toolPermissionService.hasToolPermission(toolPermission)).thenReturn(true);
+        Mockito.when(permissionService.getPermissionsForAuthority(((String) nodes.get(0)), authority)).thenReturn(new ArrayList<>());
+
+        TestClass target = new TestClass();
+        AspectJProxyFactory factory = new AspectJProxyFactory(target);
+        PermissionChecking aspect = new PermissionChecking();
+        aspect.setPermissionService(permissionService);
+        aspect.setAuthorityService(authorityService);
+        aspect.setToolPermissionService(toolPermissionService);
+        factory.addAspect(aspect);
+
+        TestClass proxy = factory.getProxy();
+
+        try (MockedStatic<AuthenticationUtil> authenticationUtilMockedStatic = Mockito.mockStatic(AuthenticationUtil.class)) {
+            authenticationUtilMockedStatic.when(AuthenticationUtil::getFullyAuthenticatedUser).thenReturn(authority);
+            // when then
+            Assertions.assertThrows(InsufficientPermissionException.class, () -> proxy.permissionTestMethod(nodes));
+        }
+    }
+
+    @Test
+    void multiNode2_List_failedNodePermissionTest() throws InsufficientPermissionException {
+        // given
+        String authority = "Muster";
+        List<Object> nodes =Arrays.asList("1",
+                new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,"2"),
+                new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,"3"));
+        List<String> nodePermissions = Arrays.asList("someNodePermission", "someMoreNodePermission", "otherNodePermission");
+        String toolPermission = "someToolPermission";
+
+        Mockito.when(authorityService.isGuest()).thenReturn(false);
+        Mockito.when(toolPermissionService.hasToolPermission(toolPermission)).thenReturn(true);
+        Mockito.when(permissionService.getPermissionsForAuthority((String) nodes.get(0), authority)).thenReturn(nodePermissions);
+        Mockito.when(permissionService.getPermissionsForAuthority(((NodeRef) nodes.get(1)).getId(), authority)).thenReturn(new ArrayList<>());
+
+        TestClass target = new TestClass();
+        AspectJProxyFactory factory = new AspectJProxyFactory(target);
+        PermissionChecking aspect = new PermissionChecking();
+        aspect.setPermissionService(permissionService);
+        aspect.setAuthorityService(authorityService);
+        aspect.setToolPermissionService(toolPermissionService);
+        factory.addAspect(aspect);
+
+        TestClass proxy = factory.getProxy();
+
+        try (MockedStatic<AuthenticationUtil> authenticationUtilMockedStatic = Mockito.mockStatic(AuthenticationUtil.class)) {
+            authenticationUtilMockedStatic.when(AuthenticationUtil::getFullyAuthenticatedUser).thenReturn(authority);
+            // when then
+            Assertions.assertThrows(InsufficientPermissionException.class, () -> proxy.permissionTestMethod(nodes));
+        }
+    }
+
+    @Test
+    void multiNode1_Array_failedNodePermissionTest() throws InsufficientPermissionException {
+        // given
+        String authority = "Muster";
+        Object[] nodes = {
+                "1",
+                new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, "2"),
+                new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, "3")
+        };
+
+        String toolPermission = "someToolPermission";
+
+        Mockito.when(authorityService.isGuest()).thenReturn(false);
+        Mockito.when(toolPermissionService.hasToolPermission(toolPermission)).thenReturn(true);
+        Mockito.when(permissionService.getPermissionsForAuthority(((String) nodes[0]), authority)).thenReturn(new ArrayList<>());
+
+        TestClass target = new TestClass();
+        AspectJProxyFactory factory = new AspectJProxyFactory(target);
+        PermissionChecking aspect = new PermissionChecking();
+        aspect.setPermissionService(permissionService);
+        aspect.setAuthorityService(authorityService);
+        aspect.setToolPermissionService(toolPermissionService);
+        factory.addAspect(aspect);
+
+        TestClass proxy = factory.getProxy();
+
+        try (MockedStatic<AuthenticationUtil> authenticationUtilMockedStatic = Mockito.mockStatic(AuthenticationUtil.class)) {
+            authenticationUtilMockedStatic.when(AuthenticationUtil::getFullyAuthenticatedUser).thenReturn(authority);
+            // when then
+            Assertions.assertThrows(InsufficientPermissionException.class, () -> proxy.permissionTestMethod(nodes));
+        }
+    }
+
+    @Test
+    void multiNode2_StringList_failedNodePermissionTest() throws InsufficientPermissionException {
+        // given
+        String authority = "Muster";
+        Object[] nodes = {
+                "1",
+                new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,"2"),
+                new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,"3")
+        };
+        List<String> nodePermissions = Arrays.asList("someNodePermission", "someMoreNodePermission", "otherNodePermission");
+        String toolPermission = "someToolPermission";
+
+        Mockito.when(authorityService.isGuest()).thenReturn(false);
+        Mockito.when(toolPermissionService.hasToolPermission(toolPermission)).thenReturn(true);
+        Mockito.when(permissionService.getPermissionsForAuthority((String) nodes[0], authority)).thenReturn(nodePermissions);
+        Mockito.when(permissionService.getPermissionsForAuthority(((NodeRef) nodes[1]).getId(), authority)).thenReturn(new ArrayList<>());
+
+        TestClass target = new TestClass();
+        AspectJProxyFactory factory = new AspectJProxyFactory(target);
+        PermissionChecking aspect = new PermissionChecking();
+        aspect.setPermissionService(permissionService);
+        aspect.setAuthorityService(authorityService);
+        aspect.setToolPermissionService(toolPermissionService);
+        factory.addAspect(aspect);
+
+        TestClass proxy = factory.getProxy();
+
+        try (MockedStatic<AuthenticationUtil> authenticationUtilMockedStatic = Mockito.mockStatic(AuthenticationUtil.class)) {
+            authenticationUtilMockedStatic.when(AuthenticationUtil::getFullyAuthenticatedUser).thenReturn(authority);
+            // when then
+            Assertions.assertThrows(InsufficientPermissionException.class, () -> proxy.permissionTestMethod(nodes));
         }
     }
 }
 
-class MyClass {
+class TestClass {
     @Permission(requiresUser = true, value = {"someToolPermission"})
-    public void SomeMethod(
-            @NodePermission({"someNodePermission","otherNodePermission"}) String nodeA,
-            @NodePermission({"someMoreNodePermission"}) String nodeB)
+    public void permissionTestMethod(
+            @NodePermission({"someNodePermission","otherNodePermission"}) Object nodeA,
+            Object nodeB,
+            @NodePermission({"someMoreNodePermission"}) Object nodeC)
+            throws InsufficientPermissionException {
+        System.out.println("MyPermissionTest");
+    }
+
+    @Permission(requiresUser = true, value = {"someToolPermission"})
+    public void permissionTestMethod(
+            @NodePermission({"someNodePermission","otherNodePermission"}) Object[] node)
+            throws InsufficientPermissionException {
+        System.out.println("MyPermissionTest");
+    }
+
+    @Permission(requiresUser = true, value = {"someToolPermission"})
+    public void permissionTestMethod(
+            @NodePermission({"someNodePermission","otherNodePermission"}) List<Object> nodes)
             throws InsufficientPermissionException {
         System.out.println("MyPermissionTest");
     }

@@ -1,7 +1,6 @@
 package org.edu_sharing.service.permission;
 
 
-import groovy.util.logging.Log4j;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -17,6 +16,7 @@ import org.edu_sharing.service.permission.annotation.Permission;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Aspect
+@Component
 public class PermissionChecking {
 
     AuthorityService authorityService;
@@ -31,17 +32,17 @@ public class PermissionChecking {
     ToolPermissionService toolPermissionService;
 
     @Autowired
-    public void setAuthorityService(AuthorityService authorityService){
+    public void setAuthorityService(AuthorityService authorityService) {
         this.authorityService = authorityService;
     }
 
     @Autowired
-    public void setPermissionService(PermissionService permissionService){
+    public void setPermissionService(PermissionService permissionService) {
         this.permissionService = permissionService;
     }
 
     @Autowired
-    public void setToolPermissionService(ToolPermissionService toolPermissionService){
+    public void setToolPermissionService(ToolPermissionService toolPermissionService) {
         this.toolPermissionService = toolPermissionService;
     }
 
@@ -56,7 +57,7 @@ public class PermissionChecking {
 
         Permission permissionAnnotation = AnnotationUtils.findAnnotation(method, Permission.class);
 
-        if(permissionAnnotation.requiresUser() && authorityService.isGuest()){
+        if (permissionAnnotation.requiresUser() && authorityService.isGuest()) {
             throw new GuestCagePolicy.GuestPermissionDeniedException(String.format("guests can not use %s", method.getName()));
         }
 
@@ -66,6 +67,10 @@ public class PermissionChecking {
             }
         }
 
+        checkNodePermissions(joinPoint, user, method);
+    }
+
+    private void checkNodePermissions(JoinPoint joinPoint, String user, Method method) throws InsufficientPermissionException {
         Object[] args = joinPoint.getArgs();
         Parameter[] parameters = method.getParameters();
         for (int i = 0; i < parameters.length; i++) {
@@ -73,24 +78,42 @@ public class PermissionChecking {
             Object arg = args[i];
 
             NodePermission nodePermissionAnnotation = parameter.getAnnotation(NodePermission.class);
-            if(nodePermissionAnnotation == null) {
+            if (nodePermissionAnnotation == null) {
                 continue;
             }
 
-            String nodeId;
-            if(arg instanceof String) {
-                nodeId = (String) arg;
-            } else if(arg instanceof NodeRef){
-                nodeId = ((NodeRef)arg).getId();
-            }else{
-                throw new InvalidArgumentException(String.format("%s must be of type %s or %s" ,parameter.getName(), String.class, NodeRef.class));
+            if (arg.getClass().isArray()) {
+                int j = 0;
+                for (Object item : (Object[]) arg) {
+                    checkNodePermissions(item, user, nodePermissionAnnotation.value(), String.format("%s[%s] ", parameter.getName(), j));
+                    j++;
+                }
+            } else if (arg instanceof Iterable) {
+                int j = 0;
+                for (Object item : (Iterable<?>) arg) {
+                    checkNodePermissions(item, user, nodePermissionAnnotation.value(), String.format("%s[%s] ", parameter.getName(), j));
+                    j++;
+                }
+            } else {
+                checkNodePermissions(arg, user, nodePermissionAnnotation.value(), parameter.getName());
             }
+        }
+    }
 
-            List<String> nodePermissions = permissionService.getPermissionsForAuthority(nodeId, user);
-            if(!nodePermissions.containsAll(Arrays.asList(nodePermissionAnnotation.value()))){
-                throw new InsufficientPermissionException(String.format("%s with id %s requires permission(s): %s",
-                        parameter.getName() , nodeId, String.join(", ", nodePermissionAnnotation.value())));
-            }
+    private void checkNodePermissions(Object node, String user, String[] permissions, String parameterName) throws InsufficientPermissionException {
+        String nodeId;
+        if (node instanceof String) {
+            nodeId = (String) node;
+        } else if (node instanceof NodeRef) {
+            nodeId = ((NodeRef) node).getId();
+        } else {
+            throw new InvalidArgumentException(String.format("%s must be of type %s or %s", parameterName, String.class, NodeRef.class));
+        }
+
+        List<String> nodePermissions = permissionService.getPermissionsForAuthority(nodeId, user);
+        if (!nodePermissions.containsAll(Arrays.asList(permissions))) {
+            throw new InsufficientPermissionException(String.format("%s with id %s requires permission(s): %s",
+                    parameterName, nodeId, String.join(", ", permissions)));
         }
     }
 }

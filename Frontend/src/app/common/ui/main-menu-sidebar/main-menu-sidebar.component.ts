@@ -68,7 +68,7 @@ export class MainMenuSidebarComponent implements OnInit {
     // Internal methods, should only be called by this component.
 
     async ngOnInit() {
-        this.loginInfo = await this.connector.isLoggedIn().toPromise();
+        this.loginInfo = await this.connector.isLoggedIn(false).toPromise();
     }
 
     /**

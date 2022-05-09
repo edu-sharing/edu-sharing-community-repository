@@ -18,13 +18,17 @@ public class QueryUtils {
         if(query==null)
             return query;
         try {
-
-            for(Map.Entry<String, Serializable> prop : getUserInfo().entrySet()){
-                if(prop.getValue()==null) {
-                    continue;
+            Map<String, Serializable> info = getUserInfo();
+            if(info != null) {
+                for (Map.Entry<String, Serializable> prop : info.entrySet()) {
+                    if (prop.getValue() == null) {
+                        continue;
+                    }
+                    query = replacer.replaceString(query, "${user." + CCConstants.getValidLocalName(prop.getKey()) + "}",
+                            prop.getValue().toString());
                 }
-                query = replacer.replaceString(query, "${user."+CCConstants.getValidLocalName(prop.getKey())+"}",
-                        prop.getValue().toString());
+            } else {
+                logger.debug("User Info was empty, will not replace any user data in search query");
             }
         } catch (Exception e) {
             logger.warn("Could not replace user data in search query, search might fail",e);
@@ -42,6 +46,8 @@ query = replacer.replaceString(query, "${authority}", AuthenticationUtil.getFull
      */
     private static ReplaceInterface dslReplacer = (str, search, replace) -> str.replace(search, JSONValue.escape( QueryParser.escape(replace)));
 
+    private static ReplaceInterface dslReplacerRaw = (str, search, replace) -> str.replace(search, JSONValue.escape( replace));
+
     public static void setUserInfo(Map<String, Serializable> userInfo) {
         QueryUtils.userInfo.set(userInfo);
     }
@@ -50,14 +56,19 @@ query = replacer.replaceString(query, "${authority}", AuthenticationUtil.getFull
         return userInfo.get();
     }
 
-    public static ReplaceInterface replacerFromSyntax(String syntax) {
+    public static ReplaceInterface replacerFromSyntax(String syntax, boolean raw) {
         if(syntax.equals(MetadataReader.QUERY_SYNTAX_DSL)){
-            return dslReplacer;
+            if(raw) return dslReplacerRaw;
+            else return dslReplacer;
         } else if (syntax.equals(MetadataReader.QUERY_SYNTAX_LUCENE)) {
             return luceneReplacer;
         } else {
             throw new IllegalArgumentException("No replacer for search syntax " + syntax);
         }
+    }
+
+    public static ReplaceInterface replacerFromSyntax(String syntax) {
+        return replacerFromSyntax(syntax,false);
     }
 
     public interface ReplaceInterface {

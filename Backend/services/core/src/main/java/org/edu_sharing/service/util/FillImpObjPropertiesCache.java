@@ -45,7 +45,7 @@ public class FillImpObjPropertiesCache implements ApplicationListener<ContextRef
 			
 			Class job = RefreshCacheJob.class;
 			
-			ImmediateJobListener jobListener = JobHandler.getInstance().startJob(job, params);
+			ImmediateJobListener jobListener = JobHandler.getInstance(event.getApplicationContext()).startJob(job, params);
 			if(jobListener != null && jobListener.isVetoed()){
 				throw new Exception("job was vetoed by " + jobListener.getVetoBy());
 			}

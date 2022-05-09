@@ -6,8 +6,8 @@
   "scripts": {
     "start": "ng serve",
     "start-public": "ng serve --host 0.0.0.0 --disable-host-check",
-    "build": "ng build --configuration production --base-href /edu-sharing/ --delete-output-path false",
-    "build-dev": "ng build --base-href /edu-sharing/",
+    "build": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build --configuration production --base-href /edu-sharing/ --delete-output-path false",
+    "build-dev": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build --base-href /edu-sharing/",
     "lint": "ng lint",
     "test": "ng test",
     "pree2e": "webdriver-manager update",
@@ -17,7 +17,7 @@
     "gitlog": "..\\Edu-Sharing-Internal\\Frontend\\gitlog.sh",
     "start-storybook": "start-storybook -p 4300 -s ./src/assets",
     "build-storybook": "build-storybook -s ./src/assets",
-    "postinstall": "ngcc"
+    "postinstall": "node --max_old_space_size=2048 ./node_modules/@angular/compiler-cli/ngcc --async=false"
   },
   "private": true,
   "dependencies": {

@@ -41,7 +41,9 @@ import org.edu_sharing.repository.server.tools.cache.UserCache;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 
+@Component
 public class AuthorityServiceImpl implements AuthorityService {
 
 	Logger logger = Logger.getLogger(AuthorityServiceImpl.class);

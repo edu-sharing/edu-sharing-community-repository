@@ -657,8 +657,14 @@ export class NodeHelperService {
             };
         } else {
             if (node.isDirectory) {
+                let path;
+                if (node.properties?.[RestConstants.CCM_PROP_EDUSCOPENAME]?.[0] === RestConstants.SAFE_SCOPE) {
+                    path = UIConstants.ROUTER_PREFIX + 'workspace/safe';
+                } else {
+                    path = UIConstants.ROUTER_PREFIX + 'workspace';
+                }
                 data = {
-                    routerLink: UIConstants.ROUTER_PREFIX + 'workspace',
+                    routerLink: path,
                     queryParams: { id: node.ref.id },
                 };
             } else if (node.ref) {

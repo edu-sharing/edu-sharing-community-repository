@@ -58,16 +58,16 @@ export class FileUploadComponent{
        });
    }
 
-    uploadNodes(event: any) {
+    uploadNodes(event: FileList) {
         this._showUploadSelect=false;
         this.filesToUpload=event;
     }
-    onDone(node: Node){
+    onDone(node: Node[]){
        if(node==null){
            // canceled;
            this._showUploadSelect=true;
            return;
        }
-       this.nodeHelper.addNodeToLms(node,this.reurl);
+       this.nodeHelper.addNodeToLms(node[0],this.reurl);
     }
 }

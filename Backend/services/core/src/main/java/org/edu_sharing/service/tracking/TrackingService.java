@@ -35,7 +35,19 @@ public interface TrackingService {
     List<String> getAlteredNodes(java.util.Date from);
     List<NodeData> getNodeData(String nodeId, java.util.Date from);
     boolean trackActivityOnUser(String authorityName,EventType type);
-    boolean trackActivityOnNode(NodeRef nodeRef,NodeTrackingDetails details,EventType type);
+
+    /**
+     *
+     * @param nodeRef
+     * @param details
+     * @param type
+     * @param authorityName might be null (then the current authenticated user is used)
+     * @return
+     */
+    boolean trackActivityOnNode(NodeRef nodeRef,NodeTrackingDetails details,EventType type, String authorityName);
+    default boolean trackActivityOnNode(NodeRef nodeRef, NodeTrackingDetails details, EventType type) {
+        return trackActivityOnNode(nodeRef, details, type, null);
+    }
     List<StatisticEntryNode> getNodeStatisics(GroupingType type, Date dateFrom, Date dateTo, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws Throwable;
     List<StatisticEntry> getUserStatistics(GroupingType type, java.util.Date dateFrom, java.util.Date dateTo, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws Throwable;
     StatisticEntry getSingleNodeData(NodeRef nodeRef,java.util.Date dateFrom,java.util.Date dateTo) throws Throwable;

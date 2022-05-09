@@ -69,7 +69,7 @@ export class WorkspaceFileUploadSelectComponent  {
   }
   @Output() parentChange = new EventEmitter();
   @Output() onCancel= new EventEmitter();
-  @Output() onFileSelected= new EventEmitter();
+  @Output() onFileSelected= new EventEmitter<FileList>();
   @Output() onLinkSelected= new EventEmitter<LinkData>();
 
   public cancel(){
@@ -78,11 +78,11 @@ export class WorkspaceFileUploadSelectComponent  {
   public selectFile(){
     this.file.nativeElement.click();
   }
-  public onDrop(fileList: any){
+  public onDrop(fileList: FileList){
       this.onFileSelected.emit(fileList);
   }
   public filesSelected(event: any): void {
-    this.onFileSelected.emit(event.target.files);
+    this.onFileSelected.emit(event.target.files as FileList);
   }
   public setLink(){
     if (this.ltiActivated && (!this.ltiConsumerKey || !this.ltiSharedSecret)){
@@ -143,7 +143,7 @@ export class WorkspaceFileUploadSelectComponent  {
     private toast: Toast,
   ){
     this.setState('');
-    this.iamService.getUser().subscribe((user) => {
+    this.iamService.getCurrentUserAsync().then((user) => {
       this.user = user;
     });
   }

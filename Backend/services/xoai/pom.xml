@@ -42,17 +42,12 @@
 
   <dependencies>
 
-    <!-- compile -->
+    <!-- provided -->
 
     <dependency>
       <groupId>org.dspace</groupId>
       <artifactId>xoai-data-provider</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.codehaus.woodstox</groupId>
-          <artifactId>wstx-asl</artifactId>
-        </exclusion>
-      </exclusions>
+      <scope>provided</scope>
     </dependency>
 
   </dependencies>
