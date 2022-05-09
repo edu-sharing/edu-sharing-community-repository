@@ -67,7 +67,8 @@ COPY assets/apache2/sites/* /etc/apache2/sites-available/
 RUN set -eux \
 	&& a2dissite 000-default \
 	&& a2ensite external \
-	&& a2ensite internal
+	&& a2ensite internal \
+    && a2ensite metrics
 
 COPY assets/rendering/de.metaventis.esrender.log4php.properties conf/
 COPY assets/rendering/de.metaventis.esrender.log4php.cachecleaner.properties conf/

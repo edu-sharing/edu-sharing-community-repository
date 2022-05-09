@@ -105,7 +105,7 @@ spec:
       - name: {{ include "edusharing_rendering_service.name" . }}-metrics
         image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/{{ .Values.image.prefix }}-deploy-docker-build-apache_exporter:{{ .Values.image.tag }}
         args:
-        - --scrape_uri=http://127.0.0.1:8080/server-status/?auto
+        - --scrape_uri=http://127.0.0.1:8082/server-status/?auto
         - --telemetry.address={{ if .Values.global.cluster.istio.enabled }}127.0.0.1{{ end }}:9117
         - --telemetry.endpoint=/metrics
         ports:
