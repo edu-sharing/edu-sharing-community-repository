@@ -1,8 +1,6 @@
 import { ComponentFactoryResolver, Injectable, ViewContainerRef } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { MdsEditorWrapperComponent } from '../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
-import { replaceElementWithDiv } from '../common/ui/mds-editor/util/replace-element-with-div';
 import { Node } from '../core-module/rest/data-object';
 import { RestConstants } from '../core-module/rest/rest-constants';
 import { RestUsageService } from '../core-module/rest/services/rest-usage.service';
@@ -13,6 +11,8 @@ import { NodeDataSource } from './components/node-entries-wrapper/node-data-sour
 import { NodeEntriesWrapperComponent } from './components/node-entries-wrapper/node-entries-wrapper.component';
 import { SpinnerComponent } from '../shared/components/spinner/spinner.component';
 import { UIHelper } from './ui-helper';
+import { replaceElementWithDiv } from '../features/mds/mds-editor/util/replace-element-with-div';
+import { MdsEditorWrapperComponent } from '../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 
 @Injectable()
 export class RenderHelperService {

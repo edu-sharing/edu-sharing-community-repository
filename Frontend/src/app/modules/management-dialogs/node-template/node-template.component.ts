@@ -8,8 +8,8 @@ import {TranslateService} from "@ngx-translate/core";
 import {DateHelper} from "../../../core-ui-module/DateHelper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../core-module/ui/ui-animation";
-import {MdsComponent} from "../../../common/ui/mds/mds.component";
-import {MdsEditorWrapperComponent} from '../../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import {MdsComponent} from "../../../features/mds/legacy/mds/mds.component";
+import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 @Component({
   selector: 'es-node-template',
   templateUrl: 'node-template.component.html',

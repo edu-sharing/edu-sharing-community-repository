@@ -45,7 +45,7 @@ import {NgxEditorModel} from 'ngx-monaco-editor';
 import {Scope} from '../../core-ui-module/option-item';
 import {AboutService} from 'ngx-edu-sharing-api';
 import { SkipTarget } from '../../main/navigation/skip-nav/skip-nav.service';
-import {AuthoritySearchMode} from '../../common/ui/authority-search-input/authority-search-input.component';
+import {AuthoritySearchMode} from '../../shared/components/authority-search-input/authority-search-input.component';
 import {PlatformLocation} from '@angular/common';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 
