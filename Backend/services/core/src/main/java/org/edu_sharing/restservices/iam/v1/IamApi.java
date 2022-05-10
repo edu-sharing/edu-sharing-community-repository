@@ -214,7 +214,7 @@ public class IamApi  {
 			SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
     		Filter propFilter = new Filter(propertyFilter);
 	    	NodeEntries result=new NodeEntries();
-	    	List<NodeRef> refList = personDao.getNodeList(list);
+	    	List<NodeRef> refList = PersonDao.getNodeList(personDao, list);
 	    	if(refList!=null){
                 refList=NodeDao.sortApiNodeRefs(repoDao,refList,null,sortDefinition);
 	    	    result=NodeDao.convertToRest(repoDao,propFilter,refList,0,Integer.MAX_VALUE);
@@ -247,7 +247,7 @@ public class IamApi  {
 		try{
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	PersonDao personDao = PersonDao.getPerson(repoDao, person);
-	    	personDao.addNodeList(list, node);
+	    	PersonDao.addNodeList(personDao, list, node);
 	    	return Response.status(Response.Status.OK).build();
 		}catch(Throwable t){
 			return ErrorResponse.createResponse(t);
@@ -276,7 +276,7 @@ public class IamApi  {
 		try{
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	PersonDao personDao = PersonDao.getPerson(repoDao, person);
-	    	personDao.removeNodeList(list, node);
+			PersonDao.removeNodeList(personDao, list, node);
 	    	return Response.status(Response.Status.OK).build();
 		}catch(Throwable t){
 			return ErrorResponse.createResponse(t);
