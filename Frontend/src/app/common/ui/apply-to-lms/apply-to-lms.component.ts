@@ -48,6 +48,7 @@ export class ApplyToLmsComponent {
         this.reurl=params.reurl;
       }
       this.route.params.subscribe((params: Params) => {
+        this.toast.showProgressDialog();
         if(temporaryStorage.get(TemporaryStorageService.APPLY_TO_LMS_PARAMETER_NODE)) {
           this.node = temporaryStorage.get(TemporaryStorageService.APPLY_TO_LMS_PARAMETER_NODE);
           this.forward();

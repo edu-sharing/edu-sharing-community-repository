@@ -97,9 +97,7 @@ export class NodeListService {
         );
         // TODO: replace `concat` / `toArray` with `forkJoin` when the backend can handle
         // simultaneous requests.
-        return rxjs.concat(...observables).pipe(
-            toArray(), // Replace until here.
-            // return rxjs.forkJoin(observables).pipe(
+        return rxjs.forkJoin(observables).pipe(
             switchMap((responses) => {
                 if (responses.every((response) => 'success' in response)) {
                     return rxjs.of(void 0);
