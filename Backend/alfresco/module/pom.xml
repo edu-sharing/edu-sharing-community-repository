@@ -527,6 +527,12 @@
       <groupId>org.dspace</groupId>
       <artifactId>xoai-data-provider</artifactId>
       <scope>runtime</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.codehaus.woodstox</groupId>
+          <artifactId>wstx-asl</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>

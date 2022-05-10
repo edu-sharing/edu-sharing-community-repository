@@ -32,6 +32,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
+
 /**
  * This will register all Alfresco beans in the edu sharing spring context
  * All Beans are in form of transactional and secure

@@ -93,8 +93,8 @@ public class Monitoring {
 	}
 	
 	private String executeTask(int timeoutInSeconds, Callable<String> task) throws Throwable{
-		ExecutorService executor = Executors.newFixedThreadPool(1);
-		Future<String> future = executor.submit(task);
+		ExecutorService executorService = Executors.newSingleThreadExecutor();
+		Future<String> future = executorService.submit(task);
 		String result = future.get(timeoutInSeconds, TimeUnit.SECONDS);
 		return result;
 	}

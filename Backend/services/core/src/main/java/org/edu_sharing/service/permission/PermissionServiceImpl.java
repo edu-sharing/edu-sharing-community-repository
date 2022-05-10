@@ -372,7 +372,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				replace.put("name", name.trim());
 				replace.put("message", _mailText.trim());
 				replace.put("permissions", permText.trim());
-				replace.put("link", MailTemplate.generateContentLink(appInfo, _nodeId));
+				MailTemplate.addContentLinks(appInfo, _nodeId, replace, "link");
 				String template="invited";
 				boolean send=true;
 				org.edu_sharing.service.nodeservice.NodeService nodeServiceApp = NodeServiceFactory.getNodeService(appInfo.getAppId());
