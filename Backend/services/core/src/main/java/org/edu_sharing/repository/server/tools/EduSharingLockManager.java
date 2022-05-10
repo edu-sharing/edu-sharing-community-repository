@@ -11,7 +11,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class EduSharingLockManager {
     private static final ConcurrentHashMap<String, Lock> pool = new ConcurrentHashMap<>();
 
-    protected static synchronized Lock getLock(Class clazz, String keyName) {
+    protected synchronized Lock getLock(Class clazz, String keyName) {
         Lock lock = pool.get(getKey(clazz, keyName));
         if(lock == null) {
             lock = new ReentrantLock();
@@ -19,13 +19,13 @@ public class EduSharingLockManager {
         }
         return lock;
     }
-    protected static synchronized void cleanupLock(Lock lock) {
+    protected synchronized void cleanupLock(Lock lock) {
         if (!((ReentrantLock)lock).hasQueuedThreads()) {
             pool.remove(pool.entrySet().stream().filter(e -> e.getValue().equals(lock)).findAny().get().getKey());
         }
     }
 
-    protected static String getKey(Class clazz, String lockName) {
+    protected String getKey(Class clazz, String lockName) {
         return clazz.getName() + "_" + lockName;
     }
 }

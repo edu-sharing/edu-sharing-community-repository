@@ -1,5 +1,8 @@
 package org.edu_sharing.repository.server.tools;
 
+import org.edu_sharing.repository.server.jobs.quartz.JobClusterLocker;
+import org.edu_sharing.spring.ApplicationContextFactory;
+
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Lock;
@@ -21,7 +24,8 @@ public class EduSharingLockHelper {
      * @param runnable The runnable to run only once at a time for the given clazz + keyName combination
      */
     public static void runSingleton(Class clazz, String keyName, Runnable runnable) {
-        Lock lock = EduSharingLockManager.getLock(clazz, keyName);
+        EduSharingLockManager manager = (EduSharingLockManager) ApplicationContextFactory.getApplicationContext().getBean("esLockManager");
+        Lock lock = manager.getLock(clazz, keyName);
         try {
             EduSharingLockHelper.acquire(lock);
             try {
@@ -30,7 +34,7 @@ public class EduSharingLockHelper {
                 lock.unlock();
             }
         } finally {
-            EduSharingLockManager.cleanupLock(lock);
+            manager.cleanupLock(lock);
         }
     }
 }
