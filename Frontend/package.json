@@ -17,7 +17,7 @@
     "gitlog": "..\\Edu-Sharing-Internal\\Frontend\\gitlog.sh",
     "start-storybook": "start-storybook -p 4300 -s ./src/assets",
     "build-storybook": "build-storybook -s ./src/assets",
-    "postinstall": "node --max_old_space_size=2048 ./node_modules/@angular/compiler-cli/ngcc --async=false"
+    "postinstall": "ngcc --async=false"
   },
   "private": true,
   "dependencies": {
