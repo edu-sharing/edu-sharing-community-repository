@@ -9,6 +9,7 @@ import {
     Input,
     NgZone,
     OnDestroy,
+    OnInit,
     Output,
     ViewChild,
     ViewContainerRef
@@ -25,7 +26,6 @@ import {Location, PlatformLocation} from '@angular/common';
 import {UIConstants} from '../../../core-module/ui/ui-constants';
 import {SearchService} from '../../../modules/search/search.service';
 import {ActionbarHelperService} from '../../services/actionbar-helper';
-import {MainNavComponent} from '../main-nav/main-nav.component';
 import {HttpClient} from '@angular/common/http';
 import {
     ConfigurationHelper,
@@ -54,7 +54,7 @@ import {
 } from '../../../core-module/core.module';
 import {MdsHelper} from '../../../core-module/rest/mds-helper';
 import {ListTableComponent} from '../../../core-ui-module/components/list-table/list-table.component';
-import {SpinnerComponent} from '../../../core-ui-module/components/spinner/spinner.component';
+import {SpinnerComponent} from '../../../shared/components/spinner/spinner.component';
 import {CommentsListComponent} from '../../../modules/management-dialogs/node-comments/comments-list/comments-list.component';
 import {GlobalContainerComponent} from '../global-container/global-container.component';
 import {VideoControlsComponent} from '../../../core-ui-module/components/video-controls/video-controls.component';
@@ -65,13 +65,14 @@ import {
 } from '../../../core-ui-module/options-helper.service';
 import {RestTrackingService} from '../../../core-module/rest/services/rest-tracking.service';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
-import {CardComponent} from '../../../core-ui-module/components/card/card.component';
+import {CardComponent} from '../../../shared/components/card/card.component';
 import {CardService} from '../../../core-ui-module/card.service';
 import {RouterComponent} from '../../../router/router.component';
 import {RenderHelperService} from '../../../core-ui-module/render-helper.service';
 import {NodeDataSource} from '../../../core-ui-module/components/node-entries-wrapper/node-data-source';
 import { Subject } from 'rxjs';
 import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
+import { MainNavService } from '../../../main/navigation/main-nav.service';
 
 
 @Component({
@@ -87,7 +88,7 @@ import { LoadingScreenService } from '../../../main/loading-screen/loading-scree
 })
 
 
-export class NodeRenderComponent implements EventListener, OnDestroy {
+export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
     @Input() set node(node: Node|string) {
       const id=(node as Node).ref ? (node as Node).ref.id : (node as string);
       jQuery('#nodeRenderContent').html('');
@@ -127,6 +128,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
       private platformLocation : PlatformLocation,
       private optionsHelper : OptionsHelperService,
       private loadingScreen: LoadingScreenService,
+      private mainNavService: MainNavService,
       private temporaryStorageService: TemporaryStorageService) {
       (window as any).nodeRenderComponentRef = {component: this, zone: _ngZone};
       (window as any).ngRender = {setDownloadUrl:(url:string)=> {this.setDownloadUrl(url)}};
@@ -172,6 +174,13 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
 
       });
       this.frame.broadcastEvent(FrameEventsService.EVENT_VIEW_OPENED,'node-render');
+    }
+
+    ngOnInit(): void {
+      this.mainNavService.setMainNavConfig({
+        show: false,
+        currentScope: 'render',
+      })
     }
 
 
@@ -223,7 +232,6 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
   private readonly destroyed$ = new Subject<void>();
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
-  @ViewChild('mainNav') mainNavRef : MainNavComponent;
   @ViewChild('actionbar') actionbar: ActionbarComponent;
   isChildobject = false;
     _node : Node;
@@ -286,7 +294,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
             // use a timeout to let the browser try to go back in history first
             setTimeout(()=> {
                 if(!this.isDestroyed) {
-                    this.mainNavRef.toggleMenuSidebar();
+                    this.mainNavService.getMainNav().topBar.toggleMenuSidebar();
                 }
             },250);
           }
@@ -352,7 +360,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     if(this.isLoading) {
         return;
     }
-    this.optionsHelper.clearComponents(this.mainNavRef, this.actionbar);
+    this.optionsHelper.clearComponents(this.actionbar);
     this.isLoading=true;
     this.node=this._nodeId;
   }
@@ -403,7 +411,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
   private loadRenderData() {
     const loadingTask = this.loadingScreen.addLoadingTask();
       this.isLoading=true;
-      this.optionsHelper.clearComponents(this.mainNavRef, this.actionbar);
+      this.optionsHelper.clearComponents(this.actionbar);
     if(this.isBuildingPage) {
         setTimeout(()=>this.loadRenderData(),50);
         return;
@@ -558,7 +566,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                 addOptions: this.currentOptions
             },
         });
-        this.optionsHelper.initComponents(this.mainNavRef, this.actionbar);
+        this.optionsHelper.initComponents(this.actionbar);
         this.optionsHelper.setListener({
             onRefresh: (node) => {
                 this.refresh();

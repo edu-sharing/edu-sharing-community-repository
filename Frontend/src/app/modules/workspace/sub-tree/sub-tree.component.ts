@@ -12,9 +12,9 @@ import { Helper } from '../../../core-module/rest/helper';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { DropData, DragData } from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
 import {MatMenuTrigger} from '@angular/material/menu';
-import {DropdownComponent} from '../../../core-ui-module/components/dropdown/dropdown.component';
+import {DropdownComponent} from '../../../shared/components/dropdown/dropdown.component';
 import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../../core-ui-module/options-helper.service';
-import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
+import {MainNavComponent} from '../../../main/navigation/main-nav/main-nav.component';
 import {CdkDragDrop, CdkDragEnter, CdkDragExit} from '@angular/cdk/drag-drop';
 import {DragCursorDirective} from '../../../core-ui-module/directives/drag-cursor.directive';
 import {DropSource} from '../../../core-ui-module/components/node-entries-wrapper/entries-model';
@@ -43,7 +43,6 @@ export class WorkspaceSubTreeComponent {
     dropdownTop: string;
 
     @Input() openPath: string[][] = [];
-    @Input() mainNav: MainNavComponent;
     @Input() set reload(reload: Boolean) {
         if (reload) {
             this.refresh();
@@ -149,7 +148,7 @@ export class WorkspaceSubTreeComponent {
             activeObjects: [node],
             scope: Scope.WorkspaceTree
         });
-        this.optionsService.initComponents(this.mainNav, null, null, this.dropdown);
+        this.optionsService.initComponents(null, null, this.dropdown);
         this.optionsService.setListener({
             onRefresh: () => this.refresh(),
             onDelete: () => this.refresh()

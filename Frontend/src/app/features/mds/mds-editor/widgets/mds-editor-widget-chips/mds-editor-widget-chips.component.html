@@ -1,0 +1,96 @@
+<es-mds-editor-widget-container
+  #container
+  [injectedView]="this"
+  [widget]="widget"
+  [label]="false"
+  [valueType]="valueType"
+  [control]="chipsControl"
+>
+  <!-- The aria-describedby attribute is set automatically by MatFormField to the ChipList. We pass
+  it on to the input element. -->
+  <!-- We use `chipsControl` as `formControl` of the chips list. This serves different purposes:
+    - The `formControl` of the chips list controls which chips are *selected*. Thus, by using
+      `chipsControl`, which controls *all* chips, we automatically mark all chips as selected (see
+      below for the reason).
+    - The chips list is the element controlling the form. By attaching `chipsControl` we:
+      - get correct value readings for the required-state
+      - pass the disabled state to chips and the input.
+    -->
+  <mat-chip-list
+    #chipList
+    *ngIf="chipsControl"
+    [formControl]="chipsControl"
+    [attr.aria-labelledby]="chipsControl.value.length > 0 ? container.labelId : null"
+    esOnAttributeChange="aria-describedby"
+    (attributeChange)="input.setAttribute('aria-describedby', $event)"
+    [multiple]="true"
+  >
+    <!-- We mark all chips as selected because NVDA will announce "not selected" for each item
+    otherwise. It announces nothing (!) for selected items. -->
+    <mat-chip
+      #chip="matChip"
+      *ngFor="let value of chipsControl.value"
+      [value]="value"
+      [removable]="true"
+      (blur)="onBlurInput($event)"
+      (click)="add(value)"
+      (removed)="remove(value)"
+      [class.indeterminate]="(indeterminateValues$ | async)?.includes(value.key)"
+      [class.mat-chip-selected]="false"
+      [matTooltip]="getTooltip(value)"
+    >
+      <span class="mat-chip-label">{{ value.label }}</span>
+      <mat-icon matChipRemove>cancel</mat-icon>
+    </mat-chip>
+    <div class="input-wrapper">
+      <input
+        #input
+        #trigger="matAutocompleteTrigger"
+        autocomplete="off"
+        [formControl]="inputControl"
+        [matAutocomplete]="auto"
+        [placeholder]="chipsControl.value?.length ? null : widget.definition.placeholder"
+        [matChipInputFor]="chipList"
+        [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+        [matChipInputAddOnBlur]="false"
+        (matChipInputTokenEnd)="onInputTokenEnd($event)"
+        (blur)="onBlurInput($event)"
+      />
+      <button
+        mat-icon-button
+        class="mat-button-select-arrow"
+        *ngIf="showDropdownArrow"
+        (click)="toggleAutoCompletePanel()"
+        [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
+        (keydown.tab)="chipList._allowFocusEscape()"
+        [disabled]="chipsControl.disabled"
+      >
+        <span class="mat-select-arrow"></span>
+      </button>
+    </div>
+  </mat-chip-list>
+  <mat-autocomplete
+    #auto="matAutocomplete"
+    (optionSelected)="selected($event)"
+    (optionActivated)="showTooltip($any($event.option)?.tooltip)"
+  >
+    <mat-option
+      *ngFor="let value of autocompleteValues | async"
+      [value]="value"
+      esCheckTextOverflow=".mat-option-text"
+      #text="esCheckTextOverflow"
+      #tooltip="matTooltip"
+      #option="matOption"
+      [matTooltip]="text.hasTextOverflow() ? value.label : null"
+      [esRegisterCustomProperty]="{ key: 'tooltip', value: tooltip, object: option }"
+    >
+      <span [innerHTML]="value.label | sanitizeHTML | highlight: inputControl.value"></span>
+    </mat-option>
+    <mat-option disabled *ngIf="shouldShowNoMatchingValuesNotice | async" aria-live="polite">
+      {{ 'MDS.NO_MATCHING_VALUES' | translate }}
+    </mat-option>
+  </mat-autocomplete>
+</es-mds-editor-widget-container>
+
+<!-- Load styles for mat-select-arrow. -->
+<mat-select hidden style="display: none"></mat-select>

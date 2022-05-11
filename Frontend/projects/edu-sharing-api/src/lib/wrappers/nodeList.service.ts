@@ -95,11 +95,7 @@ export class NodeListService {
                     catchError((error) => rxjs.of({ nodeId, error })),
                 ),
         );
-        // TODO: replace `concat` / `toArray` with `forkJoin` when the backend can handle
-        // simultaneous requests.
-        return rxjs.concat(...observables).pipe(
-            toArray(), // Replace until here.
-            // return rxjs.forkJoin(observables).pipe(
+        return rxjs.forkJoin(observables).pipe(
             switchMap((responses) => {
                 if (responses.every((response) => 'success' in response)) {
                     return rxjs.of(void 0);
@@ -141,11 +137,7 @@ export class NodeListService {
                 node: nodeId,
             }),
         );
-        // TODO: replace `concat` / `toArray` with `forkJoin` when the backend can handle
-        // simultaneous requests.
-        return rxjs.concat(...observables).pipe(
-            toArray(), // Replace until here.
-            // return rxjs.forkJoin(observables).pipe(
+        return rxjs.forkJoin(observables).pipe(
             map(() => void 0),
             finalize(() => this.nodeListChangesSubject.next(listId)),
         );

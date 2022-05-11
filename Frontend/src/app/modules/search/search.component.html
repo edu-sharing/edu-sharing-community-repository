@@ -1,24 +1,10 @@
 <div id="eduSearchWrapper" (window:resize)="onResize()">
   <es-tutorial [element]="tutorialElement" [heading]="'SEARCH.TUTORIAL_HEADING'" [description]="'SEARCH.TUTORIAL_DESCRIPTION'" [showSkip]="false"
   ></es-tutorial>
-  <es-main-nav #mainNav
-    [hidden]="!mainnav"
-    [title]="'SEARCH.TITLE'"
-    [currentScope]="'search'"
-    [searchEnabled]="true"
-    [showScope]="mainnav"
-    [showUser]="mainnav"
-    [searchPlaceholder]="'SEARCH.SEARCH_STUFF'"
-    [canOpen]="true"
-    [create]="{allowed: isHomeRepository(), allowBinary: true}"
-    [(searchQuery)]="searchService.searchTerm"
-    (onSearch)="applyParameters('mainnav')"
-    (onCreate)="list.addVirtualNodes($event)"
-  ></es-main-nav>
 
   <div class="rowRepositories scrollWithBanner"
        [class.no-mainnav]="!mainnav"
-       *ngIf="repositories && repositories.length>2"
+       *ngIf="repositories && repositories.length>2 || false"
   >
       <div class="mobile-move-top row tab-group row-dark">
           <div class="col s12" role="region">

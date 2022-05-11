@@ -1,11 +1,3 @@
-<es-main-nav #mainNav
-          [title]="'STREAM.TITLE'"
-          [currentScope]="'stream'"
-          [searchEnabled]="false"
-          [searchPlaceholder]="'STREAM.SEARCH_PLACEHOLDER'"
-          [(searchQuery)]="searchQuery"
-          (onSearch)="doSearch($event)"
-></es-main-nav>
 <es-workspace-management
   [(addToCollection)]="collectionNodes"
 ></es-workspace-management>

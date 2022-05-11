@@ -37,7 +37,7 @@ import {trigger} from '@angular/animations';
 import {CordovaService} from '../../common/services/cordova.service';
 import * as moment from 'moment';
 import {ActionbarHelperService} from '../../common/services/actionbar-helper';
-import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {MainNavComponent} from '../../main/navigation/main-nav/main-nav.component';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 import {filter, pairwise} from 'rxjs/operators';
@@ -50,6 +50,7 @@ import {
 import {SelectionModel} from '@angular/cdk/collections';
 import { StreamEntry, StreamV1Service } from 'ngx-edu-sharing-api';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
+import { MainNavService } from '../../main/navigation/main-nav.service';
 
 
 @Component({
@@ -63,8 +64,7 @@ import { LoadingScreenService } from '../../main/loading-screen/loading-screen.s
         OptionsHelperService
     ]
 })
-export class StreamComponent implements AfterViewInit {
-    @ViewChild('mainNav') mainNavRef: MainNavComponent;
+export class StreamComponent implements OnInit, AfterViewInit {
     connectorList: ConnectorList;
     createConnectorName: string;
     createConnectorType: Connector;
@@ -137,6 +137,7 @@ export class StreamComponent implements AfterViewInit {
         private actionbarHelperService: ActionbarHelperService,
         private collectionService: RestCollectionService,
         private loadingScreen: LoadingScreenService,
+        private mainNavService: MainNavService,
         private translations: TranslationsService) {
         const loadingTask = this.loadingScreen.addLoadingTask();
         this.translations.waitForInit().subscribe(() => {
@@ -174,8 +175,19 @@ export class StreamComponent implements AfterViewInit {
             });
     }
 
+    ngOnInit(): void {
+        this.mainNavService.setMainNavConfig({
+            title: 'STREAM.TITLE',
+            currentScope: 'stream',
+            searchEnabled: false,
+            searchPlaceholder: 'STREAM.SEARCH_PLACEHOLDER',
+            searchQueryChange: (searchQuery) => (this.searchQuery = searchQuery),
+            onSearch: (query, cleared) => this.doSearch({ query, cleared }),
+        });
+    }
+
     async ngAfterViewInit() {
-        await this.optionsHelper.initComponents(this.mainNavRef);
+        await this.optionsHelper.initComponents();
     }
 
     setStreamMode() {

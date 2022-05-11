@@ -20,7 +20,7 @@ import { DialogButton, RestHelper } from 'src/app/core-module/core.module';
 import { Toast, ToastType } from 'src/app/core-ui-module/toast';
 import { UIHelper } from 'src/app/core-ui-module/ui-helper';
 import { Node } from '../../../core-module/rest/data-object';
-import { MainNavService } from '../../services/main-nav.service';
+import { MainNavService } from '../../../main/navigation/main-nav.service';
 
 export interface NodeEmbedConfig {
     node: Node;

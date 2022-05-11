@@ -14,7 +14,6 @@ import {RestConstants} from '../../../../core-module/rest/rest-constants';
 import {RestConnectorService} from '../../../../core-module/rest/services/rest-connector.service';
 
 import {RestHelper} from '../../../../core-module/rest/rest-helper';
-import {MainNavService} from '../../../../common/services/main-nav.service';
 import {RestNodeService} from '../../../../core-module/rest/services/rest-node.service';
 import {Observable, Observer} from 'rxjs';
 import {Router} from '@angular/router';
@@ -24,8 +23,9 @@ import {BridgeService} from '../../../../core-bridge-module/bridge.service';
 import {Helper} from '../../../../core-module/rest/helper';
 import {Toast} from '../../../../core-ui-module/toast';
 import {TranslateService} from '@ngx-translate/core';
-import {MdsEditorInstanceService, CompletionStatusEntry} from '../../../../common/ui/mds-editor/mds-editor-instance.service';
 import {NodeHelperService} from '../../../../core-ui-module/node-helper.service';
+import { MainNavService } from '../../../../main/navigation/main-nav.service';
+import { CompletionStatusEntry, MdsEditorInstanceService } from '../../../../features/mds/mds-editor/mds-editor-instance.service';
 
 @Component({
     selector: 'es-share-publish',

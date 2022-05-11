@@ -5,7 +5,7 @@ import {DialogButton} from "../core-module/core.module";
 import { TranslationsService } from '../translations/translations.service';
 import {MessageType} from "../core-module/ui/message-type";
 import {ModalDialogOptions} from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
-import {ProgressType} from '../common/ui/modal-dialog/modal-dialog.component';
+import {ProgressType} from '../shared/components/modal-dialog/modal-dialog.component';
 
 @Injectable({providedIn: 'root'})
 export class BridgeService {

@@ -17,7 +17,6 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
             "baseHref": "/edu-sharing/",
-            "deployUrl": "/edu-sharing/",
             "assets": [
               { "glob": "**/*", "input": "src/assets/", "output": "/assets/" },
               { "glob": "**/*", "input": "node_modules/ngx-monaco-editor/assets/monaco", "output": "/assets/monaco/" },
