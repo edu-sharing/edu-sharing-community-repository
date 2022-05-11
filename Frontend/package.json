@@ -4,15 +4,15 @@
   "license": "GNU GPL v2",
   "angular-cli": {},
   "scripts": {
-    "prestart": "ng build edu-sharing-api --configuration development",
+    "prestart": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build edu-sharing-api --configuration development",
     "start": "ng serve",
     "start-public": "ng serve --host 0.0.0.0 --disable-host-check",
-    "build:edu-sharing-api": "ng build edu-sharing-api",
+    "build:edu-sharing-api": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build edu-sharing-api",
     "publish:edu-sharing-api": "npm run build:edu-sharing-api && cd dist/edu-sharing-api && npm publish",
     "prebuild": "npm run build:edu-sharing-api",
-    "build": "ng build --configuration production --delete-output-path false --base-href /edu-sharing/",
-    "prebuild-dev": "ng build edu-sharing-api --configuration development",
-    "build-dev": "ng build --delete-output-path false --base-href /edu-sharing/",
+    "build": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build --configuration production --delete-output-path false --base-href /edu-sharing/",
+    "prebuild-dev": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build edu-sharing-api --configuration development",
+    "build-dev": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build --delete-output-path false --base-href /edu-sharing/",
     "check:lint": "ng lint --max-warnings=379",
     "fix:lint": "ng lint --fix",
     "test": "ng test",
@@ -20,10 +20,9 @@
     "test:edu-sharing-api": "ng test edu-sharing-api",
     "docs": "typedoc --mode file --experimentalDecorators --excludePrivate --ignoreCompilerErrors --target 'ES6' --module 'commonjs' --out docs src",
     "print-licenses": "node licenses.js",
-    "gitlog": "..\\Edu-Sharing-Internal\\Frontend\\gitlog.sh",
     "start-storybook": "start-storybook -p 4300 -s ./src/assets",
     "build-storybook": "build-storybook -s ./src/assets",
-    "postinstall": "ngcc"
+    "postinstall": "node --max_old_space_size=2048 ./node_modules/@angular/compiler-cli/ngcc --async=false"
   },
   "private": true,
   "dependencies": {

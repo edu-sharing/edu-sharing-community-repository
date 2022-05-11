@@ -1,25 +1,36 @@
-@import "../../../../app/core-ui-module/styles/variables.scss";
+@import '../../../../app/core-ui-module/styles/variables.scss';
 
 .pinning-content {
-  padding: $cardPadding;
-  .entry {
-    cursor: default;
-    padding: 10px 5px;
-    display: flex;
-    align-items: center;
+    padding: $cardPadding;
+    .entry {
+        cursor: default;
+        padding: 10px 5px;
+        display: flex;
+        align-items: center;
 
-    div, i, mat-checkbox, label {
-      display: flex;
-    }
+        div,
+        mat-checkbox,
+        label {
+            display: flex;
+        }
 
-    .name {
-      flex-grow: 1;
-      margin-left: 10px;
-    }
+        mat-checkbox {
+            flex-grow: 1;
+            ::ng-deep .mat-checkbox-layout {
+                white-space: normal;
+                .mat-checkbox-label {
+                    overflow-wrap: anywhere;
+                }
+            }
+        }
 
-    .drag {
-      color: #aaa;
-      margin-left: 15px;
+        .drag {
+            color: #aaa;
+            margin-left: 10px;
+            padding: 5px;
+            &.cdk-keyboard-focused {
+                @include setGlobalKeyboardFocus();
+            }
+        }
     }
-  }
 }

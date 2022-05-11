@@ -1,41 +1,26 @@
-Edu-Sharing-Internal/
-node_modules/
-Backend/version.properties
-Backend/build.*.properties
-Backend/ng/
-Backend/war/
-*.class
-Backend/.gradle
-Backend/.settings
-Backend/build.number
-Backend/edu-sharing/
-Backend/release/
-Backend/lib/edu-sharing_webservices.jar
-Backend/lib/edu-sharing_webdav.jar
-Backend/lib/edu-sharing_cmis.jar
-Backend/lib/edu-sharing_spring.jar
-Backend/lib/edu-sharing_security.jar
-Backend/lib/edu-sharing_classloaderstuff.jar
-Backend/src/org/edu_sharing/repository/public/version.html
-edu-sharing-cluster/
-Backend/lib/edu-sharing_cifs.jar
-Backend/lib/edu-sharing-tomcat.jar
-.vscode/settings.json
-.DS_Store
-Cordova/node_modules
-Cordova/www
-Cordova/plugins
-Cordova/platforms
-Frontend/gitlog.html
-Cordova/npm-debug.log
-Cordova/.gradle/
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.git-versioned-pom.xml
+# IntelliJ
+.idea/
 *.iml
-Backend/.idea/
-Backend/soap-generation/generated/
-.idea/workspace.xml
-Cordova/.idea/workspace.xml
-edu-sharing-current
-.idea
-.idea/modules.xml
-.idea/libraries
-
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+.history/
+# 3rd party licenses
+THIRD-PARTY*.txt
+# Dotenv
+.env

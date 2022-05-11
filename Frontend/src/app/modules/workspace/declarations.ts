@@ -5,6 +5,7 @@ import {WorkspaceExplorerComponent} from "./explorer/explorer.component";
 import {WorkspaceMetadataComponent} from "./metadata/metadata.component";
 import {WorkspaceShareComponent} from "./share/share.component";
 import {WorkspaceShareChooseTypeComponent} from "./share/choose-type/choose-type.component";
+import {WorkspaceShareFocusableOptionDirective} from "./share/choose-type/focusable-option.directive";
 import {WorkspacePermissionComponent} from "./share/permission/permission.component";
 import {WorkspaceRoutingComponent} from "./workspace-routing.component";
 import {WorkspaceHistoryComponent} from "./share/history/history.component";
@@ -27,6 +28,7 @@ export const DECLARATIONS_WORKSPACE = [
   SharePublishComponent,
   WorkspaceShareLinkComponent,
   WorkspaceShareChooseTypeComponent,
+  WorkspaceShareFocusableOptionDirective,
   WorkspacePermissionComponent,
   WorkspaceUsageComponent,
   WorkspaceHistoryComponent,
