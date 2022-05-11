@@ -1,5 +1,7 @@
 package org.edu_sharing.alfresco.service.toolpermission;
 
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigValue;
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
@@ -12,6 +14,7 @@ import org.alfresco.service.cmr.security.OwnableService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
@@ -222,10 +225,30 @@ public class ToolPermissionBaseService {
         for(String toolPermission : toolPermissions){
             getToolPermissionNodeId(toolPermission);
         }
-
+        List<? extends Config> list = LightbendConfigLoader.get().getConfigList("repository.toolpermissions.create");
+        if(!list.isEmpty()) {
+            list.forEach((value) -> {
+                try {
+                    String id = value.getString("id");
+                    String nodeid = getToolPermissionNodeId(id, false);
+                    // only create and set permissions if not yet exists
+                    if(nodeid == null) {
+                        nodeid = getToolPermissionNodeId(id, true);
+                        List<String> allowed = value.getStringList("allowed");
+                        if (allowed != null) {
+                            for (String authority : allowed) {
+                                permissionService.setPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeid),
+                                        authority, CCConstants.PERMISSION_READ, true);
+                            }
+                        }
+                    }
+                } catch (Throwable e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
     }
-
-    public String getToolPermissionNodeId(String toolPermission) throws Throwable{
+    public String getToolPermissionNodeId(String toolPermission, boolean autoCreate) throws Throwable{
         if(toolPermissionNodeCache.containsKey(toolPermission)) {
             String nodeId=toolPermissionNodeCache.get(toolPermission);
             // validate that the cached node is not deleted
@@ -239,12 +262,20 @@ public class ToolPermissionBaseService {
         NodeRef sysObject = nodeService.getChildByName(systemFolderId, ContentModel.ASSOC_CONTAINS, toolPermission);
 
         if(sysObject == null){
-            return createToolpermission(toolPermission).getId();
+            if(autoCreate) {
+                return createToolpermission(toolPermission).getId();
+            } else {
+                return null;
+            }
         }else{
             String nodeId=sysObject.getId();
             toolPermissionNodeCache.put(toolPermission, nodeId);
             return nodeId;
         }
+    }
+
+    public String getToolPermissionNodeId(String toolPermission) throws Throwable{
+        return getToolPermissionNodeId(toolPermission, true);
     }
 
     protected NodeRef createToolpermission(String toolPermission) throws Throwable {
