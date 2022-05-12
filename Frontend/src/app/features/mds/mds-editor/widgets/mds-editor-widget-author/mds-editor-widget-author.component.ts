@@ -7,10 +7,10 @@ import { RestIamService } from '../../../../../core-module/rest/services/rest-ia
 import { UIService } from '../../../../../core-module/rest/services/ui.service';
 import { VCard } from '../../../../../core-module/ui/VCard';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
-import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import { Values } from '../../../types/types';
 import {MatTabGroup} from '@angular/material/tabs';
 import { MainNavService } from '../../../../../main/navigation/main-nav.service';
+import {NativeWidgetComponent} from '../../../types/mds-types';
 
 export interface AuthorData {
     freetext: string;

@@ -7,8 +7,11 @@ import {
     RestMdsService,
     RestNodeService,
 } from '../../../core-module/core.module';
-import { MdsDefinition, MdsType, Values } from './types';
+import { MdsDefinition, MdsType, Values } from '../types/types';
 import {Metadata} from 'ngx-edu-sharing-graphql';
+import {Meta} from '@angular/platform-browser';
+import {Apollo} from 'apollo-angular';
+import {DocumentNode} from '@apollo/client/link/core/types';
 
 /** Error with a translatable message that is suitable to be shown to the user. */
 export class UserPresentableError extends Error {
@@ -30,7 +33,11 @@ export class UserPresentableError extends Error {
     providedIn: 'root',
 })
 export class MdsEditorCommonService {
-    constructor(private restNode: RestNodeService, private mdsService: RestMdsService) {}
+    constructor(
+        private restNode: RestNodeService,
+        private mdsService: RestMdsService,
+        private apollo: Apollo,
+    ) {}
 
     /**
      * Fetches the up-to-date and complete metadata from the server.
@@ -61,6 +68,22 @@ export class MdsEditorCommonService {
                         .editNodeMetadata(node.ref.id, values)
                         .pipe(map((nodeWrapper) => nodeWrapper.node));
                 }
+            }),
+        ).toPromise();
+    }
+    async saveGraphqlMetadata(
+        pairs: Metadata[],
+        versionComment?: string,
+    ): Promise<Node[]> {
+        return forkJoin(
+            pairs.map((metadata) => {
+                console.log('graphql target metadata', metadata);
+                /*this.apollo.mutate({
+                    variables: {
+                        id
+                    },
+                    mutation: DocumentNode
+                })*/
             }),
         ).toPromise();
     }

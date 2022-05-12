@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import {NativeWidgetComponent} from '../../mds-editor-view/mds-editor-view.component';
 import {BehaviorSubject} from 'rxjs';
 import {MdsEditorInstanceService} from '../../mds-editor-instance.service';
 import {RestConstants} from '../../../../../core-module/rest/rest-constants';
 import {filter} from 'rxjs/operators';
+import {NativeWidgetComponent} from '../../../types/mds-types';
 
 @Component({
     selector: 'es-mds-editor-widget-version',

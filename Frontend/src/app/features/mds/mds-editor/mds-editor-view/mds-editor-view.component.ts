@@ -26,16 +26,16 @@ import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { MdsWidgetComponent } from '../../mds-viewer/widget/mds-widget.component';
 import { MdsEditorCardComponent } from '../mds-editor-card/mds-editor-card.component';
 import { MdsEditorCoreComponent } from '../mds-editor-core/mds-editor-core.component';
-import {GeneralWidget, MdsEditorInstanceService, Widget} from '../mds-editor-instance.service';
+import {MdsEditorInstanceService, Widget} from '../mds-editor-instance.service';
 import {
     Constraints,
     InputStatus,
     MdsEditorWidgetComponent,
     MdsView,
     MdsWidget,
-    MdsWidgetType, NativeWidgets,
+    MdsWidgetType,
     NativeWidgetType,
-    Values, WidgetComponents,
+    Values,
 } from '../../types/types';
 import { replaceElementWithDiv } from '../util/replace-element-with-div';
 import { MdsEditorWidgetAuthorComponent } from '../widgets/mds-editor-widget-author/mds-editor-widget-author.component';
@@ -64,21 +64,8 @@ import {MdsEditorWidgetVCardComponent} from '../widgets/mds-editor-widget-vcard/
 import {
     MdsEditorWidgetTinyMCE
 } from '../widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-tinymce.component';
-import { EditorMode } from '../../types/mds-types';
-
-export interface NativeWidgetComponent {
-    hasChanges: BehaviorSubject<boolean>;
-    onSaveNode?: (nodes: Node[]) => Promise<Node[]>;
-    getValues?: (values: Values, node: Node) => Promise<Values>;
-    status?: Observable<InputStatus>;
-    focus?: () => void;
-}
-
-export type NativeWidgetClass = {
-    constraints: Constraints;
-    // ids of fields in dot-notation this widget requires for displaying the node data
-    graphqlIds?: string[];
-} & Type<NativeWidgetComponent>;
+import {EditorMode, GeneralWidget, NativeWidgets, WidgetComponents} from '../../types/mds-types';
+import { Metadata } from 'dist/edu-sharing-graphql/ngx-edu-sharing-graphql';
 
 @Component({
     selector: 'es-mds-editor-view',

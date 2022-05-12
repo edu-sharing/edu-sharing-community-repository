@@ -1,8 +1,8 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import {BehaviorSubject, Observable} from 'rxjs';
-import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import {InputStatus, Values} from '../../../types/types';
 import { map } from 'rxjs/operators';
+import {NativeWidgetComponent} from '../../../types/mds-types';
 
 @Component({
     selector: 'es-mds-editor-widget-file-upload',

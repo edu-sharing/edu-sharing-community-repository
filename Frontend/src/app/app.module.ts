@@ -40,10 +40,12 @@ import { PROVIDERS } from './providers';
 import { RouterComponent } from './router/router.component';
 import { SharedModule } from './shared/shared.module';
 import { TranslationsModule } from './translations/translations.module';
-import { MainModule } from './main/main.module';
 import {ApolloClientOptions, InMemoryCache} from '@apollo/client';
 import {HttpLink} from 'apollo-angular/http';
 import {APOLLO_OPTIONS, ApolloModule} from 'apollo-angular';
+import {
+    EduSharingGraphqlModule
+} from 'ngx-edu-sharing-graphql';
 
 
 // http://blog.angular-university.io/angular2-ngmodule/

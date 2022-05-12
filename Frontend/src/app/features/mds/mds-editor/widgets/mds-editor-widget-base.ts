@@ -1,7 +1,7 @@
 import { ValidatorFn, Validators } from '@angular/forms';
-import { MdsEditorWidgetCore } from '../mds-editor-instance.service';
 import { assertUnreachable, InputStatus, RequiredMode } from '../../types/types';
 import {Directive, EventEmitter} from '@angular/core';
+import {MdsEditorWidgetCore} from '../mds-editor-widget-core.directive';
 
 export enum ValueType {
     String,

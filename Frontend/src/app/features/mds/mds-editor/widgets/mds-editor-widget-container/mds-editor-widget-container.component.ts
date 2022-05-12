@@ -22,16 +22,12 @@ import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import { distinctUntilChanged, map, startWith, takeUntil } from 'rxjs/operators';
 import { UIAnimation } from '../../../../../core-module/ui/ui-animation';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
-import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import { ViewInstanceService } from '../../mds-editor-view/view-instance.service';
 import { BulkBehavior, BulkMode, EditorBulkMode, InputStatus } from '../../../types/types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { FormFieldRegistrationService } from './form-field-registration.service';
-import {
-    InteractionType
-} from '../../../../../core-ui-module/components/node-entries-wrapper/entries-model';
-import {UIHelper} from '../../../../../core-ui-module/ui-helper';
 import {UIService} from '../../../../../core-module/rest/services/ui.service';
+import {NativeWidgetComponent} from '../../../types/mds-types';
 
 @Component({
     selector: 'es-mds-editor-widget-container',

@@ -1,22 +1,11 @@
 import {first, filter} from 'rxjs/operators';
 import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { Node } from '../../../../../core-module/rest/data-object';
-import { RestConstants } from '../../../../../core-module/rest/rest-constants';
-import { RestIamService } from '../../../../../core-module/rest/services/rest-iam.service';
-import { UIService } from '../../../../../core-module/rest/services/ui.service';
 import { VCard } from '../../../../../core-module/ui/VCard';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
-import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
-import { Values } from '../../../types/types';
 import {MdsEditorWidgetBase, ValueType} from '../mds-editor-widget-base';
 import {FormControl, FormGroup} from '@angular/forms';
 import {TranslateService} from '@ngx-translate/core';
 import {Toast} from '../../../../../core-ui-module/toast';
-import {DateHelper} from '../../../../../core-ui-module/DateHelper';
-import {
-    WorkspaceContributorComponent
-} from '../../../../../modules/management-dialogs/contributor/contributor.component';
 import {MatTabGroup} from '@angular/material/tabs';
 
 export interface AuthorData {

@@ -2,12 +2,11 @@ import {forkJoin as observableForkJoin, BehaviorSubject, Observable} from 'rxjs'
 import { map } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
-import {NativeWidgetComponent} from '../../mds-editor-view/mds-editor-view.component';
-import {FileChangeEvent} from '@angular/compiler-cli/src/perform_watch';
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import {RestNodeService} from '../../../../../core-module/rest/services/rest-node.service';
 import {Node} from '../../../../../core-module/rest/data-object';
 import {Metadata} from 'ngx-edu-sharing-graphql';
+import {NativeWidgetComponent} from '../../../types/mds-types';
 @Component({
     selector: 'es-mds-editor-widget-preview',
     templateUrl: './mds-editor-widget-preview.component.html',

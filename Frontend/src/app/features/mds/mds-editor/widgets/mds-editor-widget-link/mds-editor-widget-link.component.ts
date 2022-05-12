@@ -1,6 +1,5 @@
 import {Component, OnInit, Input, NgZone} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
-import {NativeWidgetComponent} from '../../mds-editor-view/mds-editor-view.component';
 import {MdsEditorInstanceService} from '../../mds-editor-instance.service';
 import {MdsEditorWidgetAuthorComponent} from '../mds-editor-widget-author/mds-editor-widget-author.component';
 import {Constraints, NativeWidgetType} from '../../../types/types';
@@ -12,6 +11,7 @@ import {DomSanitizer} from '@angular/platform-browser';
 import {TranslateService} from '@ngx-translate/core';
 import {NodeHelperService} from '../../../../../core-ui-module/node-helper.service';
 import { MainNavService } from '../../../../../main/navigation/main-nav.service';
+import {NativeWidgetComponent} from '../../../types/mds-types';
 
 @Component({
     selector: 'es-mds-editor-widget-link',

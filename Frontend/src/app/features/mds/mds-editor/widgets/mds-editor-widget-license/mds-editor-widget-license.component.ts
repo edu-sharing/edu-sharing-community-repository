@@ -10,10 +10,10 @@ import { NodeHelperService } from '../../../../../core-ui-module/node-helper.ser
 import { UIHelper } from '../../../../../core-ui-module/ui-helper';
 import { MainNavService } from '../../../../../main/navigation/main-nav.service';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
-import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import {Constraints, MdsWidgetValue, Values} from '../../../types/types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import {Lom} from 'ngx-edu-sharing-graphql';
+import {NativeWidgetComponent} from '../../../types/mds-types';
 
 @Component({
     selector: 'es-mds-editor-widget-license',

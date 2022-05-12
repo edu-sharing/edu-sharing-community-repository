@@ -1,6 +1,5 @@
-import { Directive, EventEmitter, Injectable, Input, OnDestroy } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
-import { ConfigService, FacetsDict, MdsService, MdsViewRelation } from 'ngx-edu-sharing-api';
+import {EventEmitter, Injectable, OnDestroy} from '@angular/core';
+import {ConfigService, FacetsDict, MdsService, MdsViewRelation} from 'ngx-edu-sharing-api';
 import {
     BehaviorSubject,
     combineLatest,
@@ -12,17 +11,7 @@ import {
     Subject,
     zip,
 } from 'rxjs';
-import {
-    combineAll,
-    filter,
-    first,
-    map,
-    shareReplay,
-    skip,
-    switchMap,
-    takeUntil,
-    tap
-} from 'rxjs/operators';
+import {filter, first, map, shareReplay, skip, switchMap, takeUntil, tap} from 'rxjs/operators';
 import {
     ConfigurationHelper,
     ConfigurationService,
@@ -33,14 +22,15 @@ import {
     RestMdsService,
     RestSearchService,
 } from '../../../core-module/core.module';
-import { SearchService } from '../../../modules/search/search.service';
-import { MdsEditorCommonService } from './mds-editor-common.service';
-import { EditorMode } from '../types/mds-types';
+import {SearchService} from '../../../modules/search/search.service';
+import {MdsEditorCommonService} from './mds-editor-common.service';
 import {
-    MdsEditorViewComponent,
-    NativeWidgetClass,
-    NativeWidgetComponent
-} from './mds-editor-view/mds-editor-view.component';
+    EditorMode,
+    GeneralWidget,
+    NativeWidget,
+    NativeWidgetComponent,
+    NativeWidgets
+} from '../types/mds-types';
 import {
     BulkBehavior,
     BulkMode,
@@ -53,22 +43,20 @@ import {
     MdsWidget,
     MdsWidgetCondition,
     MdsWidgetType,
-    MdsWidgetValue, NativeWidgets,
+    MdsWidgetValue,
     NativeWidgetType,
     RequiredMode,
     Values,
 } from '../types/types';
-import { parseAttributes } from './util/parse-attributes';
-import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
-import {EditorMode} from '../../../core-ui-module/mds-types';
-import {MdsWidgetComponent} from '../mds-viewer/widget/mds-widget.component';
-import {UIHelper} from '../../../core-ui-module/ui-helper';
-import {MdsEditorWidgetBase, ValueType} from './widgets/mds-editor-widget-base';
-import {Apollo, QueryRef} from 'apollo-angular';
-import { Query } from 'ngx-edu-sharing-graphql';
+import {parseAttributes} from './util/parse-attributes';
+import {
+    MdsEditorWidgetVersionComponent
+} from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
+import {Apollo} from 'apollo-angular';
+import {Metadata, Query} from 'ngx-edu-sharing-graphql';
 import {gql} from '@apollo/client';
-import {Metadata} from 'ngx-edu-sharing-graphql';
 import {Helper} from '../../../core-module/rest/helper';
+import {MdsEditorWidgetCore} from './mds-editor-widget-core.directive';
 
 export interface CompletionStatusField {
     widget: Widget;
@@ -84,19 +72,6 @@ export type Widget = InstanceType<typeof MdsEditorInstanceService.Widget>;
 
 export type CompletionStatus = { [key in RequiredMode]: CompletionStatusEntry };
 
-/**
- * NativeWidget and Widget
- */
-export interface GeneralWidget {
-    status: Observable<InputStatus>;
-    viewId: string;
-}
-
-// TODO: use this object for data properties and register it with the component.
-interface NativeWidget extends GeneralWidget {
-    component: NativeWidgetComponent;
-}
-
 export interface InitialValues {
     /** Values that are initially present in all nodes. */
     readonly jointValues: string[];
@@ -106,21 +81,6 @@ export interface InitialValues {
      * Can be null but will never be set to an empty array.
      */
     readonly individualValues?: string[];
-}
-
-@Directive()
-export abstract class MdsEditorWidgetCore {
-    @Input() widget: Widget;
-    readonly editorMode: EditorMode;
-    readonly editorBulkMode: EditorBulkMode;
-
-    constructor(
-        public mdsEditorInstance: MdsEditorInstanceService,
-        protected translate: TranslateService,
-    ) {
-        this.editorMode = this.mdsEditorInstance.editorMode;
-        this.editorBulkMode = this.mdsEditorInstance.editorBulkMode;
-    }
 }
 
 /**
@@ -1131,7 +1091,32 @@ export class MdsEditorInstanceService implements OnDestroy {
 
     async save(): Promise<Node[] | Values> {
         if(this.graphqlMetadata$.value) {
-
+            const newValues = await this.getGraphqlValues();
+            let updatedNodes: Node[];
+            const versionWidget: MdsEditorWidgetVersionComponent = this.nativeWidgets.value.find(
+                (w) => w.component instanceof MdsEditorWidgetVersionComponent,
+            )?.component as MdsEditorWidgetVersionComponent;
+            for (const widget of this.nativeWidgets.value) {
+                if (widget.component.onSaveNode) {
+                    await widget.component.onSaveNode(this.nodes$.value);
+                }
+            }
+            if (versionWidget) {
+                if (versionWidget.file) {
+                    updatedNodes = await this.mdsEditorCommonService.saveGraphqlMetadata(newValues);
+                    await this.mdsEditorCommonService.saveNodeContent(
+                        this.nodes$.value[0],
+                        versionWidget.file,
+                        versionWidget.comment,
+                    );
+                    return updatedNodes;
+                }
+            }
+            updatedNodes = await this.mdsEditorCommonService.saveGraphqlMetadata(
+                newValues,
+                versionWidget?.comment || RestConstants.COMMENT_METADATA_UPDATE,
+            );
+            return updatedNodes;
         }
         if (!this.nodes$.value) {
             return this.getValues();
@@ -1190,7 +1175,42 @@ export class MdsEditorInstanceService implements OnDestroy {
 
         return values;
     }
+    async getValuesGraphql(node?: Metadata, validate = true): Promise<Metadata> {
+        // same behaviour as old mds, do not return values until it is valid
+        if (validate && !this.isValid$.value) {
+            this.showMissingRequiredWidgets(true);
+            return null;
+        }
 
+        let values = this.mapWidgetValuesGraphql(this.widgets.value, node);
+        // Native widgets don't necessarily match their ID and relevant property or even affect
+        // multiple properties. Therefore, we allow them to set arbitrary properties by implementing
+        // `getValues()`.
+        for (const widget of this.nativeWidgets.value) {
+            values = widget.component.getValuesGraphql
+                ? await widget.component.getValuesGraphql(values, node)
+                : values;
+        }
+
+        return values;
+    }
+    private mapWidgetValuesGraphql(widgets: Widget[], node?: Metadata): Metadata {
+        return widgets
+            .filter((widget) => widget.relation === null)
+            .reduce((acc, widget) => {
+                // @TODO: Remove any cast
+                const property = (widget.definition as any).ids?.graphql;
+                const newValue = this.getNewPropertyValue(widget, Helper.getDotPathFromNestedObject(node, property));
+                // filter null values in search
+                if (newValue) {
+                    if (widget.definition.type === MdsWidgetType.Range) {
+                        // @TODO: how to handle for graphql?
+                        throw new Error(MdsWidgetType.Range + ' not implemeneted for graphql');
+                    }
+                }
+                return acc;
+            }, {} as Metadata);
+    }
     private mapWidgetValues(widgets: Widget[], node?: Node): { [id: string]: string[] } {
         return widgets
             .filter((widget) => widget.relation === null)
@@ -1540,6 +1560,11 @@ export class MdsEditorInstanceService implements OnDestroy {
                 node,
                 values: await this.getValues(node),
             })),
+        );
+    }
+    private async getGraphqlValues(): Promise<Metadata[]> {
+        return Promise.all(
+            this.graphqlMetadata$.value.map(async (metadata) => (await this.getValuesGraphql(metadata))),
         );
     }
 

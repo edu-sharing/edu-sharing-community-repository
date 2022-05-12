@@ -7,7 +7,6 @@ import {VCard} from '../../../../../core-module/ui/VCard';
 import {UIService} from '../../../../../core-module/rest/services/ui.service';
 import {Node, NodeWrapper} from '../../../../../core-module/rest/data-object';
 import {RestIamService} from '../../../../../core-module/rest/services/rest-iam.service';
-import {NativeWidgetComponent} from '../../mds-editor-view/mds-editor-view.component';
 import {Helper} from '../../../../../core-module/rest/helper';
 import {Values} from '../../../types/types';
 import {RestNodeService} from '../../../../../core-module/rest/services/rest-node.service';
@@ -19,6 +18,7 @@ import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
 import {NodeHelperService} from '../../../../../core-ui-module/node-helper.service';
 import {distinctUntilChanged} from 'rxjs/operators';
 import { DialogsService } from '../../../../../modules/management-dialogs/dialogs.service';
+import {NativeWidgetComponent} from '../../../types/mds-types';
 
 
 interface Childobject {
