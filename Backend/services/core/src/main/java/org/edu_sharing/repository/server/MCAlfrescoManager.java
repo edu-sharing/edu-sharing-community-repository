@@ -43,6 +43,7 @@ import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.repository.server.jobs.quartz.JobHandler;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.InitHelper;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
 import org.edu_sharing.repository.server.tracking.TrackingService;
@@ -128,7 +129,12 @@ public class MCAlfrescoManager implements ServletContextListener {
 
 			// init the esuid for admin
 			createESUIDAdmin();
-			
+
+			try {
+				InitHelper.initGroups();
+			}catch(Throwable t) {
+				logger.error("init of config groups failed: " + t.getMessage(), t);
+			}
 			//init ToolPermisssions
 			ToolPermissionServiceFactory.getInstance().init();
 
