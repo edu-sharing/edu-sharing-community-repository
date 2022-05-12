@@ -24,3 +24,5 @@ buildNumber.properties
 THIRD-PARTY*.txt
 # Dotenv
 .env
+# Unit-Test
+*.log

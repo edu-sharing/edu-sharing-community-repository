@@ -527,6 +527,16 @@
       <groupId>edu.uoc.elc.lti</groupId>
       <artifactId>spring-boot-lti-advantage</artifactId>
       <scope>runtime</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-configuration-processor</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-web</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
