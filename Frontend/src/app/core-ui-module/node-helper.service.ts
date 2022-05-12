@@ -676,6 +676,22 @@ export class NodeHelperService {
         return found;
     }
 
+    getValueForAllString(values: string[], fallbackNotIdentical: any = '',fallbackIsEmpty = fallbackNotIdentical, asArray=true) {
+        let found=null;
+        let foundAny=false;
+
+        for (let v of values) {
+            const value = v ? asArray ? v : v[0] : fallbackIsEmpty;
+            if(foundAny && found !== value)
+                return fallbackNotIdentical;
+            found = value;
+            foundAny = true;
+        }
+        if(!foundAny)
+            return fallbackIsEmpty;
+        return found;
+    }
+
     createUrlLink(link : LinkData) {
         const properties: any = {};
         const aspects: string[] = [];

@@ -31,6 +31,19 @@ export type Association = {
     symlink?: Maybe<Metadata>;
 };
 
+export type BooleanSuggestionData = SuggestionDataInterface & {
+    __typename?: 'BooleanSuggestionData';
+    info: SuggestionInfo;
+    value: Scalars['Boolean'];
+    version?: Maybe<Array<Scalars['String']>>;
+};
+
+export type BooleanSuggestionDataInput = {
+    info: SuggestionInfoInput;
+    value: Scalars['Boolean'];
+    version: Array<Scalars['String']>;
+};
+
 export type Classification = {
     __typename?: 'Classification';
     description?: Maybe<Scalars['String']>;
@@ -42,6 +55,19 @@ export type ClassificationInput = {
     description?: InputMaybe<Scalars['String']>;
     purpose: Scalars['String'];
     taxon?: InputMaybe<Array<RangedValueInput>>;
+};
+
+export type ClassificationSuggestion = {
+    __typename?: 'ClassificationSuggestion';
+    description?: Maybe<StringSuggestionData>;
+    purpose?: Maybe<StringSuggestionData>;
+    taxon?: Maybe<Array<Maybe<RangedValueSuggestionData>>>;
+};
+
+export type ClassificationSuggestionInput = {
+    description?: InputMaybe<StringSuggestionDataInput>;
+    purpose?: InputMaybe<StringSuggestionDataInput>;
+    taxon?: InputMaybe<Array<InputMaybe<RangedValueSuggestionDataInput>>>;
 };
 
 export type Collection = {
@@ -71,6 +97,19 @@ export type ContributeInput = {
     role: Scalars['String'];
 };
 
+export type DateSuggestionData = SuggestionDataInterface & {
+    __typename?: 'DateSuggestionData';
+    info: SuggestionInfo;
+    value: Scalars['Date'];
+    version?: Maybe<Array<Scalars['String']>>;
+};
+
+export type DateSuggestionDataInput = {
+    info: SuggestionInfoInput;
+    value: Scalars['Date'];
+    version: Array<Scalars['String']>;
+};
+
 export type Dimension = {
     __typename?: 'Dimension';
     height: Scalars['Float'];
@@ -82,10 +121,36 @@ export type DimensionInput = {
     width: Scalars['Float'];
 };
 
+export type DimensionSuggestionData = SuggestionDataInterface & {
+    __typename?: 'DimensionSuggestionData';
+    info: SuggestionInfo;
+    value: Dimension;
+    version?: Maybe<Array<Scalars['String']>>;
+};
+
+export type DimensionSuggestionDataInput = {
+    info: SuggestionInfoInput;
+    value: DimensionInput;
+    version: Array<Scalars['String']>;
+};
+
 export type Directory = {
     __typename?: 'Directory';
     hasTemplate?: Maybe<Scalars['Boolean']>;
     type?: Maybe<Scalars['String']>;
+};
+
+export type DurationSuggestionData = SuggestionDataInterface & {
+    __typename?: 'DurationSuggestionData';
+    info: SuggestionInfo;
+    value: Scalars['Duration'];
+    version?: Maybe<Array<Scalars['String']>>;
+};
+
+export type DurationSuggestionDataInput = {
+    info: SuggestionInfoInput;
+    value: Scalars['Duration'];
+    version: Array<Scalars['String']>;
 };
 
 export type Editorial = {
@@ -97,6 +162,17 @@ export type Editorial = {
 export type EditorialInput = {
     checklist?: InputMaybe<Array<RangedValueInput>>;
     state?: InputMaybe<RangedValueInput>;
+};
+
+export type EditorialSuggestion = {
+    __typename?: 'EditorialSuggestion';
+    checklist?: Maybe<Array<Maybe<RangedValueSuggestionData>>>;
+    state?: Maybe<RangedValueSuggestionData>;
+};
+
+export type EditorialSuggestionInput = {
+    checklist?: InputMaybe<Array<InputMaybe<RangedValueSuggestionDataInput>>>;
+    state?: InputMaybe<RangedValueSuggestionDataInput>;
 };
 
 export type Educational = {
@@ -124,6 +200,31 @@ export type EducationalInput = {
     typicalLerningTime?: InputMaybe<Scalars['Duration']>;
 };
 
+export type EducationalSuggestion = {
+    __typename?: 'EducationalSuggestion';
+    context?: Maybe<Array<Maybe<RangedValueSuggestionData>>>;
+    curriculum?: Maybe<Array<Maybe<RangedValueSuggestionData>>>;
+    intendedEndUserRole?: Maybe<Array<Maybe<RangedValueSuggestionData>>>;
+    interactivityType?: Maybe<Array<Maybe<RangedValueSuggestionData>>>;
+    language?: Maybe<Array<Maybe<StringSuggestionData>>>;
+    learningResourceType?: Maybe<Array<Maybe<RangedValueSuggestionData>>>;
+    typicalAgeRange?: Maybe<Array<Maybe<RangedValueSuggestionData>>>;
+    typicalAgeRangeNominal?: Maybe<IntRangeSuggestionData>;
+    typicalLerningTime?: Maybe<DurationSuggestionData>;
+};
+
+export type EducationalSuggestionInput = {
+    context?: InputMaybe<Array<InputMaybe<RangedValueSuggestionDataInput>>>;
+    curriculum?: InputMaybe<Array<InputMaybe<RangedValueSuggestionDataInput>>>;
+    intendedEndUserRole?: InputMaybe<Array<InputMaybe<RangedValueSuggestionDataInput>>>;
+    interactivityType?: InputMaybe<Array<InputMaybe<RangedValueSuggestionDataInput>>>;
+    language?: InputMaybe<Array<InputMaybe<StringSuggestionDataInput>>>;
+    learningResourceType?: InputMaybe<Array<InputMaybe<RangedValueSuggestionDataInput>>>;
+    typicalAgeRange?: InputMaybe<Array<InputMaybe<RangedValueSuggestionDataInput>>>;
+    typicalAgeRangeNominal?: InputMaybe<IntRangeSuggestionDataInput>;
+    typicalLerningTime?: InputMaybe<DurationSuggestionDataInput>;
+};
+
 export type Format = {
     __typename?: 'Format';
     content?: Maybe<Scalars['String']>;
@@ -139,6 +240,19 @@ export type FormatInput = {
     subtype?: InputMaybe<Array<Scalars['String']>>;
     type?: InputMaybe<Scalars['String']>;
     version?: InputMaybe<Scalars['String']>;
+};
+
+export type FormatSuggestionData = SuggestionDataInterface & {
+    __typename?: 'FormatSuggestionData';
+    info: SuggestionInfo;
+    value: Format;
+    version?: Maybe<Array<Scalars['String']>>;
+};
+
+export type FormatSuggestionDataInput = {
+    info: SuggestionInfoInput;
+    value: FormatInput;
+    version: Array<Scalars['String']>;
 };
 
 export type General = {
@@ -160,6 +274,26 @@ export type GeneralInput = {
     language?: InputMaybe<Array<Scalars['String']>>;
     structure?: InputMaybe<RangedValueInput>;
     title?: InputMaybe<Scalars['String']>;
+};
+
+export type GeneralSuggestion = {
+    __typename?: 'GeneralSuggestion';
+    aggregationLevel?: Maybe<RangedValueSuggestionData>;
+    coverage?: Maybe<Array<Maybe<StringSuggestionData>>>;
+    description?: Maybe<StringSuggestionData>;
+    keyword?: Maybe<Array<Maybe<StringSuggestionData>>>;
+    language?: Maybe<Array<Maybe<StringSuggestionData>>>;
+    structure?: Maybe<RangedValueSuggestionData>;
+    title?: Maybe<StringSuggestionData>;
+};
+
+export type GeneralSuggestionInput = {
+    aggregationLevel?: InputMaybe<RangedValueSuggestionDataInput>;
+    coverage?: InputMaybe<Array<InputMaybe<StringSuggestionDataInput>>>;
+    description?: InputMaybe<StringSuggestionDataInput>;
+    keyword?: InputMaybe<Array<InputMaybe<StringSuggestionDataInput>>>;
+    language?: InputMaybe<Array<InputMaybe<StringSuggestionDataInput>>>;
+    structure?: InputMaybe<RangedValueSuggestionDataInput>;
 };
 
 export type ImportedObject = {
@@ -200,6 +334,19 @@ export type IntRangeInput = {
     to?: InputMaybe<Scalars['Int']>;
 };
 
+export type IntRangeSuggestionData = SuggestionDataInterface & {
+    __typename?: 'IntRangeSuggestionData';
+    info: SuggestionInfo;
+    value: IntRange;
+    version?: Maybe<Array<Scalars['String']>>;
+};
+
+export type IntRangeSuggestionDataInput = {
+    info: SuggestionInfoInput;
+    value: IntRangeInput;
+    version: Array<Scalars['String']>;
+};
+
 export type LegacyAssociation = {
     __typename?: 'LegacyAssociation';
     schemaRelation: Array<Scalars['String']>;
@@ -216,6 +363,19 @@ export type LifecycleInput = {
     contribute?: InputMaybe<Array<ContributeInput>>;
     status?: InputMaybe<RangedValueInput>;
     version?: InputMaybe<Scalars['String']>;
+};
+
+export type LocaleSuggestionData = SuggestionDataInterface & {
+    __typename?: 'LocaleSuggestionData';
+    info: SuggestionInfo;
+    value: Scalars['Locale'];
+    version?: Maybe<Array<Scalars['String']>>;
+};
+
+export type LocaleSuggestionDataInput = {
+    info: SuggestionInfoInput;
+    value: Scalars['Locale'];
+    version: Array<Scalars['String']>;
 };
 
 export type Lom = {
@@ -241,6 +401,25 @@ export type LomInput = {
     technical?: InputMaybe<TechnicalInput>;
 };
 
+export type LomSuggestion = {
+    __typename?: 'LomSuggestion';
+    classification?: Maybe<Array<ClassificationSuggestion>>;
+    editorial?: Maybe<Array<EditorialSuggestion>>;
+    educational?: Maybe<Array<EducationalSuggestion>>;
+    general?: Maybe<GeneralSuggestion>;
+    rights?: Maybe<RightsSuggestion>;
+    technical?: Maybe<TechnicalSuggestion>;
+};
+
+export type LomSuggestionInput = {
+    classification?: InputMaybe<Array<InputMaybe<ClassificationSuggestionInput>>>;
+    editorial?: InputMaybe<Array<InputMaybe<EditorialSuggestionInput>>>;
+    educational?: InputMaybe<Array<InputMaybe<EducationalSuggestionInput>>>;
+    general?: InputMaybe<GeneralSuggestionInput>;
+    rights?: InputMaybe<RightsSuggestionInput>;
+    technical?: InputMaybe<TechnicalSuggestionInput>;
+};
+
 export type MetaMetadata = {
     __typename?: 'MetaMetadata';
     contribute?: Maybe<Array<Contribute>>;
@@ -259,6 +438,7 @@ export type Metadata = {
     collection?: Maybe<Collection>;
     content?: Maybe<Scalars['String']>;
     directory?: Maybe<Directory>;
+    generated?: Maybe<Array<Suggestion>>;
     id: Scalars['ID'];
     importedObject?: Maybe<ImportedObject>;
     info?: Maybe<Info>;
@@ -281,12 +461,17 @@ export type MetadataFilter = {
 
 export type Mutation = {
     __typename?: 'Mutation';
-    updateLom?: Maybe<Metadata>;
+    addOrUpdateSuggestion: Scalars['Boolean'];
+    removeSuggestion: Scalars['Boolean'];
 };
 
-export type MutationUpdateLomArgs = {
-    id: Scalars['ID'];
-    lom?: InputMaybe<LomInput>;
+export type MutationAddOrUpdateSuggestionArgs = {
+    suggestion?: InputMaybe<SuggestionInput>;
+};
+
+export type MutationRemoveSuggestionArgs = {
+    nodeId: Scalars['ID'];
+    suggestionId: Scalars['ID'];
 };
 
 export type Order = {
@@ -369,6 +554,19 @@ export type RangedValueInput = {
     value: Scalars['String'];
 };
 
+export type RangedValueSuggestionData = SuggestionDataInterface & {
+    __typename?: 'RangedValueSuggestionData';
+    info: SuggestionInfo;
+    value: RangedValue;
+    version?: Maybe<Array<Scalars['String']>>;
+};
+
+export type RangedValueSuggestionDataInput = {
+    info: SuggestionInfoInput;
+    value: RangedValueInput;
+    version: Array<Scalars['String']>;
+};
+
 export type Reference = {
     __typename?: 'Reference';
     collection?: Maybe<Metadata>;
@@ -437,6 +635,35 @@ export type RightsInput = {
     version?: InputMaybe<Scalars['String']>;
 };
 
+export type RightsSuggestion = {
+    __typename?: 'RightsSuggestion';
+    author?: Maybe<Array<Maybe<StringSuggestionData>>>;
+    copyrightAndOtherRestrictions?: Maybe<RangedValueSuggestionData>;
+    cost?: Maybe<RangedValueSuggestionData>;
+    description?: Maybe<StringSuggestionData>;
+    expirationDate?: Maybe<DateSuggestionData>;
+    internal?: Maybe<Array<Maybe<StringSuggestionData>>>;
+    locale?: Maybe<LocaleSuggestionData>;
+    negotiationPermitted?: Maybe<BooleanSuggestionData>;
+    publicAccess?: Maybe<BooleanSuggestionData>;
+    restrictedAccess?: Maybe<BooleanSuggestionData>;
+    version?: Maybe<StringSuggestionData>;
+};
+
+export type RightsSuggestionInput = {
+    author?: InputMaybe<Array<InputMaybe<StringSuggestionDataInput>>>;
+    copyrightAndOtherRestrictions?: InputMaybe<RangedValueSuggestionDataInput>;
+    cost?: InputMaybe<RangedValueSuggestionDataInput>;
+    description?: InputMaybe<StringSuggestionDataInput>;
+    expirationDate?: InputMaybe<DateSuggestionDataInput>;
+    internal?: InputMaybe<Array<InputMaybe<StringSuggestionDataInput>>>;
+    locale?: InputMaybe<LocaleSuggestionDataInput>;
+    negotiationPermitted?: InputMaybe<BooleanSuggestionDataInput>;
+    publicAccess?: InputMaybe<BooleanSuggestionDataInput>;
+    restrictedAccess?: InputMaybe<BooleanSuggestionDataInput>;
+    version?: InputMaybe<StringSuggestionDataInput>;
+};
+
 export type SavedSearch = {
     __typename?: 'SavedSearch';
     mds?: Maybe<Scalars['String']>;
@@ -460,6 +687,62 @@ export type Store = {
     protocol?: Maybe<Scalars['String']>;
 };
 
+export type StringSuggestionData = SuggestionDataInterface & {
+    __typename?: 'StringSuggestionData';
+    info: SuggestionInfo;
+    value: Scalars['String'];
+    version?: Maybe<Array<Scalars['String']>>;
+};
+
+export type StringSuggestionDataInput = {
+    info: SuggestionInfoInput;
+    value: Scalars['String'];
+    version: Array<Scalars['String']>;
+};
+
+export type Suggestion = {
+    __typename?: 'Suggestion';
+    date: Scalars['Date'];
+    id: Scalars['String'];
+    lom: LomSuggestion;
+    nodeId: Scalars['String'];
+    type: SuggestionType;
+};
+
+export type SuggestionDataInterface = {
+    info: SuggestionInfo;
+    version?: Maybe<Array<Scalars['String']>>;
+};
+
+export type SuggestionInfo = {
+    __typename?: 'SuggestionInfo';
+    date: Scalars['Date'];
+    editor?: Maybe<Scalars['String']>;
+    status: SuggestionStatus;
+};
+
+export type SuggestionInfoInput = {
+    status: SuggestionStatus;
+};
+
+export type SuggestionInput = {
+    id: Scalars['String'];
+    lom: LomSuggestionInput;
+    nodeId: Scalars['String'];
+    type: SuggestionType;
+};
+
+export enum SuggestionStatus {
+    Accepted = 'ACCEPTED',
+    Declined = 'DECLINED',
+    Pending = 'PENDING',
+}
+
+export enum SuggestionType {
+    Ai = 'AI',
+    UserProposal = 'USER_PROPOSAL',
+}
+
 export type Technical = {
     __typename?: 'Technical';
     dimension?: Maybe<Dimension>;
@@ -479,6 +762,27 @@ export type TechnicalInput = {
     location?: InputMaybe<Array<Scalars['String']>>;
     otherPlatformRequirements?: InputMaybe<Array<Scalars['String']>>;
     size?: InputMaybe<Scalars['String']>;
+};
+
+export type TechnicalSuggestion = {
+    __typename?: 'TechnicalSuggestion';
+    dimension?: Maybe<DimensionSuggestionData>;
+    duration?: Maybe<DurationSuggestionData>;
+    format?: Maybe<Array<Maybe<FormatSuggestionData>>>;
+    installationRemarks?: Maybe<Array<Maybe<StringSuggestionData>>>;
+    location?: Maybe<Array<Maybe<StringSuggestionData>>>;
+    otherPlatformRequirements?: Maybe<Array<Maybe<StringSuggestionData>>>;
+    size?: Maybe<StringSuggestionData>;
+};
+
+export type TechnicalSuggestionInput = {
+    dimension?: InputMaybe<DimensionSuggestionDataInput>;
+    duration?: InputMaybe<DurationSuggestionDataInput>;
+    format?: InputMaybe<Array<InputMaybe<FormatSuggestionDataInput>>>;
+    installationRemarks?: InputMaybe<Array<InputMaybe<StringSuggestionDataInput>>>;
+    location?: InputMaybe<Array<InputMaybe<StringSuggestionDataInput>>>;
+    otherPlatformRequirements?: InputMaybe<Array<InputMaybe<StringSuggestionDataInput>>>;
+    size?: InputMaybe<StringSuggestionDataInput>;
 };
 
 export type Version = {

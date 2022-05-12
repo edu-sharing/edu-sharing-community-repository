@@ -1,0 +1,5 @@
+
+enum SuggestionType {
+    AI,
+    USER_PROPOSAL,
+}

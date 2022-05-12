@@ -138,7 +138,7 @@ export const WidgetComponents: {
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;
     onSaveNode?: (nodes: Node[]) => Promise<Node[]>;
-    getValues?: (values: Values, node: Node) => Promise<Values>;
+    getValues?: (values: Values, node: Node|Metadata) => Promise<Values>;
     getValuesGraphql?: (values: Metadata, node: Metadata) => Promise<Metadata>;
     status?: Observable<InputStatus>;
     focus?: () => void;

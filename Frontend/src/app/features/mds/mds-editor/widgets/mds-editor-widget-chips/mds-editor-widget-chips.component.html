@@ -42,6 +42,24 @@
       <span class="mat-chip-label">{{ value.label }}</span>
       <mat-icon matChipRemove>cancel</mat-icon>
     </mat-chip>
+    <ng-container *ngIf="chipsSuggestions?.length">
+      <mat-chip
+        #chip="matChip"
+        *ngFor="let suggestion of chipsSuggestions"
+        [value]="suggestion"
+        [removable]="true"
+        (blur)="onBlurInput($event)"
+        (click)="addSuggestion(suggestion)"
+        (removed)="removeSuggestion(suggestion)"
+        [class.indeterminate]="true"
+        [class.mat-chip-selected]="false"
+        [matTooltip]="getSuggestionTooltip(suggestion)"
+      >
+        <span class="mat-chip-label">{{ suggestion.value.value }}</span>
+        <mat-icon>check</mat-icon>
+        <mat-icon matChipRemove>cancel</mat-icon>
+      </mat-chip>
+    </ng-container>
     <div class="input-wrapper">
       <input
         #input

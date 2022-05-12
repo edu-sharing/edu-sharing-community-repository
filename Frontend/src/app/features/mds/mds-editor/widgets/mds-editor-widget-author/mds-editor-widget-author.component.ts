@@ -11,6 +11,7 @@ import { Values } from '../../../types/types';
 import {MatTabGroup} from '@angular/material/tabs';
 import { MainNavService } from '../../../../../main/navigation/main-nav.service';
 import {NativeWidgetComponent} from '../../../types/mds-types';
+import { Metadata } from 'dist/edu-sharing-graphql/ngx-edu-sharing-graphql';
 
 export interface AuthorData {
     freetext: string;
@@ -104,14 +105,16 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
         this.onChange();
     }
 
-    async getValues(values: Values, node: Node = null): Promise<Values> {
+    async getValues(values: Values, node: Node|Metadata = null): Promise<Values> {
         if(this.mdsEditorValues.graphqlMetadata$.value) {
             // @TODO: map data to graphql
             return {};
         }
         values[RestConstants.CCM_PROP_AUTHOR_FREETEXT] = [this.author.freetext];
         // copy current value from node, replace only first entry (if it has multiple authors)
-        values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = node?.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR];
+        values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] =
+            (node as Node)?.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] ||
+            (node as Metadata).lom?.lifecycle?.contribute?.filter((c) => c.role === 'author');
         if (!values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]) {
             values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = [''];
         }

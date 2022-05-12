@@ -12,7 +12,7 @@ import { MainNavService } from '../../../../../main/navigation/main-nav.service'
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import {Constraints, MdsWidgetValue, Values} from '../../../types/types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
-import {Lom} from 'ngx-edu-sharing-graphql';
+import {Lom, Metadata} from 'ngx-edu-sharing-graphql';
 import {NativeWidgetComponent} from '../../../types/mds-types';
 
 @Component({
@@ -43,6 +43,7 @@ export class MdsEditorWidgetLicenseComponent
     licenses: License[];
     /** IDs of checked licenses. */
     checked: string[] = [];
+    metadata: Metadata[];
 
     constructor(
         private connector: RestConnectorService,
@@ -59,6 +60,7 @@ export class MdsEditorWidgetLicenseComponent
 
     ngOnInit(): void {
         this.nodes = this.mdsEditorValues.nodes$.value;
+        this.mdsEditorValues.graphqlMetadata$.subscribe((n) => (this.metadata = n));
         this.mdsEditorValues.nodes$.subscribe((n) => (this.nodes = n));
         this.licenses = this.widget?.definition?.values.map((v) => {
             const url = this.nodeHelper.getLicenseIconByString(v.id, false);

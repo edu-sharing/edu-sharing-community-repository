@@ -1,0 +1,4 @@
+input SuggestionInfoInput {
+    status: SuggestionStatus!
+}
+

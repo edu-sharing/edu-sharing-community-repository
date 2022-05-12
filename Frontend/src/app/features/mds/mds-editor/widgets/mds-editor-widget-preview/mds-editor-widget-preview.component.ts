@@ -1,4 +1,4 @@
-import {forkJoin as observableForkJoin, BehaviorSubject, Observable} from 'rxjs';
+import {forkJoin as observableForkJoin, BehaviorSubject, Observable, forkJoin} from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
@@ -37,15 +37,23 @@ export class MdsEditorWidgetPreviewComponent implements OnInit, NativeWidgetComp
     ) {}
 
     ngOnInit(): void {
-        this.mdsEditorValues.nodes$.subscribe((nodes) => {
-            if (nodes?.length === 1) {
-                this.nodeSrc = nodes[0].preview.url + '&crop=true&width=400&height=300&dontcache=:cache';
-                this.node = nodes[0];
+        forkJoin([
+            this.mdsEditorValues.nodes$,
+            this.mdsEditorValues.graphqlMetadata$,
+        ]).subscribe(data => {
+            if (data[0]?.length === 1) {
+                this.node = data[0][0];
+                this.nodeSrc = this.node.preview.url + '&crop=true&width=400&height=300&dontcache=:cache';
+            } else if (data[1]?.length === 1) {
+                this.metadata = data[1][0];
+                this.nodeSrc = this.metadata.info.preview.url + '&crop=true&width=400&height=300&dontcache=:cache';
+            }
+            if (data[0]?.length === 1 || data[1]?.length === 1) {
                 this.updateSrc();
                 // we need to reload the image since we don't know if the image (e.g. video file) is still being processed
                 // FIXME: this will run forever!
                 setInterval(() => {
-                    if(this.file) {
+                    if (this.file) {
                         return;
                     }
                     this.updateSrc();

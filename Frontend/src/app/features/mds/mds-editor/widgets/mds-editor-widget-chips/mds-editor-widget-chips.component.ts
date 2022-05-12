@@ -1,4 +1,4 @@
-import { COMMA, ENTER } from '@angular/cdk/keycodes';
+import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {
     AfterViewInit,
     ChangeDetectorRef,
@@ -9,17 +9,17 @@ import {
     ViewChild,
     ViewChildren,
 } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import {FormControl} from '@angular/forms';
 import {
     MatAutocomplete,
     MatAutocompleteSelectedEvent,
     MatAutocompleteTrigger,
 } from '@angular/material/autocomplete';
-import { MatChip, MatChipInputEvent } from '@angular/material/chips';
-import { MatTooltip } from '@angular/material/tooltip';
-import { TranslateService } from '@ngx-translate/core';
+import {MatChip, MatChipInputEvent} from '@angular/material/chips';
+import {MatTooltip} from '@angular/material/tooltip';
+import {TranslateService} from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject, combineLatest, EMPTY, from, Observable, Subject, timer } from 'rxjs';
+import {BehaviorSubject, combineLatest, EMPTY, from, Observable, Subject, timer} from 'rxjs';
 import {
     debounce,
     delay,
@@ -30,13 +30,23 @@ import {
     switchMap,
     throttleTime,
 } from 'rxjs/operators';
-import { Toast, ToastType } from 'src/app/core-ui-module/toast';
-import { UIHelper } from '../../../../../core-ui-module/ui-helper';
-import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
-import { MdsWidgetType, MdsWidgetValue } from '../../../types/types';
-import { DisplayValue } from '../DisplayValues';
-import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
-import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
+import {Toast, ToastType} from 'src/app/core-ui-module/toast';
+import {UIHelper} from '../../../../../core-ui-module/ui-helper';
+import {MdsEditorInstanceService} from '../../mds-editor-instance.service';
+import {MdsWidgetType, MdsWidgetValue} from '../../../types/types';
+import {DisplayValue} from '../DisplayValues';
+import {MdsEditorWidgetBase, ValueType} from '../mds-editor-widget-base';
+import {
+    MdsEditorWidgetContainerComponent
+} from '../mds-editor-widget-container/mds-editor-widget-container.component';
+import {Helper} from '../../../../../core-module/rest/helper';
+import {
+    StringSuggestionData,
+    Suggestion,
+    SuggestionStatus
+} from 'ngx-edu-sharing-graphql';
+
+type SuggestionGroup = {suggestion: Suggestion, value:StringSuggestionData};
 
 @Component({
     selector: 'es-mds-editor-widget-chips',
@@ -58,6 +68,8 @@ export class MdsEditorWidgetChipsComponent
     readonly separatorKeysCodes: number[] = [ENTER, COMMA];
     inputControl = new FormControl();
     chipsControl: FormControl;
+    // holds suggestions from users or automatic generated data
+    chipsSuggestions: SuggestionGroup[];
     autocompleteValues: Observable<DisplayValue[]>;
     shouldShowNoMatchingValuesNotice: Observable<boolean>;
     indeterminateValues$: BehaviorSubject<string[]>;
@@ -92,6 +104,15 @@ export class MdsEditorWidgetChipsComponent
             ].map((value) => this.toDisplayValues(value)),
             this.getStandardValidators(),
         );
+        this.chipsSuggestions = this.widget.getSuggestions()?.map(
+            suggestion => {
+                return {
+                    suggestion,
+                    value: (Helper.getDotPathFromNestedObject(suggestion, (this.widget.definition as any).ids.graphql) as StringSuggestionData)
+                }
+            }).filter(
+            s => s.value.info.status === SuggestionStatus.Pending
+        ) ?? [];
         this.indeterminateValues$ = new BehaviorSubject(
             this.widget.getInitialValues()?.individualValues,
         );
@@ -221,6 +242,9 @@ export class MdsEditorWidgetChipsComponent
         this.removeFromIndeterminateValues(toBeRemoved.key);
         this.inhibitAutocomplete();
     }
+    removeSuggestion(toBeRemoved: SuggestionGroup): void {
+        this.setSuggestionState(toBeRemoved, SuggestionStatus.Declined);
+    }
 
     selected(event: MatAutocompleteSelectedEvent) {
         this.add(event.option.value);
@@ -231,7 +255,19 @@ export class MdsEditorWidgetChipsComponent
     focus() {
         this.input?.nativeElement?.focus();
     }
-
+    addSuggestion(suggestion: SuggestionGroup) {
+        this.add(
+            {
+                // @TODO! resolve label
+                label: suggestion.value.value,
+                key: suggestion.value.value,
+            }
+        );
+        this.setSuggestionState(suggestion, SuggestionStatus.Accepted);
+    }
+    setSuggestionState(suggestion: SuggestionGroup, state: SuggestionStatus) {
+        suggestion.value.info.status = state;
+    }
     add(value: DisplayValue): void {
         if (!this.chipsControl.value.some((v: DisplayValue) => v.key === value.key)) {
             this.chipsControl.setValue([...this.chipsControl.value, value]);
@@ -251,6 +287,13 @@ export class MdsEditorWidgetChipsComponent
         } else {
             return value.label + ` (${this.translate.instant('MDS.DELETE_KEY_NOTICE')})`;
         }
+    }
+    getSuggestionTooltip(suggestion: SuggestionGroup): string | null {
+        return `${this.translate.instant('MDS.SUGGESTION_TOOLTIP', {
+            value: suggestion.value,
+            // @TODO
+            creator: suggestion.suggestion.id
+        })}`;
     }
 
     /**

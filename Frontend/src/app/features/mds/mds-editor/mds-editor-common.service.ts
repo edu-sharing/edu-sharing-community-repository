@@ -54,18 +54,18 @@ export class MdsEditorCommonService {
     }
 
     async saveNodesMetadata(
-        pairs: Array<{ node: Node; values: Values }>,
+        pairs: Array<{ id?: string; node?: Node; values: Values }>,
         versionComment?: string,
     ): Promise<Node[]> {
         return forkJoin(
-            pairs.map(({ node, values }) => {
+            pairs.map(({id, node, values }) => {
                 if (versionComment) {
                     return this.restNode
-                        .editNodeMetadataNewVersion(node.ref.id, versionComment, values)
+                        .editNodeMetadataNewVersion(node?.ref?.id || id, versionComment, values)
                         .pipe(map((nodeWrapper) => nodeWrapper.node));
                 } else {
                     return this.restNode
-                        .editNodeMetadata(node.ref.id, values)
+                        .editNodeMetadata(node?.ref?.id || id, values)
                         .pipe(map((nodeWrapper) => nodeWrapper.node));
                 }
             }),

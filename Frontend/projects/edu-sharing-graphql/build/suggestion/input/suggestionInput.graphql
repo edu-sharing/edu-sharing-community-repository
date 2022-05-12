@@ -1,0 +1,6 @@
+input SuggestionInput {
+    nodeId: String!
+    id: String!
+    type: SuggestionType!
+    lom: LomSuggestionInput!
+}
