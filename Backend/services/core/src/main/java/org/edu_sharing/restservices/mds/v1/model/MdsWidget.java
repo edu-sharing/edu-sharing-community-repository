@@ -1,7 +1,9 @@
 package org.edu_sharing.restservices.mds.v1.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.edu_sharing.metadataset.v2.MetadataCondition;
 import org.edu_sharing.metadataset.v2.MetadataKey;
@@ -76,6 +78,7 @@ public class MdsWidget {
 		}
 
 	}
+	private Map<MetadataWidget.IdRelation, String> ids = new HashMap<>();
 	private String id,caption,bottomCaption,icon,type,link,template;
 	private boolean hasValues;
 	private List<MdsValue> values;
@@ -100,6 +103,7 @@ public class MdsWidget {
 	public MdsWidget(){}
 	public MdsWidget(MetadataWidget widget) {
 		this.id=widget.getId();
+		this.ids=widget.getIds();
 		this.caption=widget.getCaption();
 		this.bottomCaption=widget.getBottomCaption();
 		this.icon=widget.getIcon();
@@ -146,6 +150,16 @@ public class MdsWidget {
 		}
 
 	}
+
+	@JsonProperty
+	public Map<MetadataWidget.IdRelation, String> getIds() {
+		return ids;
+	}
+
+	public void setIds(Map<MetadataWidget.IdRelation, String> ids) {
+		this.ids = ids;
+	}
+
 	@JsonProperty
 	public MdsWidgetCondition getCondition() {
 		return condition;

@@ -14,6 +14,9 @@ public class MetadataWidget extends MetadataTranslatable{
 		optional,
 		ignore
 	}
+	public enum IdRelation{
+		graphql,
+	}
 	public enum TextEscapingPolicy{
 		// no escaping, strongly discouraged since it can allow XSS vulnerabilities if the data comes from untrusted sources
 		none,
@@ -47,6 +50,7 @@ public class MetadataWidget extends MetadataTranslatable{
 			"multivalueCombined"
 	};
 
+	private Map<IdRelation, String> ids = new HashMap<>();
 	private String id,type,caption,bottomCaption,icon,
 	placeholder,defaultvalue,template,
 	suggestionSource,suggestionQuery,unit,format,
@@ -152,6 +156,9 @@ public class MetadataWidget extends MetadataTranslatable{
 	}
 	public void setPlaceholder(String placeholder) {
 		this.placeholder = placeholder;
+	}
+	public Map<IdRelation, String> getIds() {
+		return ids;
 	}
 	public String getId() {
 		return id;
