@@ -1,0 +1,58 @@
+@import "../../../core-ui-module/styles/variables";
+
+// We cannot use `:host` here, since the `mat-menu` elements are rearranged
+// outside of the original container. Hence we rely on the `.mat-dropdown-menu`
+// selector to not bleed into other components.
+::ng-deep .mat-dropdown-menu {
+
+    .mat-menu-content {
+        min-width: 200px;
+        > ul > li > button {
+            &:not(:disabled) {
+                color: $primary;
+            }
+            display: flex;
+            align-items: center;
+            > i {
+                width: 35px;
+            }
+        }
+        &:not(:empty) {
+            padding: 0 !important;
+        }
+    }
+
+    ul {
+        margin: 0;
+        li {
+            .mat-menu-item {
+                &:hover:not([disabled]), &.cdk-focused {
+                    color: $itemSelectedTextColor;
+                    background-color: $itemSelectedBackground;
+                }
+                &.cdk-keyboard-focused{
+                    @include setGlobalKeyboardFocus('border');
+                }
+            }
+
+            .mat-menu-item-separate {
+                border-top: 1px solid #ccc;
+            }
+
+            // Mobile menus at bottom
+            @media screen and (max-width: ($mobileWidth - $mobileStage*1)) {
+                &.cdk-overlay-backdrop {
+                    background: rgba(0, 0, 0, 0.8);
+                }
+                &.mat-menu-panel {
+                    position: fixed;
+                    bottom: 0;
+                    left: 0;
+                    max-width: 100%;
+                    width: 100%;
+                    border-radius: 0;
+                }
+            }
+        }
+    }
+}

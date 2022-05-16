@@ -39,6 +39,7 @@
         "LTI_CONSUMER_KEY": "Consumer Key",
         "LTI_SHARED_SECRET": "Shared Secret",
         "SHARED_FILES": "Gemeinsame Inhalte",
+        "RESTRICTED_FOLDER": "Fremder Speicherort",
         "MY_SHARED_FILES": "Von mir freigegeben",
         "TO_ME_SHARED_FILES": "Für mich freigegeben",
         "WORKFLOW_RECEIVE": "Ich bin zuständig",
@@ -86,7 +87,8 @@
         "INVITE_RECENT_AUTHORITIES": "Zuletzt eingeladen",
         "FILE_LOCATION": "Speicherort der Datei",
         "CHANGE__LOCATION": "Ändern",
-        "CHOOSE_LOCATION": "Speicherort wählen",
+        "CHOOSE_LOCATION_TITLE": "Speicherort",
+        "CHOOSE_LOCATION_DESCRIPTION": "Einen Ordner für die Ablage wählen",
         "TREE_MORE_ITEMS": "+ {{count}} weitere Ordner",
         "SHARE": {
             "TITLE": "Freigaben verwalten",
@@ -171,7 +173,9 @@
                 "DOI_DISTINCT": "Neuen Handle erzeugen",
                 "DOI_DISTINCT_INFO": "Ein neuer, eindeutiger Handle wird erzeugt. Zukünftige Versionen des Objektes haben eigenständige Identifikatoren. Beachten Sie, dass nach einmaliger Wahl dieser Option nachträglich keine aktualisierten Versionen des Elements unter dem gleichen Handle erfolgen können",
                 "DOI_UPDATE": "Bestehenden Handle aktualisieren",
-                "DOI_UPDATE_INFO": "Die neue Version des Elements wird unter der bestehenden, alten Handle-Adresse zukünftig verfügbar gemacht. Die zuvor veröffentlichte Version ist über die Handle-Adresse nicht mehr direkt zugänglich"
+                "DOI_UPDATE_INFO": "Die neue Version des Elements wird unter der bestehenden, alten Handle-Adresse zukünftig verfügbar gemacht. Die zuvor veröffentlichte Version ist über die Handle-Adresse nicht mehr direkt zugänglich",
+                "LICENSE_REQUIRED": "Um das Material zu veröffentlichen muss zunächst die Lizenz definiert werden",
+                "AUTHOR_REQUIRED": "Um das Material zu veröffentlichen muss der Autor definiert werden"
             },
             "STATE": {
                 "PRIVATE": "Privat",
@@ -245,6 +249,7 @@
                 "BULK_CREATE": "Node via Bulk importiert",
                 "BULK_UPDATE": "Node via Bulk aktualisiert",
                 "BULK_UPDATE_RESYNC": "Lokale Änderungen auf Bulk-Änderungen angewendet",
+                "REMOTE_OBJECT_INIT": "Objekt wurde aus förderierter Suche importiert",
                 "IMPORT_BLOCKED": "Status der Import-Blockierung wurde geändert"
             }
         },
@@ -321,6 +326,7 @@
             "NEW_STATUS": "neuer Status",
             "HISTORY": "Protokoll der bisherigen Workflow-Aktivitäten",
             "NO_COMMENT": "Bitte geben Sie einen Kommentar für diesen Vorgang an",
+            "NO_RECEIVER": "Bitte geben Sie einen Zuständigen für diesen Vorgang an",
             "NO_HISTORY": "Es wurden noch keine Workflow-Einträge vorgenommen",
             "USER_NO_PERMISSION": "Zuständige(n) als Koordinator einladen",
             "USER_NO_PERMISSION_INFO": "Die von Ihnen gewählte zuständige Person/Gruppe {{user}} hat aktuell keine Berechtigung das Objekt / die Objekte zu bearbeiten. Möchten Sie sie als Koordinator zulassen?\n\nKoordinatoren dürfen das Material bearbeiten und weiteren Personen Zugriff gewähren.",
@@ -388,7 +394,6 @@
             "CURRENT": "Aktuell ausgewählte Lizenz",
             "VERSION": "Version",
             "LOCALE": "Rechtsordnung",
-            "RELEASE_WITHOUT_LICENSE": "Um ein Objekt freizugeben muss eine Lizenz definiert werden",
             "CUSTOM_RIGHTS": "GNU GPL oder andere Lizenzen...",
             "RELEASE": "Objekt mit dieser Lizenz veröffentlichen",
             "RELEASE_MULTI": "{{count}} Objekte mit dieser Lizenz veröffentlichen",
@@ -424,20 +429,33 @@
                 "PDM_INFO": "Das Werk ist frei von bekannten Urheberrechts-Bedingungen"
             }
         },
+        "FILE_CHOOSER": {
+            "NO_WRITE_PERMISSIONS": "Für den gewählten Ordner sind keine Schreibrechte verfügbar. Bitte wählen Sie einen anderen Speicherort.",
+            "HOME_FOLDER_NO_PERMISSIONS": "In diesem Ordner können keine Elemente abgelegt werden. Bitte wählen Sie einen Unterordner."
+        },
+        "GO_TO_HOME": "\"Meine Inhalte\" öffnen",
+        "CREATE_REASON": {
+          "TITLE": "Erstellen hier nicht möglich",
+          "SEARCH": "Sie befinden sich aktuell in einer Suchansicht und können hier keine Elemente ablegen.",
+          "PERMISSIONS": "Sie haben im aktuellen Ordner keine Rechte, Elemente hinzuzufügen.",
+          "VIRTUAL": "Sie befinden sich in einem Ordner, wo das Ablegen von Elementen nicht möglich ist.",
+          "GENERAL": "Navigieren Sie in einen anderen Ordner und fügen Sie die Elemente dort hinzu."
+        },
         "TOAST": {
             "FOLDER_ADDED": "Ordner wurde erstellt",
             "NODE_EXISTS_IN_COLLECTION": "Das Element {{name}} ist bereits in der Sammlung enthalten",
             "VIEW_COLLECTION": "Sammlung anzeigen",
-            "ADDED_TO_COLLECTION_MY": "{{count}} Material(ien) in {{collection}} hinzugefügt und darin nur für Sie sichtbar",
-            "ADDED_TO_COLLECTION_SHARED": "{{count}} Material(ien) in {{collection}} hinzugefügt und darin für eingeladene Personen sichtbar",
-            "ADDED_TO_COLLECTION_PUBLIC": "{{count}} Material(ien) in {{collection}} hinzugefügt und darin öffentlich sichtbar",
-            "ADDED_TO_COLLECTION_MEDIA_CENTER": "{{count}} Material(ien) in {{collection}} hinzugefügt und darin für Mitglieder des Medienzentrums sichtbar",
+            "ADDED_TO_COLLECTION_MY": "{{count}} Material(ien) in \"{{collection}}\" hinzugefügt und darin nur für Sie sichtbar",
+            "ADDED_TO_COLLECTION_SHARED": "{{count}} Material(ien) in \"{{collection}}\" hinzugefügt und darin für eingeladene Personen sichtbar",
+            "ADDED_TO_COLLECTION_PUBLIC": "{{count}} Material(ien) in \"{{collection}}\" hinzugefügt und darin öffentlich sichtbar",
+            "ADDED_TO_COLLECTION_MEDIA_CENTER": "{{count}} Material(ien) in \"{{collection}}\" hinzugefügt und darin für Mitglieder des Medienzentrums sichtbar",
+            "PROPOSED_FOR_COLLECTION": "{{count}} Material(ien) für Sammlung \"{{collection}}\" vorgeschlagen. Die Elemente sind erst sichtbar, wenn ein Berechtigter sie freischaltet.",
             "ADD_TO_COLLECTION_DISABLED": "Für mindestens 1 gewähltes Material fehlen die Berechtigungen zum einsammeln",
             "DELETE_FINISHED": "Element(e) wurden in den Papierkorb verschoben",
             "CUT_COPY": "{{count}} Element(e) wurden in die Zwischenablage übernommen",
             "PASTE": "{{count}} Element(e) wurden von {{from}} nach {{to}} {{mode}}",
             "PASTE_DRAG": "{{count}} Element(e) wurde(n) nach {{to}} {{mode}}",
-            "DUPLICATE_NAME": "Der Name {{name}} existiert bereits.<br>Bitte verwenden Sie einen anderen, eindeutigen Namen",
+            "DUPLICATE_NAME": "Der Name {{name}} existiert bereits.\nBitte verwenden Sie einen anderen, eindeutigen Namen",
             "CYCLIC_NODE": "Ein Ordner kann nicht in sich selbst eingefügt werden",
             "NOT_POSSIBLE_IN_SEARCH": "Dieser Vorgang ist während einer Suche leider nicht möglich",
             "NOT_POSSIBLE_GENERAL": "In diesem Bereich ist ein Upload nicht möglich",

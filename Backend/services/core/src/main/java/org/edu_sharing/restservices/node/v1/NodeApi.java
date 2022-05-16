@@ -1,28 +1,20 @@
 package org.edu_sharing.restservices.node.v1;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -36,6 +28,7 @@ import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.editlock.LockedException;
 import org.edu_sharing.service.nodeservice.AssocInfo;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.service.repoproxy.RepoProxy;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.search.model.SearchToken;
@@ -44,15 +37,17 @@ import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.share.ShareService;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Hidden;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Path("/node/v1")
 @Tag(name="NODE v1")
@@ -158,7 +153,7 @@ public class NodeApi  {
 		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 		    	
 		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-		    	nodeDao.addWorkflowHistory(entry);
+		    	nodeDao.addWorkflowHistory(entry, true);
 		    	return Response.status(Response.Status.OK).build();
 		
 	    	} catch (Throwable t) {
@@ -462,38 +457,42 @@ public class NodeApi  {
 	    	Node last=nodeDao.asNode();
 	    	parents.add(last);
 	    	String userHome=repoDao.getUserHome();
-	    	List<NodeRef> shared = PersonDao.getPerson(repoDao,PersonDao.ME).asPerson().getSharedFolders();
-	    	boolean collection=last.getMediatype().equals("collection");
-	    	if(fullPath==null)
-	    		fullPath=false;
-	    	while(true){
-	    		if(last==null || last.getParent()==null || last.getParent().getId()==null)
-	    			break;
-	    		if(!fullPath){
-	    			if(last.getParent().getId().equals(userHome)){
-	    				response.setScope("MY_FILES");
-	    				break;
-	    			}
-	    			if((shared!=null && shared.contains(last.getRef()))){
-	    				response.setScope("SHARED_FILES");
-	    				break;
-	    			}
-	    		}
-	    		if(collection && !fullPath){
-					Node finalLast = last;
-					last=AuthenticationUtil.runAsSystem(()-> NodeDao.getNode(repoDao, finalLast.getParent().getId(),filter).asNode());
-					if(!last.getMediatype().equals("collection")){
-	    				response.setScope("COLLECTION");
-	    				break;
-	    			}
-	    		}
-	    		else{
-					last=NodeDao.getNode(repoDao, last.getParent().getId(),filter).asNode();
+			if(last.getRef().getId().equals(userHome)) {
+				response.setNodes(new ArrayList<>());
+				response.setScope("MY_FILES");
+			} else {
+				List<NodeRef> shared = PersonDao.getPerson(repoDao, PersonDao.ME).asPerson().getSharedFolders();
+				boolean collection = last.getMediatype().equals("collection");
+				if (fullPath == null)
+					fullPath = false;
+				while (true) {
+					if (last == null || last.getParent() == null || last.getParent().getId() == null)
+						break;
+					if (!fullPath) {
+						if (last.getParent().getId().equals(userHome)) {
+							response.setScope("MY_FILES");
+							break;
+						}
+						if ((shared != null && shared.contains(last.getRef()))) {
+							response.setScope("SHARED_FILES");
+							break;
+						}
+					}
+					if (collection && !fullPath) {
+						Node finalLast = last;
+						last = AuthenticationUtil.runAsSystem(() -> NodeDao.getNode(repoDao, finalLast.getParent().getId(), filter).asNode());
+						if (!last.getMediatype().equals("collection")) {
+							response.setScope("COLLECTION");
+							break;
+						}
+					} else {
+						last = NodeDao.getNode(repoDao, last.getParent().getId(), filter).asNode();
+					}
+					parents.add(last);
 				}
-	    		parents.add(last);
-	    	}
-	    	
-	    	response.setNodes(parents);
+
+				response.setNodes(parents);
+			}
 	    	return Response.status(Response.Status.OK).entity(response).build();
 	
     	} catch (Throwable t) {
@@ -1134,22 +1133,11 @@ public class NodeApi  {
 			node=NodeDao.mapNodeConstants(repoDao,node);
 
 			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-	    	WebsiteInformation websiteInformation = resolveURLTitle(properties);
+	    	resolveURLTitle(properties);
 	    	NodeDao child = nodeDao.createChild(type, aspects, properties,
 	    			renameIfExists==null ? false : renameIfExists.booleanValue(),
 					assocType!=null && !assocType.trim().isEmpty() ? assocType : null);
-
-	    	if(websiteInformation != null && websiteInformation.getTwitterImage() != null
-					&& !websiteInformation.getTwitterImage().trim().isEmpty()){
-				InputStream inputStream = null;
-	    		try {
-					child.changePreview(inputStream = new URL(websiteInformation.getTwitterImage()).openStream(), "");
-				}catch(IOException e){}
-	    		finally {
-	    			if(inputStream != null) inputStream.close();
-				}
-			}
-
+	    	
 			if(versionComment!=null && !versionComment.isEmpty()){
 				child.createVersion(versionComment);
 			}
@@ -1203,21 +1191,21 @@ public class NodeApi  {
 
 	}
 
-	public WebsiteInformation resolveURLTitle(HashMap<String, String[]> properties) {
+	public void resolveURLTitle(HashMap<String, String[]> properties) {
 		String[] url=(String[])properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_WWWURL));
 		if(url==null)
-			return null;
+			return;
 		// Don't resolve url if name is already given by client
 		if(properties.get(CCConstants.getValidLocalName(CCConstants.CM_NAME))!=null) {
 			properties.put(CCConstants.getValidLocalName(CCConstants.CM_NAME),
 					new String[]{NodeServiceHelper.cleanupCmName(properties.get(CCConstants.getValidLocalName(CCConstants.CM_NAME))[0])});
-			return null;
+			return;
 		}
 		 WebsiteInformation info=ClientUtilsService.getWebsiteInformation(url[0]);
 		 if(info==null){
 		     properties.put(CCConstants.getValidLocalName(CCConstants.CM_NAME), new String[]{NodeServiceHelper.cleanupCmName(url[0])});
 		     properties.put(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_TITLE),url);
-			 return null;
+			 return;
 		 }
 		 String title=info.getTitle();
 		 if(info.getTitle()==null) {
@@ -1240,7 +1228,6 @@ public class NodeApi  {
 	    if(info.getLrmiProperties()!=null){
 	    	properties.putAll(info.getLrmiProperties());
 		}
-	    return info;
 	}
 	@OPTIONS    
     @Path("/nodes/{repository}/{node}/children")
@@ -2130,7 +2117,7 @@ public class NodeApi  {
 			
 		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-		    	nodeDao.setProperty(property, (Serializable) value);
+		    	nodeDao.setProperty(property, value == null || value.size() != 1? (Serializable) value : value.get(0));
 		    	return Response.status(Response.Status.OK).build();
 		
 	    	} catch (DAOValidationException t) {

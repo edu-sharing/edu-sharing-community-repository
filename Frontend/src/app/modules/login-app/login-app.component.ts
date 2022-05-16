@@ -11,11 +11,9 @@ import {OPEN_URL_MODE, UIConstants} from "../../core-module/ui/ui-constants";
 import { CordovaService } from "../../common/services/cordova.service";
 import { ConfigurationService } from '../../core-module/core.module';
 import { UIHelper } from '../../core-ui-module/ui-helper';
-import { Translation } from '../../core-ui-module/translation';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslationsService } from '../../translations/translations.service';
 import { RestHelper } from '../../core-module/core.module';
 import {RestLocatorService} from "../../core-module/core.module";
-import {SessionStorageService} from "../../core-module/core.module";
 import {BridgeService} from "../../core-bridge-module/bridge.service";
 import {PlatformLocation} from '@angular/common';
 
@@ -23,7 +21,7 @@ import {PlatformLocation} from '@angular/common';
 enum StateUI { SERVERLIST = 0, LOGIN = 1, SERVERURL = 2, NOINTERNET = 3}
 
 @Component({
-    selector: 'app-login',
+    selector: 'es-login',
     templateUrl: 'login-app.component.html',
     styleUrls: ['login-app.component.scss']
 })
@@ -47,8 +45,7 @@ export class LoginAppComponent  implements OnInit {
         private toast:Toast,
         private router:Router,
         private route:ActivatedRoute,
-        private translation: TranslateService,
-        private storage: SessionStorageService,
+        private translations: TranslationsService,
         private platformLocation: PlatformLocation,
         private cordova: CordovaService,
         private connector: RestConnectorService,
@@ -179,22 +176,19 @@ export class LoginAppComponent  implements OnInit {
         return 'assets/images/app-icon.svg';
     }
     private init() {
-        Translation.initialize(this.translation,this.configService,this.storage,this.route).subscribe(()=>{
-            this.locator.locateApi().subscribe(()=>{
-                this.serverurl=this.locator.endpointUrl;
-                this.configService.getAll().subscribe((config)=>{
-                    this.config=config;
-                    if(!this.config.register)
-                    // default register mode: allow local registration if not disabled
-                        this.config.register={local:true};
+        this.translations.waitForInit().subscribe(()=>{
+            this.serverurl=this.locator.endpointUrl;
+            this.configService.getAll().subscribe((config)=>{
+                this.config=config;
+                if(!this.config.register)
+                // default register mode: allow local registration if not disabled
+                    this.config.register={local:true};
 
-                    this.isLoading=false;
+                this.isLoading=false;
 
-                    this.handleCurrentState();
+                this.handleCurrentState();
 
-                });
             });
-
         });
     }
     register(){

@@ -4,10 +4,9 @@ import {DateHelper} from "../../../core-ui-module/DateHelper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import { DateAdapter } from "@angular/material/core";
-import {Translation} from "../../../core-ui-module/translation";
 
 @Component({
-  selector: 'calendar',
+  selector: 'es-calendar',
   templateUrl: 'calendar.component.html',
   styleUrls: ['calendar.component.scss'],
     animations: [
@@ -36,7 +35,8 @@ export class CalendarComponent{
       private translate : TranslateService,
       private _adapter: DateAdapter<any>
     ){
-        this._adapter.setLocale(Translation.getLanguage());
+      this.translate.currentLang
+        this._adapter.setLocale(this.translate.currentLang);
     }
     getFormatted() {
         if(this.date){

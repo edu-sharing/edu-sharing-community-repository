@@ -332,7 +332,8 @@
 		<widget>
 			<id>cclom:size</id>
 			<caption>lom_prop_size</caption>
-			<type>filesize</type>
+			<type>number</type>
+			<format>bytes</format>
 		</widget>
 		<widget>
 			<id>ccm:educationaltypicalagerange</id>
@@ -403,6 +404,16 @@
 			<icon>chat_bubble</icon>
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
+		<widget>
+			<id>cclom:classification_keyword</id>
+			<type>multivalueFixedBadges</type>
+			<caption>lom_prop_classification_keyword</caption>
+			<placeholder>lom_prop_classification_keyword_placeholder</placeholder>
+			<suggestionSource>Sql</suggestionSource>
+			<suggestionQuery>select factual_term_ident, CASE WHEN factual_term_synonyms IS NULL THEN factual_term_value WHEN array_length(factual_term_synonyms,1) = 1 THEN format('%s (%s)',factual_term_value, factual_term_synonyms[1])  ELSE format('%s (%s, %s)',factual_term_value, factual_term_synonyms[1], factual_term_synonyms[2]) END from edu_factual_term where (lower(factual_term_value) like ? OR lower(factual_term_synonyms[0]) like ? OR lower(factual_term_synonyms[1]) like ? OR lower(factual_term_ident) like ?) order by char_length(factual_term_value) limit 100</suggestionQuery>
+			<suggestDisplayProperty>ccm:classification_keyword_display</suggestDisplayProperty>
+			<textEscapingPolicy>all</textEscapingPolicy>
+		</widget>
 	</widgets>
 	<templates>
 		<template>
@@ -451,6 +462,7 @@
               <ccm:wwwurl>
               <cm:name>
               <cclom:title>
+			  <ccm:educationallearningresourcetype>
               <author>
 				]]></html>
 		</template>
@@ -556,6 +568,14 @@
 			<id>search_suggestions</id>
 			<rel>suggestions</rel>
 			<html><![CDATA[
+              <cclom:general_keyword>
+				]]></html>
+		</template>
+		<template>
+			<id>search_input</id>
+			<rel>suggestions</rel>
+			<html><![CDATA[
+			  <ccm:educationallearningresourcetype>
               <cclom:general_keyword>
 				]]></html>
 		</template>
@@ -853,6 +873,13 @@
 			</views>
 		</group>
 		<group>
+			<id>search_input</id>
+			<rendering>angular</rendering>
+			<views>
+				<view>search_input</view>
+			</views>
+		</group>
+		<group>
 			<id>add_to_stream</id>
 			<views>
 				<view>add_to_stream</view>
@@ -872,6 +899,7 @@
 		</group>
 		<group>
 			<id>collection_sidebar</id>
+			<rendering>angular</rendering>
 			<views>
 				<view>collection_sidebar</view>
 			</views>
@@ -917,6 +945,14 @@
 				<column>cm:modified</column>
 				<column>ccm:commonlicense_key</column>
 				<column>ccm:replicationsource</column>
+			</columns>
+		</list>
+		<list>
+			<id>searchCollections</id>
+			<columns>
+				<column>COLLECTION.title</column>
+				<column>COLLECTION.info</column>
+				<column>COLLECTION.scope</column>
 			</columns>
 		</list>
 		<list>
@@ -1019,7 +1055,8 @@
 			</property>
 		</query>
 		<query join="AND"  id="collections">
-			<basequery propertyNull="ngsearchword">@ccm\:collectionlevel0:true OR @ccm\:collection_pinned_status:true</basequery>
+			<basequery>ASPECT:"ccm:collection"</basequery>
+			<basequery propertyNull="ngsearchword">ASPECT:"ccm:collection" AND (@ccm\:collectionlevel0:true OR @ccm\:collection_pinned_status:true)</basequery>
 			<property name="ngsearchword">
 				<statement>(@sys\:node-uuid:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
 				<exactMatching>false</exactMatching>
@@ -1100,7 +1137,16 @@
 		<query join="AND" id="ngsearch">
 			<!--TODO basequery-->
 			<!--basequery>ISNULL:@ccm\:tool_category</basequery-->
-			<basequery>{"bool":{"must":[{"term":{"type":"ccm:io"}},{"term":{"nodeRef.storeRef.protocol":"workspace"}}],"must_not":[{"term":{"aspects":"ccm:metadataPresettingTemplate"}},{"term":{"aspects":"ccm:io_childobject"}},{"wildcard":{"properties.cm:name.keyword":"._*"}},{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}]}}</basequery>
+			<basequery>
+				{"bool":
+				{"must":[{"term":{"nodeRef.storeRef.protocol":"workspace"}}],
+				 "must_not":[{"term":{"aspects":"ccm:metadataPresettingTemplate"}},
+							 {"term":{"aspects":"ccm:io_childobject"}},
+							 {"wildcard":{"properties.cm:name.keyword":"._*"}},
+							 {"term":{"aspects":"ccm:collection_io_reference"}},
+				             {"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}]
+				}
+				}</basequery>
 			<property name="ngsearchword">
 				<statement>{"bool":{"should":[
 					{"wildcard":{"properties.cm:name":{"value":"*${value}*", "case_insensitive": true }}},
@@ -1108,7 +1154,7 @@
 					{"wildcard":{"properties.cclom:general_description":{"value":"*${value}*", "case_insensitive": true }}},
 					{"wildcard":{"properties.cclom:general_keyword":{"value":"*${value}*", "case_insensitive": true }}},
 					{"wildcard":{"content.fulltext":{"value":"*${value}*", "case_insensitive": true }}},
-					{"term":{"properties.sys:node-uuid":{"value":"*${value}*", "case_insensitive": true }}}
+					{"wildcard":{"nodeRef.id":{"value":"*${value}*", "case_insensitive": true }}}
 					]}}</statement>
 				<exactMatching>false</exactMatching>
 				<multiple>true</multiple>

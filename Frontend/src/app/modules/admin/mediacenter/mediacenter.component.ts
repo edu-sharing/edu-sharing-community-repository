@@ -16,18 +16,16 @@ import {
 import {Helper} from '../../../core-module/rest/helper';
 import {Toast} from '../../../core-ui-module/toast';
 import {CustomOptions, ElementType, OptionItem} from '../../../core-ui-module/option-item';
-import {MdsComponent} from '../../../common/ui/mds/mds.component';
 import {MdsHelper} from '../../../core-module/rest/mds-helper';
-import { AuthoritySearchMode } from '../../../common/ui/authority-search-input/authority-search-input.component';
+import { AuthoritySearchMode } from '../../../shared/components/authority-search-input/authority-search-input.component';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
-import {MdsEditorCoreComponent} from '../../../common/ui/mds-editor/mds-editor-core/mds-editor-core.component';
-import {MdsEditorWrapperComponent} from '../../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 
 // Charts.js
 declare var Chart: any;
 
 @Component({
-    selector: 'app-admin-mediacenter',
+    selector: 'es-admin-mediacenter',
     templateUrl: 'mediacenter.component.html',
     styleUrls: ['mediacenter.component.scss']
 })

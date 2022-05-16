@@ -16,7 +16,7 @@ import {Toast} from "../../../core-ui-module/toast";
 
 
 @Component({
-  selector: 'node-info',
+  selector: 'es-node-info',
   templateUrl: 'node-info.component.html',
   styleUrls: ['node-info.component.scss'],
   animations: [
@@ -98,7 +98,7 @@ export class NodeInfoComponent{
   addProperty() {
     if(this.customProperty[0]) {
         this.saving = true;
-        this.nodeApi.editNodeProperty(this._node.ref.id, this.customProperty[0], this.customProperty[1], this._node.ref.repo).subscribe(() => {
+        this.nodeApi.editNodeProperty(this._node.ref.id, this.customProperty[0], this.customProperty[1].split(','), this._node.ref.repo).subscribe(() => {
             this.customProperty = [];
             this.refreshMeta();
         }, (error) => {
@@ -109,7 +109,7 @@ export class NodeInfoComponent{
   }
 
     saveProperty(property: string[]) {
-        this.nodeApi.editNodeProperty(this._node.ref.id, property[0], property[1], this._node.ref.repo).subscribe(() => {
+        this.nodeApi.editNodeProperty(this._node.ref.id, property[0], property[1].split(','), this._node.ref.repo).subscribe(() => {
             this.customProperty = [];
             this.refreshMeta();
         }, (error) => {

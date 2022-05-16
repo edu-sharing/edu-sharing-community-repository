@@ -1,38 +1,23 @@
-<div class="frame">
+<div class="frame" cdkDropListGroup>
 
-  <main-nav
-    #mainNav
-    [title]="isSafe ? 'WORKSPACE.TITLE_SAFE' : 'WORKSPACE.TITLE'"
-    [currentScope]="isSafe ? 'safe' : 'workspace'"
-    [searchEnabled]="!isBlocked"
-    [create]="{allowed: createAllowed, allowBinary: allowBinary, parent: currentFolder, folder: true}"
-    (onCreate)="explorer.list.addVirtualNodes($event)"
-    [searchPlaceholder]="isSafe ? 'WORKSPACE.SAFE_SEARCH' : 'WORKSPACE.SEARCH' "
-    [canOpen]="mainnav"
-    [searchQuery]="searchQuery ? searchQuery.query : null"
-    (onSearch)="doSearch($event)"
-  >
-
-  </main-nav>
 <div *ngIf="isBlocked" class="isBlocked">{{'NO_PERMISSIONS_FOR_SCOPE'|translate}}</div>
 <div *ngIf="!isBlocked" [class.hide]="globalProgress">
 
 
   <div class="dialog" *ngIf="showSelectRoot" (click)="showSelectRoot=false"></div>
   <div class="selectRootMenu collection" [@overlay]="showSelectRoot" *ngIf="showSelectRoot">
-    <a class="collection-item" [class.rootSelected]="root=='MY_FILES'" (click)="showSelectRoot=false;setRoot('MY_FILES')"><i icon="person"></i> {{ 'WORKSPACE.MY_FILES' | translate}}</a>
-    <a class="collection-item" [class.rootSelected]="root=='SHARED_FILES'" (click)="showSelectRoot=false;setRoot('SHARED_FILES')"><i icon="group"></i> {{ 'WORKSPACE.SHARED_FILES' | translate}}</a>
-    <a class="collection-item" [class.rootSelected]="root=='MY_SHARED_FILES'" (click)="showSelectRoot=false;setRoot('MY_SHARED_FILES')"><i icon="share"></i> {{ 'WORKSPACE.MY_SHARED_FILES' | translate}}</a>
-    <a class="collection-item" [class.rootSelected]="root=='TO_ME_SHARED_FILES'" (click)="showSelectRoot=false;setRoot('TO_ME_SHARED_FILES')"><i icon="send"></i> {{ 'WORKSPACE.TO_ME_SHARED_FILES' | translate}}</a>
-    <a class="collection-item" [class.rootSelected]="root=='WORKFLOW_RECEIVE'" (click)="showSelectRoot=false;setRoot('WORKFLOW_RECEIVE')"><i icon="inbox"></i> {{ 'WORKSPACE.WORKFLOW_RECEIVE' | translate}}</a>
-    <a class="collection-item" [class.rootSelected]="root=='RECYCLE'" (click)="showSelectRoot=false;setRoot('RECYCLE')"><i icon="delete"></i> {{ 'WORKSPACE.RECYCLE' | translate}}</a>
+    <a class="collection-item" [class.rootSelected]="root=='MY_FILES'" (click)="showSelectRoot=false;setRoot('MY_FILES')"><i esIcon="person"></i> {{ 'WORKSPACE.MY_FILES' | translate}}</a>
+    <a class="collection-item" [class.rootSelected]="root=='SHARED_FILES'" (click)="showSelectRoot=false;setRoot('SHARED_FILES')"><i esIcon="group"></i> {{ 'WORKSPACE.SHARED_FILES' | translate}}</a>
+    <a class="collection-item" [class.rootSelected]="root=='MY_SHARED_FILES'" (click)="showSelectRoot=false;setRoot('MY_SHARED_FILES')"><i esIcon="share"></i> {{ 'WORKSPACE.MY_SHARED_FILES' | translate}}</a>
+    <a class="collection-item" [class.rootSelected]="root=='TO_ME_SHARED_FILES'" (click)="showSelectRoot=false;setRoot('TO_ME_SHARED_FILES')"><i esIcon="send"></i> {{ 'WORKSPACE.TO_ME_SHARED_FILES' | translate}}</a>
+    <a class="collection-item" [class.rootSelected]="root=='WORKFLOW_RECEIVE'" (click)="showSelectRoot=false;setRoot('WORKFLOW_RECEIVE')"><i esIcon="inbox"></i> {{ 'WORKSPACE.WORKFLOW_RECEIVE' | translate}}</a>
+    <a class="collection-item" [class.rootSelected]="root=='RECYCLE'" (click)="showSelectRoot=false;setRoot('RECYCLE')"><i esIcon="delete"></i> {{ 'WORKSPACE.RECYCLE' | translate}}</a>
   </div>
   <div class="tree" *ngIf="isLoggedIn">
-      <workspace-tree
+      <es-workspace-tree
                   [class.tree-quota]="user.person.quota.enabled"
                   [current]="currentFolder ? currentFolder.ref.id : null"
                   [path]="path"
-                  [mainNav]="mainNavRef"
                   [selectedNode]="selectedNodeTree"
                   [root]="root"
                   [workspace]="this"
@@ -40,9 +25,9 @@
                   (onDrop)="handleDrop($event)"
                   (onSetRoot)="setRoot($event)"
                   (onOpenNode)="openNode($event)"
-                  (onDeleteNodes)="mainNav.management.nodeDelete=$event"
-  ></workspace-tree>
-  <user-quota *ngIf="user.person.quota.enabled" [quota]="user.person.quota"></user-quota>
+                  (onDeleteNodes)="onDeleteNodes($event)"
+  ></es-workspace-tree>
+  <es-user-quota *ngIf="user.person.quota.enabled" [quota]="user.person.quota"></es-user-quota>
   </div>
 <div class="breadcrumbFrame">
     <div class="mobile-move-top">
@@ -51,52 +36,48 @@
             queryParams: { id: null },
             queryParamsHandling: 'merge'
           } : null"-->
-        <breadcrumbs *ngIf="isLoggedIn"
+        <es-breadcrumbs *ngIf="isLoggedIn"
           [breadcrumbsAsNode]="path"
-          [invisibleDescription]="true"
           [searchQuery]="searchQuery ? searchQuery.query : null"
           [home]="'WORKSPACE.'+root"
-          [canDrop]="canDropBreadcrumbs"
           (onDrop)="handleDrop($event)"
           (onClick)="openBreadcrumb($event)"
-        ></breadcrumbs>
+        ></es-breadcrumbs>
     </div>
 </div>
-  <recycle *ngIf="root=='RECYCLE'" class="explorer"
+  <es-recycle *ngIf="root=='RECYCLE'" class="explorer"
            [actionbar]="actionbar"
            [searchWorkspace]="searchQuery ? searchQuery.query : null"
-           [isInsideWorkspace]="true"></recycle>
+           [isInsideWorkspace]="true"></es-recycle>
 <div class="actionbarFrame"><div class="mobile-move-top">
-  <actionbar #actionbar
-></actionbar>
+  <es-actionbar #actionbar
+></es-actionbar>
 </div></div>
-<h1 appTitle class="cdk-visually-hidden">{{ 'WORKSPACE.TITLE' | translate }}</h1>
-  <workspace-explorer class="explorer"
+<h1 esTitle class="cdk-visually-hidden">{{ 'WORKSPACE.TITLE' | translate }}</h1>
+  <es-workspace-explorer class="explorer"
                       #explorer
                       role="main"
-                      [appSkipTarget]="SkipTarget.MainContent"
+                      esSkipTarget="MAIN_CONTENT"
                       appCreateContextMenu
                       *ngIf="root!='RECYCLE'"
                       [current]="currentFolder"
-                      [selection]="selection"
                       [root]="root"
                       [searchQuery]="searchQuery"
                       [customOptions]="customOptions"
-                      [viewType]="viewType"
+                      [displayType]="displayType"
+                      (displayTypeChange)="setDisplayType($event)"
                       [(reorderDialog)]="reorderDialog"
                       [preventKeyevents]="cardHasOpenModals$ | async"
-                      [(nodes)]="currentNodes"
-                      [mainNav]="mainNav"
+                      [dataSource]="dataSource"
                       [actionbar]="actionbar"
                       (onSearchGlobal)="searchGlobal($event)"
                       (onDrop)="handleDrop($event)"
-                      (onSelectionChanged)="setSelection($event)"
-                      (onViewNode)="openNode($event, false)"
-                      (onOpenNode)="openNode($event, false)"
+                      (onViewNode)="openNode($any($event), false)"
+                      (onOpenNode)="openNode($any($event), false)"
                       (onReset)="resetWorkspace()"
-></workspace-explorer>
+></es-workspace-explorer>
 
 </div>
-  <global-progress *ngIf="globalProgress"></global-progress>
+  <es-global-progress *ngIf="globalProgress"></es-global-progress>
 </div>
 

@@ -6,12 +6,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.restservices.shared.Contributor;
 
 public class NodeRefImpl implements NodeRef {
 
 	String repositoryId;
 
-	List<NodeRef> usedInCollections = new ArrayList<>();
+	List<CollectionRef> usedInCollections = new ArrayList<>();
+
+	Map<Relation, NodeRef> relations = new HashMap<>();
 
 	public static class PreviewImpl implements Preview {
 		String mimetype;
@@ -53,6 +56,8 @@ public class NodeRefImpl implements NodeRef {
 	private List<String> aspects;
 
 	String owner;
+
+	List<Contributor> contributors;
 
 	public NodeRefImpl(){
 		
@@ -137,12 +142,12 @@ public class NodeRefImpl implements NodeRef {
 	}
 
 	@Override
-	public void setUsedInCollections(List<NodeRef> usedInCollections) {
+	public void setUsedInCollections(List<CollectionRef> usedInCollections) {
 		this.usedInCollections = usedInCollections;
 	}
 
 	@Override
-	public List<NodeRef> getUsedInCollections() {
+	public List<CollectionRef> getUsedInCollections() {
 		return usedInCollections;
 	}
 
@@ -161,4 +166,28 @@ public class NodeRefImpl implements NodeRef {
 
 	@Override
 	public void setOwner(String owner) { this.owner = owner; }
+
+	public enum Relation {
+		Original
+	}
+
+	@Override
+	public Map<Relation, NodeRef> getRelations() {
+		return relations;
+	}
+
+	@Override
+	public void setRelations(Map<Relation, NodeRef> relations) {
+		this.relations = relations;
+	}
+
+	@Override
+	public void setContributors(List<Contributor> contributors) {
+		this.contributors = contributors;
+	}
+
+	@Override
+	public List<Contributor> getContributors() {
+		return contributors;
+	}
 }

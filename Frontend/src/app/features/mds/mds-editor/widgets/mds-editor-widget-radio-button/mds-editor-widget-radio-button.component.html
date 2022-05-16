@@ -1,0 +1,20 @@
+<es-mds-editor-widget-container
+  #container
+  [widget]="widget"
+  [label]="true"
+  [valueType]="valueType"
+  [control]="formControl"
+  [wrapInFormField]="false"
+  [wrapInGroup]="false"
+>
+  <mat-radio-group
+    [formControl]="formControl"
+    [attr.aria-labelledby]="container.labelId"
+    [attr.aria-describedby]="container.descriptionId"
+    [class]="mode"
+  >
+    <mat-radio-button *ngFor="let value of values.values" [value]="value">
+      {{ value.label }}
+    </mat-radio-button>
+  </mat-radio-group>
+</es-mds-editor-widget-container>

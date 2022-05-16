@@ -14,7 +14,7 @@ import {CordovaService} from "../../../common/services/cordova.service";
 import {RestLocatorService} from "../../../core-module/core.module";
 
 @Component({
-  selector: 'app-register-done',
+  selector: 'es-register-done',
   templateUrl: 'register-done.component.html',
   styleUrls: ['register-done.component.scss']
 })

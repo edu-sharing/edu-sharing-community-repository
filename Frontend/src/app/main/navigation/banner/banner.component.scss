@@ -1,0 +1,26 @@
+@import "../../../core-ui-module/styles/variables";
+$bannerHeight:130px;
+
+.banner{
+  position: absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:$bannerHeight;
+  z-index: 95;
+  background-repeat:repeat-y;
+  background-position: 0 0;
+}
+
+es-header {
+  position: relative;
+  display: flex;
+  // Make sure bars with class="mobile-move-top" to cover the banner during their animation.
+  z-index: 95;
+}
+
+@media screen and (max-width: $mobileWidth+$mobileStage*1) {
+  .banner{
+    display: none;
+  }
+}

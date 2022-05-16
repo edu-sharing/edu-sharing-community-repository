@@ -3,7 +3,7 @@
   padding:10px 30px;
   .info-wrapper {
     padding:0 10%;
-    info-message {
+    es-info-message {
       margin: 10px 10%;
     }
   }
@@ -14,6 +14,13 @@
   }
   .group{
     padding: 10px 20px;
+      &.group-jobs {
+          > mat-form-field {
+              padding: 30px 20px;
+              width: 100%;
+              max-width: 800px;
+          }
+      }
   }
   .group-interactions,.group-metadata{
     display: flex;
@@ -30,7 +37,7 @@
     >div{
       width: 0;
       flex-grow: 1;
-        info-message {
+        es-info-message {
             display: flex;
             padding: 10px;
         }

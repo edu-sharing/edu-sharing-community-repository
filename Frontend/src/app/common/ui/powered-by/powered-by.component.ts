@@ -5,7 +5,7 @@
 import {Component, EventEmitter, Input, Output, HostBinding} from '@angular/core';
 
 @Component({
-  selector: 'powered-by',
+  selector: 'es-powered-by',
   templateUrl: 'powered-by.component.html',
   styleUrls: ['powered-by.component.scss'],
 })

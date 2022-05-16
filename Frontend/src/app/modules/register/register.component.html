@@ -1,6 +1,6 @@
-<global-progress *ngIf="isLoading"></global-progress>
-<card *ngIf="!isLoading"
-      role="main" [appSkipTarget]="SkipTarget.MainContent"
+<es-global-progress *ngIf="isLoading"></es-global-progress>
+<es-card *ngIf="!isLoading"
+      role="main" esSkipTarget="MAIN_CONTENT"
       avatar="assets/images/app-icon.svg"
       [buttons]="updateButtons()"
       title="{{(state=='request' || state=='done-reset' ? 'REGISTER.REQUEST.TITLE' : state=='reset-password' ? 'REGISTER.RESET.TITLE' : 'REGISTER.TITLE') | translate}}"
@@ -11,16 +11,16 @@
       [isCancelable]="false"
 >
     <div class="register-content card-content-padding">
-        <h1 appTitle class="cdk-visually-hidden">{{ 'REGISTER.TITLE' | translate }}</h1>
-        <app-register-form [class.display-none]="!(state=='register')" (onRegisterDone)="onRegisterDone()" #registerForm></app-register-form>
-        <app-register-done *ngIf="state=='done' || state=='done-reset'" (onModify)="modifyData()" [inputState]="state" #registerDone></app-register-done>
-        <app-register-request *ngIf="state=='request'" (onDone)="onPasswordRequested()" #request></app-register-request>
-        <app-register-reset-password *ngIf="state=='reset-password'" #resetPassword></app-register-reset-password>
+        <h1 esTitle class="cdk-visually-hidden">{{ 'REGISTER.TITLE' | translate }}</h1>
+        <es-register-form [class.display-none]="!(state=='register')" (onRegisterDone)="onRegisterDone()" #registerForm></es-register-form>
+        <es-register-done *ngIf="state=='done' || state=='done-reset'" (onModify)="modifyData()" [inputState]="state" #registerDone></es-register-done>
+        <es-register-request *ngIf="state=='request'" (onDone)="onPasswordRequested()" #request></es-register-request>
+        <es-register-reset-password *ngIf="state=='reset-password'" #resetPassword></es-register-reset-password>
         <div *ngIf="state != 'register' && state != 'done' && state != 'done-reset' && state != 'request' && canRegister()" class="register">
             {{'LOGIN.REGISTER_TEXT' | translate}}
-            <button mat-button color="primary" (click)="linkRegister()">{{'LOGIN.REGISTER_LINK' | translate}} <i icon="arrow_forward"></i></button>
+            <button mat-button color="primary" (click)="linkRegister()">{{'LOGIN.REGISTER_LINK' | translate}} <i esIcon="arrow_forward"></i></button>
         </div>
     </div>
     <div class="card-action">
     </div>
-</card>
+</es-card>

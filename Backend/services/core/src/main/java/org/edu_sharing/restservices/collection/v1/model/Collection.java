@@ -37,7 +37,7 @@ public class Collection {
 
 	private String scope;
 	private String authorFreetext;
-
+	private Boolean orderAscending;
 
 
 	@Schema(required = true, description = "false")
@@ -195,4 +195,13 @@ public class Collection {
 	public void setAuthorFreetext(String authorFreetext) {
 		this.authorFreetext = authorFreetext;
 	}
+
+	@JsonProperty
+    public void setOrderAscending(Boolean orderAscending) {
+        this.orderAscending = orderAscending;
+    }
+
+    public Boolean getOrderAscending() {
+        return orderAscending;
+    }
 }

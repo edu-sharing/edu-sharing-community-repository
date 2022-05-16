@@ -94,6 +94,7 @@ public class RenderingServiceImpl implements RenderingService{
 			logger.debug(renderingServiceUrl);
 			RenderingServiceOptions options = new RenderingServiceOptions();
 			options.displayMode = displayMode;
+			options.parameters = parameters;
 			RenderingServiceData data = getData(appInfo, nodeId, nodeVersion, AuthenticationUtil.getFullyAuthenticatedUser(), options);
 			return getDetails(renderingServiceUrl, data);
 		}catch(Throwable t) {
@@ -212,7 +213,11 @@ public class RenderingServiceImpl implements RenderingService{
 				user,
 				nodeDao.getNativeType(),
 				nodeDao.getAspectsNative(),
-				nodeDao.getNativeProperties()).render(RenderingTool.DISPLAY_INLINE.equals(options.displayMode) ? "io_render_inline" : "io_render"));
+				nodeDao.getNativeProperties()).render(
+						options.parameters != null && options.parameters.containsKey("metadataGroup") ?
+								options.parameters.get("metadataGroup") :
+						RenderingTool.DISPLAY_INLINE.equals(options.displayMode) ? "io_render_inline" : "io_render"
+		));
 
 		// user
 		if(!AuthenticationUtil.isRunAsUserTheSystemUser()) {

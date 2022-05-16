@@ -12,12 +12,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
-import org.apache.xpath.operations.Bool;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.CollectionDao.SearchScope;
 import org.edu_sharing.restservices.collection.v1.model.*;
+import org.edu_sharing.restservices.node.v1.model.AbstractEntries;
 import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Filter;
@@ -67,35 +67,36 @@ public class CollectionApi {
 			@Parameter(description = "ID of collection", required = true) @PathParam("collectionId") String collectionId,
 			@Context HttpServletRequest req) {
 
-			try {
+		try {
 
-				RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 
-				if (repoDao == null) {
+			if (repoDao == null) {
 
-					return Response.status(Response.Status.NOT_FOUND).build();
-				}
+				return Response.status(Response.Status.NOT_FOUND).build();
+			}
 
-				NodeDao nodeDao = NodeDao.getNode(repoDao,
-						collectionId, Filter.createShowAllFilter());
+			NodeDao nodeDao = NodeDao.getNode(repoDao,
+					collectionId, Filter.createShowAllFilter());
 
-				if (nodeDao == null) {
+			if (nodeDao == null) {
 
-					return Response.status(Response.Status.NOT_FOUND).build();
-				}
+				return Response.status(Response.Status.NOT_FOUND).build();
+			}
 
-				CollectionEntry response = new CollectionEntry();
+			CollectionEntry response = new CollectionEntry();
 
-				Node collection = nodeDao.asNode();
+			Node collection = nodeDao.asNode();
 
-				response.setCollection(collection);
+			response.setCollection(collection);
 
-				return Response.status(Response.Status.OK).entity(response).build();
+			return Response.status(Response.Status.OK).entity(response).build();
 
-			} catch (Throwable t) {
-	    		return ErrorResponse.createResponse(t);
-	    	}
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
 	}
+
 	@POST
 	@Path("/collections/{repository}/{collection}/order")
 	@Operation(summary = "Set order of nodes in a collection. In order to work as expected, provide a list of all nodes in this collection", description = "Current order will be overriden. Requires full permissions for the parent collection")
@@ -123,8 +124,8 @@ public class CollectionApi {
 			return Response.status(Response.Status.OK).build();
 
 		} catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);
-    	}
+			return ErrorResponse.createResponse(t);
+		}
 	}
 
 	@POST
@@ -149,13 +150,14 @@ public class CollectionApi {
 			if (repoDao == null) {
 				return Response.status(Response.Status.NOT_FOUND).build();
 			}
-			CollectionDao.setPinned(repoDao,collections);
+			CollectionDao.setPinned(repoDao, collections);
 			return Response.status(Response.Status.OK).build();
 
 		} catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);
-    	}
+			return ErrorResponse.createResponse(t);
+		}
 	}
+
 	@GET
 	@Path("/collections/{repository}/search")
 	@Operation(operationId = "searchCollections", summary = "Search collections.", description = "Search collections.")
@@ -223,29 +225,29 @@ public class CollectionApi {
 			@Parameter(description = "collection node", required = true) Node node,
 			@Context HttpServletRequest req) {
 
-			try {
+		try {
 
-				RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 
-				if (repoDao == null) {
+			if (repoDao == null) {
 
-					return Response.status(Response.Status.NOT_FOUND).build();
-				}
+				return Response.status(Response.Status.NOT_FOUND).build();
+			}
 
-				CollectionDao collectionDao = CollectionDao.getCollection(repoDao, node.getRef().getId());
+			CollectionDao collectionDao = CollectionDao.getCollection(repoDao, node.getRef().getId());
 
-				if (collectionDao == null) {
+			if (collectionDao == null) {
 
-					return Response.status(Response.Status.NOT_FOUND).build();
-				}
+				return Response.status(Response.Status.NOT_FOUND).build();
+			}
 
-				collectionDao.update(node);
+			collectionDao.update(node);
 
-				return Response.status(Response.Status.OK).build();
+			return Response.status(Response.Status.OK).build();
 
-			} catch (Throwable t) {
-	    		return ErrorResponse.createResponse(t);
-	    	}
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
 	}
 
 	@DELETE
@@ -289,8 +291,8 @@ public class CollectionApi {
 			return Response.status(Response.Status.OK).build();
 
 		} catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);
-    	}
+			return ErrorResponse.createResponse(t);
+		}
 	}
 
 	@OPTIONS
@@ -329,7 +331,7 @@ public class CollectionApi {
 
 		try {
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
+			SortDefinition sortDefinition = new SortDefinition(sortProperties, sortAscending);
 			ReferenceEntries response = new ReferenceEntries();
 			List<CollectionReference> references = new ArrayList<>();
 			Filter filter = new Filter();
@@ -343,8 +345,70 @@ public class CollectionApi {
 			return Response.status(Response.Status.OK).entity(response).build();
 
 		} catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);
-    	}
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+	@GET
+	@Path("/collections/{repository}/{collection}/children/proposals")
+	@Operation(summary = "Get proposed objects for collection (requires edit permissions on collection).")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = AbstractEntries.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
+
+	public Response getCollectionsProposals(
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of parent collection", required = true) @PathParam("collection") String parentId,
+			@Parameter(description = "Only show elements with given status", required = true) @QueryParam("status") CCConstants.PROPOSAL_STATUS status,
+			@Context HttpServletRequest req) {
+
+		try {
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			AbstractEntries<NodeProposal> base = CollectionDao.getCollectionsProposals(repoDao, parentId, status);
+			return Response.status(Response.Status.OK).entity(base).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+	@GET
+	@Path("/collections/{repository}/children/proposals/collections")
+	@Operation(summary = "Get all collections containing proposals with a given state (via search index)")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = CollectionProposalEntries.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
+
+	public Response getCollectionsContainingProposals(
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "status of the proposals to search for") @QueryParam("status")  @DefaultValue(value = "PENDING") CCConstants.PROPOSAL_STATUS status,
+			@Parameter(description = "fetch counts of collections (materials and subcollections). This parameter will decrease performance so only enable if if you need this data", required = false) @QueryParam("fetchCounts") @DefaultValue(value = "true") Boolean fetchCounts,
+			@Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue="50")) @QueryParam("maxItems") Integer maxItems,
+			@Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
+			@Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+			@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+			@Context HttpServletRequest req) {
+
+		try {
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			CollectionProposalEntries entries = CollectionDao.getCollectionsContainingProposals(
+					repoDao, status == null ? CCConstants.PROPOSAL_STATUS.PENDING : status,
+					fetchCounts, skipCount, maxItems, new SortDefinition(sortProperties, sortAscending)
+			);
+			return Response.status(Response.Status.OK).entity(entries).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
 	}
 
 	@GET
@@ -404,11 +468,11 @@ public class CollectionApi {
 	
 	@ApiResponses(value = {
 			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = CollectionEntry.class))),
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
 	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
 	public Response createCollection(
@@ -474,12 +538,12 @@ public class CollectionApi {
 	
 	@ApiResponses(value = {
 			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
 	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-	        @ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	        @ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
 	public Response addToCollection(
@@ -488,6 +552,7 @@ public class CollectionApi {
 			@Parameter(description = "ID of node", required = true) @PathParam("node") String nodeId,
 			@Parameter(description = "ID of source repository", required=false ) @QueryParam("sourceRepo")  String sourceRepo,
 			@Parameter(description = "Allow that a node that already is inside the collection can be added again", required = false, schema = @Schema(defaultValue="false")) @QueryParam("allowDuplicate")  Boolean allowDuplicate,
+			@Parameter(description = "Mark this node only as a proposal (not really adding but just marking it). This can also be used for collections where you don't have permissions", required = false, schema = @Schema(defaultValue="false")) @QueryParam("asProposal")  Boolean asProposal,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -502,13 +567,12 @@ public class CollectionApi {
 			}
             NodeEntry entry=new NodeEntry();
 
-            if(sourceRepo != null && !sourceRepo.equals(RepositoryDao.getHomeRepository().getId())){
-				entry.setNode(CollectionDao.addToCollection(repoDao,collectionId,nodeId,sourceRepo, allowDuplicate != null && allowDuplicate).asNode());
-            }else {
-                entry.setNode(CollectionDao.addToCollection(repoDao,collectionId,nodeId, null, allowDuplicate != null && allowDuplicate).asNode());
-            }
-
-
+			sourceRepo = sourceRepo != null && !sourceRepo.equals(RepositoryDao.getHomeRepository().getId()) ? sourceRepo : null;
+			if(asProposal != null && asProposal) {
+				CollectionDao.proposeForCollection(repoDao, collectionId, nodeId, sourceRepo);
+			} else {
+				entry.setNode(CollectionDao.addToCollection(repoDao, collectionId, nodeId, sourceRepo, allowDuplicate != null && allowDuplicate).asNode());
+			}
             return Response.status(Response.Status.OK).entity(entry).build();
 
     	} catch (Throwable t) {
@@ -524,11 +588,11 @@ public class CollectionApi {
 	
 	@ApiResponses(value = {
 			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
 	public Response deleteFromCollection(
@@ -593,11 +657,11 @@ public class CollectionApi {
 	
 	@ApiResponses(value = {
 			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = CollectionEntry.class))),
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
+	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
+	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
 	    })
 
 	public Response changeIconOfCollection(

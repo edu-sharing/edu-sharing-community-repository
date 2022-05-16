@@ -1,6 +1,6 @@
 <div class="title">
     <div class="label">{{ title | translate}}</div>
-    <button mat-button (click)="cancel()"><i icon="close" [aria]="true"></i></button>
+    <button mat-button (click)="cancel()"><i esIcon="close"></i></button>
 </div>
 <div class="content" infinite-scroll [scrollWindow]="false" (scrolled)="loadLatest()">
   <ng-container *ngTemplateOutlet="beforeRecentRef; context: { $implicit: currentRoot }"></ng-container>
@@ -10,13 +10,13 @@
             <form (ngSubmit)="loadLatest(true)" autocomplete="off">
                 <mat-form-field floatLabel="always">
                     <mat-label>{{ 'COLLECTION_CHOOSER.SEARCH_COLLECTIONS' | translate}}</mat-label>
-                    <i icon="search" matPrefix></i>
+                    <i esIcon="search" matPrefix></i>
                     <input matInput type="search" name="search" [(ngModel)]="searchQuery"
                            placeholder="{{'COLLECTION_CHOOSER.SEARCH_COLLECTIONS' | translate}}" />
                 </mat-form-field>
             </form>
         </div>
-        <app-custom-node-list-wrapper *ngIf="isLoadingLatest || listLatest.length"
+        <es-custom-node-list-wrapper *ngIf="isLoadingLatest || listLatest.length"
                    [nodes]="listLatest.slice(0, showMore ? listLatest.length : 5)"
                    [columns]="columns"
                    [hasIcon]="true"
@@ -33,23 +33,23 @@
                    (onDrop)="drop($event)"
                    (clickRow)="clickCollection($event.node)"
                    (doubleClickRow)="clickCollection($event)"
-        ></app-custom-node-list-wrapper>
+        ></es-custom-node-list-wrapper>
         <h5 class="noElements" *ngIf="!isLoadingLatest && !listLatest.length && searchQuery==''">{{'COLLECTION_CHOOSER.NO_RECENT_COLLECTIONS' | translate }}</h5>
         <h5 class="noElements" *ngIf="!isLoadingLatest && !listLatest.length && searchQuery!=''">{{'NO_MATCHES' | translate }}</h5>
     </div>
     <h5 class="mat-heading-5">{{'COLLECTION_CHOOSER.ADD_TO_MY_COLLECTION' | translate}}</h5>
     <div class="breadcrumbs" *ngIf="currentRoot">
-        <button mat-button color="primary" (click)="navigateBack()"><i icon="arrow_back"></i></button>
+        <button mat-button color="primary" (click)="navigateBack()"><i esIcon="arrow_back"></i></button>
         <h5 class="mat-heading-5">{{currentRoot.title ? currentRoot.title : currentRoot.name}}</h5>
     </div>
-    <app-custom-node-list-wrapper
+    <es-custom-node-list-wrapper
         *ngIf="canCreate"
         [viewType]="2"
         [hasHeading]="false"
         [optionItems]="[createCollectionOptionItem]"
-    ></app-custom-node-list-wrapper>
+    ></es-custom-node-list-wrapper>
     <div class="list-my">
-        <app-custom-node-list-wrapper *ngIf="isLoadingMy || listMy.length"
+        <es-custom-node-list-wrapper *ngIf="isLoadingMy || listMy.length"
                    [nodes]="listMy"
                    [columns]="columns"
                    [hasIcon]="true"
@@ -65,9 +65,9 @@
                    (clickRow)="goIntoCollection($event.node)"
                    (doubleClickRow)="goIntoCollection($event)">
             <ng-template #itemContent>
-                <div class="go-into"><button aria-hidden="true" tabindex="-1" mat-mini-fab [color]="$any('white')"><i icon="arrow_forward"></i></button></div>
+                <div class="go-into"><button mat-mini-fab [color]="$any('white')"><i esIcon="arrow_forward"></i></button></div>
             </ng-template>
-        </app-custom-node-list-wrapper>
+        </es-custom-node-list-wrapper>
         <h5 class="noElements" *ngIf="!isLoadingMy && !listMy.length && !currentRoot">{{'COLLECTION_CHOOSER.NO_PERSONAL_COLLECTIONS' | translate }}</h5>
         <h5 class="noElements" *ngIf="!isLoadingMy && !listMy.length && currentRoot">{{'COLLECTION_CHOOSER.NO_SUB_COLLECTIONS' | translate }}</h5>
     </div>

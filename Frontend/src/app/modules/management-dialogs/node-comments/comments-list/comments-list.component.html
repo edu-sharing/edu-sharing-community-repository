@@ -1,40 +1,40 @@
-<dropdown #dropdown [options]="options"></dropdown>
+<es-dropdown #dropdown [options]="options"></es-dropdown>
 <div *ngIf="_node" class="group">
   <div class="new" *ngIf="canComment()">
     <div class="left">
-      <user-avatar
+      <es-user-avatar
               [size]="'small'"
               [user]="user"
-      ></user-avatar>
+      ></es-user-avatar>
     </div>
     <div class="right">
       <form (ngSubmit)="addComment()">
         <textarea name="addComment" class="materialize-textarea" [disabled]="sending" placeholder="{{'NODE_COMMENTS.NEW_COMMENT_PLACEHOLDER' | translate}}" [(ngModel)]="newComment"></textarea>
         <i *ngIf="!sending" tabindex="0" class="material-icons send-icon" (click)="addComment()" (keyup.enter)="addComment()">send</i>
-        <spinner-small *ngIf="sending" ></spinner-small>
+        <es-spinner-small *ngIf="sending" ></es-spinner-small>
       </form>
     </div>
   </div>
   <div class="new-no-permission" *ngIf="!canComment()">
     <div class="no-permission">{{ 'NODE_COMMENTS.NO_PERMISSION' | translate}}</div>
   </div>
-  <div class="comments comments-loading" *ngIf="loading"><spinner></spinner></div>
+  <div class="comments comments-loading" *ngIf="loading"><es-spinner></es-spinner></div>
   <div class="comments" [class.commentsLong]="!canComment()" *ngIf="comments">
     <div *ngIf="comments && !comments.length && canComment()" class="no-comments">{{'NODE_COMMENTS.NO_COMMENTS' | translate}}</div>
     <div *ngFor="let comment of comments;let i=index" class="comment">
       <div class="top">
         <div class="left">
-          <user-avatar
+          <es-user-avatar
                   [link]="true"
                   [size]="'small'"
                   [user]="comment.creator"
-          ></user-avatar>
+          ></es-user-avatar>
         </div>
         <div class="right">
           <div class="creator">
             <div class="name">{{comment.creator | authorityName}}</div>
             <button mat-icon-button #menuTrigger="matMenuTrigger" mat-button class="dropdown-dummy" [matMenuTriggerFor]="dropdown.menu" (click)="options=getOptions(comment)">
-              <i icon="more_vert" class="dropdown" *ngIf="getOptions(comment) && getOptions(comment).length"></i>
+              <i esIcon="more_vert" class="dropdown" *ngIf="getOptions(comment) && getOptions(comment).length"></i>
             </button>
           </div>
           <div class="commentText" *ngIf="comment!=editComment">{{comment.comment}}</div>
@@ -46,8 +46,8 @@
         </div>
       </div>
       <div class="icons" *ngIf="comment==editComment">
-        <div class="btn-negative" tabindex="0" (click)="editComment=null" (keyup.enter)="editComment=null"><i icon="close"></i></div>
-        <div class="btn-positive" tabindex="0" (click)="saveEditComment()" (keyup.enter)="saveEditComment()"><i icon="check"></i></div>
+        <div class="btn-negative" tabindex="0" (click)="editComment=null" (keyup.enter)="editComment=null"><i esIcon="close"></i></div>
+        <div class="btn-positive" tabindex="0" (click)="saveEditComment()" (keyup.enter)="saveEditComment()"><i esIcon="check"></i></div>
       </div>
       <div class="date" *ngIf="comment!=editComment">{{comment.created | formatDate}}</div>
     </div>

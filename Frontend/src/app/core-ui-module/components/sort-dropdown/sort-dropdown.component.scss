@@ -18,6 +18,9 @@
     text-align: left;
     border: none;
     width: 100%;
+    &.cdk-keyboard-focused {
+        @include setGlobalKeyboardFocus('border');
+    }
     &.active {
         font-weight: bold;
     }

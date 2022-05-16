@@ -100,7 +100,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
-//import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.springframework.extensions.surf.util.I18NUtil;
 
 /**

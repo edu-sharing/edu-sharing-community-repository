@@ -1,5 +1,5 @@
-<card title="{{'OPTIONS.TEMPLATE' | translate}}" [node]="node" [buttons]="buttons" (onCancel)="cancel()" width="normal" height="xlarge">
-        <spinner *ngIf="loading"></spinner>
+<es-card title="{{'OPTIONS.TEMPLATE' | translate}}" [node]="node" [buttons]="buttons" (onCancel)="cancel()" width="normal" height="xlarge">
+        <es-spinner *ngIf="loading"></es-spinner>
         <div *ngIf="!loading">
             <div class="enable-toggle">
             <mat-slide-toggle [(ngModel)]="enabled"></mat-slide-toggle>
@@ -9,13 +9,13 @@
                 </div>
             </div>
             <div class="template-content">
-                <app-mds-editor-wrapper #mds
-                [groupId]="'io_template'"
+                <es-mds #mds
                 [embedded]="true"
-                [editorMode]="'nodes'"
+                [groupId]="'io_template'"
                 [currentValues]="node ? node.properties : {}"
+                [invalidate]="true"
                 [class.display-none]="!enabled"
-                ></app-mds-editor-wrapper>
+                ></es-mds>
                 <div *ngIf="!enabled" class="template-disabled">
                     <div class="disabled-info"  data-i18n="[html]content.body">
                         {{ 'WORKSPACE.NODE_TEMPLATE.STATUS_DISABLED' | translate}}
@@ -23,4 +23,4 @@
                 </div>
             </div>
         </div>
-</card>
+</es-card>

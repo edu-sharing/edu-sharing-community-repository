@@ -1,7 +1,10 @@
 @import "../../core-ui-module/styles/variables";
 
+$repoTabBarHeight: 48px;
+$toolbarHeight: 65px;
+
 $sidenavWidth:300px;
-$sidenavTopBaseOffset:110px;
+$sidenavTopBaseOffset: $repoTabBarHeight + $toolbarHeight;
 .switchToCollections{
     font-weight:bold;
     flex-grow: 1;
@@ -73,6 +76,7 @@ $sidenavTopBaseOffset:110px;
     // padding-bottom: 10px;
     margin-left: 15px;
     margin-right: 5px;
+    width: 100%;
     h2 {
         font-size: 120%;
         margin: 1rem 0;
@@ -117,7 +121,7 @@ $sidenavTopBaseOffset:110px;
     padding: 5px;
 }
 
-sort-dropdown{
+es-sort-dropdown{
     position: absolute;
     right: 250px;
 }
@@ -129,6 +133,15 @@ sort-dropdown{
         display:none!important;
     }
 }
+
+.did-you-mean-suggestion {
+    padding: 0 20px;
+    .did-you-mean-suggestion-link ::ng-deep em {
+        font-style: normal;
+        font-weight: bold;
+    }
+}
+
 .noResults,.noResultsMatched{
     color: $noResultsColor;
     text-align: center;
@@ -292,16 +305,23 @@ a, a:hover, a:visited, a:active, button {
 
 .top {
     position: fixed;
+    // On mobile, the underlying `div` of this container gets hidden by `MainNav` via
+    // `.mobile-move-top`, however, this container remains invisibly on its usual position. This
+    // inhibits mouse clicks on content below the invisible container. To fix this, we disable
+    // pointer events on this container and explicitly enable them again on the underlying `div`
+    // using `pointer-events: auto`.
+    pointer-events: none;
     top: $mainnavHeight+48px;
     z-index: 12;
     width:100%;
     &.no-mainnav{
         top: 48px;
     }
-    actionbar{
+    es-actionbar{
         margin-right: -5px;
     }
     >div {
+        pointer-events: auto; // See above.
         height: $secondaryBarHeight;
         background-color: #fff;
         display: flex;
@@ -310,7 +330,7 @@ a, a:hover, a:visited, a:active, button {
         @include materialShadow();
     }
 }
-small-collection{
+es-small-collection{
     position: absolute;
     top: 0;
     left: $sidenavWidth;
@@ -353,20 +373,27 @@ small-collection{
 }
 .sidenav{
     position: fixed;
+    display: flex;
+    flex-direction: column;
     z-index: 10;
     box-shadow: none;
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
-    overflow-x: hidden;
-    overflow-y: auto;
     width: $sidenavWidth;
-    top:$mainnavHeight+$sidenavTopBaseOffset;
-    height: calc(100% - #{$mainnavHeight} - #{$sidenavTopBaseOffset} - 75px);
+    top: $mainnavHeight + $sidenavTopBaseOffset;
+    height: calc(100% - #{$mainnavHeight} - #{$sidenavTopBaseOffset});
     transition: $transitionNormal all ease;
     @include iosScrolling();
     &.no-mainnav{
-        top:$sidenavTopBaseOffset;
-        height: calc(100% - #{$sidenavTopBaseOffset} - 70px);
+        top: $sidenavTopBaseOffset;
+        height: calc(100% - #{$sidenavTopBaseOffset});
+    }
+    .mat-tab-group {
+        min-height: 0;
+        flex-grow: 1;
+        & ::ng-deep .mat-tab-body-wrapper {
+            flex-grow: 1;
+        }
     }
 }
 .sidenavHidden{
@@ -374,12 +401,12 @@ small-collection{
     display: none;
 }
 .sidenavNoRepositories{
-    top:$mainnavHeight+65px;
+    top: $mainnavHeight + $toolbarHeight;
     // This brakes when the site has a custom header, that adds to the page height.
-    height: calc(100% - #{$mainnavHeight} - 65px - 70px);
+    height: calc(100% - #{$mainnavHeight} - #{$toolbarHeight});
     &.no-mainnav{
-        top:65px;
-        height: calc(100% - 65px - 70px);
+        top: $toolbarHeight;
+        height: calc(100% - #{$toolbarHeight});
     }
 }
 #sub {
@@ -470,8 +497,9 @@ small-collection{
     clear: both;
 }
 
-listtable {
-    margin-top: 20px;
+es-node-entries-wrapper {
+    display: block;
+    padding: 0 20px;
 }
 
 .chip.facette {
@@ -511,7 +539,7 @@ listtable {
         float:left;
         width:100%;
     }
-    listTable,.noResults{
+    es-listTable,.noResults{
         width:calc(100% + #{$cardWidth + 60px});
         float: left;
         overflow: hidden;
@@ -547,24 +575,15 @@ listtable {
     }
 }
 .sidenav-container{
-    app-mds-editor-wrapper {
+    es-mds-editor-wrapper {
         display: block;
         margin-top: 15px;
     }
     .apply{
-        position: fixed;
         background-color: $backgroundColor;
-        width:$sidenavWidth;
         display: flex;
         justify-content: flex-end;
-        left:0;
-        bottom:0;
-        padding:20px 8px;
-        z-index: 25;
-        actionbar,a{
-            position: relative;
-            top: 5px;
-        }
+        padding: 20px 8px;
     }
 }
 .sidenav {
@@ -623,7 +642,7 @@ div.dialog.darken {
     .sidenav .list > div{
         margin-bottom: 20px;
     }
-    .sidenav-container actionbar {
+    .sidenav-container es-actionbar {
         .action-always-caption {
             display: inline-block !important;
         }
@@ -633,7 +652,7 @@ div.dialog.darken {
             width: 220px;
         }
     }
-    mds {
+    es-mds {
         .mdsEmbeddedGroup {
             float:left;
             width: 100%;
@@ -641,9 +660,9 @@ div.dialog.darken {
             /* margin-bottom: 40px; */
         }
     }
-    app-mds-editor-embedded {
-        app-mds-editor-core {
-            padding: 0 20px;
+    es-mds-editor-embedded {
+        es-mds-editor-core {
+            --mds-editor-horizontal-padding: 20px;
         }
     }
 }
@@ -691,7 +710,7 @@ div.dialog.darken {
             width:max-content;
         }
     }
-    small-collection {
+    es-small-collection {
         left: 0;
         width: 100%;
     }
@@ -736,7 +755,7 @@ div.dialog.darken {
         margin-bottom: $mobileTabNavHeight;
     }
     .sidenav{
-        height: calc(100% - #{$mainnavHeight} - #{$mobileTabNavHeight} - 180px);
+        height: calc(100% - #{$mainnavHeight} - #{$mobileTabNavHeight} - 105px);
     }
     .sidenavNoRepositories{
         height: calc(100% - #{$mainnavHeight} - #{$mobileTabNavHeight} - 65px - 70px);

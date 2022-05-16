@@ -77,6 +77,10 @@ public class I18nServer {
 			return key;
 		}
 	}
+
+	/**
+	 * @DEPRECATED
+	 */
 	public static String getTranslationDefaultResourcebundle(String key, String locale){
 		return MetadataReader.getTranslation("mds", key, null, locale);
 		// return getTranslation(key,locale,defaultResourceBundle);

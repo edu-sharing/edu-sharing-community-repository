@@ -1,0 +1,67 @@
+@import "../../../../../core-ui-module/styles/variables";
+
+.childobject-wrapper{
+  background-color: $cardLightBackground;
+  padding:20px $cardPadding;
+  margin-left: $cardPadding*-1;
+  margin-bottom: 1.5em;
+  width: calc(100% + #{$cardPadding*2});
+  .group {
+    display: flex;
+    flex-direction: column;
+
+    label {
+      font-size: $fontSizeSmall;
+      margin-bottom: 20px;
+    }
+    .add{
+      margin-top: 20px;
+    }
+  }
+}
+::ng-deep {
+  .cdk-drop-list-dragging .childobject-entry:not(.cdk-drag-placeholder) {
+    transition: transform $transitionNormal cubic-bezier(0, 0, 0.2, 1);
+  }
+  .childobject-entry {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 6px 15px;
+    cursor: default;
+    background-color: $cardLightBackground;
+
+    &:hover {
+      background-color: $itemSelectedBackground;
+    }
+
+    .icon {
+      min-width: $tableIconSize;
+      width: $tableIconSize;
+      height: $tableIconSize;
+      background: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 12px;
+
+      > img {
+        width: 50%;
+      }
+    }
+
+    .name {
+      flex-grow: 1;
+      @include shortenText();
+      margin-right: 10px;
+    }
+
+    .license, .edit, .remove {
+      margin: 0 5px;
+      color: $primary;
+      position: relative;
+      top: 2px;
+    }
+  }
+}

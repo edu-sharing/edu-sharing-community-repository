@@ -69,8 +69,29 @@ public class SKOSReader extends ValuespaceReader{
                 key.setLocale("en");
             }catch(JSONException ignored) { }
         }
-        // @TODO handle tree structures
-        //key.setParent(entry.isNull("parent_id") ? null : entry.getString("parent_id"));
+        if(entry.has("notation")) {
+            JSONArray notations = entry.getJSONArray("notation");
+            List<String> altKeys = new ArrayList<>();
+            for(int i = 0; i < notations.length(); i++) {
+                altKeys.add(notations.getString(i));
+            }
+            key.setAlternativeKeys(altKeys);
+        }
+        if(entry.has("url")) {
+            key.setUrl(entry.getString("url"));
+        }
+        for(MetadataKey.MetadataKeyRelated.Relation relation: MetadataKey.MetadataKeyRelated.Relation.values()) {
+            if(entry.has(relation.name())) {
+                JSONArray related = entry.getJSONArray(relation.name());
+                for(int i = 0; i < related.length(); i++) {
+                    JSONObject relatedJson = related.getJSONObject(i);
+                    MetadataKey.MetadataKeyRelated relatedKey = new MetadataKey.MetadataKeyRelated(relation);
+                    relatedKey.setKey(relatedJson.getString("id"));
+                    key.addRelated(relatedKey);
+                }
+            }
+        }
+
         return key;
     }
 

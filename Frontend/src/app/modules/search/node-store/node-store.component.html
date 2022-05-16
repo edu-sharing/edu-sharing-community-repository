@@ -1,18 +1,17 @@
-<card
+<es-card
   title="{{'SEARCH.NODE_STORE.TITLE' | translate }}"
-  subtitle="{{'SEARCH.NODE_STORE.SUBTITLE' | translate }}"
   height="large" width="normal"
-  icon="bookmark_border"
   [buttons]="buttons"
+  [node]="nodes"
   [isCancelable]="true" (onCancel)="cancel()">
-      <spinner *ngIf="loading"></spinner>
+      <es-spinner *ngIf="loading"></es-spinner>
       <div *ngIf="!loading">
           <div class="actions">
-            <actionbar #actionbar
-            ></actionbar>
+            <es-actionbar #actionbar
+            ></es-actionbar>
           </div>
         <div class="noElementsInfo noElements" *ngIf="!nodes.length">{{'SEARCH.NODE_STORE.LIST_EMPTY' | translate}}</div>
-        <listTable *ngIf="nodes.length"
+        <es-listTable *ngIf="nodes.length"
           [nodes]="nodes"
           [columns]="columns"
           [hasIcon]="true"
@@ -23,11 +22,11 @@
           [dragDrop]="false"
           [selectOnClick]="true"
           [selectedNodes]="selected"
-          [sortBy]="sortBy"
-          [sortAscending]="sortAscending"
+          [sortBy]="sortPolicySubject.value.property"
+          [sortAscending]="sortPolicySubject.value.direction === 'asc'"
           (sortListener)="changeSort($event)"
           (selectionChanged)="onSelection($event)"
           (doubleClickRow)="onDoubleClick($event)"
-          ></listTable>
+          ></es-listTable>
       </div>
-</card>>
+</es-card>>

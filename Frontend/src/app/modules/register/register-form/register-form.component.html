@@ -14,7 +14,7 @@
         <mat-label>{{'USER.email' | translate}}</mat-label>
         <input matInput required [formControl]="emailFormControl" type="email" name="email" id="email"/>
     </mat-form-field>
-    <input-password label="{{'USER.password' | translate}}" hint="{{ 'REGISTER.HINT' | translate }}" [displayStrength]="true" autocomplete="new-password" id="password" [required]="true" (keydown.enter)="register()" [(value)]="info.password"></input-password>
+    <es-input-password label="{{'USER.password' | translate}}" hint="{{ 'REGISTER.HINT' | translate }}" [displayStrength]="true" autocomplete="new-password" inputId="password" [required]="true" (keydown.enter)="register()" [(value)]="info.password"></es-input-password>
     <mat-form-field class="organization">
         <mat-label>{{'REGISTER.ORGANIZATION' | translate}}</mat-label>
         <input matInput type="text" [required]="isRequired('organization')" name="organization" id="organization" [(ngModel)]="info.organization"/>

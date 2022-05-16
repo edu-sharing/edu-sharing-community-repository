@@ -6,14 +6,14 @@ import {Toast} from "../../../core-ui-module/toast";
 import {TranslateService} from "@ngx-translate/core";
 import {RestSearchService} from "../../../core-module/core.module";
 import {OptionItem} from "../../../core-ui-module/option-item";
-import {MdsComponent} from "../../../common/ui/mds/mds.component";
+import {MdsComponent} from "../../../features/mds/legacy/mds/mds.component";
 import {RestToolService} from "../../../core-module/core.module";
 import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {trigger} from "@angular/animations";
-import { MdsType } from '../../../common/ui/mds-editor/types';
+import { MdsType } from '../../../features/mds/types/types';
 
 @Component({
-  selector: 'workspace-lti-tools',
+  selector: 'es-workspace-lti-tools',
   templateUrl: 'lti-tools.component.html',
   styleUrls: ['lti-tools.component.scss'],
   animations: [

@@ -1,0 +1,15 @@
+<button
+  *ngFor="let entry of entries$ | async"
+  (click)="entry.open()"
+  (keydown.enter)="entry.open()"
+  class="waves-effect"
+  [class.selected]="currentScope === entry.scope"
+  [class.collection-item-separate]="entry.isSeparate"
+  [class.disabled]="entry.isDisabled"
+  [disabled]="entry.isDisabled"
+  title="{{ 'GOTO' | translate }} {{ entry.name | translate }}"
+  cdkMonitorElementFocus
+>
+  <i [esIcon]="entry.icon" *ngIf="entry.icon" aria-hidden="true" class="material-icons"></i>
+  <span>{{ (entry.isCustom ? entry.name : entry.name + '_SHORT') | translate }}</span>
+</button>

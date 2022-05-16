@@ -14,11 +14,16 @@ import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.handleservice.HandleService;
 import org.edu_sharing.alfresco.service.handleservice.HandleServiceNotConfiguredException;
+import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.alfresco.tools.UsageTool;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
 import net.handle.hdllib.HandleException;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class BeforeDeleteIOPolicy implements BeforeDeleteNodePolicy {
 
@@ -41,6 +46,7 @@ public class BeforeDeleteIOPolicy implements BeforeDeleteNodePolicy {
 			//don't delete handle when it's an collection ref
 			return;
 		}
+		handleNodeProposals(nodeRef);
 		// not wanted anymore since handle should NEVER be removed but instead pointing simply to a delete/unpublished file
 		/*
 		if(handleService != null) {
@@ -74,6 +80,18 @@ public class BeforeDeleteIOPolicy implements BeforeDeleteNodePolicy {
 				}
 			}
 		}*/
+	}
+
+	/**
+	 * delete any collection proposals of this node
+	 */
+	private void handleNodeProposals(NodeRef target) {
+		Map<String, Object> filters = new HashMap<>();
+		filters.put(CCConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET, target.toString());
+		List<NodeRef> nodes = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_COLLECTION_PROPOSAL, filters);
+		nodes.forEach((n) -> {
+			nodeService.deleteNode(n);
+		});
 	}
 
 	private void removeCollectionRefUsage(NodeRef nodeRef) {

@@ -154,12 +154,14 @@
         "TOOLPERMISSION_MEDIACENTER_MANAGE": "Ändern der Basisdaten (Anschrift, Kataloge) von Medienzentren, bei welchen der Nutzer Administrator ist",
         "TOOLPERMISSION_VIDEO_AUDIO_CUT": "Video- & Audiodateien dürfen in Sammlungen beliebig zugeschnitten gespeichert werden",
         "TOOLPERMISSION_COLLECTION_CHANGE_OWNER": "Erlaubnis zum Ändern des Ersteller-Namens einer Sammlung",
-        "TOOLPERMISSION_RATE": "Die Berechtigung zum Bewerten von Materialien",
+        "TOOLPERMISSION_RATE_READ": "Die Berechtigung zum ansehen von Bewertungen von Materialien",
+        "TOOLPERMISSION_RATE_WRITE": "Die Berechtigung zum Bewerten von Materialien (benötigt TOOLPERMISSION_RATE_READ)",
         "TOOLPERMISSION_CONNECTOR": "Editor \"{{connector}}\" darf benutzt werden",
         "TOOLPERMISSION_CONNECTOR_SAFE": "Editor \"{{connector}}\" darf im gesicherten Bereich benutzt werden",
         "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" darf angezeigt und durchsucht werden",
         "TOOLPERMISSION_CREATE_MAP_LINK": "Ordner anlegen, welche auf andere Ordner verweisen/verlinken",
-        "TOOLPERMISSION_SIGNUP_GROUP": "Zu einer Organisation/Gruppe einschreiben (gilt nur für seperat dafür freigegebene Organisationen/Gruppen)"
+        "TOOLPERMISSION_SIGNUP_GROUP": "Zu einer Organisation/Gruppe einschreiben (gilt nur für seperat dafür freigegebene Organisationen/Gruppen)",
+        "TOOLPERMISSION_COLLECTION_PROPOSAL": "Vorschlagen von Materialien für Sammlungen, für welche der Nutzer keine Schreibrechte hat"
     },
     "NO_WRITE_PERMISSIONS": "Keine Rechte für diesen Vorgang",
     "NODE_SEARCH": "Elemente suchen...",
@@ -175,10 +177,12 @@
     "REPLACE": "Ersetzen",
     "CHANGE_STORAGE_LOCATION": "Ändern",
     "STORAGE_LOCATION_UNSET": "Nicht gewählt",
+    "STORAGE_LOCATION_SAVE": "Diesen Speicherort zukünftig als Standard verwenden",
     "SUGGESTION": "Vorschlag",
     "CLICKTOREMOVE": "Klicken zum Entfernen",
     "NO_PERMISSIONS_FOR_SCOPE": "Keine Berechtigungen, um diesen Bereich anzuzeigen",
     "DATE_SELECT_YEAR": "Jahr wählen",
+    "SEARCH_CLEAR": "Löschen",
     "DATE_CLEAR": "Löschen",
     "USER_TUTORIAL_HEADING": "Dein Profil",
     "USER_TUTORIAL_DESCRIPTION": "Hier kannst du ein eigenes Profilbild angeben und zeigen, wer du bist und was du tust. Du entscheidest, was Andere sehen können.",
@@ -240,7 +244,8 @@
     },
     "LIST_TABLE": {
         "DUMMY_ICON_LABEL": "Dateityp",
-        "TOGGLE_ALL": "Alle / Nichts auswählen"
+        "TOGGLE_ALL": "Alle / Nichts auswählen",
+        "CONFIGURE_COLUMNS": "Spalten konfigurieren"
     },
     "NODE": {
         "cm:name": "Dateiname",
@@ -252,9 +257,10 @@
         "size": "Größe",
         "mediatype": "Dateityp",
         "ccm:commonlicense_key": "Lizenz",
+        "ccm:collection_ordered_position": "Benutzerdefiniert",
         "ccm:educationallearningresourcetype": "Medienart",
         "ccm:replicationsourceid": "Original-ID",
-        "ccm:educationalcontext": "Bildungsbereich",
+        "ccm:educationalcontext": "Bildungsstufe",
         "ccm:lifecyclecontributer_publisher": "Herausgeber",
         "ccm:lifecyclecontributer_publisherFN": "",
         "ccm:eaf_sequence_title": "Serientitel",
@@ -269,6 +275,7 @@
         "cclom:general_keyword": "Schlagwörter",
         "cclom:general_description": "Beschreibung",
         "cclom:duration": "Dauer",
+        "ccm:taxonid": "Fachgebiet",
         "sys:archivedDate": "gelöscht",
         "cclom:version": "Version",
         "virtual:usagecount": "Anz. Verwendungen",
@@ -283,6 +290,15 @@
             "DOWNLOAD_MATERIAL": "Downloads",
             "VIEW_MATERIAL_PLAY_MEDIA": "Wiedergaben"
         }
+    },
+    "PROPOSAL_STATUS" : {
+      "DECLINED":  "abgelehnt",
+      "ACCEPTED":  "akzeptiert",
+      "PENDING":  "ausstehend"
+    },
+    "NODE_PROPOSAL": {
+        "cm:created": "Zeitpunkt des Vorschlags",
+        "cm:creator": "Vorgeschlagen von"
     },
     "LICENSE": {
         "TITLE_OF_WORK": "Titel",
@@ -312,7 +328,7 @@
             "CC_SHARE_ND": "Keine Bearbeitung des Werks erlaubt.",
             "CC_SHARE_SA": "Bearbeitung erlaubt, wenn es unter gleichen Bedingungen weitergegeben wird.",
             "CC_COMMERCIAL_NC": "Keine kommerzielle Verwendung erlaubt.",
-            "CC_0": "Dieses Werk ist gemeinfrei.<br />Keine Attribuierung und Namensnennung notwendig.<br />Kommerzielle Nutzung erlaubt.",
+            "CC_0": "Dieses Werk ist gemeinfrei.<br />Keine Attributierung und Namensnennung notwendig.<br />Kommerzielle Nutzung erlaubt.",
             "COPYRIGHT_FREE": "Das Werk ist kostenfrei zugänglich.<br />Nutzung und Quellenangabe gemäß den allgemeingültigen gesetzlichen Regelungen (UrhG).",
             "COPYRIGHT_LICENSE": "Das Werk darf ausschließlich vom lizenzierten Nutzerkreis gemäß den vertraglichen Bedingungen genutzt werden.<br />Keine Weitergabe an Dritte.<br />Quellenangabe gemäß der üblichen Praxis.",
             "SCHULFUNK": "Zugangsbeschränkte und zeitlich begrenzte Bereitstellung als Schulfunksendung nach §47 UrhG.<br />Keine Weitergabe an Dritte.<br />Quellenangabe gemäß der üblichen Praxis.",
@@ -376,7 +392,6 @@
     },
     "NODE_REPORT": {
         "TITLE": "Problem melden",
-        "SUBTITLE": "Problem oder Fehler am Medium melden",
         "REPORT": "Melden",
         "REPORT_INFO": "Problem mit \"{{name}}\" melden",
         "COMMENT": "Nennen Sie zusätzliche Hinweise zum aufgetretenen Problem",
@@ -384,9 +399,9 @@
         "EMAIL": "Ihre E-Mail-Adresse",
         "EMAIL_PLACEHOLDER": "jemand@beispiel.de",
         "EMAIL_REQUIRED": "Bitte eine gültige E-Mail-Adresse angeben",
+        "REASON": "Art des Problems",
         "REASON_REQUIRED": "Bitte wählen Sie aus, welches Problem besteht",
         "DONE": "Vielen Dank für Ihre Meldung.",
-        "REASON": "Welches Problem besteht?",
         "REASONS": {
             "UNAVAILABLE": "Medium nicht verfügbar",
             "INAPPROPRIATE_CONTENT": "Problematischer Inhalt",
@@ -464,6 +479,18 @@
         "TITLE": "Barrierefreiheit",
         "SUBTITLE": "Optionen für barrierefreie Nutzung",
         "ENTRY_MESSAGE": "Um persönliche Bedürfnisse zu berücksichtigen, können nachfolgend einige Einstellungen für die Verwendung unserer Anwendung gesetzt werden.",
+        "CONTRAST_MODE_TITLE": "Kontrast-Modus",
+        "CONTRAST_MODE_MESSAGE": "Im Kontrast-Modus sind Elemente auf der Seite visuell deutlich sichtbar abgegrenzt.",
+        "CONTRAST_MODE_OPTION": {
+            "STANDARD": "Standard-Ansicht",
+            "CONTRAST": "Verstärkter Kontrast"
+        },
+        "INDICATOR_ICONS_TITLE": "Bedeutungstragende Symbole",
+        "INDICATOR_ICONS_MESSAGE": "Inhalt durch Symbole vermitteln. Die Bedeutung eines Symbols wird angezeigt, wenn der Mauszeiger über das Symbol bewegt wird. Das ist bei reiner Tastatur-Nutzung jedoch nicht möglich.",
+        "INDICATOR_ICONS_OPTION": {
+            "ICONS": "Symbole anzeigen",
+            "TEXT_ONLY": "Nur Text anzeigen"
+        },
         "TOAST_TITLE": "Statusmeldungen",
         "TOAST_MESSAGE": "Statusmeldungen zeigen an, ob das System korrekt arbeitet. Bspw. lässt sich so erkennen, ob ein Inhalt oder Änderungen korrekt gespeichert wurden.",
         "TOAST_TYPE": {
@@ -480,6 +507,7 @@
     },
     "AUTHORITY_TYPE_GROUP": "Gruppe",
     "AUTHORITY_TYPE_ORG": "Organisation",
+    "CHILDOBJECT_COUNT": "{{count}} Elemente (Serienobjekt)",
     "GROUP": {
         "displayName": "Gruppenname",
         "authorityName": "Systemname",
@@ -568,8 +596,12 @@
     },
     "DIALOG": {
         "COLLECTION_SHARE_PUBLIC": "Material zur Sammlung hinzufügen?",
-        "COLLECTION_SHARE_PUBLIC_INFO": "Durch Hinzufügen des Materials in die Sammlung \"{{collection}}\" wird es für alle Personen sichtbar, die Zugriff auf diese Sammlung haben."
+        "COLLECTION_SHARE_PUBLIC_INFO": "Durch Hinzufügen des Materials in die Sammlung \"{{collection}}\" wird es für alle Personen sichtbar, die Zugriff auf diese Sammlung haben.",
+        "COLLECTION_PROPSE": "Vorschlag einreichen?",
+        "COLLECTION_PROPSE_INFO": "Sie haben auf die Sammlung \"{{collection}}\" keine ausreichenden Rechte. Sie können das Material jedoch als Vorschlag einreichen. Möchten Sie fortfahren?"
     },
+    "OPTIONS_FOR": "Aktionen für {{element}}",
+    "NO_AVAILABLE_OPTIONS": "Es sind keine Aktionen für die ausgewählten Elemente verfügbar",
     "OPTIONS": {
         "SHOW_ALL_OPTIONS": "Weitere Aktionen",
         "APPLY": "Übernehmen",
@@ -584,6 +616,8 @@
         "COLLECTION_PIN": "Sammlung pinnen",
         "COLLECTION_FEEDBACK": "Feedback...",
         "COLLECTION_FEEDBACK_VIEW": "Feedback ansehen",
+        "COLLECTION_PROPOSAL_ACCEPT": "Vorschlag bestätigen",
+        "COLLECTION_PROPOSAL_DECLINE": "Vorschlag ablehnen",
         "OPEN": "Öffnen",
         "DOWNLOAD": "Herunterladen",
         "DOWNLOAD_ALL": "Zip herunterladen",
@@ -599,7 +633,7 @@
         "PASTE": "Einfügen",
         "METADATA": "Details",
         "COLLECTION": "In Sammlung",
-        "COLLECTION_OTHER": "In Weitere Sammlung",
+        "COLLECTION_OTHER": "In weitere Sammlung",
         "STREAM": "Auf Stream",
         "LICENSE": "Lizenz",
         "CONTRIBUTOR": "Beteiligte",
@@ -609,6 +643,7 @@
         "VARIANT": "Variante anlegen",
         "VARIANT_OPEN": "Als Variante öffnen",
         "QR_CODE": "QR-Code Link",
+        "EMBED": "Einbetten",
         "ADD_OBJECT": "Neues Material",
         "SEARCH_OBJECT": "Material suchen",
         "NEW_COLLECTION": "Neue Sammlung",
@@ -619,7 +654,14 @@
         "SWITCH_TO_CARDS_VIEW": "Zur Kachelansicht wechseln",
         "LIST_SETTINGS": "Liste konfigurieren",
         "METADATA_SIDEBAR": "Materialinformationen",
-        "ACCESSIBILITY": "Barrierefreiheit"
+        "ACCESSIBILITY": "Barrierefreiheit",
+        "LTI": "In LTI Plattform übernehmen"
+    },
+    "LTI" : {
+      "REGISTERED": {
+        "TITLE": "LTI-Plattform registriert",
+        "DESCRIPTION": "edu-sharing ist nun mit ihren System verbunden und Inhalte können per LTI eingebunden werden."
+      }
     },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Versionskommentar",
@@ -627,7 +669,8 @@
         "DIFFERENT_VALUES": "(Verschiedene Werte)",
         "HAS_CHANGES": "geändert",
         "TITLE": "Infos bearbeiten",
-        "SHOW_EXTENDED": "Erweitere Infos anzeigen",
+        "SHOW_EXTENDED_FALSE": "Erweitere Infos ausgeblendet",
+        "SHOW_EXTENDED_TRUE": "Erweitere Infos eingeblendet",
         "SHOW_EXTENDED_SEARCH": "Weitere Filter anzeigen",
         "AUTHOR_LABEL": "Urheber{{GENDER_SEPARATOR}}in-Angabe",
         "AUTHOR_FREETEXT": "Freie Urheber{{GENDER_SEPARATOR}}in-Angabe",
@@ -659,7 +702,13 @@
         "SHOW_OPTIONS_BUTTON": "Zeige Auswahlmöglichkeiten",
         "FILTER_FOR": "Nach \"{{value}}\" filtern ({{count}} passende(s) Element(e))",
         "FILTER_TREE": "Filtern...",
-        "OPEN_CLOSE_EXTENDED": "Ansicht auf-/zuklappen"
+        "OPEN_CLOSE_EXTENDED": "Ansicht auf-/zuklappen",
+        "SUGGEST_VALUE_LABEL": "Neuen Wert vorschlagen",
+        "SUGGEST_VALUE_SEND": "Vorschlagen",
+        "SUGGEST_VALUE_SENT": "Der Vorschlag wurde eingereicht und wird durch die Redaktion geprüft. Der Vorschlag taucht erst auf, wenn er durch die Redaktion aktiviert wurde. Vielen Dank!",
+        "NO_MATCHING_VALUES": "Keine passenden Werte",
+        "NO_ARBITRARY_VALUES_NOTICE": "Für dieses Feld können Werte nicht frei gewählt werden. Bitte wählen Sie Werte aus der Liste.",
+        "DELETE_KEY_NOTICE": "Löschen mit Entf-Taste"
     },
     "SIMPLE_EDIT": {
         "TITLE": "Schnell-Bearbeitung",
@@ -743,14 +792,16 @@
     },
     "TOAST": {
         "NODE_LOCKED": "Das gewünschte Dokument wird aktuell von einem anderen Nutzer verwendet und kann deshalb nicht geöffnet werden",
-        "FIELD_REQUIRED": "Das Feld {{ name }} muss ausgefüllt sein",
+        "FIELD_REQUIRED": "Das Feld \"{{ name }}\" muss ausgefüllt sein",
         "NO_CONNECTION": "Instabile Internetverbindung, Inhalt konnte nicht geladen werden. Bitte später erneut versuchen",
         "RENDER_NOT_FOUND": "Das angeforderte Element wurde gelöscht oder existiert nicht",
-        "DOWNLOAD_STARTED": "Download von {{name}} wurde gestartet",
-        "DOWNLOAD_FINISHED_ANDROID": "Download von {{name}} abgeschlossen.<br />Sie finden das Element im Download-Ordner des Gerätes",
-        "DOWNLOAD_FINISHED_IOS": "Download von {{name}} abgeschlossen.<br />Sie finden das Element in der Dateien-App",
-        "DOWNLOAD_FAILED": "Download von {{name}} fehlgeschlagen.<br />Überprüfen Sie die Internetverbindung und versuchen Sie es erneut",
+        "DOWNLOAD_STARTED": "Download von \"{{name}}\" wurde gestartet",
+        "DOWNLOAD_FINISHED_ANDROID": "Download von \"{{name}}\" abgeschlossen.\nSie finden das Element im Download-Ordner des Gerätes",
+        "DOWNLOAD_FINISHED_IOS": "Download von \"{{name}}\" abgeschlossen.\nSie finden das Element in der Dateien-App",
+        "DOWNLOAD_FAILED": "Download von \"{{name}}\" fehlgeschlagen.\nÜberprüfen Sie die Internetverbindung und versuchen Sie es erneut",
         "DOWNLOAD_TRY_AGAIN": "Erneut versuchen",
+        "STORAGE_LOCATION_SAVED": "Der Ordner \"{{name}}\" wird zukünftig standardmäßig für Uploads verwendet",
+        "STORAGE_LOCATION_RESET": "Der Standard-Ordner für Uploads wurde zurückgesetzt",
         "API_FORBIDDEN": "Keine Rechte, um auf diesen Inhalt zuzugreifen",
         "API_FORBIDDEN_LOGIN": "Bitte anmelden, um auf diesen Bereich zuzugreifen"
     },
@@ -1097,13 +1148,27 @@
     "ROCKETCHAT": {
         "TITLE": "Chat"
     },
+    "RATING": {
+      "LIKES": "Empfehlen",
+      "STARS_RATE": "Mit {{rating}} bewerten",
+      "COUNT_RATINGS": "Anzahl Bewertungen",
+      "COUNT_LIKES": "Anzahl Empfehlungen",
+      "DELETE_RATING": "Bewertung entfernen",
+      "TOAST": {
+        "LIKED": "Material \"{{name}}\" empfohlen. Vielen Dank!",
+        "RATED": "Material \"{{name}}\" wurde mit {{rating}} bewertet. Vielen Dank!",
+        "LIKE_REMOVED": "Empfehlung für Material \"{{name}}\" entfernt",
+        "RATING_REMOVED": "Bewertung für Material \"{{name}}\" entfernt"
+      }
+    },
     "NAV": {
         "MAIN": "Hauptmenü",
         "SKIP": "Sprungmarken",
-        "COLLECTIONS": "Sammlungen"
+        "COLLECTIONS": "Sammlungshierarchie"
     },
     "SKIP_LINKS": {
-        "MAIN_CONTENT": "Springe zum Hauptinhalt"
+        "MAIN_CONTENT": "Springe zum Hauptinhalt",
+        "ACCESSIBILITY_SETTINGS": "Einstellungen zur Barrierefreiheit"
     },
     "REPOSITORIES": {
         "de_fwu": "FWU",
@@ -1115,5 +1180,27 @@
         "tutory": "Tutory",
         "youtube": "YouTube",
         "zum": "ZUM Wiki"
+    },
+    "BREADCRUMBS": {
+        "YOU_ARE_HOME": "Sie befinden sich im Stammverzeichnis",
+        "IN_HOME": "Im Stammverzeichnis"
+    },
+    "EMBED": {
+        "NOT_PUBLIC_WARNING": "Dieses Material ist nicht öffentlich zugänglich.",
+        "CODE_LABEL": "Einbettungscode",
+        "HEIGHT": "Höhe",
+        "WIDTH": "Breite",
+        "SIZE_CONSTRAINTS_ERROR_NOTICE": "Bitte wählen Sie einen Wert zwischen {{ min }} und {{ max }}",
+        "VERSION": "Version",
+        "VERSION_OPTION": {
+            "FIXED": "Aktuelle Version",
+            "NEWEST": "Immer die neuste Version"
+        },
+        "COPIED_TO_CLIPBOARD_NOTICE": "Der Einbettungscode wurde in die Zwischenablage kopiert."
+    },
+    "API_ERROR": {
+        "RELOAD_NOTICE_TITLE": "Seite muss neugeladen werden",
+        "RELOAD_NOTICE": "Beim Laden von wichtigen Informationen ist etwas schief gegangen. Bitte laden Sie die Seite neu.",
+        "RELOAD_BUTTON_LABEL": "Seite neuladen"
     }
 }

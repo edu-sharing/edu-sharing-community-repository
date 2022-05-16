@@ -1,6 +1,9 @@
 package org.edu_sharing.repository.server.tools.mailtemplates;
 
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.security.AuthorityType;
+import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
@@ -10,10 +13,12 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.Mail;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -52,7 +57,12 @@ public class MailTemplate {
 	}
 	public static void sendMail(String receiver, String templateId, Map<String, String> replace) throws Exception {
 		Mail mail = new Mail();
-		ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
+		ServletContext context;
+		try {
+			context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
+		} catch(Throwable t) {
+			context = Context.getGlobalContext();
+		}
 		String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
 		mail.sendMailHtml(
 				context,
@@ -61,17 +71,44 @@ public class MailTemplate {
 				MailTemplate.getContent(templateId,currentLocale, true),
 				replace);
 	}
-	public static String generateContentLink(ApplicationInfo appInfo,String nodeId) throws Throwable{
+	public static void addContentLinks(ApplicationInfo appInfo,String nodeId, Map<String, String> target, String keyName) throws Throwable{
 		NodeService nodeService=NodeServiceFactory.getNodeService(appInfo.getAppId());
 		String mime=MimeTypesV2.getMimeType(nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId));
 		if(MimeTypesV2.MIME_DIRECTORY.equals(mime)){
 			if(nodeService.hasAspect(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId,CCConstants.CCM_ASPECT_COLLECTION)){
-				return URLTool.getNgComponentsUrl()+"collections/?id="+nodeId;
+				target.put(keyName, URLTool.getNgComponentsUrl() + "collections/?id="+nodeId);
+				target.put(keyName + ".static", URLTool.getNgComponentsUrl(false) + "collections/?id="+nodeId);
 			}
-			return URLTool.getNgComponentsUrl()+"workspace/?id="+nodeId;
+			target.put(keyName, URLTool.getNgComponentsUrl() +  "workspace/?id="+nodeId);
+			target.put(keyName + ".static", URLTool.getNgComponentsUrl(false) +  "workspace/?id="+nodeId);
 		}
-		return 	URLTool.getNgComponentsUrl()+"render/"+nodeId+"?closeOnBack=true";
+		target.put(keyName, URLTool.getNgComponentsUrl() + "render/"+nodeId+"?closeOnBack=true");
+		target.put(keyName + ".static", URLTool.getNgComponentsUrl(false) + "render/"+nodeId+"?closeOnBack=true");
 	}
+	public static UserMail getUserMailData(String authorityName) {
+
+		String fullName = null;
+		String firstName = null, lastName = null, email = null;
+
+		String user = new AuthenticationToolAPI().getCurrentUser();
+		NodeRef nodeRef = AuthorityServiceHelper.getAuthorityNodeRef(authorityName);
+		if(nodeRef != null) {
+			firstName = (String) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.CM_PROP_PERSON_FIRSTNAME);
+			lastName = (String) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.CM_PROP_PERSON_LASTNAME);
+			email = (String) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.PROP_USER_EMAIL);
+			if(AuthorityType.GROUP.equals(AuthorityType.getAuthorityType(authorityName))) {
+				firstName = (String) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME);
+				email = (String) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.CCM_PROP_GROUPEXTENSION_GROUPEMAIL);
+			}
+		}
+		if (firstName != null && lastName != null) {
+			fullName = (firstName + " " + lastName).trim();
+		} else {
+			fullName = user;
+		}
+		return new UserMail(fullName, firstName, lastName, email);
+	}
+
 	private static Map<TemplateDescription, Node> getTemplates(String locale) throws Exception {
 		Document base=getXML(locale,false);
 		NodeList templatesBase = (NodeList) xpath.evaluate("/templates/template", base, XPathConstants.NODESET);

@@ -1,10 +1,10 @@
 <input #fileSelect type="file" style="display:none" id="fileSelect" [multiple]="multiple" (change)="filesSelected($event)" />
-<card title="{{'WORKSPACE.ADD_OBJECT_TITLE' | translate }}"
+<es-card title="{{'WORKSPACE.ADD_OBJECT_TITLE' | translate }}"
       [priority]="priority"
       subtitle="{{'WORKSPACE.ADD_OBJECT_SUBTITLE' | translate }}"
       icon="cloud_upload"
       width="normal"
-      height="large"
+      height="xlarge"
       [buttons]="buttons"
       (onCancel)="cancel()"
 >
@@ -13,13 +13,13 @@
                  (onFileDrop)="onDrop($event)"
                  (click)="selectFile()"
                  (fileOver)="isFileOver=$event">
-                <div><i icon="cloud_upload"></i></div>
+                <div><i esIcon="cloud_upload"></i></div>
                 <div *ngIf="supportsDrop">{{ 'WORKSPACE.ADD_OBJECT_MESSAGE' | translate}}
-                    <mat-link (click)="selectFile()">{{ 'WORKSPACE.ADD_OBJECT_BROWSE' | translate}}</mat-link>
+                    <es-mat-link (click)="selectFile()">{{ 'WORKSPACE.ADD_OBJECT_BROWSE' | translate}}</es-mat-link>
                 </div>
             </div>
             <div class="quota" *ngIf="user && user.person.quota.enabled">
-                <user-quota [quota]="user.person.quota"></user-quota>
+                <es-user-quota [quota]="user.person.quota"></es-user-quota>
             </div>
             <div class="seperator-line uppercase">{{ 'WORKSPACE.SELECT_ORG' | translate}}</div>
             <div class="link">
@@ -59,24 +59,32 @@
                     <div class="no-breadcrumbs" *ngIf="!_parent">
                         {{'STORAGE_LOCATION_UNSET' | translate}}
                     </div>
-                    <breadcrumbs *ngIf="_parent"
+                    <es-breadcrumbs *ngIf="breadcrumbs"
                             short="always"
                             [clickable]="false"
-                            [breadcrumbsAsNode]="breadcrumbs"
-                            [home]="'WORKSPACE.MY_FILES'"
-                    ></breadcrumbs>
+                            [breadcrumbsAsNode]="breadcrumbs.nodes"
+                            [home]="breadcrumbs.homeLabel"
+                            [homeIcon]="breadcrumbs.homeIcon"
+                    ></es-breadcrumbs>
                     <div class="change">
                         <button mat-button color="primary" (click)="chooseParent=true">{{'CHANGE_STORAGE_LOCATION' | translate}}</button>
                     </div>
                 </div>
+              <mat-checkbox
+                *ngIf="showSaveParent"
+                [(ngModel)]="saveParent"
+                (ngModelChange)="setSaveParent($event)"
+              >{{'STORAGE_LOCATION_SAVE' | translate}}
+              </mat-checkbox>
             </div>
         </div>
     </div>
-</card>
-<file-chooser *ngIf="chooseParent"
+</es-card>
+<es-file-chooser *ngIf="chooseParent"
               [isCancelable]="true"
               [pickDirectory]="true"
-              [title]="'WORKSPACE.CHOOSE_LOCATION'"
+              [title]="'WORKSPACE.CHOOSE_LOCATION_TITLE'"
+              [subtitle]="'WORKSPACE.CHOOSE_LOCATION_DESCRIPTION'"
               (onCancel)="chooseParent=false"
               (onChoose)="parentChoosed($event)"
-></file-chooser>
+></es-file-chooser>

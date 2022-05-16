@@ -1,14 +1,15 @@
 import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostListener, Input, NgZone, Output, ViewChild} from "@angular/core";
 import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
 import {trigger} from "@angular/animations";
-import {MainNavComponent} from "../../main-nav/main-nav.component";
 import {EventListener,FrameEventsService} from "../../../../core-module/rest/services/frame-events.service";
 import {UIAnimation} from "../../../../core-module/ui/ui-animation";
 import {ConfigurationService, RestConnectorService} from '../../../../core-module/core.module';
-import {GlobalContainerComponent} from "../global-container.component";
+import { first } from "rxjs/operators";
+import { LoadingScreenService } from "../../../../main/loading-screen/loading-screen.service";
+import { RocketChatService } from "./rocket-chat.service";
 
 @Component({
-  selector: 'rocketchat',
+  selector: 'es-rocketchat',
   templateUrl: 'rocketchat.component.html',
   styleUrls: ['rocketchat.component.scss'],
   animations: [
@@ -33,19 +34,18 @@ export class RocketchatComponent implements EventListener {
             return;
         }
     }
-    _data: any;
     src: SafeResourceUrl;
-    opened=false;
     fullscreen=false;
     loaded=false;
-    unread=0;
     constructor(
         private sanitizer: DomSanitizer,
         private connector: RestConnectorService,
         private configuration: ConfigurationService,
         private ngZone: NgZone,
         private changes: ChangeDetectorRef,
-        private events: FrameEventsService
+        private events: FrameEventsService,
+        private loadingScreen: LoadingScreenService,
+        public rocketChat: RocketChatService
     ){
         this.events.addSelfListener(this);
         this.initalize();
@@ -57,11 +57,11 @@ export class RocketchatComponent implements EventListener {
                         this.changes.detectChanges();
                         this.frame.nativeElement.contentWindow.postMessage({
                             externalCommand: 'login-with-token',
-                            token: this._data.token
-                        }, this._data.url);
+                            token: this.rocketChat._data.token
+                        }, this.rocketChat._data.url);
                     }
-                    else if (event.data.eventName === 'new-message' && !this.opened) {
-                        this.unread++;
+                    else if (event.data.eventName === 'new-message' && !this.rocketChat.opened) {
+                        this.rocketChat.unread++;
                         this.changes.detectChanges();
                     }
                 }
@@ -70,21 +70,21 @@ export class RocketchatComponent implements EventListener {
     }
     getFrameUrl() {
         //return this.sanitizer.bypassSecurityTrustResourceUrl(this._data.url+'/channel/general?layout=embedded');
-        return this.sanitizer.bypassSecurityTrustResourceUrl(this._data.url+'/channel/general');
+        return this.sanitizer.bypassSecurityTrustResourceUrl(this.rocketChat._data.url+'/channel/general');
     }
 
     private async initalize() {
-        this._data = null;
+        this.rocketChat._data = null;
         this.src = null;
-        this.opened = await this.configuration.get('remote.rocketchat.shouldOpen', false).toPromise();
+        this.rocketChat.opened = await this.configuration.get('remote.rocketchat.shouldOpen', false).toPromise();
         this.fullscreen = false;
-        if (GlobalContainerComponent.getPreloading()) {
-            GlobalContainerComponent.subscribePreloading().first().subscribe(() => this.initalize());
+        if (this.loadingScreen.getIsLoading()) {
+            this.loadingScreen.observeIsLoading().pipe(first(isLoading => !isLoading)).subscribe(() => this.initalize());
             return;
         }
         const login = await this.connector.isLoggedIn(false).toPromise();
         if (login.remoteAuthentications && login.remoteAuthentications.ROCKETCHAT) {
-            this._data = login.remoteAuthentications.ROCKETCHAT;
+            this.rocketChat._data = login.remoteAuthentications.ROCKETCHAT;
             this.src = this.getFrameUrl();
         }
     }

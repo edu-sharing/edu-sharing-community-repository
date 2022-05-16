@@ -53,6 +53,28 @@
 				<aspect>ccm:eduscope</aspect>
 			</mandatory-aspects>
 		</type>
+		<type name="ccm:collection_proposal">
+			<title>Campus Content proposal on an ccm:io for a specific collection</title>
+			<parent>cm:cmobject</parent>
+			<properties>
+				<!-- link to a ccm:io this object is a proposal for -->
+				<property name="ccm:collection_proposal_target">
+					<type>d:noderef</type>
+				</property>
+				<!-- status indicating if this proposal was accepted, declined or not yet decided -->
+				<property name="ccm:collection_proposal_status">
+					<type>d:text</type>
+				</property>
+				<!-- optional comment for this proposal -->
+				<property name="ccm:collection_proposal_comment">
+					<type>d:text</type>
+					<mandatory>false</mandatory>
+				</property>
+			</properties>
+			<mandatory-aspects>
+				<aspect>ccm:eduscope</aspect>
+			</mandatory-aspects>
+		</type>
 		<type name="ccm:collection_feedback">
 			<title>Campus Content feedback on ccm:map with aspect ccm:collection</title>
 			<parent>cm:cmobject</parent>
@@ -295,6 +317,17 @@
 					</source>
 					<target>
 						<class>ccm:collection_feedback</class>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</target>
+				</child-association>
+				<child-association name="ccm:childcollectionproposal">
+					<source>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</source>
+					<target>
+						<class>ccm:collection_proposal</class>
 						<mandatory>false</mandatory>
 						<many>true</many>
 					</target>
@@ -1038,6 +1071,16 @@
 						<tokenised>false</tokenised>
 					</index>
 				</property>
+				<!-- any info about unmet legacy criteria for a given node (e.g. some law restriction that is not met) -->
+				<property name="ccm:unmetLegalCriteria">
+					<type>d:text</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
 			</properties>
 		</aspect>
 
@@ -1153,6 +1196,15 @@
 	          			<stored>false</stored>
 	         			<tokenised>both</tokenised>
 	         		</index>										
+				</property>
+				<property name="ccm:classification_keyword_display">
+					<type>d:mltext</type>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>both</tokenised>
+					</index>
 				</property>
 				<property name="ccm:classification_purpose">
 					<type>d:text</type>
@@ -1843,8 +1895,15 @@
 					<type>d:boolean</type>
 					<default>false</default>
 				</property>
+				<!-- order mode for references inside this collection -->
 				<property name="ccm:collectionordermode">
 					<type>d:text</type>
+					<multiple>true</multiple>
+				</property>
+				<!-- order mode for subcollection inside this collection -->
+				<property name="ccm:collectionsubcollectionordermode">
+					<type>d:text</type>
+					<multiple>true</multiple>
 				</property>
 				<!-- freetext author info -->
 				<property name="ccm:collection_author_freetext">

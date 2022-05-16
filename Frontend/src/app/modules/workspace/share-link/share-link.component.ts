@@ -4,7 +4,6 @@ import {RestConstants} from "../../../core-module/core.module";
 import {NodeWrapper, Node, NodeShare} from "../../../core-module/core.module";
 import {VCard} from "../../../core-module/ui/VCard";
 import {Toast} from "../../../core-ui-module/toast";
-import {Translation} from "../../../core-ui-module/translation";
 import {TranslateService} from "@ngx-translate/core";
 import {Helper} from "../../../core-module/rest/helper";
 import {DateHelper} from "../../../core-ui-module/DateHelper";
@@ -13,7 +12,7 @@ import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {UIHelper} from "../../../core-ui-module/ui-helper";
 
 @Component({
-  selector: 'workspace-share-link',
+  selector: 'es-workspace-share-link',
   templateUrl: 'share-link.component.html',
   styleUrls: ['share-link.component.scss'],
   animations: [

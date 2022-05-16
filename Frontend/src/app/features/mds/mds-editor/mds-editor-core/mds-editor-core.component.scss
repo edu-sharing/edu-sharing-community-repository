@@ -1,0 +1,15 @@
+:host {
+    display: block;
+    // We must not create a scrolling context here with `overflow: hidden`, otherwise sticky section
+    // headings will break. Therefore, we inject padding sizes via variables to adjust negative
+    // margins on ripple effects accordingly and prevent horizontal scroll bars.
+    //
+    // An alternative would be to use `overflow-x: clip` when it is supported by Safari.
+    padding: 0 var(--mds-editor-horizontal-padding, 0);
+}
+
+.clear-button {
+    display: block;
+    margin-left: auto;
+    margin-bottom:  50px;
+}

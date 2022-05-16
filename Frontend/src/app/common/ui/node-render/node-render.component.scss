@@ -34,16 +34,18 @@ a, a:hover, a:visited, a:active {
   color:#fff;
 }
 :host ::ng-deep{
-  .topBar-render{
-    display: none!important;
-  }
   a.edusharing_rendering_content{
     background-color: $primary;
+    // `&.cdk-keyboard-focused` would be better, but we cannot trivially apply the
+    // `cdkMonitorElementFocus` directive here.
+    &:focus {
+      @include setGlobalKeyboardFocus();
+    }
   }
   .edusharing_rendering_metadata_body comments .group{
     padding: 0 10px;
   }
-  .edusharing_rendering_metadata_body collections .list{
+  .edusharing_rendering_metadata_body [data-element=collections] .list{
     padding-top:15px;
     .cardContainer{
       display: flex;
@@ -61,6 +63,10 @@ a, a:hover, a:visited, a:active {
       color: $primary;
       font-weight: 400;
     }
+  }
+  // Again, `&.cdk-keyboard-focused` would be better.
+  .edusharing_rendering_metadata_body .mds_license a:focus {
+    @include setGlobalKeyboardFocus();
   }
 }
 .topBar{
@@ -85,7 +91,7 @@ a, a:hover, a:visited, a:active {
 .displayBar {
   display: flex;
   height: 100%;
-  > button, > span {
+  > button, > .actionbar-container {
     flex-grow: 2;
     flex-basis: 0;
     text-align: center;
@@ -99,7 +105,7 @@ a, a:hover, a:visited, a:active {
   justify-content: flex-start !important;
 }
 
-.displayBar > span:last-child {
+.displayBar > .actionbar-container:last-child {
   position: relative;
   top: -5px;
   text-align: right;
@@ -189,7 +195,7 @@ a, a:hover, a:visited, a:active {
 .nodeRenderLoading{
   height: calc(100vh - #{$mainnavHeight});
   overflow: hidden;
-  spinner{
+  es-spinner{
     position: relative;
     top: 50px;
   }
@@ -261,7 +267,7 @@ div.download {
   padding:20px;
   width:100%;
   background-color:#FFF;
-  listTable{
+  es-listTable{
     /*margin:auto;*/
   }
   .caption{

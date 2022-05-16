@@ -1,0 +1,10 @@
+@import '../../../../../core-ui-module/styles/variables';
+
+.mat-chip.mat-standard-chip {
+    cursor: pointer;
+    @each $property, $color in $chip-colors {
+        &.filter-chip-#{$property} {
+            background-color: $color;
+        }
+    }
+}

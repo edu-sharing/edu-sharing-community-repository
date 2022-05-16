@@ -131,6 +131,32 @@ public class NodeServiceHelper {
 	public static void removeProperty(NodeRef nodeRef,String key){
 		NodeServiceFactory.getLocalService().removeProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),key);
 	}
+
+	/**
+	 * returns true if the value is not empty
+	 * This will not only return false for null values, but also for empty strings and lists with only empty string
+	 */
+	public static boolean hasPropertyValue(NodeRef nodeRef, String key) {
+		Serializable property = getPropertyNative(nodeRef, key);
+		if(property == null) {
+			return false;
+		}
+		if(property instanceof String) {
+			return !((String) property).trim().isEmpty();
+		} else if(property instanceof Collection) {
+			if(((Collection<?>) property).isEmpty()) {
+				return false;
+			}
+			if(((Collection<?>) property).iterator().next() instanceof String) {
+				return ((Collection<?>) property).stream().map((p) -> (String) p).filter(Objects::nonNull).map(String::trim).noneMatch(String::isEmpty);
+			} else {
+				// don't know what to do, we assume it has a value if it is NOT a null value
+				return ((Collection<?>) property).stream().anyMatch(Objects::nonNull);
+			}
+		} else {
+			return true;
+		}
+	}
 	public static Serializable getPropertyNative(NodeRef nodeRef, String key){
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
@@ -138,6 +164,11 @@ public class NodeServiceHelper {
 	}
 	public static String getType(NodeRef nodeRef){
 		return NodeServiceFactory.getLocalService().getType(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId());
+	}
+	public static NodeRef getPrimaryParent(NodeRef nodeRef){
+		return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+				NodeServiceFactory.getLocalService().getPrimaryParent(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId())
+		);
 	}
 	public static List<ChildAssociationRef> getChildrenChildAssociationRefType(NodeRef nodeRef, String type){
     	return NodeServiceFactory.getLocalService().getChildrenChildAssociationRefType(nodeRef.getId(), type);
@@ -467,10 +498,15 @@ public class NodeServiceHelper {
 	 * @return
 	 */
 	public static Map<String, Object> addVirtualProperties(String type, List<String> aspects, Map<String, Object> properties) {
+		properties.put(CCConstants.VIRT_PROP_TYPE, CCConstants.getValidLocalName(type));
 		properties.put(CCConstants.VIRT_PROP_MEDIATYPE, I18nAngular.getTranslationAngular("common", "MEDIATYPE." + MimeTypesV2.getNodeType(type,
 				properties,
 				aspects))
 		);
 		return properties;
+	}
+
+	public static void renameNode(NodeRef node, String newName) {
+		NodeServiceHelper.setProperty(node, CCConstants.CM_NAME, newName);
 	}
 }

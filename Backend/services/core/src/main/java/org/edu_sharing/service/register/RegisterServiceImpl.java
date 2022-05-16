@@ -115,6 +115,7 @@ public class RegisterServiceImpl implements RegisterService {
                 String content = MailTemplate.getContent("userRecoverPassword", currentLocale, true);
                 Map<String, String> replace = new HashMap<>();
                 replace.put("link", URLTool.getNgComponentsUrl() + "register/reset-password/" + URLEncoder.encode(key));
+                replace.put("link.static", URLTool.getNgComponentsUrl(false) + "register/reset-password/" + URLEncoder.encode(key));
                 replace.put("key", key);
                 addMailRegisterInfo(info, replace);
                 Mail mail = new Mail();

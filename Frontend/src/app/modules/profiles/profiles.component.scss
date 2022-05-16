@@ -61,7 +61,7 @@ $path:'../../../assets/images/';
         color: $textOnPrimary;
       }
 
-      a, .name, .mail, user-avatar, input, .editAvatar {
+      a, .name, .mail, es-user-avatar, input, .editAvatar {
         position: relative;
         z-index: 2;
       }
@@ -70,7 +70,7 @@ $path:'../../../assets/images/';
         opacity: 0.75;
       }
 
-      user-avatar {
+      es-user-avatar {
         display: flex;
         justify-content: center;
       }
@@ -82,7 +82,7 @@ $path:'../../../assets/images/';
         //background-color: rgba(255,255,255,0.1);
       }
 
-      .edit, actionbar {
+      .edit, es-actionbar {
         position: absolute;
         right: 20px;
         top: 20px;
@@ -179,7 +179,7 @@ $path:'../../../assets/images/';
         mat-form-field {
           padding-bottom: 20px;
         }
-        info-message {
+        es-info-message {
           display: flex;
           width: 100%;
           margin-bottom: 20px;
@@ -293,7 +293,7 @@ $path:'../../../assets/images/';
 }
 
 :host ::ng-deep{
-  input-password mat-form-field{
+  es-input-password mat-form-field{
     width: 100%;
   }
 }

@@ -79,12 +79,7 @@ public class ClientUtilsService {
 						info.setDescription(content);
 					if (name.equals("keywords"))
 						info.setKeywords(content.split(","));
-
-					if(name.equals("twitter:image")){
-						info.setTwitterImage(content);
-					}
 				}
-
 
 			}
 			String[] licenses = new String[] { "by", "by-nd", "by-sa", "by-nc", "by-nc-nd", "by-nc-sa" };

@@ -1,0 +1,36 @@
+<es-mds-editor-widget-container
+  #container
+  [widget]="widget"
+  [label]="true"
+  [valueType]="valueType"
+  [control]="formArray"
+  [wrapInFormField]="false"
+>
+  <ul *ngIf="formArray" [formGroup]="$any(formArray)" class="checkboxes-group">
+    <li *ngFor="let control of formArray.controls; let i = index">
+      <mat-checkbox
+        [formControlName]="i"
+        esCheckTextOverflow=".caption"
+        #text="esCheckTextOverflow"
+        [matTooltip]="text.hasTextOverflow() ? getFacet(i).label : null"
+      >
+        <span class="label">
+          <span class="caption">{{ getFacet(i).label }}</span>
+          <span class="count">{{ getFacet(i).count }}</span>
+        </span>
+      </mat-checkbox>
+    </li>
+  </ul>
+  <button
+    *ngIf="(facetAggregationSubject | async)?.hasMore"
+    mat-button
+    color="primary"
+    (click)="onLoadMore()"
+    [disabled]="isLoading"
+    class="load-more-button"
+  >
+    {{ 'LOAD_MORE' | translate }}
+    <i *ngIf="!isLoading" esIcon="keyboard_arrow_down"></i>
+    <es-spinner-small *ngIf="isLoading" class="spinner"></es-spinner-small>
+  </button>
+</es-mds-editor-widget-container>

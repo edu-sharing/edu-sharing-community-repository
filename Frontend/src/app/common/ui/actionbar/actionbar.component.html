@@ -1,9 +1,9 @@
-<dropdown
+<es-dropdown
   #dropdownRef
   [options]="optionsMenu"
   [showDisabled]="showDisabled"
   [position]="dropdownPosition"
-></dropdown>
+></es-dropdown>
 <div
   class="actionbar"
   [class.actionbar-all-flat]="style == 'flat'"
@@ -17,12 +17,12 @@
     color="primary"
     [disabled]="!option.isEnabled"
     [class.display-none]="!option.isEnabled && !showDisabled"
-    [class.mat-flat-button]="shouldHighlight(i)"
+    [class.mat-flat-button]="shouldHighlight(i, option)"
     matTooltip="{{ option | optionTooltip }}"
     [attr.aria-label]="option.name | translate"
     (click)="click(option)"
   >
-    <i [icon]="option.icon"></i>
+    <i [esIcon]="option.icon"></i>
     <span class="action-always-caption" *ngIf="option.showName && appearance != 'round'">
       {{ option.name | translate }}</span
     >
@@ -35,7 +35,7 @@
     [matMenuTriggerFor]="dropdownRef.menu"
     *ngIf="canShowDropdown()"
   >
-    <i icon="more_vert" [aria]="false"></i>
+    <i esIcon="more_vert" [aria]="false"></i>
   </button>
   <div
     *ngIf="optionsToggle.length"
@@ -51,7 +51,7 @@
       (click)="click(option)"
       [class.disabled]="!option.isEnabled"
     >
-      <i [icon]="option.icon" [aria]="false"></i>
+      <i [esIcon]="option.icon" [aria]="false"></i>
     </button>
   </div>
 </div>

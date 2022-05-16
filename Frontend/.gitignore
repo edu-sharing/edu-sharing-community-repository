@@ -20,6 +20,7 @@
 .settings/
 
 # misc
+/.angular/cache
 /.sass-cache
 /connect.lock
 /coverage/*
@@ -27,6 +28,7 @@
 npm-debug.log
 testem.log
 /typings
+.eslintcache
 
 # e2e
 /e2e/*.js

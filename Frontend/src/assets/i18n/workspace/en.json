@@ -39,6 +39,7 @@
         "LTI_CONSUMER_KEY": "Consumer Key",
         "LTI_SHARED_SECRET": "Shared Secret",
         "SHARED_FILES": "Shared content",
+        "RESTRICTED_FOLDER": "Foreign folder",
         "MY_SHARED_FILES": "Shared by me",
         "TO_ME_SHARED_FILES": "Shared with me",
         "WORKFLOW_RECEIVE": "Assigned to me",
@@ -87,7 +88,8 @@
         "INVITE_RECENT_AUTHORITIES": "Recently invited",
         "FILE_LOCATION": "Storage location",
         "CHANGE__LOCATION": "Change",
-        "CHOOSE_LOCATION": "Choose location",
+        "CHOOSE_LOCATION_TITLE": "Location",
+        "CHOOSE_LOCATION_DESCRIPTION": "Choose a directory for storage",
         "TREE_MORE_ITEMS": "+ {{count}} more folders",
         "SHARE": {
             "TITLE": "Manage Sharing",
@@ -172,7 +174,9 @@
                 "DOI_DISTINCT": "Create new handle",
                 "DOI_DISTINCT_INFO": "A new, unique handle is created. Future versions of the object will have independent identifiers. Note that after selecting this option, no updated versions of the item can subsequently be published under the same handle",
                 "DOI_UPDATE": "Update an existing handle",
-                "DOI_UPDATE_INFO": "The new version of the element will be made available under the existing, old handle address in the future. The previously published version is no longer directly accessible via the handle address"
+                "DOI_UPDATE_INFO": "The new version of the element will be made available under the existing, old handle address in the future. The previously published version is no longer directly accessible via the handle address",
+                "LICENSE_REQUIRED": "In order to publish the material you need to define a license first",
+                "AUTHOR_REQUIRED": "In order to publish the material you need to define the author first"
             },
             "STATE": {
                 "PRIVATE": "Private",
@@ -246,6 +250,7 @@
                 "BULK_CREATE": "Node imported via bulk",
                 "BULK_UPDATE": "Node updated via bulk",
                 "BULK_UPDATE_RESYNC": "Applied local changes onto bulk-changes",
+                "REMOTE_OBJECT_INIT": "Object imported from federated search source",
                 "IMPORT_BLOCKED": "Changed status of import-blocking"
             }
         },
@@ -304,6 +309,7 @@
             "NEW_STATUS": "new status",
             "HISTORY": "workflow activities",
             "NO_COMMENT": "Please enter a comment for workflow activity.",
+            "NO_RECEIVER": "Please enter a receiver for workflow activity.",
             "NO_HISTORY": "No entries for workflow activites have been made yet.",
             "USER_NO_PERMISSION": "Missing permissions",
             "USER_NO_PERMISSION_INFO": "The user/group in charge '{{user}}' has currently no permission to access this document / these documents. Do you want to grant them coordinator permissions?\n\nCoordinators may edit the material and grant additional users access.",
@@ -380,7 +386,6 @@
             "CURRENT": "currently picked license",
             "VERSION": "version",
             "LOCALE": "locale",
-            "RELEASE_WITHOUT_LICENSE": "In order to release an object you need to select a license",
             "CUSTOM_RIGHTS": "GNU GPL or other licenses...",
             "RELEASE": "Release object under this license",
             "RELEASE_MULTI": "Release {{count}} objects under this license",
@@ -415,6 +420,18 @@
                 "PDM_INFO": "This object is free of known restrictions covered by copyright law."
             }
         },
+        "FILE_CHOOSER": {
+            "NO_WRITE_PERMISSIONS": "You don't have write permissions for the selected directory. Please select a different one.",
+            "HOME_FOLDER_NO_PERMISSIONS": "You can't store elements in this directory. Please choose a sub-directory."
+        },
+        "GO_TO_HOME": "Open \"My files\"",
+        "CREATE_REASON": {
+          "TITLE": "Create not possible",
+          "SEARCH": "You're currently in a search view and can not insert elements here.",
+          "PERMISSIONS": "You don't have sufficient permissions to create elements in the current folder.",
+          "VIRTUAL": "You're inside a folder where inserting elements is not possible.",
+          "GENERAL": "Navigate to a different folder and create your elements there."
+        },
         "TOAST": {
             "FOLDER_ADDED": "Folder added",
             "NODE_EXISTS_IN_COLLECTION": "The collection already contains the element {{name}}",
@@ -423,12 +440,13 @@
             "ADDED_TO_COLLECTION_SHARED": "{{count}} element(s) have been added to the collection \"{{collection}}\" and are visible to all invited persons",
             "ADDED_TO_COLLECTION_PUBLIC": "{{count}} element(s) have been added to the collection \"{{collection}}\" and are visible to everyone",
             "ADDED_TO_COLLECTION_MEDIA_CENTER": "{{count}} element(s) have been added to the collection \"{{collection}}\" and are visible to members of the mediacenter",
+            "PROPOSED_FOR_COLLECTION": "{{count}} element(s) proposed for collection \"{{collection}}\". The elements need to be approved before they are visible.",
             "ADD_TO_COLLECTION_DISABLED": "At least 1 selected material can not be collected",
             "DELETE_FINISHED": "Element(s) moved to recycle",
             "CUT_COPY": "{{count}} Element(s) copied to clipboard",
             "PASTE": "{{count}} Element(s) have been {{mode}} from \"{{from}}\" to \"{{to}}\"",
             "PASTE_DRAG": "{{count}} Element(s) have been {{mode}} to {{to}}",
-            "DUPLICATE_NAME": "The name {{name}} already exists.<br>Please use an other, unique name",
+            "DUPLICATE_NAME": "The name {{name}} already exists.\nPlease use an other, unique name",
             "CYCLIC_NODE": "A folder can not be pasted into its own",
             "NOT_POSSIBLE_IN_SEARCH": "This operation is not possible during search",
             "NOT_POSSIBLE_GENERAL": "Uploading is not possible in the current area",

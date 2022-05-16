@@ -99,6 +99,9 @@ public class CheckLinkJob extends AbstractJob {
                 } catch (IOException e) {
                     status = 404;
                     //logger.error(ref.getId()+";" + replicationSourceId + ";"+e.getMessage());
+                } catch(Throwable t) {
+                    logger.error(ref.getId() + ";" + location + ";" + t.getMessage());
+                    status = 900;
                 }
                 if(status >= 300) {
                     logger.info(ref.getId() + ";" + location + ";" + status);

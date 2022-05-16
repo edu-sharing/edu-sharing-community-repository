@@ -4,6 +4,7 @@
         "SEARCH_OPTIONS_LABEL": "Search Options",
         "TUTORIAL_HEADING": "searching and finding",
         "TUTORIAL_DESCRIPTION": "The search field allows you to quickly find interesting materials. Use filters to narrow down your search results.",
+        "DID_YOU_MEAN": "Did you mean",
         "COLLECTIONS": "Collections",
         "MATERIALS": "Materials",
         "IGNORED_PARAMETERS": "The result contains objects which may not fit all given search criterias",
@@ -13,6 +14,8 @@
         "SEARCH_STUFF": "Search for stuff ...",
         "EXPANDED_SEARCH": "Extended Search",
         "EXPANDED_SEARCH_SHORT": "Extended Search",
+        "ACTIVE_FILTER": "Active filter criteria ({{count}})",
+        "ACTIVE_FILTER_TOOLTIP": "{{count}} criterias filtered",
         "METADATASET": "Choose Metadataset",
         "METADATASET_INFO": "Filter other search criterias",
         "APPLY": "Apply",
@@ -48,7 +51,6 @@
         "ADDED_TO_NODE_STORE_EXISTS": "Element {{name}} is already on the memo list.",
         "NODE_STORE": {
             "TITLE": "Memo List",
-            "SUBTITLE": "View and manage marked elemens",
             "LIST_EMPTY": "Memo list is empty",
             "REMOVE_ITEM": "Remove",
             "REMOVED_ITEMS": "{{count}} Element(s) have been removed from the memo list."

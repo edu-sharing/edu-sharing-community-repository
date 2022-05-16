@@ -104,7 +104,11 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	public static final String KEY_CUSTOM_HTML_HEADERS = "custom_html_headers";
 
 	public static final String KEY_METADATASETS_V2 = "metadatasetsV2";
-	
+
+	// metadataset used when an element from a remote repository is copied into the local one
+	// if unset, the main metadataset (KEY_METADATASETS_V2) from the remote repo will be used
+	public static final String KEY_IMPORT_METADATASET = "import_metadataset";
+
 	public static final String KEY_PUBLIC_KEY = "public_key";
 	public static final String KEY_PRIVATE_KEY = "private_key";
 	
@@ -121,6 +125,25 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	public static final String KEY_ALLOW_ORIGIN = "allow_origin";
 
 	public static final String KEY_COOKIE_ATTRIBUTES = "cookie_attributes";
+
+	public static final String KEY_LTI_ISS = "lti_iss";
+
+	public static final String KEY_LTI_CLIENT_ID = "lti_client_id";
+
+	public static final String KEY_LTI_DEPLOYMENT_ID = "lti_deployment_id";
+
+	public static final String KEY_LTI_OIDC_ENDPOINT = "lti_oidc_endpoint";
+
+	public static final String KEY_LTI_AUTH_TOKEN_ENDPOINT = "lti_auth_token_endpoint";
+
+	public static final String KEY_LTI_KEYSET_URL = "lti_keyset_url";
+
+	public static final String KEY_LTI_KID = "lti_kid";
+
+	public static final String KEY_LTI_USAGES_ENABLED = "lti_usages_enabled";
+
+	public static final String KEY_LTI_SYNCREADERS = "lti_sync_readers";
+
 
 	/**
 	 * property file vals
@@ -324,6 +347,25 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	private String xml;
 
+	private String ltiOidc;
+
+	private String ltiAuthTokenEndpoint;
+
+	private String ltiClientId;
+
+	private String ltiDeploymentId;
+
+	private String ltiIss;
+
+	private final String ltiKeysetUrl;
+
+	private String ltiKid;
+
+	private String ltiUsagesEnabled;
+
+	private String ltiSyncReaders;
+
+
 	/**
 	 * der Anfangsteil des alfresco Intergity Pattern:
 	 * (.*[\"\*\\\>\<\?\/\:\|]+.*)|(.*[\.]?.*[\.]+$)|(.*[ ]+$)
@@ -477,6 +519,15 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 			validatorRegexCMName = cmNameRegex;
 		}
 
+		ltiClientId = properties.getProperty(KEY_LTI_CLIENT_ID);
+		ltiIss = properties.getProperty(KEY_LTI_ISS);
+		ltiDeploymentId = properties.getProperty(KEY_LTI_DEPLOYMENT_ID);
+		ltiOidc = properties.getProperty(KEY_LTI_OIDC_ENDPOINT);
+		ltiAuthTokenEndpoint = properties.getProperty(KEY_LTI_AUTH_TOKEN_ENDPOINT);
+		ltiKeysetUrl = properties.getProperty(KEY_LTI_KEYSET_URL);
+		ltiKid = properties.getProperty(KEY_LTI_KID);
+		ltiUsagesEnabled = properties.getProperty(KEY_LTI_USAGES_ENABLED);
+		ltiSyncReaders = properties.getProperty(KEY_LTI_SYNCREADERS);
 	}
 	
 	public String getXml() {
@@ -581,7 +632,12 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	}
 	
 	public String getClientBaseUrl(){
-		String result = this.getClientprotocol() + "://"+ ((this.getDomain() == null) ? this.getHost() : this.getDomain()) +":"+ this.getClientport() + "/"+getWebappname();
+		String result = this.getClientprotocol() + "://"+ ((this.getDomain() == null) ? this.getHost() : this.getDomain());
+		if(this.getClientport().equals("80") || this.getClientport().equals("443")){
+			result += "/"+getWebappname();
+		}else{
+			result += ":"+ this.getClientport() + "/"+getWebappname();
+		}
 		return result;
 	}
 
@@ -946,4 +1002,42 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	public enum CacheKey{
 		RemoteAlfrescoVersion
 	}
+
+	public String getLtiClientId() {
+		return ltiClientId;
+	}
+
+	public String getLtiDeploymentId() {
+		return ltiDeploymentId;
+	}
+
+	public String getLtiIss() {
+		return ltiIss;
+	}
+
+	public String getLtiOidc(){
+		return ltiOidc;
+	}
+	public String getLtiAuthTokenEndpoint() {
+		return ltiAuthTokenEndpoint;
+	}
+
+	public String getLtiKeysetUrl() {return ltiKeysetUrl;}
+
+	public String getLtiKid(){return ltiKid;};
+
+	public boolean isLtiUsagesEnabled(){
+		if(this.ltiUsagesEnabled != null){
+			return new Boolean(this.ltiUsagesEnabled);
+		}
+		return true;
+	}
+
+	public boolean isLtiSyncReaders(){
+		if(this.ltiSyncReaders == null){
+			return false;
+		}
+		else return new Boolean(this.ltiSyncReaders);
+	}
+
 }

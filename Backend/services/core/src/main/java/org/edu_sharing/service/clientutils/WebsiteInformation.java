@@ -38,7 +38,6 @@ public class WebsiteInformation {
 	private String title,page,description;
 	private String[] keywords;
 	private License license;
-	private String twitterImage;
 	
 	public String getDescription() {
 		return description;
@@ -84,8 +83,6 @@ public class WebsiteInformation {
 	public void setLicense(License license) {
 		this.license = license;
 	}
-
-	public void setTwitterImage(String twitterImage) { this.twitterImage = twitterImage; }
-
-	public String getTwitterImage() { return twitterImage; }
+	
+	
 }

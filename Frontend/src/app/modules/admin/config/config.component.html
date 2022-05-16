@@ -4,9 +4,9 @@
       {{'ADMIN.GLOBAL_CONFIG.SHOW_RO' | translate}}
     </mat-slide-toggle>
   </div>
-  <info-message mode="info" *ngIf="!editSupported">
+  <es-info-message mode="info" *ngIf="!editSupported">
     {{'ADMIN.GLOBAL_CONFIG.EDIT_DISABLED' | translate:{key: 'security.configuration.inlineEditing'} }}
-  </info-message>
+  </es-info-message>
   <!--<div class="size-chooser">
       <mat-label>{{'ADMIN.GLOBAL_CONFIG.SIZE' | translate}}</mat-label>
       <mat-button-toggle-group name="size" [(ngModel)]="size">
@@ -15,13 +15,13 @@
       </mat-button-toggle-group>
   </div>-->
   <h3 class="mat-heading-3 mat-heading-underline">{{ 'ADMIN.GLOBAL_CONFIG.CLIENT_CONFIG_TITLE' | translate}}</h3>
-  <info-message mode="warning" *ngIf="editSupported">{{'ADMIN.GLOBAL_CONFIG.VOLATILE_WARNING' | translate}}</info-message>
+  <es-info-message mode="warning" *ngIf="editSupported">{{'ADMIN.GLOBAL_CONFIG.VOLATILE_WARNING' | translate}}</es-info-message>
   <div class="monaco-editor">
     <ngx-monaco-editor [options]="clientCodeOptions" [(ngModel)]="configs.clientConfig" [ngModelOptions]="{standalone: true}"></ngx-monaco-editor>
     <mat-hint><div>{{'ADMIN.GLOBAL_CONFIG.CLIENT_CONFIG_HINT' | translate}}</div></mat-hint>
   </div>
   <ng-container *ngIf="showRO">
-    <info-message mode="info">{{'ADMIN.GLOBAL_CONFIG.INHERIT_INFO' | translate}}</info-message>
+    <es-info-message mode="info">{{'ADMIN.GLOBAL_CONFIG.INHERIT_INFO' | translate}}</es-info-message>
     <h3 class="mat-heading-3 mat-heading-underline">{{ 'ADMIN.GLOBAL_CONFIG.BASE_CONFIG_TITLE' | translate}}</h3>
     <div class="monaco-editor">
       <ngx-monaco-editor class="roConfig" [options]="codeOptionsHocoonRO" [(ngModel)]="configs.reference" [ngModelOptions]="{standalone: true}"></ngx-monaco-editor>
@@ -64,7 +64,7 @@
     </div>
   </ng-container>
   <div class="actions" *ngIf="editSupported">
-    <info-message mode="warning">{{'ADMIN.GLOBAL_CONFIG.WARNING' | translate}}</info-message>
+    <es-info-message mode="warning">{{'ADMIN.GLOBAL_CONFIG.WARNING' | translate}}</es-info-message>
     <button mat-raised-button color="primary" (click)="save()">{{'SAVE' | translate}}</button>
   </div>
 </div>

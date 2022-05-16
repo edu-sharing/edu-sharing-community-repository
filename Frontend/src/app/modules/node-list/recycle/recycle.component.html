@@ -1,4 +1,4 @@
-<node-list #list
+<es-node-list #list
 [isInsideWorkspace]="isInsideWorkspace"
 [parent]="this"
 [actionbar]="actionbar"
@@ -11,7 +11,7 @@
 (onSelectionChanged)="onSelection($event)"
 [searchLabel]="'RECYCLE.SEARCH_ARCHIVE'"
 [searchWorkspace]="searchWorkspace"
-></node-list>
-<recycle-delete-confirmation *ngIf="toDelete" [node]="toDelete" (onClose)="finishDelete()" (onDelete)="deleteNodesWithoutConfirmation()"></recycle-delete-confirmation>
-<recycle-restore-info *ngIf="restoreResult" [results]="restoreResult" (onClose)="finishRestore()" (onRestoreFolder)="restoreNodesEvent($event)"></recycle-restore-info>
+></es-node-list>
+<es-recycle-delete-confirmation *ngIf="toDelete" [node]="toDelete" (onClose)="finishDelete()" (onDelete)="deleteNodesWithoutConfirmation()"></es-recycle-delete-confirmation>
+<es-recycle-restore-info *ngIf="restoreResult" [results]="restoreResult" (onClose)="finishRestore()" (onRestoreFolder)="restoreNodesEvent($event)"></es-recycle-restore-info>
 

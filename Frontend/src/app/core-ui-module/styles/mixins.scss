@@ -18,20 +18,23 @@
 @mixin materialShadow($important: false){
   box-shadow:0 0 5px rgba(0,0,0,0.3) if($important,!important,null);
 }
+@mixin materialShadowSmall($important: false){
+    box-shadow:0 0 3px rgba(0,0,0,0.3) if($important,!important,null);
+}
 @mixin blurImage($blurStrength:25px){
     position: absolute;
-    left:-$blurStrength;
-    top:-$blurStrength;
-    width:calc(100% + #{$blurStrength*2});
-    height:calc(100% + #{$blurStrength*2});
+    left:-$blurStrength*2;
+    top:-$blurStrength*2;
+    width:calc(100% + #{$blurStrength*4});
+    height:calc(100% + #{$blurStrength*4});
     z-index: 0;
     overflow: hidden;
     filter: blur($blurStrength);
     object-fit: cover;
     opacity: 0.7;
 }
-@mixin materialShadowMediumLarge($important: false){
-  box-shadow:0 0 25px rgba(0,0,0,0.6) if($important,!important,null);
+@mixin materialShadowMediumLarge($important: false, $opacity: 0.6){
+  box-shadow:0 0 25px rgba(0,0,0,$opacity) if($important,!important,null);
 }
 @mixin materialShadowLarge($important: false){
   box-shadow:0 10px 70px rgba(0, 0, 0, 0.15) if($important,!important,null);
@@ -129,3 +132,26 @@
   box-shadow: 0 0 0 $focusWidth $focusColor !important;
 }
 
+// Apply the content styles in contrast mode. This is just enough contrast to be WCAG complient ---
+// not a high-contrast mode.
+//
+// Call without arguments for use in encapsulated component styles, e.g.,
+//     @include contrastMode {
+//         // Styles to apply in contrast mode
+//     }
+// To us in global context, pass 'global' as first argument, e.g.,
+//     @include contrastMode(global) { /* ... */ }
+@mixin contrastMode($scope: encapsulated) {
+  $contrastModeSelector: 'body.es-contrast-mode';
+  @if $scope == encapsulated {
+    :host-context(#{$contrastModeSelector}) & {
+      @content;
+    }
+  } @else if $scope == global {
+    #{if(&, '#{$contrastModeSelector} &', $contrastModeSelector)} {
+      @content;
+    }
+  } @else {
+    @error "Invalid scope #{$scope}.";
+  }
+}

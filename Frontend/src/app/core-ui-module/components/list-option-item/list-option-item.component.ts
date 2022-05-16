@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { OptionItem } from '../../option-item';
 
 @Component({
-    selector: 'app-list-option-item',
+    selector: 'es-list-option-item',
     templateUrl: './list-option-item.component.html',
     styleUrls: ['./list-option-item.component.scss'],
 })

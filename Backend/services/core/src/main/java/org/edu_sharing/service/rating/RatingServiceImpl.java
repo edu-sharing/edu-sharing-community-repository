@@ -176,7 +176,7 @@ public class RatingServiceImpl implements RatingService {
         if(authorityService.isGuest()){
             throw new GuestCagePolicy.GuestPermissionDeniedException("guests can not use ratings");
         }
-        ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_RATE);
+        ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_RATE_WRITE);
         if(!NodeServiceHelper.getType(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId)).equals(CCConstants.CCM_TYPE_IO)){
             throw new IllegalArgumentException("Ratings only supported for nodes of type "+CCConstants.CCM_TYPE_IO);
         }

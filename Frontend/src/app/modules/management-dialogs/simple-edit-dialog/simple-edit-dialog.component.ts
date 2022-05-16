@@ -9,12 +9,12 @@ import {BridgeService} from '../../../core-bridge-module/bridge.service';
 import {SimpleEditMetadataComponent} from './simple-edit-metadata/simple-edit-metadata.component';
 import {SimpleEditInviteComponent} from './simple-edit-invite/simple-edit-invite.component';
 import {SimpleEditLicenseComponent} from './simple-edit-license/simple-edit-license.component';
-import {Observable} from 'rxjs';
-import {CardType} from '../../../core-ui-module/components/card/card.component';
+import {forkJoin, Observable} from 'rxjs';
+import {CardType} from '../../../shared/components/card/card.component';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 
 @Component({
-  selector: 'app-simple-edit-dialog',
+  selector: 'es-simple-edit-dialog',
   templateUrl: 'simple-edit-dialog.component.html',
   styleUrls: ['simple-edit-dialog.component.scss'],
   animations: [
@@ -89,7 +89,7 @@ export class SimpleEditDialogComponent  {
     this.metadata.save().subscribe( () => {
       this.invite.save().subscribe(() => {
         this.license.save().subscribe(() => {
-          Observable.forkJoin(this._nodes.map((n) => this.nodeApi.getNodeMetadata(n.ref.id, [RestConstants.ALL])))
+          forkJoin(this._nodes.map((n) => this.nodeApi.getNodeMetadata(n.ref.id, [RestConstants.ALL])))
               .subscribe((nodes) => {
                 this.toast.toast('SIMPLE_EDIT.SAVED' + (nodes.length === 1 ? '' : '_MULTIPLE'),
                       {name: nodes[0].node.name, count: nodes.length});

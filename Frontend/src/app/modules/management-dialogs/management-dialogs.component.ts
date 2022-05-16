@@ -1,3 +1,4 @@
+import {forkJoin as observableForkJoin, observable, Observable} from 'rxjs';
 import {
     Component,
     Input,
@@ -9,14 +10,16 @@ import {
     ContentChild, TemplateRef
 } from '@angular/core';
 import {
+    CollectionProposalStatus,
     CollectionReference,
     DialogButton,
     LocalPermissions,
-    NodeVersions,
+    NodeProperties,
+    NodeVersions, ProposalNode,
     RestConnectorService,
     RestNodeService,
     Version
-} from "../../core-module/core.module";
+} from '../../core-module/core.module';
 import {TranslateService} from "@ngx-translate/core";
 import {RestSearchService} from "../../core-module/core.module";
 import {Toast} from "../../core-ui-module/toast";
@@ -25,7 +28,6 @@ import {NodeWrapper, Node, Collection} from "../../core-module/core.module";
 import {RestHelper} from "../../core-module/core.module";
 import {RestToolService} from "../../core-module/core.module";
 import {ConfigurationService} from "../../core-module/core.module";
-import {BulkBehavior, MdsComponent} from "../../common/ui/mds/mds.component";
 import {RestCollectionService} from "../../core-module/core.module";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../core-module/ui/ui-animation";
@@ -34,19 +36,27 @@ import {Router} from '@angular/router';
 import {UIConstants} from "../../core-module/ui/ui-constants";
 import {ClipboardObject, TemporaryStorageService} from '../../core-module/core.module';
 import {RestUsageService} from "../../core-module/core.module";
-import {observable, Observable} from 'rxjs';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {LinkData, NodeHelperService} from '../../core-ui-module/node-helper.service';
-import { MdsEditorWrapperComponent } from '../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import {WorkspaceLicenseComponent} from './license/license.component';
+import {ErrorProcessingService} from '../../core-ui-module/error.processing';
+import { BulkBehavior } from '../../features/mds/types/types';
+import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 
 
 export enum DialogType {
     SimpleEdit = 'SimpleEdit',
     Mds = 'Mds'
 }
+export enum ManagementEventType {
+    AddCollectionNodes,
+}
+export interface ManagementEvent {
+    event: ManagementEventType,
+    data?: any
+}
 @Component({
-  selector: 'workspace-management',
+  selector: 'es-workspace-management',
   templateUrl: 'management-dialogs.component.html',
   styleUrls: ['management-dialogs.component.scss'],
   animations: [
@@ -74,6 +84,7 @@ export class WorkspaceManagementDialogsComponent  {
   @Output() nodeLicenseChange = new EventEmitter();
   @Input() addPinnedCollection: Node;
   @Output() addPinnedCollectionChange = new EventEmitter();
+  @Output() onEvent = new EventEmitter<ManagementEvent>();
   @Input() linkMap: Node;
   @Output() linkMapChange = new EventEmitter<Node>();
   @Input() set nodeImportUnblock (nodeImportUnblock: Node[]) {
@@ -93,7 +104,6 @@ export class WorkspaceManagementDialogsComponent  {
         this.nodeDeleteTitle='WORKSPACE.DELETE_TITLE'+(nodeDelete.length === 1 ? '_SINGLE' : '');
         this.nodeDeleteMessage='WORKSPACE.DELETE_MESSAGE'+(nodeDelete.length === 1 ? '_SINGLE' : '');
         this.nodeDeleteMessageParams = {name:RestHelper.getName(nodeDelete[0])};
-        this.dialogNode=nodeDelete;
         this.nodeDeleteButtons=DialogButton.getCancel(()=> {this._nodeDelete = null});
         this.nodeDeleteButtons.push(new DialogButton('YES_DELETE',DialogButton.TYPE_DANGER,()=>{this.deleteConfirmed(nodeDelete)}));
       if(nodeDelete.length === 1) {
@@ -160,6 +170,7 @@ export class WorkspaceManagementDialogsComponent  {
     @Output() nodeSidebarChange = new EventEmitter<Node>();
     @Input() showUploadSelect=false;
   @Output() showUploadSelectChange = new EventEmitter();
+  @Output() onUploadSelectCanceled = new EventEmitter();
   @Output() onClose=new EventEmitter();
   @Output() onCreate=new EventEmitter();
   @Output() onRefresh=new EventEmitter<Node[]|void>();
@@ -184,12 +195,6 @@ export class WorkspaceManagementDialogsComponent  {
   public metadataParent: Node;
   public ltiToolConfig : Node;
   public ltiObject: Node;
-  public dialogTitle:string;
-  public dialogMessage:string;
-  public dialogMessageParameters:any;
-  public dialogCancelable:boolean;
-  public dialogNode:Node|Node[];
-  public dialogButtons:DialogButton[];
   currentLtiTool: Node;
   ltiToolRefresh: Boolean;
   @Input() nodeDeleteOnCancel: boolean;
@@ -280,6 +285,7 @@ export class WorkspaceManagementDialogsComponent  {
     private connector:RestConnectorService,
     private searchService:RestSearchService,
     private toast:Toast,
+    private errorProcessing:ErrorProcessingService,
     private nodeHelper: NodeHelperService,
     private bridge:BridgeService,
     private router:Router,
@@ -296,9 +302,8 @@ export class WorkspaceManagementDialogsComponent  {
  closeShare() {
       // reload node metadata
      this.toast.showProgressDialog();
-     Observable.forkJoin(this.nodeShare.map((n) => this.nodeService.getNodeMetadata(n.ref.id, [RestConstants.ALL])))
+     observableForkJoin(this.nodeShare.map((n) => this.nodeService.getNodeMetadata(n.ref.id, [RestConstants.ALL])))
          .subscribe((nodes: NodeWrapper[]) => {
-             console.log(nodes);
              this.onRefresh.emit(nodes.map(n => n.node));
              this.nodeShare = null
              this.nodeShareChange.emit(null);
@@ -328,7 +333,6 @@ export class WorkspaceManagementDialogsComponent  {
             }
             return;
         }
-        this.dialogTitle=null;
         this.toast.showProgressDialog();
         let callback;
         if(this.nodeDeleteBlockStatus) {
@@ -410,6 +414,10 @@ export class WorkspaceManagementDialogsComponent  {
    this.showUploadSelect=false
    this.showUploadSelectChange.emit(false);
  }
+  public cancelUploadSelect(){
+    this.closeUploadSelect();
+    this.onUploadSelectCanceled.emit(false);
+  }
  public closeContributor(node: Node){
      if(this.editorPending){
          this.editorPending=false;
@@ -449,7 +457,7 @@ export class WorkspaceManagementDialogsComponent  {
   }
   deleteNodes(nodes: Node[]) {
       this.toast.showProgressDialog();
-      Observable.forkJoin(nodes.map((n) => this.nodeService.deleteNode(n.ref.id, false)))
+      observableForkJoin(nodes.map((n) => this.nodeService.deleteNode(n.ref.id, false)))
           .subscribe(() => {
               this.toast.closeModalDialog();
               this.closeEditor(true);
@@ -521,7 +529,6 @@ export class WorkspaceManagementDialogsComponent  {
         this.nodeVariantChange.emit(null);
     }
   cancelAddToCollection(){
-    this.dialogTitle=null;
     this.addToCollection=null;
     this.addToCollectionChange.emit(null);
     this.onCloseAddToCollection.emit();
@@ -535,32 +542,46 @@ export class WorkspaceManagementDialogsComponent  {
       this.addToCollection=null;
       this.addToCollectionChange.emit(null);
   }
-  public addToCollectionList(collection:Node,list:Node[]=this.addToCollection,close=true,callback:Function=null,force=false){
-    if(!force && (collection.collection.scope!=RestConstants.COLLECTIONSCOPE_MY)){
-      this.dialogTitle='DIALOG.COLLECTION_SHARE_PUBLIC';
-      this.dialogMessage='DIALOG.COLLECTION_SHARE_PUBLIC_INFO';
-      this.dialogNode=collection;
-      this.dialogCancelable=true;
-      this.dialogMessageParameters={collection:RestHelper.getTitle(collection)};
-      this.dialogButtons=DialogButton.getNextCancel(()=>{this.dialogTitle=null},()=>{
-        this.addToCollectionList(collection,list,close,callback,true);
-      });
-      return;
-    }
-    if(close)
-      this.cancelAddToCollection();
-    else{
-      this.dialogTitle=null;
-    }
-    this.toast.showProgressDialog();
-    UIHelper.addToCollection(this.nodeHelper, this.collectionService,this.router,this.bridge,collection,list,(nodes) => {
-        this.toast.closeModalDialog();
-        this.onStoredAddToCollection.emit({collection, references: nodes});
-        if(callback) {
-            callback();
+    public addToCollectionList(collection:Node,list:Node[]=this.addToCollection,close=true,callback:() => void =null, asProposal = false,force=false){
+        if(!force) {
+            if ((collection.access.indexOf(RestConstants.ACCESS_WRITE) === -1)) {
+                this.toast.showConfigurableDialog({
+                    title: 'DIALOG.COLLECTION_PROPSE',
+                    message: 'DIALOG.COLLECTION_PROPSE_INFO',
+                    messageParameters: {collection: RestHelper.getTitle(collection)},
+                    buttons: DialogButton.getNextCancel(() => this.toast.closeModalDialog(), () => {
+                        this.toast.closeModalDialog();
+                        this.addToCollectionList(collection, list, close, callback, true, true);
+                    })
+                });
+                return;
+            } else if ((collection.collection.scope !== RestConstants.COLLECTIONSCOPE_MY)) {
+                this.toast.showConfigurableDialog({
+                    title: 'DIALOG.COLLECTION_SHARE_PUBLIC',
+                    message: 'DIALOG.COLLECTION_SHARE_PUBLIC_INFO',
+                    messageParameters: {collection: RestHelper.getTitle(collection)},
+                    buttons: DialogButton.getNextCancel(() => this.toast.closeModalDialog(), () => {
+                        this.toast.closeModalDialog();
+                        this.addToCollectionList(collection, list, close, callback, asProposal, true);
+                    })
+                });
+                return;
+            }
         }
-    });
-  }
+        if(close)
+            this.cancelAddToCollection();
+        else {
+            this.toast.closeModalDialog();
+        }
+        this.toast.showProgressDialog();
+        UIHelper.addToCollection(this.nodeHelper, this.collectionService,this.router,this.bridge,collection,list, asProposal,(nodes) => {
+            this.toast.closeModalDialog();
+            this.onStoredAddToCollection.emit({collection, references: nodes});
+            if(callback) {
+                callback();
+            }
+        });
+    }
 
     private showMetadataAfterUpload(event: Node[]) {
         const dialog = this.config.instant('upload.postDialog', DialogType.SimpleEdit);
@@ -666,7 +687,6 @@ export class WorkspaceManagementDialogsComponent  {
     }
 
     closeSimpleEdit(saved: boolean, nodes: Node[] = null) {
-      console.log('close simple', saved);
         if (saved && this._nodeFromUpload) {
             this.onUploadFilesProcessed.emit(nodes);
         } else if(!saved && this.nodeDeleteOnCancel) {
@@ -683,7 +703,7 @@ export class WorkspaceManagementDialogsComponent  {
 
     private unblockImportedNodes(nodes: Node[]) {
         this.toast.showProgressDialog();
-        Observable.forkJoin(nodes.map((n) => {
+        observableForkJoin(nodes.map((n) => {
             const properties: any = {};
             properties[RestConstants.CCM_PROP_IMPORT_BLOCKED] = [null];
             return new Observable((observer) => {
@@ -712,5 +732,44 @@ export class WorkspaceManagementDialogsComponent  {
     private setNodeDeleteOnCancel(nodeDeleteOnCancel: boolean) {
         this.nodeDeleteOnCancel = nodeDeleteOnCancel;
         this.nodeDeleteOnCancelChange.emit(nodeDeleteOnCancel);
+    }
+
+    declineProposals(nodes: ProposalNode[]) {
+        this.errorProcessing.handleRestRequest(
+            observableForkJoin(nodes.map((n) =>
+                this.nodeService.editNodeProperty(n.proposal.ref.id,
+                    RestConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS,
+                    [('DECLINED' as CollectionProposalStatus)])
+            ))).then(() => {
+                this.toast.toast('COLLECTIONS.PROPOSALS.TOAST.DECLINED');
+                this.onDelete.emit({objects: nodes, error: false, count: nodes.length});
+            });
+    }
+
+    addProposalsToCollection(nodes: ProposalNode[]) {
+        this.errorProcessing.handleRestRequest(
+        observableForkJoin(nodes.map((n) =>
+            this.nodeService.editNodeProperty(n.proposal.ref.id,
+                RestConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS,
+                [('ACCEPTED' as CollectionProposalStatus)])
+
+        ))).then(() => {
+            this.errorProcessing.handleRestRequest(observableForkJoin(nodes.map((n) =>
+                this.collectionService.addNodeToCollection(n.proposalCollection.ref.id,
+                    n.ref.id,
+                    n.ref.repo)
+            ))).then((results) => {
+                this.toast.toast('COLLECTIONS.PROPOSALS.TOAST.ACCEPTED');
+                this.onDelete.emit({objects: nodes, error: false, count: nodes.length});
+                this.onRefresh.emit();
+                this.onEvent.emit({
+                    event: ManagementEventType.AddCollectionNodes,
+                    data: {
+                        collection: nodes[0].proposalCollection,
+                        references: results.map((r) => r.node)
+                    }
+                });
+            });
+        });
     }
 }

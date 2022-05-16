@@ -1,4 +1,4 @@
-<card title="{{'SIGNUP_GROUP.TITLE' | translate }}"
+<es-card title="{{'SIGNUP_GROUP.TITLE' | translate }}"
       subtitle="{{'SIGNUP_GROUP.SUBTITLE' | translate }}" width="small" height="large"
       icon="group_add"
       [buttons]="buttons"
@@ -6,7 +6,7 @@
 >
     <div *ngIf="dialogStep === STEP.selectGroup" class="select-group">
         <h5 class="mat-heading-5">{{'SIGNUP_GROUP.SELECT_GROUP' | translate}}</h5>
-        <spinner *ngIf="groupsLoading"></spinner>
+        <es-spinner *ngIf="groupsLoading"></es-spinner>
         <ng-container *ngIf="!groupsLoading">
             <button
                     mat-button
@@ -15,10 +15,10 @@
                     [class.selected]="g===group"
                     [class.is-member]="isMemberOf(g)"
             >
-        <app-authority-row
+        <es-authority-row
                 [authority]="g"
                 [secondaryTitle]="(isMemberOf(g) ? 'SIGNUP_GROUP.ALREADY_MEMBER' : ('SIGNUP_GROUP.SIGNUP_TYPE.' + g.signupMethod)) | translate"
-        ></app-authority-row>
+        ></es-authority-row>
             </button>
         </ng-container>
         <h4 class="mat-heading-4"
@@ -28,15 +28,15 @@
     <div *ngIf="dialogStep === STEP.confirmGroup" class="confirm-group card-content-padding">
         <h5 class="mat-heading-5">{{'SIGNUP_GROUP.CONFIRM_GROUP' | translate}}</h5>
         <h4 class="mat-heading-4">{{ group | authorityName}}</h4>
-        <info-message
+        <es-info-message
             mode="info"
             message="{{'SIGNUP_GROUP.DESCRIPTION.' + group.signupMethod | translate}}"
-        ></info-message>
-        <input-password *ngIf="group.signupMethod === 'password'"
+        ></es-info-message>
+        <es-input-password *ngIf="group.signupMethod === 'password'"
                         [(value)]="password"
                         label="{{'SIGNUP_GROUP.GROUP_PASSWORD' | translate}}"
                         autocomplete="new-password"
-                        (valueChange)="updateButtons()"></input-password>
+                        (valueChange)="updateButtons()"></es-input-password>
     </div>
-</card>
+</es-card>
 

@@ -7,7 +7,7 @@ import {UIConstants} from '../../core-module/ui/ui-constants';
 import {Router} from '@angular/router';
 
 @Component({
-  selector: 'app-startup',
+  selector: 'es-startup',
   template: ''
 })
 export class StartupComponent {

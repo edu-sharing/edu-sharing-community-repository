@@ -1,0 +1,16 @@
+quill-editor {
+    height: 150px;
+    display: block;
+    margin-bottom: 48px;
+}
+:host ::ng-deep {
+    // fix add link position
+    .ql-tooltip {
+        position: absolute;
+        top: -10px !important;
+        left: 10px !important;
+    }
+    .ql-editor strong {
+        font-weight: bold;
+    }
+}

@@ -23,6 +23,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocket;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -99,6 +100,10 @@ public class HttpQueryTool {
 
 	private String execute(String url, Map<String,String> header, HttpUriRequest method, boolean followRedirects, Callback callback){
 		logger.debug("url:" + url);
+
+		if(url == null && method != null){
+			url = method.getURI().toString();
+		}
 
 		if(method == null){
 			method = new HttpGet(url);

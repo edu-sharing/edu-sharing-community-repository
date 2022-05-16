@@ -1,21 +1,29 @@
 import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
 import { Node, RestNodeService, RestConstants } from '../../../core-module/core.module';
-import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
+import {DragData, DragNodeTarget, DropData} from '../../directives/drag-nodes/drag-nodes';
 import { Params, QueryParamsHandling } from '@angular/router';
+import {CdkDragDrop, CdkDragEnter, CdkDragExit} from '@angular/cdk/drag-drop';
+import {DragCursorDirective} from '../../directives/drag-cursor.directive';
+import {DropSource} from '../node-entries-wrapper/entries-model';
 
 /**
  * Breadcrumbs for nodes or collections.
  */
 @Component({
-    selector: 'breadcrumbs',
+    selector: 'es-breadcrumbs',
     templateUrl: 'breadcrumbs.component.html',
     styleUrls: ['breadcrumbs.component.scss'],
 })
 export class BreadcrumbsComponent {
     /**
-     * Caption of the home, if not set, an icon is used.
+     * Caption of the home, if not set, a default icon is used.
      */
     @Input() home: string;
+
+    /**
+     * Icon of home, can be used together with `home`.
+     */
+    @Input() homeIcon: string;
 
     /**
      * shall an invisbile description (for screen readers) be generated, similar to
@@ -49,15 +57,6 @@ export class BreadcrumbsComponent {
      * If set true, the onClick emitter will only be fired for the "root" element.
      */
     @Input() createLink = true;
-    /**
-     * Allow Dropping of other items (nodes) on to the breadcrumb items.
-     *
-     * A function that should return true or false and gets the same argument object as the onDrop
-     * callback.
-     */
-    @Input() canDrop: (arg0: DropData) => boolean = (arg0: DropData) => {
-        return false;
-    };
     /**
      * Set a search query so the breadcrumbs will show this query.
      */
@@ -95,43 +94,13 @@ export class BreadcrumbsComponent {
     /**
      * Called when an item is dropped on the breadcrumbs.
      */
-    @Output() onDrop = new EventEmitter();
+    @Output() onDrop = new EventEmitter<{target: Node, source: DropSource<Node>}>();
 
     nodes: Node[] = [];
-    dragHover: Node;
 
     private _searchQuery: string;
 
     constructor(private node: RestNodeService) {}
-
-    canDropNodes(target: Node, { event, nodes, dropAction }: DragData) {
-        return this.canDrop({ event, nodes, dropAction, target });
-    }
-
-    onNodesHoveringChange(nodesHovering: boolean, target: Node) {
-        if (nodesHovering) {
-            this.dragHover = target;
-        } else {
-            // The enter event of another node might have fired before this leave
-            // event and already updated `dragHover`. Only set it to null if that is
-            // not the case.
-            if (this.dragHover === target) {
-                this.dragHover = null;
-            }
-        }
-    }
-
-    onNodesDrop({ event, nodes, dropAction }: DragData, target: Node) {
-        if (dropAction === 'link') {
-            throw new Error('dropAction "link" is not allowed');
-        }
-        this.onDrop.emit({
-            target,
-            source: nodes,
-            event,
-            type: dropAction,
-        });
-    }
 
     openBreadcrumb(position: number) {
         this.onClick.emit(position);
@@ -155,5 +124,29 @@ export class BreadcrumbsComponent {
         } else if (!add) {
             this.nodes.splice(this.nodes.length, 1);
         }
+    }
+
+    drop(event: CdkDragDrop<Node|any>) {
+        this.onDrop.emit({
+            target: event.container.data,
+            source: {
+                element: [event.item.data],
+                sourceList: null,
+                mode: DragCursorDirective.dragState.mode
+            }
+        });
+        DragCursorDirective.dragState.element = null;
+    }
+    getDragState() {
+        return DragCursorDirective.dragState;
+    }
+
+    dragExit(event: CdkDragExit<any>) {
+        DragCursorDirective.dragState.element = null;
+    }
+
+    dragEnter(event: CdkDragEnter<any>) {
+        DragCursorDirective.dragState.element = event.container.data;
+        DragCursorDirective.dragState.dropAllowed = true;
     }
 }

@@ -1,4 +1,4 @@
-// Overwrite this file in extensions to define additional routes.
+// Overwrite this file in extensions to define additional imports.
 
 import { ModuleWithProviders, Type } from '@angular/core';
 

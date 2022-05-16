@@ -1,16 +1,29 @@
 package org.edu_sharing.restservices;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.security.PersonService;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.RepoFactory;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.restservices.mds.v1.model.*;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.restservices.shared.Mds;
+import org.edu_sharing.restservices.shared.Node;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.Suggestion;
+import org.springframework.security.core.Authentication;
 
 public class MdsDao {
 
@@ -126,5 +139,47 @@ public class MdsDao {
 	public MetadataSet getMds() {
 		return mds;
 	}
-	
+
+	public MdsValue suggestValue(String widget, String valueCaption, String parent, List<String> nodes) throws DAOException {
+		Optional<MetadataWidget> widgetDefinition = mds.findAllWidgets(widget).stream().filter((w) -> w.getSuggestionReceiver() != null && !w.getSuggestionReceiver().isEmpty()).findFirst();
+		if (!widgetDefinition.isPresent()) {
+			throw new DAOValidationException(new IllegalArgumentException("No widget definition found which can receive suggestion data"));
+		}
+		MdsValue result = new MdsValue();
+		result.setId(UUID.randomUUID().toString());
+		result.setParent(parent);
+		result.setCaption(valueCaption);
+		String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
+		Map<String, String> replace = new HashMap<>();
+		if(currentUser != null) {
+			NodeRef userRef = AuthorityServiceHelper.getAuthorityNodeRef(currentUser);
+			if (userRef != null) {
+				replace.put("firstName", NodeServiceHelper.getProperty(userRef, CCConstants.CM_PROP_PERSON_FIRSTNAME));
+				replace.put("lastName", NodeServiceHelper.getProperty(userRef, CCConstants.CM_PROP_PERSON_LASTNAME));
+			}
+		}
+		replace.put("widgetId", widgetDefinition.get().getId());
+		replace.put("widgetCaption", widgetDefinition.get().getCaption());
+		replace.put("caption", valueCaption);
+		replace.put("id", result.getId());
+		replace.put("parentId", parent);
+		replace.put("parentCaption", parent == null ? null : widgetDefinition.get().getValuesAsMap().get(parent).getCaption());
+		if(nodes != null && !nodes.isEmpty()) {
+			try {
+				MailTemplate.applyNodePropertiesToMap("node.", NodeServiceHelper.getProperties(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodes.get(0))), replace);
+				MailTemplate.addContentLinks(ApplicationInfoList.getHomeRepository(), nodes.get(0), replace, "link");
+			} catch (Throwable t) {
+				throw DAOException.mapping(t);
+			}
+		}
+		String[] receiver = widgetDefinition.get().getSuggestionReceiver().split(",");
+		Arrays.stream(receiver).forEach((r) -> {
+			try {
+				MailTemplate.sendMail(r, "mdsValuespaceSuggestion", replace);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		});
+		return result;
+	}
 }

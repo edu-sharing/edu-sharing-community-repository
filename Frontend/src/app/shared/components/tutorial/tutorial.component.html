@@ -1,0 +1,35 @@
+<div
+  class="tutorial"
+  *ngIf="show"
+  [@fade]="show"
+  [style.background]="background"
+  (click)="next()"
+  cdkTrapFocus
+>
+  <div
+    #tutoral
+    [style.left]="pos.left"
+    [style.top]="pos.top"
+    [style.width]="pos.width"
+    class="align-tutorial"
+    tabindex="-1"
+  >
+    <h1 class="heading">{{ heading | translate }}</h1>
+    <div class="description">{{ description | translate }}</div>
+    <div class="buttons">
+      <button
+        cdkMonitorElementFocus
+        mat-button
+        color="primary"
+        class="skip"
+        *ngIf="showSkip"
+        (click)="skip()"
+      >
+        {{ 'SKIP' | translate }}
+      </button>
+      <button cdkMonitorElementFocus mat-flat-button color="primary" (click)="next()" class="next">
+        {{ 'NEXT' | translate }}
+      </button>
+    </div>
+  </div>
+</div>

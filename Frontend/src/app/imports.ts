@@ -96,6 +96,7 @@ export const IMPORTS=[
     // navigation. In case this doesn't work everywhere, a small modification to the default
     // behavior might be needed as done here:
     // https://github.com/openeduhub/oeh-search-frontend/blob/a74047b57007fc6c9561feab02d4d3664051e5c9/src/app/app.component.ts#L37-L52
-    scrollPositionRestoration: 'enabled'
-  }),
+    scrollPositionRestoration: 'enabled',
+    relativeLinkResolution: 'legacy'
+}),
 ];

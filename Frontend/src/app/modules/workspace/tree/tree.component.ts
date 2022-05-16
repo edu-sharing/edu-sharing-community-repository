@@ -8,19 +8,21 @@ import {
 import { Helper } from '../../../core-module/rest/helper';
 import { OptionItem } from '../../../core-ui-module/option-item';
 import { DropData, DragData } from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
-import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
-import {WorkspaceMainComponent, WorkspaceRoot} from '../workspace.component';
+import {WorkspaceMainComponent} from '../workspace.component';
+import {
+    DropSource,
+    NodeRoot
+} from '../../../core-ui-module/components/node-entries-wrapper/entries-model';
 
 @Component({
-    selector: 'workspace-tree',
+    selector: 'es-workspace-tree',
     templateUrl: 'tree.component.html',
     styleUrls: ['tree.component.scss'],
 })
 export class WorkspaceTreeComponent {
-    @Input() root: WorkspaceRoot;
+    @Input() root: NodeRoot;
     @Input() workspace: WorkspaceMainComponent;
     @Input() isSafe: boolean;
-    @Input() mainNav: MainNavComponent;
     @Input() selectedNode: string;
     @Input() set path(path: Node[]) {
         if (path.length === 0) {
@@ -45,7 +47,7 @@ export class WorkspaceTreeComponent {
     @Output() onOpenNode = new EventEmitter();
     @Output() onUpdateOptions = new EventEmitter();
     @Output() onSetRoot = new EventEmitter();
-    @Output() onDrop = new EventEmitter();
+    @Output() onDrop = new EventEmitter<{target: Node, source: DropSource<Node>}>();
     @Output() onDeleteNodes = new EventEmitter();
 
     readonly MY_FILES = 'MY_FILES';

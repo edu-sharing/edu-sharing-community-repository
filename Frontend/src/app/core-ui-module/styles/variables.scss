@@ -1,93 +1,125 @@
-@import "branding";
+@use "sass:map";
+@import 'branding';
 
+// All variables can be overridden in `branding.scss`.
 /* replace variables which are may not defined in the branding */
-@if not variable-exists(primaryVeryLight) {
-    $primaryVeryLight:  lighten($primaryLight, 5%)!global;
-}
-@if not variable-exists(primaryMediumDark) {
-    $primaryMediumDark:  lighten($primaryDark, 10%)!global;
-}
+$primaryVeryLight: lighten($primaryLight, 5%) !default;
+$primaryMediumDark: lighten($primaryDark, 10%) !default;
 
-$tabColor: $primary;
-$tabColorDark: $primary;
-$tabColorLight: $primaryMediumLight;
-$warning: #f44336;
-$warningMedium:       #c90;
-$toastLeftError:     #c15d5d;
-$toastPrimary:  #5C5C5C;
-$textLight:     #585858;
-$textMediumLight:     #888;
-$textVeryLight:     #aaa;
-$textMain: #383838;
-$fontSizeXLarge:120%;
-$fontSizeLarge:110%;
-$fontSizeSmall:90%;
-$fontSizeXSmall:85%;
-$backgroundColor: #fff;
-$workspaceSidebarWidth: 300px;
-$workspaceInheritColor: #42CA8D;
-$editorialCollectionsBackground: #f5ec19;
-$itemSelectedBackground:     $primaryVeryLight;
-$itemSelectedTextColor:     $primaryMediumDark;
-$buttonHoverBackground: rgba(red($primary), green($primary), blue($primary), 0.08);
-$workspaceNewBackground: $itemSelectedBackground;
-$secondaryBarHeight: 65px; // the white bar height in search and workspace
-$listItemSelectedBackground: #F1F6FA;
-$workspaceSelectedBackgroundEffect: linear-gradient(to right, $primary 0,$primary 5px,rgba(0,0,0,0) 5px,rgba(0,0,0,0) 5px) no-repeat;
-$listItemSelectedBackgroundEffect: linear-gradient(to right, $primary 0,$primary 5px,rgba(red($primary), green($primary), blue($primary), 0.15) 5px,rgba(red($primary), green($primary), blue($primary), 0.15) 5px) no-repeat;
-$workspaceTreeBackground: #f7f7f7;
-$mainnavHeight: 70px;
-$dialogRightWidth: 320px;
-$workspaceTreeSelectedBackground: #fff;
-$workspaceTreeWidth: 300px;;
-$workspaceBreadcrumbsHeight: $secondaryBarHeight;
-$workspaceTreeSelectedBackgroundEffect: linear-gradient(to right, $primary 0,$primary 5px,rgba(0,0,0,0) 5px,rgba(0,0,0,0) 5px);
-$workspaceMetadataBackground: #f7f7f7;
-$buttonBorderRadius: 2px;
-$contextMenuWidth: 240px;
-$tableIconSize:38px;
-$actionDialogBackground: #eee;
-$cardLightBackground: #F9F9F9;
-$searchInputBorderColor: #ccc;
-$cardSeperatorLineColor: #ccc;
-$genericSeperatorLineColor: #ececec;
-$inputBorderColor:#9e9e9e;
-$commentsActionsSeperatorLineColor: $backgroundColor;
-$noResultsColor: #999;
-$darkenColor:rgba(0,0,0,.75);
-$darkenLightColor:rgba(0,0,0,.25);
-$colorStatusPositive:#40BF8E;
-$colorStatusWarning:$warningMedium;
-$colorStatusNeutral:#777;
-$colorStatusNegative:$warning;
-$focusColor: darken($primaryMediumLight, 10%);
-$placeholderColor: #767676; // 4.5:1 on white
-$focusWidth: 2px;
-$cardWidth: 200px;
-$cardHeight: 300px;
-$listItemHeight: 70px;
-$listCardSmallHeight: 100px;
-$listHeadingHeight: 36px;
-$cardPadding: 25px;
-$transitionNormal: .2s;
-$mobileWidth:   700px;
-$mobileHeight:   750px;
-$mobileHeightWithKeyboard:   550px;
-$mobileHeightLandscape: 400px;
-$mobileWidthPortrait: 400px;
+$tabColor: $primary !default;
+$tabColorDark: $primary !default;
+$tabColorLight: $primaryMediumLight !default;
+$warning: #cd2457 !default;
+$warningMedium: #e98c1b !default;
+$toastLeftError: #c15d5d !default;
+$toastPrimary: #5c5c5c !default;
+$textLight: #585858 !default;
+$textMediumLight: #888 !default;
+$textVeryLight: #aaa !default;
+$textMain: #383838 !default;
+$fontSizeXLarge: 120% !default;
+$fontSizeLarge: 110% !default;
+$fontSizeSmall: 90% !default;
+$fontSizeXSmall: 85% !default;
+$backgroundColor: #fff !default;
+$workspaceSidebarWidth: 300px !default;
+$workspaceInheritColor: #42ca8d !default;
+$nodeVirtualColor: #42ca8d !default;
+$editorialCollectionsBackground: #f5ec19 !default;
+$itemSelectedBackground: $primaryVeryLight !default;
+$itemSelectedTextColor: $primaryMediumDark !default;
+$buttonHoverBackground: rgba(red($primary), green($primary), blue($primary), 0.08) !default;
+$workspaceNewBackground: $itemSelectedBackground !default;
+// the white bar height in search and es-workspace
+$secondaryBarHeight: 65px !default;
+$listItemSelectedBackground: #f1f6fa !default;
+$workspaceSelectedBackgroundEffect: linear-gradient(
+        to right,
+        $primary 0,
+        $primary 5px,
+        rgba(0, 0, 0, 0) 5px,
+        rgba(0, 0, 0, 0) 5px
+    )
+    no-repeat !default;
+$listItemSelectedBackgroundEffect: linear-gradient(
+        to right,
+        $primary 0,
+        $primary 5px,
+        rgba(red($primary), green($primary), blue($primary), 0.15) 5px,
+        rgba(red($primary), green($primary), blue($primary), 0.15) 5px
+    )
+    no-repeat !default;
+$workspaceTreeBackground: #f7f7f7 !default;
+$mainnavHeight: 70px !default;
+$dialogRightWidth: 320px !default;
+$workspaceTreeSelectedBackground: #fff !default;
+$workspaceTreeWidth: 300px !default;
+$workspaceBreadcrumbsHeight: $secondaryBarHeight !default;
+$workspaceTreeSelectedBackgroundEffect: linear-gradient(
+    to right,
+    $primary 0,
+    $primary 5px,
+    rgba(0, 0, 0, 0) 5px,
+    rgba(0, 0, 0, 0) 5px
+) !default;
+$workspaceMetadataBackground: #f7f7f7 !default;
+$buttonBorderRadius: 2px !default;
+$contextMenuWidth: 240px !default;
+$tableIconSize: 38px !default;
+$actionDialogBackground: #eee !default;
+$cardLightBackground: #f9f9f9 !default;
+$searchInputBorderColor: #ccc !default;
+$cardSeperatorLineColor: #ccc !default;
+$genericSeperatorLineColor: #ececec !default;
+$inputBorderColor: #9e9e9e !default;
+$commentsActionsSeperatorLineColor: $backgroundColor !default;
+$noResultsColor: rgba(black, 0.54) !default;
+$darkenColor: rgba(0, 0, 0, 0.75) !default;
+$darkenLightColor: rgba(0, 0, 0, 0.25) !default;
+$colorStatusPositive: #40bf8e !default;
+$colorStatusWarning: $warningMedium !default;
+$colorStatusRecommended: #acd331 !default;
+$colorStatusNeutral: #777 !default;
+$colorStatusNegative: $warning !default;
+$colorStarActive: #ba7c00 !default;
+$focusColor: darken($primaryMediumLight, 10%) !default;
+$placeholderColor: #767676 !default;
+$focusWidth: 2px !default;
+$cardWidth: 200px !default;
+$cardHeight: 300px !default;
+$listItemHeight: 70px !default;
+$listCardSmallHeight: 100px !default;
+$listHeadingHeight: 36px !default;
+$cardPadding: 25px !default;
+$transitionNormal: 0.2s !default;
+$mobileWidth: 700px !default;
+$mobileHeight: 750px !default;
+$mobileHeightWithKeyboard: 550px !default;
+$mobileHeightLandscape: 400px !default;
+$mobileWidthPortrait: 400px !default;
 // this factor should be multiplied by a natural number, e.g. *3 means stage 3 (relatively early)
-$mobileStage:   100px;
-$dialogZIndex: 120;
-$dialogNonModalZIndex: 90; // before the top bar on mobile, but behind the mobile tabs and the top bar on desktop
-$topBarZIndex: 98;
-$topBarMobileZIndex: 80;
-$workspaceTopBarInputBackground: #eee;
-$workspaceTopBarInputText: $textMain;
-$mobileTabsZIndex: 110;
-$mobileTabSwitchWidth:   $mobileWidth+$mobileStage*2;
-$mobileTabNavHeight:62px;
-$primaryFontFamily: 'open_sansregular';
+$mobileStage: 100px !default;
+$dialogZIndex: 120 !default;
+// before the top bar on mobile, but behind the mobile tabs and the top bar on desktop
+$dialogNonModalZIndex: 90 !default;
+$topBarZIndex: 98 !default;
+$topBarMobileZIndex: 80 !default;
+$workspaceTopBarInputBackground: #eee !default;
+$workspaceTopBarInputText: $textMain !default;
+$mobileTabsZIndex: 110 !default;
+$mobileTabSwitchWidth: $mobileWidth + $mobileStage * 2 !default;
+$mobileTabNavHeight: 62px !default;
+$primaryFontFamily: 'open_sansregular' !default;
 
-// for variable overrides, include it again
-@import "branding";
-@import "mixins";
+$default-chip-colors: (
+    'cclom_general_keyword': rgb(166, 214, 208),
+    'ccm_educationalcontext': rgb(214, 166, 166),
+    'ccm_educationallearningresourcetype': rgb(214, 193, 166),
+    'ccm_objecttype': rgb(166, 192, 214),
+    'ccm_taxonid': rgb(166, 214, 174),
+    'ccm_educationalintendedenduserrole': rgb(211, 214, 166),
+);
+$custom-chip-colors: () !default;
+$chip-colors: map.merge($default-chip-colors, $custom-chip-colors);
+
+@import 'mixins';

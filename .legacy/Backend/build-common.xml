@@ -99,6 +99,19 @@
 		<mkdir dir="${webserver.home}/webapps/${webapp.name}/WEB-INF/classes" />
 		<mkdir dir="${webserver.home}/webapps/${webapp.name}/WEB-INF/lib" />
 
+		<antcall target="copy-file-if-not-exist">
+			<param name="source-file-param" value="${output.dir}/homeApplication.properties.xml"/>
+			<param name="to-file-param" value="${webserver.home}/shared/classes/homeApplication.properties.xml"/>
+		</antcall>
+		<antcall target="copy-file-if-not-exist">
+			<param name="source-file-param" value="${output.dir}/ccapp-registry.properties.xml"/>
+		    <param name="to-file-param" value="${webserver.home}/shared/classes/ccapp-registry.properties.xml"/>
+		</antcall>
+		<antcall target="copy-file-if-not-exist">
+			<param name="source-file-param" value="${config.dir}/ccmail.properties.xml"/>
+			<param name="to-file-param" value="${webserver.home}/shared/classes/ccmail.properties.xml"/>
+		</antcall>
+
 		<copy todir="${webserver.home}/webapps/${webapp.name}/WEB-INF/lib">
 			<fileset dir="lib" includes="log4j-1.2.8.jar, commons-logging-1.0.4.jar, cas-client-core-3.2.1.jar">
 			</fileset>

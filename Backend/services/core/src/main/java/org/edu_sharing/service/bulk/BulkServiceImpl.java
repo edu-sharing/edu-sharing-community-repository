@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class BulkServiceImpl implements BulkService {
-	private static final String PRIMARY_FOLDER_NAME = "SYNC_OBJ";
+	public static final String PRIMARY_FOLDER_NAME = "SYNC_OBJ";
 	static NodeService nodeServiceAlfresco = (NodeService) AlfAppContextGate.getApplicationContext().getBean("alfrescoDefaultDbNodeService");
 	static ServiceRegistry serviceRegistry = (ServiceRegistry) AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
 	static VersionService versionServiceAlfresco = serviceRegistry.getVersionService();
@@ -154,7 +154,7 @@ public class BulkServiceImpl implements BulkService {
 		/*HashMap<String, Serializable> cleanProps = new HashMap<>();
 		propsToClean.forEach((k) -> cleanProps.put(k, null));
 		return cleanProps;*/
-		return Stream.concat(MetadataHelper.getWidgetsByNode(nodeRef).stream().map((w) -> CCConstants.getValidGlobalName(w.getId())).
+		return Stream.concat(MetadataHelper.getWidgetsByNode(nodeRef, false).stream().map((w) -> CCConstants.getValidGlobalName(w.getId())).
 				filter(Objects::nonNull),
 				propsToClean.stream())
 				.collect(Collectors.toList());

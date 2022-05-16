@@ -104,48 +104,62 @@
 		</style>
 	</template>
 	<template name="invited">
-		<subject>{{inviterFirstName}} {{inviterLastName}} invited you to a material.</subject>
+		<subject>{{inviter.firstName}} {{inviter.lastName}} invited you to a material.</subject>
 		<message><![CDATA[
 			<h1>Hello {{firstName}} {{lastName}}</h1>
-			<h2>{{inviterFirstName}} {{inviterLastName}} invited you to: "{{name}}".</h2>
+			<h2>{{inviter.firstName}} {{inviter.lastName}} invited you to: "{{name}}".</h2>
 			Your access rights are:<br>
 			<div class="rights">{{permissions}}</div>
 			<br>
 			<div class="center"><a class="btn" href="{{link}}">Link to the material</a></div>
 			<br><br>
-			{{if message}}Message from {{inviterFirstName}} {{inviterLastName}}:<br>
+			{{if message}}Message from {{inviter.firstName}} {{inviter.lastName}}:<br>
 				{{message}}
 			{{endif}}
 		]]>
 		</message>
 	</template>
-	<template name="invited_safe">
-		<subject>{{inviterFirstName}} {{inviterLastName}} invited you to a material.</subject>
+	<template name="invited_workflow">
+		<subject>{{assigner.firstName}} {{assigner.lastName}} has assigned you to a material.</subject>
 		<message><![CDATA[
 			<h1>Hello {{firstName}} {{lastName}}</h1>
-			<h2>{{inviterFirstName}} {{inviterLastName}} invited you to: "{{name}}".</h2>
+			<h2>{{assigner.firstName}} {{assigner.lastName}} has assigned "{{node.cm:name}}" with status "{{status}}" to you.</h2>
+			<br>
+			<div class="center"><a class="btn" href="{{link}}">Link to the material</a></div>
+			<br><br>
+			{{if comment}}Comment from user:<br>
+				{{comment}}
+			{{endif}}
+		]]>
+		</message>
+	</template>
+	<template name="invited_safe">
+		<subject>{{inviter.firstName}} {{inviter.lastName}} invited you to a material.</subject>
+		<message><![CDATA[
+			<h1>Hello {{firstName}} {{lastName}}</h1>
+			<h2>{{inviter.firstName}} {{inviter.lastName}} invited you to: "{{name}}".</h2>
 			Your access rights are:<br>
 			<div class="rights">{{permissions}}</div>
 			<br>
 			After logging into the safe area you will find the element at "shared with me".
 			<br><br>
-			{{if message}}Message from {{inviterFirstName}} {{inviterLastName}}:<br>
+			{{if message}}Message from {{inviter.firstName}} {{inviter.lastName}}:<br>
 				{{message}}
 			{{endif}}
 		]]>
 		</message>
 	</template>
 	<template name="invited_collection">
-		<subject>{{inviterFirstName}} {{inviterLastName}} invited you to a collection.</subject>
+		<subject>{{inviter.firstName}} {{inviter.lastName}} invited you to a collection.</subject>
 		<message><![CDATA[
 			<h1>Hello {{firstName}} {{lastName}}</h1>
-			<h2>{{inviterFirstName}} {{inviterLastName}} invited you to collection "{{name}}".</h2>
+			<h2>{{inviter.firstName}} {{inviter.lastName}} invited you to collection "{{name}}".</h2>
 			Your access rights are:<br>
 			<div class="rights">{{permissions}}</div>
 			<br>
 			<div class="center"><a class="btn" href="{{link}}">Link to collection</a></div>
 			<br><br>
-			{{if message}}Message from {{inviterFirstName}} {{inviterLastName}}:<br>
+			{{if message}}Message from {{inviter.firstName}} {{inviter.lastName}}:<br>
 				{{message}}
 			{{endif}}
 		]]>
@@ -293,6 +307,25 @@
 			<h2>{{firstName}} {{lastName}} just joined "{{group}}".</h2>
 			<br>
 			You can manage the members of your group in the user management.
+		]]>
+		</message>
+	</template>
+	<template name="mdsValuespaceSuggestion">
+		<subject>A new metadata suggestion for {{widgetCaption}}</subject>
+		<message><![CDATA[
+			<h1>Hi!</h1>
+			<h2>{{firstName}} {{lastName}} has made a suggestion for a new valuespace entry:</h2>
+			<br>
+			Field: {{widgetCaption}} ({{widgetId}})<br>
+			Suggested Value: {{caption}} ({{id}})<br>
+			{{if parentId}}Parent Value: {{parentCaption}} ({{parentId}})<br>
+			{{endif}}
+			{{if link}}
+				<br><br>
+				Suggested for element "{{node.cm:name}}"
+				<br><br>
+				<div class="center"><a class="btn" href="{{link}}">Link to element</a></div>
+			{{endif}}
 		]]>
 		</message>
 	</template>

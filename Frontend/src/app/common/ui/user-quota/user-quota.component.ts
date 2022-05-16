@@ -5,7 +5,7 @@ import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {UserQuota} from '../../../core-module/core.module';
 
 @Component({
-  selector: 'user-quota',
+  selector: 'es-user-quota',
   templateUrl: 'user-quota.component.html',
   styleUrls: ['user-quota.component.scss'],
 })

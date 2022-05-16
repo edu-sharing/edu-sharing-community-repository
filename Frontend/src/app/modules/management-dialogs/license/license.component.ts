@@ -1,3 +1,5 @@
+import {forkJoin as observableForkJoin, Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
 import {DialogButton, RestConnectorService, RestIamService} from '../../../core-module/core.module';
 import {Toast} from '../../../core-ui-module/toast';
@@ -14,16 +16,20 @@ import {trigger} from '@angular/animations';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {UIService} from '../../../core-module/core.module';
 import {Helper} from '../../../core-module/rest/helper';
-import {MdsEditorWidgetAuthorComponent} from '../../../common/ui/mds-editor/widgets/mds-editor-widget-author/mds-editor-widget-author.component';
-import {MdsEditorInstanceService} from '../../../common/ui/mds-editor/mds-editor-instance.service';
-import {UserPresentableError, Values} from '../../../common/ui/mds-editor/types';
-import {Observable} from 'rxjs/Rx';
+import { Values } from 'dist/edu-sharing-api/lib/api/models';
+import { UserPresentableError } from '../../../features/mds/mds-editor/mds-editor-common.service';
+import { MdsEditorInstanceService } from '../../../features/mds/mds-editor/mds-editor-instance.service';
+import { ViewInstanceService } from '../../../features/mds/mds-editor/mds-editor-view/view-instance.service';
+import { MdsEditorWidgetAuthorComponent } from '../../../features/mds/mds-editor/widgets/mds-editor-widget-author/mds-editor-widget-author.component';
 
 @Component({
-    selector: 'workspace-license',
+    selector: 'es-workspace-license',
     templateUrl: 'license.component.html',
     styleUrls: ['license.component.scss'],
-    providers: [MdsEditorInstanceService],
+    providers: [
+        MdsEditorInstanceService,
+        ViewInstanceService
+    ],
     animations: [
         trigger('fade', UIAnimation.fade()),
         trigger('cardAnimation', UIAnimation.cardAnimation()),
@@ -184,7 +190,7 @@ export class WorkspaceLicenseComponent  {
     userAuthor = false;
     @Output() onCancel=new EventEmitter();
     @Output() onLoading=new EventEmitter();
-    @Output() onDone=new EventEmitter<Node[]|void>();
+    @Output() onDone =new EventEmitter<Node[] | Values>();
     @Output() openContributor=new EventEmitter();
 
     public isAllowedLicense(license:string) {
@@ -195,9 +201,9 @@ export class WorkspaceLicenseComponent  {
             || this.getLicenseProperty()=='CC_BY' || this.getLicenseProperty()=='CC_BY_SA';
     }
     public loadNodes(nodes:Node[]) {
-        return Observable.forkJoin(
+        return observableForkJoin(
             nodes.map((n) =>
-                this.nodeApi.getNodeMetadata(n.ref.id, [RestConstants.ALL]).map((n2) => n2.node)
+                this.nodeApi.getNodeMetadata(n.ref.id, [RestConstants.ALL]).pipe(map((n2) => n2.node))
             )
         );
     }

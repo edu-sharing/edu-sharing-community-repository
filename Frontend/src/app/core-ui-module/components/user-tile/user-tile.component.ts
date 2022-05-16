@@ -9,10 +9,10 @@ import {DomSanitizer} from "@angular/platform-browser";
 import {RestConstants} from "../../../core-module/rest/rest-constants";
 import {AuthorityProfile, UserSimple} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
-import {AuthorityNamePipe} from "../../pipes/authority-name.pipe";
+import {AuthorityNamePipe} from "../../../shared/pipes/authority-name.pipe";
 
 @Component({
-    selector: 'app-user-tile',
+    selector: 'es-user-tile',
     templateUrl: 'user-tile.component.html',
     styleUrls: ['user-tile.component.scss'],
 })

@@ -1,6 +1,11 @@
 import {Component, Input, EventEmitter, Output, ViewChild, ElementRef} from '@angular/core';
-import {ConfigurationService, DialogButton, RestConstants} from '../../../core-module/core.module';
-import {IamUser, Node, NodeList, NodeWrapper} from '../../../core-module/core.module';
+import {
+    ConfigurationService,
+    DialogButton,
+    ParentList,
+    SessionStorageService
+} from '../../../core-module/core.module';
+import {IamUser, Node} from '../../../core-module/core.module';
 import {RestNodeService} from '../../../core-module/core.module';
 import {trigger} from '@angular/animations';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
@@ -8,9 +13,11 @@ import {RestSearchService} from '../../../core-module/core.module';
 import {Toast} from '../../../core-ui-module/toast';
 import {RestIamService} from '../../../core-module/core.module';
 import {LinkData} from '../../../core-ui-module/node-helper.service';
+import { map, catchError } from 'rxjs/operators';
+import * as rxjs from 'rxjs';
 
 @Component({
-  selector: 'workspace-file-upload-select',
+  selector: 'es-workspace-file-upload-select',
   templateUrl: 'file-upload-select.component.html',
   styleUrls: ['file-upload-select.component.scss'],
   animations: [
@@ -19,8 +26,10 @@ import {LinkData} from '../../../core-ui-module/node-helper.service';
   ]
 })
 export class WorkspaceFileUploadSelectComponent  {
-  public disabled= true;
-  public chooseParent= false;
+  public disabled = true;
+  public chooseParent = false;
+  public showSaveParent = false;
+  public saveParent = false;
   @ViewChild('fileSelect') file: ElementRef;
   @ViewChild('link') linkRef: ElementRef;
   /**
@@ -48,7 +57,11 @@ export class WorkspaceFileUploadSelectComponent  {
    * @type {boolean}
    */
   @Input() showLti=true;
-  breadcrumbs: Node[];
+  breadcrumbs: {
+    nodes: Node[];
+    homeLabel: string;
+    homeIcon: string;
+  }
   ltiAllowed: boolean;
   ltiActivated: boolean;
   ltiConsumerKey: string;
@@ -59,13 +72,8 @@ export class WorkspaceFileUploadSelectComponent  {
   buttons: DialogButton[];
   user: IamUser;
   @Input() set parent(parent: Node){
-    this.breadcrumbs = null;
     this._parent = parent;
-    if (parent) {
-        this.nodeService.getNodeParents(parent.ref.id).subscribe((data: NodeList) => {
-            this.breadcrumbs = data.nodes.reverse();
-        });
-    }
+    this.getBreadcrumbs(parent).subscribe((breadcrumbs) => this.breadcrumbs = breadcrumbs);
   }
   @Output() parentChange = new EventEmitter();
   @Output() onCancel= new EventEmitter();
@@ -81,8 +89,8 @@ export class WorkspaceFileUploadSelectComponent  {
   public onDrop(fileList: FileList){
       this.onFileSelected.emit(fileList);
   }
-  public filesSelected(event: any): void {
-    this.onFileSelected.emit(event.target.files as FileList);
+  public async filesSelected(event: any) {
+      this.onFileSelected.emit(event.target.files);
   }
   public setLink(){
     if (this.ltiActivated && (!this.ltiConsumerKey || !this.ltiSharedSecret)){
@@ -131,6 +139,7 @@ export class WorkspaceFileUploadSelectComponent  {
     */
   }
   public parentChoosed(event: Node[]) {
+    this.showSaveParent = true;
     this._parent = event[0];
     this.parentChange.emit(this._parent);
     this.chooseParent = false;
@@ -139,6 +148,7 @@ export class WorkspaceFileUploadSelectComponent  {
     private nodeService: RestNodeService,
     private iamService: RestIamService,
     private searchService: RestSearchService,
+    private storageService: SessionStorageService,
     public configService: ConfigurationService,
     private toast: Toast,
   ){
@@ -164,5 +174,60 @@ export class WorkspaceFileUploadSelectComponent  {
         if (end == -1)
           return null;
         return link.substr(start, end - start);
+    }
+
+    private getBreadcrumbs(node: Node) {
+        if (node) {
+            return this.nodeService.getNodeParents(node.ref.id).pipe(
+                map((parentList) => this.getBreadcrumbsByParentList(parentList)),
+                catchError(() => rxjs.of(this.getBreadcrumbsByParentList({
+                    nodes: [node], pagination: null, scope: 'UNKNOWN',
+                }))),
+            );
+        } else {
+            return rxjs.of(null)
+        }
+    }
+
+    private getBreadcrumbsByParentList(parentList: ParentList) {
+        const nodes = parentList.nodes.reverse();
+        switch (parentList.scope) {
+            case 'MY_FILES':
+                return {
+                    nodes,
+                    homeLabel: 'WORKSPACE.MY_FILES',
+                    homeIcon: 'person',
+                };
+            case 'SHARED_FILES':
+                return {
+                    nodes,
+                    homeLabel: 'WORKSPACE.SHARED_FILES',
+                    homeIcon: 'group',
+                };
+
+            case 'UNKNOWN':
+                return {
+                    nodes,
+                    homeLabel: 'WORKSPACE.RESTRICTED_FOLDER',
+                    homeIcon: 'folder',
+                };
+            default:
+                console.warn(`Unknown scope "${parentList.scope}"`)
+                return {
+                    nodes,
+                    homeLabel: null,
+                    homeIcon: null,
+                };
+        }
+    }
+
+    async setSaveParent(status: boolean) {
+      if(status) {
+          await this.storageService.set('defaultInboxFolder', this._parent.ref.id);
+          this.toast.toast('TOAST.STORAGE_LOCATION_SAVED', {name: this._parent.name});
+      } else {
+          await this.storageService.delete('defaultInboxFolder');
+          this.toast.toast('TOAST.STORAGE_LOCATION_RESET');
+      }
     }
 }

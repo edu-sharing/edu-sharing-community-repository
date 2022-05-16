@@ -157,12 +157,14 @@
         "TOOLPERMISSION_MEDIACENTER_MANAGE": "Change basic data (Address, Catalogs) from media centers where the given user is admin of",
         "TOOLPERMISSION_VIDEO_AUDIO_CUT": "Video- and audio-files can be cutted when added into collections",
         "TOOLPERMISSION_COLLECTION_CHANGE_OWNER": "Permission to change the ownername of a collection",
-        "TOOLPERMISSION_RATE": "The permission to rate materials",
+        "TOOLPERMISSION_RATE_READ": "The permission to see ratings of materials",
+        "TOOLPERMISSION_RATE_WRITE": "The permission to rate materials (requires TOOLPERMISSION_RATE_READ)",
         "TOOLPERMISSION_CONNECTOR": "Editor \"{{connector}}\" can be used",
         "TOOLPERMISSION_CONNECTOR_SAFE": "Editor \"{{connector}}\" can be used in safe",
         "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" can be viewed & browsed",
         "TOOLPERMISSION_CREATE_MAP_LINK": "Create folders that link to other folders",
-        "TOOLPERMISSION_SIGNUP_GROUP": "Signup to an organisation/group (only applies to organisation/groups which are configured for signup)"
+        "TOOLPERMISSION_SIGNUP_GROUP": "Signup to an organisation/group (only applies to organisation/groups which are configured for signup)",
+        "TOOLPERMISSION_COLLECTION_PROPOSAL": "Allow the user to propose materials for collection where he/she doesn't has write permissions for"
     },
     "NO_WRITE_PERMISSIONS": "No permissions",
     "NODE_SEARCH": "Search elements...",
@@ -171,10 +173,12 @@
     "REPLACE": "Replace",
     "CHANGE_STORAGE_LOCATION": "Select",
     "STORAGE_LOCATION_UNSET": "Not set",
+    "STORAGE_LOCATION_SAVE": "Use this location as default",
     "SUGGESTION": "Suggestion",
     "CLICKTOREMOVE": "Click to remove",
     "NO_PERMISSIONS_FOR_SCOPE": "No permissions to access this environment",
     "DATE_SELECT_YEAR": "Choose year",
+    "SEARCH_CLEAR": "Clear",
     "DATE_CLEAR": "Clear",
     "USER_TUTORIAL_HEADING": "Your Profile",
     "USER_TUTORIAL_DESCRIPTION": "Here you can add a profile picture and show who you are and what you do. You decide what others can see.",
@@ -225,7 +229,8 @@
     },
     "LIST_TABLE": {
         "DUMMY_ICON_LABEL": "File type",
-        "TOGGLE_ALL": "Select all/none"
+        "TOGGLE_ALL": "Select all/none",
+        "CONFIGURE_COLUMNS": "Configure columns"
     },
     "NODE": {
         "cm:name": "filename",
@@ -235,6 +240,7 @@
         "size": "size",
         "mediatype": "file type",
         "ccm:commonlicense_key": "license",
+        "ccm:collection_ordered_position": "custom",
         "ccm:educationallearningresourcetype": "Type",
         "ccm:replicationsourceid": "Original-ID",
         "ccm:educationalcontext": "Educational Context",
@@ -250,6 +256,7 @@
         "cclom:general_keyword": "keywords",
         "cclom:general_description": "description",
         "cclom:duration": "duration",
+        "ccm:taxonid": "Discipline",
         "sys:archivedDate": "deleted",
         "cclom:version": "version",
         "virtual:usagecount": "usage count",
@@ -265,6 +272,11 @@
             "VIEW_MATERIAL_PLAY_MEDIA": "Wiedergaben"
         }
 
+    },
+    "PROPOSAL_STATUS" : {
+      "DECLINED":  "declined",
+      "ACCEPTED":  "accepted",
+      "PENDING":  "pending"
     },
     "COOKIE_INFO": {
         "ACCEPT": " Accept",
@@ -311,7 +323,6 @@
     },
     "NODE_REPORT": {
         "TITLE": "Report problem",
-        "SUBTITLE": "Report an issue or problem",
         "REPORT": "report",
         "REPORT_INFO": "Report problem with \"{{name}}\"",
         "COMMENT": "Provide additional information about the problem that has occurred",
@@ -319,9 +330,9 @@
         "EMAIL": "your e-mail-address",
         "EMAIL_PLACEHOLDER": "somebody@example.net",
         "EMAIL_REQUIRED": "Please provide a valind e-mail address.",
+        "REASON": "Problem kind",
         "REASON_REQUIRED": "Please select what kind of problem you are experiencing.",
         "DONE": "Thanks for your message.",
-        "REASON": "Which problem exists?",
         "REASONS": {
             "UNAVAILABLE": "object not available",
             "INAPPROPRIATE_CONTENT": "problematic content",
@@ -399,22 +410,35 @@
         "TITLE": "Accessibility",
         "SUBTITLE": "accessibility options",
         "ENTRY_MESSAGE": "To accommodate personal needs, some settings for using our application can be set below.",
+        "CONTRAST_MODE_TITLE": "Contrast mode",
+        "CONTRAST_MODE_MESSAGE": "In contrast mode, elements on the page are clearly marked out.",
+        "CONTRAST_MODE_OPTION": {
+            "STANDARD": "Default view",
+            "CONTRAST": "Enhanced contrast"
+        },
+        "INDICATOR_ICONS_TITLE": "Indicator icons",
+        "INDICATOR_ICONS_MESSAGE": "Communicate meaning using icons. An icon's meaning is displayed when the mouse cursor is hovered above the icon. However, this is not possible using only a keyboard.",
+        "INDICATOR_ICONS_OPTION": {
+            "ICONS": "Show icons",
+            "TEXT_ONLY": "Show text only"
+        },
         "TOAST_TITLE": "Status messages",
         "TOAST_MESSAGE": "Status messages indicate whether the system is working correctly. For example, you can see whether a content or changes have been saved correctly.",
         "TOAST_TYPE": {
-            "IMPORTANT": "Show only important messages.",
-            "ALL": "Show all messages."
+            "IMPORTANT": "Show only important messages",
+            "ALL": "Show all messages"
         },
         "TOAST_DURATION_SECONDS": "{{seconds}} seconds",
         "TOAST_DURATION_INFINITE": "Do not hide.",
         "TOAST_DURATION_INFINITE_INFO": "Status messages are not automatically hidden and must be closed manually.",
-        "TOAST_DURATION_TITLE": "display time",
+        "TOAST_DURATION_TITLE": "Display time",
         "TOAST_DURATION_MESSAGE": "Status messages disappear automatically after a specified time or can be closed manually by clicking.",
         "SAVED": "Settings have been saved.",
         "DISMISS_TOAST": "Hide"
     },
     "AUTHORITY_TYPE_GROUP": "Group",
     "AUTHORITY_TYPE_ORG": "Organisation",
+    "CHILDOBJECT_COUNT": "{{count}} elements (series)",
     "GROUP": {
         "displayName": "group name",
         "authorityName": "system name",
@@ -534,8 +558,12 @@
     },
     "DIALOG": {
         "COLLECTION_SHARE_PUBLIC": "Add material to collection?",
-        "COLLECTION_SHARE_PUBLIC_INFO": "By adding this material into collection \"{{collection}}\" everyone who has access to this collection may access it."
+        "COLLECTION_SHARE_PUBLIC_INFO": "By adding this material into collection \"{{collection}}\" everyone who has access to this collection may access it.",
+        "COLLECTION_PROPSE": "Propose material(s)?",
+        "COLLECTION_PROPSE_INFO": "You don't have sufficient permissions for the collection \"{{collection}}\". You can, however, propose this material for this collection. Do you want to continue?"
     },
+    "OPTIONS_FOR": "Actions for {{element}}",
+    "NO_AVAILABLE_OPTIONS": "There are no available options for the selected elements",
     "OPTIONS": {
         "SHOW_ALL_OPTIONS": "More actions",
         "APPLY": "Apply",
@@ -575,6 +603,7 @@
         "VARIANT": "Create variant",
         "VARIANT_OPEN": "Open as variant",
         "QR_CODE": "QR-Code Link",
+        "EMBED": "Embed",
         "ADD_OBJECT": "Add Material",
         "SEARCH_OBJECT": "Search material",
         "NEW_COLLECTION": "Add collection",
@@ -584,7 +613,15 @@
         "SWITCH_TO_LIST_VIEW": "Switch to list view",
         "SWITCH_TO_CARDS_VIEW": "Switch to cards view",
         "LIST_SETTINGS": "Configure List",
-        "METADATA_SIDEBAR": "Material details"
+        "METADATA_SIDEBAR": "Material details",
+        "ACCESSIBILITY": "Accessibility",
+        "LTI": "Add to LTI Platform"
+    },
+    "LTI" : {
+      "REGISTERED": {
+        "TITLE": "LTI platform registered",
+        "DESCRIPTION": "edu-sharing ist now connected with your system. You may now include contents via LTI."
+      }
     },
     "NO_SIZE": "-",
     "VERSION_COMMENT": "Version comment",
@@ -592,7 +629,8 @@
         "DIFFERENT_VALUES": "(Different values)",
         "HAS_CHANGES": "changed",
         "TITLE": "Edit info",
-        "SHOW_EXTENDED": "Show extended info",
+        "SHOW_EXTENDED_FALSE": "extended info hidden",
+        "SHOW_EXTENDED_TRUE": "extended info shown",
         "SHOW_EXTENDED_SEARCH": "Show more filters",
         "AUTHOR_LABEL": "About the Author",
         "AUTHOR_FREETEXT": "General Author information",
@@ -624,7 +662,13 @@
         "SHOW_OPTIONS_BUTTON": "Show options",
         "FILTER_FOR": "Filter for \"{{value}}\" ({{count}} matching element(s))",
         "FILTER_TREE": "Filter...",
-        "OPEN_CLOSE_EXTENDED": "Open/close view"
+        "OPEN_CLOSE_EXTENDED": "Open/close view",
+        "SUGGEST_VALUE_LABEL": "Suggest new value",
+        "SUGGEST_VALUE_SEND": "Suggest",
+        "SUGGEST_VALUE_SENT": "The suggestion has been submitted and will now be checked by the editorial team. It will appear as soon as it is being activated. Thank you.",
+        "NO_MATCHING_VALUES": "No matching values",
+        "NO_ARBITRARY_VALUES_NOTICE": "For this field, you cannot use arbitrary values. Please select values from the list.",
+        "DELETE_KEY_NOTICE": "Remove with Delete key"
     },
 
      "SIMPLE_EDIT": {
@@ -707,11 +751,13 @@
 
     },
     "VIDEO_CONTROLS": {
-        "HEADING": "Select a clip for saving to a collection",
+        "HEADING": "Select a part of the video to be played back in this collection",
         "SAVED": "Saved changes"
     },
     "TOAST": {
         "NODE_LOCKED": "The document is currently used by an other user and can not be opened",
+        "STORAGE_LOCATION_SAVED": "The folder \"{{name}}\" will be used as a default location for future uploads",
+        "STORAGE_LOCATION_RESET": "The default folder for uploads has been reset",
         "RENDER_NOT_FOUND": "The requested element is deleted or does not exist",
         "FIELD_REQUIRED": "The field {{ name }} is required",
         "API_FORBIDDEN": "No permissions to access this content",
@@ -1035,14 +1081,50 @@
     "ROCKETCHAT": {
         "TITLE": "Chat"
     },
+    "RATING": {
+      "LIKES": "Recommend",
+      "STARS_RATE": "Rate with {{rating}}",
+      "COUNT_RATINGS": "Rating count",
+      "COUNT_LIKES": "Recommendation count",
+      "DELETE_RATING": "Remove rating",
+      "TOAST": {
+        "LIKED": "Recommended material \"{{name}}\". Thank you!",
+        "RATED": "Rated material \"{{name}}\" with {{rating}} stars. Thank you!",
+        "LIKE_REMOVED": "Removed recommendation for material \"{{name}}\"",
+        "RATING_REMOVED": "Removed rating for material \"{{name}}\""
+      }
+    },
     "NAV": {
         "MAIN": "main",
         "SKIP": "skip",
-        "COLLECTIONS": "collections"
+        "COLLECTIONS": "collection hierarchy"
     },
     "SKIP_LINKS": {
-        "MAIN_CONTENT": "Skip to main content"
+        "MAIN_CONTENT": "Skip to main content",
+        "ACCESSIBILITY_SETTINGS": "Accessibility settings"
     },
     "REPOSITORIES": {
+    },
+    "BREADCRUMBS": {
+        "YOU_ARE_HOME": "You are in the root directory",
+        "IN_HOME": "In the root directory"
+    },
+    "EMBED": {
+        "NOT_PUBLIC_WARNING": "This material is not publicly available.",
+        "CODE_LABEL": "Embed code",
+        "HEIGHT": "Height",
+        "WIDTH": "Width",
+        "SIZE_CONSTRAINTS_ERROR_NOTICE": "Please choose a value between {{ min }} and {{ max }}",
+        "VERSION": "Version",
+        "VERSION_OPTION": {
+            "FIXED": "Current version",
+            "NEWEST": "Always the newest version"
+        },
+        "COPIED_TO_CLIPBOARD_NOTICE": "The embed code was copied to the clipboard."
+    },
+    "API_ERROR": {
+        "RELOAD_NOTICE_TITLE": "The page has to be reloaded",
+        "RELOAD_NOTICE": "Something went wrong when loading important information. Please reload the page.",
+        "RELOAD_BUTTON_LABEL": "Reload page"
     }
 }

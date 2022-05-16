@@ -3,8 +3,7 @@
 
 $sidenavWidth:250px;
 $sidenavWidthMobile:66px;
-main-nav{
-    display: flex;
+.main-nav-placeholder {
     height: $mainnavHeight;
 }
 .main{
@@ -94,7 +93,7 @@ main-nav{
 .frontpage,.global-config{
     display: flex;
     justify-content: center;
-    app-admin-frontpage,app-admin-config{
+    es-admin-frontpage,es-admin-config{
         width: 100%;
     }
 }
@@ -449,7 +448,7 @@ main-nav{
     }
     .search-list{
         padding: 20px 0 40px 0;
-        actionbar{
+        es-actionbar{
             display: flex;
             align-items: flex-end;
             justify-content: flex-end;
@@ -489,7 +488,7 @@ main-nav{
 .statistics{
     display: flex;
     justify-content: center;
-    app-admin-statistics{
+    es-admin-statistics{
         width: 100%;
     }
 }
@@ -507,7 +506,7 @@ main-nav{
         width:100%;
         .autocomplete{
             flex-direction: column;
-            >autocomplete {
+            >es-autocomplete {
                 width: calc(100% - 18px);
             }
             >div{
@@ -651,7 +650,7 @@ main-nav{
         .job-status {
             display: flex;
             align-items: center;
-            spinner-small {
+            es-spinner-small {
                 margin: 0 10px;
             }
 

@@ -1,9 +1,9 @@
+import {first, catchError, filter, map, takeUntil, tap} from 'rxjs/operators';
 import {trigger} from '@angular/animations';
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {Router} from '@angular/router';
-import {Options} from 'ng5-slider';
+import {Options} from '@angular-slider/ngx-slider';
 import {of, ReplaySubject} from 'rxjs';
-import {catchError, filter, map, takeUntil, tap} from 'rxjs/operators';
 import {BridgeService} from '../../../core-bridge-module/bridge.service';
 import {
     NodesRightMode,
@@ -21,7 +21,7 @@ import {Toast} from '../../toast';
 import {UIHelper} from '../../ui-helper';
 import {DurationPipe} from './duration.pipe';
 import {NodeHelperService} from '../../node-helper.service';
-import {MainNavService} from "../../../common/services/main-nav.service";
+import { MainNavService } from '../../../main/navigation/main-nav.service';
 interface VideoControlsValues {
     startTime: number;
     endTime: number;
@@ -29,7 +29,7 @@ interface VideoControlsValues {
 }
 
 @Component({
-    selector: 'video-controls',
+    selector: 'es-video-controls',
     templateUrl: 'video-controls.component.html',
     styleUrls: ['video-controls.component.scss'],
     animations: [trigger('fromRight', UIAnimation.fromRight())],
@@ -96,9 +96,9 @@ export class VideoControlsComponent implements OnInit, OnDestroy {
         } else {
             // Not an individual object, choose new location first.
             this.mainNav.getDialogs().addToCollection = [this.node];
-            this.mainNav.getDialogs().onStoredAddToCollection.first().pipe(
+            this.mainNav.getDialogs().onStoredAddToCollection.pipe(first()).pipe(
                 // takeUntil(this.destroyed$)
-            ).filter((ref) => ref.references.some((r) => r.originalId === this.node.ref.id))
+            ).pipe(filter((ref) => ref.references.some((r) => r.originalId === this.node.ref.id)))
                 .subscribe(async ({references}) => {
                 const node = await this.writeVideoControlsValues(references[0], this.values, false);
                 this.node = node;

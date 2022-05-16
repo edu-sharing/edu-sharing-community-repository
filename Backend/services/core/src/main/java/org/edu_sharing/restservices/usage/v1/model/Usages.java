@@ -278,6 +278,15 @@ public class Usages {
 	}
 	public static class CollectionUsage extends Usage {
 		private Node collection;
+		private CollectionUsageType collectionUsageType;
+
+		public CollectionUsageType getCollectionUsageType() {
+			return collectionUsageType;
+		}
+
+		public void setCollectionUsageType(CollectionUsageType collectionUsageType) {
+			this.collectionUsageType = collectionUsageType;
+		}
 
 		public Node getCollection() {
 			return collection;
@@ -315,5 +324,10 @@ public class Usages {
 			this.node = node;
 		}
 	}
-	
+
+	public enum CollectionUsageType {
+		ACTIVE,
+		PROPOSAL_PENDING,
+		PROPOSAL_DECLINED,
+	}
 }

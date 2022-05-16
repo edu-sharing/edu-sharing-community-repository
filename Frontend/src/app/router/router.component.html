@@ -1,7 +1,12 @@
+<es-main-nav></es-main-nav>
 <router-outlet></router-outlet>
-<modal-dialog-toast></modal-dialog-toast>
-<global-container></global-container>
-<cookie-info #cookie></cookie-info>
-<app-accessibility #accessibility></app-accessibility>
+<es-modal-dialog-toast></es-modal-dialog-toast>
+<es-global-container></es-global-container>
+<es-cookie-info #cookie></es-cookie-info>
+<es-accessibility #accessibility></es-accessibility>
 <!-- central access to all dialogs for actions -->
-<workspace-management #management></workspace-management>
+<es-workspace-management #management></es-workspace-management>
+<es-scroll-to-top-button
+  role="navigation"
+  [attr.aria-label]="'GO_TO_TOP' | translate"
+></es-scroll-to-top-button>
