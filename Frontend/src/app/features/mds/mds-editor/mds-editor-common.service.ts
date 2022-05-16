@@ -57,6 +57,7 @@ export class MdsEditorCommonService {
         pairs: Array<{ id?: string; node?: Node; values: Values }>,
         versionComment?: string,
     ): Promise<Node[]> {
+        console.log(pairs);
         return forkJoin(
             pairs.map(({id, node, values }) => {
                 if (versionComment) {

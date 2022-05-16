@@ -32,7 +32,7 @@ import {
 } from 'rxjs/operators';
 import {Toast, ToastType} from 'src/app/core-ui-module/toast';
 import {UIHelper} from '../../../../../core-ui-module/ui-helper';
-import {MdsEditorInstanceService} from '../../mds-editor-instance.service';
+import {MdsEditorInstanceService, SuggestionGroup} from '../../mds-editor-instance.service';
 import {MdsWidgetType, MdsWidgetValue} from '../../../types/types';
 import {DisplayValue} from '../DisplayValues';
 import {MdsEditorWidgetBase, ValueType} from '../mds-editor-widget-base';
@@ -43,10 +43,10 @@ import {Helper} from '../../../../../core-module/rest/helper';
 import {
     StringSuggestionData,
     Suggestion,
-    SuggestionStatus
+    SuggestionStatus,
+    SuggestionInfoInput,
+    RangedValueSuggestionData
 } from 'ngx-edu-sharing-graphql';
-
-type SuggestionGroup = {suggestion: Suggestion, value:StringSuggestionData};
 
 @Component({
     selector: 'es-mds-editor-widget-chips',
@@ -104,15 +104,13 @@ export class MdsEditorWidgetChipsComponent
             ].map((value) => this.toDisplayValues(value)),
             this.getStandardValidators(),
         );
-        this.chipsSuggestions = this.widget.getSuggestions()?.map(
-            suggestion => {
-                return {
-                    suggestion,
-                    value: (Helper.getDotPathFromNestedObject(suggestion, (this.widget.definition as any).ids.graphql) as StringSuggestionData)
-                }
-            }).filter(
-            s => s.value.info.status === SuggestionStatus.Pending
-        ) ?? [];
+        this.chipsSuggestions = this.widget.getSuggestions()?.filter(
+            s => s.data.info.status === SuggestionStatus.Pending
+        ).map(s => {
+            s.displayValue = this.toDisplayValues((s.data as RangedValueSuggestionData).value.value)
+            return s;
+        }) ?? [];
+        console.log(this.widget.definition.id, this.chipsSuggestions);
         this.indeterminateValues$ = new BehaviorSubject(
             this.widget.getInitialValues()?.individualValues,
         );
@@ -243,7 +241,7 @@ export class MdsEditorWidgetChipsComponent
         this.inhibitAutocomplete();
     }
     removeSuggestion(toBeRemoved: SuggestionGroup): void {
-        this.setSuggestionState(toBeRemoved, SuggestionStatus.Declined);
+        this.updateSuggestionState(toBeRemoved, SuggestionStatus.Declined);
     }
 
     selected(event: MatAutocompleteSelectedEvent) {
@@ -256,17 +254,13 @@ export class MdsEditorWidgetChipsComponent
         this.input?.nativeElement?.focus();
     }
     addSuggestion(suggestion: SuggestionGroup) {
-        this.add(
-            {
-                // @TODO! resolve label
-                label: suggestion.value.value,
-                key: suggestion.value.value,
-            }
-        );
-        this.setSuggestionState(suggestion, SuggestionStatus.Accepted);
+        this.add(suggestion.displayValue);
+        this.updateSuggestionState(suggestion, SuggestionStatus.Accepted);
     }
-    setSuggestionState(suggestion: SuggestionGroup, state: SuggestionStatus) {
-        suggestion.value.info.status = state;
+    updateSuggestionState(suggestion: SuggestionGroup, status: SuggestionStatus) {
+        suggestion.status = status;
+        this.mdsEditorInstance.updateSuggestionState(suggestion);
+        this.chipsSuggestions.splice(this.chipsSuggestions.indexOf(suggestion), 1);
     }
     add(value: DisplayValue): void {
         if (!this.chipsControl.value.some((v: DisplayValue) => v.key === value.key)) {
@@ -290,7 +284,7 @@ export class MdsEditorWidgetChipsComponent
     }
     getSuggestionTooltip(suggestion: SuggestionGroup): string | null {
         return `${this.translate.instant('MDS.SUGGESTION_TOOLTIP', {
-            value: suggestion.value,
+            value: suggestion.displayValue.label,
             // @TODO
             creator: suggestion.suggestion.id
         })}`;
@@ -380,6 +374,7 @@ export class MdsEditorWidgetChipsComponent
 
     private toDisplayValues(value: MdsWidgetValue | string): DisplayValue {
         if (typeof value === 'string') {
+            console.log(value, this.widget.definition.values);
             const knownValue = this.widget.definition.values?.find((v) => v.id === value);
             if (!knownValue && this.widget.getInitialDisplayValues()) {
                 const ds = this.widget

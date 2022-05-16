@@ -11,7 +11,7 @@ import { Values } from '../../../types/types';
 import {MatTabGroup} from '@angular/material/tabs';
 import { MainNavService } from '../../../../../main/navigation/main-nav.service';
 import {NativeWidgetComponent} from '../../../types/mds-types';
-import { Metadata } from 'dist/edu-sharing-graphql/ngx-edu-sharing-graphql';
+import { Metadata } from 'ngx-edu-sharing-graphql';
 
 export interface AuthorData {
     freetext: string;
@@ -58,6 +58,11 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
             filter((n) => n != null))
             .subscribe((nodes) => {
                 this.updateValues(nodes);
+            });
+        this.mdsEditorValues.graphqlMetadata$.pipe(
+            filter((v) => v != null))
+            .subscribe((values) => {
+                this.updateValuesGraphQL(values)
             });
         this.mdsEditorValues.values$.pipe(
             filter((v) => v != null))
@@ -108,13 +113,13 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
     async getValues(values: Values, node: Node|Metadata = null): Promise<Values> {
         if(this.mdsEditorValues.graphqlMetadata$.value) {
             // @TODO: map data to graphql
-            return {};
+            // return values;
         }
         values[RestConstants.CCM_PROP_AUTHOR_FREETEXT] = [this.author.freetext];
         // copy current value from node, replace only first entry (if it has multiple authors)
         values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] =
-            (node as Node)?.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] ||
-            (node as Metadata).lom?.lifecycle?.contribute?.filter((c) => c.role === 'author');
+            (node as Node)?.properties?.[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] ||
+            (node as Metadata).lom?.lifecycle?.contribute?.filter((c) => c.role === 'author').map(c => c.content);
         if (!values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]) {
             values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = [''];
         }
@@ -185,5 +190,54 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
             this.mainNavService,
         );
         this.updateValues([updatedNode]);
+    }
+
+    private async updateValuesGraphQL(values: Metadata[]) {
+        if (values?.length) {
+            let freetext = Array.from(
+                new Set(
+                    values.map(
+                        (n) => n.lom.rights.author?.[0],
+                    ),
+                ),
+            );
+            let author = Array.from(
+                new Set(
+                    values.map(
+                        (n) =>
+                            n.lom.lifecycle?.contribute?.filter(c => c.role === 'author')?.[0]
+                    ),
+                ),
+            );
+            if (freetext.length !== 1) {
+                freetext = null;
+            }
+            let authorVCard = new VCard();
+            if (author.length !== 1) {
+                author = null;
+            } else {
+                authorVCard = new VCard(author[0]?.content?.[0]);
+            }
+            this.userAuthor =
+                authorVCard?.uid &&
+                authorVCard?.uid === (await this.iamApi.getCurrentUserVCard()).uid;
+            this.author = {
+                freetext: freetext?.[0] ?? '',
+                author: authorVCard,
+            };
+            // switch to author tab if no freetext but author exists
+            if (
+                !this.author.freetext?.trim() &&
+                this.author.author?.getDisplayName().trim()
+            ) {
+                this.authorTab = 1;
+            }
+            // deep copy the elements to compare state
+            this.initialAuthor = {
+                freetext: this.author.freetext,
+                author: new VCard(this.author.author.toVCardString()),
+            };
+            setTimeout(() => this.tabGroup.realignInkBar());
+        }
     }
 }

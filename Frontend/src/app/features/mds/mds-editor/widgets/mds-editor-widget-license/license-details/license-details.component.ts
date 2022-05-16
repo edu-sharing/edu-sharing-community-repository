@@ -15,7 +15,8 @@ import {Helper} from '../../../../../../core-module/rest/helper';
 })
 export class LicenseDetailsComponent implements OnChanges {
     static PROPERTIES_MAPPING_GRAPHQL: { [key: string]: string } = {
-        [RestConstants.CCM_PROP_LICENSE]: "lom.rights.internal"
+        [RestConstants.CCM_PROP_LICENSE]: 'lom.rights.internal',
+        [RestConstants.LOM_PROP_RIGHTS_DESCRIPTION]: 'lom.rights.description'
     };
 
     @Input() nodes: Node[];
@@ -39,8 +40,7 @@ export class LicenseDetailsComponent implements OnChanges {
     }
     ngOnChanges(changes: SimpleChanges) {
         // Set the `draggable` attribute when this directive is active.
-        if (changes.nodes?.currentValue) {
-            console.log(changes.nodes);
+        if (changes.nodes?.currentValue || changes.metadata?.currentValue) {
             this.readLicense();
         }
     }
