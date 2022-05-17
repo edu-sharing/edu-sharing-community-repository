@@ -42,7 +42,7 @@
       <span class="mat-chip-label">{{ value.label }}</span>
       <mat-icon matChipRemove>cancel</mat-icon>
     </mat-chip>
-    <ng-container *ngIf="chipsSuggestions?.length">
+    <ng-container *ngIf="getSuggestions()?.length">
       <mat-chip
         #chip="matChip"
         class="mat-chip-suggestion"

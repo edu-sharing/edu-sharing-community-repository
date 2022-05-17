@@ -110,7 +110,6 @@ export class MdsEditorWidgetChipsComponent
             s.displayValue = this.toDisplayValues((s.data as RangedValueSuggestionData).value.value)
             return s;
         }) ?? [];
-        console.log(this.widget.definition.id, this.chipsSuggestions);
         this.indeterminateValues$ = new BehaviorSubject(
             this.widget.getInitialValues()?.individualValues,
         );
@@ -374,7 +373,6 @@ export class MdsEditorWidgetChipsComponent
 
     private toDisplayValues(value: MdsWidgetValue | string): DisplayValue {
         if (typeof value === 'string') {
-            console.log(value, this.widget.definition.values);
             const knownValue = this.widget.definition.values?.find((v) => v.id === value);
             if (!knownValue && this.widget.getInitialDisplayValues()) {
                 const ds = this.widget
@@ -423,5 +421,11 @@ export class MdsEditorWidgetChipsComponent
         setTimeout(() => {
             this.autocompleteIsInhibited.next(false);
         });
+    }
+
+    getSuggestions() {
+        return this.chipsSuggestions?.filter(
+            s => !this.chipsControl.value.filter((s1: DisplayValue) => s1.key === s.displayValue.key).length
+        );
     }
 }

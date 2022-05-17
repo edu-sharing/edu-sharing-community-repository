@@ -42,7 +42,7 @@ import { SharedModule } from './shared/shared.module';
 import { TranslationsModule } from './translations/translations.module';
 import {ApolloClientOptions, InMemoryCache} from '@apollo/client';
 import {HttpLink} from 'apollo-angular/http';
-import {APOLLO_OPTIONS, ApolloModule} from 'apollo-angular';
+import {Apollo, APOLLO_OPTIONS, ApolloModule} from 'apollo-angular';
 import {
     EduSharingGraphqlModule
 } from 'ngx-edu-sharing-graphql';

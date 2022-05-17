@@ -12,6 +12,7 @@ import {
     zip,
 } from 'rxjs';
 import {filter, first, map, shareReplay, skip, switchMap, takeUntil, tap} from 'rxjs/operators';
+import { filter as graphqlFilter} from 'graphql-anywhere'
 import {
     ConfigurationHelper,
     ConfigurationService,
@@ -53,13 +54,13 @@ import {
     MdsEditorWidgetVersionComponent
 } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 import {Apollo} from 'apollo-angular';
-import {Metadata, Query, Suggestion, StringSuggestionData, SuggestionStatus, SuggestionInput} from 'ngx-edu-sharing-graphql';
+import {Metadata, Query, Suggestion, StringSuggestionData, SuggestionStatus, SuggestionInput, SuggestionsGQL} from 'ngx-edu-sharing-graphql';
 import {gql} from '@apollo/client';
 import {Helper} from '../../../core-module/rest/helper';
 import {MdsEditorWidgetCore} from './mds-editor-widget-core.directive';
 import {isNull} from '@angular/compiler/src/output/output_ast';
 import {isNumeric} from 'rxjs/util/isNumeric';
-import {RangedValue, RangedValueSuggestionData, SuggestionDataInterface} from 'ngx-edu-sharing-graphql';
+import {RangedValue, RangedValueSuggestionData, MetadatasGQL} from 'ngx-edu-sharing-graphql';
 import {DisplayValue} from './widgets/DisplayValues';
 export interface CompletionStatusField {
     widget: Widget;
@@ -256,7 +257,6 @@ export class MdsEditorInstanceService implements OnDestroy {
                     } as SuggestionGroup)
                 ))
             ))));
-            console.log(this.suggestionValues);
             // Set initial values, so the initial completion status is calculated correctly.
             this.value$.next([...this.initialValues.jointValues]);
             if (this.mdsEditorInstanceService.getIsBulk(nodes)) {
@@ -532,7 +532,6 @@ export class MdsEditorInstanceService implements OnDestroy {
                     if(!Array.isArray(value)) {
                         value = [value];
                     }
-                    console.log(value);
                     value = value.map((v: any) => v.__typename === 'RangedValue' ? (v as RangedValue).value : v);
                     return value;
                 } else {
@@ -676,6 +675,8 @@ export class MdsEditorInstanceService implements OnDestroy {
         private mdsEditorCommonService: MdsEditorCommonService,
         private mdsService: MdsService,
         private apollo: Apollo,
+        private metadatasGQL: MetadatasGQL,
+        private suggestionsGQL: SuggestionsGQL,
         private restMdsService: RestMdsService,
         private configService: ConfigurationService,
         private restConnector: RestConnectorService,
@@ -907,29 +908,12 @@ export class MdsEditorInstanceService implements OnDestroy {
         } else {
             this.editorBulkMode = { isBulk: false };
         }
-        const query = this.apollo.query<Query>({
-            query: gql`query($ids: [ID!]) {
-                  metadatas(
-                    input: {
-                        ids: $ids
-                    }
-                  ) {
-                    nodeType,
-                    info{
-                        aspects,
-                        metadataSet,
-                        objectType{
-                            id
-                        }
-                    }
-                }
-            }`,
-            variables: {
-                ids: graphqlIds
-            }
+        const query = this.metadatasGQL.fetch({
+            ids: graphqlIds
         });
         const metadataSets = await query.toPromise();
         if (!groupId) {
+            metadataSets.data.metadatas
             groupId = this.mdsEditorCommonService.getGroupIdGraphql(metadataSets.data.metadatas);
         }
         const mdsId = this.mdsEditorCommonService.getMdsId(metadataSets.data.metadatas);
@@ -937,7 +921,6 @@ export class MdsEditorInstanceService implements OnDestroy {
             .getMetadataSet({ metadataSet: mdsId, repository: this.repository })
             .toPromise();
         const widgets = this.getWidgetsForGroup(groupId, mdsDefinition);
-        console.log(widgets);
         const graphqlRequests = new Set(widgets.map((w)  => {
             let id: string[];
             if(Object.values(NativeWidgetType).includes(w.id as NativeWidgetType)) {
@@ -959,6 +942,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             .filter((id) => !!id)
         );
         const combined = Array.from(graphqlRequests).map((id) => this.mapGraphqlField(id,a => a)).join('\n');
+        // This is a bit hacky, may we find an easier way to dynamically fetch the suggestions?
         const combinedSuggestions = [].concat(...Array.from(graphqlRequests).filter(
             id => id.startsWith('lom') && !id.startsWith('lom.lifecycle')
         ).map((id) =>
@@ -973,6 +957,13 @@ export class MdsEditorInstanceService implements OnDestroy {
                     }
                     a.push('info')
                     a.push('status')
+                    return a;
+                }),
+                this.mapGraphqlField(id, a => {
+                    if(a[a.length-1] === 'value') {
+                        a = a.slice(0, -1);
+                    }
+                    a.push('version')
                     return a;
                 }),
                 this.mapGraphqlField(id, a => {
@@ -1001,7 +992,6 @@ export class MdsEditorInstanceService implements OnDestroy {
                     }
                 }
             }`;
-        console.log(metaQueryQgl);
         const metaQuery = this.apollo.query<Query>({
             query: gql(metaQueryQgl),
             variables: {
@@ -1267,7 +1257,6 @@ export class MdsEditorInstanceService implements OnDestroy {
         }
 
         let values = this.mapWidgetValuesGraphql(this.widgets.value, metadata);
-        console.log(values);
         // Native widgets don't necessarily match their ID and relevant property or even affect
         // multiple properties. Therefore, we allow them to set arbitrary properties by implementing
         // `getValues()`.
@@ -1671,23 +1660,8 @@ export class MdsEditorInstanceService implements OnDestroy {
     }
     private async saveGraphqlSuggestions() {
         return this.suggestions.map(s => {
-            console.log(s);
-            const suggestion: SuggestionInput = {
-                id: s.id,
-                nodeId: s.nodeId,
-                type: s.type,
-                lom: null,
-            };
-            return this.apollo.mutate({
-                mutation: gql`
-                mutation($suggestion: SuggestionInput!) {
-                  addOrUpdateSuggestion(
-                    suggestion: $suggestion
-                  )
-              }`,
-                variables: {
-                    suggestion: s,
-                }
+            return this.suggestionsGQL.mutate({
+                suggestion: s
             }).toPromise();
         });
     }
@@ -1873,12 +1847,18 @@ export class MdsEditorInstanceService implements OnDestroy {
     updateSuggestionState(modified: SuggestionGroup) {
         let suggestion = this.suggestions.find(s => s.id === modified.suggestion.id && s.nodeId === modified.suggestion.nodeId);
         if(!suggestion) {
-            this.suggestions.push({...modified.suggestion as SuggestionInput});
-            suggestion = this.suggestions[this.suggestions.length - 1];
+            const suggestionCopy = Helper.deepCopy(modified.suggestion) as Suggestion;
+            //const suggestion = graphqlFilter(SuggestionInput, suggestion);
+            //@TODO: find an automatic way to reduce the object
+            delete suggestionCopy.lom.general.title;
+            Helper.filterObjectPropertyNested(suggestionCopy, ['editor']);
+            suggestion = suggestionCopy as SuggestionInput;
+            this.suggestions.push(suggestion);
+
+
+            // clean up the object to use it as the input model
         }
         const obj = Helper.getDotPathFromNestedObject(suggestion, modified.path.split('.').join('.'));
-        console.log(obj);
-        // @TODO: check if access to the first object is val
         (obj as RangedValueSuggestionData[]).find(
             s => s.value.value === (modified.data.value as RangedValue).value
         ).info.status = modified.status;

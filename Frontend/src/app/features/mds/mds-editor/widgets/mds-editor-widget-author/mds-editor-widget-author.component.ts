@@ -119,7 +119,7 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
         // copy current value from node, replace only first entry (if it has multiple authors)
         values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] =
             (node as Node)?.properties?.[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] ||
-            (node as Metadata).lom?.lifecycle?.contribute?.filter((c) => c.role === 'author').map(c => c.content);
+            (node as Metadata)?.lom?.lifecycle?.contribute?.filter((c) => c.role === 'author').map(c => c.content);
         if (!values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]) {
             values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = [''];
         }

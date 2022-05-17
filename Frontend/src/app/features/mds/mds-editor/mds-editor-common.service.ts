@@ -8,7 +8,7 @@ import {
     RestNodeService,
 } from '../../../core-module/core.module';
 import { MdsDefinition, MdsType, Values } from '../types/types';
-import {Metadata} from 'ngx-edu-sharing-graphql';
+import {Metadata, BaseMetadataFragment} from 'ngx-edu-sharing-graphql';
 import {Meta} from '@angular/platform-browser';
 import {Apollo} from 'apollo-angular';
 import {DocumentNode} from '@apollo/client/link/core/types';
@@ -115,7 +115,7 @@ export class MdsEditorCommonService {
      *
      * Throws with a translatable error message if the given nodes cannot be handled by an MDS.
      */
-    getMdsId(nodes: Node[]|Metadata[]): string {
+    getMdsId(nodes: Node[]|BaseMetadataFragment[]): string {
         const types = nodes.map((node) => (node as Node).type || (node as Metadata).nodeType);
         if (!areAllEqual(types)) {
             throw new UserPresentableError('MDS.ERROR_INVALID_TYPE_COMBINATION');
@@ -132,7 +132,7 @@ export class MdsEditorCommonService {
         }
         return requestedMdsIds[0];
     }
-    getGroupIdGraphql(nodes: Metadata[]): MdsType {
+    getGroupIdGraphql(nodes: BaseMetadataFragment[]): MdsType {
         const node = nodes[0];
         let nodeGroup: MdsType = node.nodeType === RestConstants.CCM_TYPE_MAP ? MdsType.Map : MdsType.Io;
         if (node.info.objectType?.id === 'folder-link') {
