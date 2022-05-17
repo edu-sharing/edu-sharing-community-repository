@@ -185,7 +185,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType> implemen
         this.displayTypeChange.emit(displayType);
     }
 
-    updateNodes(nodes: void | T[]): void {
+    updateNodes(nodes: void | T[]) {
         if(!nodes) {
             return;
         }
@@ -200,7 +200,12 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType> implemen
                 this.nodeHelperService.copyDataToNode(d as Node, hits[0] as Node);
             }
         });
-        console.log(nodes);
+        nodes?.forEach(node => {
+            if(!this.dataSource.getData().filter(n => (n as Node).ref.id === (node as Node).ref.id).length) {
+                (node as Node).virtual = true;
+                this.dataSource.appendData([node], 'before');    
+            }
+        });
     }
 
     showReorderColumnsDialog(): void {
