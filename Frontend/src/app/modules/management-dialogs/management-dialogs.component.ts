@@ -42,6 +42,8 @@ import {WorkspaceLicenseComponent} from './license/license.component';
 import {ErrorProcessingService} from '../../core-ui-module/error.processing';
 import { BulkBehavior } from '../../features/mds/types/types';
 import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import { MainNavService } from 'src/app/main/navigation/main-nav.service';
+import { first } from 'rxjs/operators';
 
 
 export enum DialogType {
@@ -284,6 +286,7 @@ export class WorkspaceManagementDialogsComponent  {
     private config:ConfigurationService,
     private connector:RestConnectorService,
     private searchService:RestSearchService,
+    private mainNavService:MainNavService,
     private toast:Toast,
     private errorProcessing:ErrorProcessingService,
     private nodeHelper: NodeHelperService,
@@ -397,11 +400,12 @@ export class WorkspaceManagementDialogsComponent  {
  public uploadFile(event: FileList){
    this.onUploadFileSelected.emit(event);
  }
-  createUrlLink(link : LinkData) {
+  async createUrlLink(link : LinkData) {
     const urlData = this.nodeHelper.createUrlLink(link);
     this.closeUploadSelect();
     this.toast.showProgressDialog();
-    this.nodeService.createNode(this.parent.ref.id,RestConstants.CCM_TYPE_IO,urlData.aspects,urlData.properties,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(
+    const config = await this.mainNavService.observeMainNavConfig().pipe(first()).toPromise();
+    this.nodeService.createNode(config.create?.parent?.ref.id,RestConstants.CCM_TYPE_IO,urlData.aspects,urlData.properties,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(
       (data) => {
         this.showMetadataAfterUpload([data.node]);
         this.toast.closeModalDialog();
