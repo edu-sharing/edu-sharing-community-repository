@@ -43,6 +43,7 @@ export class MdsNodeRelationsWidgetComponent implements OnInit, OnChanges {
         new ListItem('NODE', RestConstants.LOM_PROP_TITLE)
     ];
     versions: Node[];
+    forkedChilds: Node[];
 
     constructor(
         private translate: TranslateService,
@@ -59,12 +60,14 @@ export class MdsNodeRelationsWidgetComponent implements OnInit, OnChanges {
         console.log(this.node);
         if (this.node) {
             observableForkJoin([
-                this.relationService.getRelations(this.node.ref.id),
+                this.nodeService.getForkedChilds(this.node.ref.id),
                 this.nodeService.getPublishedCopies(this.node.ref.id)
+                this.relationService.getRelations(this.node.ref.id),
             ]).subscribe(
                 (result) => {
-                    this.relations = result[0].relations;
+                    this.forkedChilds = result[0].nodes;
                     this.versions = result[1].nodes.reverse();
+                    this.relations = result[2].relations;
                     this.loading = false;
                 }
             )
