@@ -9,12 +9,12 @@ import {
     CardDialogConfig,
     CardDialogContentComponent,
     CardDialogState,
+    CARD_DIALOG_DATA,
     ViewMode,
 } from './card-dialog-config';
 import { CardDialogContainerComponent } from './card-dialog-container/card-dialog-container.component';
 import { CardDialogRef } from './card-dialog-ref';
 
-export const CARD_DIALOG_DATA = new InjectionToken<any>('CardDialogData');
 export const CARD_DIALOG_STATE = new InjectionToken<CardDialogState>('CardDialogState');
 export const CARD_DIALOG_OVERLAY_REF = new InjectionToken<CardDialogState>('CardDialogOverlayRef');
 

@@ -20,8 +20,8 @@ import { Toast, ToastType } from 'src/app/core-ui-module/toast';
 import { UIHelper } from 'src/app/core-ui-module/ui-helper';
 import { Node } from '../../../../core-module/rest/data-object';
 import { MainNavService } from '../../../../main/navigation/main-nav.service';
-import { CardDialogState } from '../../card-dialog/card-dialog-config';
-import { CARD_DIALOG_DATA, CARD_DIALOG_STATE } from '../../card-dialog/card-dialog.service';
+import { CardDialogState, CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
+import {  CARD_DIALOG_STATE } from '../../card-dialog/card-dialog.service';
 
 export interface NodeEmbedDialogData {
     node: Node;

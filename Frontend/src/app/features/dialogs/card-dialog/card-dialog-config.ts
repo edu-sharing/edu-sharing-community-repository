@@ -1,6 +1,9 @@
+import { InjectionToken } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { DialogButton } from '../../../core-module/core.module';
-import { CardAvatar } from './card-dialog-container/card-header/card-header.component';
+import { DialogButton } from '../../../core-module/ui/dialog-button';
+import { CardAvatar } from './card-dialog-container/card-header/card-avatar';
+
+export const CARD_DIALOG_DATA = new InjectionToken<any>('CardDialogData');
 
 export interface CardDialogCardConfig {
     title?: string;
