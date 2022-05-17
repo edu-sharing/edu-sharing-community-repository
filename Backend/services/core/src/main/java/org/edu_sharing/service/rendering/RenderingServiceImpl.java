@@ -53,7 +53,8 @@ public class RenderingServiceImpl implements RenderingService{
 	AuthenticationTool authTool;
 	
 	Logger logger = Logger.getLogger(RenderingServiceImpl.class);
-	
+	private ContextManagementFilter.B3 b3;
+
 	public RenderingServiceImpl(String appId){
 
 		try{
@@ -123,7 +124,11 @@ public class RenderingServiceImpl implements RenderingService{
 	@Override
 	public String getDetails(String renderingServiceUrl, RenderingServiceData data) throws JsonProcessingException, UnsupportedEncodingException {
 		HttpPost post = new HttpPost(renderingServiceUrl);
-		ContextManagementFilter.b3.get().addToRequest(post);
+		if(b3 == null) {
+			ContextManagementFilter.b3.get().addToRequest(post);
+		} else {
+			b3.addToRequest(post);
+		}
 		/*
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
@@ -234,5 +239,9 @@ public class RenderingServiceImpl implements RenderingService{
 	@Override
 	public boolean renderingSupported() {
 		return true;
+	}
+
+	public void setB3(ContextManagementFilter.B3 b3) {
+		this.b3 = b3;
 	}
 }
