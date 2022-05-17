@@ -46,7 +46,7 @@ import { IconDirective } from './directives/icon.directive';
 import { InfiniteScrollDirective } from './directives/infinite-scroll.directive';
 import { OnAttributeChangeDirective } from './directives/on-attribute-change.directive';
 import { RegisterCustomPropertyDirective } from './directives/register-custom-property.directive';
-import { SanitizeHTMLPipe } from './directives/sanitizeHTML.pipe';
+import { EscapeHtmlPipe } from './directives/escape-html.pipe';
 import { SkipTargetDirective } from './directives/skip-target.directive';
 import { AuthorityAffiliationPipe } from './pipes/authority-affiliation.pipe';
 import { AuthorityColorPipe } from './pipes/authority-color.pipe';
@@ -83,7 +83,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         OptionTooltipPipe,
         RegisterCustomPropertyDirective,
         ReplaceCharsPipe,
-        SanitizeHTMLPipe,
+        EscapeHtmlPipe,
         SkipTargetDirective,
         SpinnerComponent,
         SpinnerSmallComponent,
@@ -157,7 +157,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         RegisterCustomPropertyDirective,
         ReplaceCharsPipe,
         RouterModule,
-        SanitizeHTMLPipe,
+        EscapeHtmlPipe,
         SkipTargetDirective,
         SpinnerComponent,
         SpinnerSmallComponent,

@@ -5,7 +5,7 @@ import { Pipe, PipeTransform } from '@angular/core';
  *
  * Use this pipe in combination with other pipes that introduce markup into text strings, e.g.,
  * ```html
- * <span [innerHTML]="value | sanitizeHTML | highlight: substring"></span>
+ * <span [innerHTML]="value | escapeHtml | highlight: substring"></span>
  * ```
  * This will render `value` as it would have been when used in normal text interpolation like
  * `<span>{{ value }}</span>`, but allows us to use markup introduced by the `highlight` pipe.
@@ -20,9 +20,9 @@ import { Pipe, PipeTransform } from '@angular/core';
  *   `innerHTML`.
  */
 @Pipe({
-    name: 'sanitizeHTML',
+    name: 'escapeHtml',
 })
-export class SanitizeHTMLPipe implements PipeTransform {
+export class EscapeHtmlPipe implements PipeTransform {
     transform(value: string): string {
         return (
             value
