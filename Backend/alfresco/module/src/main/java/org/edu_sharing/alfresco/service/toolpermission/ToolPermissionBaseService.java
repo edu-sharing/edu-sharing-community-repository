@@ -225,23 +225,37 @@ public class ToolPermissionBaseService {
         for(String toolPermission : toolPermissions){
             getToolPermissionNodeId(toolPermission);
         }
-        List<? extends Config> list = LightbendConfigLoader.get().getConfigList("repository.toolpermissions.create");
+        List<? extends Config> list = LightbendConfigLoader.get().getConfigList("repository.toolpermissions.managed");
         if(!list.isEmpty()) {
             list.forEach((value) -> {
                 try {
                     String id = value.getString("id");
-                    String nodeid = getToolPermissionNodeId(id, false);
+                    // String nodeid = getToolPermissionNodeId(id, false);
                     // only create and set permissions if not yet exists
-                    if(nodeid == null) {
-                        nodeid = getToolPermissionNodeId(id, true);
-                        List<String> allowed = value.getStringList("allowed");
-                        if (allowed != null) {
-                            for (String authority : allowed) {
-                                permissionService.setPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeid),
-                                        authority, CCConstants.PERMISSION_READ, true);
-                            }
+                    // if(nodeid == null) {
+                    logger.info("auto-configure toolpermission " + id);
+                    String nodeid = getToolPermissionNodeId(id, true);
+                    permissionService.deletePermissions(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeid));
+                    nodeService.setProperty(
+                            new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeid),
+                            QName.createQName(CCConstants.CCM_PROP_TOOLPERMISSION_SYSTEM_MANAGED),
+                            true
+                    );
+                    List<String> allowed = value.getStringList("allowed");
+                    if (allowed != null) {
+                        for (String authority : allowed) {
+                            permissionService.setPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeid),
+                                    authority, CCConstants.PERMISSION_READ, true);
                         }
                     }
+                    List<String> denied = value.getStringList("denied");
+                    if (denied != null) {
+                        for (String authority : denied) {
+                            permissionService.setPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeid),
+                                    authority, CCConstants.PERMISSION_DENY, true);
+                        }
+                    }
+                    // }
                 } catch (Throwable e) {
                     throw new RuntimeException(e);
                 }

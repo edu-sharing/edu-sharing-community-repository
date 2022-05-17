@@ -120,6 +120,7 @@
             "SAVED": "Berechtigungen wurden aktualisiert",
             "ADD": "Hinzufügen",
             "ADDED": "Toolpermission {{name}} hinzugefügt",
+            "SYSTEM_MANAGED_WARNING": "Diese Berechtigung wird durch die Systemkonfiguration initalisiert und verwaltet. Änderungen an dieser Berechtigung gehen nach einem Neustart verloren!",
             "GROUP": {
                 "SHARING": "Freigaben",
                 "LICENSING": "Lizenzierung & Veröffentlichung",
