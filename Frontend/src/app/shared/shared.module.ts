@@ -100,6 +100,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         MatAutocompleteModule,
         MatButtonModule,
         MatCardModule,
+        MatInputModule,
         MatMenuModule,
         MatOptionModule,
         MatProgressSpinnerModule,
