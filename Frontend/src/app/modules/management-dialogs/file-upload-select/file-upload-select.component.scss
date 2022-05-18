@@ -29,6 +29,30 @@
         }
     }
 }
+.loading-website-information-spinner {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+.link-details {
+    .page-infos {
+        padding: 10px 20px;
+        border: 1px solid $cardSeparatorLineColor;
+        .title {
+            font-weight: bold;
+        }
+
+        .description {
+            @include limitLineCount(2, 1.25);
+            color: $textMediumLight;
+            font-size: $fontSizeSmall;
+        }
+    }
+    es-info-message {
+        display: flex;
+        margin: 20px 0;
+    }
+}
 .seperator-line {
     margin: 20px 5px;
 }

@@ -19,6 +19,8 @@ import {SimpleEditLicenseComponent} from './simple-edit-dialog/simple-edit-licen
 import {LicenseSourceComponent} from "./license/license-source/license-source.component";
 import {MapLinkComponent} from './map-link/map-link.component';
 import {SignupGroupComponent} from './signup-group/signup-group.component';
+import {NodeSearchSelectorComponent} from './node-search-selector/node-search-selector.component';
+import {NodeRowComponent} from './node-search-selector/node-row/node-row.component';
 
 export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   WorkspaceLicenseComponent,
@@ -32,6 +34,8 @@ export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   WorkspaceContributorComponent,
   NodeReportComponent,
   CommentsListComponent,
+  NodeSearchSelectorComponent,
+  NodeRowComponent,
   AddStreamComponent,
   NodeVariantComponent,
   MapLinkComponent,

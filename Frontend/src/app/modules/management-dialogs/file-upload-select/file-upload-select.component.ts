@@ -1,20 +1,33 @@
-import { Component, Input, EventEmitter, Output, ViewChild, ElementRef } from '@angular/core';
+import { trigger } from '@angular/animations';
+import {
+    Component,
+    ElementRef,
+    EventEmitter,
+    Input,
+    OnInit,
+    Output,
+    ViewChild,
+} from '@angular/core';
+import { FormControl } from '@angular/forms';
+import { ClientutilsV1Service, WebsiteInformation } from 'ngx-edu-sharing-api';
+import * as rxjs from 'rxjs';
+import { catchError, debounce, finalize, map, switchMap, tap } from 'rxjs/operators';
 import {
     ConfigurationService,
     DialogButton,
+    IamUser,
+    ListItem,
+    Node,
     ParentList,
+    RestConstants,
+    RestIamService,
+    RestNodeService,
+    RestSearchService,
     SessionStorageService,
 } from '../../../core-module/core.module';
-import { IamUser, Node } from '../../../core-module/core.module';
-import { RestNodeService } from '../../../core-module/core.module';
-import { trigger } from '@angular/animations';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import { RestSearchService } from '../../../core-module/core.module';
-import { Toast } from '../../../core-ui-module/toast';
-import { RestIamService } from '../../../core-module/core.module';
 import { LinkData } from '../../../core-ui-module/node-helper.service';
-import { map, catchError } from 'rxjs/operators';
-import * as rxjs from 'rxjs';
+import { Toast } from '../../../core-ui-module/toast';
 
 @Component({
     selector: 'es-workspace-file-upload-select',
@@ -23,9 +36,10 @@ import * as rxjs from 'rxjs';
     animations: [
         trigger('fade', UIAnimation.fade()),
         trigger('cardAnimation', UIAnimation.cardAnimation()),
+        trigger('openOverlay', UIAnimation.openOverlay()),
     ],
 })
-export class WorkspaceFileUploadSelectComponent {
+export class WorkspaceFileUploadSelectComponent implements OnInit {
     @ViewChild('fileSelect') file: ElementRef;
     @ViewChild('link') linkRef: ElementRef;
 
@@ -78,17 +92,18 @@ export class WorkspaceFileUploadSelectComponent {
     ltiConsumerKey: string;
     ltiSharedSecret: string;
     // private ltiTool: Node;
-    private _link: string;
     _parent: Node;
     buttons: DialogButton[];
     user: IamUser;
-    get link() {
-        return this._link;
-    }
-    set link(link: string) {
-        this._link = link;
-        this.setState(link);
-    }
+    readonly linkControl = new FormControl('');
+    websiteInformation: WebsiteInformation;
+    hideFileUpload = false;
+    loadingWebsiteInformation = false;
+    showInvalidUrlMessage = false;
+    columns = [
+        new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
+        new ListItem('NODE', RestConstants.CM_PROP_C_CREATED),
+    ];
 
     constructor(
         private nodeService: RestNodeService,
@@ -97,11 +112,62 @@ export class WorkspaceFileUploadSelectComponent {
         private storageService: SessionStorageService,
         public configService: ConfigurationService,
         private toast: Toast,
+        private clientUtils: ClientutilsV1Service,
     ) {
         this.setState('');
         this.iamService.getCurrentUserAsync().then((user) => {
             this.user = user;
         });
+    }
+
+    ngOnInit(): void {
+        this.registerLink();
+    }
+
+    private registerLink(): void {
+        this.linkControl.valueChanges
+            .pipe(
+                // Don't let the user submit the link until we fetched website information.
+                tap(() => this.setState('')),
+                map((url) => getValidHttpUrl(url)),
+                debounce((url) => (url ? rxjs.timer(500) : rxjs.timer(0))),
+                tap(() => {
+                    this.loadingWebsiteInformation = true;
+                    this.websiteInformation = null;
+                    this.showInvalidUrlMessage = false;
+                }),
+                switchMap((url) =>
+                    url ? this.clientUtils.getWebsiteInformation({ url }) : rxjs.of(null),
+                ),
+                finalize(() => (this.loadingWebsiteInformation = false)),
+            )
+            .subscribe({
+                next: (websiteInformation) => {
+                    this.loadingWebsiteInformation = false;
+                    this.websiteInformation = websiteInformation;
+                    if (websiteInformation) {
+                        this.setState(this.linkControl.value);
+                    }
+                    this.updateShowInvalidUrlMessage();
+                    this.updateHideFileUpload();
+                },
+                error: () => {
+                    this.loadingWebsiteInformation = false;
+                },
+            });
+    }
+
+    private updateHideFileUpload(): void {
+        if (this.hideFileUpload && !this.linkControl.value.trim()) {
+            this.hideFileUpload = false;
+        } else if (!this.hideFileUpload && this.websiteInformation) {
+            this.hideFileUpload = true;
+        }
+    }
+
+    private updateShowInvalidUrlMessage(): void {
+        this.showInvalidUrlMessage =
+            this.linkControl.value.trim() && !this.websiteInformation?.page;
     }
 
     cancel() {
@@ -121,7 +187,9 @@ export class WorkspaceFileUploadSelectComponent {
     }
 
     setLink() {
-        if (this.ltiActivated && (!this.ltiConsumerKey || !this.ltiSharedSecret)) {
+        if (this.disabled) {
+            // To nothing
+        } else if (this.ltiActivated && (!this.ltiConsumerKey || !this.ltiSharedSecret)) {
             const params = {
                 link: {
                     caption: 'WORKSPACE.TOAST.LTI_FIELDS_REQUIRED_LINK',
@@ -132,10 +200,14 @@ export class WorkspaceFileUploadSelectComponent {
                 },
             };
             this.toast.error(null, 'WORKSPACE.TOAST.LTI_FIELDS_REQUIRED', null, null, null, params);
-            return;
+        } else {
+            this.emitLinkSelected();
         }
+    }
+
+    private emitLinkSelected(): void {
         this.onLinkSelected.emit({
-            link: this._link,
+            link: this.linkControl.value,
             lti: this.ltiActivated,
             consumerKey: this.ltiConsumerKey,
             sharedSecret: this.ltiSharedSecret,
@@ -147,23 +219,39 @@ export class WorkspaceFileUploadSelectComponent {
         this.disabled = !link;
         this.ltiAllowed = true;
         this.updateButtons();
-        /*
-    if(this.cleanupUrlForLti(link)) {
-        this.searchService.search([{
-            property: "url",
-            values: [this.cleanupUrlForLti(link)]
-        }], [], null, RestConstants.CONTENT_TYPE_ALL, RestConstants.HOME_REPOSITORY, RestConstants.DEFAULT, [], 'tool_instances')
-            .subscribe((result: NodeList) => {
-                // for now, always allow
-                this.ltiAllowed = result.nodes.length > 0 || true;
-                if(result.nodes.length){
-                  this.nodeService.getNodeMetadata(result.nodes[0].parent.id,[],result.nodes[0].parent.repo).subscribe((data:NodeWrapper)=>{
-                    this.ltiTool=data.node;
-                  })
-                }
-            });
-    }
-    */
+        // if (this.cleanupUrlForLti(link)) {
+        //     this.searchService
+        //         .search(
+        //             [
+        //                 {
+        //                     property: 'url',
+        //                     values: [this.cleanupUrlForLti(link)],
+        //                 },
+        //             ],
+        //             [],
+        //             null,
+        //             RestConstants.CONTENT_TYPE_ALL,
+        //             RestConstants.HOME_REPOSITORY,
+        //             RestConstants.DEFAULT,
+        //             [],
+        //             'tool_instances',
+        //         )
+        //         .subscribe((result: NodeList) => {
+        //             // for now, always allow
+        //             this.ltiAllowed = result.nodes.length > 0 || true;
+        //             if (result.nodes.length) {
+        //                 this.nodeService
+        //                     .getNodeMetadata(
+        //                         result.nodes[0].parent.id,
+        //                         [],
+        //                         result.nodes[0].parent.repo,
+        //                     )
+        //                     .subscribe((data: NodeWrapper) => {
+        //                         this.ltiTool = data.node;
+        //                     });
+        //             }
+        //         });
+        // }
     }
 
     parentChoosed(event: Node[]) {
@@ -251,4 +339,24 @@ export class WorkspaceFileUploadSelectComponent {
             this.toast.toast('TOAST.STORAGE_LOCATION_RESET');
         }
     }
+}
+
+// Adapted from https://stackoverflow.com/questions/5717093/check-if-a-javascript-string-is-a-url
+function getValidHttpUrl(url: string): string {
+    url = url?.trim();
+    if (!url) {
+        return null;
+    }
+    if (!(url.startsWith('http://') || url.startsWith('https://'))) {
+        url = 'http://' + url;
+    }
+    try {
+        const parsedUrl = new URL(url);
+        if (parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:') {
+            return url;
+        }
+    } catch (e) {
+        // Return null
+    }
+    return null;
 }
