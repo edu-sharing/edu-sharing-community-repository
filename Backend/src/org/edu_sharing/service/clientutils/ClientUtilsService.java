@@ -167,10 +167,8 @@ public class ClientUtilsService {
 						JSONArray result = new JSONArray(new HttpQueryTool().query(method));
 						for (int i = 0; i < result.length(); i++) {
 							JSONArray entry = result.getJSONArray(0);
-							if(entry.getDouble(1) > duplicate.getDouble("confidence")) {
-								String uuid = entry.getString(0);
-								nodes.add(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, uuid));
-							}
+							String uuid = entry.getString(0);
+							nodes.add(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, uuid));
 						}
 					}
 				}
