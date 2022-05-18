@@ -2178,7 +2178,7 @@ public class NodeDao {
  	public void createVersion(String comment) throws DAOException, Exception {
 		this.changePropertiesWithVersioning(getAllProperties(), comment);
 	}
-	public static List<NodeRef> convertAlfrescoNodeRef(List<org.alfresco.service.cmr.repository.NodeRef> refs) {
+	public static List<NodeRef> convertAlfrescoNodeRef(java.util.Collection<org.alfresco.service.cmr.repository.NodeRef> refs) {
 		return refs.stream().map((ref) -> {
 			try {
 				return new NodeRef(RepositoryDao.getHomeRepository().getId(), ref.getId());
