@@ -1,11 +1,15 @@
 package org.edu_sharing.service.clientutils;
 
-import java.io.Serializable;
+import org.edu_sharing.restservices.shared.Node;
+import org.edu_sharing.service.model.NodeRef;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class WebsiteInformation {
 	private Map<String, String[]> lrmiProperties;
+	private final List<Node> duplicateNodes = new ArrayList<>();
 
 	public void setLrmiProperties(Map<String, String[]> properties) {
         this.lrmiProperties = properties;
@@ -58,6 +62,10 @@ public class WebsiteInformation {
 			}
 		}
 		this.keywords = keywords;		
+	}
+
+	public List<Node> getDuplicateNodes() {
+		return duplicateNodes;
 	}
 
 	public String getPage() {

@@ -1,11 +1,23 @@
 package org.edu_sharing.service.clientutils;
 
 import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.repository.server.tools.LRMITool;
+import org.edu_sharing.restservices.DAOException;
+import org.edu_sharing.restservices.NodeDao;
+import org.edu_sharing.restservices.RepositoryDao;
+import org.edu_sharing.restservices.RestConstants;
+import org.edu_sharing.restservices.shared.Filter;
+import org.edu_sharing.restservices.shared.Node;
 import org.htmlparser.NodeFilter;
 import org.htmlparser.Parser;
 import org.htmlparser.Tag;
@@ -37,6 +49,7 @@ public class ClientUtilsService {
 			String result = httpQuery.query(url);
 			if (result == null)
 				return null;
+
 			Parser parser = new Parser(new Lexer(result));
 
 			NodeFilter filter = new NodeClassFilter(TitleTag.class);
@@ -105,11 +118,28 @@ public class ClientUtilsService {
 					}
 				}
 			}
+			addDuplicateNodes(url, info);
 			return info;
 
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	private static void addDuplicateNodes(String url, WebsiteInformation info) throws DAOException {
+		// check via cmis for simple duplicates
+		Map<String, Object> filters = new HashMap<>();
+		filters.put(CCConstants.CCM_PROP_IO_WWWURL, url);
+		List<NodeRef> nodes = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO,
+				filters
+		);
+		List<Node> converted = NodeDao.convertToRest(
+				RepositoryDao.getHomeRepository(),
+				NodeDao.convertAlfrescoNodeRef(nodes),
+				Filter.createShowAllFilter(),
+				null
+		);
+		info.getDuplicateNodes().addAll(converted);
 	}
 }
