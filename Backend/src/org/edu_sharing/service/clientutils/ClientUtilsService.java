@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -18,6 +19,7 @@ import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Node;
+import org.edu_sharing.service.nodeservice.NodeServiceImpl;
 import org.htmlparser.NodeFilter;
 import org.htmlparser.Parser;
 import org.htmlparser.Tag;
@@ -31,6 +33,8 @@ import org.htmlparser.util.NodeList;
 import org.json.JSONObject;
 
 public class ClientUtilsService {
+	static Logger logger = Logger.getLogger(ClientUtilsService.class);
+
 	public static WebsiteInformation getWebsiteInformation(String url) {
 		WebsiteInformation info = new WebsiteInformation();
 		String page = url;
@@ -41,6 +45,11 @@ public class ClientUtilsService {
 		info.setPage(page);
 		boolean resolveWebsites = LightbendConfigLoader.get().getBoolean("repository.communication.resolveUrlInformation");
 		if (!resolveWebsites) {
+			try {
+				addDuplicateNodes(url, info);
+			} catch (Throwable e) {
+				logger.info(e.getMessage());
+			}
 			return info;
 		}
 		try {
@@ -122,7 +131,7 @@ public class ClientUtilsService {
 			return info;
 
 		} catch (Throwable e) {
-			e.printStackTrace();
+			logger.info(e.getMessage());
 		}
 		return null;
 	}
