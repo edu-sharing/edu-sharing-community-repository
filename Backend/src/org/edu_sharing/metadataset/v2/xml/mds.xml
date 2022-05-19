@@ -924,7 +924,7 @@
 			<query join="AND"  id="collections">
 				<basequery propertyNull="ngsearchword">@ccm\:collectionlevel0:true OR @ccm\:collection_pinned_status:true</basequery>
 				<property name="ngsearchword">
-					<statement>(@sys\:node-uuid:"${value}" OR @cm\:name:"${value}" OR @cm\:title:"${value}" OR @cm\:description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*")</statement>
+					<statement>(@sys\:node-uuid:"${value}" OR @cm\:name:"*${value}*" OR @cm\:title:"*${value}*" OR @cm\:description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*")</statement>
 					<exactMatching>false</exactMatching>
 					<multiple>true</multiple>
 					<multiplejoin>AND</multiplejoin>
