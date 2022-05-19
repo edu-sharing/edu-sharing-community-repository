@@ -23,7 +23,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTreeModule } from '@angular/material/tree';
 import { RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
-import { MdsDurationPipe } from '../features/mds/mds-editor/shared/mds-duration.pipe';
 import { AuthorityRowComponent } from './components/authority-search-input/authority-row/authority-row.component';
 import { AuthoritySearchInputComponent } from './components/authority-search-input/authority-search-input.component';
 import { CardComponent } from './components/card/card.component';
@@ -76,7 +75,6 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         InfiniteScrollDirective,
         InfoMessageComponent,
         LinkComponent,
-        MdsDurationPipe,
         ModalDialogComponent,
         MultiLineLabelComponent,
         OnAttributeChangeDirective,
@@ -148,7 +146,6 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         MatTabsModule,
         MatTooltipModule,
         MatTreeModule,
-        MdsDurationPipe,
         ModalDialogComponent,
         MultiLineLabelComponent,
         OnAttributeChangeDirective,
