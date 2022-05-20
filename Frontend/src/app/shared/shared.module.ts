@@ -12,7 +12,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatOptionModule, MatRippleModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
+import { MatInput, MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatRadioModule } from '@angular/material/radio';
@@ -95,6 +95,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         A11yModule,
         CommonModule,
         FormsModule,
+        MatInputModule,
         MatAutocompleteModule,
         MatButtonModule,
         MatCardModule,
