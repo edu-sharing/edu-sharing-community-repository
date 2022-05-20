@@ -1544,10 +1544,22 @@ export class AdminV1Service extends BaseService {
          * filename to fetch
          */
         filename: string;
+
+        /**
+         * path prefix this file belongs to
+         */
+        pathPrefix:
+            | 'node'
+            | 'cluster/applications'
+            | 'cluster'
+            | 'defaults'
+            | 'defaults/metadatasets'
+            | 'defaults/mailtemplates';
     }): Observable<StrictHttpResponse<string>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetConfigFilePath, 'get');
         if (params) {
             rb.query('filename', params.filename, {});
+            rb.query('pathPrefix', params.pathPrefix, {});
         }
 
         return this.http
@@ -1580,6 +1592,17 @@ export class AdminV1Service extends BaseService {
          * filename to fetch
          */
         filename: string;
+
+        /**
+         * path prefix this file belongs to
+         */
+        pathPrefix:
+            | 'node'
+            | 'cluster/applications'
+            | 'cluster'
+            | 'defaults'
+            | 'defaults/metadatasets'
+            | 'defaults/mailtemplates';
     }): Observable<string> {
         return this.getConfigFile$Response(params).pipe(
             map((r: StrictHttpResponse<string>) => r.body as string),
@@ -1606,11 +1629,23 @@ export class AdminV1Service extends BaseService {
          * filename to fetch
          */
         filename: string;
+
+        /**
+         * path prefix this file belongs to
+         */
+        pathPrefix:
+            | 'node'
+            | 'cluster/applications'
+            | 'cluster'
+            | 'defaults'
+            | 'defaults/metadatasets'
+            | 'defaults/mailtemplates';
         body?: string;
     }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.UpdateConfigFilePath, 'put');
         if (params) {
             rb.query('filename', params.filename, {});
+            rb.query('pathPrefix', params.pathPrefix, {});
             rb.body(params.body, 'application/json');
         }
 
@@ -1644,6 +1679,17 @@ export class AdminV1Service extends BaseService {
          * filename to fetch
          */
         filename: string;
+
+        /**
+         * path prefix this file belongs to
+         */
+        pathPrefix:
+            | 'node'
+            | 'cluster/applications'
+            | 'cluster'
+            | 'defaults'
+            | 'defaults/metadatasets'
+            | 'defaults/mailtemplates';
         body?: string;
     }): Observable<any> {
         return this.updateConfigFile$Response(params).pipe(

@@ -2019,6 +2019,15 @@
           "schema" : {
             "type" : "string"
           }
+        }, {
+          "name" : "pathPrefix",
+          "in" : "query",
+          "description" : "path prefix this file belongs to",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "node", "cluster/applications", "cluster", "defaults", "defaults/metadatasets", "defaults/mailtemplates" ]
+          }
         } ],
         "responses" : {
           "200" : {
@@ -2094,6 +2103,15 @@
           "required" : true,
           "schema" : {
             "type" : "string"
+          }
+        }, {
+          "name" : "pathPrefix",
+          "in" : "query",
+          "description" : "path prefix this file belongs to",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "node", "cluster/applications", "cluster", "defaults", "defaults/metadatasets", "defaults/mailtemplates" ]
           }
         } ],
         "requestBody" : {
@@ -24304,6 +24322,29 @@
           }
         }
       },
+      "Contributor" : {
+        "type" : "object",
+        "properties" : {
+          "property" : {
+            "type" : "string"
+          },
+          "firstname" : {
+            "type" : "string"
+          },
+          "lastname" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "vcard" : {
+            "type" : "string"
+          },
+          "org" : {
+            "type" : "string"
+          }
+        }
+      },
       "License" : {
         "type" : "object",
         "properties" : {
@@ -24438,6 +24479,9 @@
           },
           "owner" : {
             "$ref" : "#/components/schemas/Person"
+          },
+          "isPublic" : {
+            "type" : "boolean"
           }
         }
       },
@@ -25824,6 +25868,9 @@
           },
           "owner" : {
             "$ref" : "#/components/schemas/Person"
+          },
+          "isPublic" : {
+            "type" : "boolean"
           }
         }
       },
@@ -25977,6 +26024,9 @@
           },
           "originalId" : {
             "type" : "string"
+          },
+          "isPublic" : {
+            "type" : "boolean"
           }
         }
       },
@@ -27724,16 +27774,16 @@
             "type" : "string",
             "enum" : [ "Input", "None" ]
           },
-          "required" : {
-            "type" : "string",
-            "writeOnly" : true,
-            "enum" : [ "mandatory", "mandatoryForPublish", "recommended", "optional", "ignore" ]
-          },
           "subwidgets" : {
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/MdsSubwidget"
             }
+          },
+          "required" : {
+            "type" : "string",
+            "writeOnly" : true,
+            "enum" : [ "mandatory", "mandatoryForPublish", "recommended", "optional", "ignore" ]
           },
           "id" : {
             "type" : "string"
@@ -27798,13 +27848,13 @@
           "defaultvalue" : {
             "type" : "string"
           },
+          "isSearchable" : {
+            "type" : "boolean"
+          },
           "isExtended" : {
             "type" : "boolean"
           },
           "isSearchable" : {
-            "type" : "boolean"
-          },
-          "hideIfEmpty" : {
             "type" : "boolean"
           }
         }

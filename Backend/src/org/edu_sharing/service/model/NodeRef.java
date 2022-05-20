@@ -24,25 +24,25 @@ public interface NodeRef {
 		String getMimetype();
 		byte[] getData();
 	}
-	
+
 	public String getRepositoryId();
-	
+
 	public void setRepositoryId(String repositoryId);
-	
+
 	public String getStoreProtocol();
-	
+
 	public void setStoreProtocol(String storeProtocol);
-	
+
 	public String getStoreId();
-	
+
 	public void setStoreId(String storeId);
-	
+
 	public String getNodeId();
-	
+
 	public void setNodeId(String nodeId);
-	
+
 	public HashMap<String,Object> getProperties();
-	
+
 	public void setProperties(HashMap<String,Object> properties);
 
 	public void setPreview(Preview preview);
@@ -52,6 +52,10 @@ public interface NodeRef {
 	public Map<String,Boolean> getPermissions();
 
 	public void setPermissions(Map<String,Boolean> permissions);
+
+	public Boolean getPublic();
+
+	public void setPublic(Boolean aPublic);
 
 	void setAspects(List<String> aspects);
 
