@@ -241,21 +241,20 @@ public class ToolPermissionBaseService {
                             QName.createQName(CCConstants.CCM_PROP_TOOLPERMISSION_SYSTEM_MANAGED),
                             true
                     );
-                    List<String> allowed = value.getStringList("allowed");
-                    if (allowed != null) {
+                    if(value.hasPath("allowed")) {
+                        List<String> allowed = value.getStringList("allowed");
                         for (String authority : allowed) {
                             permissionService.setPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeid),
                                     authority, CCConstants.PERMISSION_READ, true);
                         }
                     }
-                    List<String> denied = value.getStringList("denied");
-                    if (denied != null) {
+                    if(value.hasPath("denied")) {
+                        List<String> denied = value.getStringList("denied");
                         for (String authority : denied) {
                             permissionService.setPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeid),
                                     authority, CCConstants.PERMISSION_DENY, true);
                         }
                     }
-                    // }
                 } catch (Throwable e) {
                     throw new RuntimeException(e);
                 }
