@@ -11,9 +11,9 @@
       <div class="preview" [innerHTML]="embedCode | safeHtml"></div>
     </div>
     <div class="preferences-container">
-      <es-info-message *ngIf="showNotPublicWarning" mode="warning">
+      <es-info-message *ngIf="!isPublic" mode="warning">
         <p class="not-public-warning-message">{{ 'EMBED.NOT_PUBLIC_WARNING' | translate }}</p>
-        <div>
+        <div *ngIf="canPublish">
           <button mat-button (click)="openInviteDialog()">
             <i esIcon="arrow_forward"></i>
             {{ 'OPTIONS.INVITE' | translate }}
