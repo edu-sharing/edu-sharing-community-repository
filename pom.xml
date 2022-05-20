@@ -47,7 +47,7 @@
     <npm.args.build>run build-dev</npm.args.build>
     <npm.version>7.24.2</npm.version>
 
-    <postgresql.jdbc.version>42.3.3</postgresql.jdbc.version>
+    <postgresql.jdbc.version>42.3.5</postgresql.jdbc.version>
 
     <tomcat.version.major>8</tomcat.version.major>
     <tomcat.version.minor>5</tomcat.version.minor>

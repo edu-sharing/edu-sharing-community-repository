@@ -15,6 +15,8 @@ public class ToolPermission {
 	private Status effective;
 	private List<Group> effectiveSource;
 
+	private boolean systemManaged;
+
 	public ToolPermission() {
 		explicit=Status.UNDEFINED;
 		effective=Status.UNDEFINED;				
@@ -40,4 +42,11 @@ public class ToolPermission {
 		return effectiveSource;
 	}
 
+	public boolean isSystemManaged() {
+		return systemManaged;
+	}
+
+	public void setSystemManaged(boolean systemManaged) {
+		this.systemManaged = systemManaged;
+	}
 }
