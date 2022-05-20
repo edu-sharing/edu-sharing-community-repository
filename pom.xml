@@ -9,7 +9,7 @@
   <parent>
     <groupId>org.edu_sharing</groupId>
     <artifactId>edu_sharing-super-pom</artifactId>
-    <version>4</version>
+    <version>5</version>
     <relativePath/>
   </parent>
 
