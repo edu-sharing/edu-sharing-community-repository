@@ -35,7 +35,7 @@ export class CardDialogService {
         component: ComponentType<T>,
         config?: CardDialogConfig<T['data']>,
     ): CardDialogRef<R> {
-        const cardConfig = config?.cardConfig ?? {};
+        const cardConfig = this.applyCardConfigDefaults(config?.cardConfig);
         const overlayRef = this.createOverlay(cardConfig);
         const cardState = new CardDialogState({ cardConfig });
         this.registerSizeAndPositionSwitch(cardState, cardConfig, overlayRef);
@@ -66,6 +66,13 @@ export class CardDialogService {
         // Notify the dialog container that the content has been attached.
         containerRef.instance.initializeWithAttachedContent();
         return dialogRef;
+    }
+
+    private applyCardConfigDefaults(config: CardDialogCardConfig = {}): CardDialogCardConfig {
+        return {
+            ...new CardDialogCardConfig(),
+            ...config,
+        };
     }
 
     private createOverlay(config: CardDialogCardConfig): OverlayRef {
@@ -133,7 +140,8 @@ export class CardDialogService {
 
     private setMobileSizeAndPosition(overlayRef: OverlayRef): void {
         overlayRef.updateSize({
-            maxHeight: 'calc(100% - 40px)',
+            maxHeight: 'calc(100% - 25px)',
+            minHeight: '80%',
             width: '100%',
             maxWidth: null,
         });

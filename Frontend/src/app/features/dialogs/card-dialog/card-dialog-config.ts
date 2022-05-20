@@ -5,17 +5,17 @@ import { CardAvatar } from './card-dialog-container/card-header/card-avatar';
 
 export const CARD_DIALOG_DATA = new InjectionToken<any>('CardDialogData');
 
-export interface CardDialogCardConfig {
+export class CardDialogCardConfig {
     title?: string;
     subtitle?: string;
     avatar?: CardAvatar;
     buttons?: DialogButton[];
     width?: number;
     minWidth?: number | string;
-    maxWidth?: number | string;
+    maxWidth?: number | string = '95%';
     height?: number;
     minHeight?: number | string;
-    maxHeight?: number | string;
+    maxHeight?: number | string = '95%';
     maximizeThresholdWidth?: number;
     maximizeThresholdHeight?: number;
 }

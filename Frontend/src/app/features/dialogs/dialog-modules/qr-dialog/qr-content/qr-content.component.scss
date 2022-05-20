@@ -5,6 +5,7 @@
     align-items: center;
     min-height: 0;
     width: 100vw;
+    background-color: #ebebeb;
 }
 
 qrcode {
@@ -23,8 +24,6 @@ qrcode {
 
         > img {
             width: 100%;
-            // ff scrollbar issue 100%, use calc
-            height: calc(100% - 5px);
             min-height: 0;
             object-fit: contain;
             image-rendering: pixelated;
