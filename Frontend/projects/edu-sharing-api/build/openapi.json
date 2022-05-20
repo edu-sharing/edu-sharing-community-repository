@@ -144,7 +144,7 @@
         "operationId" : "addApplication",
         "requestBody" : {
           "content" : {
-            "application/json" : {
+            "multipart/form-data" : {
               "schema" : {
                 "required" : [ "xml" ],
                 "type" : "object",
@@ -2019,6 +2019,15 @@
           "schema" : {
             "type" : "string"
           }
+        }, {
+          "name" : "pathPrefix",
+          "in" : "query",
+          "description" : "path prefix this file belongs to",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "node", "cluster/applications", "cluster", "defaults", "defaults/metadatasets", "defaults/mailtemplates" ]
+          }
         } ],
         "responses" : {
           "200" : {
@@ -2094,6 +2103,15 @@
           "required" : true,
           "schema" : {
             "type" : "string"
+          }
+        }, {
+          "name" : "pathPrefix",
+          "in" : "query",
+          "description" : "path prefix this file belongs to",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "node", "cluster/applications", "cluster", "defaults", "defaults/metadatasets", "defaults/mailtemplates" ]
           }
         } ],
         "requestBody" : {
@@ -24281,6 +24299,29 @@
           }
         }
       },
+      "Contributor" : {
+        "type" : "object",
+        "properties" : {
+          "property" : {
+            "type" : "string"
+          },
+          "firstname" : {
+            "type" : "string"
+          },
+          "lastname" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "vcard" : {
+            "type" : "string"
+          },
+          "org" : {
+            "type" : "string"
+          }
+        }
+      },
       "License" : {
         "type" : "object",
         "properties" : {
@@ -24328,6 +24369,12 @@
             "type" : "object",
             "additionalProperties" : {
               "$ref" : "#/components/schemas/Node"
+            }
+          },
+          "contributors" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Contributor"
             }
           },
           "ref" : {
@@ -24409,6 +24456,9 @@
           },
           "owner" : {
             "$ref" : "#/components/schemas/Person"
+          },
+          "isPublic" : {
+            "type" : "boolean"
           }
         }
       },
@@ -25280,11 +25330,11 @@
               "type" : "string"
             }
           },
-          "fullName" : {
-            "type" : "string"
-          },
           "volatile" : {
             "type" : "boolean"
+          },
+          "fullName" : {
+            "type" : "string"
           }
         }
       },
@@ -25689,6 +25739,12 @@
               "$ref" : "#/components/schemas/Node"
             }
           },
+          "contributors" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Contributor"
+            }
+          },
           "proposalCounts" : {
             "type" : "object",
             "additionalProperties" : {
@@ -25783,6 +25839,9 @@
           },
           "owner" : {
             "$ref" : "#/components/schemas/Person"
+          },
+          "isPublic" : {
+            "type" : "boolean"
           }
         }
       },
@@ -25837,6 +25896,12 @@
             "type" : "object",
             "additionalProperties" : {
               "$ref" : "#/components/schemas/Node"
+            }
+          },
+          "contributors" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Contributor"
             }
           },
           "accessOriginal" : {
@@ -25930,6 +25995,9 @@
           },
           "originalId" : {
             "type" : "string"
+          },
+          "isPublic" : {
+            "type" : "boolean"
           }
         }
       },
@@ -27677,16 +27745,16 @@
             "type" : "string",
             "enum" : [ "Input", "None" ]
           },
-          "required" : {
-            "type" : "string",
-            "writeOnly" : true,
-            "enum" : [ "mandatory", "mandatoryForPublish", "recommended", "optional", "ignore" ]
-          },
           "subwidgets" : {
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/MdsSubwidget"
             }
+          },
+          "required" : {
+            "type" : "string",
+            "writeOnly" : true,
+            "enum" : [ "mandatory", "mandatoryForPublish", "recommended", "optional", "ignore" ]
           },
           "id" : {
             "type" : "string"
@@ -27751,13 +27819,13 @@
           "defaultvalue" : {
             "type" : "string"
           },
+          "isSearchable" : {
+            "type" : "boolean"
+          },
           "isExtended" : {
             "type" : "boolean"
           },
           "hideIfEmpty" : {
-            "type" : "boolean"
-          },
-          "isSearchable" : {
             "type" : "boolean"
           }
         }
