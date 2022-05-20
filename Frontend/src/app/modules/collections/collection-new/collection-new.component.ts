@@ -753,8 +753,8 @@ export class CollectionNewComponent implements EventListener, OnInit {
 
          */
         this.buttons=[
-            new DialogButton('BACK',DialogButton.TYPE_CANCEL,()=>this.goBack()),
-            new DialogButton(this.isLastStep() ? 'SAVE' : 'NEXT',DialogButton.TYPE_PRIMARY,()=>this.goToNextStep())
+            new DialogButton('BACK',{ color: 'standard' },()=>this.goBack()),
+            new DialogButton(this.isLastStep() ? 'SAVE' : 'NEXT',{ color: 'primary' },()=>this.goToNextStep())
         ]
     }
 

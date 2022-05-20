@@ -27,8 +27,8 @@ export class MdsEditorCardComponent implements OnInit, OnDestroy {
     nodes: Node[];
     jumpMarks: CardJumpmark[];
     readonly buttons = [
-        new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.cancel.emit()),
-        new DialogButton('SAVE', DialogButton.TYPE_PRIMARY, () => this.save.emit()),
+        new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel.emit()),
+        new DialogButton('SAVE', { color: 'primary' }, () => this.save.emit()),
     ];
 
     // Progress indicator
@@ -62,10 +62,10 @@ export class MdsEditorCardComponent implements OnInit, OnDestroy {
                 'MDS.CONFIRM_DISCARD_TITLE',
                 'MDS.CONFIRM_DISCARD_MESSAGE',
                 [
-                    new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => {
+                    new DialogButton('CANCEL', { color: 'standard' }, () => {
                         this.toast.closeModalDialog();
                     }),
-                    new DialogButton('DISCARD', DialogButton.TYPE_PRIMARY, () => {
+                    new DialogButton('DISCARD', { color: 'primary' }, () => {
                         this.cancel.emit();
                         this.toast.closeModalDialog();
                     }),

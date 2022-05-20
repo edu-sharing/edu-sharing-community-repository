@@ -107,7 +107,7 @@ export class WorkspaceManagementDialogsComponent  {
         this.nodeDeleteMessage='WORKSPACE.DELETE_MESSAGE'+(nodeDelete.length === 1 ? '_SINGLE' : '');
         this.nodeDeleteMessageParams = {name:RestHelper.getName(nodeDelete[0])};
         this.nodeDeleteButtons=DialogButton.getCancel(()=> {this._nodeDelete = null});
-        this.nodeDeleteButtons.push(new DialogButton('YES_DELETE',DialogButton.TYPE_DANGER,()=>{this.deleteConfirmed(nodeDelete)}));
+        this.nodeDeleteButtons.push(new DialogButton('YES_DELETE', { color: 'danger' },()=>{this.deleteConfirmed(nodeDelete)}));
       if(nodeDelete.length === 1) {
           if (nodeDelete[0].collection) {
               this.nodeDeleteTitle = 'WORKSPACE.DELETE_TITLE_COLLECTION';

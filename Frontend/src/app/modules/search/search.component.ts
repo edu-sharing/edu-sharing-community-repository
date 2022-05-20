@@ -1368,12 +1368,12 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                             buttons: [
                                 new DialogButton(
                                     'RENAME',
-                                    DialogButton.TYPE_CANCEL,
+                                    { color: 'standard'},
                                     () => this.toast.closeModalDialog(),
                                 ),
                                 new DialogButton(
                                     'REPLACE',
-                                    DialogButton.TYPE_PRIMARY,
+                                    { color: 'primary' },
                                     () => {
                                         this.toast.closeModalDialog();
                                         this.saveSearch(name, true);

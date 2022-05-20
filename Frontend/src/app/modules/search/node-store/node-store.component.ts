@@ -29,7 +29,7 @@ export class SearchNodeStoreComponent implements OnInit {
     options: CustomOptions = {
         useDefaultOptions: false,
     };
-    buttons = DialogButton.getSingleButton('CLOSE', () => this.cancel(), DialogButton.TYPE_CANCEL);
+    buttons = DialogButton.getSingleButton('CLOSE', () => this.cancel(), 'standard');
     loading = true;
     nodes: Node[] = [];
 

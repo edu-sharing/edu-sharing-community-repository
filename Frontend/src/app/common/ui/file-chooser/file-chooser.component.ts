@@ -415,7 +415,7 @@ export class FileChooserComponent implements OnInit {
 
     updateButtons() {
         this.buttons = [
-            new DialogButton(this.translate.instant('CANCEL'), DialogButton.TYPE_CANCEL, () =>
+            new DialogButton(this.translate.instant('CANCEL'), { color: 'standard' }, () =>
                 this.cancel(),
             ),
         ];
@@ -428,7 +428,7 @@ export class FileChooserComponent implements OnInit {
             }
             confirmButton = new DialogButton(
                 this.translate.instant('APPLY'),
-                DialogButton.TYPE_PRIMARY,
+                { color: 'primary' },
                 () => this.chooseDirectory(),
             );
             confirmButton.disabled = (!this.path$.value.length && !this.canSelectHome) || !this.folderIsWritable();
@@ -436,7 +436,7 @@ export class FileChooserComponent implements OnInit {
             this.defaultSubtitle = null;
             confirmButton = new DialogButton(
                 'SELECT_ROOT_DISABLED',
-                DialogButton.TYPE_PRIMARY,
+                { color: 'primary' },
                 () => {},
             );
             confirmButton.disabled = true;
@@ -446,7 +446,7 @@ export class FileChooserComponent implements OnInit {
                 this.translate.instant(this._collections ? 'SELECT_COLLECTION' : 'SELECT_FILE', {
                     name: this.defaultSubtitle,
                 }),
-                DialogButton.TYPE_PRIMARY,
+                { color: 'primary' },
                 () => this.chooseFile(),
             );
             confirmButton.disabled =

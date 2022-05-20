@@ -66,7 +66,7 @@ export class NodeInfoComponent{
               private config : ConfigurationService,
               private router : Router){
     this.buttons=[
-        new DialogButton('CLOSE',DialogButton.TYPE_CANCEL,()=>this.close())
+        new DialogButton('CLOSE',{ color: 'standard' },()=>this.close())
     ];
   }
 

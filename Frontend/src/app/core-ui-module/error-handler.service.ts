@@ -45,7 +45,7 @@ export class ErrorHandlerService {
             'API_ERROR.RELOAD_NOTICE_TITLE',
             'API_ERROR.RELOAD_NOTICE',
             [
-                new DialogButton('API_ERROR.RELOAD_BUTTON_LABEL', DialogButton.TYPE_PRIMARY, () =>
+                new DialogButton('API_ERROR.RELOAD_BUTTON_LABEL', { color: 'primary' }, () =>
                     location.reload(),
                 ),
             ],

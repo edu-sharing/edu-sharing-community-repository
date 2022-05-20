@@ -145,7 +145,7 @@ export class ToolpermissionManagerComponent {
               private node : RestNodeService,
               private translate : TranslateService,
               private iam: RestIamService) {
-    this.buttons=DialogButton.getSingleButton('CLOSE',()=>this.close(),DialogButton.TYPE_CANCEL);
+    this.buttons=DialogButton.getSingleButton('CLOSE',()=>this.close(), 'standard');
   }
   close(){
     this.onClose.emit();

@@ -933,7 +933,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
                 this.dialogButtons.push(
                     new DialogButton(
                         'OPTIONS.REMOVE_REF',
-                        DialogButton.TYPE_CANCEL,
+                        { color: 'standard' },
                         () =>
                             this.deleteFromCollection(() => this.closeDialog()),
                     ),
@@ -942,7 +942,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
             this.dialogButtons.push(
                 new DialogButton(
                     'COLLECTIONS.OPEN_MISSING',
-                    DialogButton.TYPE_PRIMARY,
+                    { color: 'primary' },
                     () => this.onContentClick(content, true),
                 ),
             );

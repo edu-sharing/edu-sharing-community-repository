@@ -261,8 +261,8 @@ export class MdsComponent {
     private static MAX_SUGGESTIONS = 5;
     private suggestionsViaSearch = false;
     buttons = [
-        new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.cancel()),
-        new DialogButton('SAVE', DialogButton.TYPE_PRIMARY, () => this.saveValues()),
+        new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel()),
+        new DialogButton('SAVE', { color: 'primary' }, () => this.saveValues()),
     ];
 
     resetValues() {
@@ -710,10 +710,10 @@ export class MdsComponent {
                 warning: this.translate.instant('EXTENSION_NOT_MATCH_WARNING'),
             };
             this.dialogButtons = [
-                new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => {
+                new DialogButton('CANCEL', { color: 'standard' }, () => {
                     this.dialogTitle = null;
                 }),
-                new DialogButton('SAVE', DialogButton.TYPE_PRIMARY, () => {
+                new DialogButton('SAVE', { color: 'primary' }, () => {
                     this.dialogTitle = null;
                     this.saveValues(callback, true);
                 }),

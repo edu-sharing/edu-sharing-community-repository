@@ -64,8 +64,8 @@ export class NodeReportComponent {
         private nodeApi: RestNodeService,
     ) {
         this.buttons = [
-            new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.cancel()),
-            new DialogButton('NODE_REPORT.REPORT', DialogButton.TYPE_PRIMARY, () => this.report()),
+            new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel()),
+            new DialogButton('NODE_REPORT.REPORT', { color: 'primary' }, () => this.report()),
         ];
         this.connector.isLoggedIn().subscribe((data: LoginResult) => {
             if (!data.isGuest) {

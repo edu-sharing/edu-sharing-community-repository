@@ -101,12 +101,12 @@ export class AdminComponent implements OnInit, OnDestroy {
       this.searchColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
       this.translations.waitForInit().subscribe(() => {
           this.warningButtons=[
-              new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=> {window.history.back()}),
-              new DialogButton('ADMIN.UNDERSTAND',DialogButton.TYPE_PRIMARY,()=> {this.showWarning=false})
+              new DialogButton('CANCEL',{ color: 'standard' },()=> {window.history.back()}),
+              new DialogButton('ADMIN.UNDERSTAND',{ color: 'primary' },()=> {this.showWarning=false})
           ];
           this.xmlCardButtons=[
-              new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=> {this.xmlAppProperties=null}),
-              new DialogButton('APPLY',DialogButton.TYPE_PRIMARY,()=> {this.saveApp()})
+              new DialogButton('CANCEL',{ color: 'standard' },()=> {this.xmlAppProperties=null}),
+              new DialogButton('APPLY',{ color: 'primary' },()=> {this.saveApp()})
           ];
           this.getTemplates();
           this.connector.isLoggedIn().subscribe((data: LoginResult) => {
@@ -434,8 +434,8 @@ export class AdminComponent implements OnInit, OnDestroy {
 
     this.dialogParameters= {info};
     this.dialogButtons=[
-      new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=> {this.dialogTitle=null}),
-      new DialogButton('ADMIN.APPLICATIONS.REMOVE',DialogButton.TYPE_DANGER,()=> {
+      new DialogButton('CANCEL',{ color: 'standard' },()=> {this.dialogTitle=null}),
+      new DialogButton('ADMIN.APPLICATIONS.REMOVE',{ color: 'danger' },()=> {
         this.dialogTitle=null;
         this.globalProgress=true;
         this.admin.removeApplication(app.id).subscribe(()=> {

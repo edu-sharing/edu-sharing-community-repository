@@ -339,8 +339,8 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         this.dialogMessage="WORKSPACE.DRAG_DROP_MESSAGE";
         this.dialogMessageParameters={source:event.source.name,target:event.target.name};
         this.dialogButtons=[
-          new DialogButton("WORKSPACE.DRAG_DROP_COPY",DialogButton.TYPE_PRIMARY,()=>this.copyNode(event.target,event.source)),
-          new DialogButton("WORKSPACE.DRAG_DROP_MOVE",DialogButton.TYPE_PRIMARY,()=>this.moveNode(event.target,event.source)),
+          new DialogButton("WORKSPACE.DRAG_DROP_COPY",{ color: 'primary' },()=>this.copyNode(event.target,event.source)),
+          new DialogButton("WORKSPACE.DRAG_DROP_MOVE",{ color: 'primary' },()=>this.moveNode(event.target,event.source)),
         ]
         */
     }
@@ -913,11 +913,11 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
                 message,
                 isCancelable: true,
                 buttons: [
-                    new DialogButton('WORKSPACE.GO_TO_HOME', DialogButton.TYPE_PRIMARY + DialogButton.TYPE_SECONDARY, () => {
+                    new DialogButton('WORKSPACE.GO_TO_HOME', { color: 'primary', position: 'opposite' }, () => {
                         this.openDirectory(RestConstants.USERHOME);
                         this.toast.closeModalDialog();
                     }),
-                    new DialogButton('CLOSE', DialogButton.TYPE_CANCEL, () => this.toast.closeModalDialog()),
+                    new DialogButton('CLOSE', { color: 'standard' }, () => this.toast.closeModalDialog()),
                 ]
             });
     }

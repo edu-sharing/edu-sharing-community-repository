@@ -200,10 +200,10 @@ export class LoginAppComponent  implements OnInit {
         }
     }
     updateButtons(){
-        let login=new DialogButton('LOGIN.LOGIN',DialogButton.TYPE_PRIMARY,()=>this.login());
+        let login=new DialogButton('LOGIN.LOGIN',{ color: 'primary' },()=>this.login());
         login.disabled=this.disabled;
         if(this.config && (this.config.register.local || this.config.register.recoverUrl)){
-            let recover=new DialogButton('LOGIN.RECOVER_PASSWORD',DialogButton.TYPE_CANCEL,()=>this.recoverPassword());
+            let recover=new DialogButton('LOGIN.RECOVER_PASSWORD',{ color: 'standard' },()=>this.recoverPassword());
             this.buttons=[recover,login];
         }
         else{

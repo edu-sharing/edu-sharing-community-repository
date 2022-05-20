@@ -41,8 +41,8 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
     @ViewChild('textarea') textareaRef: ElementRef<HTMLTextAreaElement>;
 
     readonly buttons = [
-        new DialogButton('OPTIONS.COPY', DialogButton.TYPE_PRIMARY, () => this.copy()),
-        // new DialogButton('CLOSE', DialogButton.TYPE_CANCEL, this.config.onClose),
+        new DialogButton('OPTIONS.COPY', { color: 'primary' }, () => this.copy()),
+        // new DialogButton('CLOSE', { color: 'standard' }, this.config.onClose),
     ];
 
     readonly sizeConstraints = {

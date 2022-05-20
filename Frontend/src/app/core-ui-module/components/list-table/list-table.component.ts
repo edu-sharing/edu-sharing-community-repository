@@ -532,7 +532,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
             () => this.closeReorder(true),
         );
         this.reorderButtons.splice(0, 0,
-            new DialogButton('RESET', + DialogButton.TYPE_CANCEL + DialogButton.TYPE_SECONDARY, () => {
+            new DialogButton('RESET', { color: 'standard', position: 'opposite' }, () => {
             this.sessionStorage.delete('workspaceColumns');
             this.onInvalidateColumns.emit();
         }));

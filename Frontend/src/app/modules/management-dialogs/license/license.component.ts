@@ -548,10 +548,10 @@ export class WorkspaceLicenseComponent  {
     }
 
     private updateButtons() {
-        const save=new DialogButton('SAVE',DialogButton.TYPE_PRIMARY,()=>this.saveLicense());
+        const save=new DialogButton('SAVE',{ color: 'primary' },()=>this.saveLicense());
         save.disabled=this.loading || this.type=='MULTI';
         this.buttons=[
-            new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
+            new DialogButton('CANCEL',{ color: 'standard' },()=>this.cancel()),
             save
         ];
     }
