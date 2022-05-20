@@ -34,6 +34,7 @@
     <alfresco.pdf-renderer.version>1.1</alfresco.pdf-renderer.version>
     <alfresco.platform.version>5.2.g</alfresco.platform.version>
     <alfresco.share.version>5.2.f</alfresco.share.version>
+    <alfresco.sdk.version>3.1.0</alfresco.sdk.version>
 
     <!-- release-1 -->
     <bom.repository-repackaged.version>7.0.0-RC2</bom.repository-repackaged.version>
@@ -46,7 +47,7 @@
     <npm.args.build>run build-dev</npm.args.build>
     <npm.version>7.24.2</npm.version>
 
-    <postgresql.jdbc.version>42.3.3</postgresql.jdbc.version>
+    <postgresql.jdbc.version>42.3.5</postgresql.jdbc.version>
 
     <tomcat.version.major>8</tomcat.version.major>
     <tomcat.version.minor>5</tomcat.version.minor>
@@ -77,6 +78,38 @@
     </profile>
 
   </profiles>
+
+  <build>
+
+    <pluginManagement>
+
+      <plugins>
+
+        <plugin>
+          <groupId>org.alfresco.maven.plugin</groupId>
+          <artifactId>alfresco-maven-plugin</artifactId>
+          <version>${alfresco.sdk.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <!-- Avoid 3+, which is not compatible with the Alfresco SDK -->
+          <version>2.6</version>
+          <dependencies>
+            <dependency>
+              <groupId>org.alfresco.maven.plugin</groupId>
+              <artifactId>alfresco-maven-plugin</artifactId>
+              <version>${alfresco.sdk.version}</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+
+      </plugins>
+
+    </pluginManagement>
+
+  </build>
 
   <dependencyManagement>
 

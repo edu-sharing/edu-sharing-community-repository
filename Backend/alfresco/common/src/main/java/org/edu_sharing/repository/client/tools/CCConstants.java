@@ -473,6 +473,8 @@ public class CCConstants {
 
 	public final static String CCM_PROP_LINKTYPE = "{http://www.campuscontent.de/model/1.0}linktype";
 
+	public final static String CCM_PROP_TOOLPERMISSION_SYSTEM_MANAGED = "{http://www.campuscontent.de/model/1.0}toolpermission_system_managed";
+
 	public final static String CCM_PROP_TOOL_INSTANCE_KEY = "{http://www.campuscontent.de/model/1.0}tool_instance_key";
 
 	public final static String CCM_PROP_TOOL_INSTANCE_SECRET = "{http://www.campuscontent.de/model/1.0}tool_instance_secret";
