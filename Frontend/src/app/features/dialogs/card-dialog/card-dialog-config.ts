@@ -16,8 +16,31 @@ export class CardDialogCardConfig {
     height?: number;
     minHeight?: number | string;
     maxHeight?: number | string = '95%';
-    maximizeThresholdWidth?: number;
-    maximizeThresholdHeight?: number;
+    closable?: Closable = Closable.Casual;
+}
+
+/**
+ * Standard ways for the user to close the dialog, ordered by increasing resistance.
+ */
+export enum Closable {
+    /**
+     * The dialog can be closed by pressing Escape, clicking the 'X' button or clicking the
+     * backdrop.
+     */
+    Casual,
+    /**
+     * The dialog can be closed by pressing Escape or clicking the 'X' button.
+     */
+    Standard,
+    /**
+     * The dialog can be closed by pressing Escape or clicking the 'X' button after confirming a
+     * dialog.
+     */
+    Confirm,
+    /**
+     * The dialog cannot be closed via standard actions.
+     */
+    Disabled,
 }
 
 export type ViewMode = 'mobile' | 'default';
@@ -25,6 +48,10 @@ export type ViewMode = 'mobile' | 'default';
 export class CardDialogState {
     cardConfig$: Observable<CardDialogCardConfig>;
     viewMode$: Observable<ViewMode>;
+
+    get cardConfig() {
+        return this.cardConfigSubject.value;
+    }
 
     private cardConfigSubject: BehaviorSubject<CardDialogCardConfig>;
     private viewModeSubject: BehaviorSubject<ViewMode>;

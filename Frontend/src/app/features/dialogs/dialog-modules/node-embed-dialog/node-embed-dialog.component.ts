@@ -14,14 +14,14 @@ import {
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { first, startWith } from 'rxjs/operators';
+import { first, startWith, take } from 'rxjs/operators';
 import { DialogButton, RestHelper } from 'src/app/core-module/core.module';
 import { Toast, ToastType } from 'src/app/core-ui-module/toast';
 import { UIHelper } from 'src/app/core-ui-module/ui-helper';
 import { Node } from '../../../../core-module/rest/data-object';
 import { MainNavService } from '../../../../main/navigation/main-nav.service';
-import { CardDialogState, CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
-import {  CARD_DIALOG_STATE } from '../../card-dialog/card-dialog.service';
+import { CardDialogState, CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
+import { CARD_DIALOG_STATE } from '../../card-dialog/card-dialog.service';
 
 export interface NodeEmbedDialogData {
     node: Node;
@@ -111,6 +111,10 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
                 );
             }
             this.buttons[0].disabled = !this.form.valid;
+        });
+        // The dialog is closable by backdrop click until any value has been changed.
+        this.form.valueChanges.pipe(take(1)).subscribe(() => {
+            this.dialogState.patchCardConfig({ closable: Closable.Standard });
         });
     }
 

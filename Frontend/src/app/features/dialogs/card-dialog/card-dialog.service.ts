@@ -52,7 +52,7 @@ export class CardDialogService {
         const containerRef = overlayRef.attach(
             new ComponentPortal(CardDialogContainerComponent, undefined, containerInjector),
         );
-        const dialogRef = new CardDialogRef<R>(overlayRef, containerRef.instance);
+        const dialogRef = new CardDialogRef<R>(overlayRef, cardState, containerRef.instance);
         const contentInjector = Injector.create({
             parent: containerInjector,
             providers: [

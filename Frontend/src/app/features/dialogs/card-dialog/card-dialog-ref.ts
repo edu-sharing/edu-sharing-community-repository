@@ -1,8 +1,9 @@
+import { ESCAPE, hasModifierKey } from '@angular/cdk/keycodes';
 import { OverlayRef, OverlaySizeConfig } from '@angular/cdk/overlay';
 import { Observable, Subject } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
+import { CardDialogState, Closable } from './card-dialog-config';
 import { CardDialogContainerComponent } from './card-dialog-container/card-dialog-container.component';
-
 // A lot of this code is copied from
 // https://github.com/angular/components/blob/13.3.x/src/material/dialog/dialog-ref.ts.
 
@@ -14,6 +15,7 @@ export class CardDialogRef<R> {
 
     constructor(
         private overlayRef: OverlayRef,
+        private cardState: CardDialogState,
         private containerInstance: CardDialogContainerComponent,
     ) {
         containerInstance.animationStateChanged
@@ -25,12 +27,12 @@ export class CardDialogRef<R> {
                 clearTimeout(this.closeFallbackTimeout);
                 this.finishDialogClose();
             });
-        containerInstance.triggerClose.subscribe(() => this.close());
         this.overlayRef.detachments().subscribe(() => {
             this.afterClosedSubject.next(this.result);
             this.afterClosedSubject.complete();
             // this.componentInstance = null!;
         });
+        this.registerClose();
     }
 
     close(result?: R): void {
@@ -71,5 +73,38 @@ export class CardDialogRef<R> {
 
     private finishDialogClose(): void {
         this.overlayRef.dispose();
+    }
+
+    private registerClose(): void {
+        this.containerInstance.triggerClose.subscribe(() => {
+            const closable = this.cardState.cardConfig.closable;
+            if (closable <= Closable.Standard) {
+                this.close();
+            } else if (closable <= Closable.Confirm) {
+                // TODO implement
+            }
+        });
+        this.overlayRef
+            .keydownEvents()
+            .pipe(filter((event) => event.keyCode === ESCAPE && !hasModifierKey(event)))
+            .subscribe((event) => {
+                const closable = this.cardState.cardConfig.closable;
+                if (closable <= Closable.Standard) {
+                    event.preventDefault();
+                    this.close();
+                } else if (closable <= Closable.Confirm) {
+                    // TODO implement
+                }
+            });
+
+        this.overlayRef.backdropClick().subscribe(() => {
+            const closable = this.cardState.cardConfig.closable;
+            if (closable <= Closable.Casual) {
+                this.close();
+            } else {
+                // Move focus back to the dialog.
+                this.containerInstance.trapFocus();
+            }
+        });
     }
 }

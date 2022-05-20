@@ -4,8 +4,6 @@ import {
     ConfigurableFocusTrapFactory,
     FocusMonitor,
 } from '@angular/cdk/a11y';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { _getFocusedElementPierceShadowDom } from '@angular/cdk/platform';
 import { CdkPortalOutlet, ComponentPortal } from '@angular/cdk/portal';
 import { DOCUMENT } from '@angular/common';
@@ -26,7 +24,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { UIAnimation } from '../../../../core-module/ui/ui-animation';
 import { CardDialogCardConfig, CardDialogState } from '../card-dialog-config';
-import { CARD_DIALOG_OVERLAY_REF, CARD_DIALOG_STATE } from '../card-dialog.service';
+import { CARD_DIALOG_STATE } from '../card-dialog.service';
 
 let idCounter = 0;
 
@@ -76,6 +74,9 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
     @HostBinding('attr.role') readonly role = 'dialog';
     @HostBinding('class') readonly class = 'mat-elevation-z24';
     @HostBinding('class.card-dialog-mobile') isMobile: boolean;
+    // Make the container focusable, so keyboard shortcuts keep working when the user clicked some
+    // non-interactive element.
+    @HostBinding('attr.tabindex') readonly tabIndex = '-1';
     @HostBinding('attr.aria-labelledby') readonly ariaLabelledby = `card-dialog-title-${this.id}`;
     @HostBinding('attr.aria-describedby')
     readonly ariaDescribedby = `card-dialog-subtitle-${this.id}`;
@@ -87,6 +88,7 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
 
     /** Emits when an animation state changes. */
     readonly animationStateChanged = new EventEmitter<DialogAnimationEvent>();
+    /** Emits when the user clicked the card's 'X' button. */
     readonly triggerClose = new EventEmitter<void>();
 
     private focusTrap: ConfigurableFocusTrap;
@@ -96,10 +98,8 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
 
     constructor(
         @Inject(CARD_DIALOG_STATE) private dialogState: CardDialogState,
-        @Inject(CARD_DIALOG_OVERLAY_REF) private overlayRef: OverlayRef,
+        // @Inject(CARD_DIALOG_OVERLAY_REF) private overlayRef: OverlayRef,
         @Optional() @Inject(DOCUMENT) private document: any,
-        private overlay: Overlay,
-        private breakpointObserver: BreakpointObserver,
         private elementRef: ElementRef<HTMLElement>,
         private focusTrapFactory: ConfigurableFocusTrapFactory,
         private focusMonitor?: FocusMonitor,
@@ -209,7 +209,7 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
         }
     }
 
-    private trapFocus() {
+    trapFocus() {
         // Ensure that focus is on the dialog container. It's possible that a different
         // component tried to move focus while the open animation was running. See:
         // https://github.com/angular/components/issues/16215. Note that we only want to do this
@@ -227,28 +227,8 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
         return element === activeElement || element.contains(activeElement);
     }
 
-    /** Temporarily makes the container focusable and focuses it. */
     private focusContainer(): void {
         const element = this.elementRef.nativeElement;
-        if (!element.hasAttribute('tabindex')) {
-            element.setAttribute('tabindex', '-1');
-            element.addEventListener(
-                'blur',
-                (event) => (event.target as HTMLElement).removeAttribute('tabindex'),
-                { once: true },
-            );
-        }
         element.focus();
     }
-
-    // getSubtitle$(): Observable<string> {
-    //     if (this.cardConfig instanceof Observable) {
-    //         return this.cardConfig;
-    //     } else if (typeof this.cardConfig.subtitle === 'string') {
-    //         // FIXME: This will be called a lot of times
-    //         return rxjs.of(this.cardConfig.subtitle);
-    //     } else {
-    //         return null;
-    //     }
-    // }
 }
