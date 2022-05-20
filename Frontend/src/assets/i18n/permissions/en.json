@@ -120,6 +120,7 @@
             "SAVED": "Permissions have been updated.",
             "ADD": "add",
             "ADDED": "Toolpermission {{name}} added",
+            "SYSTEM_MANAGED_WARNING": "This permissions is initialized and managed via the system config. Any changes made to the permission are lost when restarting",
             "GROUP": {
                 "SHARING": "Sharing",
                 "LICENSING": "Licensing & Publishing",
