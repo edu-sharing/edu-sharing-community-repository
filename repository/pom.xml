@@ -15,6 +15,44 @@
 
   <name>edu_sharing-projects-community-repository</name>
 
+  <properties>
+
+    <alfresco.sdk.version>3.1.0</alfresco.sdk.version>
+
+  </properties>
+
+  <build>
+
+    <pluginManagement>
+
+      <plugins>
+
+        <plugin>
+          <groupId>org.alfresco.maven.plugin</groupId>
+          <artifactId>alfresco-maven-plugin</artifactId>
+          <version>${alfresco.sdk.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <!-- Avoid 3+, which is not compatible with the Alfresco SDK -->
+          <version>2.6</version>
+          <dependencies>
+            <dependency>
+              <groupId>org.alfresco.maven.plugin</groupId>
+              <artifactId>alfresco-maven-plugin</artifactId>
+              <version>${alfresco.sdk.version}</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+
+      </plugins>
+
+    </pluginManagement>
+
+  </build>
+
 <modules>  <module>Backend</module>
     <module>config</module>
     <module>Frontend</module>

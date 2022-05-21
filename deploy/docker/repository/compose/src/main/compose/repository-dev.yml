@@ -3,6 +3,9 @@ version: '3.7'
 services:
 
   repository-service:
+    environment:
+      CACHE_HOST: ""
+      CACHE_PORT: ""
     volumes:
       - "${GIT_ROOT}/repository/Backend/alfresco/module/target/edu_sharing-community-repository-backend-alfresco-module-${org.edu_sharing:edu_sharing-community-repository-backend-alfresco-module:amp.version}.amp:/opt/alfresco/amps/alfresco/0/edu_sharing-community-repository-backend-alfresco-module-${org.edu_sharing:edu_sharing-community-repository-backend-alfresco-module:amp.version}.amp"
       - "${GIT_ROOT}/repository/Backend/services/common/target/edu_sharing-community-repository-backend-services-common-${org.edu_sharing:edu_sharing-community-repository-backend-services-common:jar.version}.jar:/opt/alfresco/tomcat/webapps/edu-sharing/WEB-INF/lib/edu_sharing-community-repository-backend-services-common-${org.edu_sharing:edu_sharing-community-repository-backend-services-common:jar.version}.jar"
