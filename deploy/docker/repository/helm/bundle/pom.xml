@@ -309,6 +309,8 @@
                       if (range.contains('-SNAPSHOT')) {
                         if (range.contains('fixes-')) {
                           range = '~' + range.substring(range.indexOf('fixes-')).replace("fixes-","").replace("-SNAPSHOT","").concat(".0-0")
+                        } else if (range.contains('release-')) {
+                          range = '~' + range.substring(range.indexOf('release-')).replace("release-","").replace("-SNAPSHOT","").concat(".0-0")
                         } else {
                           range = '${git.closest.tag.fallback}'
                         }
@@ -321,6 +323,8 @@
                       if (range.contains('-SNAPSHOT')) {
                         if (range.contains('fixes-')) {
                           range = '~' + range.substring(range.indexOf('fixes-')).replace("fixes-","").replace("-SNAPSHOT","").concat(".0-0")
+                        } else if (range.contains('release-')) {
+                          range = '~' + range.substring(range.indexOf('release-')).replace("release-","").replace("-SNAPSHOT","").concat(".0-0")
                         } else {
                           range = '${git.closest.tag.fallback}'
                         }
@@ -429,6 +433,8 @@
                       if (range.contains('-SNAPSHOT')) {
                         if (range.contains('fixes-')) {
                           range = '~' + range.substring(range.indexOf('fixes-')).replace("fixes-","").replace("-SNAPSHOT","").concat(".0-0")
+                        } else if (range.contains('release-')) {
+                          range = '~' + range.substring(range.indexOf('release-')).replace("release-","").replace("-SNAPSHOT","").concat(".0-0")
                         } else {
                           range = '${git.closest.tag.fallback}'
                         }
