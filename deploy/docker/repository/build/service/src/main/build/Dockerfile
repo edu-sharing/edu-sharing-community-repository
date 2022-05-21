@@ -1,5 +1,6 @@
 FROM ${docker.from.tomcat}
 
+########################################################################################################################
 
 RUN set -eux \
     && apt-get update -y \
@@ -18,6 +19,17 @@ RUN set -eux \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
 
+RUN set -eux \
+    && echo "deb http://deb.debian.org/debian stretch main" >> /etc/apt/sources.list \
+    && apt-get update -y \
+    && apt-get install -y --no-install-recommends \
+        openjdk-8-dbg \
+    && apt-get clean \
+    && rm -r /var/lib/apt/lists/*
+
+ENV JAVA_HOME /usr
+
+########################################################################################################################
 
 ENV ALF_HOME /opt/alfresco
 ENV PATH $ALF_HOME/bin:$PATH

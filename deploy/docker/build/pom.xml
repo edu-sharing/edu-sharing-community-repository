@@ -42,6 +42,7 @@
     <module>minideb</module>
     <module>postgresql</module>
     <module>postgresql_exporter</module>
+    <module>profiler</module>
     <module>redis</module>
     <module>redis_exporter</module>
     <module>rediscluster</module>

@@ -13,6 +13,8 @@ services:
     ports:
       - "${COMMON_BIND_HOST:-127.0.0.1}:${REPOSITORY_SEARCH_SOLR4_PORT_HTTP:-8200}:8080"
       - "${COMMON_BIND_HOST:-127.0.0.1}:${REPOSITORY_SEARCH_SOLR4_PORT_JPDA:-8201}:5005"
+    volumes:
+      - "profiler:/opt/profiler"
 
   repository-service:
     command: ["catalina.sh", "jpda", "run"]
@@ -20,3 +22,5 @@ services:
       JPDA_ADDRESS: "0.0.0.0:5005"
     ports:
       - "${COMMON_BIND_HOST:-127.0.0.1}:${REPOSITORY_SERVICE_PORT_JPDA:-8101}:5005"
+    volumes:
+      - "profiler:/opt/profiler"

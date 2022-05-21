@@ -23,11 +23,11 @@
 
     <php.version.major>8</php.version.major>
     <php.version.minor>1</php.version.minor>
-    <php.version.patch>5</php.version.patch>
+    <php.version.patch>6</php.version.patch>
     <php.version>${php.version.major}.${php.version.minor}.${php.version.patch}</php.version>
 
     <postgresql.version.major>13</postgresql.version.major>
-    <postgresql.version.minor>6</postgresql.version.minor>
+    <postgresql.version.minor>7</postgresql.version.minor>
     <postgresql.version.patch>0</postgresql.version.patch>
     <postgresql.version>${postgresql.version.major}.${postgresql.version.minor}.${postgresql.version.patch}
     </postgresql.version>

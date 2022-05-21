@@ -51,11 +51,34 @@
       ${docker.registry}/mirror/docker.io/tomcat:${tomcat.version}-jdk8-openjdk-bullseye
     </docker.from.tomcat>
 
+    <helm.kube.version>&gt;= 1.18.0</helm.kube.version>
+    <helm.version>3.8.2</helm.version>
+
     <phpredis.version>5.3.7</phpredis.version>
     <prometheus.jmx.version>0.14.0</prometheus.jmx.version>
     <redisson.version>3.17.1</redisson.version>
 
   </properties>
+
+  <build>
+
+    <pluginManagement>
+
+      <plugins>
+
+        <plugin>
+          <groupId>io.kokuwa.maven</groupId>
+          <artifactId>helm-maven-plugin</artifactId>
+          <configuration>
+            <helmVersion>${helm.version}</helmVersion>
+          </configuration>
+        </plugin>
+
+      </plugins>
+
+    </pluginManagement>
+
+  </build>
 
 <modules>  <module>build</module>
     <module>compose</module>
