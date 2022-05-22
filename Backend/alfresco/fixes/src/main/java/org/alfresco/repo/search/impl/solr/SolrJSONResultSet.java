@@ -136,11 +136,35 @@ public class SolrJSONResultSet implements SearchEngineResultSet {
             status = responseHeader.getLong("status");
             queryTime = responseHeader.getLong("QTime");
 
-            JSONObject response = json.getJSONObject("response");
-            numberFound = response.getLong("numFound");
-            start = response.getLong("start");
-            Double d = response.getDouble("maxScore");
-            maxScore = d.floatValue();
+
+            if(json.has("response")) {
+                JSONObject response = json.getJSONObject("response");
+                numberFound = response.getLong("numFound");
+                start = response.getLong("start");
+                Double d = response.getDouble("maxScore");
+                maxScore = d.floatValue();
+            }else if(json.has("grouped")){
+                JSONObject grouped = json.getJSONObject("grouped");
+
+                /**
+                 * @ToDo only the first group by att is used at the moment
+                 */
+                String groupedByName = (String) grouped.names().get(0);
+                logger.info("groupedByName:"+groupedByName);
+                JSONObject groupedByObj = grouped.getJSONObject(groupedByName);
+
+                /**
+                 * take numberfound of ngroups not numFound
+                 */
+                numberFound = groupedByObj.getLong("ngroups");
+                /**
+                 * take from serachParams not response.getLong("start");
+                 */
+                start = (long)searchParameters.getSkipCount();
+            }else{
+                logger.error("no response or grouped part found");
+            }
+
             if (json.has("lastIndexedTx"))
             {
                 lastIndexedTxId = json.getLong("lastIndexedTx");
@@ -149,68 +173,149 @@ public class SolrJSONResultSet implements SearchEngineResultSet {
             {
                 processedDenies = json.getBoolean("processedDenies");
             }
-            JSONArray docs = response.getJSONArray("docs");
 
-            int numDocs = docs.length();
+            Map<Long,NodeRef> dbIdNodeRefs = null;
+            if(json.has("response")) {
+                JSONObject response = json.getJSONObject("response");
+                JSONArray docs = response.getJSONArray("docs");
 
-            ArrayList<Long> rawDbids = new ArrayList<Long>(numDocs);
-            ArrayList<Float> rawScores = new ArrayList<Float>(numDocs);
-            for(int i = 0; i < numDocs; i++)
-            {
-                JSONObject doc = docs.getJSONObject(i);
-                JSONArray dbids = doc.optJSONArray("DBID");
-                if(dbids != null)
-                {
-                    Long dbid = dbids.getLong(0);
-                    Float score = Float.valueOf((float)doc.getDouble("score"));
-                    rawDbids.add(dbid);
-                    rawScores.add(score);
-                }
-                else
-                {
-                    Long dbid = doc.optLong("DBID");
-                    if(dbid != null)
-                    {
-                        Float score = Float.valueOf((float)doc.getDouble("score"));
+                int numDocs = docs.length();
+
+                ArrayList<Long> rawDbids = new ArrayList<Long>(numDocs);
+                ArrayList<Float> rawScores = new ArrayList<Float>(numDocs);
+                for (int i = 0; i < numDocs; i++) {
+                    JSONObject doc = docs.getJSONObject(i);
+                    JSONArray dbids = doc.optJSONArray("DBID");
+                    if (dbids != null) {
+                        Long dbid = dbids.getLong(0);
+                        Float score = Float.valueOf((float) doc.getDouble("score"));
                         rawDbids.add(dbid);
                         rawScores.add(score);
+                    } else {
+                        Long dbid = doc.optLong("DBID");
+                        if (dbid != null) {
+                            Float score = Float.valueOf((float) doc.getDouble("score"));
+                            rawDbids.add(dbid);
+                            rawScores.add(score);
+                        } else {
+                            // No DBID found
+                            throw new QueryParserException("No DBID found for doc ...");
+                        }
                     }
-                    else
-                    {
-                        // No DBID found
-                        throw new QueryParserException("No DBID found for doc ...");
-                    }
+
                 }
 
-            }
-
-            // bulk load
-            if (searchParameters.isBulkFetchEnabled())
-            {
-                nodeDao.cacheNodesById(rawDbids);
-            }
-
-            // filter out rubbish
-
-            page = new ArrayList<Pair<Long, Float>>(numDocs);
-            refs = new ArrayList<NodeRef>(numDocs);
-            Map<Long,NodeRef> dbIdNodeRefs = new HashMap<>(numDocs);
-
-            for(int i = 0; i < numDocs; i++)
-            {
-                Long dbid = rawDbids.get(i);
-                NodeRef nodeRef = nodeService.getNodeRef(dbid);
-
-                if(nodeRef != null)
+                // bulk load
+                if (searchParameters.isBulkFetchEnabled())
                 {
-                    page.add(new Pair<Long, Float>(dbid, rawScores.get(i)));
-                    refs.add(nodeRef);
-                    dbIdNodeRefs.put(dbid, nodeRef);
+                    nodeDao.cacheNodesById(rawDbids);
+                }
+
+                // filter out rubbish
+
+                page = new ArrayList<Pair<Long, Float>>(numDocs);
+                refs = new ArrayList<NodeRef>(numDocs);
+                dbIdNodeRefs = new HashMap<>(numDocs);
+
+                for(int i = 0; i < numDocs; i++)
+                {
+                    Long dbid = rawDbids.get(i);
+                    NodeRef nodeRef = nodeService.getNodeRef(dbid);
+
+                    if(nodeRef != null)
+                    {
+                        page.add(new Pair<Long, Float>(dbid, rawScores.get(i)));
+                        refs.add(nodeRef);
+                        dbIdNodeRefs.put(dbid, nodeRef);
+                    }
+                }
+            }else if(json.has("grouped")){
+                JSONObject grouped = json.getJSONObject("grouped");
+
+                /**
+                 * @ToDo only the first group by att is used at the moment
+                 */
+                String groupedByName = (String) grouped.names().get(0);
+                JSONObject groupedByObj = grouped.getJSONObject(groupedByName);
+                JSONArray groups = groupedByObj.getJSONArray("groups");
+                int numGropus = groups.length();
+                /**
+                 * we expect only one document per group: group.limit=1
+                 */
+                ArrayList<Long> rawDbids = new ArrayList<Long>(groups.length());
+                ArrayList<Float> rawScores = new ArrayList<Float>(groups.length());
+
+                //this should only be one loop
+                for(int g = 0; g < groups.length(); g++){
+                    JSONObject group = groups.getJSONObject(g);
+                    JSONObject doclist = group.getJSONObject("doclist");
+
+                    JSONArray docs = doclist.getJSONArray("docs");
+                    int numDocs = docs.length();
+
+
+                    for(int i = 0; i < numDocs; i++)
+                    {
+                        JSONObject doc = docs.getJSONObject(i);
+                        JSONArray dbids = doc.optJSONArray("DBID");
+                        if(dbids != null)
+                        {
+                            Long dbid = dbids.getLong(0);
+                            Float score = Float.valueOf(doc.getString("score"));
+                            rawDbids.add(dbid);
+                            rawScores.add(score);
+                        }
+                        else
+                        {
+                            Long dbid = doc.optLong("DBID");
+                            if(dbid != null)
+                            {
+                                Float score = Float.valueOf(doc.getString("score"));
+                                rawDbids.add(dbid);
+                                rawScores.add(score);
+                            }
+                            else
+                            {
+                                // No DBID found
+                                throw new QueryParserException("No DBID found for doc ...");
+                            }
+                        }
+
+                    }
+
+                    /*there is always the same maxScore for every group*/
+                    maxScore = Float.valueOf(doclist.getString("maxScore"));
+                }
+
+
+
+                // bulk load
+                if (searchParameters.isBulkFetchEnabled())
+                {
+                    nodeDao.cacheNodesById(rawDbids);
+                }
+
+                // filter out rubbish
+
+                page = new ArrayList<Pair<Long, Float>>(numGropus);
+                refs = new ArrayList<NodeRef>(numGropus);
+                for(int i = 0; i < numGropus; i++)
+                {
+                    Long dbid = rawDbids.get(i);
+                    NodeRef nodeRef = nodeService.getNodeRef(dbid);
+
+                    if(nodeRef != null)
+                    {
+                        page.add(new Pair<Long, Float>(dbid, rawScores.get(i)));
+                        refs.add(nodeRef);
+                    }
                 }
             }
+
+
 
             //Process hightlight response
-            if(json.has("highlighting"))
+            if(json.has("highlighting") && json.has("response"))
             {
                 JSONObject highObj = (JSONObject) json.getJSONObject("highlighting");
                 for(Iterator it = highObj.keys(); it.hasNext(); /**/)
