@@ -32,14 +32,14 @@
   <properties>
 
     <alfresco.pdf-renderer.version>1.1</alfresco.pdf-renderer.version>
-    <alfresco.platform.version>5.2.g</alfresco.platform.version>
-    <alfresco.share.version>5.2.f</alfresco.share.version>
-    <alfresco.sdk.version>3.1.0</alfresco.sdk.version>
+    <alfresco.platform.version>7.2.0.1</alfresco.platform.version>
+    <alfresco.share.version>7.0.0</alfresco.share.version>
+    <alfresco.sdk.version>4.4.0</alfresco.sdk.version>
 
     <!-- release-1 -->
     <bom.repository-repackaged.version>${project.version}</bom.repository-repackaged.version>
 
-    <java.version.range>[1.8.0, 9)</java.version.range>
+    <java.version.range>[11,)</java.version.range>
 
     <node.version>v14.18.1</node.version>
 
@@ -49,9 +49,9 @@
 
     <postgresql.jdbc.version>42.3.3</postgresql.jdbc.version>
 
-    <tomcat.version.major>8</tomcat.version.major>
-    <tomcat.version.minor>5</tomcat.version.minor>
-    <tomcat.version.patch>78</tomcat.version.patch>
+    <tomcat.version.major>9</tomcat.version.major>
+    <tomcat.version.minor>0</tomcat.version.minor>
+    <tomcat.version.patch>63</tomcat.version.patch>
     <tomcat.version>${tomcat.version.major}.${tomcat.version.minor}.${tomcat.version.patch}
     </tomcat.version>
 
@@ -145,7 +145,7 @@
 
       <dependency>
         <groupId>org.alfresco</groupId>
-        <artifactId>alfresco-platform-distribution</artifactId>
+        <artifactId>acs-community-packaging</artifactId>
         <version>${alfresco.platform.version}</version>
         <type>pom</type>
         <scope>import</scope>
