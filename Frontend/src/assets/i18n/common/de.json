@@ -846,7 +846,7 @@
         "RELATION_COPY_HINT": "Es werden Beziehungen einer veröffentlichten Kopie verwaltet. Beachten Sie, dass diese Beziehungen für alle veröffentlichten Versionen als auch das Originalelement gelten.",
         "RELATION_TYPE": {
           "VERSIONS": "Versionen",
-          "FORKED_CHILD": "Hat Varianten",
+          "FORKED_CHILDS": "Hat Varianten",
           "isPartOf": "ist Teil von",
           "isBasedOn": "basiert auf",
           "references": "bezieht sich auf",
