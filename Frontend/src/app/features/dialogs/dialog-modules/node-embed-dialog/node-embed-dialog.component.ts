@@ -6,42 +6,37 @@ import {
     ElementRef,
     HostBinding,
     Inject,
-    InjectionToken,
     NgZone,
     OnDestroy,
     OnInit,
     ViewChild,
 } from '@angular/core';
-import { AuthenticationService, Node, NodeService } from 'ngx-edu-sharing-api';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { pipe, Subject } from 'rxjs';
-import { first, startWith, tap } from 'rxjs/operators';
-import { DialogButton, RestConstants, RestHelper } from 'src/app/core-module/core.module';
+import { Subject } from 'rxjs';
+import { first, startWith, take } from 'rxjs/operators';
+import { DialogButton, RestHelper } from 'src/app/core-module/core.module';
 import { Toast, ToastType } from 'src/app/core-ui-module/toast';
 import { UIHelper } from 'src/app/core-ui-module/ui-helper';
-import { MainNavService } from '../../../main/navigation/main-nav.service';
-import { I } from '@angular/cdk/keycodes';
+import { Node } from '../../../../core-module/rest/data-object';
+import { MainNavService } from '../../../../main/navigation/main-nav.service';
+import { CardDialogState, CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
+import { CARD_DIALOG_STATE } from '../../card-dialog/card-dialog.service';
 
-export interface NodeEmbedConfig {
+export interface NodeEmbedDialogData {
     node: Node;
-    onClose: () => void;
 }
-
-export const NODE_EMBED_CONFIG = new InjectionToken<NodeEmbedConfig>('Node Embed Config');
 
 /**
  * Dialog to generate an embed snippet for a node.
- *
- * Use via `NodeEmbedService`.
  */
 @Component({
-    selector: 'es-node-embed',
-    templateUrl: './node-embed.component.html',
-    styleUrls: ['./node-embed.component.scss'],
+    selector: 'es-node-embed-dialog',
+    templateUrl: './node-embed-dialog.component.html',
+    styleUrls: ['./node-embed-dialog.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NodeEmbedComponent implements OnInit, OnDestroy {
+export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
     @HostBinding('hidden') hidden: string | null = null;
     @ViewChild('textarea') textareaRef: ElementRef<HTMLTextAreaElement>;
 
@@ -68,38 +63,25 @@ export class NodeEmbedComponent implements OnInit, OnDestroy {
     });
 
     embedCode = '';
+    showNotPublicWarning = false;
 
     private readonly destroyed$ = new Subject<void>();
-    isPublic: boolean;
-    canPublish: boolean;
 
     constructor(
-        @Inject(NODE_EMBED_CONFIG) public config: NodeEmbedConfig,
+        @Inject(CARD_DIALOG_DATA) public data: NodeEmbedDialogData,
+        @Inject(CARD_DIALOG_STATE) private dialogState: CardDialogState,
         private changeDetectorRef: ChangeDetectorRef,
         private location: Location,
         private mainNav: MainNavService,
-        private nodeService: NodeService,
-        private authenticationService: AuthenticationService,
         private ngZone: NgZone,
         private router: Router,
         private toast: Toast,
     ) {}
 
     ngOnInit(): void {
+        this.dialogState.patchCardConfig({ buttons: this.buttons });
         this.registerFormChanges();
-        this.updateIsPublic(this.config.node);
-        this.updateSharingPermissions();
-    }
-    async updateSharingPermissions() {
-        const info = await this.authenticationService.observeLoginInfo().pipe(first()).toPromise();
-        this.canPublish = 
-            info.toolPermissions.includes(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES) &&
-            this.config.node.access?.includes(RestConstants.PERMISSION_WRITE);
-        this.changeDetectorRef.detectChanges();
-    }
-    updateIsPublic(node: Node) {
-        this.isPublic = node.isPublic;
-        this.changeDetectorRef.detectChanges();
+        this.registerNotPublicWarning();
     }
 
     ngOnDestroy(): void {
@@ -111,17 +93,11 @@ export class NodeEmbedComponent implements OnInit, OnDestroy {
         // We cannot show the invite dialog on top of this dialog, since this dialog is attached via
         // a `cdkOverlay`, so instead, we just hide this dialog until the invite dialog is closed.
         this.hidden = 'true';
-        this.mainNav.getDialogs().nodeShare = [this.config.node];
+        this.mainNav.getDialogs().nodeShare = [this.data.node];
         this.mainNav
             .getDialogs()
-            .nodeShareChange.pipe(
-                first((value) => !value),
-                tap((event) => console.log(this.config.node)),
-                // update node to check if "isPublic" has changed
-                tap(async () => 
-                    this.updateIsPublic(await this.nodeService.getNode(this.config.node.ref.repo, this.config.node.ref.id).toPromise())
-                ),
-            ).subscribe(() => (this.hidden = null));
+            .nodeShareChange.pipe(first((value) => !value))
+            .subscribe(() => (this.hidden = null));
     }
 
     private registerFormChanges(): void {
@@ -136,6 +112,18 @@ export class NodeEmbedComponent implements OnInit, OnDestroy {
             }
             this.buttons[0].disabled = !this.form.valid;
         });
+        // The dialog is closable by backdrop click until any value has been changed.
+        this.form.valueChanges.pipe(take(1)).subscribe(() => {
+            this.dialogState.patchCardConfig({ closable: Closable.Standard });
+        });
+    }
+
+    private registerNotPublicWarning() {
+        // TODO
+        //
+        // observeIsPublic(node)
+        //     .pipe(takeUntil(this.destroyed$))
+        //     .subscribe((isPublic) => (this.showNotPublicWarning = !isPublic));
     }
 
     private async copy(): Promise<void> {
@@ -148,7 +136,7 @@ export class NodeEmbedComponent implements OnInit, OnDestroy {
     }
 
     private getEmbedCode(values: any): string {
-        const node = this.config.node;
+        const node = this.data.node;
         // We use `createElement` to have attributes sanitized. Note that occurrences of `&` in the
         // attribute `src` are rightfully escaped to `&amp;`.
         const iFrame = document.createElement('iframe');
