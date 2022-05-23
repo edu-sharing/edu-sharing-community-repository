@@ -11,19 +11,19 @@ import {combineLatest, Observable} from 'rxjs';
 import {FormControl} from '@angular/forms';
 import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
 import {debounceTime, map, switchMap} from 'rxjs/operators';
-import {RestSearchService} from '../../../core-module/rest/services/rest-search.service';
-import {Node, NodesRightMode, SearchRequestCriteria} from '../../../core-module/rest/data-object';
-import {RestConstants} from '../../../core-module/rest/rest-constants';
+import {RestSearchService} from '../../core-module/rest/services/rest-search.service';
+import {Node, NodesRightMode, SearchRequestCriteria} from '../../core-module/rest/data-object';
+import {RestConstants} from '../../core-module/rest/rest-constants';
+import {MdsHelper} from '../../core-module/rest/mds-helper';
+import {RestMdsService} from '../../core-module/rest/services/rest-mds.service';
+import {TranslateService} from '@ngx-translate/core';
+import {ListItem} from '../../core-module/ui/list-item';
+import {NodeHelperService} from '../../core-ui-module/node-helper.service';
+import {animate, state, style, transition, trigger} from '@angular/animations';
+import {UIAnimation} from '../../core-module/ui/ui-animation';
 import {
     MdsEditorWrapperComponent
-} from '../../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
-import {MdsHelper} from '../../../core-module/rest/mds-helper';
-import {RestMdsService} from '../../../core-module/rest/services/rest-mds.service';
-import {TranslateService} from '@ngx-translate/core';
-import {ListItem} from '../../../core-module/ui/list-item';
-import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
-import {animate, state, style, transition, trigger} from '@angular/animations';
-import {UIAnimation} from '../../../core-module/ui/ui-animation';
+} from "../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component";
 
 
 @Component({

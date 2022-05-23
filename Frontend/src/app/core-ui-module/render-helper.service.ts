@@ -15,10 +15,9 @@ import {
 } from './components/node-entries-wrapper/node-entries-wrapper.component';
 import {SpinnerComponent} from '../shared/components/spinner/spinner.component';
 import {UIHelper} from './ui-helper';
-import {SpinnerSmallComponent} from './components/spinner-small/spinner-small.component';
 import {
     MdsNodeRelationsWidgetComponent
-} from '../features/mds/mds-viewer/widget/node-relations/node-relations-widget.component';
+} from '../common/ui/node-render/node-relations/node-relations-widget.component';
 import { replaceElementWithDiv } from '../features/mds/mds-editor/util/replace-element-with-div';
 import { MdsEditorWrapperComponent } from '../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 

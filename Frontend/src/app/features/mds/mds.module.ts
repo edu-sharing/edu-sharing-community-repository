@@ -43,9 +43,7 @@ import { MdsEditorWidgetVersionComponent } from './mds-editor/widgets/mds-editor
 import { MdsEditorWidgetTinyMCE } from './mds-editor/widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-tinymce.component';
 import { MdsViewerComponent } from './mds-viewer/mds-viewer.component';
 import { MdsWidgetComponent } from './mds-viewer/widget/mds-widget.component';
-import {
-    MdsNodeRelationsWidgetComponent
-} from "./mds-viewer/widget/node-relations/node-relations-widget.component";
+import {MatFormFieldModule} from "@angular/material/form-field";
 
 @NgModule({
     declarations: [
@@ -86,17 +84,15 @@ import {
         MdsEditorWidgetVersionComponent,
         MdsEditorWrapperComponent,
         MdsViewerComponent,
-        MdsNodeRelationsWidgetComponent,
         MdsWidgetComponent,
         PropertySlugPipe,
         RegisterFormFieldDirective,
         SearchFieldFacetsComponent,
     ],
-    imports: [SharedModule, NgxSliderModule, EditorModule],
+    imports: [SharedModule, NgxSliderModule, EditorModule, MatFormFieldModule],
     exports: [
         MdsComponent,
         MdsEditorWidgetAuthorComponent,
-        MdsNodeRelationsWidgetComponent,
         MdsEditorWrapperComponent,
         MdsViewerComponent,
     ],

@@ -7,27 +7,26 @@ import {
     SimpleChanges,
     ViewChild
 } from '@angular/core';
-import {MdsEditorWidgetBase, ValueType} from '../../../mds-editor/widgets/mds-editor-widget-base';
-import {RestConstants} from '../../../../../core-module/rest/rest-constants';
-import {ViewInstanceService} from '../../../mds-editor/mds-editor-view/view-instance.service';
-import {MdsEditorInstanceService, Widget} from '../../../mds-editor/mds-editor-instance.service';
-import {MdsWidgetComponent} from '../mds-widget.component';
+import {MdsEditorWidgetBase, ValueType} from '../../../../features/mds/mds-editor/widgets/mds-editor-widget-base';
+import {RestConstants} from '../../../../core-module/rest/rest-constants';
+import {ViewInstanceService} from '../../../../features/mds/mds-editor/mds-editor-view/view-instance.service';
+import {MdsEditorInstanceService, Widget} from '../../../../features/mds/mds-editor/mds-editor-instance.service';
+import {MdsWidgetComponent} from '../../../../features/mds/mds-viewer/widget/mds-widget.component';
 import {
     MdsEditorViewComponent
-} from '../../../mds-editor/mds-editor-view/mds-editor-view.component';
+} from '../../../../features/mds/mds-editor/mds-editor-view/mds-editor-view.component';
 import {DatePipe} from '@angular/common';
-import {DateHelper} from '../../../../../core-ui-module/DateHelper';
-import {MdsWidgetType} from '../../../mds-editor/types';
+import {DateHelper} from '../../../../core-ui-module/DateHelper';
 import {TranslateService} from '@ngx-translate/core';
-import {FormatSizePipe} from '../../../../../core-ui-module/pipes/file-size.pipe';
-import {RestHelper} from '../../../../../core-module/rest/rest-helper';
-import {Node} from '../../../../../core-module/rest/data-object';
+import {FormatSizePipe} from '../../../../core-ui-module/pipes/file-size.pipe';
+import {RestHelper} from '../../../../core-module/rest/rest-helper';
+import {Node} from '../../../../core-module/rest/data-object';
 import {
     RelationService,
     NodeService,
     RelationData
 } from 'ngx-edu-sharing-api';
-import {ListItem} from '../../../../../core-module/ui/list-item';
+import {ListItem} from '../../../../core-module/ui/list-item';
 import {forkJoin as observableForkJoin} from 'rxjs';
 
 @Component({
@@ -57,11 +56,10 @@ export class MdsNodeRelationsWidgetComponent implements OnInit, OnChanges {
     }
 
     ngOnChanges(changes?: SimpleChanges) {
-        console.log(this.node);
         if (this.node) {
             observableForkJoin([
                 this.nodeService.getForkedChilds(this.node.ref.id),
-                this.nodeService.getPublishedCopies(this.node.ref.id)
+                this.nodeService.getPublishedCopies(this.node.ref.id),
                 this.relationService.getRelations(this.node.ref.id),
             ]).subscribe(
                 (result) => {
