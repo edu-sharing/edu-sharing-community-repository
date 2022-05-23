@@ -158,7 +158,6 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
     infoMessage: string;
     infoButtons: DialogButton[];
     infoClose: Function;
-    nodeReport: Node;
     collectionsColumns: ListItem[] = [];
     referencesColumns: ListItem[] = [];
     createSubCollectionOptionItem = new OptionItem(

@@ -213,7 +213,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
   public nodeDelete: Node[];
   public nodeVariant: Node;
   public addToCollection: Node[];
-  public nodeReport: Node;
   private editor: string;
   private fromLogin = false;
   public banner: any;

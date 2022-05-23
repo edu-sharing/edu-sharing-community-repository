@@ -144,8 +144,6 @@ export class WorkspaceManagementDialogsComponent  {
     @Output() nodeWorkflowChange = new EventEmitter();
     @Input() signupGroup : boolean;
     @Output() signupGroupChange = new EventEmitter<boolean>();
-  @Input() nodeReport : Node;
-  @Output() nodeReportChange = new EventEmitter();
   @Input() addNodesStream : Node[];
   @Output() addNodesStreamChange = new EventEmitter();
     @Input() nodeVariant : Node;
@@ -258,12 +256,6 @@ export class WorkspaceManagementDialogsComponent  {
       }
       if(this.showLtiTools){
         this.closeLtiTools();
-        event.preventDefault();
-        event.stopPropagation();
-        return;
-      }
-      if(this.nodeReport!=null){
-        this.closeReport();
         event.preventDefault();
         event.stopPropagation();
         return;
@@ -523,10 +515,6 @@ export class WorkspaceManagementDialogsComponent  {
   public closeStream() {
     this.addNodesStream=null;
     this.addNodesStreamChange.emit(null);
-  }
-  public closeReport() {
-    this.nodeReport=null;
-    this.nodeReportChange.emit(null);
   }
     public closeVariant() {
         this.nodeVariant=null;

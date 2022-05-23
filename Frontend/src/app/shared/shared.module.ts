@@ -55,6 +55,7 @@ import { OptionTooltipPipe } from './pipes/option-tooltip.pipe';
 import { ReplaceCharsPipe } from './pipes/replace-chars.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { VCardNamePipe } from './pipes/vcard-name.pipe';
+import { NodeTitlePipe } from './pipes/node-title.pipe';
 
 @NgModule({
     declarations: [
@@ -90,6 +91,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         VCardNamePipe,
         WorkspaceCreateConnector,
         SafeHtmlPipe,
+        NodeTitlePipe,
     ],
     imports: [
         A11yModule,
@@ -165,6 +167,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         VCardNamePipe,
         WorkspaceCreateConnector,
         SafeHtmlPipe,
+        NodeTitlePipe,
     ],
 })
 export class SharedModule {}

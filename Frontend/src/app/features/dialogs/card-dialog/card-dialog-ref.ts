@@ -86,7 +86,10 @@ export class CardDialogRef<R> {
         });
         this.overlayRef
             .keydownEvents()
-            .pipe(filter((event) => event.keyCode === ESCAPE && !hasModifierKey(event)))
+            .pipe(
+                filter(() => !this.cardState.loading.value),
+                filter((event) => event.keyCode === ESCAPE && !hasModifierKey(event)),
+            )
             .subscribe((event) => {
                 const closable = this.cardState.cardConfig.closable;
                 if (closable <= Closable.Standard) {
@@ -97,14 +100,17 @@ export class CardDialogRef<R> {
                 }
             });
 
-        this.overlayRef.backdropClick().subscribe(() => {
-            const closable = this.cardState.cardConfig.closable;
-            if (closable <= Closable.Casual) {
-                this.close();
-            } else {
-                // Move focus back to the dialog.
-                this.containerInstance.trapFocus();
-            }
-        });
+        this.overlayRef
+            .backdropClick()
+            .pipe(filter(() => !this.cardState.loading.value))
+            .subscribe(() => {
+                const closable = this.cardState.cardConfig.closable;
+                if (closable <= Closable.Casual) {
+                    this.close();
+                } else {
+                    // Move focus back to the dialog.
+                    this.containerInstance.trapFocus();
+                }
+            });
     }
 }

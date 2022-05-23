@@ -986,7 +986,7 @@ export class OptionsHelperService implements OnDestroy {
         options.push(report);
          */
         const reportNode = new OptionItem('OPTIONS.NODE_REPORT', 'flag', (node) =>
-            management.nodeReport = this.getObjects(node)[0]
+            this.dialogs.openNodeReportDialog({ node: this.getObjects(node)[0] })
         );
         reportNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         reportNode.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository];

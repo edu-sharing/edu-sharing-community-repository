@@ -22,8 +22,9 @@ import {
 } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { DialogButton } from '../../../../core-module/core.module';
 import { UIAnimation } from '../../../../core-module/ui/ui-animation';
-import { CardDialogCardConfig, CardDialogState } from '../card-dialog-config';
+import { CardDialogCardConfig, CardDialogState, Closable } from '../card-dialog-config';
 import { CARD_DIALOG_STATE } from '../card-dialog.service';
 
 let idCounter = 0;
@@ -85,6 +86,8 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
     @ViewChild(CdkPortalOutlet, { static: true }) portalOutlet: CdkPortalOutlet;
 
     cardConfig: CardDialogCardConfig = {};
+    buttons: DialogButton[];
+    isLoading = false;
 
     /** Emits when an animation state changes. */
     readonly animationStateChanged = new EventEmitter<DialogAnimationEvent>();
@@ -106,14 +109,30 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit(): void {
-        this.dialogState.cardConfig$
-            .pipe(takeUntil(this.destroyed$))
-            .subscribe((cardConfig) =>
-                Promise.resolve().then(() => (this.cardConfig = cardConfig)),
-            );
+        this.dialogState.cardConfig$.pipe(takeUntil(this.destroyed$)).subscribe((cardConfig) =>
+            Promise.resolve().then(() => {
+                this.cardConfig = cardConfig;
+                this.updateButtons();
+            }),
+        );
         this.dialogState.viewMode$
             .pipe(takeUntil(this.destroyed$))
             .subscribe((viewMode) => (this.isMobile = viewMode === 'mobile'));
+        this.dialogState.loading.pipe(takeUntil(this.destroyed$)).subscribe((isLoading) => {
+            this.updateButtons();
+            this.isLoading = isLoading;
+        });
+    }
+
+    private updateButtons(): void {
+        if (this.dialogState.loading.value) {
+            this.buttons = this.cardConfig.buttons?.map((button) => ({
+                ...button,
+                disabled: true,
+            }));
+        } else {
+            this.buttons = this.cardConfig.buttons;
+        }
     }
 
     ngOnDestroy(): void {
@@ -160,6 +179,10 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
 
     close(): void {
         this.triggerClose.next();
+    }
+
+    shouldShowCloseButton(): boolean {
+        return this.cardConfig.closable <= Closable.Confirm;
     }
 
     /** Starts the dialog exit animation. */

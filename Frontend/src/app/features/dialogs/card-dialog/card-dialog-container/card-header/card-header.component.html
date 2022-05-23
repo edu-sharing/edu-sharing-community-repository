@@ -10,8 +10,13 @@
   </p>
 </div>
 
-<div class="card-dialog-close-button-box" *ngIf="!disableClose">
-  <button class="card-dialog-close-button" mat-icon-button (click)="onClose()">
+<div class="card-dialog-close-button-box" *ngIf="showCloseButton">
+  <button
+    class="card-dialog-close-button"
+    mat-icon-button
+    [disabled]="disableCloseButton"
+    (click)="onClose()"
+  >
     <i esIcon="close" [aria]="true"></i>
   </button>
 </div>

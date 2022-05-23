@@ -10,6 +10,7 @@ export class CardDialogCardConfig {
     subtitle?: string;
     avatar?: CardAvatar;
     buttons?: DialogButton[];
+    contentPadding?: number = 25;
     width?: number;
     minWidth?: number | string;
     maxWidth?: number | string = '95%';
@@ -48,6 +49,8 @@ export type ViewMode = 'mobile' | 'default';
 export class CardDialogState {
     cardConfig$: Observable<CardDialogCardConfig>;
     viewMode$: Observable<ViewMode>;
+    // TODO: consistent naming
+    loading = new BehaviorSubject<boolean>(false);
 
     get cardConfig() {
         return this.cardConfigSubject.value;

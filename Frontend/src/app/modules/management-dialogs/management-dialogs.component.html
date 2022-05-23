@@ -116,13 +116,6 @@
                       (onLoading)="globalProgress=$event"
                       (onClose)="closeShareLink()"
 ></es-workspace-share-link>
-<es-node-report
-  *ngIf="nodeReport"
-  [node]="nodeReport"
-  (onLoading)="globalProgress=$event"
-  (onCancel)="closeReport()"
-  (onDone)="closeReport()"
-></es-node-report>
 <es-node-variant
         *ngIf="nodeVariant"
         [node]="nodeVariant"

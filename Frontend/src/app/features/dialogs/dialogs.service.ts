@@ -6,6 +6,7 @@ import { CardDialogCardConfig } from './card-dialog/card-dialog-config';
 import { CardDialogRef } from './card-dialog/card-dialog-ref';
 import { CardDialogService } from './card-dialog/card-dialog.service';
 import { NodeEmbedDialogData } from './dialog-modules/node-embed-dialog/node-embed-dialog.component';
+import { NodeReportDialogData } from './dialog-modules/node-report-dialog/node-report/node-report.component';
 import { QrDialogData } from './dialog-modules/qr-dialog/qr-dialog.component';
 
 @Injectable({
@@ -20,6 +21,7 @@ export class DialogsService {
             cardConfig: {
                 title: 'OPTIONS.QR_CODE',
                 ...this.cardWithNode(data.node),
+                contentPadding: 0,
             },
             data,
         });
@@ -35,6 +37,20 @@ export class DialogsService {
                 ...this.cardWithNode(data.node),
                 // Set size via NodeEmbedDialogComponent, so it can choose fitting values for its
                 // responsive layouts.
+                contentPadding: 0,
+            },
+            data,
+        });
+    }
+
+    async openNodeReportDialog(data: NodeReportDialogData): Promise<CardDialogRef<void>> {
+        const { NodeReportComponent } = await import(
+            './dialog-modules/node-report-dialog/node-report-dialog.module'
+        );
+        return this.cardDialog.open(NodeReportComponent, {
+            cardConfig: {
+                title: 'NODE_REPORT.TITLE',
+                ...this.cardWithNode(data.node),
             },
             data,
         });

@@ -57,7 +57,7 @@ export class CardDialogService {
             parent: containerInjector,
             providers: [
                 { provide: CARD_DIALOG_DATA, useValue: config.data },
-                // { provide: CardDialogRef, useValue: dialogRef },
+                { provide: CardDialogRef, useValue: dialogRef },
             ],
         });
         containerRef.instance.attachComponentPortal(

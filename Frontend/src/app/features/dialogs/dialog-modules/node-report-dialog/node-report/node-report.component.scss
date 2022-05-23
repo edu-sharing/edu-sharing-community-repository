@@ -1,4 +1,4 @@
-@import '../../../core-ui-module/styles/variables';
+@import '../../../../../core-ui-module/styles/variables';
 
 .report {
     margin-bottom: 20px;
@@ -16,7 +16,7 @@ mat-form-field {
 }
 
 h2 {
-    margin: 1.14rem 0 20px 0;
+    margin: 0 0 20px 0;
     font-size: 110%;
     font-weight: bold;
     color: $textLight;

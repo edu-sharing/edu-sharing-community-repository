@@ -62,7 +62,6 @@ import {NodeEntriesWrapperComponent} from './components/node-entries-wrapper/nod
 import {NodeEntriesCardGridComponent} from './components/node-entries/node-entries-card-grid/node-entries-card-grid.component';
 import {NodeEntriesCardComponent} from './components/node-entries/node-entries-card/node-entries-card.component';
 import {NodeImagePipe} from './pipes/node-image.pipe';
-import {NodeTitlePipe} from './pipes/node-title.pipe';
 import {OptionButtonComponent} from './components/option-button/option-button.component';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {NodeEntriesDragDirective} from './directives/node-entries-drag';
@@ -111,7 +110,6 @@ import { SharedModule } from '../shared/shared.module';
         UrlPipe,
         NodeImagePipe,
         NodeSourcePipe,
-        NodeTitlePipe,
         NodesDragSourceDirective,
         NodesDropTargetDirective,
         ImageConfigDirective,
@@ -193,7 +191,6 @@ import { SharedModule } from '../shared/shared.module';
         ListCollectionInfoComponent,
         ListBaseComponent,
         ListTextComponent,
-        NodeTitlePipe,
         TitleDirective,
         NodeEntriesWrapperComponent,
         DragCursorDirective,

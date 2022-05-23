@@ -1,15 +1,16 @@
 import { trigger } from '@angular/animations';
 import {
     ChangeDetectionStrategy,
+    ChangeDetectorRef,
     Component,
     ElementRef,
-    EventEmitter,
-    Input,
-    Output,
+    Inject,
+    OnInit,
     ViewChild,
 } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
+import { filter, take, tap } from 'rxjs/operators';
 import {
     DialogButton,
     LoginResult,
@@ -17,9 +18,20 @@ import {
     RestConnectorService,
     RestIamService,
     RestNodeService,
-} from '../../../core-module/core.module';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import { Toast } from '../../../core-ui-module/toast';
+} from '../../../../../core-module/core.module';
+import { UIAnimation } from '../../../../../core-module/ui/ui-animation';
+import { Toast } from '../../../../../core-ui-module/toast';
+import {
+    CardDialogState,
+    CARD_DIALOG_DATA,
+    Closable,
+} from '../../../card-dialog/card-dialog-config';
+import { CardDialogRef } from '../../../card-dialog/card-dialog-ref';
+import { CARD_DIALOG_STATE } from '../../../card-dialog/card-dialog.service';
+
+export interface NodeReportDialogData {
+    node: Node;
+}
 
 @Component({
     selector: 'es-node-report',
@@ -31,24 +43,10 @@ import { Toast } from '../../../core-ui-module/toast';
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NodeReportComponent {
+export class NodeReportComponent implements OnInit {
     readonly reasons = ['UNAVAILABLE', 'INAPPROPRIATE_CONTENT', 'INVALID_METADATA', 'OTHER'];
 
-    private _node: Node;
-    @Input() set node(node: Node) {
-        this._node = node;
-    }
-    get node() {
-        return this._node;
-    }
-
-    @Output() onCancel = new EventEmitter();
-    @Output() onLoading = new EventEmitter();
-    @Output() onDone = new EventEmitter();
-
     @ViewChild('formElement') formRef: ElementRef<HTMLFormElement>;
-
-    buttons: DialogButton[];
 
     readonly form = new FormGroup({
         reason: new FormControl('', Validators.required),
@@ -57,16 +55,25 @@ export class NodeReportComponent {
     });
 
     constructor(
+        @Inject(CARD_DIALOG_DATA) public data: NodeReportDialogData,
+        @Inject(CARD_DIALOG_STATE) private dialogState: CardDialogState,
+        private dialogRef: CardDialogRef<void>,
         private connector: RestConnectorService,
         private iam: RestIamService,
         private translate: TranslateService,
         private toast: Toast,
         private nodeApi: RestNodeService,
-    ) {
-        this.buttons = [
-            new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel()),
-            new DialogButton('NODE_REPORT.REPORT', { color: 'primary' }, () => this.report()),
-        ];
+        private cdr: ChangeDetectorRef,
+    ) {}
+
+    ngOnInit(): void {
+        this.dialogState.patchCardConfig({
+            buttons: [
+                new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel()),
+                new DialogButton('NODE_REPORT.REPORT', { color: 'primary' }, () => this.report()),
+            ],
+        });
+        // Pre-fill the email field for logged-in users.
         this.connector.isLoggedIn().subscribe((data: LoginResult) => {
             if (!data.isGuest) {
                 this.form.get('email').disable();
@@ -75,42 +82,44 @@ export class NodeReportComponent {
                 });
             }
         });
+        // Disable close by backdrop click as soon as the user enters any value .
+        this.form.valueChanges
+            .pipe(
+                filter((values) => Object.values(values).some((value) => !!value)),
+                take(1),
+            )
+            .subscribe(() => this.dialogState.patchCardConfig({ closable: Closable.Standard }));
     }
 
     cancel() {
-        this.onCancel.emit();
-    }
-
-    done() {
-        this.onDone.emit();
+        this.dialogRef.close();
     }
 
     shouldShowError(field: string) {
         const fieldControl = this.form.get(field);
-        return fieldControl.touched && !fieldControl.valid;
+        return !fieldControl.disabled && fieldControl.touched && !fieldControl.valid;
     }
 
     report() {
         if (this.form.valid) {
             // Include value for possibly disabled email field.
             const value = this.form.getRawValue();
-            this.onLoading.emit(true);
+            this.setLoading(true);
             this.nodeApi
                 .reportNode(
-                    this.node.ref.id,
+                    this.data.node.ref.id,
                     this.getReasonAsString(value.reason),
                     value.email,
                     value.comment,
-                    this.node.ref.repo,
+                    this.data.node.ref.repo,
                 )
                 .subscribe(
                     () => {
                         this.toast.toast('NODE_REPORT.DONE');
-                        this.onLoading.emit(false);
-                        this.onDone.emit();
+                        this.dialogRef.close();
                     },
                     (error: any) => {
-                        this.onLoading.emit(false);
+                        this.setLoading(false);
                         this.toast.error(error);
                     },
                 );
@@ -120,9 +129,19 @@ export class NodeReportComponent {
                 if (!control.valid) {
                     control.markAsTouched();
                     this.focusField(field);
+                    this.cdr.detectChanges();
                     break;
                 }
             }
+        }
+    }
+
+    setLoading(isLoading: boolean): void {
+        this.dialogState.loading.next(isLoading);
+        if (isLoading) {
+            this.form.disable();
+        } else {
+            this.form.enable();
         }
     }
 

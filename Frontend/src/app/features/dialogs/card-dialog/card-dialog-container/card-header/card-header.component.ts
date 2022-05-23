@@ -14,7 +14,8 @@ export class CardHeaderComponent {
     @Input() title: string;
     @Input() subtitle?: string;
     @Input() avatar?: CardAvatar;
-    @Input() disableClose: boolean = false;
+    @Input() showCloseButton: boolean = true;
+    @Input() disableCloseButton: boolean = false;
     @Output() triggerClose: EventEmitter<void> = new EventEmitter();
 
     getIconImageUrl(): string {
