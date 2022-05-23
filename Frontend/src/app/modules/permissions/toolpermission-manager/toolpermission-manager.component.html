@@ -26,9 +26,9 @@
                   <div *ngIf="group.name=='CONNECTORS'">{{('TOOLPERMISSION.TOOLPERMISSION_CONNECTOR'+(getTpSafe(key) ? '_SAFE' : '')) | translate:{connector:getTpConnector(key)} }}</div>
                   <div *ngIf="group.name=='REPOSITORIES'">{{('TOOLPERMISSION.TOOLPERMISSION_REPOSITORY') | translate:{repository:getTpRepository(key)} }}</div>
                   <div class="technicalName">{{key}}</div>
-                  <info-message *ngIf="permissions[key]?.systemManaged" mode="warning">
+                  <es-info-message *ngIf="permissions[key]?.systemManaged" mode="warning">
                     {{('PERMISSIONS.TOOLPERMISSIONS.SYSTEM_MANAGED_WARNING') | translate }}
-                  </info-message>
+                  </es-info-message>
               </div>
               <div class="checkboxDiv checkboxInput"><mat-checkbox [disabled]="changing.indexOf(key)!=-1" [(ngModel)]="allow[key]" name="allow{{key}}" (change)="deny[key]=false;change(key)"></mat-checkbox></div>
               <div class="checkboxDiv checkboxInput" *ngIf="_authority.authorityType!='EVERYONE'"><mat-checkbox [disabled]="changing.indexOf(key)!=-1" [(ngModel)]="deny[key]" name="deny{{key}}" (change)="allow[key]=false;change(key)"></mat-checkbox></div>              <div class="result" [class.allowed]="getEffective(key)=='ALLOWED'" [class.denied]="getEffective(key)!='ALLOWED'">
