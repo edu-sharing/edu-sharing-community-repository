@@ -606,6 +606,9 @@
           "isDirectory": {
             "type": "boolean"
           },
+          "isPublic": {
+            "type": "boolean"
+          },
           "license": {
             "$ref": "#/components/schemas/License"
           },
@@ -2682,6 +2685,9 @@
           "isDirectory": {
             "type": "boolean"
           },
+          "isPublic": {
+            "type": "boolean"
+          },
           "license": {
             "$ref": "#/components/schemas/License"
           },
@@ -2815,6 +2821,9 @@
             "type": "string"
           },
           "isDirectory": {
+            "type": "boolean"
+          },
+          "isPublic": {
             "type": "boolean"
           },
           "license": {
@@ -5462,6 +5471,12 @@
         "properties": {
           "description": {
             "type": "string"
+          },
+          "duplicateNodes": {
+            "items": {
+              "$ref": "#/components/schemas/Node"
+            },
+            "type": "array"
           },
           "keywords": {
             "items": {
