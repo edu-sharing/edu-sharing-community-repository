@@ -24,4 +24,4 @@ export * from './lib/wrappers/relation.service';
 // Exporting services here indicates that these services are safe to use and don't interfere with
 // any wrappers. If you make assumptions in wrappers about what API calls have been made, make sure
 // to not expose these API calls here, but instead provide a wrapper that keeps track of calls.
-export { MdsV1Service, StreamV1Service } from './lib/api/services';
+export { MdsV1Service, StreamV1Service, ClientutilsV1Service } from './lib/api/services';
