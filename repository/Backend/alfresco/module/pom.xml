@@ -126,4 +126,76 @@
 
   </dependencies>
 
+  <profiles>
+
+    <profile>
+
+      <id>ant.build</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <file>
+          <exists>build.xml</exists>
+        </file>
+      </activation>
+
+      <build>
+
+        <plugins>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-clean-plugin</artifactId>
+            <configuration>
+              <filesets>
+                <fileset>
+                  <directory>src/generated</directory>
+                </fileset>
+              </filesets>
+            </configuration>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>unpack-dependencies</goal>
+                </goals>
+                <phase>generate-sources</phase>
+                <configuration>
+                  <includeArtifactIds>edu_sharing-community-repository-backend-alfresco-module</includeArtifactIds>
+                  <outputDirectory>src/generated/amp</outputDirectory>
+                  <classifier>sources</classifier>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>process-resources</phase>
+                <configuration>
+                  <target name="build">
+                    <ant antfile="build.xml" />
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+        </plugins>
+
+      </build>
+
+    </profile>
+
+  </profiles>
+
 </project>
