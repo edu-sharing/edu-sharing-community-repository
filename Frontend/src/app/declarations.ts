@@ -31,9 +31,6 @@
   import {AccessibilityComponent} from './common/ui/accessibility/accessibility.component';
   import {MatConfirmGroupComponent} from './common/ui/mat-confirm-group/mat-confirm-group.component';
   import { ScrollToTopButtonComponent } from './common/ui/scroll-to-top-button/scroll-to-top-button.component';
-  import {
-      NodeSearchSelectorComponent
-  } from "./modules/node-search-selector/node-search-selector.component";
 
   export const DECLARATIONS = [
       MdsTestComponent,
@@ -54,7 +51,6 @@
       ScrollToTopButtonComponent,
       GlobalContainerComponent,
       RocketchatComponent,
-      NodeSearchSelectorComponent,
       RouterComponent,
       InfobarComponent,
       NodeRenderComponent,

@@ -20,7 +20,6 @@ import {LicenseSourceComponent} from "./license/license-source/license-source.co
 import {MapLinkComponent} from './map-link/map-link.component';
 import {SignupGroupComponent} from './signup-group/signup-group.component';
 import {NodeSearchSelectorComponent} from './node-search-selector/node-search-selector.component';
-import {NodeRowComponent} from './node-search-selector/node-row/node-row.component';
 import {
     NodeRelationManagerComponent
 } from './node-relation-manager/node-relation-manager.component';
@@ -39,7 +38,6 @@ export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   NodeRelationManagerComponent,
   CommentsListComponent,
   NodeSearchSelectorComponent,
-  NodeRowComponent,
   AddStreamComponent,
   NodeVariantComponent,
   MapLinkComponent,

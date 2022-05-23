@@ -6,8 +6,8 @@
       <h5 class="mat-heading-5">{{('NODE_RELATIONS.RELATION_TYPE.VERSIONS') | translate}}</h5>
       <div class="relation-nodes version">
         <es-node-url class="relation-node" *ngFor="let version of versions"
-          [class.current-version]="isCurrentVersion(version)" [node]="version" [queryParams]="{closeOnBack: true}"
-          target="_BLANK">
+                     [class.current-version]="isCurrentVersion(version)" [node]="version" [queryParams]="{closeOnBack: true}"
+                     target="_BLANK">
           <es-node-row [node]="version" [columns]="columns">
             <ng-template #customMetadata>
               <div class="info-group">
@@ -27,14 +27,14 @@
       </div>
     </div>
 
-    <div class="empty" *ngIf="!relations?.length">
+    <div class="empty" *ngIf="!relations?.length && !forkedChilds?.length">
       {{'NODE_RELATIONS.NO_RELATIONS' | translate}}
     </div>
     <div class="relations-group" *ngFor="let key of getRelationKeys()">
       <h5 class="mat-heading-5">{{('NODE_RELATIONS.RELATION_TYPE.' + key) | translate}}</h5>
       <div class="relation-nodes">
         <es-node-url class="relation-node" [node]="relation.node" [queryParams]="{closeOnBack: true}" target="_BLANK"
-          *ngFor="let relation of getRelations(key)">
+                     *ngFor="let relation of getRelations(key)">
           <es-node-row [node]="relation.node" [columns]="columns">
             <ng-template #customMetadata>
               <div class="info-group">
@@ -50,25 +50,26 @@
         </es-node-url>
       </div>
     </div>
-
-    <h5 class="mat-heading-5">{{('NODE_RELATIONS.RELATION_TYPE.FORKED_CHILDS') | translate}}</h5>
-    <div class="relation-nodes version">
-      <es-node-url class="relation-node" *ngFor="let child of forkedChilds" [node]="child"
-        [queryParams]="{closeOnBack: true}" target="_BLANK">
-        <es-node-row [node]="child" [columns]="columns">
-          <ng-template #customMetadata>
-            <div class="info-group">
-              <label>{{'NODE_RELATIONS.VARIANT_CREATED' | translate}}</label>
-              <span>{{ child.createdAt | formatDate:{relative: true} }}</span>
-            </div>
-            <div class="info-group">
-              <label>{{'NODE_RELATIONS.VARIANT_CREATOR' | translate}}</label>
-              <span>{{ child.createdBy | authorityName }}</span>
-            </div>
-          </ng-template>
-        </es-node-row>
-      </es-node-url>
-    </div>
+    <ng-container *ngIf="forkedChilds?.length">
+      <h5 class="mat-heading-5">{{('NODE_RELATIONS.RELATION_TYPE.FORKED_CHILDS') | translate}}</h5>
+      <div class="relation-nodes version">
+        <es-node-url class="relation-node" *ngFor="let child of forkedChilds" [node]="child"
+                     [queryParams]="{closeOnBack: true}" target="_BLANK">
+          <es-node-row [node]="child" [columns]="columns">
+            <ng-template #customMetadata>
+              <div class="info-group">
+                <label>{{'NODE_RELATIONS.VARIANT_CREATED' | translate}}</label>
+                <span>{{ child.createdAt | formatDate:{relative: true} }}</span>
+              </div>
+              <div class="info-group">
+                <label>{{'NODE_RELATIONS.VARIANT_CREATOR' | translate}}</label>
+                <span>{{ child.createdBy | authorityName }}</span>
+              </div>
+            </ng-template>
+          </es-node-row>
+        </es-node-url>
+      </div>
+    </ng-container>
   </ng-container>
 </div>
 <ng-template let-key="key" let-nodes="nodes">
