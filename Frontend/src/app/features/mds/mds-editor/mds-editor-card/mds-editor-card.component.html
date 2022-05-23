@@ -9,11 +9,12 @@
   [node]="nodes"
   [jumpmarks]="jumpMarks"
 >
-  <es-input-fill-progress
-    action-area
-    [current]="completedProperties"
-    [maximum]="totalProperties"
-    (showMissing)="onShowMissing()"
-  ></es-input-fill-progress>
+  <ng-template #beforeButton>
+    <es-input-fill-progress
+      [current]="completedProperties"
+      [maximum]="totalProperties"
+      (showMissing)="onShowMissing()"
+    ></es-input-fill-progress>
+  </ng-template>
   <es-mds-editor-core [card]="card" #core></es-mds-editor-core>
 </es-card>

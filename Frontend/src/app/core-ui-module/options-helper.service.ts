@@ -16,7 +16,9 @@ import {
 } from './option-item';
 import {UIHelper} from './ui-helper';
 import {UIService} from '../core-module/rest/services/ui.service';
-import {WorkspaceManagementDialogsComponent} from '../modules/management-dialogs/management-dialogs.component';
+import {
+    WorkspaceManagementDialogsComponent
+} from '../modules/management-dialogs/management-dialogs.component';
 import {
     Connector,
     Filetype,
@@ -55,11 +57,11 @@ import {
     NodeEntriesDisplayType
 } from './components/node-entries-wrapper/entries-model';
 import {FormBuilder} from '@angular/forms';
-import { NodeEmbedService } from '../common/ui/node-embed/node-embed.service';
 import { NodeStoreService } from '../modules/search/node-store/node-store.service';
 import {NodeEntriesDataType} from './components/node-entries/node-entries.component';
 import {isArray} from 'rxjs/internal/util/isArray';
 import { MainNavService } from '../main/navigation/main-nav.service';
+import { DialogsService } from '../features/dialogs/dialogs.service';
 
 
 export class OptionsHelperConfig {
@@ -156,8 +158,8 @@ export class OptionsHelperService implements OnDestroy {
         private mainNavService: MainNavService,
         private storage: TemporaryStorageService,
         private bridge: BridgeService,
-        private nodeEmbed: NodeEmbedService,
         private nodeStore: NodeStoreService,
+        private dialogs: DialogsService,
         @Optional() @Inject(OPTIONS_HELPER_CONFIG) config: OptionsHelperConfig,
     ) {
         if (config == null) {
@@ -997,8 +999,7 @@ export class OptionsHelperService implements OnDestroy {
 
         const qrCodeNode = new OptionItem('OPTIONS.QR_CODE', 'edu-qr_code', (node) => {
             node = this.getObjects(node)[0];
-            const url = this.nodeHelper.getNodeUrl(node);
-            management.qr = { node, data: url };
+            this.dialogs.openQrDialog({ node });
         });
         qrCodeNode.constrains = [Constrain.NoBulk];
         qrCodeNode.scopes = [Scope.Render, Scope.CollectionsCollection];
@@ -1007,12 +1008,25 @@ export class OptionsHelperService implements OnDestroy {
 
         const embedNode = new OptionItem('OPTIONS.EMBED', 'perm_media', (node) => {
             node = this.getObjects(node)[0];
-            this.nodeEmbed.open(node);
+            this.dialogs.openNodeEmbedDialog({ node });
         });
         embedNode.constrains = [Constrain.NoBulk, Constrain.HomeRepository];
         embedNode.scopes = [Scope.Render];
         embedNode.group = DefaultGroups.View;
         embedNode.priority = 80;
+
+        const relationNode = new OptionItem('OPTIONS.RELATIONS', 'swap_horiz', async (node) => {
+            management.nodeRelations = await this.getObjectsAsync(node, true);
+        });
+        relationNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
+        relationNode.constrains = [Constrain.NoBulk, Constrain.User];
+        relationNode.scopes = [Scope.Render];
+        relationNode.toolpermissions = [RestConstants.TOOLPERMISSION_MANAGE_RELATIONS];
+        relationNode.permissions = [RestConstants.PERMISSION_WRITE];
+        relationNode.permissionsRightMode = NodesRightMode.Original;
+        relationNode.group = DefaultGroups.Edit;
+        relationNode.priority = 70;
+
 
         /**
          * if (this.isAllowedToEditCollection()) {
@@ -1187,6 +1201,7 @@ export class OptionsHelperService implements OnDestroy {
         options.push(downloadNode);
         options.push(downloadMetadataNode);
         options.push(qrCodeNode);
+        options.push(relationNode);
         options.push(embedNode);
         options.push(linkMap);
         options.push(cutNodes);
@@ -1262,12 +1277,16 @@ export class OptionsHelperService implements OnDestroy {
             const originals = await observableForkJoin(
                 nodes.map((n) => {
                     if(n.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1) {
-                        return this.nodeService.getNodeMetadata(n.properties[RestConstants.CCM_PROP_IO_ORIGINAL][0])
+                        return this.nodeService.getNodeMetadata(
+                            n.properties[RestConstants.CCM_PROP_IO_ORIGINAL][0],
+                            [RestConstants.ALL]
+                        )
                     } else if(n.type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL) {
                         return this.nodeService.getNodeMetadata(
                             RestHelper.removeSpacesStoreRef(
-                                n.properties[RestConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET][0]
-                            )
+                                n.properties[RestConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET][0],
+                            ),
+                            [RestConstants.ALL]
                         );
                     } else {
                         return of({

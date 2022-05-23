@@ -1,0 +1,80 @@
+@import '../../../../../core-ui-module/styles/variables';
+@import '../../../../../shared/components/card/variables';
+
+:host {
+    border-top-left-radius: inherit;
+    border-top-right-radius: inherit;
+    flex-shrink: 0;
+    background-color: $actionDialogBackground;
+    border-bottom: solid 1px $cardSeparatorLineColor;
+    display: flex;
+    align-items: center;
+    height: $titleHeight;
+}
+
+.card-dialog-avatar {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 20px;
+    background-color: #fff;
+    height: 40px;
+    width: 40px;
+    border-radius: 50px;
+    img {
+        width: 24px;
+        height: 24px;
+    }
+    i {
+        color: $primary;
+    }
+}
+
+.card-dialog-header-text {
+    flex-grow: 1;
+    min-width: 0;
+    margin-left: 16px;
+    &:last-child {
+        margin-right: 16px;
+    }
+
+    .card-dialog-title,
+    .card-dialog-subtitle {
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .card-dialog-title {
+        color: $textMain;
+        font-size: 130%;
+    }
+    .card-dialog-subtitle {
+        color: $textLight;
+        margin-top: 4px;
+    }
+}
+
+.card-dialog-close-button-box {
+    flex-shrink: 0;
+    height: $titleHeight;
+    width: $titleHeight;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .card-dialog-close-button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        // We use a standard icon button, which has a width and height of 40px, for aesthetic
+        // reasons, but we widen the clickable area to cover the complete square.
+        &::before {
+            content: '';
+            position: absolute;
+            height: $titleHeight;
+            width: $titleHeight;
+        }
+    }
+}

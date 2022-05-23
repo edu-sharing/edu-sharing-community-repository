@@ -43,7 +43,7 @@ export class AdminV1Service extends BaseService {
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
      * To access only the response body, use `addApplication()` instead.
      *
-     * This method sends `application/json` and handles request body of type `application/json`.
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
      */
     addApplication$Response(params?: {
         body?: {
@@ -55,7 +55,7 @@ export class AdminV1Service extends BaseService {
     }): Observable<StrictHttpResponse<string>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.AddApplicationPath, 'put');
         if (params) {
-            rb.body(params.body, 'application/json');
+            rb.body(params.body, 'multipart/form-data');
         }
 
         return this.http
@@ -81,7 +81,7 @@ export class AdminV1Service extends BaseService {
      * This method provides access to only to the response body.
      * To access the full response (for headers, for example), `addApplication$Response()` instead.
      *
-     * This method sends `application/json` and handles request body of type `application/json`.
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
      */
     addApplication(params?: {
         body?: {
@@ -1544,10 +1544,22 @@ export class AdminV1Service extends BaseService {
          * filename to fetch
          */
         filename: string;
+
+        /**
+         * path prefix this file belongs to
+         */
+        pathPrefix:
+            | 'node'
+            | 'cluster/applications'
+            | 'cluster'
+            | 'defaults'
+            | 'defaults/metadatasets'
+            | 'defaults/mailtemplates';
     }): Observable<StrictHttpResponse<string>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetConfigFilePath, 'get');
         if (params) {
             rb.query('filename', params.filename, {});
+            rb.query('pathPrefix', params.pathPrefix, {});
         }
 
         return this.http
@@ -1580,6 +1592,17 @@ export class AdminV1Service extends BaseService {
          * filename to fetch
          */
         filename: string;
+
+        /**
+         * path prefix this file belongs to
+         */
+        pathPrefix:
+            | 'node'
+            | 'cluster/applications'
+            | 'cluster'
+            | 'defaults'
+            | 'defaults/metadatasets'
+            | 'defaults/mailtemplates';
     }): Observable<string> {
         return this.getConfigFile$Response(params).pipe(
             map((r: StrictHttpResponse<string>) => r.body as string),
@@ -1606,11 +1629,23 @@ export class AdminV1Service extends BaseService {
          * filename to fetch
          */
         filename: string;
+
+        /**
+         * path prefix this file belongs to
+         */
+        pathPrefix:
+            | 'node'
+            | 'cluster/applications'
+            | 'cluster'
+            | 'defaults'
+            | 'defaults/metadatasets'
+            | 'defaults/mailtemplates';
         body?: string;
     }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.UpdateConfigFilePath, 'put');
         if (params) {
             rb.query('filename', params.filename, {});
+            rb.query('pathPrefix', params.pathPrefix, {});
             rb.body(params.body, 'application/json');
         }
 
@@ -1644,6 +1679,17 @@ export class AdminV1Service extends BaseService {
          * filename to fetch
          */
         filename: string;
+
+        /**
+         * path prefix this file belongs to
+         */
+        pathPrefix:
+            | 'node'
+            | 'cluster/applications'
+            | 'cluster'
+            | 'defaults'
+            | 'defaults/metadatasets'
+            | 'defaults/mailtemplates';
         body?: string;
     }): Observable<any> {
         return this.updateConfigFile$Response(params).pipe(

@@ -42,6 +42,8 @@ import {WorkspaceLicenseComponent} from './license/license.component';
 import {ErrorProcessingService} from '../../core-ui-module/error.processing';
 import { BulkBehavior } from '../../features/mds/types/types';
 import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import { MainNavService } from 'src/app/main/navigation/main-nav.service';
+import { first } from 'rxjs/operators';
 
 
 export enum DialogType {
@@ -169,6 +171,8 @@ export class WorkspaceManagementDialogsComponent  {
     @Input() nodeSidebar: Node;
     @Output() nodeSidebarChange = new EventEmitter<Node>();
     @Input() showUploadSelect=false;
+    @Input() nodeRelations: Node[];
+    @Output() nodeRelationsChange = new EventEmitter<Node[]>();
   @Output() showUploadSelectChange = new EventEmitter();
   @Output() onUploadSelectCanceled = new EventEmitter();
   @Output() onClose=new EventEmitter();
@@ -205,7 +209,7 @@ export class WorkspaceManagementDialogsComponent  {
      * @node: Reference to the node (for header title)
      * @data: The string to display inside the qr code (e.g. an url)
      */
-  @Input() qr: {node: Node, data: string};
+//   @Input() qr: {node: Node, data: string};
 
     /**
      * @Deprecated, the components should use toast service directly
@@ -284,6 +288,7 @@ export class WorkspaceManagementDialogsComponent  {
     private config:ConfigurationService,
     private connector:RestConnectorService,
     private searchService:RestSearchService,
+    private mainNavService:MainNavService,
     private toast:Toast,
     private errorProcessing:ErrorProcessingService,
     private nodeHelper: NodeHelperService,
@@ -397,11 +402,12 @@ export class WorkspaceManagementDialogsComponent  {
  public uploadFile(event: FileList){
    this.onUploadFileSelected.emit(event);
  }
-  createUrlLink(link : LinkData) {
+  async createUrlLink(link : LinkData) {
     const urlData = this.nodeHelper.createUrlLink(link);
     this.closeUploadSelect();
     this.toast.showProgressDialog();
-    this.nodeService.createNode(this.parent.ref.id,RestConstants.CCM_TYPE_IO,urlData.aspects,urlData.properties,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(
+    const config = await this.mainNavService.observeMainNavConfig().pipe(first()).toPromise();
+    this.nodeService.createNode(config.create?.parent?.ref.id,RestConstants.CCM_TYPE_IO,urlData.aspects,urlData.properties,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(
       (data) => {
         this.showMetadataAfterUpload([data.node]);
         this.toast.closeModalDialog();
@@ -676,6 +682,14 @@ export class WorkspaceManagementDialogsComponent  {
     closeSidebar() {
         this.nodeSidebar = null;
         this.nodeSidebarChange.emit(null);
+    }
+
+    closeRelations(changed: boolean) {
+        this.nodeRelations = null;
+        this.nodeRelationsChange.emit(null);
+        if(changed) {
+            this.onRefresh.emit();
+        }
     }
 
     displayNode(node: Node) {

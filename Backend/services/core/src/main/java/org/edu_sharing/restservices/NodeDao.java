@@ -117,6 +117,7 @@ public class NodeDao {
 	private String version;
 
 	private static ThreadLocal<Boolean> isGlobalAdmin = new ThreadLocal<>();
+	private boolean isPublic;
 
 	public static NodeDao getNodeWithVersion(RepositoryDao repoDao, String nodeId,String versionLabel) throws DAOException {
 		if(versionLabel!=null && versionLabel.equals("-1"))
@@ -732,13 +733,25 @@ public class NodeDao {
 		return remoteId!=null || !this.repoDao.isHomeRepo() || this.aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY);
 	}
 	public void refreshPermissions(org.edu_sharing.service.model.NodeRef nodeRef) {
+		boolean isRemoteCopy = !this.isCollectionReference() && aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY);
+		org.edu_sharing.service.permission.PermissionService usedPermissionService = isRemoteCopy ? PermissionServiceFactory.getLocalService() : permissionService;
+		if(nodeRef!=null && nodeRef.getPublic()!=null){
+			this.isPublic = nodeRef.getPublic();
+		} else {
+			if(ApplicationInfoList.getHomeRepository().getGuest_username() != null) {
+				this.isPublic = usedPermissionService.hasPermission(
+						storeProtocol,
+						storeId,
+						nodeId,
+						ApplicationInfoList.getHomeRepository().getGuest_username(),
+						CCConstants.PERMISSION_READ_ALL
+				);
+			}
+		}
 		if(nodeRef!=null && nodeRef.getPermissions()!=null && nodeRef.getPermissions().size() > 0){
 			this.hasPermissions = nodeRef.getPermissions();
-		} else if(!this.isCollectionReference() && aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)) {
-			// remote copy -> local rights apply since it can be modified locally
-			this.hasPermissions = PermissionServiceFactory.getLocalService().hasAllPermissions(storeProtocol, storeId, nodeId, DAO_PERMISSIONS);
 		} else {
-			this.hasPermissions = permissionService.hasAllPermissions(storeProtocol, storeId, nodeId, DAO_PERMISSIONS);
+			this.hasPermissions = usedPermissionService.hasAllPermissions(storeProtocol, storeId, nodeId, DAO_PERMISSIONS);
 		}
 	}
 	public static NodeEntries convertToRest(RepositoryDao repoDao,
@@ -1226,6 +1239,8 @@ public class NodeDao {
 		data.setProperties(getProperties());
 
 		data.setAccess(access);
+
+		data.setPublic(isPublic);
 
 		data.setMimetype(getMimetype());
 		data.setMediatype(getMediatype());
@@ -2228,7 +2243,15 @@ public class NodeDao {
  	public void createVersion(String comment) throws DAOException, Exception {
 		this.changePropertiesWithVersioning(getAllProperties(), comment);
 	}
-
+	public static List<NodeRef> convertAlfrescoNodeRef(java.util.Collection<org.alfresco.service.cmr.repository.NodeRef> refs) {
+		return refs.stream().map((ref) -> {
+			try {
+				return new NodeRef(RepositoryDao.getHomeRepository().getId(), ref.getId());
+			} catch (DAOException e) {
+				throw new RuntimeException(e);
+			}
+		}).collect(Collectors.toList());
+	}
     public static List<org.alfresco.service.cmr.repository.NodeRef> convertApiNodeRef(List<NodeRef> refs) {
         List<org.alfresco.service.cmr.repository.NodeRef> converted=new ArrayList<>(refs.size());
         for(NodeRef ref : refs){

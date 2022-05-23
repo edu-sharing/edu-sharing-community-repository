@@ -45,6 +45,7 @@ public class Node {
 	private List<Node> usedInCollections = new ArrayList<>();
 	private Map<NodeRefImpl.Relation, Node> relations;
 	private List<Contributor> contributors;
+	private boolean isPublic;
 
 	/**
    **/
@@ -408,5 +409,13 @@ public class Node {
 
 	public List<Contributor> getContributors() {
 		return contributors;
+	}
+
+	public void setPublic(boolean isPublic) {
+		this.isPublic = isPublic;
+	}
+	@JsonProperty("isPublic")
+	public boolean isPublic() {
+		return isPublic;
 	}
 }

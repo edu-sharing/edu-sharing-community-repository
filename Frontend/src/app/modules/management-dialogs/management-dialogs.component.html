@@ -26,7 +26,10 @@
                     (onEditMetadata)="nodeMetadata=[$event]"
                     (onClose)="closeSidebar()"
 ></es-workspace-metadata>
-
+<es-node-relation-manager *ngIf="nodeRelations"
+                       [nodes]="nodeRelations"
+                       (close)="closeRelations($event)"
+></es-node-relation-manager>
 <es-mds
         *ngIf="collectionWriteFeedback"
         customTitle="COLLECTIONS.FEEDBACK_TITLE"
@@ -70,7 +73,7 @@
            [node]="$any(nodeDebug)"
            (onClose)="closeDebug()"
 ></es-node-info>
-<es-card
+<!-- <es-card
         *ngIf="qr"
         [node]="qr.node"
         [isCancelable]="true"
@@ -80,7 +83,7 @@
         width="xlarge"
         height="xxxlarge">
     <qrcode [qrdata]="qr.data" elementType="img" [margin]="2" [width]="512" errorCorrectionLevel="M"></qrcode>
-</es-card>
+</es-card> -->
 <es-card
     *ngIf="_nodeDelete"
     title="{{ nodeDeleteTitle | translate }}"

@@ -27,7 +27,8 @@
         "SELECT_COLLECTION": "Select collection",
         "SELECT_ORG": "or",
         "SELECT_LINK": "Enter URL",
-
+        "LINK_INVALID_INFO": "We could not find a website for this link.",
+        "LINK_DUPLICATES_INFO": "We found other items that are similar to this link. Please check if this item already exists.",
         "RELOGIN": "Re-Login",
         "AUTOLOGOUT": "You have been logged out",
         "AUTOLOGOUT_INFO": "Your session was automatically closed for your safety, because you have been inactive for at least {{ minutes }} minutes. Please login again.",
@@ -171,6 +172,7 @@
                 "VERSION_COMMENT": "Version comment",
                 "VERSION_NUMBER": "Version number",
                 "VERSION_DATE": "Date of publication",
+                "VERSION_DATE_ABSOLUTE": "Publicated",
                 "DOI_DISTINCT": "Create new handle",
                 "DOI_DISTINCT_INFO": "A new, unique handle is created. Future versions of the object will have independent identifiers. Note that after selecting this option, no updated versions of the item can subsequently be published under the same handle",
                 "DOI_UPDATE": "Update an existing handle",

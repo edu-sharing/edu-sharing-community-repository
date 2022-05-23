@@ -1305,7 +1305,7 @@ a.rowInner {
             left: 0;
         }
         &:not(.option-item-container):not(:last-child) {
-            border-bottom: 1px solid $cardSeperatorLineColor;
+            border-bottom: 1px solid $cardSeparatorLineColor;
         }
     }
     .cardList > .option-item-container {

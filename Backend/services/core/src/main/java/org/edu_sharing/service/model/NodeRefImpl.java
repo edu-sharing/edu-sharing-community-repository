@@ -53,6 +53,11 @@ public class NodeRefImpl implements NodeRef {
 	Preview preview;
 	HashMap<String, Object> properties;
 	Map<String, Boolean> permissions;
+
+	/**
+	 * is this node ref publicly accessible, e.g. shared with "GROUP_EVERYONE"
+	 */
+	Boolean isPublic;
 	private List<String> aspects;
 
 	String owner;
@@ -129,6 +134,14 @@ public class NodeRefImpl implements NodeRef {
 	@Override
 	public void setPermissions(Map<String, Boolean> permissions) {
 		this.permissions = permissions;
+	}
+
+	public Boolean getPublic() {
+		return isPublic;
+	}
+
+	public void setPublic(Boolean aPublic) {
+		isPublic = aPublic;
 	}
 
 	@Override

@@ -32,7 +32,7 @@ export class NodeDataSource<T extends Node|GenericAuthority> extends DataSource<
         this.setPagination(pagination);
     }
 
-    async appendData(appendData: T[], location: 'before' | 'after' = 'after') {
+    appendData(appendData: T[], location: 'before' | 'after' = 'after') {
         let data = this.getData();
         if (location === 'after') {
             data = data.concat(appendData);

@@ -12,6 +12,16 @@ buildNumber.properties
 # IntelliJ
 .idea/
 *.iml
+Backend/.idea/
+Backend/soap-generation/generated/
+.idea/workspace.xml
+Cordova/.idea/workspace.xml
+edu-sharing-current
+.idea
+.idea/modules.xml
+.idea/libraries
+Frontend/.angular
+
 # VS Code
 .vscode/*
 !.vscode/settings.json

@@ -1,13 +1,17 @@
-import {Component, Input, ViewChild} from "@angular/core";
-import {ListItem, RestArchiveService} from "../../../core-module/core.module";
-import {RestConstants} from "../../../core-module/core.module";
-import {CustomOptions, OptionItem} from "../../../core-ui-module/option-item";
-import {RecycleRestoreComponent} from "./restore/restore.component";
-import {TranslateService} from "@ngx-translate/core";
-import {Toast} from "../../../core-ui-module/toast";
-import {ArchiveRestore,Node} from "../../../core-module/core.module";
-import {TemporaryStorageService} from "../../../core-module/core.module";
-import {ActionbarComponent} from "../../../common/ui/actionbar/actionbar.component";
+import {Component, Input, ViewChild} from '@angular/core';
+import {
+    ArchiveRestore,
+    ListItem,
+    Node,
+    RestArchiveService,
+    RestConstants,
+    TemporaryStorageService
+} from '../../../core-module/core.module';
+import {CustomOptions, ElementType, OptionItem} from '../../../core-ui-module/option-item';
+import {RecycleRestoreComponent} from './restore/restore.component';
+import {TranslateService} from '@ngx-translate/core';
+import {Toast} from '../../../core-ui-module/toast';
+import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
 
 @Component({
   selector: 'es-recycle',
@@ -39,7 +43,9 @@ export class RecycleMainComponent {
     this.columns.push(new ListItem("NODE",RestConstants.CM_ARCHIVED_DATE));
     this.options.addOptions.push(new OptionItem("RECYCLE.OPTION.RESTORE_SINGLE","undo", (node : Node) => this.restoreSingle(node)));
     this.options.addOptions.push(new OptionItem("RECYCLE.OPTION.DELETE_SINGLE","delete", (node : Node) => this.deleteSingle(node)));
-
+    this.options.addOptions.forEach(o => {
+        o.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
+    });
   }
   public onSelection(data:Node[]){
     this.selected=data;

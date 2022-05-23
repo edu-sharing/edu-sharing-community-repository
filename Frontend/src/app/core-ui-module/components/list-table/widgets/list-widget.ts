@@ -8,18 +8,19 @@ import {
     ProposalNode,
 } from '../../../../core-module/rest/data-object';
 import { ListItem } from '../../../../core-module/ui/list-item';
+import {UniversalNode} from '../../../../common/definitions';
 
 @Directive()
 export class ListWidget {
     @Input()
-    get node(): Node | ProposalNode | Group | Person | Statistics {
+    get node(): UniversalNode | ProposalNode | Group | Person | Statistics {
         return this.nodeSubject.value;
     }
-    set node(value: Node | ProposalNode | Group | Person | Statistics) {
+    set node(value: UniversalNode | ProposalNode | Group | Person | Statistics) {
         this.nodeSubject.next(value);
     }
     protected readonly nodeSubject = new BehaviorSubject<
-        Node | ProposalNode | Group | Person | Statistics
+        UniversalNode | ProposalNode | Group | Person | Statistics
     >(null); // node (or group/user)
 
     @Input() item: ListItem;

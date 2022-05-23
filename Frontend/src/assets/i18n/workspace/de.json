@@ -27,7 +27,8 @@
         "SELECT_COLLECTION": "Sammlung wählen",
         "SELECT_ORG": "oder",
         "SELECT_LINK": "URL eingeben",
-
+        "LINK_INVALID_INFO": "Zu diesem Link konnte keine Webseite gefunden werden.",
+        "LINK_DUPLICATES_INFO": "Für diesen Link wurden bereits ähnliche Inhalte gefunden. Bitte überprüfen Sie, ob dieser Inhalt bereits existiert",
         "RELOGIN": "Neu Anmelden",
         "AUTOLOGOUT": "Sie wurden abgemeldet",
         "AUTOLOGOUT_INFO": "Ihre Sitzung wurde aufgrund von Inaktivität zu Ihrer Sicherheit automatisch beendet, da Sie mindestens {{ minutes }} Minuten nicht aktiv waren. Bitte melden Sie sich erneut an.",
@@ -170,6 +171,7 @@
                 "VERSION_COMMENT": "Versionskommentar",
                 "VERSION_NUMBER": "Versionsnummer",
                 "VERSION_DATE": "Zeitpunkt der Veröffentlichung",
+                "VERSION_DATE_ABSOLUTE": "Veröffentlicht am",
                 "DOI_DISTINCT": "Neuen Handle erzeugen",
                 "DOI_DISTINCT_INFO": "Ein neuer, eindeutiger Handle wird erzeugt. Zukünftige Versionen des Objektes haben eigenständige Identifikatoren. Beachten Sie, dass nach einmaliger Wahl dieser Option nachträglich keine aktualisierten Versionen des Elements unter dem gleichen Handle erfolgen können",
                 "DOI_UPDATE": "Bestehenden Handle aktualisieren",

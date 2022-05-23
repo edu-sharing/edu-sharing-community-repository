@@ -94,6 +94,7 @@ export class WorkspaceShareComponent {
         'ReadPermissions',
         'ChangePermissions',
         'CCPublish',
+        'Relation',
         'Comment',
         'Feedback',
         'Deny',
@@ -111,6 +112,7 @@ export class WorkspaceShareComponent {
         ['DeleteChildren', ['Delete']],
         ['DeleteNode', ['Delete']],
         ['AddChildren', ['Contributor']],
+        ['Relation', ['Contributor']],
         ['ReadPermissions', ['Contributor']],
         ['Contributor', ['Collaborator']],
     ];

@@ -49,7 +49,6 @@ import { NodeImageSizePipe } from './pipes/node-image-size.pipe';
 import { NodePersonNamePipe } from './pipes/node-person-name.pipe';
 import { NodeSourcePipe } from './pipes/node-source.pipe';
 import { PermissionNamePipe } from './pipes/permission-name.pipe';
-import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { UrlPipe } from './pipes/url.pipe';
 import { Toast } from './toast';
 import {ImageConfigDirective} from './directives/image-config.directive';
@@ -80,6 +79,13 @@ import {NodeRatingComponent} from './components/node-entries/node-rating/node-ra
 import { PreviewImageComponent } from './components/node-entries/preview-image/preview-image.component';
 import { FocusStateDirective } from './directives/focus-state.directive';
 import { SharedModule } from '../shared/shared.module';
+import {
+    MdsNodeRelationsWidgetComponent
+} from "../common/ui/node-render/node-relations/node-relations-widget.component";
+import {AppModule} from "../app.module";
+import {
+    NodeRowComponent
+} from "./components/node-row/node-row.component";
 
 @NgModule({
     declarations: [
@@ -104,6 +110,7 @@ import { SharedModule } from '../shared/shared.module';
         NodePersonNamePipe,
         NodeDatePipe,
         NodeUrlComponent,
+        MdsNodeRelationsWidgetComponent,
         ToastMessageComponent,
         FormatSizePipe,
         KeysPipe,
@@ -116,7 +123,6 @@ import { SharedModule } from '../shared/shared.module';
         NodesDragSourceDirective,
         NodesDropTargetDirective,
         ImageConfigDirective,
-        SafeHtmlPipe,
         ListOptionItemComponent,
         DistinctClickDirective,
         DurationPipe,
@@ -125,6 +131,7 @@ import { SharedModule } from '../shared/shared.module';
         NodeEntriesWrapperComponent,
         NodeEntriesComponent,
         NodeEntriesCardGridComponent,
+        NodeRowComponent,
         NodeEntriesCardComponent,
         NodeRatingComponent,
         NodeEntriesCardSmallComponent,
@@ -178,6 +185,7 @@ import { SharedModule } from '../shared/shared.module';
         ListOptionItemComponent,
         InputPasswordComponent,
         VideoControlsComponent,
+        NodeRowComponent,
         ImageConfigDirective,
         UserTileComponent,
         CollectionChooserComponent,
@@ -197,7 +205,6 @@ import { SharedModule } from '../shared/shared.module';
         ListTextComponent,
         NodeTitlePipe,
         TitleDirective,
-        SafeHtmlPipe,
         NodeEntriesWrapperComponent,
         DragCursorDirective,
         NodeEntriesTableComponent,

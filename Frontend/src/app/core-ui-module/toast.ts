@@ -194,6 +194,10 @@ export class Toast implements OnDestroy {
         customAction: CustomAction = null,
         toastMessage: ToastMessage = null,
     ): void {
+        if(errorObject?.processed) {
+            console.warn('Called toast.error() with an already consumed error object');
+            return;
+        }
         const parsingResult = this.parseErrorObject({
             errorObject,
             message,
