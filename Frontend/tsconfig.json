@@ -41,7 +41,10 @@
     "typeRoots": [
       "./node_modules/@types"
     ],
-    "downlevelIteration": true
+    "downlevelIteration": true,
+    // Needed for imports of @angular/compiler-cli in version 13.3.5. Can be removed, when
+    // @angular/compiler-cli compiles without this.
+    "allowSyntheticDefaultImports": true,
   },
   "angularCompilerOptions": {
     "strictInjectionParameters": true,

@@ -4,7 +4,7 @@
 
   <div class="rowRepositories scrollWithBanner"
        [class.no-mainnav]="!mainnav"
-       *ngIf="repositories && repositories.length>2"
+       *ngIf="repositories && repositories.length>2 || false"
   >
       <div class="mobile-move-top row tab-group row-dark">
           <div class="col s12" role="region">

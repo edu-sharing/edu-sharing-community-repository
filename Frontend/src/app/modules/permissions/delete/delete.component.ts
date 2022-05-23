@@ -7,7 +7,7 @@ import {Toast} from '../../../core-ui-module/toast';
 import {TranslateService} from '@ngx-translate/core';
 import {AuthorityNamePipe} from '../../../shared/pipes/authority-name.pipe';
 import {Helper} from '../../../core-module/rest/helper';
-import { AuthoritySearchMode } from '../../../common/ui/authority-search-input/authority-search-input.component';
+import { AuthoritySearchMode } from '../../../shared/components/authority-search-input/authority-search-input.component';
 
 @Component({
   selector: 'es-permissions-delete',
@@ -97,7 +97,6 @@ export class PermissionsDeleteComponent implements OnInit {
     async ngOnInit() {
         this.jobs = (await this.admin.getAllJobs().toPromise())
             .filter((j) => j.tags?.includes('DeletePersonJob'));
-        console.log(this.jobs);
     }
 
   /**

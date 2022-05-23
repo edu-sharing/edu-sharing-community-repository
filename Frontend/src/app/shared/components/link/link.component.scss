@@ -1,0 +1,20 @@
+@import "../../../core-ui-module/styles/variables";
+:host ::ng-deep  {
+  a {
+    display: inline-flex;
+    align-items: center;
+    color: $primary;
+    cursor: pointer;
+    > i {
+      font-size: 120%;
+    }
+    &:hover {
+      color: $primaryDark;
+    }
+    &:focus {
+      box-shadow: none !important;
+      @include removeDefaultFocus();
+      border-bottom: 1px solid $focusColor;
+    }
+  }
+}

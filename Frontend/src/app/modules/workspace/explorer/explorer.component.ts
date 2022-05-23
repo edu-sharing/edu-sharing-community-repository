@@ -28,7 +28,6 @@ import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.compone
 import {MainNavComponent} from '../../../main/navigation/main-nav/main-nav.component';
 import {ListTableComponent} from '../../../core-ui-module/components/list-table/list-table.component';
 import {DragNodeTarget, DropData} from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
-import {compareNumbers} from '@angular/compiler-cli/src/diagnostics/typescript_version';
 import {
     NodeEntriesWrapperComponent
 } from '../../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';

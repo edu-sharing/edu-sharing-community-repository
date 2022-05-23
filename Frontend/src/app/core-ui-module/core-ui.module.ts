@@ -21,9 +21,7 @@ import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
 import { CollectionChooserComponent } from './components/collection-chooser/collection-chooser.component';
 import { CustomNodeListWrapperComponent } from './components/custom-node-list-wrapper/custom-node-list-wrapper.component';
-import { InfoMessageComponent } from './components/info-message/info-message.component';
 import { InputPasswordComponent } from './components/input-password/input-password.component';
-import { LinkComponent } from './components/link/link.component';
 import { ListOptionItemComponent } from './components/list-option-item/list-option-item.component';
 import { ListTableComponent } from './components/list-table/list-table.component';
 import { ListBaseComponent } from './components/list-table/widgets/list-base/list-base.component';
@@ -35,7 +33,6 @@ import { ListNodeWorkflowComponent } from './components/list-table/widgets/list-
 import { ListTextComponent } from './components/list-table/widgets/list-text/list-text.component';
 import { NodeUrlComponent } from './components/node-url/node-url.component';
 import { SortDropdownComponent } from './components/sort-dropdown/sort-dropdown.component';
-import { SpinnerSmallComponent } from './components/spinner-small/spinner-small.component';
 import { UserTileComponent } from './components/user-tile/user-tile.component';
 import { DurationPipe } from './components/video-controls/duration.pipe';
 import { VideoControlsComponent } from './components/video-controls/video-controls.component';
@@ -45,7 +42,6 @@ import { NodesDropTargetDirective } from './directives/drag-nodes/nodes-drop-tar
 import { TitleDirective } from './directives/title.directive';
 import { NodeHelperService } from './node-helper.service';
 import { OptionsHelperService } from './options-helper.service';
-import { AuthorityAffiliationPipe } from './pipes/authority-affiliation.pipe';
 import { NodeDatePipe } from './pipes/date.pipe';
 import { FormatSizePipe } from './pipes/file-size.pipe';
 import { KeysPipe } from './pipes/keys.pipe';
@@ -56,13 +52,11 @@ import { PermissionNamePipe } from './pipes/permission-name.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { UrlPipe } from './pipes/url.pipe';
 import { Toast } from './toast';
-import {VCardNamePipe} from './pipes/vcard-name.pipe';
 import {ImageConfigDirective} from './directives/image-config.directive';
 import {ErrorProcessingService} from './error.processing';
 import {ToastMessageComponent} from './components/toast-message/toast-message.component';
 import { FormatDurationPipe } from './pipes/format-duration.pipe';
 import {RenderHelperService} from './render-helper.service';
-import {MdsDurationPipe} from './pipes/mds-duration.pipe';
 import {DragDropModule} from '@angular/cdk/drag-drop';
 import {NodeEntriesComponent} from './components/node-entries/node-entries.component';
 import {NodeEntriesWrapperComponent} from './components/node-entries-wrapper/node-entries-wrapper.component';
@@ -78,7 +72,6 @@ import {NodeEntriesTableComponent} from './components/node-entries/node-entries-
 import {MatTableModule} from '@angular/material/table';
 import {ColumnChooserComponent} from './components/node-entries/node-entries-table/column-chooser/column-chooser.component';
 import {MatPaginatorModule} from '@angular/material/paginator';
-import {CheckTextOverflowDirective} from './directives/check-text-overflow.directive';
 import {MatSortModule} from '@angular/material/sort';
 import {OverlayModule} from '@angular/cdk/overlay';
 import {ListItemLabelPipe} from './pipes/list-item-label.pipe';
@@ -103,15 +96,11 @@ import { SharedModule } from '../shared/shared.module';
         NodeEntriesDragDirective,
         SortDropdownComponent,
         UserTileComponent,
-        LinkComponent,
         CustomNodeListWrapperComponent,
         BreadcrumbsComponent,
-        SpinnerSmallComponent,
         VideoControlsComponent,
-        InfoMessageComponent,
         OptionButtonComponent,
         InputPasswordComponent,
-        VCardNamePipe,
         NodePersonNamePipe,
         NodeDatePipe,
         NodeUrlComponent,
@@ -121,7 +110,6 @@ import { SharedModule } from '../shared/shared.module';
         PermissionNamePipe,
         NodeImageSizePipe,
         UrlPipe,
-        AuthorityAffiliationPipe,
         NodeImagePipe,
         NodeSourcePipe,
         NodeTitlePipe,
@@ -132,7 +120,6 @@ import { SharedModule } from '../shared/shared.module';
         ListOptionItemComponent,
         DistinctClickDirective,
         DurationPipe,
-        MdsDurationPipe,
         TitleDirective,
         FormatDurationPipe,
         NodeEntriesWrapperComponent,
@@ -143,7 +130,6 @@ import { SharedModule } from '../shared/shared.module';
         NodeEntriesCardSmallComponent,
         NodeEntriesTableComponent,
         ColumnChooserComponent,
-        CheckTextOverflowDirective,
         ListItemLabelPipe,
         DragCursorDirective,
         PreviewImageComponent,
@@ -189,25 +175,19 @@ import { SharedModule } from '../shared/shared.module';
         NodeEntriesComponent,
         CustomNodeListWrapperComponent,
         BreadcrumbsComponent,
-        SpinnerSmallComponent,
         ListOptionItemComponent,
         InputPasswordComponent,
         VideoControlsComponent,
         ImageConfigDirective,
         UserTileComponent,
-        MdsDurationPipe,
-        LinkComponent,
         CollectionChooserComponent,
         SortDropdownComponent,
-        InfoMessageComponent,
-        VCardNamePipe,
         NodeDatePipe,
         NodeUrlComponent,
         FormatSizePipe,
         KeysPipe,
         PermissionNamePipe,
         UrlPipe,
-        AuthorityAffiliationPipe,
         ListItemLabelPipe,
         NodeSourcePipe,
         NodesDragSourceDirective,
@@ -219,7 +199,6 @@ import { SharedModule } from '../shared/shared.module';
         TitleDirective,
         SafeHtmlPipe,
         NodeEntriesWrapperComponent,
-        CheckTextOverflowDirective,
         DragCursorDirective,
         NodeEntriesTableComponent,
     ],

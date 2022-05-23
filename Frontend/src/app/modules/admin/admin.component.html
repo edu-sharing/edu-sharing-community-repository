@@ -181,6 +181,9 @@
     <div *ngIf="modeIsActive('GLOBAL_CONFIG')" class="content global-config">
       <es-admin-config></es-admin-config>
     </div>
+    <div *ngIf="modeIsActive('PLUGINS')" class="content plugins">
+      <app-admin-plugins></app-admin-plugins>
+    </div>
     <div *ngIf="modeIsActive('APPLICATIONS')" class="content applications">
       <input #xmlSelect type="file" style="display:none" id="xmlSelect" accept="application/xml" (change)="registerAppXml($event)" />
       <form class="register-app">

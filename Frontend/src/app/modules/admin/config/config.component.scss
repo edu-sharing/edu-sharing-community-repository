@@ -6,8 +6,20 @@
     max-width: 1300px;
     padding-right: 20px;
     overflow-x: hidden;
+    .config-hide {
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+        padding: 20px;
+        background-color: $actionDialogBackground;
+        border-radius: 20px;
+    }
     .actions{
         margin:10px 0;
+        info-message {
+            display: flex;
+            margin: 20px 0;
+        }
     }
     > es-info-message {
         display: flex;
@@ -33,7 +45,7 @@
     }
 }
 :host ::ng-deep{
-    ngx-monaco-editor.globalConfig{
+    ngx-monaco-editor.roConfig{
         .view-lines{
             opacity: 0.7;
         }

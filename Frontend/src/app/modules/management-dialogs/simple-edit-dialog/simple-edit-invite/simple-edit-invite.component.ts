@@ -17,7 +17,6 @@ import {FrameEventsService} from '../../../../core-module/core.module';
 
 import {OPEN_URL_MODE} from '../../../../core-module/ui/ui-constants';
 import {BridgeService} from '../../../../core-bridge-module/bridge.service';
-import {BulkBehavior, MdsComponent} from '../../../../common/ui/mds/mds.component';
 import {forkJoin, Observable, Observer} from 'rxjs';
 import {MatButtonToggleGroup} from '@angular/material/button-toggle';
 import {Helper} from '../../../../core-module/rest/helper';

@@ -14,8 +14,8 @@ import { MatChip } from '@angular/material/chips';
 import { FacetsDict, LabeledValue, LabeledValuesDict } from 'ngx-edu-sharing-api';
 import { Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
-import { SearchFieldFacetsComponent } from '../../../common/ui/mds-editor/search-field-facets/search-field-facets.component';
-import { Values } from '../../../common/ui/mds-editor/types';
+import { SearchFieldFacetsComponent } from '../../../features/mds/mds-editor/search-field-facets/search-field-facets.component';
+import { Values } from '../../../features/mds/types/types';
 import { SearchFieldService } from './search-field.service';
 
 @Component({
@@ -134,12 +134,14 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
         this.searchField.removeFilter(property, filter);
     }
 
-    onOutsideClick(event: MouseEvent): void {
-        const clickTarget = event.target as HTMLElement;
-        if (!(this.overlay.origin.elementRef.nativeElement as HTMLElement).contains(clickTarget)) {
-            this.showOverlay = false;
-        }
-    }
+    // Can probably be replaced by using `@Output() overlayOutsideClick` of the overlay.
+
+    // onOutsideClick(event: MouseEvent): void {
+    //     const clickTarget = event.target as HTMLElement;
+    //     if (!(this.overlay.origin.elementRef.nativeElement as HTMLElement).contains(clickTarget)) {
+    //         this.showOverlay = false;
+    //     }
+    // }
 
     focusOverlayIfOpen(event: Event): void {
         if (this.firstActiveChip) {
@@ -196,7 +198,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
             return 0;
         }
         const mapped = Object.keys(filters)
-            .filter((f) => this.categories$.value.includes(f))
+            .filter((f) => this.categories$.value?.includes(f))
             .map((k) => filters[k].length);
         if (!mapped.length) {
             return 0;

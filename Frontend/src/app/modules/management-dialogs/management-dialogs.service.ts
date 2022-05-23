@@ -10,6 +10,11 @@ export interface DialogRef<R> {
     afterClosed: () => Observable<R | undefined>;
 }
 
+/**
+ * Provides access to dialogs via a global component.
+ * 
+ * @deprecated will be replaced by overlay-based dialogs available through `DialogsService`.
+ */
 @Injectable({
     providedIn: 'root',
 })
@@ -80,6 +85,23 @@ export class ManagementDialogsService {
             afterClosed: () => dialogClosed.asObservable(),
         };
     }
+
+    // openLicense({ nodes }: { nodes: Node[] }): DialogRef<Node[]> {
+    //     const dialogClosed = new Subject<Node[] | undefined>();
+    //     this.dialogsComponent.nodeLicense = nodes;
+    //     this.dialogsComponent.nodeLicenseChange.pipe(takeUntil(dialogClosed)).subscribe(() => {
+    //         dialogClosed.next();
+    //         dialogClosed.complete();
+    //     });
+    //     this.dialogsComponent.onRefresh.pipe(takeUntil(dialogClosed)).subscribe((nodes) => {
+    //         dialogClosed.next(nodes as Node[]);
+    //         dialogClosed.complete();
+    //     });
+    //     return {
+    //         close: () => dialogClosed.isStopped || (this.dialogsComponent.nodeLicense = null),
+    //         afterClosed: () => dialogClosed.asObservable(),
+    //     };
+    // }
 
     private subscribeChanges() {
         this.dialogsComponent.signupGroupChange.subscribe((value: boolean) => {

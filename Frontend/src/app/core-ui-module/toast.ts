@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {BehaviorSubject, Observable, Subject} from 'rxjs';
 import { ModalDialogOptions } from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
-import { ProgressType } from '../common/ui/modal-dialog/modal-dialog.component';
+import { ProgressType } from '../shared/components/modal-dialog/modal-dialog.component';
 import { RestConstants } from '../core-module/rest/rest-constants';
 import { TemporaryStorageService } from '../core-module/rest/services/temporary-storage.service';
 import { DialogButton } from '../core-module/ui/dialog-button';

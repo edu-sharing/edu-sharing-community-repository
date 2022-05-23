@@ -34,7 +34,7 @@ import {
 } from '../core-module/rest/services/temporary-storage.service';
 import {BridgeService} from '../core-bridge-module/bridge.service';
 import {MessageType} from '../core-module/ui/message-type';
-import {Inject, Injectable, InjectionToken, Injector, OnDestroy, Optional} from '@angular/core';
+import {Inject, Injectable, InjectionToken, OnDestroy, Optional} from '@angular/core';
 import {CardComponent} from '../shared/components/card/card.component';
 import {TranslateService} from '@ngx-translate/core';
 import {RestNodeService} from '../core-module/rest/services/rest-node.service';
@@ -80,7 +80,6 @@ export class OptionsHelperService implements OnDestroy {
     private globalOptions: OptionItem[];
     private list: ListEventInterface<NodeEntriesDataType>;
     private subscriptions: Subscription[] = [];
-    private mainNavService: MainNavService;
     private actionbar: ActionbarComponent;
     private dropdown: DropdownComponent;
     private queryParams: Params;
@@ -155,7 +154,7 @@ export class OptionsHelperService implements OnDestroy {
         private nodeService: RestNodeService,
         private collectionService: RestCollectionService,
         private configService: ConfigurationService,
-        private injector: Injector,
+        private mainNavService: MainNavService,
         private storage: TemporaryStorageService,
         private bridge: BridgeService,
         private nodeEmbed: NodeEmbedService,
@@ -243,7 +242,6 @@ export class OptionsHelperService implements OnDestroy {
     async initComponents(actionbar: ActionbarComponent = null,
                          list: ListEventInterface<NodeEntriesDataType> = null,
                          dropdown: DropdownComponent = null) {
-        this.mainNavService = this.injector.get(MainNavService);
         if(!this.mainNavService.getMainNav()) {
             console.warn('mainnav was not available via singleton service');
         }
@@ -267,7 +265,7 @@ export class OptionsHelperService implements OnDestroy {
             this.subscriptions.forEach((s) => s.unsubscribe());
             this.subscriptions = [];
         }
-        if (this.mainNavService?.getMainNav()) {
+        if (this.mainNavService.getMainNav()) {
             this.subscriptions.push(this.mainNavService.getDialogs().onRefresh.subscribe((nodes: void | Node[]) => {
                 this.listener?.onRefresh(nodes);
                 if (this.list) {
@@ -326,7 +324,7 @@ export class OptionsHelperService implements OnDestroy {
             }
         }
         let options: OptionItem[] = [];
-        if (this.mainNavService?.getMainNav()) {
+        if (this.mainNavService.getMainNav()) {
             options = this.prepareOptions(this.mainNavService.getDialogs(), objects);
         } else {
             console.warn('options helper was called without main nav. Can not load default options');

@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "ng-openapi-gen": "^0.20.0"
+  },
+  "scripts": {
+    "build": "ng-openapi-gen --input target/api/openapi.json --output target/generated-sources/openapi",
+    "build-dev": "ng-openapi-gen --input target/api/openapi.json --output target/generated-sources/openapi"
+  }
+}

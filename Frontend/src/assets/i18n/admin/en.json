@@ -6,6 +6,7 @@
         "WARNING_INFO": "This area is intended for repository administration only.\nImproper settings can lead to errors or even data loss.\n\nDo not carry out any actions that you are unsure about!",
         "MODE": {
             "INFO": "Info",
+            "PLUGINS": "Extensions",
             "STATISTICS": "Statistics",
             "FRONTPAGE": "Start page",
             "MEDIACENTER": "Media centres",
@@ -19,15 +20,37 @@
             "BROWSER": "Node Browser & Solr-Debugging",
             "FOLDERTEMPLATES": "Folder templates"
         },
+        "PLUGINS": {
+            "TITLE":  "Extensions",
+            "INFO":  "This list shows extensions for alfresco & edu-sharing. These are functional extensions for the repository.",
+            "NO_DESCRIPTION":  "There are no details available for this plugin",
+            "ENABLED": "Active",
+            "DISABLED": "Inactive",
+            "PLUGIN_DETAILS": {
+
+            },
+            "MORE": "More information about how to obtain, confiure and deploy extensions can be found on the edu-sharing website",
+            "MORE_LINK": "Go to edu-sharing website"
+        },
         "GLOBAL_CONFIG": {
+            "EDIT_DISABLED": "The configuration was set to read-only. No modifications can be made via this tool. The parameter {{key}} must be set to true in order to change parameters via this tool.",
+            "SHOW_RO": "Display read-only configuration files",
+            "INHERIT_INFO": "The displayed configurations are read from top to bottom. Configuration values can be overriden by files underneath the one they're declared",
+            "VOLATILE_WARNING": "Changes for this configuration file are volatile and will be removed on next update/rollout. If you want to persist them please share them with the edu-sharing dev team",
             "CLIENT_CONFIG_TITLE": "Client configuration (configuration of display relevant functions)",
             "CLIENT_CONFIG_HINT": "You can enter values here to overwrite labels, configure contexts, set up authentication methods and more. After saving, you may need to reload the entire page in your browser",
             "BASE_CONFIG_TITLE": "Global configuration file (default values)",
             "BASE_CONFIG_HINT": "This file serves only as a template and must not be changed. Please enter changed values in the specific configuration",
-            "EXTENSION_CONFIG_TITLE": "Extension configuration file (Override)",
-            "EXTENSION_CONFIG_HINT": "You can overwrite values of the standard configuration here. Please note that this file will be replaced on rollout. Changes made to this file must be provided to the edu-sharing dev team",
-            "SERVER_CONFIG_TITLE": "Server configuration file (Override)",
-            "SERVER_CONFIG_HINT": "You can overwrite values of the standard configuration here. The changes are for the current server and will not get overriden. This file has the highest priority. CAUTION! In cluster environments this only overrides the config on the current server.",
+            "PARSED_TITLE": "Active configuration values",
+            "PARSED_HINT": "The JSON-Result of the currently active configuration including all applied inherit steps of the individual files",
+            "CLUSTER_DEPLOYMENT_CONFIG_TITLE": "Cluster-Deployment",
+            "CLUSTER_DEPLOYMENT_CONFIG_HINT": "Deployment-Configuration preset for all cluster nodes",
+            "NODE_DEPLOYMENT_CONFIG_TITLE": "Node-Deployment",
+            "NODE_DEPLOYMENT_CONFIG_HINT": "Deployment-Configuration preset for all this node (check ip address!)",
+            "CLUSTER_OVERRIDE_CONFIG_TITLE": "Cluster-Override",
+            "CLUSTER_OVERRIDE_CONFIG_HINT": "Override-Configuration for all cluster nodes",
+            "NODE_OVERRIDE_CONFIG_TITLE": "Node-Override",
+            "NODE_OVERRIDE_CONFIG_HINT": "Override-Configuration for this cluster node (check ip address!)",
 
             "SIZE": "Editor-size",
             "SIZE_MEDIUM": "normal",

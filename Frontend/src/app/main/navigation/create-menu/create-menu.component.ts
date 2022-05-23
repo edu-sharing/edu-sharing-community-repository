@@ -75,7 +75,6 @@ import { DialogRef, ManagementDialogsService } from '../../../modules/management
 })
 export class CreateMenuComponent {
     @ViewChild('dropdown', { static: true }) dropdown: DropdownComponent;
-    @ViewChild('management') management: WorkspaceManagementDialogsComponent;
 
     /**
      * Currently allowed to drop files?
@@ -126,6 +125,7 @@ export class CreateMenuComponent {
         private connectors: RestConnectorsService,
         private iamService: RestIamService,
         private nodeService: RestNodeService,
+        private managementService: ManagementDialogsService,
         private toast: Toast,
         private router: Router,
         private translate: TranslateService,
@@ -177,7 +177,7 @@ export class CreateMenuComponent {
                         if (data.toLowerCase().startsWith('http')) {
                             // @TODO: Later we should find a way to prevent the event from propagating
                             // this currently fails because getAsString is called async!
-                            this.management.createUrlLink(new LinkData(data));
+                            this.managementService.getDialogsComponent().createUrlLink(new LinkData(data));
                             event.preventDefault();
                             event.stopPropagation();
                         } else {

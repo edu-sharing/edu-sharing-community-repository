@@ -45,7 +45,7 @@ import {NgxEditorModel} from 'ngx-monaco-editor';
 import {Scope} from '../../core-ui-module/option-item';
 import {AboutService} from 'ngx-edu-sharing-api';
 import { SkipTarget } from '../../main/navigation/skip-nav/skip-nav.service';
-import {AuthoritySearchMode} from '../../common/ui/authority-search-input/authority-search-input.component';
+import {AuthoritySearchMode} from '../../shared/components/authority-search-input/authority-search-input.component';
 import {PlatformLocation} from '@angular/common';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 
@@ -1087,6 +1087,10 @@ export class AdminComponent implements OnInit, OnDestroy {
                     icon: 'info_outline'
                 },
                 {
+                    id: 'PLUGINS',
+                    icon: 'extension'
+                },
+                {
                   id: 'FRONTPAGE',
                   icon: 'home'
                 },
@@ -1204,7 +1208,6 @@ export class AdminComponent implements OnInit, OnDestroy {
             this.admin.getRepositoryVersion().subscribe((data: string) => {
                 this.repositoryVersion = data;
             }, (error: any) => {
-                console.info(error);
                 this.repositoryVersion = 'Error accessing version information. Are you in dev mode?';
             });
         }

@@ -1,4 +1,4 @@
-@use '~@angular/material' as mat;
+@use '@angular/material' as mat;
 @import "variables";
 
 // Include the common styles for Angular Material. We include this here so that you only
@@ -305,6 +305,10 @@ mat-slide-toggle.mat-primary-bright{
         color: #fff;
     }
 }
+.mat-slide-toggle.cdk-keyboard-focused .mat-slide-toggle-thumb-container .mat-focus-indicator {
+    @include setGlobalKeyboardFocus();
+}
+
 // will fix g and y to cut off with custom font
 input.mat-input-element, mat-label, .mat-select-value{
     line-height: normal;

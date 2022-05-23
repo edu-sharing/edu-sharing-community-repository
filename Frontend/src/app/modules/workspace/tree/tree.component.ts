@@ -88,7 +88,7 @@ export class WorkspaceTreeComponent {
             let pos = this._path[i].indexOf(id);
             if (pos != -1) {
                 //this._path[i].splice(pos,this._path[i].length-pos);
-                this._path.splice(i, 1);
+                this._path[i].splice(pos, 1);
                 create = false;
                 i--;
             }

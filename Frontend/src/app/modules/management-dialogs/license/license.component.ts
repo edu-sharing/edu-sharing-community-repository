@@ -16,10 +16,11 @@ import {trigger} from '@angular/animations';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {UIService} from '../../../core-module/core.module';
 import {Helper} from '../../../core-module/rest/helper';
-import {MdsEditorWidgetAuthorComponent} from '../../../common/ui/mds-editor/widgets/mds-editor-widget-author/mds-editor-widget-author.component';
-import {MdsEditorInstanceService} from '../../../common/ui/mds-editor/mds-editor-instance.service';
-import {UserPresentableError, Values} from '../../../common/ui/mds-editor/types';
-import {ViewInstanceService} from '../../../common/ui/mds-editor/mds-editor-view/view-instance.service';
+import { Values } from 'dist/edu-sharing-api/lib/api/models';
+import { UserPresentableError } from '../../../features/mds/mds-editor/mds-editor-common.service';
+import { MdsEditorInstanceService } from '../../../features/mds/mds-editor/mds-editor-instance.service';
+import { ViewInstanceService } from '../../../features/mds/mds-editor/mds-editor-view/view-instance.service';
+import { MdsEditorWidgetAuthorComponent } from '../../../features/mds/mds-editor/widgets/mds-editor-widget-author/mds-editor-widget-author.component';
 
 @Component({
     selector: 'es-workspace-license',
@@ -189,7 +190,7 @@ export class WorkspaceLicenseComponent  {
     userAuthor = false;
     @Output() onCancel=new EventEmitter();
     @Output() onLoading=new EventEmitter();
-    @Output() onDone=new EventEmitter<Node[]|void>();
+    @Output() onDone =new EventEmitter<Node[] | Values>();
     @Output() openContributor=new EventEmitter();
 
     public isAllowedLicense(license:string) {
