@@ -15,7 +15,6 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
-import com.googlecode.mp4parser.FileDataSourceImpl;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.lock.mem.LockState;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -37,11 +36,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.SchedulerException;
 
-import com.coremedia.iso.IsoFile;
-import com.coremedia.iso.boxes.Box;
-import com.coremedia.iso.boxes.MovieBox;
-import com.coremedia.iso.boxes.TrackBox;
-import com.coremedia.iso.boxes.TrackHeaderBox;
+
 
 public class PreviewJob implements Job {
 
