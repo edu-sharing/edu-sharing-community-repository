@@ -2,13 +2,13 @@ package org.edu_sharing.metadataset.v2;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.log4j.Logger;
-import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.json.simple.JSONValue;
 
 import java.io.Serializable;
 import java.util.Map;
+import org.edu_sharing.repackaged.elasticsearch.org.apache.lucene.queryparser.classic.QueryParser;
 
 public class QueryUtils {
     private static Logger logger = Logger.getLogger(QueryUtils.class);
