@@ -18,7 +18,7 @@
   padding-top:25px;
 }
 
-.tree,.explorer{
+.tree {
   display:table-cell;
 }
 
@@ -89,7 +89,8 @@ es-user-quota{
 
 }
 .explorer{
-  position:absolute;
+  position: relative;
+  display: block;
   left:300px;
   top: $mainnavHeight+$secondaryBarHeight;
   width:calc(100% - 300px);

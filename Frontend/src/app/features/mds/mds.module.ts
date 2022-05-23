@@ -12,6 +12,7 @@ import { MdsEditorWrapperComponent } from './mds-editor/mds-editor-wrapper/mds-e
 import { MdsEditorComponent } from './mds-editor/mds-editor.component';
 import { SearchFieldFacetsComponent } from './mds-editor/search-field-facets/search-field-facets.component';
 import { LabelPipe } from './mds-editor/shared/label.pipe';
+import { MdsDurationPipe } from './mds-editor/shared/mds-duration.pipe';
 import { PropertySlugPipe } from './mds-editor/shared/property-slug.pipe';
 import { MdsEditorWidgetAuthorComponent } from './mds-editor/widgets/mds-editor-widget-author/mds-editor-widget-author.component';
 import { MdsEditorWidgetAuthorityComponent } from './mds-editor/widgets/mds-editor-widget-authority/mds-editor-widget-authority.component';
@@ -88,6 +89,7 @@ import {MatFormFieldModule} from "@angular/material/form-field";
         PropertySlugPipe,
         RegisterFormFieldDirective,
         SearchFieldFacetsComponent,
+        MdsDurationPipe,
     ],
     imports: [SharedModule, NgxSliderModule, EditorModule, MatFormFieldModule],
     exports: [

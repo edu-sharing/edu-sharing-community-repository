@@ -39,8 +39,8 @@
     grid-column-gap: 20px;
     grid-row-gap: 20px;
     grid-template-rows: auto;
-    margin-block-start: 1em;
-    margin-block-end: 1em;
+    padding-block-start: 1em;
+    padding-block-end: 1em;
     > .card-grid-drag-wrapper {
         position: relative;
         .card-grid-drop-allowed-container,
