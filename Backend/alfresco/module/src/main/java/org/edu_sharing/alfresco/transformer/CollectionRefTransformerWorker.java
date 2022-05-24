@@ -1,13 +1,10 @@
 package org.edu_sharing.alfresco.transformer;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.File;
+import java.util.*;
 
 import org.alfresco.model.ContentModel;
-import org.alfresco.repo.content.transform.ContentTransformerHelper;
-import org.alfresco.repo.content.transform.ContentTransformerWorker;
+
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentReader;
@@ -19,13 +16,15 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.repository.TransformationOptions;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.transformer.AbstractTransformerController;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
-public class CollectionRefTransformerWorker extends ContentTransformerHelper implements ContentTransformerWorker  {
-	
+public class CollectionRefTransformerWorker{
+
+	/*
 	Logger logger = Logger.getLogger(CollectionRefTransformerWorker.class);
 	
 	NodeService nodeService = null;
@@ -46,7 +45,7 @@ public class CollectionRefTransformerWorker extends ContentTransformerHelper imp
 		return true;
 	}
 	
-	@Override
+
 	public boolean isTransformable(String sourceMimetype, String targetMimetype, TransformationOptions options) {
 		logger.debug("is transformable sourceMimetype:" + sourceMimetype + " targetMimetype:" + targetMimetype);
 		
@@ -78,7 +77,12 @@ public class CollectionRefTransformerWorker extends ContentTransformerHelper imp
 		return AuthenticationUtil.runAs(isTransformableWorker, ApplicationInfoList.getHomeRepository().getUsername());
 		
 	}
-	
+
+	@Override
+	public void transformImpl(String transformName, String sourceMimetype, String targetMimetype, Map<String, String> transformOptions, File sourceFile, File targetFile) {
+
+	}
+
 	@Override
 	public void transform(ContentReader reader, ContentWriter writer, TransformationOptions options) throws Exception {
 		NodeRef nodeRef = options.getSourceNodeRef();
@@ -111,4 +115,5 @@ public class CollectionRefTransformerWorker extends ContentTransformerHelper imp
 	public void setContentService(ContentService contentService) {
 		this.contentService = contentService;
 	}
+	*/
 }

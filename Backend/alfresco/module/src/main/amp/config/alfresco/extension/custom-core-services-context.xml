@@ -607,7 +607,7 @@
     	   <ref bean="TransactionService" />
       </property>
     </bean>
-    <bean id="transformer.worker.ESH5PTransformerWorker" class="org.edu_sharing.alfresco.transformer.H5PTransformerWorker">
+    <!--<bean id="transformer.worker.ESH5PTransformerWorker" class="org.edu_sharing.alfresco.transformer.H5PTransformerWorker">
         <property name="mimetypeService" ref="mimetypeService"/>
         <property name="transformerConfig">
             <ref bean="transformerConfig" />
@@ -619,17 +619,20 @@
             <ref bean="TransactionService" />
         </property>
     </bean>
-    <bean id="transformer.ESVideoTransformer" class="org.alfresco.repo.content.transform.ProxyContentTransformer" parent="baseContentTransformer">
-      <property name="worker">
-         <ref bean="transformer.worker.ESVideoTransformerWorker" />
-      </property>
-   </bean>
     <bean id="transformer.ESH5PTransformer" class="org.alfresco.repo.content.transform.ProxyContentTransformer" parent="baseContentTransformer">
         <property name="worker">
             <ref bean="transformer.worker.ESH5PTransformerWorker" />
         </property>
     </bean>
-     <bean id="transformer.worker.ESCollectionRefTransformerWorker" class="org.edu_sharing.alfresco.transformer.CollectionRefTransformerWorker">
+    -->
+
+    <bean id="transformer.ESVideoTransformer" class="org.alfresco.repo.content.transform.ProxyContentTransformer" parent="baseContentTransformer">
+      <property name="worker">
+         <ref bean="transformer.worker.ESVideoTransformerWorker" />
+      </property>
+   </bean>
+
+    <!-- <bean id="transformer.worker.ESCollectionRefTransformerWorker" class="org.edu_sharing.alfresco.transformer.CollectionRefTransformerWorker">
     	<property name="mimetypeService" ref="mimetypeService"/>
     	 <property name="transformerConfig">
          <ref bean="transformerConfig" />
@@ -641,12 +644,14 @@
             <ref bean="contentService" />
         </property>
     </bean>
+
     <bean id="transformer.ESCollectionRefTransformer" class="org.alfresco.repo.content.transform.ProxyContentTransformer" parent="baseContentTransformer">
       <property name="worker">
          <ref bean="transformer.worker.ESCollectionRefTransformerWorker" />
       </property>
    </bean>
-   
+   -->
+
     <bean id="eduNodeServiceInterceptor" class="org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor" init-method="init">
       <property name="nodeService">
          <ref bean="mlAwareNodeService" />
