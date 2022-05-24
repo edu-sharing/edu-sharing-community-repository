@@ -1,16 +1,16 @@
 <es-card-header
   [id]="id"
-  [title]="cardConfig.title | translate"
-  [subtitle]="cardConfig.subtitle | translate"
-  [avatar]="cardConfig.avatar"
-  (triggerClose)="close()"
+  [title]="config.title | translate"
+  [subtitle]="config.subtitle | translate"
+  [avatar]="config.avatar"
+  (closeButtonClick)="onCloseButtonClick()"
   [showCloseButton]="shouldShowCloseButton()"
   [disableCloseButton]="isLoading"
 ></es-card-header>
 
 <div
   class="card-content"
-  [style.padding.px]="cardConfig.contentPadding"
+  [style.padding.px]="config.contentPadding"
   [attr.aria-hidden]="isLoading"
 >
   <ng-template cdkPortalOutlet></ng-template>

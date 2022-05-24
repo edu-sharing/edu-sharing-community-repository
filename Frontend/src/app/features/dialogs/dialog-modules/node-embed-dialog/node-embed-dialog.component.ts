@@ -20,8 +20,8 @@ import { Toast, ToastType } from 'src/app/core-ui-module/toast';
 import { UIHelper } from 'src/app/core-ui-module/ui-helper';
 import { Node } from '../../../../core-module/rest/data-object';
 import { MainNavService } from '../../../../main/navigation/main-nav.service';
-import { CardDialogState, CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
-import { CARD_DIALOG_STATE } from '../../card-dialog/card-dialog.service';
+import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
+import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 
 export interface NodeEmbedDialogData {
     node: Node;
@@ -40,10 +40,7 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
     @HostBinding('hidden') hidden: string | null = null;
     @ViewChild('textarea') textareaRef: ElementRef<HTMLTextAreaElement>;
 
-    readonly buttons = [
-        new DialogButton('OPTIONS.COPY', { color: 'primary' }, () => this.copy()),
-        // new DialogButton('CLOSE', { color: 'standard' }, this.config.onClose),
-    ];
+    readonly buttons = [new DialogButton('OPTIONS.COPY', { color: 'primary' }, () => this.copy())];
 
     readonly sizeConstraints = {
         width: { min: 300, max: 1200 },
@@ -69,7 +66,7 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
 
     constructor(
         @Inject(CARD_DIALOG_DATA) public data: NodeEmbedDialogData,
-        @Inject(CARD_DIALOG_STATE) private dialogState: CardDialogState,
+        private dialogRef: CardDialogRef,
         private changeDetectorRef: ChangeDetectorRef,
         private location: Location,
         private mainNav: MainNavService,
@@ -79,7 +76,7 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit(): void {
-        this.dialogState.patchCardConfig({ buttons: this.buttons });
+        this.dialogRef.patchConfig({ buttons: this.buttons });
         this.registerFormChanges();
         this.registerNotPublicWarning();
     }
@@ -114,7 +111,7 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
         });
         // The dialog is closable by backdrop click until any value has been changed.
         this.form.valueChanges.pipe(take(1)).subscribe(() => {
-            this.dialogState.patchCardConfig({ closable: Closable.Standard });
+            this.dialogRef.patchConfig({ closable: Closable.Standard });
         });
     }
 

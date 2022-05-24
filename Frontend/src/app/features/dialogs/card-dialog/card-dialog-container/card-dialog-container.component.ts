@@ -24,8 +24,8 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { DialogButton } from '../../../../core-module/core.module';
 import { UIAnimation } from '../../../../core-module/ui/ui-animation';
-import { CardDialogCardConfig, CardDialogState, Closable } from '../card-dialog-config';
-import { CARD_DIALOG_STATE } from '../card-dialog.service';
+import { CardDialogConfig, Closable } from '../card-dialog-config';
+import { CardDialogRef } from '../card-dialog-ref';
 
 let idCounter = 0;
 
@@ -85,14 +85,16 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
 
     @ViewChild(CdkPortalOutlet, { static: true }) portalOutlet: CdkPortalOutlet;
 
-    cardConfig: CardDialogCardConfig = {};
+    config: CardDialogConfig<unknown> = {};
     buttons: DialogButton[];
     isLoading = false;
 
     /** Emits when an animation state changes. */
     readonly animationStateChanged = new EventEmitter<DialogAnimationEvent>();
-    /** Emits when the user clicked the card's 'X' button. */
-    readonly triggerClose = new EventEmitter<void>();
+
+    // Cannot be injected because the dialogRef is available only after this container is created.
+    // Will be set right after construction.
+    dialogRef!: CardDialogRef<unknown, unknown>;
 
     private focusTrap: ConfigurableFocusTrap;
     /** Element that was focused before the dialog was opened. Save this to restore upon close. */
@@ -100,7 +102,7 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
     private readonly destroyed$ = new Subject<void>();
 
     constructor(
-        @Inject(CARD_DIALOG_STATE) private dialogState: CardDialogState,
+        // @Inject(CARD_DIALOG_STATE) private dialogState: CardDialogState,
         // @Inject(CARD_DIALOG_OVERLAY_REF) private overlayRef: OverlayRef,
         @Optional() @Inject(DOCUMENT) private document: any,
         private elementRef: ElementRef<HTMLElement>,
@@ -109,35 +111,43 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit(): void {
-        this.dialogState.cardConfig$.pipe(takeUntil(this.destroyed$)).subscribe((cardConfig) =>
-            Promise.resolve().then(() => {
-                this.cardConfig = cardConfig;
-                this.updateButtons();
-            }),
-        );
-        this.dialogState.viewMode$
+        this.dialogRef
+            .observeConfig()
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((cardConfig) =>
+                Promise.resolve().then(() => {
+                    this.config = cardConfig;
+                    this.updateButtons();
+                }),
+            );
+        this.dialogRef
+            .observeState('viewMode')
             .pipe(takeUntil(this.destroyed$))
             .subscribe((viewMode) => (this.isMobile = viewMode === 'mobile'));
-        this.dialogState.loading.pipe(takeUntil(this.destroyed$)).subscribe((isLoading) => {
-            this.updateButtons();
-            this.isLoading = isLoading;
-        });
+        this.dialogRef
+            .observeState('isLoading')
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((isLoading) => {
+                this.updateButtons();
+                this.isLoading = isLoading;
+            });
     }
 
     private updateButtons(): void {
-        if (this.dialogState.loading.value) {
-            this.buttons = this.cardConfig.buttons?.map((button) => ({
+        if (this.dialogRef.state.isLoading) {
+            this.buttons = this.config.buttons?.map((button) => ({
                 ...button,
                 disabled: true,
             }));
         } else {
-            this.buttons = this.cardConfig.buttons;
+            this.buttons = this.config.buttons;
         }
     }
 
     ngOnDestroy(): void {
         this.destroyed$.next();
         this.destroyed$.complete();
+        this.dialogRef = null;
     }
 
     attachComponentPortal<T>(portal: ComponentPortal<T>): ComponentRef<T> {
@@ -177,12 +187,12 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
         }
     }
 
-    close(): void {
-        this.triggerClose.next();
+    onCloseButtonClick(): void {
+        this.dialogRef.tryCancel('x-button');
     }
 
     shouldShowCloseButton(): boolean {
-        return this.cardConfig.closable <= Closable.Confirm;
+        return this.config.closable <= Closable.Confirm;
     }
 
     /** Starts the dialog exit animation. */

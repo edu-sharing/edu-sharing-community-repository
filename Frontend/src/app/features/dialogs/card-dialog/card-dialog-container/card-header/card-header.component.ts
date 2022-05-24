@@ -16,7 +16,7 @@ export class CardHeaderComponent {
     @Input() avatar?: CardAvatar;
     @Input() showCloseButton: boolean = true;
     @Input() disableCloseButton: boolean = false;
-    @Output() triggerClose: EventEmitter<void> = new EventEmitter();
+    @Output() closeButtonClick: EventEmitter<void> = new EventEmitter();
 
     getIconImageUrl(): string {
         if (this.avatar?.kind === 'image') {
@@ -35,6 +35,6 @@ export class CardHeaderComponent {
     }
 
     onClose(): void {
-        this.triggerClose.emit();
+        this.closeButtonClick.emit();
     }
 }

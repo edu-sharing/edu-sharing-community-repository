@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
-import { filter, take, tap } from 'rxjs/operators';
+import { filter, take } from 'rxjs/operators';
 import {
     DialogButton,
     LoginResult,
@@ -21,13 +21,8 @@ import {
 } from '../../../../../core-module/core.module';
 import { UIAnimation } from '../../../../../core-module/ui/ui-animation';
 import { Toast } from '../../../../../core-ui-module/toast';
-import {
-    CardDialogState,
-    CARD_DIALOG_DATA,
-    Closable,
-} from '../../../card-dialog/card-dialog-config';
+import { CARD_DIALOG_DATA, Closable } from '../../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../../card-dialog/card-dialog-ref';
-import { CARD_DIALOG_STATE } from '../../../card-dialog/card-dialog.service';
 
 export interface NodeReportDialogData {
     node: Node;
@@ -56,8 +51,7 @@ export class NodeReportComponent implements OnInit {
 
     constructor(
         @Inject(CARD_DIALOG_DATA) public data: NodeReportDialogData,
-        @Inject(CARD_DIALOG_STATE) private dialogState: CardDialogState,
-        private dialogRef: CardDialogRef<void>,
+        private dialogRef: CardDialogRef,
         private connector: RestConnectorService,
         private iam: RestIamService,
         private translate: TranslateService,
@@ -67,7 +61,7 @@ export class NodeReportComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.dialogState.patchCardConfig({
+        this.dialogRef.patchConfig({
             buttons: [
                 new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel()),
                 new DialogButton('NODE_REPORT.REPORT', { color: 'primary' }, () => this.report()),
@@ -88,7 +82,7 @@ export class NodeReportComponent implements OnInit {
                 filter((values) => Object.values(values).some((value) => !!value)),
                 take(1),
             )
-            .subscribe(() => this.dialogState.patchCardConfig({ closable: Closable.Standard }));
+            .subscribe(() => this.dialogRef.patchConfig({ closable: Closable.Standard }));
     }
 
     cancel() {
@@ -137,7 +131,7 @@ export class NodeReportComponent implements OnInit {
     }
 
     setLoading(isLoading: boolean): void {
-        this.dialogState.loading.next(isLoading);
+        this.dialogRef.patchState({ isLoading });
         if (isLoading) {
             this.form.disable();
         } else {
