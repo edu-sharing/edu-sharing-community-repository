@@ -139,225 +139,226 @@ public class MetadataTemplateRenderer {
 		String content=template.getHtml();
 		for(MetadataWidget srcWidget : mds.getWidgets()){
 			MetadataWidget widget=mds.findWidgetForTemplateAndCondition(srcWidget.getId(),template.getId(),properties);
-			int start=content.indexOf("<"+widget.getId());
+			int start=content.indexOf("<"+srcWidget.getId());
 			if(start==-1)
 				continue;
 			int end=content.indexOf(">",start);
 			String first=content.substring(0, start);
 			String second=content.substring(end+1);
-			String attributes=content.substring(start+1+widget.getId().length(),end);
-			widget=applyAttributes(widget,attributes);
-			String[] values=properties.get(widget.getId());
+			String attributes=content.substring(start+1+srcWidget.getId().length(),end);
+			if(widget != null) {
+				widget = applyAttributes(widget, attributes);
+			}
+			String[] values=properties.get(srcWidget.getId());
 			boolean wasEmpty=false;
 			if(values==null){
 				values=new String[]{"-"};
 				wasEmpty=true;
 			}
 			StringBuffer widgetHtml=new StringBuffer();
-			if(renderingMode.equals(RenderingMode.HTML)) {
-				widgetHtml.append("<div data-widget-id='").append(widget.getId()).append("' class='mdsWidget");
-				if (widget.getType() != null) {
-					widgetHtml.append(" mdsWidget_").append(widget.getType());
-				}
-				widgetHtml.append("'").append(attributes).append(">");
-				if (widget.getCaption() != null) {
-					widgetHtml.append("<h3 class='mdsWidgetCaption'>").append(widget.getCaption()).append("</h3>");
-				}
-				widgetHtml.append("<div class='mdsWidgetContent mds_").append(widget.getId().replace(":", "_"));
-				if (widget.isMultivalue()) {
-					widgetHtml.append(" mdsWidgetMultivalue");
-				}
+			if(widget != null) {
+				if (renderingMode.equals(RenderingMode.HTML)) {
+					widgetHtml.append("<div data-widget-id='").append(widget.getId()).append("' class='mdsWidget");
+					if (widget.getType() != null) {
+						widgetHtml.append(" mdsWidget_").append(widget.getType());
+					}
+					widgetHtml.append("'").append(attributes).append(">");
+					if (widget.getCaption() != null) {
+						widgetHtml.append("<h3 class='mdsWidgetCaption'>").append(widget.getCaption()).append("</h3>");
+					}
+					widgetHtml.append("<div class='mdsWidgetContent mds_").append(widget.getId().replace(":", "_"));
+					if (widget.isMultivalue()) {
+						widgetHtml.append(" mdsWidgetMultivalue");
+					}
 
-				widgetHtml.append("'>");
-			}else if(renderingMode.equals(RenderingMode.TEXT)){
-				widgetHtml.append(widget.getCaption()).append(": ");
+					widgetHtml.append("'>");
+				} else if (renderingMode.equals(RenderingMode.TEXT)) {
+					widgetHtml.append(widget.getCaption()).append(": ");
+				}
 			}
 			boolean empty=true;
-			if("multivalueTree".equals(widget.getType())) {
-				empty = renderTree(widgetHtml, widget);
-			}
-			else if("multivalueCombined".equals(widget.getType())){
-				empty = renderWidgetSubwidgets(widget, widgetHtml);
-				wasEmpty = empty;
-			}
-			else if("collection_feedback".equals(widget.getType())){
-				empty = renderCollectionFeedback(widget,widgetHtml);
-				wasEmpty = empty;
-			}
-			else {
-				for(String value : values){
-					String rawValue = value;
-					HashMap<String, Object> vcardData = null;
-					if("vcard".equals(widget.getType())){
-						ArrayList<HashMap<String, Object>> map = VCardConverter.vcardToHashMap(value);
-						if(map.size() > 0) {
-							vcardData = map.get(0);
+			if(widget != null) {
+				if ("multivalueTree".equals(widget.getType())) {
+					empty = renderTree(widgetHtml, widget);
+				} else if ("multivalueCombined".equals(widget.getType())) {
+					empty = renderWidgetSubwidgets(widget, widgetHtml);
+					wasEmpty = empty;
+				} else if ("collection_feedback".equals(widget.getType())) {
+					empty = renderCollectionFeedback(widget, widgetHtml);
+					wasEmpty = empty;
+				} else {
+					for (String value : values) {
+						String rawValue = value;
+						HashMap<String, Object> vcardData = null;
+						if ("vcard".equals(widget.getType())) {
+							ArrayList<HashMap<String, Object>> map = VCardConverter.vcardToHashMap(value);
+							if (map.size() > 0) {
+								vcardData = map.get(0);
+							}
 						}
-					}
-					if(widget.getId().equals("license")){
-						wasEmpty = false;
-						String licenseName=properties.containsKey(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY)) ?
-								   properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY))[0] : null;
-						String licenseVersion=properties.containsKey(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION)) ?
+						if (widget.getId().equals("license")) {
+							wasEmpty = false;
+							String licenseName = properties.containsKey(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY)) ?
+									properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY))[0] : null;
+							String licenseVersion = properties.containsKey(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION)) ?
 									properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION))[0] : null;
 
 
-						LicenseService license=new LicenseService();
-						String link=license.getLicenseUrl(licenseName,mds.getI18n(), licenseVersion);
-						value="";
-						if(renderingMode.equals(RenderingMode.HTML)) {
-							if (link != null)
-								value = "<a href='" + link + "' target='_blank'>";
-							value += "<img src='" +
-									// @TODO 5.1 This can be set to dynamic!
-									license.getIconUrl(licenseName, false) +
-									"' alt=\"\">";
-						}
-						String name = getLicenseName(licenseName, properties);
-						String group = getLicenseGroup(licenseName, properties);
-						if(name!=null) {
-							if(renderingMode.equals(RenderingMode.HTML)) {
-								value += "<div class='licenseName'>" + name + "</div>";
-							}else if(renderingMode.equals(RenderingMode.TEXT)){
-								value += name;
+							LicenseService license = new LicenseService();
+							String link = license.getLicenseUrl(licenseName, mds.getI18n(), licenseVersion);
+							value = "";
+							if (renderingMode.equals(RenderingMode.HTML)) {
+								if (link != null)
+									value = "<a href='" + link + "' target='_blank'>";
+								value += "<img src='" +
+										// @TODO 5.1 This can be set to dynamic!
+										license.getIconUrl(licenseName, false) +
+										"' alt=\"\">";
 							}
-						}
-						if (renderingMode.equals(RenderingMode.HTML) && link != null) {
-							value += "</a>";
-						}
-						if(group != null && !group.equals(name)) {
-							if(renderingMode.equals(RenderingMode.HTML)) {
-								value += "<div class='licenseGroup'>" + group + "</div>";
-							}else if(renderingMode.equals(RenderingMode.TEXT)){
-								if(!value.isEmpty()){
-									value += TEXT_LICENSE_SEPERATOR;
+							String name = getLicenseName(licenseName, properties);
+							String group = getLicenseGroup(licenseName, properties);
+							if (name != null) {
+								if (renderingMode.equals(RenderingMode.HTML)) {
+									value += "<div class='licenseName'>" + name + "</div>";
+								} else if (renderingMode.equals(RenderingMode.TEXT)) {
+									value += name;
 								}
-								value += group;
 							}
-						}
-						if(CCConstants.COMMON_LICENSE_CUSTOM.equals(licenseName)) {
-							// skipping description
-						}
-						else{
-							if(renderingMode.equals(RenderingMode.HTML)) {
-								value+="<div class='licenseDescription'>" +getLicenseDescription(licenseName) +"</div>";
-							}else if(renderingMode.equals(RenderingMode.TEXT)){
-								if(!value.isEmpty()){
-									value += TEXT_LICENSE_SEPERATOR;
+							if (renderingMode.equals(RenderingMode.HTML) && link != null) {
+								value += "</a>";
+							}
+							if (group != null && !group.equals(name)) {
+								if (renderingMode.equals(RenderingMode.HTML)) {
+									value += "<div class='licenseGroup'>" + group + "</div>";
+								} else if (renderingMode.equals(RenderingMode.TEXT)) {
+									if (!value.isEmpty()) {
+										value += TEXT_LICENSE_SEPERATOR;
+									}
+									value += group;
 								}
-								value += getLicenseDescription(licenseName).replaceAll("((<br \\/>)|(\\n))",TEXT_LICENSE_SEPERATOR);
 							}
-						}
-						if(renderingMode.equals(RenderingMode.HTML) && properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK))!=null){
-							value+="<div class='licenseTitleOfWork'>";
-							value+="<div class='mdsWidgetCaptionChild'>"+
-									I18nAngular.getTranslationAngular("common","LICENSE.TITLE_OF_WORK")
-									+"</div>";
-							boolean source = properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_SOURCE_URL))!=null;
-							if(source){
-								value+="<a href='"+properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_SOURCE_URL))[0]+"'>";
+							if (CCConstants.COMMON_LICENSE_CUSTOM.equals(licenseName)) {
+								// skipping description
+							} else {
+								if (renderingMode.equals(RenderingMode.HTML)) {
+									value += "<div class='licenseDescription'>" + getLicenseDescription(licenseName) + "</div>";
+								} else if (renderingMode.equals(RenderingMode.TEXT)) {
+									if (!value.isEmpty()) {
+										value += TEXT_LICENSE_SEPERATOR;
+									}
+									value += getLicenseDescription(licenseName).replaceAll("((<br \\/>)|(\\n))", TEXT_LICENSE_SEPERATOR);
+								}
 							}
-							value+=properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK))[0];
-							if(source){
-								value+="</a>";
+							if (renderingMode.equals(RenderingMode.HTML) && properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK)) != null) {
+								value += "<div class='licenseTitleOfWork'>";
+								value += "<div class='mdsWidgetCaptionChild'>" +
+										I18nAngular.getTranslationAngular("common", "LICENSE.TITLE_OF_WORK")
+										+ "</div>";
+								boolean source = properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_SOURCE_URL)) != null;
+								if (source) {
+									value += "<a href='" + properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_SOURCE_URL))[0] + "'>";
+								}
+								value += properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_TITLE_OF_WORK))[0];
+								if (source) {
+									value += "</a>";
+								}
+								if (properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL)) != null) {
+									value += " (<a href='" +
+											properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL))[0] + "'>" +
+											I18nAngular.getTranslationAngular("common", "LICENSE.LINK_AUTHOR")
+											+ "</a>)";
+								}
+								value += "</div>";
 							}
-							if(properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL)) != null){
-								value+=" (<a href='"+
-										properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL))[0]+"'>"+
-										I18nAngular.getTranslationAngular("common","LICENSE.LINK_AUTHOR")
-										+"</a>)";
-							}
-							value+="</div>";
-						}
 
-					}
-					if(value==null || value.trim().isEmpty())
-						continue;
-					value=renderWidgetValue(widget,value);
-					boolean isLink=false;
-					// do not use global link for vcard, they handle links seperately
-					if(!widget.getType().equals("vcard") && widget.getLink()!=null && !widget.getLink().isEmpty() && renderingMode.equals(RenderingMode.HTML)){
-						widgetHtml.append("<a href=\"").append(value).append("\" target=\"").append(widget.getLink()).append("\">");
-						isLink=true;
-					}
-					else if(vcardData != null){
-						value = VCardConverter.getNameForVCard("",vcardData);
-					}
-					if(renderingMode.equals(RenderingMode.HTML)){
-						widgetHtml.append("<div class='mdsValue' data-value-key='" + rawValue + "'>");
-						if(widget.getIcon()!=null){
-							widgetHtml.append(insertIcon(widget.getIcon()));
 						}
-					}
-					if(!value.trim().isEmpty()) {
-						if(!empty && renderingMode.equals(RenderingMode.TEXT)){
-							widgetHtml.append(TEXT_MULTIVALUE_SEPERATOR);
-						}
-						empty = false;
-					}
-					if (renderingMode.equals(RenderingMode.HTML)) {
-						widgetHtml.append("<div>");
-					}
-					if(vcardData != null && renderingMode.equals(RenderingMode.HTML)){
-						Object linkUrl = vcardData.get(widget.getLink() == null ? CCConstants.VCARD_URL :
-								widget.getLink().equals("email") ? CCConstants.VCARD_EMAIL
-										: null);
-						String url=linkUrl != null ? linkUrl.toString() : "";
-						if(!url.isEmpty()) {
-							if("email".equals(widget.getLink())) {
-								url = "mailto:" + url;
-							} else if (!url.contains("://")) {
-								url = "http://" + url;
-							}
-							widgetHtml.append("<a href=\"").append(url).append("\" target=\"_blank\">");
+						if (value == null || value.trim().isEmpty())
+							continue;
+						value = renderWidgetValue(widget, value);
+						boolean isLink = false;
+						// do not use global link for vcard, they handle links seperately
+						if (!widget.getType().equals("vcard") && widget.getLink() != null && !widget.getLink().isEmpty() && renderingMode.equals(RenderingMode.HTML)) {
+							widgetHtml.append("<a href=\"").append(value).append("\" target=\"").append(widget.getLink()).append("\">");
 							isLink = true;
+						} else if (vcardData != null) {
+							value = VCardConverter.getNameForVCard("", vcardData);
 						}
-					}
-					widgetHtml.append(value);
-					if(vcardData != null && renderingMode.equals(RenderingMode.HTML)) {
-						if(isLink){
-							widgetHtml.append("</a>");
+						if (renderingMode.equals(RenderingMode.HTML)) {
+							widgetHtml.append("<div class='mdsValue' data-value-key='" + rawValue + "'>");
+							if (widget.getIcon() != null) {
+								widgetHtml.append(insertIcon(widget.getIcon()));
+							}
 						}
-						try{
-							VCardEngine vCardEngine = new VCardEngine();
-							VCard vcard = vCardEngine.parse(rawValue);
-							String persistentIdUrl = null;
-							for (ExtendedType type : vcard.getExtendedTypes()) {
-								if (type.getExtendedName().equals(CCConstants.VCARD_T_X_ORCID) ||
-										type.getExtendedName().equals(CCConstants.VCARD_T_X_GND_URI) ||
-										type.getExtendedName().equals(CCConstants.VCARD_T_X_ROR) ||
-										type.getExtendedName().equals(CCConstants.VCARD_T_X_WIKIDATA)) {
-									persistentIdUrl = type.getExtendedValue();
-									break;
+						if (!value.trim().isEmpty()) {
+							if (!empty && renderingMode.equals(RenderingMode.TEXT)) {
+								widgetHtml.append(TEXT_MULTIVALUE_SEPERATOR);
+							}
+							empty = false;
+						}
+						if (renderingMode.equals(RenderingMode.HTML)) {
+							widgetHtml.append("<div>");
+						}
+						if (vcardData != null && renderingMode.equals(RenderingMode.HTML)) {
+							Object linkUrl = vcardData.get(widget.getLink() == null ? CCConstants.VCARD_URL :
+									widget.getLink().equals("email") ? CCConstants.VCARD_EMAIL
+											: null);
+							String url = linkUrl != null ? linkUrl.toString() : "";
+							if (!url.isEmpty()) {
+								if ("email".equals(widget.getLink())) {
+									url = "mailto:" + url;
+								} else if (!url.contains("://")) {
+									url = "http://" + url;
 								}
+								widgetHtml.append("<a href=\"").append(url).append("\" target=\"_blank\">");
+								isLink = true;
 							}
-							if (persistentIdUrl != null && !persistentIdUrl.isEmpty()) {
-								widgetHtml.append("<br><a href=\"").append(persistentIdUrl)
-										.append("\" target=\"blank\">")
-										.append(MetadataHelper.getTranslation("vcard_link_persistent_id"))
-										.append("</a>");
-							}
-						}catch(Throwable t){
-							// empty or invalid value
 						}
-					}
+						widgetHtml.append(value);
+						if (vcardData != null && renderingMode.equals(RenderingMode.HTML)) {
+							if (isLink) {
+								widgetHtml.append("</a>");
+							}
+							try {
+								VCardEngine vCardEngine = new VCardEngine();
+								VCard vcard = vCardEngine.parse(rawValue);
+								String persistentIdUrl = null;
+								for (ExtendedType type : vcard.getExtendedTypes()) {
+									if (type.getExtendedName().equals(CCConstants.VCARD_T_X_ORCID) ||
+											type.getExtendedName().equals(CCConstants.VCARD_T_X_GND_URI) ||
+											type.getExtendedName().equals(CCConstants.VCARD_T_X_ROR) ||
+											type.getExtendedName().equals(CCConstants.VCARD_T_X_WIKIDATA)) {
+										persistentIdUrl = type.getExtendedValue();
+										break;
+									}
+								}
+								if (persistentIdUrl != null && !persistentIdUrl.isEmpty()) {
+									widgetHtml.append("<br><a href=\"").append(persistentIdUrl)
+											.append("\" target=\"blank\">")
+											.append(MetadataHelper.getTranslation("vcard_link_persistent_id"))
+											.append("</a>");
+								}
+							} catch (Throwable t) {
+								// empty or invalid value
+							}
+						}
 
-					if (renderingMode.equals(RenderingMode.HTML)) {
-						widgetHtml.append("</div>");
-					}
-					if(renderingMode.equals(RenderingMode.HTML)) {
-						widgetHtml.append("</div>");
-						if (isLink) {
-							widgetHtml.append("</a>");
+						if (renderingMode.equals(RenderingMode.HTML)) {
+							widgetHtml.append("</div>");
+						}
+						if (renderingMode.equals(RenderingMode.HTML)) {
+							widgetHtml.append("</div>");
+							if (isLink) {
+								widgetHtml.append("</a>");
+							}
 						}
 					}
 				}
-			}
-			if(renderingMode.equals(RenderingMode.HTML)) {
-				widgetHtml.append("</div></div>");
-			}
-			if((empty || wasEmpty) && widget.isHideIfEmpty()) {
-				widgetHtml = new StringBuffer();
+				if (renderingMode.equals(RenderingMode.HTML)) {
+					widgetHtml.append("</div></div>");
+				}
+				if ((empty || wasEmpty) && widget.isHideIfEmpty()) {
+					widgetHtml = new StringBuffer();
+				}
 			}
 
 			content = first.trim();
