@@ -33,7 +33,7 @@ public class ImageTool {
 
 	private static int readImageOrientation(InputStream imageFile)  throws IOException, MetadataException, ImageProcessingException {
 	    Metadata metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(imageFile));
-	    Directory directory = metadata.getDirectory(ExifIFD0Directory.class);
+	    Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
 	    int orientation = 1;
 	    try {
 	        orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);

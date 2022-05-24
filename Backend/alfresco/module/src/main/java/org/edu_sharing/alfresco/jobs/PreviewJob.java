@@ -121,7 +121,7 @@ public class PreviewJob implements Job {
 			public Void doWork() throws Exception {
 
 				logger.debug("starting: " + context.getFireTime() + " name:"
-						+ context.getJobDetail().getName());
+						+ context.getJobDetail().getKey().getName());
 
 				try {
 					List<JobExecutionContext> currentlyExecutingJobs = (List<JobExecutionContext>) context

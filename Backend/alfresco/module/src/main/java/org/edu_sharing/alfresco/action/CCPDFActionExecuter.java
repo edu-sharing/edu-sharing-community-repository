@@ -59,6 +59,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageTree;
+import org.apache.pdfbox.rendering.PDFRenderer;
 
 /**
  * Logger action executer.
@@ -239,13 +241,17 @@ public class CCPDFActionExecuter extends ActionExecuterAbstractBase {
 				// Check org.pdfbox.PDFToImage.java in source.
 				System.err.println("Please remove password from PDF file");
 			} else {
-				List pages = document.getDocumentCatalog().getAllPages();
-				for (int i = 0; i < pages.size(); i++) {
+				for (PDPage page : document.getDocumentCatalog().getPages()) {
+
+				}
+
+				PDPageTree pages = document.getDocumentCatalog().getPages();
+				PDFRenderer pdfRenderer = new PDFRenderer(document);
+				for (int i = 0; i < pages.getCount(); i++) {
 					ImageOutputStream output = null;
 					ImageWriter imageWriter = null;
 					try {
-						PDPage page = (PDPage) pages.get(i);
-						BufferedImage image = page.convertToImage();
+						BufferedImage image = pdfRenderer.renderImage(i);
 						String fileName = outputPrefix + (i + 1) + "." + imageType;
 						output = ImageIO.createImageOutputStream(new File(fileName));
 
@@ -302,15 +308,12 @@ public class CCPDFActionExecuter extends ActionExecuterAbstractBase {
 				// Check org.pdfbox.PDFToImage.java in source.
 				System.err.println("Please remove password from PDF file");
 			} else {
-				List pages = document.getDocumentCatalog().getAllPages();
+				PDFRenderer pdfRenderer = new PDFRenderer(document);
+				PDPageTree pages = document.getDocumentCatalog().getPages();
 				//only first page:
-				if(pages != null && pages.size() > 0){
-					ImageOutputStream output = null;
-					ImageWriter imageWriter = null;
+				if(pages != null && pages.getCount() > 0){
 					try {
-						PDPage page = (PDPage) pages.get(0);
-						
-						BufferedImage image = page.convertToImage();
+						BufferedImage image = pdfRenderer.renderImage(0);
 						image = scaleImage(image);
 						result.add(image);
 					} catch (Exception e) {
