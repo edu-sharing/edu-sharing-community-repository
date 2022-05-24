@@ -104,6 +104,21 @@
     <!-- compile -->
 
     <dependency>
+      <groupId>org.alfresco</groupId>
+      <artifactId>alfresco-transform-model</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.alfresco</groupId>
+      <artifactId>alfresco-transformer-base</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.alfresco</groupId>
+      <artifactId>alfresco-transform-tika</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>org.apache.axis</groupId>
       <artifactId>axis</artifactId>
     </dependency>

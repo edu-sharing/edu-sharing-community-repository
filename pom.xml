@@ -151,18 +151,36 @@
         <scope>import</scope>
       </dependency>
 
-      <dependency>
+     <!-- <dependency>
         <groupId>org.alfresco</groupId>
         <artifactId>alfresco-solr4-distribution</artifactId>
         <version>${alfresco.platform.version}</version>
         <type>zip</type>
       </dependency>
-
+-->
       <dependency>
         <groupId>org.alfresco</groupId>
         <artifactId>api-explorer</artifactId>
         <version>${alfresco.platform.version}</version>
         <type>war</type>
+      </dependency>
+
+      <dependency>
+        <groupId>org.alfresco</groupId>
+        <artifactId>alfresco-transform-model</artifactId>
+        <version>2.6.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.alfresco</groupId>
+        <artifactId>alfresco-transformer-base</artifactId>
+        <version>2.6.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.alfresco</groupId>
+        <artifactId>alfresco-transform-tika</artifactId>
+        <version>2.6.0</version>
       </dependency>
 
       <dependency>
@@ -820,6 +838,11 @@
         <enabled>true</enabled>
         <updatePolicy>always</updatePolicy>
       </snapshots>
+    </repository>
+
+    <repository>
+      <id>alfresco-maven-repo</id>
+      <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
     </repository>
 
   </repositories>
