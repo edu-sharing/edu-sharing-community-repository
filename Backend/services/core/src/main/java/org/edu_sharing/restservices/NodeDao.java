@@ -82,7 +82,6 @@ import org.json.JSONObject;
 
 import org.springframework.context.ApplicationContext;
 
-import static org.codehaus.groovy.runtime.DefaultGroovyMethods.collect;
 
 public class NodeDao {
 	private static Logger logger = Logger.getLogger(NodeDao.class);

@@ -7,7 +7,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.cache.CacheCluster;
 import org.edu_sharing.repository.client.rpc.cache.CacheInfo;
 
-import jdk.nashorn.internal.ir.debug.ObjectSizeCalculator;
+//import jdk.nashorn.internal.ir.debug.ObjectSizeCalculator;
 
 
 
@@ -22,7 +22,10 @@ public class CacheManagerDefault implements CacheManager {
 		
 		
 		ci.setSize(cache.getKeys().size());
-		ci.setSizeInMemory(ObjectSizeCalculator.getObjectSize(cache));
+		/**
+		 * @TODO fix alf 7.0
+		 */
+		//ci.setSizeInMemory(ObjectSizeCalculator.getObjectSize(cache));
 		ci.setName(beanName);
 		
 		return ci;

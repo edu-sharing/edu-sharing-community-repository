@@ -1,6 +1,5 @@
 package org.edu_sharing.metadataset.v2.tools;
 
-import com.sun.star.lang.IllegalArgumentException;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;

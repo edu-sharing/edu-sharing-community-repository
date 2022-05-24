@@ -23,7 +23,6 @@ import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.springframework.context.ApplicationContext;
 
-import com.sun.star.lang.IllegalArgumentException;
 
 public class NotificationServiceImpl implements NotificationService {
 

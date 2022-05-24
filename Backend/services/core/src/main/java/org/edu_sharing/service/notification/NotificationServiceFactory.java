@@ -2,10 +2,8 @@ package org.edu_sharing.service.notification;
 
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.service.nodeservice.NodeService;
-import org.edu_sharing.service.nodeservice.NodeServiceImpl;
 
-import com.sun.star.lang.IllegalArgumentException;
+
 
 public class NotificationServiceFactory {
 

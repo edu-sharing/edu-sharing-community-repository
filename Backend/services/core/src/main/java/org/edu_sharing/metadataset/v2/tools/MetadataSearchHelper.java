@@ -15,7 +15,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
-import org.apache.lucene.queryParser.QueryParser;
+import org.edu_sharing.repackaged.elasticsearch.org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -27,9 +27,6 @@ import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.SearchServiceImpl;
 import org.edu_sharing.service.search.Suggestion;
 import org.edu_sharing.service.search.model.SharedToMeType;
-
-import com.sun.star.lang.IllegalArgumentException;
-
 public class MetadataSearchHelper {
 	
 	static Logger logger = Logger.getLogger(MetadataSearchHelper.class);
