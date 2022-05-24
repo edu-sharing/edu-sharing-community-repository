@@ -32,7 +32,7 @@ import {
     OptionsHelperService,
     OPTIONS_HELPER_CONFIG,
 } from '../../options-helper.service';
-import { ActionbarComponent } from '../../../common/ui/actionbar/actionbar.component';
+import { ActionbarComponent } from '../../../shared/components/actionbar/actionbar.component';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
     ConfigurationService,

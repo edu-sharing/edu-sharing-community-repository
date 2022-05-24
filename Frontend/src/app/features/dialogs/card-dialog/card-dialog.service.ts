@@ -4,11 +4,7 @@ import { ComponentPortal, ComponentType } from '@angular/cdk/portal';
 import { Injectable, Injector } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, skipWhile, takeUntil, tap } from 'rxjs/operators';
-import {
-    CardDialogConfig,
-    CardDialogContentComponent,
-    CARD_DIALOG_DATA,
-} from './card-dialog-config';
+import { CardDialogConfig, CARD_DIALOG_DATA } from './card-dialog-config';
 import { CardDialogContainerComponent } from './card-dialog-container/card-dialog-container.component';
 import { CardDialogRef } from './card-dialog-ref';
 import { CardDialogState, ViewMode } from './card-dialog-state';
@@ -29,10 +25,7 @@ export class CardDialogService {
         private breakpointObserver: BreakpointObserver,
     ) {}
 
-    open<T extends CardDialogContentComponent<D, R>, D, R>(
-        component: ComponentType<T>,
-        config?: CardDialogConfig<T['data']>,
-    ): CardDialogRef<D, R> {
+    open<T, D, R>(component: ComponentType<T>, config?: CardDialogConfig<D>): CardDialogRef<D, R> {
         config = this.applyCardConfigDefaults(config);
         const overlayRef = this.createOverlay(config);
         const state = new CardDialogState();

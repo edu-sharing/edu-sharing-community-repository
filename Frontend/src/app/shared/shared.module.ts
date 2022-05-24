@@ -64,6 +64,7 @@ import { FormatSizePipe } from './pipes/file-size.pipe';
 import { NodeImageSizePipe } from './pipes/node-image-size.pipe';
 import { NodePersonNamePipe } from './pipes/node-person-name.pipe';
 import { SortDropdownComponent } from './components/sort-dropdown/sort-dropdown.component';
+import { ActionbarComponent } from './components/actionbar/actionbar.component';
 
 @NgModule({
     declarations: [
@@ -107,6 +108,7 @@ import { SortDropdownComponent } from './components/sort-dropdown/sort-dropdown.
         NodeImageSizePipe,
         NodePersonNamePipe,
         SortDropdownComponent,
+        ActionbarComponent,
     ],
     imports: [
         A11yModule,
@@ -194,6 +196,7 @@ import { SortDropdownComponent } from './components/sort-dropdown/sort-dropdown.
         NodeImageSizePipe,
         NodePersonNamePipe,
         SortDropdownComponent,
+        ActionbarComponent,
     ],
 })
 export class SharedModule {}

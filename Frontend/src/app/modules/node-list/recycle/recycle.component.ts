@@ -7,7 +7,7 @@ import {TranslateService} from "@ngx-translate/core";
 import {Toast} from "../../../core-ui-module/toast";
 import {ArchiveRestore,Node} from "../../../core-module/core.module";
 import {TemporaryStorageService} from "../../../core-module/core.module";
-import {ActionbarComponent} from "../../../common/ui/actionbar/actionbar.component";
+import {ActionbarComponent} from "../../../shared/components/actionbar/actionbar.component";
 
 @Component({
   selector: 'es-recycle',

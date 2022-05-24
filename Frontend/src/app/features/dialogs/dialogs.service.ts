@@ -65,16 +65,15 @@ export class DialogsService {
         });
     }
 
-    // private cardWithNodes(nodes: Node[]): Partial<CardDialogCardConfig> {
-    //     if (nodes.length === 0) {
-    //         return {};
-    //     } else if (nodes.length === 1) {
-    //         return this.cardWithNode(nodes[0]);
-    //     } else {
-    //         return {
-    //             avatar: null,
-    //             subtitle: this.translate.get('CARD_SUBTITLE_MULTIPLE', { count: nodes.length }),
-    //         };
-    //     }
-    // }
+    async openNodeStoreDialog(): Promise<CardDialogRef<void, void>> {
+        const { SearchNodeStoreComponent } = await import(
+            './dialog-modules/node-store-dialog/node-store-dialog.module'
+        );
+        return this.cardDialog.open(SearchNodeStoreComponent, {
+            title: 'SEARCH.NODE_STORE.TITLE',
+            width: 400,
+            minHeight: 'min(95%, 600px)',
+            contentPadding: 0,
+        });
+    }
 }

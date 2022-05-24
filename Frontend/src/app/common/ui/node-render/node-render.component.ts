@@ -54,7 +54,7 @@ import {
 } from '../../../core-module/core.module';
 import {MdsHelper} from '../../../core-module/rest/mds-helper';
 import {VideoControlsComponent} from '../../../core-ui-module/components/video-controls/video-controls.component';
-import {ActionbarComponent} from '../actionbar/actionbar.component';
+import {ActionbarComponent} from '../../../shared/components/actionbar/actionbar.component';
 import {
     OPTIONS_HELPER_CONFIG,
     OptionsHelperService

@@ -23,7 +23,7 @@ import {TranslateService} from '@ngx-translate/core';
 import {CustomOptions, Scope} from '../../../core-ui-module/option-item';
 import {Toast} from '../../../core-ui-module/toast';
 import {Helper} from '../../../core-module/rest/helper';
-import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
+import {ActionbarComponent} from '../../../shared/components/actionbar/actionbar.component';
 import {ListTableComponent} from '../../../core-ui-module/components/list-table/list-table.component';
 import { DropSource, DropTarget, InteractionType, ListSortConfig, NodeClickEvent, NodeEntriesDisplayType, NodeRoot } from 'src/app/features/node-entries/entries-model';
 import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-entries-wrapper.component';

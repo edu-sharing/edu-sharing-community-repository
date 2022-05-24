@@ -6,8 +6,7 @@ import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { Toast } from 'src/app/core-ui-module/toast';
-import { RestConstants, RestHelper } from '../../../core-module/core.module';
-import { SearchNodeStoreComponent } from './node-store.component';
+import { RestConstants, RestHelper } from '../../core-module/core.module';
 
 @Injectable({
     providedIn: 'root',
@@ -51,15 +50,5 @@ export class NodeStoreService {
                     return rxjs.of(void 0);
                 }),
             );
-    }
-
-    open(onDestroy?: () => void): void {
-        const overlayRef = this.overlay.create();
-        const portal = new ComponentPortal(SearchNodeStoreComponent);
-        const componentRef = overlayRef.attach(portal);
-        componentRef.instance.onClose.subscribe(() => overlayRef.dispose());
-        if (onDestroy) {
-            componentRef.onDestroy(onDestroy);
-        }
     }
 }

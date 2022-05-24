@@ -1,6 +1,5 @@
   import {FileChooserComponent} from './common/ui/file-chooser/file-chooser.component';
   import {RouterComponent} from './router/router.component';
-  import {ActionbarComponent} from './common/ui/actionbar/actionbar.component';
   import {NodeRenderComponent} from './common/ui/node-render/node-render.component';
   import {ApplyToLmsComponent} from './common/ui/apply-to-lms/apply-to-lms.component';
   import {MdsTestComponent} from './common/test/mds-test/mds-test.component';
@@ -44,7 +43,6 @@
       VersionLabelPipe,
       TimePipe,
       FileChooserComponent,
-      ActionbarComponent,
       SmallCollectionComponent,
       ScrollToTopButtonComponent,
       GlobalContainerComponent,

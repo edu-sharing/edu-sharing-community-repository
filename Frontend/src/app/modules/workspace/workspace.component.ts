@@ -45,7 +45,7 @@ import {Helper} from '../../core-module/rest/helper';
 import {CordovaService} from '../../common/services/cordova.service';
 import {HttpClient} from '@angular/common/http';
 import {MainNavComponent} from '../../main/navigation/main-nav/main-nav.component';
-import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
+import {ActionbarComponent} from '../../shared/components/actionbar/actionbar.component';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {WorkspaceExplorerComponent} from './explorer/explorer.component';
 import {CardService} from '../../core-ui-module/card.service';

@@ -65,7 +65,7 @@ import {BehaviorSubject, ReplaySubject, combineLatest, Observable, Subject} from
 import {delay, distinctUntilChanged, first, map, shareReplay, switchMap, takeUntil, tap} from 'rxjs/operators';
 import {MatTabGroup} from '@angular/material/tabs';
 import {OptionsHelperService} from '../../core-ui-module/options-helper.service';
-import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
+import {ActionbarComponent} from '../../shared/components/actionbar/actionbar.component';
 import { SearchFieldService } from 'src/app/main/navigation/search-field/search-field.service';
 import { MdsDefinition, MdsService, MetadataSetInfo, SearchResults, SearchService as SearchApiService } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';

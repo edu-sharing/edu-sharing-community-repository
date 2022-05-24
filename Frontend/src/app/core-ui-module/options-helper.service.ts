@@ -2,7 +2,7 @@ import {forkJoin as observableForkJoin, fromEvent, of, Subscription} from 'rxjs'
 import {RestNetworkService} from '../core-module/rest/services/rest-network.service';
 import {RestConnectorsService} from '../core-module/rest/services/rest-connectors.service';
 import {RestConstants} from '../core-module/rest/rest-constants';
-import {ActionbarComponent} from '../common/ui/actionbar/actionbar.component';
+import {ActionbarComponent} from '../shared/components/actionbar/actionbar.component';
 import {
     Constrain,
     CustomOptions,
@@ -50,12 +50,12 @@ import {ActivatedRoute, Params, Router} from '@angular/router';
 import {DropdownComponent} from '../shared/components/dropdown/dropdown.component';
 import {ConfigOptionItem, NodeHelperService} from './node-helper.service';
 import {PlatformLocation} from '@angular/common';
-import { NodeStoreService } from '../modules/search/node-store/node-store.service';
 import {isArray} from 'rxjs/internal/util/isArray';
 import { MainNavService } from '../main/navigation/main-nav.service';
 import { DialogsService } from '../features/dialogs/dialogs.service';
 import { ListEventInterface, NodeEntriesDisplayType } from '../features/node-entries/entries-model';
 import { NodeEntriesDataType } from '../features/node-entries/node-entries.component';
+import { NodeStoreService } from '../modules/search/node-store.service';
 
 
 export class OptionsHelperConfig {

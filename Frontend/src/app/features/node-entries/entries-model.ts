@@ -3,7 +3,7 @@ import {Sort} from '@angular/material/sort';
 
 import {SelectionModel} from '@angular/cdk/collections';
 import {NodeEntriesDataType} from '../node-entries/node-entries.component';
-import { ActionbarComponent } from '../../common/ui/actionbar/actionbar.component';
+import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';
 import { ListItemSort, ListItem, Node } from '../../core-module/core.module';
 import { DropAction } from '../../core-ui-module/directives/drag-nodes/drag-nodes';
 import { OptionItem, Scope, CustomOptions, Target } from '../../core-ui-module/option-item';

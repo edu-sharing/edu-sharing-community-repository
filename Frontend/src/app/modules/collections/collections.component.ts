@@ -57,7 +57,7 @@ import { MdsHelper } from '../../core-module/rest/mds-helper';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { HttpClient } from '@angular/common/http';
 import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../core-ui-module/options-helper.service';
-import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
+import {ActionbarComponent} from '../../shared/components/actionbar/actionbar.component';
 import {
     ManagementEvent,
     ManagementEventType

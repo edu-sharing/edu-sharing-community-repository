@@ -23,7 +23,7 @@ import {
 } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { Observable, ReplaySubject, Subject } from 'rxjs';
-import { map, take, takeUntil, tap, delay } from 'rxjs/operators';
+import { map, take, takeUntil, tap, delay, filter } from 'rxjs/operators';
 import { NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
 import { RocketChatService } from '../../../common/ui/global-container/rocketchat/rocket-chat.service';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
@@ -48,7 +48,9 @@ import { OPEN_URL_MODE, UIConstants } from '../../../core-module/ui/ui-constants
 import { OptionGroup, OptionItem } from '../../../core-ui-module/option-item';
 import { Toast } from '../../../core-ui-module/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { NodeStoreService } from '../../../modules/search/node-store/node-store.service';
+import { CardDialogRef } from '../../../features/dialogs/card-dialog/card-dialog-ref';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { NodeStoreService } from '../../../modules/search/node-store.service';
 import { TranslationsService } from '../../../translations/translations.service';
 import { MainMenuEntriesService } from '../main-menu-entries.service';
 import { MainNavConfig, MainNavService } from '../main-nav.service';
@@ -84,7 +86,8 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     visible = !this.shouldAlwaysHide;
     autoLogoutTimeout$: Observable<string>;
     config: any = {};
-    isNodeStoreOpen = false;
+    nodeStoreIsOpen = false;
+    nodeStoreDialogRef: CardDialogRef<void, void> | null = null;
     acceptLicenseAgreement: boolean;
     licenseAgreement: boolean;
     licenseAgreementHTML: string;
@@ -139,6 +142,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         // private changeDetectorRef: ChangeDetectorRef,
         private nodeStore: NodeStoreService,
         private rocketChat: RocketChatService,
+        private dialogs: DialogsService,
     ) {}
 
     ngOnInit(): void {
@@ -223,21 +227,38 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         if (queryParams.nodeStore === 'true') {
             this.openNodeStore();
+        } else {
+            this.closeNodeStore();
         }
         this.showUser = mainNavConfig.currentScope !== 'login' && mainNavConfig.showUser;
         this.checkConfig();
         this.canEditProfile = userInfo.user.editProfile;
     }
 
-    private openNodeStore(): void {
-        if (this.isNodeStoreOpen) {
+    private async openNodeStore(): Promise<void> {
+        if (this.nodeStoreIsOpen) {
             return;
         }
-        this.isNodeStoreOpen = true;
-        this.nodeStore.open(() => {
-            this.isNodeStoreOpen = false;
-            this.setNodeStore(false);
+        this.nodeStoreIsOpen = true;
+        this.nodeStoreDialogRef = await this.dialogs.openNodeStoreDialog();
+        this.nodeStoreDialogRef.afterClosed().subscribe(() => {
+            this.nodeStoreIsOpen = false;
+            this.nodeStoreDialogRef = null;
+            // Remove the query parameter only if it wasn't already removed by navigation (and the
+            // dialog closed because of that).
+            this.route.queryParams
+                .pipe(
+                    take(1),
+                    filter(({ nodeStore }) => nodeStore === 'true'),
+                )
+                .subscribe(() => this.setNodeStore(false));
         });
+    }
+
+    private closeNodeStore(): void {
+        if (this.nodeStoreDialogRef) {
+            this.nodeStoreDialogRef.close();
+        }
     }
 
     private getIsVisible(mainNavConfig: MainNavConfig, queryParams: Params): boolean {
@@ -365,7 +386,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     setNodeStore(value: boolean) {
-        UIHelper.changeQueryParameter(this.router, this.route, 'nodeStore', value);
+        UIHelper.changeQueryParameter(this.router, this.route, 'nodeStore', value || null);
     }
 
     onEvent(event: string, data: any) {
@@ -459,8 +480,8 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     openChat() {
-       this.rocketChat.opened = true;
-       this.rocketChat.unread = 0;
+        this.rocketChat.opened = true;
+        this.rocketChat.unread = 0;
     }
 
     isCreateAllowed() {
