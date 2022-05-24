@@ -1,7 +1,6 @@
 package org.edu_sharing.alfresco.metadata;
 
 import org.alfresco.repo.content.MimetypeMap;
-import org.alfresco.repo.content.metadata.TikaPoweredMetadataExtracter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.tika.config.TikaConfig;
@@ -11,15 +10,19 @@ import org.apache.tika.mime.MediaType;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.Parser;
 import org.edu_sharing.alfresco.apache.tika.parser.mp4.MP4Parser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TikaAutoMetadataExtracter extends TikaPoweredMetadataExtracter
+
+public class TikaAutoMetadataExtracter extends org.alfresco.transformer.metadataExtractors.AbstractTikaMetadataExtractor
 {
-    protected static Log logger = LogFactory.getLog(org.alfresco.repo.content.metadata.TikaAutoMetadataExtracter.class);
+
+    protected static Logger logger = LoggerFactory.getLogger(TikaAutoMetadataExtracter.class);
     private static AutoDetectParser parser;
     private static TikaConfig config;
     private static String EXIF_IMAGE_HEIGHT_TAG = "Exif Image Height";
@@ -68,9 +71,9 @@ public class TikaAutoMetadataExtracter extends TikaPoweredMetadataExtracter
         return SUPPORTED_MIMETYPES;
     }
 
-    public TikaAutoMetadataExtracter(TikaConfig tikaConfig)
+    public TikaAutoMetadataExtracter()
     {
-        super( buildMimeTypes(tikaConfig) );
+        super( logger );
     }
 
     /**
@@ -109,6 +112,30 @@ public class TikaAutoMetadataExtracter extends TikaPoweredMetadataExtracter
             }
         }
         return properties;
+    }
+
+    /**
+     * Exif metadata for size also returns the string "pixels"
+     * after the number value , this function will
+     * stop at the first non digit character found in the text
+     * @param sizeText string text
+     * @return the size value
+     */
+    private String extractSize(String sizeText)
+    {
+        StringBuilder sizeValue = new StringBuilder();
+        for(char c : sizeText.toCharArray())
+        {
+            if(Character.isDigit(c))
+            {
+                sizeValue.append(c);
+            }
+            else
+            {
+                break;
+            }
+        }
+        return sizeValue.toString();
     }
 
 }
