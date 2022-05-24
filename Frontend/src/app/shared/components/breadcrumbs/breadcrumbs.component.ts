@@ -4,7 +4,7 @@ import {DragData, DragNodeTarget, DropData} from '../../../core-ui-module/direct
 import { Params, QueryParamsHandling } from '@angular/router';
 import {CdkDragDrop, CdkDragEnter, CdkDragExit} from '@angular/cdk/drag-drop';
 import {DragCursorDirective} from '../../../core-ui-module/directives/drag-cursor.directive';
-import {DropSource} from '../../../core-ui-module/components/node-entries-wrapper/entries-model';
+import { DropSource } from 'src/app/features/node-entries/entries-model';
 
 /**
  * Breadcrumbs for nodes or collections.

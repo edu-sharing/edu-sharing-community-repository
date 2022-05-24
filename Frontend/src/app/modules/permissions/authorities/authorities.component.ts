@@ -51,34 +51,14 @@ import {
     ModalDialogOptions
 } from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
-import {
-    ListTableComponent
-} from '../../../core-ui-module/components/list-table/list-table.component';
-import {forkJoin, Observable} from 'rxjs';
+import {forkJoin} from 'rxjs';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
-import {ActionbarHelperService} from '../../../common/services/actionbar-helper';
 import {CsvHelper} from '../../../core-module/csv.helper';
 import {ListItemType} from '../../../core-module/ui/list-item';
-import {VCard} from '../../../core-module/ui/VCard';
-import {
-    NodeDataSource
-} from '../../../core-ui-module/components/node-entries-wrapper/node-data-source';
-import {
-    FetchEvent,
-    InteractionType,
-    ListEventInterface,
-    ListOptions,
-    ListOptionsConfig,
-    ListSortConfig,
-    NodeClickEvent,
-    NodeEntriesDisplayType
-} from '../../../core-ui-module/components/node-entries-wrapper/entries-model';
 import {OptionsHelperService} from '../../../core-ui-module/options-helper.service';
-import {SelectionModel} from '@angular/cdk/collections';
-import {
-    NodeEntriesWrapperComponent
-} from '../../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
-import {tap} from 'rxjs/operators';
+import { NodeEntriesDisplayType, InteractionType, ListSortConfig, FetchEvent, NodeClickEvent } from 'src/app/features/node-entries/entries-model';
+import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
+import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-entries-wrapper.component';
 
 @Component({
     selector: 'es-permissions-authorities',

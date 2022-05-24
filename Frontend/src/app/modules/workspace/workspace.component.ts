@@ -55,13 +55,10 @@ import {delay} from 'rxjs/operators';
 import {ListTableComponent} from '../../core-ui-module/components/list-table/list-table.component';
 import {SkipTarget} from '../../main/navigation/skip-nav/skip-nav.service';
 import {DragNodeTarget} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
-import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
-import {
-    DropSource, DropTarget, NodeEntriesDisplayType,
-    NodeRoot
-} from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
+import { DropSource, DropTarget, NodeEntriesDisplayType, NodeRoot } from 'src/app/features/node-entries/entries-model';
+import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 
 @Component({
     selector: 'es-workspace-main',

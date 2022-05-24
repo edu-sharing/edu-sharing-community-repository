@@ -1,0 +1,44 @@
+@import '../../../core-ui-module/styles/variables';
+
+::ng-deep .sort-dropdown-menu {
+    width: 240px;
+}
+
+.collection-item-title {
+    color: $textLight;
+    font-size: 80%;
+    font-weight: bold;
+    padding: 5px 16px;
+}
+
+.collection-item {
+    display: flex;
+    align-items: center;
+    color: $primary;
+    text-align: left;
+    border: none;
+    width: 100%;
+    &.cdk-keyboard-focused {
+        @include setGlobalKeyboardFocus('border');
+    }
+    &.active {
+        font-weight: bold;
+    }
+    &.active::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            to right,
+            $tabColorDark 0,
+            $tabColorDark 5px,
+            transparent 5px,
+            transparent 5%
+        );
+    }
+    .title {
+        flex-grow: 1;
+    }
+}

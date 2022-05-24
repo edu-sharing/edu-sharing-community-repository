@@ -8,7 +8,7 @@ import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {UIConstants} from '../../../core-module/ui/ui-constants';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 import { FormatDatePipe } from '../../../shared/pipes/format-date.pipe';
-import {NodeImageSizePipe} from '../../../core-ui-module/pipes/node-image-size.pipe';
+import {NodeImageSizePipe} from '../../../shared/pipes/node-image-size.pipe';
 
 // Charts.js
 declare var Chart: any;

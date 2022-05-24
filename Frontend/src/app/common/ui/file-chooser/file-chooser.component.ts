@@ -4,6 +4,7 @@ import {TranslateService} from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
 import {BehaviorSubject, Observable, Subject} from 'rxjs';
 import {map, skip, switchMap, takeUntil, tap} from 'rxjs/operators';
+import { InteractionType, ListSortConfig, NodeEntriesDisplayType } from '../../../features/node-entries/entries-model';
 import {
     DialogButton,
     ListItem,
@@ -16,14 +17,8 @@ import {
 } from '../../../core-module/core.module';
 import {Toast} from '../../../core-ui-module/toast';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
-import {
-    InteractionType, ListSortConfig,
-    NodeEntriesDisplayType
-} from '../../../core-ui-module/components/node-entries-wrapper/entries-model';
-import {
-    NodeDataSource
-} from '../../../core-ui-module/components/node-entries-wrapper/node-data-source';
 import {WorkspaceExplorerComponent} from '../../../modules/workspace/explorer/explorer.component';
+import { NodeDataSource } from '../../../features/node-entries/node-data-source';
 
 @Component({
     selector: 'es-file-chooser',

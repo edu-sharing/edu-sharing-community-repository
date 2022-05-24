@@ -50,16 +50,12 @@ import {ActivatedRoute, Params, Router} from '@angular/router';
 import {DropdownComponent} from '../shared/components/dropdown/dropdown.component';
 import {ConfigOptionItem, NodeHelperService} from './node-helper.service';
 import {PlatformLocation} from '@angular/common';
-import {
-    ListEventInterface,
-    NodeEntriesDisplayType
-} from './components/node-entries-wrapper/entries-model';
-import {FormBuilder} from '@angular/forms';
 import { NodeStoreService } from '../modules/search/node-store/node-store.service';
-import {NodeEntriesDataType} from './components/node-entries/node-entries.component';
 import {isArray} from 'rxjs/internal/util/isArray';
 import { MainNavService } from '../main/navigation/main-nav.service';
 import { DialogsService } from '../features/dialogs/dialogs.service';
+import { ListEventInterface, NodeEntriesDisplayType } from '../features/node-entries/entries-model';
+import { NodeEntriesDataType } from '../features/node-entries/node-entries.component';
 
 
 export class OptionsHelperConfig {

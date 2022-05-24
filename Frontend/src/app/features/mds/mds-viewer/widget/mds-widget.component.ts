@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { DateHelper } from '../../../../core-ui-module/DateHelper';
-import { FormatSizePipe } from '../../../../core-ui-module/pipes/file-size.pipe';
+import { FormatSizePipe } from '../../../../shared/pipes/file-size.pipe';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor/mds-editor-instance.service';
 import { MdsEditorViewComponent } from '../../mds-editor/mds-editor-view/mds-editor-view.component';
 import { ViewInstanceService } from '../../mds-editor/mds-editor-view/view-instance.service';

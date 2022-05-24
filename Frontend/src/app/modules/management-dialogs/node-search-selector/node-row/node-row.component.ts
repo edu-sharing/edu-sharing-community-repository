@@ -1,15 +1,6 @@
-
-import {Component, ContentChild, EventEmitter, Input, Output, TemplateRef} from '@angular/core';
-import {Group, Node, User} from '../../../../core-module/rest/data-object';
-import {
-    ListItem,
-    RestIamService,
-    RestMdsService,
-    RestOrganizationService
-} from '../../../../core-module/core.module';
-import {PermissionNamePipe} from '../../../../core-ui-module/pipes/permission-name.pipe';
-import {MdsHelper} from '../../../../core-module/rest/mds-helper';
-import {UniversalNode} from '../../../../common/definitions';
+import { Component, ContentChild, Input, TemplateRef } from '@angular/core';
+import { UniversalNode } from '../../../../common/definitions';
+import { ListItem } from '../../../../core-module/core.module';
 
 @Component({
     selector: 'es-node-row',
@@ -21,8 +12,5 @@ export class NodeRowComponent {
     @Input() node: UniversalNode;
     @Input() columns: ListItem[];
 
-    constructor(
-    ) {
-    }
-
+    constructor() {}
 }
