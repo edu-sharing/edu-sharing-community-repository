@@ -1,34 +1,27 @@
 package org.edu_sharing.alfresco.transformer;
 
-import java.io.*;
+import org.alfresco.error.AlfrescoRuntimeException;
+import org.alfresco.service.cmr.repository.MimetypeService;
+import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.transaction.TransactionService;
+import org.alfresco.transform.exceptions.TransformException;
+import org.alfresco.transformer.AbstractTransformerController;
+import org.alfresco.transformer.probes.ProbeTestTransform;
+import org.apache.log4j.Logger;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import org.alfresco.error.AlfrescoRuntimeException;
-import org.alfresco.repo.content.MimetypeMap;
-import org.alfresco.repo.content.transform.ContentTransformerHelper;
-import org.alfresco.repo.content.transform.ContentTransformerWorker;
-import org.alfresco.repo.transaction.AlfrescoTransactionSupport;
-import org.alfresco.repo.transaction.AlfrescoTransactionSupport.TxnReadState;
-import org.alfresco.repo.transaction.RetryingTransactionHelper;
-import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
-import org.alfresco.service.cmr.repository.ContentReader;
-import org.alfresco.service.cmr.repository.ContentWriter;
-import org.alfresco.service.cmr.repository.MimetypeService;
-import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.repository.TransformationOptions;
-import org.alfresco.service.namespace.QName;
-import org.alfresco.service.transaction.TransactionService;
-import org.alfresco.util.TempFileProvider;
-import org.apache.log4j.Logger;
-import org.edu_sharing.repository.client.tools.CCConstants;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
-public class VideoTransformerWorker extends ContentTransformerHelper implements ContentTransformerWorker  {
+public class VideoTransformerWorker  extends AbstractTransformerController {
 
 	
 	String ffmpegPath = "ffmpeg"; 
@@ -38,28 +31,12 @@ public class VideoTransformerWorker extends ContentTransformerHelper implements 
 	NodeService nodeService = null;
 	TransactionService transactionService = null;
 
-	@Override
-	public String getComments(boolean available) {
-		StringBuilder sb = new StringBuilder();
-        sb.append("# Supports transformations between mimetypes starting with \"video/\", but not\n");
-        sb.append("# tiff to pdf.\n");
-        
-        logger.debug("getComments");
-        
-        return sb.toString();
-	}
+	MimetypeService mimetypeService;
+
+
 	
-	public String getVersionString() {
-		logger.debug("getVersionString");
-		return "1.0";
-	};
-	
-	public boolean isAvailable() {
-		logger.debug("isAvailable");
-		return true;
-	};
-	
-	@Override
+	/**@Override
+	 * TODO: mimetype prüfung in json config
 	public boolean isTransformable(String sourceMimetype, String targetMimetype, TransformationOptions options) {
 
 		//JCodec supports only AVC, H.264 in MP4, ISO BMF, Quicktime container for getting a singe frame
@@ -72,7 +49,7 @@ public class VideoTransformerWorker extends ContentTransformerHelper implements 
 		}
 		
 		return false;
-	}
+	}**/
 	public static void convertFFMPEG(File sourceFile,File targetFile,Format format) throws InterruptedException, IOException {
 
         
@@ -131,69 +108,58 @@ public class VideoTransformerWorker extends ContentTransformerHelper implements 
 	//        	logger.error("determined videoLength is to small");
 	//        }
 	}
-			
+
 	@Override
-	public void transform(ContentReader reader, ContentWriter writer, TransformationOptions options) throws Exception {
-		
-		  // get mimetypes
-        String sourceMimetype = getMimetype(reader);
-        String targetMimetype = getMimetype(writer);
-        // get the extensions to use
-        MimetypeService mimetypeService = getMimetypeService();
-        String sourceExtension = mimetypeService.getExtension(sourceMimetype);
-        String targetExtension = mimetypeService.getExtension(targetMimetype);
-	    if (sourceExtension == null || targetExtension == null)
-        {
-            throw new AlfrescoRuntimeException("Unknown extensions for mimetypes: \n" +
-                    "   source mimetype: " + sourceMimetype + "\n" +
-                    "   source extension: " + sourceExtension + "\n" +
-                    "   target mimetype: " + targetMimetype + "\n" +
-                    "   target extension: " + targetExtension);
-        }
-        File sourceFile = TempFileProvider.createTempFile(
-                getClass().getSimpleName() + "_source_",
-                "." + sourceExtension);
-        File targetFile = TempFileProvider.createTempFile(
-                getClass().getSimpleName() + "_target_",
-                "." + targetExtension);
-        try {
-	        // create required temp files
-	        
-	        // pull reader file into source temp file
-	        reader.getContent(sourceFile);
-	        convertFFMPEG(sourceFile, targetFile,Format.webp);
-	        
-	        if(targetFile.length() > 0){
-		    	writer.putContent(targetFile);
-	        }else{
-	        	logger.warn("ffmpeg failed to convert webp. Check version is greater or equal to (March 24, 2014, FFmpeg 2.2). Will fall back to gif.");
+	public void transformImpl(String transformName,
+							  String sourceMimetype,
+							  String targetMimetype, Map<String, String> transformOptions, File sourceFile, File targetFile) {
+		// get the extensions to use
+		MimetypeService mimetypeService = getMimetypeService();
+		String sourceExtension = mimetypeService.getExtension(sourceMimetype);
+		String targetExtension = mimetypeService.getExtension(targetMimetype);
+		if (sourceExtension == null || targetExtension == null)
+		{
+			throw new AlfrescoRuntimeException("Unknown extensions for mimetypes: \n" +
+					"   source mimetype: " + sourceMimetype + "\n" +
+					"   source extension: " + sourceExtension + "\n" +
+					"   target mimetype: " + targetMimetype + "\n" +
+					"   target extension: " + targetExtension);
+		}
+
+		try {
+			// create required temp files
+
+			// pull reader file into source temp file
+			convertFFMPEG(sourceFile, targetFile,Format.webp);
+
+			if(targetFile.length() < 1){
+				logger.warn("ffmpeg failed to convert webp. Check version is greater or equal to (March 24, 2014, FFmpeg 2.2). Will fall back to gif.");
 				convertFFMPEG(sourceFile, targetFile,Format.gif);
-				if(targetFile.length() > 0){
-					writer.putContent(targetFile);
-				}
-				else {
+				if(targetFile.length() < 1){
 					throw new AlfrescoRuntimeException("ffmpeg: generated preview file has no content");
 				}
-	        }
+			}
 
-        }catch(Throwable t) {
-        	logger.error("Error initializing ffmpeg. Generating preview+reading metadata failed ("+t.getMessage()+")");
-        	throw t;
-        }
-        finally {
-        	sourceFile.delete();
-	        targetFile.delete();
-        }
-        		
-	}
-	public static void main(String[] args){
-		try {
-			//convertFFMPEG(new File("C:\\temp\\test.mov"),new File("C:\\temp\\test"+System.currentTimeMillis()+".webp"),Format.webp);
-		}catch(Exception e) {
-			
+		}catch(Throwable t) {
+			throw new TransformException(INTERNAL_SERVER_ERROR.value(),"There was a problem during transformation: " + t.getMessage());
 		}
 	}
 
+	@Override
+	public String getTransformerName() {
+		return "edu-sharing video transformer";
+	}
+
+	@Override
+	public ProbeTestTransform getProbeTestTransform() {
+		//@TODO
+		return null;
+	}
+
+	@Override
+	public String version() {
+		return "1.0";
+	}
 
 	long getMilliseconds(String timeString) throws ParseException{
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SS");
@@ -230,5 +196,13 @@ public class VideoTransformerWorker extends ContentTransformerHelper implements 
 	private enum Format {
 		webp,
 		gif
+	}
+
+	public MimetypeService getMimetypeService() {
+		return mimetypeService;
+	}
+
+	public void setMimetypeService(MimetypeService mimetypeService) {
+		this.mimetypeService = mimetypeService;
 	}
 }
