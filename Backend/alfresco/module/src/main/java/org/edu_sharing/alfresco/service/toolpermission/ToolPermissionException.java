@@ -1,6 +1,5 @@
 package org.edu_sharing.alfresco.service.toolpermission;
 
-import com.sun.star.uno.RuntimeException;
 
 public class ToolPermissionException extends RuntimeException{
 	private String toolpermission;
