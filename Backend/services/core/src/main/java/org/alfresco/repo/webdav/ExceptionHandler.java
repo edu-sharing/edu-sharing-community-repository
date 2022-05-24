@@ -25,15 +25,12 @@
  */
 package org.alfresco.repo.webdav;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.io.IOException;
 
 /**
  * Create a suitable HttpServletResponse when face with an exception.
@@ -93,9 +90,7 @@ public class ExceptionHandler
             }
             else
             {
-                //edu-sharing customization: do not use error since it will trigger web.xml handlers which are failing for PROPFIND requests
-                response.setStatus(error.getHttpStatusCode());
-                //response.sendError(error.getHttpStatusCode());
+                response.sendError(error.getHttpStatusCode());
             }
         }
         else

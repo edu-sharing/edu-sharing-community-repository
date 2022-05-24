@@ -25,30 +25,8 @@
  */
 package org.alfresco.repo.webdav;
 
-import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.NetworkInterface;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.StringTokenizer;
-import java.util.regex.Pattern;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.alfresco.events.types.ContentEvent;
-import org.alfresco.events.types.ContentEventImpl;
-import org.alfresco.events.types.Event;
 import org.alfresco.jlan.util.IPAddress;
 import org.alfresco.model.ContentModel;
-import org.alfresco.repo.Client;
-import org.alfresco.repo.Client.ClientType;
-import org.alfresco.repo.events.EventPreparator;
-import org.alfresco.repo.events.EventPublisher;
-import org.alfresco.repo.lock.LockUtils;
 import org.alfresco.repo.model.filefolder.HiddenAspect;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.tenant.TenantService;
@@ -70,6 +48,13 @@ import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.namespace.NamespaceService;
+import org.alfresco.sync.events.types.ContentEvent;
+import org.alfresco.sync.events.types.ContentEventImpl;
+import org.alfresco.sync.events.types.Event;
+import org.alfresco.sync.repo.Client;
+import org.alfresco.sync.repo.Client.ClientType;
+import org.alfresco.sync.repo.events.EventPreparator;
+import org.alfresco.sync.repo.events.EventPublisher;
 import org.alfresco.util.EqualsHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -77,6 +62,19 @@ import org.springframework.extensions.surf.util.URLDecoder;
 import org.springframework.extensions.surf.util.URLEncoder;
 import org.springframework.util.StringUtils;
 import org.xml.sax.helpers.AttributesImpl;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.NetworkInterface;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 /**
  * WebDAV Protocol Helper Class
@@ -1189,7 +1187,7 @@ public class WebDAVHelper
     /**
      * Indicates if the node is unlocked or the current user has a WRITE_LOCK<p>
      * 
-     * @see LockService#isLockedAndReadOnly(org.alfresco.service.cmr.repository.NodeRef)
+     * @see LockService#isLockedAndReadOnly(NodeRef)
      * 
      * @param nodeRef    the node reference
      */
