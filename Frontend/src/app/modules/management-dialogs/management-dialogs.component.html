@@ -66,10 +66,6 @@
                  (onLoading)="globalProgress=$event"
                  (onClose)="closeShare()"
 ></es-workspace-share>
-<es-node-info *ngIf="nodeDebug"
-           [node]="$any(nodeDebug)"
-           (onClose)="closeDebug()"
-></es-node-info>
 <!-- <es-card
         *ngIf="qr"
         [node]="qr.node"

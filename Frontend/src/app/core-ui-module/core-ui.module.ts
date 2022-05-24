@@ -18,7 +18,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
-import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
 import { CollectionChooserComponent } from './components/collection-chooser/collection-chooser.component';
 import { CustomNodeListWrapperComponent } from './components/custom-node-list-wrapper/custom-node-list-wrapper.component';
 import { InputPasswordComponent } from './components/input-password/input-password.component';
@@ -31,7 +30,6 @@ import { ListNodeLicenseComponent } from './components/list-table/widgets/list-n
 import { ListNodeReplicationSourceComponent } from './components/list-table/widgets/list-node-replication-source/list-node-replication-source.component';
 import { ListNodeWorkflowComponent } from './components/list-table/widgets/list-node-workflow/list-node-workflow.component';
 import { ListTextComponent } from './components/list-table/widgets/list-text/list-text.component';
-import { NodeUrlComponent } from './components/node-url/node-url.component';
 import { SortDropdownComponent } from './components/sort-dropdown/sort-dropdown.component';
 import { UserTileComponent } from './components/user-tile/user-tile.component';
 import { DurationPipe } from './components/video-controls/duration.pipe';
@@ -42,7 +40,6 @@ import { NodesDropTargetDirective } from './directives/drag-nodes/nodes-drop-tar
 import { TitleDirective } from './directives/title.directive';
 import { NodeHelperService } from './node-helper.service';
 import { OptionsHelperService } from './options-helper.service';
-import { NodeDatePipe } from './pipes/date.pipe';
 import { FormatSizePipe } from './pipes/file-size.pipe';
 import { KeysPipe } from './pipes/keys.pipe';
 import { NodeImageSizePipe } from './pipes/node-image-size.pipe';
@@ -95,13 +92,10 @@ import { SharedModule } from '../shared/shared.module';
         SortDropdownComponent,
         UserTileComponent,
         CustomNodeListWrapperComponent,
-        BreadcrumbsComponent,
         VideoControlsComponent,
         OptionButtonComponent,
         InputPasswordComponent,
         NodePersonNamePipe,
-        NodeDatePipe,
-        NodeUrlComponent,
         ToastMessageComponent,
         FormatSizePipe,
         KeysPipe,
@@ -170,7 +164,6 @@ import { SharedModule } from '../shared/shared.module';
         ListTableComponent,
         NodeEntriesComponent,
         CustomNodeListWrapperComponent,
-        BreadcrumbsComponent,
         ListOptionItemComponent,
         InputPasswordComponent,
         VideoControlsComponent,
@@ -178,8 +171,6 @@ import { SharedModule } from '../shared/shared.module';
         UserTileComponent,
         CollectionChooserComponent,
         SortDropdownComponent,
-        NodeDatePipe,
-        NodeUrlComponent,
         FormatSizePipe,
         KeysPipe,
         PermissionNamePipe,

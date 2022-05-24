@@ -65,7 +65,7 @@ import {NodeHelperService} from '../../node-helper.service';
 import {DomSanitizer} from '@angular/platform-browser';
 import {CollectionChooserComponent} from '../collection-chooser/collection-chooser.component';
 import {NodeTitlePipe} from '../../../shared/pipes/node-title.pipe';
-import {NodeUrlComponent} from '../node-url/node-url.component';
+import {NodeUrlComponent} from '../../../shared/components/node-url/node-url.component';
 import {SelectionModel} from '@angular/cdk/collections';
 import {
     ListEventInterface,

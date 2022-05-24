@@ -7,7 +7,7 @@ import {Router} from '@angular/router';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {UIConstants} from '../../../core-module/ui/ui-constants';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
-import {NodeDatePipe} from '../../../core-ui-module/pipes/date.pipe';
+import { FormatDatePipe } from '../../../shared/pipes/format-date.pipe';
 import {NodeImageSizePipe} from '../../../core-ui-module/pipes/node-image-size.pipe';
 
 // Charts.js
@@ -173,7 +173,7 @@ export class WorkspaceMetadataComponent{
       data.keywords = null;
     //data["creator"]=node.properties[RestConstants.CM_CREATOR];
     data.creator = ConfigurationHelper.getPersonWithConfigDisplayName(node.createdBy, this.config);
-    data.createDate = new NodeDatePipe(this.translate).transform(node.createdAt);
+    data.createDate = new FormatDatePipe(this.translate).transform(node.createdAt);
     data.duration = RestHelper.getDurationFormatted(node);
     data.author = this.toVCards(node.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]).join(', ');
     data.author_freetext = node.properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT] ? node.properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT][0] : null;
@@ -181,7 +181,7 @@ export class WorkspaceMetadataComponent{
     data.mimetype = node.mimetype;
     data.size = node.size;
     if (node.properties[RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL]) {
-        data.exifDate = new NodeDatePipe(this.translate).transform(node.properties[RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL][0]);
+        data.exifDate = new FormatDatePipe(this.translate).transform(node.properties[RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL][0]);
     }
 
     data.dimensions = new NodeImageSizePipe().transform(node);

@@ -1,4 +1,6 @@
 import { InjectionToken } from '@angular/core';
+import { Node } from 'ngx-edu-sharing-api';
+import { RestHelper } from '../../../core-module/core.module';
 import { DialogButton } from '../../../core-module/ui/dialog-button';
 import { CardAvatar } from './card-dialog-container/card-header/card-avatar';
 
@@ -42,6 +44,13 @@ export enum Closable {
      * The dialog cannot be closed via standard actions.
      */
     Disabled,
+}
+
+export function configForNode(node: Node): Partial<CardDialogConfig> {
+    return {
+        avatar: { kind: 'image', url: node.iconURL },
+        subtitle: RestHelper.getTitle(node),
+    };
 }
 
 export interface CardDialogContentComponent<D = {}, R = void> {

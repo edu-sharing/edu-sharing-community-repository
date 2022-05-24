@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { Node } from 'ngx-edu-sharing-api';
-import { RestHelper } from '../../core-module/core.module';
-import { CardDialogConfig } from './card-dialog/card-dialog-config';
+import { configForNode } from './card-dialog/card-dialog-config';
 import { CardDialogRef } from './card-dialog/card-dialog-ref';
 import { CardDialogService } from './card-dialog/card-dialog.service';
 import { NodeEmbedDialogData } from './dialog-modules/node-embed-dialog/node-embed-dialog.component';
+import { NodeInfoDialogData } from './dialog-modules/node-info-dialog/node-info/node-info.component';
 import { NodeReportDialogData } from './dialog-modules/node-report-dialog/node-report/node-report.component';
 import { QrDialogData } from './dialog-modules/qr-dialog/qr-dialog.component';
 
@@ -19,7 +18,7 @@ export class DialogsService {
         const { QrDialogComponent } = await import('./dialog-modules/qr-dialog/qr-dialog.module');
         return this.cardDialog.open(QrDialogComponent, {
             title: 'OPTIONS.QR_CODE',
-            ...this.cardWithNode(data.node),
+            ...configForNode(data.node),
             contentPadding: 0,
             data,
         });
@@ -33,7 +32,7 @@ export class DialogsService {
         );
         return this.cardDialog.open(NodeEmbedDialogComponent, {
             title: 'OPTIONS.EMBED',
-            ...this.cardWithNode(data.node),
+            ...configForNode(data.node),
             // Set size via NodeEmbedDialogComponent, so it can choose fitting values for its
             // responsive layouts.
             contentPadding: 0,
@@ -49,16 +48,21 @@ export class DialogsService {
         );
         return this.cardDialog.open(NodeReportComponent, {
             title: 'NODE_REPORT.TITLE',
-            ...this.cardWithNode(data.node),
+            ...configForNode(data.node),
             data,
         });
     }
 
-    private cardWithNode(node: Node): Partial<CardDialogConfig<unknown>> {
-        return {
-            avatar: { kind: 'image', url: node.iconURL },
-            subtitle: RestHelper.getTitle(node),
-        };
+    async openNodeInfoDialog(
+        data: NodeInfoDialogData,
+    ): Promise<CardDialogRef<NodeInfoDialogData, void>> {
+        const { NodeInfoComponent } = await import(
+            './dialog-modules/node-info-dialog/node-info-dialog.module'
+        );
+        return this.cardDialog.open(NodeInfoComponent, {
+            // Header will be configured by the component
+            data,
+        });
     }
 
     // private cardWithNodes(nodes: Node[]): Partial<CardDialogCardConfig> {

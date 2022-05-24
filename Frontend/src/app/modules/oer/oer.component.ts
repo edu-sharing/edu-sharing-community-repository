@@ -17,7 +17,7 @@ import { MainNavService } from '../../main/navigation/main-nav.service';
 import {MdsHelper} from '../../core-module/rest/mds-helper';
 import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {Helper} from '../../core-module/rest/helper';
-import {NodeUrlComponent} from "../../core-ui-module/components/node-url/node-url.component";
+import {NodeUrlComponent} from "../../shared/components/node-url/node-url.component";
 import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 import { BehaviorSubject } from 'rxjs';
 

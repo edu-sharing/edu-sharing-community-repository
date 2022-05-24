@@ -10,7 +10,6 @@
   import {SmallCollectionComponent} from './common/ui/small-collection/small-collection.component';
   import {InfobarComponent} from './common/ui/infobar/infobar.component';
   import {AutocompleteComponent} from './common/ui/autocomplete/autocomplete.component';
-  import {NodeInfoComponent} from './common/ui/node-info/node-info.component';
   import {CookieInfoComponent} from './common/ui/cookie-info/cookie-info.component';
   import {PoweredByComponent} from './common/ui/powered-by/powered-by.component';
   import {FooterComponent} from './common/ui/footer/footer.component';
@@ -46,7 +45,6 @@
       TimePipe,
       FileChooserComponent,
       ActionbarComponent,
-      NodeInfoComponent,
       SmallCollectionComponent,
       ScrollToTopButtonComponent,
       GlobalContainerComponent,

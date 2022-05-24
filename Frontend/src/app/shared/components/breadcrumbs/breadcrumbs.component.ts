@@ -1,10 +1,10 @@
 import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
 import { Node, RestNodeService, RestConstants } from '../../../core-module/core.module';
-import {DragData, DragNodeTarget, DropData} from '../../directives/drag-nodes/drag-nodes';
+import {DragData, DragNodeTarget, DropData} from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
 import { Params, QueryParamsHandling } from '@angular/router';
 import {CdkDragDrop, CdkDragEnter, CdkDragExit} from '@angular/cdk/drag-drop';
-import {DragCursorDirective} from '../../directives/drag-cursor.directive';
-import {DropSource} from '../node-entries-wrapper/entries-model';
+import {DragCursorDirective} from '../../../core-ui-module/directives/drag-cursor.directive';
+import {DropSource} from '../../../core-ui-module/components/node-entries-wrapper/entries-model';
 
 /**
  * Breadcrumbs for nodes or collections.

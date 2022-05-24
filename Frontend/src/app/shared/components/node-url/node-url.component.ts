@@ -1,7 +1,7 @@
 import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { Node } from '../../../core-module/rest/data-object';
-import { NodeHelperService } from '../../node-helper.service';
-import { ListTableComponent } from '../list-table/list-table.component';
+import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
+import { ListTableComponent } from '../../../core-ui-module/components/list-table/list-table.component';
 
 // TODO: Decide if providing focus highlights and ripples with this component is a good idea. When
 // using `app-node-url` for cards, we might need highlights and ripples for the whole card while

@@ -513,7 +513,7 @@ export class OptionsHelperService implements OnDestroy {
                     console.warn(e);
                 }
             }
-            management.nodeDebug = node;
+            this.dialogs.openNodeInfoDialog({ node });
         });
         debugNode.elementType = [
             ElementType.Node,

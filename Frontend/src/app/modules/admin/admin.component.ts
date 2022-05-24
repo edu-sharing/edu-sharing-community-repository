@@ -48,6 +48,7 @@ import { SkipTarget } from '../../main/navigation/skip-nav/skip-nav.service';
 import {AuthoritySearchMode} from '../../shared/components/authority-search-input/authority-search-input.component';
 import {PlatformLocation} from '@angular/common';
 import { MainNavService } from '../../main/navigation/main-nav.service';
+import { DialogsService } from '../../features/dialogs/dialogs.service';
 
 
 type LuceneData = {
@@ -94,6 +95,7 @@ export class AdminComponent implements OnInit, OnDestroy {
               private node: RestNodeService,
               private searchApi: RestSearchService,
               private mainNav: MainNavService,
+              private dialogs: DialogsService,
               private organization: RestOrganizationService) {
       this.addCustomComponents(CustomHelper.getCustomComponents('AdminComponent',this.componentFactoryResolver));
       this.searchColumns.push(new ListItem('NODE', RestConstants.CM_NAME));
@@ -204,7 +206,6 @@ export class AdminComponent implements OnInit, OnDestroy {
   ]
   searchResponse: NodeList | NodeListElastic;
   searchColumns: ListItem[]=[];
-  nodeInfo: Node;
   public selectedTemplate = '';
   public templates:string[];
   public eduGroupSuggestions:SuggestItem[];
@@ -250,7 +251,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
   }
   public debugNode(node:Node) {
-    this.nodeInfo=node;
+    this.dialogs.openNodeReportDialog({ node });
   }
   public getModeButton(mode=this.mode) : any {
       return this.buttons[Helper.indexOfObjectArray(this.buttons,'id',mode)];
