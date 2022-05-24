@@ -38,24 +38,19 @@ import org.alfresco.service.ServiceRegistry;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
-import org.quartz.CronTrigger;
-import org.quartz.Job;
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.quartz.JobListener;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.SchedulerFactory;
-import org.quartz.Trigger;
-import org.quartz.TriggerListener;
-import org.quartz.TriggerUtils;
+import org.quartz.*;
+import org.quartz.impl.JobDetailImpl;
+import org.quartz.impl.matchers.GroupMatcher;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.xml.xpath.XPathConstants;
 import org.springframework.context.ApplicationContext;
+
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
+import static org.quartz.TriggerBuilder.newTrigger;
+import static org.quartz.CronScheduleBuilder.*;
 
 /**
  * @author rudi start jobs, start scheduling of an job, stop scheduling of a job
@@ -71,10 +66,11 @@ public class JobHandler {
 	JobClusterLocker jobClusterLocker = null;
 
 	public boolean cancelJob(String jobName) throws SchedulerException {
-		boolean result=quartzScheduler.interrupt(jobName, null);
+
+		boolean result=quartzScheduler.interrupt(JobKey.jobKey(jobName));
 		if(!result){
 			try {
-				finishJob(quartzScheduler.getJobDetail(jobName, null), JobInfo.Status.Aborted);
+				finishJob(quartzScheduler.getJobDetail(JobKey.jobKey(jobName)), JobInfo.Status.Aborted);
 			}catch(Throwable t){
 				t.printStackTrace();
 			}
@@ -91,7 +87,7 @@ public class JobHandler {
 		}
 		if(JobLogger.IGNORABLE_JOBS.contains(jobDetail.getJobClass().getName()))
 			return;
-		throw new IllegalArgumentException("Job "+jobDetail.getFullName()+" was not found");
+		throw new IllegalArgumentException("Job "+jobDetail.getKey()+" was not found");
 	}
 
 	public void updateJobName(JobDetail jobDetail, String name) {
@@ -99,7 +95,7 @@ public class JobHandler {
 			return;
 		for(JobInfo info : jobs){
 			if(info.getJobDetail().equals(jobDetail)){
-				jobDetail.setName(name);
+				((JobDetailImpl)jobDetail).setName(name);
 				info.setJobDetail(jobDetail);
 				return;
 			}
@@ -196,14 +192,16 @@ public class JobHandler {
 		this.jobClusterLocker = (JobClusterLocker)eduApplicationContext.getBean("jobClusterLocker");
 		SchedulerFactory schedFact = new org.quartz.impl.StdSchedulerFactory();
 		quartzScheduler = schedFact.getScheduler();
-		quartzScheduler.addGlobalTriggerListener(new TriggerListener() {
+
+		quartzScheduler.getListenerManager().addTriggerListener(new TriggerListener() {
 			@Override
 			public String getName() {
 				return "Edu-SharingGlobalTriggerListener";
 			}
 
 			@Override
-			public void triggerComplete(Trigger arg0, JobExecutionContext arg1, int arg2) {
+			public void triggerComplete(Trigger trigger, JobExecutionContext context, Trigger.CompletedExecutionInstruction triggerInstructionCode) {
+
 			}
 
 			@Override
@@ -274,7 +272,7 @@ public class JobHandler {
 				}
 			}
 		});
-		quartzScheduler.addGlobalJobListener(new JobListener() {
+		quartzScheduler.getListenerManager().addJobListener(new JobListener() {
 
 			@Override
 			public void jobWasExecuted(JobExecutionContext context, JobExecutionException exception) {
@@ -341,8 +339,10 @@ public class JobHandler {
 			List<? extends Config> list = LightbendConfigLoader.get().getConfigList("jobs.entries");
 			jobConfigList.clear();
 			for (String groupName : quartzScheduler.getJobGroupNames()) {
-				for (String jobName : quartzScheduler.getJobNames(groupName)) {
-					if (!quartzScheduler.deleteJob(jobName, groupName)) {
+
+				for (JobKey jobKey : quartzScheduler.getJobKeys(GroupMatcher.jobGroupEquals(groupName))) {
+					String jobName = jobKey.getName();
+					if (!quartzScheduler.deleteJob(jobKey)) {
 						logger.warn("Unable to delete previously scheduled job " + jobName);
 					}
 				}
@@ -392,11 +392,15 @@ public class JobHandler {
 					minute = new Integer(splittedConfig[1]);
 				}
 			}
-			trigger = TriggerUtils.makeDailyTrigger(hour, minute);
-			trigger.setName(jobName + "_DailyTrigger"+ System.currentTimeMillis());
+
+			trigger = newTrigger()
+					.withSchedule(dailyAtHourAndMinute(hour,minute))
+					.withIdentity(jobName + "_DailyTrigger"+ System.currentTimeMillis())
+					.build();
+
 		}else if (triggerConfig.contains(TRIGGER_TYPE_CRON)) {
 			String triggerName = jobName + "_CronTrigger_"+System.currentTimeMillis();
-			trigger = new CronTrigger(triggerName, null);
+
 			String cronConfig = triggerConfig.replace("Cron", "");
 			String cronexpression = "0 0 12 * * ?"; // Fire at 12pm (noon)
 			// every day
@@ -406,12 +410,16 @@ public class JobHandler {
 					cronexpression = cronConfig;
 				}
 			}
-			((CronTrigger) trigger).setCronExpression(cronexpression);
+			trigger = newTrigger()
+					.withIdentity(triggerName)
+					.withSchedule(cronSchedule(cronexpression))
+					.build();
 		} else if (triggerConfig.contains(TRIGGER_TYPE_IMMEDIATE)) {
-			trigger = TriggerUtils.makeImmediateTrigger(0, 1);
-
 			String triggerName = jobName+"_ImmediateTrigger"+System.currentTimeMillis();
-			trigger.setName(triggerName);
+			trigger = newTrigger()
+					.withIdentity(triggerName)
+					.withSchedule(simpleSchedule().withIntervalInSeconds(1).withRepeatCount(0))
+					.build();
 		}
 		return trigger;
 
@@ -476,23 +484,27 @@ public class JobHandler {
 
 		JobDataMap jdm = createJobDataMap(params);
 
-		Trigger trigger = TriggerUtils.makeImmediateTrigger(0, 1);
 		String triggerName = jobClass.getSimpleName() + "ImmediateTrigger";
-		trigger.setName(triggerName);
+		Trigger trigger = newTrigger()
+				.withIdentity(triggerName)
+				.withSchedule(simpleSchedule()
+								.withIntervalInSeconds(1)
+								.withRepeatCount(0))
+				.build();
 
 		final String jobListenerName = jobName;
-		
-		JobDetail jobDetail = new JobDetail(jobName, null, jobClass) {
+
+		JobDetail jobDetail = newJob(jobClass).withIdentity(jobName).setJobData(jdm).build();
+
+		/*JobDetail jobDetail = new JobDetail(jobName, null, jobClass) {
 			@Override
 			public String[] getJobListenerNames() {
 				return new String[] { jobListenerName };
 			}
-		};
-		jobDetail.setJobDataMap(jdm);
+		};*/
 
 		ImmediateJobListener iJobListener = new ImmediateJobListener(jobListenerName);
-
-		quartzScheduler.addJobListener(iJobListener);
+		quartzScheduler.getListenerManager().addJobListener(iJobListener);
 		quartzScheduler.scheduleJob(jobDetail, trigger);
 		/**
 		 * the job is executed asynchronous. we want to give the
@@ -535,8 +547,7 @@ public class JobHandler {
 		JobDataMap jdm = createJobDataMap(jobConfig.getParams());
 		if (jobConfig.getTrigger() != null) {
 			logger.info("Schedule job "+jobConfig.getJobname()+" "+jobConfig.getJobClass().getSimpleName()+" "+jobConfig.getTrigger().toString());
-			JobDetail jobDetail = new JobDetail(jobConfig.getJobname(), null, jobConfig.getJobClass());
-			jobDetail.setJobDataMap(jdm);
+			JobDetail jobDetail =  newJob(jobConfig.getJobClass()).withIdentity(jobConfig.getJobname()).setJobData(jdm).build();
 			quartzScheduler.scheduleJob(jobDetail, jobConfig.getTrigger());
 		}
 	}
@@ -564,7 +575,8 @@ public class JobHandler {
 	}
 
 	public Object getTriggerAttribut(String triggerName, String attribut) throws SchedulerException {
-		Trigger trigger = quartzScheduler.getTrigger(triggerName, null);
+
+		Trigger trigger = quartzScheduler.getTrigger(TriggerKey.triggerKey(triggerName));
 
 		if (trigger != null) {
 			JobDataMap jdm = trigger.getJobDataMap();
