@@ -38,12 +38,14 @@ interface DialogAnimationEvent {
     totalTime: number;
 }
 
+type CardState = 'void' | 'enter' | 'exit';
+
 @Component({
     selector: 'es-card-dialog-container',
     templateUrl: './card-dialog-container.component.html',
     styleUrls: ['./card-dialog-container.component.scss'],
     animations: [
-        trigger('cardAnimation', [
+        trigger('defaultAnimation', [
             state('void, exit', style({ opacity: 0, transform: 'scale(0.7)' })),
             state('enter', style({ transform: 'none' })),
             transition('* => enter', [
@@ -67,6 +69,30 @@ interface DialogAnimationEvent {
                 ),
             ]),
         ]),
+        trigger('mobileAnimation', [
+            state('void, exit', style({ opacity: 0, transform: 'scale(0.7)' })),
+            state('enter', style({ transform: 'none' })),
+            transition('* => enter', [
+                style({
+                    transform: 'translateY(15%)',
+                    opacity: 0,
+                }),
+                animate(
+                    UIAnimation.ANIMATION_TIME_NORMAL + 'ms ease',
+                    style({ transform: 'translateY(0)', opacity: 1 }),
+                ),
+            ]),
+            transition('* => void, * => exit', [
+                style({ opacity: 1 }),
+                animate(
+                    UIAnimation.ANIMATION_TIME_NORMAL + 'ms ease',
+                    style({
+                        transform: 'translateY(15%)',
+                        opacity: 0,
+                    }),
+                ),
+            ]),
+        ]),
     ],
 })
 export class CardDialogContainerComponent implements OnInit, OnDestroy {
@@ -81,7 +107,8 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
     @HostBinding('attr.aria-labelledby') readonly ariaLabelledby = `card-dialog-title-${this.id}`;
     @HostBinding('attr.aria-describedby')
     readonly ariaDescribedby = `card-dialog-subtitle-${this.id}`;
-    @HostBinding('@cardAnimation') state: 'void' | 'enter' | 'exit' = 'enter';
+    @HostBinding('@defaultAnimation') defaultAnimation: CardState | null = null;
+    @HostBinding('@mobileAnimation') mobileAnimation: CardState | null = null;
 
     @ViewChild(CdkPortalOutlet, { static: true }) portalOutlet: CdkPortalOutlet;
 
@@ -131,6 +158,7 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
                 this.updateButtons();
                 this.isLoading = isLoading;
             });
+        this.setState('enter');
     }
 
     private updateButtons(): void {
@@ -165,7 +193,8 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
         this.trapFocus();
     }
 
-    @HostListener('@cardAnimation.start', ['$event'])
+    @HostListener('@defaultAnimation.start', ['$event'])
+    @HostListener('@mobileAnimation.start', ['$event'])
     onAnimationStart({ toState, totalTime }: AnimationEvent) {
         if (toState === 'enter') {
             this.animationStateChanged.next({ state: 'opening', totalTime });
@@ -174,7 +203,8 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
         }
     }
 
-    @HostListener('@cardAnimation.done', ['$event'])
+    @HostListener('@defaultAnimation.done', ['$event'])
+    @HostListener('@mobileAnimation.done', ['$event'])
     onAnimationDone({ toState, totalTime }: AnimationEvent) {
         if (toState === 'enter') {
             // if (this._config.delayFocusTrap) {
@@ -197,11 +227,22 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
 
     /** Starts the dialog exit animation. */
     startExitAnimation(): void {
-        this.state = 'exit';
+        this.setState('exit');
 
         // Mark the container for check so it can react if the
         // view container is using OnPush change detection.
         // this._changeDetectorRef.markForCheck();
+    }
+
+    private setState(state: CardState): void {
+        switch (this.dialogRef.state.viewMode) {
+            case 'default':
+                this.defaultAnimation = state;
+                break;
+            case 'mobile':
+                this.mobileAnimation = state;
+                break;
+        }
     }
 
     /** Restores focus to the element that was focused before the dialog opened. */
