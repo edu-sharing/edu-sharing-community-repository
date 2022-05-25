@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.edu_sharing</groupId>
     <artifactId>edu_sharing-super-pom</artifactId>
-    <version>6</version>
+    <version>7</version>
     <relativePath/>
   </parent>
 
