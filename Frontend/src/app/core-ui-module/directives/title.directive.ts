@@ -10,8 +10,8 @@ import {
 import { Title } from '@angular/platform-browser';
 import { combineLatest, forkJoin, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { TranslationsService } from '../../translations/translations.service';
 import { ConfigurationService } from '../../core-module/core.module';
-import { Translation } from '../translation';
 
 /**
  * Uses the element's text content to update the document title.
@@ -19,10 +19,10 @@ import { Translation } from '../translation';
  * Use on the page's h1 heading. If the page doesn't have a visible h1 heading, add one at the
  * beginning of the main content and make it invisible.
  *
- * @example <h1 appTitle class="cdk-visually-hidden">{{ 'WORKSPACE.TITLE' | translate }}</h1>
+ * @example <h1 esTitle class="cdk-visually-hidden">{{ 'WORKSPACE.TITLE' | translate }}</h1>
  */
 @Directive({
-    selector: '[appTitle]',
+    selector: '[esTitle]',
 })
 export class TitleDirective implements OnInit, OnChanges, OnDestroy {
     /**
@@ -30,16 +30,16 @@ export class TitleDirective implements OnInit, OnChanges, OnDestroy {
      *
      * Set to `null` to not use a page heading and use the site title as title.
      *
-     * @example <h1 appTitle="Home">Trending items</h1>
-     * @example <h1 [appTitle]="null">Trending items</h1>
+     * @example <h1 esTitle="Home">Trending items</h1>
+     * @example <h1 [esTitle]="null">Trending items</h1>
      */
-    @Input() appTitle: string;
+    @Input() esTitle: string;
 
     private mutationObserver: MutationObserver;
     /** The page heading as by the content of the directive's h1 element. */
     private pageHeading = new Subject<string>();
     /**
-     * Overrides pageHeading with the `appTitle` input.
+     * Overrides pageHeading with the `esTitle` input.
      *
      * Will be set to `null` if the input isn't used.
      */
@@ -50,6 +50,7 @@ export class TitleDirective implements OnInit, OnChanges, OnDestroy {
     constructor(
         private elementRef: ElementRef,
         private documentTitle: Title,
+        private translations: TranslationsService,
         configuration: ConfigurationService,
     ) {
         this.mutationObserver = new MutationObserver(() => this.updatePageHeading());
@@ -66,13 +67,13 @@ export class TitleDirective implements OnInit, OnChanges, OnDestroy {
                 siteTitle: configuration.get('siteTitle', 'edu-sharing'),
             }),
             this.pageTitle,
-            Translation.waitForInit(), // Prevent initial flicker of the untranslated heading
+            this.translations.waitForInit(), // Prevent initial flicker of the untranslated heading
         ]).subscribe(([config, pageTitle]) => this.updateTitle(config, pageTitle));
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes.appTitle) {
-            const override = changes.appTitle.currentValue;
+        if (changes.esTitle) {
+            const override = changes.esTitle.currentValue;
             if (override === '') {
                 // Input not set
                 this.titleOverride.next(null);

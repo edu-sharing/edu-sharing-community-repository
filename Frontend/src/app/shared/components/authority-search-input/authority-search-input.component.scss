@@ -1,0 +1,36 @@
+@import '../../../../app/core-ui-module/styles/variables';
+
+$optionHeight: 66px;
+
+form {
+    width: 100%;
+}
+.authority-search-input {
+    width: 100%;
+    .material-icons {
+        color: $textLight;
+    }
+    mat-hint {
+        margin-top: 15px;
+    }
+}
+
+es-user-avatar {
+    height: 40px;
+}
+
+.mat-option {
+    height: $optionHeight;
+}
+
+.mat-optgroup ::ng-deep .mat-optgroup-label {
+    display: flex;
+    align-items: flex-end;
+    height: $optionHeight;
+}
+
+.authority-search-input-option {
+    es-authority-row {
+        width: 100%;
+    }
+}

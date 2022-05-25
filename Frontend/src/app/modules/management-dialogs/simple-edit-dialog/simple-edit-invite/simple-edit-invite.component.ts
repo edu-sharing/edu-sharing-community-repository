@@ -1,5 +1,5 @@
 import {ApplicationRef, Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {Authority, AuthorityProfile, DialogButton, Group, LocalPermissions, Permission, Permissions, RestConnectorService, RestOrganizationService} from '../../../../core-module/core.module';
+import {Authority, AuthorityProfile, DialogButton, Group, LocalPermissions, Organization, Permission, Permissions, RestConnectorService, RestOrganizationService} from '../../../../core-module/core.module';
 import {Toast} from '../../../../core-ui-module/toast';
 import {RestNodeService} from '../../../../core-module/core.module';
 import {Connector, Node} from '../../../../core-module/core.module';
@@ -17,13 +17,12 @@ import {FrameEventsService} from '../../../../core-module/core.module';
 
 import {OPEN_URL_MODE} from '../../../../core-module/ui/ui-constants';
 import {BridgeService} from '../../../../core-bridge-module/bridge.service';
-import {BulkBehavior, MdsComponent} from '../../../../common/ui/mds/mds.component';
-import {Observable, Observer} from 'rxjs';
+import {forkJoin, Observable, Observer} from 'rxjs';
 import {MatButtonToggleGroup} from '@angular/material/button-toggle';
 import {Helper} from '../../../../core-module/rest/helper';
 import {ShareMode, SharePublishComponent} from '../../../workspace/share/share-publish/share-publish.component';
 
-type Org = {organization: Group, groups?: any};
+type Org = {organization: Organization, groups?: any};
 
 class SimpleEditGroupConfig {
   toolpermission?: string;
@@ -31,7 +30,7 @@ class SimpleEditGroupConfig {
 }
 
 @Component({
-  selector: 'app-simple-edit-invite',
+  selector: 'es-simple-edit-invite',
   templateUrl: 'simple-edit-invite.component.html',
   styleUrls: ['simple-edit-invite.component.scss'],
   animations: [
@@ -125,7 +124,7 @@ export class SimpleEditInviteComponent {
           addPermission.permissions = [RestConstants.PERMISSION_CONSUMER];
         }
       }
-      Observable.forkJoin(this._nodes.map((n, i) => {
+      forkJoin(this._nodes.map((n, i) => {
         let permissions = this.nodesPermissions[i].localPermissions;
         // if currentPermissions available (single node mode), we will check the state and override if possible
         if (this.currentPermissions && this.currentPermissions.length) {
@@ -209,7 +208,7 @@ export class SimpleEditInviteComponent {
         this.onError.emit(error)
       }
     });
-    Observable.forkJoin((this._nodes.map((n) => this.nodeApi.getNodePermissions(n.ref.id)))).
+    forkJoin((this._nodes.map((n) => this.nodeApi.getNodePermissions(n.ref.id)))).
     subscribe((permissions) => {
       this.nodesPermissions = permissions.map((p) => p.permissions);
       this.inherited = permissions.some((p) => p.permissions.localPermissions.inherited);
@@ -228,11 +227,11 @@ export class SimpleEditInviteComponent {
               organization: o,
               groups: {}
             }});
-          Observable.forkJoin(
+          forkJoin(
               this.organizations.map((o) => {
                 return new Observable<Org>((observer) => {
                   if(this.organizationGroups?.length) {
-                    Observable.forkJoin(this.organizationGroups.map((g) =>
+                    forkJoin(this.organizationGroups.map((g) =>
                         this.iamApi.getSubgroupByType(o.organization.authorityName, g)
                     )).subscribe(groups => {
                       groups.forEach((g) => {
@@ -283,7 +282,7 @@ export class SimpleEditInviteComponent {
         authorityType: RestConstants.AUTHORITY_TYPE_EVERYONE
       });
     }
-    Observable.forkJoin(groups.map((d) => this.iamApi.getGroup(d))).
+    forkJoin(groups.map((d) => this.iamApi.getGroup(d))).
     subscribe((groups) =>
         this.globalGroups = groups.map((g) => g.group).concat(this.globalGroups)
     );

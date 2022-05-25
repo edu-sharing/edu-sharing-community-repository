@@ -1,0 +1,79 @@
+@import '../../../../../../core-ui-module/styles/variables';
+
+.tree {
+    background-color: $cardLightBackground;
+    float: left; // Don't cull background color in case of horizontal overflow
+    min-width: 100%;
+    .tree-header {
+        display: flex;
+        padding: 10px 20px;
+        width: 100%;
+        align-items: center;
+        mat-form-field {
+            flex-grow: 1;
+            .mat-form-field-wrapper {
+                margin-bottom: 0;
+            }
+        }
+        button {
+            margin-left: 20px;
+            height: 50px;
+        }
+    }
+    li,
+    .mat-nested-tree-node,
+    .mat-tree-node {
+        display: flex;
+        flex-direction: column;
+        align-items: normal;
+        .item {
+            display: flex;
+            align-items: center;
+            &.selected {
+                background-color: rgba(0, 0, 0, 0.04);
+                @include setGlobalKeyboardFocus();
+                outline-offset: -$focusWidth;
+            }
+        }
+        .suggest-input {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            > mat-form-field {
+                flex-grow: 1;
+                .prefix {
+                    color: $primary;
+                }
+            }
+            es-spinner-small, button {
+                margin: 0 20px;
+            }
+        }
+        .children-group {
+            padding-inline-start: 30px;
+        }
+    }
+}
+
+[hidden] {
+    display: none !important;
+}
+
+:host ::ng-deep {
+    mat-form-field {
+        .mat-form-field-wrapper {
+            padding-bottom: 0;
+        }
+    }
+    .mat-checkbox {
+        .mat-checkbox-layout {
+            white-space: unset;
+            overflow-wrap: anywhere;
+            padding: 5px 20px 5px 0;
+        }
+
+        .mat-checkbox-inner-container {
+            margin-top: auto !important; // Override !important styling from material
+        }
+    }
+}

@@ -1,0 +1,78 @@
+<div class="card-dialog dialog"
+    role="dialog"
+    [attr.aria-label]="title"
+    [attr.modal]="modal"
+    [attr.width]="width"
+    [attr.height]="height"
+    [attr.priority]="priority"
+    [cdkTrapFocus]="modal=='always'"
+    [cdkTrapFocusAutoCapture]="captureFocus"
+    (keydown)="handleEvent($event)"
+>
+  <mat-card
+      [class.card-no-buttons]="!(_buttons && _buttons.length)"
+      [class.card-jumpmarks]="jumpmarks && jumpmarks.length>1"
+      [class.card-tabbed]="tabbed"
+      [@cardAnimation]="this">
+    <!-- <es-card-header
+    [title]="title"
+    [subtitle]="subtitle"
+    [avatar]="icon ? {kind: 'icon', icon: icon} : {kind: 'image', url: avatar}"
+    [disableClose]="!isCancelable"
+    (triggerClose)="cancel()"
+    ></es-card-header> -->
+    <mat-card-header *ngIf="header">
+      <div *ngIf="avatar" class="avatar" mat-card-avatar><img [src]="avatar" alt="" esImage-config></div>
+      <div *ngIf="icon" class="avatar" mat-card-avatar><i [esIcon]="icon"></i></div>
+      <mat-card-title [class.no-subtitle]="!subtitle">{{title}}</mat-card-title>
+      <mat-card-subtitle>{{subtitle}}</mat-card-subtitle>
+      <div class="cancel">
+        <button mat-button *ngIf="isCancelable" (click)="cancel()"><i esIcon="close" [aria]="true"></i></button>
+      </div>
+    </mat-card-header>
+    <div #jumpmarksRef class="jumpmarks" *ngIf="jumpmarks && jumpmarks.length>1">
+      <button mat-button color="primary"
+              *ngFor="let jumpmark of jumpmarks"
+              [class.active]="jumpmark==jumpmarkActive"
+              (click)="scrollSmooth(jumpmark)"
+      ><i [esIcon]="jumpmark.icon"></i> {{jumpmark.label}}</button>
+    </div>
+    <mat-card-content
+      #cardContainer
+      cdkScrollable
+      infinite-scroll
+      [class.card-content-header]="header"
+      [scrollWindow]="false"
+      (scrolled)="scrolled()"
+      (scroll)="onScroll()"
+      ><ng-content></ng-content>
+    </mat-card-content>
+    <!-- <es-card-actions
+    [buttons]="buttons"
+    [additionalContent]="beforeButtonRef"
+    ></es-card-actions> -->
+    <mat-card-actions #cardActions *ngIf="_buttons && _buttons.length">
+      <ng-container [ngTemplateOutlet]="beforeButtonRef"></ng-container>
+      <div class="additional-action-area-content">
+        <ng-content select="[action-area]"></ng-content>
+      </div>
+      <div class="buttons-left">
+        <ng-container *ngFor="let button of _buttonsLeft"
+                      [ngTemplateOutlet]="buttonsTemplate"
+                      [ngTemplateOutletContext]="{ $implicit: button }">
+        </ng-container>
+      </div>
+      <div class="buttons">
+        <ng-container *ngFor="let button of _buttons"
+                      [ngTemplateOutlet]="buttonsTemplate"
+                      [ngTemplateOutletContext]="{ $implicit: button }">
+        </ng-container>
+      </div>
+    </mat-card-actions>
+  </mat-card>
+</div>
+<ng-template #buttonsTemplate let-button>
+  <button *ngIf="button.type | bitwise:{operator: 1}" mat-flat-button color="primary" [disabled]="button.disabled" (click)="button.callback()">{{button.name | translate}}</button>
+  <button *ngIf="button.type | bitwise:{operator: 2}" mat-button color="primary" [disabled]="button.disabled" (click)="button.callback()">{{button.name | translate}}</button>
+  <button *ngIf="button.type | bitwise:{operator: 4}" mat-flat-button color="warn" [disabled]="button.disabled" (click)="button.callback()">{{button.name | translate}}</button>
+</ng-template>

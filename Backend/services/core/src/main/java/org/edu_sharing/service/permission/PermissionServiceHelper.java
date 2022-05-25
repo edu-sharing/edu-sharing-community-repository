@@ -3,6 +3,7 @@ package org.edu_sharing.service.permission;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.repository.client.rpc.ACE;
@@ -36,7 +37,11 @@ public class PermissionServiceHelper {
                 collect(Collectors.toCollection(HashSet::new));
     }
 
-	public void validatePermissionOrThrow(String nodeId, String permissionName) {
+	public static Boolean isNodePublic(NodeRef nodeRef) {
+		return AuthenticationUtil.runAs(() -> hasPermission(nodeRef, CCConstants.PERMISSION_READ), org.alfresco.service.cmr.security.PermissionService.GUEST_AUTHORITY);
+	}
+
+    public void validatePermissionOrThrow(String nodeId, String permissionName) {
 		if(!permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId,permissionName))
 			throw new PermissionException(nodeId,permissionName);
 	}
@@ -66,5 +71,12 @@ public class PermissionServiceHelper {
 					nodeRef.getStoreRef().getIdentifier(),
 					nodeRef.getId(),
 					permission);
+	}
+	public static boolean hasPermission(NodeRef nodeRef, String authority, String permission){
+		return PermissionServiceFactory.getLocalService().hasPermission(nodeRef.getStoreRef().getProtocol(),
+				nodeRef.getStoreRef().getIdentifier(),
+				nodeRef.getId(),
+				authority,
+				permission);
 	}
 }

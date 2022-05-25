@@ -1,0 +1,9 @@
+<div class="block {{mode}}">
+    <div>
+        <i [esIcon]="getIcon()"></i>
+    </div>
+    <div class="message-container">
+        <div class="message">{{message | translate}}</div>
+        <ng-content></ng-content>
+    </div>
+</div>

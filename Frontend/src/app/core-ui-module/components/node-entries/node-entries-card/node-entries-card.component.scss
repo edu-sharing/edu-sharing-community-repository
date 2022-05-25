@@ -1,0 +1,30 @@
+@import '../../../styles/variables';
+
+$imageHeight: 150px;
+$entriesCardPaddingHorizontal: 20px;
+$entriesCardPaddingVertical: 10px;
+$topBarHeight: 40px;
+$collectionIconPadding: 40px;
+$collectionIconSize: 40px;
+
+@import 'node-entries-card.main';
+
+.grid-card {
+    grid-template-rows: $topBarHeight auto $optionBarHeight;
+    .card-meta {
+        .card-meta-row {
+            > es-list-base {
+                @include limitLineCount(2, 1.25);
+            }
+        }
+    }
+}
+:host ::ng-deep {
+    .grid-card {
+        es-node-url {
+            .node-url-wrapper {
+                height: 100%;
+            }
+        }
+    }
+}

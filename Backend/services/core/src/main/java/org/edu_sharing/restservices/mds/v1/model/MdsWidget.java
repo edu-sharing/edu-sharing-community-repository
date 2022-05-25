@@ -79,7 +79,7 @@ public class MdsWidget {
 
 	}
 	private Map<MetadataWidget.IdRelation, String> ids = new HashMap<>();
-	private String id,caption,bottomCaption,icon,type,link,template;
+	private String id,caption,bottomCaption,icon,type,link,template, configuration;
 	private boolean hasValues;
 	private List<MdsValue> values;
 	private List<MdsSubwidget> mdsSubwidgets;
@@ -92,6 +92,10 @@ public class MdsWidget {
 	private Integer defaultMax;
 	private Integer step;
 	private boolean isExtended;
+	/**
+	 * info if suggestions for new valuespace entries are allowed for this widget
+	 */
+	private boolean allowValuespaceSuggestions;
 	private boolean isHideIfEmpty;
 	private MetadataWidget.Required isRequired;
 	private boolean allowempty;
@@ -99,6 +103,7 @@ public class MdsWidget {
 	private boolean isSearchable;
 	private MdsWidgetCondition condition;
 	private int maxlength;
+	private MetadataWidget.InteractionType interactionType;
 
 	public MdsWidget(){}
 	public MdsWidget(MetadataWidget widget) {
@@ -112,7 +117,9 @@ public class MdsWidget {
 		this.defaultvalue=widget.getDefaultvalue();
 		this.placeholder=widget.getPlaceholder();
 		this.maxlength=widget.getMaxlength();
+		this.interactionType=widget.getInteractionType();
 		this.unit=widget.getUnit();
+		this.configuration=widget.getConfiguration();
 		this.min=widget.getMin();
 		this.max=widget.getMax();
 		this.defaultMin=widget.getDefaultMin();
@@ -120,6 +127,7 @@ public class MdsWidget {
 		this.step=widget.getStep();
 		this.format=widget.getFormat();
 		this.template=widget.getTemplate();
+		this.allowValuespaceSuggestions =widget.getSuggestionReceiver() != null;
 		this.isExtended=widget.isExtended();
 		this.isHideIfEmpty=widget.isHideIfEmpty();
 		this.isRequired=widget.isRequired();
@@ -158,6 +166,15 @@ public class MdsWidget {
 
 	public void setIds(Map<MetadataWidget.IdRelation, String> ids) {
 		this.ids = ids;
+	}
+
+	@JsonProperty
+	public boolean isAllowValuespaceSuggestions() {
+		return allowValuespaceSuggestions;
+	}
+
+	public void setAllowValuespaceSuggestions(boolean allowValuespaceSuggestions) {
+		this.allowValuespaceSuggestions = allowValuespaceSuggestions;
 	}
 
 	@JsonProperty
@@ -344,8 +361,26 @@ public class MdsWidget {
 		return maxlength;
 	}
 
-		public void setMaxlength(int maxlength) {
-			this.maxlength = maxlength;
-		}
+	public void setMaxlength(int maxlength) {
+		this.maxlength = maxlength;
+	}
+
+	@JsonProperty
+	public String getConfiguration() {
+		return configuration;
+	}
+
+	public void setConfiguration(String configuration) {
+		this.configuration = configuration;
+	}
+
+	@JsonProperty
+	public MetadataWidget.InteractionType getInteractionType() {
+		return interactionType;
+	}
+
+	public void setInteractionType(MetadataWidget.InteractionType interactionType) {
+		this.interactionType = interactionType;
+	}
 }
 

@@ -1,11 +1,11 @@
-<card title="{{'MAP_LINK.TITLE' | translate}}" [node]="_node" width="normal" height="normal"
+<es-card title="{{'MAP_LINK.TITLE' | translate}}" [node]="_node" width="normal" height="normal"
       [buttons]="buttons"
       (onCancel)="cancel()"
 >
     <div *ngIf="_node" class="card-content-padding">
-        <info-message>
+        <es-info-message>
             {{'MAP_LINK.INFO' | translate}}
-        </info-message>
+        </es-info-message>
         <mat-form-field>
             <mat-label>{{'MAP_LINK.NAME' | translate}}</mat-label>
             <input matInput type="text" [(ngModel)]="name" (ngModelChange)="updateButtons()">
@@ -13,17 +13,17 @@
         <div class="breadcrumb-style">
             <div class="breadcrumb-info">{{'MAP_LINK.BREADCRUMB_INFO' | translate}}</div>
             <div class="breadcrumb-group">
-                <breadcrumbs
+                <es-breadcrumbs
                         short="always"
                         [breadcrumbsAsNode]="breadcrumbs"
                         [home]="'WORKSPACE.MY_FILES'"
                         [clickable]="false"
-                ></breadcrumbs>
+                ></es-breadcrumbs>
                 <div class="btn-choose"></div><button mat-raised-button (click)="chooseDirectory=true">{{'MAP_LINK.CHOOSE' | translate}}</button></div>
         </div>
     </div>
-</card>
-<file-chooser
+</es-card>
+<es-file-chooser
         *ngIf="chooseDirectory"
         [title]="'MAP_LINK.FILE_PICKER_TITLE'"
         [pickDirectory]="true"
@@ -32,4 +32,4 @@
         [priority]="1"
         (onCancel)="chooseDirectory=false"
         (onChoose)="setDirectory($event)"
-></file-chooser>
+></es-file-chooser>

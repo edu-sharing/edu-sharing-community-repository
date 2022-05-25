@@ -159,7 +159,7 @@ public class UsageApi {
 			@Parameter(description = "ID of node", required = true) @PathParam("nodeId") String nodeId,
 			@Context HttpServletRequest req) {
 		try {
-			Set<Usages.CollectionUsage> collections = new UsageDao(RepositoryDao.getRepository(RepositoryDao.HOME)).getUsagesByNodeCollection(nodeId);
+			java.util.Collection<Usages.CollectionUsage> collections = new UsageDao(RepositoryDao.getRepository(RepositoryDao.HOME)).getUsagesByNodeCollection(nodeId);
 			return Response.status(Response.Status.OK).entity(collections).build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);

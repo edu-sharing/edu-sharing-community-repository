@@ -28,66 +28,11 @@ h2{
     font-weight: bold;
     padding-top:30px;
 }
-.no-history{
-    padding: 60px 0;
-    text-align: center;
-    color: $textLight;
+es-workflow-list {
+    display: flex;
+    padding:0 $cardPadding $cardPadding $cardPadding;
 }
-.history {
-    .user,.date{
-        padding-top: 20px;
-        padding-bottom: 10px;
-        color: $textLight;
-    }
-    .user{
-        float:left;
-    }
-    .date{
-        float:right;
-    }
-    .box {
-        background-color: $backgroundColor;
-        padding:10px 0;
-        display: flex;
-        width:100%;
-        label{
-            padding-bottom: 5px;
-        }
-        .workflowStatus{
-            float:left;
-        }
-        .status,.comment{
-            padding-top: 15px;
-        }
-        .row{
-            display:flex;
-            flex-direction: column;
-            &.arrow{
-                flex-grow: 0;
-                padding: 0 25px;
-                justify-content: center;
-            }
-            &.origin, &.target{
-                .badgeIconLeft{
-                    padding-right: 5px;
-                }
-                flex-grow: 1;
-                width: 100%;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-            }
-        }
-
-        label{
-            float: left;
-            width: 100%;
-        }
-    }
-
-
-}
-:host ::ng-deep authority-search-input .mat-form-field-wrapper{
+:host ::ng-deep es-authority-search-input .mat-form-field-wrapper{
     padding-bottom: 0;
 }
 .inputs{
@@ -95,7 +40,7 @@ h2{
     align-items: center;
     width:100%;
     margin-bottom: 20px;
-    authority-search-input{
+    es-authority-search-input{
         display: flex;
         width:0;
         flex-grow: 1;
@@ -152,7 +97,7 @@ h2{
 @media screen and (max-width: $mobileWidth - $mobileStage*1) {
     .inputs {
         flex-direction: column;
-        authority-search-input {
+        es-authority-search-input {
             width: 100%;
             margin-bottom: 30px;
         }

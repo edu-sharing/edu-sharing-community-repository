@@ -3,7 +3,7 @@ import { AVAILABLE_LIST_WIDGETS, ListWidgetType } from '../available-widgets';
 import { ListWidget } from '../list-widget';
 
 @Component({
-    selector: 'app-list-base',
+    selector: 'es-list-base',
     templateUrl: './list-base.component.html',
 })
 export class ListBaseComponent extends ListWidget implements OnChanges {

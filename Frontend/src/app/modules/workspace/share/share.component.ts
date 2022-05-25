@@ -1,3 +1,5 @@
+
+import {forkJoin as observableForkJoin, Observable, Observer} from 'rxjs';
 import { trigger } from '@angular/animations';
 import {
     ApplicationRef,
@@ -7,7 +9,6 @@ import {
     Output, ViewChild,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import {Observable, Observer} from 'rxjs';
 import {
     Collection,
     CollectionUsage,
@@ -39,7 +40,7 @@ import {SharePublishComponent} from './share-publish/share-publish.component';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 
 @Component({
-    selector: 'workspace-share',
+    selector: 'es-workspace-share',
     templateUrl: 'share.component.html',
     styleUrls: ['share.component.scss'],
     animations: [
@@ -49,6 +50,7 @@ import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 })
 export class WorkspaceShareComponent {
     @ViewChild('publish') publishComponent: SharePublishComponent;
+    @ViewChild('inheritRef') inheritRef: any;
     @Input() sendMessages = true;
     @Input() sendToApi = true;
     @Input() currentPermissions: LocalPermissions = null;
@@ -172,7 +174,7 @@ export class WorkspaceShareComponent {
     notifyUsers = true;
     notifyMessage: string;
     inherit: Permission[] = [];
-    permissions: Permission[] = [];
+    permissions: Permission[] = null;
     private originalPermissions: LocalPermissions[];
     showChooseType = false;
     private showChooseTypeList: Permission;
@@ -262,13 +264,13 @@ export class WorkspaceShareComponent {
         if (this.currentPermissions) {
             this.originalPermissions = Helper.deepCopy(this.currentPermissions);
             this.setPermissions(this.currentPermissions.permissions);
-            this.inherited = this.currentPermissions.inherited;
+            this.isInherited(this.currentPermissions.inherited)
             this.showLink = false;
         } else {
             this.showLink = true;
             this.updateNodeLink();
             this.toast.showProgressDialog();
-            Observable.forkJoin(
+            observableForkJoin(
                 this._nodes.map(n => this.nodeApi.getNodePermissions(n.ref.id)),
             ).subscribe(permissions => {
                 this.originalPermissions = Helper.deepCopy(
@@ -279,8 +281,7 @@ export class WorkspaceShareComponent {
                     this.setPermissions(
                         permissions[0].permissions.localPermissions.permissions,
                     );
-                    this.inherited =
-                        permissions[0].permissions.localPermissions.inherited;
+                    this.isInherited(permissions[0].permissions.localPermissions.inherited);
                     setTimeout(()=>this.setInitialState());
                 }
                 this.toast.closeModalDialog();
@@ -447,7 +448,7 @@ export class WorkspaceShareComponent {
         this.usageApi
             .getNodeUsagesCollection(this._nodes[0].ref.id)
             .subscribe(collections => {
-                this.collections = collections;
+                this.collections = collections.filter((c) => c.collectionUsageType === 'ACTIVE');
                 this.usageApi
                     .getNodeUsages(this._nodes[0].ref.id)
                     .subscribe((usages: UsageList) => {
@@ -640,7 +641,7 @@ export class WorkspaceShareComponent {
                     }
                 })
             });
-            Observable.forkJoin(actions).subscribe(
+            observableForkJoin(actions).subscribe(
                 () => {
                     if(!this.sendToApi) {
                         return;
@@ -843,6 +844,80 @@ export class WorkspaceShareComponent {
         return this.filterDisabledPermissions(this.newPermissions).filter(
             (p) => p.authority.authorityName !== RestConstants.AUTHORITY_EVERYONE
         );
+    }
+
+
+    onCheckInherit(event: any): void {
+        if (!event._checked) {
+            if (this.isLicenseMandatory() && !this.isLicenseEmpty()) {
+                if (this.isAuthorRequired() && this.isAuthorEmpty()) {
+                    this.toast.error(null, this.translate.instant('WORKSPACE.LICENSE.RELEASE_WITHOUT_AUTHOR'));
+                } else {
+                    this.toast.error(null, this.translate.instant('WORKSPACE.SHARE.PUBLISH.LICENSE_REQUIRED'));
+                }
+                event.preventDefaultEvent();
+            }
+        }
+    }
+
+    private isInherited(inherited: boolean) {
+        if (this.isLicenseMandatory() && !this.isLicenseEmpty()) {
+            if (this.isAuthorRequired() && this.isAuthorEmpty()) {
+                this.inherited = false
+            } else {
+                this.inherited = inherited;
+            }
+        } else {
+            this.inherited = inherited
+        }
+    }
+
+    /**
+     * Check if license is mandatory
+     * @return true | false | not exist return false
+     */
+    isLicenseMandatory() {
+        return this.config.instant('publish.licenseMandatory', false);
+    }
+    isAuthorMandatory() {
+        return this.config.instant('publish.authorMandatory', false);
+    }
+
+    /**
+     * Check if license is empty
+     * @return true | false | not exist return false
+     */
+    isLicenseEmpty() {
+        if (this._nodes == null || !this._nodes[0].properties[RestConstants.CCM_PROP_LICENSE]?.[0]) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Check if author is required
+     * For CC_0 and PDM, Author is not required, and we can share also without author
+     * @return true | false | not exist return false
+     */
+    isAuthorRequired() {
+        if(!this.isAuthorMandatory()) {
+            return false;
+        }
+        if (this._nodes !== null) {
+            return !this._nodes[0].properties[RestConstants.CCM_PROP_LICENSE]?.includes('CC_0') && !this._nodes[0].properties[RestConstants.CCM_PROP_LICENSE]?.includes('PDM');
+        }
+        return false;
+    }
+
+    /**
+     * Check if Author is empty
+     * @return true | false | not exist return false
+     */
+    isAuthorEmpty() {
+        if (this._nodes == null || !this._nodes[0].properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]?.[0]) {
+            return true;
+        }
+        return false;
     }
 }
 /*

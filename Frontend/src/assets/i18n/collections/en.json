@@ -6,14 +6,18 @@
         "ERROR_DELETE": "An error occurred while deleting the collection.",
         "ENTER_NAME": "Please enter a name for this collection.",
         "NO_EDITORIAL_GROUPS": "No editorial groups found",
-        "ORDER_ELEMENTS": "Would you like to change the order of the objects manually?",
+        "ORDER_ELEMENTS": "Change the order of the materials manually",
         "ORDER_ELEMENTS_INFO": "Viewers of the collection see the contained materials in a certain order.",
-        "ORDER_SAVED": "The object order has been changed.",
+        "ORDER_COLLECTIONS": "Change the order of the collections manually",
+        "ORDER_COLLECTIONS_INFO": "Viewers of the collection see the contained subcollections in a certain order.",
+        "SORT_SLIDER": "Umsortieren",
         "CUSTOM_ORDER":"change element order",
-        "PERMISSIONS": "Invited:",
+        "PERMISSIONS": "Invited",
         "DETAILS": "Collection details",
         "EDITORIAL_PUBLIC": "Publicly visible",
         "EDITORIAL_PUBLIC_INFO": "The editorial collection is for all users and guests visible",
+        "CREATOR": "Creator",
+        "SHARING_STATE": "Sharing state",
         "STEP": {
             "GENERAL": "Title, Image, Description and Color",
             "METADATA": "Additional information",
@@ -55,10 +59,7 @@
         },
         "PINNING": {
             "TITLE": "pinned collections",
-            "UPDATED": "The list of pinned collections has been updated.",
-            "POSITION_SLIDER": "Position of collection \"{{ collection }}\" within the list",
-            "MOVE_DOWN": "Move down",
-            "MOVE_UP": "Move up"
+            "UPDATED": "The list of pinned collections has been updated."
         },
         "NO_ADD_PERMISSIONS": "You have insufficient permissions to add materials to this collection",
         "ERROR_NOT_FOUND": "Collection not found",
@@ -84,7 +85,12 @@
             "INVALID_NAME": "The given name is invalid. Please don't use special characters"
         },
         "NEW": {
-            "AUTHOR_FREETEXT": "Name of author"
+            "AUTHOR_FREETEXT": "Name of author",
+          "IMAGE": {
+            "UPLOAD" : "Upload image",
+            "SEARCH" : "Select image from search",
+            "DELETE" : "Delete image"
+          }
         },
         "FEEDBACK_TITLE": "Give feedback for collection",
         "FEEDBACK_VIEW_TITLE": "Given feedback for collection",
@@ -107,9 +113,6 @@
     "collections_howToAddContent": "Just click on the \"ADD MATERIAL\" button and use the search engine to find contents for your collection.",
 
     "collectionNew_preview": "preview of the collection",
-    "collectionNew_collectionImage": "Collection image",
-    "collectionNew_uploadCollectionImage": "Upload a new collection image",
-    "collectionNew_deleteCollectionImage": "Delete the collection image",
     "collectionNew_setColor": "color of the collection:",
     "collectionNew_colorIndex": "color {{ index }}",
     "collectionNew_createCollection": "create",

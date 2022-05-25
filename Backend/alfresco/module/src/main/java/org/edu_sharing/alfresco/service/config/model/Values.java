@@ -23,12 +23,14 @@ public class Values implements Serializable {
 	@XmlElement	public LogoutInfo logout;
 	@XmlElement	public MenuEntry[] menuEntries;
 	@XmlElement	public ContextMenuEntry[] customOptions;
+	@XmlElement	public ContextMenuEntry[] userMenuOverrides;
 	@XmlElement	public String[] allowedLicenses;
 	@XmlElement	public License[] customLicenses;
 	@XmlElement	public ConfigWorkflow workflow;
 	@XmlElement	public Boolean licenseDialogOnUpload;
 	@XmlElement	public Boolean nodeReport;
 	@XmlElement	public Boolean branding;
+	@XmlElement	public ConfigRating rating;
 	@XmlElement	public Boolean publishingNotice;
 	@XmlElement	public String siteTitle;
 	@XmlElement	public String userDisplayName;
@@ -60,6 +62,7 @@ public class Values implements Serializable {
 	@XmlElement	public SimpleEdit simpleEdit;
 	@XmlElement	public ConfigFrontpage frontpage;
 	@XmlElement	public ConfigUpload upload;
+	@XmlElement	public ConfigPublish publish;
 	@XmlElement	public ConfigRemote remote;
 	@XmlElement	public String customCSS;
 	@XmlElement	public ConfigPrivacy privacy;

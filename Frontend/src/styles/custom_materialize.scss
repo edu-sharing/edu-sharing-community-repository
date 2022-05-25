@@ -227,7 +227,7 @@ option {
 .collection{
   .disabled{
     color:$textLight!important;
-    cursor:default;
+    cursor:not-allowed;
   }
   a.collection-item {
     color: $primary;
@@ -277,7 +277,7 @@ input:focus:not([readonly])+label {
   height: 18px;
 }
 .switch label input[type=checkbox]+.lever{
-  background-color:$cardSeperatorLineColor;
+  background-color:$cardSeparatorLineColor;
   height:12px;
 }
 .switch label input[type=checkbox]:checked+.lever{
@@ -329,7 +329,7 @@ img.align-icon {
   background: linear-gradient(to top, $tabColor 0%,$tabColor 5px,transparent 5px,transparent 5%);
 }
 .tabs{
-  /* background: linear-gradient(to top, transparent 0,transparent 5px,$cardSeperatorLineColor 5px,$cardSeperatorLineColor 6px,transparent 6px); */
+  /* background: linear-gradient(to top, transparent 0,transparent 5px,$cardSeparatorLineColor 5px,$cardSeparatorLineColor 6px,transparent 6px); */
   border-bottom: 1px solid #ccc;
 }
 .row-dark{

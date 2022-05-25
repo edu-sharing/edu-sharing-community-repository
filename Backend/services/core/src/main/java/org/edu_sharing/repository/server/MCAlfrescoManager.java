@@ -43,6 +43,7 @@ import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.repository.server.jobs.quartz.JobHandler;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.InitHelper;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.repository.server.tools.cache.EduGroupCache;
 import org.edu_sharing.repository.server.tracking.TrackingService;
@@ -59,6 +60,8 @@ import org.edu_sharing.repository.update.Release_3_2_FillOriginalId;
 import org.edu_sharing.repository.update.Release_3_2_PermissionInheritFalse;
 import org.edu_sharing.repository.update.Release_4_2_PersonStatusUpdater;
 import org.edu_sharing.repository.update.SQLUpdater;
+import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.authority.AuthorityServiceImpl;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 
@@ -128,7 +131,12 @@ public class MCAlfrescoManager implements ServletContextListener {
 
 			// init the esuid for admin
 			createESUIDAdmin();
-			
+
+			try {
+				InitHelper.initGroups();
+			}catch(Throwable t) {
+				logger.error("init of config groups failed: " + t.getMessage(), t);
+			}
 			//init ToolPermisssions
 			ToolPermissionServiceFactory.getInstance().init();
 

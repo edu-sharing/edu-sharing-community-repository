@@ -14,6 +14,7 @@ public class SearchResult<T> {
 	private List<T> nodes = new ArrayList<T>();
 	private Pagination pagination = null;
 	private List<Facet> facets = null;
+	private List<NodeSearch.Suggest> suggests = null;
 	private List<String> ignored;
 
 	/**
@@ -59,7 +60,9 @@ public class SearchResult<T> {
 	public void setIgnored(List<String> ignored) {
 		this.ignored = ignored;
 	}
-	
-	
-	
+
+	public void setSuggests(List<NodeSearch.Suggest> suggests) { this.suggests = suggests; }
+
+	@Schema(required = false, description = "")
+	public List<NodeSearch.Suggest> getSuggests() { return suggests; }
 }

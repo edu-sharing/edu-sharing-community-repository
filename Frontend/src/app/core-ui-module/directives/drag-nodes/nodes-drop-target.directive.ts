@@ -25,7 +25,7 @@ import { UIService } from '../../../core-module/core.module';
  * events are filtered to not trigger unnecessarily.
  */
 @Directive({
-    selector: '[appNodesDropTarget]',
+    selector: '[esNodesDropTarget]',
 })
 export class NodesDropTargetDirective {
     /**
@@ -49,7 +49,7 @@ export class NodesDropTargetDirective {
      *
      * Output events are *only* fired, when this function evaluates to `true`.
      */
-    @Input('appNodesDropTarget') canDrop:
+    @Input('esNodesDropTarget') canDrop:
         | boolean
         | ((dragData: DragData) => boolean);
     @Input() nodesDragAllowedActions: DropAction[] = ['move', 'copy'];

@@ -1,10 +1,3 @@
-<main-nav
-        #mainNav
-        [title]="'PROFILES.TITLE_NAV'"
-        [currentScope]="'profiles'"
-        [searchEnabled]="false"
-></main-nav>
-
 <div class="profile-bg" *ngIf="user">
   <div class="avatar-default"></div>
   <!--
@@ -16,34 +9,34 @@
 </div>
 <div class="profiles-wrapper">
   <div class="profiles" *ngIf="user">
-    <div role="main" [appSkipTarget]="SkipTarget.MainContent" class="main">
-      <h1 appTitle class="cdk-visually-hidden">{{ 'PROFILES.TITLE' | translate: {name: user | authorityName} }}</h1>
+    <div role="main" esSkipTarget="MAIN_CONTENT" class="main">
+      <h1 esTitle class="cdk-visually-hidden">{{ 'PROFILES.TITLE' | translate: {name: user | authorityName} }}</h1>
       <div class="top" style.background-color="{{ (edit ? userEdit : user) | authorityColor }}">
         <div class="profile-gradient"></div>
         <img *ngIf="!edit && user.profile.avatar" class="blurred-image" [src]="user.profile.avatar+'&crop=true&width=400&height=400'" alt="">
         <img *ngIf="edit && !avatarFile && userEdit.profile.avatar" class="blurred-image" [src]="user.profile.avatar+'&crop=true&width=400&height=400'" alt="">
         <img *ngIf="edit && avatarFile" class="blurred-image" [src]="avatarImage" alt="">
         <!--<button mat-button class="edit clickable" *ngIf="isMe && !edit && !editAbout && editProfile && (userEditProfile || editProfileUrl)" (click)="beginEdit()"><i class="material-icons">edit</i><span>{{'PROFILES.EDIT' | translate}}</span></button>-->
-        <actionbar *ngIf="isMe && !edit"
+        <es-actionbar *ngIf="isMe && !edit"
                    [style]="'flat'"
                    [numberOfAlwaysVisibleOptions]="1"
                    [numberOfAlwaysVisibleOptionsMobile]="1"
-                   [options]="actions"></actionbar>
-        <button mat-button class="edit clickable" *ngIf="isMe && edit" (click)="edit=false"><i icon="close"></i><span>{{'PROFILES.CANCEL_EDIT' | translate}}</span></button>
-        <user-avatar *ngIf="!edit"
+                   [options]="actions"></es-actionbar>
+        <button mat-button class="edit clickable" *ngIf="isMe && edit" (click)="edit=false"><i esIcon="close"></i><span>{{'PROFILES.CANCEL_EDIT' | translate}}</span></button>
+        <es-user-avatar *ngIf="!edit"
                      [user]="user"
-        ></user-avatar>
-        <user-avatar *ngIf="edit"
+        ></es-user-avatar>
+        <es-user-avatar *ngIf="edit"
                      [user]="userEdit"
                      [customImage]="avatarFile"
-        ></user-avatar>
+        ></es-user-avatar>
 
         <div *ngIf="edit" class="editAvatar">
           <input #avatar type="file" (change)="updateAvatar($event)" accept="image/*" class="hide">
           <div class="new-avatar-button" (click)="avatar.click()">
             <span>{{'PROFILES.IMG_CHANGE' | translate}}</span>
           </div>
-          <button mat-button *ngIf="hasAvatar()" (click)="clearAvatar()"><i icon="delete"></i></button>
+          <button mat-button *ngIf="hasAvatar()" (click)="clearAvatar()"><i esIcon="delete"></i></button>
         </div>
 
         <div *ngIf="!edit">
@@ -88,7 +81,7 @@
               {{'PROFILES.STATS.MATERIALS' | translate}}
             </div>
             <div class="value">
-              {{ userStats?.nodeCount || '-' }}
+              {{ userStats?.nodeCount ?? '-' }}
             </div>
           </div>
           <div>
@@ -96,7 +89,7 @@
               {{'PROFILES.STATS.COLLECTIONS' | translate}}
             </div>
             <div class="value">
-              {{ userStats?.collectionCount || '-' }}
+              {{ userStats?.collectionCount ?? '-' }}
             </div>
           </div>
           <div>
@@ -104,13 +97,13 @@
               {{'PROFILES.STATS.MATERIALS_CC' | translate}}
             </div>
             <div class="value">
-              {{ userStats?.nodeCountCC || '-' }}
+              {{ userStats?.nodeCountCC ?? '-' }}
             </div>
           </div>
         </div>
       </div>
       <div class="about">
-        <i icon="edu-quotes" class="quotes"></i>
+        <i esIcon="edu-quotes" class="quotes"></i>
         <div class="about-buttons" *ngIf="isMe && editProfile">
           <button mat-button color="primary" class="edit" *ngIf="!editAbout && !edit" (click)="aboutEdit()">{{'PROFILES.EDIT' | translate}}</button>
           <button mat-button color="primary" class="edit" *ngIf="editAbout" (click)="editAbout=false">{{'PROFILES.CANCEL_EDIT' | translate}}</button>
@@ -138,14 +131,14 @@
       <div *ngIf="isMe && editProfile" class="persistent-id">
         <div class="toggle">
           <button mat-button color="primary" (click)="showPersistentIds=!showPersistentIds">
-            <i icon="fingerprint"></i>
+            <i esIcon="fingerprint"></i>
             <span>{{'WORKSPACE.CONTRIBUTOR.PERSISTENT_IDS' | translate}}</span>
-            <i icon="keyboard_arrow_down" *ngIf="showPersistentIds"></i>
-            <i icon="keyboard_arrow_right" *ngIf="!showPersistentIds"></i>
+            <i esIcon="keyboard_arrow_down" *ngIf="showPersistentIds"></i>
+            <i esIcon="keyboard_arrow_right" *ngIf="!showPersistentIds"></i>
           </button>
         </div>
         <div *ngIf="showPersistentIds" [@overlay]="showPersistentIds" class="persistent-id-inputs">
-          <info-message message="{{'PROFILES.PERSISTENT_ID_INFO' | translate}}"></info-message>
+          <es-info-message message="{{'PROFILES.PERSISTENT_ID_INFO' | translate}}"></es-info-message>
           <mat-form-field floatLabel="always">
             <mat-label>{{'VCARD.X-ORCID' | translate}}</mat-label>
             <input matInput
@@ -182,9 +175,9 @@
           </button>
         </div>
         <div *ngIf="changePassword" class="password" [@overlay]="changePassword">
-          <input-password label="{{'OLD_PASSWORD' | translate }}" [displayStrength]="false" [(value)]="oldPassword" [required]="true" id="oldPassword"></input-password>
+          <es-input-password label="{{'OLD_PASSWORD' | translate }}" [displayStrength]="false" [(value)]="oldPassword" [required]="true" inputId="oldPassword"></es-input-password>
           <!--<input type="password" id="oldPassword" name="oldPassword" [(ngModel)]="" required="true">-->
-          <input-password #newPassword label="{{'NEW_PASSWORD' | translate }}" hint="{{ 'REGISTER.HINT' | translate }}" [displayStrength]="true" [(value)]="password" [required]="true" id="password"></input-password>
+          <es-input-password #newPassword label="{{'NEW_PASSWORD' | translate }}" hint="{{ 'REGISTER.HINT' | translate }}" [displayStrength]="true" [(value)]="password" [required]="true" inputId="password"></es-input-password>
           <div class="change-buttons">
             <button mat-raised-button color="primary" [disabled]="!oldPassword.trim() || newPassword.passwordStrength == 'weak'"  (click)="savePassword()">{{'SAVE' | translate}}</button>
           </div>

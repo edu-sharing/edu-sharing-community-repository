@@ -1,11 +1,19 @@
-import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    OnChanges,
+    OnInit,
+    Output,
+    SimpleChanges,
+    ViewChild
+} from '@angular/core';
 import {UIHelper} from "../../../../core-ui-module/ui-helper";
 import {Node, Permission} from '../../../../core-module/rest/data-object';
 import {RestConstants} from '../../../../core-module/rest/rest-constants';
 import {RestConnectorService} from '../../../../core-module/rest/services/rest-connector.service';
 
 import {RestHelper} from '../../../../core-module/rest/rest-helper';
-import {MainNavService} from '../../../../common/services/main-nav.service';
 import {RestNodeService} from '../../../../core-module/rest/services/rest-node.service';
 import {Observable, Observer} from 'rxjs';
 import {Router} from '@angular/router';
@@ -15,11 +23,12 @@ import {BridgeService} from '../../../../core-bridge-module/bridge.service';
 import {Helper} from '../../../../core-module/rest/helper';
 import {Toast} from '../../../../core-ui-module/toast';
 import {TranslateService} from '@ngx-translate/core';
-import {MdsEditorInstanceService, CompletionStatusEntry} from '../../../../common/ui/mds-editor/mds-editor-instance.service';
 import {NodeHelperService} from '../../../../core-ui-module/node-helper.service';
+import { MainNavService } from '../../../../main/navigation/main-nav.service';
+import { CompletionStatusEntry, MdsEditorInstanceService } from '../../../../features/mds/mds-editor/mds-editor-instance.service';
 
 @Component({
-    selector: 'app-share-publish',
+    selector: 'es-share-publish',
     templateUrl: 'share-publish.component.html',
     styleUrls: ['share-publish.component.scss'],
     providers: [MdsEditorInstanceService],
@@ -28,8 +37,12 @@ export class SharePublishComponent implements OnChanges {
     @Input() node: Node;
     @Input() permissions: Permission[];
     @Input() inherited: boolean;
+    @Input() isAuthorEmpty: boolean;
+    @Input() isLicenseEmpty: boolean;
     @Output() onDisableInherit = new EventEmitter<void>();
     @Output() onInitCompleted = new EventEmitter<void>();
+    @ViewChild('shareModeCopyRef') shareModeCopyRef: any;
+    @ViewChild('shareModeDirectRef') shareModeDirectRef: any;
     doiPermission: boolean;
     initialState: {
         copy: boolean,
@@ -250,6 +263,12 @@ export class SharePublishComponent implements OnChanges {
         return new Set(this.allPublishedVersions.filter(
             (v) => !v.virtual && v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID]
         ).map((v) => v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID][0])).size === 1;
+    }
+    isLicenseMissing() {
+        return !this.getLicense() && this.isLicenseEmpty && !this.node.isDirectory;
+    }
+    isAuthorMissing() {
+        return this.isAuthorEmpty && !this.node.isDirectory;
     }
 }
 export enum ShareMode {

@@ -28,11 +28,7 @@
 package org.edu_sharing.repository.server.jobs.quartz;
 
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigValue;
@@ -66,6 +62,7 @@ import org.springframework.context.ApplicationContext;
  */
 public class JobHandler {
 
+	public static final Object KEY_RESULT_DATA = "JOB_RESULT_DATA";
 	private static final int MAX_JOB_LOG_COUNT = 20; // maximal number of jobs to store for history and gui
 	private static List<JobInfo> jobs = new ArrayList<>();
 
@@ -86,7 +83,7 @@ public class JobHandler {
 	}
 	public void finishJob(JobDetail jobDetail, JobInfo.Status status) {
 		for(JobInfo job : jobs){
-			if(job.getJobDetail().equals(jobDetail) && job.getStatus().equals(JobInfo.Status.Running)){
+			if(Objects.equals(job.getJobDetail(),(jobDetail)) && job.getStatus().equals(JobInfo.Status.Running)){
 				job.setStatus(status);
 				job.setFinishTime(System.currentTimeMillis());
 				return;
@@ -484,9 +481,7 @@ public class JobHandler {
 		trigger.setName(triggerName);
 
 		final String jobListenerName = jobName;
-
-		ImmediateJobListener iJobListener = new ImmediateJobListener(jobListenerName);
-
+		
 		JobDetail jobDetail = new JobDetail(jobName, null, jobClass) {
 			@Override
 			public String[] getJobListenerNames() {
@@ -494,6 +489,8 @@ public class JobHandler {
 			}
 		};
 		jobDetail.setJobDataMap(jdm);
+
+		ImmediateJobListener iJobListener = new ImmediateJobListener(jobListenerName);
 
 		quartzScheduler.addJobListener(iJobListener);
 		quartzScheduler.scheduleJob(jobDetail, trigger);

@@ -1,0 +1,134 @@
+@import '../../../core-ui-module/styles/variables';
+
+:host {
+    position: relative;
+    display: block;
+}
+
+:host mat-form-field.search-field ::ng-deep {
+    .mat-form-field-wrapper {
+        padding-bottom: 0;
+    }
+    .mat-form-field-underline {
+        display: none;
+    }
+    .mat-form-field-infix {
+        padding: 0;
+        border: none;
+    }
+}
+
+mat-form-field {
+    width: 100%;
+}
+
+.search-field-wrapper {
+    width: 100%;
+    display: flex;
+    background: $workspaceTopBarInputBackground;
+    border-radius: 2px;
+    padding: 4px;
+    &.input-has-focus {
+        border-radius: 0;
+        &:not(.cdk-keyboard-focused) {
+            @include setGlobalFocus();
+        }
+        &.cdk-keyboard-focused {
+            transition: none;
+            @include setGlobalKeyboardFocus();
+        }
+    }
+}
+
+.suggestion-active-filter {
+    &.suggestion-active-filter-separator {
+        padding-bottom: 8px;
+        border-bottom: 1px solid $cardSeparatorLineColor;
+        margin-bottom: 8px;
+    }
+    > label {
+        display: flex;
+        color: $textLight;
+        font-size: $fontSizeSmall;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+    }
+    .chips-wrapper {
+        display: flex;
+        width: 100%;
+        flex-wrap: wrap;
+        .mat-chip.mat-standard-chip {
+            word-break: break-word;
+
+            @each $property, $color in $chip-colors {
+                &.filter-chip-#{$property} {
+                    background-color: $color;
+                }
+            }
+            .mat-chip-remove {
+                color: inherit;
+                opacity: 0.4;
+            }
+        }
+    }
+}
+
+.search-field-input-wrapper {
+    flex: 1 0 0;
+    display: flex;
+    align-items: center;
+    min-width: 220px;
+    .filter-prefix {
+        font-weight: bold;
+        padding: 5px;
+        width: 24px;
+        font-size: $fontSizeXSmall;
+        text-align: center;
+        border-radius: 50%;
+        background-color: darken($warningMedium, 14%);
+        user-select: none;
+        margin: 0 5px;
+    }
+}
+
+.search-input {
+    color: $workspaceTopBarInputText;
+    flex-grow: 1;
+    background: none;
+    width: unset;
+    min-width: 0;
+    flex: 1 0 0;
+    &::placeholder {
+        color: mix($workspaceTopBarInputText, $workspaceTopBarInputBackground, 75%);
+    }
+}
+
+.submit-button {
+    border-radius: 0 2px 2px 0;
+    color: $workspaceTopBarInputText;
+    background-color: mix($workspaceTopBarInputBackground, $workspaceTopBarBackground, 80%);
+}
+
+.clear-button {
+    color: rgba($workspaceTopBarInputText, 0.8);
+    &.cdk-keyboard-focused {
+        @include setGlobalKeyboardFocus('border');
+    }
+}
+
+.suggestion-card {
+    width: 100%;
+    background-color: $backgroundColor;
+    border-radius: 2px;
+    padding: 10px;
+}
+
+::ng-deep .cdk-overlay-container .suggestion-card {
+    es-mds-editor-widget-container {
+        label {
+            font-size: $fontSizeSmall;
+            color: $textLight;
+            text-transform: uppercase;
+        }
+    }
+}

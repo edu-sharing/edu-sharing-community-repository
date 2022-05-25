@@ -1,7 +1,8 @@
 import {TranslateService} from '@ngx-translate/core';
 import {FormatSizePipe} from './pipes/file-size.pipe';
-import {Observable, Observer} from 'rxjs';
+import {observable, Observable, Observer} from 'rxjs';
 import {Params, Router} from '@angular/router';
+import {Location} from '@angular/common';
 import {DefaultGroups, OptionGroup, OptionItem} from './option-item';
 import {DateHelper} from './DateHelper';
 import {UIConstants} from '../core-module/ui/ui-constants';
@@ -14,7 +15,17 @@ import {Toast} from './toast';
 import {UIHelper} from './ui-helper';
 import {ComponentFactoryResolver, Injectable, ViewContainerRef} from '@angular/core';
 import {BridgeService} from '../core-bridge-module/bridge.service';
-import {AuthorityProfile, CollectionReference, NodesRightMode, Node, Permission, User, WorkflowDefinition, Repository} from '../core-module/rest/data-object';
+import {
+    AuthorityProfile,
+    CollectionReference,
+    NodesRightMode,
+    Node,
+    Permission,
+    User,
+    WorkflowDefinition,
+    Repository,
+    ProposalNode, DeepLinkResponse
+} from '../core-module/rest/data-object';
 import {TemporaryStorageService} from '../core-module/rest/services/temporary-storage.service';
 import {RestConstants} from '../core-module/rest/rest-constants';
 import {ConfigurationService} from '../core-module/rest/services/configuration.service';
@@ -22,9 +33,13 @@ import {RestHelper} from '../core-module/rest/rest-helper';
 import {RestConnectorService} from '../core-module/rest/services/rest-connector.service';
 import {ListItem} from '../core-module/ui/list-item';
 import {RestNetworkService} from '../core-module/rest/services/rest-network.service';
-import {SpinnerSmallComponent} from './components/spinner-small/spinner-small.component';
+import {SpinnerSmallComponent} from '../shared/components/spinner-small/spinner-small.component';
 import {AVAILABLE_LIST_WIDGETS} from './components/list-table/widgets/available-widgets';
 import {NodePersonNamePipe} from './pipes/node-person-name.pipe';
+import {FormBuilder} from '@angular/forms';
+import {SessionStorageService} from '../core-module/rest/services/session-storage.service';
+import {map} from 'rxjs/operators';
+import {RestNodeService} from '../core-module/rest/services/rest-node.service';
 
 export type WorkflowDefinitionStatus = {
     current: WorkflowDefinition
@@ -34,8 +49,8 @@ export interface ConfigEntry {
     name: string;
     icon: string;
     scope?: string;
-    isDisabled: boolean;
-    isSeparate: boolean;
+    isDisabled?: boolean;
+    isSeparate?: boolean;
     isCustom: boolean;
     position?: number;
     url?: string;
@@ -66,9 +81,13 @@ export class NodeHelperService {
         private bridge: BridgeService,
         private http:HttpClient,
         private connector:RestConnectorService,
+        private nodeService:RestNodeService,
         private toast: Toast,
         private router:Router,
+        private sessionStorage:SessionStorageService,
         private storage:TemporaryStorageService,
+        private location: Location,
+        private formBuilder: FormBuilder,
     ) {
     }
     setViewContainerRef(viewContainerRef: ViewContainerRef){
@@ -198,10 +217,15 @@ export class NodeHelperService {
             const options:any=this.rest.getRequestOptions();
             options.responseType='blob';
 
-            this.rest.get(node.preview.url+'&quality='+quality,options,false).subscribe((data:HttpResponse<Blob>)=> {
-                node.preview.data=data.body;
-                observer.next(node);
-                observer.complete();
+            this.rest.get(node.preview.url+'&allowRedirect=false&quality='+quality,options,false).subscribe(async (data: Blob)=> {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const dataUrl = reader.result;
+                    node.preview.data = [dataUrl.toString()];
+                    observer.next(node);
+                    observer.complete();
+                };
+                reader.readAsDataURL(data);
             },(error)=> {
                 observer.error(error);
                 observer.complete();
@@ -408,6 +432,41 @@ export class NodeHelperService {
         this.storage.set(TemporaryStorageService.APPLY_TO_LMS_PARAMETER_NODE,node);
         this.router.navigate([UIConstants.ROUTER_PREFIX+'apply-to-lms',node.ref.repo, node.ref.id],{queryParams:{reurl}});
     }
+
+    addNodesToLTIPlatform(nodes: Node[]) {
+
+        let url = this.connector.createUrl('/lti/v13/generateDeepLinkingResponse', null, []);
+        nodes.forEach(n => {
+            if (!url.includes('?')) {
+                url += '?nodeIds=' + n.ref.id;
+            } else {
+                url += '&nodeIds=' + n.ref.id;
+            }
+        });
+
+        this.connector.get<DeepLinkResponse>(url, this.connector.getRequestOptions())
+            .subscribe( (data: DeepLinkResponse) => {
+                this.postLtiDeepLinkResponse(data.jwtDeepLinkResponse, data.ltiDeepLinkReturnUrl);
+            } );
+    }
+
+    private postLtiDeepLinkResponse(jwt: string, url: string) {
+        const form = window.document.createElement('form');
+        form.setAttribute('method', 'post');
+        form.setAttribute('action', url);
+        form.appendChild(this.createHiddenElement('JWT', jwt));
+        window.document.body.appendChild(form);
+        form.submit();
+    }
+
+    private createHiddenElement(name: string, value: string): HTMLInputElement {
+        const hiddenField = document.createElement('input');
+        hiddenField.setAttribute('name', name);
+        hiddenField.setAttribute('value', value);
+        hiddenField.setAttribute('type', 'hidden');
+        return hiddenField;
+    }
+
     /**
      * Download one or multiple nodes
      * @param node
@@ -645,8 +704,8 @@ export class NodeHelperService {
         return !!o.properties?.[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]?.[0];
     }
 
-    getNodeLink(mode: "routerLink" | "queryParams", node: Node) {
-        if (!node) {
+    getNodeLink(mode: 'routerLink' | 'queryParams', node: Node) {
+        if (!node?.ref) {
             return null;
         }
         let data: { routerLink: string; queryParams: Params } = null;
@@ -673,6 +732,8 @@ export class NodeHelperService {
                     routerLink: UIConstants.ROUTER_PREFIX + 'render/' + node.ref.id,
                     queryParams: {
                         repository: fromHome ? null : node.ref.repo,
+                        proposal: (node as ProposalNode).proposal?.ref.id,
+                        proposalCollection: (node as ProposalNode).proposalCollection?.ref.id,
                     },
                 };
             }
@@ -684,6 +745,53 @@ export class NodeHelperService {
             return '/' + data.routerLink;
         }
         return data.queryParams;
+    }
+
+    /**
+     * Returns the full URL to a node, including the server origin and base href.
+     */
+    getNodeUrl(node: Node): string {
+        const link = this.getNodeLink('queryParams', node);
+        if (link) {
+            const urlTree = this.router.createUrlTree([this.getNodeLink('routerLink', node)], {
+                queryParams: this.getNodeLink('queryParams', node) as Params
+            });
+            return location.origin + this.location.prepareExternalUrl(urlTree.toString());
+        } else {
+            return null;
+        }
+    }
+
+    copyDataToNode<T extends Node>(target: T, source: T) {
+        target.properties = source.properties;
+        target.name = source.name;
+        target.title = source.title;
+    }
+    getDefaultInboxFolder() {
+        return new Observable<Node>((subscriber) => {
+            this.sessionStorage.get('defaultInboxFolder', RestConstants.INBOX).subscribe((id) => {
+                this.nodeService
+                    .getNodeMetadata(id)
+                    .subscribe(node => {
+                        subscriber.next(node.node);
+                        subscriber.complete();
+                    }, error => {
+                        console.warn('error resolving defaultInboxFolder', error);
+                        return this.nodeService
+                            .getNodeMetadata(RestConstants.INBOX)
+                            .pipe(
+                                map(n => n.node)
+                            ).subscribe(subscriber);
+                    });
+            }, (error) => {
+                console.warn('error resolving defaultInboxFolder', error);
+                return this.nodeService
+                    .getNodeMetadata(RestConstants.INBOX)
+                    .pipe(
+                        map(n => n.node)
+                    ).subscribe(subscriber);
+            });
+        });
     }
 }
 

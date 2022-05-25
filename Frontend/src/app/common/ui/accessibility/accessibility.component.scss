@@ -1,4 +1,4 @@
-@import "../../../core-ui-module/styles/variables";
+@import '../../../core-ui-module/styles/variables';
 
 .card-content-padding {
     > label {
@@ -8,7 +8,6 @@
         margin: 20px 0;
         color: $primaryDark;
     }
-
     > mat-radio-group {
         display: flex;
         flex-direction: column;

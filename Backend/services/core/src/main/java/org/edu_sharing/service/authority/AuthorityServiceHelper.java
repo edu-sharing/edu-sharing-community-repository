@@ -2,6 +2,7 @@ package org.edu_sharing.service.authority;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.springframework.context.ApplicationContext;
@@ -60,4 +61,7 @@ public class AuthorityServiceHelper {
         return fields;
     }
 
+    public static NodeRef getAuthorityNodeRef(String user) {
+        return AuthorityServiceFactory.getLocalService().getAuthorityNodeRef(user);
+    }
 }

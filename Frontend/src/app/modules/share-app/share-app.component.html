@@ -1,4 +1,4 @@
-<global-progress *ngIf="globalProgress"></global-progress>
+<es-global-progress *ngIf="globalProgress"></es-global-progress>
 <div class="content" *ngIf="!globalProgress">
     <div class="preview">
         <img [src]="previewUrl">
@@ -20,8 +20,8 @@
         <div class="addToCollection">
             {{'SHARE_APP.ADD_TO_COLLECTION' | translate}}
         </div>
-        <spinner *ngIf="loading"></spinner>
-        <listTable
+        <es-spinner *ngIf="loading"></es-spinner>
+        <es-listTable
                 [nodes]="collections"
                 [columns]="columns"
                 [hasIcon]="true"
@@ -31,9 +31,9 @@
                 [isClickable]="true"
                 [viewType]="2"
                 (clickRow)="saveToCollection($event.node)"
-        ></listTable>
+        ></es-listTable>
       <div class="save">
-        <button mat-flat-button color="primary" (click)="saveFile()"><i icon="folder"></i><span>{{'SAVE' | translate}}</span></button>
+        <button mat-flat-button color="primary" (click)="saveFile()"><i esIcon="folder"></i><span>{{'SAVE' | translate}}</span></button>
       </div>
     </div>
 </div>

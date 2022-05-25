@@ -1,8 +1,8 @@
 package org.edu_sharing.restservices.shared;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.media.Schema;;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -41,7 +41,8 @@ public class NodeSearch {
 		}
 
 		private String property = null;
-		private List<Value> values = null;
+		private List<Value> values = new ArrayList<>();
+		private Long sumOtherDocCount = null;
 
 		@Schema(required = true, description = "")
 		@JsonProperty(value = "property")
@@ -62,11 +63,51 @@ public class NodeSearch {
 		public void setValues(List<Value> values) {
 			this.values = values;
 		}
+
+		public void setSumOtherDocCount(Long sumOtherDocCount) { this.sumOtherDocCount = sumOtherDocCount; }
+
+		@Schema(required = false, defaultValue = "")
+		@JsonProperty(value = "sumOtherDocCount")
+		public Long getSumOtherDocCount() { return sumOtherDocCount; }
+	}
+
+	public static class Suggest{
+		String text;
+		String highlighted;
+		float score;
+
+		public void setHighlighted(String highlighted) {
+			this.highlighted = highlighted;
+		}
+
+		@Schema(required = true, description = "suggested text")
+		public String getText() {
+			return text;
+		}
+
+		public void setText(String text) {
+			this.text = text;
+		}
+
+		@Schema(required = false, description = "suggested text with corrected words highlighted")
+		public String getHighlighted() {
+			return highlighted;
+		}
+
+		public void setScore(float score) {
+			this.score = score;
+		}
+
+		@Schema(required = true, description = "score of the suggestion")
+		public float getScore() {
+			return score;
+		}
 	}
 	
 	private List<String> ignored = null;
 	private List<NodeRef> result = null;
 	private List<Facet> facets = null;
+	private List<Suggest> suggests = null;
 	private Integer count = null;
 	private Integer skip = null;
 	private List<Node> nodes = null;
@@ -103,6 +144,10 @@ public class NodeSearch {
 	public void setFacets(List<Facet> facets) {
 		this.facets = facets;
 	}
+
+	public void setSuggests(List<Suggest> suggests) { this.suggests = suggests; }
+
+	public List<Suggest> getSuggests() { return suggests; }
 
 	/**
    **/

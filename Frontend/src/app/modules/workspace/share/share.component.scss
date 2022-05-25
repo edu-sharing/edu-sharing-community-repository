@@ -1,5 +1,5 @@
-@import "../../../core-ui-module/styles/variables";
-@import "../../../core-ui-module/components/card/variables";
+@import "../../../core-ui-module/styles/variables.scss";
+@import "../../../shared/components/card/variables";
 
 $shareLinkHeight:40px;
 
@@ -216,7 +216,7 @@ a.active{
   padding-right: 5px;
   margin-bottom: 6px;
   align-items: center;
-  workspace-share-permission{
+  es-workspace-share-permission{
     width: 100%;
   }
   border:2px dashed transparent;

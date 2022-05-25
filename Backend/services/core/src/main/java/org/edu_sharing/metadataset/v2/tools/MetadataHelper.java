@@ -2,20 +2,21 @@ package org.edu_sharing.metadataset.v2.tools;
 
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.apache.commons.collections.IteratorUtils;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.restservices.mds.v1.model.MdsWidget;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MetadataHelper {
 
@@ -39,9 +40,13 @@ public class MetadataHelper {
 			return MetadataReader.getMetadataset(ApplicationInfoList.getRepositoryInfoById(node.getRepo()), CCConstants.metadatasetdefault_id, getLocale());
 		}
 	}
-	public static List<MetadataWidget> getWidgetsByNode(NodeRef node) throws Exception{
+	public static Collection<MetadataWidget> getWidgetsByNode(NodeRef node, boolean onlyPrimaryWidgets) throws Exception{
 		MetadataSet metadata = getMetadataset(node);
-		return metadata.getWidgetsByNode(NodeServiceFactory.getLocalService().getType(node.getId()),Arrays.asList(NodeServiceHelper.getAspects(node)));
+		return metadata.getWidgetsByNode(
+				NodeServiceFactory.getLocalService().getType(node.getId()),
+				Arrays.asList(NodeServiceHelper.getAspects(node)),
+				onlyPrimaryWidgets
+		);
 	}
 
 		private static String getLocale() {
@@ -92,4 +97,32 @@ public class MetadataHelper {
         //logger.info("skipping condition type "+condition.getType()+" for widget "+getId()+" since it's not supported in backend");
         return true;
     }
+
+	/**
+	 * attach any available translations/display names for keys of a given property set and attach them with the postfix DISPLAYNAME in this set
+	 * The current locale will be used
+	 */
+	public static void addVirtualDisplaynameProperties(MetadataSet mds, HashMap<String, Object> props) {
+		for(MetadataWidget widget: mds.getWidgets()) {
+			Map<String, MetadataKey> values = widget.getValuesAsMap();
+			String id = CCConstants.getValidGlobalName(widget.getId());
+			if(values!=null && values.size() > 0 && props.containsKey(id)) {
+				Object prop = props.get(CCConstants.getValidGlobalName(widget.getId()));
+				if(prop instanceof String) {
+					prop = Arrays.asList(ValueTool.getMultivalue((String) prop));
+				}
+				if(prop instanceof Iterable) {
+					List<MetadataKey> keys = new ArrayList<>();
+					((Iterable<?>) prop).forEach(
+							p -> keys.add(values.get((String)p))
+					);
+					props.put(id + CCConstants.DISPLAYNAME_SUFFIX,
+									keys.stream()
+									.map(metadataKey -> metadataKey == null ? "" : metadataKey.getCaption())
+									.collect(Collectors.toList())
+					);
+				}
+			}
+		}
+	}
 }

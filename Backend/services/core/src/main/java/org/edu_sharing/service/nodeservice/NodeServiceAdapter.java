@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.alfresco.service.cmr.repository.*;
@@ -78,7 +79,7 @@ public class NodeServiceAdapter implements NodeService {
         return null;
     }
 
-    @Override
+	@Override
 	public void setOwner(String nodeId, String username) {
 	}
 

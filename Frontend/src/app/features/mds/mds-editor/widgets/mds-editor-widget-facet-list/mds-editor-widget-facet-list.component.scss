@@ -1,0 +1,47 @@
+@import '../../../../../core-ui-module/styles/variables';
+
+$countBackgroundColor: scale-color($backgroundColor, $lightness: -15%);
+
+:host ::ng-deep mat-checkbox {
+    .mat-checkbox-layout {
+        width: 100%;
+    }
+    .mat-checkbox-label {
+        flex-grow: 1;
+        min-width: 0;
+    }
+}
+
+li {
+    padding: 3px 4px;
+}
+
+mat-checkbox {
+    width: 100%;
+}
+
+.label {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    .caption {
+        flex-grow: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-right: 1em;
+    }
+    .count {
+        border-radius: 20px;
+        padding: 0 6px;
+        color: $textMain;
+        background-color: $countBackgroundColor;
+        font-weight: bold;
+    }
+}
+
+.load-more-button {
+    .spinner {
+        margin-left: 10px;
+        transform: scale(0.8);
+    }
+}

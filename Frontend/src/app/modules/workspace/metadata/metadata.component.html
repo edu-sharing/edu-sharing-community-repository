@@ -7,80 +7,25 @@
       <div class="col s12">
         <ul class="tabs">
           <li class="clickable tab col s4" (click)="setTab(INFO)" title="Info">
-            <a [class.active]="tab==INFO"><i icon="info_outline" [aria]="true"></i></a>
+            <a [class.active]="tab==INFO"><i esIcon="info_outline" [aria]="true"></i></a>
           </li>
           <!--Icon for Usages-->
           <li class="clickable tab col s4" (click)="setTab(PROPERTIES)">
-            <a [class.active]="tab==PROPERTIES"><i icon="equalizer"></i><div class="value-properties">{{statsTotalPoints}}</div></a>
+            <a [class.active]="tab==PROPERTIES"><i esIcon="equalizer"></i><div class="value-properties">{{statsTotalPoints}}</div></a>
           </li>
           <li class="clickable tab col s4" (click)="setTab(VERSIONS)">
-            <a [class.active]="tab==VERSIONS"><i icon="restore"></i></a>
+            <a [class.active]="tab==VERSIONS"><i esIcon="restore"></i></a>
           </li>
         </ul>
     </div>
   </div>
 
-  <div *ngIf="tab==INFO" class="content">
-    <img class="preview clickable" (click)="display()" [src]="isAnimated() ? data.preview : data.preview+'&crop=true&width=600&height=450'" />
-    <div class="edit clickable" (click)="edit()" *ngIf="canEdit()"><i class="material-icons">edit</i></div>
-    <div class="description">{{'NODE.cm:name' | translate}}</div>
-    <div class="value">{{data.name}}</div>
-    <div class="description" *ngIf="data.title">{{'NODE.cclom:title' | translate}}</div>
-    <div class="value" *ngIf="data.title">{{data.title}}</div>
-    <div class="description" *ngIf="data.keywords">{{'NODE.cclom:general_keyword' | translate}}</div>
-    <div class="value" *ngIf="data.keywords">
-      <div class="badge" *ngFor="let keyword of data.keywords"><span class="text">{{ keyword }}</span></div>
-    </div>
-    <div class="description" *ngIf="data.description">{{'NODE.description' | translate}}</div>
-    <div class="value descriptionValue" *ngIf="data.description">{{data.description}}</div>
-    <div class="description" *ngIf="data.author_freetext">{{'NODE.ccm:author_freetext' | translate}}</div>
-    <div class="value valueFreetext" *ngIf="data.author_freetext">{{data.author_freetext}}</div>
-    <div class="description" *ngIf="data.author">{{'NODE.ccm:lifecyclecontributer_authorFN' | translate}}</div>
-    <div class="value" *ngIf="data.author">{{data.author}}</div>
-    <div class="description">{{'NODE.cm:creator' | translate}}</div>
-    <div class="value">{{data.creator}}<br>{{data.createDate}}</div>
-    <div class="description">{{'NODE.mimetype' | translate}}</div>
-    <div class="value">
-      <span *ngIf="data.mediatype && !data.isDirectory">{{'MEDIATYPE.'+data.mediatype | translate}}</span>
-      <span *ngIf="!data.mediatype">{{'MEDIATYPE.file' | translate}}</span>
-      <span *ngIf="data.isDirectory && !data.isCollection">{{'MEDIATYPE.folder' | translate}}</span>
-      <span *ngIf="data.isCollection">{{'MEDIATYPE.collection' | translate}}</span>
-      <span class="mimetype" *ngIf="data.mimetype && data.mediatype!=data.mimetype && !data.isDirectory">({{data.mimetype}})</span>
-    </div>
-    <div class="description" *ngIf="data.exifDate">{{'NODE.exif:dateTimeOriginal' | translate}}</div>
-    <div class="value" *ngIf="data.exifDate">{{data.exifDate}}</div>
-    <div class="description" *ngIf="data.dimensions">{{'NODE.dimensions' | translate}}</div>
-    <div class="value" *ngIf="data.dimensions">{{data.dimensions}}</div>
-    <div class="description" *ngIf="data.duration">{{'NODE.cclom:duration' | translate}}</div>
-    <div class="value" *ngIf="data.duration">{{data.duration}}</div>
-    <div class="description" *ngIf="!data.isDirectory">{{'NODE.size' | translate}}</div>
-    <div class="value" *ngIf="!data.isDirectory && data.size">{{data.size | formatSize}}</div>
-    <div class="value" *ngIf="!data.isDirectory && !data.size">{{'NO_SIZE' | translate}}</div>
-    <div *ngIf="permissions">
-      <div class="description" *ngIf="permissions.users.length">{{'WORKSPACE.METADATA.INVITED_USERS' | translate}}</div>
-      <div class="value" *ngIf="permissions.users.length">
-        <div *ngFor="let authority of permissions.users">{{authority | permissionName}}</div>
-      </div>
-      <div class="description" *ngIf="permissions.groups.length">{{'WORKSPACE.METADATA.INVITED_GROUPS' | translate}}</div>
-      <div class="value" *ngIf="permissions.groups.length">
-        <div *ngFor="let authority of permissions.groups">{{authority | permissionName}}</div>
-      </div>
-
-    </div>
-    <div class="description" *ngIf="data.license">{{'NODE.ccm:commonlicense_key' | translate}}</div>
-    <div class="value license-value" *ngIf="data.license">
-      <img class="license" [src]="data.license">
-      <div class="licenseName">{{data.licenseName}}</div>
-    </div>
-    <div *ngIf="isAdmin">
-      <div class="description">{{'Aspects'}}</div>
-      <div class="value"><div class="aspect" *ngFor="let aspect of data.aspects">{{aspect}}</div></div>
-      <div *ngFor="let property of data.properties">
-        <div class="description">{{property[0]}}</div>
-        <div class="value">{{property[1]}}</div>
-      </div>
-    </div>
-  </div>
+  <es-workspace-metadata-block *ngIf="tab==INFO"
+                                class="content"
+                                [node]="nodeObject"
+                                (onDisplay)="display()"
+                                (onEditMetadata)="edit()"
+  ></es-workspace-metadata-block>
   <!--Usages Info -->
   <div [class.hiddendiv]="tab!=PROPERTIES" class="content">
     <div class="description">{{'WORKSPACE.METADATA.USAGE_COUNT_TITLE' | translate}}</div>
@@ -93,7 +38,7 @@
     </ul>
     <div class="description usage-count">{{'WORKSPACE.METADATA.USAGE_COUNT' | translate}} <span class="usage-counter">{{ statsTotalPoints }}</span></div>
     <div class="description collections" *ngIf="usagesCollection && usagesCollection.length">{{'WORKSPACE.METADATA.COLLECTIONS' | translate:{count:usagesCollection.length} }}</div>
-    <listTable *ngIf="usagesCollection && usagesCollection.length"
+    <es-listTable *ngIf="usagesCollection && usagesCollection.length"
                [nodes]="usagesCollection"
                [columns]="columnsCollections"
                [viewType]="0"
@@ -101,9 +46,9 @@
                [hasIcon]="true"
                [isClickable]="true"
                (clickRow)="displayCollection($event.node)"
-    ></listTable>
+    ></es-listTable>
     <div class="description forkedParend" *ngIf="forkedParent">{{'WORKSPACE.METADATA.FORKED_PARENT' | translate}}</div>
-    <listTable *ngIf="forkedParent"
+    <es-listTable *ngIf="forkedParent"
                [nodes]="[forkedParent]"
                [columns]="columns"
                [viewType]="0"
@@ -111,9 +56,9 @@
                [hasIcon]="true"
                [isClickable]="true"
                (clickRow)="displayNode($event.node)"
-    ></listTable>
+    ></es-listTable>
     <div class="description forkedParend" *ngIf="forkedChilds && forkedChilds.length">{{'WORKSPACE.METADATA.FORKED_CHILDS' | translate:{count:forkedChilds.length} }}</div>
-    <listTable *ngIf="forkedChilds && forkedChilds.length"
+    <es-listTable *ngIf="forkedChilds && forkedChilds.length"
                [nodes]="forkedChilds"
                [columns]="columns"
                [viewType]="0"
@@ -121,7 +66,7 @@
                [hasIcon]="true"
                [isClickable]="true"
                (clickRow)="displayNode($event.node)"
-    ></listTable>
+    ></es-listTable>
 
 
     <!--<div class="value">{{usageCount}}</div>-->
@@ -129,7 +74,7 @@
   </div>
 
   <div *ngIf="tab==VERSIONS" class="content">
-    <div *ngIf="versionsLoading" class="center"><spinner></spinner></div>
+    <div *ngIf="versionsLoading" class="center"><es-spinner></es-spinner></div>
     <div *ngFor="let version of versions" class="version" [class.versionMain]="isCurrentVersion(version)">
       <div class="versionTitle">
         <span *ngIf="isCurrentVersion(version)">{{'WORKSPACE.METADATA.CURRENT_VERSION' | translate}}</span>

@@ -8,7 +8,7 @@
   </button>
 </mat-menu>
 
-<card
+<es-card
   *ngIf="isNewTemplateDialogVisible"
   title="{{ 'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.NEW_BUTTON' | translate }}"
   (onCancel)="closeNewTemplateDialog()"
@@ -28,7 +28,7 @@
       />
     </mat-form-field>
   </div>
-</card>
+</es-card>
 
 <fieldset>
   <legend>{{ 'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.GROUP_LABEL' | translate }}</legend>

@@ -6,7 +6,7 @@ import {RestHelper} from "../../../core-module/core.module";
 import {RestNodeService} from "../../../core-module/core.module";
 
 @Component({
-  selector: 'workspace-create-lti',
+  selector: 'es-workspace-create-lti',
   templateUrl: 'create-lti.component.html',
   styleUrls: ['create-lti.component.scss']
 })

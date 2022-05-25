@@ -8,10 +8,10 @@
 		</message>
 	</template>
 	<template name="invited">
-		<subject>{{inviterFirstName}} {{inviterLastName}} hat Sie zu einem Material eingeladen.</subject>
+		<subject>{{inviter.firstName}} {{inviter.lastName}} hat Sie zu einem Material eingeladen.</subject>
 		<message><![CDATA[
 			<h1>Hallo {{firstName}} {{lastName}}</h1>
-			<h2>{{inviterFirstName}} {{inviterLastName}} hat "{{name}}" für Sie freigegeben.</h2>
+			<h2>{{inviter.firstName}} {{inviter.lastName}} hat "{{name}}" für Sie freigegeben.</h2>
 			Ihnen wurden die folgenden Rechte zugeteilt:<br>
 			<div class="rights">{{permissions}}</div>
 			<br>
@@ -23,11 +23,25 @@
 		]]>
 		</message>
 	</template>
-	<template name="invited_safe">
-		<subject>{{inviterFirstName}} {{inviterLastName}} hat Sie zu einem Material eingeladen.</subject>
+	<template name="invited_workflow">
+		<subject>{{assigner.firstName}} {{assigner.lastName}} hat Ihnen ein Material zugewiesen.</subject>
 		<message><![CDATA[
 			<h1>Hallo {{firstName}} {{lastName}}</h1>
-			<h2>{{inviterFirstName}} {{inviterLastName}} hat "{{name}}" für Sie freigegeben.</h2>
+			<h2>{{assigner.firstName}} {{assigner.lastName}} hat Ihnen "{{node.cm:name}}" mit den Status "{{status}}" zugewiesen.</h2>
+			<br>
+			<div class="center"><a class="btn" href="{{link}}">Link zum Material</a></div>
+			<br><br>
+			{{if comment}}Kommentar vom Nutzer:<br>
+				{{comment}}
+			{{endif}}
+		]]>
+		</message>
+	</template>
+	<template name="invited_safe">
+		<subject>{{inviter.firstName}} {{inviter.lastName}} hat Sie zu einem Material eingeladen.</subject>
+		<message><![CDATA[
+			<h1>Hallo {{firstName}} {{lastName}}</h1>
+			<h2>{{inviter.firstName}} {{inviter.lastName}} hat "{{name}}" für Sie freigegeben.</h2>
 			Ihnen wurden die folgenden Rechte zugeteilt:<br>
 			<div class="rights">{{permissions}}</div>
 			<br>
@@ -40,10 +54,10 @@
 		</message>
 	</template>
 	<template name="invited_collection">
-		<subject>{{inviterFirstName}} {{inviterLastName}} hat Sie zur Mitarbeit an einer Sammlung eingeladen.</subject>
+		<subject>{{inviter.firstName}} {{inviter.lastName}} hat Sie zur Mitarbeit an einer Sammlung eingeladen.</subject>
 		<message><![CDATA[
 			<h1>Hallo {{firstName}} {{lastName}}</h1>
-			<h2>{{inviterFirstName}} {{inviterLastName}} hat die Sammlung "{{name}}" für Sie freigegeben.</h2>
+			<h2>{{inviter.firstName}} {{inviter.lastName}} hat die Sammlung "{{name}}" für Sie freigegeben.</h2>
 			Ihnen wurden die folgenden Rechte zugeteilt:<br>
 			<div class="rights">{{permissions}}</div>
 			<br>
@@ -183,6 +197,25 @@
 			<h2> {{firstName}} {{lastName}} ist soeben "{{group}}" beigetreten.</h2>
 			<br>
 			Sie können die Mitglieder der Gruppe in der Nutzerverwaltung verwalten.
+		]]>
+		</message>
+	</template>
+	<template name="mdsValuespaceSuggestion">
+		<subject>Ein neuer Metadaten-Vorschlag für {{widgetCaption}}</subject>
+		<message><![CDATA[
+			<h1>Hallo!</h1>
+			<h2>{{firstName}} {{lastName}} hat einen neuen Wertebereichseintrag vorgeschlagen:</h2>
+			<br>
+			Feld: {{widgetCaption}} ({{widgetId}})<br>
+			Vorgeschlagener Wert: {{caption}} ({{id}})<br>
+			{{if parentId}}Übergerodneter Wert: {{parentCaption}} ({{parentId}})<br>
+			{{endif}}
+			{{if link}}
+				<br><br>
+				Vorgeschlagen für Element "{{node.cm:name}}"
+				<br><br>
+				<div class="center"><a class="btn" href="{{link}}">Link zum Element</a></div>
+			{{endif}}
 		]]>
 		</message>
 	</template>

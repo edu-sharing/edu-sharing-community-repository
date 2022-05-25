@@ -17,7 +17,7 @@ import {CollectionChooserComponent} from '../../../../core-ui-module/components/
 import {NodeHelperService} from '../../../../core-ui-module/node-helper.service';
 
 @Component({
-  selector: 'workspace-share-history',
+  selector: 'es-workspace-share-history',
   templateUrl: 'history.component.html',
   styleUrls: ['history.component.scss'],
   animations: [

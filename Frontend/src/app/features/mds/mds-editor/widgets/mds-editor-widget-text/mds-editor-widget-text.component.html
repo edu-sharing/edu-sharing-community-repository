@@ -1,0 +1,37 @@
+<!-- There is a bug that causes changed-after-checked errors when there is an *ngIf on a matInput:
+  https://github.com/angular/components/issues/16209. To avoid that, we put the *ngIf on
+  mat-form-field and have a little code duplication. -->
+
+<es-mds-editor-widget-container
+  *ngIf="widget.definition.type !== 'textarea'"
+  [injectedView]="this"
+  [widget]="widget"
+  [label]="false"
+  [valueType]="valueType"
+  [control]="formControl"
+>
+  <input
+    matInput
+    #inputElement
+    [type]="widget.definition.type"
+    [placeholder]="widget.definition.placeholder"
+    [formControl]="formControl"
+    (blur)="blur()"
+  />
+</es-mds-editor-widget-container>
+
+<es-mds-editor-widget-container
+  *ngIf="widget.definition.type === 'textarea'"
+  [widget]="widget"
+  [label]="false"
+  [valueType]="valueType"
+  [control]="formControl"
+>
+  <textarea
+    matInput
+    #textAreaElement
+    [placeholder]="widget.definition.placeholder"
+    [formControl]="formControl"
+    (blur)="blur()"
+  ></textarea>
+</es-mds-editor-widget-container>

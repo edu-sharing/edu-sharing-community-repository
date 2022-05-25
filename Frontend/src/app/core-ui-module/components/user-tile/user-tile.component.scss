@@ -12,11 +12,11 @@
   flex-direction: row;
   align-items: center;
   @include clickable();
-  .name, user-avatar{
+  .name, es-user-avatar{
     display: flex;
     align-items: center;
   }
-  user-avatar {
+  es-user-avatar {
     margin-bottom: -4px;
   }
   .name{

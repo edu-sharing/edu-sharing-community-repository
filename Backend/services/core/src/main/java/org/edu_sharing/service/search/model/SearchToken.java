@@ -44,6 +44,7 @@ public class SearchToken implements Serializable {
 	private MetadataQueries queries;
 	private List<String> permissions;
 	private boolean resolveCollections = false;
+	private boolean returnSuggestion = false;
 
 	public ContentType getContentType(){
 		if(contentType==null)
@@ -156,10 +157,12 @@ public class SearchToken implements Serializable {
 	public List<String> getFacets() {
 		if(this.query != null && facets != null) {
 			List<String> combined = new ArrayList<>();
-			this.facets.forEach((facette) -> {
-				List<String> sublist = this.query.findParameterByName(facette).getFacets();
+			this.facets.forEach((facet) -> {
+				List<String> sublist = this.query.findParameterByName(facet).getFacets();
 				if(sublist != null) {
 					combined.addAll(sublist);
+				} else {
+					combined.add(facet);
 				}
 			});
 			return combined;
@@ -171,7 +174,7 @@ public class SearchToken implements Serializable {
 	 *
 	 * re aggregates splitted facettes from the current mds query to a single list for the client
 	 */
-	public Map<String, Map<String, Integer>> aggregateFacettes(Map<String, Map<String, Integer>> propsMap) {
+	public Map<String, Map<String, Integer>> aggregateFacetes(Map<String, Map<String, Integer>> propsMap) {
 		Map<String, Map<String, Integer>> combined = new HashMap<>();
 		if(this.query != null && facets != null) {
 			List<MetadataQueryParameter> facetParams = this.query.getParameters().stream().filter((p) -> p.getFacets() != null).collect(Collectors.toList());
@@ -234,6 +237,9 @@ public class SearchToken implements Serializable {
 		if(getContentType().equals(ContentType.TOOLPERMISSIONS)){
 			searchCriterias.setContentkind(new String[]{CCConstants.CCM_TYPE_TOOLPERMISSION});
 		}
+		if(getContentType().equals(ContentType.COLLECTION_PROPOSALS)){
+			searchCriterias.setContentkind(new String[]{CCConstants.CCM_TYPE_COLLECTION_PROPOSAL});
+		}
 	}
 	/**
 	 * Get and set query string (for ui purposes/info)
@@ -243,9 +249,7 @@ public class SearchToken implements Serializable {
 		this.queryString=queryString;
 	}
 	public String getQueryString() throws IllegalArgumentException {
-		if(queryString!=null)
-			return queryString;
-		return getLuceneString();
+		return queryString;
 	}
 	
 	/**
@@ -281,4 +285,8 @@ public class SearchToken implements Serializable {
 	public void setResolveCollections(boolean resolveCollections) {
 		this.resolveCollections = resolveCollections;
 	}
+
+	public boolean isReturnSuggestion() { return returnSuggestion; }
+
+	public void setReturnSuggestion(boolean returnSuggestion) {	this.returnSuggestion = returnSuggestion; }
 }

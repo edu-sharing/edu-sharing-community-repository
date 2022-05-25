@@ -7,7 +7,7 @@ import {MatButton} from '@angular/material/button';
 /**
  * Directive to automatically disable buttons if a required toolpermission is missing for the action
  */
-@Directive({ selector: '[appToolpermissionCheck]' })
+@Directive({ selector: '[esToolpermissionCheck]' })
 export class ToolpermissionCheckDirective implements OnChanges{
     @Input() toolpermission: string;
     @Input() toolpermissionDisplayHint = true;

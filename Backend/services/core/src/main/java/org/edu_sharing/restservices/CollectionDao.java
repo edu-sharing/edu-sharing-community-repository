@@ -6,22 +6,23 @@ import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
+import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
+import org.edu_sharing.restservices.collection.v1.model.*;
 import org.edu_sharing.restservices.collection.v1.model.Collection;
-import org.edu_sharing.restservices.collection.v1.model.CollectionBaseEntries;
-import org.edu_sharing.restservices.collection.v1.model.CollectionReference;
+import org.edu_sharing.restservices.node.v1.model.AbstractEntries;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.shared.*;
+import org.edu_sharing.service.collection.CollectionProposalInfo;
 import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.model.SortDefinition;
-import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 
 public class CollectionDao {
@@ -29,7 +30,7 @@ public class CollectionDao {
 	public static Logger logger = Logger.getLogger(CollectionDao.class);
 	public static final String ROOT = "-root-";
 
-	public enum Scope {
+    public enum Scope {
 		EDU_ALL,
 		EDU_GROUPS,
 		MY,
@@ -90,6 +91,40 @@ public class CollectionDao {
 			throw DAOException.mapping(e);
 		}
 	}
+
+	public static CollectionProposalEntries getCollectionsContainingProposals(RepositoryDao repoDao, CCConstants.PROPOSAL_STATUS status, Boolean fetchCounts, Integer skipCount, Integer maxItems, SortDefinition sortDefinition) throws DAOException {
+		try {
+			List<NodeCollectionProposalCount> result = new ArrayList<>();
+
+			CollectionProposalInfo children =
+					repoDao.getCollectionClient().getCollectionsContainingProposals(
+							status,
+							skipCount, maxItems,
+							sortDefinition
+					);
+			Pagination pagination = new Pagination();
+			pagination.setTotal((int) children.getTotalHits());
+			pagination.setFrom(skipCount);
+			pagination.setCount(children.getData().size());
+
+			for(CollectionProposalInfo.CollectionProposalData data : children.getData()) {
+				NodeDao dao = NodeDao.getNode(repoDao, data.getNodeRef());
+				NodeCollectionProposalCount node = new NodeCollectionProposalCount();
+				dao.fetchCounts = fetchCounts;
+				dao.fillNodeObject(node);
+				node.setProposalCount(data.getProposalCount());
+				result.add(node);
+			}
+
+			CollectionProposalEntries obj = new CollectionProposalEntries();
+			obj.setCollections(result);
+			obj.setPagination(pagination);
+			return obj;
+		}catch(Throwable t){
+			throw DAOException.mapping(t);
+		}
+	}
+
 	public static CollectionBaseEntries getCollectionsSubcollections(RepositoryDao repoDao, String parentId, SearchScope scope, boolean fetchCounts, Filter filter, SortDefinition sortDefinition, int skipCount, int maxItems)	throws DAOException {
 		try {
 			return getCollectionsChildren(repoDao, parentId, scope, fetchCounts, filter, Arrays.asList(new String[]{"folders"}), sortDefinition, skipCount, maxItems);
@@ -105,12 +140,6 @@ public class CollectionDao {
 				parentNode = NodeDao.getNode(repoDao, parentId);
 				parentNode.fetchCounts = false;
 			}
-			// if this collection is ordered by user, use the position of the elements as primary order criteria
-			if (parentNode != null && CCConstants.COLLECTION_ORDER_MODE_CUSTOM.equals(parentNode.asNode().getCollection().getOrderMode())) {
-				sortDefinition.addSortDefinitionEntry(
-						new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CCM_PROP_COLLECTION_ORDERED_POSITION), true), 0);
-			}
-
 			List<org.alfresco.service.cmr.repository.NodeRef> children =
 					repoDao.getCollectionClient().getChildren(
 							ROOT.equals(parentId) ? null : parentId,
@@ -126,8 +155,7 @@ public class CollectionDao {
 					(dao) -> {
 						dao.fetchCounts = fetchCounts;
 						return dao;
-					})
-			;
+					});
 			Pagination pagination = sorted.getPagination();
 			for (Node child : sorted.getNodes()) {
 
@@ -255,8 +283,58 @@ public class CollectionDao {
 		}
 			
 	}
-	
-	public static synchronized NodeDao addToCollection(RepositoryDao repoDao, String collectionId, String nodeId, String sourceRepositoryId, boolean allowDuplicate) throws DAOException {
+
+
+	public static AbstractEntries<NodeProposal> getCollectionsProposals(RepositoryDao repoDao, String parentId, CCConstants.PROPOSAL_STATUS filterStatus) throws DAOException {
+		try {
+			List<NodeProposal> proposals = new ArrayList<>();
+
+			for(AssociationRef ref : CollectionServiceFactory.getCollectionService(repoDao.getApplicationInfo().getAppId()).
+					getChildrenProposal(parentId)) {
+				NodeProposal proposal = new NodeProposal();
+				String status = NodeServiceHelper.getProperty(ref.getSourceRef(), CCConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS);
+				CCConstants.PROPOSAL_STATUS enumStatus = CCConstants.PROPOSAL_STATUS.PENDING;
+				if(status != null){
+					enumStatus = CCConstants.PROPOSAL_STATUS.valueOf(status);
+				}
+				if(!Objects.equals(filterStatus, enumStatus)){
+					continue;
+				}
+				try {
+					NodeDao original = NodeDao.getNode(repoDao, ref.getTargetRef().getId());
+					original.fillNodeObject(proposal);
+					proposal.setAccessible(true);
+				} catch(DAOSecurityException e){
+					proposal = NodeDao.createEmptyDummy(NodeProposal.class,
+							new org.edu_sharing.restservices.shared.NodeRef(repoDao.getId(),ref.getTargetRef().getId())
+					);
+					proposal.setName(NodeServiceHelper.getProperty(ref.getSourceRef(), CCConstants.CM_NAME));
+					proposal.setAccessible(false);
+				}
+				proposal.setStatus(enumStatus);
+				proposal.setProposal(NodeDao.getNode(repoDao, ref.getSourceRef().getId()).asNode());
+				proposals.add(proposal);
+			}
+			AbstractEntries<NodeProposal> entries = new AbstractEntries<>();
+			entries.setNodes(proposals);
+			entries.setPagination(new Pagination(proposals));
+			return entries;
+		} catch(Throwable t){
+			throw DAOException.mapping(t);
+		}
+	}
+
+	public static synchronized void proposeForCollection(RepositoryDao repoDao, String collectionId, String nodeId, String sourceRepositoryId) throws DAOException {
+		try {
+
+			CollectionServiceFactory.getCollectionService(repoDao.getApplicationInfo().getAppId()).
+					proposeForCollection(collectionId,nodeId,sourceRepositoryId);
+		} catch (Throwable t) {
+			throw DAOException.mapping(t);
+		}
+	}
+
+	public static NodeDao addToCollection(RepositoryDao repoDao, String collectionId, String nodeId, String sourceRepositoryId, boolean allowDuplicate) throws DAOException {
 		try {
 
 			String resultId=CollectionServiceFactory.getCollectionService(repoDao.getApplicationInfo().getAppId()).
@@ -343,6 +421,7 @@ public class CollectionDao {
 		result.setTitle(collection.getTitle());
 		result.setType(collection.getType());
 		result.setOrderMode(collection.getOrderMode());
+		result.setOrderAscending(collection.getOrderAscending());
 		result.setViewtype(collection.getViewtype());
 		result.setX(collection.getX());
 		result.setY(collection.getY());
@@ -375,7 +454,7 @@ public class CollectionDao {
 	public static void setPinned(RepositoryDao repoDao, String[] collections) {
 		if(!ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING))
 			throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING);
-		AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
+		AuthenticationUtil.runAsSystem(new AuthenticationUtil.RunAsWork<Void>() {
 			@Override
 			public Void doWork() throws Exception {
 				repoDao.getCollectionClient().setPinned(collections);

@@ -1,0 +1,10 @@
+<!-- Initially show the non-animated image to prevent a short flicker. -->
+<img *ngIf="!animationLoaded" src="assets/images/edu-sharing-loading.svg" alt="" />
+
+<img
+  [hidden]="!animationLoaded"
+  src="assets/images/edu-sharing-loading-animation.svg"
+  esImage-config
+  alt=""
+  (load)="animationLoaded = true"
+/>

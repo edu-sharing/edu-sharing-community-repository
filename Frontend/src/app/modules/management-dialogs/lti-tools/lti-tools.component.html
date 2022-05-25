@@ -1,7 +1,7 @@
 <div class="dialog darken">
   <div class="card center-card card-high card-actionbar card-wide">
     <div class="card-content">
-      <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon="close" [aria]="true"></i></div>
+      <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i esIcon="close" [aria]="true"></i></div>
       <div class="card-title" *ngIf="_currentTool">{{'WORKSPACE.LTI_TOOLS.TITLE_TOOL' |
         translate:{tool:_currentTool.name} }}</div>
       <div class="card-title" *ngIf="!_currentTool">{{'WORKSPACE.LTI_TOOLS.TITLE' | translate}}</div>
@@ -17,10 +17,10 @@
           </form>
         </div>
         <div class="actionbar">
-          <actionbar
+          <es-actionbar
             [options]="options"
             [numberOfAlwaysVisibleOptions]="1"
-          ></actionbar>
+          ></es-actionbar>
           <div class="dialog" *ngIf="showCreateList" (click)="showCreateList=false" (contextmenu)="showCreateList=false;$event.preventDefault();$event.stopPropagation();"></div>
           <div class="createList collection"
                [@overlay]="showCreateList"
@@ -32,13 +32,13 @@
           </div>
         </div>
       </div>
-      <spinner *ngIf="loading"></spinner>
+      <es-spinner *ngIf="loading"></es-spinner>
       <div class="card-scroll" *ngIf="!loading">
         <div *ngIf="_currentTool">
-          <toolList
+          <es-toolList
             [nodes]="[_currentTool]"
             [clickable]="false"
-          ></toolList>
+          ></es-toolList>
           <div class="description">{{$any(_currentTool).description}}</div>
           <a class="url clickable"
              *ngIf="_currentTool.properties['ccm:tool_producer']"
@@ -47,11 +47,11 @@
             {{_currentTool.properties['ccm:tool_producer']}}</a>
         </div>
         <div *ngIf="!_currentTool">
-          <toolList
+          <es-toolList
           [nodes]="nodes"
           [clickable]="true"
           (onClick)="openTool($event)"
-          ></toolList>
+          ></es-toolList>
         </div>
       </div>
   </div>

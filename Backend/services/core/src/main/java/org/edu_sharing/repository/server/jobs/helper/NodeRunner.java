@@ -296,7 +296,7 @@ public class NodeRunner {
                 new RepositoryCache().remove(ref.getId());
             }
         }finally {
-            policyBehaviourFilter.enableBehaviour(ref);
+            if(keepModifiedDate || (!keepModifiedDate && !transaction.equals(TransactionMode.None))) policyBehaviourFilter.enableBehaviour(ref);
         }
     }
 

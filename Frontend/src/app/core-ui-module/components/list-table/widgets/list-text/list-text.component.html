@@ -1,93 +1,157 @@
+<label *ngIf="item.config?.showLabel">
+  {{ getI18n(item) | translate }}
+</label>
 <ng-container *ngIf="item.type === 'ORG' || item.type === 'GROUP'">
   <ng-container [ngSwitch]="item.name">
     <span *ngSwitchCase="'displayName'">
-      {{ $any(node).profile.displayName }}
+      {{ $any(getNode()).profile.displayName }}
     </span>
     <span *ngSwitchCase="'groupType'">
-      {{ 'PERMISSIONS.GROUP_TYPE.' + $any(node).profile.groupType | translate }}
+      {{ 'PERMISSIONS.GROUP_TYPE.' + $any(getNode()).profile.groupType | translate }}
     </span>
     <span *ngSwitchDefault>
-      {{ $any(node)[item.name] }}
+      {{ $any(getNode())[item.name] }}
     </span>
   </ng-container>
 </ng-container>
 <ng-container *ngIf="item.type === 'USER'">
   <span *ngIf="isUserProfileAttribute(item.name)">
-    {{ $any(node).profile[item.name] }}
+    {{ $any(getNode()).profile[item.name] }}
   </span>
   <span *ngIf="item.name === 'status'">
-    {{ 'PERMISSIONS.USER_STATUS.' + $any(node).status.status | translate }}
+    {{ 'PERMISSIONS.USER_STATUS.' + $any(getNode()).status.status | translate }}
   </span>
   <span *ngIf="!isUserProfileAttribute(item.name) && item.name !== 'status'">
-    {{ $any(node)[item.name] }}
+    {{ $any(getNode())[item.name] }}
   </span>
 </ng-container>
-<ng-container [ngSwitch]="item.name" *ngIf="item.type === 'NODE' || item.type === 'COLLECTION'">
+<ng-container
+  [ngSwitch]="item.name"
+  *ngIf="item.type === 'NODE' || item.type === 'NODE_PROPOSAL' || item.type === 'COLLECTION'"
+>
   <span *ngSwitchCase="'name'">
-    {{ $any(node).name }}
+    {{ $any(getNode()).name }}
   </span>
-  <span *ngSwitchCase="'title'">
-    {{ $any(node).title || $any(node).name }}
+  <span
+    *ngSwitchCase="'title'"
+    [matTooltip]="provideLabel ? $any(getNode()).title || $any(getNode()).name : null"
+  >
+    {{ $any(getNode()).title || $any(getNode()).name }}
   </span>
-  <span *ngSwitchCase="'cm:title'">
-    {{ $any(node).title || $any(node).name }}
+  <span
+    *ngSwitchCase="'cm:title'"
+    [matTooltip]="provideLabel ? $any(getNode()).title || $any(getNode()).name : null"
+  >
+    {{ $any(getNode()).title || $any(getNode()).name }}
   </span>
-  <span *ngSwitchCase="'cclom:title'">
-    {{ $any(node).title || $any(node).name }}
+  <span
+    *ngSwitchCase="'cclom:title'"
+    [matTooltip]="provideLabel ? $any(getNode()).title || $any(getNode()).name : null"
+  >
+    {{ $any(getNode()).title || $any(getNode()).name }}
   </span>
   <span
     *ngSwitchCase="'mediatype'"
-    [matTooltip]="showFieldTooltip ? ('NODE.mediatype' | translate) : null"
+    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
   >
-    <span class="cdk-visually-hidden">{{ 'NODE.mediatype' | translate }}:</span>
-    {{ 'MEDIATYPE.' + $any(node).mediatype | translate }}
+    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
+    {{ 'MEDIATYPE.' + $any(getNode()).mediatype | translate }}
   </span>
-  <span *ngSwitchCase="'size'" [matTooltip]="showFieldTooltip ? ('NODE.size' | translate) : null">
-    <span class="cdk-visually-hidden">{{ 'NODE.size' | translate }}:</span>
-    {{ $any(node).size | formatSize }}
+  <span *ngSwitchCase="'size'" [matTooltip]="provideLabel ? (getI18n(item) | translate) : null">
+    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
+    {{ $any(getNode()).size | formatSize }}
   </span>
   <span
     *ngSwitchCase="'dimensions'"
-    [matTooltip]="showFieldTooltip ? ('NODE.dimensions' | translate) : null"
+    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
   >
-    <span class="cdk-visually-hidden">{{ 'NODE.dimensions' | translate }}:</span>
-    {{ $any(node) | NodeImageSize }}
+    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
+    {{ $any(getNode()) | NodeImageSize }}
+  </span>
+  <span
+    *ngSwitchCase="'ccm:wf_status'"
+    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
+  >
+    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
+    {{ 'WORKFLOW.' + getWorkflowStatus().id | translate }}
   </span>
   <span
     *ngSwitchCase="'cm:creator'"
-    [matTooltip]="showFieldTooltip ? ('NODE.cm:creator' | translate) : null"
+    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
   >
-    <span class="cdk-visually-hidden">{{ 'NODE.cm:creator' | translate }}:</span>
-    {{ $any(node).createdBy | nodePersonName }}
+    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
+    {{ $any(getNode()).createdBy | nodePersonName }}
   </span>
   <span
     *ngSwitchCase="'cm:modifier'"
-    [matTooltip]="showFieldTooltip ? ('NODE.cm:modifier' | translate) : null"
+    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
   >
-    <span class="cdk-visually-hidden">{{ 'NODE.cm:modifier' | translate }}:</span>
-    {{ $any(node).modifiedBy | nodePersonName }}
+    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ 'NODE.cm:modifier' | translate }}:</span>
+    {{ $any(getNode()).modifiedBy | nodePersonName }}
   </span>
-  <span *ngSwitchDefault [matTooltip]="showFieldTooltip ? ('NODE.' + item.name | translate) : null">
-    <span class="cdk-visually-hidden">{{ 'NODE.' + item.name | translate }}:</span>
+  <span
+    *ngSwitchCase="'ccm:commonlicense_key'"
+    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
+  >
+    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ 'NODE.ccm:commonlicense_key' | translate }}:</span>
+    <ng-container *ngIf="$any(getNode()).properties['ccm:commonlicense_key'] as license">
+      {{
+      license[0] === 'CUSTOM'
+        ? $any(getNode()).properties['cclom:rights_description']
+        : ('LICENSE.NAMES.' + $any(getNode()).properties['ccm:commonlicense_key']
+          | translate: { fallback: $any(getNode()).properties['ccm:commonlicense_key'] })
+      }}
+    </ng-container>
+  </span>
+  <span
+    *ngSwitchCase="'ccm:educationaltypicalagerange'"
+    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
+  >
+    <span *ngIf="provideLabel" class="cdk-visually-hidden"
+    >{{ 'NODE.ccm:educationaltypicalagerange' | translate }}:</span
+    >
+    <ng-container
+      *ngIf="
+        $any(getNode()).properties['ccm:educationaltypicalagerange_from'] ||
+        $any(getNode()).properties['ccm:educationaltypicalagerange_to']
+      "
+    >
+      {{ $any(getNode()).properties['ccm:educationaltypicalagerange_from'] }} -
+      {{ $any(getNode()).properties['ccm:educationaltypicalagerange_to'] }}
+    </ng-container>
+  </span>
+  <span
+    *ngSwitchCase="'cclom:duration'"
+    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
+  >
+    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ 'NODE.cclom:duration' | translate }}:</span>
+    {{ $any(getNode()) | formatDuration }}
+  </span>
+  <span *ngSwitchDefault [matTooltip]="provideLabel ? (getI18n(item) | translate) : null">
+    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
     <ng-container
       *ngIf="DATE_FIELDS.indexOf(item.name) === -1 && VCARD_FIELDS.indexOf(item.name) === -1"
     >
       {{
-        $any(node).properties
-          ? $any(node).properties[item.name + '_DISPLAYNAME']
-            ? $any(node).properties[item.name + '_DISPLAYNAME'].join(', ')
-            : $any(node).properties[item.name]?.join(', ')
-          : ''
+      $any(getNode()).properties
+        ? $any(getNode()).properties[item.name + '_DISPLAYNAME']?.join('')
+          ? $any(getNode()).properties[item.name + '_DISPLAYNAME'].join(', ')
+          : $any(getNode()).properties[item.name]?.join(', ')
+        : ''
       }}
     </ng-container>
     <ng-container *ngIf="DATE_FIELDS.indexOf(item.name) !== -1">
       {{
-        $any(node).properties[item.name] ? ($any(node).properties[item.name][0] | formatDate) : ''
+      $any(getNode()).properties[item.name]
+        ? ($any(getNode()).properties[item.name][0] | formatDate)
+        : ''
       }}
     </ng-container>
     <ng-container *ngIf="VCARD_FIELDS.indexOf(item.name) !== -1">
       {{
-        $any(node).properties[item.name] ? ($any(node).properties[item.name][0] | vcardName) : ''
+      $any(getNode()).properties[item.name]
+        ? ($any(getNode()).properties[item.name][0] | vcardName)
+        : ''
       }}
     </ng-container>
   </span>

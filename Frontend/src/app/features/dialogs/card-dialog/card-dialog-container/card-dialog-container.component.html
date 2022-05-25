@@ -1,0 +1,16 @@
+<es-card-header
+  [id]="id"
+  [title]="cardConfig.title | translate"
+  [subtitle]="cardConfig.subtitle | translate"
+  [avatar]="cardConfig.avatar"
+  (triggerClose)="close()"
+></es-card-header>
+
+<div class="card-content">
+  <ng-template cdkPortalOutlet></ng-template>
+</div>
+
+<es-card-actions
+  *ngIf="cardConfig.buttons && cardConfig.buttons.length > 0"
+  [buttons]="cardConfig.buttons"
+></es-card-actions>

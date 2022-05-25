@@ -1,5 +1,5 @@
 @import "../../core-ui-module/styles/variables";
-@import "../../core-ui-module/components/card/variables";
+@import "../../shared/components/card/variables";
 
 .login-content{
   padding:$cardPadding;
@@ -9,7 +9,7 @@
     width: calc(100% - .2rem);
   }
 }
-powered-by{
+es-powered-by{
   position: fixed;
   left: 0;
   bottom: 5%;
@@ -38,7 +38,6 @@ powered-by{
     justify-content: flex-end;
     height: 1.25em;
     a{
-      text-transform: uppercase;
       font-size: $fontSizeXSmall;
       &.cdk-keyboard-focused {
         @include setGlobalKeyboardFocus();
@@ -118,7 +117,7 @@ powered-by{
   }
 }
 @media screen and (max-height: $mobileHeight) {
-  powered-by{
+  es-powered-by{
     display: none;
   }
 }
@@ -140,7 +139,7 @@ powered-by{
   }
 }
 @media screen and (max-width: $mobileTabSwitchWidth){
-  powered-by{
+  es-powered-by{
     display: none;
   }
   .login-help{

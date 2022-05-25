@@ -1,0 +1,63 @@
+<es-mds-editor-widget-container [label]="'MDS.AUTHOR_LABEL' | translate">
+  <mat-tab-group mat-stretch-tabs *ngIf="author" [(selectedIndex)]="authorTab" class="author-tabs">
+    <mat-tab label="{{ 'MDS.AUTHOR_FREETEXT' | translate }}">
+      <mat-form-field class="authorFreetext">
+        <mat-label>{{ 'MDS.AUTHOR_FREETEXT_PLACEHOLDER' | translate }}</mat-label>
+        <textarea
+          matInput
+          cdkTextareaAutosize
+          id="authorFreetext"
+          [(ngModel)]="author.freetext"
+          (ngModelChange)="onChange()"
+          cdkAutosizeMinRows="2"
+          cdkAutosizeMaxRows="5"
+        ></textarea>
+      </mat-form-field>
+    </mat-tab>
+    <mat-tab label="{{ 'MDS.AUTHOR_PERSON' | translate }}">
+      <div class="author-checkbox">
+        <mat-checkbox [(ngModel)]="userAuthor" (ngModelChange)="setVCardAuthor($event)">{{
+          'WORKSPACE.LICENSE.CHECKBOX_AUTHOR' | translate
+        }}</mat-checkbox>
+      </div>
+      <div class="vcard authorPerson">
+        <div class="vcardGroup">
+          <!-- <i esIcon="person"></i> -->
+          <mat-form-field class="mat-form-field-no-padding">
+            <mat-label>{{ 'VCARD.Givenname' | translate }}</mat-label>
+            <input
+              matInput
+              class="vcard_Givenname vcardFirstInput"
+              [(ngModel)]="author.author.givenname"
+              (ngModelChange)="onChange()"
+              [disabled]="userAuthor"
+            />
+          </mat-form-field>
+        </div>
+        <div class="vcardGroup">
+          <mat-form-field class="mat-form-field-no-padding">
+            <mat-label>{{ 'VCARD.Surname' | translate }}</mat-label>
+            <input
+              matInput
+              class="vcard_Surname vcardFirstInput"
+              [(ngModel)]="author.author.surname"
+              (ngModelChange)="onChange()"
+              [disabled]="userAuthor"
+            />
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="contributors" *ngIf="showContributorDialog && mdsEditorValues.nodes$.value">
+        <button
+          mat-button
+          color="primary"
+          (click)="openContributorDialog()"
+          *ngIf="_nodes && _nodes.length == 1 && !ui.isMobile()"
+        >
+          {{ 'MDS.CONTRIBUTOR_LINK' | translate }} <i esIcon="arrow_forward"></i>
+        </button>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+  <es-spinner-small *ngIf="!author"></es-spinner-small>
+</es-mds-editor-widget-container>

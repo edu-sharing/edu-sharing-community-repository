@@ -8,7 +8,7 @@ import {RestHelper} from '../../../core-module/rest/rest-helper';
 import {ConfigurationService} from '../../../core-module/rest/services/configuration.service';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {RestStatisticsService} from '../../../core-module/rest/services/rest-statistics.service';
-import {AuthorityNamePipe} from '../../../core-ui-module/pipes/authority-name.pipe';
+import {AuthorityNamePipe} from '../../../shared/pipes/authority-name.pipe';
 import {Toast} from '../../../core-ui-module/toast';
 import {Helper} from '../../../core-module/rest/helper';
 import {CsvHelper} from '../../../core-module/csv.helper';
@@ -31,7 +31,7 @@ type GroupTemplate = {
 }
 
 @Component({
-    selector: 'app-admin-statistics',
+    selector: 'es-admin-statistics',
     templateUrl: 'statistics.component.html',
     styleUrls: ['statistics.component.scss'],
     animations: [

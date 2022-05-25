@@ -34,7 +34,6 @@ import {RestLocatorService, CoreModule} from "./core-module/core.module";
 import {CoreBridgeModule} from "./core-bridge-module/core.bridge.module";
 import {CoreUiModule} from "./core-ui-module/core-ui.module";
 import {MonacoEditorModule} from "ngx-monaco-editor";
-import {QRCodeModule} from 'angularx-qrcode';
 import { A11yModule } from "@angular/cdk/a11y";
 import {MatTreeModule} from '@angular/material/tree';
 import {OverlayModule} from '@angular/cdk/overlay';
@@ -47,7 +46,6 @@ export const IMPORTS=[
   ReactiveFormsModule,
   HttpClientModule,
   LazyLoadImageModule,
-  QRCodeModule,
   OverlayModule,
   MatButtonModule,
   MatTabsModule,
@@ -96,6 +94,7 @@ export const IMPORTS=[
     // navigation. In case this doesn't work everywhere, a small modification to the default
     // behavior might be needed as done here:
     // https://github.com/openeduhub/oeh-search-frontend/blob/a74047b57007fc6c9561feab02d4d3664051e5c9/src/app/app.component.ts#L37-L52
-    scrollPositionRestoration: 'enabled'
-  }),
+    scrollPositionRestoration: 'enabled',
+    relativeLinkResolution: 'legacy'
+}),
 ];

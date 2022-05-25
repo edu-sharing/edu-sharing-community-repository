@@ -65,6 +65,12 @@ export class OptionItem {
   public isEnabled = true;
 
   /**
+   * Whether the option should be manually marked as primary action when always visible on an
+   * `actionbar`.
+   */
+  public isPrimary: boolean;
+
+  /**
    * A function called with the node as param which should return true or false if the option should be shown for this node
    * Is handled by optionsHelper and may not be used otherwise
    * Please use @customShowCallback instead
@@ -160,6 +166,8 @@ export enum Scope {
   WorkspaceList = 'WorkspaceList',
   WorkspaceTree = 'WorkspaceTree',
   Oer = 'Oer',
+  UserManagement = 'UserManagement',
+  Stream = 'Stream',
   CreateMenu = 'CreateMenu',
   Admin = 'Admin', // Admin Tools / Debugging
 }
@@ -169,6 +177,7 @@ export enum ElementType {
   MapRef, // Map ref (link to another map)
   NodePublishedCopy,
   NodeBlockedImport, // node with property ccm:importblocked == true
+  NodeProposal, // node proposal for a collection
   Person,
   Group,
   SavedSearch,
@@ -209,6 +218,7 @@ export enum Constrain {
   HomeRepository, // Only visible when the nodes are from the local (home) repository
   User, // Only visible when a user is present and logged in
   ReurlMode, // Only visible when a reurl is present (called to pick object from lms)
+  LTIMode,  // Only visible when a lti session is present (called to pick object from lti platform)
 }
 export enum KeyCombination {
   CtrlOrAppleCmd

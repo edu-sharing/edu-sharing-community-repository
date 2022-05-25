@@ -2,6 +2,9 @@ package org.edu_sharing.service.admin;
 
 import java.io.*;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 import java.text.Collator;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,6 +29,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.module.ModuleInstallState;
 import org.alfresco.service.cmr.module.ModuleService;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.input.ReversedLinesFileReader;
@@ -67,10 +71,13 @@ import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.foldertemplates.FolderTemplatesImpl;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.StreamUtils;
 import org.w3c.dom.Document;
@@ -79,6 +86,27 @@ import org.w3c.dom.Element;
 import com.google.common.io.Files;
 
 public class AdminServiceImpl implements AdminService  {
+
+	//cause standard properties class does not save the values sorted
+	class SortedProperties extends Properties{
+
+		public SortedProperties() {
+			super();
+		}
+
+		public SortedProperties(Properties initWith) {
+			for (Map.Entry entry : initWith.entrySet()) {
+				this.setProperty((String)entry.getKey(), (String)entry.getValue());
+			}
+		}
+
+		//for sorted xml storing
+		@Override
+		public Set<Object> keySet() {
+			return new TreeSet<Object>(super.keySet());
+		}
+
+	}
 
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
@@ -137,10 +165,15 @@ public class AdminServiceImpl implements AdminService  {
 		Map<String,ToolPermission> toolpermissions=new HashMap<>();
 		// refresh the tp in this case, since may a new one is created meanwhile by the client
 		for(String tp : tpService.getAllToolPermissions(true)) {
-			String nodeId=tpService.getToolPermissionNodeId(tp);
+			String nodeId=tpService.getToolPermissionNodeId(tp, true);
 			List<String> permissionsExplicit = permissionService.getExplicitPermissionsForAuthority(nodeId,authority);
 			List<String> permissions = permissionService.getPermissionsForAuthority(nodeId, authority);
 			ToolPermission status=new ToolPermission();
+			Boolean managed = (Boolean) NodeServiceHelper.getPropertyNative(
+					new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
+					CCConstants.CCM_PROP_TOOLPERMISSION_SYSTEM_MANAGED
+			);
+			status.setSystemManaged(managed != null && managed);
 
 			if(permissionsExplicit.contains(CCConstants.PERMISSION_DENY)) {
 				status.setExplicit(ToolPermission.Status.DENIED);
@@ -197,7 +230,7 @@ public class AdminServiceImpl implements AdminService  {
 		}
 		for(String tp : tpService.getAllAvailableToolPermissions()) {
 			ToolPermission.Status status = toolpermissions.get(tp);
-			String nodeId=tpService.getToolPermissionNodeId(tp);
+			String nodeId=tpService.getToolPermissionNodeId(tp, true);
 			ACL acl = permissionService.getPermissions(nodeId);
 			boolean add=true;
 			List<ACE> newAce=new ArrayList<>();
@@ -396,7 +429,7 @@ public class AdminServiceImpl implements AdminService  {
 		ApplicationInfoList.refresh();
 		RepoFactory.refresh();
 	}
-	
+
 	@Override
 	public HashMap<String,String> addApplication(String appMetadataUrl) throws Exception{
 		
@@ -412,28 +445,7 @@ public class AdminServiceImpl implements AdminService  {
 	
 	@Override
 	public HashMap<String, String> addApplicationFromStream(InputStream is) throws Exception {
-		
-		//cause standard properties class does not save the values sorted
-		class SortedProperties extends Properties{
-					
-			public SortedProperties() {
-				super();
-			}
-					
-			public SortedProperties(Properties initWith) {
-				for (Map.Entry entry : initWith.entrySet()) {
-					this.setProperty((String)entry.getKey(), (String)entry.getValue());
-				}
-			}
-					
-			//for sorted xml storing
-			@Override
-				public Set<Object> keySet() {
-				return new TreeSet<Object>(super.keySet());
-			}
 
-		}
-				
 		Properties props = new SortedProperties();
 		props.loadFromXML(is);
 		String appId = props.getProperty(ApplicationInfo.KEY_APPID);
@@ -442,25 +454,69 @@ public class AdminServiceImpl implements AdminService  {
 			throw new Exception("no appId found");
 		}
 		
-		String filename = "app-"+appId+".properties.xml";
-		
+		return storeProperties(appId,props);
+	}
+
+	public HashMap<String,String> addApplication(Map<String,String> properties) throws Exception{
+		if(properties == null){
+			throw new Exception("no properties provided");
+		}
+
+		if(!properties.containsKey(ApplicationInfo.KEY_APPID)){
+			throw new Exception("no appid provided");
+		}
+
+		boolean fieldKnown = false;
+		String unknownField = null;
+		for(Map.Entry<String,String> entry : properties.entrySet()){
+			for(Field f : ApplicationInfo.class.getFields()){
+				if (java.lang.reflect.Modifier.isStatic(f.getModifiers())
+						&& f.getName().startsWith("KEY_")){
+					if(entry.getKey().equals(f.get(null))){
+						fieldKnown = true;
+						unknownField = entry.getKey();
+					}
+				}
+			}
+		}
+
+		if(!fieldKnown){
+			throw new Exception("unknown field:" + unknownField);
+		}
+
+		String appId = properties.get(ApplicationInfo.KEY_APPID);
+
+		Properties props = new Properties();
+		for(Map.Entry<String,String> entry : properties.entrySet()){
+			if(entry.getValue() != null) {
+				props.put(entry.getKey(), entry.getValue());
+			}
+		}
+
+		return storeProperties(appId,props);
+	}
+
+	private HashMap<String,String> storeProperties(String appId, Properties props) throws Exception{
+		String fileNamePart = appId.replaceAll("[/:]","");
+		String filename = "app-"+fileNamePart+".properties.xml";
+
 		//check if appID already exists
 		if(ApplicationInfoList.getApplicationInfos().keySet().contains(appId)){
 			throw new Exception("appId is already in registry");
 		}
-		
+
 		//check for mandatory Property type
 		String type = props.getProperty(ApplicationInfo.KEY_TYPE);
 		if(type == null || type.trim().equals("")){
 			throw new Exception("missing type");
 		}
-		
+
 		if(type.equals(ApplicationInfo.TYPE_RENDERSERVICE)){
 			String contentUrl = props.getProperty("contenturl");
 			if(contentUrl == null || contentUrl.trim().equals("")){
 				throw new Exception("a renderservice must have an contenturl");
 			}
-			
+
 		}
 		
 		File appFile = new File(PropertiesHelper.Config.getAbsolutePathForConfigFile(PropertiesHelper.Config.getPropertyFilePath(filename)));
@@ -469,17 +525,17 @@ public class AdminServiceImpl implements AdminService  {
 		}else{
 			throw new Exception("File "+appFile.getPath() + " already exsists");
 		}
-		
-		
+
+
 		String newProperty=getAppPropertiesApplications()+","+filename;
 		changeAppPropertiesApplications(newProperty,new Date()+" added file:"+filename);
-		
-		
+
+
 		if(type.equals(ApplicationInfo.TYPE_RENDERSERVICE)){
-			
+
 			String contentUrl = props.getProperty("contenturl");
 			//String previewUrl = props.getProperty("previewurl");
-			
+
 			//store that in the homeApplication.properties.xml cause every repository has it's own renderservice
 			//and we don't want to config an renderservice of an remote repository
 			
@@ -491,17 +547,17 @@ public class AdminServiceImpl implements AdminService  {
 			
 			//backup
 			homeAppProps.storeToXML(new FileOutputStream(new File(homeAppPath+System.currentTimeMillis()+".bak")), " backup of homeApplication.properties.xml");
-			
+
 			homeAppProps.setProperty(ApplicationInfo.KEY_CONTENTURL, contentUrl);
-			//homeAppProps.setProperty(ApplicationInfo.KEY_PREVIEWURL, previewUrl);	
-			
+			//homeAppProps.setProperty(ApplicationInfo.KEY_PREVIEWURL, previewUrl);
+
 			//overwrite
 			homeAppProps.storeToXML(new FileOutputStream(new File(homeAppPath)), " added contenturl and preview url");
 		}
-		
+
 		ApplicationInfoList.refresh();
 		RepoFactory.refresh();
-		
+
 		HashMap<String,String> result = new HashMap<String,String>();
 		for(Object key : props.keySet()){
 			result.put((String)key,props.getProperty((String)key));
@@ -852,20 +908,41 @@ public class AdminServiceImpl implements AdminService  {
 	}
 
 	@Override
-	public void startJob(String jobClass, HashMap<String,Object> params) throws Exception {
+	public ImmediateJobListener startJob(String jobClass, HashMap<String,Object> params) throws Exception {
 
 		if(params == null) {
-			params = new HashMap<String,Object>();
+			params = new HashMap<>();
 		}
-		params.put(OAIConst.PARAM_USERNAME, getAuthInfo().get(CCConstants.AUTH_USERNAME));
-		params.put(JobHandler.AUTH_INFO_KEY, getAuthInfo());
+		if(!AuthenticationUtil.isRunAsUserTheSystemUser()) {
+			params.put(OAIConst.PARAM_USERNAME, getAuthInfo().get(CCConstants.AUTH_USERNAME));
+			params.put(JobHandler.AUTH_INFO_KEY, getAuthInfo());
+		}
 
 		Class job = Class.forName(jobClass);
 		ImmediateJobListener jobListener = JobHandler.getInstance().startJob(job, params);
 		if(jobListener != null && jobListener.isVetoed()){
 			throw new Exception("job was vetoed by " + jobListener.getVetoBy());
 		}
+		return jobListener;
 
+	}
+
+	@Override
+	public Object startJobSync(String jobClass, HashMap<String,Object> params) throws Throwable {
+		ImmediateJobListener listener = startJob(jobClass, params);
+		while(true) {
+			if(listener.wasExecuted()) {
+				Optional<JobInfo> result = getJobs().stream().filter(job -> job.getStatus().equals(JobInfo.Status.Finished) && job.getJobDetail().getJobClass().getName().equals(jobClass)).max((a, b) -> Long.compare(a.getFinishTime(), b.getFinishTime()));
+				if(!result.isPresent()) {
+					throw new IllegalStateException("Job status not found");
+				}
+				return result.get().getJobDetail().getJobDataMap().get(JobHandler.KEY_RESULT_DATA);
+			}
+			if(listener.isVetoed()) {
+				throw new Exception("job was vetoed by " + listener.getVetoBy());
+			}
+			Thread.sleep(1000);
+		}
 	}
 
 	@Override
@@ -945,30 +1022,39 @@ public class AdminServiceImpl implements AdminService  {
 	}
 
 	@Override
-	public List<JobDescription> getJobDescriptions() {
+	public List<JobDescription> getJobDescriptions(boolean fetchAbstractJobs) {
 
 		List<JobDescription> result = new ArrayList<>();
 
 		List<Class> jobClasses = ClassHelper.getSubclasses(AbstractJob.class);
 
 		for(Class clazz : jobClasses){
+			if(!fetchAbstractJobs) {
+				if(Modifier.isAbstract(clazz.getModifiers())) {
+					continue;
+				}
+			}
 			JobDescription desc = new JobDescription();
 			desc.setName(clazz.getName());
 			if(clazz.isAnnotationPresent(org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription.class)) {
 				org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription annotationDesc = (org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription) clazz.getAnnotation(org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription.class);
 				desc.setDescription(annotationDesc.description());
+				desc.setTags(annotationDesc.tags());
 			}
 			desc.setParams(Arrays.stream(clazz.getDeclaredFields()).filter(
 					(f) -> f.isAnnotationPresent(JobFieldDescription.class)
 			).map((f) -> {
 				JobDescription.JobFieldDescription fieldDesc = new JobDescription.JobFieldDescription();
 				fieldDesc.setName(f.getName());
-				fieldDesc.setType(f.getType());
+				boolean isArray = f.getType().isAssignableFrom(Collection.class) || f.getType().equals(List.class);
+				Class<?> type = isArray ? (Class<?>) ((ParameterizedType)f.getGenericType()).getActualTypeArguments()[0] : f.getType();
+				fieldDesc.setType(type);
+				fieldDesc.setIsArray(isArray);
 				fieldDesc.setDescription(f.getAnnotation(JobFieldDescription.class).description());
 				fieldDesc.setSampleValue(f.getAnnotation(JobFieldDescription.class).sampleValue());
 				fieldDesc.setFile(f.getAnnotation(JobFieldDescription.class).file());
-				if(f.getType().isEnum()){
-					fieldDesc.setValues(Arrays.stream(f.getType().getDeclaredFields()).
+				if(type.isEnum()){
+					fieldDesc.setValues(Arrays.stream(type.getDeclaredFields()).
 							filter((v) -> !v.getName().startsWith("$")).
 							map((v) -> {
 						JobDescription.JobFieldDescription value = new JobDescription.JobFieldDescription();

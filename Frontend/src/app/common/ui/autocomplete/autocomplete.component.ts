@@ -2,7 +2,7 @@ import {Component, Input, Output, EventEmitter, OnInit, SimpleChanges, ContentCh
 import {TranslateService} from "@ngx-translate/core";
 
 @Component({
-  selector: 'autocomplete',
+  selector: 'es-autocomplete',
   templateUrl: 'autocomplete.component.html',
   styleUrls: ['autocomplete.component.scss'],
   host: {'(keydown)': 'handleKeyDown($event)'}

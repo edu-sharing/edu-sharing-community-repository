@@ -6,21 +6,21 @@ import {
     ComponentRef, ContentChild,
     ElementRef,
     EventEmitter, Injector,
-    Input,
+    Input, NgZone,
     OnChanges,
     Output,
     SimpleChange, SkipSelf, TemplateRef,
     ViewContainerRef,
 } from '@angular/core';
 import { ActionbarComponent } from '../../../common/ui/actionbar/actionbar.component';
-import { MainNavComponent } from '../../../common/ui/main-nav/main-nav.component';
+import { MainNavComponent } from '../../../main/navigation/main-nav/main-nav.component';
 import {
     ListItem,
     Node,
     TemporaryStorageService,
 } from '../../../core-module/core.module';
 import { UIHelper } from '../../ui-helper';
-import {OptionItem, Scope} from "../../option-item";
+import {CustomOptions, OptionItem, Scope} from '../../option-item';
 import {DropData} from "../../directives/drag-nodes/drag-nodes";
 import {ListTableComponent} from "../list-table/list-table.component";
 
@@ -49,7 +49,7 @@ export interface CustomNodeListWrapperInterface {
  * `CustomNodeListWrapperInterface`, and 3) the configured component.
  */
 @Component({
-    selector: 'app-custom-node-list-wrapper',
+    selector: 'es-custom-node-list-wrapper',
     template: '',
 })
 export class CustomNodeListWrapperComponent implements OnChanges {
@@ -74,9 +74,9 @@ export class CustomNodeListWrapperComponent implements OnChanges {
     @Input() canDelete: (node: Node | any) => boolean;
 
 
-    @Input() mainNav: MainNavComponent;
     @Input() actionbar: ActionbarComponent;
     @Input() optionItems: OptionItem[];
+    @Input() customOptions: CustomOptions;
     @Input() viewType: 0 | 1 | 2;
     @Input() validatePermissions: (
         node: Node,
@@ -84,7 +84,7 @@ export class CustomNodeListWrapperComponent implements OnChanges {
         status: boolean;
         message?: string;
         button?: {
-            click: Function;
+            click: () => void;
             caption: string;
             icon: string;
         };
@@ -117,8 +117,13 @@ export class CustomNodeListWrapperComponent implements OnChanges {
         private temporaryStorageService: TemporaryStorageService,
         private componentFactoryResolver: ComponentFactoryResolver,
         private viewContainerRef: ViewContainerRef,
+        private ngZone: NgZone,
         private elementRef: ElementRef,
     ) {
+        // regulary re-bind template since it might have updated without ngChanges trigger
+        ngZone.runOutsideAngular(() =>
+            setInterval(() => this.componentRef.instance.itemContentRef = this.itemContentRef)
+        );
     }
 
     ngOnChanges(changes: { [key: string]: SimpleChange }) {
@@ -136,9 +141,11 @@ export class CustomNodeListWrapperComponent implements OnChanges {
         }
         // attach the template ref
         this.componentRef.instance.itemContentRef = this.itemContentRef;
-
         // force change detection on list table component
         this.componentRef.instance.changeDetectorRef?.detectChanges();
+    }
+    getListTable(): ListTableComponent {
+        return this.componentRef?.instance;
     }
 
     /**

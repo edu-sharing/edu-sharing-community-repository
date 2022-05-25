@@ -172,7 +172,7 @@ public class XApiTool {
         if(!xApiData.getJSONObject("object").getJSONObject("definition").has("extensions"))
             xApiData.getJSONObject("object").getJSONObject("definition").put("extensions",new JSONObject());
         JSONObject propsData = new JSONObject();
-        List<MetadataWidget> widgets = MetadataHelper.getWidgetsByNode(nodeRef);
+        Collection<MetadataWidget> widgets = MetadataHelper.getWidgetsByNode(nodeRef, true);
         // widgets objects to unique id set
         Set<String> storedProperties = widgets.stream().map((w) -> CCConstants.getValidGlobalName(w.getId())).collect(Collectors.toSet());
         // fixed properties that always should be added

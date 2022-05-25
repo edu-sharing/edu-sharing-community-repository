@@ -1,5 +1,5 @@
 import {trigger} from '@angular/animations';
-import { Component, Input } from '@angular/core';
+import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { UIService } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
@@ -9,7 +9,7 @@ import {KeyCombination, OptionItem} from '../../../core-ui-module/option-item';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 
 @Component({
-    selector: 'actionbar',
+    selector: 'es-actionbar',
     templateUrl: 'actionbar.component.html',
     styleUrls: ['actionbar.component.scss'],
     animations: [trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
@@ -17,7 +17,7 @@ import { UIHelper } from '../../../core-ui-module/ui-helper';
 /**
  * The action bar provides several icons, usually at the top right, with actions for a current context
  */
-export class ActionbarComponent {
+export class ActionbarComponent implements OnChanges {
     /**
      * The amount of options which are not hidden inside an overflow menu
      * (default: depending on mobile (1) or not (2))
@@ -45,7 +45,13 @@ export class ActionbarComponent {
      * Style, currently default or 'flat' if all always visible icons should get a flat look
      */
     @Input() style: 'default' | 'flat' = 'default';
-    @Input() highlight: 'first' | 'last' = 'first';
+    /**
+     * Highlight one or more of the always-visible buttons as primary action.
+     *
+     * - `first`, `last`: The first / last of `optionsAlways` by order.
+     * - `manual`: Highlight all options that set `isPrimary = true`.
+     */
+    @Input() highlight: 'first' | 'last' | 'manual' = 'first';
     /**
      * Should disabled ("greyed out") options be shown or hidden?
      */
@@ -149,12 +155,18 @@ export class ActionbarComponent {
         return this.optionsMenu.filter((o) => o.isEnabled).length > 0;
     }
 
-    shouldHighlight(optionIndex: number): boolean {
+    shouldHighlight(optionIndex: number, option: OptionItem): boolean {
         switch (this.highlight) {
             case 'first':
                 return optionIndex === 0;
             case 'last':
                 return optionIndex === this.optionsAlways.length - 1;
+            case 'manual':
+                return option.isPrimary;
         }
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        this.invalidate();
     }
 }

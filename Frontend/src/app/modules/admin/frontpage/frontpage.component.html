@@ -1,17 +1,17 @@
-<info-message *ngIf="!(configService.get('frontpage.enabled', true) | async)" class="info-disabled">
+<es-info-message *ngIf="!(configService.get('frontpage.enabled', true) | async)" class="info-disabled">
   {{'ADMIN.FRONTPAGE.DISABLED' | translate }}
-</info-message>
-<collection-chooser
+</es-info-message>
+<es-collection-chooser
   class="dialog-right scrollWithBanner"
   *ngIf="chooseCollection"
   [@fromRight]="chooseCollection"
   title="WORKSPACE.SELECT_COLLECTION"
   (onCancel)="chooseCollection=false"
   (onChoose)="setCollection($event)"
-></collection-chooser>
+></es-collection-chooser>
 <div class="frontpage" *ngIf="configService.get('frontpage.enabled', true) | async">
   <form *ngIf="config" [formGroup]="form">
-    <h4 class="mat-heading-4 mat-heading-underline"><i icon="settings"></i>{{'ADMIN.FRONTPAGE.GENERAL' | translate}}</h4>
+    <h4 class="mat-heading-4 mat-heading-underline"><i esIcon="settings"></i>{{'ADMIN.FRONTPAGE.GENERAL' | translate}}</h4>
     <div class="group">
       <div>
         <mat-form-field>
@@ -73,9 +73,9 @@
         </mat-form-field>
       </div>
       <div class="group-info">
-        <info-message *ngIf="form.get('totalCount').value>form.get('displayCount').value">
+        <es-info-message *ngIf="form.get('totalCount').value>form.get('displayCount').value">
           {{'ADMIN.FRONTPAGE.TOTAL_COUNT_LARGER_HINT' | translate }}
-        </info-message>
+        </es-info-message>
       </div>
       <div class="group queries" *ngFor="let query of config.frontpage.queries">
         <div class="condition">
@@ -128,12 +128,12 @@
       </div>
     </div>
   </form>
-  <h4 class="mat-heading-4 mat-heading-underline preview-heading"><i icon="apps"></i>{{'ADMIN.FRONTPAGE.PREVIEW' | translate}}
-    <div class="reload"><button mat-icon-button (click)="updatePreviews()"><i icon="refresh"></i></button></div>
+  <h4 class="mat-heading-4 mat-heading-underline preview-heading"><i esIcon="apps"></i>{{'ADMIN.FRONTPAGE.PREVIEW' | translate}}
+    <div class="reload"><button mat-icon-button (click)="updatePreviews()"><i esIcon="refresh"></i></button></div>
   </h4>
   <div class="group preview">
     <h5 class="mat-heading-5 preview-error" *ngIf="previewError">{{'ADMIN.FRONTPAGE.PREVIEW_ERROR.'+previewError | translate}}</h5>
-    <app-custom-node-list-wrapper *ngIf="!previewError"
+    <es-custom-node-list-wrapper *ngIf="!previewError"
                [isLoading]="previewLoading"
                [nodes]="previewNodes"
                [columns]="previewColumns"
@@ -144,7 +144,7 @@
                [createLink]="false"
                (clickRow)="openNode($event)"
                (doubleClickRow)="openNode($event)"
-    ></app-custom-node-list-wrapper>
+    ></es-custom-node-list-wrapper>
   </div>
   <h5 class="mat-heading-5 preview-hint" *ngIf="!previewLoading && !previewError" innerHTML="{{'ADMIN.FRONTPAGE.PREVIEW_HINT' | translate}}"></h5>
 </div>

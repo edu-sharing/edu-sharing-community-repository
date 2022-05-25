@@ -1,34 +1,57 @@
-<card
-  title="{{'NODE_REPORT.TITLE' | translate }}"
-  subtitle="{{'NODE_REPORT.SUBTITLE' | translate }}"
-  height="auto"
-  icon="flag"
+<es-card
+  title="{{ 'NODE_REPORT.TITLE' | translate }}"
+  [node]="node"
   [isCancelable]="true"
   (onCancel)="cancel()"
-  [buttons]="buttons">
-  <div *ngIf="_node" class="card-content-padding">
-    <form (ngSubmit)="report()" [formGroup]="form">
-      <h4>{{'NODE_REPORT.REPORT_INFO' | translate:{name:(_node | nodeTitle) } }}</h4>
+  [buttons]="buttons"
+>
+  <div *ngIf="node" class="card-content-padding">
+    <form #formElement (ngSubmit)="report()" [formGroup]="form">
+      <h2>{{ 'NODE_REPORT.REPORT_INFO' | translate: { name: (node | nodeTitle) } }}</h2>
       <div class="report">
-        <mat-radio-group formControlName="reason">
-          <mat-label>{{'NODE_REPORT.REASON' | translate}} <span class="required-marker">*</span></mat-label>
-          <mat-radio-button *ngFor="let reason of reasons" [value]="reason">{{'NODE_REPORT.REASONS.'+reason | translate}}</mat-radio-button>
-          <mat-error *ngIf="form.get('reason').touched && form.get('reason').errors">
-            <span>{{'NODE_REPORT.REASON_REQUIRED' | translate}}</span>
-          </mat-error>
+        <mat-radio-group
+          formControlName="reason"
+          name="reason"
+          [attr.aria-label]="'NODE_REPORT.REASON' | translate"
+        >
+          <mat-radio-button
+            *ngFor="let reason of reasons"
+            [value]="reason"
+            [aria-describedby]="shouldShowError('reason') ? 'node-report-reason-error' : null"
+            >{{ 'NODE_REPORT.REASONS.' + reason | translate }}</mat-radio-button
+          >
         </mat-radio-group>
+        <mat-error *ngIf="shouldShowError('reason')" id="node-report-reason-error">
+          {{ 'NODE_REPORT.REASON_REQUIRED' | translate }}
+        </mat-error>
       </div>
       <mat-form-field floatLabel="always">
-        <mat-label>{{'NODE_REPORT.COMMENT' | translate}}</mat-label>
-        <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="2" cdkAutosizeMaxRows="5" formControlName="comment" placeholder="{{'NODE_REPORT.COMMENT_PLACEHOLDER' | translate}}" autofocus></textarea>
+        <mat-label>{{ 'NODE_REPORT.COMMENT' | translate }}</mat-label>
+        <textarea
+          matInput
+          cdkTextareaAutosize
+          cdkAutosizeMinRows="2"
+          cdkAutosizeMaxRows="5"
+          name="comment"
+          formControlName="comment"
+          placeholder="{{ 'NODE_REPORT.COMMENT_PLACEHOLDER' | translate }}"
+          autofocus
+        ></textarea>
       </mat-form-field>
       <mat-form-field floatLabel="always">
-        <mat-label>{{'NODE_REPORT.EMAIL' | translate}} <span class="required-marker">*</span></mat-label>
-        <input matInput type="email" formControlName="email" placeholder="{{'NODE_REPORT.EMAIL_PLACEHOLDER' | translate}}">
-        <mat-error *ngIf="form.get('email').errors">
-          <span>{{'NODE_REPORT.EMAIL_REQUIRED' | translate}}</span>
+        <mat-label>{{ 'NODE_REPORT.EMAIL' | translate }}</mat-label>
+        <input
+          matInput
+          type="email"
+          name="reportMail"
+          name="email"
+          formControlName="email"
+          placeholder="{{ 'NODE_REPORT.EMAIL_PLACEHOLDER' | translate }}"
+        />
+        <mat-error>
+          {{ 'NODE_REPORT.EMAIL_REQUIRED' | translate }}
         </mat-error>
       </mat-form-field>
     </form>
   </div>
-</card>
+</es-card>

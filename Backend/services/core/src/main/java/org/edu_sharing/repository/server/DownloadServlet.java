@@ -73,10 +73,14 @@ public class DownloadServlet extends HttpServlet{
 		try {
 			// allow signature based auth from connector to bypass the download/content access
 			NodeService nodeService = repositoryId == null ? NodeServiceFactory.getLocalService() : NodeServiceFactory.getNodeService(repositoryId);
-			logger.debug("Access tool: " + ContextManagementFilter.accessToolType.get());
+			logger.debug("Access tool: " + ContextManagementFilter.accessTool.get());
 			if (repositoryId == null &&
 					!NodeServiceHelper.downloadAllowed(nodeId) &&
-					!ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessToolType.get())) {
+					!(
+							ContextManagementFilter.accessTool.get() != null &&
+							ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getType())
+					)
+					) {
 				logger.info("Download forbidden for node " + nodeId);
 				throw new ErrorFilter.ErrorFilterException(HttpServletResponse.SC_FORBIDDEN);
 			}

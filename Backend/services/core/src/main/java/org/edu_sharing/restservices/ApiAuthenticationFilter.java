@@ -23,6 +23,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.authentication.AuthenticationFilter;
+import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.service.authentication.EduAuthentication;
 import org.edu_sharing.service.authentication.oauth2.TokenService;
 import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
@@ -119,8 +120,12 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 			
 		}
 
-		List<String> AUTHLESS_ENDPOINTS=Arrays.asList(new String[]{"/authentication","/_about","/config","/register","/sharing"});
-		List<String> ADMIN_ENDPOINTS=Arrays.asList(new String[]{"/admin", "/bulk"});
+		List<String> AUTHLESS_ENDPOINTS=Arrays.asList(new String[]{"/authentication","/_about","/config","/register","/sharing",
+				"/lti/v13/oidc/login_initiations",
+				"/lti/v13/lti13",
+				"/lti/v13/registration/dynamic",
+				"/lti/v13/jwks"});
+		List<String> ADMIN_ENDPOINTS=Arrays.asList(new String[]{"/admin", "/bulk","/lti/v13/registration/static","/lti/v13/registration/url"});
 		List<String> DISABLED_ENDPOINTS=new ArrayList<>();
 
 		try {
@@ -180,13 +185,22 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 			httpResp.getWriter().print("Admin rights are required for this endpoint");
 			return;
 		}
-		// ignore the auth for the login
-		if(validatedAuth == null && !noAuthenticationNeeded) {
-			String pathInfo = httpReq.getPathInfo();
-			if (pathInfo != null && pathInfo.equals("/openapi.json")) {
-				httpResp.setHeader("WWW-Authenticate", "BASIC realm=\"" + "Edu-Sharing Rest API" + "\"");
-			}
 
+		/**
+		 * allow authless calls with AUTH_SINGLE_USE_NODEID by appauth
+		 */
+		boolean trustedAuth = false;
+		if(ContextManagementFilter.accessTool != null && ContextManagementFilter.accessTool.get() != null){
+			if(httpReq.getSession() != null && httpReq.getSession().getAttribute(CCConstants.AUTH_SINGLE_USE_NODEID) != null ){
+
+				trustedAuth = true;
+			}
+		}
+
+		// ignore the auth for the login
+		if(validatedAuth == null && (!noAuthenticationNeeded && !trustedAuth)){
+			if(httpReq.getPathInfo().equals("/openapi.json"))
+				httpResp.setHeader("WWW-Authenticate", "BASIC realm=\""+ "Edu-Sharing Rest API" +"\"");
 			httpResp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			httpResp.flushBuffer();
 			return;

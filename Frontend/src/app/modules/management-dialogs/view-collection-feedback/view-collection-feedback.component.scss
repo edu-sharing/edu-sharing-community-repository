@@ -21,7 +21,7 @@
       display: flex;
       align-items: center;
       flex-grow: 1;
-      >user-avatar{
+      >es-user-avatar{
         height: 22px;
         margin-right: 10px;
       }
@@ -36,7 +36,7 @@
 }
 
 :host ::ng-deep{
-  mds-widget{
+  es-mds-widget{
     .widget-label{
       text-transform: uppercase;
     }

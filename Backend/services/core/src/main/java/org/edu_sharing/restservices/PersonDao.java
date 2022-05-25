@@ -53,8 +53,6 @@ public class PersonDao {
 	Logger logger = Logger.getLogger(PersonDao.class);
 	public static final String ME = "-me-";
 
-	private final ArrayList<EduGroup> parentOrganizations;
-
 	public static PersonDao getPerson(RepositoryDao repoDao, String userName) throws DAOException {
 		
 		try {
@@ -152,12 +150,6 @@ public class PersonDao {
 			this.repoDao = repoDao;
 
 			this.userInfo = authorityService.getUserInfo(userName);
-
-			// may causes performance penalties!
-			this.parentOrganizations = AuthenticationUtil.runAsSystem(() ->
-					authorityService.getEduGroups(userName, NodeServiceInterceptor.getEduSharingScope())
-			);
-
 
 			try{
 
@@ -295,15 +287,16 @@ public class PersonDao {
     	
     	data.setUserName(getUserName());
 
-		data.setOrganizations(OrganizationDao.mapOrganizations(parentOrganizations));
+		data.setOrganizations(OrganizationDao.mapOrganizations(getParentOrganizations()));
 
 
 		data.setProfile(getProfile());
     	data.setStatus(getStatus());
-    	data.setProperties(getProperties());
 
     	if(isCurrentUserOrAdmin()) {
-	    	NodeRef homeDir = new NodeRef();
+			data.setProperties(getProperties());
+
+			NodeRef homeDir = new NodeRef();
 	    	homeDir.setRepo(repoDao.getId());
 	    	homeDir.setId(getHomeFolder());
 	    	data.setHomeFolder(homeDir);
@@ -321,6 +314,13 @@ public class PersonDao {
 	    	data.setSharedFolders(sharedFolderRefs);
     	}
     	return data;
+	}
+
+	private List<EduGroup> getParentOrganizations() {
+		// may causes performance penalties!
+		return AuthenticationUtil.runAsSystem(() ->
+				authorityService.getEduGroups(this.getUserName(), NodeServiceInterceptor.getEduSharingScope())
+		);
 	}
 
 	private Map<String, String[]> getProperties() {
@@ -469,7 +469,10 @@ public class PersonDao {
     	data.setUserName(getUserName());    	
     	data.setProfile(getProfile());
 		data.setStatus(getStatus());
-		data.setOrganizations(OrganizationDao.mapOrganizations(parentOrganizations));
+		if(isCurrentUserOrAdmin()){
+			data.setProperties(getProperties());
+		}
+		data.setOrganizations(OrganizationDao.mapOrganizations(getParentOrganizations()));
 		if(isCurrentUserOrAdmin()) {
 	    	NodeRef homeDir = new NodeRef();
 	    	homeDir.setRepo(repoDao.getId());

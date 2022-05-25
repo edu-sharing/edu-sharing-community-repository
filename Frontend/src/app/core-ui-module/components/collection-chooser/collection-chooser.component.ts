@@ -24,7 +24,7 @@ import { OptionItem } from '../../option-item';
  * An edu-sharing sidebar dialog for adding data to a collection
  */
 @Component({
-    selector: 'collection-chooser',
+    selector: 'es-collection-chooser',
     templateUrl: 'collection-chooser.component.html',
     styleUrls: ['collection-chooser.component.scss'],
 })
@@ -161,25 +161,34 @@ export class CollectionChooserComponent implements OnInit {
     }
 
     private checkPermissions(node: Node) {
-        if (node.access.indexOf(RestConstants.ACCESS_WRITE) == -1) {
+        if (!this.hasWritePermissions(node)) {
             this.toast.error(null, 'NO_WRITE_PERMISSIONS');
             return false;
         }
         return true;
     }
+    hasWritePermissions = (node: Node) => this.hasWritePermissionsInternal(node);
 
-    hasWritePermissions(
+    hasWritePermissionsInternal(
         node: Node,
     ): {
         status: boolean;
         message?: string;
         button?: {
-            click: Function;
+            click: () => void;
             caption: string;
             icon: string;
         };
     } {
-        if (node.access.indexOf(RestConstants.ACCESS_WRITE) == -1) {
+        /*if (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_PROPOSAL)){
+            return { status: false, message: 'COLLECTIONS.SUGGEST_ONLY', button: {
+                    click: () => this.onChoose.emit(node),
+                    caption: 'TEST',
+                    icon: 'home'
+                } };
+        }*/
+        if (!this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_PROPOSAL) &&
+            node.access.indexOf(RestConstants.ACCESS_WRITE) === -1) {
             return { status: false, message: 'NO_WRITE_PERMISSIONS' };
         }
         return { status: true };

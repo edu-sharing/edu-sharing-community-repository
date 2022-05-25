@@ -4,15 +4,14 @@ import {RestConstants} from "../../../core-module/core.module";
 import {NodeWrapper,Node} from "../../../core-module/core.module";
 import {VCard} from "../../../core-module/ui/VCard";
 import {Toast} from "../../../core-ui-module/toast";
-import {Translation} from "../../../core-ui-module/translation";
 import {TranslateService} from "@ngx-translate/core";
 import {DateHelper} from "../../../core-ui-module/DateHelper";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../../core-module/ui/ui-animation";
-import {MdsComponent} from "../../../common/ui/mds/mds.component";
-import {MdsEditorWrapperComponent} from '../../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import {MdsComponent} from "../../../features/mds/legacy/mds/mds.component";
+import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 @Component({
-  selector: 'node-template',
+  selector: 'es-node-template',
   templateUrl: 'node-template.component.html',
   styleUrls: ['node-template.component.scss'],
   animations: [

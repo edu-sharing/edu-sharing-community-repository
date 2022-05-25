@@ -34,9 +34,6 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-//import org.edu_sharing.restservices.RestConstants;
-//import org.edu_sharing.service.config.ConfigServiceFactory;
-//import org.edu_sharing.service.rating.RatingsCache;
 
 
 public class ApplicationInfoList {

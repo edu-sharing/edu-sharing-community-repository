@@ -1,3 +1,4 @@
+import {filter, skipWhile} from 'rxjs/operators';
 import {
     ChangeDetectorRef,
     Component,
@@ -8,6 +9,7 @@ import {
     Input,
     NgZone,
     OnDestroy,
+    OnInit,
     Output,
     ViewChild,
     ViewContainerRef
@@ -15,8 +17,8 @@ import {
 import {Toast} from '../../../core-ui-module/toast';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
-import {Translation} from '../../../core-ui-module/translation';
-import {DefaultGroups, ElementType, OptionGroup, OptionItem, Scope} from '../../../core-ui-module/option-item';
+import { TranslationsService } from '../../../translations/translations.service';
+import {DefaultGroups, ElementType, OptionGroup, OptionItem, Scope, Target} from '../../../core-ui-module/option-item';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {trigger} from '@angular/animations';
@@ -24,7 +26,6 @@ import {Location, PlatformLocation} from '@angular/common';
 import {UIConstants} from '../../../core-module/ui/ui-constants';
 import {SearchService} from '../../../modules/search/search.service';
 import {ActionbarHelperService} from '../../services/actionbar-helper';
-import {MainNavComponent} from '../main-nav/main-nav.component';
 import {HttpClient} from '@angular/common/http';
 import {
     ConfigurationHelper,
@@ -33,9 +34,11 @@ import {
     EventType,
     FrameEventsService,
     ListItem,
-    LoginResult, Mds, Metadataset,
+    LoginResult,
+    Mds,
     Node,
     NodeList,
+    ProposalNode,
     RestConnectorService,
     RestConnectorsService,
     RestConstants,
@@ -47,12 +50,11 @@ import {
     RestSearchService,
     RestToolService,
     RestUsageService,
-    SessionStorageService,
-    TemporaryStorageService
+    TemporaryStorageService, UIService
 } from '../../../core-module/core.module';
 import {MdsHelper} from '../../../core-module/rest/mds-helper';
 import {ListTableComponent} from '../../../core-ui-module/components/list-table/list-table.component';
-import {SpinnerComponent} from '../../../core-ui-module/components/spinner/spinner.component';
+import {SpinnerComponent} from '../../../shared/components/spinner/spinner.component';
 import {CommentsListComponent} from '../../../modules/management-dialogs/node-comments/comments-list/comments-list.component';
 import {GlobalContainerComponent} from '../global-container/global-container.component';
 import {VideoControlsComponent} from '../../../core-ui-module/components/video-controls/video-controls.component';
@@ -63,14 +65,18 @@ import {
 } from '../../../core-ui-module/options-helper.service';
 import {RestTrackingService} from '../../../core-module/rest/services/rest-tracking.service';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
-import {CardComponent} from '../../../core-ui-module/components/card/card.component';
+import {CardComponent} from '../../../shared/components/card/card.component';
+import {CardService} from '../../../core-ui-module/card.service';
 import {RouterComponent} from '../../../router/router.component';
+import {RenderHelperService} from '../../../core-ui-module/render-helper.service';
+import {NodeDataSource} from '../../../core-ui-module/components/node-entries-wrapper/node-data-source';
+import { Subject } from 'rxjs';
+import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
+import { MainNavService } from '../../../main/navigation/main-nav.service';
 
-declare var jQuery:any;
-declare var window: any;
 
 @Component({
-  selector: 'node-render',
+  selector: 'es-node-render',
   templateUrl: 'node-render.component.html',
   styleUrls: ['node-render.component.scss'],
     providers: [OptionsHelperService, {provide: OPTIONS_HELPER_CONFIG, useValue: {
@@ -82,7 +88,7 @@ declare var window: any;
 })
 
 
-export class NodeRenderComponent implements EventListener, OnDestroy {
+export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
     @Input() set node(node: Node|string) {
       const id=(node as Node).ref ? (node as Node).ref.id : (node as string);
       jQuery('#nodeRenderContent').html('');
@@ -91,8 +97,11 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     }
     constructor(
       private translate : TranslateService,
+      private translations : TranslationsService,
+      private uiService : UIService,
       private tracking : RestTrackingService,
       private nodeHelper: NodeHelperService,
+      private renderHelper: RenderHelperService,
       private location: Location,
       private searchService : SearchService,
       private connector : RestConnectorService,
@@ -105,25 +114,28 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
       private usageApi : RestUsageService,
       private toolService: RestToolService,
       private componentFactoryResolver: ComponentFactoryResolver,
+      private cardServcie: CardService,
       private viewContainerRef: ViewContainerRef,
       private frame : FrameEventsService,
       private actionbarService : ActionbarHelperService,
       private toast : Toast,
       private cd: ChangeDetectorRef,
       private config : ConfigurationService,
-      private storage : SessionStorageService,
       private route : ActivatedRoute,
       private networkService : RestNetworkService,
       private _ngZone: NgZone,
       private router : Router,
       private platformLocation : PlatformLocation,
       private optionsHelper : OptionsHelperService,
+      private loadingScreen: LoadingScreenService,
+      private mainNavService: MainNavService,
       private temporaryStorageService: TemporaryStorageService) {
       (window as any).nodeRenderComponentRef = {component: this, zone: _ngZone};
       (window as any).ngRender = {setDownloadUrl:(url:string)=> {this.setDownloadUrl(url)}};
       this.frame.addListener(this);
+      this.renderHelper.setViewContainerRef(viewContainerRef);
 
-        Translation.initialize(translate,config,storage,route).subscribe(()=> {
+        this.translations.waitForInit().subscribe(()=> {
         this.banner = ConfigurationHelper.getBanner(this.config);
         this.connector.setRoute(this.route);
         this.networkService.prepareCache();
@@ -138,7 +150,12 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
           this.route.params.subscribe((params: Params) => {
             if(params.node) {
               this.isRoute=true;
-              this.list = this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST);
+              const dataSource: NodeDataSource<Node> = this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE)
+                if(dataSource) {
+                    this.list = dataSource.getData();
+                } else {
+                    this.list = this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST);
+                }
               this.connector.isLoggedIn(false).subscribe((data:LoginResult)=> {
                 this.isSafe=data.currentScope==RestConstants.SAFE_SCOPE;
                 if(params.version) {
@@ -157,6 +174,13 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
 
       });
       this.frame.broadcastEvent(FrameEventsService.EVENT_VIEW_OPENED,'node-render');
+    }
+
+    ngOnInit(): void {
+      this.mainNavService.setMainNavConfig({
+        show: false,
+        currentScope: 'render',
+      })
     }
 
 
@@ -205,9 +229,9 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
   public similarNodes: Node[];
   mds: Mds;
   isDestroyed = false;
+  private readonly destroyed$ = new Subject<void>();
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
-  @ViewChild('mainNav') mainNavRef : MainNavComponent;
   @ViewChild('actionbar') actionbar: ActionbarComponent;
   isChildobject = false;
     _node : Node;
@@ -223,7 +247,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
   @HostListener('window:beforeunload', ['$event'])
   beforeunloadHandler(event:any) {
     if(this.isSafe) {
-      this.connector.logoutSync();
+      this.connector.logout().toPromise();
     }
   }
   @HostListener('window:resize', ['$event'])
@@ -270,7 +294,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
             // use a timeout to let the browser try to go back in history first
             setTimeout(()=> {
                 if(!this.isDestroyed) {
-                    this.mainNavRef.toggleMenuSidebar();
+                    this.mainNavService.getMainNav().topBar.toggleMenuSidebar();
                 }
             },250);
           }
@@ -282,10 +306,15 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
 
 
     showDetails() {
-      const rect=document.getElementById('edusharing_rendering_metadata').getBoundingClientRect();
-      if(window.scrollY<rect.top) {
-          UIHelper.scrollSmooth(rect.top, 1.5);
-      }
+      const element = document.getElementById('edusharing_rendering_metadata');
+      element.setAttribute('tabindex', '-1');
+      element.addEventListener(
+          'blur',
+          (event) => (event.target as HTMLElement).removeAttribute('tabindex'),
+          { once: true },
+      );
+      element.focus({ preventScroll: true });
+      element.scrollIntoView({ behavior: 'smooth' });
     }
     public getPosition() {
       if(!this._node || !this.list)
@@ -307,6 +336,8 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
         (window as any).ngRender = null;
         this.optionsHelper.setListener(null);
         this.isDestroyed = true;
+        this.destroyed$.next();
+        this.destroyed$.complete();
     }
 
   public switchPosition(pos:number) {
@@ -329,7 +360,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     if(this.isLoading) {
         return;
     }
-    this.optionsHelper.clearComponents(this.mainNavRef, this.actionbar);
+    this.optionsHelper.clearComponents(this.actionbar);
     this.isLoading=true;
     this.node=this._nodeId;
   }
@@ -355,7 +386,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     }
 
     const download=new OptionItem('OPTIONS.DOWNLOAD','cloud_download',()=>this.downloadCurrentNode());
-    download.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.NodePublishedCopy];
+    download.elementType = OptionsHelperService.DownloadElementTypes;
     // declare explicitly so that callback will be overriden
     download.customEnabledCallback = null;
     download.group = DefaultGroups.View;
@@ -378,8 +409,9 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     this.addDownloadButton(download);
   }
   private loadRenderData() {
+    const loadingTask = this.loadingScreen.addLoadingTask();
       this.isLoading=true;
-      this.optionsHelper.clearComponents(this.mainNavRef, this.actionbar);
+      this.optionsHelper.clearComponents(this.actionbar);
     if(this.isBuildingPage) {
         setTimeout(()=>this.loadRenderData(),50);
         return;
@@ -392,7 +424,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     this.isBuildingPage=true;
       // we only fetching versions for the primary parent (child objects don't have versions)
       this.nodeApi.getNodeRenderSnippet(this._nodeId,this.version && !this.isChildobject ? this.version : '-1',parameters,this.repository)
-        .subscribe((data:any)=> {
+        .subscribe((data)=> {
             if (!data.detailsSnippet) {
                 console.error(data);
                 this.toast.error(null,'RENDERSERVICE_API_ERROR');
@@ -403,9 +435,11 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                 const finish = (set:Mds = null) => {
                     this.similarNodeColumns = MdsHelper.getColumns(this.translate, set, 'search');
                     this.mds = set;
-
-                    jQuery('#nodeRenderContent').html(data.detailsSnippet);
+                    const nodeRenderContent = jQuery('#nodeRenderContent')
+                    nodeRenderContent.html(data.detailsSnippet);
+                    this.moveInnerStyleToHead(nodeRenderContent);
                     this.postprocessHtml();
+                    this.handleProposal();
                     this.addCollections();
                     this.addVideoControls();
                     this.linkSearchableWidgets();
@@ -424,7 +458,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                 });
             }
             this.isLoading = false;
-            GlobalContainerComponent.finishPreloading();
+            loadingTask.done();
         },(error)=> {
             console.log(error.error.error);
             if(error?.error?.error === 'org.edu_sharing.restservices.DAOMissingException') {
@@ -438,7 +472,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                 this.toast.error(error);
             }
             this.isLoading = false;
-            GlobalContainerComponent.finishPreloading();
+            loadingTask.done();
         })
   }
     onDelete(event:any) {
@@ -477,44 +511,11 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     }
 
     addCollections() {
-        let domContainer:Element;
-        let domCollections:Element;
-        try {
-            domContainer = document.getElementsByClassName('node_collections_render')[0].parentElement;
-            domCollections = document.getElementsByTagName('collections')[0];
-        } catch(e) {
-            return;
-        }
-        UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,SpinnerComponent,domCollections);
-        this.usageApi.getNodeUsagesCollection(this.isCollectionRef() ? this._node.properties[RestConstants.CCM_PROP_IO_ORIGINAL] : this._node.ref.id,this._node.ref.repo).subscribe((usages)=> {
-            // @TODO: This does currently ignore the "hideIfEmpty" flag of the mds template
-            if(usages.length==0) {
-                domContainer.parentElement.removeChild(domContainer);
-                return;
-            }
-            const data= {
-                nodes:usages.map((u)=>u.collection),
-                columns:ListItem.getCollectionDefaults(),
-                isClickable:true,
-                clickRow:(event: {node: Node})=> {
-                    UIHelper.goToCollection(this.router,event.node);
-                },
-                doubleClickRow:(event: Node)=> {
-                    UIHelper.goToCollection(this.router,event);
-                },
-                viewType:ListTableComponent.VIEW_TYPE_GRID_SMALL,
-            };
-            UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,ListTableComponent,document.getElementsByTagName('collections')[0],data, { delay: 250 });
-        },(error)=> {
-            domContainer.parentElement.removeChild(domContainer);
-        });
+        this.renderHelper.injectModuleInCollections(this._node);
     }
-  private addComments() {
-      const data= {
-          node:this._node
-      };
-      UIHelper.injectAngularComponent(this.componentFactoryResolver,this.viewContainerRef,CommentsListComponent,document.getElementsByTagName('comments')[0],data);
-  }
+    addComments() {
+        this.renderHelper.injectModuleComments(this._node)
+    }
   private postprocessHtml() {
     if(!this.config.instant('rendering.showPreview',true)) {
       jQuery('.edusharing_rendering_content_wrapper').hide();
@@ -565,14 +566,17 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                 addOptions: this.currentOptions
             },
         });
-        this.optionsHelper.initComponents(this.mainNavRef, this.actionbar);
+        this.optionsHelper.initComponents(this.actionbar);
         this.optionsHelper.setListener({
-            onRefresh: () => this.refresh(),
+            onRefresh: (node) => {
+                this.refresh();
+            },
             onDelete: (result) => this.onDelete(result),
         });
         this.optionsHelper.refreshComponents();
         this.postprocessHtml();
         this.isBuildingPage=false;
+        this.handleQueryAction();
     }
 
   private isCollectionRef() {
@@ -639,7 +643,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     scroll(direction: string) {
         const element = this.sequencediv.nativeElement;
         const width=window.innerWidth/2;
-        UIHelper.scrollSmoothElement(element.scrollLeft + (direction=='left' ? -width : width),element,2,'x').then((limit)=> {
+        this.uiService.scrollSmoothElement(element.scrollLeft + (direction=='left' ? -width : width),element,2,'x').then((limit)=> {
             this.setScrollparameters();
         });
     }
@@ -674,7 +678,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     }
 
     public switchNode(event : any) {
-        UIHelper.scrollSmooth();
+        this.uiService.scrollSmooth();
         this.node = event.node;
     }
 
@@ -725,5 +729,66 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
 
     private getMdsId() {
         return this._node.metadataset ? this._node.metadataset : RestConstants.DEFAULT;
+    }
+
+    private async handleProposal() {
+        if(this.queryParams.proposal && this.queryParams.proposalCollection) {
+            (this._node as ProposalNode).proposal = (await this.nodeApi.getNodeMetadata(
+                this.queryParams.proposal, [RestConstants.ALL]).toPromise()
+            ).node;
+            (this._node as ProposalNode).proposalCollection = new Node(this.queryParams.proposalCollection);
+            // access is granted when we can fetch the node
+            (this._node as ProposalNode).accessible = true;
+            this.optionsHelper.refreshComponents();
+        }
+    }
+
+    /**
+     * check if the current url requested to directly open an action (from the actionbar),
+     * and if so, call it
+     */
+    private handleQueryAction() {
+        if(this.queryParams.action) {
+            const option = this.optionsHelper.getAvailableOptions(Target.Actionbar).
+            filter((o) => o.name === this.queryParams.action)?.[0];
+            if(option) {
+                if(option.isEnabled) {
+                    option.callback();
+                    // wait until a dialog has opened, then, as soon as the particular dialog closed
+                    // trigger that the action has been done
+                    this.cardServcie.hasOpenModals.pipe(
+                        skipWhile((h) => !h),
+                        filter((h) => !h),)
+                        .subscribe(() => this.onQueryActionDone());
+                } else {
+                    console.warn('action ' + this.queryParams.action + ' is currently not enabled');
+                }
+            } else {
+                console.warn('action ' + this.queryParams.action + ' is either not supported or not allowed for current user');
+            }
+        }
+    }
+
+    private onQueryActionDone() {
+        if(this.queryParams.action) {
+            window.close();
+        }
+    }
+
+    /**
+     * Moves a style element that is a child of `element` to the document head.
+     *
+     * Existing style elements that were previously moved to the document head like this will be
+     * removed.
+     *
+     * The style element will be removed from document head on `ngDestroy`.
+     */
+    private moveInnerStyleToHead(element: JQuery<HTMLElement>): void {
+        const styleAttr = 'data-render-content-style';
+        jQuery('[' + styleAttr + ']').remove();
+        const style = element.find('style');
+        style.attr(styleAttr, '');
+        jQuery(document.head).append(style);
+        this.destroyed$.subscribe(() => style.remove());
     }
 }

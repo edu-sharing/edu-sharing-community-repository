@@ -9,6 +9,7 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.AuthenticationService;
@@ -39,6 +40,7 @@ import org.edu_sharing.webservices.usage2.Usage2Exception;
 import org.edu_sharing.webservices.util.AuthenticationUtils;
 
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
+import org.springframework.context.ApplicationContext;
 
 
 public class ContextManagementFilter implements javax.servlet.Filter {
@@ -81,12 +83,17 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 		}
 	}
 	// stores the currently accessing tool type, e.g. CONNECTOR
-	public static ThreadLocal<String> accessToolType = new ThreadLocal<>();
+	public static ThreadLocal<ApplicationInfo> accessTool = new ThreadLocal<>();
 	public static ThreadLocal<B3> b3 = new ThreadLocal<>();
 
 	Logger logger = Logger.getLogger(ContextManagementFilter.class);
 
 	ServletContext context;
+
+	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+	ServiceRegistry serviceRegistry = (ServiceRegistry)applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+	AuthenticationService authservice = serviceRegistry.getAuthenticationService();
+	AuthenticationComponent authenticationComponent = (AuthenticationComponent)applicationContext.getBean("authenticationComponent");
 
 	@Override
 	public void destroy() {
@@ -145,7 +152,7 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 				logger.debug(e.getMessage());
 			}
 
-			handleAppSignature((HttpServletRequest)req);
+			handleAppSignature((HttpServletRequest)req, (HttpServletResponse)res);
 
 			chain.doFilter(req,res);
 
@@ -173,8 +180,7 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 			//clean up alfresco security context
 
 			//for native API
-			ServiceRegistry serviceRegistry = (ServiceRegistry) AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
-			AuthenticationService authservice = serviceRegistry.getAuthenticationService();
+
 			try{
 				//its not really necessary cause AuthenticationFilter -> AuthenticationTool calls alfresco authenticationservice.validate which
 				//also calls clearCurrentSecurityContext()
@@ -192,19 +198,20 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 
 	/**
 	 * Checks if app headers and signature are present and sets the header accordingly
-	 * @param httpReq
 	 */
-	private void handleAppSignature(HttpServletRequest httpReq) {
-		accessToolType.set(null);
+	private void handleAppSignature(HttpServletRequest httpReq, HttpServletResponse httpRes) throws IOException {
+		accessTool.set(null);
 
 		String appId = httpReq.getHeader("X-Edu-App-Id");
 		if(appId != null) {
 			SignatureVerifier.Result result = new SignatureVerifier().verifyAppSignature(httpReq);
 			if (result.getStatuscode() != 200) {
-				logger.warn("application request could not be verified:" + appId + " " + result.getMessage());
+				String msg = "application request could not be verified:" + appId + " " + result.getMessage();
+				logger.warn(msg);
+				httpRes.sendError(result.getStatuscode(), result.getMessage());
 			} else {
 				ApplicationInfo appInfo = result.getAppInfo();
-				accessToolType.set(appInfo.getType());
+				accessTool.set(appInfo);
 
 				String courseId = httpReq.getHeader("X-Edu-Usage-Course-Id");
 				String nodeId = httpReq.getHeader("X-Edu-Usage-Node-Id");
@@ -215,6 +222,7 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 						Usage usage = u2.getUsage(appId, courseId, nodeId, resourceId);
 						if (usage != null) {
 							httpReq.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, nodeId);
+							authenticationComponent.setCurrentUser(CCConstants.PROXY_USER);
 						}
 
 					} catch (Usage2Exception e) {

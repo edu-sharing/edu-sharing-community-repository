@@ -1,7 +1,5 @@
 package org.edu_sharing.repository.client.rpc;
 
-//import org.alfresco.service.namespace.QName;
-
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;

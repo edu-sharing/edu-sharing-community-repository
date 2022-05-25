@@ -18,6 +18,18 @@
 			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/intendedEndUserRole/index.json</valuespace>
 		</widget>
 		<widget>
+			<caption>Nicht erfüllte, rechtlichte Kriterien</caption>
+			<id>ccm:unmetLegalCriteria</id>
+			<type>checkboxVertical</type>
+			<values>
+				<value cap="Strafrecht">criminal_law</value>
+				<value cap="Jugendschutz">protection_of_minors</value>
+				<value cap="Perönlichkeitsrechte">personality_right</value>
+				<value cap="Urheberrechte">copyright_law</value>
+				<value cap="Datenschutzangaben">data_privacy</value>
+			</values>
+		</widget>
+		<widget>
 			<caption>Bildungsumfeld</caption>
 			<id>ccm:educationalcontext</id>
 			<type>multivalueFixedBadges</type>
@@ -30,6 +42,7 @@
 			<type>multivalueTree</type>
 			<hideIfEmpty>true</hideIfEmpty>
 			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/learningResourceType/index.json</valuespace>
+			<required>mandatoryForPublish</required>
 		</widget>
 		<widget>
 			<caption>Art der Seite</caption>
@@ -39,6 +52,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/sourceContentType/index.json</valuespace>
 			<condition type="PROPERTY" pattern="SOURCE" dynamic="true">ccm:objecttype</condition>
+			<required>mandatoryForPublish</required>
 		</widget>
 		<widget>
 			<caption>Art des Tools</caption>
@@ -48,6 +62,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/toolCategory/index.json</valuespace>
 			<condition type="PROPERTY" pattern="TOOL" dynamic="true">ccm:objecttype</condition>
+			<required>mandatoryForPublish</required>
 		</widget>
 		<widget>
 			<caption>Zugangsbedingungen (Login)</caption>
@@ -135,6 +150,7 @@
 			<type>multivalueFixedBadges</type>
 			<caption>Quelle</caption>
 			<hideIfEmpty>true</hideIfEmpty>
+			<valuespace>https://vocabs.openeduhub.de/w3id.org/openeduhub/vocabs/sources/index.json</valuespace>
 		</widget>
 		<widget>
 			<id>cclom:location</id>
@@ -328,11 +344,23 @@
 		]]></html>
 		</template>
 		<template>
+			<id>search_input</id>
+			<rel>suggestions</rel>
+			<html><![CDATA[
+			  <ccm:objecttype>
+			  <ccm:taxonid>
+			  <ccm:educationalcontext>
+		  	  <ccm:educationalintendedenduserrole>
+		      <ccm:educationallearningresourcetype>
+				]]></html>
+		</template>
+		<template>
 			<id>search_suggestions</id>
 			<rel>suggestions</rel>
 			<html><![CDATA[
 		  <ccm:educationalcontext>
 		  <cclom:general_keyword>
+		  <ccm:taxonid>
 		]]></html>
 		</template>
 		<template>
@@ -351,7 +379,8 @@
 		<basequery>-TYPE:"ccm:toolpermission" AND NOT ASPECT:"ccm:metadataPresettingTemplate" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*" AND NOT PATH:"/sys\:system/sys\:people//*" AND -ASPECT:"ccm:io_childobject"</basequery>
 		<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
 		<query join="AND"  id="collections">
-			<basequery propertyNull="ngsearchword">@ccm\:educontextname:"${educontext}" AND @ccm\:collectionlevel0:true OR @ccm\:collection_pinned_status:true</basequery>
+			<basequery>ASPECT:"ccm:collection"</basequery>
+			<basequery propertyNull="ngsearchword">ASPECT:"ccm:collection" AND @ccm\:educontextname:"${educontext}" AND @ccm\:collectionlevel0:true OR @ccm\:collection_pinned_status:true</basequery>
 			<property name="ngsearchword">
 				<statement>@ccm\:educontextname:"${educontext}" AND (@sys\:node-uuid:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
 				<exactMatching>false</exactMatching>
@@ -419,7 +448,7 @@
 			<property name="ccm:taxonid">
 				<multiple>true</multiple>
 				<multiplejoin>OR</multiplejoin>
-				<statement>{"term":{"properties.ccm:taxonid":"${valueRaw}"}}</statement>
+				<statement>{"term":{"properties.ccm:taxonid.keyword":"${valueRaw}"}}</statement>
 			</property>
 			<property name="ccm:educationalintendedenduserrole">
 				<multiple>true</multiple>
@@ -432,6 +461,12 @@
 			<property name="ccm:educationalcontext">
 				<multiple>true</multiple>
 				<multiplejoin>OR</multiplejoin>
+				<statement>{"term":{"properties.ccm:educationalcontext.keyword":"${value}"}}</statement>
+			</property>
+			<property name="cclom:general_keyword">
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+				<statement>{"term":{"properties.cclom:general_keyword.keyword":"${value}"}}</statement>
 			</property>
 			<property name="ccm:educationallearningresourcetype">
 				<multiple>true</multiple>

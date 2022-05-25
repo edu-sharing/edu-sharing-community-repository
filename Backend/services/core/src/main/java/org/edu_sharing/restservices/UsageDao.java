@@ -1,5 +1,8 @@
 package org.edu_sharing.restservices;
 
+import java.io.StringReader;
+import java.util.*;
+
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -12,6 +15,7 @@ import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.usage.v1.model.CreateUsage;
 import org.edu_sharing.restservices.usage.v1.model.Usages;
 import org.edu_sharing.restservices.usage.v1.model.Usages.Usage;
+import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
@@ -21,11 +25,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.ValidationEvent;
 import javax.xml.bind.ValidationEventHandler;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class UsageDao {
 	Logger logger = Logger.getLogger(UsageDao.class);
@@ -129,26 +128,50 @@ public class UsageDao {
 
 	public void deleteUsage(String nodeId, String usageId) throws DAOException {
 		try {
-			boolean permission = (ContextManagementFilter.accessToolType.get() != null) ? true : permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,
+			org.edu_sharing.service.usage.Usage usage = AuthenticationUtil.runAsSystem(() -> {
+				for (org.edu_sharing.service.usage.Usage u : new Usage2Service().getUsageByParentNodeId(null, null,
+						nodeId)) {
+					if (u.getNodeId().equals(usageId)) {
+						return u;
+					}
+				}
+				return null;
+			});
+			if(usage == null) {
+				throw new DAOMissingException(new IllegalArgumentException(usageId + " is not an usage of " + nodeId));
+			}
+			boolean permission = (ContextManagementFilter.accessTool.get() != null) ? true : permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,
 					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId,
 					CCConstants.PERMISSION_CHANGEPERMISSIONS);
-
+			if(ContextManagementFilter.accessTool != null
+					&& ContextManagementFilter.accessTool.get() != null){
+				if(ContextManagementFilter.accessTool.get().getAppId().equals(usage.getLmsId())) {
+					permission = true;
+					logger.info("Delete usage allowed for app id " + usage.getLmsId());
+				} else {
+					throw new SecurityException("The current authenticated app id is not allowed to delete this usage");
+				}
+			}
 			if (!permission) {
 				throw new SecurityException("Can not modify usages on node " + nodeId);
 			}
-			for (org.edu_sharing.service.usage.Usage usage : new Usage2Service().getUsageByParentNodeId(null, null,
-					nodeId)) {
-				if (usage.getNodeId().equals(usageId)) {
-					if (new Usage2Service().deleteUsage(null, null, usage.getLmsId(), usage.getCourseId(), nodeId,
-							usage.getResourceId()))
-						return;
-					else
-						throw new Exception("Error deleting usage " + usage.getNodeId());
+			AuthenticationUtil.runAsSystem(() -> {
+				if (new Usage2Service().deleteUsage(null, null, usage.getLmsId(), usage.getCourseId(), nodeId,
+						usage.getResourceId())) {
+					return null;
+				} else {
+					throw new RuntimeException("Error deleting usage " + usage.getNodeId());
 				}
-			}
-			throw new DAOMissingException(new IllegalArgumentException(usageId + " is not an usage of " + nodeId));
+			});
 		} catch (Throwable t) {
-			throw DAOException.mapping(t);
+			// unmarshall exception
+			if(t instanceof DAOException) {
+				throw t;
+			} else if(t.getCause() != null) {
+				throw DAOException.mapping(t.getCause().getCause());
+			} else {
+				throw DAOException.mapping(t);
+			}
 		}
 	}
 
@@ -175,9 +198,10 @@ public class UsageDao {
 		}
 	}
 
-	public Set<Usages.CollectionUsage> getUsagesByNodeCollection(String nodeId) throws DAOException {
+	public Collection<Usages.CollectionUsage> getUsagesByNodeCollection(String nodeId) throws DAOException {
 		try {
-			Set<Usages.CollectionUsage> collections = new HashSet<>();
+			//Collection<Usages.CollectionUsage> collections = new HashSet<>();
+			Collection<Usages.CollectionUsage> collections = new ArrayList<>();
 			for (org.edu_sharing.service.usage.Usage usage : new Usage2Service().getUsageByParentNodeId(null, null,
 					nodeId)) {
 				if (usage.getCourseId() == null)
@@ -186,10 +210,31 @@ public class UsageDao {
 					Usages.CollectionUsage collectionUsage = convertUsage(usage, Usages.CollectionUsage.class);
 					collectionUsage
 							.setCollection(CollectionDao.getCollection(repoDao, usage.getCourseId()).asNode());
+					collectionUsage.setCollectionUsageType(Usages.CollectionUsageType.ACTIVE);
 					collections.add(collectionUsage);
 				} catch (Throwable t) {
 				}
 			}
+			CollectionServiceFactory.getLocalService().getCollectionProposals(nodeId, CCConstants.PROPOSAL_STATUS.PENDING).forEach((ref) -> {
+				Usages.CollectionUsage usage = new Usages.CollectionUsage();
+				try {
+					usage.setCollection(CollectionDao.getCollection(repoDao, ref.getId()).asNode());
+					usage.setCollectionUsageType(Usages.CollectionUsageType.PROPOSAL_PENDING);
+					collections.add(usage);
+				} catch (DAOException e) {
+					logger.warn("Could not fetch collection: " + e.getMessage(), e);
+				}
+			});
+			CollectionServiceFactory.getLocalService().getCollectionProposals(nodeId, CCConstants.PROPOSAL_STATUS.DECLINED).forEach((ref) -> {
+				Usages.CollectionUsage usage = new Usages.CollectionUsage();
+				try {
+					usage.setCollection(CollectionDao.getCollection(repoDao, ref.getId()).asNode());
+					usage.setCollectionUsageType(Usages.CollectionUsageType.PROPOSAL_DECLINED);
+					collections.add(usage);
+				} catch (DAOException e) {
+					logger.warn("Could not fetch collection: " + e.getMessage(), e);
+				}
+			});
 			return collections;
 		} catch (Throwable t) {
 			throw DAOException.mapping(t);
@@ -223,9 +268,8 @@ public class UsageDao {
 
 	public Usages.Usage setUsage(String repository, CreateUsage usage) throws Exception {
 
-		if(ContextManagementFilter.accessToolType == null
-				|| ContextManagementFilter.accessToolType.get() == null
-				|| ContextManagementFilter.accessToolType.get().trim().equals("") ){
+		if(ContextManagementFilter.accessTool == null
+				|| ContextManagementFilter.accessTool.get() == null){
 			throw new DAOSecurityException(new Exception("app signature required to use this endpoint."));
 		}
 		if(AuthenticationUtil.getFullyAuthenticatedUser() == null || AuthorityServiceFactory.getLocalService().isGuest()){

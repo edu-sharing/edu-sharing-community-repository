@@ -110,12 +110,7 @@
       <filter-name>Edu-Sharing Authentication Rest Filter</filter-name>
       <filter-class>org.edu_sharing.restservices.ApiAuthenticationFilter</filter-class>
     </filter>
-   
-    <filter>
-        <filter-name>App Signature Filter</filter-name>
-        <filter-class>org.edu_sharing.repository.server.authentication.AppSignatureFilter</filter-class>
-    </filter>
-    
+
     <filter>
     	<filter-name>Shibboleth SoapAction Header Fix</filter-name>
     	<filter-class>org.edu_sharing.repository.server.authentication.ShibbolethSLOHeaderFix</filter-class>
@@ -171,11 +166,6 @@
     <filter-mapping>
         <filter-name>DisableCacheFilter</filter-name>
         <url-pattern>/components/*</url-pattern>
-    </filter-mapping>
-
-    <filter-mapping>
-        <filter-name>App Signature Filter</filter-name>
-        <url-pattern>/rest/authentication/v1/appauth/*</url-pattern>
     </filter-mapping>
 
     <filter-mapping>

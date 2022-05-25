@@ -1,7 +1,6 @@
 
 import {TranslateService} from "@ngx-translate/core";
-import {isNumeric} from "rxjs/util/isNumeric";
-import {Translation} from "./translation";
+import { isNumeric } from "../common/ui/isNumeric";
 
 export class FormatOptions {
     showDate?=true;
@@ -59,8 +58,11 @@ export class DateHelper{
    */
   public static formatDate(translation : TranslateService,date: number|any,options:FormatOptions = new FormatOptions()) : string{
     try {
-      if(!isNumeric(date)) {
-        date=Date.parse(date)
+      if (date == null) {
+          return null;
+      }
+      if (!isNumeric(date)) {
+        date = Date.parse(date);
       }
       let dateObject = new Date((date as number) * 1);
       let dateToday = new Date();
@@ -111,7 +113,7 @@ export class DateHelper{
       //return dateFormat+time;
       let str=prefix;
       if(addDate) {
-        if(Translation.getLanguage()=="en"){
+        if (translation.currentLang === "en") {
           str += dateObject.getFullYear()+"-"+DateHelper.fillDate(dateObject.getMonth()+1)+"-"+DateHelper.fillDate(dateObject.getDate());
         }
         else {

@@ -12,10 +12,10 @@ import {TranslateService} from "@ngx-translate/core";
 import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {Helper} from "../../../core-module/rest/helper";
 import {trigger} from "@angular/animations";
-import {AuthorityNamePipe} from '../../../core-ui-module/pipes/authority-name.pipe';
+import {AuthorityNamePipe} from '../../../shared/pipes/authority-name.pipe';
 
 @Component({
-  selector: 'toolpermission-manager',
+  selector: 'es-toolpermission-manager',
   templateUrl: 'toolpermission-manager.component.html',
   styleUrls: ['toolpermission-manager.component.scss'],
   animations: [
@@ -49,13 +49,14 @@ export class ToolpermissionManagerComponent {
         RestConstants.TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS,
     ]},
     {name:"DATA_MANAGEMENT",icon:"folder",permissions:[
-        RestConstants.TOOLPERMISSION_WORKSPACE,
-        RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES,
-        RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS,
-        RestConstants.TOOLPERMISSION_CREATE_MAP_LINK,
-        RestConstants.TOOLPERMISSION_UNCHECKEDCONTENT,
+            RestConstants.TOOLPERMISSION_WORKSPACE,
+            RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES,
+            RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS,
+            RestConstants.TOOLPERMISSION_CREATE_MAP_LINK,
+            RestConstants.TOOLPERMISSION_UNCHECKEDCONTENT,
             RestConstants.TOOLPERMISSION_COMMENT_WRITE,
-            RestConstants.TOOLPERMISSION_RATE
+            RestConstants.TOOLPERMISSION_RATE_READ,
+            RestConstants.TOOLPERMISSION_RATE_WRITE
     ]},
     {name:"ACCOUNT_MANAGEMENT",icon:"group",permissions:[
               RestConstants.TOOLPERMISSION_SIGNUP_GROUP,
@@ -69,6 +70,7 @@ export class ToolpermissionManagerComponent {
     ]},
     {name:"COLLECTIONS",icon:"layers",permissions:[
         RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS,
+        RestConstants.TOOLPERMISSION_COLLECTION_PROPOSAL,
         RestConstants.TOOLPERMISSION_COLLECTION_EDITORIAL,
         RestConstants.TOOLPERMISSION_COLLECTION_CURRICULUM,
         RestConstants.TOOLPERMISSION_COLLECTION_PINNING,

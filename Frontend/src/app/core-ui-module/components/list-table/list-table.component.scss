@@ -1,3 +1,4 @@
+@use 'sass:math';
 @import '../../styles/variables';
 $borderRadius: 2px;
 $previewHeight: 160px;
@@ -58,7 +59,6 @@ $previewHeight: 160px;
 .moreAlways {
     transition: $transitionNormal all;
     opacity: 1;
-    color: $primary !important;
 }
 .disabled {
     color: $textVeryLight !important;
@@ -161,7 +161,7 @@ $badgeWidth: 250px;
 }
 :host ::ng-deep {
     .list .node-row{
-        app-node-url, app-node-url > a{
+        es-node-url, es-node-url > *{
             display: block;
             width: 100%;
             height: 100%;
@@ -177,22 +177,22 @@ $badgeWidth: 250px;
                 @include setGlobalKeyboardFocus();
             }
             .cardList, .cardSmallList {
-                app-list-option-item >div:focus,
+                es-list-option-item >div:focus,
                 .row:focus,
-                .row a:focus {
+                .row es-node-url > *:focus {
                     @include setGlobalKeyboardFocus();
                 }
             }
             .tableList {
                 .row:focus,
-                .row a:focus {
+                .row es-node-url > *:focus {
                     @include setGlobalKeyboardFocus('border');
                 }
             }
         }
     }
     .headingGroup .heading,
-    .tableList .node-row app-node-url > a{
+    .tableList .node-row es-node-url > *{
         /* fallback for unset/unknown fields */
         > div {
             width: 120px;
@@ -377,12 +377,6 @@ $badgeWidth: 250px;
     padding: 0 5px;
     vertical-align: middle;
     color: $textLight;
-    &.more {
-        color: $primary;
-        > button {
-            color: unset;
-        }
-    }
 }
 .heading > div {
     align-self: flex-end;
@@ -485,7 +479,7 @@ $badgeWidth: 250px;
     border-right-color: $textOnPrimary;
     border-bottom-color: $textOnPrimary;
 }
-:host ::ng-deep .tableList .row > app-node-url > a {
+:host ::ng-deep .tableList .row > es-node-url > * {
     width: 100%;
     border-bottom: 1px solid $textOnPrimary;
     height: $listItemHeight;
@@ -515,11 +509,25 @@ $badgeWidth: 250px;
     background-color: #fff;
 }
 
-.cardList .row {
-    display: flex;
-    flex-direction: column;
-    > a{
-        flex-grow: 1;
+.cardList {
+    .item_with_label.column {
+        .rowInner {
+            max-height: 2.5em;
+        }
+        ::ng-deep es-list-base {
+            label {
+                display: flex;
+                font-size: $fontSizeXSmall;
+            }
+        }
+    }
+    .row {
+        display: flex;
+        flex-direction: column;
+
+        > a {
+            flex-grow: 1;
+        }
     }
 }
 
@@ -538,11 +546,11 @@ $badgeWidth: 250px;
     .tableList {
         .row {
             position: relative;
-            app-node-url.node-padding > a{
+            app-node-url.node-padding > * {
                 // keep spacing for more options item
                 padding-right: 50px;
             }
-            app-node-url > a {
+            es-node-url > * {
                 display: flex;
                 align-items: center;
                 width: 100%;
@@ -563,11 +571,11 @@ $badgeWidth: 250px;
 }
 :host ::ng-deep {
     .list .nodeCollection .row {
-        app-node-url > a .column{
+        es-node-url > * .column{
             color: #fff !important;
         }
 
-        &.dark-color app-node-url > a .column{
+        &.dark-color es-node-url > * .column{
             color: #000 !important;
         }
     }
@@ -632,33 +640,33 @@ $badgeWidth: 250px;
 
 @keyframes OrderAnimationCards {
     0% {
-        transform: rotate(-0.75deg);
+        transform: rotate(-0.5deg);
     }
     50% {
-        transform: rotate(0.75deg);
+        transform: rotate(0.5deg);
     }
     100% {
-        transform: rotate(-0.75deg);
+        transform: rotate(-0.5deg);
     }
 }
 
 @keyframes OrderAnimationList {
     0% {
-        transform: translate(0, -.1em);
+        transform: translate(0, -.05em);
     }
     50% {
-        transform: translate(0, .1em);
+        transform: translate(0, .05em);
     }
     100% {
-        transform: translate(0, -.1em);
+        transform: translate(0, -.05em);
     }
 }
 
 .order-animation {
-    $orderAnimationTime: $transitionNormal;
+    $orderAnimationTime: 0.5s;
     animation-iteration-count: infinite;
     animation-duration: $orderAnimationTime;
-    .cardList & {
+    .cardList &, .cardSmallList & {
         animation-name: OrderAnimationCards;
     }
     .tableList & {
@@ -668,13 +676,13 @@ $badgeWidth: 250px;
         animation-delay: 0s;
     }
     &:nth-of-type(2n + 1) {
-        animation-delay: -$orderAnimationTime/2;
+        animation-delay: math.div(-$orderAnimationTime, 2);
     }
     &:nth-of-type(3n) {
-        animation-delay: -$orderAnimationTime/4;
+        animation-delay: math.div(-$orderAnimationTime, 4);
     }
     &:nth-of-type(5n) {
-        animation-delay: -$orderAnimationTime/8;
+        animation-delay: math.div(-$orderAnimationTime, 8);
     }
 }
 .rowFrame {
@@ -694,13 +702,13 @@ $badgeWidth: 250px;
     border-radius: 50%;
     width: $tableIconSize;
     height: $tableIconSize !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .icon-bg img,
 .icon-bg i {
     width: 50%;
-    position: relative;
-    top: 10px;
-    left: 9px;
     z-index: 0;
 }
 .icon-bg i {
@@ -830,7 +838,7 @@ a.rowInner {
     float: left;
     margin: 6px;
     position: relative;
-    app-list-option-item{
+    es-list-option-item{
         height: 0; // size is done via flex-grow
         flex-grow: 1;
     }
@@ -838,7 +846,7 @@ a.rowInner {
 }
 .tableList{
     // limit line height to 2 lines
-    app-list-base {
+    es-list-base {
         @include limitLineCount(2, 1.25);
     }
     .nodeDeleted{
@@ -931,7 +939,7 @@ a.rowInner {
     float: left;
     margin: 6px !important;
     // safari height fix
-    app-list-option-item{
+    es-list-option-item{
         height: 0;
         flex-grow: 1;
     }
@@ -944,7 +952,7 @@ a.rowInner {
         border-bottom: 5px solid $primary;
         // Compensate border-bottom for focus highlight
         overflow: visible;
-        app-node-url {
+        es-node-url {
             height: calc(100% + 5px);
         }
     }
@@ -1025,7 +1033,7 @@ a.rowInner {
     }
 }
 
-// In the workspace, the user can toggle between list and cards view. When list
+// In the es-workspace, the user can toggle between list and cards view. When list
 // view is selected, the list spans the entire container with no padding.
 // However, cards need some padding, so we add some padding when cards view is
 // selected here.
@@ -1218,6 +1226,42 @@ a.rowInner {
     display: inline-block;
 }
 
+.item-order-overlay {
+    position: absolute;
+    z-index: 15;
+    color: $primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    > i {
+        font-size: 20px;
+    }
+}
+.cardList .item-order-overlay{
+    background-color: rgba(255,255,255,.95);
+    backdrop-filter: blur(5px);
+    width: auto;
+    height: 60px;
+    margin: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: 5px;
+    top: math.div($previewHeight - 60px, 2);
+}
+.cardSmallList .item-order-overlay{
+    background-color: rgba(255,255,255,.95);
+    backdrop-filter: blur(5px);
+    height: 40px;
+    bottom: 0;
+    width: 100%;
+}
+.tableList .item-order-overlay{
+    background-color: transparent;
+    right: 10px;
+    width: 20px!important;
+}
+
 @media all {
     .cardList .row .column.node_ccm_commonlicense_key {
         /*text-align: right;
@@ -1250,18 +1294,18 @@ a.rowInner {
     .cardList > .item-container {
         width: 100%;
         height: 160px;
-        > app-list-option-item{
+        > es-list-option-item{
             height: 120px;
         }
         box-shadow: none;
         .typeicon {
-            top:17px;
+            display: none !important;
         }
         .more a {
             left: 0;
         }
         &:not(.option-item-container):not(:last-child) {
-            border-bottom: 1px solid $cardSeperatorLineColor;
+            border-bottom: 1px solid $cardSeparatorLineColor;
         }
     }
     .cardList > .option-item-container {
@@ -1304,7 +1348,7 @@ a.rowInner {
     }
     .cardList .childobjectCount {
         right: auto;
-        left: 80px;
+        left: 15px;
         top: 23px;
     }
     .cardList .nodeRatingComments {

@@ -57,7 +57,7 @@ public class MetadataReader {
 		return PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PathPrefix.DEFAULTS_METADATASETS + "/";
 	}
 
-	public static List<MetadataWidget> getWidgetsByNode(NodeRef node,String locale) throws Exception{
+	public static Collection<MetadataWidget> getWidgetsByNode(NodeRef node,String locale) throws Exception{
 		ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) alfApplicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		String mdsSet = serviceRegistry.getNodeService().getProperty(node, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET)).toString();
@@ -66,7 +66,8 @@ public class MetadataReader {
 		}
 		MetadataSet metadata = MetadataReader.getMetadataset(ApplicationInfoList.getHomeRepository(), mdsSet, locale);
 		return metadata.getWidgetsByNode(serviceRegistry.getNodeService().getType(node).toString(),
-				serviceRegistry.getNodeService().getAspects(node).stream().map(QName::toString).collect(Collectors.toList()));
+				serviceRegistry.getNodeService().getAspects(node).stream().map(QName::toString).collect(Collectors.toList()),
+				true);
 	}
 	public static MetadataSet getMetadataset(ApplicationInfo appId, String mdsSet, String locale) throws Exception{
 		return getMetadataset(appId, mdsSet, locale, true);
@@ -125,7 +126,7 @@ public class MetadataReader {
 					if(mdsOverride.getInherit().equals(mdsName)){
 						throw new RuntimeException("Detected cyclic dependency in your mds inherition. Please check your mds " + mdsName);
 					}
-					mds = getMetadataset(appId, mdsOverride.getInherit(), locale, false);
+					mds = SerializationUtils.clone(getMetadataset(appId, mdsOverride.getInherit(), locale, false));
 					mds.overrideWith(mdsOverride);
 				} else {
 					// fallback for backward compatibility: use the default mds for inherition
@@ -176,7 +177,7 @@ public class MetadataReader {
 		}
 		query.addCondition(result);
 	}
-	private Map<String,MetadataQueries> getQueries() throws Exception {
+	private Map<String,MetadataQueries> getQueries(MetadataSet mds) throws Exception {
 		Map<String,MetadataQueries> result=new HashMap<>();
 		NodeList queryNodes = (NodeList) xpath.evaluate("/metadataset/queries", doc, XPathConstants.NODESET);
 		for(int a=0;a<queryNodes.getLength(); a++) {
@@ -225,6 +226,10 @@ public class MetadataReader {
 				if (nodeMap.getNamedItem("applyBasequery") != null)
 					query.setApplyBasequery(nodeMap.getNamedItem("applyBasequery").getTextContent().equals("true"));
 
+				if(nodeMap.getNamedItem("basequeryAsFilter") != null && nodeMap.getNamedItem("basequeryAsFilter").getTextContent() != null){
+					query.setBasequeryAsFilter(new Boolean(nodeMap.getNamedItem("basequeryAsFilter").getTextContent()));
+				}
+
 				List<MetadataQueryParameter> parameters = new ArrayList<>();
 
 				NodeList list2 = node.getChildNodes();
@@ -241,12 +246,15 @@ public class MetadataReader {
 					if (parameterNode.getNodeName().equals("condition")) {
 						handleQueryCondition(parameterNode, query);
 					}
-					MetadataQueryParameter parameter = new MetadataQueryParameter(syntaxName);
+					MetadataQueryParameter parameter = new MetadataQueryParameter(syntaxName, mds);
 					NodeList list3 = parameterNode.getChildNodes();
 					NamedNodeMap attributes = parameterNode.getAttributes();
 					if (attributes == null || attributes.getNamedItem("name") == null)
 						continue;
 					parameter.setName(attributes.getNamedItem("name").getTextContent());
+					if(attributes.getNamedItem("asFilter") != null && attributes.getNamedItem("asFilter").getTextContent() != null){
+						parameter.setAsFilter(new Boolean(attributes.getNamedItem("asFilter").getTextContent()));
+					}
 					Map<String, String> statements = new HashMap<String, String>();
 					for (int k = 0; k < list3.getLength(); k++) {
 						Node data = list3.item(k);
@@ -362,7 +370,7 @@ public class MetadataReader {
 		mds.setGroups(getGroups());
 		mds.setLists(getLists());
 		mds.setSorts(getSorts());
-		mds.setQueries(getQueries());
+		mds.setQueries(getQueries(mds));
 		
 		return mds;
 	}
@@ -420,6 +428,9 @@ public class MetadataReader {
 				if(name.equals("bottomCaption")){
 					widget.setBottomCaption(getTranslation(widget,value));
 				}
+				if(name.equals("configuration")){
+					widget.setConfiguration(value);
+				}
 				if(name.equals("unit")){
 					widget.setUnit(getTranslation(widget,value));
 				}
@@ -437,10 +448,14 @@ public class MetadataReader {
 				if(name.equals("condition")) {
 					widget.setCondition(getCondition(data,widget.getId()));
 				}
+				if(name.equals("suggestionReceiver"))
+					widget.setSuggestionReceiver(value);
 				if(name.equals("suggestionSource"))
 					widget.setSuggestionSource(value);
 				if(name.equals("suggestionQuery"))
 					widget.setSuggestionQuery(value);
+				if(name.equals("suggestDisplayProperty"))
+					widget.setSuggestDisplayProperty(value);
 				if(name.equals("required")) {
 					if(value.equalsIgnoreCase("true")){
 						widget.setRequired(MetadataWidget.Required.mandatory);
@@ -466,6 +481,9 @@ public class MetadataReader {
 				}
 				if(name.equals("valuespaceClient")){
 					widget.setValuespaceClient(value.equalsIgnoreCase("true"));				
+				}
+				if(name.equals("interactionType")){
+					widget.setInteractionType(MetadataWidget.InteractionType.valueOf(value));
 				}
 				if(name.equals("searchable")){
 					widget.setSearchable(value.equalsIgnoreCase("true"));
@@ -529,21 +547,23 @@ public class MetadataReader {
 	}
 	private List<MetadataKey> getValuespace(String value,MetadataWidget widget, String valuespaceI18n, String valuespaceI18nPrefix) throws Exception {
 		if(value.startsWith("http://") || value.startsWith("https://")){
-			return getValuespaceExternal(value);
+			return sortValues(widget, getValuespaceExternal(value));
 		}
 		Document docValuespace = builder.parse(getFile(value,Filetype.VALUESPACE));
-		List<MetadataKey> keys=new ArrayList<>();
 		NodeList keysNode=(NodeList)xpath.evaluate("/valuespaces/valuespace[@property='"+widget.getId()+"']/key",docValuespace, XPathConstants.NODESET);
 		if(keysNode.getLength()==0){
 			throw new Exception("No valuespace found in file "+value+": Searching for a node named /valuespaces/valuespace[@property='"+widget.getId()+"']");
 		}
-		List<MetadataKey> list=getValues(keysNode,valuespaceI18n,valuespaceI18nPrefix);
+		return sortValues(widget, getValues(keysNode,valuespaceI18n,valuespaceI18nPrefix));
+	}
+
+	private List<MetadataKey> sortValues(MetadataWidget widget, List<MetadataKey> list) {
 		if(!"default".equals(widget.getValuespaceSort())){
-			Collections.sort(list, (o1, o2) -> {
-				if("caption".equals(widget.getValuespaceSort())){
-					return o1.getCaption().compareTo(o2.getCaption());
+			list.sort((o1, o2) -> {
+				if ("caption".equals(widget.getValuespaceSort())) {
+					return StringUtils.compareIgnoreCase(o1.getCaption(), o2.getCaption());
 				}
-				logger.error("Invalid value for valuespaceSort '"+widget.getValuespaceSort()+"' for widget '"+widget.getId()+"'");
+				logger.error("Invalid value for valuespaceSort '" + widget.getValuespaceSort() + "' for widget '" + widget.getId() + "'");
 				return 0;
 			});
 		}

@@ -1,0 +1,73 @@
+<es-mds-editor-widget-container
+  *ngIf="!editWrapper.innerText.trim()"
+  [injectedView]="this"
+  [widget]="widget"
+  [label]="false"
+  [wrapInFormField]="false"
+  [wrapInGroup]="false"
+  [valueType]="valueType"
+>
+  <div class="edit-wrapper">
+    <div *ngIf="!isEmpty() || !widget.definition.hideIfEmpty" class="widget-wrapper">
+      <div
+        class="widget-label"
+        [attr.role]="headingLevel ? 'heading' : null"
+        [attr.aria-level]="headingLevel"
+      >
+        {{ widget.definition.caption
+        }}<span *ngIf="!headingLevel" class="cdk-visually-hidden">: </span>
+      </div>
+      <div
+        class="value-wrapper"
+        [class.value-wrapper-edit]="isEditable()"
+        (click)="isEditable() ? view.injectEditField(this, editWrapper.children[0]) : null"
+      >
+        <div *ngIf="isEmpty()" class="widget-data widget-no-data widget-type-{{ getBasicType() }}">
+          -
+        </div>
+        <div
+          *ngIf="!isEmpty()"
+          class="widget-data widget-type-{{ getBasicType() }} {{
+            widget.definition.link ? 'widget-link' : ''
+          }}"
+          (click)="click()"
+        >
+          <div *ngIf="getBasicType() == 'text'">{{ formatText() }}</div>
+          <div *ngIf="getBasicType() == 'number'">{{ formatNumber() }}</div>
+          <div *ngIf="getBasicType() == 'date'">{{ formatDate() }}</div>
+          <div *ngIf="getBasicType() == 'array'">
+            <div class="array-entry" *ngFor="let v of value">{{ v }}</div>
+          </div>
+          <div *ngIf="getBasicType() == 'vcard'">
+            <div class="array-entry" *ngFor="let v of value">{{ v | vcardName }}</div>
+          </div>
+          <div *ngIf="getBasicType() == 'slider'">
+            <span class="slider-value">{{ value }}</span
+            ><span> / </span><span class="slider-max">{{ widget.definition.max }}</span>
+          </div>
+          <div *ngIf="getBasicType() == 'duration'">
+            <span class="duration-value">{{ value[0] | appMdsDuration }}</span>
+          </div>
+          <div *ngIf="getBasicType() == 'range'">
+            <span class="slider-value">{{ value[0] }}</span
+            >-<span class="slider-value">{{ value[1] }}</span>
+          </div>
+          <div *ngIf="getBasicType() == 'unknown'">
+            The widget type {{ widget.definition.type }} is currently not supported via angular
+            rendering
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--<button mat-icon-button
+            *ngIf="mdsEditorInstance.editorMode === 'inline' && widget.definition.interactionType === 'Input'"
+            (click)="view.injectEditField(this, edit)"
+            class="btn-edit">
+      <i esIcon="edit"></i>
+    </button>-->
+  </div>
+</es-mds-editor-widget-container>
+<div class="edit-wrapper">
+  <div #editWrapper><div #edit></div></div>
+  <!--<button *ngIf="!!editWrapper.innerText.trim()" mat-icon-button><i esIcon="save"></i></button>-->
+</div>

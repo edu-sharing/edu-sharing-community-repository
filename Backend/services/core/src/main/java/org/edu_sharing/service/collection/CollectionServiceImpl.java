@@ -1,15 +1,18 @@
 package org.edu_sharing.service.collection;
 
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
+import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.search.impl.solr.ESSearchParameters;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -22,6 +25,7 @@ import org.alfresco.service.transaction.TransactionService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
+import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.metadataset.v2.MetadataSet;
@@ -43,6 +47,7 @@ import org.edu_sharing.restservices.CollectionDao;
 import org.edu_sharing.restservices.CollectionDao.Scope;
 import org.edu_sharing.restservices.CollectionDao.SearchScope;
 import org.edu_sharing.restservices.shared.Authority;
+import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeService;
@@ -272,20 +277,72 @@ public class CollectionServiceImpl implements CollectionService{
 			throw e;
 		}
 	}
-	
+
 	@Override
-	public String addToCollection(String collectionId, String originalNodeId, String sourceRepositoryId, boolean allowDuplicate)
+	public List<AssociationRef> getChildrenProposal(String parentId) throws Exception {
+		if (!PermissionServiceHelper.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId), CCConstants.PERMISSION_WRITE)) {
+			throw new InsufficientPermissionException("No " + CCConstants.PERMISSION_WRITE + " on collection " + parentId);
+		}
+		return NodeServiceFactory.getLocalService().getChildrenChildAssociationRefType(parentId, CCConstants.CCM_TYPE_COLLECTION_PROPOSAL).stream().map((proposal) -> {
+			NodeRef target = new NodeRef(NodeServiceHelper.getProperty(proposal.getChildRef(), CCConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET));
+			return new AssociationRef(proposal.getChildRef(), ContentModel.ASSOC_ORIGINAL, target);
+		}).collect(Collectors.toList());
+	}
+
+	@Override
+	public void proposeForCollection(String collectionId, String originalNodeId, String sourceRepositoryId)
 			throws DuplicateNodeException, Throwable {
+		String finalId = mapNodeId(originalNodeId, sourceRepositoryId);
+
+		/*
+		if(!PermissionServiceHelper.isNodePublic(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, finalId))) {
+			throw new IllegalArgumentException("Suggested node is required to be publicly accessible");
+		}
+		*/
+		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PROPOSAL);
+		if(!PermissionServiceHelper.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, collectionId), CCConstants.PERMISSION_READ)){
+			throw new InsufficientPermissionException("No " + CCConstants.PERMISSION_READ + " permissions for collection " + collectionId);
+		}
+		if(!PermissionServiceHelper.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, finalId), CCConstants.PERMISSION_CC_PUBLISH)){
+			throw new InsufficientPermissionException("No " + CCConstants.PERMISSION_CC_PUBLISH + " permissions for collection " + collectionId);
+		}
+		AuthenticationUtil.runAsSystem(() -> {
+			NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, finalId);
+			if(getChildren(collectionId, null, new SortDefinition(), Collections.singletonList("files")).stream().anyMatch((ref) ->
+					nodeRef.getId().equals(NodeServiceHelper.getProperty(ref, CCConstants.CCM_PROP_IO_ORIGINAL))
+			)){
+				throw new DuplicateNodeException("Node id " + nodeRef.getId() + " is already in this collection");
+			}
+			if(getChildrenProposal(collectionId).stream().anyMatch((assoc) -> assoc.getTargetRef().equals(nodeRef))){
+				throw new DuplicateNodeException("Node id " + nodeRef.getId() + " is already proposed for this collection");
+			}
+			HashMap<String, Serializable> props = new HashMap<>();
+			props.put(CCConstants.CM_NAME, NodeServiceHelper.getProperty(nodeRef, CCConstants.CM_NAME));
+			props.put(CCConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, finalId));
+			props.put(CCConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS, CCConstants.PROPOSAL_STATUS.PENDING);
+			return NodeServiceFactory.getLocalService().createNodeBasic(collectionId,
+					CCConstants.CCM_TYPE_COLLECTION_PROPOSAL,
+					props
+			);
+		});
+	}
+
+	public String mapNodeId(String originalNodeId, String sourceRepositoryId) throws Throwable {
 		if(sourceRepositoryId != null) {
 			ApplicationInfo rep = ApplicationInfoList.getRepositoryInfoById(sourceRepositoryId);
 			if (rep.ishomeNode() || ApplicationInfo.REPOSITORY_TYPE_LOCAL.equals(rep.getRepositoryType())) {
-				return addToCollection(collectionId, originalNodeId, allowDuplicate);
+				return originalNodeId;
 			}
-			String nodeId = new RemoteObjectService().getOrCreateRemoteMetadataObject(sourceRepositoryId, originalNodeId);
-			return this.addToCollection(collectionId, nodeId, allowDuplicate);
-		} else {
-			return addToCollection(collectionId, originalNodeId, allowDuplicate);
+			return RemoteObjectService.getOrCreateRemoteMetadataObject(sourceRepositoryId, originalNodeId);
 		}
+		return originalNodeId;
+	}
+
+	@Override
+	public String addToCollection(String collectionId, String originalNodeId, String sourceRepositoryId, boolean allowDuplicate)
+			throws DuplicateNodeException, Throwable {
+		originalNodeId = mapNodeId(originalNodeId, sourceRepositoryId);
+		return addToCollection(collectionId, originalNodeId, allowDuplicate);
 	}
 
 	@Override
@@ -313,7 +370,7 @@ public class CollectionServiceImpl implements CollectionService{
 						
 						collection.setLevel0(true);
 						
-						parentIdLocal = NodeServiceHelper.getContainerIdByPath(path, pattern);
+						parentIdLocal = getHomePath();
 					}
 					
 					HashMap<String,Object> props = asProps(collection);
@@ -337,7 +394,15 @@ public class CollectionServiceImpl implements CollectionService{
 		}
 			
 	}
-	
+
+	/**
+	 * return the folder id to the collection home where new collections should be created
+	 */
+	@Override
+	public String getHomePath() {
+		return AuthenticationUtil.runAsSystem(() -> NodeServiceHelper.getContainerIdByPath(path, pattern));
+	}
+
 	@Override
 	public Collection createAndSetScope(String parentId, Collection collection) throws Throwable{
 		Collection col = create(parentId,collection);
@@ -507,8 +572,16 @@ public class CollectionServiceImpl implements CollectionService{
 		collection.setColor((String)props.get(CCConstants.CCM_PROP_MAP_COLLECTIONCOLOR));
 		collection.setType((String)props.get(CCConstants.CCM_PROP_MAP_COLLECTIONTYPE));
 		collection.setViewtype((String)props.get(CCConstants.CCM_PROP_MAP_COLLECTIONVIEWTYPE));		
-		collection.setScope((String)props.get(CCConstants.CCM_PROP_MAP_COLLECTIONSCOPE));		
-		collection.setOrderMode((String)props.get(CCConstants.CCM_PROP_MAP_COLLECTION_ORDER_MODE));		
+		collection.setScope((String)props.get(CCConstants.CCM_PROP_MAP_COLLECTIONSCOPE));
+		collection.setOrderAscending(false);
+		String[] order = NodeServiceHelper.getPropertiesMultivalue(props).get(CCConstants.CCM_PROP_MAP_COLLECTION_ORDER_MODE);
+		if(order != null) {
+			collection.setOrderMode(order[0]);
+			// since 6.1, we store 2 values
+			if(order.length > 1) {
+				collection.setOrderAscending(Boolean.parseBoolean(order[1]));
+			}
+		}
 		collection.setAuthorFreetext((String)props.get(CCConstants.CCM_PROP_MAP_COLLECTION_AUTHOR_FREETEXT));
 		if(props.containsKey(CCConstants.CCM_PROP_COLLECTION_PINNED_STATUS))
 			collection.setPinned(new Boolean((String)props.get(CCConstants.CCM_PROP_COLLECTION_PINNED_STATUS)));
@@ -530,7 +603,7 @@ public class CollectionServiceImpl implements CollectionService{
 	@Override
 	public Collection get(String storeId, String storeProtocol, String collectionId, boolean fetchCounts) {
 		try{
-			HashMap<String,Object> props = client.getProperties(storeProtocol,storeId,collectionId);
+			HashMap<String,Object> props = nodeService.getProperties(storeProtocol,storeId,collectionId);
 			throwIfNotACollection(storeProtocol,storeId,collectionId);
 			
 			Collection collection = asCollection(props);
@@ -862,15 +935,10 @@ public class CollectionServiceImpl implements CollectionService{
 
 	@Override
 	public void setOrder(String parentId, String[] nodes) {
-		List<NodeRef> refs=getChildren(parentId, null, new SortDefinition(),Arrays.asList(new String[]{"files"}));
+		List<NodeRef> refs=getChildren(parentId, null, new SortDefinition(),Arrays.asList(new String[]{"files", "folders"}));
 		int order=0;
-		
-		String mode=CCConstants.COLLECTION_ORDER_MODE_CUSTOM;
-		if(nodes==null || nodes.length==0)
-			mode=null;
-		
+
 		HashMap<String,Object> collectionProps=new HashMap<>();
-		collectionProps.put(CCConstants.CCM_PROP_MAP_COLLECTION_ORDER_MODE, mode);
 		nodeService.updateNodeNative(parentId, collectionProps);
 		
 		if(nodes==null || nodes.length==0)
@@ -904,6 +972,19 @@ public class CollectionServiceImpl implements CollectionService{
 	}
 
 	@Override
+	public List<NodeRef> getReferenceObjectsSync(String nodeId){
+		Map<String,Object> map = new HashMap<>();
+		map.put(CCConstants.CCM_PROP_IO_ORIGINAL,nodeId);
+
+		List<String> aspects = new ArrayList<>();
+		aspects.add(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
+		logger.debug("cmis helper start");
+		List<org.alfresco.service.cmr.repository.NodeRef> nodes = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO,map,aspects,null,100000);
+		logger.debug("cmis helper finished");
+		return nodes;
+	}
+
+	@Override
 	public String addFeedback(String id, HashMap<String, String[]> feedbackData) throws Throwable {
 		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK);
 		new PermissionServiceHelper(PermissionServiceFactory.getLocalService()).validatePermissionOrThrow(id,CCConstants.PERMISSION_FEEDBACK);
@@ -934,5 +1015,19 @@ public class CollectionServiceImpl implements CollectionService{
 		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK);
 		new PermissionServiceHelper(PermissionServiceFactory.getLocalService()).validatePermissionOrThrow(id,CCConstants.PERMISSION_COORDINATOR);
 		return AuthenticationUtil.runAsSystem(()-> nodeService.getChildrenChildAssociationRefType(id, CCConstants.CCM_TYPE_COLLECTION_FEEDBACK).stream().map((ref)->ref.getChildRef().getId()).collect(Collectors.toList()));
+	}
+
+	@Override
+	public List<NodeRef> getCollectionProposals(String nodeId, CCConstants.PROPOSAL_STATUS status) {
+		Map<String, Object> filters = new HashMap<>();
+		filters.put(CCConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId).toString());
+		filters.put(CCConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS, status.toString());
+		List<NodeRef> collections = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_COLLECTION_PROPOSAL, filters);
+		return collections.stream().map(
+				(ref) -> serviceRegistry.getNodeService().getPrimaryParent(ref).getParentRef()
+		).filter((ref) ->
+			PermissionServiceHelper.hasPermission(ref, CCConstants.PERMISSION_ADD_CHILDREN)
+		).collect(Collectors.toList());
+
 	}
 }

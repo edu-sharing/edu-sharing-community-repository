@@ -6,7 +6,7 @@ import {Node} from '../../../../../core-module/rest/data-object';
 import {NodeHelperService} from '../../../../node-helper.service';
 
 @Component({
-    selector: 'app-list-node-workflow',
+    selector: 'es-list-node-workflow',
     templateUrl: './list-node-workflow.component.html',
 })
 export class ListNodeWorkflowComponent extends ListWidget {

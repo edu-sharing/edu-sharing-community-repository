@@ -1,13 +1,13 @@
 <div class="dialog darken">
   <div class="card center-card card-action">
     <div class="card-content">
-      <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i icon="close" [aria]="true"></i></div>
+      <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()"><i esIcon="close" [aria]="true"></i></div>
       <span class="card-title">{{'WORKSPACE.LTI_TOOLS.TITLE_CREATE_LTI' | translate:{tool:_tool.name} }}</span>
       <input type="text" #input [(ngModel)]="_name" (keyup.enter)="create()" (keyup)="setState($event)" (keypress)="setState($event)" placeholder="{{'WORKSPACE.LTI_TOOLS.CREATE_NAME_PLACEHOLDER' | translate }}" autofocus>
       <div class="location">{{ 'WORKSPACE.LTI_TOOLS.CREATE_LOCATION' | translate}}</div>
-      <breadcrumbs
+      <es-breadcrumbs
         [breadcrumbsAsNode]="path"
-      ></breadcrumbs>
+      ></es-breadcrumbs>
     </div>
 
     <div class="card-action">

@@ -1,11 +1,11 @@
-<card title="{{'WORKSPACE.WORKFLOW.TITLE' | translate}}" [node]="nodes" width="normal" height="large"
+<es-card title="{{'WORKSPACE.WORKFLOW.TITLE' | translate}}" [node]="nodes" width="large" height="xlarge"
       [buttons]="buttons"
       (onCancel)="cancel()"
 >
-  <spinner *ngIf="loading"></spinner>
+  <es-spinner *ngIf="loading"></es-spinner>
   <div class="workflow-content" *ngIf="!loading">
     <div class="inputs">
-      <authority-search-input
+      <es-authority-search-input
         [disabled]="!status.hasReceiver"
         [globalSearchAllowed]="globalAllowed"
         [groupType]="TYPE_EDITORIAL"
@@ -13,7 +13,7 @@
         (onChooseAuthority)="addSuggestion($event)"
         [placeholder]="'WORKSPACE.WORKFLOW.RECEIVERS'"
         hint="{{'WORKSPACE.WORKFLOW.RECEIVERS_HINT' | translate}}"
-      ></authority-search-input>
+      ></es-authority-search-input>
       <div class="status">
         <button mat-raised-button (click)="chooseStatus=true">
           <i class="align-icon statusIcon" [style.background-color]="status.color">&nbsp;</i> {{'WORKFLOW.'+status.id | translate}}
@@ -40,7 +40,7 @@
             <span class="primary">{{receiver | authorityName}}</span>
             <span class="secondary">{{receiver | permissionName:{field:'secondary'} }}</span>
           </div>
-          <i matChipRemove icon="cancel"></i>
+          <i matChipRemove esIcon="cancel"></i>
         </mat-chip>
       </mat-chip-list>
     </div>
@@ -52,74 +52,10 @@
     <div class="historyLabel" *ngIf="history.length">
       {{'WORKSPACE.WORKFLOW.HISTORY' | translate}}
     </div>
-    <div class="no-history" *ngIf="!history.length">{{'WORKSPACE.WORKFLOW.NO_HISTORY' | translate}}</div>
-    <div class="history">
-      <div *ngFor="let entry of history;let i=index">
-        <div class="user">{{ entry.editor | authorityName }}</div><div class="date">{{entry.time | formatDate:{time:true,relative:true} }}</div>
-        <div class="box">
-          <div class="row origin">
-            <div class="receivers">
-              <label>{{'WORKSPACE.WORKFLOW.RECEIVERS' | translate}}</label>
-              <mat-chip-list *ngIf="(i==history.length-1 || !getWorkflowForId(history[i+1].status).hasReceiver)">
-                <mat-chip>
-                  {{ 'WORKSPACE.WORKFLOW.NOBODY' | translate }}
-                </mat-chip>
-              </mat-chip-list>
-              <mat-chip-list *ngIf="!(i==history.length-1 || !getWorkflowForId(history[i+1].status).hasReceiver)">
-                <mat-chip *ngFor="let receiver of history[i+1].receiver" class="badge">
-                  <i class="badgeIconLeft" [icon]="receiver.authorityType=='USER' ? 'person' : 'group'"></i>
-                  <div class="mat-chip-group">
-                    <span class="primary">{{receiver | authorityName}}</span>
-                    <span class="secondary">{{receiver | permissionName:{field:'secondary'} }}</span>
-                  </div>
-                </mat-chip>
-              </mat-chip-list>
-            </div>
-            <div class="status" *ngIf="i<history.length-1">
-              <label>{{'WORKSPACE.WORKFLOW.OLD_STATUS' | translate}}</label>
-              <div class="workflowStatus" [style.background-color]="getWorkflowForId(history[i+1].status).color">{{'WORKFLOW.'+history[i+1].status | translate}}</div>
-            </div>
-            <div class="status" *ngIf="i==history.length-1">
-              <label>{{'WORKSPACE.WORKFLOW.OLD_STATUS' | translate}}</label>
-              <div class="workflowStatus" [style.background-color]="defaultStatus.color">{{'WORKFLOW.'+defaultStatus.id | translate}}</div>
-            </div>
-          </div>
-          <div class="row arrow">
-            <i icon="keyboard_arrow_right"></i>
-          </div>
-          <div class="row target">
-            <div class="receivers">
-              <label>{{'WORKSPACE.WORKFLOW.RECEIVERS_NEXT' | translate}}</label>
-              <mat-chip-list *ngIf="!getWorkflowForId(history[i].status).hasReceiver">
-                <mat-chip>
-                  {{ 'WORKSPACE.WORKFLOW.NOBODY' | translate }}
-                </mat-chip>
-              </mat-chip-list>
-              <mat-chip-list *ngIf="getWorkflowForId(history[i].status).hasReceiver && entry.receiver?.length">
-                <mat-chip *ngFor="let receiver of entry.receiver" class="badge">
-                  <i class="badgeIconLeft" [icon]="receiver.authorityType=='USER' ? 'person' : 'group'"></i>
-                  <div class="mat-chip-group">
-                    <span class="primary">{{receiver | authorityName}}</span>
-                    <span class="secondary">{{receiver | permissionName:{field:'secondary'} }}</span>
-                  </div>
-                </mat-chip>
-              </mat-chip-list>
-            </div>
-            <div class="status">
-              <label>{{'WORKSPACE.WORKFLOW.NEW_STATUS' | translate}}</label>
-              <div class="workflowStatus" [style.background-color]="getWorkflowForId(entry.status).color">{{'WORKFLOW.'+entry.status | translate}}</div>
-            </div>
-          </div>
-        </div>
-        <div class="comment" *ngIf="entry.comment">
-          <label>{{'WORKSPACE.WORKFLOW.COMMENT' | translate}}</label>
-          <div>{{ entry.comment }}</div>
-        </div>
-      </div>
-    </div>
   </div>
-</card>
-<modal-dialog
+  <es-workflow-list [history]="history"></es-workflow-list>
+</es-card>
+<es-modal-dialog
   [isCancelable]="true"
   [title]="dialogTitle"
   [message]="dialogMessage"
@@ -127,4 +63,4 @@
   [buttons]="dialogButtons"
   [priority]="1"
   (onCancel)="dialogTitle=null"
-></modal-dialog>
+></es-modal-dialog>

@@ -1,10 +1,11 @@
-import { TestBed, async, inject, getTestBed, ComponentFixture } from '@angular/core/testing';
+import { TestBed, inject, getTestBed, ComponentFixture, waitForAsync } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { WorkspaceLicenseComponent } from './license.component';
 import { TranslateService, TranslateModule, TranslatePipe, TranslateLoader } from '@ngx-translate/core';
 import { DECLARATIONS } from '../../../declarations';
 import { PROVIDERS } from '../../../providers';
 import { IMPORTS } from '../../../imports';
+import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
@@ -20,7 +21,7 @@ const fake_translate: any = {
 
 export class FakeLoader implements TranslateLoader {
   getTranslation(lang: string): Observable<any> {
-    return Observable.of(fake_translate)
+    return rxjs.of(fake_translate)
   }
 }
 
@@ -31,7 +32,7 @@ const country_code = ["AL", "DE", "AR", "FR", "GR", "CH"]
 
 // FIXME: Currently, all tests fail.
 xdescribe('WorkspaceLicenseComponent ', () => {
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         IMPORTS,

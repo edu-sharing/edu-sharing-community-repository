@@ -1,23 +1,23 @@
-<workspace-license
+<es-workspace-license
   *ngIf="nodeLicense"
   [nodes]="nodeLicense"
   (onLoading)="globalProgress=$event"
   (onCancel)="closeLicense()"
   (openContributor)="nodeContributor=$event[0]"
   (onDone)="updateLicense($any($event))"
-></workspace-license>
-<add-stream
+></es-workspace-license>
+<es-add-stream
   *ngIf="addNodesStream"
   [nodes]="addNodesStream"
   (onLoading)="globalProgress=$event"
   (onCancel)="closeStream()"
   (onDone)="closeStream()"
-></add-stream>
-<app-signup-group *ngIf="signupGroup"
+></es-add-stream>
+<es-signup-group *ngIf="signupGroup"
     (onCancel)="signupGroup = false; signupGroupChange.emit(false)"
 >
-</app-signup-group>
-<workspace-metadata *ngIf="nodeSidebar"
+</es-signup-group>
+<es-workspace-metadata *ngIf="nodeSidebar"
                     [@fromRight]="nodeSidebar"
                     class="metadata-sidebar"
                     [node]="nodeSidebar"
@@ -25,9 +25,9 @@
                     (onDisplay)="displayNode($event)"
                     (onEditMetadata)="nodeMetadata=[$event]"
                     (onClose)="closeSidebar()"
-></workspace-metadata>
+></es-workspace-metadata>
 
-<mds
+<es-mds
         *ngIf="collectionWriteFeedback"
         customTitle="COLLECTIONS.FEEDBACK_TITLE"
         [embedded]="false"
@@ -38,8 +38,8 @@
         labelPositive="COLLECTIONS.FEEDBACK_SAVE"
         (onCancel)="closeCollectionWriteFeedback()"
         (onDone)="addCollectionFeedback($event)"
-></mds>
-<app-simple-edit-dialog
+></es-mds>
+<es-simple-edit-dialog
     *ngIf="_nodeSimpleEdit"
     [nodes]="_nodeSimpleEdit"
     [fromUpload]="_nodeFromUpload"
@@ -49,39 +49,39 @@
     (onCancel)="closeSimpleEdit(false)"
     (onClose)="closeSimpleEdit(true, $event)"
     (onDone)="closeSimpleEdit(true, $event)"
-    ></app-simple-edit-dialog>
-<app-view-collection-feedback
+    ></es-simple-edit-dialog>
+<es-view-collection-feedback
     *ngIf="collectionViewFeedback"
     [collection]="collectionViewFeedback"
     (onClose)="closeCollectionViewFeedback()"
-    ></app-view-collection-feedback>
-<collections-manage-pinning
+    ></es-view-collection-feedback>
+<es-collections-manage-pinning
         *ngIf="addPinnedCollection"
         [addCollection]="addPinnedCollection"
         (onClose)="closePinnedCollection()"
-></collections-manage-pinning>
-<workspace-share *ngIf="nodeShare"
+></es-collections-manage-pinning>
+<es-workspace-share *ngIf="nodeShare"
                  [nodes]="nodeShare"
                  [sendMessages]="true"
                  (onLoading)="globalProgress=$event"
                  (onClose)="closeShare()"
-></workspace-share>
-<node-info *ngIf="nodeDebug"
+></es-workspace-share>
+<es-node-info *ngIf="nodeDebug"
            [node]="$any(nodeDebug)"
            (onClose)="closeDebug()"
-></node-info>
-<card
+></es-node-info>
+<!-- <es-card
         *ngIf="qr"
         [node]="qr.node"
         [isCancelable]="true"
         title="{{ 'OPTIONS.QR_CODE' | translate }}"
         (onCancel)="qr=null"
-        class="qr"
+        class="qr-link-card"
         width="xlarge"
         height="xxxlarge">
     <qrcode [qrdata]="qr.data" elementType="img" [margin]="2" [width]="512" errorCorrectionLevel="M"></qrcode>
-</card>
-<card
+</es-card> -->
+<es-card
     *ngIf="_nodeDelete"
     title="{{ nodeDeleteTitle | translate }}"
     height="auto"
@@ -93,52 +93,50 @@
         {{ nodeDeleteMessage | translate:nodeDeleteMessageParams }}
         <div *ngIf="nodeDeleteBlock" class="delete-block-checkbox">
           <mat-checkbox [(ngModel)]="nodeDeleteBlockStatus">
-            <app-multi-line-label>
+            <es-multi-line-label>
               <ng-container slot="label">
                 {{'WORKSPACE.DELETE_IMPORT_BLOCK' | translate}}
               </ng-container>
               <ng-container slot="description">
                 {{'WORKSPACE.DELETE_IMPORT_BLOCK_INFO' | translate}}
               </ng-container>
-            </app-multi-line-label>
+            </es-multi-line-label>
           </mat-checkbox>
         </div>
     </div>
-</card>
-<workspace-workflow *ngIf="nodeWorkflow"
+</es-card>
+<es-workspace-workflow *ngIf="nodeWorkflow"
                     [nodes]="nodeWorkflow"
                     (onLoading)="globalProgress=$event"
                     (onDone)="closeWorkflow($event)"
                     (onClose)="closeWorkflow()"
-></workspace-workflow>
-<workspace-share-link *ngIf="nodeShareLink"
+></es-workspace-workflow>
+<es-workspace-share-link *ngIf="nodeShareLink"
                       [node]="nodeShareLink"
                       (onLoading)="globalProgress=$event"
                       (onClose)="closeShareLink()"
-></workspace-share-link>
-<node-report
+></es-workspace-share-link>
+<es-node-report
   *ngIf="nodeReport"
   [node]="nodeReport"
   (onLoading)="globalProgress=$event"
   (onCancel)="closeReport()"
   (onDone)="closeReport()"
-></node-report>
-<node-variant
+></es-node-report>
+<es-node-variant
         *ngIf="nodeVariant"
         [node]="nodeVariant"
         (onLoading)="globalProgress=$event"
         (onCancel)="closeVariant()"
         (onDone)="closeVariant()"
-></node-variant>
-<app-map-link
+></es-node-variant>
+<es-map-link
         *ngIf="linkMap"
         [node]="linkMap"
         (onCancel)="closeLinkMap()"
         (onDone)="closeLinkMap($event)"
-></app-map-link>
-<collection-chooser
-  role="dialog"
-  [attr.aria-label]="'WORKSPACE.SELECT_COLLECTION' | translate"
+></es-map-link>
+<es-collection-chooser
   class="dialog-right scrollWithBanner"
   *ngIf="addToCollection"
   [@fromRight]="addToCollection"
@@ -151,8 +149,8 @@
   <ng-template #beforeRecent let-currentRoot>
     <ng-container *ngTemplateOutlet="collectionChooserBeforeRecentRef; context: { $implicit: currentRoot }"></ng-container>
   </ng-template>
-</collection-chooser>
-<workspace-lti-tools *ngIf="showLtiTools"
+</es-collection-chooser>
+<es-workspace-lti-tools *ngIf="showLtiTools"
                      [refresh]="ltiToolRefresh"
                      [(currentTool)]="currentLtiTool"
                      (onClose)="closeLtiTools()"
@@ -160,21 +158,21 @@
                      (onCreateLtiObject)="createLtiObject($event)"
                      (onCreate)="createLti($event)"
                      (onOpenConfig)="openLtiConfig($event)"
-></workspace-lti-tools>
+></es-workspace-lti-tools>
 
-<workspace-lti-tool-configs *ngIf="ltiToolConfig"
+<es-workspace-lti-tool-configs *ngIf="ltiToolConfig"
                             [tool]="ltiToolConfig"
                             (onClose)="closeLtiToolConfig()"
                             (onEdit)="editLti($event)"
                             (onCreate)="createLti($event)"
-></workspace-lti-tool-configs>
-<workspace-create-lti *ngIf="ltiObject"
+></es-workspace-lti-tool-configs>
+<es-workspace-create-lti *ngIf="ltiObject"
                       [tool]="ltiObject"
                       [parent]="parent"
                       (onCancel)="ltiObject=null"
                       (onCreate)="createLtiNodeObject($event)"
-></workspace-create-lti>
-<app-mds-editor-wrapper *ngIf="_nodeMetadata || createMetadata"
+></es-workspace-create-lti>
+<es-mds-editor-wrapper *ngIf="_nodeMetadata || createMetadata"
      [nodes]="_nodeMetadata"
      [create]="createMetadata"
      [parentNode]="metadataParent"
@@ -184,37 +182,27 @@
      (openLicense)="nodeLicense=_nodeMetadata;editorPending=true;"
      (openTemplate)="nodeTemplate=_nodeMetadata[0]"
      (openContributor)="nodeContributor=_nodeMetadata[0];editorPending=true;"
-></app-mds-editor-wrapper>
-<node-template *ngIf="nodeTemplate"
+></es-mds-editor-wrapper>
+<es-node-template *ngIf="nodeTemplate"
      [nodeId]="nodeTemplate.ref.id"
      (onClose)="closeTemplate()"
-></node-template>
-<workspace-file-upload *ngIf="filesToUpload"
+></es-node-template>
+<es-workspace-file-upload *ngIf="filesToUpload"
                        [current]="parent"
                        [files]="filesToUpload"
                        (onDone)="uploadDone($event)"
-></workspace-file-upload>
-<workspace-file-upload-select *ngIf="showUploadSelect"
+></es-workspace-file-upload>
+<es-workspace-file-upload-select *ngIf="showUploadSelect"
                               [isFileOver]="fileIsOver"
                               [(parent)]="parent"
                               [showPicker]="uploadShowPicker"
                               [multiple]="uploadMultiple"
-                              (onCancel)="closeUploadSelect()"
+                              (onCancel)="cancelUploadSelect()"
                               (onFileSelected)="uploadFile($event)"
                               (onLinkSelected)="createUrlLink($event)"
-></workspace-file-upload-select>
-<workspace-contributor *ngIf="nodeContributor"
+></es-workspace-file-upload-select>
+<es-workspace-contributor *ngIf="nodeContributor"
                        [node]="nodeContributor"
                        (onLoading)="globalProgress=$event"
                        (onClose)="closeContributor($event)"
-></workspace-contributor>
-<modal-dialog
-              *ngIf="dialogTitle"
-              [title]="dialogTitle"
-              [message]="dialogMessage"
-              [messageParameters]="dialogMessageParameters"
-              [node]="dialogNode"
-              [isCancelable]="dialogCancelable"
-              [buttons]="dialogButtons"
-              (onCancel)="dialogTitle=null"
-></modal-dialog>
+></es-workspace-contributor>
