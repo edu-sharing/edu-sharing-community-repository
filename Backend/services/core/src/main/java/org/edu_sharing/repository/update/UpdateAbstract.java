@@ -106,10 +106,13 @@ public abstract class UpdateAbstract implements Update {
 		}
 	}
 
+
 	public boolean runAndReport(){
 		return false;
 	}
 	
-	public abstract void run() throws Throwable;
+	public void run() throws Throwable {
+		runAndReport();
+	}
 	
 }
