@@ -138,7 +138,7 @@
 
       <dependency>
         <groupId>org.alfresco</groupId>
-        <artifactId>alfresco-platform-community-distributionzip</artifactId>
+        <artifactId>alfresco-content-services-community-distribution</artifactId>
         <version>${alfresco.platform.version}</version>
         <type>zip</type>
       </dependency>
