@@ -1,7 +1,13 @@
 import { Injectable } from '@angular/core';
-import { Node } from '../../core-module/core.module';
-import { ListItem } from '../../core-module/core.module';
+import { SearchConfig } from 'ngx-edu-sharing-api';
 import { BehaviorSubject } from 'rxjs';
+import { SearchFieldService } from 'src/app/main/navigation/search-field/search-field.service';
+import { ListItem, Node } from '../../core-module/core.module';
+import { NodeDataSource } from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
+import {
+    ListSortConfig,
+    NodeEntriesDisplayType
+} from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 
 /**
  * Session state for search.component.
@@ -11,24 +17,28 @@ import { BehaviorSubject } from 'rxjs';
  */
 @Injectable()
 export class SearchService {
-    searchTerm: string = '';
-    searchResult: Node[] = [];
+    searchTermSubject = new BehaviorSubject<string>('');
+    get searchTerm(): string {
+        return this.searchTermSubject.value;
+    }
+    set searchTerm(value: string) {
+        this.searchTermSubject.next(value);
+    }
+    dataSourceSearchResult: { [key: number]: NodeDataSource<Node> } = [];
     searchResultRepositories: Node[][] = [];
-    searchResultCollections: Node[] = [];
+    dataSourceCollections = new NodeDataSource<Node>();
     columns: ListItem[] = [];
     collectionsColumns: ListItem[] = [];
     ignored: Array<string> = [];
     reurl: string;
-    facettes: Array<any> = [];
     autocompleteData: any = [];
-    skipcount: number[] = [];
     numberofresults: number = 0;
     offset: number = 0;
     complete: boolean = false;
     showchosenfilters: boolean = false;
+    displayType: NodeEntriesDisplayType = null;
     // Used by node-render.component
     reinit = true;
-    resultCount: any = {};
     sidenavSet = false;
     sidenavOpened$ = new BehaviorSubject(false);
     set sidenavOpened(value: boolean) {
@@ -37,13 +47,20 @@ export class SearchService {
     get sidenavOpened(): boolean {
         return this.sidenavOpened$.value;
     }
-    showspinner: boolean;
     ex: boolean;
-    viewType = -1;
-    sort: any = {};
+    sort: ListSortConfig;
     extendedSearchUsed = false;
 
-    constructor() {}
+    private readonly searchConfigSubject = new BehaviorSubject<Partial<SearchConfig>>({});
+
+    constructor(private searchField: SearchFieldService) {
+        this.searchConfigSubject.pipe().subscribe((config) => {
+            const { repository, metadataSet } = config;
+            if (repository && metadataSet) {
+                this.searchField.setMdsInfo({ repository, metadataSet });
+            }
+        });
+    }
 
     clear() {
         this.searchTerm = '';
@@ -53,12 +70,23 @@ export class SearchService {
         if (!this.reinit) {
             return;
         }
-        this.skipcount = [];
         this.offset = 0;
-        this.searchResult = [];
-        this.searchResultCollections = [];
+        this.dataSourceSearchResult = [new NodeDataSource<Node>()];
+        this.dataSourceSearchResult[0].isLoading = true;
+        this.dataSourceCollections.reset();
         this.searchResultRepositories = [];
         this.complete = false;
-        this.facettes = [];
+    }
+
+    setRepository(repository: string): void {
+        if (this.searchConfigSubject.value.repository !== repository) {
+            this.searchConfigSubject.next({ ...this.searchConfigSubject.value, repository });
+        }
+    }
+
+    setMetadataSet(metadataSet: string): void {
+        if (this.searchConfigSubject.value.metadataSet !== metadataSet) {
+            this.searchConfigSubject.next({ ...this.searchConfigSubject.value, metadataSet });
+        }
     }
 }

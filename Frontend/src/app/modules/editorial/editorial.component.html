@@ -1,9 +1,7 @@
-<main-nav #mainNav
-></main-nav>
-<h1 appTitle class="cdk-visually-hidden">{{ 'WORKSPACE.TITLE' | translate }}</h1>
+<h1 esTitle class="cdk-visually-hidden">{{ 'WORKSPACE.TITLE' | translate }}</h1>
 <div class="editorial-container">
-    <actionbar #actionbar></actionbar>
-    <listTable #list
+    <es-actionbar #actionbar></es-actionbar>
+    <es-listTable #list
                [nodes]="nodes"
                [viewType]="0"
                [scope]="SCOPES.Search"
@@ -13,5 +11,5 @@
                [columns]="columns"
                [hasCheckbox]="true"
                [hasIcon]="true"
-    ></listTable>
+    ></es-listTable>
 </div>

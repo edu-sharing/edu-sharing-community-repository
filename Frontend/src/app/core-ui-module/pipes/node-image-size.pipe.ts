@@ -1,5 +1,4 @@
 import {PipeTransform, Pipe} from '@angular/core';
-import {Translation} from "../translation";
 import {RestConstants} from '../../core-module/rest/rest-constants';
 import {Node} from '../../core-module/rest/data-object';
 

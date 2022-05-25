@@ -142,7 +142,7 @@ public class Mail {
 		
 		email.setCharset("utf-8");
 		
-		email.setDebug(true);
+		email.setDebug(false);
 		email.setHostName(mailServer);
 		email.setSmtpPort((int) smtpPort);
 		
@@ -157,12 +157,12 @@ public class Mail {
 		
 
 		if ((username != null && password != null) && (!username.trim().equals("") && !password.trim().equals(""))) {
-			logger.info("email.setAuthentication()");
+			logger.debug("email.setAuthentication()");
 			email.setAuthentication(username, password);
 		}
 		try{
 			logger.info("start sending mail...");
-			logger.info("sender:" + sender);
+			logger.debug("sender:" + sender);
 			logger.debug("receiver:" + receiver);
 			logger.debug("subject" + subject);
 			logger.debug("message:" + message);
@@ -255,7 +255,7 @@ public class Mail {
 				String condVar=cond.substring(0,end);
 				boolean isTrue=false;
 				if(replace!=null){
-					isTrue=replace.containsKey(condVar) && !replace.get(condVar).trim().isEmpty();
+					isTrue=replace.get(condVar) != null && !replace.get(condVar).trim().isEmpty();
 				}
 				int endif=cond.indexOf("{{endif}}");
 				String content=cond.substring(end+2,endif);

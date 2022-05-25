@@ -1,16 +1,5 @@
 package org.edu_sharing.restservices.admin.v1;
 
-import java.io.*;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -32,20 +21,13 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.cache.CacheCluster;
 import org.edu_sharing.repository.client.rpc.cache.CacheInfo;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.jobs.quartz.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
-import org.edu_sharing.restservices.ApiService;
-import org.edu_sharing.restservices.CollectionDao;
-import org.edu_sharing.restservices.DAOException;
-import org.edu_sharing.restservices.NodeDao;
-import org.edu_sharing.restservices.RepositoryDao;
-import org.edu_sharing.restservices.RestConstants;
+import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.admin.v1.model.*;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.NotAnAdminException;
@@ -54,8 +36,8 @@ import org.edu_sharing.service.admin.AdminServiceFactory;
 import org.edu_sharing.service.admin.model.GlobalGroup;
 import org.edu_sharing.service.admin.model.RepositoryConfig;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
-import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.admin.model.ToolPermission;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.lifecycle.PersonDeleteOptions;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.lifecycle.PersonReport;
@@ -66,14 +48,24 @@ import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
-import org.edu_sharing.service.admin.model.ToolPermission;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.xcontent.ToXContent;
 import org.elasticsearch.xcontent.XContentBuilder;
 import org.elasticsearch.xcontent.XContentFactory;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
-import io.swagger.annotations.Api;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import java.io.FileWriter;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.io.Writer;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 @Path("/admin/v1")
 @Tag(name="ADMIN v1")
@@ -238,7 +230,7 @@ public class AdminApi {
 				entry.setRepositoryType(appInfo.getRepositoryType());
 				entry.setSubtype(appInfo.getSubtype());
 				entry.setXml(appInfo.getXml());
-				entry.setFile(new File(appInfo.getAppFile()).getName());
+				entry.setFile(appInfo.getAppFile());
 				if (ApplicationInfo.TYPE_RENDERSERVICE.equals(entry.getType()) && entry.getContentUrl() != null) {
 					entry.setConfigUrl(appInfo.getContentUrl().replace("/application/esmain/index.php", "/admin"));
 				}
@@ -281,7 +273,7 @@ public class AdminApi {
 			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response getAllJobs(@Context HttpServletRequest req) {
 		try {
-			return Response.ok().entity(AdminServiceFactory.getInstance().getJobDescriptions()).build();
+			return Response.ok().entity(AdminServiceFactory.getInstance().getJobDescriptions(false)).build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}
@@ -375,7 +367,6 @@ public class AdminApi {
 
 	@PUT
 	@Path("/applications/{xml}")
-
 	@Operation(summary = "edit any properties xml (like homeApplication.properties.xml)", description = "if the key exists, it will be overwritten. Otherwise, it will be created. You only need to transfer keys you want to edit")
 
 	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
@@ -422,7 +413,7 @@ public class AdminApi {
 
 	@PUT
 	@Path("/applications/xml")
-
+	@Consumes({ "multipart/form-data" })
 	@Operation(summary = "register/add an application via xml file", description = "register the xml file provided.")
 
 	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = HashMap.class))),
@@ -1120,7 +1111,7 @@ public class AdminApi {
 
 	public Response startJob(
 			@Parameter(description = "jobClass", required = true) @PathParam("jobClass") String jobClass,
-			@Parameter(description = "params", required = true) HashMap<String, String> params,
+			@Parameter(description = "params", required = true) HashMap<String, Serializable> params,
 			@Context HttpServletRequest req) {
 		try {
 			AdminServiceFactory.getInstance().startJob(jobClass, new HashMap<String,Object>(params));
@@ -1128,6 +1119,31 @@ public class AdminApi {
 		} catch (NotAnAdminException e) {
 			return ErrorResponse.createResponse(e);
 		} catch (Exception e) {
+			return ErrorResponse.createResponse(e);
+		}
+
+	}
+	@POST
+	@Path("/job/{jobClass}/sync")
+	@Operation(summary = "Start a Job.", description = "Start a Job. Wait for the result synchronously")
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Object.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+
+	public Response startJobSync(
+			@Parameter(description = "jobClass", required = true) @PathParam("jobClass") String jobClass,
+			@Parameter(description = "params", required = true) HashMap<String, Serializable> params,
+			@Context HttpServletRequest req) {
+		try {
+			Object result = AdminServiceFactory.getInstance().startJobSync(jobClass, new HashMap<>(params));
+			return Response.ok().entity(result).build();
+		} catch (NotAnAdminException e) {
+			return ErrorResponse.createResponse(e);
+		} catch (Throwable e) {
 			return ErrorResponse.createResponse(e);
 		}
 
@@ -1511,8 +1527,8 @@ public class AdminApi {
 			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response getConfigFile(@Context HttpServletRequest req,
 								  @Parameter(description = "filename to fetch", required = true) @QueryParam("filename") String filename,
- 								  @Parameter(description = "path prefix this file belongs to", required = true) @QueryParam("pathPrefix") PropertiesHelper.Config.PathPrefix pathPrefix
-								  ) {
+								  @Parameter(description = "path prefix this file belongs to", required = true) @QueryParam("pathPrefix") PropertiesHelper.Config.PathPrefix pathPrefix
+	) {
 		try {
 			String content=AdminServiceFactory.getInstance().getConfigFile(filename, pathPrefix);
 			return Response.ok().entity(content).build();
@@ -1520,6 +1536,7 @@ public class AdminApi {
 			return ErrorResponse.createResponse(t);
 		}
 	}
+
 	@GET
 	@Path("/plugins")
 	@Operation(summary = "get enabled system plugins")
@@ -1541,14 +1558,14 @@ public class AdminApi {
 
 	@GET
 	@Path("/config/merged")
-	@Operation(summary = "Get the fully merged & parsed (lightbend) backend config")
+	@Operation(description = "Get the fully merged & parsed (lightbend) backend config")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Object.class))),
-			@ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Object.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
 	public Response getLightbendConfig(@Context HttpServletRequest req) {
 		try {
 			return Response.ok().entity(
@@ -1584,7 +1601,7 @@ public class AdminApi {
 	@Path("/authenticate/{authorityName}")
 	@Operation(summary = "switch the session to a known authority name")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
 			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),

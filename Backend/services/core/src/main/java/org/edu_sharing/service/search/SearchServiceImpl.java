@@ -38,8 +38,8 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 
+import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.service.InsufficientPermissionException;
-import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
@@ -675,7 +675,7 @@ public class SearchServiceImpl implements SearchService {
 		HashMap<ContentType, SearchToken> lastTokens = getLastSearchTokens();
 		lastTokens.put(searchToken.getContentType(),searchToken);
 		Context.getCurrentInstance().getRequest().getSession().setAttribute(CCConstants.SESSION_LAST_SEARCH_TOKENS,lastTokens);
-		List<String> facettes = searchToken.getFacets();
+		List<String> facets = searchToken.getFacets();
 		SearchResultNodeRef search = search(searchToken,true);
 		return search;
 	}
@@ -728,15 +728,17 @@ public class SearchServiceImpl implements SearchService {
 				}
 			}
 
-			List<String> facettes = searchToken.getFacets();
+			List<String> facets = searchToken.getFacets();
 
-			if (facettes != null && facettes.size() > 0) {
-				for (String facetteProp : facettes) {
-					String fieldFacette = facetteProp;
-					if(!fieldFacette.startsWith("@")) {
-						fieldFacette = "@" + facetteProp;
+			if (facets != null && facets.size() > 0) {
+				for (String facetProp : facets) {
+					String fieldFacetStr = facetProp;
+					if(!fieldFacetStr.startsWith("@")) {
+						fieldFacetStr = "@" + facetProp;
 					}
-					FieldFacet fieldFacet = new FieldFacet(fieldFacette);
+					FieldFacet fieldFacet = new FieldFacet(fieldFacetStr);
+					fieldFacet.setLimit(searchToken.getFacetLimit());
+					fieldFacet.setMinCount(searchToken.getFacetsMinCount());
 					searchParameters.addFieldFacet(fieldFacet);
 				}
 			}
@@ -768,21 +770,25 @@ public class SearchServiceImpl implements SearchService {
 			sr.setNodeCount((int) resultSet.getNumberFound());
 
 			// process facette
-			if (facettes != null && facettes.size() > 0) {
-				Map<String, Map<String, Integer>> newCountPropsMap = new HashMap<String, Map<String, Integer>>();
-				for (FieldFacet facetteProp : searchParameters.getFieldFacets()) {
-					Map<String, Integer> resultPairs = newCountPropsMap.get(facetteProp.getField());
-					if (resultPairs == null) {
-						resultPairs = new HashMap<String, Integer>();
+			if (facets != null && facets.size() > 0) {
+				Map<String, NodeSearch.Facet> newCountPropsMap = new HashMap<>();
+				for (FieldFacet facetProp : searchParameters.getFieldFacets()) {
+					NodeSearch.Facet facetPair = newCountPropsMap.get(facetProp.getField());
+					if (facetPair == null) {
+						facetPair = new NodeSearch.Facet();
 					}
-					String fieldFacette = facetteProp.getField();
+					String facetField = facetProp.getField();
+					if(facetField.startsWith("@")) {
+						facetField = facetField.substring(1);
+					}
+					facetPair.setProperty(facetField);
+					String fieldFacet = facetProp.getField();
 
-					List<Pair<String, Integer>> facettPairs = resultSet.getFieldFacet(fieldFacette);
-					Integer subStringCount = null;
+					List<Pair<String, Integer>> facetPairs = resultSet.getFieldFacet(fieldFacet);
 
 					// plain solr
-					logger.info("found " + facettPairs.size() + " facette pairs for" + fieldFacette);
-					for (Pair<String, Integer> pair : facettPairs) {
+					logger.info("found " + facetPairs.size() + " facet pairs for" + fieldFacet);
+					for (Pair<String, Integer> pair : facetPairs) {
 
 						// value contains language information i.e. {de}
 						String first = pair.getFirst().replaceAll("\\{[a-z]*\\}", "");
@@ -795,25 +801,21 @@ public class SearchServiceImpl implements SearchService {
 						 * --> pair.getSecond() > 0
 						 */
 						if (first != null && !first.trim().equals("") && pair.getSecond() > 0) {
-							resultPairs.put(first, pair.getSecond());
+							NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
+							value.setValue(first);
+							value.setCount(pair.getSecond());
+							facetPair.getValues().add(value);
 						}
 					}
 
-					if (resultPairs.size() > 0) {
-						String prop = facetteProp.getField();
-						if(prop.startsWith("@")) {
-							prop = prop.substring(1);
-						}
-						newCountPropsMap.put(prop, resultPairs);
+					if (facetPair.getValues().size() > 0) {
+						newCountPropsMap.put(facetProp.getField(), facetPair);
 					}
+					sr.setFacets(new ArrayList<>(newCountPropsMap.values()));
 				}
-
-				sr.setCountedProps(searchToken.aggregateFacettes(newCountPropsMap));
-
 			}
 			SearchLogger.logSearch(searchToken,sr);
 			return sr;
-
 		} catch (Throwable e) {
 			if(e.getCause() != null) e.getCause().printStackTrace();
 			logger.error(e.getMessage(), e);
@@ -1064,5 +1066,10 @@ public class SearchServiceImpl implements SearchService {
 	@Override
 	public Set<SearchVCard> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind contributorKind) throws IOException {
 		throw new NotImplementedException("searchContributors not supported via Solr");
+	}
+
+	@Override
+	public SearchResultNodeRef getMetadata(List<String> nodeIds) throws IOException {
+		throw new NotImplementedException("getMetadata not supported via Solr");
 	}
 }

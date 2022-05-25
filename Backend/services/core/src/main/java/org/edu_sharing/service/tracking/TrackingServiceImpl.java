@@ -8,6 +8,7 @@ import org.alfresco.service.namespace.QName;
 import org.apache.ibatis.binding.BindingException;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.EduGroup;
@@ -127,7 +128,9 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
     @Override
     public boolean trackActivityOnUser(String authorityName, EventType type) {
         super.trackActivityOnUser(authorityName,type);
-        if(authorityName==null || authorityName.equals(ApplicationInfoList.getHomeRepository().getGuest_username()) || authorityName.equals(AuthenticationUtil.getSystemUserName())){
+        if(authorityName==null
+                || GuestCagePolicy.getGuestUsers().contains(authorityName)
+                || authorityName.equals(AuthenticationUtil.getSystemUserName())){
             return false;
         }
         return AuthenticationUtil.runAs(()-> execDatabaseQuery(TRACKING_INSERT_USER, statement -> {

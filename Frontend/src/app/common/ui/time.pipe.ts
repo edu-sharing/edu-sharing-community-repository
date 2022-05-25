@@ -1,7 +1,7 @@
 import {PipeTransform, Pipe} from '@angular/core';
 import {TranslateService} from "@ngx-translate/core";
 import {DateHelper} from "../../core-ui-module/DateHelper";
-import {isNumeric} from "rxjs/util/isNumeric";
+import { isNumeric } from './isNumeric';
 
 /**
  * Format a given value of time in seconds to a readable time span

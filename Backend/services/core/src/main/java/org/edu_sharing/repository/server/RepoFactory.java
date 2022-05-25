@@ -52,6 +52,7 @@ import org.edu_sharing.repository.server.tools.AuthenticatorRemoteAppResult;
 import org.edu_sharing.repository.server.tools.AuthenticatorRemoteRepository;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.service.config.ConfigServiceFactory;
+import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.provider.ProviderHelper;
 import org.edu_sharing.service.version.VersionService;
 
@@ -241,6 +242,8 @@ public class RepoFactory {
 			JobHandler.getInstance().refresh();
 		} catch (Exception ignored) {}
 		eduSharingProps = null;
+		PropertiesInterceptorFactory.refresh();
+		ProviderHelper.clearCache();
 	}
 
 	public static List<MetadataSetInfo> getMetadataSetsForRepository(String repositoryId) throws Exception {

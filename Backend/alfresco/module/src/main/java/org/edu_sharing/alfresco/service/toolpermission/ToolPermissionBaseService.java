@@ -56,7 +56,7 @@ public class ToolPermissionBaseService {
     private boolean hasToolPermissionWithoutCache(String toolPermission) {
         AuthenticationUtil.RunAsWork<String> workTP= () -> {
             try {
-                return getToolPermissionNodeId(toolPermission);
+                return getToolPermissionNodeId(toolPermission, true);
             } catch (Throwable e) {
                 logger.error(e.getMessage(), e);
                 return null;
@@ -223,7 +223,7 @@ public class ToolPermissionBaseService {
     protected void initToolPermissions(List<String> toolPermissions) throws Throwable{
 
         for(String toolPermission : toolPermissions){
-            getToolPermissionNodeId(toolPermission);
+            getToolPermissionNodeId(toolPermission, true);
         }
         List<? extends Config> list = LightbendConfigLoader.get().getConfigList("repository.toolpermissions.managed");
         if(!list.isEmpty()) {
@@ -261,7 +261,8 @@ public class ToolPermissionBaseService {
             });
         }
     }
-    public String getToolPermissionNodeId(String toolPermission, boolean autoCreate) throws Throwable{
+
+    public String getToolPermissionNodeId(String toolPermission, boolean createIfNotExists) throws Throwable{
         if(toolPermissionNodeCache.containsKey(toolPermission)) {
             String nodeId=toolPermissionNodeCache.get(toolPermission);
             // validate that the cached node is not deleted
@@ -275,10 +276,10 @@ public class ToolPermissionBaseService {
         NodeRef sysObject = nodeService.getChildByName(systemFolderId, ContentModel.ASSOC_CONTAINS, toolPermission);
 
         if(sysObject == null){
-            if(autoCreate) {
+            if(createIfNotExists) {
                 return createToolpermission(toolPermission).getId();
             } else {
-                return null;
+                 return null;
             }
         }else{
             String nodeId=sysObject.getId();
@@ -374,7 +375,8 @@ public class ToolPermissionBaseService {
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COMMENT_WRITE);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_USER);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_NODES);
-        toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_RATE);
+        toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_RATE_READ);
+        toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_RATE_WRITE);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_VIDEO_AUDIO_CUT);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_MEDIACENTER_MANAGE);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_PUBLISH_COPY);
@@ -382,6 +384,7 @@ public class ToolPermissionBaseService {
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_SIGNUP_GROUP);
 
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS);
+        toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PROPOSAL);
 
         addConnectorToolpermissions(toInit);
         return toInit;

@@ -1,20 +1,17 @@
-import {Component, ElementRef, HostListener, ViewChild, OnInit, OnDestroy} from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
-import { Translation } from '../../core-ui-module/translation';
+import {Component, HostListener, NgZone, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {TranslateService} from '@ngx-translate/core';
+import { TranslationsService } from '../../translations/translations.service';
 import {
     ClipboardObject,
     ConfigurationService,
     Connector,
-    ConnectorList, DialogButton,
+    DialogButton,
     EventListener,
     Filetype,
     FrameEventsService,
     IamUser,
-    LoginResult,
     Node,
     NodeList,
-    NodeRef,
-    NodeVersions,
     NodeWrapper,
     RestCollectionService,
     RestConnectorService,
@@ -27,37 +24,47 @@ import {
     RestToolService,
     SessionStorageService,
     TemporaryStorageService,
-    UIService,
-    Version
+    UIService
 } from '../../core-module/core.module';
-import { ActivatedRoute, Params, Router } from '@angular/router';
-import {CustomOptions, DefaultGroups, ElementType, OptionGroup, OptionItem} from '../../core-ui-module/option-item';
-import { Toast } from '../../core-ui-module/toast';
-import { UIAnimation } from '../../core-module/ui/ui-animation';
+import {ActivatedRoute, Params, Router} from '@angular/router';
+import {
+    CustomOptions,
+    DefaultGroups,
+    ElementType,
+    OptionItem
+} from '../../core-ui-module/option-item';
+import {Toast} from '../../core-ui-module/toast';
+import {UIAnimation} from '../../core-module/ui/ui-animation';
 import {NodeHelperService} from '../../core-ui-module/node-helper.service';
-import { KeyEvents } from '../../core-module/ui/key-events';
-import { UIHelper } from '../../core-ui-module/ui-helper';
-import { trigger } from '@angular/animations';
-import { UIConstants } from '../../core-module/ui/ui-constants';
-import { ActionbarHelperService } from '../../common/services/actionbar-helper';
-import { Helper } from '../../core-module/rest/helper';
-import { DateHelper } from '../../core-ui-module/DateHelper';
-import { CordovaService } from '../../common/services/cordova.service';
-import { HttpClient } from '@angular/common/http';
-import { MainNavComponent } from '../../common/ui/main-nav/main-nav.component';
-import { MatMenuTrigger } from '@angular/material/menu';
-import { GlobalContainerComponent } from '../../common/ui/global-container/global-container.component';
+import {KeyEvents} from '../../core-module/ui/key-events';
+import {UIHelper} from '../../core-ui-module/ui-helper';
+import {trigger} from '@angular/animations';
+import {UIConstants} from '../../core-module/ui/ui-constants';
+import {ActionbarHelperService} from '../../common/services/actionbar-helper';
+import {Helper} from '../../core-module/rest/helper';
+import {CordovaService} from '../../common/services/cordova.service';
+import {HttpClient} from '@angular/common/http';
+import {MainNavComponent} from '../../main/navigation/main-nav/main-nav.component';
 import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {WorkspaceExplorerComponent} from './explorer/explorer.component';
-import { CardService } from '../../core-ui-module/card.service';
-import { Observable } from 'rxjs';
-import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
+import {CardService} from '../../core-ui-module/card.service';
+import {BehaviorSubject, Observable, Subject} from 'rxjs';
+import * as rxjs from 'rxjs';
+import {delay} from 'rxjs/operators';
 import {ListTableComponent} from '../../core-ui-module/components/list-table/list-table.component';
+import {SkipTarget} from '../../main/navigation/skip-nav/skip-nav.service';
+import {DragNodeTarget} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
+import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
+import {
+    DropSource, DropTarget, NodeEntriesDisplayType,
+    NodeRoot
+} from '../../core-ui-module/components/node-entries-wrapper/entries-model';
+import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
+import { MainNavService } from '../../main/navigation/main-nav.service';
 
-export type WorkspaceRoot = 'MY_FILES' | 'SHARED_FILES' | 'MY_SHARED_FILES' | 'TO_ME_SHARED_FILES' | 'WORKFLOW_RECEIVE' | 'RECYCLE' | 'ALL_FILES';
 @Component({
-    selector: 'workspace-main',
+    selector: 'es-workspace-main',
     templateUrl: 'workspace.component.html',
     styleUrls: ['workspace.component.scss'],
     animations: [
@@ -68,8 +75,7 @@ export type WorkspaceRoot = 'MY_FILES' | 'SHARED_FILES' | 'MY_SHARED_FILES' | 'T
         trigger('fromRight', UIAnimation.fromRight())
     ]
 })
-export class WorkspaceMainComponent implements EventListener, OnDestroy {
-    readonly SkipTarget = SkipTarget;
+export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy {
     @ViewChild('explorer') explorer: WorkspaceExplorerComponent;
     @ViewChild('actionbar') actionbarRef: ActionbarComponent;
     private static VALID_ROOTS = ['MY_FILES', 'SHARED_FILES', 'MY_SHARED_FILES', 'TO_ME_SHARED_FILES', 'WORKFLOW_RECEIVE', 'RECYCLE'];
@@ -78,33 +84,54 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
 
     cardHasOpenModals$: Observable<boolean>;
     private isRootFolder: boolean;
-    private homeDirectory: string;
     private sharedFolders: Node[] = [];
     path: Node[] = [];
     private parameterNode: Node;
-    root: WorkspaceRoot = 'MY_FILES';
-
-    selection: Node[] = [];
+    root: NodeRoot = 'MY_FILES';
 
     showSelectRoot = false;
-    createConnectorName: string;
-    createConnectorType: Connector;
 
-    public allowBinary = true;
+    private allowBinarySubject = new BehaviorSubject(true);
+    get allowBinary() {
+        return this.allowBinarySubject.value;
+    }
+    set allowBinary(value) {
+        this.allowBinarySubject.next(value);
+    }
+    private createAllowedSubject = new BehaviorSubject<boolean | 'EMIT_EVENT'>(null);
+    get createAllowed(): boolean | 'EMIT_EVENT' {
+        return this.createAllowedSubject.value;
+    }
+    set createAllowed(value: boolean | 'EMIT_EVENT') {
+        this.createAllowedSubject.next(value);
+    }
+    private currentFolderSubject = new BehaviorSubject<Node>(null);
+    get currentFolder(): Node {
+        return this.currentFolderSubject.value;
+    }
+    set currentFolder(value: Node) {
+        this.currentFolderSubject.next(value);
+    }
+    private searchQuerySubject = new BehaviorSubject<{ node: Node; query: string; }>(null);
+    public get searchQuery(): { node: Node; query: string; } {
+        return this.searchQuerySubject.value;
+    }
+    public set searchQuery(value: { node: Node; query: string; }) {
+        this.searchQuerySubject.next(value);
+    }
+
+
     public globalProgress = false;
     public editNodeDeleteOnCancel = false;
     private createMds: string;
     private nodeDisplayedVersion: string;
-    createAllowed: boolean;
-    currentFolder: Node;
+    notAllowedReason: string;
     user: IamUser;
-    public searchQuery: any;
     public isSafe = false;
     isLoggedIn = false;
     public addNodesToCollection: Node[];
     public addNodesStream: Node[];
     public variantNode: Node;
-    @ViewChild('mainNav') mainNavRef: MainNavComponent;
     private connectorList: Connector[];
     private currentNode: Node;
     public mainnav = true;
@@ -121,7 +148,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
 
     toMeSharedToggle: boolean;
 
-    currentNodes: Node[];
+    dataSource = new NodeDataSource<Node>();
     private appleCmd = false;
     private reurl: string;
     private mdsParentNode: Node;
@@ -130,17 +157,18 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     selectedNodeTree: string;
     public contributorNode: Node;
     public shareLinkNode: Node;
-    viewType: 0|1|null = null;
+    displayType: NodeEntriesDisplayType  = null;
     private reurlDirectories: boolean;
     reorderDialog: boolean;
+    private readonly destroyed$ = new Subject<void>();
+    private loadingTask = this.loadingScreen.addLoadingTask();
     @HostListener('window:beforeunload', ['$event'])
     beforeunloadHandler(event: any) {
         if (this.isSafe) {
             this.connector.logout().toPromise();
         }
     }
-    @HostListener('window:scroll', ['$event'])
-    handleScroll(event: Event) {
+    private handleScroll(event: Event) {
         const scroll = (window.pageYOffset || document.documentElement.scrollTop);
         if (scroll > 0) {
             this.storage.set('workspace_scroll', scroll);
@@ -163,29 +191,27 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         const clip = (this.storage.get('workspace_clipboard') as ClipboardObject);
         const fromInputField = KeyEvents.eventFromInputField(event);
 
-        if (event.key === 'Escape') {
-            if (this.createConnectorName != null) {
-                this.createConnectorName = null;
-            }
-            else {
-                return;
-            }
-            event.preventDefault();
-            event.stopPropagation();
-        }
     }
     onEvent(event: string, data: any): void {
         if (event === FrameEventsService.EVENT_REFRESH) {
             this.refresh();
         }
     }
+
+    ngOnInit(): void {
+        this.registerScroll();
+        this.registerUpdateMainNav();
+    }
+
     ngOnDestroy(): void {
+        this.destroyed$.next();
+        this.destroyed$.complete();
         this.storage.remove('workspace_clipboard');
         if(this.currentFolder) {
             this.storage.set(this.getLastLocationStorageId(), this.currentFolder.ref.id);
         }
         // close sidebar, if open
-        this.mainNavRef.management.closeSidebar();
+        this.mainNavService.getDialogs().closeSidebar();
     }
     constructor(
         private toast: Toast,
@@ -195,6 +221,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         private http: HttpClient,
         private nodeHelper: NodeHelperService,
         private translate: TranslateService,
+        private translations: TranslationsService,
         private storage: TemporaryStorageService,
         private config: ConfigurationService,
         private connectors: RestConnectorsService,
@@ -210,54 +237,101 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         private connector: RestConnectorService,
         private cordova: CordovaService,
         private card: CardService,
+        private ngZone: NgZone,
+        private loadingScreen: LoadingScreenService,
+        private mainNavService: MainNavService,
     ) {
         this.event.addListener(this);
-        Translation.initialize(translate, this.config, this.session, this.route).subscribe(() => {
+        this.translations.waitForInit().subscribe(() => {
             this.initialize();
         });
         this.connector.setRoute(this.route);
         this.globalProgress = true;
-        this.cardHasOpenModals$ = card.hasOpenModals.delay(0);
+        this.cardHasOpenModals$ = card.hasOpenModals.pipe(delay(0));
+    }
+
+    /**
+     * Needs the following member variables to be initialized:
+     * - isSafe
+     * - isBlocked
+     * - mainnav
+     */
+     private initMainNav(): void {
+        this.mainNavService.setMainNavConfig({
+            title: this.isSafe ? 'WORKSPACE.TITLE_SAFE' : 'WORKSPACE.TITLE',
+            currentScope: this.isSafe ? 'safe' : 'workspace',
+            searchEnabled: !this.isBlocked,
+            create: {
+                allowed: this.createAllowed,
+                allowBinary: this.allowBinary,
+                parent: this.currentFolder,
+                folder: true,
+            },
+            onCreate: (nodes) => this.explorer.nodeEntries.addVirtualNodes(nodes),
+            onCreateNotAllowed: () => this.createNotAllowed(),
+            searchPlaceholder: this.isSafe ? 'WORKSPACE.SAFE_SEARCH' : 'WORKSPACE.SEARCH',
+            canOpen: this.mainnav,
+            searchQuery: this.searchQuery?.query,
+            onSearch: (query, cleared) => this.doSearch({ query, cleared }),
+        });
+    }
+
+    private registerUpdateMainNav(): void {
+        rxjs.combineLatest([
+            this.createAllowedSubject,
+            this.allowBinarySubject,
+            this.currentFolderSubject,
+        ]).subscribe(([createAllowed, allowBinary, currentFolder]) =>
+            this.mainNavService.patchMainNavConfig({
+                create: {
+                    allowed: createAllowed,
+                    allowBinary: allowBinary,
+                    parent: currentFolder,
+                    folder: true,
+                },
+            }),
+        );
+        this.searchQuerySubject.subscribe((searchQuery) =>
+            this.mainNavService.patchMainNavConfig({
+                searchQuery: searchQuery?.query,
+            }),
+        );
+    }    
+
+    private registerScroll(): void {
+        this.ngZone.runOutsideAngular(() => {
+            const handleScroll = (event: Event) => this.handleScroll(event);
+            window.addEventListener('scroll', handleScroll);
+            this.destroyed$.subscribe(() => window.removeEventListener('scroll', handleScroll));
+        })
     }
 
     private hideDialog(): void {
         this.toast.closeModalDialog();
     }
-    // @ TODO: Move to create menu (probably)
-    showCreateConnector(connector: Connector) {
-        this.createConnectorName = '';
-        this.createConnectorType = connector;
-        this.iam.getCurrentUserAsync().then((user) => {
-            if (user.person.quota.enabled && user.person.quota.sizeCurrent >= user.person.quota.sizeQuota) {
-                this.toast.showModalDialog('CONNECTOR_QUOTA_REACHED_TITLE', 'CONNECTOR_QUOTA_REACHED_MESSAGE', DialogButton.getOk(() => {
-                    this.toast.closeModalDialog();
-                }), true);
-                this.createConnectorName = null;
-            }
-        });
-    }
+
     private editConnector(node: Node = null, type: Filetype = null, win: any = null, connectorType: Connector = null) {
         UIHelper.openConnector(this.connectors, this.iam, this.event, this.toast, this.getNodeList(node)[0], type, win, connectorType);
     }
-    handleDrop(event: any) {
-        for (const s of event.source) {
-            if (event.target.ref.id === s.ref.id || event.target.ref.id === s.parent.id) {
+    handleDrop(event: {target: DropTarget, source: DropSource<Node>}) {
+        for (const s of event.source.element) {
+            if ((event.target as Node).ref?.id === s.ref.id || (event.target as Node).ref?.id === s.parent.id) {
                 this.toast.error(null, 'WORKSPACE.SOURCE_TARGET_IDENTICAL');
                 return;
             }
         }
-        if (!event.target.isDirectory) {
+        if (event.target !== 'MY_FILES' && !(event.target as Node).isDirectory) {
             this.toast.error(null, 'WORKSPACE.TARGET_NO_DIRECTORY');
             return;
         }
-        if (event.event.altKey) {
+        if (event.source.mode === 'link') {
             this.toast.error(null, 'WORKSPACE.FEATURE_NOT_IMPLEMENTED');
         }
-        else if (event.type === 'copy') {
-            this.copyNode(event.target, event.source);
+        else if (event.source.mode === 'copy') {
+            this.copyNode(event.target, event.source.element);
         }
         else {
-            this.moveNode(event.target, event.source);
+            this.moveNode(event.target, event.source.element);
         }
         /*
         this.dialogTitle="WORKSPACE.DRAG_DROP_TITLE";
@@ -270,15 +344,18 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         ]
         */
     }
-    canDropBreadcrumbs = (event: any) => event.target.ref.id !== this.currentFolder.ref.id;
-    private moveNode(target: Node, source: Node[], position = 0) {
+    canDropBreadcrumbs = (event: any) => {
+        return event.target === 'HOME' ? this.root === 'MY_FILES' :
+            event.target?.ref?.id !== this.currentFolder.ref.id;
+    };
+    private moveNode(target: DropTarget, source: Node[], position = 0) {
         this.globalProgress = true;
         if (position >= source.length) {
             this.finishMoveCopy(target, source, false);
             this.globalProgress = false;
             return;
         }
-        this.node.moveNode(target.ref.id, source[position].ref.id).subscribe((data: NodeWrapper) => {
+        this.node.moveNode((target as Node).ref?.id || RestConstants.USERHOME, source[position].ref.id).subscribe((data: NodeWrapper) => {
                 this.moveNode(target, source, position + 1);
             },
             (error: any) => {
@@ -287,14 +364,14 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 this.moveNode(target, source, position + 1);
             });
     }
-    private copyNode(target: Node, source: Node[], position = 0) {
+    private copyNode(target: DropTarget, source: Node[], position = 0) {
         this.globalProgress = true;
         if (position >= source.length) {
             this.finishMoveCopy(target, source, true);
             this.globalProgress = false;
             return;
         }
-        this.node.copyNode(target.ref.id, source[position].ref.id).subscribe((data: NodeWrapper) => {
+        this.node.copyNode((target as Node).ref?.id || RestConstants.USERHOME, source[position].ref.id).subscribe((data: NodeWrapper) => {
                 this.copyNode(target, source, position + 1);
             },
             (error: any) => {
@@ -303,10 +380,10 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 this.copyNode(target, source, position + 1);
             });
     }
-    private finishMoveCopy(target: Node, source: Node[], copy: boolean) {
+    private finishMoveCopy(target: DropTarget, source: Node[], copy: boolean) {
         this.toast.closeModalDialog();
         const info: any = {
-            to: target.name,
+            to: (target as Node).name || this.translate.instant('WORKSPACE.MY_FILES'),
             count: source.length,
             mode: this.translate.instant('WORKSPACE.' + (copy ? 'PASTE_COPY' : 'PASTE_MOVE'))
         };
@@ -358,15 +435,8 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             } catch (e) {
                 console.warn('no connectors found: ' + e.toString());
             }
-            const data = await this.node.getHomeDirectory().toPromise();
             this.globalProgress = false;
-            this.homeDirectory = data.id;
             this.route.queryParams.subscribe((params: Params) => {
-
-                if (params.connector) {
-                    this.showCreateConnector(this.connectorList.filter((c) => c.id === params.connector)[0]);
-                }
-
                 let needsUpdate = false;
                 if (this.oldParams) {
                     for (const key of Object.keys(this.oldParams).concat(Object.keys(params))) {
@@ -380,13 +450,12 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                     }
                 } else {
                     needsUpdate = true;
-                    this.explorer.showLoading = true;
                 }
                 this.oldParams = params;
-                if (params.viewType != null) {
-                    this.setViewType(params.viewType, false);
+                if (params.displayType != null) {
+                    this.setDisplayType(parseInt(params[UIConstants.QUERY_PARAM_LIST_VIEW_TYPE], 10), false);
                 } else {
-                    this.setViewType(this.config.instant('workspaceViewType', ListTableComponent.VIEW_TYPE_LIST), false);
+                    this.setDisplayType(this.config.instant('workspaceViewType', NodeEntriesDisplayType.Table) as NodeEntriesDisplayType, false);
                 }
                 if (params.root && WorkspaceMainComponent.VALID_ROOTS.indexOf(params.root) !== -1) {
                     this.root = params.root;
@@ -399,11 +468,13 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 this.reurlDirectories = params.applyDirectories === 'true';
                 this.mainnav = params.mainnav === 'false' ? false : true;
 
+                this.initMainNav();
+
                 if (params.file) {
                     this.node.getNodeMetadata(params.file, [RestConstants.ALL]).subscribe((paramNode) => {
                         this.setSelection([paramNode.node]);
                         this.parameterNode = paramNode.node;
-                        this.mainNavRef.management.nodeSidebar = paramNode.node;
+                        this.mainNavService.getDialogs().nodeSidebar = paramNode.node;
                     });
                 }
 
@@ -428,7 +499,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         });
     }
     public resetWorkspace() {
-        if (this.mainNavRef.management.nodeSidebar && this.parameterNode) {
+        if (this.mainNavService.getDialogs().nodeSidebar && this.parameterNode) {
             this.setSelection([this.parameterNode]);
         }
     }
@@ -450,9 +521,10 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         if (node == null && this.root !== 'RECYCLE') {
             this.root = 'ALL_FILES';
         }
-        this.createAllowed = false;
+        this.createAllowed = 'EMIT_EVENT';
+        this.notAllowedReason = 'WORKSPACE.CREATE_REASON.SEARCH';
         this.path = [];
-        this.selection = [];
+        this.setSelection([]);
     }
     private deleteDone() {
         this.closeMetadata();
@@ -474,7 +546,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             this.nodeDisplayed = event;
             this.nodeDisplayedVersion = event.version;
             */
-            this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.currentNodes);
+            this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE, this.dataSource);
             this.currentNode = list[0];
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', list[0].ref.id, list[0].version ? list[0].version : ''],
                 {
@@ -492,7 +564,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         }
         let nodes = [node];
         if (node == null) {
-            nodes = this.selection;
+            nodes = this.explorer.nodeEntries.getSelection().selected;
         }
         return nodes;
     }
@@ -502,28 +574,26 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             this.node.getNodeMetadata(folder.id).subscribe((node: NodeWrapper) => this.sharedFolders.push(node.node));
         }
     }
-    setRoot(root: WorkspaceRoot) {
+    setRoot(root: NodeRoot) {
         this.root = root;
         this.searchQuery = null;
         this.routeTo(root, null, null);
         this.actionbarRef.invalidate();
     }
-    private updateList(nodes: Node[]) {
-        this.currentNodes = nodes;
-    }
 
     setSelection(nodes: Node[]) {
-        this.selection = nodes;
+        this.explorer.nodeEntries.getSelection().clear();
+        this.explorer.nodeEntries.getSelection().select(...nodes);
         this.setFixMobileNav();
     }
     private setFixMobileNav() {
-        this.mainNavRef.setFixMobileElements(this.selection && this.selection.length > 0);
+        this.mainNavService.getMainNav().setFixMobileElements(this.explorer.nodeEntries.getSelection().selected?.length > 0);
     }
     private updateLicense() {
         this.closeMetadata();
     }
     private closeMetadata() {
-        this.mainNavRef.management.closeSidebar();
+        this.mainNavService.getDialogs().closeSidebar();
     }
     private openDirectory(id: string) {
         this.routeTo(this.root, id);
@@ -533,13 +603,12 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     }
     private openDirectoryFromRoute(params: any = null) {
         let id = params?.id;
-        this.selection = [];
         this.closeMetadata();
-        this.createAllowed = false;
         if (!id) {
             this.path = [];
             id = this.getRootFolderInternalId();
             if (this.root === 'RECYCLE') {
+                this.createAllowed = false;
                 // GlobalContainerComponent.finishPreloading();
                 // return;
             }
@@ -549,6 +618,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             this.node.getNodeParents(id, false, [RestConstants.ALL]).subscribe((data: NodeList) => {
                 if (this.root === 'RECYCLE') {
                     this.path = [];
+                    this.createAllowed = false;
                 }
                 else {
                     this.path = data.nodes.reverse();
@@ -573,7 +643,8 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                     }
                 });
                 this.updateNodeByParams(params, data.node);
-                this.createAllowed = !this.searchQuery && this.nodeHelper.getNodesRight([data.node], RestConstants.ACCESS_ADD_CHILDREN);
+                this.createAllowed = !this.searchQuery && this.nodeHelper.getNodesRight([data.node], RestConstants.ACCESS_ADD_CHILDREN) ? true : 'EMIT_EVENT';
+                this.notAllowedReason = 'WORKSPACE.CREATE_REASON.PERMISSIONS';
                 this.recoverScrollposition();
             }, (error: any) => {
                 this.updateNodeByParams(params, { ref: { id } });
@@ -586,9 +657,13 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 || id === '-to_me_shared_files-') {
                 this.isRootFolder = false;
             }
-
             if (id === RestConstants.USERHOME) {
                 this.createAllowed = true;
+            } else if (this.root === 'RECYCLE') {
+                this.createAllowed = false;
+            } else {
+                this.createAllowed = 'EMIT_EVENT';
+                this.notAllowedReason = 'WORKSPACE.CREATE_REASON.VIRTUAL';
             }
             const node: Node|any = {
                 ref: {
@@ -647,7 +722,6 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         const folder = this.currentFolder;
         this.currentFolder = null;
         this.searchQuery = null;
-        this.selection = [];
         const path = this.path;
         if (refreshPath) {
             this.path = [];
@@ -659,26 +733,17 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         });
     }
 
-    private refreshRoute() {
-        this.routeTo(
-            this.root,
-            !this.isRootFolder && this.currentFolder ? this.currentFolder.ref.id : null,
-            this.searchQuery ? this.searchQuery.query : null
-        );
-    }
-    private routeTo(root: string, node: string = null, search: string = null) {
-        const params: any = { root, id: node, query: search, mainnav: this.mainnav };
+    private async routeTo(root: string, node: string = null, search: string = null) {
+        const params = await UIHelper.getCommonParameters(this.route).toPromise();
+        params.root = root;
+        params.id = node;
+        params.query = search;
+        params.mainnav = this.mainnav;
         // tslint:disable-next-line:triple-equals
-        if(this.viewType !== null) {
-            params[UIConstants.QUERY_PARAM_LIST_VIEW_TYPE] = this.viewType;
+        if (this.displayType !== null) {
+            params.displayType = this.displayType;
         }
-        if (this.reurl) {
-            params.reurl = this.reurl;
-        }
-        if (this.reurlDirectories) {
-            params.applyDirectories = this.reurlDirectories;
-        }
-        this.router.navigate(['./'], { queryParams: params, relativeTo: this.route })
+        this.router.navigate(['./'], {queryParams: params, relativeTo: this.route})
             .then((result: boolean) => {
                 if (!result) {
                     this.refresh(false);
@@ -741,17 +806,6 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         return this.getRootFolderId();
     }
 
-    private toggleView() {
-        this.setViewType(this.viewType === 1 ? 0 : 1);
-        if (this.viewType === 0) {
-            this.viewToggle.icon = 'view_module';
-        }
-        else {
-            this.viewToggle.icon = 'list';
-        }
-
-    }
-
     public listLTI() {
         this.showLtiTools = true;
     }
@@ -778,7 +832,9 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     }
 
     private updateNodeByParams(params: any, node: Node | any) {
-        GlobalContainerComponent.finishPreloading();
+        if (!this.loadingTask.isDone) {
+            this.loadingTask.done();
+        }
         if (params?.query) {
             this.doSearchFromRoute(params, node);
         }
@@ -799,7 +855,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
     }
 
     private updateNodes(nodes: Node[]) {
-        for(let node of this.currentNodes){
+        for(let node of this.dataSource.getData()){
             const hit = nodes.filter((n) => n.ref.id === node.ref.id);
             if (hit && hit.length === 1) {
                 Helper.copyObjectProperties(node, hit[0]);
@@ -835,14 +891,38 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         return TemporaryStorageService.WORKSPACE_LAST_LOCATION + (this.isSafe ? RestConstants.SAFE_SCOPE : '');
     }
 
-    /**
-     * function to add value to viewType
-     * @param viewType as params accept number, in this case we want just 0|1
-     */
-    private setViewType(viewType: 0|1, refreshRoute = true) {
-        this.viewType = viewType;
+    setDisplayType(displayType: NodeEntriesDisplayType, refreshRoute = true) {
+        this.displayType = displayType;
         if(refreshRoute) {
-            this.refreshRoute();
+            this.router.navigate(['./'], {
+                relativeTo: this.route,
+                replaceUrl: true,
+                queryParamsHandling: 'merge',
+                queryParams: {
+                    [UIConstants.QUERY_PARAM_LIST_VIEW_TYPE]: displayType
+                }
+            });
         }
+    }
+
+    async createNotAllowed() {
+        const message = (await this.translate.get(this.notAllowedReason).toPromise()) + '\n\n' +
+                (await this.translate.get('WORKSPACE.CREATE_REASON.GENERAL').toPromise());
+            this.toast.showConfigurableDialog({
+                title: 'WORKSPACE.CREATE_REASON.TITLE',
+                message,
+                isCancelable: true,
+                buttons: [
+                    new DialogButton('WORKSPACE.GO_TO_HOME', DialogButton.TYPE_PRIMARY + DialogButton.TYPE_SECONDARY, () => {
+                        this.openDirectory(RestConstants.USERHOME);
+                        this.toast.closeModalDialog();
+                    }),
+                    new DialogButton('CLOSE', DialogButton.TYPE_CANCEL, () => this.toast.closeModalDialog()),
+                ]
+            });
+    }
+
+    onDeleteNodes(nodes: Node[]): void {
+        this.mainNavService.getDialogs().nodeDelete = nodes;
     }
 }

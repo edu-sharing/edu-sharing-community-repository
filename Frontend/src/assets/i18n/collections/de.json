@@ -6,14 +6,18 @@
         "ERROR_DELETE": "Fehler beim Löschen der Sammlung",
         "ENTER_NAME": "Bitte einen Namen für die Sammlung eingeben.",
         "NO_EDITORIAL_GROUPS": "Noch keine Redaktionsgruppen festgelegt.",
-        "ORDER_ELEMENTS": "Reihenfolge der Materialien manuell festlegen?",
-        "ORDER_ELEMENTS_INFO": "Betrachter der Sammlung sehen die enthaltenen Materialien in einer bestimmten Reihenfolge.",
-        "ORDER_SAVED": "Reihenfolge erfolgreich festgelegt",
+        "ORDER_ELEMENTS": "Reihenfolge der Materialien manuell festlegen",
+        "ORDER_ELEMENTS_INFO": "Betrachter der Sammlung sehen die enthaltenen Materialien in der festgelegten Reihenfolge.",
+        "ORDER_COLLECTIONS": "Reihenfolge der Sammlungen manuell festlegen",
+        "ORDER_COLLECTIONS_INFO": "Betrachter der Sammlung sehen die enthaltenen Untersammlungen in der festgelegten Reihenfolge.",
+        "SORT_SLIDER": "Umsortieren",
         "CUSTOM_ORDER": "Festgelegte Reihenfolge",
-        "PERMISSIONS": "Eingeladen:",
+        "PERMISSIONS": "Eingeladen",
         "DETAILS": "Sammlungsdetails",
         "EDITORIAL_PUBLIC": "Öffentlich sichtbar",
         "EDITORIAL_PUBLIC_INFO": "Die redaktionelle Sammlung ist für alle Nutzer und ggf. Gäste sichtbar",
+        "CREATOR": "Ersteller",
+        "SHARING_STATE": "Freigabezustand",
         "STEP": {
             "GENERAL": "Titel, Bild, Beschreibung und Farbe",
             "METADATA": "Weitere Informationen",
@@ -55,10 +59,7 @@
         },
         "PINNING": {
             "TITLE": "Gepinnte Sammlungen",
-            "UPDATED": "Liste gepinnter Sammlungen wurde aktualisiert",
-            "POSITION_SLIDER": "Position der Sammlung \"{{ collection }}\" in der Liste",
-            "MOVE_DOWN": "Nach unten verschieben",
-            "MOVE_UP": "Nach oben verschieben"
+            "UPDATED": "Liste gepinnter Sammlungen wurde aktualisiert"
         },
         "NO_ADD_PERMISSIONS": "Sie besitzen keine Berechtigung um Materialien in diese Sammlung aufzunehmen",
         "ERROR_NOT_FOUND": "Sammlung wurde nicht gefunden",
@@ -80,11 +81,19 @@
         "EXTENDED_PERMISSIONS_BUTTON": "Einladen",
         "TOAST": {
             "DUPLICATE_NAME": "Eine Sammlung mit diesen Namen existiert bereits",
+            "ERROR_IMAGE_APPLY": "Das ausgewählte Bild konnte leider nicht gelesen werden. Bitte versuchen Sie es mit einem anderen Element.",
             "CREATED": "Sammlung wurde erstellt",
-            "INVALID_NAME": "Der Name ist unzulässig. Bitte keine Sonderzeichen verwenden"
+            "INVALID_NAME": "Der Name ist unzulässig. Bitte keine Sonderzeichen verwenden",
+            "SORT_SAVED_TYPE": "Die gewählte Sortierung nach \"{{type}}\" gilt zukünftig für alle Betrachter der Sammlung",
+            "SORT_SAVED_CUSTOM": "Die festgelegte Reihenfolge gilt zukünftig für alle Betrachter der Sammlung"
         },
         "NEW": {
-            "AUTHOR_FREETEXT": "Bezeichnung des Autors"
+            "AUTHOR_FREETEXT": "Bezeichnung des Autors",
+            "IMAGE": {
+              "UPLOAD" : "Bild hochladen",
+              "SEARCH" : "Bild aus Suche wählen",
+              "DELETE" : "Bild löschen"
+            }
         },
         "FEEDBACK_TITLE": "Feedback zur Sammlung geben",
         "FEEDBACK_VIEW_TITLE": "Abgegebenes Feedback zur Sammlung",
@@ -95,6 +104,13 @@
         "ADD_TO": {
             "DUPLICATE_TITLE": "Element(e) bereits vorhanden",
             "DUPLICATE_MESSAGE": "{{count}} Element(e) sind bereits in der Sammlung vorhanden. Möchten Sie diese erneut einfügen?"
+        },
+        "PROPOSALS": {
+            "TITLE": "Von Nutzern vorgeschlagene Materialien",
+            "TOAST": {
+                "ACCEPTED": "Das Element wurde der Sammlung hinzugefügt",
+                "DECLINED": "Der Vorschlag wurde abgelehnt"
+            }
         }
     },
 
@@ -107,9 +123,6 @@
     "collections_howToAddContent": "Sie können in der Suchumgebung nach geeigneten Materialien für Ihre Sammlung suchen. Klicken Sie einfach auf ein geeignetes Material und wählen Sie dann die Option 'zu Sammlung hinzufügen' aus.",
 
     "collectionNew_preview": "Vorschau meiner Sammlung",
-    "collectionNew_collectionImage": "Sammlungsbild",
-    "collectionNew_uploadCollectionImage": "Ein neues Sammlungsbild hochladen",
-    "collectionNew_deleteCollectionImage": "Das Sammlungsbild löschen",
     "collectionNew_setColor": "Farbe für diese Sammlung:",
     "collectionNew_colorIndex": "Farbe {{ index }}",
     "collectionNew_createCollection": "erstellen",

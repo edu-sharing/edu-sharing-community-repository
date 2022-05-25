@@ -83,6 +83,14 @@ public abstract class AbstractJob implements Job,InterruptableJob {
 		isInterrupted = true;
 	}
 
+	/**
+	 * store any result data which should be given back to the request
+	 * Only used when the job was called via a synchronized wait
+	 */
+	public void storeJobResultData(Object data) {
+		jobDataMap.put(JobHandler.KEY_RESULT_DATA, data);
+	}
+
 	@Override
 	public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
 		this.jobDataMap=jobExecutionContext.getJobDetail().getJobDataMap();

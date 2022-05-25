@@ -14,6 +14,7 @@ public class Collection {
 	String viewtype;
 	String scope;
 	String orderMode;
+	Boolean orderAscending;
 	
 	int childCollectionsCount;
 	
@@ -154,8 +155,15 @@ public class Collection {
 		this.orderMode = orderMode;
 	}
 
+	public Boolean getOrderAscending() {
+		return orderAscending;
+	}
 
-    public String getAuthorFreetext() {
+	public void setOrderAscending(Boolean orderAscending) {
+		this.orderAscending = orderAscending;
+	}
+
+	public String getAuthorFreetext() {
         return authorFreetext;
     }
 

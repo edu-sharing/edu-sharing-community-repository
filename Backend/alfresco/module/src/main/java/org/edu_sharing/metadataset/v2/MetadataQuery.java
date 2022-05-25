@@ -7,6 +7,7 @@ public class MetadataQuery extends MetadataQueryBase implements Serializable {
 	protected String id;
 	protected String join;
 	protected Boolean applyBasequery;
+	protected boolean basequeryAsFilter = true;
 	private List<MetadataQueryParameter> parameters;
 
 	public MetadataQuery(){}
@@ -64,6 +65,11 @@ public class MetadataQuery extends MetadataQueryBase implements Serializable {
 			this.conditions=query.conditions;
 		if(query.join!=null)
 			this.join=query.join;
+
+		if(query.getBasequeryAsFilter() != this.getBasequeryAsFilter()){
+			this.setBasequeryAsFilter(query.getBasequeryAsFilter());
+		}
+
 		for(MetadataQueryParameter param : query.parameters) {
 			if(parameters.contains(param)) {
 				parameters.remove(param);
@@ -80,5 +86,13 @@ public class MetadataQuery extends MetadataQueryBase implements Serializable {
 			return true;
 
 		return applyBasequery;
+	}
+
+	public void setBasequeryAsFilter(boolean basequeryAsFilter) {
+		this.basequeryAsFilter = basequeryAsFilter;
+	}
+
+	public boolean getBasequeryAsFilter() {
+		return basequeryAsFilter;
 	}
 }

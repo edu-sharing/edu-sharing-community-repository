@@ -12,7 +12,7 @@ interface LuceneTemplate {
 type LuceneTemplates = { [key: string]: LuceneTemplate };
 
 @Component({
-    selector: 'app-lucene-template-memory',
+    selector: 'es-lucene-template-memory',
     templateUrl: './lucene-template-memory.component.html',
     styleUrls: ['./lucene-template-memory.component.scss'],
 })

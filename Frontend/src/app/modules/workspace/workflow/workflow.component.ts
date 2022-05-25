@@ -19,7 +19,7 @@ import {
     WorkflowEntry,
 } from '../../../core-module/core.module';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import { AuthorityNamePipe } from '../../../core-ui-module/pipes/authority-name.pipe';
+import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
 import { Toast } from '../../../core-ui-module/toast';
 import {
     NodeHelperService,
@@ -29,7 +29,7 @@ import {
 type WorkflowReceiver = UserSimple | Group;
 
 @Component({
-    selector: 'workspace-workflow',
+    selector: 'es-workspace-workflow',
     templateUrl: 'workflow.component.html',
     styleUrls: ['workflow.component.scss'],
     animations: [
@@ -61,7 +61,6 @@ export class WorkspaceWorkflowComponent implements OnChanges {
     @Output() onDone = new EventEmitter<Node[]>();
     @Output() onClose = new EventEmitter();
     @Output() onLoading = new EventEmitter();
-    defaultStatus: WorkflowDefinition;
 
     constructor(
         private nodeService: RestNodeService,
@@ -119,10 +118,6 @@ export class WorkspaceWorkflowComponent implements OnChanges {
         this.updateButtons();
     }
 
-    getWorkflowForId(id: string) {
-        return this.nodeHelper.getWorkflowStatusById(id);
-    }
-
     removeReceiver(data: WorkflowReceiver) {
         const pos = this.receivers.indexOf(data);
         if (pos !== -1) {
@@ -150,6 +145,9 @@ export class WorkspaceWorkflowComponent implements OnChanges {
             if (!hasPermission) {
                 return;
             }
+        } else if(this.status.hasReceiver) {
+            this.toast.error(null, 'WORKSPACE.WORKFLOW.NO_RECEIVER');
+            return;
         }
         this.saveWorkflowFinal(receivers);
     }
@@ -179,9 +177,6 @@ export class WorkspaceWorkflowComponent implements OnChanges {
         const histories = await forkJoin(
             nodes.map((node) => this.nodeService.getWorkflowHistory(node.ref.id)),
         ).toPromise();
-        ({
-            initial: this.defaultStatus
-        } = this.nodeHelper.getDefaultWorkflowStatus(false));
         if (nodes.length > 1) {
             if (histories.some((history) => history.length > 0)) {
                 this.toast.error(null, 'WORKSPACE.WORKFLOW.BULK_WORKFLOWS_EXIST');

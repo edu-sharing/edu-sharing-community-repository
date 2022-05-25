@@ -1,5 +1,6 @@
 package org.edu_sharing.service.rendering;
 
+import java.util.Map;
 import java.util.function.Function;
 
 import javax.servlet.http.HttpServletRequest;
@@ -7,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 public class RenderingServiceOptions {
     public String displayMode;
     public SavedSearchOptions savedSearch;
+    public Map<String, String> parameters;
 
     public static RenderingServiceOptions fromRequestParameters(HttpServletRequest req) throws ParameterException {
         RenderingServiceOptions options = new RenderingServiceOptions();

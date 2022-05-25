@@ -1,6 +1,5 @@
 package org.edu_sharing.repository.server.jobs.helper;
 
-//import com.mchange.v2.log.MLog;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -27,14 +26,14 @@ public class NodeCollectorLucene {
     private final String lucene;
     private Logger logger = Logger.getLogger(NodeCollectorLucene.class);
 
-    int PAGE_SIZE = 100;
+    int PAGE_SIZE = 500;
 
     public NodeCollectorLucene(String lucene, StoreRef storeRef){
         this.lucene = lucene;
         this.storeRef = storeRef;
     }
 
-    List<NodeRef> getNodes(){
+    public List<NodeRef> getNodes(){
         logger.info("query:" + lucene);
         Set<NodeRef> set = new HashSet<>();
         execute(0,lucene,set);

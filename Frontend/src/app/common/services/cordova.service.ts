@@ -14,11 +14,17 @@ import {RestConstants} from '../../core-module/rest/rest-constants';
 
 declare var cordova : any;
 
+export enum OnBackBehaviour {
+    default,
+    closeApp,
+}
+
 /**
  * All services that touch the mobile app or cordova plugins are available here.
  */
 @Injectable()
 export class CordovaService {
+    private onBackBehaviour = OnBackBehaviour.default;
 
   get oauth() {
     return this._oauth;
@@ -1233,6 +1239,9 @@ export class CordovaService {
 
       });
     }
+    setOnBackBehaviour(behaviour: OnBackBehaviour) {
+        this.onBackBehaviour = behaviour;
+    }
 
     private onBackKeyDown() {
         const eventDown = new KeyboardEvent('keydown', {key: 'Escape',view: window,bubbles: true,cancelable: true});
@@ -1243,7 +1252,11 @@ export class CordovaService {
 
         } else// if(window.history.length>2) {
             // (navigator as any).app.backHistory();
-            this.location.back();
+            if(this.onBackBehaviour === OnBackBehaviour.closeApp) {
+                (navigator as any).app.exitApp();
+            } else {
+                this.location.back();
+            }
         /*}
         else{
             (navigator as any).app.exitApp();

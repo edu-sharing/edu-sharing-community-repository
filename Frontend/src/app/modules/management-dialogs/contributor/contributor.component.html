@@ -1,4 +1,4 @@
-<card title="{{'WORKSPACE.CONTRIBUTOR.TITLE' | translate }}"
+<es-card title="{{'WORKSPACE.CONTRIBUTOR.TITLE' | translate }}"
       [node]="_node"
       width="small"
       height="large"
@@ -6,7 +6,7 @@
       [buttons]="buttons"
       (onCancel)="cancel()"
 >
-  <spinner *ngIf="loading"></spinner>
+  <es-spinner *ngIf="loading"></es-spinner>
   <div class="contributor-content" *ngIf="!loading">
     <h4 class="mat-heading-4 lifecycleHeading">{{'WORKSPACE.CONTRIBUTOR.LIFECYCLECONTRIBUTOR' | translate}}</h4>
     <div *ngFor="let role of rolesLifecycle">
@@ -17,7 +17,7 @@
         </div>
       </div>
     </div>
-    <button mat-raised-button class="btnAdd" (click)="addVCard('lifecycle')"><i icon="add"></i> {{'ADD' | translate}}</button>
+    <button mat-raised-button class="btnAdd" (click)="addVCard('lifecycle')"><i esIcon="add"></i> {{'ADD' | translate}}</button>
     <h4 class="mat-heading-4 metadataHeading">{{'WORKSPACE.CONTRIBUTOR.METADATACONTRIBUTOR' | translate}}</h4>
     <div *ngFor="let role of rolesMetadata">
       <div *ngIf="contributorMetadata[role] && contributorMetadata[role].length"  class="group">
@@ -27,10 +27,10 @@
         </div>
       </div>
     </div>
-    <button mat-raised-button class="btnAdd" (click)="addVCard('metadata')"><i icon="add"></i> {{'ADD' | translate}}</button>
+    <button mat-raised-button class="btnAdd" (click)="addVCard('metadata')"><i esIcon="add"></i> {{'ADD' | translate}}</button>
   </div>
-</card>
-<card title="{{'WORKSPACE.CONTRIBUTOR.'+(editOriginal ? 'EDIT' : 'ADD')+'_TITLE' | translate }}"
+</es-card>
+<es-card title="{{'WORKSPACE.CONTRIBUTOR.'+(editOriginal ? 'EDIT' : 'ADD')+'_TITLE' | translate }}"
       subtitle="{{'WORKSPACE.CONTRIBUTOR.TYPE.'+editScopeNew.toUpperCase() | translate}}"
       [priority]="3"
       (onCancel)="cancel()"
@@ -38,9 +38,9 @@
       *ngIf="edit"
       width="small" height="xlarge">
   <div *ngIf="editDisabled && !userAuthor">
-    <info-message message="{{'WORKSPACE.CONTRIBUTOR.EDIT_DISABLED' | translate}}"></info-message>
+    <es-info-message message="{{'WORKSPACE.CONTRIBUTOR.EDIT_DISABLED' | translate}}"></es-info-message>
     <div class="edit-reset">
-      <button mat-button color="primary" (click)="resetVCard()"><i icon="delete"></i>
+      <button mat-button color="primary" (click)="resetVCard()"><i esIcon="delete"></i>
         {{'WORKSPACE.CONTRIBUTOR.RESET' | translate}}
       </button>
     </div>
@@ -98,10 +98,10 @@
 
       </div>
       <button mat-button color="primary" (click)="showPersistentIds=!showPersistentIds">
-        <i icon="fingerprint"></i>
+        <i esIcon="fingerprint"></i>
         <span>{{'WORKSPACE.CONTRIBUTOR.PERSISTENT_IDS' | translate}}</span>
-        <i icon="keyboard_arrow_down" *ngIf="showPersistentIds"></i>
-        <i icon="keyboard_arrow_right" *ngIf="!showPersistentIds"></i>
+        <i esIcon="keyboard_arrow_down" *ngIf="showPersistentIds"></i>
+        <i esIcon="keyboard_arrow_right" *ngIf="!showPersistentIds"></i>
       </button>
       <div *ngIf="showPersistentIds" [@overlay]="more" class="persistent-id">
         <div class="table">
@@ -130,7 +130,7 @@
             <mat-hint innerHTML="{{'VCARD_HINT.X-GND-URI' | translate}}"></mat-hint>
           </mat-form-field>
         </div>
-        <info-message *ngIf="edit.orcid || edit.gnduri">{{'WORKSPACE.CONTRIBUTOR.PERSISTENT_ID_SET' | translate}}</info-message>
+        <es-info-message *ngIf="edit.orcid || edit.gnduri">{{'WORKSPACE.CONTRIBUTOR.PERSISTENT_ID_SET' | translate}}</es-info-message>
       </div>
     </mat-tab>
 
@@ -156,10 +156,10 @@
         </mat-form-field>
       </div>
       <button mat-button color="primary" (click)="showPersistentIds=!showPersistentIds">
-        <i icon="fingerprint"></i>
+        <i esIcon="fingerprint"></i>
         <span>{{'WORKSPACE.CONTRIBUTOR.PERSISTENT_IDS' | translate}}</span>
-        <i icon="keyboard_arrow_down" *ngIf="showPersistentIds"></i>
-        <i icon="keyboard_arrow_right" *ngIf="!showPersistentIds"></i>
+        <i esIcon="keyboard_arrow_down" *ngIf="showPersistentIds"></i>
+        <i esIcon="keyboard_arrow_right" *ngIf="!showPersistentIds"></i>
       </button>
       <div *ngIf="showPersistentIds" [@overlay]="more" class="persistent-id">
         <div class="table">
@@ -188,7 +188,7 @@
             <mat-hint innerHTML="{{'VCARD_HINT.X-Wikidata' | translate}}"></mat-hint>
           </mat-form-field>
         </div>
-        <info-message *ngIf="edit.ror || edit.wikidata">{{'WORKSPACE.CONTRIBUTOR.PERSISTENT_ID_SET' | translate}}</info-message>
+        <es-info-message *ngIf="edit.ror || edit.wikidata">{{'WORKSPACE.CONTRIBUTOR.PERSISTENT_ID_SET' | translate}}</es-info-message>
       </div>
     </mat-tab>
   </mat-tab-group>
@@ -212,15 +212,16 @@
         </mat-form-field>
       </div>
       <div class="calendar">
-        <calendar label="{{'WORKSPACE.CONTRIBUTOR.DATE' | translate}}"
+        <es-calendar label="{{'WORKSPACE.CONTRIBUTOR.DATE' | translate}}"
                   [isResettable]="true"
                   [(date)]="date"
-        ></calendar>
+                  [disabled]="editDisabled"
+        ></es-calendar>
       </div>
     </div>
     <button mat-button color="primary" class="more clickable" (click)="more=!more">
-      <i icon="keyboard_arrow_down" *ngIf="more"></i>
-      <i icon="keyboard_arrow_right" *ngIf="!more"></i>
+      <i esIcon="keyboard_arrow_down" *ngIf="more"></i>
+      <i esIcon="keyboard_arrow_right" *ngIf="!more"></i>
       <span>{{'WORKSPACE.CONTRIBUTOR.MORE' | translate}}</span>
     </button>
     <div *ngIf="more" [@overlay]="more" class="moreOpen">
@@ -301,4 +302,4 @@
       </div>
     </div>
   </div>
-</card>
+</es-card>

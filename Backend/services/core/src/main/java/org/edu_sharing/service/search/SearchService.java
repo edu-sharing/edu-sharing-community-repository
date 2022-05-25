@@ -26,6 +26,7 @@ public interface SearchService {
 		FILES_AND_FOLDERS,
 		COLLECTIONS,
 		TOOLPERMISSIONS,
+		COLLECTION_PROPOSALS,
 		ALL
 	};
 	public static enum CombineMode{
@@ -94,4 +95,6 @@ public interface SearchService {
 	SearchResultNodeRef searchFingerPrint(String nodeId);
 
 	public Set<SearchVCard> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind kind) throws IOException;
+
+	public SearchResultNodeRef getMetadata(List<String> nodeIds) throws IOException;
 }

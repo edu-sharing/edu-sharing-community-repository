@@ -640,6 +640,12 @@
       </dependency>
 
       <dependency>
+        <groupId>com.nimbusds</groupId>
+        <artifactId>nimbus-jose-jwt</artifactId>
+        <version>9.9</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.jsoup</groupId>
         <artifactId>jsoup</artifactId>
         <version>1.12.1</version>
@@ -669,6 +675,18 @@
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
         <version>1.18.22</version>
+      </dependency>
+
+      <dependency>
+        <groupId>edu.uoc.elc.lti</groupId>
+        <artifactId>lti-13</artifactId>
+        <version>0.0.3</version>
+      </dependency>
+
+      <dependency>
+        <groupId>edu.uoc.elc.lti</groupId>
+        <artifactId>lti-13-jwt</artifactId>
+        <version>0.0.3</version>
       </dependency>
 
       <dependency>
@@ -711,6 +729,12 @@
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
         <version>1.7.33</version>
+      </dependency>
+
+      <dependency>
+        <groupId>edu.uoc.elc.lti</groupId>
+        <artifactId>spring-boot-lti-advantage</artifactId>
+        <version>0.0.10</version>
       </dependency>
 
       <dependency>

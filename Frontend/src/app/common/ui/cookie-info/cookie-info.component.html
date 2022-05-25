@@ -14,7 +14,7 @@
   <button mat-flat-button (click)="accept()">{{ 'OK' | translate }}</button>
 </div>
 -->
-<card *ngIf="show"
+<es-card *ngIf="show"
       [isCancelable]="false"
       height="auto"
       icon="open_in_browser"
@@ -27,10 +27,10 @@
     </div>
     <button mat-button color="primary" (click)="details = !details">
       {{'COOKIE_INFO.MORE_LINK' | translate}}
-      <i [icon]="details ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"></i>
+      <i [esIcon]="details ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"></i>
     </button>
     <div class="details"
          *ngIf="details"
          [@overlay]="details">{{'COOKIE_INFO.DIALOG_MESSAGE' | translate}}</div>
   </div>
-</card>
+</es-card>

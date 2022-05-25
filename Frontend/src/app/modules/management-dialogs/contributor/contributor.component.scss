@@ -1,5 +1,5 @@
 @import "../../../core-ui-module/styles/variables";
-@import "../../../core-ui-module/components/card/variables";
+@import "../../../shared/components/card/variables";
 
 
 input[type=number]::-webkit-inner-spin-button,
@@ -95,7 +95,7 @@ h2{
         margin: 0 5px;
       }
     }
-    calendar{
+    es-calendar{
       flex-grow: 1;
     }
   }
@@ -120,7 +120,7 @@ h2{
   }
 }
 :host ::ng-deep{
-  calendar{
+  es-calendar{
     input{
       width:100px;
     }

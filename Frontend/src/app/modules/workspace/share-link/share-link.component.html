@@ -1,8 +1,8 @@
-<card title="{{'WORKSPACE.SHARE_LINK.TITLE' | translate }}" [priority]="priority" [node]="_node" width="small" height="xlarge"
+<es-card title="{{'WORKSPACE.SHARE_LINK.TITLE' | translate }}" [priority]="priority" [node]="_node" width="small" height="xlarge"
       [buttons]="buttons"
       (onCancel)="cancel()"
 >
-  <spinner *ngIf="loading"></spinner>
+  <es-spinner *ngIf="loading"></es-spinner>
   <div *ngIf="!loading">
     <div class="group">
       <div class="configuration-link">
@@ -14,7 +14,7 @@
             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
           </mat-form-field>-->
-          <calendar *ngIf="expiry" label="{{'WORKSPACE.SHARE_LINK.EXPIRY_LABEL' | translate}}" [(date)]="expiryDate" [minDate]="today"></calendar>
+          <es-calendar *ngIf="expiry" label="{{'WORKSPACE.SHARE_LINK.EXPIRY_LABEL' | translate}}" [(date)]="expiryDate" [minDate]="today"></es-calendar>
           <!--<ng-datepicker class="datepickerShareLink" *ngIf="expiry" [(ngModel)]="expiryDate"
                          [options]="dateOptions"></ng-datepicker>-->
         </div>
@@ -31,8 +31,8 @@
         <div class="info-right">
           <mat-slide-toggle [(ngModel)]="password" (change)="setPassword()" [disabled]="!enabled"></mat-slide-toggle>
         </div>
-        <input-password *ngIf="password" (change)="setPassword()" [(value)]="passwordString" label="{{(edit ? 'WORKSPACE.SHARE_LINK.PASSWORD_PLACEHOLDER_EDIT' : 'WORKSPACE.SHARE_LINK.PASSWORD_PLACEHOLDER') | translate}}">
-        </input-password>
+        <es-input-password *ngIf="password" (change)="setPassword()" [(value)]="passwordString" label="{{(edit ? 'WORKSPACE.SHARE_LINK.PASSWORD_PLACEHOLDER_EDIT' : 'WORKSPACE.SHARE_LINK.PASSWORD_PLACEHOLDER') | translate}}">
+        </es-input-password>
       </div>
     </div>
 
@@ -59,4 +59,4 @@
         translate:{count:currentShare.downloadCount} }}</div>
       </div>
   </div>
-</card>
+</es-card>

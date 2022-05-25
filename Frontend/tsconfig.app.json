@@ -1,7 +1,10 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "types": []
+    // Prevent relative imports outside the `src` directory. Here instead of `tsconfig.json` to not
+    // confuse VS Code in `projects` folder.
+    "rootDir": "src",
+    "types": ["jquery"]
   },
   "files": [
     "src/main.ts",

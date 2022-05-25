@@ -1,13 +1,13 @@
 @import '../../styles/variables';
 
-// ng5-slider sets `visibility: visible` on some elements. This reintroduces interactive elements to
+// ngx-slider sets `visibility: visible` on some elements. This reintroduces interactive elements to
 // the tab order although the parent container sets `visibility: hidden`. We fix this be hiding
-// everything inside ng5-slider explicitly as long as the expansion panel is collapsed.
+// everything inside ngx-slider explicitly as long as the expansion panel is collapsed.
 :host
     .mat-expansion-panel:not(.mat-expanded)
     ::ng-deep
     .mat-expansion-panel-content:not(.ng-animating)
-    ng5-slider
+    ngx-slider
     * {
     display: none !important;
 }
@@ -19,7 +19,7 @@
     }
 }
 
-.ng5-slider {
+.ngx-slider {
     width: 90%;
 }
 
@@ -78,7 +78,7 @@
 }
 
 .selection.small {
-    .ng5-slider {
+    .ngx-slider {
         width: 100%;
     }
     .addChapter {

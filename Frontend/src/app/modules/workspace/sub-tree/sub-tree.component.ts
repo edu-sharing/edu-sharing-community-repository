@@ -1,7 +1,6 @@
 import {Component, Input, EventEmitter, Output, ViewChild} from '@angular/core';
 import { RestNodeService } from '../../../core-module/core.module';
 import { TranslateService } from '@ngx-translate/core';
-import { Translation } from '../../../core-ui-module/translation';
 import { RestConstants } from '../../../core-module/core.module';
 import { Node, NodeList } from '../../../core-module/core.module';
 import { TemporaryStorageService } from '../../../core-module/core.module';
@@ -13,12 +12,15 @@ import { Helper } from '../../../core-module/rest/helper';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { DropData, DragData } from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
 import {MatMenuTrigger} from '@angular/material/menu';
-import {DropdownComponent} from '../../../core-ui-module/components/dropdown/dropdown.component';
+import {DropdownComponent} from '../../../shared/components/dropdown/dropdown.component';
 import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../../core-ui-module/options-helper.service';
-import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
+import {MainNavComponent} from '../../../main/navigation/main-nav/main-nav.component';
+import {CdkDragDrop, CdkDragEnter, CdkDragExit} from '@angular/cdk/drag-drop';
+import {DragCursorDirective} from '../../../core-ui-module/directives/drag-cursor.directive';
+import {DropSource} from '../../../core-ui-module/components/node-entries-wrapper/entries-model';
 
 @Component({
-    selector: 'workspace-sub-tree',
+    selector: 'es-workspace-sub-tree',
     templateUrl: 'sub-tree.component.html',
     styleUrls: ['sub-tree.component.scss'],
     animations: [
@@ -41,7 +43,6 @@ export class WorkspaceSubTreeComponent {
     dropdownTop: string;
 
     @Input() openPath: string[][] = [];
-    @Input() mainNav: MainNavComponent;
     @Input() set reload(reload: Boolean) {
         if (reload) {
             this.refresh();
@@ -62,7 +63,7 @@ export class WorkspaceSubTreeComponent {
     @Output() onClick = new EventEmitter();
     @Output() onToggleTree = new EventEmitter();
     @Output() onLoading = new EventEmitter();
-    @Output() onDrop = new EventEmitter();
+    @Output() onDrop = new EventEmitter<{target: Node, source: DropSource<Node>}>();
     @Output() hasChilds = new EventEmitter();
     @Output() onUpdateOptions = new EventEmitter();
 
@@ -121,10 +122,6 @@ export class WorkspaceSubTreeComponent {
         }
     }
 
-    onNodesDrop({ event, nodes, dropAction }: DragData, target: Node) {
-        this.onDrop.emit({ target, source: nodes, event, type: dropAction });
-    }
-
     contextMenu(event: any, node: Node) {
         event.preventDefault();
         event.stopPropagation();
@@ -151,7 +148,7 @@ export class WorkspaceSubTreeComponent {
             activeObjects: [node],
             scope: Scope.WorkspaceTree
         });
-        this.optionsService.initComponents(this.mainNav, null, null, this.dropdown);
+        this.optionsService.initComponents(null, null, this.dropdown);
         this.optionsService.setListener({
             onRefresh: () => this.refresh(),
             onDelete: () => this.refresh()
@@ -239,5 +236,27 @@ export class WorkspaceSubTreeComponent {
                 this.onLoading.emit(false);
                 this.loading = false;
             });
+    }
+    getDragState() {
+        return DragCursorDirective.dragState;
+    }
+    dragExit(event: CdkDragExit<any>) {
+        DragCursorDirective.dragState.element = null;
+    }
+
+    dragEnter(event: CdkDragEnter<any>) {
+        DragCursorDirective.dragState.element = event.container.data;
+        DragCursorDirective.dragState.dropAllowed = true;
+    }
+    drop(event: CdkDragDrop<Node, any>) {
+        this.onDrop.emit({
+            target: event.container.data,
+            source: {
+                element: [event.item.data || event.previousContainer.data],
+                sourceList: null,
+                mode: DragCursorDirective.dragState.mode
+            }
+        });
+        DragCursorDirective.dragState.element = null;
     }
 }

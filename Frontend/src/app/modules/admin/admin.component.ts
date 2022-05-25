@@ -1,4 +1,4 @@
-import {Translation} from '../../core-ui-module/translation';
+import { TranslationsService } from '../../translations/translations.service';
 import {UIHelper} from '../../core-ui-module/ui-helper';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Toast} from '../../core-ui-module/toast';
@@ -12,7 +12,7 @@ import {
 import {TranslateService} from '@ngx-translate/core';
 import {SessionStorageService} from '../../core-module/core.module';
 import {RestConnectorService} from '../../core-module/core.module';
-import {Component, ViewChild, ElementRef, ViewContainerRef, ComponentFactoryResolver} from '@angular/core';
+import {Component, ViewChild, ElementRef, ViewContainerRef, ComponentFactoryResolver, OnDestroy, OnInit} from '@angular/core';
 import {
     LoginResult,
     ServerUpdate,
@@ -32,11 +32,10 @@ import {SuggestItem} from '../../common/ui/autocomplete/autocomplete.component';
 import {RestOrganizationService} from '../../core-module/core.module';
 import {RestSearchService} from '../../core-module/core.module';
 import {RestHelper} from '../../core-module/core.module';
-import {Observable, Observer} from 'rxjs/index';
+import {Observable, Observer} from 'rxjs';
 import {RestNetworkService} from '../../core-module/core.module';
-import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {MainNavComponent} from '../../main/navigation/main-nav/main-nav.component';
 import {CustomHelper} from '../../common/custom-helper';
-import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {DateHelper} from '../../core-ui-module/DateHelper';
 import {CsvHelper} from '../../core-module/csv.helper';
 import {trigger} from '@angular/animations';
@@ -44,9 +43,11 @@ import {UIAnimation} from '../../core-module/ui/ui-animation';
 import IEditorOptions = monaco.editor.IEditorOptions;
 import {NgxEditorModel} from 'ngx-monaco-editor';
 import {Scope} from '../../core-ui-module/option-item';
-import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
-import {AuthoritySearchMode} from '../../common/ui/authority-search-input/authority-search-input.component';
+import {AboutService} from 'ngx-edu-sharing-api';
+import { SkipTarget } from '../../main/navigation/skip-nav/skip-nav.service';
+import {AuthoritySearchMode} from '../../shared/components/authority-search-input/authority-search-input.component';
 import {PlatformLocation} from '@angular/common';
+import { MainNavService } from '../../main/navigation/main-nav.service';
 
 
 type LuceneData = {
@@ -63,17 +64,16 @@ type LuceneData = {
 }
 
 @Component({
-  selector: 'admin-main',
+  selector: 'es-admin-main',
   templateUrl: 'admin.component.html',
   styleUrls: ['admin.component.scss'],
   animations: [
     trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))
   ]
 })
-export class AdminComponent {
+export class AdminComponent implements OnInit, OnDestroy {
   readonly AuthoritySearchMode = AuthoritySearchMode;
   readonly SCOPES = Scope;
-  readonly SkipTarget = SkipTarget;
 
   constructor(private toast: Toast,
               private route: ActivatedRoute,
@@ -81,6 +81,7 @@ export class AdminComponent {
               private platformLocation: PlatformLocation,
               private config: ConfigurationService,
               private translate: TranslateService,
+              private translations: TranslationsService,
               private iamService: RestIamService,
               private storage : SessionStorageService,
               private networkService : RestNetworkService,
@@ -89,15 +90,16 @@ export class AdminComponent {
               private viewContainerRef : ViewContainerRef,
               private admin : RestAdminService,
               private connector: RestConnectorService,
+              private about: AboutService,
               private node: RestNodeService,
               private searchApi: RestSearchService,
+              private mainNav: MainNavService,
               private organization: RestOrganizationService) {
       this.addCustomComponents(CustomHelper.getCustomComponents('AdminComponent',this.componentFactoryResolver));
       this.searchColumns.push(new ListItem('NODE', RestConstants.CM_NAME));
       this.searchColumns.push(new ListItem('NODE', RestConstants.NODE_ID));
       this.searchColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
-      Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
-          GlobalContainerComponent.finishPreloading();
+      this.translations.waitForInit().subscribe(() => {
           this.warningButtons=[
               new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=> {window.history.back()}),
               new DialogButton('ADMIN.UNDERSTAND',DialogButton.TYPE_PRIMARY,()=> {this.showWarning=false})
@@ -122,6 +124,7 @@ export class AdminComponent {
   static RS_CONFIG_HELP='https://docs.edu-sharing.com/confluence/edp/de/installation-en/installation-of-the-edu-sharing-rendering-service';
   mailTemplates=[
       'invited',
+      'invited_workflow',
       'invited_safe',
       'invited_collection',
       'nodeIssue',
@@ -180,7 +183,6 @@ export class AdminComponent {
   parentCollectionType = 'root';
   public catalina : string;
   oaiClasses: string[];
-  @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('catalinaRef') catalinaRef : ElementRef;
   @ViewChild('xmlSelect') xmlSelect : ElementRef;
   @ViewChild('excelSelect') excelSelect : ElementRef;
@@ -215,6 +217,20 @@ export class AdminComponent {
   private mediacenters: any[];
   ownAppMode='repository';
   authenticateAuthority: Authority;
+  private readonly onDestroyTasks: Array<() => void> = [];
+
+  ngOnInit(): void {
+    this.mainNav.setMainNavConfig({
+      title: 'ADMIN.TITLE',
+      currentScope: 'admin',
+      searchEnabled: false,
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.onDestroyTasks.forEach((task) => task());
+  }
+
   public startJob() {
     this.storage.set('admin_job',this.job);
     this.globalProgress=true;
@@ -394,7 +410,7 @@ export class AdminComponent {
     window.open(app.configUrl);
   }
   public editApp(app:any) {
-    this.currentApp=app.name;
+    this.currentApp=app.name || 'HOMEAPP';
     this.currentAppXml=app.file;
     this.globalProgress=true;
     this.admin.getApplicationXML(app.file).subscribe((data:any[])=> {
@@ -610,7 +626,7 @@ export class AdminComponent {
     });
   }
 
-  private refreshAppList() {
+  public refreshAppList() {
     this.admin.getApplications().subscribe((data:Application[])=> {
       this.applications = data;
       this.applicationsOpen = {};
@@ -789,7 +805,7 @@ export class AdminComponent {
     }
     reloadJobStatus() {
         this.admin.getJobs().subscribe((jobs)=> {
-            this.jobs=jobs;
+            this.jobs = jobs.filter((j: any) => !!j);
             this.updateJobLogs();
         })
     }
@@ -823,12 +839,12 @@ export class AdminComponent {
         this.systemChecks=[];
 
         // check versions render service
-        this.connector.getAbout().subscribe((about:any)=> {
-            about.version.repository=this.getMajorVersion(about.version.repository);
-            about.version.renderservice=this.getMajorVersion(about.version.renderservice);
+        this.about.getAbout().subscribe((about)=> {
+            const repositoryVersion = this.getMajorVersion(about.version.repository);
+            const renderServiceVersion = this.getMajorVersion(about.version.renderservice);
             this.systemChecks.push({
               name:'RENDERING',
-                status:about.version.repository=='unknown' ? 'WARN' : about.version.repository==about.version.renderservice ? 'OK' : 'FAIL',
+                status:repositoryVersion=='unknown' ? 'WARN' : repositoryVersion==renderServiceVersion ? 'OK' : 'FAIL',
                 translate:about.version,
               callback:()=> {
                   this.setMode('APPLICATIONS');
@@ -1168,10 +1184,11 @@ export class AdminComponent {
               this.availableJobs = jobs;
               this.prepareJobClasses();
             });
-            setInterval(() => {
+            const interval = setInterval(() => {
                 if (this.mode == 'JOBS')
                     this.reloadJobStatus();
             }, 10000);
+            this.onDestroyTasks.push(() => clearInterval(interval));
             this.admin.getOAIClasses().subscribe((classes: string[]) => {
                 this.oaiClasses = classes;
                 this.storage.get('admin_oai').subscribe((data: any) => {
@@ -1191,14 +1208,13 @@ export class AdminComponent {
             this.admin.getRepositoryVersion().subscribe((data: string) => {
                 this.repositoryVersion = data;
             }, (error: any) => {
-                console.info(error);
                 this.repositoryVersion = 'Error accessing version information. Are you in dev mode?';
             });
         }
     }
 
   getOwnAppUrl() {
-    return this.connector.getAbsoluteEdusharingUrl()+'metadata?format='+this.ownAppMode;
+    return this.connector.getAbsoluteEdusharingUrl()+'metadata?format='+this.ownAppMode + '&external=true';
   }
 
   copyOwnApp() {
@@ -1250,9 +1266,12 @@ export class AdminComponent {
       if (param.file) {
         continue;
       }
-      data[param.name] = param.sampleValue ?? '';
+      data[param.name] = param.type === 'boolean' ? param.sampleValue === 'true' : param.sampleValue ?? '';
       if(param.values) {
         data[param.name] = param.values.map((v) => v.name).join('|');
+      }
+      if(param.array) {
+          data[param.name] = [data[param.name]];
       }
       modified = true;
     }

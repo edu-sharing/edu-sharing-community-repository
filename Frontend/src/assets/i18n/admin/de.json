@@ -12,7 +12,7 @@
             "MEDIACENTER": "Medienzentren",
             "GLOBAL_CONFIG": "Globale Systemkonfiguration",
             "CONFIG": "Erweiterte Systemkonfiguration",
-            "APPLICATIONS": "Remote-Systeme (Rendering, LMS, Suchen)",
+            "APPLICATIONS": "Remote-Systeme (Rendering, LMS, LTI, Suchen)",
             "UPDATE": "Server Updates",
             "IMPORT": "Importieren",
             "JOBS": "Aufgaben",
@@ -133,6 +133,7 @@
                 "host": "Öffentliche IP-Adresse des Hosts",
                 "is_home_node": "Beschreibt diese Datei das Heimatrepository? Muss für die homeapplication immer true sein",
                 "metadatasetsV2": "Kommagetrennte Liste möglicher Metadatensets für Home-Nodes. Erster Wert sollte immer \"mds\" für das Standard-Set sein",
+                "import_metadataset": "Metadatenset, was für importierte Objekte von dieser Quelle verwendet wird",
                 "authenticationwebservice": "Absolute URL zum Authentifikationsservice-Endpunkt",
                 "domain": "Die primäre, öffentliche Domain des Systems",
                 "port": "Port für den Zugriff, typischerweise 80 oder 443",
@@ -597,6 +598,31 @@
             "CONDITION_TYPE": {
                 "TOOLPERMISSION": "Toolpermission"
             }
+        },
+      "LTI": {
+        "HEADER": "LTI Plattform Registrierung",
+        "DYNAMIC": "LTI Dynamische Registrierung",
+        "ADVANCED": "LTI Manuelle Registrierung",
+        "URL": "Url",
+        "TOKEN" : "Token",
+        "TS" : "Ablaufdatum",
+        "GENERATE" : "Token hinzufügen",
+        "SAVE" : "Speichern",
+        "REMOVE_TITLE": "Token löschen?",
+        "REMOVE_MESSAGE": "Möchten Sie das Token mit der URL \"{{url}}\" wirklich löschen?\n\nBestehende Verlinkungen werden dadurch möglicherweise unbrauchbar.",
+        "DYNAMIC_INFO": "Mit Hilfe der dynamischen LTI-Registrierung können andere, LTI-Kompatible Systeme, einfach mit edu-sharing verbunden werden. Durch Klick auf \"Token hinzufügen\" können Sie einen Token generieren.\n\nFügen Sie diesen anschließend in ihr LTI-Kompatibles System (z.B. Moodle) ein. Anschließend wird das externe System automatisch an edu-sharing angebunden.",
+        "MANUAL_INFO": "Sollte ihr LTI-Kompatibles System die dynamische Registrierung nicht unterstützen oder diese nicht funktionieren, können Sie die manuelle Registrierung unten nutzen.\n\nNach Klick auf \"Speichern\" wird mit den gegebenen Daten eine Anbindung vorbereitet.",
+        "EXPIRED": "Abgelaufen",
+        "DATA" : {
+          "platformId" : "Platform Id",
+          "client_id" : "Client Id",
+          "deployment_id" : "Deployment Id",
+          "authentication_request_url" : "Authentication Request Url",
+          "keyset_url" : "Keyset url",
+          "key_id" : "Key id",
+          "auth_token_url" : "Auth Token Url",
+          "CREATED" : "Plattform wurde angebunden"
         }
+      }
     }
 }

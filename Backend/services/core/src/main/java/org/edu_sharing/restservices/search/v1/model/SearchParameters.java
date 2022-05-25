@@ -5,37 +5,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 
-import org.edu_sharing.restservices.shared.MdsQueryCriteria;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Schema(description = "")
-public class SearchParameters {
+public class SearchParameters extends SearchParametersFacets{
 
 	private List<String> permissions;
-	private List<MdsQueryCriteria> criteria;
-	private List<String> facets;
 	private boolean resolveCollections = false;
-
-	@Schema(required = true, description = "")
-	@JsonProperty("criteria")
-	public List<MdsQueryCriteria> getCriteria() {
-		return criteria;
-	}
-
-	public void setCriteria(List<MdsQueryCriteria> criteria) {
-		this.criteria = criteria;
-	}
-
-	@Schema(required = true, description = "")
-	@JsonProperty("facets")
-	public List<String> getFacets() {
-		return facets;
-	}
-
-	public void setFacets(List<String> facets) {
-		this.facets = facets;
-	}
+	private boolean returnSuggestions = false;
 
 	@JsonProperty
 	public List<String> getPermissions() {
@@ -52,5 +29,17 @@ public class SearchParameters {
 
 	public void setResolveCollections(boolean resolveCollections) {
 		this.resolveCollections = resolveCollections;
+	}
+
+	@Schema(required = false, description = "")
+	@JsonProperty("facets")
+	public List<String> getFacets() { return super.getFacets();}
+
+	public void setReturnSuggestions(boolean returnSuggestions) {
+		this.returnSuggestions = returnSuggestions;
+	}
+
+	public boolean isReturnSuggestions() {
+		return returnSuggestions;
 	}
 }

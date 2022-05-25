@@ -1,8 +1,38 @@
 <ng-container [ngSwitch]="widgetType">
-    <app-list-collection-info *ngSwitchCase="'CollectionInfo'" [item]="item" [node]="node"></app-list-collection-info>
-    <app-list-text *ngSwitchCase="'Text'" [item]="item" [node]="node" [showFieldTooltip]="showFieldTooltip"></app-list-text>
-    <app-list-counts *ngSwitchCase="'NodeCounts'" [item]="item" [node]="node"></app-list-counts>
-    <app-list-node-license *ngSwitchCase="'NodeLicense'" [item]="item" [node]="node"></app-list-node-license>
-    <app-list-node-replication-source *ngSwitchCase="'NodeReplicationSource'" [item]="item" [node]="node"></app-list-node-replication-source>
-    <app-list-node-workflow *ngSwitchCase="'NodeWorkflow'" [item]="item" [node]="node"></app-list-node-workflow>
+  <es-list-collection-info
+    *ngSwitchCase="'CollectionInfo'"
+    [item]="item"
+    [node]="node"
+    [provideLabel]="provideLabel"
+  ></es-list-collection-info>
+  <es-list-text
+    *ngSwitchCase="'Text'"
+    [item]="item"
+    [node]="node"
+    [provideLabel]="provideLabel"
+  ></es-list-text>
+  <es-list-counts
+    *ngSwitchCase="'NodeCounts'"
+    [item]="item"
+    [node]="node"
+    [provideLabel]="provideLabel"
+  ></es-list-counts>
+  <es-list-node-license
+    *ngSwitchCase="'NodeLicense'"
+    [item]="item"
+    [node]="node"
+    [provideLabel]="provideLabel"
+  ></es-list-node-license>
+  <es-list-node-replication-source
+    *ngSwitchCase="'NodeReplicationSource'"
+    [item]="item"
+    [node]="node"
+    [provideLabel]="provideLabel"
+  ></es-list-node-replication-source>
+  <es-list-node-workflow
+    *ngSwitchCase="'NodeWorkflow'"
+    [item]="item"
+    [node]="node"
+    [provideLabel]="provideLabel"
+  ></es-list-node-workflow>
 </ng-container>

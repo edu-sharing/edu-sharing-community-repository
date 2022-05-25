@@ -4,6 +4,7 @@
         "SEARCH_OPTIONS_LABEL": "Such-Optionen",
         "TUTORIAL_HEADING": "Suchen und finden",
         "TUTORIAL_DESCRIPTION": "Über das Suchfeld findest du sehr schnell interessante Materialien. Benutze Filter, um deine Suchergebnisse einzuschränken.",
+        "DID_YOU_MEAN": "Meinten Sie",
         "COLLECTIONS": "Sammlungen",
         "MATERIALS": "Materialien",
         "IGNORED_PARAMETERS": "Die Liste enthält Ergebnisse, für die nicht alle gewählten Kriterien zutreffen",
@@ -14,6 +15,8 @@
         "SEARCH_STUFF": "Suchen ...",
         "EXPANDED_SEARCH": "Erweiterte Suche",
         "EXPANDED_SEARCH_SHORT": "Erweiterte Suche",
+        "ACTIVE_FILTER": "Aktive Filterkriteren ({{count}})",
+        "ACTIVE_FILTER_TOOLTIP": "{{count}} Filter gesetzt",
         "METADATASET": "Metadaten-Set wählen",
         "METADATASET_INFO": "Nach anderen Suchkriterien filtern",
         "APPLY": "Übernehmen",
@@ -48,7 +51,6 @@
         "ADDED_TO_NODE_STORE_EXISTS": "Element {{name}} ist bereits auf der Merkliste",
         "NODE_STORE": {
             "TITLE": "Merkliste",
-            "SUBTITLE": "Markierte Elemente anzeigen und verwalten",
             "LIST_EMPTY": "Keine Elemente auf der Merkliste",
             "REMOVE_ITEM": "Entfernen",
             "REMOVED_ITEMS": "{{count}} Element(e) wurden von der Merkliste entfernt"

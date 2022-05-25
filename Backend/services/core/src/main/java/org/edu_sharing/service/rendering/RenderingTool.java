@@ -14,6 +14,7 @@ import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
+import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
@@ -148,6 +149,7 @@ public class RenderingTool {
 	}
 
 	public static void buildRenderingCache(String nodeId) {
+		ContextManagementFilter.B3 b3 = ContextManagementFilter.b3.get();
 		prepareExecutor.execute(()->{
 			AuthenticationUtil.runAsSystem(()-> {
 				try {
@@ -159,7 +161,9 @@ public class RenderingTool {
 						return null;
 					}
 					// @TODO: May we need to build up caches just for particular file types?
-					return RenderingServiceFactory.getLocalService().getDetails(nodeId, null, DISPLAY_PRERENDER, null);
+					RenderingServiceImpl service = (RenderingServiceImpl) RenderingServiceFactory.getLocalService();
+					service.setB3(b3);
+					return service.getDetails(nodeId, null, DISPLAY_PRERENDER, null);
 				} catch (Exception e) {
 					logger.warn("Error building rendering cache for node " + nodeId + ": " + e.getMessage(), e);
 					return e;

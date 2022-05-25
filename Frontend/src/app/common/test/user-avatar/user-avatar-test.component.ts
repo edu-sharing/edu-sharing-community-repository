@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import {Collection, RestCollectionService, RestConnectorService, RestConstants} from '../../../core-module/core.module';
 
 @Component({
-  selector: 'app-user-avatar-test',
+  selector: 'es-user-avatar-test',
   styleUrls: ['./user-avatar-test.component.scss'],
   templateUrl: './user-avatar-test.component.html',
 })

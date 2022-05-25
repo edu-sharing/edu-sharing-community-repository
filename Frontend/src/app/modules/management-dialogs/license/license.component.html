@@ -1,11 +1,11 @@
 <!-- TODO: remove remaining h4 and h5 headings (misused as labels) -->
-<card title="{{'WORKSPACE.LICENSE.TITLE' | translate }}" [priority]="priority" [node]="getNodes()" width="large" height="xlarge"
+<es-card title="{{'WORKSPACE.LICENSE.TITLE' | translate }}" [priority]="priority" [node]="getNodes()" width="large" height="xlarge"
       [buttons]="embedded ? null : buttons"
       [header]="!embedded"
       [isCancelable]="!embedded"
       (onCancel)="cancel()"
 >
-      <spinner *ngIf="loading"></spinner>
+      <es-spinner *ngIf="loading"></es-spinner>
       <div *ngIf="(getNodes() || _properties) && !loading" class="license-content">
         <mat-slide-toggle class="oerSelect switch toggle-reverse" [(ngModel)]="oerMode">{{ 'WORKSPACE.LICENSE.ONLY_OER' | translate }}</mat-slide-toggle>
         <mat-radio-group class="oerLicenses" [(ngModel)]="type" name="oerLicenses" *ngIf="oerMode">
@@ -14,14 +14,14 @@
             <div class="oerCC0">
               <div *ngIf="isAllowedLicense('CC_0')">
                 <mat-radio-button value="CC_0">
-                  <app-multi-line-label>
+                  <es-multi-line-label>
                     <ng-container slot="label">
                       {{'WORKSPACE.LICENSE.CC0.CC0' | translate}}
                     </ng-container>
                     <ng-container slot="description">
                       <span innerHTML="{{'WORKSPACE.LICENSE.CC0.CC0_INFO' | translate}}"></span>
                     </ng-container>
-                  </app-multi-line-label>
+                  </es-multi-line-label>
                 </mat-radio-button>
                 <div class="more-information-link">
                   <a class="focus-underline" [href]="getLicenseUrlVersion('CC_0')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a>
@@ -29,14 +29,14 @@
               </div>
               <div *ngIf="isAllowedLicense('PDM')">
                 <mat-radio-button value="PDM">
-                  <app-multi-line-label>
+                  <es-multi-line-label>
                     <ng-container slot="label">
                       {{'WORKSPACE.LICENSE.CC0.PDM' | translate}}
                     </ng-container>
                     <ng-container slot="description">
                       {{'WORKSPACE.LICENSE.CC0.PDM_INFO' | translate}}
                     </ng-container>
-                  </app-multi-line-label>
+                  </es-multi-line-label>
                 </mat-radio-button>
                 <div class="more-information-link">
                   <a class="focus-underline" [href]="getLicenseUrlVersion('PDM')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a>
@@ -49,14 +49,14 @@
             <div class="oerCCBY">
               <div *ngIf="isAllowedLicense('CC_BY')">
                 <mat-radio-button value="CC_BY" id="CC_BY">
-                  <app-multi-line-label>
+                  <es-multi-line-label>
                     <ng-container slot="label">
                       {{'WORKSPACE.LICENSE.CC.CC_BY_RADIO' | translate}}
                     </ng-container>
                     <ng-container slot="description">
                       {{'WORKSPACE.LICENSE.CC.CC_BY_INFO' | translate}}
                     </ng-container>
-                  </app-multi-line-label>
+                  </es-multi-line-label>
                 </mat-radio-button>
                 <div class="more-information-link">
                   <a class="focus-underline" [href]="getLicenseUrlVersion('CC_BY')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a>
@@ -64,14 +64,14 @@
               </div>
               <div *ngIf="isAllowedLicense('CC_BY_SA')">
                 <mat-radio-button value="CC_BY_SA" id="CC_BY_SA">
-                  <app-multi-line-label>
+                  <es-multi-line-label>
                     <ng-container slot="label">
                       {{'WORKSPACE.LICENSE.CC.CC_BY_SA_RADIO' | translate}}
                     </ng-container>
                     <ng-container slot="description">
                       {{'WORKSPACE.LICENSE.CC.CC_BY_SA_INFO' | translate}}
                     </ng-container>
-                  </app-multi-line-label>
+                  </es-multi-line-label>
                 </mat-radio-button>
                 <div class="more-information-link">
                   <a class="focus-underline" [href]="getLicenseUrlVersion('CC_BY_SA')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a>
@@ -110,40 +110,40 @@
               <mat-radio-group [(ngModel)]="type" *ngIf="primaryType=='COPYRIGHT'" class="copyright">
                 <div *ngIf="isAllowedLicense('COPYRIGHT_FREE')">
                   <mat-radio-button value="COPYRIGHT_FREE">
-                    <app-multi-line-label>
+                    <es-multi-line-label>
                       <ng-container slot="label">
                         {{'WORKSPACE.LICENSE.COPYRIGHT.FREE' | translate}}
                       </ng-container>
                       <ng-container slot="description">
                         <span innerHTML="{{'WORKSPACE.LICENSE.COPYRIGHT.FREE_INFO' | translate}}"></span>
                       </ng-container>
-                    </app-multi-line-label>
+                    </es-multi-line-label>
                   </mat-radio-button>
                 </div>
                 <div *ngIf="isAllowedLicense('COPYRIGHT_LICENSE')">
                   <mat-radio-button value="COPYRIGHT_LICENSE">
-                    <app-multi-line-label>
+                    <es-multi-line-label>
                       <ng-container slot="label">
                         {{'WORKSPACE.LICENSE.COPYRIGHT.LICENSE' | translate}}
                       </ng-container>
                       <ng-container slot="description">
                         {{'WORKSPACE.LICENSE.COPYRIGHT.LICENSE_INFO' | translate}}
                       </ng-container>
-                    </app-multi-line-label>
+                    </es-multi-line-label>
                   </mat-radio-button>
                 </div>
               </mat-radio-group>
               <mat-radio-group [(ngModel)]="type" *ngIf="primaryType=='CC_0'" class="cc">
                 <div *ngIf="isAllowedLicense('CC_0')">
                   <mat-radio-button value="CC_0">
-                    <app-multi-line-label>
+                    <es-multi-line-label>
                       <ng-container slot="label">
                         {{'WORKSPACE.LICENSE.CC0.CC0' | translate}}
                       </ng-container>
                       <ng-container slot="description">
                         <span [innerHTML]="'WORKSPACE.LICENSE.CC0.CC0_INFO' | translate"></span>
                       </ng-container>
-                    </app-multi-line-label>
+                    </es-multi-line-label>
                   </mat-radio-button>
                   <div class="more-information-link">
                     <a class="focus-underline" [href]="getLicenseUrlVersion('CC_0')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a>
@@ -151,14 +151,14 @@
                 </div>
                 <div *ngIf="isAllowedLicense('PDM')">
                   <mat-radio-button value="PDM">
-                    <app-multi-line-label>
+                    <es-multi-line-label>
                       <ng-container slot="label">
                         {{'WORKSPACE.LICENSE.CC0.PDM' | translate}}
                       </ng-container>
                       <ng-container slot="description">
                         {{'WORKSPACE.LICENSE.CC0.PDM_INFO' | translate}}
                       </ng-container>
-                    </app-multi-line-label>
+                    </es-multi-line-label>
                   </mat-radio-button>
                   <div class="more-information-link">
                     <a class="focus-underline" [href]="getLicenseUrlVersion('PDM')" target="_blank">{{'WORKSPACE.LICENSE.MORE' | translate}}</a>
@@ -195,14 +195,14 @@
                 </mat-form-field>
               </div>
           </div>
-        <app-mds-editor-widget-author #author
+        <es-mds-editor-widget-author #author
           [showContributorDialog]="!_properties"
-        ></app-mds-editor-widget-author>
-        <app-license-source class="cc-additional" *ngIf="isCCAttributableLicense()"
+        ></es-mds-editor-widget-author>
+        <es-license-source class="cc-additional" *ngIf="isCCAttributableLicense()"
           [(ccTitleOfWork)]="ccTitleOfWork"
           [(ccSourceUrl)]="ccSourceUrl"
           [(ccProfileUrl)]="ccProfileUrl"
-        ></app-license-source>
+        ></es-license-source>
           <div class="currentLicense">
           <h4  *ngIf="type!='MULTI'">{{'WORKSPACE.LICENSE.CURRENT' | translate}}</h4>
           <img *ngIf="type!='MULTI'" class="currentLicenseIcon" src="{{getLicenseIcon()}}">
@@ -274,4 +274,4 @@
         </div>
         -->
       </div>
-</card>
+</es-card>

@@ -5,7 +5,7 @@ import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import {Statistics} from "../../../../../core-module/rest/data-object";
 
 @Component({
-    selector: 'app-list-counts',
+    selector: 'es-list-counts',
     templateUrl: './list-counts.component.html',
     styleUrls: ['./list-counts.component.scss'],
 })

@@ -2,7 +2,22 @@
 
 :host {
     display: flex;
+    flex-direction: row-reverse; // Automatically scroll to the end
     align-items: center;
+    // Make room for keyboard focus styles.
+    padding: 5px;
+    margin: -5px;
+    overflow-y: hidden;
+    overflow-x: auto;
+    // Firefox
+    scrollbar-width: thin;
+    // Chromium-based
+    &::-webkit-scrollbar {
+        height: 4px;
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: $textMediumLight;
+    }
 }
 
 :host[short='always'] .breadcrumb-full {
@@ -38,42 +53,43 @@
 
 .breadcrumb {
     display: flex;
-    width: 100%;
+    flex-grow: 1;
     max-height: 1.5em;
     align-items: center;
     &:not(.breadcrumb-readonly) {
         @media screen and (max-width: $mobileTabSwitchWidth) {
-            margin-top: -2px;
             min-height: 25px;
-            margin-left: -10px;
+            // margin-left: -10px; // This doesn't work if we want to scroll the host container
             .breadcrumb-element-home {
-                margin-left: 20px;
+                margin-left: 10px;
             }
         }
     }
     &.breadcrumb-readonly {
         // This should wrap as a whole with '>' separators blending into lines.
-        display: inline;
+        display: inline-flex;
+        align-items: center;
         font-size: $fontSizeSmall;
-        i {
-            position: relative;
-            top: 5px;
+    }
+}
+:host ::ng-deep {
+    .breadcrumb-element {
+        position: relative;
+        max-height: 1.5em;
+        display: inline-flex;
+        align-items: center;
+        &.cdk-drop-list-dragging {
+            > *:first-child {
+                display: none;
+            }
         }
     }
 }
 
-.breadcrumb-element {
-    position: relative;
-    max-height: 1.5em;
-    display: flex;
-    align-items: center;
-    &.cdk-keyboard-focused {
-        @include setGlobalKeyboardFocus();
-    }
-    i {
-        width: 35px;
-        text-align: center;
-    }
+i.home-icon,
+i.breadcrumb-arrow {
+    width: 35px;
+    text-align: center;
 }
 
 button {
@@ -91,6 +107,22 @@ button {
     padding: 2px 4px;
     font-size: 95%;
     white-space: nowrap;
+    align-items: center;
+}
+
+.breadcrumb-readonly .breadcrumb-element:not(.breadcrumb-element-active) {
+    color: $textLight;
+}
+
+.breadcrumb-element-home.cdk-keyboard-focused {
+    @include setGlobalKeyboardFocus();
+    // Other focus styles are handled by node-url.
+}
+
+.breadcrumb-element-active,
+.breadcrumb-inner-active {
+    color: unset;
+    font-weight: bold;
 }
 
 .mat-ripple {
@@ -102,8 +134,8 @@ button {
     pointer-events: none;
 }
 
-.home-icon {
-    margin-top: 3px;
+.home-notice {
+    color: $textLight;
 }
 
 .dropdown-icon {
@@ -117,6 +149,6 @@ button {
 
 .selected {
     background-color: #fff;
-    border: 2px dashed $primary;
+    border: 2px dashed $colorStatusPositive;
     padding: 0 2px !important;
 }

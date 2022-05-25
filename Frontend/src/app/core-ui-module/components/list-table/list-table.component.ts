@@ -34,7 +34,6 @@ import {
     OPTIONS_HELPER_CONFIG,
 } from '../../options-helper.service';
 import { ActionbarComponent } from '../../../common/ui/actionbar/actionbar.component';
-import { MainNavComponent } from '../../../common/ui/main-nav/main-nav.component';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
@@ -60,17 +59,24 @@ import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
 import { DistinctClickEvent } from '../../directives/distinct-click.directive';
 import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
-import { CustomOptions, OptionItem, Scope } from '../../option-item';
+import {CustomOptions, OptionItem, Scope, Target} from '../../option-item';
 import { Toast } from '../../toast';
 import {NodeHelperService} from '../../node-helper.service';
 import {DomSanitizer} from '@angular/platform-browser';
 import {CollectionChooserComponent} from '../collection-chooser/collection-chooser.component';
-import {NodeTitlePipe} from '../../../common/ui/node-title.pipe';
+import {NodeTitlePipe} from '../../pipes/node-title.pipe';
 import {NodeUrlComponent} from '../node-url/node-url.component';
+import {SelectionModel} from '@angular/cdk/collections';
+import {
+    ListEventInterface,
+    ListOptions,
+    ListOptionsConfig, NodeEntriesDisplayType
+} from '../node-entries-wrapper/entries-model';
+import { MainNavService } from '../../../main/navigation/main-nav.service';
 
 
 @Component({
-    selector: 'listTable',
+    selector: 'es-listTable',
     templateUrl: 'list-table.component.html',
     styleUrls: ['list-table.component.scss'],
     providers: [
@@ -116,7 +122,7 @@ import {NodeUrlComponent} from '../node-url/node-url.component';
 /**
  * A provider to render multiple Nodes as a list
  */
-export class ListTableComponent implements OnChanges, AfterViewInit, EventListener {
+export class ListTableComponent implements OnChanges, AfterViewInit, EventListener, ListEventInterface<Node> {
     public static readonly VIEW_TYPE_LIST = 0;
     public static readonly VIEW_TYPE_GRID = 1;
     public static readonly VIEW_TYPE_GRID_SMALL = 2;
@@ -143,7 +149,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
             const pos = this._nodes.length;
             setTimeout(() => {
                 // handle focus
-                (this.childList.toArray()[pos] as any as NodeUrlComponent).link.nativeElement.focus();
+                (this.childList.toArray()[pos] as any as NodeUrlComponent).focus();
             });
         }
         this._nodes = nodes;
@@ -285,11 +291,6 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
      */
     @Input() viewType = ListTableComponent.VIEW_TYPE_LIST;
 
-    /**
-     * Link to the MainNavComponent
-     * Required to refresh particular events when triggered, e.g. a node was bookmarked
-     */
-    @Input() mainNav: MainNavComponent;
     /**
      * link to the actionbar component that is in use
      */
@@ -523,6 +524,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         private bridge: BridgeService,
         private frame: FrameEventsService,
         private renderer: Renderer2,
+        private mainnavService: MainNavService,
     ) {
         this.nodeHelper.setViewContainerRef(this.viewContainerRef);
         this.reorderButtons = DialogButton.getSaveCancel(
@@ -548,10 +550,13 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         if (changes.viewType && typeof changes.viewType.currentValue === 'string') {
             this.viewType = parseInt(changes.viewType.currentValue, 10);
         }
+        if(changes.orderElementsActive) {
+            this.clearSelection();
+        }
     }
 
     ngAfterViewInit(): void {
-        this.optionsHelper.initComponents(this.mainNav, this.actionbar, this);
+        this.optionsHelper.initComponents(this.actionbar, this);
     }
 
     setViewType(viewType: number) {
@@ -559,7 +564,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         // store in url for remembering layout
         const params: any = {};
         params[UIConstants.QUERY_PARAM_LIST_VIEW_TYPE] = this.viewType;
-        this.router.navigate([], {relativeTo: this.route, queryParamsHandling: 'merge', queryParams: params, replaceUrl: true});
+        this.router.navigate([], {relativeTo: this.route, queryParamsHandling: 'merge', queryParams: params, skipLocationChange: true});
         this.changes.detectChanges();
     }
 
@@ -568,14 +573,12 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
             return;
         }
         this.locator.setRoute(this.route).subscribe(() => {
-            this.locator.locateApi().subscribe(() => {
-                this.network
-                    .getRepositories()
-                    .subscribe((data: NetworkRepositories) => {
-                        this.repositories = data.repositories;
-                        this.changeDetectorRef.detectChanges();
-                    });
-            });
+            this.network
+                .getRepositories()
+                .subscribe((data: NetworkRepositories) => {
+                    this.repositories = data.repositories;
+                    this.changeDetectorRef.detectChanges();
+                });
         });
     }
 
@@ -693,14 +696,18 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
     }
 
     getItemCssClass(item: ListItem): string {
-        return (
+        let css = (
             item.type.toLowerCase() +
             '_' +
             item.name
                 .toLowerCase()
                 .replace(':', '_')
                 .replace('.', '_')
-        );
+        ) + ' type_' + item.type.toLowerCase();
+        if(item.config?.showLabel) {
+            css += ' item_with_label'
+        }
+        return css;
     }
 
     handleKeyboard(event: any): void {
@@ -795,6 +802,9 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
     }
 
     onNodesDrop({ event, nodes, dropAction }: DragData, target: Node) {
+        if(this.orderElementsActive) {
+            return;
+        }
         if (dropAction === 'link') {
             throw new Error('dropAction "link" is not allowed');
         }
@@ -807,6 +817,9 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
     onDistinctClick(event: DistinctClickEvent, node: Node, region?: string) {
         // in link mode, we will not emit any events
         if(this.createLink) {
+            return;
+        }
+        if(this.orderElementsActive){
             return;
         }
         if (!this.isClickable) {
@@ -836,8 +849,8 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
             } else {
                 this.setSelectionToSingleNode(node);
             }
-            if (this.mainNav && this.mainNav.management.nodeSidebar) {
-                this.mainNav.management.nodeSidebar = node;
+            if (this.mainnavService.getDialogs().nodeSidebar) {
+                this.mainnavService.getDialogs().nodeSidebar = node;
             }
         }
         event.event.stopPropagation();
@@ -1217,7 +1230,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         this.optionsHelper.setData({
             scope: this.scope,
             activeObjects: this.selectedNodes,
-            selectedObjects: this.selectedNodes,
+            selectedObjects: this.orderElementsActive ? []: this.selectedNodes,
             allObjects: this._nodes,
             parent: this.parent,
             customOptions: this._customOptions,
@@ -1248,7 +1261,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         this.refreshAvailableOptions();
     }
     replaceNodes(newObjects: Node[], localArray: Node[]){
-        newObjects.forEach((o: any) => {
+        newObjects?.forEach((o: any) => {
             const index = localArray.findIndex(n => n.ref.id === o.ref.id);
             if (index === -1) {
                 console.warn(
@@ -1278,6 +1291,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         this.selectedNodes = objects;
         this.selectionChanged.emit(objects);
         this.refreshAvailableOptions();
+        console.log(objects);
     }
 
     showReorder() {
@@ -1329,4 +1343,40 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
             .filter((_, index) => index > 0)
             .join(' ');
     }
+
+
+    /*
+        from list event interface
+     */
+    getDisplayType(): NodeEntriesDisplayType {
+        return this.viewType;
+    }
+
+    setDisplayType(displayType: NodeEntriesDisplayType): void {
+        this.viewType = displayType;
+    }
+
+    getSelection(): SelectionModel<Node> {
+        return null;
+    }
+
+    setOptions(options: ListOptions): void {
+        this.options = options?.[Target.List];
+        this.dropdownOptions = options?.[Target.ListDropdown];
+    }
+
+    showReorderColumnsDialog(): void {
+        this.reorderDialog = true;
+    }
+
+    /**
+     * @deprecated
+     * config paramter will be ignored
+     * Switch to new @NodeEntriesComponent
+     */
+    async initOptionsGenerator(config: ListOptionsConfig) {
+        await this.optionsHelper.initComponents(this.actionbar, this);
+        this.optionsHelper.refreshComponents();
+    }
+
 }

@@ -9,6 +9,6 @@
     <div class="title" *ngIf="titleLabel">{{titleLabel |translate:{title:_collection.title} }}</div>
     <div class="title titleMobile" *ngIf="titleLabelShort">{{titleLabelShort |translate:{title:_collection.title} }}</div>
     <div class="title titleMobile" *ngIf="!(titleLabel && titleLabelShort)">{{_collection.title}}</div>
-    <app-list-base [node]="_collection" [item]="scopeItem"></app-list-base>
+    <es-list-base [node]="_collection" [item]="scopeItem"></es-list-base>
   </div>
 </div>

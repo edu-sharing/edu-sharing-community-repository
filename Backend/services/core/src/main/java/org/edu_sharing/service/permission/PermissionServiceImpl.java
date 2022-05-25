@@ -32,6 +32,7 @@ import org.alfresco.util.ISO9075;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
+import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfresco.service.handleservice.HandleService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
@@ -277,56 +278,32 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		// used for sending copy to user
 		String copyMailText = "";
 
-		String senderName = null;
-		String senderFirstName = null, senderLastName = null;
-
 		String user = new AuthenticationToolAPI().getCurrentUser();
-		HashMap<String, String> senderInfo = repoClient.getUserInfo(user);
-		if (senderInfo != null) {
-			senderFirstName = senderInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
-			senderLastName = senderInfo.get(CCConstants.CM_PROP_PERSON_LASTNAME);
-			if (senderFirstName != null && senderLastName != null) {
-				senderName = senderFirstName + " " + senderLastName;
-			} else {
-				senderName = user;
-			}
-		}
+		MailTemplate.UserMail sender = MailTemplate.getUserMailData(user);
 
 		for (String authority : _authPerm.keySet()) {
 			String[] permissions = _authPerm.get(authority);
 			setPermissions(_nodeId, authority, permissions, _inheritPermissions);
 
-			String emailaddress = null;
-			String receiverFirstName = null, receiverLastName = null;
-
+			MailTemplate.UserMail receiver = MailTemplate.getUserMailData(authority);
 			AuthorityType authorityType = AuthorityType.getAuthorityType(authority);
 
 
 			if (AuthorityType.USER.equals(authorityType)) {
-				HashMap<String, String> personInfo = repoClient.getUserInfo(authority);
-
-				if (personInfo != null) {
-					receiverFirstName = personInfo.get(CCConstants.CM_PROP_PERSON_FIRSTNAME);
-					receiverLastName = personInfo.get(CCConstants.CM_PROP_PERSON_LASTNAME);
-					emailaddress = personInfo.get(CCConstants.CM_PROP_PERSON_EMAIL);
-				}
 				addToRecent(personService.getPerson(authority));
 			}
 			// send group email notifications
 			if(AuthorityType.GROUP.equals(authorityType)){
-				receiverLastName="";
-				receiverFirstName= (String) nodeService.getProperty(authorityService.getAuthorityNodeRef(authority),QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME));
-				emailaddress= (String) nodeService.getProperty(authorityService.getAuthorityNodeRef(authority),QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPEMAIL));
 				addToRecent(authorityService.getAuthorityNodeRef(authority));
 			}
 
 
-			if (mailValidator.isValid(emailaddress) && _sendMail) {
+			if (mailValidator.isValid(receiver.getEmail()) && _sendMail) {
 				Mail mail = new Mail();
 				HashMap<String, Object> props = repoClient.getProperties(_nodeId);
 				String nodeType = (String) props.get(CCConstants.NODETYPE);
 
-				String name = null;
+				String name;
 				if (nodeType.equals(CCConstants.CCM_TYPE_IO)) {
 					name = (String) props.get(CCConstants.LOM_PROP_GENERAL_TITLE);
 					name = (name == null || name.trim().isEmpty()) ? (String) props.get(CCConstants.CM_NAME) : name;
@@ -365,10 +342,9 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 				ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
 				Map<String, String> replace = new HashMap<>();
-				replace.put("inviterFirstName", senderFirstName.trim());
-				replace.put("inviterLastName", senderLastName.trim());
-				replace.put("firstName", receiverFirstName.trim());
-				replace.put("lastName", receiverLastName.trim());
+				receiver.applyToMap("", replace);
+				sender.applyToMap("inviter.", replace);
+				MailTemplate.applyNodePropertiesToMap("node.", props, replace);
 				replace.put("name", name.trim());
 				replace.put("message", _mailText.trim());
 				replace.put("permissions", permText.trim());
@@ -388,12 +364,12 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 					template = "invited_safe";
 				}
 				if(send) {
-					mail.sendMailHtml(context, senderName, senderInfo.get(CCConstants.CM_PROP_PERSON_EMAIL), emailaddress, MailTemplate.getSubject(template, currentLocale),
+					mail.sendMailHtml(context, sender.getFullName(), sender.getEmail(), receiver.getEmail(), MailTemplate.getSubject(template, currentLocale),
 							MailTemplate.getContent(template, currentLocale, true), replace);
 				}
 
 			} else {
-				logger.info("username/authority: " + authority + " has no valid emailaddress:" + emailaddress);
+				logger.info("username/authority: " + authority + " has no valid emailaddress:" + receiver.getEmail());
 			}
 
 		}
@@ -886,7 +862,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 			return;
 		try {
 			// fetch all groups which are allowed to acces confidential and
-			String nodeId = toolPermission.getToolPermissionNodeId(CCConstants.CCM_VALUE_TOOLPERMISSION_CONFIDENTAL);
+			String nodeId = toolPermission.getToolPermissionNodeId(CCConstants.CCM_VALUE_TOOLPERMISSION_CONFIDENTAL, true);
 			StringBuffer groupPathQuery = new StringBuffer();
 			// user may not has ReadPermissions on ToolPermission, so fetch as admin
 			ACL permissions = AuthenticationUtil.runAsSystem(new RunAsWork<ACL>() {
@@ -1054,10 +1030,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	}
 
 	private void filterGuestAuthority(StringBuffer searchQuery) {
-		String guest=ApplicationInfoList.getHomeRepository().getGuest_username();
-		if(guest!=null && !guest.trim().isEmpty()){
-			searchQuery.append(" AND NOT @cm\\:userName:\""+ QueryParser.escape(guest)+"\""
-							 + " AND NOT @cm\\:userName:\"guest\"");
+		for(String guest : GuestCagePolicy.getGuestUsers()){
+			searchQuery.append(" AND NOT @cm\\:userName:\""+ QueryParser.escape(guest)+"\"");
 		}
 	}
 
@@ -1569,9 +1543,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 	@Override
 	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId,
 			String[] permissions) {
-		ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
-		String guestName = appInfo.getGuest_username();
-		boolean guest = guestName != null && guestName.equals(AuthenticationUtil.getFullyAuthenticatedUser());
+		boolean guest = GuestCagePolicy.getGuestUsers().contains(AuthenticationUtil.getFullyAuthenticatedUser());
 		PermissionService permissionService = serviceRegistry.getPermissionService();
 		HashMap<String, Boolean> result = new HashMap<String, Boolean>();
 		NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);

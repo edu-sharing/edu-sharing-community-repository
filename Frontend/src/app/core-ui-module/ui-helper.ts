@@ -1,12 +1,13 @@
+import {forkJoin as observableForkJoin, Observable, Observer, of} from 'rxjs';
+import {catchError, first} from 'rxjs/operators';
 import {OPEN_URL_MODE, UIConstants} from '../core-module/ui/ui-constants';
 import {ConfigurationService} from '../core-module/rest/services/configuration.service';
 import {TranslateService} from '@ngx-translate/core';
 import {ActivatedRoute, NavigationExtras, Router} from '@angular/router';
 import {
-    Collection, CollectionReference,
+    CollectionReference,
     Connector,
     Filetype,
-    LoginResult,
     MdsInfo,
     Node,
     NodeLock,
@@ -18,14 +19,12 @@ import {RestConstants} from '../core-module/rest/rest-constants';
 import {RestNodeService} from '../core-module/rest/services/rest-node.service';
 import {Toast} from './toast';
 import {RestHelper} from '../core-module/rest/rest-helper';
-import {TemporaryStorageService} from '../core-module/rest/services/temporary-storage.service';
 import {UIService} from '../core-module/rest/services/ui.service';
 import {
     ComponentFactoryResolver,
     ComponentRef,
     ElementRef,
     EmbeddedViewRef,
-    EventEmitter,
     Injector,
     NgZone,
     Type,
@@ -38,18 +37,17 @@ import {ListItem} from '../core-module/ui/list-item';
 import {BridgeService} from '../core-bridge-module/bridge.service';
 import {OptionItem} from './option-item';
 import {RestConnectorService} from '../core-module/rest/services/rest-connector.service';
-import {Observable, Observer, of} from 'rxjs';
 import {RouterHelper} from './router.helper';
 import {PlatformLocation} from '@angular/common';
 import {MessageType} from '../core-module/ui/message-type';
 import {Helper} from '../core-module/rest/helper';
 import {NodeHelperService} from './node-helper.service';
-import { RestIamService } from '../core-module/rest/services/rest-iam.service';
-import { DialogButton } from '../core-module/ui/dialog-button';
-import {catchError} from "rxjs/operators";
-import {ObservedValueOf} from "rxjs/internal/types";
+import {RestIamService} from '../core-module/rest/services/rest-iam.service';
+import {DialogButton} from '../core-module/ui/dialog-button';
+import {LoginInfo} from 'ngx-edu-sharing-api';
 
 export class UIHelper {
+    static COPY_URL_PARAMS = ['mainnav', 'reurl', 'reurlTypes', 'reurlCreate', 'applyDirectories'];
     public static evaluateMediaQuery(type: string, value: number) {
         if (type == UIConstants.MEDIA_QUERY_MAX_WIDTH)
             return value > window.innerWidth;
@@ -216,6 +214,12 @@ export class UIHelper {
             },
         });
     }
+    public static goToNode(
+        router: Router,
+        node: Node,
+    ) {
+        router.navigate([UIConstants.ROUTER_PREFIX, 'node', node.ref.id]);
+    }
     public static goToCollection(
         router: Router,
         node: Node,
@@ -230,6 +234,39 @@ export class UIHelper {
         }
     }
     /**
+     * Navigate to the search in reurl (apply) mode
+     * when done, the app will redirect to the current location
+     */
+    public static openSearchWithReurl(
+        platformLocation: PlatformLocation,
+        router: Router,
+        mode: 'REDIRECT' | 'WINDOW',
+        extras: NavigationExtras = {},
+    ) {
+        if(!extras.queryParams) {
+            extras.queryParams = {};
+        }
+        if(mode === 'REDIRECT') {
+            extras.queryParams.reurl = window.location.href;
+        } else {
+            extras.queryParams.reurl = 'WINDOW';
+        }
+        if(mode === 'REDIRECT') {
+            return router.navigate([
+                    UIConstants.ROUTER_PREFIX +
+                    'search'
+                ], extras
+            );
+        } else {
+            return window.open(platformLocation.getBaseHrefFromDOM() + router.createUrlTree([
+                UIConstants.ROUTER_PREFIX + 'search'
+                ], extras).toString(),
+                '_blank',
+                'toolbar=no,scrollbars=yes,resizable=yes'
+            );
+        }
+    }
+    /**
      * Navigate to the workspace
      * @param nodeService instance of NodeService
      * @param router instance of Router
@@ -239,7 +276,7 @@ export class UIHelper {
     public static goToWorkspace(
         nodeService: RestNodeService,
         router: Router,
-        login: LoginResult,
+        login: LoginInfo,
         node: Node,
         extras: NavigationExtras = {},
     ) {
@@ -271,7 +308,7 @@ export class UIHelper {
     public static goToWorkspaceFolder(
         nodeService: RestNodeService,
         router: Router,
-        login: LoginResult,
+        login: LoginInfo,
         folder: string,
         extras: NavigationExtras = {},
     ) {
@@ -312,6 +349,7 @@ export class UIHelper {
         router: Router,
         node: any,
         count: number,
+        asProposal = false,
     ) {
         let scope = node.collection ? node.collection.scope : node.scope;
         let type = node.collection ? node.collection.type : node.type;
@@ -332,16 +370,23 @@ export class UIHelper {
         } else if (type == RestConstants.COLLECTIONTYPE_MEDIA_CENTER) {
             scope = 'MEDIA_CENTER';
         }
-        bridge.showTemporaryMessage(MessageType.info,
-            'WORKSPACE.TOAST.ADDED_TO_COLLECTION_' + scope,
-            { count: count, collection: RestHelper.getTitle(node) },
-            {
-                link: {
-                    caption: 'WORKSPACE.TOAST.VIEW_COLLECTION',
-                    callback: () => UIHelper.goToCollection(router, node),
+        if(asProposal) {
+            bridge.showTemporaryMessage(MessageType.info,
+                'WORKSPACE.TOAST.PROPOSED_FOR_COLLECTION',
+                {count: count, collection: RestHelper.getTitle(node)},
+            );
+        } else {
+            bridge.showTemporaryMessage(MessageType.info,
+                'WORKSPACE.TOAST.ADDED_TO_COLLECTION_' + scope,
+                {count: count, collection: RestHelper.getTitle(node)},
+                {
+                    link: {
+                        caption: 'WORKSPACE.TOAST.VIEW_COLLECTION',
+                        callback: () => UIHelper.goToCollection(router, node),
+                    },
                 },
-            },
-        );
+            );
+        }
     }
 
     static prepareMetadatasets(
@@ -362,15 +407,17 @@ export class UIHelper {
         bridge: BridgeService,
         collection: Node,
         nodes: Node[],
+        asProposal = false,
         callback: (nodes: CollectionReference[]) => void = null,
         allowDuplicate = false,
     ) {
-        Observable.forkJoin(nodes.map(node =>
+        observableForkJoin(nodes.map(node =>
             collectionService.addNodeToCollection(
                 collection.ref.id,
                 node.ref.id,
                 node.ref.repo,
-                allowDuplicate
+                allowDuplicate,
+                asProposal
                 ).pipe(
                     catchError(error => of({error, node}),)
                 )
@@ -385,11 +432,12 @@ export class UIHelper {
                     router,
                     collection,
                     success.length,
+                    asProposal
                 );
             }
             if(failed.length > 0) {
                 const duplicated = failed.filter(({error}) => error.status === RestConstants.DUPLICATE_NODE_RESPONSE);
-                if (duplicated.length > 0) {
+                if (duplicated.length > 0 && !asProposal) {
                     bridge.showModalDialog({
                         title: 'COLLECTIONS.ADD_TO.DUPLICATE_TITLE',
                         message: 'COLLECTIONS.ADD_TO.DUPLICATE_MESSAGE',
@@ -411,6 +459,7 @@ export class UIHelper {
                                     bridge,
                                     collection,
                                     duplicated.map(d => d.node),
+                                    false,
                                     callback,
                                     true
                                 )
@@ -516,122 +565,6 @@ export class UIHelper {
                 if (win) win.close();
             },
         );
-    }
-
-    /**
-     * smoothly scroll to the given y offset
-     * @param {y} number
-     * @param {smoothness} lower numbers indicate less smoothness, higher more smoothness
-     */
-    static scrollSmooth(y: number = 0, smoothness = 1) {
-        let mode = window.scrollY >= y;
-        let divider = 3 * smoothness;
-        let minSpeed = 7 / smoothness;
-        let lastY = y;
-        let interval = setInterval(() => {
-            let yDiff = window.scrollY - lastY;
-            lastY = window.scrollY;
-            if (window.scrollY > y && mode && yDiff) {
-                window.scrollBy(
-                    0,
-                    -Math.max((window.scrollY - y) / divider, minSpeed),
-                );
-            } else if (window.scrollY < y && !mode && yDiff) {
-                window.scrollBy(
-                    0,
-                    Math.max((y - window.scrollY) / divider, minSpeed),
-                );
-            } else {
-                clearInterval(interval);
-            }
-        }, 16);
-    }
-    /**
-     * smoothly scroll to the given y offset inside an element (use offsetTop on the child to determine this position)
-     * @param {y} number
-     * @param {smoothness} lower numbers indicate less smoothness, higher more smoothness
-     */
-    static scrollSmoothElement(
-        pos: number = 0,
-        element: Element,
-        smoothness = 1,
-        axis = 'y',
-    ) {
-        return new Promise(resolve => {
-            let currentPos =
-                axis == 'x' ? element.scrollLeft : element.scrollTop;
-            if (element.getAttribute('data-is-scrolling') == 'true') {
-                return;
-            }
-            let mode = currentPos > pos;
-            let divider = 3 * smoothness;
-            let minSpeed = 7 / smoothness;
-            let lastPos = pos;
-            let maxPos =
-                axis == 'x'
-                    ? element.scrollWidth - element.clientWidth
-                    : element.scrollHeight - element.clientHeight;
-            let limitReached = false;
-            if (mode && pos <= 0) {
-                pos = 0;
-                limitReached = true;
-            }
-            if (!mode && pos >= maxPos) {
-                pos = maxPos;
-                limitReached = true;
-            }
-            let interval = setInterval(() => {
-                let currentPos =
-                    axis == 'x' ? element.scrollLeft : element.scrollTop;
-                let posDiff = currentPos - lastPos;
-                lastPos = currentPos;
-                let finished = true;
-                if (currentPos > pos) {
-                    currentPos -= Math.max(
-                        (currentPos - pos) / divider,
-                        minSpeed,
-                    );
-                    finished = currentPos <= pos;
-                } else if (currentPos < pos && !mode) {
-                    currentPos += Math.max(
-                        (pos - currentPos) / divider,
-                        minSpeed,
-                    );
-                    finished = currentPos >= pos;
-                }
-                if (axis == 'x') element.scrollLeft = currentPos;
-                else element.scrollTop = currentPos;
-                if (finished) {
-                    clearInterval(interval);
-                    element.removeAttribute('data-is-scrolling');
-                    resolve();
-                }
-            }, 16);
-            element.setAttribute('data-is-scrolling', 'true');
-        });
-    }
-
-    /**
-     * smoothly scroll to the given child inside an element (The child will be placed around the first 1/3 of the parent's top)
-     * @param child
-     * @param element
-     * @param smoothness
-     */
-    static scrollSmoothElementToChild(
-        child: Element,
-        element: Element,
-        smoothness = 1,
-    ) {
-        // y equals to the top of the child + any scrolling of the parent - the top of the parent
-        let y =
-            child.getBoundingClientRect().top +
-            element.scrollTop -
-            element.getBoundingClientRect().top;
-        // move the focused element to 1/3 at the top of the container
-        y +=
-            child.getBoundingClientRect().height / 2 -
-            element.getBoundingClientRect().height / 3;
-        this.scrollSmoothElement(y, element, smoothness);
     }
 
     static setFocusOnCard() {
@@ -757,6 +690,7 @@ export class UIHelper {
         targetElement: Element,
         bindings: { [key: string]: any } = null,
         { delay = 0, replace = true } = {},
+        injector?: Injector,
     ): ComponentRef<T> {
         if (targetElement == null) {
             return null;
@@ -765,7 +699,7 @@ export class UIHelper {
             componentName,
         );
         const component: ComponentRef<T> = viewContainerRef.createComponent(
-            factory
+            factory, undefined, injector,
         );
         if (bindings) {
             const instance: { [key: string]: any } = component.instance;
@@ -776,6 +710,9 @@ export class UIHelper {
                     instance[key].subscribe((value: any) => binding(value));
                 } else {
                     instance[key] = binding;
+                    // `ngOnChanges` won't be called on the component like this. Consider doing
+                    // something like this:
+                    // https://scm.edu-sharing.com/edu-sharing/projects/oeh-redaktion/ng-meta-widgets/-/blob/1603fb2dedadd3952401385bcbd91a4bd8407643/src/app/app.module.ts#L66-79
                 }
             }
         }
@@ -800,14 +737,13 @@ export class UIHelper {
      * @param route
      */
     static getCommonParameters(route: ActivatedRoute) {
-        const COPY_PARAMS = ['mainnav', 'reurl', 'applyDirectories'];
         return new Observable<any>((observer: Observer<any>) => {
             route.queryParams
-                .pipe()
-                .first()
+                .pipe().pipe(
+                first())
                 .subscribe(queryParams => {
                     let result: any = {};
-                    COPY_PARAMS.forEach(params => {
+                    UIHelper.COPY_URL_PARAMS.forEach(params => {
                         if (queryParams[params]) {
                             result[params] = queryParams[params];
                         }
@@ -923,5 +859,16 @@ export class UIHelper {
             RestConstants.BASIC_PERMISSIONS.indexOf(p1) >
             RestConstants.BASIC_PERMISSIONS.indexOf(p2)
         );
+    }
+
+    static isParentElementOfElement(target: HTMLElement, possibleParent: HTMLElement) {
+        let e = target;
+        while(e != null) {
+            if(e === possibleParent) {
+                return true;
+            }
+            e = e.parentElement;
+        }
+        return false;
     }
 }

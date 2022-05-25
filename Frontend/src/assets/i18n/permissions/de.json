@@ -29,6 +29,8 @@
         "MENU_EXCLUDE": "Ausschließen",
         "MENU_REMOVE_MEMBERSHIP": "Aus Gruppe(n) entfernen",
         "MENU_STATUS": "Status festlegen",
+        "ORG_HOME_FOLDER_LABEL": "Position des Organisations-Ordners",
+        "ORG_HOME_FOLDER_MAIN": "System",
         "SEARCH_GROUP": "Gruppen suchen...",
         "SEARCH_USER": "Nutzer suchen...",
         "SEARCH_GROUPS": "Gruppen durchsuchen...",
@@ -56,8 +58,8 @@
         "EDIT_ORG_MEMBERS": "Organisation verwalten",
         "USER_ADDED_TO_GROUP": "{{count}} Nutzer wurde(n) zur Gruppe {{group}} hinzugefügt",
         "USER_ADDED_TO_GROUP_MULTI": "{{count}} Zuordnung(en) wurden vorgenommen",
-        "USER_ADDED_FAILED_MULTI": "{{error}} Zuordnung(en) sind fehlgeschlagen, da die Nutzer bereits Mitglied sind<br>{{count}} Zuordnung(en) wurden vorgenommen",
-        "USER_ADDED_FAILED": "{{error}} Nutzer war(en) bereits Mitglied und wurden nicht hinzugefügt<br>{{count}} Nutzer wurde(n) zur Gruppe {{group}} hinzugefügt",
+        "USER_ADDED_FAILED_MULTI": "{{error}} Zuordnung(en) sind fehlgeschlagen, da die Nutzer bereits Mitglied sind\n{{count}} Zuordnung(en) wurden vorgenommen",
+        "USER_ADDED_FAILED": "{{error}} Nutzer war(en) bereits Mitglied und wurden nicht hinzugefügt\n{{count}} Nutzer wurde(n) zur Gruppe {{group}} hinzugefügt",
         "ADD_TO": "Hinzufügen",
         "DELETE_TITLE": "Löschen",
         "DELETE_USER_SINGLE": "Möchten Sie den Nutzer {{name}} aus der Organisation ausschließen?",
@@ -157,6 +159,11 @@
                 "RECEIVER": "Folgender Nutzer wird zum Eigentümer aller Daten: {{user}}",
                 "RECEIVER_GROUP": "Folgende Organisation erhält die Verwaltungsrechte für alle Daten: {{group}}",
                 "FINAL": "Durch betätigen von \"Vorgang Starten\" werden die gewählten Aktionen unwiderruflich durchgeführt. Prüfen Sie bitte alle Optionen, bevor Sie fortfahren."
+            },
+            "JOBS": {
+              "CAPTION": "Löschprofil auswählen",
+              "TITLE": "Löschprofil",
+              "DEFAULT": "Standard-Löschprofil (Parameter unten benutzen)"
             },
             "HOME_FOLDER": {
                 "CAPTION": "Stamm-Verzeichnisse der Nutzer & enthaltene Daten",

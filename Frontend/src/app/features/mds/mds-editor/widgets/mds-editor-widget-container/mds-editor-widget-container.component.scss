@@ -1,0 +1,67 @@
+@import '../../../../../core-ui-module/styles/variables';
+:host {
+    display: block;
+}
+.widget-container {
+    display: block;
+    &:not(.read-only) {
+        margin-bottom: 1.5em;
+        scroll-margin-top: 50px;
+    }
+}
+
+.ripple-container {
+    // Calculate the exact negative margins to prevent horizontal scroll bars.
+    --horizontal-total-padding: calc(
+        var(--mds-content-padding, 0px) + var(--mds-editor-horizontal-padding, 0px)
+    );
+    margin: -10px calc(0px - var(--horizontal-total-padding));
+    padding: 10px var(--horizontal-total-padding);
+    & > ::ng-deep .mat-ripple-element {
+        background-color: $primaryLight;
+        z-index: -1;
+    }
+}
+
+.mat-form-field {
+    width: 100%;
+}
+
+:host .mat-form-field.mat-form-field-invalid.warn ::ng-deep {
+    .mat-form-field-label,
+    .mat-form-field-outline,
+    .mat-error {
+        color: $colorStatusWarning;
+    }
+    .mat-input-element {
+        caret-color: $colorStatusWarning;
+    }
+}
+
+.header-container {
+    display: flex;
+    align-items: center;
+    label {
+        margin-bottom: 5px;
+        :host.disabled & {
+            color: rgba(0, 0, 0, 0.38);
+        }
+    }
+    .spacer {
+        flex-grow: 1;
+    }
+    .changes-notice {
+        color: $primary;
+    }
+    > *:not(:last-child) {
+        margin-right: 10px;
+    }
+}
+
+.subscript {
+    font-size: 75%;
+    margin-top: 5px;
+    &.warn {
+        color: $colorStatusWarning;
+    }
+}

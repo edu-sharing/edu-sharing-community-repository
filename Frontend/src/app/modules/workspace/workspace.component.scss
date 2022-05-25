@@ -18,7 +18,7 @@
   padding-top:25px;
 }
 
-.tree,.explorer{
+.tree {
   display:table-cell;
 }
 
@@ -37,7 +37,7 @@ $quotaHeight:60px;
   height:calc(100% - #{$workspaceBreadcrumbsHeight} - #{$mainnavHeight});
   z-index: 2;
   background: $workspaceTreeBackground;
-  workspace-tree{
+  es-workspace-tree{
     min-width:$workspaceTreeWidth;
     max-width:$workspaceTreeWidth;
     top:$workspaceBreadcrumbsHeight+$mainnavHeight;
@@ -50,7 +50,7 @@ $quotaHeight:60px;
   }
 }
 
-user-quota{
+es-user-quota{
   position: absolute;
   width: $workspaceTreeWidth;
   height: $quotaHeight;
@@ -89,7 +89,8 @@ user-quota{
 
 }
 .explorer{
-  position:absolute;
+  position: relative;
+  display: block;
   left:300px;
   top: $mainnavHeight+$secondaryBarHeight;
   width:calc(100% - 300px);
@@ -145,13 +146,13 @@ user-quota{
 }
 :host ::ng-deep{
   @media screen and (min-width: ($mobileWidth)) {
-    workspace-explorer listTable .list.list-type-card > .list-container {
+    es-workspace-explorer es-listTable .list.list-type-card > .list-container {
       padding-top: 20px;
       padding-bottom: 20px;
     }
   }
   @media screen and (min-width: ($mobileTabSwitchWidth)) {
-      workspace-explorer listTable .list{
+      es-workspace-explorer es-listTable .list{
           overflow-y: auto;
           position: relative;
           &.list-type-card {
@@ -172,7 +173,7 @@ user-quota{
       }
   }
   @media screen and (min-width: ($mobileWidth+$mobileStage*6)) {
-    workspace-explorer.explorerMetadata listTable .list-type-table .headingGroup {
+    workspace-explorer.explorerMetadata es-listTable .list-type-table .headingGroup {
         width: calc(100% - #{$workspaceTreeWidth} - 300px);
     }
   }
@@ -221,7 +222,7 @@ user-quota{
     height:calc(100% - #{$mainnavHeight+$secondaryBarHeight+$mobileTabNavHeight});
   }
   :host ::ng-deep{
-    workspace-explorer .list{
+    es-workspace-explorer .list{
       margin-bottom: 62px;
     }
   }

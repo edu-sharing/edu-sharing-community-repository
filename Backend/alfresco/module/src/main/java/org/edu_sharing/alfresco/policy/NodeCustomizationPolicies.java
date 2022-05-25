@@ -78,6 +78,9 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 
 	/* Some safe properties they're not necessary in the mds, but the client is allowed to define */
 	public static final String[] SAFE_PROPS = new String[]{
+			CCConstants.CM_NAME,
+			CCConstants.CM_PROP_TITLE,
+			CCConstants.CM_PROP_DESCRIPTION,
 			CCConstants.LOM_PROP_GENERAL_TITLE,
 			CCConstants.LOM_PROP_TECHNICAL_FORMAT,
 			CCConstants.CCM_PROP_IO_WWWURL,
@@ -110,7 +113,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			CCConstants.CCM_PROP_SERVICE_NODE_TYPE,
 			CCConstants.CCM_PROP_SERVICE_NODE_DATA,
 			CCConstants.CCM_PROP_IO_REF_VIDEO_VTT,
-			CCConstants.CCM_PROP_MAP_REF_TARGET
+			CCConstants.CCM_PROP_MAP_REF_TARGET,
 	};
 	/**
 	 * These are the properties that will be copied to all io_reference nodes inside collections
@@ -811,7 +814,6 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 
 	private static byte[] getPreviewFromURLSplash(String httpURL) {
 		Config splash = LightbendConfigLoader.get().getConfig("repository.communication.splash");
-
 		if(splash != null && splash.hasPath("url")) {
 			try {
 				final StringBuilder url = new StringBuilder(splash.getString("url") + "?url=" + java.net.URLEncoder.encode(httpURL, "ISO-8859-1"));

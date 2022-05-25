@@ -1,0 +1,44 @@
+<div class="suggestion-content">
+  <es-user-avatar [user]="authority" size="small"></es-user-avatar>
+  <div class="text-content">
+    <div class="data">
+      <div
+        class="primary"
+        esCheckTextOverflow
+        #name="esCheckTextOverflow"
+        [matTooltip]="name.hasTextOverflow() ? (authority | authorityName) : null"
+      >
+        {{ authority | authorityName }}
+      </div>
+      <div class="secondary" *ngIf="secondaryTitle">{{ secondaryTitle }}</div>
+    </div>
+    <div class="secondary-data">
+      <div class="parent-orgs">
+        <span
+          *ngIf="authority.organizations"
+          esCheckTextOverflow
+          #orgs="esCheckTextOverflow"
+          #div
+          [matTooltip]="orgs.hasTextOverflow() ? div.innerText : null"
+        >
+          <span *ngFor="let org of authority.organizations; last as last">
+            {{ org | authorityName }}<ng-container *ngIf="!last">, </ng-container>
+          </span>
+        </span>
+        <span *ngIf="!authority.organizations">&nbsp;</span>
+      </div>
+      <div class="affiliation" *ngIf="authority.authorityType === 'USER'">
+        {{ (authority | authorityAffiliation) || '&nbsp;' }}
+      </div>
+      <div
+        class="affiliation affiliation-group"
+        *ngIf="authority.profile.displayName && authority.properties"
+      >
+        {{
+          'AUTHORITY_TYPE_' + (authority.properties['ccm:edu_homedir'] ? 'ORG' : 'GROUP')
+            | translate
+        }}
+      </div>
+    </div>
+  </div>
+</div>

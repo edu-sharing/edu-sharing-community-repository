@@ -1,0 +1,18 @@
+<es-mds-editor-widget-container [widget]="widget" [label]="widget.definition.caption" [valueType]="valueType">
+  <ngx-slider
+    *ngIf="isRange"
+    class="ngx-slider-small"
+    [(value)]="currentValue[0]"
+    [(highValue)]="currentValue[1]"
+    [options]="sliderOptions"
+    (valueChange)="updateValues()"
+    (highValueChange)="updateValues()"
+  ></ngx-slider>
+  <ngx-slider
+    *ngIf="!isRange"
+    class="ngx-slider-small"
+    [(value)]="currentValue[0]"
+    [options]="sliderOptions"
+    (valueChange)="updateValues()"
+  ></ngx-slider>
+</es-mds-editor-widget-container>

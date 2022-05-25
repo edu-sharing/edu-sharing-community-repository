@@ -41,7 +41,7 @@ public class DAOException extends Exception {
 	
 	public static DAOException mapping(Throwable t,String nodeId) {
 		// de-capsulate previously capsulated runtime throwables
-		if(t instanceof RuntimeException && (t.getCause() instanceof RestrictedAccessException)) {
+		if(t instanceof RuntimeException && (t.getCause() instanceof RestrictedAccessException || (t.getMessage() != null && t.getMessage().contains("Error during run as.")))) {
 			t = t.getCause();
 		}
 		if (t instanceof DAOException) {

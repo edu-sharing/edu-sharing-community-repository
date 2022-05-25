@@ -62,21 +62,6 @@
   padding-top:20px;
 }
 
-.description{
-  color: $textMain;
-  font-size:90%;
-  float:left;
-  text-transform: uppercase;
-  font-weight: bold;
-}
-.descriptionValue{
-  white-space: pre-wrap;
-}
-.edit{
-  color:$textLight;
-  float:right;
-  position: relative;
-}
 .btnVersion{
   margin-right: 5px;
 }
@@ -85,20 +70,7 @@
   overflow-x: hidden;
   overflow-y: auto;
 }
-.value{
-  padding-top:0;
-  float:left;
-  padding-bottom:20px;
-}
-.aspect:not(:last-child){
-  padding-bottom: 4px;
-}
-.valueFreetext{
-  white-space: pre-line;
-}
-.description,.value{
-  width:calc(100% - 30px);
-}
+
 /*Value show in memu-tabs*/
 .value-properties{
   float: right;
@@ -109,7 +81,7 @@
 canvas{
   margin: 20px 0;
 }
-listTable{
+es-listTable{
   float:left;
   width:100%;
   padding: 10px 0 30px;
@@ -143,14 +115,6 @@ listTable{
 }
 .usage-counter{
   font-weight: bold;
-}
-.preview{
-  width:calc(100% + 24px);
-  margin-left:-12px;
-  margin-bottom: 12px;
-  height:200px;
-  position: relative;
-  object-fit: cover;
 }
 .license-value {
   padding-top: 4px;

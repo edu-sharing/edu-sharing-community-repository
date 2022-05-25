@@ -1,0 +1,33 @@
+@import '../../../../../core-ui-module/styles/variables';
+@import '../../../../../shared/components/card/variables';
+
+:host {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 17px 20px;
+    border-top: 1px solid $cardSeparatorLineColor;
+}
+
+.card-dialog-button-box {
+    flex-grow: 1;
+    display: flex;
+    gap: 10px;
+}
+
+.card-dialog-button-box-right {
+    justify-content: flex-end;
+}
+
+button {
+    padding: 0 2rem;
+    font-weight: 600;
+}
+
+@media screen and (max-width: ($mobileWidth - $mobileStage*3)) {
+    // when screen is small, all buttons should have the same size to prevent long texts to let
+    // short text to be too small
+    button {
+        width: 0;
+        flex-grow: 1;
+    }
+}

@@ -1,20 +1,12 @@
 <div>
-<div class="header">
-  <img src="assets/images/layout/oer_bg.jpg" image-config alt="">
+<div class="header"
+(esBorderBoxObserver)="setMainNavOffset($event.height - 75)"
+>
+  <img src="assets/images/layout/oer_bg.jpg" esImage-config alt="">
   <div class="headerGradient"></div>
 </div>
-  <main-nav
-          #mainNav
-          [title]="'SEARCH.TITLE'"
-          [currentScope]="'oer'"
-          [searchEnabled]="true"
-          [searchPlaceholder]="'OER.SEARCH'"
-          [canOpen]="true"
-          [searchQuery]="currentQuery"
-          (onSearch)="routeSearch($event.query)"
-  ></main-nav>
 <div class="heading">
-  <h1 appTitle>{{'OER.HEADING_TITLE' | translate}}</h1>
+  <h1 esTitle>{{'OER.HEADING_TITLE' | translate}}</h1>
   <h2>{{'OER.HEADING_DESCRIPTION' | translate}}</h2>
 </div>
 <div class="content">
@@ -23,7 +15,7 @@
   <div class="more" *ngIf="hasMore[COLLECTIONS] || true"><a tabindex="0" class="clickable" (click)="goToCollections()" (keyup.enter)="goToCollections()">{{(showMore[COLLECTIONS] ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a> </div>
   <div class="noResults collections" *ngIf="!loading[COLLECTIONS] && !nodes[COLLECTIONS].length">{{'OER.NO_COLLECTION_RESULTS' | translate}}</div>
   <div>
-  <listTable  *ngIf="loading[COLLECTIONS] || nodes[COLLECTIONS].length"
+  <es-listTable  *ngIf="loading[COLLECTIONS] || nodes[COLLECTIONS].length"
     id="collections"
     class="list collections"
     [class.listLoading]="loading[COLLECTIONS]"
@@ -35,19 +27,18 @@
     [hasHeading]="false"
     [isClickable]="true"
     [createLink]="true"
-    [mainNav]="mainNavRef"
     [scope]="SCOPES.Oer"
     [viewType]="2"
     [scrollWindow]="true"
     (loadMore)="loadMore(COLLECTIONS)"
-    [isLoading]="loading[COLLECTIONS]"></listTable>
+    [isLoading]="loading[COLLECTIONS]"></es-listTable>
   </div>
 </div>
   <div class="materials">
     <div class="caption">{{ 'OER.MATERIALS' | translate}}</div>
     <div class="more" *ngIf="hasMore[MATERIALS]"><a tabindex="0" class="clickable" (click)="goToSearch()">{{(showMore[MATERIALS] ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a> </div>
     <div class="noResults materials" *ngIf="!(loading[MATERIALS] || nodes[MATERIALS] && nodes[MATERIALS].length)">{{'OER.NO_MATERIAL_RESULTS' | translate}}</div>
-    <listTable *ngIf="loading[MATERIALS] || nodes[MATERIALS] && nodes[MATERIALS].length"
+    <es-listTable *ngIf="loading[MATERIALS] || nodes[MATERIALS] && nodes[MATERIALS].length"
       id="materials"
       class="list materials"
       [class.listLoading]="loading[MATERIALS]"
@@ -55,7 +46,6 @@
       [nodes]="nodes[MATERIALS]"
       [columns]="columns[MATERIALS]"
       [hasIcon]="true"
-      [mainNav]="mainNavRef"
       [scope]="SCOPES.Oer"
       [hasCheckbox]="false"
       [hasHeading]="false"
@@ -65,13 +55,13 @@
       [scrollWindow]="true"
       (onUpdateOptions)="updateOptions(MATERIALS,$event)"
       (loadMore)="loadMore(MATERIALS)"
-      [isLoading]="loading[MATERIALS]"></listTable>
+      [isLoading]="loading[MATERIALS]"></es-listTable>
   </div>
   <div class="tools" *ngIf="false">
     <div class="caption">{{ 'OER.TOOLS' | translate}}</div>
     <div class="more" *ngIf="hasMore[TOOLS]"><a tabindex="0" class="clickable" (click)="toggleMore(TOOLS)" (keyup.enter)="toggleMore(TOOLS)">{{(showMore[TOOLS] ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</a> </div>
     <div class="noResults tools" *ngIf="!loading[TOOLS] && !nodes[TOOLS].length">{{'OER.NO_TOOL_RESULTS' | translate}}</div>
-    <listTable *ngIf="loading[TOOLS] || nodes[TOOLS].length"
+    <es-listTable *ngIf="loading[TOOLS] || nodes[TOOLS].length"
                id="tools"
                class="list materials"
                [class.listLoading]="loading[TOOLS]"
@@ -79,7 +69,6 @@
                [nodes]="nodes[TOOLS]"
                [columns]="columns[TOOLS]"
                [hasIcon]="true"
-               [mainNav]="mainNavRef"
                [scope]="SCOPES.Oer"
                [hasCheckbox]="false"
                [hasHeading]="false"
@@ -88,8 +77,8 @@
                [viewType]="1"
                [scrollWindow]="true"
                (loadMore)="loadMore(TOOLS)"
-               [isLoading]="loading[TOOLS]"></listTable>
+               [isLoading]="loading[TOOLS]"></es-listTable>
   </div>
 </div>
 </div>
-<app-footer [scope]="'oer'"></app-footer>
+<es-footer [scope]="'oer'"></es-footer>

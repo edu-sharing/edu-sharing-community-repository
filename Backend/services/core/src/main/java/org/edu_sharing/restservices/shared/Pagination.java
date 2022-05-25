@@ -22,6 +22,11 @@ public class Pagination  {
 	  total=result.getTotalCount();
 	  count=result.getCount();
   }
+  public <T extends Node>  Pagination(List<T> result) {
+    from=0;
+    total=result.size();
+    count=result.size();
+  }
 /**
    **/
   @Schema(required = true, description = "")

@@ -1,19 +1,21 @@
-import {Component} from '@angular/core';
-import {DeleteMode, DialogButton, Group,
-    ListItem, RestAdminService, RestConstants, RestIamService, SessionStorageService, User} from '../../../core-module/core.module';
+import {Component, OnInit} from '@angular/core';
+import {
+    DeleteMode, DialogButton, Group, JobDescription,
+    ListItem, RestAdminService, RestConstants, RestIamService, SessionStorageService, User
+} from '../../../core-module/core.module';
 import {Toast} from '../../../core-ui-module/toast';
 import {TranslateService} from '@ngx-translate/core';
-import {AuthorityNamePipe} from '../../../core-ui-module/pipes/authority-name.pipe';
+import {AuthorityNamePipe} from '../../../shared/pipes/authority-name.pipe';
 import {Helper} from '../../../core-module/rest/helper';
-import { AuthoritySearchMode } from '../../../common/ui/authority-search-input/authority-search-input.component';
+import { AuthoritySearchMode } from '../../../shared/components/authority-search-input/authority-search-input.component';
 
 @Component({
-  selector: 'permissions-delete',
+  selector: 'es-permissions-delete',
   templateUrl: 'delete.component.html',
   styleUrls: ['delete.component.scss'],
 
 })
-export class PermissionsDeleteComponent {
+export class PermissionsDeleteComponent implements OnInit {
  readonly AuthoritySearchMode = AuthoritySearchMode;
  deleteModes= [DeleteMode.none, DeleteMode.assign, DeleteMode.delete];
  deleteModesFolder= [DeleteMode.none, DeleteMode.assign];
@@ -26,6 +28,8 @@ export class PermissionsDeleteComponent {
  columns: ListItem[]= [];
  deleteResult: string;
  deleteButtons: DialogButton[];
+ jobs: JobDescription[];
+ job: JobDescription | 'NONE' = 'NONE';
 
     constructor(
         private iam: RestIamService,
@@ -90,6 +94,11 @@ export class PermissionsDeleteComponent {
         this.refresh();
     }
 
+    async ngOnInit() {
+        this.jobs = (await this.admin.getAllJobs().toPromise())
+            .filter((j) => j.tags?.includes('DeletePersonJob'));
+    }
+
   /**
    * returns a code whether all selected modes seem to be data conform and all user-relevant data will be removed and all options match up
    */
@@ -144,11 +153,25 @@ export class PermissionsDeleteComponent {
     }
 
     start() {
+      this.toast.showProgressDialog();
+        if(this.job !== 'NONE') {
+          this.admin.startJobSync(this.job.name, {
+              authorities: this.selectedUsers.map((u) => u.authorityName)
+          }).subscribe((result) => {
+              this.toast.closeModalDialog();
+              this.deleteResult = JSON.stringify(result, null, 2);
+              this.refresh();
+          }, error => {
+              this.toast.error(error);
+              this.toast.closeModalDialog();
+          });
+          return;
+      }
+
       if (this.hasAssigning()) {
           this.options.receiver = this.receiver.authorityName;
           this.options.receiverGroup = this.receiverGroup.authorityName;
       }
-      this.toast.showProgressDialog();
       this.storage.set('delete_users_options', this.options);
       const submit = Helper.deepCopy(this.options);
       delete submit.version;

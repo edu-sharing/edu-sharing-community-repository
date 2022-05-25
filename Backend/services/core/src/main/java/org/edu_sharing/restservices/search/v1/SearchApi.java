@@ -13,9 +13,14 @@ import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.restservices.*;
+import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.search.v1.model.SearchParameters;
+import org.edu_sharing.restservices.search.v1.model.SearchParametersFacets;
 import org.edu_sharing.restservices.shared.*;
+import org.edu_sharing.service.lti13.LTIConstants;
+import org.edu_sharing.service.lti13.LTIJWTUtil;
+import org.edu_sharing.service.lti13.model.LTISessionObject;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchService.CombineMode;
@@ -81,12 +86,18 @@ public class SearchApi {
 
 			SearchToken token = new SearchToken();
 			token.setFacets(parameters.getFacets());
+			token.setFacetLimit((parameters.getFacetLimit() != null && parameters.getFacetLimit() > 0)
+					? parameters.getFacetLimit() : 10);
+			token.setFacetsMinCount((parameters.getFacetMinCount() != null && parameters.getFacetMinCount() >= 0 )
+					? parameters.getFacetMinCount(): 5);
+			token.setQueryString(parameters.getFacetSuggest());
 			token.setPermissions(parameters.getPermissions());
 			token.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
 			token.setFrom(skipCount != null ? skipCount : 0);
 			token.setMaxResult(maxItems != null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS);
 			token.setContentType(contentType);
 			token.setResolveCollections(parameters.isResolveCollections());
+			token.setReturnSuggestion(parameters.isReturnSuggestions());
 			NodeSearch search = NodeDao.search(repoDao, mdsDao, query, parameters.getCriteria(), token, filter);
 
 		    	List<Node> data = null;//new ArrayList<Node>();
@@ -98,7 +109,7 @@ public class SearchApi {
 		    		data = search.getNodes();
 		    		// @TODO: we may need to still call convertToRest to make sure we've latest data from remote repos
 		    	}
-		    	
+
 		    	
 		    	Pagination pagination = new Pagination();
 		    	pagination.setFrom(search.getSkip());
@@ -111,12 +122,63 @@ public class SearchApi {
 		    	response.setIgnored(search.getIgnored());
 		    	response.setPagination(pagination);	    	
 		    	response.setFacets(search.getFacets());
-		    	
+				response.setSuggests(search.getSuggests());
+
 		    	return Response.status(Response.Status.OK).entity(response).build();
 		
 	    	}  catch (Throwable t) {
 	    		return ErrorResponse.createResponse(t);
 	    	}
+
+	}
+
+
+	@POST
+	@Path("/queries/{repository}/{metadataset}/{query}/facets")
+	@Consumes({ "application/json" })
+
+	@Operation(summary = "Search in facets.", description = "Perform queries based on metadata sets.")
+
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResultNode.class))),
+		@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
+
+	public Response searchFacets(
+
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, schema = @Schema(defaultValue="-default-")) @PathParam("metadataset") String mdsId,
+			@Parameter(description = "ID of query", required = true) @PathParam("query") String query,
+			@Parameter(description = "facet parameters", required = true) SearchParametersFacets parameters,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			MdsDao mdsDao = MdsDao.getMds(repoDao, mdsId);
+
+			SearchToken token = new SearchToken();
+			token.setFacets(parameters.getFacets());
+			token.setFrom(0);
+			token.setMaxResult(0);
+			token.setFacetLimit((parameters.getFacetLimit() != null && parameters.getFacetLimit() > 0)
+					? parameters.getFacetLimit() : 10);
+			token.setFacetsMinCount((parameters.getFacetMinCount()  != null && parameters.getFacetMinCount() >= 0 )
+					? parameters.getFacetMinCount() : 5);
+			token.setQueryString(parameters.getFacetSuggest());
+
+			NodeSearch search = NodeDao.searchFacets(repoDao, mdsDao, query, parameters.getCriteria(), token);
+			SearchResultNode response = new SearchResultNode();
+			response.setNodes(new ArrayList<>());
+			response.setIgnored(search.getIgnored());
+			response.setFacets(search.getFacets());
+			return Response.status(Response.Status.OK).entity(search).build();
+
+		}  catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
 
 	}
 
@@ -431,6 +493,48 @@ public class SearchApi {
 
 		}  catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
+		}
+
+	}
+
+	@GET
+	@Path("/metadata/{repository}")
+	@Consumes({ "application/json" })
+	@Operation(summary = "get nodes with metadata and collections")
+	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntries.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+	public Response getMetdata(
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = "nodeIds") @QueryParam("nodeIds") List<String> nodeIds,
+			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Context HttpServletRequest req) {
+
+		try {
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+
+			Filter filter = new Filter(propertyFilter);
+			NodeSearch search = NodeDao.getMetadata(repoDao, nodeIds, filter);
+
+			List<Node> data = null;//new ArrayList<Node>();
+			if(search.getNodes().size() < search.getResult().size()){
+				//searched repo deliveres only nodeRefs by query time
+				data = NodeDao.convertToRest(repoDao, search.getResult(), null, null);
+			}else{
+				//searched repo delivered properties by query time
+				data = search.getNodes();
+				// @TODO: we may need to still call convertToRest to make sure we've latest data from remote repos
+			}
+			NodeEntries response = new NodeEntries();
+			response.setNodes(data);
+
+			return Response.status(Response.Status.OK).entity(response).build();
+
+		} catch (DAOException e) {
+			return ErrorResponse.createResponse(e);
 		}
 
 	}

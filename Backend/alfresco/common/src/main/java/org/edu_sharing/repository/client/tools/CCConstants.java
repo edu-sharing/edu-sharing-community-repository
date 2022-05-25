@@ -119,6 +119,8 @@ public class CCConstants {
 	
 	public final static String AUTH_TYPE_TICKET = "AUTH_TYPE_TICKET";
 
+	public final static String AUTH_TYPE_LTI = "AUTH_TYPE_LTI";
+
 	public final static String AUTH_ACCESS_TOKEN = "AUTH_ACCESS_TOKEN";
 
 	public final static String AUTH_HEADER_EDU_TICKET = "EDU-TICKET";
@@ -198,6 +200,8 @@ public class CCConstants {
 	public final static String CCM_TYPE_IO = "{http://www.campuscontent.de/model/1.0}io";
 
 	public final static String CCM_TYPE_CONFIGOBJECT = "{http://www.campuscontent.de/model/1.0}configobject";
+
+	public final static String CCM_TYPE_COLLECTION_PROPOSAL = "{http://www.campuscontent.de/model/1.0}collection_proposal";
 
 	public final static String CCM_TYPE_SAVED_SEARCH = "{http://www.campuscontent.de/model/1.0}saved_search";
 
@@ -464,6 +468,10 @@ public class CCConstants {
 
 	public final static String CCM_PROP_GROUPEXTENSION_GROUPSOURCE = "{http://www.campuscontent.de/model/1.0}groupSource";
 
+	public final static String CCM_PROP_COLLECTION_PROPOSAL_TARGET = "{http://www.campuscontent.de/model/1.0}collection_proposal_target";
+	public final static String CCM_PROP_COLLECTION_PROPOSAL_STATUS = "{http://www.campuscontent.de/model/1.0}collection_proposal_status";
+	public final static String CCM_PROP_COLLECTION_PROPOSAL_COMMENT = "{http://www.campuscontent.de/model/1.0}collection_proposal_comment";
+
 	public final static String CCM_PROP_MEDIACENTER_ID = "{http://www.campuscontent.de/model/1.0}mediacenterId";
 	public final static String CCM_PROP_MEDIACENTER_DISTRICT_ABBREVIATION = "{http://www.campuscontent.de/model/1.0}mediacenterDistrictAbbreviation";
 	public final static String CCM_PROP_MEDIACENTER_MAIN_URL = "{http://www.campuscontent.de/model/1.0}mediacenterMainUrl";
@@ -513,8 +521,18 @@ public class CCConstants {
 			CCConstants.LOM_PROP_TECHNICAL_SIZE
 	);
     public static final String AUTHORITY_DELETED_USER = "DELETED_USER";
+    /**
+     * authority needed for appAuth authentication and read only tasks
+     */
+    public static final String PROXY_USER = "edu_proxy";
 
-    public static String CCM_WF_STATUS_VALUE_UNCHECKED="100_unchecked";
+    public enum PROPOSAL_STATUS {
+		PENDING,
+		ACCEPTED,
+		DECLINED
+	};
+
+	public static String CCM_WF_STATUS_VALUE_UNCHECKED="100_unchecked";
 	public static String CCM_WF_STATUS_VALUE_TO_CHECK="200_tocheck";
 	public static String CCM_WF_STATUS_VALUE_HASFLAWS="300_hasflaws";
 	public static String CCM_WF_STATUS_VALUE_CHECKED="400_checked";
@@ -665,6 +683,7 @@ public class CCConstants {
 	public final static String CCM_PROP_IO_REPL_TAXONPATH_XML = "{http://www.campuscontent.de/model/1.0}taxonpath_xml";
 
 	public final static String CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD  = "{http://www.campuscontent.de/model/1.0}classification_keyword";
+	public final static String CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD_DISPLAY  = "{http://www.campuscontent.de/model/1.0}classification_keyword_display";
 	public final static String CCM_PROP_IO_REPL_CLASSIFICATION_PURPOSE  = "{http://www.campuscontent.de/model/1.0}classification_purpose";
 	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER = "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_publisher";
 	public final static String CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_UNKNOWN = "{http://www.campuscontent.de/model/1.0}lifecyclecontributer_unknown";
@@ -860,6 +879,8 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_CHANGE_OWNER = "TOOLPERMISSION_COLLECTION_CHANGE_OWNER";
 
+	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_PROPOSAL = "TOOLPERMISSION_COLLECTION_PROPOSAL";
+
 	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_EDITORIAL = "TOOLPERMISSION_COLLECTION_EDITORIAL";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_CURRICULUM = "TOOLPERMISSION_COLLECTION_CURRICULUM";
@@ -882,7 +903,8 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_NODES = "TOOLPERMISSION_GLOBAL_STATISTICS_NODES";
 
-	public final static String CCM_VALUE_TOOLPERMISSION_RATE = "TOOLPERMISSION_RATE";
+	public final static String CCM_VALUE_TOOLPERMISSION_RATE_READ = "TOOLPERMISSION_RATE_READ";
+	public final static String CCM_VALUE_TOOLPERMISSION_RATE_WRITE = "TOOLPERMISSION_RATE_WRITE";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_VIDEO_AUDIO_CUT = "TOOLPERMISSION_VIDEO_AUDIO_CUT";
 
@@ -911,6 +933,8 @@ public class CCConstants {
 	/**
 	 * dynamic generated properties
 	 */
+	public final static String VIRT_PROP_TYPE = "{virtualproperty}type";
+
 	public final static String VIRT_PROP_MEDIATYPE = "{virtualproperty}mediatype";
 
 	public final static String VIRT_PROP_USAGECOUNT = "{virtualproperty}usagecount";
@@ -918,6 +942,8 @@ public class CCConstants {
 	public final static String VIRT_PROP_COMMENTCOUNT = "{virtualproperty}commentcount";
 
 	public final static String VIRT_PROP_CHILDOBJECTCOUNT = "{virtualproperty}childobjectcount";
+
+	public final static String VIRT_PROP_MEDIACENTERS = "{virtualproperty}mediacenters";
 
 	/**
 	 * says if this set of properties is from an remote repository that was linked in the local repo by an remoteobject
@@ -1299,6 +1325,8 @@ public class CCConstants {
 
 
 	public final static String CCM_VALUE_IO_NAME_CONFIG_NODE_NAME = "RepositoryConfig";
+
+	public final static String CCM_VALUE_IO_NAME_LTI_REGISTRATION_NODE_NAME = "LTIRegistration";
 
 
 	/**
@@ -2135,6 +2163,7 @@ public class CCConstants {
 	public static final String VERSION_COMMENT_BULK_CREATE = "BULK_CREATE";
 	public static final String VERSION_COMMENT_BULK_UPDATE = "BULK_UPDATE";
 	public static final String VERSION_COMMENT_BULK_UPDATE_RESYNC = "BULK_UPDATE_RESYNC";
+	public static final String VERSION_COMMENT_REMOTE_OBJECT_INIT = "REMOTE_OBJECT_INIT";
 
 	/**
 	 * Methos that set all the Properties for ProfileSettings

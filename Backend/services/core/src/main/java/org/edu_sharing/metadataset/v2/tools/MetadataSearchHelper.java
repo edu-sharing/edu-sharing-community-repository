@@ -13,20 +13,12 @@ import java.util.Map;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.SearchParameters;
-import org.alfresco.service.cmr.search.SearchParameters.FieldFacet;
-import org.alfresco.service.cmr.search.SearchService;
-import org.alfresco.util.Pair;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
@@ -35,7 +27,6 @@ import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.SearchServiceImpl;
 import org.edu_sharing.service.search.Suggestion;
 import org.edu_sharing.service.search.model.SharedToMeType;
-import org.springframework.context.ApplicationContext;
 
 import com.sun.star.lang.IllegalArgumentException;
 
@@ -201,8 +192,7 @@ public class MetadataSearchHelper {
 		/**
 		 * remote repo
 		 */
-		if(!ApplicationInfoList.getHomeRepository().getAppId().equals(repoId) &&
-				!ApplicationInfo.REPOSITORY_TYPE_LOCAL.equals(ApplicationInfoList.getRepositoryInfoById(repoId).getRepositoryType())) {
+		if(!ApplicationInfoList.getHomeRepository().getAppId().equals(repoId)) {
 			return SearchServiceFactory.getSearchService(repoId).getSuggestions(mds, queryId, parameterId, value, criterias);
 		}
 
@@ -219,7 +209,7 @@ public class MetadataSearchHelper {
 			return getSuggestionsSql(widget, value);
 		}
 		throw new IllegalArgumentException("Unknow suggestionSource "+source+" for widget "+parameterId+
-				", use "+MetadataReader.SUGGESTION_SOURCE_MDS+", "+
+				", use "+ MetadataReader.SUGGESTION_SOURCE_MDS+", "+
 				MetadataReader.SUGGESTION_SOURCE_SEARCH+" or "+
 				MetadataReader.SUGGESTION_SOURCE_SQL
 		);
@@ -232,7 +222,7 @@ public class MetadataSearchHelper {
 		Connection con = null;
 		PreparedStatement statement = null;
 		if(query == null || query.trim().equals("")){
-			throw new IllegalArgumentException("suggestionSource "+MetadataReader.SUGGESTION_SOURCE_SQL+" at widget "+widget.getId()+" needs an suggestionQuery, but none was found");
+			throw new IllegalArgumentException("suggestionSource "+ MetadataReader.SUGGESTION_SOURCE_SQL+" at widget "+widget.getId()+" needs an suggestionQuery, but none was found");
 		}
 		
 		ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
@@ -265,6 +255,7 @@ public class MetadataSearchHelper {
 				result.add(sqlKw);
 			}	
 		}catch(Throwable e){
+			logger.debug(e.getMessage(),e);
 		}finally {
 			dbAlf.cleanUp(con, statement);
 		}
@@ -273,7 +264,7 @@ public class MetadataSearchHelper {
 	private static List<? extends Suggestion> getSuggestionsMds(MetadataWidget widget,
 			String value) throws IllegalArgumentException {
 		if(widget.getValues()==null)
-			throw new IllegalArgumentException("Requested suggestion type "+MetadataReader.SUGGESTION_SOURCE_MDS+" for widget "+widget.getId()+", but widget has no values attached");
+			throw new IllegalArgumentException("Requested suggestion type "+ MetadataReader.SUGGESTION_SOURCE_MDS+" for widget "+widget.getId()+", but widget has no values attached");
 		List<Suggestion> result = new ArrayList<>();
 		value=value.toLowerCase();
 		for(MetadataKey key : widget.getValues()){

@@ -13,6 +13,7 @@ import java.util.Properties;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.repository.client.rpc.cache.CacheCluster;
 import org.edu_sharing.repository.client.rpc.cache.CacheInfo;
+import org.edu_sharing.repository.server.jobs.quartz.ImmediateJobListener;
 import org.edu_sharing.repository.server.jobs.quartz.JobDescription;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
@@ -73,6 +74,8 @@ public interface AdminService {
 
 	HashMap<String, String> addApplicationFromStream(InputStream is) throws Exception;
 
+	public HashMap<String, String> addApplication(Map<String,String> properties) throws Exception;
+
 	int importExcel(String parent, InputStream csv, Boolean addToCollection) throws Exception;
 
 	Properties getPropertiesXML(String xmlFile) throws Exception;
@@ -95,9 +98,11 @@ public interface AdminService {
 
 	String uploadTemp(String name, InputStream is) throws Exception;
 
-	void startJob(String jobClass, HashMap<String, Object> params) throws Exception;
+	ImmediateJobListener startJob(String jobClass, HashMap<String, Object> params) throws Exception;
 
-    RepositoryConfig getConfig();
+	Object startJobSync(String jobClass, HashMap<String, Object> stringObjectHashMap) throws Throwable;
+
+	RepositoryConfig getConfig();
 
     void setConfig(RepositoryConfig config);
 
@@ -117,9 +122,9 @@ public interface AdminService {
     void updateConfigFile(String filename, PropertiesHelper.Config.PathPrefix pathPrefix, String content) throws Throwable;
 	String getConfigFile(String filename, PropertiesHelper.Config.PathPrefix pathPrefix) throws Throwable;
 
-	List<JobDescription> getJobDescriptions();
+	List<JobDescription> getJobDescriptions(boolean fetchAbstractJobs);
 
-    void switchAuthentication(String authorityName);
+	void switchAuthentication(String authorityName);
 
     Object getLightbendConfig();
 

@@ -152,6 +152,12 @@
     </dependency>
 
     <dependency>
+      <groupId>com.nimbusds</groupId>
+      <artifactId>nimbus-jose-jwt</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.jsoup</groupId>
       <artifactId>jsoup</artifactId>
       <scope>provided</scope>
@@ -160,6 +166,18 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>edu.uoc.elc.lti</groupId>
+      <artifactId>lti-13</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>edu.uoc.elc.lti</groupId>
+      <artifactId>lti-13-jwt</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -178,6 +196,12 @@
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>edu.uoc.elc.lti</groupId>
+      <artifactId>spring-boot-lti-advantage</artifactId>
       <scope>provided</scope>
     </dependency>
 

@@ -1,21 +1,27 @@
 package org.edu_sharing.metadataset.v2;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MetadataWidget extends MetadataTranslatable{
 
-	public enum Required{
+	private Map<String, MetadataKey> valuesAsMapCache;
+	private String configuration;
+
+    public enum Required{
 		mandatory,
 		mandatoryForPublish,
+		recommended,
 		optional,
 		ignore
 	}
 	public enum IdRelation{
 		graphql,
+	}
+	public enum InteractionType {
+		Input,
+		None
 	}
 	public enum TextEscapingPolicy{
 		// no escaping, strongly discouraged since it can allow XSS vulnerabilities if the data comes from untrusted sources
@@ -53,7 +59,7 @@ public class MetadataWidget extends MetadataTranslatable{
 	private Map<IdRelation, String> ids = new HashMap<>();
 	private String id,type,caption,bottomCaption,icon,
 	placeholder,defaultvalue,template,
-	suggestionSource,suggestionQuery,unit,format,
+	suggestionSource,suggestionQuery,suggestDisplayProperty,unit,format,
 	valuespaceSort="default";
 	private Integer min,max,defaultMin,defaultMax,step;
 	private boolean extended,allowempty,valuespaceClient=true,hideIfEmpty,inherit=true;
@@ -62,6 +68,7 @@ public class MetadataWidget extends MetadataTranslatable{
 	private List<Subwidget> subwidgets;
 	private int maxlength;
 	private TextEscapingPolicy textEscapingPolicy = TextEscapingPolicy.htmlBasic;
+	private InteractionType interactionType = InteractionType.Input;
 	/**
 	 * hint for the client if this widget creates a link to the search
 	 * so e.g. if you click a keyword, you can be directed to the search with this keyword as filter
@@ -70,6 +77,15 @@ public class MetadataWidget extends MetadataTranslatable{
 
 	private MetadataCondition condition;
 	private String link;
+	private String suggestionReceiver;
+
+	public void setSuggestionReceiver(String suggestionReceiver) {
+		this.suggestionReceiver = suggestionReceiver;
+	}
+
+	public String getSuggestionReceiver() {
+		return suggestionReceiver;
+	}
 
 	public void setLink(String link) {
 		this.link = link;
@@ -93,6 +109,9 @@ public class MetadataWidget extends MetadataTranslatable{
 	public void setSuggestionQuery(String suggestionQuery) {
 		this.suggestionQuery = suggestionQuery;
 	}
+	public void setSuggestDisplayProperty(String suggestDisplayProperty) { this.suggestDisplayProperty = suggestDisplayProperty; }
+	public String getSuggestDisplayProperty() { return suggestDisplayProperty; }
+
 	public String getUnit() {
 		return unit;
 	}
@@ -280,6 +299,21 @@ public class MetadataWidget extends MetadataTranslatable{
 	public TextEscapingPolicy getTextEscapingPolicy() {
 		return textEscapingPolicy;
 	}
+	public void setConfiguration(String configuration) {
+		this.configuration = configuration;
+	}
+
+	public String getConfiguration() {
+		return configuration;
+	}
+
+	public void setInteractionType(InteractionType interactionType) {
+		this.interactionType = interactionType;
+	}
+
+	public InteractionType getInteractionType() {
+		return interactionType;
+	}
 
 	@Override
 	public boolean equals(Object obj) {
@@ -304,12 +338,28 @@ public class MetadataWidget extends MetadataTranslatable{
 	}
 	public Map<String, MetadataKey> getValuesAsMap() {
 		Map<String,MetadataKey> map=new HashMap<>();
-		if(values==null)
+		if(values==null) {
 			return map;
+		}
+		if(valuesAsMapCache != null) {
+			return valuesAsMapCache;
+		}
 		for(MetadataKey value : values){
 			map.put(value.getKey(), value);
+			if(value.getAlternativeKeys() != null) {
+				value.getAlternativeKeys().forEach(
+						(key) -> map.put(key, value)
+				);
+			}
+		}
+		valuesAsMapCache = map;
+		return map;
+	}
+	public Map<String, Collection<MetadataKey.MetadataKeyRelated>> getValuespaceMappingByRelation(MetadataKey.MetadataKeyRelated.Relation relation) {
+		Map<String, Collection<MetadataKey.MetadataKeyRelated>> map=new HashMap<>();
+		for(MetadataKey value : values){
+			map.put(value.getKey(), value.getRelated().stream().filter(r -> r.getRelation().equals(relation)).collect(Collectors.toList()));
 		}
 		return map;
 	}
-
 }

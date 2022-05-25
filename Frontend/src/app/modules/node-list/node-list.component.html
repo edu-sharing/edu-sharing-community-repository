@@ -10,14 +10,14 @@
 
 </div>
 
-  <actionbar *ngIf="selected.length" class="actionbar" [class.actionbarWorkspace]="isInsideWorkspace"
+  <es-actionbar *ngIf="selected.length" class="actionbar" [class.actionbarWorkspace]="isInsideWorkspace"
     [options]="options"
-  ></actionbar>
+  ></es-actionbar>
 
 <div class="dialog" *ngIf="currentMore" (click)="currentMore=null"></div>
 <div class="recycleContainer" [class.recylceContainerWorkspace]="isInsideWorkspace">
 <div class="results">
-  <listTable
+  <es-listTable
     [nodes]="list"
     [columns]="_columns"
     [hasIcon]="true"
@@ -35,7 +35,7 @@
     (sortListener)="setSorting($event)"
     [selectedNodes]="selected"
     (selectionChanged)="onSelection($event)"
-    (loadMore)="loadMore()"></listTable>
+    (loadMore)="loadMore()"></es-listTable>
 </div>
 
 <div class="noResults" *ngIf="!list && hasSearched && !isLoading">
@@ -47,6 +47,6 @@
   <h5>{{ "RECYCLE.ARCHIVE_EMPTY" | translate}}</h5>
 </div>
 <div class="dialog darken valign-wrapper" *ngIf="fullscreenLoading">
-  <spinner class="center"></spinner>
+  <es-spinner class="center"></es-spinner>
 </div>
 </div>

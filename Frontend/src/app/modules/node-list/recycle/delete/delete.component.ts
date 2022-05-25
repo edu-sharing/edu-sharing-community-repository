@@ -4,7 +4,7 @@ import {DialogButton, RestArchiveService, Node} from "../../../../core-module/co
 import {TemporaryStorageService} from "../../../../core-module/core.module";
 
 @Component({
-  selector: 'recycle-delete-confirmation',
+  selector: 'es-recycle-delete-confirmation',
   templateUrl: 'delete.component.html'
 })
 export class RecycleDeleteComponent {

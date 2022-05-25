@@ -1,0 +1,50 @@
+<es-mds-editor-widget-container
+  [injectedView]="this"
+  [widget]="widget"
+  [label]="true"
+  [valueType]="valueType"
+  [wrapInFormField]="false"
+  [control]="formControl"
+>
+  <form [formGroup]="formControl" (blur)="blur()">
+    <mat-tab-group mat-stretch-tabs [(selectedIndex)]="editType">
+      <mat-tab label="{{'WORKSPACE.CONTRIBUTOR.MODE_PERSON' | translate}}">
+        <div class="vcard">
+          <div class="vcardGroup">
+            <!-- <i esIcon="person"></i> -->
+            <mat-form-field class="mat-form-field-no-padding">
+              <mat-label>{{ 'VCARD.Givenname' | translate }}</mat-label>
+              <input
+                matInput
+                class="vcard_Givenname vcardFirstInput"
+                formControlName="givenname"
+              >
+            </mat-form-field>
+          </div>
+          <div class="vcardGroup">
+            <mat-form-field class="mat-form-field-no-padding">
+              <mat-label>{{ 'VCARD.Surname' | translate }}</mat-label>
+              <input
+                matInput
+                class="vcard_Surname vcardFirstInput"
+                formControlName="surname"
+              />
+            </mat-form-field>
+          </div>
+        </div>
+      </mat-tab>
+      <mat-tab label="{{'WORKSPACE.CONTRIBUTOR.MODE_ORG' | translate}}">
+        <div class="vcard">
+          <div class="vcardGroup">
+            <mat-form-field class="vcard_Org">
+              <mat-label>{{'VCARD.Org' | translate}}</mat-label>
+              <input matInput id="org"
+                     formControlName="org"
+              >
+            </mat-form-field>
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </form>
+</es-mds-editor-widget-container>

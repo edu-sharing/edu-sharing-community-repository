@@ -8,7 +8,9 @@ import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.alfresco.service.config.model.KeyValuePair;
 import org.json.JSONObject;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
+import javax.servlet.jsp.PageContext;
 import java.io.File;
 
 /**
@@ -54,6 +56,10 @@ public class I18nAngular {
                 return replaceGenderSeperator(override);
             // Using global instance singe it only is used for file reading
             ServletContext servletContext = Context.getGlobalContext();
+            if(servletContext == null) {
+                logger.debug("Trying to fetch angular translation before context initalization");
+                return key;
+            }
             String json=FileUtils.readFileToString(new File(servletContext.getRealPath("/assets/i18n/"+scope+"/"+language+".json")),"UTF-8");
             JSONObject object=new JSONObject(json);
             String[] list=key.split("\\.");
@@ -62,7 +68,7 @@ public class I18nAngular {
             }
             return replaceGenderSeperator(object.getString(list[list.length-1]));
         } catch (Exception e) {
-            logger.info("No translation in Angular found for "+scope+" "+key);
+            logger.info("No translation in Angular found for " + scope + " " + key + " " + language);
             return key;
         }
     }

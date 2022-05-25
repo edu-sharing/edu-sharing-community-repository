@@ -1,0 +1,39 @@
+@import '../../../core-ui-module/styles/variables';
+
+:host {
+    display: flex;
+    width: 100%;
+    background-color: #fff;
+    overflow-x: auto;
+    height: $mobileTabNavHeight;
+    @include materialShadow();
+}
+button {
+    border: unset;
+    background-color: unset;
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    width: 0;
+    min-width: 85px;
+    color: $textLight;
+    border-top: 4px solid transparent;
+    align-items: center;
+    padding: 9px 10px;
+    transition: none;
+    &.cdk-keyboard-focused {
+        @include setGlobalKeyboardFocus();
+        outline-offset: -3px;
+    }
+    &.selected {
+        color: $primary;
+        border-color: $primary;
+        > span {
+            font-weight: bold;
+        }
+    }
+    > span {
+        padding-top: 1px;
+        font-size: 9pt;
+    }
+}
