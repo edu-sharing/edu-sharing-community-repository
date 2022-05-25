@@ -631,12 +631,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			);
 			nodeService.setProperties(nodeRef, propsStore);
 
-		} catch (org.hibernate.StaleObjectStateException e) {
-			// this occurs sometimes in workspace
-			// it seems it is an alfresco bug:
-			// https://issues.alfresco.com/jira/browse/ETHREEOH-2461
-			logger.error("Thats maybe an alfreco bug: https://issues.alfresco.com/jira/browse/ETHREEOH-2461", e);
-		} catch (org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException e) {
+		} catch (Exception e) {
 			// this occurs sometimes in workspace
 			// it seems it is an alfresco bug:
 			// https://issues.alfresco.com/jira/browse/ETHREEOH-2461

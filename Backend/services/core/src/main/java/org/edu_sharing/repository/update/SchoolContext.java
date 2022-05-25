@@ -23,12 +23,9 @@ import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
+import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.usermodel.*;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -70,7 +67,7 @@ public class SchoolContext {
 	public void init(InputStream in) {
 		try {
 			workbook = WorkbookFactory.create(in);
-		}catch(InvalidFormatException e) {
+		}catch(EncryptedDocumentException e) {
 			logger.error(e.getMessage(), e);
 		}catch(IOException e) {
 			logger.error(e.getMessage(), e);
@@ -178,28 +175,28 @@ public class SchoolContext {
 					break;
 				}
 				
-				if ((Cell.CELL_TYPE_STRING != keyCell.getCellType())
-						&& (Cell.CELL_TYPE_NUMERIC != keyCell.getCellType())) {
+				if ((CellType.STRING != keyCell.getCellType())
+						&& (CellType.NUMERIC != keyCell.getCellType())) {
 					continue;
 				}
 
 				Cell nameCell = row.getCell(nameCol);
-				if ((Cell.CELL_TYPE_STRING != nameCell.getCellType())
-						&& (Cell.CELL_TYPE_NUMERIC != nameCell.getCellType())) {
+				if ((CellType.STRING != nameCell.getCellType())
+						&& (CellType.NUMERIC != nameCell.getCellType())) {
 					continue;
 				}
 
 				String key = null;
-				if (Cell.CELL_TYPE_STRING == keyCell.getCellType()) {
+				if (CellType.STRING == keyCell.getCellType()) {
 					key = keyCell.getStringCellValue();
-				} else if (Cell.CELL_TYPE_NUMERIC == keyCell.getCellType()) {
+				} else if (CellType.NUMERIC == keyCell.getCellType()) {
 					key = new Integer(new Double(keyCell.getNumericCellValue()).intValue()).toString();
 				}
 
 				String name = null;
-				if (Cell.CELL_TYPE_STRING == nameCell.getCellType()) {
+				if (CellType.STRING == nameCell.getCellType()) {
 					name = nameCell.getStringCellValue();
-				} else if (Cell.CELL_TYPE_NUMERIC == nameCell.getCellType()) {
+				} else if (CellType.NUMERIC == nameCell.getCellType()) {
 					name = new Integer(new Double(nameCell.getNumericCellValue()).intValue()).toString();
 				}
 
