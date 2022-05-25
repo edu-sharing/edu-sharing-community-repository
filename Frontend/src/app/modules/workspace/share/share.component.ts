@@ -172,7 +172,7 @@ export class WorkspaceShareComponent {
     notifyUsers = true;
     notifyMessage: string;
     inherit: Permission[] = [];
-    permissions: Permission[] = [];
+    permissions: Permission[] = null;
     private originalPermissions: LocalPermissions[];
     showChooseType = false;
     private showChooseTypeList: Permission;

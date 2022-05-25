@@ -37,6 +37,7 @@ import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.RecurseMode;
 import org.edu_sharing.service.provider.Provider;
 import org.edu_sharing.service.util.CSVTool;
@@ -79,8 +80,9 @@ public class BulkEditNodesJob extends AbstractJob{
 	private String property;
 	@JobFieldDescription(description = "Value to replace target property with")
 	private Serializable value;
-	@JobFieldDescription(description = "property to copy value from, if mode == Copy", sampleValue = "cclom:title")
+	@JobFieldDescription(description = "property to copy value from, if mode == Copy. Hint: use \"parent::\" prefix to copy data from the primary parent", sampleValue = "cclom:title")
 	private String copy;
+	private boolean copyParent;
 	@JobFieldDescription(description = "token to replace, if mode == ReplaceToken")
 	private String searchToken;
 	@JobFieldDescription(description = "Token to replace with, if mode == ReplaceToken")
@@ -134,6 +136,12 @@ public class BulkEditNodesJob extends AbstractJob{
 
 		copy = prepareParam(context, "copy", false);
 		if (copy != null) {
+			if(copy.startsWith("parent::")) {
+				copyParent = true;
+				copy = copy.substring("parent::".length());
+			} else {
+				copyParent = false;
+			}
 			copy = CCConstants.getValidGlobalName(copy);
 		}
 		value = prepareParam(context, "value", false);
@@ -196,7 +204,14 @@ public class BulkEditNodesJob extends AbstractJob{
 				org.alfresco.service.cmr.repository.NodeRef nodeRef = new org.alfresco.service.cmr.repository.NodeRef(ref.getStoreRef(), ref.getId());
 				logger.info("Bulk edit metadata for node " + ref.getId());
 				if (copy != null) {
-					value = nodeService.getProperty(nodeRef, QName.createQName(copy));
+					if(copyParent) {
+						value = nodeService.getProperty(
+								nodeService.getPrimaryParent(nodeRef).getParentRef(),
+								QName.createQName(copy)
+						);
+					} else {
+						value = nodeService.getProperty(nodeRef, QName.createQName(copy));
+					}
 				}
 				if (mode.equals(Mode.Replace)) {
 					nodeService.setProperty(nodeRef, QName.createQName(property), value);

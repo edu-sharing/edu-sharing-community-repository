@@ -61,16 +61,19 @@ public class MailTemplate {
 				MailTemplate.getContent(templateId,currentLocale, true),
 				replace);
 	}
-	public static String generateContentLink(ApplicationInfo appInfo,String nodeId) throws Throwable{
+	public static void addContentLinks(ApplicationInfo appInfo,String nodeId, Map<String, String> target, String keyName) throws Throwable{
 		NodeService nodeService=NodeServiceFactory.getNodeService(appInfo.getAppId());
 		String mime=MimeTypesV2.getMimeType(nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId));
 		if(MimeTypesV2.MIME_DIRECTORY.equals(mime)){
 			if(nodeService.hasAspect(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId,CCConstants.CCM_ASPECT_COLLECTION)){
-				return URLTool.getNgComponentsUrl()+"collections/?id="+nodeId;
+				target.put(keyName, URLTool.getNgComponentsUrl() + "collections/?id="+nodeId);
+				target.put(keyName + ".static", URLTool.getNgComponentsUrl(false) + "collections/?id="+nodeId);
 			}
-			return URLTool.getNgComponentsUrl()+"workspace/?id="+nodeId;
+			target.put(keyName, URLTool.getNgComponentsUrl() +  "workspace/?id="+nodeId);
+			target.put(keyName + ".static", URLTool.getNgComponentsUrl(false) +  "workspace/?id="+nodeId);
 		}
-		return 	URLTool.getNgComponentsUrl()+"render/"+nodeId+"?closeOnBack=true";
+		target.put(keyName, URLTool.getNgComponentsUrl() + "render/"+nodeId+"?closeOnBack=true");
+		target.put(keyName + ".static", URLTool.getNgComponentsUrl(false) + "render/"+nodeId+"?closeOnBack=true");
 	}
 	private static Map<TemplateDescription, Node> getTemplates(String locale) throws Exception {
 		Document base=getXML(locale,false);

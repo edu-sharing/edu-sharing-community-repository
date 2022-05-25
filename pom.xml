@@ -34,16 +34,10 @@
     <alfresco.pdf-renderer.version>1.1</alfresco.pdf-renderer.version>
     <alfresco.platform.version>5.2.g</alfresco.platform.version>
     <alfresco.share.version>5.2.f</alfresco.share.version>
+    <alfresco.sdk.version>3.1.0</alfresco.sdk.version>
 
     <!-- release-1 -->
     <bom.repository-repackaged.version>${project.version}</bom.repository-repackaged.version>
-
-    <elasticsearch.version.major>7</elasticsearch.version.major>
-    <elasticsearch.version.minor>17</elasticsearch.version.minor>
-    <elasticsearch.version.patch>0</elasticsearch.version.patch>
-    <elasticsearch.version>
-      ${elasticsearch.version.major}.${elasticsearch.version.minor}.${elasticsearch.version.patch}
-    </elasticsearch.version>
 
     <java.version.range>[1.8.0, 9)</java.version.range>
 
@@ -53,11 +47,11 @@
     <npm.args.build>run build-dev</npm.args.build>
     <npm.version>7.24.2</npm.version>
 
-    <postgresql.jdbc.version>42.3.3</postgresql.jdbc.version>
+    <postgresql.jdbc.version>42.3.5</postgresql.jdbc.version>
 
     <tomcat.version.major>8</tomcat.version.major>
     <tomcat.version.minor>5</tomcat.version.minor>
-    <tomcat.version.patch>75</tomcat.version.patch>
+    <tomcat.version.patch>78</tomcat.version.patch>
     <tomcat.version>${tomcat.version.major}.${tomcat.version.minor}.${tomcat.version.patch}
     </tomcat.version>
 
@@ -84,6 +78,38 @@
     </profile>
 
   </profiles>
+
+  <build>
+
+    <pluginManagement>
+
+      <plugins>
+
+        <plugin>
+          <groupId>org.alfresco.maven.plugin</groupId>
+          <artifactId>alfresco-maven-plugin</artifactId>
+          <version>${alfresco.sdk.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <!-- Avoid 3+, which is not compatible with the Alfresco SDK -->
+          <version>2.6</version>
+          <dependencies>
+            <dependency>
+              <groupId>org.alfresco.maven.plugin</groupId>
+              <artifactId>alfresco-maven-plugin</artifactId>
+              <version>${alfresco.sdk.version}</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+
+      </plugins>
+
+    </pluginManagement>
+
+  </build>
 
   <dependencyManagement>
 
@@ -152,6 +178,12 @@
       </dependency>
 
       <dependency>
+        <groupId>org.aspectj</groupId>
+        <artifactId>aspectjweaver</artifactId>
+        <version>1.8.9</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.apache.axis</groupId>
         <artifactId>axis</artifactId>
         <version>1.4</version>
@@ -178,7 +210,7 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
-        <version>3.11</version>
+        <version>3.12.0</version>
       </dependency>
 
       <dependency>
@@ -412,7 +444,7 @@
       <dependency>
         <groupId>com.google.code.gson</groupId>
         <artifactId>gson</artifactId>
-        <version>2.8.6</version>
+        <version>2.8.8</version>
       </dependency>
 
       <dependency>
@@ -490,7 +522,7 @@
       <dependency>
         <groupId>org.openapitools</groupId>
         <artifactId>jackson-databind-nullable</artifactId>
-        <version>0.2.1</version>
+        <version>0.2.2</version>
       </dependency>
 
       <dependency>
@@ -616,7 +648,7 @@
       <dependency>
         <groupId>com.google.code.findbugs</groupId>
         <artifactId>jsr305</artifactId>
-        <version>1.3.9</version>
+        <version>3.0.2</version>
       </dependency>
 
       <dependency>
@@ -630,7 +662,7 @@
       <dependency>
         <groupId>com.squareup.okhttp3</groupId>
         <artifactId>logging-interceptor</artifactId>
-        <version>4.9.1</version>
+        <version>4.9.2</version>
       </dependency>
 
       <dependency>
@@ -642,7 +674,7 @@
       <dependency>
         <groupId>com.squareup.okhttp3</groupId>
         <artifactId>okhttp</artifactId>
-        <version>4.9.1</version>
+        <version>4.9.2</version>
       </dependency>
 
       <dependency>
@@ -714,7 +746,7 @@
       <dependency>
         <groupId>io.swagger</groupId>
         <artifactId>swagger-annotations</artifactId>
-        <version>1.6.2</version>
+        <version>1.6.3</version>
       </dependency>
 
       <dependency>
@@ -746,6 +778,12 @@
         <groupId>org.apache.tomcat</groupId>
         <artifactId>tomcat-coyote</artifactId>
         <version>${tomcat.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.woodstox</groupId>
+        <artifactId>woodstox-core</artifactId>
+        <version>6.2.8</version>
       </dependency>
 
       <dependency>

@@ -26,6 +26,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.module.ModuleInstallState;
 import org.alfresco.service.cmr.module.ModuleService;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.input.ReversedLinesFileReader;
@@ -67,6 +68,7 @@ import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.foldertemplates.FolderTemplatesImpl;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
@@ -141,6 +143,11 @@ public class AdminServiceImpl implements AdminService  {
 			List<String> permissionsExplicit = permissionService.getExplicitPermissionsForAuthority(nodeId,authority);
 			List<String> permissions = permissionService.getPermissionsForAuthority(nodeId, authority);
 			ToolPermission status=new ToolPermission();
+			Boolean managed = (Boolean) NodeServiceHelper.getPropertyNative(
+					new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
+					CCConstants.CCM_PROP_TOOLPERMISSION_SYSTEM_MANAGED
+			);
+			status.setSystemManaged(managed != null && managed);
 
 			if(permissionsExplicit.contains(CCConstants.PERMISSION_DENY)) {
 				status.setExplicit(ToolPermission.Status.DENIED);
@@ -590,12 +597,15 @@ public class AdminServiceImpl implements AdminService  {
 			String currentLocale = new AuthenticationToolAPI().getCurrentLocale();
 			String subject = MailTemplate.getSubject(template, currentLocale);
 			String content = MailTemplate.getContent(template, currentLocale, true);
+			HashMap<String, String> dummy = new HashMap<>();
+			dummy.put("link", URLTool.getNgComponentsUrl(true) + "admin");
+			dummy.put("link.static", URLTool.getNgComponentsUrl(false) + "admin");
 			Mail mail = new Mail();
 			ServletContext context = Context.getCurrentInstance().getRequest().getSession().getServletContext();
 			mail.sendMailHtml(
 					context,
 					receiver,
-					subject, content, null);
+					subject, content, dummy);
 		}catch(Throwable t){
 			throw new RuntimeException(t);
 		}

@@ -539,6 +539,7 @@ export class WorkspaceManagementDialogsComponent  {
     if(!force && (collection.collection.scope!=RestConstants.COLLECTIONSCOPE_MY)){
       this.dialogTitle='DIALOG.COLLECTION_SHARE_PUBLIC';
       this.dialogMessage='DIALOG.COLLECTION_SHARE_PUBLIC_INFO';
+      this.dialogNode=collection;
       this.dialogCancelable=true;
       this.dialogMessageParameters={collection:RestHelper.getTitle(collection)};
       this.dialogButtons=DialogButton.getNextCancel(()=>{this.dialogTitle=null},()=>{

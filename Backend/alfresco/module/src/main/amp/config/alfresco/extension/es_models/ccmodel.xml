@@ -441,6 +441,12 @@
 		<type name="ccm:toolpermission">
        		<title>Tool Permission</title>
          	<parent>ccm:io</parent>
+			<properties>
+				<!-- flag if this toolpermission is managed via system/init and should not be re-configured -->
+				<property name="ccm:toolpermission_system_managed">
+					<type>d:boolean</type>
+				</property>
+			</properties>
        </type>
         <type name="ccm:service_node">
             <title>Service discovery information object</title>
