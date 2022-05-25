@@ -13,6 +13,8 @@ buildNumber.properties
 # IntelliJ
 .idea/
 *.iml
+# IntelliJ Ultimate
+overlays/
 # VS Code
 .vscode/*
 !.vscode/settings.json
