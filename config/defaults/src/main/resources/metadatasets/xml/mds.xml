@@ -95,7 +95,7 @@
 		</widget>
 		<widget>
 			<id>ccm:educationallearningresourcetype</id>
-			<id rel="graphql">lom.educational.0.learningResourceType.value</id>
+			<id rel="graphql">lom.educational.0.learningResourceType</id>
 			<type>multivalueFixedBadges</type>
 			<caption>lom_prop_educationallearningresourcetype</caption>
 			<placeholder>lom_prop_educationallearningresourcetype_placeholder</placeholder>
