@@ -12,7 +12,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatOptionModule, MatRippleModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
+import { MatInput, MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatRadioModule } from '@angular/material/radio';
@@ -113,6 +113,7 @@ import { SortDropdownComponent } from './components/sort-dropdown/sort-dropdown.
         CommonModule,
         DragDropModule,
         FormsModule,
+        MatInputModule,
         MatAutocompleteModule,
         MatButtonModule,
         MatCardModule,

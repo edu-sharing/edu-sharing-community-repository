@@ -23,6 +23,7 @@ export interface NodeCollectionProposalCount {
     downloadUrl: string;
     iconURL?: string;
     isDirectory?: boolean;
+    isPublic?: boolean;
     license?: License;
     mediatype?: string;
     metadataset?: string;

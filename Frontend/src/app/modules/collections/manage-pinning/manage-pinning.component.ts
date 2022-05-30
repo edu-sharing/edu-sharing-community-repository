@@ -62,8 +62,13 @@ export class CollectionManagePinningComponent {
   public isChecked(collection:Node){
     return this.checked.indexOf(collection.ref.id)!=-1;
   }
-  public moveUp(pos:number){
+  public moveUp(pos:number, event?: Event){
     Helper.arraySwap(this.pinnedCollections,pos,pos-1);
+    if (event instanceof KeyboardEvent) {
+      setTimeout(() => {
+        (event.target as HTMLElement).focus();
+      });
+    }
   }
   public moveDown(pos:number){
     Helper.arraySwap(this.pinnedCollections,pos,pos+1);

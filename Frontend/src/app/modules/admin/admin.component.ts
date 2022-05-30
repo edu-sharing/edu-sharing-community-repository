@@ -1088,6 +1088,10 @@ export class AdminComponent implements OnInit, OnDestroy {
                     icon: 'info_outline'
                 },
                 {
+                    id: 'PLUGINS',
+                    icon: 'extension'
+                },
+                {
                   id: 'FRONTPAGE',
                   icon: 'home'
                 },

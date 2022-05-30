@@ -2019,6 +2019,15 @@
           "schema" : {
             "type" : "string"
           }
+        }, {
+          "name" : "pathPrefix",
+          "in" : "query",
+          "description" : "path prefix this file belongs to",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "node", "cluster/applications", "cluster", "defaults", "defaults/metadatasets", "defaults/mailtemplates" ]
+          }
         } ],
         "responses" : {
           "200" : {
@@ -2094,6 +2103,15 @@
           "required" : true,
           "schema" : {
             "type" : "string"
+          }
+        }, {
+          "name" : "pathPrefix",
+          "in" : "query",
+          "description" : "path prefix this file belongs to",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "node", "cluster/applications", "cluster", "defaults", "defaults/metadatasets", "defaults/mailtemplates" ]
           }
         } ],
         "requestBody" : {
@@ -24438,6 +24456,9 @@
           },
           "owner" : {
             "$ref" : "#/components/schemas/Person"
+          },
+          "isPublic" : {
+            "type" : "boolean"
           }
         }
       },
@@ -25636,12 +25657,6 @@
       "WebsiteInformation" : {
         "type" : "object",
         "properties" : {
-          "duplicateNodes" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/Node"
-            }
-          },
           "title" : {
             "type" : "string"
           },
@@ -25824,6 +25839,9 @@
           },
           "owner" : {
             "$ref" : "#/components/schemas/Person"
+          },
+          "isPublic" : {
+            "type" : "boolean"
           }
         }
       },
@@ -25977,6 +25995,9 @@
           },
           "originalId" : {
             "type" : "string"
+          },
+          "isPublic" : {
+            "type" : "boolean"
           }
         }
       },
@@ -27724,16 +27745,16 @@
             "type" : "string",
             "enum" : [ "Input", "None" ]
           },
-          "required" : {
-            "type" : "string",
-            "writeOnly" : true,
-            "enum" : [ "mandatory", "mandatoryForPublish", "recommended", "optional", "ignore" ]
-          },
           "subwidgets" : {
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/MdsSubwidget"
             }
+          },
+          "required" : {
+            "type" : "string",
+            "writeOnly" : true,
+            "enum" : [ "mandatory", "mandatoryForPublish", "recommended", "optional", "ignore" ]
           },
           "id" : {
             "type" : "string"
@@ -27798,10 +27819,10 @@
           "defaultvalue" : {
             "type" : "string"
           },
-          "isExtended" : {
+          "isSearchable" : {
             "type" : "boolean"
           },
-          "isSearchable" : {
+          "isExtended" : {
             "type" : "boolean"
           },
           "hideIfEmpty" : {
