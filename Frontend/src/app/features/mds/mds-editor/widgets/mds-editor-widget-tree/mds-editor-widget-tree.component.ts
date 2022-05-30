@@ -14,7 +14,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, fromEvent, ReplaySubject } from 'rxjs';
 import { filter, startWith, takeUntil } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
-import { MdsWidgetType } from '../../../types/types';
+import {MdsWidget, MdsWidgetType} from '../../../types/types';
 import { DisplayValue } from '../DisplayValues';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { MdsEditorWidgetTreeCoreComponent } from './mds-editor-widget-tree-core/mds-editor-widget-tree-core.component';
@@ -22,6 +22,9 @@ import { Tree } from './tree';
 import { FocusOrigin } from '@angular/cdk/a11y';
 import { MatChip } from '@angular/material/chips';
 import {UIService} from '../../../../../core-module/rest/services/ui.service';
+import {
+    MdsEditorWidgetChipsComponent
+} from "../mds-editor-widget-chips/mds-editor-widget-chips.component";
 
 @Component({
     selector: 'es-mds-editor-widget-tree',
@@ -205,5 +208,9 @@ export class MdsEditorWidgetTreeComponent
 
     onValuesChange(values: DisplayValue[]): void {
         this.chipsControl.setValue(values);
+    }
+    public static mapGraphqlId(definition: MdsWidget) {
+        // attach the "RangedValue" graphql Attributes
+        return MdsEditorWidgetBase.attachGraphqlSelection(definition, ['id', 'value']);
     }
 }

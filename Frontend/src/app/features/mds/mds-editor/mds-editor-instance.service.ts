@@ -12,7 +12,6 @@ import {
     zip,
 } from 'rxjs';
 import {filter, first, map, shareReplay, skip, switchMap, takeUntil, tap} from 'rxjs/operators';
-import { filter as graphqlFilter} from 'graphql-anywhere'
 import {
     ConfigurationHelper,
     ConfigurationService,
@@ -248,16 +247,21 @@ export class MdsEditorInstanceService implements OnDestroy {
             } else {
                 this.initialValues = this.calculateInitialValues(nodeValues as string[][]);
             }
-            this.suggestionValues = [].concat(...(nodes as Metadata[]).map(m => [].concat(...(m.generated.map(suggestion =>
-                this.readNodeValue(suggestion, this.definition).map((v) => ({
-                    suggestion,
-                    // @TODO fix types
-                    path: (this.definition as any).ids.graphql,
-                    // copy from cache to prevent readonly issues
-                    data: {...(v as RangedValueSuggestionData)}
-                    } as SuggestionGroup)
-                ))
-            ))));
+            if((nodes[0] as Node)?.ref?.id) {
+                console.warn('Suggestions are not supported without graphql');
+            } else {
+                console.log(nodes);
+                this.suggestionValues = [].concat(...(nodes as Metadata[]).map(m => [].concat(...((m.generated || []).map(suggestion =>
+                        this.readNodeValue(suggestion, this.definition).map((v) => ({
+                                suggestion,
+                                // @TODO fix types
+                                path: (this.definition as any).ids.graphql,
+                                // copy from cache to prevent readonly issues
+                                data: {...(v as RangedValueSuggestionData)}
+                            } as SuggestionGroup)
+                        ))
+                ))));
+            }
             // Set initial values, so the initial completion status is calculated correctly.
             this.value$.next([...this.initialValues.jointValues]);
             if (this.mdsEditorInstanceService.getIsBulk(nodes)) {
@@ -535,10 +539,10 @@ export class MdsEditorInstanceService implements OnDestroy {
                     }
                     value = value.map((v: any) => v.__typename === 'RangedValue' ? (v as RangedValue).value : v);
                     return value;
-                } else {
+                } else if(!NativeWidgets[definition.id as NativeWidgetType]) {
                     console.warn('Widget ' + definition.id + ' has no graphql mapping, returning empty value');
-                    return [];
                 }
+                return [];
             }
         }
 
@@ -950,24 +954,15 @@ export class MdsEditorInstanceService implements OnDestroy {
                     return a;
                 }),
                 this.mapGraphqlField(id, a => {
-                    if(a[a.length-1] === 'value') {
-                        a = a.slice(0, -1);
-                    }
                     a.push('info')
                     a.push('status')
                     return a;
                 }),
                 this.mapGraphqlField(id, a => {
-                    if(a[a.length-1] === 'value') {
-                        a = a.slice(0, -1);
-                    }
                     a.push('version')
                     return a;
                 }),
                 this.mapGraphqlField(id, a => {
-                    if(a[a.length-1] === 'value') {
-                        a = a.slice(0, -1);
-                    }
                     a.push('info')
                     a.push('editor')
                     return a;
@@ -990,6 +985,7 @@ export class MdsEditorInstanceService implements OnDestroy {
                     }
                 }
             }`;
+        console.log(metaQueryQgl);
         const metaQuery = this.apollo.query<Query>({
             query: gql(metaQueryQgl),
             variables: {

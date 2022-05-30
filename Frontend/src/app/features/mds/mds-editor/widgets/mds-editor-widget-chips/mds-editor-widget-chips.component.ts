@@ -33,7 +33,7 @@ import {
 import {Toast, ToastType} from 'src/app/core-ui-module/toast';
 import {UIHelper} from '../../../../../core-ui-module/ui-helper';
 import {MdsEditorInstanceService, SuggestionGroup} from '../../mds-editor-instance.service';
-import {MdsWidgetType, MdsWidgetValue} from '../../../types/types';
+import {MdsWidget, MdsWidgetType, MdsWidgetValue} from '../../../types/types';
 import {DisplayValue} from '../DisplayValues';
 import {MdsEditorWidgetBase, ValueType} from '../mds-editor-widget-base';
 import {
@@ -49,7 +49,6 @@ import {
 } from 'ngx-edu-sharing-graphql';
 
 @Component({
-    selector: 'es-mds-editor-widget-chips',
     templateUrl: './mds-editor-widget-chips.component.html',
     styleUrls: ['./mds-editor-widget-chips.component.scss'],
 })
@@ -427,5 +426,15 @@ export class MdsEditorWidgetChipsComponent
         return this.chipsSuggestions?.filter(
             s => !this.chipsControl.value.filter((s1: DisplayValue) => s1.key === s.displayValue.key).length
         );
+    }
+}
+@Component({
+    templateUrl: './mds-editor-widget-chips.component.html',
+    styleUrls: ['./mds-editor-widget-chips.component.scss'],
+})
+export class MdsEditorWidgetChipsRangedValueComponent extends MdsEditorWidgetChipsComponent {
+    public static mapGraphqlId(definition: MdsWidget) {
+        // attach the "RangedValue" graphql Attributes
+        return MdsEditorWidgetBase.attachGraphqlSelection(definition, ['id', 'value']);
     }
 }

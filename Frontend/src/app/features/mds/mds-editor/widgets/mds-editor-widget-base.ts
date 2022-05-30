@@ -69,7 +69,14 @@ export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {
         }
         return validators;
     }
-
+    protected static attachGraphqlSelection(definition: MdsWidget, fields: string[]) {
+        const id = MdsEditorWidgetBase.mapGraphqlId(definition);
+        if(id) {
+            const originalId = id[0];
+            return fields.map(f => originalId + '.' + f);
+        }
+        return null;
+    }
     public static mapGraphqlId(definition: MdsWidget) {
         // @TODO: make types!
         const id = (definition as any).ids?.graphql;

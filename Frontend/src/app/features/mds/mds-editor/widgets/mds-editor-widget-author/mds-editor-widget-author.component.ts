@@ -33,7 +33,6 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
         'lom.lifecycle.contribute.role',
         'lom.lifecycle.contribute.content',
         'lom.rights.author',
-
     ];
     @ViewChild(MatTabGroup) tabGroup: MatTabGroup;
     @Input() showContributorDialog = true;
@@ -198,7 +197,7 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
             let freetext = Array.from(
                 new Set(
                     values.map(
-                        (n) => n.lom.rights.author?.[0],
+                        (n) => n.lom.rights?.author?.[0],
                     ),
                 ),
             );
