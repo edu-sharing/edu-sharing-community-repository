@@ -46,8 +46,8 @@ export class LtiAdminComponent implements OnInit {
           message: 'ADMIN.LTI.REMOVE_MESSAGE',
           messageParameters: element,
           buttons: [
-              new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.toast.closeModalDialog()),
-              new DialogButton('ADMIN.APPLICATIONS.REMOVE', DialogButton.TYPE_DANGER, () => {
+              new DialogButton('CANCEL', { color: 'standard' }, () => this.toast.closeModalDialog()),
+              new DialogButton('ADMIN.APPLICATIONS.REMOVE', { color: 'danger' }, () => {
                   this.ltiService.removeToken(element.token).subscribe((t: void) => {
                       this.refresh();
                   });

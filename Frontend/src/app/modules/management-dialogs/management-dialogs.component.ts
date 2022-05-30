@@ -42,6 +42,8 @@ import {WorkspaceLicenseComponent} from './license/license.component';
 import {ErrorProcessingService} from '../../core-ui-module/error.processing';
 import { BulkBehavior } from '../../features/mds/types/types';
 import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import { MainNavService } from 'src/app/main/navigation/main-nav.service';
+import { first } from 'rxjs/operators';
 
 
 export enum DialogType {
@@ -105,7 +107,7 @@ export class WorkspaceManagementDialogsComponent  {
         this.nodeDeleteMessage='WORKSPACE.DELETE_MESSAGE'+(nodeDelete.length === 1 ? '_SINGLE' : '');
         this.nodeDeleteMessageParams = {name:RestHelper.getName(nodeDelete[0])};
         this.nodeDeleteButtons=DialogButton.getCancel(()=> {this._nodeDelete = null});
-        this.nodeDeleteButtons.push(new DialogButton('YES_DELETE',DialogButton.TYPE_DANGER,()=>{this.deleteConfirmed(nodeDelete)}));
+        this.nodeDeleteButtons.push(new DialogButton('YES_DELETE', { color: 'danger' },()=>{this.deleteConfirmed(nodeDelete)}));
       if(nodeDelete.length === 1) {
           if (nodeDelete[0].collection) {
               this.nodeDeleteTitle = 'WORKSPACE.DELETE_TITLE_COLLECTION';
@@ -134,16 +136,12 @@ export class WorkspaceManagementDialogsComponent  {
     @Output() onDelete = new EventEmitter<{objects: Node[]|any,error: boolean, count: number}>();
   @Input() nodeShare : Node[];
   @Output() nodeShareChange = new EventEmitter<Node[]>();
-    @Input() nodeDebug : Node[];
-    @Output() nodeDebugChange = new EventEmitter<Node[]>();
     @Input() nodeShareLink : Node;
     @Output() nodeShareLinkChange = new EventEmitter();
     @Input() nodeWorkflow : Node[];
     @Output() nodeWorkflowChange = new EventEmitter();
     @Input() signupGroup : boolean;
     @Output() signupGroupChange = new EventEmitter<boolean>();
-  @Input() nodeReport : Node;
-  @Output() nodeReportChange = new EventEmitter();
   @Input() addNodesStream : Node[];
   @Output() addNodesStreamChange = new EventEmitter();
     @Input() nodeVariant : Node;
@@ -207,7 +205,7 @@ export class WorkspaceManagementDialogsComponent  {
      * @node: Reference to the node (for header title)
      * @data: The string to display inside the qr code (e.g. an url)
      */
-  @Input() qr: {node: Node, data: string};
+//   @Input() qr: {node: Node, data: string};
 
     /**
      * @Deprecated, the components should use toast service directly
@@ -262,12 +260,6 @@ export class WorkspaceManagementDialogsComponent  {
         event.stopPropagation();
         return;
       }
-      if(this.nodeReport!=null){
-        this.closeReport();
-        event.preventDefault();
-        event.stopPropagation();
-        return;
-      }
       if(this.ltiObject){
         this.ltiObject=null;
         event.preventDefault();
@@ -286,6 +278,7 @@ export class WorkspaceManagementDialogsComponent  {
     private config:ConfigurationService,
     private connector:RestConnectorService,
     private searchService:RestSearchService,
+    private mainNavService:MainNavService,
     private toast:Toast,
     private errorProcessing:ErrorProcessingService,
     private nodeHelper: NodeHelperService,
@@ -399,11 +392,12 @@ export class WorkspaceManagementDialogsComponent  {
  public uploadFile(event: FileList){
    this.onUploadFileSelected.emit(event);
  }
-  createUrlLink(link : LinkData) {
+  async createUrlLink(link : LinkData) {
     const urlData = this.nodeHelper.createUrlLink(link);
     this.closeUploadSelect();
     this.toast.showProgressDialog();
-    this.nodeService.createNode(this.parent.ref.id,RestConstants.CCM_TYPE_IO,urlData.aspects,urlData.properties,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(
+    const config = await this.mainNavService.observeMainNavConfig().pipe(first()).toPromise();
+    this.nodeService.createNode(config.create?.parent?.ref.id,RestConstants.CCM_TYPE_IO,urlData.aspects,urlData.properties,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(
       (data) => {
         this.showMetadataAfterUpload([data.node]);
         this.toast.closeModalDialog();
@@ -523,10 +517,6 @@ export class WorkspaceManagementDialogsComponent  {
     this.addNodesStream=null;
     this.addNodesStreamChange.emit(null);
   }
-  public closeReport() {
-    this.nodeReport=null;
-    this.nodeReportChange.emit(null);
-  }
     public closeVariant() {
         this.nodeVariant=null;
         this.nodeVariantChange.emit(null);
@@ -604,11 +594,6 @@ export class WorkspaceManagementDialogsComponent  {
     closeTemplate() {
         this.nodeTemplate = null;
         this.nodeTemplateChange.emit(null);
-    }
-
-    closeDebug() {
-      this.nodeDebug = null;
-      this.nodeDebugChange.emit(null);
     }
 
     closePinnedCollection() {

@@ -846,7 +846,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                         'WORKSPACE.AUTOLOGOUT',
                         'WORKSPACE.AUTOLOGOUT_INFO',
                         [
-                            new DialogButton('WORKSPACE.RELOGIN', DialogButton.TYPE_PRIMARY, () => {
+                            new DialogButton('WORKSPACE.RELOGIN', { color: 'primary' }, () => {
                                 RestHelper.goToLogin(
                                     this.router,
                                     this.configService,

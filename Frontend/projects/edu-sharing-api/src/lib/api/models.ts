@@ -4,6 +4,7 @@ export { ServiceVersion } from './models/service-version';
 export { ErrorResponse } from './models/error-response';
 export { Collection } from './models/collection';
 export { Content } from './models/content';
+export { Contributor } from './models/contributor';
 export { License } from './models/license';
 export { Node } from './models/node';
 export { NodeLtiDeepLink } from './models/node-lti-deep-link';

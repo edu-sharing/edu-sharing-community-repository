@@ -15,8 +15,8 @@ export class RecycleDeleteComponent {
     buttons: DialogButton[];
     constructor(private service : TemporaryStorageService) {
         this.buttons=[
-            new DialogButton('RECYCLE.DELETE.CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
-            new DialogButton('RECYCLE.DELETE.YES',DialogButton.TYPE_PRIMARY,()=>this.confirm()),
+            new DialogButton('RECYCLE.DELETE.CANCEL',{ color: 'standard' },()=>this.cancel()),
+            new DialogButton('RECYCLE.DELETE.YES',{ color: 'primary' },()=>this.confirm()),
         ];
     }
 

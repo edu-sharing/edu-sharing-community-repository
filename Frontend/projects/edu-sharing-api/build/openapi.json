@@ -144,7 +144,7 @@
         "operationId" : "addApplication",
         "requestBody" : {
           "content" : {
-            "application/json" : {
+            "multipart/form-data" : {
               "schema" : {
                 "required" : [ "xml" ],
                 "type" : "object",
@@ -24281,6 +24281,29 @@
           }
         }
       },
+      "Contributor" : {
+        "type" : "object",
+        "properties" : {
+          "property" : {
+            "type" : "string"
+          },
+          "firstname" : {
+            "type" : "string"
+          },
+          "lastname" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "vcard" : {
+            "type" : "string"
+          },
+          "org" : {
+            "type" : "string"
+          }
+        }
+      },
       "License" : {
         "type" : "object",
         "properties" : {
@@ -24328,6 +24351,12 @@
             "type" : "object",
             "additionalProperties" : {
               "$ref" : "#/components/schemas/Node"
+            }
+          },
+          "contributors" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Contributor"
             }
           },
           "ref" : {
@@ -25280,11 +25309,11 @@
               "type" : "string"
             }
           },
-          "fullName" : {
-            "type" : "string"
-          },
           "volatile" : {
             "type" : "boolean"
+          },
+          "fullName" : {
+            "type" : "string"
           }
         }
       },
@@ -25607,6 +25636,12 @@
       "WebsiteInformation" : {
         "type" : "object",
         "properties" : {
+          "duplicateNodes" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Node"
+            }
+          },
           "title" : {
             "type" : "string"
           },
@@ -25687,6 +25722,12 @@
             "type" : "object",
             "additionalProperties" : {
               "$ref" : "#/components/schemas/Node"
+            }
+          },
+          "contributors" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Contributor"
             }
           },
           "proposalCounts" : {
@@ -25837,6 +25878,12 @@
             "type" : "object",
             "additionalProperties" : {
               "$ref" : "#/components/schemas/Node"
+            }
+          },
+          "contributors" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Contributor"
             }
           },
           "accessOriginal" : {
@@ -27754,10 +27801,10 @@
           "isExtended" : {
             "type" : "boolean"
           },
-          "hideIfEmpty" : {
+          "isSearchable" : {
             "type" : "boolean"
           },
-          "isSearchable" : {
+          "hideIfEmpty" : {
             "type" : "boolean"
           }
         }

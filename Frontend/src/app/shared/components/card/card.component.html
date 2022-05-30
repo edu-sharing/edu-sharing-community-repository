@@ -14,6 +14,13 @@
       [class.card-jumpmarks]="jumpmarks && jumpmarks.length>1"
       [class.card-tabbed]="tabbed"
       [@cardAnimation]="this">
+    <!-- <es-card-header
+    [title]="title"
+    [subtitle]="subtitle"
+    [avatar]="icon ? {kind: 'icon', icon: icon} : {kind: 'image', url: avatar}"
+    [disableClose]="!isCancelable"
+    (triggerClose)="cancel()"
+    ></es-card-header> -->
     <mat-card-header *ngIf="header">
       <div *ngIf="avatar" class="avatar" mat-card-avatar><img [src]="avatar" alt="" esImage-config></div>
       <div *ngIf="icon" class="avatar" mat-card-avatar><i [esIcon]="icon"></i></div>
@@ -40,6 +47,10 @@
       (scroll)="onScroll()"
       ><ng-content></ng-content>
     </mat-card-content>
+    <!-- <es-card-actions
+    [buttons]="buttons"
+    [additionalContent]="beforeButtonRef"
+    ></es-card-actions> -->
     <mat-card-actions #cardActions *ngIf="_buttons && _buttons.length">
       <ng-container [ngTemplateOutlet]="beforeButtonRef"></ng-container>
       <div class="additional-action-area-content">
@@ -61,7 +72,7 @@
   </mat-card>
 </div>
 <ng-template #buttonsTemplate let-button>
-  <button *ngIf="button.type | bitwise:{operator: 1}" mat-flat-button color="primary" [disabled]="button.disabled" (click)="button.callback()">{{button.name | translate}}</button>
-  <button *ngIf="button.type | bitwise:{operator: 2}" mat-button color="primary" [disabled]="button.disabled" (click)="button.callback()">{{button.name | translate}}</button>
-  <button *ngIf="button.type | bitwise:{operator: 4}" mat-flat-button color="warn" [disabled]="button.disabled" (click)="button.callback()">{{button.name | translate}}</button>
+  <button *ngIf="button.color === 'primary'" mat-flat-button color="primary" [disabled]="button.disabled" (click)="button.callback()">{{button.label | translate}}</button>
+  <button *ngIf="button.color === 'standard'" mat-button color="primary" [disabled]="button.disabled" (click)="button.callback()">{{button.label | translate}}</button>
+  <button *ngIf="button.color === 'danger'" mat-flat-button color="warn" [disabled]="button.disabled" (click)="button.callback()">{{button.label | translate}}</button>
 </ng-template>

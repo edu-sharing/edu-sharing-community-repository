@@ -50,7 +50,7 @@ export class WorkspaceHistoryComponent {
               private toast: Toast,
               private nodeHelper: NodeHelperService,
               private translation: TranslateService) {
-    this.buttons = DialogButton.getSingleButton('CLOSE', () => this.close(), DialogButton.TYPE_CANCEL);
+    this.buttons = DialogButton.getSingleButton('CLOSE', () => this.close(), 'standard');
   }
 
   public close(){

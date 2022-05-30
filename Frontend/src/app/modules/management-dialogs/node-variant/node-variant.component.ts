@@ -138,8 +138,8 @@ export class NodeVariantComponent  {
   }
     updateButtons(): any {
         this.buttons=[
-            new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
-            new DialogButton('NODE_VARIANT.CREATE'+(this.openViaConnector ? '_EDIT' : ''),DialogButton.TYPE_PRIMARY,()=>this.create())
+            new DialogButton('CANCEL',{ color: 'standard' },()=>this.cancel()),
+            new DialogButton('NODE_VARIANT.CREATE'+(this.openViaConnector ? '_EDIT' : ''),{ color: 'primary' },()=>this.create())
         ]
     }
 }

@@ -138,7 +138,7 @@ export class RegisterComponent {
 
     updateButtons() {
         const primaryButton = this.getPrimaryButton();
-        const cancelButton = new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.cancel());
+        const cancelButton = new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel());
         this.buttons = [cancelButton];
         if (primaryButton) {
             this.buttons.push(primaryButton);
@@ -149,23 +149,23 @@ export class RegisterComponent {
     private getPrimaryButton(): DialogButton {
         let btn: DialogButton;
         if (this.state === 'register') {
-            btn = new DialogButton('REGISTER.BUTTON', DialogButton.TYPE_PRIMARY, () => this.registerForm.register());
+            btn = new DialogButton('REGISTER.BUTTON', { color: 'primary' }, () => this.registerForm.register());
             btn.disabled = !this.registerForm || !this.registerForm.canRegister();
         }
         if (this.state === 'request') {
-            btn = new DialogButton('REGISTER.REQUEST.BUTTON', DialogButton.TYPE_PRIMARY, () => {
+            btn = new DialogButton('REGISTER.REQUEST.BUTTON', { color: 'primary' }, () => {
                 this.requestDone(this.request.emailFormControl.value);
             });
             btn.disabled = !this.request || !this.request.emailFormControl.valid;
         }
         if (this.state === 'reset-password') {
-            btn = new DialogButton('REGISTER.RESET.BUTTON', DialogButton.TYPE_PRIMARY, () => this.newPassword());
+            btn = new DialogButton('REGISTER.RESET.BUTTON', { color: 'primary' }, () => this.newPassword());
             btn.disabled = !this.resetPassword || !this.resetPassword.buttonCheck();
         }
         if ((this.state === 'done' || this.state === 'done-reset') && this.registerDone) {
             btn = new DialogButton(
                 this.state === 'done' ? 'REGISTER.DONE.ACTIVATE' : 'NEXT',
-                DialogButton.TYPE_PRIMARY,
+                { color: 'primary' },
                 () => this.registerDone.activate(this.registerDone.keyInput),
             );
             btn.disabled = !this.registerDone || !this.registerDone.keyInput.trim();

@@ -6,7 +6,6 @@ import {WorkspaceCreateLtiComponent} from "./create-lti/create-lti.component";
 import {WorkspaceFileUploadComponent} from "./file-upload/file-upload.component";
 import {WorkspaceFileUploadSelectComponent} from "./file-upload-select/file-upload-select.component";
 import {WorkspaceContributorComponent} from "./contributor/contributor.component";
-import {NodeReportComponent} from "./node-report/node-report.component";
 import {AddStreamComponent} from "./add-stream/add-stream.component";
 import {NodeTemplateComponent} from "./node-template/node-template.component";
 import {NodeVariantComponent} from './node-variant/node-variant.component';
@@ -19,6 +18,8 @@ import {SimpleEditLicenseComponent} from './simple-edit-dialog/simple-edit-licen
 import {LicenseSourceComponent} from "./license/license-source/license-source.component";
 import {MapLinkComponent} from './map-link/map-link.component';
 import {SignupGroupComponent} from './signup-group/signup-group.component';
+import {NodeSearchSelectorComponent} from './node-search-selector/node-search-selector.component';
+import {NodeRowComponent} from './node-search-selector/node-row/node-row.component';
 
 export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   WorkspaceLicenseComponent,
@@ -30,8 +31,9 @@ export const DECLARATIONS_MANAGEMENT_DIALOGS = [
   WorkspaceFileUploadComponent,
   WorkspaceFileUploadSelectComponent,
   WorkspaceContributorComponent,
-  NodeReportComponent,
   CommentsListComponent,
+  NodeSearchSelectorComponent,
+  NodeRowComponent,
   AddStreamComponent,
   NodeVariantComponent,
   MapLinkComponent,

@@ -23,7 +23,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTreeModule } from '@angular/material/tree';
 import { RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
-import { MdsDurationPipe } from '../features/mds/mds-editor/shared/mds-duration.pipe';
 import { AuthorityRowComponent } from './components/authority-search-input/authority-row/authority-row.component';
 import { AuthoritySearchInputComponent } from './components/authority-search-input/authority-search-input.component';
 import { CardComponent } from './components/card/card.component';
@@ -46,7 +45,7 @@ import { IconDirective } from './directives/icon.directive';
 import { InfiniteScrollDirective } from './directives/infinite-scroll.directive';
 import { OnAttributeChangeDirective } from './directives/on-attribute-change.directive';
 import { RegisterCustomPropertyDirective } from './directives/register-custom-property.directive';
-import { SanitizeHTMLPipe } from './directives/sanitizeHTML.pipe';
+import { EscapeHtmlPipe } from './directives/escape-html.pipe';
 import { SkipTargetDirective } from './directives/skip-target.directive';
 import { AuthorityAffiliationPipe } from './pipes/authority-affiliation.pipe';
 import { AuthorityColorPipe } from './pipes/authority-color.pipe';
@@ -54,7 +53,17 @@ import { AuthorityNamePipe } from './pipes/authority-name.pipe';
 import { BitwisePipe } from './pipes/bitwise.pipe';
 import { OptionTooltipPipe } from './pipes/option-tooltip.pipe';
 import { ReplaceCharsPipe } from './pipes/replace-chars.pipe';
+import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { VCardNamePipe } from './pipes/vcard-name.pipe';
+import { NodeTitlePipe } from './pipes/node-title.pipe';
+import { FormatDatePipe } from './pipes/format-date.pipe';
+import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
+import { NodeUrlComponent } from './components/node-url/node-url.component';
+import {MatTableModule} from '@angular/material/table'; 
+import { FormatSizePipe } from './pipes/file-size.pipe';
+import { NodeImageSizePipe } from './pipes/node-image-size.pipe';
+import { NodePersonNamePipe } from './pipes/node-person-name.pipe';
+import { SortDropdownComponent } from './components/sort-dropdown/sort-dropdown.component';
 
 @NgModule({
     declarations: [
@@ -65,24 +74,28 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         AuthoritySearchInputComponent,
         BitwisePipe,
         BorderBoxObserverDirective,
+        BreadcrumbsComponent,
         CardComponent,
         CheckTextOverflowDirective,
         DropdownComponent,
         ElementRefDirective,
+        EscapeHtmlPipe,
         FileDropDirective,
+        FormatDatePipe,
         GlobalProgressComponent,
         IconDirective,
         InfiniteScrollDirective,
         InfoMessageComponent,
         LinkComponent,
-        MdsDurationPipe,
         ModalDialogComponent,
         MultiLineLabelComponent,
+        NodeTitlePipe,
+        NodeUrlComponent,
         OnAttributeChangeDirective,
         OptionTooltipPipe,
         RegisterCustomPropertyDirective,
         ReplaceCharsPipe,
-        SanitizeHTMLPipe,
+        SafeHtmlPipe,
         SkipTargetDirective,
         SpinnerComponent,
         SpinnerSmallComponent,
@@ -90,20 +103,28 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         UserAvatarComponent,
         VCardNamePipe,
         WorkspaceCreateConnector,
+        FormatSizePipe,
+        NodeImageSizePipe,
+        NodePersonNamePipe,
+        SortDropdownComponent,
     ],
     imports: [
         A11yModule,
         CommonModule,
+        DragDropModule,
         FormsModule,
         MatAutocompleteModule,
         MatButtonModule,
         MatCardModule,
+        MatInputModule,
         MatMenuModule,
         MatOptionModule,
         MatProgressSpinnerModule,
+        MatRippleModule,
         MatSelectModule,
         MatTooltipModule,
         ReactiveFormsModule,
+        RouterModule,
         TranslateModule,
     ],
     exports: [
@@ -115,13 +136,16 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         AuthoritySearchInputComponent,
         BitwisePipe,
         BorderBoxObserverDirective,
+        BreadcrumbsComponent,
         CardComponent,
         CheckTextOverflowDirective,
         CommonModule,
         DragDropModule,
         DropdownComponent,
         ElementRefDirective,
+        EscapeHtmlPipe,
         FileDropDirective,
+        FormatDatePipe,
         FormsModule,
         GlobalProgressComponent,
         IconDirective,
@@ -130,6 +154,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         LinkComponent,
         MatAutocompleteModule,
         MatButtonModule,
+        MatCardModule,
         MatCheckboxModule,
         MatChipsModule,
         MatFormFieldModule,
@@ -144,9 +169,10 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         MatTabsModule,
         MatTooltipModule,
         MatTreeModule,
-        MdsDurationPipe,
         ModalDialogComponent,
         MultiLineLabelComponent,
+        NodeTitlePipe,
+        NodeUrlComponent,
         OnAttributeChangeDirective,
         OptionTooltipPipe,
         OverlayModule,
@@ -154,7 +180,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         RegisterCustomPropertyDirective,
         ReplaceCharsPipe,
         RouterModule,
-        SanitizeHTMLPipe,
+        SafeHtmlPipe,
         SkipTargetDirective,
         SpinnerComponent,
         SpinnerSmallComponent,
@@ -163,6 +189,11 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         UserAvatarComponent,
         VCardNamePipe,
         WorkspaceCreateConnector,
+        MatTableModule,
+        FormatSizePipe,
+        NodeImageSizePipe,
+        NodePersonNamePipe,
+        SortDropdownComponent,
     ],
 })
 export class SharedModule {}

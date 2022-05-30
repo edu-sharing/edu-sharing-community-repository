@@ -8,8 +8,8 @@
     </div>
     <div class="infobar-buttons" *ngIf="_buttons">
       <div *ngFor="let button of _buttons;let i=index" #buttonElements>
-          <button mat-raised-button [color]="$any('white')" *ngIf="button.type==1" (click)="click(button)">{{button.name | translate}}</button>
-          <button mat-button [color]="$any('white')" *ngIf="button.type==2" (click)="click(button)">{{button.name | translate}}</button>
+          <button mat-raised-button [color]="$any('white')" *ngIf="button.color === 'primary'" (click)="click(button)">{{button.label | translate}}</button>
+          <button mat-button [color]="$any('white')" *ngIf="button.color === 'standard'" (click)="click(button)">{{button.label | translate}}</button>
       </div>
     </div>
     <div *ngIf="isCancelable" class="infobar-cancel clickable" (click)="cancel()"><i class="material-icons">close</i></div>

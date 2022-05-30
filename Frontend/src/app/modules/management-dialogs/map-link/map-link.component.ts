@@ -57,8 +57,8 @@ export class MapLinkComponent  {
 
     updateButtons(): any {
         this.buttons=[
-            new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
-            new DialogButton('MAP_LINK.CREATE',DialogButton.TYPE_PRIMARY,()=>this.createLink())
+            new DialogButton('CANCEL',{ color: 'standard' },()=>this.cancel()),
+            new DialogButton('MAP_LINK.CREATE',{ color: 'primary' },()=>this.createLink())
         ];
         this.buttons[1].disabled = !this.name;
   }

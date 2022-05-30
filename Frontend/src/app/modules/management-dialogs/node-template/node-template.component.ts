@@ -71,10 +71,10 @@ export class NodeTemplateComponent  {
   }
 
     private updateButtons() {
-        let save=new DialogButton('SAVE',DialogButton.TYPE_PRIMARY,()=>this.save());
+        let save=new DialogButton('SAVE',{ color: 'primary' },()=>this.save());
         save.disabled=this.loading;
         this.buttons=[
-            new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
+            new DialogButton('CANCEL',{ color: 'standard' },()=>this.cancel()),
             save
         ]
     }

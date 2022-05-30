@@ -9,10 +9,7 @@ import { Helper } from '../../../core-module/rest/helper';
 import { OptionItem } from '../../../core-ui-module/option-item';
 import { DropData, DragData } from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
 import {WorkspaceMainComponent} from '../workspace.component';
-import {
-    DropSource,
-    NodeRoot
-} from '../../../core-ui-module/components/node-entries-wrapper/entries-model';
+import { DropSource, NodeRoot } from 'src/app/features/node-entries/entries-model';
 
 @Component({
     selector: 'es-workspace-tree',

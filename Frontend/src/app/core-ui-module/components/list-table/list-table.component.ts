@@ -21,7 +21,6 @@ import {
     SimpleChanges,
     OnChanges,
     Renderer2,
-    Sanitizer,
     ViewChildren,
     QueryList,
     AfterViewInit,
@@ -63,16 +62,11 @@ import {CustomOptions, OptionItem, Scope, Target} from '../../option-item';
 import { Toast } from '../../toast';
 import {NodeHelperService} from '../../node-helper.service';
 import {DomSanitizer} from '@angular/platform-browser';
-import {CollectionChooserComponent} from '../collection-chooser/collection-chooser.component';
-import {NodeTitlePipe} from '../../pipes/node-title.pipe';
-import {NodeUrlComponent} from '../node-url/node-url.component';
+import {NodeTitlePipe} from '../../../shared/pipes/node-title.pipe';
+import {NodeUrlComponent} from '../../../shared/components/node-url/node-url.component';
 import {SelectionModel} from '@angular/cdk/collections';
-import {
-    ListEventInterface,
-    ListOptions,
-    ListOptionsConfig, NodeEntriesDisplayType
-} from '../node-entries-wrapper/entries-model';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
+import { ListEventInterface, ListOptions, ListOptionsConfig, NodeEntriesDisplayType } from 'src/app/features/node-entries/entries-model';
 
 
 @Component({
@@ -532,7 +526,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
             () => this.closeReorder(true),
         );
         this.reorderButtons.splice(0, 0,
-            new DialogButton('RESET', + DialogButton.TYPE_CANCEL + DialogButton.TYPE_SECONDARY, () => {
+            new DialogButton('RESET', { color: 'standard', position: 'opposite' }, () => {
             this.sessionStorage.delete('workspaceColumns');
             this.onInvalidateColumns.emit();
         }));

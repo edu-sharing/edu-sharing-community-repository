@@ -1,6 +1,6 @@
 import {Component, Input, EventEmitter, Output} from '@angular/core';
 import {RestNodeService} from "../../../core-module/core.module";
-import {Node, NodeList, NodeWrapper} from "../../../core-module/core.module";
+import {Node, NodeWrapper} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
 import {RestHelper} from "../../../core-module/core.module";
 import {TimePipe} from "../../../common/ui/time.pipe";

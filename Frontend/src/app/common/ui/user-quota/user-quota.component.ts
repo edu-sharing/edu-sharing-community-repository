@@ -1,7 +1,4 @@
-import {Component, Input, Output, EventEmitter, OnInit, HostListener} from '@angular/core';
-import {TranslateService} from "@ngx-translate/core";
-import {Toast} from "../../../core-ui-module/toast";
-import {UIHelper} from '../../../core-ui-module/ui-helper';
+import {Component, Input} from '@angular/core';
 import {UserQuota} from '../../../core-module/core.module';
 
 @Component({

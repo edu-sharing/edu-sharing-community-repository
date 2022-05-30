@@ -122,10 +122,8 @@ export class CardComponent implements AfterContentInit, OnDestroy {
         }
     }
     @Input() set buttons(buttons: DialogButton[]) {
-        // tslint:disable-next-line:no-bitwise
-        this._buttons = buttons?.filter((b) => (b.type & DialogButton.TYPE_SECONDARY) === 0);
-        // tslint:disable-next-line:no-bitwise
-        this._buttonsLeft = buttons?.filter((b) => (b.type & DialogButton.TYPE_SECONDARY) === DialogButton.TYPE_SECONDARY);
+        this._buttons = buttons?.filter((button) => button.position === 'standard');
+        this._buttonsLeft = buttons?.filter((button) => button.position === 'opposite');
     }
 
     /**

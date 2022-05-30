@@ -36,8 +36,8 @@ export class WorkspaceCreateConnector  {
   }
   constructor() {
     this.buttons = [
-        new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.cancel()),
-        new DialogButton('CREATE', DialogButton.TYPE_PRIMARY, () => this.create()),
+        new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel()),
+        new DialogButton('CREATE', { color: 'primary' }, () => this.create()),
     ];
   }
   getType() {

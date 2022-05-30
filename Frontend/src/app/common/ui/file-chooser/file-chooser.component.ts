@@ -4,6 +4,7 @@ import {TranslateService} from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
 import {BehaviorSubject, Observable, Subject} from 'rxjs';
 import {map, skip, switchMap, takeUntil, tap} from 'rxjs/operators';
+import { InteractionType, ListSortConfig, NodeEntriesDisplayType } from '../../../features/node-entries/entries-model';
 import {
     DialogButton,
     ListItem,
@@ -16,14 +17,8 @@ import {
 } from '../../../core-module/core.module';
 import {Toast} from '../../../core-ui-module/toast';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
-import {
-    InteractionType, ListSortConfig,
-    NodeEntriesDisplayType
-} from '../../../core-ui-module/components/node-entries-wrapper/entries-model';
-import {
-    NodeDataSource
-} from '../../../core-ui-module/components/node-entries-wrapper/node-data-source';
 import {WorkspaceExplorerComponent} from '../../../modules/workspace/explorer/explorer.component';
+import { NodeDataSource } from '../../../features/node-entries/node-data-source';
 
 @Component({
     selector: 'es-file-chooser',
@@ -415,7 +410,7 @@ export class FileChooserComponent implements OnInit {
 
     updateButtons() {
         this.buttons = [
-            new DialogButton(this.translate.instant('CANCEL'), DialogButton.TYPE_CANCEL, () =>
+            new DialogButton(this.translate.instant('CANCEL'), { color: 'standard' }, () =>
                 this.cancel(),
             ),
         ];
@@ -428,7 +423,7 @@ export class FileChooserComponent implements OnInit {
             }
             confirmButton = new DialogButton(
                 this.translate.instant('APPLY'),
-                DialogButton.TYPE_PRIMARY,
+                { color: 'primary' },
                 () => this.chooseDirectory(),
             );
             confirmButton.disabled = (!this.path$.value.length && !this.canSelectHome) || !this.folderIsWritable();
@@ -436,7 +431,7 @@ export class FileChooserComponent implements OnInit {
             this.defaultSubtitle = null;
             confirmButton = new DialogButton(
                 'SELECT_ROOT_DISABLED',
-                DialogButton.TYPE_PRIMARY,
+                { color: 'primary' },
                 () => {},
             );
             confirmButton.disabled = true;
@@ -446,7 +441,7 @@ export class FileChooserComponent implements OnInit {
                 this.translate.instant(this._collections ? 'SELECT_COLLECTION' : 'SELECT_FILE', {
                     name: this.defaultSubtitle,
                 }),
-                DialogButton.TYPE_PRIMARY,
+                { color: 'primary' },
                 () => this.chooseFile(),
             );
             confirmButton.disabled =

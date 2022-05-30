@@ -2,6 +2,7 @@
 /* eslint-disable */
 import { Collection } from './collection';
 import { Content } from './content';
+import { Contributor } from './contributor';
 import { License } from './license';
 import { Node } from './node';
 import { NodeLtiDeepLink } from './node-lti-deep-link';
@@ -17,6 +18,7 @@ export interface CollectionReference {
     collection: Collection;
     commentCount?: number;
     content?: Content;
+    contributors?: Array<Contributor>;
     createdAt: string;
     createdBy: Person;
     downloadUrl: string;

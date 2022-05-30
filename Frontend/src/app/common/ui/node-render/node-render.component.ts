@@ -18,7 +18,7 @@ import {Toast} from '../../../core-ui-module/toast';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
 import { TranslationsService } from '../../../translations/translations.service';
-import {DefaultGroups, ElementType, OptionGroup, OptionItem, Scope, Target} from '../../../core-ui-module/option-item';
+import {DefaultGroups, ElementType, OptionItem, Scope, Target} from '../../../core-ui-module/option-item';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {trigger} from '@angular/animations';
@@ -53,10 +53,6 @@ import {
     TemporaryStorageService, UIService
 } from '../../../core-module/core.module';
 import {MdsHelper} from '../../../core-module/rest/mds-helper';
-import {ListTableComponent} from '../../../core-ui-module/components/list-table/list-table.component';
-import {SpinnerComponent} from '../../../shared/components/spinner/spinner.component';
-import {CommentsListComponent} from '../../../modules/management-dialogs/node-comments/comments-list/comments-list.component';
-import {GlobalContainerComponent} from '../global-container/global-container.component';
 import {VideoControlsComponent} from '../../../core-ui-module/components/video-controls/video-controls.component';
 import {ActionbarComponent} from '../actionbar/actionbar.component';
 import {
@@ -69,10 +65,10 @@ import {CardComponent} from '../../../shared/components/card/card.component';
 import {CardService} from '../../../core-ui-module/card.service';
 import {RouterComponent} from '../../../router/router.component';
 import {RenderHelperService} from '../../../core-ui-module/render-helper.service';
-import {NodeDataSource} from '../../../core-ui-module/components/node-entries-wrapper/node-data-source';
 import { Subject } from 'rxjs';
 import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
+import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 
 
 @Component({
@@ -213,7 +209,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
   public nodeDelete: Node[];
   public nodeVariant: Node;
   public addToCollection: Node[];
-  public nodeReport: Node;
   private editor: string;
   private fromLogin = false;
   public banner: any;

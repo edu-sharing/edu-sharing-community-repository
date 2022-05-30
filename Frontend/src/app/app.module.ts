@@ -4,13 +4,15 @@ import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from "@angular/material/form-field";
 import { MatTooltipDefaultOptions, MAT_TOOLTIP_DEFAULT_OPTIONS } from "@angular/material/tooltip";
 import { ResizableModule } from 'angular-resizable-element';
 import { EduSharingApiConfigurationParams, EduSharingApiModule, EDU_SHARING_API_CONFIG } from 'ngx-edu-sharing-api';
-import { NodeEmbedComponent } from './common/ui/node-embed/node-embed.component';
 import { ErrorHandlerService } from './core-ui-module/error-handler.service';
 import { DECLARATIONS } from './declarations';
 import { extensionDeclarations } from './extension/extension-declarations';
 import { extensionImports } from './extension/extension-imports';
 import { extensionProviders } from './extension/extension-providers';
+import { DialogsModule } from './features/dialogs/dialogs.module';
+import { ListItemsModule } from './features/list-items/list-items.module';
 import { MdsModule } from './features/mds/mds.module';
+import { NodeEntriesModule } from './features/node-entries/node-entries.module';
 import { IMPORTS } from './imports';
 import { MainModule } from './main/main.module';
 import { DECLARATIONS_ADMIN } from './modules/admin/declarations';
@@ -84,12 +86,13 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         extensionDeclarations,
         LtiComponent,
         LtiAdminComponent,
-        NodeEmbedComponent,
     ],
     imports: [
         IMPORTS,
         ApolloModule,
         SharedModule,
+        NodeEntriesModule,
+        ListItemsModule,
         MainModule,
         EduSharingApiModule.forRoot(),
         EduSharingGraphqlModule,
@@ -98,6 +101,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         extensionImports,
         ResizableModule,
         MdsModule,
+        DialogsModule,
     ],
     providers: [
         {

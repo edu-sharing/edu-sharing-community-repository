@@ -72,8 +72,8 @@ export class WorkspaceAddFolder  {
 
   private updateButtons() {
     this.buttons = [
-      new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.cancel()),
-      new DialogButton('SAVE', DialogButton.TYPE_PRIMARY, () => this.addFolder())
+      new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel()),
+      new DialogButton('SAVE', { color: 'primary' }, () => this.addFolder())
     ];
     this.buttons[1].disabled = !this._folder.trim();
   }

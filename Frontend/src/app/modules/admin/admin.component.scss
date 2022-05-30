@@ -78,7 +78,7 @@ $sidenavWidthMobile:66px;
     font-weight: bold;
     font-size: 110%;
     width:100%;
-    border-bottom: 1px solid $cardSeperatorLineColor;
+    border-bottom: 1px solid $cardSeparatorLineColor;
     margin: 20px 0;
     padding:0 10px;
     i{
@@ -184,7 +184,7 @@ $sidenavWidthMobile:66px;
         >div {
             display: flex;
             align-items: center;
-            border-bottom: 1px solid $cardSeperatorLineColor;
+            border-bottom: 1px solid $cardSeparatorLineColor;
             div {
                 width: 0;
                 flex-grow: 2;
@@ -323,7 +323,7 @@ $sidenavWidthMobile:66px;
         padding:5px 10px;
         vertical-align: middle;
         word-break: break-all;
-        border-bottom: 1px solid $cardSeperatorLineColor;
+        border-bottom: 1px solid $cardSeparatorLineColor;
         .material-icons{
             color:$textLight;
         }
@@ -565,7 +565,7 @@ $sidenavWidthMobile:66px;
     }
     .job{
         &:not(:last-child){
-            border-bottom: 1px solid $cardSeperatorLineColor;
+            border-bottom: 1px solid $cardSeparatorLineColor;
         }
         display:flex;
         width:100%;

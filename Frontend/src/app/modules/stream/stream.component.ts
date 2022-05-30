@@ -1,7 +1,7 @@
-import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Params, Router, RoutesRecognized} from '@angular/router';
 import { TranslationsService } from '../../translations/translations.service';
-import * as EduData from '../../core-module/core.module'; //
+import * as EduData from '../../core-module/core.module';
 import {
     Connector,
     ConnectorList,
@@ -37,17 +37,10 @@ import {trigger} from '@angular/animations';
 import {CordovaService} from '../../common/services/cordova.service';
 import * as moment from 'moment';
 import {ActionbarHelperService} from '../../common/services/actionbar-helper';
-import {MainNavComponent} from '../../main/navigation/main-nav/main-nav.component';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 import {filter, pairwise} from 'rxjs/operators';
 import {OptionsHelperService} from '../../core-ui-module/options-helper.service';
-import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
-import {
-    ListEventInterface,
-    ListOptions, ListOptionsConfig, NodeEntriesDisplayType
-} from '../../core-ui-module/components/node-entries-wrapper/entries-model';
-import {SelectionModel} from '@angular/cdk/collections';
 import { StreamEntry, StreamV1Service } from 'ngx-edu-sharing-api';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';

@@ -147,8 +147,8 @@ export class PermissionsDeleteComponent implements OnInit {
       }
       message += '\n\n' + this.translate.instant('PERMISSIONS.DELETE.CONFIRM.FINAL');
       this.toast.showModalDialog('PERMISSIONS.DELETE.CONFIRM.CAPTION', message, [
-          new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.toast.closeModalDialog()),
-          new DialogButton('PERMISSIONS.DELETE.START', DialogButton.TYPE_PRIMARY, () => this.start())
+          new DialogButton('CANCEL', { color: 'standard' }, () => this.toast.closeModalDialog()),
+          new DialogButton('PERMISSIONS.DELETE.START', { color: 'primary' }, () => this.start())
       ]);
     }
 

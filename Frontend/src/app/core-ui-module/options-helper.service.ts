@@ -50,16 +50,12 @@ import {ActivatedRoute, Params, Router} from '@angular/router';
 import {DropdownComponent} from '../shared/components/dropdown/dropdown.component';
 import {ConfigOptionItem, NodeHelperService} from './node-helper.service';
 import {PlatformLocation} from '@angular/common';
-import {
-    ListEventInterface,
-    NodeEntriesDisplayType
-} from './components/node-entries-wrapper/entries-model';
-import {FormBuilder} from '@angular/forms';
-import { NodeEmbedService } from '../common/ui/node-embed/node-embed.service';
 import { NodeStoreService } from '../modules/search/node-store/node-store.service';
-import {NodeEntriesDataType} from './components/node-entries/node-entries.component';
 import {isArray} from 'rxjs/internal/util/isArray';
 import { MainNavService } from '../main/navigation/main-nav.service';
+import { DialogsService } from '../features/dialogs/dialogs.service';
+import { ListEventInterface, NodeEntriesDisplayType } from '../features/node-entries/entries-model';
+import { NodeEntriesDataType } from '../features/node-entries/node-entries.component';
 
 
 export class OptionsHelperConfig {
@@ -156,8 +152,8 @@ export class OptionsHelperService implements OnDestroy {
         private mainNavService: MainNavService,
         private storage: TemporaryStorageService,
         private bridge: BridgeService,
-        private nodeEmbed: NodeEmbedService,
         private nodeStore: NodeStoreService,
+        private dialogs: DialogsService,
         @Optional() @Inject(OPTIONS_HELPER_CONFIG) config: OptionsHelperConfig,
     ) {
         if (config == null) {
@@ -513,7 +509,7 @@ export class OptionsHelperService implements OnDestroy {
                     console.warn(e);
                 }
             }
-            management.nodeDebug = node;
+            this.dialogs.openNodeInfoDialog({ node });
         });
         debugNode.elementType = [
             ElementType.Node,
@@ -986,7 +982,7 @@ export class OptionsHelperService implements OnDestroy {
         options.push(report);
          */
         const reportNode = new OptionItem('OPTIONS.NODE_REPORT', 'flag', (node) =>
-            management.nodeReport = this.getObjects(node)[0]
+            this.dialogs.openNodeReportDialog({ node: this.getObjects(node)[0] })
         );
         reportNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         reportNode.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository];
@@ -997,8 +993,7 @@ export class OptionsHelperService implements OnDestroy {
 
         const qrCodeNode = new OptionItem('OPTIONS.QR_CODE', 'edu-qr_code', (node) => {
             node = this.getObjects(node)[0];
-            const url = this.nodeHelper.getNodeUrl(node);
-            management.qr = { node, data: url };
+            this.dialogs.openQrDialog({ node });
         });
         qrCodeNode.constrains = [Constrain.NoBulk];
         qrCodeNode.scopes = [Scope.Render, Scope.CollectionsCollection];
@@ -1007,7 +1002,7 @@ export class OptionsHelperService implements OnDestroy {
 
         const embedNode = new OptionItem('OPTIONS.EMBED', 'perm_media', (node) => {
             node = this.getObjects(node)[0];
-            this.nodeEmbed.open(node);
+            this.dialogs.openNodeEmbedDialog({ node });
         });
         embedNode.constrains = [Constrain.NoBulk, Constrain.HomeRepository];
         embedNode.scopes = [Scope.Render];

@@ -17,7 +17,7 @@ import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../../core-ui-modu
 import {MainNavComponent} from '../../../main/navigation/main-nav/main-nav.component';
 import {CdkDragDrop, CdkDragEnter, CdkDragExit} from '@angular/cdk/drag-drop';
 import {DragCursorDirective} from '../../../core-ui-module/directives/drag-cursor.directive';
-import {DropSource} from '../../../core-ui-module/components/node-entries-wrapper/entries-model';
+import { DropSource } from 'src/app/features/node-entries/entries-model';
 
 @Component({
     selector: 'es-workspace-sub-tree',
