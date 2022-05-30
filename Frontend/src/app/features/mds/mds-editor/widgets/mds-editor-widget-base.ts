@@ -1,5 +1,5 @@
-import { ValidatorFn, Validators } from '@angular/forms';
-import { assertUnreachable, InputStatus, RequiredMode } from '../../types/types';
+import {ValidatorFn, Validators} from '@angular/forms';
+import {assertUnreachable, InputStatus, MdsDefinition, MdsWidget, RequiredMode} from '../../types/types';
 import {Directive, EventEmitter} from '@angular/core';
 import {MdsEditorWidgetCore} from '../mds-editor-widget-core.directive';
 
@@ -68,5 +68,14 @@ export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {
             validators.push(overrides.requiredValidator ?? Validators.required);
         }
         return validators;
+    }
+
+    public static mapGraphqlId(definition: MdsWidget) {
+        // @TODO: make types!
+        const id = (definition as any).ids?.graphql;
+        if(id) {
+            return [(definition as any).ids?.graphql];
+        }
+        return null;
     }
 }

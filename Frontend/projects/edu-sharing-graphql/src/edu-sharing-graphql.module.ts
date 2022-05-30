@@ -29,6 +29,34 @@ export class EduSharingGraphqlModule {
             link: myAppLink,
             cache: new InMemoryCache()
         });
+        // @TODO: check if this is feasible for resolving types of elements
+        /*
+        apollo.query({
+            gql: `{
+                  __schema {
+                    types {
+                      name
+                      fields {
+                        name
+                        type {
+                          kind
+                          name
+                          ofType {
+                            kind
+                            name
+                            ofType {
+                              kind
+                              name
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }`
+        });
+
+         */
     }
     private static omitTypename(key: string, value: any) {
         return key === '__typename' ? undefined : value

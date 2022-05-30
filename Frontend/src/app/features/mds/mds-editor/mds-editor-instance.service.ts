@@ -30,7 +30,7 @@ import {
     GeneralWidget,
     NativeWidget,
     NativeWidgetComponent,
-    NativeWidgets
+    NativeWidgets, WidgetComponents
 } from '../types/mds-types';
 import {
     BulkBehavior,
@@ -38,7 +38,7 @@ import {
     EditorBulkMode,
     EditorType,
     InputStatus,
-    MdsDefinition,
+    MdsDefinition, MdsEditorWidgetComponent,
     MdsGroup,
     MdsView,
     MdsWidget,
@@ -62,6 +62,7 @@ import {isNull} from '@angular/compiler/src/output/output_ast';
 import {isNumeric} from 'rxjs/util/isNumeric';
 import {RangedValue, RangedValueSuggestionData, MetadatasGQL} from 'ngx-edu-sharing-graphql';
 import {DisplayValue} from './widgets/DisplayValues';
+import {MdsEditorWidgetBase} from "./widgets/mds-editor-widget-base";
 export interface CompletionStatusField {
     widget: Widget;
     isCompleted: boolean;
@@ -926,11 +927,8 @@ export class MdsEditorInstanceService implements OnDestroy {
             if(Object.values(NativeWidgetType).includes(w.id as NativeWidgetType)) {
                 id = NativeWidgets[w.id as NativeWidgetType]?.graphqlIds;
             } else {
-                // @TODO: make types!
-                let defId = (w as any).ids?.graphql;
-                if(defId) {
-                    id = [defId];
-                }
+                const componentClass: MdsEditorWidgetComponent = WidgetComponents[w.type as MdsWidgetType];
+                id = componentClass.mapGraphqlId(w);
             }
             if (!id) {
                 console.error(w.id + ' does not have a id for graphql, data will be missing! Please specify the graphql id in the widget definition', w);

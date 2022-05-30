@@ -65,7 +65,6 @@ import {
     MdsEditorWidgetTinyMCE
 } from '../widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-tinymce.component';
 import {EditorMode, GeneralWidget, NativeWidgets, WidgetComponents} from '../../types/mds-types';
-import { Metadata } from 'dist/edu-sharing-graphql/ngx-edu-sharing-graphql';
 
 @Component({
     selector: 'es-mds-editor-view',
