@@ -250,7 +250,6 @@ export class MdsEditorInstanceService implements OnDestroy {
             if((nodes[0] as Node)?.ref?.id) {
                 console.warn('Suggestions are not supported without graphql');
             } else {
-                console.log(nodes);
                 this.suggestionValues = [].concat(...(nodes as Metadata[]).map(m => [].concat(...((m.generated || []).map(suggestion =>
                         this.readNodeValue(suggestion, this.definition).map((v) => ({
                                 suggestion,
@@ -944,10 +943,28 @@ export class MdsEditorInstanceService implements OnDestroy {
             .filter((id) => !!id)
         );
         const combined = Array.from(graphqlRequests).map((id) => this.mapGraphqlField(id,a => a)).join('\n');
+        const graphqlSuggestionRequests = new Set(widgets.map((w)  => {
+                let id: string[];
+                if(!Object.values(NativeWidgetType).includes(w.id as NativeWidgetType)) {
+                    // const componentClass: MdsEditorWidgetComponent = WidgetComponents[w.type as MdsWidgetType];
+                    // use the base class for mapping
+                    const baseId = MdsEditorWidgetBase.mapGraphqlId(w);
+                    if(!(baseId[0].startsWith('lom') && !baseId[0].startsWith('lom.lifecycle'))) {
+                        return [];
+                    }
+                    // map into the "value" structure of the suggestion element
+                    baseId[0] += '.value';
+                }
+                if (!id) {
+                    id = [];
+                }
+                return id;
+            })
+                .reduce((acc, arr) => [...acc, ...arr])
+                .filter((id) => !!id)
+        );
         // This is a bit hacky, may we find an easier way to dynamically fetch the suggestions?
-        const combinedSuggestions = [].concat(...Array.from(graphqlRequests).filter(
-            id => id.startsWith('lom') && !id.startsWith('lom.lifecycle')
-        ).map((id) =>
+        const combinedSuggestions = [].concat(...Array.from(graphqlSuggestionRequests).map((id) =>
             [
                 this.mapGraphqlField(id, a => {
                     a.push('value')
