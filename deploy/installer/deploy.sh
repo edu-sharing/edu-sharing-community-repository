@@ -11,7 +11,6 @@ export ROOT_PATH
 pushd "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)" >/dev/null || exit
 
 COMPOSE_PROJECT=$(basename $(cd ../../.. && pwd))
-COMPOSE_WORKTREE=""
 COMPOSE_PLATFORM="debian/bullseye"
 COMPOSE_DIR="compose/$COMPOSE_PLATFORM/target/compose"
 
@@ -32,7 +31,7 @@ popd >/dev/null || exit
 	cp -f ".env" "${COMPOSE_DIR}"
 }
 
-export COMPOSE_NAME="${COMPOSE_PROJECT_NAME:-$(echo "${COMPOSE_PROJECT}-${COMPOSE_WORKTREE}-installer-$(git rev-parse --abbrev-ref HEAD)" | sed 's|[\/\.]|-|g')}"
+export COMPOSE_NAME="${COMPOSE_PROJECT_NAME:-$(echo "${COMPOSE_PROJECT}-installer-$(git rev-parse --abbrev-ref HEAD)" | sed 's|[\/\.]|-|g' | tr '[:upper:]' '[:lower:]')}"
 
 case "$(uname)" in
 MINGW*)

@@ -1,4 +1,4 @@
-FROM ${docker.registry}/mirror/docker.io/openjdk:11-jdk-bullseye
+FROM ${docker.from.openjdk.11}
 
 ########################################################################################################################
 
