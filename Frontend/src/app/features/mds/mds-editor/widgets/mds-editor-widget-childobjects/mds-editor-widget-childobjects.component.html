@@ -3,6 +3,7 @@
         [priority]="2"
         groupId="io_childobject"
         editorMode="nodes"
+        [setId]="nodes?.[0].metadataset"
         [currentValues]="_edit.properties"
         (onCancel)="_edit=null"
         (onDone)="setProperties($any($event))"
