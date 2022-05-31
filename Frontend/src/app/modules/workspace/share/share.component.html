@@ -63,7 +63,14 @@
         <div *ngIf="sendMessages && getNewInvitedAuthorities().length" class="groupMessage">
           <mat-form-field>
             <mat-label>{{'WORKSPACE.SHARE.MESSAGE' | translate}}</mat-label>
-            <input matInput id="message" name="message" [(ngModel)]="notifyMessage" placeholder="{{'WORKSPACE.SHARE.MESSAGE_PLACEHOLDER' | translate}}"/>
+            <textarea matInput
+                      cdkTextareaAutosize
+                      cdkAutosizeMinRows="2"
+                      cdkAutosizeMaxRows="4"
+                      id="message"
+                      name="message"
+                      [(ngModel)]="notifyMessage"
+                      placeholder="{{'WORKSPACE.SHARE.MESSAGE_PLACEHOLDER' | translate}}"></textarea>
           </mat-form-field>
           <mat-checkbox id="notify" [(ngModel)]="notifyUsers">
             <div>{{'WORKSPACE.NOTIFY_TITLE' | translate}}</div>
