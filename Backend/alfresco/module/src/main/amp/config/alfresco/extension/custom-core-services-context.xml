@@ -499,9 +499,6 @@
       <property name="storeArchiveMap">
          <ref bean="storeArchiveMap"/>
       </property>
-      <property name="nodeIndexer">
-         <ref bean="nodeIndexer"/>
-      </property>
       <property name="policyBehaviourFilter" ref="policyBehaviourFilter" />
       <property name="tenantService">
          <ref bean="tenantService"/>
@@ -524,7 +521,6 @@
       <property name="permissionService" ref="permissionServiceImpl" />
       <property name="policyComponent" ref="policyComponent"/>
       <property name="storeArchiveMap" ref="storeArchiveMap"/>
-      <property name="nodeIndexer" ref="nodeIndexer"/>
       <property name="policyBehaviourFilter" ref="policyBehaviourFilter" />
       <property name="tenantService" ref="tenantService"/>
       <property name="storesToIgnorePolicies">
