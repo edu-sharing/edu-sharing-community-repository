@@ -20,7 +20,7 @@
 
   <properties>
 
-    <composer.project.root>repository-rest-client</composer.project.root>
+    <composer.project.root>community-repository-rest-client</composer.project.root>
     <java.package.root>${java.root.generated}.repository.backend.services.rest.client</java.package.root>
 
   </properties>
