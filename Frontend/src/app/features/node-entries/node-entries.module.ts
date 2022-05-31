@@ -32,6 +32,6 @@ import { PreviewImageComponent } from './preview-image/preview-image.component';
         FocusStateDirective,
     ],
     imports: [SharedModule, ListItemsModule],
-    exports: [NodeEntriesWrapperComponent],
+    exports: [NodeEntriesWrapperComponent, ListItemLabelPipe],
 })
 export class NodeEntriesModule {}
