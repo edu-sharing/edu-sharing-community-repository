@@ -18,37 +18,40 @@
   <properties>
 
     <docker.from.apache.exporter>
-      ${docker.registry}/mirror/docker.io/bitnami/apache-exporter:0.10.1
+      dockerio.mirror.docker.edu-sharing.com/bitnami/apache-exporter:0.10.1
     </docker.from.apache.exporter>
     <!--suppress UnresolvedMavenProperty -->
     <docker.from.apache.server>
-      ${docker.registry}/mirror/docker.io/php:${php.version}-apache-bullseye
+      dockerio.mirror.docker.edu-sharing.com/php:${php.version}-apache-bullseye
     </docker.from.apache.server>
     <docker.from.minideb>
-      ${docker.registry}/mirror/docker.io/bitnami/minideb:bullseye
+      dockerio.mirror.docker.edu-sharing.com/bitnami/minideb:bullseye
     </docker.from.minideb>
-    <docker.from.openjdk>
-      ${docker.registry}/mirror/docker.io/openjdk:8-jdk-bullseye
-    </docker.from.openjdk>
+    <docker.from.openjdk.8>
+      dockerio.mirror.docker.edu-sharing.com/openjdk:8-jdk-bullseye
+    </docker.from.openjdk.8>
+    <docker.from.openjdk.11>
+      dockerio.mirror.docker.edu-sharing.com/openjdk:11-jdk-bullseye
+    </docker.from.openjdk.11>
     <docker.from.postgresql.exporter>
-      ${docker.registry}/mirror/quay.io/prometheuscommunity/postgres-exporter:v0.10.0
+      quay.mirror.docker.edu-sharing.com/prometheuscommunity/postgres-exporter:v0.10.0
     </docker.from.postgresql.exporter>
     <!--suppress UnresolvedMavenProperty -->
     <docker.from.postgresql.server>
-      ${docker.registry}/mirror/docker.io/bitnami/postgresql:${postgresql.version}
+      dockerio.mirror.docker.edu-sharing.com/bitnami/postgresql:${postgresql.version}
     </docker.from.postgresql.server>
     <docker.from.redis.exporter>
-      ${docker.registry}/mirror/docker.io/bitnami/redis-exporter:1.32.0
+      dockerio.mirror.docker.edu-sharing.com/bitnami/redis-exporter:1.32.0
     </docker.from.redis.exporter>
     <docker.from.redis.server>
-      ${docker.registry}/mirror/docker.io/bitnami/redis:6.2.6
+      dockerio.mirror.docker.edu-sharing.com/bitnami/redis:6.2.6
     </docker.from.redis.server>
     <docker.from.rediscluster.server>
-      ${docker.registry}/mirror/docker.io/bitnami/redis-cluster:6.2.6
+      dockerio.mirror.docker.edu-sharing.com/bitnami/redis-cluster:6.2.6
     </docker.from.rediscluster.server>
     <!--suppress UnresolvedMavenProperty -->
     <docker.from.tomcat>
-      ${docker.registry}/mirror/docker.io/tomcat:${tomcat.version}-jdk8-openjdk-bullseye
+      dockerio.mirror.docker.edu-sharing.com/tomcat:${tomcat.version}-jdk8-openjdk-bullseye
     </docker.from.tomcat>
 
     <helm.kube.version>&gt;= 1.18.0</helm.kube.version>
