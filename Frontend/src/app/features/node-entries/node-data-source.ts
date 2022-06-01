@@ -42,6 +42,21 @@ export class NodeDataSource<T extends Node|GenericAuthority> extends DataSource<
         this.dataStream.next(data);
     }
 
+    /**
+     * Removes elements from the visible data.
+     */
+    removeData(removeData: T[]): void {
+        const data = this.getData().filter((value) => !removeData.includes(value));
+        this.dataStream.next(data);
+        if (this.pagination) {
+            this.setPagination({
+                count: this.pagination.count - removeData.length,
+                from: this.pagination.from,
+                total: this.pagination.total - removeData.length,
+            });
+        }
+    }
+
     setPagination(pagination: Pagination) {
         this.pagination = pagination;
     }

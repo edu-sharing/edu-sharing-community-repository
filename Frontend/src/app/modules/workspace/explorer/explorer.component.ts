@@ -394,6 +394,12 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             scope: Scope.WorkspaceList,
             parent: this._node,
         });
+        this.nodeEntries.setOptionsListener({
+            onDelete: ({ objects }) => {
+                this._dataSource.removeData(objects);
+                this.nodeEntries?.getSelection().clear();
+            },
+        });
     }
 
     saveColumns(columns: ListItem[]) {

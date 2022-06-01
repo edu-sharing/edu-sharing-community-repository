@@ -27,6 +27,7 @@ import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { OptionItem } from '../../core-ui-module/option-item';
 import {
     OptionsHelperService,
+    OptionsListener,
     OPTIONS_HELPER_CONFIG,
 } from '../../core-ui-module/options-helper.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
@@ -259,6 +260,10 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
             customOptions: config.customOptions,
         });
         this.optionsHelper.refreshComponents();
+    }
+    
+    setOptionsListener(listener: OptionsListener): void {
+        this.optionsHelper.setListener(listener);
     }
 
     ngAfterViewInit(): void {
