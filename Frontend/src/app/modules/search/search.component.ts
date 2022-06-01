@@ -65,19 +65,17 @@ import {BehaviorSubject, ReplaySubject, combineLatest, Observable, Subject} from
 import {delay, distinctUntilChanged, first, map, shareReplay, switchMap, takeUntil, tap} from 'rxjs/operators';
 import {MatTabGroup} from '@angular/material/tabs';
 import {OptionsHelperService} from '../../core-ui-module/options-helper.service';
-import {
-    NodeEntriesWrapperComponent
-} from '../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
-import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
-import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
+import {ActionbarComponent} from '../../shared/components/actionbar/actionbar.component';
 import { SearchFieldService } from 'src/app/main/navigation/search-field/search-field.service';
 import { MdsDefinition, MdsService, MetadataSetInfo, SearchResults, SearchService as SearchApiService } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
-import {InteractionType, ListSortConfig, NodeEntriesDisplayType} from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { Values } from '../../features/mds/types/types';
+import { NodeEntriesDisplayType, InteractionType, ListSortConfig } from 'src/app/features/node-entries/entries-model';
+import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
+import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-entries-wrapper.component';
 
 @Component({
     selector: 'es-search',
@@ -1368,12 +1366,12 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                             buttons: [
                                 new DialogButton(
                                     'RENAME',
-                                    DialogButton.TYPE_CANCEL,
+                                    { color: 'standard'},
                                     () => this.toast.closeModalDialog(),
                                 ),
                                 new DialogButton(
                                     'REPLACE',
-                                    DialogButton.TYPE_PRIMARY,
+                                    { color: 'primary' },
                                     () => {
                                         this.toast.closeModalDialog();
                                         this.saveSearch(name, true);

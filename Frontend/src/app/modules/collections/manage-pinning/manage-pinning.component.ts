@@ -55,8 +55,8 @@ export class CollectionManagePinningComponent {
              ){
     this.isMobile=ui.isMobile();
     this.buttons=[
-        new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
-        new DialogButton('APPLY',DialogButton.TYPE_PRIMARY,()=>this.apply())
+        new DialogButton('CANCEL',{ color: 'standard' },()=>this.cancel()),
+        new DialogButton('APPLY',{ color: 'primary' },()=>this.apply())
     ]
   }
   public isChecked(collection:Node){

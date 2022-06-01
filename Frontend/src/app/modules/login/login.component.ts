@@ -321,9 +321,9 @@ export class LoginComponent implements OnInit {
             return;
         }
         if (this.canRegister()) {
-            this.buttons.push(new DialogButton('LOGIN.REGISTER_TEXT', DialogButton.TYPE_CANCEL, () => this.register()));
+            this.buttons.push(new DialogButton('LOGIN.REGISTER_TEXT', { color: 'standard' }, () => this.register()));
         }
-        const login = new DialogButton('LOGIN.LOGIN', DialogButton.TYPE_PRIMARY, () => this.login());
+        const login = new DialogButton('LOGIN.LOGIN', { color: 'primary' }, () => this.login());
         login.disabled = this.disabled;
         this.buttons.push(login);
     }

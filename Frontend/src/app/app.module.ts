@@ -10,7 +10,9 @@ import { extensionDeclarations } from './extension/extension-declarations';
 import { extensionImports } from './extension/extension-imports';
 import { extensionProviders } from './extension/extension-providers';
 import { DialogsModule } from './features/dialogs/dialogs.module';
+import { ListItemsModule } from './features/list-items/list-items.module';
 import { MdsModule } from './features/mds/mds.module';
+import { NodeEntriesModule } from './features/node-entries/node-entries.module';
 import { IMPORTS } from './imports';
 import { MainModule } from './main/main.module';
 import { DECLARATIONS_ADMIN } from './modules/admin/declarations';
@@ -82,6 +84,8 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     imports: [
         IMPORTS,
         SharedModule,
+        NodeEntriesModule,
+        ListItemsModule,
         MainModule,
         EduSharingApiModule.forRoot(),
         TranslationsModule.forRoot(),

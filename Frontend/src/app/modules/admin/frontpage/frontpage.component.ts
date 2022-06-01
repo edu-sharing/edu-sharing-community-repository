@@ -119,8 +119,8 @@ export class AdminFrontpageComponent {
                 title: 'ADMIN.FRONTPAGE.CONFIG_BROKEN',
                 message: 'ADMIN.FRONTPAGE.CONFIG_BROKEN_INFO',
                 buttons: [
-                    new DialogButton('CANCEL',DialogButton.TYPE_CANCEL, () => this.toast.closeModalDialog()),
-                    new DialogButton('ADMIN.FRONTPAGE.RESET',DialogButton.TYPE_DANGER, () => {
+                    new DialogButton('CANCEL',{ color: 'standard' }, () => this.toast.closeModalDialog()),
+                    new DialogButton('ADMIN.FRONTPAGE.RESET',{ color: 'danger' }, () => {
                         this.toast.showProgressDialog()
                         this.adminService.updateRepositoryConfig(null).subscribe(() => {
                             this.update();

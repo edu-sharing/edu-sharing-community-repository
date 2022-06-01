@@ -79,7 +79,7 @@ export class AdminConfigComponent {
             messageParameters: { error: error?.error?.error },
             messageType: ModalMessageType.HTML,
             isCancelable: true,
-            buttons: [new DialogButton('ADMIN.GLOBAL_CONFIG.CHECK', DialogButton.TYPE_DANGER, () => this.toast.closeModalDialog())],
+            buttons: [new DialogButton('ADMIN.GLOBAL_CONFIG.CHECK', { color: 'danger' }, () => this.toast.closeModalDialog())],
         });
     }
     save() {

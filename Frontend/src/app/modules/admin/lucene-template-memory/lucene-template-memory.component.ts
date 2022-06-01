@@ -58,12 +58,12 @@ export class LuceneTemplateMemoryComponent implements OnInit {
     newTemplateName: string;
 
     readonly newTemplateDialogButtons = [
-        new DialogButton('CLOSE', DialogButton.TYPE_CANCEL, () => {
+        new DialogButton('CLOSE', { color: 'standard' }, () => {
             this.closeNewTemplateDialog();
         }),
         new DialogButton(
             'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.CREATE_BUTTON',
-            DialogButton.TYPE_PRIMARY,
+            { color: 'primary' },
             () => this.createNewTemplate(),
         ),
     ];
@@ -127,13 +127,13 @@ export class LuceneTemplateMemoryComponent implements OnInit {
                 'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.CONFIRM_UPDATE_TITLE',
                 'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.CONFIRM_UPDATE_MESSAGE',
                 [
-                    new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => {
+                    new DialogButton('CANCEL', { color: 'standard' }, () => {
                         this.toast.closeModalDialog();
                         resolve(false);
                     }),
                     new DialogButton(
                         'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.CONFIRM_UPDATE_BUTTON',
-                        DialogButton.TYPE_PRIMARY,
+                        { color: 'primary' },
                         () => {
                             this.updateTemplate(template);
                             this.toast.closeModalDialog();
@@ -155,12 +155,12 @@ export class LuceneTemplateMemoryComponent implements OnInit {
             'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.CONFIRM_DELETE_TITLE',
             'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.CONFIRM_DELETE_MESSAGE',
             [
-                new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => {
+                new DialogButton('CANCEL', { color: 'standard' }, () => {
                     this.toast.closeModalDialog();
                 }),
                 new DialogButton(
                     'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.CONFIRM_DELETE_BUTTON',
-                    DialogButton.TYPE_DANGER,
+                    { color: 'danger' },
                     () => {
                         this.deleteTemplate(template);
                         this.toast.closeModalDialog();

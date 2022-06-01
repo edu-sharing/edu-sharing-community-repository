@@ -127,7 +127,7 @@ export class WorkspaceShareLinkComponent  {
     private translate:TranslateService,
     private toast:Toast,
   ){
-    this.buttons=[new DialogButton('CLOSE',DialogButton.TYPE_PRIMARY,()=>this.cancel())];
+    this.buttons=[new DialogButton('CLOSE',{ color: 'primary' },()=>this.cancel())];
   }
 
     private createShare() {

@@ -52,8 +52,8 @@ export class AddStreamComponent  {
     private toast : Toast,
     private nodeApi : RestNodeService) {
     this.buttons=[
-        new DialogButton("CANCEL",DialogButton.TYPE_CANCEL,()=>this.cancel()),
-        new DialogButton("SAVE",DialogButton.TYPE_PRIMARY,()=>this.save()),
+        new DialogButton("CANCEL",{ color: 'standard' },()=>this.cancel()),
+        new DialogButton("SAVE",{ color: 'primary' },()=>this.save()),
     ]
     this.connector.isLoggedIn(false).subscribe((data:LoginResult)=>{
 

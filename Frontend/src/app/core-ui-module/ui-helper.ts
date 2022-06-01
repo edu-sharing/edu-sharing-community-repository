@@ -1,5 +1,5 @@
 import {forkJoin as observableForkJoin, Observable, Observer, of} from 'rxjs';
-import {catchError, first} from 'rxjs/operators';
+import {catchError, first, take} from 'rxjs/operators';
 import {OPEN_URL_MODE, UIConstants} from '../core-module/ui/ui-constants';
 import {ConfigurationService} from '../core-module/rest/services/configuration.service';
 import {TranslateService} from '@ngx-translate/core';
@@ -68,7 +68,7 @@ export class UIHelper {
         name: string,
         value: any,
     ) {
-        route.queryParams.subscribe((data: any) => {
+        route.queryParams.pipe(take(1)).subscribe((data: any) => {
             let queryParams: any = {};
             for (let key in data) {
                 queryParams[key] = data[key];

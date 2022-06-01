@@ -18,30 +18,30 @@
 
 <ng-template #buttonsTemplate let-button>
   <button
-    *ngIf="button.type | bitwise: { operator: 1 }"
+    *ngIf="button.color === 'primary'"
     mat-flat-button
     color="primary"
     [disabled]="button.disabled"
     (click)="button.callback()"
   >
-    {{ button.name | translate }}
+    {{ button.label | translate }}
   </button>
   <button
-    *ngIf="button.type | bitwise: { operator: 2 }"
+    *ngIf="button.color === 'standard'"
     mat-button
     color="primary"
     [disabled]="button.disabled"
     (click)="button.callback()"
   >
-    {{ button.name | translate }}
+    {{ button.label | translate }}
   </button>
   <button
-    *ngIf="button.type | bitwise: { operator: 4 }"
+    *ngIf="button.color === 'danger'"
     mat-flat-button
     color="warn"
     [disabled]="button.disabled"
     (click)="button.callback()"
   >
-    {{ button.name | translate }}
+    {{ button.label | translate }}
   </button>
 </ng-template>

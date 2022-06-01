@@ -69,11 +69,11 @@ export class SignupGroupComponent implements OnInit {
       this.buttons[1].disabled = !this.group || this.isMemberOf(this.group);
     }
     if(this.dialogStep === Step.confirmGroup) {
-      const back = new DialogButton('BACK', DialogButton.TYPE_CANCEL, () => {
+      const back = new DialogButton('BACK', { color: 'standard' }, () => {
         this.dialogStep = Step.selectGroup;
         this.updateButtons();
       });
-      const signup = new DialogButton('SIGNUP_GROUP.SIGNUP', DialogButton.TYPE_PRIMARY, () => this.signup());
+      const signup = new DialogButton('SIGNUP_GROUP.SIGNUP', { color: 'primary' }, () => this.signup());
       signup.disabled = this.group.signupMethod === 'password' && !this.password;
       this.buttons = [
           back,

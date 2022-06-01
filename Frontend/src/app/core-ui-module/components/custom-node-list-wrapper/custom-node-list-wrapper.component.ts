@@ -12,7 +12,7 @@ import {
     SimpleChange, SkipSelf, TemplateRef,
     ViewContainerRef,
 } from '@angular/core';
-import { ActionbarComponent } from '../../../common/ui/actionbar/actionbar.component';
+import { ActionbarComponent } from '../../../shared/components/actionbar/actionbar.component';
 import { MainNavComponent } from '../../../main/navigation/main-nav/main-nav.component';
 import {
     ListItem,

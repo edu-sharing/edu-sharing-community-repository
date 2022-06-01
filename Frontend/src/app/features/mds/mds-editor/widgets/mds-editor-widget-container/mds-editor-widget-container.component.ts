@@ -27,10 +27,6 @@ import { ViewInstanceService } from '../../mds-editor-view/view-instance.service
 import { BulkBehavior, BulkMode, EditorBulkMode, InputStatus } from '../../../types/types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { FormFieldRegistrationService } from './form-field-registration.service';
-import {
-    InteractionType
-} from '../../../../../core-ui-module/components/node-entries-wrapper/entries-model';
-import {UIHelper} from '../../../../../core-ui-module/ui-helper';
 import {UIService} from '../../../../../core-module/rest/services/ui.service';
 
 @Component({

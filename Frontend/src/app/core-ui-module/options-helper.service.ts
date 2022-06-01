@@ -2,7 +2,7 @@ import {forkJoin as observableForkJoin, fromEvent, of, Subscription} from 'rxjs'
 import {RestNetworkService} from '../core-module/rest/services/rest-network.service';
 import {RestConnectorsService} from '../core-module/rest/services/rest-connectors.service';
 import {RestConstants} from '../core-module/rest/rest-constants';
-import {ActionbarComponent} from '../common/ui/actionbar/actionbar.component';
+import {ActionbarComponent} from '../shared/components/actionbar/actionbar.component';
 import {
     Constrain,
     CustomOptions,
@@ -50,16 +50,12 @@ import {ActivatedRoute, Params, Router} from '@angular/router';
 import {DropdownComponent} from '../shared/components/dropdown/dropdown.component';
 import {ConfigOptionItem, NodeHelperService} from './node-helper.service';
 import {PlatformLocation} from '@angular/common';
-import {
-    ListEventInterface,
-    NodeEntriesDisplayType
-} from './components/node-entries-wrapper/entries-model';
-import {FormBuilder} from '@angular/forms';
-import { NodeStoreService } from '../modules/search/node-store/node-store.service';
-import {NodeEntriesDataType} from './components/node-entries/node-entries.component';
 import {isArray} from 'rxjs/internal/util/isArray';
 import { MainNavService } from '../main/navigation/main-nav.service';
 import { DialogsService } from '../features/dialogs/dialogs.service';
+import { ListEventInterface, NodeEntriesDisplayType } from '../features/node-entries/entries-model';
+import { NodeEntriesDataType } from '../features/node-entries/node-entries.component';
+import { NodeStoreService } from '../modules/search/node-store.service';
 
 
 export class OptionsHelperConfig {
@@ -513,7 +509,7 @@ export class OptionsHelperService implements OnDestroy {
                     console.warn(e);
                 }
             }
-            management.nodeDebug = node;
+            this.dialogs.openNodeInfoDialog({ node });
         });
         debugNode.elementType = [
             ElementType.Node,
@@ -986,7 +982,7 @@ export class OptionsHelperService implements OnDestroy {
         options.push(report);
          */
         const reportNode = new OptionItem('OPTIONS.NODE_REPORT', 'flag', (node) =>
-            management.nodeReport = this.getObjects(node)[0]
+            this.dialogs.openNodeReportDialog({ node: this.getObjects(node)[0] })
         );
         reportNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         reportNode.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository];

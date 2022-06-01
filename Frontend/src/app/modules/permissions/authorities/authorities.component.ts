@@ -50,35 +50,15 @@ import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {
     ModalDialogOptions
 } from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
-import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
-import {
-    ListTableComponent
-} from '../../../core-ui-module/components/list-table/list-table.component';
-import {forkJoin, Observable} from 'rxjs';
+import {ActionbarComponent} from '../../../shared/components/actionbar/actionbar.component';
+import {forkJoin} from 'rxjs';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
-import {ActionbarHelperService} from '../../../common/services/actionbar-helper';
 import {CsvHelper} from '../../../core-module/csv.helper';
 import {ListItemType} from '../../../core-module/ui/list-item';
-import {VCard} from '../../../core-module/ui/VCard';
-import {
-    NodeDataSource
-} from '../../../core-ui-module/components/node-entries-wrapper/node-data-source';
-import {
-    FetchEvent,
-    InteractionType,
-    ListEventInterface,
-    ListOptions,
-    ListOptionsConfig,
-    ListSortConfig,
-    NodeClickEvent,
-    NodeEntriesDisplayType
-} from '../../../core-ui-module/components/node-entries-wrapper/entries-model';
 import {OptionsHelperService} from '../../../core-ui-module/options-helper.service';
-import {SelectionModel} from '@angular/cdk/collections';
-import {
-    NodeEntriesWrapperComponent
-} from '../../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
-import {tap} from 'rxjs/operators';
+import { NodeEntriesDisplayType, InteractionType, ListSortConfig, FetchEvent, NodeClickEvent } from 'src/app/features/node-entries/entries-model';
+import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
+import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-entries-wrapper.component';
 
 @Component({
     selector: 'es-permissions-authorities',
@@ -856,8 +836,8 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
       message: 'PERMISSIONS.DELETE_' + this._mode,
       messageParameters: {name: this._mode == 'USER' ? list[0].authorityName : list[0].profile.displayName},
       buttons: [
-        new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.closeDialog()),
-        new DialogButton('PERMISSIONS.MENU_DELETE', DialogButton.TYPE_PRIMARY, () => callback(list))
+        new DialogButton('CANCEL', { color: 'standard' }, () => this.closeDialog()),
+        new DialogButton('PERMISSIONS.MENU_DELETE', { color: 'primary' }, () => callback(list))
       ],
       isCancelable: true,
     };
@@ -1098,8 +1078,8 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
 
     private updateButtons() {
         this.editButtons = [
-            new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.cancelEdit()),
-            new DialogButton('SAVE', DialogButton.TYPE_PRIMARY, () => this.saveEdits())
+            new DialogButton('CANCEL', { color: 'standard' }, () => this.cancelEdit()),
+            new DialogButton('SAVE', { color: 'primary' }, () => this.saveEdits())
         ];
         /**
          *
@@ -1112,20 +1092,20 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
          </div>
          </div>
          */
-        const add = new DialogButton('ADD', DialogButton.TYPE_PRIMARY, () => this.addMembersToGroup());
+        const add = new DialogButton('ADD', { color: 'primary' }, () => this.addMembersToGroup());
         add.disabled = this.nodeMemberAdd?.getSelection()?.isEmpty();
         this.memberButtons = [
-            new DialogButton('CLOSE', DialogButton.TYPE_CANCEL, () => this.cancelEditMembers()),
+            new DialogButton('CLOSE', { color: 'standard' }, () => this.cancelEditMembers()),
         ];
         if (this.addMembers) {
             this.memberButtons.push(add);
         }
         this.editStatusButtons = [
-        new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => {this.editStatus = null; }),
-        new DialogButton('SAVE', DialogButton.TYPE_PRIMARY, () => this.savePersonStatus())
+        new DialogButton('CANCEL', { color: 'standard' }, () => {this.editStatus = null; }),
+        new DialogButton('SAVE', { color: 'primary' }, () => this.savePersonStatus())
         ];
         this.signupButtons = DialogButton.getSaveCancel(() => this.groupSignupDetails = null, () => this.saveGroupSignup());
-        this.signupListButtons = [new DialogButton('CLOSE', DialogButton.TYPE_CANCEL, () => this.groupSignup = null)];
+        this.signupListButtons = [new DialogButton('CLOSE', { color: 'standard' }, () => this.groupSignup = null)];
     }
   private setPersonStatus(data: UserSimple) {
     this.editStatus = data;

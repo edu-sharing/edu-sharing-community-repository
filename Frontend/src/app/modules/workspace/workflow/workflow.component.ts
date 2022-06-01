@@ -274,10 +274,10 @@ export class WorkspaceWorkflowComponent implements OnChanges {
     }
 
     private updateButtons() {
-        const save = new DialogButton('SAVE', DialogButton.TYPE_PRIMARY, () => this.saveWorkflow());
+        const save = new DialogButton('SAVE', { color: 'primary' }, () => this.saveWorkflow());
         save.disabled = this.loading || !this.hasChanges();
         this.buttons = [
-            new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.cancel()),
+            new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel()),
             save,
         ];
     }
@@ -321,11 +321,11 @@ export class WorkspaceWorkflowComponent implements OnChanges {
                 user: new AuthorityNamePipe(this.translate).transform(receiver, null),
             };
             this.dialogButtons = [
-                new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => {
+                new DialogButton('CANCEL', { color: 'standard' }, () => {
                     this.dialogTitle = null;
                     resolve(false);
                 }),
-                new DialogButton('WORKSPACE.WORKFLOW.PROCEED', DialogButton.TYPE_PRIMARY, () => {
+                new DialogButton('WORKSPACE.WORKFLOW.PROCEED', { color: 'primary' }, () => {
                     this.dialogTitle = null;
                     resolve(true);
                 }),

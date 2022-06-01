@@ -1,4 +1,4 @@
-import {forkJoin as observableForkJoin,  Observable, Subject } from 'rxjs';
+import {forkJoin as observableForkJoin, Subject } from 'rxjs';
 import {
     AfterViewInit,
     Component,
@@ -13,13 +13,11 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslationsService } from '../../translations/translations.service';
 import * as EduData from '../../core-module/core.module';
 import {
-    Collection,
     ConfigurationService,
     DialogButton,
     FrameEventsService,
     ListItem,
     LoginResult,
-    MdsMetadataset,
     Node,
     NodeRef,
     NodeWrapper,
@@ -40,14 +38,12 @@ import {
     MdsMetadatasets,
     ConfigurationHelper,
     RestNetworkService,
-    SortDefault,
     RequestObject,
     RestMediacenterService, Mediacenter,
     AbstractList, ProposalNode, ListItemSort,
 } from '../../core-module/core.module';
 import { Toast } from '../../core-ui-module/toast';
-import {CustomOptions, DefaultGroups, OptionItem, Scope} from '../../core-ui-module/option-item';
-import { NodeRenderComponent } from '../../common/ui/node-render/node-render.component';
+import {OptionItem, Scope} from '../../core-ui-module/option-item';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { UIConstants } from '../../core-module/ui/ui-constants';
 import { ListTableComponent } from '../../core-ui-module/components/list-table/list-table.component';
@@ -55,37 +51,26 @@ import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 import { TranslateService } from '@ngx-translate/core';
 import { Location } from '@angular/common';
 import { Helper } from '../../core-module/rest/helper';
-import { MainNavComponent } from '../../main/navigation/main-nav/main-nav.component';
 import {ColorHelper, PreferredColor} from '../../core-module/ui/color-helper';
 import { ActionbarHelperService } from '../../common/services/actionbar-helper';
 import { MdsHelper } from '../../core-module/rest/mds-helper';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
-import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { HttpClient } from '@angular/common/http';
 import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../core-ui-module/options-helper.service';
-import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
-import {DropAction, DropData} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
+import {ActionbarComponent} from '../../shared/components/actionbar/actionbar.component';
 import {
     ManagementEvent,
     ManagementEventType
 } from '../management-dialogs/management-dialogs.component';
-import {CustomNodeListWrapperComponent} from '../../core-ui-module/components/custom-node-list-wrapper/custom-node-list-wrapper.component';
 import {
     SortEvent,
-} from '../../core-ui-module/components/sort-dropdown/sort-dropdown.component';
-import {DataSource} from '@angular/cdk/collections';
-import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
-import {
-    NodeEntriesWrapperComponent
-} from '../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
-import {Sort} from '@angular/material/sort';
+} from '../../shared/components/sort-dropdown/sort-dropdown.component';
+
 import {first} from 'rxjs/operators';
-import {
-    DropSource, DropTarget,
-    ListEventInterface, ListSortConfig, NodeEntriesDisplayType
-} from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
+import { NodeEntriesDisplayType, ListEventInterface, ListSortConfig, DropSource, DropTarget } from 'src/app/features/node-entries/entries-model';
+import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 
 // component class
 @Component({
@@ -158,7 +143,6 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
     infoMessage: string;
     infoButtons: DialogButton[];
     infoClose: Function;
-    nodeReport: Node;
     collectionsColumns: ListItem[] = [];
     referencesColumns: ListItem[] = [];
     createSubCollectionOptionItem = new OptionItem(
@@ -933,7 +917,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
                 this.dialogButtons.push(
                     new DialogButton(
                         'OPTIONS.REMOVE_REF',
-                        DialogButton.TYPE_CANCEL,
+                        { color: 'standard' },
                         () =>
                             this.deleteFromCollection(() => this.closeDialog()),
                     ),
@@ -942,7 +926,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
             this.dialogButtons.push(
                 new DialogButton(
                     'COLLECTIONS.OPEN_MISSING',
-                    DialogButton.TYPE_PRIMARY,
+                    { color: 'primary' },
                     () => this.onContentClick(content, true),
                 ),
             );

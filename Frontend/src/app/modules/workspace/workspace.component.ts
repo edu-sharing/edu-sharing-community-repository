@@ -45,7 +45,7 @@ import {Helper} from '../../core-module/rest/helper';
 import {CordovaService} from '../../common/services/cordova.service';
 import {HttpClient} from '@angular/common/http';
 import {MainNavComponent} from '../../main/navigation/main-nav/main-nav.component';
-import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
+import {ActionbarComponent} from '../../shared/components/actionbar/actionbar.component';
 import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {WorkspaceExplorerComponent} from './explorer/explorer.component';
 import {CardService} from '../../core-ui-module/card.service';
@@ -55,13 +55,10 @@ import {delay} from 'rxjs/operators';
 import {ListTableComponent} from '../../core-ui-module/components/list-table/list-table.component';
 import {SkipTarget} from '../../main/navigation/skip-nav/skip-nav.service';
 import {DragNodeTarget} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
-import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
-import {
-    DropSource, DropTarget, NodeEntriesDisplayType,
-    NodeRoot
-} from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
+import { DropSource, DropTarget, NodeEntriesDisplayType, NodeRoot } from 'src/app/features/node-entries/entries-model';
+import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 
 @Component({
     selector: 'es-workspace-main',
@@ -339,8 +336,8 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         this.dialogMessage="WORKSPACE.DRAG_DROP_MESSAGE";
         this.dialogMessageParameters={source:event.source.name,target:event.target.name};
         this.dialogButtons=[
-          new DialogButton("WORKSPACE.DRAG_DROP_COPY",DialogButton.TYPE_PRIMARY,()=>this.copyNode(event.target,event.source)),
-          new DialogButton("WORKSPACE.DRAG_DROP_MOVE",DialogButton.TYPE_PRIMARY,()=>this.moveNode(event.target,event.source)),
+          new DialogButton("WORKSPACE.DRAG_DROP_COPY",{ color: 'primary' },()=>this.copyNode(event.target,event.source)),
+          new DialogButton("WORKSPACE.DRAG_DROP_MOVE",{ color: 'primary' },()=>this.moveNode(event.target,event.source)),
         ]
         */
     }
@@ -913,11 +910,11 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
                 message,
                 isCancelable: true,
                 buttons: [
-                    new DialogButton('WORKSPACE.GO_TO_HOME', DialogButton.TYPE_PRIMARY + DialogButton.TYPE_SECONDARY, () => {
+                    new DialogButton('WORKSPACE.GO_TO_HOME', { color: 'primary', position: 'opposite' }, () => {
                         this.openDirectory(RestConstants.USERHOME);
                         this.toast.closeModalDialog();
                     }),
-                    new DialogButton('CLOSE', DialogButton.TYPE_CANCEL, () => this.toast.closeModalDialog()),
+                    new DialogButton('CLOSE', { color: 'standard' }, () => this.toast.closeModalDialog()),
                 ]
             });
     }

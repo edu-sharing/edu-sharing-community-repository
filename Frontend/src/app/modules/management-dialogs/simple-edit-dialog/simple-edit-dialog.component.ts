@@ -75,8 +75,8 @@ export class SimpleEditDialogComponent  {
   }
     updateButtons(): any {
         this.buttons=[
-            new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
-            new DialogButton('SAVE',DialogButton.TYPE_PRIMARY,()=>this.save())
+            new DialogButton('CANCEL',{ color: 'standard' },()=>this.cancel()),
+            new DialogButton('SAVE',{ color: 'primary' },()=>this.save())
         ]
     }
 
@@ -141,12 +141,12 @@ export class SimpleEditDialogComponent  {
       isCancelable: true,
       dialogType: CardType.Question,
       buttons: [
-          new DialogButton('DISCARD',DialogButton.TYPE_CANCEL, () => {
+          new DialogButton('DISCARD',{ color: 'standard' }, () => {
             this.toast.closeModalDialog();
             this.onClose.emit(this._nodes);
             callback();
           }),
-          new DialogButton('SAVE',DialogButton.TYPE_PRIMARY, () => {
+          new DialogButton('SAVE',{ color: 'primary' }, () => {
             this.toast.closeModalDialog();
             this.save(callback);
           }),

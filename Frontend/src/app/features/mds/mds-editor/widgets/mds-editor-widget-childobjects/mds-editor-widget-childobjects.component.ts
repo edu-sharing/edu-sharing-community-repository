@@ -48,6 +48,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
     _edit: ChildobjectEdit;
     childrenDelete: Node[] = [];
     isSupported: boolean;
+    nodes: Node[];
     constructor(
         private mdsEditorValues: MdsEditorInstanceService,
         private nodeApi: RestNodeService,
@@ -72,6 +73,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
                         properties: n.properties,
                     }
                 });
+                this.nodes = nodes;
                 this.isSupported = nodes[0].type === RestConstants.CCM_TYPE_IO;
             } else {
                 this.isSupported = false;

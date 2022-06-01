@@ -18,7 +18,7 @@ import {UIService} from '../../../core-module/rest/services/ui.service';
 import {MdsHelper} from '../../../core-module/rest/mds-helper';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {trigger} from '@angular/animations';
-import {ListCountsComponent} from "../../../core-ui-module/components/list-table/widgets/list-counts/list-counts.component";
+import { ListCountsComponent } from 'src/app/features/list-items/list-counts/list-counts.component';
 
 // Charts.js
 declare var Chart: any;

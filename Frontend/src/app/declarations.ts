@@ -1,6 +1,5 @@
   import {FileChooserComponent} from './common/ui/file-chooser/file-chooser.component';
   import {RouterComponent} from './router/router.component';
-  import {ActionbarComponent} from './common/ui/actionbar/actionbar.component';
   import {NodeRenderComponent} from './common/ui/node-render/node-render.component';
   import {ApplyToLmsComponent} from './common/ui/apply-to-lms/apply-to-lms.component';
   import {MdsTestComponent} from './common/test/mds-test/mds-test.component';
@@ -10,7 +9,6 @@
   import {SmallCollectionComponent} from './common/ui/small-collection/small-collection.component';
   import {InfobarComponent} from './common/ui/infobar/infobar.component';
   import {AutocompleteComponent} from './common/ui/autocomplete/autocomplete.component';
-  import {NodeInfoComponent} from './common/ui/node-info/node-info.component';
   import {CookieInfoComponent} from './common/ui/cookie-info/cookie-info.component';
   import {PoweredByComponent} from './common/ui/powered-by/powered-by.component';
   import {FooterComponent} from './common/ui/footer/footer.component';
@@ -45,8 +43,6 @@
       VersionLabelPipe,
       TimePipe,
       FileChooserComponent,
-      ActionbarComponent,
-      NodeInfoComponent,
       SmallCollectionComponent,
       ScrollToTopButtonComponent,
       GlobalContainerComponent,

@@ -1,0 +1,23 @@
+@import '../../../../../core-ui-module/styles/variables';
+
+.report {
+    margin-bottom: 20px;
+    mat-radio-group {
+        display: flex;
+        flex-direction: column;
+        > mat-radio-button {
+            margin: 3px 0;
+        }
+    }
+}
+
+mat-form-field {
+    width: 100%;
+}
+
+h2 {
+    margin: 0 0 20px 0;
+    font-size: 110%;
+    font-weight: bold;
+    color: $textLight;
+}

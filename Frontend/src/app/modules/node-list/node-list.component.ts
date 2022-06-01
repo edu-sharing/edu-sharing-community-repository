@@ -5,7 +5,7 @@ import {Toast} from "../../core-ui-module/toast";
 import {ArchiveRestore, RestoreResult, ArchiveSearch, Node, ListItem, Pagination} from '../../core-module/core.module';
 import {RestConnectorService} from "../../core-module/core.module";
 import {CustomOptions, OptionItem} from "../../core-ui-module/option-item";
-import {ActionbarComponent} from "../../common/ui/actionbar/actionbar.component";
+import {ActionbarComponent} from "../../shared/components/actionbar/actionbar.component";
 
 @Component({
   selector: 'es-node-list',

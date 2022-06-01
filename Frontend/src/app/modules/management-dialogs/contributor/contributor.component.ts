@@ -225,12 +225,12 @@ export class WorkspaceContributorComponent  {
         switchMap((v) => this.searchService.searchContributors(v.trim(), 'ORGANIZATION')),
     );
     this.buttons=[
-        new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
-        new DialogButton('APPLY',DialogButton.TYPE_PRIMARY,()=>this.saveContributor())
+        new DialogButton('CANCEL',{ color: 'standard' },()=>this.cancel()),
+        new DialogButton('APPLY',{ color: 'primary' },()=>this.saveContributor())
     ];
     this.editButtons=[
-        new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
-        new DialogButton('APPLY',DialogButton.TYPE_PRIMARY,()=>this.saveEdits())
+        new DialogButton('CANCEL',{ color: 'standard' },()=>this.cancel()),
+        new DialogButton('APPLY',{ color: 'primary' },()=>this.saveEdits())
     ];
   }
 

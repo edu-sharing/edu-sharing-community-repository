@@ -55,7 +55,7 @@ export class ViewCollectionFeedbackComponent  {
     this.feedbackViewButtons = DialogButton.getSingleButton(
         'CLOSE',
         () => this.onClose.emit(),
-        DialogButton.TYPE_CANCEL,
+        'standard',
     );
   }
 }

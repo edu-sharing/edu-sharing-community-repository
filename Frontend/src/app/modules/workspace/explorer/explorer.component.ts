@@ -17,29 +17,18 @@ import {
     RestNodeService,
     RestSearchService,
     SessionStorageService,
-    Store,
     TemporaryStorageService, UIService
 } from '../../../core-module/core.module';
 import {TranslateService} from '@ngx-translate/core';
 import {CustomOptions, Scope} from '../../../core-ui-module/option-item';
 import {Toast} from '../../../core-ui-module/toast';
 import {Helper} from '../../../core-module/rest/helper';
-import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
-import {MainNavComponent} from '../../../main/navigation/main-nav/main-nav.component';
+import {ActionbarComponent} from '../../../shared/components/actionbar/actionbar.component';
 import {ListTableComponent} from '../../../core-ui-module/components/list-table/list-table.component';
-import {DragNodeTarget, DropData} from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
-import {
-    NodeEntriesWrapperComponent
-} from '../../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
-import {NodeDataSource} from '../../../core-ui-module/components/node-entries-wrapper/node-data-source';
-import {
-    DropSource, DropTarget, InteractionType, ListSortConfig,
-    NodeClickEvent, NodeEntriesDisplayType,
-    NodeRoot
-} from '../../../core-ui-module/components/node-entries-wrapper/entries-model';
-import {
-    NodeEntriesDataType
-} from '../../../core-ui-module/components/node-entries/node-entries.component';
+import { DropSource, DropTarget, InteractionType, ListSortConfig, NodeClickEvent, NodeEntriesDisplayType, NodeRoot } from 'src/app/features/node-entries/entries-model';
+import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-entries-wrapper.component';
+import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
+import { NodeEntriesDataType } from 'src/app/features/node-entries/node-entries.component';
 
 @Component({
     selector: 'es-workspace-explorer',

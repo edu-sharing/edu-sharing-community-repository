@@ -262,10 +262,10 @@ export class WorkspaceFileUploadSelectComponent implements OnInit {
     }
 
     updateButtons() {
-        const ok = new DialogButton('OK', DialogButton.TYPE_PRIMARY, () => this.setLink());
+        const ok = new DialogButton('OK', { color: 'primary' }, () => this.setLink());
         ok.disabled = this.disabled || (this.showPicker && !this._parent);
         this.buttons = [
-            new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.cancel()),
+            new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel()),
             ok,
         ];
     }

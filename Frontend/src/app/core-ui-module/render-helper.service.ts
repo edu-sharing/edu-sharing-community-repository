@@ -6,13 +6,13 @@ import { RestConstants } from '../core-module/rest/rest-constants';
 import { RestUsageService } from '../core-module/rest/services/rest-usage.service';
 import { ListItem } from '../core-module/ui/list-item';
 import { CommentsListComponent } from '../modules/management-dialogs/node-comments/comments-list/comments-list.component';
-import { NodeEntriesDisplayType } from './components/node-entries-wrapper/entries-model';
-import { NodeDataSource } from './components/node-entries-wrapper/node-data-source';
-import { NodeEntriesWrapperComponent } from './components/node-entries-wrapper/node-entries-wrapper.component';
 import { SpinnerComponent } from '../shared/components/spinner/spinner.component';
 import { UIHelper } from './ui-helper';
 import { replaceElementWithDiv } from '../features/mds/mds-editor/util/replace-element-with-div';
 import { MdsEditorWrapperComponent } from '../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import { NodeEntriesDisplayType } from '../features/node-entries/entries-model';
+import { NodeDataSource } from '../features/node-entries/node-data-source';
+import { NodeEntriesWrapperComponent } from '../features/node-entries/node-entries-wrapper.component';
 
 @Injectable()
 export class RenderHelperService {

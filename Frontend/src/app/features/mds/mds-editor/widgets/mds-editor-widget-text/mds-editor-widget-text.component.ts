@@ -132,15 +132,15 @@ class FileNameChecker {
             'EXTENSION_NOT_MATCH',
             message,
             [
-                new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => {
+                new DialogButton('CANCEL', { color: 'standard' }, () => {
                     callbacks.onCancel();
                     this.toast.closeModalDialog();
                 }),
-                new DialogButton('EXTENSION_KEEP', DialogButton.TYPE_CANCEL, () => {
+                new DialogButton('EXTENSION_KEEP', { color: 'standard' }, () => {
                     callbacks.onRevert();
                     this.toast.closeModalDialog();
                 }),
-                new DialogButton('EXTENSION_CHANGE', DialogButton.TYPE_PRIMARY, () => {
+                new DialogButton('EXTENSION_CHANGE', { color: 'primary' }, () => {
                     callbacks.onAccept();
                     this.toast.closeModalDialog();
                 }),
