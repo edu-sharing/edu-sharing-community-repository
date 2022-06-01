@@ -65,6 +65,7 @@ import { NodeImageSizePipe } from './pipes/node-image-size.pipe';
 import { NodePersonNamePipe } from './pipes/node-person-name.pipe';
 import { SortDropdownComponent } from './components/sort-dropdown/sort-dropdown.component';
 import { ActionbarComponent } from './components/actionbar/actionbar.component';
+import { MatSortModule } from '@angular/material/sort';
 
 @NgModule({
     declarations: [
@@ -197,6 +198,7 @@ import { ActionbarComponent } from './components/actionbar/actionbar.component';
         NodePersonNamePipe,
         SortDropdownComponent,
         ActionbarComponent,
+        MatSortModule,
     ],
 })
 export class SharedModule {}
