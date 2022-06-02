@@ -6,7 +6,9 @@
   <span>{{ 'NODE.sys:node-uuid' | translate }}</span>
   <span class="node-id">
     <a class="clickable" (click)="openNodeWorkspace(_node)">{{ _node.ref.id }}</a>
-    <button mat-icon-button (click)="copyNodeIdToClipboard()"><i esIcon="content_copy" color="primary"></i></button>
+    <button mat-icon-button color="primary" (click)="copyNodeIdToClipboard()">
+      <i esIcon="content_copy" color="primary"></i>
+    </button>
   </span>
 </div>
 <div>
