@@ -8,11 +8,7 @@
   [disableCloseButton]="isLoading"
 ></es-card-header>
 
-<div
-  class="card-content"
-  [style.padding.px]="config.contentPadding"
-  [attr.aria-hidden]="isLoading"
->
+<div class="card-content" [style.padding.px]="config.contentPadding" [attr.aria-hidden]="isLoading">
   <ng-template cdkPortalOutlet></ng-template>
   <div *ngIf="isLoading" class="loading-overlay">
     <es-spinner></es-spinner>

@@ -27,7 +27,7 @@ import { ViewInstanceService } from '../../mds-editor-view/view-instance.service
 import { BulkBehavior, BulkMode, EditorBulkMode, InputStatus } from '../../../types/types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 import { FormFieldRegistrationService } from './form-field-registration.service';
-import {UIService} from '../../../../../core-module/rest/services/ui.service';
+import { UIService } from '../../../../../core-module/rest/services/ui.service';
 
 @Component({
     selector: 'es-mds-editor-widget-container',
@@ -236,7 +236,7 @@ export class MdsEditorWidgetContainerComponent
                 block: 'start',
             });*/
             console.log(this.injectedView, this.widget.definition.id);
-            setTimeout(() => this.injectedView?.focus(), );
+            setTimeout(() => this.injectedView?.focus());
         });
     }
 

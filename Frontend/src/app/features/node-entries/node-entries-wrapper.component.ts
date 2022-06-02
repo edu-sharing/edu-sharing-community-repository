@@ -261,7 +261,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         });
         this.optionsHelper.refreshComponents();
     }
-    
+
     setOptionsListener(listener: OptionsListener): void {
         this.optionsHelper.setListener(listener);
     }

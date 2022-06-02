@@ -6,7 +6,7 @@ export interface DisplayValue {
     hint?: string;
 }
 
-export class DisplayValues  {
+export class DisplayValues {
     values: DisplayValue[];
 
     static fromMdsValues(values: MdsWidgetValue[]): DisplayValues {
@@ -20,7 +20,7 @@ export class DisplayValues  {
     }
 
     get(key: string): DisplayValue {
-        return this.values.find((value) => (value.key === key));
+        return this.values.find((value) => value.key === key);
     }
 
     toDisplayValue(value: MdsWidgetValue): DisplayValue {

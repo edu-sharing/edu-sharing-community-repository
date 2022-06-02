@@ -6,7 +6,14 @@ import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { first, map, startWith } from 'rxjs/operators';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
-import { ConfigurationService, DialogButton, LoginResult, RestConnectorService, RestConstants, RestHelper } from '../../core-module/core.module';
+import {
+    ConfigurationService,
+    DialogButton,
+    LoginResult,
+    RestConnectorService,
+    RestConstants,
+    RestHelper,
+} from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
 import { OPEN_URL_MODE, UIConstants } from '../../core-module/ui/ui-constants';
@@ -19,14 +26,11 @@ import { LoginInfo, AuthenticationService } from 'ngx-edu-sharing-api';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 
-
 @Component({
     selector: 'es-workspace-login',
     templateUrl: 'login.component.html',
     styleUrls: ['login.component.scss'],
-    animations: [
-        trigger('dialog', UIAnimation.switchDialog(UIAnimation.ANIMATION_TIME_FAST)),
-    ]
+    animations: [trigger('dialog', UIAnimation.switchDialog(UIAnimation.ANIMATION_TIME_FAST))],
 })
 export class LoginComponent implements OnInit {
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
@@ -39,7 +43,7 @@ export class LoginComponent implements OnInit {
     config: any = {};
     currentProvider: any;
     disabled = false;
-    isSafeLogin=false;
+    isSafeLogin = false;
     filteredProviders: any;
     isLoading = true;
     loginUrl: any;
@@ -88,8 +92,7 @@ export class LoginComponent implements OnInit {
                         setTimeout(() => {
                             if (this.username && this.passwordInput) {
                                 this.passwordInput.nativeInput.nativeElement.focus();
-                            }
-                            else if (this.usernameInput) {
+                            } else if (this.usernameInput) {
                                 this.usernameInput.nativeElement.focus();
                             }
                         }, 100);
@@ -103,12 +106,15 @@ export class LoginComponent implements OnInit {
                             // just to make sure there is no scope still set // NO: We need a valid session when login to scope!!!
                             try {
                                 await this.connector.logout().toPromise();
-                            } catch(e) {
+                            } catch (e) {
                                 console.warn(e);
                             }
                             data.statusCode = null;
                         } else if (data.currentScope === this.scope) {
-                            if (data.statusCode === RestConstants.STATUS_CODE_OK && params.local !== 'true') {
+                            if (
+                                data.statusCode === RestConstants.STATUS_CODE_OK &&
+                                params.local !== 'true'
+                            ) {
                                 this.goToNext(data);
                             }
                         }
@@ -119,60 +125,68 @@ export class LoginComponent implements OnInit {
                         if (configService.instant('loginProvidersUrl')) {
                             this.showProviders = true;
                             this.updateButtons();
-                            this.http.get(configService.instant('loginProvidersUrl')).subscribe((providers) => {
-                                this.processProviders(providers);
-                            });
+                            this.http
+                                .get(configService.instant('loginProvidersUrl'))
+                                .subscribe((providers) => {
+                                    this.processProviders(providers);
+                                });
                         }
                         this.loginUrl = configService.instant('loginUrl');
                         const allowLocal = configService.instant('loginAllowLocal', false);
-                        if (params.local !== 'true' && !allowLocal && this.loginUrl && data.statusCode !== RestConstants.STATUS_CODE_OK) {
+                        if (
+                            params.local !== 'true' &&
+                            !allowLocal &&
+                            this.loginUrl &&
+                            data.statusCode !== RestConstants.STATUS_CODE_OK
+                        ) {
                             this.openLoginUrl();
                             return;
                         }
                         this.isLoading = false;
                         loadingTask.done();
                     });
-                    this.isSafeLogin=this.scope==RestConstants.SAFE_SCOPE;
+                    this.isSafeLogin = this.scope == RestConstants.SAFE_SCOPE;
                     this.next = params.next;
                     if (this.scope === RestConstants.SAFE_SCOPE) {
-                        this.connector.isLoggedIn(true).subscribe((data: LoginResult) => {
-                            if (data.statusCode !== RestConstants.STATUS_CODE_OK) {
-                                RestHelper.goToLogin(this.router, this.configService);
-                            }
-                            else {
-                                this.authentication
-                                    .observeHasAccessToScope(RestConstants.SAFE_SCOPE)
-                                    .pipe(first())
-                                    .subscribe((hasAccess) => {
-                                        if (hasAccess) {
-                                            this.username = data.authorityName;
-                                        }
-                                        else {
-                                            this.toast.error(null, 'LOGIN.NO_ACCESS');
-                                            this.router.navigate([UIConstants.ROUTER_PREFIX + 'workspace']);
-                                            // window.history.back();
-                                        }
-                                    });
-                            }
-                        }, (error: any) => RestHelper.goToLogin(this.router, this.configService));
+                        this.connector.isLoggedIn(true).subscribe(
+                            (data: LoginResult) => {
+                                if (data.statusCode !== RestConstants.STATUS_CODE_OK) {
+                                    RestHelper.goToLogin(this.router, this.configService);
+                                } else {
+                                    this.authentication
+                                        .observeHasAccessToScope(RestConstants.SAFE_SCOPE)
+                                        .pipe(first())
+                                        .subscribe((hasAccess) => {
+                                            if (hasAccess) {
+                                                this.username = data.authorityName;
+                                            } else {
+                                                this.toast.error(null, 'LOGIN.NO_ACCESS');
+                                                this.router.navigate([
+                                                    UIConstants.ROUTER_PREFIX + 'workspace',
+                                                ]);
+                                                // window.history.back();
+                                            }
+                                        });
+                                }
+                            },
+                            (error: any) => RestHelper.goToLogin(this.router, this.configService),
+                        );
                     }
-
 
                     if (this.scope === RestConstants.SAFE_SCOPE) {
                         this.caption = 'LOGIN.TITLE_SAFE';
-                    }
-                    else {
+                    } else {
                         this.caption = 'LOGIN.TITLE';
                     }
                 });
-
             });
-
         });
     }
 
     canRegister(): boolean {
-        return this.config.register && (this.config.register.local || this.config.register.registerUrl);
+        return (
+            this.config.register && (this.config.register.local || this.config.register.registerUrl)
+        );
     }
 
     checkConditions() {
@@ -193,10 +207,11 @@ export class LoginComponent implements OnInit {
             this.toast.error(null, 'No configuration for loginProviderTargetUrl found.');
             return;
         }
-        const target = this.connector.getAbsoluteServerUrl() + this.configService.instant('loginUrl');
-        url = url.
-            replace(':target', encodeURIComponent(target)).
-            replace(':entity', encodeURIComponent(this.currentProvider.url));
+        const target =
+            this.connector.getAbsoluteServerUrl() + this.configService.instant('loginUrl');
+        url = url
+            .replace(':target', encodeURIComponent(target))
+            .replace(':entity', encodeURIComponent(this.currentProvider.url));
         // @TODO: Redirect to shibboleth provider
         UIHelper.openUrl(url, this.bridge, OPEN_URL_MODE.Current);
     }
@@ -208,16 +223,19 @@ export class LoginComponent implements OnInit {
                 if (data.statusCode === RestConstants.STATUS_CODE_OK) {
                     this.goToNext(data);
                 } else {
-                    if (data.statusCode === RestConstants.STATUS_CODE_PREVIOUS_SESSION_REQUIRED
-                        || data.statusCode === RestConstants.STATUS_CODE_PREVIOUS_USER_WRONG
+                    if (
+                        data.statusCode === RestConstants.STATUS_CODE_PREVIOUS_SESSION_REQUIRED ||
+                        data.statusCode === RestConstants.STATUS_CODE_PREVIOUS_USER_WRONG
                     ) {
                         this.toast.error(null, 'LOGIN.SAFE_PREVIOUS');
                     } else if (data.statusCode === RestConstants.STATUS_CODE_PASSWORD_EXPIRED) {
-                        this.toast.error(null, 'LOGIN.PASSWORD_EXPIRED' + (this.isSafeLogin ? '_SAFE' : ''));
+                        this.toast.error(
+                            null,
+                            'LOGIN.PASSWORD_EXPIRED' + (this.isSafeLogin ? '_SAFE' : ''),
+                        );
                     } else if (data.statusCode === RestConstants.STATUS_CODE_PERSON_BLOCKED) {
                         this.toast.error(null, 'LOGIN.PERSON_BLOCKED');
-                    }
-                    else {
+                    } else {
                         this.toast.error(null, 'LOGIN.ERROR' + (this.isSafeLogin ? '_SAFE' : ''));
                     }
                     this.password = '';
@@ -227,7 +245,8 @@ export class LoginComponent implements OnInit {
             (error: any) => {
                 this.toast.error(error);
                 this.isLoading = false;
-            });
+            },
+        );
     }
 
     ngOnInit() {
@@ -245,8 +264,7 @@ export class LoginComponent implements OnInit {
     register() {
         if (this.config.register.local) {
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'register']);
-        }
-        else {
+        } else {
             window.location.href = this.config.register.registerUrl;
         }
     }
@@ -262,8 +280,10 @@ export class LoginComponent implements OnInit {
         }
         this.currentProvider = null;
         for (const p of Helper.deepCopy(this.providers)) {
-            p.providers = p.providers.filter((p: any) =>
-                p.name.toLowerCase().includes(filter.toLowerCase()) || p.data?.toLowerCase().includes(filter.toLowerCase())
+            p.providers = p.providers.filter(
+                (p: any) =>
+                    p.name.toLowerCase().includes(filter.toLowerCase()) ||
+                    p.data?.toLowerCase().includes(filter.toLowerCase()),
             );
             if (p.providers.length) {
                 filtered.push(p);
@@ -277,11 +297,9 @@ export class LoginComponent implements OnInit {
             this.next = Helper.addGetParameter('fromLogin', 'true', this.next);
             RouterHelper.navigateToAbsoluteUrl(this.platformLocation, this.router, this.next);
             // window.location.assign(this.next);
-        }
-        else if (data.currentScope === RestConstants.SAFE_SCOPE) {
+        } else if (data.currentScope === RestConstants.SAFE_SCOPE) {
             this.router.navigate([UIConstants.ROUTER_PREFIX, 'workspace', 'safe']);
-        }
-        else {
+        } else {
             UIHelper.goToDefaultLocation(this.router, this.platformLocation, this.configService);
         }
     }
@@ -296,7 +314,7 @@ export class LoginComponent implements OnInit {
                 if (!data[type]) {
                     data[type] = {
                         group: providers.wayf_categories[type],
-                        providers: []
+                        providers: [],
                     };
                 }
                 data[type].providers.push(object);
@@ -308,11 +326,10 @@ export class LoginComponent implements OnInit {
         }
 
         // register observer for autocomplete
-        this.filteredProviders = this.providerControl.valueChanges
-            .pipe(
-                startWith(''),
-                map((value: string) => this.filterProviders(value))
-            );
+        this.filteredProviders = this.providerControl.valueChanges.pipe(
+            startWith(''),
+            map((value: string) => this.filterProviders(value)),
+        );
     }
 
     private updateButtons(): any {
@@ -321,12 +338,14 @@ export class LoginComponent implements OnInit {
             return;
         }
         if (this.canRegister()) {
-            this.buttons.push(new DialogButton('LOGIN.REGISTER_TEXT', { color: 'standard' }, () => this.register()));
+            this.buttons.push(
+                new DialogButton('LOGIN.REGISTER_TEXT', { color: 'standard' }, () =>
+                    this.register(),
+                ),
+            );
         }
         const login = new DialogButton('LOGIN.LOGIN', { color: 'primary' }, () => this.login());
         login.disabled = this.disabled;
         this.buttons.push(login);
     }
-
-
 }

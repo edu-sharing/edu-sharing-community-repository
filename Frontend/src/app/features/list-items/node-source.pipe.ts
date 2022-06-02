@@ -5,9 +5,7 @@ import { RestNetworkService } from '../../core-module/rest/services/rest-network
 
 @Pipe({ name: 'appNodeSource' })
 export class NodeSourcePipe implements PipeTransform {
-    constructor(
-        private nodeHelper: NodeHelperService,
-    ) {}
+    constructor(private nodeHelper: NodeHelperService) {}
 
     transform(
         replicationSource: string,

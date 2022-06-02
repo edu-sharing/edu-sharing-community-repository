@@ -1,15 +1,15 @@
-import {Directive, HostListener, Inject, Input, NgZone, OnDestroy, OnInit} from '@angular/core';
-import {CdkDrag, CdkDropList} from '@angular/cdk/drag-drop';
-import {Subject} from 'rxjs';
-import {takeUntil} from 'rxjs/operators';
-import {WindowRefService} from '../../modules/search/window-ref.service';
-import {DropAction} from './drag-nodes/drag-nodes';
-import {Node} from '../../core-module/rest/data-object';
+import { Directive, HostListener, Inject, Input, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { WindowRefService } from '../../modules/search/window-ref.service';
+import { DropAction } from './drag-nodes/drag-nodes';
+import { Node } from '../../core-module/rest/data-object';
 
 export type DragDropState<T extends Node> = {
-    element: T,
-    dropAllowed: boolean,
-    mode?: DropAction,
+    element: T;
+    dropAllowed: boolean;
+    mode?: DropAction;
 };
 @Directive({
     selector: '[esDragCursor]',
@@ -19,30 +19,27 @@ export type DragDropState<T extends Node> = {
  * Must be used in cominbation with cdkDrag
  */
 export class DragCursorDirective implements OnInit, OnDestroy {
-    static dragState: DragDropState<Node|any> = {
+    static dragState: DragDropState<Node | any> = {
         element: null,
-        dropAllowed: false
+        dropAllowed: false,
     };
     private unsubscribe$: Subject<void> = new Subject();
     private dragging = false;
     private interval: number;
-    constructor(
-        private cdkDrag: CdkDrag,
-        private ngZone: NgZone,
-    ) {}
+    constructor(private cdkDrag: CdkDrag, private ngZone: NgZone) {}
 
     keyDownListener = (e: KeyboardEvent) => {
         if (e.key === 'Control' || e.keyCode == 91 || e.keyCode == 93) {
             DragCursorDirective.dragState.mode = 'copy';
             this.updateCursor();
         }
-    }
+    };
     keyUpListener = (e: KeyboardEvent) => {
         if (e.key === 'Control' || e.keyCode == 91 || e.keyCode == 93) {
             DragCursorDirective.dragState.mode = 'move';
             this.updateCursor();
         }
-    }
+    };
 
     public ngOnInit(): void {
         this.cdkDrag.started.pipe(takeUntil(this.unsubscribe$)).subscribe(() => {
@@ -73,9 +70,11 @@ export class DragCursorDirective implements OnInit, OnDestroy {
 
     private updateCursor() {
         if (this.dragging) {
-            document.body.style.cursor = DragCursorDirective.dragState?.dropAllowed ?
-                DragCursorDirective.dragState?.element ?
-                    DragCursorDirective.dragState?.mode === 'copy' ? 'copy' : 'default'
+            document.body.style.cursor = DragCursorDirective.dragState?.dropAllowed
+                ? DragCursorDirective.dragState?.element
+                    ? DragCursorDirective.dragState?.mode === 'copy'
+                        ? 'copy'
+                        : 'default'
                     : null
                 : 'no-drop';
         } else {

@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { CardAvatar } from './card-avatar';
 
-
 @Component({
     selector: 'es-card-header',
     templateUrl: './card-header.component.html',

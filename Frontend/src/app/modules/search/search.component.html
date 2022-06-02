@@ -1,47 +1,83 @@
 <div id="eduSearchWrapper" (window:resize)="onResize()">
-  <es-tutorial [element]="tutorialElement" [heading]="'SEARCH.TUTORIAL_HEADING'" [description]="'SEARCH.TUTORIAL_DESCRIPTION'" [showSkip]="false"
+  <es-tutorial
+    [element]="tutorialElement"
+    [heading]="'SEARCH.TUTORIAL_HEADING'"
+    [description]="'SEARCH.TUTORIAL_DESCRIPTION'"
+    [showSkip]="false"
   ></es-tutorial>
 
-  <div class="rowRepositories scrollWithBanner"
-       [class.no-mainnav]="!mainnav"
-       *ngIf="repositories && repositories.length>2 || false"
+  <div
+    class="rowRepositories scrollWithBanner"
+    [class.no-mainnav]="!mainnav"
+    *ngIf="(repositories && repositories.length > 2) || false"
   >
-      <div class="mobile-move-top row tab-group row-dark">
-          <div class="col s12" role="region">
-              <ul class="tabs tabsRepositories tabs-fixed-width">
-                  <li class="clickable tab col s3" *ngFor="let repo of repositories.length<=4 ? repositories : repositories.slice(0,3)"
-                      tabindex="0"
-                      (keyup.enter)="setRepository(repo.id)"
-                      (click)="setRepository(repo.id)">
-                      <a [class.active]="currentRepository==repo.id">
-                          <img [src]="getSourceIcon(repo)" alt=""><span class="repositoryTitle">{{ repo.title }}</span></a>
-                  </li>
-                  <li class="clickable tab col s3" *ngIf="repositories.length>4 && !extendedRepositorySelected" tabindex="0" (keyup.enter)="showMoreRepositories=true" (click)="showMoreRepositories=true">
-                      <a>
-            <span>
-              <img [src]="getSourceIconPath('more')" alt=""><span class="repositoryTitle">{{ 'SEARCH.REPOSITORY_MORE' | translate }}</span>
-            </span>
-                          <i aria-hidden="true" class="material-icons" >keyboard_arrow_down</i>
-                      </a>
-                  </li>
-                  <li class="clickable tab col s3" *ngIf="repositories.length>4 && extendedRepositorySelected"
-                      tabindex="0"
-                      (keyup.enter)="currentRepository==repositories[3].id ? showMoreRepositories=true : setRepository(repositories[3].id)"
-                      (click)="currentRepository==repositories[3].id ? showMoreRepositories=true : setRepository(repositories[3].id)">
-                      <a [class.active]="currentRepository==repositories[3].id">
-                          <img [src]="getSourceIcon(repositories[3])" alt=""><span class="repositoryTitle">{{ repositories[3].title }}</span>
-                          <i aria-hidden="true" class="material-icons" (click)="$event.stopPropagation();showMoreRepositories=true">keyboard_arrow_down</i>
-                      </a>
-                  </li>
-                  <!--
+    <div class="mobile-move-top row tab-group row-dark">
+      <div class="col s12" role="region">
+        <ul class="tabs tabsRepositories tabs-fixed-width">
+          <li
+            class="clickable tab col s3"
+            *ngFor="let repo of repositories.length <= 4 ? repositories : repositories.slice(0, 3)"
+            tabindex="0"
+            (keyup.enter)="setRepository(repo.id)"
+            (click)="setRepository(repo.id)"
+          >
+            <a [class.active]="currentRepository == repo.id">
+              <img [src]="getSourceIcon(repo)" alt="" /><span class="repositoryTitle">{{
+                repo.title
+              }}</span></a
+            >
+          </li>
+          <li
+            class="clickable tab col s3"
+            *ngIf="repositories.length > 4 && !extendedRepositorySelected"
+            tabindex="0"
+            (keyup.enter)="showMoreRepositories = true"
+            (click)="showMoreRepositories = true"
+          >
+            <a>
+              <span>
+                <img [src]="getSourceIconPath('more')" alt="" /><span class="repositoryTitle">{{
+                  'SEARCH.REPOSITORY_MORE' | translate
+                }}</span>
+              </span>
+              <i aria-hidden="true" class="material-icons">keyboard_arrow_down</i>
+            </a>
+          </li>
+          <li
+            class="clickable tab col s3"
+            *ngIf="repositories.length > 4 && extendedRepositorySelected"
+            tabindex="0"
+            (keyup.enter)="
+              currentRepository == repositories[3].id
+                ? (showMoreRepositories = true)
+                : setRepository(repositories[3].id)
+            "
+            (click)="
+              currentRepository == repositories[3].id
+                ? (showMoreRepositories = true)
+                : setRepository(repositories[3].id)
+            "
+          >
+            <a [class.active]="currentRepository == repositories[3].id">
+              <img [src]="getSourceIcon(repositories[3])" alt="" /><span class="repositoryTitle">{{
+                repositories[3].title
+              }}</span>
+              <i
+                aria-hidden="true"
+                class="material-icons"
+                (click)="$event.stopPropagation(); showMoreRepositories = true"
+                >keyboard_arrow_down</i
+              >
+            </a>
+          </li>
+          <!--
                   <li class="clickable tab col s1" *ngIf="repositories.length>4" (click)="showMoreRepositories=true">
                     <a><i class="material-icons">more_vert</i></a>
                   </li>
                   -->
-
-              </ul>
-          </div>
+        </ul>
       </div>
+    </div>
   </div>
   <div
     role="navigation"
@@ -51,58 +87,75 @@
     [class.no-mainnav]="!mainnav"
     [hidden]="!initalized"
   >
-        <div class="mobile-move-top">
-            <div class="extendedSearch" #extendedSearch>
-                <button
-                  mat-button
-                  matTooltip="{{(searchService.sidenavOpened ? 'SEARCH.HIDE_EXPANDED_SEARCH' : 'SEARCH.SHOW_EXTENDED_SEARCH') | translate}}"
-                  attr.aria-label="{{(searchService.sidenavOpened ? 'SEARCH.HIDE_EXPANDED_SEARCH' : 'SEARCH.SHOW_EXTENDED_SEARCH') | translate}}"
-                  (click)="toggleSidenav()"
-                  class="pointed filtertoggler"
-                >
-                  <span id="extended-search-label">{{'SEARCH.EXPANDED_SEARCH' | translate}}</span>
-                  <span class="mobile" *ngIf="!getSelection() || !getSelection()?.length">{{'SEARCH.EXPANDED_SEARCH_SHORT' | translate}}</span>
-                  <i aria-hidden="true" class="material-icons">{{searchService.sidenavOpened ? 'keyboard_arrow_left' : 'keyboard_arrow_right'}}</i>
-                </button>
-            </div>
-            <div class="switchToCollections" *ngIf="isGuest">
-                <button
-                  mat-button
-                  color="primary"
-                  (click)="switchToCollections()">
-                  {{'SEARCH.TO_COLLECTIONS' | translate}} <i esIcon="arrow_forward"></i>
-                </button>
-            </div>
-            <es-small-collection *ngIf="addToCollection"
-                              [collection]="addToCollection"
-                              [titleLabel]="'SEARCH.ADD_INTO_COLLECTION'"
-                              [titleLabelShort]="'SEARCH.ADD_INTO_COLLECTION_SHORT'"
-            ></es-small-collection>
-            <es-actionbar class="actionbarFrame" #actionbarComponent
-                       [backgroundType]="addToCollection ? 'primary' : 'bright'"
-            ></es-actionbar>
-        </div>
+    <div class="mobile-move-top">
+      <div class="extendedSearch" #extendedSearch>
+        <button
+          mat-button
+          matTooltip="{{
+            (searchService.sidenavOpened
+              ? 'SEARCH.HIDE_EXPANDED_SEARCH'
+              : 'SEARCH.SHOW_EXTENDED_SEARCH'
+            ) | translate
+          }}"
+          attr.aria-label="{{
+            (searchService.sidenavOpened
+              ? 'SEARCH.HIDE_EXPANDED_SEARCH'
+              : 'SEARCH.SHOW_EXTENDED_SEARCH'
+            ) | translate
+          }}"
+          (click)="toggleSidenav()"
+          class="pointed filtertoggler"
+        >
+          <span id="extended-search-label">{{ 'SEARCH.EXPANDED_SEARCH' | translate }}</span>
+          <span class="mobile" *ngIf="!getSelection() || !getSelection()?.length">{{
+            'SEARCH.EXPANDED_SEARCH_SHORT' | translate
+          }}</span>
+          <i aria-hidden="true" class="material-icons">{{
+            searchService.sidenavOpened ? 'keyboard_arrow_left' : 'keyboard_arrow_right'
+          }}</i>
+        </button>
+      </div>
+      <div class="switchToCollections" *ngIf="isGuest">
+        <button mat-button color="primary" (click)="switchToCollections()">
+          {{ 'SEARCH.TO_COLLECTIONS' | translate }} <i esIcon="arrow_forward"></i>
+        </button>
+      </div>
+      <es-small-collection
+        *ngIf="addToCollection"
+        [collection]="addToCollection"
+        [titleLabel]="'SEARCH.ADD_INTO_COLLECTION'"
+        [titleLabelShort]="'SEARCH.ADD_INTO_COLLECTION_SHORT'"
+      ></es-small-collection>
+      <es-actionbar
+        class="actionbarFrame"
+        #actionbarComponent
+        [backgroundType]="addToCollection ? 'primary' : 'bright'"
+      ></es-actionbar>
+    </div>
   </div>
   <es-card
-      *ngIf="(searchService.sidenavOpened && isMobileHeight() && isMobileWidth())"
-      title="{{'SEARCH.EXPANDED_SEARCH' | translate }}"
-      [buttons]="mdsButtons"
-      width="xxlarge"
-      height="xxlarge"
-      [isCancelable]="true"
-      (onCancel)="toggleSidenav()">
-      <es-mds-editor-wrapper #mdsMobile
-            [class.display-none]="currentRepository=='-all-'"
-            [groupId]="queryId"
-            [repository]="currentRepository"
-            [setId]="mdsId"
-            [embedded]="true"
-            [currentValues]="currentValues"
-            [mode]="'search'"
-            [(extended)]="mdsExtended"
-            (onMdsLoaded)="onMdsReady($event)"
-            (onDone)="applyParameters('mds', $any($event))">
-      </es-mds-editor-wrapper>
+    *ngIf="searchService.sidenavOpened && isMobileHeight() && isMobileWidth()"
+    title="{{ 'SEARCH.EXPANDED_SEARCH' | translate }}"
+    [buttons]="mdsButtons"
+    width="xxlarge"
+    height="xxlarge"
+    [isCancelable]="true"
+    (onCancel)="toggleSidenav()"
+  >
+    <es-mds-editor-wrapper
+      #mdsMobile
+      [class.display-none]="currentRepository == '-all-'"
+      [groupId]="queryId"
+      [repository]="currentRepository"
+      [setId]="mdsId"
+      [embedded]="true"
+      [currentValues]="currentValues"
+      [mode]="'search'"
+      [(extended)]="mdsExtended"
+      (onMdsLoaded)="onMdsReady($event)"
+      (onDone)="applyParameters('mds', $any($event))"
+    >
+    </es-mds-editor-wrapper>
   </es-card>
   <div class="sidenav-container">
     <div
@@ -114,15 +167,13 @@
       [class.sidenavNoRepositories]="!repositories || repositories.length <= 2"
       [class.sidenavHidden]="!searchService.sidenavOpened"
       [@fromLeft]="searchService.sidenavOpened"
-      >
+    >
       <mat-tab-group
         #extendedSearchTabGroup
         [selectedIndex]="extendedSearchSelectedTab.value"
         (selectedIndexChange)="extendedSearchSelectedTab.setValue($event)"
-        >
-        <mat-tab
-          [disabled]="isGuest"
-        >
+      >
+        <mat-tab [disabled]="isGuest">
           <ng-template mat-tab-label>
             <div class="tab-label">
               <i class="material-icons">tune</i>{{ 'SEARCH.TAB_FILTER' | translate }}
@@ -230,102 +281,133 @@
       </div>
     </div>
     <div class="content-with-footer">
+      <div
+        role="main"
+        esSkipTarget="MAIN_CONTENT"
+        class="content_wrapper"
+        [class.content_wrapper_grouped]="currentRepository == '-all-' && groupResults"
+        [class.contentSidenav]="searchService.sidenavOpened"
+      >
+        <h1 esTitle class="cdk-visually-hidden">{{ 'SEARCH.TITLE' | translate }}</h1>
         <div
-            role="main"
-            esSkipTarget="MAIN_CONTENT"
-            class="content_wrapper"
-            [class.content_wrapper_grouped]="currentRepository == '-all-' && groupResults"
-            [class.contentSidenav]="searchService.sidenavOpened"
+          class="results alignWithBanner"
+          [class.no-mainnav]="!mainnav"
+          [class.resultsNoRepositories]="!repositories || repositories.length <= 2"
+          vocab="http://schema.org/"
+          typeof="WebPage"
         >
-            <h1 esTitle class="cdk-visually-hidden">{{ 'SEARCH.TITLE' | translate }}</h1>
-            <div class="results alignWithBanner" [class.no-mainnav]="!mainnav" [class.resultsNoRepositories]="!repositories || repositories.length<=2" vocab="http://schema.org/" typeof="WebPage">
-              <ng-container *ngIf="!searchService.dataSourceSearchResult[0]?.isLoading">
-                <p
-                  *ngIf="didYouMeanSuggestion$ | async as didYouMeanSuggestion"
-                  class="did-you-mean-suggestion"
-                >
-                  {{ 'SEARCH.DID_YOU_MEAN' | translate }}: <a
-                    class="did-you-mean-suggestion-link"
-                    [innerHTML]="didYouMeanSuggestion.highlighted"
-                    routerLink="."
-                    [queryParams]="{ query: didYouMeanSuggestion.text }"
-                    queryParamsHandling="merge"
-                    (click)="acceptDidYouMeanSuggestion(didYouMeanSuggestion.text)"
-                  ></a>
-              </p>
-              </ng-container>
-              <div *ngIf="!searchService.dataSourceCollections.isEmpty() && !addToCollection">
-
-                    <div #collections class="collections">
-                        <es-node-entries-wrapper
-                                class="collections"
-                                [dataSource]="searchService.dataSourceCollections"
-                                [columns]="searchService.collectionsColumns"
-                                [displayType]="NodeEntriesDisplayType.SmallGrid"
-                                [elementInteractionType]="InteractionType.DefaultActionLink"
-                                [gridConfig]="{
-                                    maxRows: collectionsMore ? -1 : 1
-                                }"
-                        >
-                          <ng-template #title>
-                            <div class="heading">
-                              <h2>
-                                {{ 'SEARCH.COLLECTIONS' | translate}} ({{searchService.dataSourceCollections.getTotal()}})
-                              </h2>
-                              <button
-                                *ngIf="(areAllCollectionsDisplayed$ | async) === false || collectionsMore"
-                                mat-button
-                                color="primary"
-                                class="toggle"
-                                (click)="collectionsMore=!collectionsMore">{{(collectionsMore ? 'HIDE_MORE' : 'SHOW_MORE') | translate}}</button>
-                            </div>
-                          </ng-template>
-                        </es-node-entries-wrapper>
-                    </div>
+          <ng-container *ngIf="!searchService.dataSourceSearchResult[0]?.isLoading">
+            <p
+              *ngIf="didYouMeanSuggestion$ | async as didYouMeanSuggestion"
+              class="did-you-mean-suggestion"
+            >
+              {{ 'SEARCH.DID_YOU_MEAN' | translate }}:
+              <a
+                class="did-you-mean-suggestion-link"
+                [innerHTML]="didYouMeanSuggestion.highlighted"
+                routerLink="."
+                [queryParams]="{ query: didYouMeanSuggestion.text }"
+                queryParamsHandling="merge"
+                (click)="acceptDidYouMeanSuggestion(didYouMeanSuggestion.text)"
+              ></a>
+            </p>
+          </ng-container>
+          <div *ngIf="!searchService.dataSourceCollections.isEmpty() && !addToCollection">
+            <div #collections class="collections">
+              <es-node-entries-wrapper
+                class="collections"
+                [dataSource]="searchService.dataSourceCollections"
+                [columns]="searchService.collectionsColumns"
+                [displayType]="NodeEntriesDisplayType.SmallGrid"
+                [elementInteractionType]="InteractionType.DefaultActionLink"
+                [gridConfig]="{
+                  maxRows: collectionsMore ? -1 : 1
+                }"
+              >
+                <ng-template #title>
+                  <div class="heading">
+                    <h2>
+                      {{ 'SEARCH.COLLECTIONS' | translate }} ({{
+                        searchService.dataSourceCollections.getTotal()
+                      }})
+                    </h2>
+                    <button
+                      *ngIf="(areAllCollectionsDisplayed$ | async) === false || collectionsMore"
+                      mat-button
+                      color="primary"
+                      class="toggle"
+                      (click)="collectionsMore = !collectionsMore"
+                    >
+                      {{ (collectionsMore ? 'HIDE_MORE' : 'SHOW_MORE') | translate }}
+                    </button>
+                  </div>
+                </ng-template>
+              </es-node-entries-wrapper>
+            </div>
+          </div>
+          <div
+            [class.display-none]="
+              currentRepository == '-all-' &&
+              groupResults &&
+              !searchService.dataSourceSearchResult[0]?.isLoading
+            "
+            class="searchUngrouped"
+          >
+            <div
+              class="noResultsMatched"
+              *ngIf="
+                !searchService.dataSourceSearchResult[0]?.isEmpty() &&
+                searchService.ignored &&
+                searchService.ignored.length
+              "
+            >
+              <i class="material-icons">search</i>
+              {{ 'SEARCH.QUERY_NO_RESULT' | translate }}
+            </div>
+            <es-node-entries-wrapper
+              #nodeEntriesResults
+              [class.display-none]="!searchService.dataSourceSearchResult[0]"
+              [dataSource]="searchService.dataSourceSearchResult[0]"
+              [columns]="searchService.columns"
+              [sort]="{
+                allowed: true,
+                active: searchService.sort?.active,
+                direction: searchService.sort?.direction,
+                columns: searchService.sort?.columns
+              }"
+              (sortChange)="updateSort($event)"
+              [displayType]="searchService.displayType"
+              (fetchData)="getMoreResults()"
+            >
+              <ng-template #title>
+                <div class="heading" *ngIf="!searchService.dataSourceSearchResult[0]?.isEmpty()">
+                  <h2>
+                    {{ 'SEARCH.MATERIALS' | translate }}
+                    <ng-container
+                      *ngIf="
+                        searchService.dataSourceSearchResult[0] &&
+                        !searchService.dataSourceSearchResult[0]?.isEmpty() &&
+                        currentRepository != '-all-'
+                      "
+                    >
+                      ({{ searchService.dataSourceSearchResult[0]?.getTotal() }})
+                    </ng-container>
+                  </h2>
+                  <!-- TODO: make popup menu usable with keyboard -->
                 </div>
-                <div [class.display-none]="(currentRepository=='-all-' && groupResults && !searchService.dataSourceSearchResult[0]?.isLoading)" class="searchUngrouped">
-                    <div class="noResultsMatched" *ngIf="!searchService.dataSourceSearchResult[0]?.isEmpty() && searchService.ignored && searchService.ignored.length">
-                        <i class="material-icons">search</i>
-                        {{'SEARCH.QUERY_NO_RESULT' | translate}}
-                    </div>
-                  <es-node-entries-wrapper
-                    #nodeEntriesResults
-                    [class.display-none]="!searchService.dataSourceSearchResult[0]"
-                    [dataSource]="searchService.dataSourceSearchResult[0]"
-                    [columns]="searchService.columns"
-                    [sort]="{
-                      allowed: true,
-                      active: searchService.sort?.active,
-                      direction: searchService.sort?.direction,
-                      columns: searchService.sort?.columns
-                    }"
-                    (sortChange)="updateSort($event)"
-                    [displayType]="searchService.displayType"
-                    (fetchData)="getMoreResults()"
-                  >
-                    <ng-template #title>
-                      <div class="heading" *ngIf="!searchService.dataSourceSearchResult[0]?.isEmpty()">
-                        <h2>
-                          {{ 'SEARCH.MATERIALS' | translate }}
-                          <ng-container *ngIf="searchService.dataSourceSearchResult[0] && !searchService.dataSourceSearchResult[0]?.isEmpty() && currentRepository!='-all-'">
-                            ({{searchService.dataSourceSearchResult[0]?.getTotal()}})
-                          </ng-container>
-                        </h2>
-                        <!-- TODO: make popup menu usable with keyboard -->
-                      </div>
-                      <!-- TODO: Ignored params -->
-                      <ng-container *ngIf="searchService.ignored && searchService.ignored.length">
-                        {{ 'SEARCH.IGNORED_PARAMETERS' | translate}}
-                      </ng-container>
-                    </ng-template>
-                    <ng-template #empty>
-                      <div class="noResults" title="{{'SEARCH.QUERY_NO_RESULT' | translate}}">
-                        <i class="material-icons">search</i>
-                        {{'SEARCH.QUERY_NO_RESULT' | translate}}
-                      </div>
-                    </ng-template>
-                  </es-node-entries-wrapper>
-                    <!--
+                <!-- TODO: Ignored params -->
+                <ng-container *ngIf="searchService.ignored && searchService.ignored.length">
+                  {{ 'SEARCH.IGNORED_PARAMETERS' | translate }}
+                </ng-container>
+              </ng-template>
+              <ng-template #empty>
+                <div class="noResults" title="{{ 'SEARCH.QUERY_NO_RESULT' | translate }}">
+                  <i class="material-icons">search</i>
+                  {{ 'SEARCH.QUERY_NO_RESULT' | translate }}
+                </div>
+              </ng-template>
+            </es-node-entries-wrapper>
+            <!--
                     <es-listTable
                             #list
                             [nodes]="searchService.searchResult"
@@ -356,11 +438,13 @@
                             (selectionChanged)="updateSelection($event)"
                             [isLoading]="searchService.showspinner"></es-listTable>
 -->
-
-                </div>
-                <div class="searchGrouped" *ngIf="currentRepository=='-all-' && groupResults && repositories">
-                  Feature not implemented in 6.1
-                  <!--
+          </div>
+          <div
+            class="searchGrouped"
+            *ngIf="currentRepository == '-all-' && groupResults && repositories"
+          >
+            Feature not implemented in 6.1
+            <!--
                     <div *ngFor="let repo of groupedRepositories;let i=index">
                         <div class="heading" *ngIf="searchService.searchResultRepositories[i]"><img [src]="getSourceIcon(repo)"><span>{{ repo.title }}</span></div>
                         <a tabindex="0" class="more clickable" *ngIf="searchService.searchResultRepositories[i]" (click)="setRepository(repo.id)" (keyup.enter)="setRepository(repo.id)">{{'SHOW_MORE' | translate}}</a>
@@ -388,28 +472,38 @@
                     </div>
                 </div>
                 -->
-            </div>
+          </div>
         </div>
       </div>
-    <es-footer [scope]="'search'" class="alignWithBanner"></es-footer>
-</div>
-</div>
-<div tabindex="0" *ngIf="showMoreRepositories" class="scrollWithBanner dialog moreRepositories" (click)="showMoreRepositories=false" (keyup.enter)="showMoreRepositories=false">
-  <div class="collection" [class.no-mainnav]="!mainnav">
-    <a class="collection-item"
-       *ngFor="let repo of repositories.slice(3)"
-       [class.active]="currentRepository==repo.id"
-       tabindex="0"
-       (keyup.enter)="setRepository(repo.id);showMoreRepositories=false"
-       (click)="setRepository(repo.id);showMoreRepositories=false">
-      <img [src]="getSourceIcon(repo)"><span class="repositoryTitle">{{ repo.title }}</span>
-    </a>
+      <es-footer [scope]="'search'" class="alignWithBanner"></es-footer>
+    </div>
   </div>
+  <div
+    tabindex="0"
+    *ngIf="showMoreRepositories"
+    class="scrollWithBanner dialog moreRepositories"
+    (click)="showMoreRepositories = false"
+    (keyup.enter)="showMoreRepositories = false"
+  >
+    <div class="collection" [class.no-mainnav]="!mainnav">
+      <a
+        class="collection-item"
+        *ngFor="let repo of repositories.slice(3)"
+        [class.active]="currentRepository == repo.id"
+        tabindex="0"
+        (keyup.enter)="setRepository(repo.id); showMoreRepositories = false"
+        (click)="setRepository(repo.id); showMoreRepositories = false"
+      >
+        <img [src]="getSourceIcon(repo)" /><span class="repositoryTitle">{{ repo.title }}</span>
+      </a>
+    </div>
+  </div>
+  <es-search-save-search
+    *ngIf="saveSearchDialog"
+    [searchQuery]="searchService.searchTerm"
+    [name]="currentSavedSearch ? currentSavedSearch.title : null"
+    (onClose)="closeSaveSearchDialog()"
+    (onSave)="saveSearch($event)"
+  ></es-search-save-search>
+  <es-global-progress *ngIf="globalProgress"></es-global-progress>
 </div>
-<es-search-save-search *ngIf="saveSearchDialog"
-  [searchQuery]="searchService.searchTerm"
-  [name]="currentSavedSearch ? currentSavedSearch.title : null"
-  (onClose)="closeSaveSearchDialog()"
-  (onSave)="saveSearch($event)"
-></es-search-save-search>
-<es-global-progress *ngIf="globalProgress"></es-global-progress>

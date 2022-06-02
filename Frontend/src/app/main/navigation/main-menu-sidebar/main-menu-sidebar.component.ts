@@ -6,26 +6,25 @@ import {
     Input,
     OnDestroy,
     OnInit,
-    Output
+    Output,
 } from '@angular/core';
 import {
     ConfigurationService,
-    RestConnectorService, RestConstants, RestIamService,
-    UIConstants
+    RestConnectorService,
+    RestConstants,
+    RestIamService,
+    UIConstants,
 } from '../../../core-module/core.module';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import {LoginInfo, User, UserService} from 'ngx-edu-sharing-api';
-import {takeUntil} from 'rxjs/operators';
-import {Subject} from 'rxjs';
+import { LoginInfo, User, UserService } from 'ngx-edu-sharing-api';
+import { takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 @Component({
     selector: 'es-main-menu-sidebar',
     templateUrl: './main-menu-sidebar.component.html',
     styleUrls: ['./main-menu-sidebar.component.scss'],
-    animations: [
-        trigger('fade', UIAnimation.fade()),
-        trigger('fromLeft', UIAnimation.fromLeft()),
-    ],
+    animations: [trigger('fade', UIAnimation.fade()), trigger('fromLeft', UIAnimation.fromLeft())],
 })
 export class MainMenuSidebarComponent implements OnInit, OnDestroy {
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
@@ -42,10 +41,7 @@ export class MainMenuSidebarComponent implements OnInit, OnDestroy {
     loginInfo: LoginInfo;
     currentUser: User;
 
-    constructor(
-        public iam: RestIamService,
-        private user: UserService,
-    ) {
+    constructor(public iam: RestIamService, private user: UserService) {
         this.user
             .observeCurrentUser()
             .pipe(takeUntil(this.destroyed$))

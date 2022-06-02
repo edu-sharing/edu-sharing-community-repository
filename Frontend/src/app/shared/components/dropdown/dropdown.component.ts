@@ -1,5 +1,5 @@
 import { Component, Input, ViewChild } from '@angular/core';
-import {MatMenu, MatMenuContent, MatMenuTrigger} from '@angular/material/menu';
+import { MatMenu, MatMenuContent, MatMenuTrigger } from '@angular/material/menu';
 import { UIService } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
 import { OptionItem } from '../../../core-ui-module/option-item';
@@ -21,10 +21,7 @@ export class DropdownComponent {
     @Input() position: 'left' | 'right' = 'left';
 
     @Input() set options(options: OptionItem[]) {
-        this._options = UIHelper.filterValidOptions(
-            this.ui,
-            Helper.deepCopyArray(options),
-        );
+        this._options = UIHelper.filterValidOptions(this.ui, Helper.deepCopyArray(options));
     }
 
     /**

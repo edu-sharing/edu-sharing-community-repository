@@ -8,5 +8,4 @@ import { Component, ViewChild } from '@angular/core';
 /**
  * Global components (always visible regardless of route
  */
-export class GlobalContainerComponent {
-}
+export class GlobalContainerComponent {}

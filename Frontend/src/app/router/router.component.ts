@@ -5,7 +5,9 @@ import {
     NgZone,
     ViewChild,
     OnInit,
-    HostListener, Injector, EventEmitter
+    HostListener,
+    Injector,
+    EventEmitter,
 } from '@angular/core';
 import { MdsTestComponent } from '../common/test/mds-test/mds-test.component';
 import { ApplyToLmsComponent } from '../common/ui/apply-to-lms/apply-to-lms.component';
@@ -34,12 +36,12 @@ import { SharingComponent } from '../modules/sharing/sharing.component';
 import { StartupComponent } from '../modules/startup/startup.component';
 import { StreamComponent } from '../modules/stream/stream.component';
 import { WorkspaceMainComponent } from '../modules/workspace/workspace.component';
-import {ActivatedRoute, NavigationEnd, Router, Routes, UrlTree} from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router, Routes, UrlTree } from '@angular/router';
 import { CookieInfoComponent } from '../common/ui/cookie-info/cookie-info.component';
 import { BridgeService } from '../core-bridge-module/bridge.service';
-import {AccessibilityComponent} from '../common/ui/accessibility/accessibility.component';
+import { AccessibilityComponent } from '../common/ui/accessibility/accessibility.component';
 import { extensionRoutes } from '../extension/extension-routes';
-import {BehaviorSubject} from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { AccessibilityService } from '../common/ui/accessibility/accessibility.service';
 import { LtiComponent } from '../modules/lti/lti.component';
 import { printCurrentTaskInfo } from './track-change-detection';
@@ -61,11 +63,13 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
 
     public static isRedirectedFromLogin() {
         const history = RouterComponent.history.value;
-        if(history.length < 2) {
+        if (history.length < 2) {
             return false;
         }
-        return history[history.length-1].indexOf(UIConstants.ROUTER_PREFIX + 'login') !== -1 ||
-            history[history.length-1].indexOf(UIConstants.ROUTER_PREFIX) === -1;
+        return (
+            history[history.length - 1].indexOf(UIConstants.ROUTER_PREFIX + 'login') !== -1 ||
+            history[history.length - 1].indexOf(UIConstants.ROUTER_PREFIX) === -1
+        );
     }
 
     @ViewChild('management') management: WorkspaceManagementDialogsComponent;
@@ -108,7 +112,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
         private translations: TranslationsService,
         private loadingScreen: LoadingScreenService,
     ) {
-        this.injector.get(Router).events.subscribe(event => {
+        this.injector.get(Router).events.subscribe((event) => {
             if (event instanceof NavigationEnd) {
                 RouterComponent.history.value.push(event.url);
                 RouterComponent.history.next(RouterComponent.history.value);
@@ -121,9 +125,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
     }
 
     ngOnInit(): void {
-        this.translations.initialize().pipe(
-            this.loadingScreen.showUntilFinished(),
-        ).subscribe();
+        this.translations.initialize().pipe(this.loadingScreen.showUntilFinished()).subscribe();
         this.setUserScale();
         this.registerContrastMode();
     }
@@ -278,5 +280,5 @@ export const ROUTES: Routes = [
     { path: UIConstants.ROUTER_PREFIX + 'lti', component: LtiComponent },
 
     // wildcard 404
-    { path: '**', component: MessagesComponent, data: {message: 404} },
+    { path: '**', component: MessagesComponent, data: { message: 404 } },
 ];

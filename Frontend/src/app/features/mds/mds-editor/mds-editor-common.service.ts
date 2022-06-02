@@ -78,11 +78,10 @@ export class MdsEditorCommonService {
     async saveNodeProperty(
         node: Node,
         property: string,
-        values: string[]
+        values: string[],
         //versionComment?: string,
     ): Promise<void> {
         this.restNode.editNodeProperty(node.ref.id, property, values).toPromise();
-
     }
 
     /**

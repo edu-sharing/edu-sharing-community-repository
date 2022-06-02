@@ -1,4 +1,4 @@
-@import "../../../core-ui-module/styles/variables";
+@import '../../../core-ui-module/styles/variables';
 
 mat-form-field {
     width: 100%;
@@ -29,7 +29,7 @@ mat-form-field {
     align-items: center;
     backdrop-filter: blur(1px);
     z-index: 2;
-    background-color: rgba(255,255,255,0.75);
+    background-color: rgba(255, 255, 255, 0.75);
     color: $textMain;
     font-weight: bold;
 }

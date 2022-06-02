@@ -1,11 +1,11 @@
 <es-create-menu
-#createMenu
-[scope]="currentScope"
-[allowed]="isCreateAllowed"
-[allowBinary]="create.allowBinary"
-[parent]="create.parent"
-[folder]="create.folder"
-(onCreate)="created.emit($event)"
+  #createMenu
+  [scope]="currentScope"
+  [allowed]="isCreateAllowed"
+  [allowBinary]="create.allowBinary"
+  [parent]="create.parent"
+  [folder]="create.folder"
+  (onCreate)="created.emit($event)"
 ></es-create-menu>
 
 <div class="mobile-move-top2">

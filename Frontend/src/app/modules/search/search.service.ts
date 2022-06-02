@@ -1,7 +1,10 @@
 import { Injectable } from '@angular/core';
 import { SearchConfig } from 'ngx-edu-sharing-api';
 import { BehaviorSubject } from 'rxjs';
-import { ListSortConfig, NodeEntriesDisplayType } from 'src/app/features/node-entries/entries-model';
+import {
+    ListSortConfig,
+    NodeEntriesDisplayType,
+} from 'src/app/features/node-entries/entries-model';
 import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 import { SearchFieldService } from 'src/app/main/navigation/search-field/search-field.service';
 import { ListItem, Node } from '../../core-module/core.module';

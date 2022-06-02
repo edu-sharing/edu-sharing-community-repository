@@ -182,10 +182,7 @@ describe('parseAttributes', () => {
             ...definitionBoilerplate,
             id: 'ccm:foo',
         };
-        const modifiedDefinition = parseAttributes(
-            '<ccm:foo extended="true">',
-            originalDefinition,
-        );
+        const modifiedDefinition = parseAttributes('<ccm:foo extended="true">', originalDefinition);
         expect(modifiedDefinition).toEqual({
             ...originalDefinition,
             isExtended: true,

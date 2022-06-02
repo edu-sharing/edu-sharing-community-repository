@@ -264,10 +264,7 @@ export class WorkspaceFileUploadSelectComponent implements OnInit {
     updateButtons() {
         const ok = new DialogButton('OK', { color: 'primary' }, () => this.setLink());
         ok.disabled = this.disabled || (this.showPicker && !this._parent);
-        this.buttons = [
-            new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel()),
-            ok,
-        ];
+        this.buttons = [new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel()), ok];
     }
 
     private cleanupUrlForLti(link: string) {

@@ -52,7 +52,10 @@
           />
         </mat-form-field>
       </div>
-      <es-spinner-small *ngIf="loadingWebsiteInformation" class="loading-website-information-spinner"></es-spinner-small>
+      <es-spinner-small
+        *ngIf="loadingWebsiteInformation"
+        class="loading-website-information-spinner"
+      ></es-spinner-small>
       <es-info-message *ngIf="showInvalidUrlMessage" mode="error">
         {{ 'WORKSPACE.LINK_INVALID_INFO' | translate }}
       </es-info-message>

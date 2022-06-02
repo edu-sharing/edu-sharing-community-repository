@@ -15,7 +15,14 @@ import { Toast } from '../../../../core-ui-module/toast';
 import { MdsComponent } from '../../legacy/mds/mds.component';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 import { EditorMode } from '../../types/mds-types';
-import { BulkBehavior, EditorType, MdsWidget, MdsWidgetValue, UserPresentableError, Values } from '../../types/types';
+import {
+    BulkBehavior,
+    EditorType,
+    MdsWidget,
+    MdsWidgetValue,
+    UserPresentableError,
+    Values,
+} from '../../types/types';
 import { valuesDictIsEquivalent } from './values-dict-is-equivalent';
 
 /**

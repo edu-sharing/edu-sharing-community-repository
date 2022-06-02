@@ -2,28 +2,28 @@
  * Created by Torsten on 13.01.2017.
  */
 
-import {Component, EventEmitter, Input, Output, HostBinding} from '@angular/core';
+import { Component, EventEmitter, Input, Output, HostBinding } from '@angular/core';
 
 @Component({
-  selector: 'es-powered-by',
-  templateUrl: 'powered-by.component.html',
-  styleUrls: ['powered-by.component.scss'],
+    selector: 'es-powered-by',
+    templateUrl: 'powered-by.component.html',
+    styleUrls: ['powered-by.component.scss'],
 })
 export class PoweredByComponent {
-  /**
-   * The mode do display
-   * Either 'white' or 'color'
-   * @type {string}
-   */
-  @Input() mode='white';
-  @HostBinding('attr.role') readonly role = 'contentinfo';
+    /**
+     * The mode do display
+     * Either 'white' or 'color'
+     * @type {string}
+     */
+    @Input() mode = 'white';
+    @HostBinding('attr.role') readonly role = 'contentinfo';
 
-  constructor() {
-    /*
+    constructor() {
+        /*
     this.config.getAll().subscribe(()=>{
       this.config = ConfigurationHelper.getBanner(this.config);
       this.onUpdate.emit(this.banner);
     });
     */
-  }
+    }
 }

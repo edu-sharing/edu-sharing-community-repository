@@ -20,8 +20,7 @@ import { Target } from '../../../core-ui-module/option-item';
 import { NodeEntriesDisplayType } from '../entries-model';
 
 import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
-import { Node } from 'ngx-edu-sharing-api'
-
+import { Node } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-node-entries-card-grid',

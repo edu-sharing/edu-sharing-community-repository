@@ -7,7 +7,7 @@
 <div
   class="actionbar"
   [class.actionbar-all-flat]="style == 'flat'"
-  [class.actionbar-background-dark]="backgroundType=='dark'"
+  [class.actionbar-background-dark]="backgroundType == 'dark'"
   [class.actionbar-background-primary]="backgroundType == 'primary'"
   [class.actionbar-round]="appearance == 'round'"
 >
@@ -46,8 +46,8 @@
       *ngFor="let option of optionsToggle"
       mat-icon-button
       class="button-icon"
-      matTooltip="{{option.name | translate}}"
-      [attr.aria-label]="(option.name | translate)"
+      matTooltip="{{ option.name | translate }}"
+      [attr.aria-label]="option.name | translate"
       (click)="click(option)"
       [class.disabled]="!option.isEnabled"
     >

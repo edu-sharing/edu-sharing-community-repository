@@ -1,76 +1,76 @@
-@import "../../core-ui-module/styles/variables";
+@import '../../core-ui-module/styles/variables';
 
-.content{
-  padding:20px 30px;
-  width:100%;
-  max-width:$cardWidth*3 + 125px;
-  margin:auto;
-  .breadcrumbs{
-    color: $primary;
-    display: flex;
-    align-items: center;
-    margin-left: 5px;
-    >*{
-     margin:0 2px;
+.content {
+    padding: 20px 30px;
+    width: 100%;
+    max-width: $cardWidth * 3 + 125px;
+    margin: auto;
+    .breadcrumbs {
+        color: $primary;
+        display: flex;
+        align-items: center;
+        margin-left: 5px;
+        > * {
+            margin: 0 2px;
+        }
     }
-  }
-  .preview{
-    display:flex;
-    padding-bottom:10px;
-    img{
-      $imgSize:90px;
-      width: $imgSize;
-      height: $imgSize;
-      min-width: $imgSize;
-      min-height: $imgSize;
-      object-fit: cover;
+    .preview {
+        display: flex;
+        padding-bottom: 10px;
+        img {
+            $imgSize: 90px;
+            width: $imgSize;
+            height: $imgSize;
+            min-width: $imgSize;
+            min-height: $imgSize;
+            object-fit: cover;
+        }
+        .info {
+            display: flex;
+            flex-direction: column;
+            padding-left: 20px;
+            .type {
+                font-weight: bold;
+                font-size: 80%;
+                color: $textLight;
+                padding-bottom: 15px;
+            }
+            .label {
+                @include limitLineCount(1, 1.5);
+                word-break: break-all;
+                margin-bottom: 10px;
+            }
+            .description {
+                font-size: 90%;
+                color: $textLight;
+                @include limitLineCount(2, 1.5);
+            }
+        }
     }
-    .info {
-      display: flex;
-      flex-direction:column;
-      padding-left:20px;
-      .type {
-        font-weight: bold;
-        font-size: 80%;
-        color: $textLight;
-        padding-bottom: 15px;
-      }
-      .label{
-        @include limitLineCount(1,1.5);
-        word-break: break-all;
-        margin-bottom: 10px;
-      }
-      .description{
+    .location {
+        display: flex;
+        align-items: center;
         font-size: 90%;
         color: $textLight;
-        @include limitLineCount(2,1.5);
-      }
+        es-breadcrumbs {
+            margin-top: 2px;
+        }
     }
-  }
-  .location{
-    display: flex;
-    align-items: center;
-    font-size:90%;
-    color:$textLight;
-    es-breadcrumbs{
-      margin-top:2px;
+    .save {
+        display: flex;
+        justify-content: flex-end;
     }
-  }
-  .save{
-    display:flex;
-    justify-content:flex-end;
-  }
-  .collections{
-    margin-top: 40px;
-    margin-bottom: 10px;
-    .addToCollection{
-      font-weight: bold;
-      margin-bottom: 20px;
+    .collections {
+        margin-top: 40px;
+        margin-bottom: 10px;
+        .addToCollection {
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
     }
-  }
 }
 @media all and (max-width: ($cardWidth*3)) {
-  :host ::ng-deep .cardSmallList{
-    width:calc(100% - 10px)!important;
-  }
+    :host ::ng-deep .cardSmallList {
+        width: calc(100% - 10px) !important;
+    }
 }

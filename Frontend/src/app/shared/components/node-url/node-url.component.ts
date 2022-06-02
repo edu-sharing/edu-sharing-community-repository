@@ -24,7 +24,7 @@ export class NodeUrlComponent {
     /**
      * custom query params to include
      */
-    @Input() queryParams: {[key: string]: string|number|boolean} = {};
+    @Input() queryParams: { [key: string]: string | number | boolean } = {};
     /**
      * link: a element
      * button: button element
@@ -54,8 +54,8 @@ export class NodeUrlComponent {
 
     get(mode: 'routerLink' | 'queryParams'): any {
         const result: any = this.nodeHelper.getNodeLink(mode, this.node);
-        if(mode === 'queryParams' && this.queryParams) {
-            Object.keys(this.queryParams).forEach((k) => result[k] = this.queryParams[k]);
+        if (mode === 'queryParams' && this.queryParams) {
+            Object.keys(this.queryParams).forEach((k) => (result[k] = this.queryParams[k]));
         }
         return result;
     }

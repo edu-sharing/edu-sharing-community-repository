@@ -1,10 +1,10 @@
-import {Component, Input, QueryList, ViewChildren} from '@angular/core';
+import { Component, Input, QueryList, ViewChildren } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CardComponent } from '../../../../shared/components/card/card.component';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 import { MdsView } from '../../types/types';
-import {MdsEditorViewComponent} from '../mds-editor-view/mds-editor-view.component';
+import { MdsEditorViewComponent } from '../mds-editor-view/mds-editor-view.component';
 import { EditorMode } from '../../types/mds-types';
 
 @Component({

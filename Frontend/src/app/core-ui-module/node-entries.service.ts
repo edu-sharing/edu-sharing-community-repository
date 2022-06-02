@@ -3,7 +3,17 @@ import { EventEmitter, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { UIService } from '../core-module/rest/services/ui.service';
 import { ListItem } from '../core-module/ui/list-item';
-import { ListEventInterface, NodeEntriesDisplayType, InteractionType, ListOptions, ListSortConfig, ListDragGropConfig, NodeClickEvent, FetchEvent, GridConfig } from '../features/node-entries/entries-model';
+import {
+    ListEventInterface,
+    NodeEntriesDisplayType,
+    InteractionType,
+    ListOptions,
+    ListSortConfig,
+    ListDragGropConfig,
+    NodeClickEvent,
+    FetchEvent,
+    GridConfig,
+} from '../features/node-entries/entries-model';
 import { NodeDataSource } from '../features/node-entries/node-data-source';
 import { NodeEntriesDataType } from '../features/node-entries/node-entries.component';
 

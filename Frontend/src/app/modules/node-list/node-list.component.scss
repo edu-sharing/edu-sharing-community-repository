@@ -1,108 +1,109 @@
-@import "../../core-ui-module/styles/variables";
+@import '../../core-ui-module/styles/variables';
 
-
-#search,#search:focus{
-  padding: 0;
-  padding-left:50px;
-  margin-left:20px;
-  position: relative;
-  top:-14px;
-  border: 1px solid $searchInputBorderColor!important;
-  border-radius: 2pt;
-  width:calc(100% - 420px);
-}
-
-.actionbar{
-  top: 20px;
-  position: fixed;
-  right: 0px;
-  z-index:97;
-}
-.searchWorkspace{
-  display:none;
-}
-.searchIcon{
-  position:relative;
-  top:22px;
-  left:35px;
-  color:#ccc;
+#search,
+#search:focus {
+    padding: 0;
+    padding-left: 50px;
+    margin-left: 20px;
+    position: relative;
+    top: -14px;
+    border: 1px solid $searchInputBorderColor !important;
+    border-radius: 2pt;
+    width: calc(100% - 420px);
 }
 
-.search{
-  height:64px;
+.actionbar {
+    top: 20px;
+    position: fixed;
+    right: 0px;
+    z-index: 97;
 }
-.restoreMain{
-  color:#555;
+.searchWorkspace {
+    display: none;
 }
-.restoreNew{
-  color:$primary;
-  font-weight: bold;
+.searchIcon {
+    position: relative;
+    top: 22px;
+    left: 35px;
+    color: #ccc;
 }
-.search{
-  width:100%;
+
+.search {
+    height: 64px;
 }
-.actions{
-  min-width:110px;
+.restoreMain {
+    color: #555;
 }
-.actions a{
-  padding:0 12px;
+.restoreNew {
+    color: $primary;
+    font-weight: bold;
 }
-.topbar{
-  width:100%;
-  overflow: hidden;
-  position: fixed;
-  top:0;
-  z-index:5;
-  background-color: #fff;
-  @include materialShadow();
+.search {
+    width: 100%;
 }
-.topbarWorkspace{
-  display:none;
+.actions {
+    min-width: 110px;
 }
-.results{
-  width:100%;
+.actions a {
+    padding: 0 12px;
 }
-.recycleContainer{
-  margin-top: 70px;
-  width:100%;
+.topbar {
+    width: 100%;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    z-index: 5;
+    background-color: #fff;
+    @include materialShadow();
 }
-.recylceContainerWorkspace{
-  margin-top: 0;
+.topbarWorkspace {
+    display: none;
 }
-.actionbarWorkspace{
-  top:$mainnavHeight+20px;
-  right:20px;
+.results {
+    width: 100%;
 }
-.noResults{
-  text-align: center;
-  padding-top: 20px;
-  color: $textVeryLight;
+.recycleContainer {
+    margin-top: 70px;
+    width: 100%;
+}
+.recylceContainerWorkspace {
+    margin-top: 0;
+}
+.actionbarWorkspace {
+    top: $mainnavHeight + 20px;
+    right: 20px;
+}
+.noResults {
+    text-align: center;
+    padding-top: 20px;
+    color: $textVeryLight;
 }
 a:hover {
-  @include clickable();
+    @include clickable();
 }
 
-.list .filled-in:checked+label:after{
-  background-color:$textOnPrimary;
-  border-color:$textOnPrimary;
+.list .filled-in:checked + label:after {
+    background-color: $textOnPrimary;
+    border-color: $textOnPrimary;
 }
 
-.list .filled-in:checked+label:before{
-  border-right-color: $primary;
-  border-bottom-color: $primary;
+.list .filled-in:checked + label:before {
+    border-right-color: $primary;
+    border-bottom-color: $primary;
 }
-.progress{
-  background-color:#ccc;
+.progress {
+    background-color: #ccc;
 }
-.indeterminate{
-  background-color: $primary!important;
+.indeterminate {
+    background-color: $primary !important;
 }
-.list .filled-in:not(:checked)+label:after{
-  border-color:$primary;
+.list .filled-in:not(:checked) + label:after {
+    border-color: $primary;
 }
 
-@media screen and (max-width: ($mobileWidth+$mobileStage*4)){
-  #search,#search:focus{
-    width:calc(100% - 210px);
-  }
+@media screen and (max-width: ($mobileWidth+$mobileStage*4)) {
+    #search,
+    #search:focus {
+        width: calc(100% - 210px);
+    }
 }

@@ -4,7 +4,7 @@ import * as rxjs from 'rxjs';
 import { distinctUntilChanged, map, shareReplay } from 'rxjs/operators';
 import { GenericAuthority, Pagination, Node } from 'src/app/core-module/core.module';
 
-export class NodeDataSource<T extends Node|GenericAuthority> extends DataSource<T> {
+export class NodeDataSource<T extends Node | GenericAuthority> extends DataSource<T> {
     private dataStream = new BehaviorSubject<T[]>([]);
     private pagination: Pagination;
     public isLoading: boolean;

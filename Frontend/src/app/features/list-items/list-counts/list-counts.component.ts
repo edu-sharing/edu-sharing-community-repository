@@ -18,24 +18,30 @@ export class ListCountsComponent extends ListWidget {
 
     static getCountSingle(node: Statistics, id: string, group: number = null) {
         const counts = node.counts;
-        if(id === 'OVERALL') {
-            return Object.keys(counts.counts).map((c) => (group ? group : counts.counts[c])).reduce((a, b) =>
-                a + b
-            );
+        if (id === 'OVERALL') {
+            return Object.keys(counts.counts)
+                .map((c) => (group ? group : counts.counts[c]))
+                .reduce((a, b) => a + b);
         }
         return (group ? group : counts.counts[id]) || 0;
     }
     static getCount(node: Statistics, id: string) {
         const counts = node.counts;
         let result = this.getCountSingle(node, id);
-        if(Object.keys(counts.groups)?.length > 0) {
-            const i1= id;
-            if(counts.groups[i1]) {
+        if (Object.keys(counts.groups)?.length > 0) {
+            const i1 = id;
+            if (counts.groups[i1]) {
                 const i2 = Object.keys(counts.groups[i1])[0];
                 if (counts.groups?.[i1]?.[i2]) {
-                    result = Object.keys(counts.groups?.[i1]?.[i2]).map((group) =>
-                        (group || '-') + ': ' + this.getCountSingle(node, id, counts.groups?.[i1]?.[i2][group])
-                    ).join('\n').trim();
+                    result = Object.keys(counts.groups?.[i1]?.[i2])
+                        .map(
+                            (group) =>
+                                (group || '-') +
+                                ': ' +
+                                this.getCountSingle(node, id, counts.groups?.[i1]?.[i2][group]),
+                        )
+                        .join('\n')
+                        .trim();
                 }
             }
         }

@@ -23,7 +23,6 @@ declare const require: {
 getTestBed().initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting(), {
     // This was added by Angular update migration to restore the previous behavior, but it is
     // probably better to adopt the new behavior, so leave commented out if possible.
-
     // teardown: { destroyAfterEach: false },
 });
 // Then we find all the tests.

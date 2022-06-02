@@ -4,7 +4,14 @@
     class="extended-toggle"
     [ngModel]="shouldShowExtendedWidgets$ | async"
     (ngModelChange)="shouldShowExtendedWidgets$.next($event)"
-    >{{ 'MDS.SHOW_EXTENDED_' + (editorMode === 'search' ? 'SEARCH' : (shouldShowExtendedWidgets$ | async) ? 'TRUE' : 'FALSE') | translate }}</mat-slide-toggle
+    >{{
+      'MDS.SHOW_EXTENDED_' +
+        (editorMode === 'search'
+          ? 'SEARCH'
+          : (shouldShowExtendedWidgets$ | async)
+          ? 'TRUE'
+          : 'FALSE') | translate
+    }}</mat-slide-toggle
   >
 </div>
 <es-mds-editor-view

@@ -1,9 +1,13 @@
 import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
 import { Node, RestNodeService, RestConstants } from '../../../core-module/core.module';
-import {DragData, DragNodeTarget, DropData} from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
+import {
+    DragData,
+    DragNodeTarget,
+    DropData,
+} from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
 import { Params, QueryParamsHandling } from '@angular/router';
-import {CdkDragDrop, CdkDragEnter, CdkDragExit} from '@angular/cdk/drag-drop';
-import {DragCursorDirective} from '../../../core-ui-module/directives/drag-cursor.directive';
+import { CdkDragDrop, CdkDragEnter, CdkDragExit } from '@angular/cdk/drag-drop';
+import { DragCursorDirective } from '../../../core-ui-module/directives/drag-cursor.directive';
 import { DropSource } from 'src/app/features/node-entries/entries-model';
 
 /**
@@ -38,7 +42,7 @@ export class BreadcrumbsComponent {
     @Input() homeRouterLink: {
         routerLink: any[] | string;
         queryParams?: Params | null;
-        queryParamsHandling?: QueryParamsHandling | null
+        queryParamsHandling?: QueryParamsHandling | null;
     };
     /**
      * Attach a clickable class so the user cursor will be a hand.
@@ -50,7 +54,8 @@ export class BreadcrumbsComponent {
      * `auto` (default) decides via media query.
      */
     @HostBinding('attr.short')
-    @Input() short: 'never' | 'always' | 'auto' = 'auto';
+    @Input()
+    short: 'never' | 'always' | 'auto' = 'auto';
     /**
      * Should automatically be linked via angular routing.
      *
@@ -79,7 +84,7 @@ export class BreadcrumbsComponent {
      */
     @Input() set breadcrumbsForId(id: string) {
         if (id == null) return;
-        this.node.getNodeParents(id, false, [RestConstants.ALL]).subscribe(nodes => {
+        this.node.getNodeParents(id, false, [RestConstants.ALL]).subscribe((nodes) => {
             this.nodes = nodes.nodes.reverse();
             this.addSearch();
         });
@@ -94,7 +99,7 @@ export class BreadcrumbsComponent {
     /**
      * Called when an item is dropped on the breadcrumbs.
      */
-    @Output() onDrop = new EventEmitter<{target: Node, source: DropSource<Node>}>();
+    @Output() onDrop = new EventEmitter<{ target: Node; source: DropSource<Node> }>();
 
     nodes: Node[] = [];
 
@@ -126,14 +131,14 @@ export class BreadcrumbsComponent {
         }
     }
 
-    drop(event: CdkDragDrop<Node|any>) {
+    drop(event: CdkDragDrop<Node | any>) {
         this.onDrop.emit({
             target: event.container.data,
             source: {
                 element: [event.item.data],
                 sourceList: null,
-                mode: DragCursorDirective.dragState.mode
-            }
+                mode: DragCursorDirective.dragState.mode,
+            },
         });
         DragCursorDirective.dragState.element = null;
     }

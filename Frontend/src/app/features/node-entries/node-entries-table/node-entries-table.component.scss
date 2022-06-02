@@ -59,11 +59,11 @@ mat-cell {
         cursor: inherit;
     }
     &.mat-row-virtual {
-        background:  linear-gradient(
-                to right,
-                $nodeVirtualColor 0,
-                $nodeVirtualColor 5px,
-                rgba(255,255,255,0.0001) 5px
+        background: linear-gradient(
+            to right,
+            $nodeVirtualColor 0,
+            $nodeVirtualColor 5px,
+            rgba(255, 255, 255, 0.0001) 5px
         );
     }
     &.mat-row-virtual-seperator {

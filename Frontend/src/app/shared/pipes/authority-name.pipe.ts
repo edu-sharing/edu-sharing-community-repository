@@ -5,7 +5,7 @@ import { Group, Permission, RestConstants, User } from '../../core-module/core.m
 @Pipe({ name: 'authorityName' })
 export class AuthorityNamePipe implements PipeTransform {
     constructor(private translate: TranslateService) {}
-    
+
     transform(authority: Permission | User | Group | any, args: string[] = null): string {
         if (!authority) return 'invalid';
         if (authority.profile?.displayName) return authority.profile.displayName;

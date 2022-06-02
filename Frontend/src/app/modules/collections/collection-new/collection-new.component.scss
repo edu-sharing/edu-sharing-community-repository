@@ -1,307 +1,311 @@
-@import "../../../core-ui-module/styles/variables";
+@import '../../../core-ui-module/styles/variables';
 
 $imagePath: '../../../../assets/images/collections/';
-.createContainer{
-  display:flex;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  .createProgress{
-    position: fixed;
-    left: 20px;
-    top: 20%;
-    color:$textLight;
-    @include unselectableText();
-    >div{
-      position: relative;
-      margin-bottom: 20px;
+.createContainer {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    .createProgress {
+        position: fixed;
+        left: 20px;
+        top: 20%;
+        color: $textLight;
+        @include unselectableText();
+        > div {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .connection {
+            height: 25px;
+            width: 3px;
+            background-image: url($imagePath + 'dashed-line.svg');
+            position: absolute;
+            left: 9px;
+            top: 20px;
+        }
+        > div.finished {
+            color: $primary;
+            @include clickable();
+            .circle {
+                background-image: url($imagePath + 'checked-circle.svg');
+            }
+            .label {
+                font-weight: bold;
+            }
+            .connection {
+                background-image: url($imagePath + 'line.svg');
+            }
+        }
+        > div.current {
+            color: $textPrimary;
+            .circle {
+                background-image: url($imagePath + 'active-circle.svg');
+            }
+            .label {
+                font-weight: bold;
+            }
+        }
+        > div.finish {
+            .circle {
+                background-image: url($imagePath + 'finish.svg');
+            }
+            color: $colorStatusPositive;
+            .label {
+                font-weight: bold;
+                text-transform: uppercase;
+            }
+        }
+        > div,
+        .circle,
+        i,
+        .label {
+            display: flex;
+        }
+        i {
+            margin-right: 10px;
+            position: relative;
+            top: -2px;
+        }
+        .circle {
+            margin-right: 10px;
+            border-radius: 50%;
+            width: 21px;
+            height: 21px;
+            background-image: url($imagePath + 'dashed-circle.svg');
+            background-position: 50% 50%;
+            background-repeat: no-repeat;
+        }
     }
-    .connection{
-      height: 25px;
-      width: 3px;
-      background-image: url($imagePath + 'dashed-line.svg');
-      position: absolute;
-      left: 9px;
-      top: 20px;
-    }
-    >div.finished{
-      color:$primary;
-      @include clickable();
-      .circle{
-        background-image: url($imagePath + 'checked-circle.svg');
-      }
-      .label{
-        font-weight: bold;
-      }
-      .connection{
-        background-image: url($imagePath + 'line.svg');
-      }
-    }
-    >div.current{
-      color:$textPrimary;
-      .circle{
-        background-image: url($imagePath + 'active-circle.svg');
-      }
-      .label{
-        font-weight: bold;
-      }
-    }
-    >div.finish{
-      .circle{
-        background-image: url($imagePath + 'finish.svg');
-      }
-      color:$colorStatusPositive;
-      .label{
-        font-weight:bold;
-        text-transform: uppercase;
-      }
-    }
-    >div,.circle,i,.label{
-      display:flex;
-    }
-    i{
-      margin-right: 10px;
-      position: relative;
-      top: -2px;
-    }
-    .circle{
-      margin-right: 10px;
-      border-radius: 50%;
-      width:21px;
-      height:21px;
-      background-image: url($imagePath + 'dashed-circle.svg');
-      background-position: 50% 50%;
-      background-repeat: no-repeat;
-
-    }
-  }
 }
 
 .collections-master-div {
-  min-height: 100%;
-  margin:auto;
-  max-width:600px;
-  display:flex;
-  align-items: center;
-  padding-top: $mainnavHeight;
-}
-:host ::ng-deep{
-  .createCollection{
-    .collection-item{
-      &.cdk-keyboard-focused {
-        outline-offset: -4px;
-      }
-      >.mat-button-wrapper{
-        width: 100%;
-        justify-content: flex-start;
-        text-transform: none;
-      }
-    }
-  }
-}
-.createCollection{
-  background-color: #fff;
-  .headline{
-    font-size: 110%;
-    padding: 20px 20px;
-    margin: 0;
-    margin-bottom: 10px;
-    @include unselectableText();
-    background-color: $actionDialogBackground;
-    i{
-      float:right;
-    }
-  }
-  .group{
-    padding-top:5px;
-    margin-top: 5px;
-    border-top:1px solid #ccc;
-  }
-  .collection-item:hover{
-    background-color: $workspaceMetadataBackground;
-  }
-  .collection-item{
-    padding:10px 5px;
-    width: 100%;
-    border-radius: 0;
-    line-height: 2em;
-    white-space: normal;
-    .title{
-      color:$primary;
-      font-weight: bold;
-      margin-bottom: 3px;
-    }
-    .description{
-      color:$textLight;
-    }
-    .content{
-      padding:10px 0;
-      text-align: left;
-      flex-grow: 1;
-    }
-    .iconLeft{
-      vertical-align: middle;
-      padding-right: 15px;
-      padding-left: 20px;
-      i {
-        display: flex;
-        background-color: #fff;
-        width: 50px;
-        height: 50px;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        @include materialShadowBottom();
-      }
-    }
-    .next{
-      color: $primary;
-      vertical-align: middle;
-      padding-right: 15px;
-    }
-    i{
-      position:relative;
-      top:3px;
-    }
-  }
-}
-.collection-permission-container{
-  .title{
-    font-size:140%;
-    font-weight: bold;
-    padding-bottom: 20px;
-  }
-  .description{
-    color:$textLight;
-    font-size:110%;
-    padding-bottom: 20px;
-  }
-  .status{
-    margin: $cardPadding*-1;
-    margin-top: 20px;
-    padding: 6px 20px;
-    background: $actionDialogBackground;
-  }
-}
-.collection-general{
-  mat-form-field{
-    width: 100%;
-    textarea{
-      height: 6rem;
-      resize: none;
-    }
-  }
-  .dialog-input-area{
-    padding-top: 0;
-    padding-bottom: 0;
-  }
-  .collection-new-owner{
+    min-height: 100%;
+    margin: auto;
+    max-width: 600px;
     display: flex;
     align-items: center;
-    padding: 0 $cardPadding;
-    >i{
-      margin:5px;
-    }
-    >span{
-      flex-grow: 1;
-    }
-  }
-  .color-group{
-    display: flex;
-    flex-wrap: wrap;
-    margin: auto;
-    //max-width: 220px;
-    justify-content: center;
-    &:focus {
-      outline: unset;
-    }
-    &.cdk-keyboard-focused {
-      @include setGlobalKeyboardFocus();
-    }
-    .color-option {
-      display:inline-block;
-      border-radius: 4pt;
-      width: 14%;
-      height: 30px;
-      margin: 4px 3px;
-      cursor: pointer;
-    }
-    .color-selected {
-      border: 2px solid #333;
-    }
-  }
+    padding-top: $mainnavHeight;
 }
-.collection-metadata{
-  .noGroups{
-    font-size:$fontSizeXLarge;
-    color:$textLight;
-    text-align: center;
-  }
-  .noPermission{
-    color:$textLight;
-    text-align: center;
-    h4{
-      font-size: $fontSizeXLarge;
+:host ::ng-deep {
+    .createCollection {
+        .collection-item {
+            &.cdk-keyboard-focused {
+                outline-offset: -4px;
+            }
+            > .mat-button-wrapper {
+                width: 100%;
+                justify-content: flex-start;
+                text-transform: none;
+            }
+        }
     }
-    h5{
-      font-size: 100%;
+}
+.createCollection {
+    background-color: #fff;
+    .headline {
+        font-size: 110%;
+        padding: 20px 20px;
+        margin: 0;
+        margin-bottom: 10px;
+        @include unselectableText();
+        background-color: $actionDialogBackground;
+        i {
+            float: right;
+        }
     }
-  }
+    .group {
+        padding-top: 5px;
+        margin-top: 5px;
+        border-top: 1px solid #ccc;
+    }
+    .collection-item:hover {
+        background-color: $workspaceMetadataBackground;
+    }
+    .collection-item {
+        padding: 10px 5px;
+        width: 100%;
+        border-radius: 0;
+        line-height: 2em;
+        white-space: normal;
+        .title {
+            color: $primary;
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+        .description {
+            color: $textLight;
+        }
+        .content {
+            padding: 10px 0;
+            text-align: left;
+            flex-grow: 1;
+        }
+        .iconLeft {
+            vertical-align: middle;
+            padding-right: 15px;
+            padding-left: 20px;
+            i {
+                display: flex;
+                background-color: #fff;
+                width: 50px;
+                height: 50px;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                @include materialShadowBottom();
+            }
+        }
+        .next {
+            color: $primary;
+            vertical-align: middle;
+            padding-right: 15px;
+        }
+        i {
+            position: relative;
+            top: 3px;
+        }
+    }
 }
-.groupLabel{
-  margin-bottom:5px;
+.collection-permission-container {
+    .title {
+        font-size: 140%;
+        font-weight: bold;
+        padding-bottom: 20px;
+    }
+    .description {
+        color: $textLight;
+        font-size: 110%;
+        padding-bottom: 20px;
+    }
+    .status {
+        margin: $cardPadding * -1;
+        margin-top: 20px;
+        padding: 6px 20px;
+        background: $actionDialogBackground;
+    }
 }
-.collection1 label,.collection1 label:focus{
-  color:#eee!important;
+.collection-general {
+    mat-form-field {
+        width: 100%;
+        textarea {
+            height: 6rem;
+            resize: none;
+        }
+    }
+    .dialog-input-area {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+    .collection-new-owner {
+        display: flex;
+        align-items: center;
+        padding: 0 $cardPadding;
+        > i {
+            margin: 5px;
+        }
+        > span {
+            flex-grow: 1;
+        }
+    }
+    .color-group {
+        display: flex;
+        flex-wrap: wrap;
+        margin: auto;
+        //max-width: 220px;
+        justify-content: center;
+        &:focus {
+            outline: unset;
+        }
+        &.cdk-keyboard-focused {
+            @include setGlobalKeyboardFocus();
+        }
+        .color-option {
+            display: inline-block;
+            border-radius: 4pt;
+            width: 14%;
+            height: 30px;
+            margin: 4px 3px;
+            cursor: pointer;
+        }
+        .color-selected {
+            border: 2px solid #333;
+        }
+    }
 }
-.permissionsBtn{
-  margin-left: 32px;
+.collection-metadata {
+    .noGroups {
+        font-size: $fontSizeXLarge;
+        color: $textLight;
+        text-align: center;
+    }
+    .noPermission {
+        color: $textLight;
+        text-align: center;
+        h4 {
+            font-size: $fontSizeXLarge;
+        }
+        h5 {
+            font-size: 100%;
+        }
+    }
 }
-.permissionsBtn .btn-flat{
-  float:none;
+.groupLabel {
+    margin-bottom: 5px;
 }
-.title{
-  font-size:120%;
+.collection1 label,
+.collection1 label:focus {
+    color: #eee !important;
 }
-.collectionShadow{
-  @include materialShadowLarge();
+.permissionsBtn {
+    margin-left: 32px;
 }
-.collectionImage{
-  position: relative;
-  height:240px;
-  background-color:white;
-  overflow: hidden;
+.permissionsBtn .btn-flat {
+    float: none;
+}
+.title {
+    font-size: 120%;
+}
+.collectionShadow {
+    @include materialShadowLarge();
+}
+.collectionImage {
+    position: relative;
+    height: 240px;
+    background-color: white;
+    overflow: hidden;
 }
 
 .collection-new-preview-infoarea {
-  position: relative;
-  min-height: 120px;
-  padding: 16px;
-  color: #fff;
-  transition: $transitionNormal all;
-  @include placeholder {
-    color: #ccc;
-  }
-  input,textarea{
-    background-color: transparent;
-  }
+    position: relative;
+    min-height: 120px;
+    padding: 16px;
+    color: #fff;
+    transition: $transitionNormal all;
+    @include placeholder {
+        color: #ccc;
+    }
+    input,
+    textarea {
+        background-color: transparent;
+    }
 }
-.collection-new-bg{
+.collection-new-bg {
     position: absolute;
     width: 100%;
     height: calc(100% - 150px);
     left: 0;
     top: 0;
-    background-color: rgba(0,0,0,0.15);
+    background-color: rgba(0, 0, 0, 0.15);
 }
-.dark-color{
-  color:#000;
-  .collection-new-bg{
-      background-color: rgba(255,255,255,0.15);
-  }
-  @include placeholder {
-    color: #333;
-  }
+.dark-color {
+    color: #000;
+    .collection-new-bg {
+        background-color: rgba(255, 255, 255, 0.15);
+    }
+    @include placeholder {
+        color: #333;
+    }
 }
 .collection-new-preview-headline {
     font-size: 200%;
@@ -320,20 +324,20 @@ $imagePath: '../../../../assets/images/collections/';
 
 .collection-nocontent-big {
     font-size: 200%;
-    padding:16px;
+    padding: 16px;
     padding-top: 8px;
     padding-left: 0px;
 }
 
 .collection-nocontent-small {
-    padding:16px;
+    padding: 16px;
     padding-top: 0px;
     padding-left: 0px;
 }
-.collections-loading-div{
-  position: absolute;
-  top: 20%;
-  text-align: center;
+.collections-loading-div {
+    position: absolute;
+    top: 20%;
+    text-align: center;
 }
 
 .icon-bottom {
@@ -346,18 +350,18 @@ $imagePath: '../../../../assets/images/collections/';
 }
 
 .dialog-dark-area {
-    padding:16px;
-    padding-bottom:8px;
-    background: #EFEFEF;
+    padding: 16px;
+    padding-bottom: 8px;
+    background: #efefef;
 }
 
 .button-area {
     text-align: right;
-  height:74px;
+    height: 74px;
 }
-.button-area a{
-  float:right;
-  margin:5px;
+.button-area a {
+    float: right;
+    margin: 5px;
 }
 .dialog-input {
     width: 90%;
@@ -377,8 +381,8 @@ $imagePath: '../../../../assets/images/collections/';
     max-height: 200px;
     margin-top: 5px;
 }
-.card-content{
-  padding: $cardPadding;
+.card-content {
+    padding: $cardPadding;
 }
 .card-collection-icon-container {
     text-align: center;
@@ -389,8 +393,8 @@ $imagePath: '../../../../assets/images/collections/';
     color: white;
     cursor: pointer;
 }
-.card-image-distance{
-  height: 35px;
+.card-image-distance {
+    height: 35px;
 }
 .card-image-icon-container {
     height: 160px;
@@ -401,9 +405,9 @@ $imagePath: '../../../../assets/images/collections/';
     display: flex;
     align-items: center;
     justify-content: center;
-  i{
-    font-size: 75px;
-  }
+    i {
+        font-size: 75px;
+    }
 }
 
 .card-collection-image-container {
@@ -444,19 +448,19 @@ $imagePath: '../../../../assets/images/collections/';
     display: none;
 }
 
-.button-icon{
-  position: absolute;
-  bottom: 15px;
-  right: 10px;
-  z-index: 2;
-  .mat-fab{
-    margin: 0 5px;
-  }
+.button-icon {
+    position: absolute;
+    bottom: 15px;
+    right: 10px;
+    z-index: 2;
+    .mat-fab {
+        margin: 0 5px;
+    }
 }
-label{
+label {
 }
 
-input[type="radio"] {
+input[type='radio'] {
     margin: 0px 4px 8px 13px;
     cursor: pointer;
 }
@@ -464,7 +468,7 @@ input[type="radio"] {
 .dialog-header-field {
     background-color: #383838;
     padding: 8px 0px 8px 20px;
-    color: #FFFFFF;
+    color: #ffffff;
 }
 .editorial-group {
     display: flex;
@@ -483,79 +487,82 @@ input[type="radio"] {
         }
     }
 }
-@media screen and (max-width: $mobileWidth+$mobileStage*3){
-  .card-high{
-    top:15%;
-  }
-  .createContainer{
-    .createProgress{
-      position: fixed;
-      display:flex;
-      top:$mainnavHeight+40px;
-      width:100vw;
-      left:0;
-      justify-content: center;
-      .circle{
-        background-size: 60%;
-      }
-      .connection{
-        height: 20px;
-        left: 25px;
-        top: 1px;
-        transform: rotate(90deg);
-      }
+@media screen and (max-width: $mobileWidth+$mobileStage*3) {
+    .card-high {
+        top: 15%;
+    }
+    .createContainer {
+        .createProgress {
+            position: fixed;
+            display: flex;
+            top: $mainnavHeight + 40px;
+            width: 100vw;
+            left: 0;
+            justify-content: center;
+            .circle {
+                background-size: 60%;
+            }
+            .connection {
+                height: 20px;
+                left: 25px;
+                top: 1px;
+                transform: rotate(90deg);
+            }
 
-      .label,.material-icons{
-        display:none;
-      }
-      .current .label{
-        display: flex;
-        position: fixed;
-        left:0;
-        top:$mainnavHeight+20px;
-        width:100vw;
-        justify-content: center;
-      }
+            .label,
+            .material-icons {
+                display: none;
+            }
+            .current .label {
+                display: flex;
+                position: fixed;
+                left: 0;
+                top: $mainnavHeight + 20px;
+                width: 100vw;
+                justify-content: center;
+            }
+        }
     }
-  }
 }
-@media screen and (max-height: $mobileHeight + $mobileStage*2){
-  .card, .card-high, .card-low {
-    top:$mainnavHeight+15px;
-  }
-  .collectionImage{
-    height: 120px;
-  }
-  .card-collection-icon-container{
-    height: 120px;
-  }
-  .card-image-icon-container{
-    margin-top: 10px;
-    height: 100px;
-    width: 100px;
-    border-radius: 100px;
-    i{
-      font-size: 60px;
+@media screen and (max-height: $mobileHeight + $mobileStage*2) {
+    .card,
+    .card-high,
+    .card-low {
+        top: $mainnavHeight + 15px;
     }
-  }
-  .card-image-distance{
-    height: 0;
-  }
-  .blurred-image{
-    display: block;
-    filter: blur(8px);
-  }
-  .card-image-preview{
-    height: 120px;
-    width: auto;
-    margin: auto;
-    z-index: 1;
-    position: relative;
-    @include materialShadowLarge();
-  }
+    .collectionImage {
+        height: 120px;
+    }
+    .card-collection-icon-container {
+        height: 120px;
+    }
+    .card-image-icon-container {
+        margin-top: 10px;
+        height: 100px;
+        width: 100px;
+        border-radius: 100px;
+        i {
+            font-size: 60px;
+        }
+    }
+    .card-image-distance {
+        height: 0;
+    }
+    .blurred-image {
+        display: block;
+        filter: blur(8px);
+    }
+    .card-image-preview {
+        height: 120px;
+        width: auto;
+        margin: auto;
+        z-index: 1;
+        position: relative;
+        @include materialShadowLarge();
+    }
 }
 @media screen and (max-width: $mobileWidth+$mobileStage*3) and (max-height: $mobileHeight+$mobileStage*2) {
-  .createContainer .createProgress{
-    display: none;
-  }
+    .createContainer .createProgress {
+        display: none;
+    }
 }

@@ -1,7 +1,6 @@
 @use 'sass:math';
 @import '../../../core-ui-module/styles/variables';
 
-
 @keyframes OrderAnimationCards {
     0% {
         transform: rotate(-0.25deg);
@@ -55,7 +54,7 @@
             justify-content: center;
             align-items: center;
             > i {
-                background: radial-gradient(circle, #fff 30%, rgba(255,255,255,0.0001) 70%);
+                background: radial-gradient(circle, #fff 30%, rgba(255, 255, 255, 0.0001) 70%);
                 width: 200px;
                 height: 200px;
                 font-size: 80px;
@@ -148,7 +147,8 @@
                 cursor: pointer;
                 font-weight: bold;
             }
-            &:hover, &:focus {
+            &:hover,
+            &:focus {
                 background-color: $primaryVeryLight;
             }
         }

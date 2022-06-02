@@ -2,7 +2,12 @@
   <ng-container *ngIf="entriesService.displayType === NodeEntriesDisplayType.Table">
     <es-node-entries-table></es-node-entries-table>
   </ng-container>
-  <ng-container *ngIf="entriesService.displayType === NodeEntriesDisplayType.SmallGrid || entriesService.displayType === NodeEntriesDisplayType.Grid">
+  <ng-container
+    *ngIf="
+      entriesService.displayType === NodeEntriesDisplayType.SmallGrid ||
+      entriesService.displayType === NodeEntriesDisplayType.Grid
+    "
+  >
     <es-node-entries-card-grid [displayType]="entriesService.displayType">
     </es-node-entries-card-grid>
   </ng-container>

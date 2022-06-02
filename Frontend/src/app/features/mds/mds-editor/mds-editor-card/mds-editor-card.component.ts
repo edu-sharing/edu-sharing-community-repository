@@ -1,12 +1,20 @@
-import {takeUntil, delay, map, filter} from 'rxjs/operators';
-import {Component, EventEmitter, Input, OnInit, Output, OnDestroy, ViewChild} from '@angular/core';
+import { takeUntil, delay, map, filter } from 'rxjs/operators';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    OnInit,
+    Output,
+    OnDestroy,
+    ViewChild,
+} from '@angular/core';
 import { DialogButton, Node } from '../../../../core-module/core.module';
 import { CardJumpmark } from '../../../../shared/components/card/card.component';
 import { Toast } from '../../../../core-ui-module/toast';
 import { FillTypeStatus } from '../input-fill-progress/input-fill-progress.component';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
-import {ReplaySubject, Observable, combineLatest} from 'rxjs';
-import {MdsEditorCoreComponent} from '../mds-editor-core/mds-editor-core.component';
+import { ReplaySubject, Observable, combineLatest } from 'rxjs';
+import { MdsEditorCoreComponent } from '../mds-editor-core/mds-editor-core.component';
 
 @Component({
     selector: 'es-mds-editor-card',
@@ -39,8 +47,8 @@ export class MdsEditorCardComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.nodes = this.mdsEditorInstance.nodes$.value;
-        this.getJumpMarks().pipe(
-            takeUntil(this.destroyed))
+        this.getJumpMarks()
+            .pipe(takeUntil(this.destroyed))
             .subscribe((jumpMarks) => (this.jumpMarks = jumpMarks));
         this.mdsEditorInstance
             .observeCompletionStatus()
@@ -82,16 +90,26 @@ export class MdsEditorCardComponent implements OnInit, OnDestroy {
     }
 
     private getJumpMarks(): Observable<CardJumpmark[]> {
-        return combineLatest([this.mdsEditorInstance.activeViews, this.mdsEditorInstance.shouldShowExtendedWidgets$]).pipe(
+        return combineLatest([
+            this.mdsEditorInstance.activeViews,
+            this.mdsEditorInstance.shouldShowExtendedWidgets$,
+        ]).pipe(
             map((observed) =>
-                observed[0].map((view) =>
-                    this.coreRef?.viewRef?.filter(v => v.view.id === view.id)?.[0]
-                )
+                observed[0].map(
+                    (view) => this.coreRef?.viewRef?.filter((v) => v.view.id === view.id)?.[0],
+                ),
             ),
             map((viewRef) =>
-                viewRef.filter((v) => v && !v.isInHiddenState()).map(
-                    (v) => new CardJumpmark(v.view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX, v.view.caption, v.view.icon),
-                ),
+                viewRef
+                    .filter((v) => v && !v.isInHiddenState())
+                    .map(
+                        (v) =>
+                            new CardJumpmark(
+                                v.view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX,
+                                v.view.caption,
+                                v.view.icon,
+                            ),
+                    ),
             ),
         );
     }

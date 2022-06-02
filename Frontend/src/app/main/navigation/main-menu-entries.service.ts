@@ -1,4 +1,4 @@
-import {first, map, shareReplay, switchMap} from 'rxjs/operators';
+import { first, map, shareReplay, switchMap } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { AsyncSubject, Observable } from 'rxjs';
@@ -17,7 +17,7 @@ import {
 } from '../../core-module/core.module';
 import { OPEN_URL_MODE } from '../../core-module/ui/ui-constants';
 import { UIHelper } from '../../core-ui-module/ui-helper';
-import {ConfigEntry} from '../../core-ui-module/node-helper.service';
+import { ConfigEntry } from '../../core-ui-module/node-helper.service';
 import { LoginInfo, AuthenticationService } from 'ngx-edu-sharing-api';
 
 type Target = { type: 'path'; path: string } | { type: 'url'; url: string; openInNew: boolean };
@@ -67,8 +67,7 @@ export class MainMenuEntriesService {
             icon: 'cloud',
             target: { type: 'path', path: 'workspace/files' },
             scope: 'workspace',
-            isVisible: () =>
-                !this.loginInfo.isGuest && this.canAccessWorkspace(),
+            isVisible: () => !this.loginInfo.isGuest && this.canAccessWorkspace(),
         },
         {
             name: 'SIDEBAR.SEARCH',
@@ -113,9 +112,8 @@ export class MainMenuEntriesService {
             isVisible: () =>
                 !this.ui.isMobile() &&
                 (this.organizations.canCreate ||
-                    this.organizations.organizations.filter(
-                        group => group.administrationAccess,
-                    ).length > 0),
+                    this.organizations.organizations.filter((group) => group.administrationAccess)
+                        .length > 0),
         },
         {
             name: 'SIDEBAR.ADMIN',
@@ -142,7 +140,7 @@ export class MainMenuEntriesService {
             switchMap(() => rxjs.from(this.initInformation())),
             map(() => this.createEntries()),
             shareReplay(1),
-        )
+        );
     }
 
     private async initInformation() {
@@ -151,16 +149,16 @@ export class MainMenuEntriesService {
             this.configuration
                 .getAll()
                 .toPromise()
-                .then(config => (this.config = config)),
+                .then((config) => (this.config = config)),
             this.restConnector
                 .isLoggedIn(false)
                 .toPromise()
-                .then(loginInfo => (this.loginInfo = loginInfo)),
+                .then((loginInfo) => (this.loginInfo = loginInfo)),
             this.authentication
                 .observeHasAccessToScope(RestConstants.SAFE_SCOPE)
                 .pipe(first())
                 .toPromise()
-                .then(hasAccess => (this.hasAccessToSafeScope = hasAccess)),
+                .then((hasAccess) => (this.hasAccessToSafeScope = hasAccess)),
         ]);
         // The backend will throw some errors when making unauthorized calls, so we only initialize
         // these variables when we will need them.
@@ -169,13 +167,11 @@ export class MainMenuEntriesService {
                 this.restOrganization
                     .getOrganizations()
                     .toPromise()
-                    .then(
-                        organizations => (this.organizations = organizations),
-                    ),
+                    .then((organizations) => (this.organizations = organizations)),
                 this.restMediacenter
                     .getMediacenters()
                     .toPromise()
-                    .then(mediaCenters => (this.mediaCenters = mediaCenters)),
+                    .then((mediaCenters) => (this.mediaCenters = mediaCenters)),
             ]);
         }
     }
@@ -206,9 +202,7 @@ export class MainMenuEntriesService {
 
     private filterHiddenEntries(entries: ConfigEntry[]): ConfigEntry[] {
         if (this.config.hideMainMenu) {
-            return entries.filter(
-                entry => !this.config.hideMainMenu.includes(entry.scope),
-            );
+            return entries.filter((entry) => !this.config.hideMainMenu.includes(entry.scope));
         } else {
             return entries;
         }
@@ -226,11 +220,7 @@ export class MainMenuEntriesService {
                 if (pos < 0) {
                     pos = entries.length - pos;
                 }
-                entries.splice(
-                    pos,
-                    0,
-                    this.generateCustomEntry(customEntryDefinition),
-                );
+                entries.splice(pos, 0, this.generateCustomEntry(customEntryDefinition));
             }
         }
         return entries;
@@ -249,9 +239,7 @@ export class MainMenuEntriesService {
         return entry;
     }
 
-    private generateCustomEntry(
-        customEntryDefinition: CustomEntryDefinition,
-    ): ConfigEntry {
+    private generateCustomEntry(customEntryDefinition: CustomEntryDefinition): ConfigEntry {
         const target: Target = customEntryDefinition.path
             ? { type: 'path', path: customEntryDefinition.path }
             : {
@@ -266,7 +254,9 @@ export class MainMenuEntriesService {
             isDisabled: !!customEntryDefinition.isDisabled,
             isSeparate: !!customEntryDefinition.isSeperate,
             isCustom: true,
-            open: () => { this.openEntry(entry, target); },
+            open: () => {
+                this.openEntry(entry, target);
+            },
         };
         return entry;
     }
@@ -274,9 +264,7 @@ export class MainMenuEntriesService {
     private canAccessWorkspace(): boolean {
         return (
             this.loginInfo.toolPermissions &&
-            this.loginInfo.toolPermissions.indexOf(
-                RestConstants.TOOLPERMISSION_WORKSPACE,
-            ) !== -1
+            this.loginInfo.toolPermissions.indexOf(RestConstants.TOOLPERMISSION_WORKSPACE) !== -1
         );
     }
 
@@ -289,42 +277,30 @@ export class MainMenuEntriesService {
             this.loginInfo.toolPermissions.indexOf(
                 RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_USER,
             ) !== -1 ||
-            this.mediaCenters.filter(mc => mc.administrationAccess).length > 0
+            this.mediaCenters.filter((mc) => mc.administrationAccess).length > 0
         );
     }
 
     private async openEntry(entry: ConfigEntry, target: Target): Promise<void> {
-        this.frameEvents.broadcastEvent(
-            FrameEventsService.EVENT_VIEW_SWITCHED,
-            entry.scope,
-        );
+        this.frameEvents.broadcastEvent(FrameEventsService.EVENT_VIEW_SWITCHED, entry.scope);
         switch (target.type) {
             case 'path':
-                const currentParams = await this.route.queryParams.pipe(
-                    first())
-                    .toPromise();
+                const currentParams = await this.route.queryParams.pipe(first()).toPromise();
                 const params: Params = {};
                 for (const key of UIHelper.COPY_URL_PARAMS) {
                     if (currentParams.hasOwnProperty(key)) {
                         params[key] = currentParams[key];
                     }
                 }
-                this.router.navigate(
-                    [UIConstants.ROUTER_PREFIX + target.path],
-                    {
-                        queryParams: params,
-                    },
-                );
+                this.router.navigate([UIConstants.ROUTER_PREFIX + target.path], {
+                    queryParams: params,
+                });
                 break;
             case 'url':
                 const mode = target.openInNew
                     ? OPEN_URL_MODE.BlankSystemBrowser
                     : OPEN_URL_MODE.Current;
-                UIHelper.openUrl(
-                    target.url,
-                    this.bridge,
-                    mode,
-                );
+                UIHelper.openUrl(target.url, this.bridge, mode);
                 break;
         }
     }

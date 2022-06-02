@@ -1,11 +1,11 @@
-import {trigger} from '@angular/animations';
-import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
+import { trigger } from '@angular/animations';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { UIService } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
-import {KeyCombination, OptionItem} from '../../../core-ui-module/option-item';
+import { KeyCombination, OptionItem } from '../../../core-ui-module/option-item';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 
 @Component({

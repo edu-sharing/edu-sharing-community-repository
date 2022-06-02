@@ -1,30 +1,34 @@
 import { trigger } from '@angular/animations';
 import {
     AfterContentInit,
-    Component, ContentChild,
+    Component,
+    ContentChild,
     ElementRef,
     EventEmitter,
     HostListener,
     Input,
     OnDestroy,
-    Output, TemplateRef,
+    Output,
+    TemplateRef,
     ViewChild,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
-    DialogButton, Group,
+    DialogButton,
+    Group,
     Node,
     Organization,
     RestHelper,
-    UIService, UserSimple,
+    UIService,
+    UserSimple,
 } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { CardService } from '../../../core-ui-module/card.service';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
-import {AuthorityNamePipe} from '../../pipes/authority-name.pipe';
-import {Observable, BehaviorSubject} from 'rxjs';
-import {KeyEvents} from '../../../core-module/ui/key-events';
+import { AuthorityNamePipe } from '../../pipes/authority-name.pipe';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { KeyEvents } from '../../../core-module/ui/key-events';
 
 /**
  * A common edu-sharing modal card
@@ -105,7 +109,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
         if (nodes && nodes.length) {
             if (nodes.length === 1 && nodes[0]) {
                 // Group
-                if((nodes[0] as any).profile) {
+                if ((nodes[0] as any).profile) {
                     this.icon = 'group';
                     this.subtitle = new AuthorityNamePipe(this.translate).transform(nodes[0]);
                 } else {
@@ -114,10 +118,9 @@ export class CardComponent implements AfterContentInit, OnDestroy {
                 }
             } else {
                 this.avatar = null;
-                this.subtitle = this.translate.instant(
-                    'CARD_SUBTITLE_MULTIPLE',
-                    { count: nodes.length },
-                );
+                this.subtitle = this.translate.instant('CARD_SUBTITLE_MULTIPLE', {
+                    count: nodes.length,
+                });
             }
         }
     }
@@ -199,10 +202,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
     }
 
     ngOnDestroy() {
-        CardComponent.modalCards.splice(
-            CardComponent.modalCards.indexOf(this),
-            1,
-        );
+        CardComponent.modalCards.splice(CardComponent.modalCards.indexOf(this), 1);
         if (CardComponent.modalCards.length === 0) {
             document.body.style.overflow = null;
         }
@@ -211,11 +211,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
 
     @HostListener('window:resize')
     onResize() {
-        if (
-            document.activeElement &&
-            this.cardContainer &&
-            this.cardContainer.nativeElement
-        ) {
+        if (document.activeElement && this.cardContainer && this.cardContainer.nativeElement) {
             this.uiService.scrollSmoothElementToChild(
                 document.activeElement,
                 this.cardContainer.nativeElement,
@@ -238,8 +234,8 @@ export class CardComponent implements AfterContentInit, OnDestroy {
             this.cancel();
             return true;
         }
-        if(this.modal === 'always') {
-            if(KeyEvents.isChildEvent(event, this.cardContainer)) {
+        if (this.modal === 'always') {
+            if (KeyEvents.isChildEvent(event, this.cardContainer)) {
                 event.stopPropagation();
                 return true;
             }
@@ -283,12 +279,10 @@ export class CardComponent implements AfterContentInit, OnDestroy {
     }
 
     private setInitialFocus() {
-        const inputs = Array.from(
-            this.cardContainer.nativeElement.getElementsByTagName('input'),
-        );
-        if (inputs.some(el => el.autofocus)) {
+        const inputs = Array.from(this.cardContainer.nativeElement.getElementsByTagName('input'));
+        if (inputs.some((el) => el.autofocus)) {
             // Focus the first input field that sets `autofocus`.
-            inputs.find(el => el.autofocus).focus();
+            inputs.find((el) => el.autofocus).focus();
             return;
         } else if (inputs.length) {
             // Else, focus the first input field.
@@ -296,10 +290,10 @@ export class CardComponent implements AfterContentInit, OnDestroy {
             return;
         } else if (this.cardActions) {
             // Else, focus the right-most action button that is not disabled.
-            const actionButtons = Array.from(
-                this.cardActions.nativeElement.children,
-            ).map(el => el.children[0] as HTMLButtonElement);
-            const lastButton = actionButtons.reverse().find(el => !el.disabled);
+            const actionButtons = Array.from(this.cardActions.nativeElement.children).map(
+                (el) => el.children[0] as HTMLButtonElement,
+            );
+            const lastButton = actionButtons.reverse().find((el) => !el.disabled);
             if (lastButton) {
                 lastButton.focus();
                 return;
@@ -333,8 +327,8 @@ export class CardComponent implements AfterContentInit, OnDestroy {
         //
         // For sticky headings, We have an alternative approach of determining the active jumpmark:
         // the heading currently sticking to the top of the card is always active.
-        const cardTop = this.cardContainer.nativeElement.getBoundingClientRect().top
-        const cardBottom = this.cardContainer.nativeElement.getBoundingClientRect().bottom
+        const cardTop = this.cardContainer.nativeElement.getBoundingClientRect().top;
+        const cardBottom = this.cardContainer.nativeElement.getBoundingClientRect().bottom;
         let activeJumpmark: CardJumpmark = null;
         let maxPixelsVisible = 0;
         for (const jumpmark of this.jumpmarks ?? []) {
@@ -342,7 +336,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
             const sectionTop = headingElement.getBoundingClientRect().top;
             if (window.getComputedStyle(headingElement).position === 'sticky') {
                 if (sectionTop >= cardTop) {
-                    return jumpmark
+                    return jumpmark;
                 } else {
                     continue;
                 }
@@ -352,8 +346,8 @@ export class CardComponent implements AfterContentInit, OnDestroy {
                 // The section is completely visible.
                 return jumpmark;
             }
-            const pixelsVisible = Math.min(sectionBottom, cardBottom)
-                - Math.max(sectionTop, cardTop);
+            const pixelsVisible =
+                Math.min(sectionBottom, cardBottom) - Math.max(sectionTop, cardTop);
             if (pixelsVisible > maxPixelsVisible) {
                 maxPixelsVisible = pixelsVisible;
                 activeJumpmark = jumpmark;

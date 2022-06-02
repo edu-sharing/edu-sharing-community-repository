@@ -5,25 +5,25 @@ import {
     OnChanges,
     OnInit,
     SimpleChanges,
-    ViewChild
+    ViewChild,
 } from '@angular/core';
-import {NodeEntriesService} from '../../../core-ui-module/node-entries.service';
-import {Node} from '../../../core-module/rest/data-object';
-import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
-import {ColorHelper, PreferredColor} from '../../../core-module/ui/color-helper';
-import {OptionItem, Target} from '../../../core-ui-module/option-item';
-import {DropdownComponent} from '../../../shared/components/dropdown/dropdown.component';
-import {MatMenuTrigger} from '@angular/material/menu';
+import { NodeEntriesService } from '../../../core-ui-module/node-entries.service';
+import { Node } from '../../../core-module/rest/data-object';
+import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
+import { ColorHelper, PreferredColor } from '../../../core-module/ui/color-helper';
+import { OptionItem, Target } from '../../../core-ui-module/option-item';
+import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
+import { MatMenuTrigger } from '@angular/material/menu';
 import { Toast } from 'src/app/core-ui-module/toast';
-import {ConfigurationService} from '../../../core-module/rest/services/configuration.service';
-import {RestConnectorService} from '../../../core-module/rest/services/rest-connector.service';
-import {RestConstants} from '../../../core-module/rest/rest-constants';
+import { ConfigurationService } from '../../../core-module/rest/services/configuration.service';
+import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
+import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { ClickSource, InteractionType } from '../entries-model';
 
 @Component({
     selector: 'es-node-entries-card',
     templateUrl: 'node-entries-card.component.html',
-    styleUrls: ['node-entries-card.component.scss']
+    styleUrls: ['node-entries-card.component.scss'],
 })
 export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnInit {
     readonly InteractionType = InteractionType;
@@ -43,21 +43,20 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
         public connector: RestConnectorService,
         public configService: ConfigurationService,
         private toast: Toast,
-    ) {
-    }
+    ) {}
 
-    ngOnChanges(changes: SimpleChanges): void {
-    }
+    ngOnChanges(changes: SimpleChanges): void {}
 
     getTextColor() {
-        return ColorHelper.getPreferredColor(this.node.collection.color) === PreferredColor.Black ?
-            '#000' : '#fff';
+        return ColorHelper.getPreferredColor(this.node.collection.color) === PreferredColor.Black
+            ? '#000'
+            : '#fff';
     }
     optionsOnCard() {
         const options = this.entriesService.options[Target.List];
         const always = options.filter((o) => o.showAlways);
         if (always.some((o) => o.showCallback(this.node))) {
-           return always;
+            return always;
         }
         // we do NOT show any additional actions
         return [];
@@ -76,7 +75,7 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
         }
         if (!this.entriesService.selection.selected.includes(this.node)) {
             this.entriesService.selection.clear();
-            this.entriesService.selection.select(this.node)
+            this.entriesService.selection.select(this.node);
         }
         // Wait for the menu to reflect changed options.
         setTimeout(() => {
@@ -100,7 +99,10 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
     }
 
     async ngOnInit() {
-        this.showRatings = (await this.configService.get('', 'none').toPromise()) !== 'none' &&
-            (await this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_RATE_READ).toPromise())
+        this.showRatings =
+            (await this.configService.get('', 'none').toPromise()) !== 'none' &&
+            (await this.connector
+                .hasToolPermission(RestConstants.TOOLPERMISSION_RATE_READ)
+                .toPromise());
     }
 }

@@ -1,39 +1,40 @@
-@import "../../../../core-ui-module/styles/variables";
+@import '../../../../core-ui-module/styles/variables';
 
-.description{
+.description {
     color: $textMain;
-    font-size:$fontSizeSmall;
-    float:left;
+    font-size: $fontSizeSmall;
+    float: left;
     text-transform: uppercase;
     font-weight: bold;
 }
-.descriptionValue{
+.descriptionValue {
     white-space: pre-wrap;
 }
-.edit{
-    color:$textLight;
-    float:right;
+.edit {
+    color: $textLight;
+    float: right;
     position: relative;
 }
-.value{
-    padding-top:0;
-    float:left;
-    padding-bottom:20px;
+.value {
+    padding-top: 0;
+    float: left;
+    padding-bottom: 20px;
 }
-.aspect:not(:last-child){
+.aspect:not(:last-child) {
     padding-bottom: 4px;
 }
-.valueFreetext{
+.valueFreetext {
     white-space: pre-line;
 }
-.description,.value{
-    width:calc(100% - 30px);
+.description,
+.value {
+    width: calc(100% - 30px);
 }
-.preview{
-    width:calc(100% + 24px);
-    margin-left:-12px;
+.preview {
+    width: calc(100% + 24px);
+    margin-left: -12px;
     margin-bottom: 12px;
-    height:200px;
+    height: 200px;
     position: relative;
     object-fit: cover;
 }

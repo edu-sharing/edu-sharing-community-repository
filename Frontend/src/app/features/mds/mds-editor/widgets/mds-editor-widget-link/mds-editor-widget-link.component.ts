@@ -1,16 +1,14 @@
-import {Component, OnInit, Input, NgZone} from '@angular/core';
-import {BehaviorSubject} from 'rxjs';
-import {NativeWidgetComponent} from '../../mds-editor-view/mds-editor-view.component';
-import {MdsEditorInstanceService} from '../../mds-editor-instance.service';
-import {MdsEditorWidgetAuthorComponent} from '../mds-editor-widget-author/mds-editor-widget-author.component';
-import {Constraints, NativeWidgetType} from '../../../types/types';
-import {MdsEditorWidgetBase, ValueType} from '../mds-editor-widget-base';
-import {
-    RestConnectorService
-} from '../../../../../core-module/rest/services/rest-connector.service';
-import {DomSanitizer} from '@angular/platform-browser';
-import {TranslateService} from '@ngx-translate/core';
-import {NodeHelperService} from '../../../../../core-ui-module/node-helper.service';
+import { Component, OnInit, Input, NgZone } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
+import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
+import { MdsEditorWidgetAuthorComponent } from '../mds-editor-widget-author/mds-editor-widget-author.component';
+import { Constraints, NativeWidgetType } from '../../../types/types';
+import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import { RestConnectorService } from '../../../../../core-module/rest/services/rest-connector.service';
+import { DomSanitizer } from '@angular/platform-browser';
+import { TranslateService } from '@ngx-translate/core';
+import { NodeHelperService } from '../../../../../core-ui-module/node-helper.service';
 import { MainNavService } from '../../../../../main/navigation/main-nav.service';
 
 @Component({
@@ -18,7 +16,10 @@ import { MainNavService } from '../../../../../main/navigation/main-nav.service'
     templateUrl: './mds-editor-widget-link.component.html',
     styleUrls: ['./mds-editor-widget-link.component.scss'],
 })
-export class MdsEditorWidgetLinkComponent extends MdsEditorWidgetBase implements OnInit, NativeWidgetComponent {
+export class MdsEditorWidgetLinkComponent
+    extends MdsEditorWidgetBase
+    implements OnInit, NativeWidgetComponent
+{
     static readonly constraints: Constraints = {
         supportsInlineEditing: true,
         requiresNode: true,
@@ -54,7 +55,7 @@ export class MdsEditorWidgetLinkComponent extends MdsEditorWidgetBase implements
     async onClick() {
         if (this.widgetName === 'maptemplate') {
             const nodes = await this.mdsEditorValues.save();
-            if(Array.isArray(nodes)) {
+            if (Array.isArray(nodes)) {
                 this.mainnav.getDialogs().onRefresh.emit(nodes);
             }
             this.mainnav.getDialogs().nodeMetadata = null;
@@ -64,7 +65,7 @@ export class MdsEditorWidgetLinkComponent extends MdsEditorWidgetBase implements
         } else if (this.widgetName === 'contributor') {
             await MdsEditorWidgetAuthorComponent.openContributorDialog(
                 this.mdsEditorValues,
-                this.mainnav
+                this.mainnav,
             );
         } else {
             throw new Error('not implemented');

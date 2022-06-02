@@ -36,18 +36,18 @@ import { KeysPipe } from './pipes/keys.pipe';
 import { PermissionNamePipe } from './pipes/permission-name.pipe';
 import { UrlPipe } from './pipes/url.pipe';
 import { Toast } from './toast';
-import {ImageConfigDirective} from './directives/image-config.directive';
-import {ErrorProcessingService} from './error.processing';
-import {ToastMessageComponent} from './components/toast-message/toast-message.component';
-import {RenderHelperService} from './render-helper.service';
-import {DragDropModule} from '@angular/cdk/drag-drop';
-import {MatSlideToggleModule} from '@angular/material/slide-toggle';
-import {NodeEntriesDragDirective} from './directives/node-entries-drag';
-import {MatTableModule} from '@angular/material/table';
-import {MatPaginatorModule} from '@angular/material/paginator';
-import {MatSortModule} from '@angular/material/sort';
-import {OverlayModule} from '@angular/cdk/overlay';
-import {DragCursorDirective} from './directives/drag-cursor.directive';
+import { ImageConfigDirective } from './directives/image-config.directive';
+import { ErrorProcessingService } from './error.processing';
+import { ToastMessageComponent } from './components/toast-message/toast-message.component';
+import { RenderHelperService } from './render-helper.service';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { NodeEntriesDragDirective } from './directives/node-entries-drag';
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSortModule } from '@angular/material/sort';
+import { OverlayModule } from '@angular/cdk/overlay';
+import { DragCursorDirective } from './directives/drag-cursor.directive';
 import { SharedModule } from '../shared/shared.module';
 import { ListItemsModule } from '../features/list-items/list-items.module';
 
@@ -107,7 +107,8 @@ import { ListItemsModule } from '../features/list-items/list-items.module';
         ErrorProcessingService,
         NodeHelperService,
         RenderHelperService,
-        OptionsHelperService],
+        OptionsHelperService,
+    ],
     exports: [
         SharedModule,
         ListTableComponent,

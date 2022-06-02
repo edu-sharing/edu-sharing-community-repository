@@ -1,52 +1,120 @@
 <div class="group">
-<div class="deleted-info" *ngIf="isDeleted">
-    <div class="line"><hr></div>
-    <div class="info">{{'WORKSPACE.SHARE.DELETED' | translate}}</div>
-    <div class="line"><hr></div>
-</div>
-<div class="container">
-<div class="icon">
-  <es-user-avatar [user]="_permission" size="xsmall"></es-user-avatar>
-  <!--<i class="type material-icons">{{_permission.authority.authorityType=='USER' ? "person" : _permission.authority.authorityType=='LINK' ? "link" : "group"}}{{added ? "_add" : "" }}</i>-->
-</div>
-<div class="permissionName">
-  <span class="primary">{{_permission | permissionName}}</span>
-  <span class="secondary">{{_permission | permissionName:{field:'secondary'} }}</span>
-</div>
-<div class="permission" [class.clickable]="!readOnly && !isEveryone && !invalidPermission" [class.readOnly]="readOnly">
-  <div class="publish">
-    <i class="material-icons" *ngIf="_permission.permissions.indexOf('Coordinator')>-1 || _permission.permissions.indexOf('CCPublish')>-1" matTooltip="{{ 'WORKSPACE.SHARE.PUBLISHER' | translate}}">public</i>
+  <div class="deleted-info" *ngIf="isDeleted">
+    <div class="line"><hr /></div>
+    <div class="info">{{ 'WORKSPACE.SHARE.DELETED' | translate }}</div>
+    <div class="line"><hr /></div>
   </div>
-  <div *ngIf="invalidPermission" title="{{'WORKSPACE.SHARE.TYPE_UNKNOWN_DESCRIPTION'|translate:{permissions:_permission.permissions.join(', ')} }}">
-    <div>
-      <i aria-hidden="true" class="material-icons align">help_outline</i> <span>{{'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate}}</span>
-      <div class="select"></div>
+  <div class="container">
+    <div class="icon">
+      <es-user-avatar [user]="_permission" size="xsmall"></es-user-avatar>
+      <!--<i class="type material-icons">{{_permission.authority.authorityType=='USER' ? "person" : _permission.authority.authorityType=='LINK' ? "link" : "group"}}{{added ? "_add" : "" }}</i>-->
     </div>
-  </div>
-  <div *ngIf="!invalidPermission" class="permission-type">
-    <div *ngIf="_permission.permissions.indexOf('Owner')>-1" (click)="chooseType()"><i class="material-icons align">home</i> <span>{{'WORKSPACE.SHARE.GROUP_OWNER' | translate}}</span>
+    <div class="permissionName">
+      <span class="primary">{{ _permission | permissionName }}</span>
+      <span class="secondary">{{ _permission | permissionName: { field: 'secondary' } }}</span>
     </div>
-    <div *ngIf="_permission.permissions.indexOf('Consumer')>-1" tabindex="0" (keyup.enter)="chooseType()" (click)="chooseType()"><i class="material-icons align">remove_red_eye</i> <span>{{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</span>
-      <div *ngIf="!readOnly && !isEveryone" class="select"><i class="material-icons align">keyboard_arrow_down</i></div></div>
-    <div *ngIf="_permission.permissions.indexOf('Collaborator')>-1" tabindex="0" (keyup.enter)="chooseType()" (click)="chooseType()"><i class="material-icons align">edit</i> <span>{{'WORKSPACE.SHARE.TYPE_COWORKER' | translate}}</span>
-      <div *ngIf="!readOnly && !isEveryone" class="select"><i class="material-icons align">keyboard_arrow_down</i></div></div>
-    <div *ngIf="_permission.permissions.indexOf('Coordinator')>-1 || _permission.permissions.indexOf('All')>-1" tabindex="0" (keyup.enter)="chooseType()" (click)="chooseType()"><i class="material-icons align">work</i> <span>{{'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate}}</span>
-      <div *ngIf="!readOnly && !isEveryone" class="select"><i class="material-icons align">keyboard_arrow_down</i></div></div>
-    <div *ngIf="_permission.permissions.length==0"></div>
+    <div
+      class="permission"
+      [class.clickable]="!readOnly && !isEveryone && !invalidPermission"
+      [class.readOnly]="readOnly"
+    >
+      <div class="publish">
+        <i
+          class="material-icons"
+          *ngIf="
+            _permission.permissions.indexOf('Coordinator') > -1 ||
+            _permission.permissions.indexOf('CCPublish') > -1
+          "
+          matTooltip="{{ 'WORKSPACE.SHARE.PUBLISHER' | translate }}"
+          >public</i
+        >
+      </div>
+      <div
+        *ngIf="invalidPermission"
+        title="{{
+          'WORKSPACE.SHARE.TYPE_UNKNOWN_DESCRIPTION'
+            | translate: { permissions: _permission.permissions.join(', ') }
+        }}"
+      >
+        <div>
+          <i aria-hidden="true" class="material-icons align">help_outline</i>
+          <span>{{ 'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate }}</span>
+          <div class="select"></div>
+        </div>
+      </div>
+      <div *ngIf="!invalidPermission" class="permission-type">
+        <div *ngIf="_permission.permissions.indexOf('Owner') > -1" (click)="chooseType()">
+          <i class="material-icons align">home</i>
+          <span>{{ 'WORKSPACE.SHARE.GROUP_OWNER' | translate }}</span>
+        </div>
+        <div
+          *ngIf="_permission.permissions.indexOf('Consumer') > -1"
+          tabindex="0"
+          (keyup.enter)="chooseType()"
+          (click)="chooseType()"
+        >
+          <i class="material-icons align">remove_red_eye</i>
+          <span>{{ 'WORKSPACE.SHARE.TYPE_VIEWER' | translate }}</span>
+          <div *ngIf="!readOnly && !isEveryone" class="select">
+            <i class="material-icons align">keyboard_arrow_down</i>
+          </div>
+        </div>
+        <div
+          *ngIf="_permission.permissions.indexOf('Collaborator') > -1"
+          tabindex="0"
+          (keyup.enter)="chooseType()"
+          (click)="chooseType()"
+        >
+          <i class="material-icons align">edit</i>
+          <span>{{ 'WORKSPACE.SHARE.TYPE_COWORKER' | translate }}</span>
+          <div *ngIf="!readOnly && !isEveryone" class="select">
+            <i class="material-icons align">keyboard_arrow_down</i>
+          </div>
+        </div>
+        <div
+          *ngIf="
+            _permission.permissions.indexOf('Coordinator') > -1 ||
+            _permission.permissions.indexOf('All') > -1
+          "
+          tabindex="0"
+          (keyup.enter)="chooseType()"
+          (click)="chooseType()"
+        >
+          <i class="material-icons align">work</i>
+          <span>{{ 'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate }}</span>
+          <div *ngIf="!readOnly && !isEveryone" class="select">
+            <i class="material-icons align">keyboard_arrow_down</i>
+          </div>
+        </div>
+        <div *ngIf="_permission.permissions.length == 0"></div>
 
-    <es-workspace-share-choose-type *ngIf="showChooseType" class="typeAdd"
-                                 [selected]="_permission.permissions"
-                                 [isDirectory]="isDirectory"
-                                 [canPublish]="canPublish"
-                                 (onCancel)="showChooseType=false"
-                                 (onType)="changeType($event)"
-    ></es-workspace-share-choose-type>
+        <es-workspace-share-choose-type
+          *ngIf="showChooseType"
+          class="typeAdd"
+          [selected]="_permission.permissions"
+          [isDirectory]="isDirectory"
+          [canPublish]="canPublish"
+          (onCancel)="showChooseType = false"
+          (onType)="changeType($event)"
+        ></es-workspace-share-choose-type>
+      </div>
+    </div>
+    <div
+      class="remove"
+      tabindex="0"
+      (keyup.enter)="remove()"
+      (click)="remove()"
+      *ngIf="showDelete"
+      [class.clickable]="!readOnly"
+    >
+      <i *ngIf="!inherit && !isDeleted" class="material-icons">cancel</i>
+      <i *ngIf="!inherit && isDeleted" class="material-icons">undo</i>
+      <i
+        *ngIf="inherit"
+        class="inherit"
+        esIcon="edu-inherit"
+        matTooltip="{{ 'WORKSPACE.SHARE.INHERIT_HINT' | translate }}"
+      ></i>
+    </div>
   </div>
-</div>
-<div class="remove" tabindex="0" (keyup.enter)="remove()" (click)="remove()" *ngIf="showDelete" [class.clickable]="!readOnly">
-  <i *ngIf="!inherit && !isDeleted" class="material-icons">cancel</i>
-  <i *ngIf="!inherit && isDeleted" class="material-icons">undo</i>
-  <i *ngIf="inherit" class="inherit" esIcon="edu-inherit" matTooltip="{{ 'WORKSPACE.SHARE.INHERIT_HINT' | translate}}"></i>
-</div>
-</div>
 </div>

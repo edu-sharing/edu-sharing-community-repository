@@ -1,9 +1,15 @@
 import { PlatformLocation } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import {ActivatedRoute, Params, Router, UrlSerializer} from '@angular/router';
+import { ActivatedRoute, Params, Router, UrlSerializer } from '@angular/router';
 import { TranslationsService } from '../../translations/translations.service';
-import {ConfigurationService, DialogButton, RestConnectorService, RestHelper, UIService} from '../../core-module/core.module';
+import {
+    ConfigurationService,
+    DialogButton,
+    RestConnectorService,
+    RestHelper,
+    UIService,
+} from '../../core-module/core.module';
 import { UIConstants } from '../../core-module/ui/ui-constants';
 import { Toast } from '../../core-ui-module/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
@@ -16,7 +22,7 @@ import { RegisterResetPasswordComponent } from './register-reset-password/regist
     selector: 'es-register',
     templateUrl: 'register.component.html',
     styleUrls: ['register.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterComponent {
     @ViewChild('registerForm') registerForm: RegisterFormComponent;
@@ -59,10 +65,11 @@ export class RegisterComponent {
         this.route.params.subscribe((params) => {
             this.params = params;
             if (params.status) {
-                if (params.status === 'done'
-                    || params.status === 'done-reset'
-                    || params.status === 'request'
-                    || params.status === 'reset-password'
+                if (
+                    params.status === 'done' ||
+                    params.status === 'done-reset' ||
+                    params.status === 'request' ||
+                    params.status === 'reset-password'
                 ) {
                     this.state = params.status;
                     this.changes.detectChanges();
@@ -75,9 +82,11 @@ export class RegisterComponent {
         this.translations.waitForInit().subscribe(() => {
             this.isLoading = false;
             this.changes.detectChanges();
-            if(['request', 'reset-password', 'done-reset'].indexOf(this.params.status) !== -1) {
-                if(this.configService.instant('register.local', true as boolean) === false &&
-                    this.configService.instant('register.recoverPassword', false) === false) {
+            if (['request', 'reset-password', 'done-reset'].indexOf(this.params.status) !== -1) {
+                if (
+                    this.configService.instant('register.local', true as boolean) === false &&
+                    this.configService.instant('register.recoverPassword', false) === false
+                ) {
                     RestHelper.goToLogin(this.router, this.configService, null, null);
                 }
             } else if (!this.configService.instant('register.local', true)) {
@@ -86,11 +95,14 @@ export class RegisterComponent {
             setTimeout(() => this.setParams());
             this.connector.isLoggedIn().subscribe((data) => {
                 if (data.statusCode === 'OK') {
-                    UIHelper.goToDefaultLocation(this.router, this.platformLocation, this.configService);
+                    UIHelper.goToDefaultLocation(
+                        this.router,
+                        this.platformLocation,
+                        this.configService,
+                    );
                 }
             });
         });
-
     }
 
     onRegisterDone() {
@@ -133,7 +145,7 @@ export class RegisterComponent {
     onPasswordRequested() {
         const email = this.request.emailFormControl.value;
         this.state = 'done-reset';
-        setTimeout(() => this.registerDone.email = email);
+        setTimeout(() => (this.registerDone.email = email));
     }
 
     updateButtons() {
@@ -149,7 +161,9 @@ export class RegisterComponent {
     private getPrimaryButton(): DialogButton {
         let btn: DialogButton;
         if (this.state === 'register') {
-            btn = new DialogButton('REGISTER.BUTTON', { color: 'primary' }, () => this.registerForm.register());
+            btn = new DialogButton('REGISTER.BUTTON', { color: 'primary' }, () =>
+                this.registerForm.register(),
+            );
             btn.disabled = !this.registerForm || !this.registerForm.canRegister();
         }
         if (this.state === 'request') {
@@ -159,7 +173,9 @@ export class RegisterComponent {
             btn.disabled = !this.request || !this.request.emailFormControl.valid;
         }
         if (this.state === 'reset-password') {
-            btn = new DialogButton('REGISTER.RESET.BUTTON', { color: 'primary' }, () => this.newPassword());
+            btn = new DialogButton('REGISTER.RESET.BUTTON', { color: 'primary' }, () =>
+                this.newPassword(),
+            );
             btn.disabled = !this.resetPassword || !this.resetPassword.buttonCheck();
         }
         if ((this.state === 'done' || this.state === 'done-reset') && this.registerDone) {

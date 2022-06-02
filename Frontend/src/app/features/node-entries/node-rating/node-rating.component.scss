@@ -15,9 +15,9 @@
 .mat-icon-button.mat-primary {
     color: $textLight;
     &.likes {
-
     }
-    &.star, &.delete {
+    &.star,
+    &.delete {
         min-width: unset;
         width: 18px;
         height: 18px;

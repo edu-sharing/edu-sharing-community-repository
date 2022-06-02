@@ -2,13 +2,13 @@
 <!-- FIXME: Is this part of a page that already has a level 1 heading? -->
 <h1 esTitle class="cdk-visually-hidden">{{ 'WORKSPACE.ADD_OBJECT_TITLE' | translate }}</h1>
 <es-workspace-management
-    [parent]="parent"
-    [(showUploadSelect)]="showUploadSelect"
-    (onUploadSelectCanceled)="cancel()"
-    [uploadShowPicker]="true"
-    [uploadMultiple]="false"
-    [(filesToUpload)]="filesToUpload"
-    (onUploadFileSelected)="uploadNodes($event)"
-    (onUploadFilesProcessed)="onDone($event)"
-    (onCloseMetadata)="onDone($event)"
+  [parent]="parent"
+  [(showUploadSelect)]="showUploadSelect"
+  (onUploadSelectCanceled)="cancel()"
+  [uploadShowPicker]="true"
+  [uploadMultiple]="false"
+  [(filesToUpload)]="filesToUpload"
+  (onUploadFileSelected)="uploadNodes($event)"
+  (onUploadFilesProcessed)="onDone($event)"
+  (onCloseMetadata)="onDone($event)"
 ></es-workspace-management>

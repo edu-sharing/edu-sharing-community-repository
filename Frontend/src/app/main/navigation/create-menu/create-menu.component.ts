@@ -23,13 +23,16 @@ import {
     Filetype,
     FrameEventsService,
     Node,
-    NodeWrapper, RestConnectorService,
+    NodeWrapper,
+    RestConnectorService,
     RestConnectorsService,
     RestConstants,
     RestHelper,
     RestIamService,
-    RestNodeService, SessionStorageService,
-    TemporaryStorageService, UIConstants,
+    RestNodeService,
+    SessionStorageService,
+    TemporaryStorageService,
+    UIConstants,
 } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
@@ -37,7 +40,7 @@ import { CardService } from '../../../core-ui-module/card.service';
 import { CardComponent } from '../../../shared/components/card/card.component';
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
 import { DateHelper } from '../../../core-ui-module/DateHelper';
-import {LinkData, NodeHelperService} from '../../../core-ui-module/node-helper.service';
+import { LinkData, NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import {
     Constrain,
     DefaultGroups,
@@ -50,19 +53,17 @@ import {
 import { Toast } from '../../../core-ui-module/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { WorkspaceManagementDialogsComponent } from '../../../modules/management-dialogs/management-dialogs.component';
-import { delay } from "rxjs/operators";
-import { DialogRef, ManagementDialogsService } from '../../../modules/management-dialogs/management-dialogs.service';
+import { delay } from 'rxjs/operators';
+import {
+    DialogRef,
+    ManagementDialogsService,
+} from '../../../modules/management-dialogs/management-dialogs.service';
 
 @Component({
     selector: 'es-create-menu',
     templateUrl: 'create-menu.component.html',
     styleUrls: ['create-menu.component.scss'],
-    animations: [
-        trigger(
-            'dialog',
-            UIAnimation.switchDialog(UIAnimation.ANIMATION_TIME_FAST),
-        ),
-    ],
+    animations: [trigger('dialog', UIAnimation.switchDialog(UIAnimation.ANIMATION_TIME_FAST))],
     providers: [
         OptionsHelperService,
         {
@@ -140,7 +141,7 @@ export class CreateMenuComponent {
         private cardService: CardService,
         private dialogs: ManagementDialogsService,
     ) {
-        this.route.queryParams.subscribe(params => {
+        this.route.queryParams.subscribe((params) => {
             this.params = params;
             this.updateOptions();
         });
@@ -149,10 +150,8 @@ export class CreateMenuComponent {
             this.updateOptions();
         });
         this.connector.isLoggedIn(false).subscribe((login) => {
-            if(login.statusCode === RestConstants.STATUS_CODE_OK) {
-                this.nodeHelper.getDefaultInboxFolder().subscribe((n) =>
-                    this.fallbackFolder = n
-                );
+            if (login.statusCode === RestConstants.STATUS_CODE_OK) {
+                this.nodeHelper.getDefaultInboxFolder().subscribe((n) => (this.fallbackFolder = n));
             }
         });
         this.cardHasOpenModals$ = cardService.hasOpenModals.pipe(delay(0));
@@ -167,17 +166,19 @@ export class CreateMenuComponent {
             if (CardComponent.getNumberOfOpenCards() > 0) {
                 return;
             }
-            if((event.target as HTMLElement)?.tagName === 'INPUT') {
+            if ((event.target as HTMLElement)?.tagName === 'INPUT') {
                 return;
             }
             if (event.clipboardData.items.length > 0) {
                 const item = event.clipboardData.items[0];
                 if (item.type === 'text/plain') {
-                    item.getAsString(data => {
+                    item.getAsString((data) => {
                         if (data.toLowerCase().startsWith('http')) {
                             // @TODO: Later we should find a way to prevent the event from propagating
                             // this currently fails because getAsString is called async!
-                            this.managementService.getDialogsComponent().createUrlLink(new LinkData(data));
+                            this.managementService
+                                .getDialogsComponent()
+                                .createUrlLink(new LinkData(data));
                             event.preventDefault();
                             event.stopPropagation();
                         } else {
@@ -189,7 +190,6 @@ export class CreateMenuComponent {
                 } else {
                     this.toast.error(null, 'CLIPBOARD_DATA_UNSUPPORTED');
                 }
-
             }
         }
     }
@@ -197,10 +197,8 @@ export class CreateMenuComponent {
     updateOptions() {
         this.options = [];
         if (this.allowBinary && this.folder) {
-            const pasteNodes = new OptionItem(
-                'OPTIONS.PASTE',
-                'content_paste',
-                node => this.optionsService.pasteNode(),
+            const pasteNodes = new OptionItem('OPTIONS.PASTE', 'content_paste', (node) =>
+                this.optionsService.pasteNode(),
             );
             pasteNodes.elementType = [ElementType.Unknown];
             pasteNodes.constrains = [
@@ -209,43 +207,40 @@ export class CreateMenuComponent {
                 Constrain.AddObjects,
                 Constrain.User,
             ];
-            pasteNodes.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS,
-                RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES];
+            pasteNodes.toolpermissions = [
+                RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS,
+                RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES,
+            ];
             pasteNodes.key = 'KeyV';
             pasteNodes.keyCombination = [KeyCombination.CtrlOrAppleCmd];
             pasteNodes.group = DefaultGroups.Primary;
             this.options.push(pasteNodes);
         }
         if (this._parent && this.nodeHelper.isNodeCollection(this._parent)) {
-            const newCollection = new OptionItem(
-                'OPTIONS.NEW_COLLECTION',
-                'layers',
-                node =>
-                    UIHelper.goToCollection(this.router, this._parent, 'new'),
+            const newCollection = new OptionItem('OPTIONS.NEW_COLLECTION', 'layers', (node) =>
+                UIHelper.goToCollection(this.router, this._parent, 'new'),
             );
             newCollection.elementType = [ElementType.Unknown];
             newCollection.constrains = [Constrain.NoSelection, Constrain.User];
-            newCollection.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS];
+            newCollection.toolpermissions = [
+                RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS,
+            ];
             newCollection.group = DefaultGroups.Create;
             newCollection.priority = 5;
             this.options.push(newCollection);
         }
         if (this.allowBinary) {
-            if(this._parent && this.nodeHelper.isNodeCollection(this._parent)) {
-                const search = new OptionItem(
-                    'OPTIONS.SEARCH_OBJECT',
-                    'redo',
-                    () => this.pickMaterialFromSearch(),
+            if (this._parent && this.nodeHelper.isNodeCollection(this._parent)) {
+                const search = new OptionItem('OPTIONS.SEARCH_OBJECT', 'redo', () =>
+                    this.pickMaterialFromSearch(),
                 );
                 search.elementType = [ElementType.Unknown];
                 search.group = DefaultGroups.Create;
                 search.priority = 7.5;
                 this.options.push(search);
             }
-            const upload = new OptionItem(
-                'OPTIONS.ADD_OBJECT',
-                'cloud_upload',
-                () => this.openUploadSelect(),
+            const upload = new OptionItem('OPTIONS.ADD_OBJECT', 'cloud_upload', () =>
+                this.openUploadSelect(),
             );
             upload.elementType = [ElementType.Unknown];
             upload.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES];
@@ -270,10 +265,8 @@ export class CreateMenuComponent {
             }
             // handle app
             if (this.bridge.isRunningCordova()) {
-                const camera = new OptionItem(
-                    'WORKSPACE.ADD_CAMERA',
-                    'camera_alt',
-                    () => (this.openCamera()),
+                const camera = new OptionItem('WORKSPACE.ADD_CAMERA', 'camera_alt', () =>
+                    this.openCamera(),
                 );
                 camera.elementType = [ElementType.Unknown];
                 camera.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES];
@@ -299,16 +292,13 @@ export class CreateMenuComponent {
             parent: this._parent,
         });
         this.optionsService.setListener({
-            onVirtualNodes: nodes => this.onCreate.emit(nodes),
+            onVirtualNodes: (nodes) => this.onCreate.emit(nodes),
         });
-        this.options = this.optionsService.filterOptions(
-            this.options,
-            Target.CreateMenu,
-        );
+        this.options = this.optionsService.filterOptions(this.options, Target.CreateMenu);
 
         // If the menu was open, we just removed all its items, leaving focus on <body>.
         setTimeout(() => {
-            this.dropdown?.menu.focusFirstItem()
+            this.dropdown?.menu.focusFirstItem();
         });
     }
 
@@ -340,20 +330,11 @@ export class CreateMenuComponent {
         this.toast.showProgressDialog();
         const properties = RestHelper.createNameProperty(folder.name);
         if (folder.metadataset) {
-            properties[RestConstants.CM_PROP_METADATASET_EDU_METADATASET] = [
-                folder.metadataset,
-            ];
-            properties[
-                RestConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET
-            ] = ['true'];
+            properties[RestConstants.CM_PROP_METADATASET_EDU_METADATASET] = [folder.metadataset];
+            properties[RestConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET] = ['true'];
         }
         this.nodeService
-            .createNode(
-                this.getParent().ref.id,
-                RestConstants.CM_TYPE_FOLDER,
-                [],
-                properties,
-            )
+            .createNode(this.getParent().ref.id, RestConstants.CM_TYPE_FOLDER, [], properties)
             .subscribe(
                 (data: NodeWrapper) => {
                     this.toast.closeModalDialog();
@@ -363,10 +344,8 @@ export class CreateMenuComponent {
                 (error: any) => {
                     this.toast.closeModalDialog();
                     if (
-                        this.nodeHelper.handleNodeError(
-                            folder.name,
-                            error,
-                        ) === RestConstants.DUPLICATE_NODE_RESPONSE
+                        this.nodeHelper.handleNodeError(folder.name, error) ===
+                        RestConstants.DUPLICATE_NODE_RESPONSE
                     ) {
                         this.addFolderName = folder.name;
                     }
@@ -391,7 +370,11 @@ export class CreateMenuComponent {
             this.toast.error(null, 'WORKSPACE.TOAST.ONGOING_UPLOAD');
             return;
         }
-        if(!this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES)) {
+        if (
+            !this.connector.hasToolPermissionInstant(
+                RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES,
+            )
+        ) {
             this.toast.toolpermissionError(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES);
             return;
         }
@@ -411,14 +394,11 @@ export class CreateMenuComponent {
     }
 
     afterUpload(nodes: Node[]) {
-        if(nodes == null) {
+        if (nodes == null) {
             return;
         }
         if (this.params.reurl) {
-            this.nodeHelper.addNodeToLms(
-                nodes[0],
-                this.params.reurl,
-            );
+            this.nodeHelper.addNodeToLms(nodes[0], this.params.reurl);
         }
         this.onCreate.emit(nodes);
     }
@@ -449,11 +429,10 @@ export class CreateMenuComponent {
                 const name =
                     this.translate.instant('SHARE_APP.IMAGE') +
                     ' ' +
-                    DateHelper.formatDate(
-                        this.translate,
-                        new Date().getTime(),
-                        { showAlwaysTime: true, useRelativeLabels: false },
-                    ) +
+                    DateHelper.formatDate(this.translate, new Date().getTime(), {
+                        showAlwaysTime: true,
+                        useRelativeLabels: false,
+                    }) +
                     '.jpg';
                 const blob: any = Helper.base64toBlob(data, 'image/jpeg');
                 blob.name = name;
@@ -489,7 +468,7 @@ export class CreateMenuComponent {
         );
     }
     pickMaterialFromSearch() {
-        UIHelper.getCommonParameters(this.route).subscribe(params => {
+        UIHelper.getCommonParameters(this.route).subscribe((params) => {
             params.addToCollection = this._parent.ref.id;
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
                 queryParams: params,
@@ -505,30 +484,17 @@ export class CreateMenuComponent {
             win = window.open('');
         }
         this.nodeService
-            .createNode(
-                this.getParent().ref.id,
-                RestConstants.CCM_TYPE_IO,
-                [],
-                prop,
-                false,
-            )
+            .createNode(this.getParent().ref.id, RestConstants.CCM_TYPE_IO, [], prop, false)
             .subscribe(
                 (data: NodeWrapper) => {
-                    this.editConnector(
-                        data.node,
-                        event.type,
-                        win,
-                        this.createConnectorType,
-                    );
+                    this.editConnector(data.node, event.type, win, this.createConnectorType);
                     this.onCreate.emit([data.node]);
                 },
                 (error: any) => {
                     win.close();
                     if (
-                        this.nodeHelper.handleNodeError(
-                            event.name,
-                            error,
-                        ) === RestConstants.DUPLICATE_NODE_RESPONSE
+                        this.nodeHelper.handleNodeError(event.name, error) ===
+                        RestConstants.DUPLICATE_NODE_RESPONSE
                     ) {
                         this.createConnectorName = event.name;
                     }
@@ -537,7 +503,12 @@ export class CreateMenuComponent {
     }
 
     isAllowed() {
-        return this.allowed && !this.uploadDialogRef &&
-            this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES);
+        return (
+            this.allowed &&
+            !this.uploadDialogRef &&
+            this.connector.hasToolPermissionInstant(
+                RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES,
+            )
+        );
     }
 }

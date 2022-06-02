@@ -1,48 +1,48 @@
-@import "../../core-ui-module/styles/variables";
-.message-bg{
-  min-height: 100%;
-  background: #444;
-  color: white;
-  display: flex;
-  justify-content: center;
+@import '../../core-ui-module/styles/variables';
+.message-bg {
+    min-height: 100%;
+    background: #444;
+    color: white;
+    display: flex;
+    justify-content: center;
 }
-.message-container{
-  padding:5% 20px;
-  display:flex;
-  align-items: center;
-  img{
-    width: 45%;
-    margin-right: 40px;
-    max-width: 400px;
-  }
-  h1{
-    font-weight: normal;
-    font-size:28px;
-    margin: 0;
-  }
-  h2{
-    font-size:16px;
-    font-weight: normal;
-    line-height: 150%;
-  }
-  .link{
-    padding-top: 20px;
-  }
-  a{
-    color: $primaryLight;
-    text-transform: uppercase;
-    font-weight: bold;
-    margin-left: 10px;
-  }
+.message-container {
+    padding: 5% 20px;
+    display: flex;
+    align-items: center;
+    img {
+        width: 45%;
+        margin-right: 40px;
+        max-width: 400px;
+    }
+    h1 {
+        font-weight: normal;
+        font-size: 28px;
+        margin: 0;
+    }
+    h2 {
+        font-size: 16px;
+        font-weight: normal;
+        line-height: 150%;
+    }
+    .link {
+        padding-top: 20px;
+    }
+    a {
+        color: $primaryLight;
+        text-transform: uppercase;
+        font-weight: bold;
+        margin-left: 10px;
+    }
 }
 
 @media screen and (max-width: $mobileHeightLandscape) {
-  .message-container{
-    display: block;
-    text-align: center;
-    img{
-      width: 60%;
-      margin: 20%;
+    .message-container {
+        display: block;
+        text-align: center;
+        img {
+            width: 60%;
+            margin: 20%;
+        }
     }
-  }
 }

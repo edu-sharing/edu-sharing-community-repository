@@ -1,10 +1,9 @@
-@import "../../../core-ui-module/styles/variables";
+@import '../../../core-ui-module/styles/variables';
 
 // We cannot use `:host` here, since the `mat-menu` elements are rearranged
 // outside of the original container. Hence we rely on the `.mat-dropdown-menu`
 // selector to not bleed into other components.
 ::ng-deep .mat-dropdown-menu {
-
     .mat-menu-content {
         min-width: 200px;
         > ul > li > button {
@@ -26,11 +25,12 @@
         margin: 0;
         li {
             .mat-menu-item {
-                &:hover:not([disabled]), &.cdk-focused {
+                &:hover:not([disabled]),
+                &.cdk-focused {
                     color: $itemSelectedTextColor;
                     background-color: $itemSelectedBackground;
                 }
-                &.cdk-keyboard-focused{
+                &.cdk-keyboard-focused {
                     @include setGlobalKeyboardFocus('border');
                 }
             }

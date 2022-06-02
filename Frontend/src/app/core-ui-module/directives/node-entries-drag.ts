@@ -1,6 +1,6 @@
-import {Directive, ElementRef, HostListener} from '@angular/core';
-import {dragNodesTransferType, readDraggedNodes} from './drag-nodes/drag-nodes';
-import {ConfigurationService} from '../../core-module/rest/services/configuration.service';
+import { Directive, ElementRef, HostListener } from '@angular/core';
+import { dragNodesTransferType, readDraggedNodes } from './drag-nodes/drag-nodes';
+import { ConfigurationService } from '../../core-module/rest/services/configuration.service';
 
 @Directive({
     selector: '[appNodesEntriesDrag]',
@@ -27,17 +27,13 @@ export class NodeEntriesDragDirective {
         this.setActive(false);
     }
 
-    @HostListener('drop', ['$event']) onDrop(event: DragEvent) {
-
-    }
+    @HostListener('drop', ['$event']) onDrop(event: DragEvent) {}
 
     private setActive(active: boolean) {
-        if(active) {
+        if (active) {
             this.element.nativeElement.className.add('node-entries-drag-target');
         } else {
             this.element.nativeElement.className.remove('node-entries-drag-target');
         }
     }
-
-    }
-
+}

@@ -203,7 +203,7 @@ export class MdsEditorWidgetChipsComponent
         // There are different strategies for doing this (see
         // https://stackoverflow.com/questions/50491195/open-matautocomplete-with-open-openpanel-method).
         // We rely on the `autoCompleteToggleTrigger` mechanism.
-        if(this.chipsControl.disabled) {
+        if (this.chipsControl.disabled) {
             return;
         }
         if (this.trigger.panelOpen) {

@@ -21,7 +21,7 @@ import { MdsEditorWidgetTreeCoreComponent } from './mds-editor-widget-tree-core/
 import { Tree } from './tree';
 import { FocusOrigin } from '@angular/cdk/a11y';
 import { MatChip } from '@angular/material/chips';
-import {UIService} from '../../../../../core-module/rest/services/ui.service';
+import { UIService } from '../../../../../core-module/rest/services/ui.service';
 
 @Component({
     selector: 'es-mds-editor-widget-tree',

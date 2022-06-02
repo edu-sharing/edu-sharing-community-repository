@@ -1,5 +1,5 @@
-import {Component, HostListener, NgZone, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {TranslateService} from '@ngx-translate/core';
+import { Component, HostListener, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { TranslationsService } from '../../translations/translations.service';
 import {
     ClipboardObject,
@@ -24,40 +24,45 @@ import {
     RestToolService,
     SessionStorageService,
     TemporaryStorageService,
-    UIService
+    UIService,
 } from '../../core-module/core.module';
-import {ActivatedRoute, Params, Router} from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
     CustomOptions,
     DefaultGroups,
     ElementType,
-    OptionItem
+    OptionItem,
 } from '../../core-ui-module/option-item';
-import {Toast} from '../../core-ui-module/toast';
-import {UIAnimation} from '../../core-module/ui/ui-animation';
-import {NodeHelperService} from '../../core-ui-module/node-helper.service';
-import {KeyEvents} from '../../core-module/ui/key-events';
-import {UIHelper} from '../../core-ui-module/ui-helper';
-import {trigger} from '@angular/animations';
-import {UIConstants} from '../../core-module/ui/ui-constants';
-import {ActionbarHelperService} from '../../common/services/actionbar-helper';
-import {Helper} from '../../core-module/rest/helper';
-import {CordovaService} from '../../common/services/cordova.service';
-import {HttpClient} from '@angular/common/http';
-import {MainNavComponent} from '../../main/navigation/main-nav/main-nav.component';
-import {ActionbarComponent} from '../../shared/components/actionbar/actionbar.component';
-import {BridgeService} from '../../core-bridge-module/bridge.service';
-import {WorkspaceExplorerComponent} from './explorer/explorer.component';
-import {CardService} from '../../core-ui-module/card.service';
-import {BehaviorSubject, Observable, Subject} from 'rxjs';
+import { Toast } from '../../core-ui-module/toast';
+import { UIAnimation } from '../../core-module/ui/ui-animation';
+import { NodeHelperService } from '../../core-ui-module/node-helper.service';
+import { KeyEvents } from '../../core-module/ui/key-events';
+import { UIHelper } from '../../core-ui-module/ui-helper';
+import { trigger } from '@angular/animations';
+import { UIConstants } from '../../core-module/ui/ui-constants';
+import { ActionbarHelperService } from '../../common/services/actionbar-helper';
+import { Helper } from '../../core-module/rest/helper';
+import { CordovaService } from '../../common/services/cordova.service';
+import { HttpClient } from '@angular/common/http';
+import { MainNavComponent } from '../../main/navigation/main-nav/main-nav.component';
+import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';
+import { BridgeService } from '../../core-bridge-module/bridge.service';
+import { WorkspaceExplorerComponent } from './explorer/explorer.component';
+import { CardService } from '../../core-ui-module/card.service';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import * as rxjs from 'rxjs';
-import {delay} from 'rxjs/operators';
-import {ListTableComponent} from '../../core-ui-module/components/list-table/list-table.component';
-import {SkipTarget} from '../../main/navigation/skip-nav/skip-nav.service';
-import {DragNodeTarget} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
+import { delay } from 'rxjs/operators';
+import { ListTableComponent } from '../../core-ui-module/components/list-table/list-table.component';
+import { SkipTarget } from '../../main/navigation/skip-nav/skip-nav.service';
+import { DragNodeTarget } from '../../core-ui-module/directives/drag-nodes/drag-nodes';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
-import { DropSource, DropTarget, NodeEntriesDisplayType, NodeRoot } from 'src/app/features/node-entries/entries-model';
+import {
+    DropSource,
+    DropTarget,
+    NodeEntriesDisplayType,
+    NodeRoot,
+} from 'src/app/features/node-entries/entries-model';
 import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 
 @Component({
@@ -69,15 +74,28 @@ import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
         trigger('fadeFast', UIAnimation.fade(UIAnimation.ANIMATION_TIME_FAST)),
         trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST)),
         trigger('fromLeft', UIAnimation.fromLeft()),
-        trigger('fromRight', UIAnimation.fromRight())
-    ]
+        trigger('fromRight', UIAnimation.fromRight()),
+    ],
 })
 export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy {
     @ViewChild('explorer') explorer: WorkspaceExplorerComponent;
     @ViewChild('actionbar') actionbarRef: ActionbarComponent;
-    private static VALID_ROOTS = ['MY_FILES', 'SHARED_FILES', 'MY_SHARED_FILES', 'TO_ME_SHARED_FILES', 'WORKFLOW_RECEIVE', 'RECYCLE'];
-    private static VALID_ROOTS_NODES = [RestConstants.USERHOME, '-shared_files-', '-my_shared_files-', '-to_me_shared_files_personal-', '-to_me_shared_files-', '-workflow_receive-'];
-
+    private static VALID_ROOTS = [
+        'MY_FILES',
+        'SHARED_FILES',
+        'MY_SHARED_FILES',
+        'TO_ME_SHARED_FILES',
+        'WORKFLOW_RECEIVE',
+        'RECYCLE',
+    ];
+    private static VALID_ROOTS_NODES = [
+        RestConstants.USERHOME,
+        '-shared_files-',
+        '-my_shared_files-',
+        '-to_me_shared_files_personal-',
+        '-to_me_shared_files-',
+        '-workflow_receive-',
+    ];
 
     cardHasOpenModals$: Observable<boolean>;
     private isRootFolder: boolean;
@@ -109,14 +127,13 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     set currentFolder(value: Node) {
         this.currentFolderSubject.next(value);
     }
-    private searchQuerySubject = new BehaviorSubject<{ node: Node; query: string; }>(null);
-    public get searchQuery(): { node: Node; query: string; } {
+    private searchQuerySubject = new BehaviorSubject<{ node: Node; query: string }>(null);
+    public get searchQuery(): { node: Node; query: string } {
         return this.searchQuerySubject.value;
     }
-    public set searchQuery(value: { node: Node; query: string; }) {
+    public set searchQuery(value: { node: Node; query: string }) {
         this.searchQuerySubject.next(value);
     }
-
 
     public globalProgress = false;
     public editNodeDeleteOnCancel = false;
@@ -154,7 +171,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     selectedNodeTree: string;
     public contributorNode: Node;
     public shareLinkNode: Node;
-    displayType: NodeEntriesDisplayType  = null;
+    displayType: NodeEntriesDisplayType = null;
     private reurlDirectories: boolean;
     reorderDialog: boolean;
     private readonly destroyed$ = new Subject<void>();
@@ -166,7 +183,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         }
     }
     private handleScroll(event: Event) {
-        const scroll = (window.pageYOffset || document.documentElement.scrollTop);
+        const scroll = window.pageYOffset || document.documentElement.scrollTop;
         if (scroll > 0) {
             this.storage.set('workspace_scroll', scroll);
         }
@@ -185,9 +202,8 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             event.stopPropagation();
             return;
         }
-        const clip = (this.storage.get('workspace_clipboard') as ClipboardObject);
+        const clip = this.storage.get('workspace_clipboard') as ClipboardObject;
         const fromInputField = KeyEvents.eventFromInputField(event);
-
     }
     onEvent(event: string, data: any): void {
         if (event === FrameEventsService.EVENT_REFRESH) {
@@ -204,7 +220,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         this.destroyed$.next();
         this.destroyed$.complete();
         this.storage.remove('workspace_clipboard');
-        if(this.currentFolder) {
+        if (this.currentFolder) {
             this.storage.set(this.getLastLocationStorageId(), this.currentFolder.ref.id);
         }
         // close sidebar, if open
@@ -253,7 +269,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
      * - isBlocked
      * - mainnav
      */
-     private initMainNav(): void {
+    private initMainNav(): void {
         this.mainNavService.setMainNavConfig({
             title: this.isSafe ? 'WORKSPACE.TITLE_SAFE' : 'WORKSPACE.TITLE',
             currentScope: this.isSafe ? 'safe' : 'workspace',
@@ -293,26 +309,43 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
                 searchQuery: searchQuery?.query,
             }),
         );
-    }    
+    }
 
     private registerScroll(): void {
         this.ngZone.runOutsideAngular(() => {
             const handleScroll = (event: Event) => this.handleScroll(event);
             window.addEventListener('scroll', handleScroll);
             this.destroyed$.subscribe(() => window.removeEventListener('scroll', handleScroll));
-        })
+        });
     }
 
     private hideDialog(): void {
         this.toast.closeModalDialog();
     }
 
-    private editConnector(node: Node = null, type: Filetype = null, win: any = null, connectorType: Connector = null) {
-        UIHelper.openConnector(this.connectors, this.iam, this.event, this.toast, this.getNodeList(node)[0], type, win, connectorType);
+    private editConnector(
+        node: Node = null,
+        type: Filetype = null,
+        win: any = null,
+        connectorType: Connector = null,
+    ) {
+        UIHelper.openConnector(
+            this.connectors,
+            this.iam,
+            this.event,
+            this.toast,
+            this.getNodeList(node)[0],
+            type,
+            win,
+            connectorType,
+        );
     }
-    handleDrop(event: {target: DropTarget, source: DropSource<Node>}) {
+    handleDrop(event: { target: DropTarget; source: DropSource<Node> }) {
         for (const s of event.source.element) {
-            if ((event.target as Node).ref?.id === s.ref.id || (event.target as Node).ref?.id === s.parent.id) {
+            if (
+                (event.target as Node).ref?.id === s.ref.id ||
+                (event.target as Node).ref?.id === s.parent.id
+            ) {
                 this.toast.error(null, 'WORKSPACE.SOURCE_TARGET_IDENTICAL');
                 return;
             }
@@ -323,11 +356,9 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         }
         if (event.source.mode === 'link') {
             this.toast.error(null, 'WORKSPACE.FEATURE_NOT_IMPLEMENTED');
-        }
-        else if (event.source.mode === 'copy') {
+        } else if (event.source.mode === 'copy') {
             this.copyNode(event.target, event.source.element);
-        }
-        else {
+        } else {
             this.moveNode(event.target, event.source.element);
         }
         /*
@@ -342,8 +373,9 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         */
     }
     canDropBreadcrumbs = (event: any) => {
-        return event.target === 'HOME' ? this.root === 'MY_FILES' :
-            event.target?.ref?.id !== this.currentFolder.ref.id;
+        return event.target === 'HOME'
+            ? this.root === 'MY_FILES'
+            : event.target?.ref?.id !== this.currentFolder.ref.id;
     };
     private moveNode(target: DropTarget, source: Node[], position = 0) {
         this.globalProgress = true;
@@ -352,14 +384,18 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             this.globalProgress = false;
             return;
         }
-        this.node.moveNode((target as Node).ref?.id || RestConstants.USERHOME, source[position].ref.id).subscribe((data: NodeWrapper) => {
-                this.moveNode(target, source, position + 1);
-            },
-            (error: any) => {
-                this.nodeHelper.handleNodeError(source[position].name, error);
-                source.splice(position, 1);
-                this.moveNode(target, source, position + 1);
-            });
+        this.node
+            .moveNode((target as Node).ref?.id || RestConstants.USERHOME, source[position].ref.id)
+            .subscribe(
+                (data: NodeWrapper) => {
+                    this.moveNode(target, source, position + 1);
+                },
+                (error: any) => {
+                    this.nodeHelper.handleNodeError(source[position].name, error);
+                    source.splice(position, 1);
+                    this.moveNode(target, source, position + 1);
+                },
+            );
     }
     private copyNode(target: DropTarget, source: Node[], position = 0) {
         this.globalProgress = true;
@@ -368,21 +404,25 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             this.globalProgress = false;
             return;
         }
-        this.node.copyNode((target as Node).ref?.id || RestConstants.USERHOME, source[position].ref.id).subscribe((data: NodeWrapper) => {
-                this.copyNode(target, source, position + 1);
-            },
-            (error: any) => {
-                this.nodeHelper.handleNodeError(source[position].name, error);
-                source.splice(position, 1);
-                this.copyNode(target, source, position + 1);
-            });
+        this.node
+            .copyNode((target as Node).ref?.id || RestConstants.USERHOME, source[position].ref.id)
+            .subscribe(
+                (data: NodeWrapper) => {
+                    this.copyNode(target, source, position + 1);
+                },
+                (error: any) => {
+                    this.nodeHelper.handleNodeError(source[position].name, error);
+                    source.splice(position, 1);
+                    this.copyNode(target, source, position + 1);
+                },
+            );
     }
     private finishMoveCopy(target: DropTarget, source: Node[], copy: boolean) {
         this.toast.closeModalDialog();
         const info: any = {
             to: (target as Node).name || this.translate.instant('WORKSPACE.MY_FILES'),
             count: source.length,
-            mode: this.translate.instant('WORKSPACE.' + (copy ? 'PASTE_COPY' : 'PASTE_MOVE'))
+            mode: this.translate.instant('WORKSPACE.' + (copy ? 'PASTE_COPY' : 'PASTE_MOVE')),
         };
         if (source.length) {
             this.toast.toast('WORKSPACE.TOAST.PASTE_DRAG', info);
@@ -391,7 +431,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         this.refresh();
     }
     private async initialize() {
-        this.user = await (this.iam.getCurrentUserAsync());
+        this.user = await this.iam.getCurrentUserAsync();
         this.route.params.subscribe(async (routeParams: Params) => {
             this.isSafe = routeParams.mode === 'safe';
             const login = await this.connector.isLoggedIn().toPromise();
@@ -407,18 +447,23 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             if (!login.isValidLogin || login.isGuest) {
                 valid = false;
             }
-            this.isBlocked = !this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_WORKSPACE);
+            this.isBlocked = !this.connector.hasToolPermissionInstant(
+                RestConstants.TOOLPERMISSION_WORKSPACE,
+            );
             this.isAdmin = login.isAdmin;
             if (this.isSafe && login.currentScope !== RestConstants.SAFE_SCOPE) {
                 valid = false;
             }
             if (!this.isSafe && login.currentScope != null) {
-                this.connector.logout().subscribe(() => {
-                    this.goToLogin();
-                }, (error: any) => {
-                    this.toast.error(error);
-                    this.goToLogin();
-                })
+                this.connector.logout().subscribe(
+                    () => {
+                        this.goToLogin();
+                    },
+                    (error: any) => {
+                        this.toast.error(error);
+                        this.goToLogin();
+                    },
+                );
                 return;
             }
             if (!valid) {
@@ -450,9 +495,18 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
                 }
                 this.oldParams = params;
                 if (params.displayType != null) {
-                    this.setDisplayType(parseInt(params[UIConstants.QUERY_PARAM_LIST_VIEW_TYPE], 10), false);
+                    this.setDisplayType(
+                        parseInt(params[UIConstants.QUERY_PARAM_LIST_VIEW_TYPE], 10),
+                        false,
+                    );
                 } else {
-                    this.setDisplayType(this.config.instant('workspaceViewType', NodeEntriesDisplayType.Table) as NodeEntriesDisplayType, false);
+                    this.setDisplayType(
+                        this.config.instant(
+                            'workspaceViewType',
+                            NodeEntriesDisplayType.Table,
+                        ) as NodeEntriesDisplayType,
+                        false,
+                    );
                 }
                 if (params.root && WorkspaceMainComponent.VALID_ROOTS.indexOf(params.root) !== -1) {
                     this.root = params.root;
@@ -468,11 +522,13 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
                 this.initMainNav();
 
                 if (params.file) {
-                    this.node.getNodeMetadata(params.file, [RestConstants.ALL]).subscribe((paramNode) => {
-                        this.setSelection([paramNode.node]);
-                        this.parameterNode = paramNode.node;
-                        this.mainNavService.getDialogs().nodeSidebar = paramNode.node;
-                    });
+                    this.node
+                        .getNodeMetadata(params.file, [RestConstants.ALL])
+                        .subscribe((paramNode) => {
+                            this.setSelection([paramNode.node]);
+                            this.parameterNode = paramNode.node;
+                            this.mainNavService.getDialogs().nodeSidebar = paramNode.node;
+                        });
                 }
 
                 if (!needsUpdate) {
@@ -480,7 +536,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
                 }
                 this.createAllowed = this.root === 'MY_FILES';
                 let lastLocation = this.storage.pop(this.getLastLocationStorageId(), null);
-                if(this.isSafe) {
+                if (this.isSafe) {
                     // clear lastLocation, this is another folder than the safe
                     lastLocation = null;
                 }
@@ -502,8 +558,11 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     }
 
     public doSearch(query: any) {
-        const id = this.currentFolder ? this.currentFolder.ref.id :
-            this.searchQuery && this.searchQuery.node ? this.searchQuery.node.ref.id : null;
+        const id = this.currentFolder
+            ? this.currentFolder.ref.id
+            : this.searchQuery && this.searchQuery.node
+            ? this.searchQuery.node.ref.id
+            : null;
         this.routeTo(this.root, id, query.query);
         if (!query.cleared) {
             this.ui.hideKeyboardIfMobile();
@@ -513,7 +572,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         node = this.isRootFolder ? null : node;
         this.searchQuery = {
             query: params.query,
-            node
+            node,
         };
         if (node == null && this.root !== 'RECYCLE') {
             this.root = 'ALL_FILES';
@@ -532,25 +591,32 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         const list = this.getNodeList(event);
         this.closeMetadata();
         if (list[0].isDirectory || list[0].type === RestConstants.SYS_TYPE_CONTAINER) {
-            if(list[0].collection) {
-                UIHelper.goToCollection(this.router,list[0]);
+            if (list[0].collection) {
+                UIHelper.goToCollection(this.router, list[0]);
             } else {
                 this.openDirectory(list[0].ref.id);
             }
-        }
-        else {
+        } else {
             /*
             this.nodeDisplayed = event;
             this.nodeDisplayedVersion = event.version;
             */
-            this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE, this.dataSource);
+            this.storage.set(
+                TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE,
+                this.dataSource,
+            );
             this.currentNode = list[0];
-            this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', list[0].ref.id, list[0].version ? list[0].version : ''],
+            this.router.navigate(
+                [
+                    UIConstants.ROUTER_PREFIX + 'render',
+                    list[0].ref.id,
+                    list[0].version ? list[0].version : '',
+                ],
                 {
                     state: {
-                        scope: 'workspace'
-                    }
-                }
+                        scope: 'workspace',
+                    },
+                },
             );
         }
     }
@@ -568,7 +634,9 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
 
     private loadFolders(user: IamUser) {
         for (const folder of user.person.sharedFolders) {
-            this.node.getNodeMetadata(folder.id).subscribe((node: NodeWrapper) => this.sharedFolders.push(node.node));
+            this.node
+                .getNodeMetadata(folder.id)
+                .subscribe((node: NodeWrapper) => this.sharedFolders.push(node.node));
         }
     }
     setRoot(root: NodeRoot) {
@@ -584,7 +652,9 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         this.setFixMobileNav();
     }
     private setFixMobileNav() {
-        this.mainNavService.getMainNav().setFixMobileElements(this.explorer.nodeEntries.getSelection().selected?.length > 0);
+        this.mainNavService
+            .getMainNav()
+            .setFixMobileElements(this.explorer.nodeEntries.getSelection().selected?.length > 0);
     }
     private updateLicense() {
         this.closeMetadata();
@@ -609,49 +679,65 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
                 // GlobalContainerComponent.finishPreloading();
                 // return;
             }
-        }
-        else {
+        } else {
             this.selectedNodeTree = id;
-            this.node.getNodeParents(id, false, [RestConstants.ALL]).subscribe((data: NodeList) => {
-                if (this.root === 'RECYCLE') {
+            this.node.getNodeParents(id, false, [RestConstants.ALL]).subscribe(
+                (data: NodeList) => {
+                    if (this.root === 'RECYCLE') {
+                        this.path = [];
+                        this.createAllowed = false;
+                    } else {
+                        this.path = data.nodes.reverse();
+                    }
+                    this.selectedNodeTree = null;
+                },
+                (error: any) => {
+                    this.selectedNodeTree = null;
                     this.path = [];
-                    this.createAllowed = false;
-                }
-                else {
-                    this.path = data.nodes.reverse();
-                }
-                this.selectedNodeTree = null;
-            }, (error: any) => {
-                this.selectedNodeTree = null;
-                this.path = [];
-            });
+                },
+            );
         }
         this.currentFolder = null;
         this.allowBinary = true;
         const root = !id || WorkspaceMainComponent.VALID_ROOTS_NODES.indexOf(id) !== -1;
         if (!root) {
             this.isRootFolder = false;
-            this.node.getNodeMetadata(id).subscribe((data: NodeWrapper) => {
-                this.mds.getSet(data.node.metadataset ? data.node.metadataset : RestConstants.DEFAULT).subscribe((mds: any) => {
-                    if (mds.create) {
-                        this.allowBinary = !mds.create.onlyMetadata;
-                        if (!this.allowBinary) {
-                        }
-                    }
-                });
-                this.updateNodeByParams(params, data.node);
-                this.createAllowed = !this.searchQuery && this.nodeHelper.getNodesRight([data.node], RestConstants.ACCESS_ADD_CHILDREN) ? true : 'EMIT_EVENT';
-                this.notAllowedReason = 'WORKSPACE.CREATE_REASON.PERMISSIONS';
-                this.recoverScrollposition();
-            }, (error: any) => {
-                this.updateNodeByParams(params, { ref: { id } });
-            });
-        }
-        else {
+            this.node.getNodeMetadata(id).subscribe(
+                (data: NodeWrapper) => {
+                    this.mds
+                        .getSet(
+                            data.node.metadataset ? data.node.metadataset : RestConstants.DEFAULT,
+                        )
+                        .subscribe((mds: any) => {
+                            if (mds.create) {
+                                this.allowBinary = !mds.create.onlyMetadata;
+                                if (!this.allowBinary) {
+                                }
+                            }
+                        });
+                    this.updateNodeByParams(params, data.node);
+                    this.createAllowed =
+                        !this.searchQuery &&
+                        this.nodeHelper.getNodesRight(
+                            [data.node],
+                            RestConstants.ACCESS_ADD_CHILDREN,
+                        )
+                            ? true
+                            : 'EMIT_EVENT';
+                    this.notAllowedReason = 'WORKSPACE.CREATE_REASON.PERMISSIONS';
+                    this.recoverScrollposition();
+                },
+                (error: any) => {
+                    this.updateNodeByParams(params, { ref: { id } });
+                },
+            );
+        } else {
             this.isRootFolder = true;
-            if(id === '-my_shared_files-'
-                || id === '-to_me_shared_files_personal-'
-                || id === '-to_me_shared_files-') {
+            if (
+                id === '-my_shared_files-' ||
+                id === '-to_me_shared_files_personal-' ||
+                id === '-to_me_shared_files-'
+            ) {
                 this.isRootFolder = false;
             }
             if (id === RestConstants.USERHOME) {
@@ -662,30 +748,26 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
                 this.createAllowed = 'EMIT_EVENT';
                 this.notAllowedReason = 'WORKSPACE.CREATE_REASON.VIRTUAL';
             }
-            const node: Node|any = {
+            const node: Node | any = {
                 ref: {
-                    id
+                    id,
                 },
-                name: this.translate.instant('WORKSPACE.' + this.root)
+                name: this.translate.instant('WORKSPACE.' + this.root),
             };
             if (this.root === 'MY_FILES') {
                 node.access = [RestConstants.ACCESS_ADD_CHILDREN];
             }
             this.updateNodeByParams(params, node);
         }
-
     }
     openNode(node: Node, useConnector = true) {
         if (this.nodeHelper.isSavedSearchObject(node)) {
             UIHelper.routeToSearchNode(this.router, null, node);
-        }
-        else if (RestToolService.isLtiObject(node)) {
+        } else if (RestToolService.isLtiObject(node)) {
             this.toolService.openLtiObject(node);
-        }
-        else if (useConnector && this.connectors.connectorSupportsEdit(node)) {
+        } else if (useConnector && this.connectors.connectorSupportsEdit(node)) {
             this.editConnector(node);
-        }
-        else {
+        } else {
             this.displayNode(node);
         }
     }
@@ -699,7 +781,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             if (
                 UIHelper.evaluateMediaQuery(
                     UIConstants.MEDIA_QUERY_MAX_WIDTH,
-                    UIConstants.MOBILE_TAB_SWITCH_WIDTH
+                    UIConstants.MOBILE_TAB_SWITCH_WIDTH,
                 )
             ) {
                 this.showSelectRoot = true;
@@ -709,9 +791,9 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         }
     }
 
-    private refresh(refreshPath = true,nodes: Node[] = null) {
+    private refresh(refreshPath = true, nodes: Node[] = null) {
         // only refresh properties in this case
-        if(nodes && nodes.length) {
+        if (nodes && nodes.length) {
             this.updateNodes(nodes);
             return;
         }
@@ -740,7 +822,8 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         if (this.displayType !== null) {
             params.displayType = this.displayType;
         }
-        this.router.navigate(['./'], {queryParams: params, relativeTo: this.route})
+        this.router
+            .navigate(['./'], { queryParams: params, relativeTo: this.route })
             .then((result: boolean) => {
                 if (!result) {
                     this.refresh(false);
@@ -749,10 +832,11 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     }
 
     private showAlpha() {
-        this.toast.showModalDialog('WORKSPACE.ALPHA_TITLE',
+        this.toast.showModalDialog(
+            'WORKSPACE.ALPHA_TITLE',
             'WORKSPACE.ALPHA_MESSAGE',
             DialogButton.getOk(() => this.hideDialog()),
-            false
+            false,
         );
     }
 
@@ -792,8 +876,8 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         return '';
     }
 
-    getRootFolderInternalId(){
-        if(this.root === 'TO_ME_SHARED_FILES') {
+    getRootFolderInternalId() {
+        if (this.root === 'TO_ME_SHARED_FILES') {
             if (this.toMeSharedToggle) {
                 return RestConstants.TO_ME_SHARED_FILES;
             } else {
@@ -834,25 +918,31 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         }
         if (params?.query) {
             this.doSearchFromRoute(params, node);
-        }
-        else {
+        } else {
             this.searchQuery = null;
             this.currentFolder = node;
-            this.event.broadcastEvent(FrameEventsService.EVENT_NODE_FOLDER_OPENED, this.currentFolder);
+            this.event.broadcastEvent(
+                FrameEventsService.EVENT_NODE_FOLDER_OPENED,
+                this.currentFolder,
+            );
         }
     }
 
     private canPasteInCurrentLocation() {
-        const clip = (this.storage.get('workspace_clipboard') as ClipboardObject);
-        return this.currentFolder
-            && !this.searchQuery
-            && clip
-            && ((!clip.sourceNode || clip.sourceNode.ref.id !== this.currentFolder.ref.id) || clip.copy)
-            && this.createAllowed;
+        const clip = this.storage.get('workspace_clipboard') as ClipboardObject;
+        return (
+            this.currentFolder &&
+            !this.searchQuery &&
+            clip &&
+            (!clip.sourceNode ||
+                clip.sourceNode.ref.id !== this.currentFolder.ref.id ||
+                clip.copy) &&
+            this.createAllowed
+        );
     }
 
     private updateNodes(nodes: Node[]) {
-        for(let node of this.dataSource.getData()){
+        for (let node of this.dataSource.getData()) {
             const hit = nodes.filter((n) => n.ref.id === node.ref.id);
             if (hit && hit.length === 1) {
                 Helper.copyObjectProperties(node, hit[0]);
@@ -861,62 +951,79 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     }
 
     async prepareActionbar() {
-        this.toMeSharedToggle = await this.session.get('toMeSharedGroup',
-            this.config.instant('workspaceSharedToMeDefaultAll', false)
-            ).toPromise();
-        const toggle = new OptionItem('OPTIONS.TOGGLE_SHARED_TO_ME',
+        this.toMeSharedToggle = await this.session
+            .get('toMeSharedGroup', this.config.instant('workspaceSharedToMeDefaultAll', false))
+            .toPromise();
+        const toggle = new OptionItem(
+            'OPTIONS.TOGGLE_SHARED_TO_ME',
             this.toMeSharedToggle ? 'edu-content_shared_me_all' : 'edu-content_shared_me_private',
             () => {
                 this.toMeSharedToggle = !this.toMeSharedToggle;
-                toggle.icon = this.toMeSharedToggle ? 'edu-content_shared_me_all' : 'edu-content_shared_me_private';
+                toggle.icon = this.toMeSharedToggle
+                    ? 'edu-content_shared_me_all'
+                    : 'edu-content_shared_me_private';
                 this.session.set('toMeSharedGroup', this.toMeSharedToggle);
                 this.openDirectoryFromRoute();
                 //this.treeComponent.reload = Boolean(true);
-                this.toast.toast('WORKSPACE.TOAST.TO_ME_SHARED_' + (this.toMeSharedToggle ? 'ALL' : 'PERSONAL'));
-            });
+                this.toast.toast(
+                    'WORKSPACE.TOAST.TO_ME_SHARED_' + (this.toMeSharedToggle ? 'ALL' : 'PERSONAL'),
+                );
+            },
+        );
         toggle.isToggle = true;
         toggle.group = DefaultGroups.Toggles;
         toggle.elementType = [ElementType.Unknown];
         toggle.priority = 5;
         toggle.customShowCallback = () => {
             return this.root === 'TO_ME_SHARED_FILES';
-        }
+        };
         this.customOptions.addOptions = [toggle];
     }
 
     private getLastLocationStorageId() {
-        return TemporaryStorageService.WORKSPACE_LAST_LOCATION + (this.isSafe ? RestConstants.SAFE_SCOPE : '');
+        return (
+            TemporaryStorageService.WORKSPACE_LAST_LOCATION +
+            (this.isSafe ? RestConstants.SAFE_SCOPE : '')
+        );
     }
 
     setDisplayType(displayType: NodeEntriesDisplayType, refreshRoute = true) {
         this.displayType = displayType;
-        if(refreshRoute) {
+        if (refreshRoute) {
             this.router.navigate(['./'], {
                 relativeTo: this.route,
                 replaceUrl: true,
                 queryParamsHandling: 'merge',
                 queryParams: {
-                    [UIConstants.QUERY_PARAM_LIST_VIEW_TYPE]: displayType
-                }
+                    [UIConstants.QUERY_PARAM_LIST_VIEW_TYPE]: displayType,
+                },
             });
         }
     }
 
     async createNotAllowed() {
-        const message = (await this.translate.get(this.notAllowedReason).toPromise()) + '\n\n' +
-                (await this.translate.get('WORKSPACE.CREATE_REASON.GENERAL').toPromise());
-            this.toast.showConfigurableDialog({
-                title: 'WORKSPACE.CREATE_REASON.TITLE',
-                message,
-                isCancelable: true,
-                buttons: [
-                    new DialogButton('WORKSPACE.GO_TO_HOME', { color: 'primary', position: 'opposite' }, () => {
+        const message =
+            (await this.translate.get(this.notAllowedReason).toPromise()) +
+            '\n\n' +
+            (await this.translate.get('WORKSPACE.CREATE_REASON.GENERAL').toPromise());
+        this.toast.showConfigurableDialog({
+            title: 'WORKSPACE.CREATE_REASON.TITLE',
+            message,
+            isCancelable: true,
+            buttons: [
+                new DialogButton(
+                    'WORKSPACE.GO_TO_HOME',
+                    { color: 'primary', position: 'opposite' },
+                    () => {
                         this.openDirectory(RestConstants.USERHOME);
                         this.toast.closeModalDialog();
-                    }),
-                    new DialogButton('CLOSE', { color: 'standard' }, () => this.toast.closeModalDialog()),
-                ]
-            });
+                    },
+                ),
+                new DialogButton('CLOSE', { color: 'standard' }, () =>
+                    this.toast.closeModalDialog(),
+                ),
+            ],
+        });
     }
 
     onDeleteNodes(nodes: Node[]): void {

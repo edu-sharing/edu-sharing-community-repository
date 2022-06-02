@@ -9,11 +9,7 @@ import {
     SimpleChanges,
 } from '@angular/core';
 import { Node } from '../../../core-module/core.module';
-import {
-    clearDraggedNodes,
-    dragNodesTransferType,
-    saveDraggedNodes,
-} from './drag-nodes';
+import { clearDraggedNodes, dragNodesTransferType, saveDraggedNodes } from './drag-nodes';
 
 /**
  * Handle dragging and dropping of node elements.
@@ -51,13 +47,8 @@ export class NodesDragSourceDirective implements OnChanges {
     ngOnChanges(changes: SimpleChanges) {
         // Set the `draggable` attribute when this directive is active.
         if (changes.nodes) {
-            if (
-                !!changes.nodes.currentValue !== !!changes.nodes.previousValue
-            ) {
-                this.elementRef.nativeElement.setAttribute(
-                    'draggable',
-                    (!!this.nodes).toString(),
-                );
+            if (!!changes.nodes.currentValue !== !!changes.nodes.previousValue) {
+                this.elementRef.nativeElement.setAttribute('draggable', (!!this.nodes).toString());
             }
         }
     }

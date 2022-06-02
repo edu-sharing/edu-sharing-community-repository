@@ -11,11 +11,13 @@
     <mat-form-field class="search-field" appearance="legacy" floatLabel="always">
       <mat-label></mat-label>
       <div class="search-field-input-wrapper">
-        <div matPrefix
-             class="filter-prefix"
-             matTooltip="{{'SEARCH.ACTIVE_FILTER_TOOLTIP' | translate:{count: filtersCount} }}"
-             *ngIf="filtersCount">
-          {{filtersCount}}
+        <div
+          matPrefix
+          class="filter-prefix"
+          matTooltip="{{ 'SEARCH.ACTIVE_FILTER_TOOLTIP' | translate: { count: filtersCount } }}"
+          *ngIf="filtersCount"
+        >
+          {{ filtersCount }}
         </div>
         <input
           class="search-input"
@@ -37,7 +39,7 @@
           mat-icon-button
           type="button"
           (click)="onClear()"
-          attr.aria-label="{{'SEARCH_CLEAR' | translate}}"
+          attr.aria-label="{{ 'SEARCH_CLEAR' | translate }}"
         >
           <i esIcon="clear" [aria]="false"></i>
         </button>
@@ -52,8 +54,6 @@
     </mat-form-field>
   </div>
 </form>
-
-
 
 <!-- <ng-template
   cdkConnectedOverlay

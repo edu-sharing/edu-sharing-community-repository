@@ -59,7 +59,7 @@ import { NodeTitlePipe } from './pipes/node-title.pipe';
 import { FormatDatePipe } from './pipes/format-date.pipe';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
 import { NodeUrlComponent } from './components/node-url/node-url.component';
-import {MatTableModule} from '@angular/material/table'; 
+import { MatTableModule } from '@angular/material/table';
 import { FormatSizePipe } from './pipes/file-size.pipe';
 import { NodeImageSizePipe } from './pipes/node-image-size.pipe';
 import { NodePersonNamePipe } from './pipes/node-person-name.pipe';

@@ -1,5 +1,5 @@
-import {Type} from '@angular/core';
-import {MdsEditorWidgetBase} from '../mds-editor/widgets/mds-editor-widget-base';
+import { Type } from '@angular/core';
+import { MdsEditorWidgetBase } from '../mds-editor/widgets/mds-editor-widget-base';
 
 export {
     MdsDefinition,
@@ -27,7 +27,7 @@ export interface Constraints {
     supportsBulk?: boolean;
 }
 
-export type Values = { [property: string]: (string[] | null) };
+export type Values = { [property: string]: string[] | null };
 
 /** User-selectable Bulk mode per field */
 export type BulkMode = 'no-change' | 'replace';

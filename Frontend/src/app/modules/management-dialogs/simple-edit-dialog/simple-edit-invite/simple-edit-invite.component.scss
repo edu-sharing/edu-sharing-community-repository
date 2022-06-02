@@ -1,5 +1,5 @@
 @import '../../../../core-ui-module/styles/variables';
-@import "../../../../shared/components/card/variables";
+@import '../../../../shared/components/card/variables';
 
 .authorities {
     &:not(:last-child):after {
@@ -13,7 +13,7 @@
 mat-button-toggle-group {
     overflow: visible;
 }
-.toggle-org{
+.toggle-org {
     display: flex;
     flex-wrap: wrap;
     .button-toggle-org {
@@ -26,8 +26,8 @@ mat-button-toggle-group {
             border-top: none;
         }
     }
-    ::ng-deep{
-        .mat-button-toggle-label-content{
+    ::ng-deep {
+        .mat-button-toggle-label-content {
             white-space: pre-line;
             line-height: 1.5em;
             height: 48px;

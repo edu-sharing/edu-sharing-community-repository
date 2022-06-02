@@ -1,9 +1,13 @@
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { NgModule } from '@angular/core';
-import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from "@angular/material/form-field";
-import { MatTooltipDefaultOptions, MAT_TOOLTIP_DEFAULT_OPTIONS } from "@angular/material/tooltip";
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
+import { MatTooltipDefaultOptions, MAT_TOOLTIP_DEFAULT_OPTIONS } from '@angular/material/tooltip';
 import { ResizableModule } from 'angular-resizable-element';
-import { EduSharingApiConfigurationParams, EduSharingApiModule, EDU_SHARING_API_CONFIG } from 'ngx-edu-sharing-api';
+import {
+    EduSharingApiConfigurationParams,
+    EduSharingApiModule,
+    EDU_SHARING_API_CONFIG,
+} from 'ngx-edu-sharing-api';
 import { ErrorHandlerService } from './core-ui-module/error-handler.service';
 import { DECLARATIONS } from './declarations';
 import { extensionDeclarations } from './extension/extension-declarations';
@@ -32,7 +36,7 @@ import { DECLARATIONS_PROFILES } from './modules/profiles/declarations';
 import { DECLARATIONS_REGISTER } from './modules/register/declarations';
 import { DECLARATIONS_SEARCH } from './modules/search/declarations';
 import { PROVIDERS_SEARCH } from './modules/search/providers';
-import { DECLARATIONS_SERVICES } from "./modules/services/declarations";
+import { DECLARATIONS_SERVICES } from './modules/services/declarations';
 import { DECLARATIONS_SHARE_APP } from './modules/share-app/declarations';
 import { DECLARATIONS_SHARING } from './modules/sharing/declarations';
 import { DECLARATIONS_STARTUP } from './modules/startup/declarations';
@@ -43,7 +47,6 @@ import { RouterComponent } from './router/router.component';
 import { SharedModule } from './shared/shared.module';
 import { TranslationsModule } from './translations/translations.module';
 
-
 // http://blog.angular-university.io/angular2-ngmodule/
 // -> Making modules more readable using the spread operator
 
@@ -51,8 +54,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
     showDelay: 500,
     hideDelay: 0,
     touchendHideDelay: 0,
-}
-
+};
 
 @NgModule({
     declarations: [
@@ -99,14 +101,15 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         {
             provide: EDU_SHARING_API_CONFIG,
             deps: [ErrorHandlerService],
-            useFactory: (errorHandler: ErrorHandlerService) => ({
-                onError: (err, req) => errorHandler.handleError(err, req),
-            } as EduSharingApiConfigurationParams),
+            useFactory: (errorHandler: ErrorHandlerService) =>
+                ({
+                    onError: (err, req) => errorHandler.handleError(err, req),
+                } as EduSharingApiConfigurationParams),
         },
         PROVIDERS,
         PROVIDERS_SEARCH,
-        {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {appearance: 'outline'}},
-        {provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: matTooltipDefaultOptions},
+        { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
+        { provide: MAT_TOOLTIP_DEFAULT_OPTIONS, useValue: matTooltipDefaultOptions },
         extensionProviders,
         ErrorHandlerService,
     ],
@@ -130,8 +133,8 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DECLARATIONS_MESSAGES,
         DECLARATIONS_SHARING,
         DECLARATIONS_SHARE_APP,
-        DECLARATIONS_SERVICES
+        DECLARATIONS_SERVICES,
     ],
-    bootstrap: [RouterComponent]
+    bootstrap: [RouterComponent],
 })
-export class AppModule { }
+export class AppModule {}

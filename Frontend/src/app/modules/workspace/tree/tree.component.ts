@@ -8,7 +8,7 @@ import {
 import { Helper } from '../../../core-module/rest/helper';
 import { OptionItem } from '../../../core-ui-module/option-item';
 import { DropData, DragData } from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
-import {WorkspaceMainComponent} from '../workspace.component';
+import { WorkspaceMainComponent } from '../workspace.component';
 import { DropSource, NodeRoot } from 'src/app/features/node-entries/entries-model';
 
 @Component({
@@ -44,7 +44,7 @@ export class WorkspaceTreeComponent {
     @Output() onOpenNode = new EventEmitter();
     @Output() onUpdateOptions = new EventEmitter();
     @Output() onSetRoot = new EventEmitter();
-    @Output() onDrop = new EventEmitter<{target: Node, source: DropSource<Node>}>();
+    @Output() onDrop = new EventEmitter<{ target: Node; source: DropSource<Node> }>();
     @Output() onDeleteNodes = new EventEmitter();
 
     readonly MY_FILES = 'MY_FILES';

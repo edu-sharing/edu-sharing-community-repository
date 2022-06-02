@@ -1,16 +1,14 @@
+import { Sort } from '@angular/material/sort';
 
-import {Sort} from '@angular/material/sort';
-
-import {SelectionModel} from '@angular/cdk/collections';
-import {NodeEntriesDataType} from '../node-entries/node-entries.component';
+import { SelectionModel } from '@angular/cdk/collections';
+import { NodeEntriesDataType } from '../node-entries/node-entries.component';
 import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';
 import { ListItemSort, ListItem, Node } from '../../core-module/core.module';
 import { DropAction } from '../../core-ui-module/directives/drag-nodes/drag-nodes';
 import { OptionItem, Scope, CustomOptions, Target } from '../../core-ui-module/option-item';
 
-
 export type NodeRoot =
-    'MY_FILES'
+    | 'MY_FILES'
     | 'SHARED_FILES'
     | 'MY_SHARED_FILES'
     | 'TO_ME_SHARED_FILES'
@@ -21,7 +19,7 @@ export type NodeRoot =
 export enum NodeEntriesDisplayType {
     Table,
     Grid,
-    SmallGrid
+    SmallGrid,
 }
 
 export enum InteractionType {
@@ -29,15 +27,15 @@ export enum InteractionType {
     DefaultActionLink,
     // emit an event
     Emitter,
-    None
+    None,
 }
 
 export type ListOptions = { [key in Target]?: OptionItem[] };
 export type ListOptionsConfig = {
-    scope: Scope,
-    actionbar: ActionbarComponent,
-    parent?: Node,
-    customOptions?: CustomOptions,
+    scope: Scope;
+    actionbar: ActionbarComponent;
+    parent?: Node;
+    customOptions?: CustomOptions;
 };
 
 export interface ListSortConfig extends Sort {
@@ -64,21 +62,21 @@ export enum ClickSource {
     Preview,
     Icon,
     Metadata,
-    Comments
+    Comments,
 }
 
 export type NodeClickEvent<T extends NodeEntriesDataType> = {
-    element: T,
-    source: ClickSource,
-    attribute?: ListItem // only when source === Metadata
-}
+    element: T;
+    source: ClickSource;
+    attribute?: ListItem; // only when source === Metadata
+};
 export type FetchEvent = {
-    offset: number,
+    offset: number;
     amount?: number;
-}
+};
 export type GridConfig = {
-    maxRows?: number
-}
+    maxRows?: number;
+};
 
 export interface ListEventInterface<T extends NodeEntriesDataType> {
     updateNodes(nodes: void | T[]): void;

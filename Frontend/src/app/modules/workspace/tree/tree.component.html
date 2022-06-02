@@ -1,9 +1,9 @@
-<div class="rootNode" [class.rootNodeSelected]="root==MY_FILES" (click)="setRoot(MY_FILES)">
-  <i class="material-icons typeIcon">person</i>{{'WORKSPACE.MY_FILES' | translate}}
-  <i class="material-icons" *ngIf="root==MY_FILES">keyboard_arrow_down</i>
-  <i class="arrow" class="material-icons" *ngIf="root!=MY_FILES">keyboard_arrow_right</i>
+<div class="rootNode" [class.rootNodeSelected]="root == MY_FILES" (click)="setRoot(MY_FILES)">
+  <i class="material-icons typeIcon">person</i>{{ 'WORKSPACE.MY_FILES' | translate }}
+  <i class="material-icons" *ngIf="root == MY_FILES">keyboard_arrow_down</i>
+  <i class="arrow" class="material-icons" *ngIf="root != MY_FILES">keyboard_arrow_right</i>
 </div>
-<div class="tree" *ngIf="root==MY_FILES">
+<div class="tree" *ngIf="root == MY_FILES">
   <es-workspace-sub-tree
     [node]="'-userhome-'"
     [openPath]="_path"
@@ -16,12 +16,16 @@
     (onClick)="openNode($event)"
   ></es-workspace-sub-tree>
 </div>
-<div class="rootNode" [class.rootNodeSelected]="root==SHARED_FILES" (click)="setRoot(SHARED_FILES)">
-  <i class="material-icons typeIcon">group</i>{{'WORKSPACE.SHARED_FILES' | translate}}
-  <i class="material-icons" *ngIf="root==SHARED_FILES">keyboard_arrow_down</i>
-  <i class="arrow" class="material-icons" *ngIf="root!=SHARED_FILES">keyboard_arrow_right</i>
+<div
+  class="rootNode"
+  [class.rootNodeSelected]="root == SHARED_FILES"
+  (click)="setRoot(SHARED_FILES)"
+>
+  <i class="material-icons typeIcon">group</i>{{ 'WORKSPACE.SHARED_FILES' | translate }}
+  <i class="material-icons" *ngIf="root == SHARED_FILES">keyboard_arrow_down</i>
+  <i class="arrow" class="material-icons" *ngIf="root != SHARED_FILES">keyboard_arrow_right</i>
 </div>
-<div class="tree" *ngIf="root==SHARED_FILES">
+<div class="tree" *ngIf="root == SHARED_FILES">
   <es-workspace-sub-tree
     [node]="'-shared_files-'"
     [openPath]="_path"
@@ -34,30 +38,40 @@
     (onClick)="openNode($event)"
   ></es-workspace-sub-tree>
 </div>
-<div class="rootNode" [class.rootNodeSelected]="root==MY_SHARED_FILES" (click)="setRoot(MY_SHARED_FILES)">
-  <i class="material-icons typeIcon">share</i>{{'WORKSPACE.MY_SHARED_FILES' | translate}}
-  <i class="material-icons" *ngIf="root==MY_SHARED_FILES">keyboard_arrow_down</i>
-  <i class="arrow" class="material-icons" *ngIf="root!=MY_SHARED_FILES">keyboard_arrow_right</i>
+<div
+  class="rootNode"
+  [class.rootNodeSelected]="root == MY_SHARED_FILES"
+  (click)="setRoot(MY_SHARED_FILES)"
+>
+  <i class="material-icons typeIcon">share</i>{{ 'WORKSPACE.MY_SHARED_FILES' | translate }}
+  <i class="material-icons" *ngIf="root == MY_SHARED_FILES">keyboard_arrow_down</i>
+  <i class="arrow" class="material-icons" *ngIf="root != MY_SHARED_FILES">keyboard_arrow_right</i>
 </div>
-<div class="tree" *ngIf="root==MY_SHARED_FILES">
-<es-workspace-sub-tree
-  [node]="'-my_shared_files-'"
-  [openPath]="_path"
-  [reload]="reload"
-  [selectedPath]="_selectedPath"
-  [selectedNode]="selectedNode"
-  (onUpdateOptions)="updateOptions($event)"
-  (onDrop)="drop($event)"
-  (onToggleTree)="toggleTree($event)"
-  (onClick)="openNode($event)"
-></es-workspace-sub-tree>
+<div class="tree" *ngIf="root == MY_SHARED_FILES">
+  <es-workspace-sub-tree
+    [node]="'-my_shared_files-'"
+    [openPath]="_path"
+    [reload]="reload"
+    [selectedPath]="_selectedPath"
+    [selectedNode]="selectedNode"
+    (onUpdateOptions)="updateOptions($event)"
+    (onDrop)="drop($event)"
+    (onToggleTree)="toggleTree($event)"
+    (onClick)="openNode($event)"
+  ></es-workspace-sub-tree>
 </div>
-<div class="rootNode" [class.rootNodeSelected]="root==TO_ME_SHARED_FILES" (click)="setRoot(TO_ME_SHARED_FILES)">
-  <i class="material-icons typeIcon">send</i>{{'WORKSPACE.TO_ME_SHARED_FILES' | translate}}
-  <i class="material-icons" *ngIf="root==TO_ME_SHARED_FILES">keyboard_arrow_down</i>
-  <i class="arrow" class="material-icons" *ngIf="root!=TO_ME_SHARED_FILES">keyboard_arrow_right</i>
+<div
+  class="rootNode"
+  [class.rootNodeSelected]="root == TO_ME_SHARED_FILES"
+  (click)="setRoot(TO_ME_SHARED_FILES)"
+>
+  <i class="material-icons typeIcon">send</i>{{ 'WORKSPACE.TO_ME_SHARED_FILES' | translate }}
+  <i class="material-icons" *ngIf="root == TO_ME_SHARED_FILES">keyboard_arrow_down</i>
+  <i class="arrow" class="material-icons" *ngIf="root != TO_ME_SHARED_FILES"
+    >keyboard_arrow_right</i
+  >
 </div>
-<div class="tree" *ngIf="root==TO_ME_SHARED_FILES">
+<div class="tree" *ngIf="root == TO_ME_SHARED_FILES">
   <es-workspace-sub-tree
     [node]="workspace.getRootFolderInternalId()"
     [openPath]="_path"
@@ -70,10 +84,14 @@
     (onClick)="openNode($event)"
   ></es-workspace-sub-tree>
 </div>
-<div class="rootNode" [class.rootNodeSelected]="root==WORKFLOW_RECEIVE" (click)="setRoot(WORKFLOW_RECEIVE)">
-  <i class="material-icons typeIcon">inbox</i>{{'WORKSPACE.WORKFLOW_RECEIVE' | translate}}
+<div
+  class="rootNode"
+  [class.rootNodeSelected]="root == WORKFLOW_RECEIVE"
+  (click)="setRoot(WORKFLOW_RECEIVE)"
+>
+  <i class="material-icons typeIcon">inbox</i>{{ 'WORKSPACE.WORKFLOW_RECEIVE' | translate }}
 </div>
-<div class="tree" *ngIf="root==WORKFLOW_RECEIVE">
+<div class="tree" *ngIf="root == WORKFLOW_RECEIVE">
   <es-workspace-sub-tree
     [node]="'-workflow_receive-'"
     [openPath]="_path"
@@ -85,14 +103,15 @@
     (onClick)="openNode($event)"
   ></es-workspace-sub-tree>
 </div>
-<div class="rootNode"
-     [class.rootNodeSelected]="root==RECYCLE"
-     [class.hover]="dragHover==RECYCLE"
-     (click)="setRoot(RECYCLE)"
-     [esNodesDropTarget]="true"
-     [nodesDragAllowedActions]="['move']"
-     (nodesHoveringChange)="onNodesHoveringChange($event, RECYCLE)"
-     (nodesDrop)="onNodesDrop($event, RECYCLE)"
+<div
+  class="rootNode"
+  [class.rootNodeSelected]="root == RECYCLE"
+  [class.hover]="dragHover == RECYCLE"
+  (click)="setRoot(RECYCLE)"
+  [esNodesDropTarget]="true"
+  [nodesDragAllowedActions]="['move']"
+  (nodesHoveringChange)="onNodesHoveringChange($event, RECYCLE)"
+  (nodesDrop)="onNodesDrop($event, RECYCLE)"
 >
-  <i class="material-icons typeIcon">delete</i>{{'WORKSPACE.RECYCLE' | translate}}
+  <i class="material-icons typeIcon">delete</i>{{ 'WORKSPACE.RECYCLE' | translate }}
 </div>

@@ -1,4 +1,4 @@
-import {Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete/autocomplete';
 import { forkJoin, Observable, of } from 'rxjs';
@@ -6,18 +6,22 @@ import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
 import {
     Authority,
     AuthorityProfile,
-    Group, GroupProfile, Organization, RestConnectorService,
+    Group,
+    GroupProfile,
+    Organization,
+    RestConnectorService,
     RestConstants,
     RestIamService,
-    RestOrganizationService, User,
+    RestOrganizationService,
+    User,
 } from '../../../core-module/core.module';
-import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
+import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { PermissionNamePipe } from '../../../core-ui-module/pipes/permission-name.pipe';
 import { SuggestItem } from '../../../common/ui/autocomplete/autocomplete.component';
 
 interface SuggestionGroup {
-    label: string,
-    values: SuggestItem[],
+    label: string;
+    values: SuggestItem[];
 }
 
 @Component({
@@ -46,7 +50,7 @@ export class AuthoritySearchInputComponent {
      */
     @Input() showRecent = true;
     @Input() mode = AuthoritySearchMode.UsersAndGroups;
-    @Input() set disabled(disabled: boolean){
+    @Input() set disabled(disabled: boolean) {
         disabled ? this.input.disable() : this.input.enable();
     }
     @Input() maxSuggestions = 10;
@@ -58,7 +62,7 @@ export class AuthoritySearchInputComponent {
     @Input() placeholder = 'WORKSPACE.INVITE_FIELD';
     @Input() hint = '';
 
-    @Output() onChooseAuthority = new EventEmitter<Authority|any>();
+    @Output() onChooseAuthority = new EventEmitter<Authority | any>();
 
     input = new FormControl('');
     suggestionGroups$: Observable<SuggestionGroup[]>;
@@ -132,25 +136,29 @@ export class AuthoritySearchInputComponent {
     private getUsersAndGroupsSuggestions(inputValue: string): Observable<SuggestionGroup[]> {
         const observables: Observable<SuggestionGroup>[] = [];
         observables.push(
-            this.iam.searchAuthorities(inputValue, false, this.groupType, '', {
-                count: 50,
-            }).pipe(
-                map(({ authorities }) => ({
-                    label: 'WORKSPACE.INVITE_LOCAL_RESULTS',
-                    values: this.convertData(authorities),
-                })),
-            ),
-        );
-        if (this.globalSearchAllowed) {
-            observables.push(
-                this.iam.searchAuthorities(inputValue, true, this.groupType, '', {
-                    count: 100,
-                }).pipe(
+            this.iam
+                .searchAuthorities(inputValue, false, this.groupType, '', {
+                    count: 50,
+                })
+                .pipe(
                     map(({ authorities }) => ({
-                        label: 'WORKSPACE.INVITE_GLOBAL_RESULTS',
+                        label: 'WORKSPACE.INVITE_LOCAL_RESULTS',
                         values: this.convertData(authorities),
                     })),
                 ),
+        );
+        if (this.globalSearchAllowed) {
+            observables.push(
+                this.iam
+                    .searchAuthorities(inputValue, true, this.groupType, '', {
+                        count: 100,
+                    })
+                    .pipe(
+                        map(({ authorities }) => ({
+                            label: 'WORKSPACE.INVITE_GLOBAL_RESULTS',
+                            values: this.convertData(authorities),
+                        })),
+                    ),
             );
         }
         return forkJoin(observables).pipe(
@@ -218,7 +226,9 @@ export class AuthoritySearchInputComponent {
         );
     }
 
-    private convertData(authorities: Organization[] | AuthorityProfile[] | Group[] | User[]): SuggestItem[] {
+    private convertData(
+        authorities: Organization[] | AuthorityProfile[] | Group[] | User[],
+    ): SuggestItem[] {
         const result: SuggestItem[] = [];
         for (const user of authorities) {
             const group = (user.profile as GroupProfile).displayName != null;

@@ -1,5 +1,5 @@
-import {first, filter} from 'rxjs/operators';
-import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
+import { first, filter } from 'rxjs/operators';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Node } from '../../../../../core-module/rest/data-object';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
@@ -9,15 +9,13 @@ import { VCard } from '../../../../../core-module/ui/VCard';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import { Values } from '../../../types/types';
-import {MdsEditorWidgetBase, ValueType} from '../mds-editor-widget-base';
-import {FormControl, FormGroup} from '@angular/forms';
-import {TranslateService} from '@ngx-translate/core';
-import {Toast} from '../../../../../core-ui-module/toast';
-import {DateHelper} from '../../../../../core-ui-module/DateHelper';
-import {
-    WorkspaceContributorComponent
-} from '../../../../../modules/management-dialogs/contributor/contributor.component';
-import {MatTabGroup} from '@angular/material/tabs';
+import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import { FormControl, FormGroup } from '@angular/forms';
+import { TranslateService } from '@ngx-translate/core';
+import { Toast } from '../../../../../core-ui-module/toast';
+import { DateHelper } from '../../../../../core-ui-module/DateHelper';
+import { WorkspaceContributorComponent } from '../../../../../modules/management-dialogs/contributor/contributor.component';
+import { MatTabGroup } from '@angular/material/tabs';
 
 export interface AuthorData {
     freetext: string;
@@ -55,33 +53,32 @@ export class MdsEditorWidgetVCardComponent extends MdsEditorWidgetBase implement
         }
         const vcard = new VCard(initialValue[0]);
         this.editType = vcard.getType();
-        this.formControl = new FormGroup({
-            givenname: new FormControl(vcard.givenname),
-            surname: new FormControl(vcard.surname),
-            org: new FormControl(vcard.org),
-        }, this.getStandardValidators());
-        this.formControl.valueChanges.pipe(
-            filter((value) => value !== null))
-            .subscribe((value) => {
-                vcard.givenname = value.givenname;
-                vcard.surname = value.surname;
-                vcard.org = value.org;
-                let result = initialValue.slice();
-                if (vcard.isValid()) {
-                    result[0] = vcard.toVCardString();
-                } else {
-                    result = initialValue.slice(1);
-                }
-                this.setValue(result);
-            });
+        this.formControl = new FormGroup(
+            {
+                givenname: new FormControl(vcard.givenname),
+                surname: new FormControl(vcard.surname),
+                org: new FormControl(vcard.org),
+            },
+            this.getStandardValidators(),
+        );
+        this.formControl.valueChanges.pipe(filter((value) => value !== null)).subscribe((value) => {
+            vcard.givenname = value.givenname;
+            vcard.surname = value.surname;
+            vcard.org = value.org;
+            let result = initialValue.slice();
+            if (vcard.isValid()) {
+                result[0] = vcard.toVCardString();
+            } else {
+                result = initialValue.slice(1);
+            }
+            this.setValue(result);
+        });
         setTimeout(() => this.tabGroup.realignInkBar());
     }
 
-    focus(): void {
-    }
+    focus(): void {}
 
     blur(): void {
         this.onBlur.emit();
     }
-
 }

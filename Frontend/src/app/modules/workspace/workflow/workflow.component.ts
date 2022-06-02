@@ -23,7 +23,7 @@ import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
 import { Toast } from '../../../core-ui-module/toast';
 import {
     NodeHelperService,
-    WorkflowDefinitionStatus
+    WorkflowDefinitionStatus,
 } from '../../../core-ui-module/node-helper.service';
 
 type WorkflowReceiver = UserSimple | Group;
@@ -145,7 +145,7 @@ export class WorkspaceWorkflowComponent implements OnChanges {
             if (!hasPermission) {
                 return;
             }
-        } else if(this.status.hasReceiver) {
+        } else if (this.status.hasReceiver) {
             this.toast.error(null, 'WORKSPACE.WORKFLOW.NO_RECEIVER');
             return;
         }
@@ -185,10 +185,8 @@ export class WorkspaceWorkflowComponent implements OnChanges {
             } else {
                 this.history = [];
                 this.receivers = [];
-                ({
-                    current: this.status,
-                    initial: this.initialStatus,
-                } = this.nodeHelper.getDefaultWorkflowStatus(true));
+                ({ current: this.status, initial: this.initialStatus } =
+                    this.nodeHelper.getDefaultWorkflowStatus(true));
             }
         } else {
             this.history = histories[0];
@@ -198,10 +196,8 @@ export class WorkspaceWorkflowComponent implements OnChanges {
             if (!this.receivers || (this.receivers.length === 1 && !this.receivers[0])) {
                 this.receivers = [];
             }
-            ({ current: this.status, initial: this.initialStatus } = this.nodeHelper.getWorkflowStatus(
-                this.nodes[0],
-                true
-            ));
+            ({ current: this.status, initial: this.initialStatus } =
+                this.nodeHelper.getWorkflowStatus(this.nodes[0], true));
         }
     }
 

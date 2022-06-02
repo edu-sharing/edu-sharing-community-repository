@@ -1,22 +1,22 @@
 @use 'sass:math';
-@import "../../../core-ui-module/styles/variables";
-.dropdown-dummy{
+@import '../../../core-ui-module/styles/variables';
+.dropdown-dummy {
     position: fixed;
 }
-.node{
+.node {
     @include clickable();
-    padding-top:10px;
-    padding-bottom:10px;
-    width:100%;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    width: 100%;
     white-space: nowrap;
-    img{
+    img {
         z-index: 1;
     }
 }
-:host ::ng-deep{
-    es-spinner-small .preloader-wrapper.small{
-        width:14px;
-        height:14px;
+:host ::ng-deep {
+    es-spinner-small .preloader-wrapper.small {
+        width: 14px;
+        height: 14px;
     }
     .sub-tree-element {
         height: 52px;
@@ -30,79 +30,79 @@
         }
     }
 }
-.spinner{
+.spinner {
     position: absolute;
-    top:-40px;
-    right:0;
+    top: -40px;
+    right: 0;
     z-index: 10;
-    padding:10px;
+    padding: 10px;
 }
-i.arrow{
-    width:20px;
+i.arrow {
+    width: 20px;
 }
-.fade-right{
-    top:-5px;
+.fade-right {
+    top: -5px;
     position: absolute;
-    right:0;
-    width:60px;
-    height:55px;
+    right: 0;
+    width: 60px;
+    height: 55px;
     z-index: 9;
-    @include fadeRight($workspaceTreeBackground,70%);
+    @include fadeRight($workspaceTreeBackground, 70%);
 }
-.fade-right-selected{
-    @include fadeRight($workspaceTreeSelectedBackground,70%);
+.fade-right-selected {
+    @include fadeRight($workspaceTreeSelectedBackground, 70%);
 }
-.moreOpen{
+.moreOpen {
     left: math.div($workspaceSidebarWidth - $contextMenuWidth, 2);
-    width:$contextMenuWidth;
+    width: $contextMenuWidth;
 }
-.node:hover{
+.node:hover {
     background-color: $workspaceTreeSelectedBackground;
-    .fade-right{
+    .fade-right {
         /*@include fadeRight($workspaceTreeSelectedBackground,70%);*/
     }
 }
-.nodeSelected{
-    background-color: $workspaceTreeSelectedBackground!important;
+.nodeSelected {
+    background-color: $workspaceTreeSelectedBackground !important;
     background: $workspaceTreeSelectedBackgroundEffect;
-    font-weight:bold;
+    font-weight: bold;
 }
-.hover{
-    background-color: rgba($primary,0.2)!important;
+.hover {
+    background-color: rgba($primary, 0.2) !important;
     outline: 2px $primary dashed;
 }
-.node i{
-    color:$textLight;
-    margin-right:5px;
+.node i {
+    color: $textLight;
+    margin-right: 5px;
 }
-.arrow{
+.arrow {
     position: relative;
     top: 4px;
 }
-.name{
-    position:absolute;
-    top:0px;
+.name {
+    position: absolute;
+    top: 0px;
     line-height: 3.7em;
-    width:100%;
+    width: 100%;
     display: inline-block;
 }
-.node img{
-    padding-right:10px;
-    width:30px;
-    height:20px; /* ie fix */
+.node img {
+    padding-right: 10px;
+    width: 30px;
+    height: 20px; /* ie fix */
 }
-.sub-tree-wrapper{
+.sub-tree-wrapper {
     position: relative;
 }
-.empty{
+.empty {
     font-style: italic;
-    padding-top:10px;
+    padding-top: 10px;
 }
-.more-items{
+.more-items {
     color: $primary;
     background-color: transparent;
 }
-.more-items-loading{
+.more-items-loading {
     position: relative;
     top: -15px;
 }

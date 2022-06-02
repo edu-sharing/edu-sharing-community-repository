@@ -17,7 +17,7 @@
  * specific language governing permissions and limitations
  * under the License.
  *
-*/
+ */
 
 module.exports = {
     id: 'ios',
@@ -27,5 +27,5 @@ module.exports = {
         require('cordova/modulemapper').clobbers('cordova/plugin/ios/console', 'window.console');
 
         require('cordova/channel').onNativeReady.fire();
-    }
+    },
 };

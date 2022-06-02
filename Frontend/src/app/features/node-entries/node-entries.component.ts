@@ -1,23 +1,24 @@
 import {
     AfterViewInit,
     Component,
-    ContentChild, HostListener, Input,
+    ContentChild,
+    HostListener,
+    Input,
     OnChanges,
     SimpleChanges,
-    TemplateRef
+    TemplateRef,
 } from '@angular/core';
 import { UIService, GenericAuthority, Node } from '../../core-module/core.module';
 import { KeyEvents } from '../../core-module/ui/key-events';
 import { NodeEntriesService } from '../../core-ui-module/node-entries.service';
 import { NodeEntriesDisplayType } from './entries-model';
 
-import {NodeEntriesTemplatesService} from './node-entries-templates.service';
+import { NodeEntriesTemplatesService } from './node-entries-templates.service';
 
 @Component({
     selector: 'es-node-entries',
     templateUrl: 'node-entries.component.html',
     styleUrls: ['node-entries.component.scss'],
-
 })
 export class NodeEntriesComponent<T extends NodeEntriesDataType> implements OnChanges {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
@@ -29,7 +30,7 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType> implements OnCh
             (event.ctrlKey || this.uiService.isAppleCmd()) &&
             !KeyEvents.eventFromInputField(event)
         ) {
-            if(this.entriesService.selection.isEmpty()) {
+            if (this.entriesService.selection.isEmpty()) {
                 this.entriesService.selection.select(...this.entriesService.dataSource.getData());
             } else {
                 this.entriesService.selection.clear();
@@ -39,16 +40,12 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType> implements OnCh
         }
     }
 
-
     constructor(
         private uiService: UIService,
         public entriesService: NodeEntriesService<T>,
         public templatesService: NodeEntriesTemplatesService,
-    ) {
+    ) {}
 
-    }
-
-    ngOnChanges(changes: SimpleChanges): void {
-    }
+    ngOnChanges(changes: SimpleChanges): void {}
 }
 export type NodeEntriesDataType = Node | GenericAuthority;

@@ -1,8 +1,13 @@
 <div class="root">
   <div *ngFor="let user of users">
-    <h3>Basic Avatars for dummy user {{user | authorityName}}</h3>
+    <h3>Basic Avatars for dummy user {{ user | authorityName }}</h3>
     <div class="example">
-      <es-user-avatar *ngFor="let size of sizes" [user]="user" [size]="size" [customImage]="$any(user).avatar ? $any(user).avatar : null"></es-user-avatar>
+      <es-user-avatar
+        *ngFor="let size of sizes"
+        [user]="user"
+        [size]="size"
+        [customImage]="$any(user).avatar ? $any(user).avatar : null"
+      ></es-user-avatar>
     </div>
   </div>
 </div>

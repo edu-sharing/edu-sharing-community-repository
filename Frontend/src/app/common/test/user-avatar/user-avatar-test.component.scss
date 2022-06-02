@@ -1,18 +1,18 @@
 .root {
-  display: flex;
-  flex-wrap: wrap;
-  div {
-    .example{
-      display: flex;
+    display: flex;
+    flex-wrap: wrap;
+    div {
+        .example {
+            display: flex;
+        }
+        padding: 20px;
+        h3 {
+            font-size: 120%;
+        }
+        > div {
+            > * {
+                margin: 10px;
+            }
+        }
     }
-    padding:20px;
-    h3 {
-      font-size: 120%;
-    }
-    > div {
-      > * {
-        margin: 10px;
-      }
-    }
-  }
 }

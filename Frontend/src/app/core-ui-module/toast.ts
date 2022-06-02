@@ -1,8 +1,8 @@
-import {Injectable, Injector, OnDestroy} from '@angular/core';
+import { Injectable, Injector, OnDestroy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import {BehaviorSubject, Observable, Subject} from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { ModalDialogOptions } from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
 import { ProgressType } from '../shared/components/modal-dialog/modal-dialog.component';
 import { RestConstants } from '../core-module/rest/rest-constants';
@@ -10,11 +10,11 @@ import { TemporaryStorageService } from '../core-module/rest/services/temporary-
 import { DialogButton } from '../core-module/ui/dialog-button';
 import { UIConstants } from '../core-module/ui/ui-constants';
 import { DateHelper } from './DateHelper';
-import {ToastMessageComponent} from './components/toast-message/toast-message.component';
-import {RestConnectorService} from '../core-module/core.module';
+import { ToastMessageComponent } from './components/toast-message/toast-message.component';
+import { RestConnectorService } from '../core-module/core.module';
 import { AccessibilityService } from '../common/ui/accessibility/accessibility.service';
 import { takeUntil } from 'rxjs/operators';
-import {HttpErrorResponse} from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 
 interface CustomAction {
     link: {
@@ -35,22 +35,22 @@ export enum ToastDuration {
     Seconds_15 = 15,
     Seconds_30 = 30,
     Seconds_60 = 60,
-    Infinite = null
+    Infinite = null,
 }
 export enum ToastType {
     InfoSimple, // A simple info just confirming an action without providing useful data
     InfoData, // A info including some additional data to the previous action
     InfoAction, // A info including some interactive feature, e.g. navigating to a newly created item
     ErrorGeneric, // A generic error without any more specific data available
-    ErrorSpecific // a specific error may also including some details on how to solve it
+    ErrorSpecific, // a specific error may also including some details on how to solve it
 }
 export type ToastMessage = {
-    message: string,
+    message: string;
     html?: boolean;
-    type: 'error' | 'info',
-    subtype: ToastType,
-    action?: Action
-}
+    type: 'error' | 'info';
+    subtype: ToastType;
+    action?: Action;
+};
 @Injectable()
 export class Toast implements OnDestroy {
     private static MIN_TIME_BETWEEN_TOAST = 2000;
@@ -90,7 +90,7 @@ export class Toast implements OnDestroy {
                 return;
             }
             this.showNext();
-        })
+        });
         this.isModalDialogOpen = this.isModalDialogOpenSubject.asObservable();
         this.accessibility
             .observe(['toastDuration', 'toastMode'])
@@ -112,20 +112,39 @@ export class Toast implements OnDestroy {
         this.destroyed.complete();
     }
     show(message: ToastMessage) {
-        if(message.type === 'info') {
-            this.toast(message.message, null, null, null, message.action ? {
-                link: {
-                    caption: message.action.label,
-                    callback: message.action.callback
-                }
-            } : null, message);
+        if (message.type === 'info') {
+            this.toast(
+                message.message,
+                null,
+                null,
+                null,
+                message.action
+                    ? {
+                          link: {
+                              caption: message.action.label,
+                              callback: message.action.callback,
+                          },
+                      }
+                    : null,
+                message,
+            );
         } else {
-            this.error(null, message.message, null, null, null, message.action ? {
-                link: {
-                    caption: message.action.label,
-                    callback: message.action.callback
-                }
-            } : null, message);
+            this.error(
+                null,
+                message.message,
+                null,
+                null,
+                null,
+                message.action
+                    ? {
+                          link: {
+                              caption: message.action.label,
+                              callback: message.action.callback,
+                          },
+                      }
+                    : null,
+                message,
+            );
         }
     }
 
@@ -142,7 +161,7 @@ export class Toast implements OnDestroy {
         dialogTitle: string = null,
         dialogMessage: string = null,
         customAction: CustomAction = null,
-        toastMessage: ToastMessage = null
+        toastMessage: ToastMessage = null,
     ): void {
         if (
             this.lastToastMessage === message &&
@@ -153,9 +172,9 @@ export class Toast implements OnDestroy {
         toastMessage = toastMessage || {
             message: null,
             type: null,
-            subtype: null
+            subtype: null,
         };
-        if(toastMessage.subtype == null) {
+        if (toastMessage.subtype == null) {
             toastMessage.subtype = customAction ? ToastType.InfoAction : ToastType.InfoSimple;
         }
         this.lastToastMessage = message;
@@ -218,10 +237,11 @@ export class Toast implements OnDestroy {
         toastMessage = toastMessage || {
             message: null,
             type: null,
-            subtype: null
+            subtype: null,
         };
-        if(!toastMessage.subtype) {
-            toastMessage.subtype = message === 'COMMON_API_ERROR' ? ToastType.ErrorGeneric : ToastType.ErrorSpecific
+        if (!toastMessage.subtype) {
+            toastMessage.subtype =
+                message === 'COMMON_API_ERROR' ? ToastType.ErrorGeneric : ToastType.ErrorSpecific;
         }
         this.showToast({
             message,
@@ -374,7 +394,6 @@ export class Toast implements OnDestroy {
         this.isModalDialogOpenSubject.next(true);
     }
 
-
     private matSnackbarShowToast(message: ToastMessage): void {
         this.messageQueue.next(this.messageQueue.value.concat([message]));
     }
@@ -497,7 +516,7 @@ export class Toast implements OnDestroy {
                     } catch (e) {}
                 }
             } catch (e) {
-                if(json && !error) {
+                if (json && !error) {
                     error = json;
                 }
             }
@@ -523,7 +542,7 @@ export class Toast implements OnDestroy {
             } else {
                 if (!dialogMessage) {
                     dialogMessage = error + '\n\n' + errorInfo;
-                    if(errorObject instanceof HttpErrorResponse && errorObject.url) {
+                    if (errorObject instanceof HttpErrorResponse && errorObject.url) {
                         dialogMessage += '\n\nBackend URL: ' + errorObject.url;
                     }
                 }
@@ -549,22 +568,24 @@ export class Toast implements OnDestroy {
     }
 
     private showNext() {
-        if(this.messageQueue.value.length === 0) {
+        if (this.messageQueue.value.length === 0) {
             return;
         }
         const message = this.messageQueue.value[0];
         this.isInstanceVisible = true;
         this.messageQueue.next(this.messageQueue.value.slice(1));
         // check if the specific message can be ignored
-        if(this.mode === 'important') {
-            if(message.subtype === ToastType.InfoSimple) {
+        if (this.mode === 'important') {
+            if (message.subtype === ToastType.InfoSimple) {
                 this.isInstanceVisible = false;
                 return;
             }
         }
-        const snackBarRef = this.snackBar.openFromComponent(ToastMessageComponent,{
+        const snackBarRef = this.snackBar.openFromComponent(ToastMessageComponent, {
             data: message,
-            duration: Toast.convertDuration(this.duration) ? Toast.convertDuration(this.duration) * 1000 : null,
+            duration: Toast.convertDuration(this.duration)
+                ? Toast.convertDuration(this.duration) * 1000
+                : null,
             panelClass: ['app-mat-snackbar-toast', `app-mat-snackbar-toast-${message.type}`],
         });
         if (message.action) {

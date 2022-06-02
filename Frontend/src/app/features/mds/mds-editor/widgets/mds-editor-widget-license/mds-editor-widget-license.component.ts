@@ -11,7 +11,7 @@ import { UIHelper } from '../../../../../core-ui-module/ui-helper';
 import { MainNavService } from '../../../../../main/navigation/main-nav.service';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
-import {Constraints, MdsWidgetValue, Values} from '../../../types/types';
+import { Constraints, MdsWidgetValue, Values } from '../../../types/types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
 
 @Component({
@@ -97,7 +97,8 @@ export class MdsEditorWidgetLicenseComponent
             .onRefresh.pipe(first())
             .subscribe((nodes: Node[]) => {
                 this.nodes = nodes;
-                this.mdsEditorValues.updateNodes(this.nodes); });
+                this.mdsEditorValues.updateNodes(this.nodes);
+            });
     }
 
     updateValue(license: License, status: boolean) {

@@ -19,15 +19,13 @@ export class ListTextComponent extends ListWidget {
     readonly DATE_FIELDS = RestConstants.DATE_FIELDS;
     readonly VCARD_FIELDS = RestConstants.getAllVCardFields();
 
-    constructor(
-        private nodeHelper: NodeHelperService,
-    ) {
+    constructor(private nodeHelper: NodeHelperService) {
         super();
     }
     getNode() {
-        if(this.item.type === 'NODE_PROPOSAL') {
+        if (this.item.type === 'NODE_PROPOSAL') {
             return (this.node as ProposalNode).proposal;
-        } else if((this.node as Node).type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL) {
+        } else if ((this.node as Node).type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL) {
             return (this.node as Node).relations?.Original ?? this.node;
         }
         return this.node;
