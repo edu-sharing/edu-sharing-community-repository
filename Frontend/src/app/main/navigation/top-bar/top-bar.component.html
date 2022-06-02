@@ -43,6 +43,7 @@
         class="menuButton mat-button-no-uppercase"
         [class.clickable]="canOpen"
         title="{{ 'CHOOSEENVIRONMENT' | translate }}"
+        data-test="main-nav-scope-button"
       >
         <img class="material-icons eduImage" [src]="getIconSource()" alt="" />
         <span>{{ title | translate }}</span>
