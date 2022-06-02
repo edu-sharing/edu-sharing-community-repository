@@ -165,7 +165,6 @@ public class NodeServiceHelper {
 	 * gets the native property
 	 * if a special runtime property (e.g. _DISPLAYNAME) is requested, it will also resolve it
 	 * WARNING: this method is not optimized for performance!
-	 * @return
 	 */
 	public static Serializable getPropertyNativeWithMapping(NodeRef nodeRef, String key) throws Throwable {
 		if(key.endsWith(CCConstants.DISPLAYNAME_SUFFIX)) {
