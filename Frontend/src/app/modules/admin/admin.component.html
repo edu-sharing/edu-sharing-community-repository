@@ -757,22 +757,20 @@
       </div>
       <div *ngIf="lucene.mode=='NODEREF' || lucene.outputMode=='view'" class="search-list">
         <es-actionbar #actionbarComponent></es-actionbar>
-        <es-listTable *ngIf="searchResponse?.nodes?.length"
-                   [viewType]="0"
-                   [columns]="searchColumns"
-                   [scope]="SCOPES.Admin"
-                   [actionbar]="actionbarComponent"
-                   [hasHeading]="true"
-                   [nodes]="searchResponse.nodes"
-                   [hasCheckbox]="true"
-                   [hasIcon]="true"
-                   [totalCount]="searchResponse.pagination.total"
-                   [isClickable]="true"
-                   (clickRow)="debugNode($event.node)"
-        ></es-listTable>
-        <div class="no-results" *ngIf="!searchResponse?.nodes?.length">
-          {{'WORKSPACE.NO_MATCHING_ITEMS' | translate}}
-        </div>
+        <es-node-entries-wrapper
+          [dataSource]="searchResponse"
+          [columns]="searchColumns"
+          [configureColumns]="true"
+          [displayType]="NodeEntriesDisplayType.Table"
+          [elementInteractionType]="InteractionType.Emitter"
+          (clickItem)="debugNode($event.element)"
+        >
+          <ng-template #empty>
+            <div class="no-results">
+              {{'WORKSPACE.NO_MATCHING_ITEMS' | translate}}
+            </div>
+          </ng-template>
+        </es-node-entries-wrapper>
       </div>
       <es-lucene-template-memory
         [(query)]="lucene.query"
