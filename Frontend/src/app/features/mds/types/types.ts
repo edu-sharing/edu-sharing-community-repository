@@ -86,6 +86,7 @@ export enum MdsWidgetType {
     Range = 'range',
     Duration = 'duration',
     SingleValueTree = 'singlevalueTree',
+    SingleValueSuggestBadges = 'singlevalueSuggestBadges',
     MultiValueTree = 'multivalueTree',
     DefaultValue = 'defaultvalue',
     FacetList = 'facetList',

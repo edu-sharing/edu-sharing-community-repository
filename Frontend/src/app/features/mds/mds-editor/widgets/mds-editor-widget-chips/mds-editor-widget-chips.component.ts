@@ -109,6 +109,7 @@ export class MdsEditorWidgetChipsComponent
             .subscribe((values: DisplayValue[]) => this.setValue(values.map((value) => value.key)));
         if (
             this.widget.definition.type === MdsWidgetType.MultiValueSuggestBadges ||
+            this.widget.definition.type === MdsWidgetType.SingleValueSuggestBadges ||
             this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges
         ) {
             const filteredValues = this.subscribeForSuggestionUpdates();
@@ -233,6 +234,9 @@ export class MdsEditorWidgetChipsComponent
     }
 
     add(value: DisplayValue): void {
+        if(this.widget.definition.type === MdsWidgetType.SingleValueSuggestBadges) {
+            this.chipsControl.setValue([]);
+        }
         if (!this.chipsControl.value.some((v: DisplayValue) => v.key === value.key)) {
             this.chipsControl.setValue([...this.chipsControl.value, value]);
         }
