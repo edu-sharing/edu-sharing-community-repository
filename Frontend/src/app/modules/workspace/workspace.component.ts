@@ -2,6 +2,7 @@ import { trigger } from '@angular/animations';
 import { Component, HostListener, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
+import { Connector } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { delay } from 'rxjs/operators';
@@ -15,7 +16,6 @@ import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 import {
     ClipboardObject,
     ConfigurationService,
-    Connector,
     DialogButton,
     EventListener,
     Filetype,

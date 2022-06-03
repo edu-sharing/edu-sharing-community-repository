@@ -1,5 +1,6 @@
-import { Component, Input, EventEmitter, Output, ViewChild, ElementRef } from '@angular/core';
-import { Connector, DialogButton } from '../../../core-module/core.module';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Connector } from 'ngx-edu-sharing-api';
+import { DialogButton } from '../../../core-module/core.module';
 
 @Component({
     selector: 'es-workspace-create-connector',

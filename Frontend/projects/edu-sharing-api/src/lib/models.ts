@@ -2,6 +2,8 @@
 
 export {
     About,
+    Connector,
+    ConnectorList,
     Mds as MdsDefinition,
     MdsGroup,
     MdsSort,

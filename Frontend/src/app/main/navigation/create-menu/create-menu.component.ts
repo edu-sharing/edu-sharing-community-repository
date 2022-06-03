@@ -10,11 +10,9 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { Observable } from 'rxjs';
-import {
-    OptionsHelperService,
-    OPTIONS_HELPER_CONFIG,
-} from '../../../core-ui-module/options-helper.service';
+import { ConnectorService } from 'ngx-edu-sharing-api';
+import { Observable, Subject } from 'rxjs';
+import { delay, takeUntil } from 'rxjs/operators';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
@@ -37,8 +35,6 @@ import {
 import { Helper } from '../../../core-module/rest/helper';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { CardService } from '../../../core-ui-module/card.service';
-import { CardComponent } from '../../../shared/components/card/card.component';
-import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
 import { DateHelper } from '../../../core-ui-module/DateHelper';
 import { LinkData, NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import {
@@ -50,14 +46,18 @@ import {
     Scope,
     Target,
 } from '../../../core-ui-module/option-item';
+import {
+    OptionsHelperService,
+    OPTIONS_HELPER_CONFIG,
+} from '../../../core-ui-module/options-helper.service';
 import { Toast } from '../../../core-ui-module/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { WorkspaceManagementDialogsComponent } from '../../../modules/management-dialogs/management-dialogs.component';
-import { delay } from 'rxjs/operators';
 import {
     DialogRef,
     ManagementDialogsService,
 } from '../../../modules/management-dialogs/management-dialogs.service';
+import { CardComponent } from '../../../shared/components/card/card.component';
+import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
 
 @Component({
     selector: 'es-create-menu',
@@ -74,7 +74,7 @@ import {
         },
     ],
 })
-export class CreateMenuComponent {
+export class CreateMenuComponent implements OnDestroy {
     @ViewChild('dropdown', { static: true }) dropdown: DropdownComponent;
 
     /**
@@ -119,11 +119,13 @@ export class CreateMenuComponent {
     options: OptionItem[];
 
     private params: Params;
+    private destroyed = new Subject<void>();
 
     constructor(
         public bridge: BridgeService,
         private connector: RestConnectorService,
         private connectors: RestConnectorsService,
+        private connectorApi: ConnectorService,
         private iamService: RestIamService,
         private nodeService: RestNodeService,
         private managementService: ManagementDialogsService,
@@ -145,16 +147,24 @@ export class CreateMenuComponent {
             this.params = params;
             this.updateOptions();
         });
-        this.connectors.list().subscribe(() => {
-            this.connectorList = this.connectors.getConnectors();
-            this.updateOptions();
-        });
+        this.connectorApi
+            .observeConnectorList()
+            .pipe(takeUntil(this.destroyed))
+            .subscribe((list) => {
+                this.connectorList = this.connectors.filterConnectors(list?.connectors);
+                this.updateOptions();
+            });
         this.connector.isLoggedIn(false).subscribe((login) => {
             if (login.statusCode === RestConstants.STATUS_CODE_OK) {
                 this.nodeHelper.getDefaultInboxFolder().subscribe((n) => (this.fallbackFolder = n));
             }
         });
         this.cardHasOpenModals$ = cardService.hasOpenModals.pipe(delay(0));
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
     }
 
     @HostListener('document:paste', ['$event'])
