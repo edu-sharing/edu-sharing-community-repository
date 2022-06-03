@@ -49,7 +49,7 @@
     "jquery": "^3.4.1",
     "material-design-icons": "^3.0.1",
     "materialize-css": "^1.0.0",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "ng-lazyload-image": "^7.0.1",
     "ngx-monaco-editor": "^8.1.1",
     "rxjs": "^6.5.4",
