@@ -845,7 +845,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                 if (loginInfo.isGuest) {
                     this.currentUser = null;
                 } else {
-                    this.currentUser = user.person;
+                    this.currentUser = user?.person;
                 }
             });
     }

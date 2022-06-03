@@ -46,7 +46,7 @@ export class MainMenuSidebarComponent implements OnInit, OnDestroy {
             .observeCurrentUser()
             .pipe(takeUntil(this.destroyed$))
             .subscribe(async (currentUser) => {
-                this.currentUser = currentUser.person;
+                this.currentUser = currentUser?.person;
             });
     }
 
@@ -66,7 +66,7 @@ export class MainMenuSidebarComponent implements OnInit, OnDestroy {
             .observeCurrentUserInfo()
             .pipe(takeUntil(this.destroyed$))
             .subscribe(({ loginInfo, user }) => {
-                (this.loginInfo = loginInfo), (this.currentUser = user.person);
+                (this.loginInfo = loginInfo), (this.currentUser = user?.person);
             });
     }
 
