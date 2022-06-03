@@ -1,6 +1,17 @@
+import { trigger } from '@angular/animations';
 import { Component, HostListener, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { TranslationsService } from '../../translations/translations.service';
+import * as rxjs from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { delay } from 'rxjs/operators';
+import {
+    DropSource,
+    DropTarget,
+    NodeEntriesDisplayType,
+    NodeRoot,
+} from 'src/app/features/node-entries/entries-model';
+import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 import {
     ClipboardObject,
     ConfigurationService,
@@ -13,7 +24,6 @@ import {
     Node,
     NodeList,
     NodeWrapper,
-    RestCollectionService,
     RestConnectorService,
     RestConnectorsService,
     RestConstants,
@@ -26,7 +36,12 @@ import {
     TemporaryStorageService,
     UIService,
 } from '../../core-module/core.module';
-import { ActivatedRoute, Params, Router } from '@angular/router';
+import { Helper } from '../../core-module/rest/helper';
+import { KeyEvents } from '../../core-module/ui/key-events';
+import { UIAnimation } from '../../core-module/ui/ui-animation';
+import { UIConstants } from '../../core-module/ui/ui-constants';
+import { CardService } from '../../core-ui-module/card.service';
+import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import {
     CustomOptions,
     DefaultGroups,
@@ -34,36 +49,12 @@ import {
     OptionItem,
 } from '../../core-ui-module/option-item';
 import { Toast } from '../../core-ui-module/toast';
-import { UIAnimation } from '../../core-module/ui/ui-animation';
-import { NodeHelperService } from '../../core-ui-module/node-helper.service';
-import { KeyEvents } from '../../core-module/ui/key-events';
 import { UIHelper } from '../../core-ui-module/ui-helper';
-import { trigger } from '@angular/animations';
-import { UIConstants } from '../../core-module/ui/ui-constants';
-import { ActionbarHelperService } from '../../common/services/actionbar-helper';
-import { Helper } from '../../core-module/rest/helper';
-import { CordovaService } from '../../common/services/cordova.service';
-import { HttpClient } from '@angular/common/http';
-import { MainNavComponent } from '../../main/navigation/main-nav/main-nav.component';
-import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';
-import { BridgeService } from '../../core-bridge-module/bridge.service';
-import { WorkspaceExplorerComponent } from './explorer/explorer.component';
-import { CardService } from '../../core-ui-module/card.service';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import * as rxjs from 'rxjs';
-import { delay } from 'rxjs/operators';
-import { ListTableComponent } from '../../core-ui-module/components/list-table/list-table.component';
-import { SkipTarget } from '../../main/navigation/skip-nav/skip-nav.service';
-import { DragNodeTarget } from '../../core-ui-module/directives/drag-nodes/drag-nodes';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
-import {
-    DropSource,
-    DropTarget,
-    NodeEntriesDisplayType,
-    NodeRoot,
-} from 'src/app/features/node-entries/entries-model';
-import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
+import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';
+import { TranslationsService } from '../../translations/translations.service';
+import { WorkspaceExplorerComponent } from './explorer/explorer.component';
 
 @Component({
     selector: 'es-workspace-main',
@@ -137,8 +128,6 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
 
     public globalProgress = false;
     public editNodeDeleteOnCancel = false;
-    private createMds: string;
-    private nodeDisplayedVersion: string;
     notAllowedReason: string;
     user: IamUser;
     public isSafe = false;
@@ -146,15 +135,8 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     public addNodesToCollection: Node[];
     public addNodesStream: Node[];
     public variantNode: Node;
-    private connectorList: Connector[];
-    private currentNode: Node;
     public mainnav = true;
-    private timeout: string;
-    private timeIsValid = false;
-    private viewToggle: OptionItem;
-    private isAdmin = false;
     public isBlocked = false;
-    private isGuest: boolean;
 
     customOptions: CustomOptions = {
         useDefaultOptions: true,
@@ -163,16 +145,13 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     toMeSharedToggle: boolean;
 
     dataSource = new NodeDataSource<Node>();
-    private appleCmd = false;
     private reurl: string;
-    private mdsParentNode: Node;
     public showLtiTools = false;
     private oldParams: Params;
     selectedNodeTree: string;
     public contributorNode: Node;
     public shareLinkNode: Node;
     displayType: NodeEntriesDisplayType = null;
-    private reurlDirectories: boolean;
     reorderDialog: boolean;
     private readonly destroyed$ = new Subject<void>();
     private loadingTask = this.loadingScreen.addLoadingTask();
@@ -191,13 +170,11 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     @HostListener('document:keyup', ['$event'])
     handleKeyboardEventUp(event: KeyboardEvent) {
         if (event.keyCode === 91 || event.keyCode === 93) {
-            this.appleCmd = false;
         }
     }
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
         if (event.keyCode === 91 || event.keyCode === 93) {
-            this.appleCmd = true;
             event.preventDefault();
             event.stopPropagation();
             return;
@@ -228,18 +205,14 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     }
     constructor(
         private toast: Toast,
-        private bridge: BridgeService,
         private route: ActivatedRoute,
         private router: Router,
-        private http: HttpClient,
         private nodeHelper: NodeHelperService,
         private translate: TranslateService,
         private translations: TranslationsService,
         private storage: TemporaryStorageService,
         private config: ConfigurationService,
         private connectors: RestConnectorsService,
-        private actionbar: ActionbarHelperService,
-        private collectionApi: RestCollectionService,
         private toolService: RestToolService,
         private session: SessionStorageService,
         private iam: RestIamService,
@@ -248,7 +221,6 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         private ui: UIService,
         private event: FrameEventsService,
         private connector: RestConnectorService,
-        private cordova: CordovaService,
         private card: CardService,
         private ngZone: NgZone,
         private loadingScreen: LoadingScreenService,
@@ -260,7 +232,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         });
         this.connector.setRoute(this.route);
         this.globalProgress = true;
-        this.cardHasOpenModals$ = card.hasOpenModals.pipe(delay(0));
+        this.cardHasOpenModals$ = this.card.hasOpenModals.pipe(delay(0));
     }
 
     /**
@@ -443,14 +415,12 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             this.loadFolders(this.user);
 
             let valid = true;
-            this.isGuest = login.isGuest;
             if (!login.isValidLogin || login.isGuest) {
                 valid = false;
             }
             this.isBlocked = !this.connector.hasToolPermissionInstant(
                 RestConstants.TOOLPERMISSION_WORKSPACE,
             );
-            this.isAdmin = login.isAdmin;
             if (this.isSafe && login.currentScope !== RestConstants.SAFE_SCOPE) {
                 valid = false;
             }
@@ -472,11 +442,6 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             }
             this.connector.scope = this.isSafe ? RestConstants.SAFE_SCOPE : null;
             this.isLoggedIn = true;
-            try {
-                this.connectorList = (await this.connectors.list().toPromise()).connectors;
-            } catch (e) {
-                console.warn('no connectors found: ' + e.toString());
-            }
             this.globalProgress = false;
             this.route.queryParams.subscribe((params: Params) => {
                 let needsUpdate = false;
@@ -516,7 +481,6 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
                 if (params.reurl) {
                     this.reurl = params.reurl;
                 }
-                this.reurlDirectories = params.applyDirectories === 'true';
                 this.mainnav = params.mainnav === 'false' ? false : true;
 
                 this.initMainNav();
@@ -605,7 +569,6 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
                 TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE,
                 this.dataSource,
             );
-            this.currentNode = list[0];
             this.router.navigate(
                 [
                     UIConstants.ROUTER_PREFIX + 'render',
