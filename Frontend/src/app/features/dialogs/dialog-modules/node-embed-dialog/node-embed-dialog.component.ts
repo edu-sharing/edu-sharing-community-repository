@@ -11,7 +11,6 @@ import {
     OnInit,
     ViewChild,
 } from '@angular/core';
-import { AuthenticationService, Node, NodeService } from 'ngx-edu-sharing-api';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -61,10 +60,9 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
     });
 
     embedCode = '';
+    showNotPublicWarning = false;
 
     private readonly destroyed$ = new Subject<void>();
-    isPublic: boolean;
-    canPublish: boolean;
 
     constructor(
         @Inject(CARD_DIALOG_DATA) public data: NodeEmbedDialogData,
@@ -72,8 +70,6 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
         private changeDetectorRef: ChangeDetectorRef,
         private location: Location,
         private mainNav: MainNavService,
-        private nodeService: NodeService,
-        private authenticationService: AuthenticationService,
         private ngZone: NgZone,
         private router: Router,
         private toast: Toast,
@@ -82,19 +78,7 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.dialogRef.patchConfig({ buttons: this.buttons });
         this.registerFormChanges();
-        this.updateIsPublic(this.config.node);
-        this.updateSharingPermissions();
-    }
-    async updateSharingPermissions() {
-        const info = await this.authenticationService.observeLoginInfo().pipe(first()).toPromise();
-        this.canPublish =
-            info.toolPermissions.includes(RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES) &&
-            this.config.node.access?.includes(RestConstants.PERMISSION_WRITE);
-        this.changeDetectorRef.detectChanges();
-    }
-    updateIsPublic(node: Node) {
-        this.isPublic = node.isPublic;
-        this.changeDetectorRef.detectChanges();
+        this.registerNotPublicWarning();
     }
 
     ngOnDestroy(): void {
@@ -109,14 +93,8 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
         this.mainNav.getDialogs().nodeShare = [this.data.node];
         this.mainNav
             .getDialogs()
-            .nodeShareChange.pipe(
-                first((value) => !value),
-                tap((event) => console.log(this.config.node)),
-                // update node to check if "isPublic" has changed
-                tap(async () =>
-                    this.updateIsPublic(await this.nodeService.getNode(this.config.node.ref.repo, this.config.node.ref.id).toPromise())
-                ),
-            ).subscribe(() => (this.hidden = null));
+            .nodeShareChange.pipe(first((value) => !value))
+            .subscribe(() => (this.hidden = null));
     }
 
     private registerFormChanges(): void {
@@ -135,6 +113,14 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
         this.form.valueChanges.pipe(take(1)).subscribe(() => {
             this.dialogRef.patchConfig({ closable: Closable.Standard });
         });
+    }
+
+    private registerNotPublicWarning() {
+        // TODO
+        //
+        // observeIsPublic(node)
+        //     .pipe(takeUntil(this.destroyed$))
+        //     .subscribe((isPublic) => (this.showNotPublicWarning = !isPublic));
     }
 
     private async copy(): Promise<void> {
