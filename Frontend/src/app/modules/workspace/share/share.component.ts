@@ -440,7 +440,8 @@ export class WorkspaceShareComponent {
         if (this.getPublishActive() || this.getPublishInherit()) {
             return 'PUBLIC';
         }
-        for (const perm of this.permissions.concat(this.inherited ? this.inherit : [])) {
+        const permissions = [...(this.permissions ?? []), ...(this.inherited ? this.inherit : [])];
+        for (const perm of permissions) {
             if (
                 perm.authority.authorityName !== RestConstants.AUTHORITY_EVERYONE &&
                 perm.authority.authorityName !== this.connector.getCurrentLogin()?.authorityName
