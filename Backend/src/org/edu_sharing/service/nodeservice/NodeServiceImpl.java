@@ -619,7 +619,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					propsNotNull = i.beforeSetProperties(PropertiesInterceptorFactory.getPropertiesContext(
 									nodeRef,
 									propsNotNull,
-									Arrays.asList(getAspects(store.getProtocol(), store.getIdentifier(), nodeId))));
+									Arrays.asList(getAspects(store.getProtocol(), store.getIdentifier(), nodeId)), null));
 				} catch (Throwable e) {
 					logger.warn("Error while calling interceptor " + i.getClass().getName() + ": " + e.toString());
 				}
@@ -1402,7 +1402,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 						properties = i.beforeSetProperties(PropertiesInterceptorFactory.getPropertiesContext(
 										nodeRef,
 										properties,
-										Arrays.asList(getAspects(protocol, storeId, nodeId)))
+										Arrays.asList(getAspects(protocol, storeId, nodeId)), null)
 						);
 					} catch (Throwable e) {
 						logger.warn("Error while calling interceptors " + i.getClass().getName() + ": " + e);
