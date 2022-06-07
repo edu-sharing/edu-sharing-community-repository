@@ -4,6 +4,7 @@ import {
     Input,
     OnChanges,
     OnDestroy,
+    OnInit,
     Output,
     SimpleChanges,
     ViewChild,
@@ -40,7 +41,7 @@ import { MainNavService } from '../../../../main/navigation/main-nav.service';
     styleUrls: ['share-publish.component.scss'],
     providers: [MdsEditorInstanceService],
 })
-export class SharePublishComponent implements OnChanges, OnDestroy {
+export class SharePublishComponent implements OnChanges, OnInit, OnDestroy {
     @Input() node: Node;
     @Input() permissions: Permission[];
     @Input() inherited: boolean;
@@ -87,6 +88,25 @@ export class SharePublishComponent implements OnChanges, OnDestroy {
         this.publishCopyPermission = this.connector.hasToolPermissionInstant(
             RestConstants.TOOLPERMISSION_PUBLISH_COPY,
         );
+    }
+
+    ngOnInit(): void {
+        this.mdsService
+            .observeCompletionStatus()
+            .pipe(
+                takeUntil(this.destroyed),
+                filter((completion) => completion !== null),
+            )
+            .subscribe((completion) => {
+                this.mdsCompletion = {
+                    completed:
+                        (completion.mandatory.completed || 0) +
+                        (completion.mandatoryForPublish.completed || 0),
+                    total:
+                        (completion.mandatory.total || 0) +
+                        (completion.mandatoryForPublish.total || 0),
+                };
+            });
     }
 
     async ngOnChanges(changes: SimpleChanges) {
@@ -178,22 +198,6 @@ export class SharePublishComponent implements OnChanges, OnDestroy {
             copy: this.shareModeCopy,
             direct: this.shareModeDirect,
         };
-        this.mdsService
-            .observeCompletionStatus()
-            .pipe(
-                takeUntil(this.destroyed),
-                filter((completion) => completion !== null),
-            )
-            .subscribe((completion) => {
-                this.mdsCompletion = {
-                    completed:
-                        (completion.mandatory.completed || 0) +
-                        (completion.mandatoryForPublish.completed || 0),
-                    total:
-                        (completion.mandatory.total || 0) +
-                        (completion.mandatoryForPublish.total || 0),
-                };
-            });
         this.mdsService.initWithNodes([this.node]);
         this.updatePublishedVersions();
     }
