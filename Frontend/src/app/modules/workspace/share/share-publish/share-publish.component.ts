@@ -3,36 +3,36 @@ import {
     EventEmitter,
     Input,
     OnChanges,
-    OnInit,
+    OnDestroy,
     Output,
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
-import { UIHelper } from '../../../../core-ui-module/ui-helper';
-import { Node, Permission } from '../../../../core-module/rest/data-object';
-import { RestConstants } from '../../../../core-module/rest/rest-constants';
-import { RestConnectorService } from '../../../../core-module/rest/services/rest-connector.service';
-
-import { RestHelper } from '../../../../core-module/rest/rest-helper';
-import { RestNodeService } from '../../../../core-module/rest/services/rest-node.service';
-import { Observable, Observer } from 'rxjs';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
+import { Observable, Observer, Subject } from 'rxjs';
+import { filter, takeUntil } from 'rxjs/operators';
+import { BridgeService } from '../../../../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
     DialogButton,
     UIConstants,
 } from '../../../../core-module/core.module';
-import { OPEN_URL_MODE } from '../../../../core-module/ui/ui-constants';
-import { BridgeService } from '../../../../core-bridge-module/bridge.service';
+import { Node, Permission } from '../../../../core-module/rest/data-object';
 import { Helper } from '../../../../core-module/rest/helper';
-import { Toast } from '../../../../core-ui-module/toast';
-import { TranslateService } from '@ngx-translate/core';
+import { RestConstants } from '../../../../core-module/rest/rest-constants';
+import { RestHelper } from '../../../../core-module/rest/rest-helper';
+import { RestConnectorService } from '../../../../core-module/rest/services/rest-connector.service';
+import { RestNodeService } from '../../../../core-module/rest/services/rest-node.service';
+import { OPEN_URL_MODE } from '../../../../core-module/ui/ui-constants';
 import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
-import { MainNavService } from '../../../../main/navigation/main-nav.service';
+import { Toast } from '../../../../core-ui-module/toast';
+import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import {
     CompletionStatusEntry,
     MdsEditorInstanceService,
 } from '../../../../features/mds/mds-editor/mds-editor-instance.service';
+import { MainNavService } from '../../../../main/navigation/main-nav.service';
 
 @Component({
     selector: 'es-share-publish',
@@ -40,7 +40,7 @@ import {
     styleUrls: ['share-publish.component.scss'],
     providers: [MdsEditorInstanceService],
 })
-export class SharePublishComponent implements OnChanges {
+export class SharePublishComponent implements OnChanges, OnDestroy {
     @Input() node: Node;
     @Input() permissions: Permission[];
     @Input() inherited: boolean;
@@ -67,6 +67,8 @@ export class SharePublishComponent implements OnChanges {
     allPublishedVersions: Node[];
     mdsCompletion: CompletionStatusEntry;
     private initHasStarted = false;
+    private destroyed = new Subject<void>();
+
     constructor(
         private connector: RestConnectorService,
         private translate: TranslateService,
@@ -102,6 +104,12 @@ export class SharePublishComponent implements OnChanges {
             this.onInitCompleted.complete();
         }
     }
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
+    }
+
     getLicense() {
         return this.node.properties[RestConstants.CCM_PROP_LICENSE]?.[0];
     }
@@ -170,15 +178,22 @@ export class SharePublishComponent implements OnChanges {
             copy: this.shareModeCopy,
             direct: this.shareModeDirect,
         };
-        this.mdsService.observeCompletionStatus().subscribe((completion) => {
-            this.mdsCompletion = {
-                completed:
-                    (completion.mandatory.completed || 0) +
-                    (completion.mandatoryForPublish.completed || 0),
-                total:
-                    (completion.mandatory.total || 0) + (completion.mandatoryForPublish.total || 0),
-            };
-        });
+        this.mdsService
+            .observeCompletionStatus()
+            .pipe(
+                takeUntil(this.destroyed),
+                filter((completion) => completion !== null),
+            )
+            .subscribe((completion) => {
+                this.mdsCompletion = {
+                    completed:
+                        (completion.mandatory.completed || 0) +
+                        (completion.mandatoryForPublish.completed || 0),
+                    total:
+                        (completion.mandatory.total || 0) +
+                        (completion.mandatoryForPublish.total || 0),
+                };
+            });
         this.mdsService.initWithNodes([this.node]);
         this.updatePublishedVersions();
     }
