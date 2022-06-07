@@ -274,7 +274,7 @@ export class OptionsHelperService implements OnDestroy {
         if (this.mainNavService.getMainNav()) {
             this.subscriptions.push(
                 this.mainNavService.getDialogs().onRefresh.subscribe((nodes: void | Node[]) => {
-                    this.listener?.onRefresh(nodes);
+                    this.listener?.onRefresh?.(nodes);
                     if (this.list) {
                         this.list.updateNodes(nodes);
                     }
