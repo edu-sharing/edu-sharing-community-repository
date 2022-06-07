@@ -198,7 +198,6 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
                     (n) => (n as Node).ref.id === (d as unknown as CollectionReference).originalId,
                 );
             }
-            console.log(d, hits);
             if (hits.length === 1) {
                 this.nodeHelperService.copyDataToNode(d as Node, hits[0] as Node);
             }
