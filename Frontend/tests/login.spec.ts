@@ -1,9 +1,14 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
+import { GeneralPage } from './general.page';
 import { LoginPage } from './login.page';
 import { WorkspacePage } from './workspace.page';
 
 test('should redirect to login page', async ({ page }) => {
     await Promise.all([page.goto('.'), page.waitForNavigation({ url: LoginPage.url })]);
+});
+
+test('should not have any warnings or errors', async ({ page }) => {
+    await Promise.all([new GeneralPage(page).checkConsoleMessages(), page.goto(LoginPage.url)]);
 });
 
 test('should go to workspace after login', async ({ page }) => {
