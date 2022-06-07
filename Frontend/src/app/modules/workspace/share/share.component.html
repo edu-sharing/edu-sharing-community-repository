@@ -287,10 +287,10 @@
         </ng-container>
         <ng-container
           *ngIf="
-            publishComponent?.shareModeDirect ||
-            publishComponent?.shareModeCopy ||
-            publishComponent?.initialState?.direct ||
-            publishComponent?.initialState?.copy
+            !!publishComponent?.shareModeDirect ||
+            !!publishComponent?.shareModeCopy ||
+            !!publishComponent?.initialState?.direct ||
+            !!publishComponent?.initialState?.copy
           "
         >
           <div class="groupName">{{ 'WORKSPACE.SHARE.PUBLISH_LABEL' | translate }}</div>
