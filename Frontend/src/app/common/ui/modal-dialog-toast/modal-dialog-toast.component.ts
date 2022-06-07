@@ -1,23 +1,11 @@
-import {
-    Component,
-    Input,
-    Output,
-    EventEmitter,
-    OnInit,
-    HostListener,
-    ViewChild,
-    ElementRef,
-    QueryList,
-} from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
-import { Node } from '../../../core-module/rest/data-object.js';
-import { Toast } from '../../../core-ui-module/toast';
-import { DialogButton } from '../../../core-module/core.module';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { trigger } from '@angular/animations';
-import { ProgressType } from '../../../shared/components/modal-dialog/modal-dialog.component';
+import { Component } from '@angular/core';
+import { DialogButton } from '../../../core-module/core.module';
+import { Node } from '../../../core-module/rest/data-object.js';
+import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { Toast } from '../../../core-ui-module/toast';
 import { CardType } from '../../../shared/components/card/card.component';
-import { MessageType } from '../../../core-module/ui/message-type';
+import { ProgressType } from '../../../shared/components/modal-dialog/modal-dialog.component';
 
 @Component({
     selector: 'es-modal-dialog-toast',
@@ -35,20 +23,22 @@ export class ModalDialogToastComponent {
 
     constructor(public toast: Toast) {
         this.toast.onShowModalDialog((data: ModalDialogOptions) => {
-            this.title = data.title;
-            this.message = data.message;
-            this.input = data.input;
-            this.toast.dialogInputValue = '';
-            this.progressType = data.progressType;
-            this.dialogType = data.dialogType;
-            this.node = data.node;
-            this.messageParameters = data.messageParameters;
-            this.messageType = data.messageType || ModalMessageType.Text;
-            this.priority = data.priority || 10;
-            this.isCancelable = data.isCancelable;
-            this.buttons = data.buttons;
-            this.onCancel = data.onCancel;
-            this.visible = this.title != null;
+            Promise.resolve().then(() => {
+                this.title = data.title;
+                this.message = data.message;
+                this.input = data.input;
+                this.toast.dialogInputValue = '';
+                this.progressType = data.progressType;
+                this.dialogType = data.dialogType;
+                this.node = data.node;
+                this.messageParameters = data.messageParameters;
+                this.messageType = data.messageType || ModalMessageType.Text;
+                this.priority = data.priority || 10;
+                this.isCancelable = data.isCancelable;
+                this.buttons = data.buttons;
+                this.onCancel = data.onCancel;
+                this.visible = this.title != null;
+            });
         });
     }
 
