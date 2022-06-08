@@ -36,7 +36,7 @@ $licenseInfoHeight: 40px;
             overflow: hidden;
             @include unselectableText();
             > .profile {
-                z-index: 2;
+                z-index: 1;
                 left: 0;
                 width: 100%;
                 text-align: center;
