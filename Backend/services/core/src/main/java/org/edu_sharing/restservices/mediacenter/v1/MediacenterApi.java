@@ -391,7 +391,7 @@ public class MediacenterApi {
 	
 	@POST
 	@Path("/import/mediacenters")
-
+	@Consumes({ "multipart/form-data" })
 	@Operation(summary = "Import mediacenters", description = "Import mediacenters.")
 
 	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = MediacentersImportResult.class))),
@@ -419,6 +419,7 @@ public class MediacenterApi {
 	}
 
 	@POST
+	@Consumes({ "multipart/form-data" })
 	@Path("/import/organisations")
 
 	@Operation(summary = "Import Organisations", description = "Import Organisations.")
@@ -449,9 +450,8 @@ public class MediacenterApi {
 
 	@POST
 	@Path("/import/mc_org")
-
+	@Consumes({ "multipart/form-data" })
 	@Operation(summary = "Import Mediacenter Organisation Connection", description = "Import Mediacenter Organisation Connection.")
-
 	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = McOrgConnectResult.class))),
 			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
