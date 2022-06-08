@@ -13,7 +13,7 @@
     "build": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build --configuration production --delete-output-path false --base-href /edu-sharing/",
     "prebuild-dev": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build edu-sharing-api --configuration development",
     "build-dev": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build --delete-output-path false --base-href /edu-sharing/",
-    "check:lint": "ng lint --max-warnings=550",
+    "check:lint": "ng lint --max-warnings=835",
     "fix:lint": "ng lint --fix",
     "check:format": "prettier --check src projects/*/src",
     "fix:format": "prettier --write src projects/*/src",
