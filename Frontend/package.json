@@ -25,7 +25,7 @@
     "start-storybook": "start-storybook -p 4300 -s ./src/assets",
     "build-storybook": "build-storybook -s ./src/assets",
     "postinstall": "ngcc --async=false",
-    "prepare": "cd .. && husky install Frontend/.husky && cd Frontend/src/app/core-module && git config core.hooksPath ../../../.husky"    
+    "prepare": "cd .. && husky install Frontend/.husky && cd Frontend/src/app/core-module && git config core.hooksPath ../../../.husky || true"
   },
   "private": true,
   "dependencies": {
