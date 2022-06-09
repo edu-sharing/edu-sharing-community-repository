@@ -75,6 +75,17 @@ spec:
           mountPath: /var/cache/esrender/config
         - name: share-data
           mountPath: /var/cache/esrender/data
+        {{- with .Values.startupProbe }}
+        startupProbe:
+          httpGet:
+            path: /esrender/application/esmain/version.php
+            port: api-internal
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
         {{- with .Values.livenessProbe }}
         livenessProbe:
           tcpSocket:

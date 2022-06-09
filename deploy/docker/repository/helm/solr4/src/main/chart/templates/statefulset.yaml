@@ -64,6 +64,17 @@ spec:
         volumeMounts:
         - name: data
           mountPath: /opt/alfresco/alf_data
+        {{- with .Values.startupProbe }}
+        startupProbe:
+          httpGet:
+            path: /solr4
+            port: api
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
         {{- with .Values.livenessProbe }}
         livenessProbe:
           tcpSocket:

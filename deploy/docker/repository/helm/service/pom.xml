@@ -18,6 +18,7 @@
   <properties>
 
     <helm.config.cluster.enabled>false</helm.config.cluster.enabled>
+    <helm.config.transform.enabled>false</helm.config.transform.enabled>
 
   </properties>
 
@@ -115,6 +116,26 @@
       <properties>
 
         <helm.config.cluster.enabled>true</helm.config.cluster.enabled>
+
+      </properties>
+
+    </profile>
+
+    <profile>
+
+      <id>repository.transform</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.REPOSITORY_TRANSFORM_ENABLED</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <properties>
+
+        <helm.config.transform.enabled>true</helm.config.transform.enabled>
 
       </properties>
 

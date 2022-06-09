@@ -117,6 +117,20 @@ spec:
           mountPath: /usr/local/tomcat/webapps/edu-sharing/WEB-INF/classes/saml
         {{- end }}
         {{- end }}
+        {{- with .Values.startupProbe }}
+        startupProbe:
+          httpGet:
+            path: /edu-sharing/rest/_about/status/SERVICE?timeoutSeconds={{ add1 .timeoutSeconds }}
+            httpHeaders:
+              - name: Accept
+                value: application/json
+            port: api-internal
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
         {{- with .Values.livenessProbe }}
         livenessProbe:
           tcpSocket:
@@ -156,6 +170,20 @@ spec:
         ports:
         - name: api
           containerPort: 8100
+        {{- with .Values.sidecar.transform.startupProbe }}
+        startupProbe:
+          exec:
+            command:
+              - "/bin/bash"
+              - "-ec"
+              - |
+                unoconv -n -c 'socket,host=127.0.0.1,port=8100,tcpNoDelay=1;urp;StarOffice.ComponentContext' --stdout -f html /etc/hostname >/dev/null
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
         {{- with .Values.sidecar.transform.livenessProbe }}
         livenessProbe:
           exec:

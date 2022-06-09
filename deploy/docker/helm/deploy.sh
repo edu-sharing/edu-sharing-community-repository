@@ -48,7 +48,10 @@ OPTIONS+=("${root}/helm/context/${CONTEXT}/${NAMESPACE}/${RELEASE}.yaml")
 	OPTIONS+=(--debug)
 }
 
-file="bundle/target/helm/repo/${CHART}-${VERSION:-9999.99.99-dev}.tgz"
+SOURCE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
+pushd "${SOURCE_PATH}" >/dev/null || exit
+
+file="bundle/target/helm/repo/${CHART}-${VERSION}.tgz"
 
 if [[ -f $file ]]; then
 
@@ -70,10 +73,12 @@ else
 
 	set -x
 	helm "${COMMAND}" "${RELEASE}" \
-		"${CHART}" --version "${VERSION:->0.0.0-0}" \
+		"${CHART}" --version "${VERSION}" \
 		--repo "https://artifacts.edu-sharing.com/repository/helm/" \
 		"${CREDENTIALS[@]}" \
 		"${OPTIONS[@]}"
 	set +x
 
 fi
+
+popd >/dev/null || exit
