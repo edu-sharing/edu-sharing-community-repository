@@ -80,6 +80,20 @@ spec:
         - name: file
           mountPath: /opt/bitnami/redis/etc/redis-default.conf
           subPath: redis-default.conf
+        {{- with .Values.startupProbe }}
+        startupProbe:
+          exec:
+            command:
+              - "/bin/bash"
+              - "-ec"
+              - |
+                [[ $(redis-cli ping) == "PONG" && $(redis-cli CLUSTER INFO | grep cluster_state | tr -d '[:space:]') == "cluster_state:ok" ]] || exit 1
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
         {{- with .Values.livenessProbe }}
         livenessProbe:
           exec:

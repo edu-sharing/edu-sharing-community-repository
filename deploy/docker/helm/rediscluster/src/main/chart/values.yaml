@@ -102,30 +102,38 @@ securityContext:
 
 terminationGracePeriod: 120
 
+startupProbe:
+
+  failureThreshold: 30
+  initialDelaySeconds: 0
+  periodSeconds: 20
+  successThreshold: 1
+  timeoutSeconds: 10
+
 livenessProbe:
 
   failureThreshold: 3
-  initialDelaySeconds: 1200
-  periodSeconds: 10
-  timeoutSeconds: 5
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 10
 
 readinessProbe:
 
   failureThreshold: 1
-  initialDelaySeconds: 30
+  initialDelaySeconds: 10
   periodSeconds: 10
   successThreshold: 1
-  timeoutSeconds: 5
+  timeoutSeconds: 10
 
 ########################################################################################################################
 
 resources:
 
   limits:
-    cpu: 100m
+    cpu: 250m
     memory: 1Gi
   requests:
-    cpu: 100m
+    cpu: 250m
     memory: 1Gi
 
 ########################################################################################################################
@@ -137,11 +145,11 @@ init:
     resources:
 
       limits:
-        cpu: 100m
-        memory: 1Gi
+        cpu: 125m
+        memory: 512Mi
       requests:
-        cpu: 100m
-        memory: 1Gi
+        cpu: 125m
+        memory: 512Mi
 
     securityContext:
 
@@ -156,14 +164,16 @@ sidecar:
     enabled: true
 
     resources:
+
       limits:
-        cpu: 100m
-        memory: 100Mi
+        cpu: 125m
+        memory: 512Mi
       requests:
-        cpu: 100m
-        memory: 100Mi
+        cpu: 125m
+        memory: 512Mi
 
     securityContext:
+
       allowPrivilegeEscalation: false
       capabilities:
         drop:

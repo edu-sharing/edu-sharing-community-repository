@@ -65,6 +65,20 @@ spec:
         - name: file
           mountPath: /bitnami/postgresql/conf/conf.d/extended.conf
           subPath: extended.conf
+        {{- with .Values.startupProbe }}
+        startupProbe:
+          exec:
+            command:
+              - "/bin/bash"
+              - "-ec"
+              - |
+                exec pg_isready -U "${POSTGRESQL_USERNAME}" -d "${POSTGRESQL_DATABASE}"
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
         {{- with .Values.livenessProbe }}
         livenessProbe:
           tcpSocket:
