@@ -14,7 +14,7 @@ import { BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, map, switchMap, take } from 'rxjs/operators';
 import { UIService, ListItemSort, RestConstants } from '../../../core-module/core.module';
 import { SortEvent } from '../../../shared/components/sort-dropdown/sort-dropdown.component';
-import { DragCursorDirective } from '../../../core-ui-module/directives/drag-cursor.directive';
+import { DragCursorDirective } from '../../../shared/directives/drag-cursor.directive';
 import { NodeEntriesService } from '../../../core-ui-module/node-entries.service';
 import { Target } from '../../../core-ui-module/option-item';
 import { NodeEntriesDisplayType } from '../entries-model';
@@ -157,6 +157,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
             sourceList: this.entriesService.list,
             mode: DragCursorDirective.dragState.mode,
         });
+
         DragCursorDirective.dragState.element = drag.container.data;
         DragCursorDirective.dragState.dropAllowed = allowed;
     }

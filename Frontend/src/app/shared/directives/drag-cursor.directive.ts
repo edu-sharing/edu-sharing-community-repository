@@ -1,10 +1,9 @@
-import { Directive, HostListener, Inject, Input, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
+import { CdkDrag } from '@angular/cdk/drag-drop';
+import { Directive, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { WindowRefService } from '../../modules/search/window-ref.service';
-import { DropAction } from './drag-nodes/drag-nodes';
 import { Node } from '../../core-module/rest/data-object';
+import { DropAction } from '../../core-ui-module/directives/drag-nodes/drag-nodes';
 
 export type DragDropState<T extends Node> = {
     element: T;

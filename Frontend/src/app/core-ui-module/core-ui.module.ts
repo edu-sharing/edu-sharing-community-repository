@@ -47,7 +47,6 @@ import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import { OverlayModule } from '@angular/cdk/overlay';
-import { DragCursorDirective } from './directives/drag-cursor.directive';
 import { SharedModule } from '../shared/shared.module';
 import { ListItemsModule } from '../features/list-items/list-items.module';
 
@@ -71,7 +70,6 @@ import { ListItemsModule } from '../features/list-items/list-items.module';
         DistinctClickDirective,
         DurationPipe,
         TitleDirective,
-        DragCursorDirective,
     ],
     imports: [
         SharedModule,
@@ -125,7 +123,6 @@ import { ListItemsModule } from '../features/list-items/list-items.module';
         NodesDragSourceDirective,
         NodesDropTargetDirective,
         TitleDirective,
-        DragCursorDirective,
     ],
 })
 export class CoreUiModule {}

@@ -7,7 +7,7 @@ import {
 } from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
 import { Params, QueryParamsHandling } from '@angular/router';
 import { CdkDragDrop, CdkDragEnter, CdkDragExit } from '@angular/cdk/drag-drop';
-import { DragCursorDirective } from '../../../core-ui-module/directives/drag-cursor.directive';
+import { DragCursorDirective } from '../../directives/drag-cursor.directive';
 import { DropSource } from 'src/app/features/node-entries/entries-model';
 
 /**

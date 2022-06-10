@@ -19,7 +19,7 @@ import {
 } from '../../../core-ui-module/options-helper.service';
 import { MainNavComponent } from '../../../main/navigation/main-nav/main-nav.component';
 import { CdkDragDrop, CdkDragEnter, CdkDragExit } from '@angular/cdk/drag-drop';
-import { DragCursorDirective } from '../../../core-ui-module/directives/drag-cursor.directive';
+import { DragCursorDirective } from '../../../shared/directives/drag-cursor.directive';
 import { DropSource } from 'src/app/features/node-entries/entries-model';
 
 @Component({

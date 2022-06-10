@@ -15,7 +15,7 @@ import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Toast } from 'src/app/core-ui-module/toast';
 import { UIService, ListItem, Node } from '../../../core-module/core.module';
-import { DragCursorDirective } from '../../../core-ui-module/directives/drag-cursor.directive';
+import { DragCursorDirective } from '../../../shared/directives/drag-cursor.directive';
 import { NodeEntriesService } from '../../../core-ui-module/node-entries.service';
 import { Target } from '../../../core-ui-module/option-item';
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
@@ -185,7 +185,8 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
          */
     }
 
-    dragEnter = (index: number, drag: CdkDrag, drop: CdkDropList) => {
+    dragEnter = (index: number) => {
+        console.log('drag enter');
         const target = this.entriesService.dataSource.getData()[index];
         const allowed = this.entriesService.dragDrop.dropAllowed?.(target as Node, {
             element: [this.dragSource],
