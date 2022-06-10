@@ -142,47 +142,29 @@
     </mat-cell>
   </ng-container>
   <mat-header-row mat-header-row *matHeaderRowDef="getVisibleColumns()"></mat-header-row>
-  <ng-container *ngIf="entriesService.dragDrop?.dragAllowed && !ui.isMobile()">
-    <mat-row
-      mat-row
-      matRipple
-      cdkDrag
-      esDragCursor
-      [cdkDragData]="node"
-      (cdkDragStarted)="dragSource = node"
-      (cdkDragExited)="dragExit($event)"
-      (cdkDragDropped)="drop($event)"
-      class="mat-row"
-      [class.mat-row-drop-allowed]="getDragState()?.element === node && getDragState().dropAllowed"
-      [class.mat-row-drop-blocked]="getDragState()?.element === node && !getDragState().dropAllowed"
-      [class.mat-row-selected]="entriesService.selection.isSelected(node)"
-      [class.mat-row-virtual]="node.virtual"
-      [class.mat-row-virtual-seperator]="
-        node.virtual && !last && !$any(entriesService.dataSource.getData()[i + 1]).virtual
-      "
-      *matRowDef="let node; let i = index; let last = last; columns: getVisibleColumns()"
-      (contextmenu)="onRowContextMenu({ event: $event, node: node })"
-      (keydown.ContextMenu)="onRowContextMenu({ event: $event, node: node })"
-    >
-      Test
-    </mat-row>
-  </ng-container>
-  <ng-container *ngIf="!(entriesService.dragDrop?.dragAllowed && !ui.isMobile())">
-    <mat-row
-      mat-row
-      matRipple
-      class="mat-row"
-      [class.mat-row-selected]="entriesService.selection.isSelected(node)"
-      [class.mat-row-virtual]="node.virtual"
-      [class.mat-row-virtual-seperator]="
-        node.virtual && !last && !$any(entriesService.dataSource.getData()[i + 1]).virtual
-      "
-      *matRowDef="let node; let i = index; let last = last; columns: getVisibleColumns()"
-      (contextmenu)="onRowContextMenu({ event: $event, node: node })"
-      (keydown.ContextMenu)="onRowContextMenu({ event: $event, node: node })"
-    >
-    </mat-row>
-  </ng-container>
+  <mat-row
+    mat-row
+    matRipple
+    cdkDrag
+    esDragCursor
+    [cdkDragDisabled]="!entriesService.dragDrop?.dragAllowed || ui.isMobile()"
+    [cdkDragData]="node"
+    (cdkDragStarted)="dragSource = node"
+    (cdkDragExited)="dragExit($event)"
+    (cdkDragDropped)="drop($event)"
+    class="mat-row"
+    [class.mat-row-drop-allowed]="getDragState()?.element === node && getDragState().dropAllowed"
+    [class.mat-row-drop-blocked]="getDragState()?.element === node && !getDragState().dropAllowed"
+    [class.mat-row-selected]="entriesService.selection.isSelected(node)"
+    [class.mat-row-virtual]="node.virtual"
+    [class.mat-row-virtual-seperator]="
+      node.virtual && !last && !$any(entriesService.dataSource.getData()[i + 1]).virtual
+    "
+    *matRowDef="let node; let i = index; let last = last; columns: getVisibleColumns()"
+    (contextmenu)="onRowContextMenu({ event: $event, node: node })"
+    (keydown.ContextMenu)="onRowContextMenu({ event: $event, node: node })"
+  >
+  </mat-row>
 </mat-table>
 <ng-container *ngIf="entriesService.dataSource.isLoading">
   <ng-container *ngTemplateOutlet="loading"> </ng-container>
