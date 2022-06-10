@@ -13,7 +13,7 @@
   [dataSource]="entriesService.dataSource"
   matSort
   cdkDropList
-  [cdkDropListSortPredicate]="dragEnter"
+  [cdkDropListSortPredicate]="sortPredicate"
   esInfiniteScroll
   (scrolled)="loadData()"
 >

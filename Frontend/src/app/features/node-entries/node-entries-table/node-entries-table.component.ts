@@ -5,6 +5,7 @@ import {
     AfterViewInit,
     ApplicationRef,
     Component,
+    NgZone,
     OnChanges,
     SimpleChanges,
     ViewChild,
@@ -58,6 +59,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         private applicationRef: ApplicationRef,
         private toast: Toast,
         public ui: UIService,
+        private ngZone: NgZone,
     ) {}
 
     ngAfterViewInit(): void {
@@ -185,17 +187,24 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
          */
     }
 
-    dragEnter = (index: number) => {
-        console.log('drag enter');
-        const target = this.entriesService.dataSource.getData()[index];
-        const allowed = this.entriesService.dragDrop.dropAllowed?.(target as Node, {
+    sortPredicate = (index: number) => {
+        const currentTarget = this.entriesService.dataSource.getData()[index];
+        if (DragCursorDirective.dragState.element !== currentTarget) {
+            this.ngZone.run(() => {
+                this.dragEnter(currentTarget as Node);
+            });
+        }
+        return false;
+    };
+
+    private dragEnter = (target: Node) => {
+        const allowed = this.entriesService.dragDrop.dropAllowed?.(target, {
             element: [this.dragSource],
             sourceList: this.entriesService.list,
             mode: DragCursorDirective.dragState.mode,
         });
         DragCursorDirective.dragState.element = target;
         DragCursorDirective.dragState.dropAllowed = allowed;
-        return false;
     };
 
     drop(drop: CdkDragDrop<T, any>) {
