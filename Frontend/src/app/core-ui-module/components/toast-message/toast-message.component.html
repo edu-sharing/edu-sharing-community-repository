@@ -14,7 +14,7 @@
   <button
     mat-button
     class="dismiss mat-simple-snackbar-action"
-    *ngIf="toast.duration == TOAST_DURATION.Infinite"
+    *ngIf="toast.duration === TOAST_DURATION.Infinite"
     (click)="snackBar.dismiss()"
   >
     {{ 'ACCESSIBILITY.DISMISS_TOAST' | translate }}
