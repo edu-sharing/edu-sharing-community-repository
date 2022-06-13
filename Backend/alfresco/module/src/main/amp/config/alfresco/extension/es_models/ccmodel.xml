@@ -203,7 +203,7 @@
 				<aspect>ccm:iometadata</aspect>
 				<aspect>cclom:schema</aspect>
 				<aspect>ccm:usageaspect</aspect>
-				<!--<aspect>cm:thumbnailed</aspect>-->
+				<aspect>cm:thumbnailed</aspect>
 				<aspect>ccm:lomreplication</aspect>
 				<aspect>ccm:licenses</aspect>
 				<aspect>ccm:commonlicenses</aspect>
