@@ -13,14 +13,14 @@
   "ADMIN": {
     "WARNING_INFO": "Dieser Bereich ist nur zur Administration des Repositorys gedacht.\nFalsche Änderungen können zu Fehlern bis hin zu Datenverlust führen.\n\nFühre keine Aktionen durch, bei denen Du unsicher bist!",
     "GLOBAL_CONFIG": {
-      "CLIENT_CONFIG_HINT": "Du kannst hier Werte eintragen, um Labels zu überschreiben, Kontexte zu konfigurieren, Authentifizierungsmethoden einzurichten und mehr. Nach dem Speichern müsst Du möglicherweise die gesamte Seite im Browser neu laden.",
+      "CLIENT_CONFIG_HINT": "Du kannst hier Werte eintragen, um Labels zu überschreiben, Kontexte zu konfigurieren, Authentifizierungsmethoden einzurichten und mehr. Nach dem Speichern musst Du möglicherweise die gesamte Seite im Browser neu laden.",
       "EXTENSION_CONFIG_HINT": "Du kannst hier Werte der Konfiguration überschreiben. Beachten, dass diese Konfiguration beim Rollout überschrieben wird. Die hier erfolgten Änderungen müssen an das edu-sharing Entwicklerteam gegeben werden.",
       "SERVER_CONFIG_HINT": "Du kannst hier Werte der Konfiguration überschreiben. Diese Änderungen gelten für den aktuellen Server und werden bei Updates nicht überschrieben. Sie haben die höchste Priorität. ACHTUNG! Im Cluster-Betrieb gelten diese Parameter nur für den aktuellen Cluster-Server!",
-      "WARNING": "Beachten bitte, dass ungültige Werte/Syntax das System ggf. nicht mehr erreichbar machen. Prüfe bitte sorgfältig alle Änderungen, bevor Du fotfährst.",
+      "WARNING": "Beachten bitte, dass ungültige Werte/Syntax das System ggf. nicht mehr erreichbar machen. Prüfe bitte sorgfältig alle Änderungen, bevor Du fortfährst.",
       "PARSE_ERROR": "Fehler beim Übernehmen der Config! Prüfe den Syntax die Konfiguration, und wiederhole den Vorgang.<br><b>Das Repository befindet sich aktuell in einem ungültigen Zustand!</b><br>Für weitere Details prüfe bitte die Logdateien<br><br>{{error}}"
     },
     "APPLICATIONS": {
-      "URL_HINT": "Gib hier die URL für ein Repositorum oder Service an, welchen Du anbinden möchtest (z.B. Rendering-Service, moodle, mediawiki)",
+      "URL_HINT": "Gib hier die URL für ein Repositorium oder Service an, welchen Du anbinden möchtest (z.B. Rendering-Service, moodle, mediawiki)",
       "OWN_URL_HINT": "Nutze die öffentliche URL des Repositoriums, um das System z.B. in einem LMS zu registrieren.",
       "USE_FILE": "Wähle eine XML-Datei für ein Remote-Repository, welches Du hinzufügen möchtest.",
       "REMOVE_MESSAGE": "Wenn Du fortfährst, wird die Applikation mit den untenstehenden Angaben gelöscht.\nBeachte, dass dieser Vorgang nicht rückgängig gemacht werden kann!\n\n{{info}}"
@@ -76,7 +76,7 @@
     },
     "JOBS": {
       "JOB_STARTED": "Die Aufgabe wurde gestartet. Überprüfe die Aufgabenliste, um den Status einzusehen.",
-      "CANCEL_MESSAGE": "Das Abbrechen einer Aufgabe kann zu einem inkonsistenten Datenzustand oder sogar Datenverlust führen.\n\nBisst Du wirklich sicher, dass Du die Aufgabe abbrechen möchtest?"
+      "CANCEL_MESSAGE": "Das Abbrechen einer Aufgabe kann zu einem inkonsistenten Datenzustand oder sogar Datenverlust führen.\n\nBist Du wirklich sicher, dass Du die Aufgabe abbrechen möchtest?"
     },
     "FOLDERTEMPLATES": {
       "TEMPLATE_NOTAPPLIED": "Ordnervorlage {{templatename}} konnte nicht für {{groupname}} angewandt werden. Prüfe die Ordnervorlage auf Richtigkeit.",
@@ -85,7 +85,7 @@
     "MEDIACENTER": {
       "ADD_MEDIACENTER_MESSAGE": "Gib die ID des Medienzentrums ein. Alle weiteren Parameter können nach dem Erstellen konfiguriert werden.",
       "DATA": {
-        "EDIT_NOT_ALLOWED": "Deinem aktuellen Konto fehlen Berechtigungen, Medienzentren zu bearbeiten. Um weitere Änderungen an den Daten durchzuführen, kontaktiere bitte die Administrierendendes Systems."
+        "EDIT_NOT_ALLOWED": "Deinem aktuellen Konto fehlen Berechtigungen, Medienzentren zu bearbeiten. Um weitere Änderungen an den Daten durchzuführen, kontaktiere bitte die Administrierenden des Systems."
       }
     },
     "FRONTPAGE": {
