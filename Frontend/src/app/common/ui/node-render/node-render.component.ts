@@ -1,4 +1,4 @@
-import { filter, skipWhile } from 'rxjs/operators';
+import { filter, skipWhile, takeUntil } from 'rxjs/operators';
 import {
     ChangeDetectorRef,
     Component,
@@ -194,6 +194,12 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
             show: false,
             currentScope: 'render',
         });
+        this.optionsHelper.nodesChanged
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe(() => this.refresh());
+        this.optionsHelper.nodesDeleted
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((result) => this.onDelete(result));
     }
 
     public isLoading = true;
@@ -342,7 +348,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
     }
     ngOnDestroy() {
         (window as any).ngRender = null;
-        this.optionsHelper.setListener(null);
         this.isDestroyed = true;
         this.destroyed$.next();
         this.destroyed$.complete();
@@ -629,12 +634,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
             },
         });
         this.optionsHelper.initComponents(this.actionbar);
-        this.optionsHelper.setListener({
-            onRefresh: (node) => {
-                this.refresh();
-            },
-            onDelete: (result) => this.onDelete(result),
-        });
         this.optionsHelper.refreshComponents();
         this.postprocessHtml();
         this.isBuildingPage = false;

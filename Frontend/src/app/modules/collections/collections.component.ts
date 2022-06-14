@@ -1,6 +1,6 @@
-import { forkJoin as observableForkJoin, Subject } from 'rxjs';
+import { Location } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import {
-    AfterViewInit,
     Component,
     ContentChild,
     ElementRef,
@@ -11,77 +11,75 @@ import {
     ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { TranslationsService } from '../../translations/translations.service';
+import { TranslateService } from '@ngx-translate/core';
+import { forkJoin as observableForkJoin, Subject } from 'rxjs';
+import { first } from 'rxjs/operators';
+import {
+    DropSource,
+    DropTarget,
+    ListEventInterface,
+    ListSortConfig,
+    NodeEntriesDisplayType,
+} from 'src/app/features/node-entries/entries-model';
+import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
+import { ActionbarHelperService } from '../../common/services/actionbar-helper';
+import { BridgeService } from '../../core-bridge-module/bridge.service';
 import * as EduData from '../../core-module/core.module';
 import {
+    AbstractList,
+    CollectionFeedback,
+    CollectionReference,
+    ConfigurationHelper,
     ConfigurationService,
     DialogButton,
     FrameEventsService,
     ListItem,
+    ListItemSort,
     LoginResult,
+    MdsMetadatasets,
+    Mediacenter,
     Node,
     NodeRef,
+    NodesRightMode,
     NodeWrapper,
+    Permission,
+    ProposalNode,
+    RequestObject,
     RestCollectionService,
     RestConnectorService,
     RestConstants,
     RestHelper,
     RestIamService,
     RestMdsService,
+    RestMediacenterService,
+    RestNetworkService,
     RestNodeService,
     RestOrganizationService,
     TemporaryStorageService,
     UIService,
-    CollectionReference,
-    CollectionFeedback,
-    NodesRightMode,
-    Permission,
-    MdsMetadatasets,
-    ConfigurationHelper,
-    RestNetworkService,
-    RequestObject,
-    RestMediacenterService,
-    Mediacenter,
-    AbstractList,
-    ProposalNode,
-    ListItemSort,
 } from '../../core-module/core.module';
-import { Toast } from '../../core-ui-module/toast';
-import { OptionItem, Scope } from '../../core-ui-module/option-item';
-import { UIHelper } from '../../core-ui-module/ui-helper';
+import { Helper } from '../../core-module/rest/helper';
+import { MdsHelper } from '../../core-module/rest/mds-helper';
+import { ColorHelper, PreferredColor } from '../../core-module/ui/color-helper';
 import { UIConstants } from '../../core-module/ui/ui-constants';
 import { ListTableComponent } from '../../core-ui-module/components/list-table/list-table.component';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
-import { TranslateService } from '@ngx-translate/core';
-import { Location } from '@angular/common';
-import { Helper } from '../../core-module/rest/helper';
-import { ColorHelper, PreferredColor } from '../../core-module/ui/color-helper';
-import { ActionbarHelperService } from '../../common/services/actionbar-helper';
-import { MdsHelper } from '../../core-module/rest/mds-helper';
-import { BridgeService } from '../../core-bridge-module/bridge.service';
-import { HttpClient } from '@angular/common/http';
+import { OptionItem, Scope } from '../../core-ui-module/option-item';
 import {
-    OPTIONS_HELPER_CONFIG,
     OptionsHelperService,
+    OPTIONS_HELPER_CONFIG,
 } from '../../core-ui-module/options-helper.service';
+import { Toast } from '../../core-ui-module/toast';
+import { UIHelper } from '../../core-ui-module/ui-helper';
+import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
+import { MainNavService } from '../../main/navigation/main-nav.service';
 import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';
+import { SortEvent } from '../../shared/components/sort-dropdown/sort-dropdown.component';
+import { TranslationsService } from '../../translations/translations.service';
 import {
     ManagementEvent,
     ManagementEventType,
 } from '../management-dialogs/management-dialogs.component';
-import { SortEvent } from '../../shared/components/sort-dropdown/sort-dropdown.component';
-
-import { first } from 'rxjs/operators';
-import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
-import { MainNavService } from '../../main/navigation/main-nav.service';
-import {
-    NodeEntriesDisplayType,
-    ListEventInterface,
-    ListSortConfig,
-    DropSource,
-    DropTarget,
-} from 'src/app/features/node-entries/entries-model';
-import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 
 // component class
 @Component({
@@ -99,7 +97,7 @@ import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
         },
     ],
 })
-export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestroy {
+export class CollectionsMainComponent implements OnInit, OnDestroy {
     static INDEX_MAPPING = [
         RestConstants.COLLECTIONSCOPE_MY,
         RestConstants.COLLECTIONSCOPE_ORGA,
@@ -428,8 +426,6 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
             this.dataSourceReferences,
         );
     }
-
-    ngAfterViewInit() {}
 
     private registerMainNav(): void {
         this.mainNavService.setMainNavConfig({
@@ -1176,9 +1172,8 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
             )
             .subscribe(
                 () => {
-                    this.toast.toast('COLLECTIONS.REMOVED_FROM_COLLECTION');
+                    this.afterDeleteFromCollection();
                     this.toast.closeModalDialog();
-                    this.refreshContent();
                     if (callback) {
                         callback();
                     }
@@ -1188,6 +1183,11 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
                     this.toast.error(error);
                 },
             );
+    }
+
+    afterDeleteFromCollection() {
+        this.toast.toast('COLLECTIONS.REMOVED_FROM_COLLECTION');
+        this.refreshContent();
     }
 
     private deleteMultiple(nodes: Node[], position = 0, error = false) {

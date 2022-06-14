@@ -1,5 +1,7 @@
 import { animate, sequence, style, transition, trigger } from '@angular/animations';
+import { SelectionModel } from '@angular/cdk/collections';
 import {
+    AfterViewInit,
     ChangeDetectionStrategy,
     ChangeDetectorRef,
     Component,
@@ -8,22 +10,29 @@ import {
     EventEmitter,
     HostListener,
     Input,
+    OnChanges,
+    OnDestroy,
     Output,
+    QueryList,
+    Renderer2,
+    SimpleChanges,
     TemplateRef,
     ViewChild,
-    ViewContainerRef,
-    SimpleChanges,
-    OnChanges,
-    Renderer2,
     ViewChildren,
-    QueryList,
-    AfterViewInit,
+    ViewContainerRef,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
+import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { OptionsHelperService, OPTIONS_HELPER_CONFIG } from '../../options-helper.service';
-import { ActionbarComponent } from '../../../shared/components/actionbar/actionbar.component';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import {
+    ListEventInterface,
+    ListOptions,
+    ListOptionsConfig,
+    NodeEntriesDisplayType,
+} from 'src/app/features/node-entries/entries-model';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
@@ -48,22 +57,16 @@ import { ColorHelper, PreferredColor } from '../../../core-module/ui/color-helpe
 import { KeyEvents } from '../../../core-module/ui/key-events';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
+import { MainNavService } from '../../../main/navigation/main-nav.service';
+import { ActionbarComponent } from '../../../shared/components/actionbar/actionbar.component';
+import { NodeUrlComponent } from '../../../shared/components/node-url/node-url.component';
+import { NodeTitlePipe } from '../../../shared/pipes/node-title.pipe';
 import { DistinctClickEvent } from '../../directives/distinct-click.directive';
 import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
-import { CustomOptions, OptionItem, Scope, Target } from '../../option-item';
-import { Toast } from '../../toast';
 import { NodeHelperService } from '../../node-helper.service';
-import { DomSanitizer } from '@angular/platform-browser';
-import { NodeTitlePipe } from '../../../shared/pipes/node-title.pipe';
-import { NodeUrlComponent } from '../../../shared/components/node-url/node-url.component';
-import { SelectionModel } from '@angular/cdk/collections';
-import { MainNavService } from '../../../main/navigation/main-nav.service';
-import {
-    ListEventInterface,
-    ListOptions,
-    ListOptionsConfig,
-    NodeEntriesDisplayType,
-} from 'src/app/features/node-entries/entries-model';
+import { CustomOptions, OptionItem, Scope, Target } from '../../option-item';
+import { OptionsHelperService, OPTIONS_HELPER_CONFIG } from '../../options-helper.service';
+import { Toast } from '../../toast';
 
 @Component({
     selector: 'es-listTable',
@@ -104,7 +107,7 @@ import {
  * A provider to render multiple Nodes as a list
  */
 export class ListTableComponent
-    implements OnChanges, AfterViewInit, EventListener, ListEventInterface<Node>
+    implements OnChanges, OnDestroy, AfterViewInit, EventListener, ListEventInterface<Node>
 {
     public static readonly VIEW_TYPE_LIST = 0;
     public static readonly VIEW_TYPE_GRID = 1;
@@ -477,6 +480,7 @@ export class ListTableComponent
     columnsVisible: ListItem[];
     currentDragColumn: ListItem;
     private repositories: Repository[];
+    private destroyed = new Subject<void>();
 
     constructor(
         private ui: UIService,
@@ -535,6 +539,14 @@ export class ListTableComponent
 
     ngAfterViewInit(): void {
         this.optionsHelper.initComponents(this.actionbar, this);
+        this.optionsHelper.nodesDeleted
+            .pipe(takeUntil(this.destroyed))
+            .subscribe((nodes) => this.removeNodes(nodes.error, nodes.objects));
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
     }
 
     setViewType(viewType: number) {
@@ -1174,9 +1186,6 @@ export class ListTableComponent
             allObjects: this._nodes,
             parent: this.parent,
             customOptions: this._customOptions,
-        });
-        this.optionsHelper.setListener({
-            onDelete: (nodes) => this.removeNodes(nodes.error, nodes.objects),
         });
         // only refresh global if no node was given
         this.optionsHelper.refreshComponents();

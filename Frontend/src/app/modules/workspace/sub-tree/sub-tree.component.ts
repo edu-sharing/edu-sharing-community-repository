@@ -1,26 +1,36 @@
-import { Component, Input, EventEmitter, Output, ViewChild } from '@angular/core';
-import { RestNodeService } from '../../../core-module/core.module';
-import { TranslateService } from '@ngx-translate/core';
-import { RestConstants } from '../../../core-module/core.module';
-import { Node, NodeList } from '../../../core-module/core.module';
-import { TemporaryStorageService } from '../../../core-module/core.module';
-import { OptionItem, Scope } from '../../../core-ui-module/option-item';
-import { UIService } from '../../../core-module/core.module';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { trigger } from '@angular/animations';
-import { Helper } from '../../../core-module/rest/helper';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { DropData, DragData } from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
-import { MatMenuTrigger } from '@angular/material/menu';
-import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
-import {
-    OPTIONS_HELPER_CONFIG,
-    OptionsHelperService,
-} from '../../../core-ui-module/options-helper.service';
-import { MainNavComponent } from '../../../main/navigation/main-nav/main-nav.component';
 import { CdkDragDrop, CdkDragEnter, CdkDragExit } from '@angular/cdk/drag-drop';
-import { DragCursorDirective } from '../../../shared/directives/drag-cursor.directive';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    OnDestroy,
+    OnInit,
+    Output,
+    ViewChild,
+} from '@angular/core';
+import { MatMenuTrigger } from '@angular/material/menu';
+import * as rxjs from 'rxjs';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { DropSource } from 'src/app/features/node-entries/entries-model';
+import {
+    Node,
+    NodeList,
+    RestConstants,
+    RestNodeService,
+    TemporaryStorageService,
+    UIService,
+} from '../../../core-module/core.module';
+import { Helper } from '../../../core-module/rest/helper';
+import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { OptionItem, Scope } from '../../../core-ui-module/option-item';
+import {
+    OptionsHelperService,
+    OPTIONS_HELPER_CONFIG,
+} from '../../../core-ui-module/options-helper.service';
+import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
+import { DragCursorDirective } from '../../../shared/directives/drag-cursor.directive';
 
 @Component({
     selector: 'es-workspace-sub-tree',
@@ -40,7 +50,7 @@ import { DropSource } from 'src/app/features/node-entries/entries-model';
         },
     ],
 })
-export class WorkspaceSubTreeComponent {
+export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
     private static MAX_FOLDER_COUNT = 100;
 
     @ViewChild('dropdown') dropdown: DropdownComponent;
@@ -80,8 +90,9 @@ export class WorkspaceSubTreeComponent {
     _hasChilds: boolean[] = [];
     moreItems: number;
     loadingMore: boolean;
-
     loadingStates: boolean[] = [];
+
+    private destroyed = new Subject<void>();
 
     constructor(
         private ui: UIService,
@@ -89,6 +100,17 @@ export class WorkspaceSubTreeComponent {
         private storage: TemporaryStorageService,
         private optionsService: OptionsHelperService,
     ) {}
+
+    ngOnInit(): void {
+        rxjs.merge(this.optionsService.nodesChanged, this.optionsService.nodesDeleted)
+            .pipe(takeUntil(this.destroyed))
+            .subscribe(() => this.refresh());
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
+    }
 
     setLoadingState(state: boolean, pos: number) {
         this.loadingStates[pos] = state;
@@ -155,10 +177,6 @@ export class WorkspaceSubTreeComponent {
             scope: Scope.WorkspaceTree,
         });
         this.optionsService.initComponents(null, null, this.dropdown);
-        this.optionsService.setListener({
-            onRefresh: () => this.refresh(),
-            onDelete: () => this.refresh(),
-        });
         this.optionsService.refreshComponents();
         this.dropdownTrigger.openMenu();
     }

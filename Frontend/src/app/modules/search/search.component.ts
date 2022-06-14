@@ -287,9 +287,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.searchService.dataSourceSearchResult[0].isLoading = true;
         }
         this.savedSearchColumns.push(new ListItem('NODE', RestConstants.LOM_PROP_TITLE));
-        this.optionsHelper.setListener({
-            onDisplayTypeChange: (type) => this.setDisplayType(type),
-        });
+        this.optionsHelper.displayTypeChanged
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((type) => this.setDisplayType(type));
         this.connector.setRoute(this.activatedRoute).subscribe(() => {
             this.translations.waitForInit().subscribe(() => {
                 this.initAfterTranslationsReady();

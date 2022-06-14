@@ -5,6 +5,7 @@ import {
     HostListener,
     Input,
     OnDestroy,
+    OnInit,
     Output,
     ViewChild,
 } from '@angular/core';
@@ -74,7 +75,7 @@ import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.
         },
     ],
 })
-export class CreateMenuComponent implements OnDestroy {
+export class CreateMenuComponent implements OnInit, OnDestroy {
     @ViewChild('dropdown', { static: true }) dropdown: DropdownComponent;
 
     /**
@@ -160,6 +161,12 @@ export class CreateMenuComponent implements OnDestroy {
             }
         });
         this.cardHasOpenModals$ = cardService.hasOpenModals.pipe(delay(0));
+    }
+
+    ngOnInit(): void {
+        this.optionsService.virtualNodesAdded
+            .pipe(takeUntil(this.destroyed))
+            .subscribe((nodes) => this.onCreate.emit(nodes));
     }
 
     ngOnDestroy(): void {
@@ -300,9 +307,6 @@ export class CreateMenuComponent implements OnDestroy {
         this.optionsService.setData({
             scope: Scope.CreateMenu,
             parent: this._parent,
-        });
-        this.optionsService.setListener({
-            onVirtualNodes: (nodes) => this.onCreate.emit(nodes),
         });
         this.options = this.optionsService.filterOptions(this.options, Target.CreateMenu);
 

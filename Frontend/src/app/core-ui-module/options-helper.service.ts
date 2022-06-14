@@ -32,7 +32,14 @@ import {
 } from '../core-module/rest/services/temporary-storage.service';
 import { BridgeService } from '../core-bridge-module/bridge.service';
 import { MessageType } from '../core-module/ui/message-type';
-import { Inject, Injectable, InjectionToken, OnDestroy, Optional } from '@angular/core';
+import {
+    EventEmitter,
+    Inject,
+    Injectable,
+    InjectionToken,
+    OnDestroy,
+    Optional,
+} from '@angular/core';
 import { CardComponent } from '../shared/components/card/card.component';
 import { TranslateService } from '@ngx-translate/core';
 import { RestNodeService } from '../core-module/rest/services/rest-node.service';
@@ -73,6 +80,16 @@ export class OptionsHelperService implements OnDestroy {
     static ElementTypesAddToCollection = [ElementType.Node, ElementType.NodePublishedCopy];
     private static subscriptionUp: Subscription[] = [];
     private static subscriptionDown: Subscription[] = [];
+
+    readonly virtualNodesAdded = new EventEmitter<Node[]>();
+    readonly nodesChanged = new EventEmitter<Node[] | void>();
+    readonly nodesDeleted = new EventEmitter<{
+        objects: Node[] | any;
+        count: number;
+        error: boolean;
+    }>();
+    readonly displayTypeChanged = new EventEmitter<NodeEntriesDisplayType>();
+
     private localSubscripitionUp: Subscription;
     private localSubscripitionDown: Subscription;
     private appleCmd: boolean;
@@ -83,13 +100,51 @@ export class OptionsHelperService implements OnDestroy {
     private dropdown: DropdownComponent;
     private queryParams: Params;
     private data: OptionData;
-    private listener: OptionsListener;
+
+    constructor(
+        private networkService: RestNetworkService,
+        private connector: RestConnectorService,
+        private connectors: RestConnectorsService,
+        private iamService: RestIamService,
+        private router: Router,
+        private nodeHelper: NodeHelperService,
+        private route: ActivatedRoute,
+        private eventService: FrameEventsService,
+        private http: HttpClient,
+        private ui: UIService,
+        private toast: Toast,
+        private translate: TranslateService,
+        private platformLocation: PlatformLocation,
+        private nodeService: RestNodeService,
+        private collectionService: RestCollectionService,
+        private configService: ConfigurationService,
+        private mainNavService: MainNavService,
+        private storage: TemporaryStorageService,
+        private bridge: BridgeService,
+        private nodeStore: NodeStoreService,
+        private dialogs: DialogsService,
+        @Optional() @Inject(OPTIONS_HELPER_CONFIG) config: OptionsHelperConfig,
+    ) {
+        if (config == null) {
+            config = new OptionsHelperConfig();
+        }
+        this.route.queryParams.subscribe((queryParams) => (this.queryParams = queryParams));
+        // @HostListener decorator unfortunately does not work in services
+        if (config.subscribeEvents) {
+            this.initSubscription();
+        }
+    }
+
+    ngOnDestroy(): void {
+        this.clearSubscription();
+    }
 
     handleKeyboardEventUp(event: any) {
         if (event.keyCode === 91 || event.keyCode === 93) {
             this.appleCmd = false;
         }
     }
+
     handleKeyboardEvent(event: KeyboardEvent) {
         if (event.keyCode === 91 || event.keyCode === 93) {
             this.appleCmd = true;
@@ -134,42 +189,7 @@ export class OptionsHelperService implements OnDestroy {
             }
         }
     }
-    ngOnDestroy(): void {
-        this.clearSubscription();
-    }
-    constructor(
-        private networkService: RestNetworkService,
-        private connector: RestConnectorService,
-        private connectors: RestConnectorsService,
-        private iamService: RestIamService,
-        private router: Router,
-        private nodeHelper: NodeHelperService,
-        private route: ActivatedRoute,
-        private eventService: FrameEventsService,
-        private http: HttpClient,
-        private ui: UIService,
-        private toast: Toast,
-        private translate: TranslateService,
-        private platformLocation: PlatformLocation,
-        private nodeService: RestNodeService,
-        private collectionService: RestCollectionService,
-        private configService: ConfigurationService,
-        private mainNavService: MainNavService,
-        private storage: TemporaryStorageService,
-        private bridge: BridgeService,
-        private nodeStore: NodeStoreService,
-        private dialogs: DialogsService,
-        @Optional() @Inject(OPTIONS_HELPER_CONFIG) config: OptionsHelperConfig,
-    ) {
-        if (config == null) {
-            config = new OptionsHelperConfig();
-        }
-        this.route.queryParams.subscribe((queryParams) => (this.queryParams = queryParams));
-        // @HostListener decorator unfortunately does not work in services
-        if (config.subscribeEvents) {
-            this.initSubscription();
-        }
-    }
+
     private cutCopyNode(node: Node, copy: boolean) {
         let list = this.getObjects(node);
         if (!list || !list.length) {
@@ -182,6 +202,7 @@ export class OptionsHelperService implements OnDestroy {
             count: list.length,
         });
     }
+
     pasteNode(nodes: Node[] = []) {
         const clip = this.storage.get('workspace_clipboard') as ClipboardObject;
         if (!this.canAddObjects()) {
@@ -230,6 +251,7 @@ export class OptionsHelperService implements OnDestroy {
             );
         }
     }
+
     /**
      * shortcut to simply disable all options on the given compoennts
      * @param actionbar
@@ -243,6 +265,7 @@ export class OptionsHelperService implements OnDestroy {
             actionbar.options = [];
         }
     }
+
     async initComponents(
         actionbar: ActionbarComponent = null,
         list: ListEventInterface<NodeEntriesDataType> = null,
@@ -256,9 +279,7 @@ export class OptionsHelperService implements OnDestroy {
         this.dropdown = dropdown;
         await this.networkService.getRepositories().toPromise();
     }
-    setListener(listener: OptionsListener) {
-        this.listener = listener;
-    }
+
     /**
      * refresh all bound components with available menu options
      */
@@ -274,7 +295,7 @@ export class OptionsHelperService implements OnDestroy {
         if (this.mainNavService.getMainNav()) {
             this.subscriptions.push(
                 this.mainNavService.getDialogs().onRefresh.subscribe((nodes: void | Node[]) => {
-                    this.listener?.onRefresh?.(nodes);
+                    this.nodesChanged.emit(nodes);
                     if (this.list) {
                         this.list.updateNodes(nodes);
                     }
@@ -285,7 +306,7 @@ export class OptionsHelperService implements OnDestroy {
                     .getDialogs()
                     ?.onDelete?.subscribe(
                         (result: { objects: any; count: number; error: boolean }) =>
-                            this.listener?.onDelete(result),
+                            this.nodesDeleted.emit(result),
                     ),
             );
         }
@@ -304,6 +325,7 @@ export class OptionsHelperService implements OnDestroy {
             this.actionbar.options = this.globalOptions;
         }
     }
+
     private isOptionEnabled(option: OptionItem, objects: Node[] | any) {
         if (
             option.permissionsMode === HideMode.Disable &&
@@ -323,7 +345,7 @@ export class OptionsHelperService implements OnDestroy {
         return true;
     }
 
-    public getAvailableOptions(target: Target, objects: Node[] = null) {
+    getAvailableOptions(target: Target, objects: Node[] = null) {
         if (target === Target.List) {
             if (objects == null) {
                 // fetch ALL options of ALL items inside list
@@ -443,6 +465,7 @@ export class OptionsHelperService implements OnDestroy {
     private hasSelection() {
         return this.data.selectedObjects && this.data.selectedObjects.length;
     }
+
     private getType(objects: Node[]): ElementType {
         if (objects) {
             const types = Array.from(new Set(objects.map((o) => this.getTypeSingle(o))));
@@ -452,6 +475,7 @@ export class OptionsHelperService implements OnDestroy {
         }
         return ElementType.Unknown;
     }
+
     private getTypeSingle(object: Node | any) {
         if (object.authorityType === RestConstants.AUTHORITY_TYPE_GROUP) {
             return ElementType.Group;
@@ -486,6 +510,7 @@ export class OptionsHelperService implements OnDestroy {
                 .length === 0
         );
     }
+
     private validatePermissions(option: OptionItem, objects: Node[] | any[]) {
         return (
             option.permissions.filter(
@@ -1294,7 +1319,7 @@ export class OptionsHelperService implements OnDestroy {
                     break;
             }
             if (emit) {
-                this.listener?.onDisplayTypeChange?.(this.list.getDisplayType());
+                this.displayTypeChanged.emit(this.list.getDisplayType());
             }
         };
         const toggleViewType = new OptionItem('', '', () => {
@@ -1416,6 +1441,7 @@ export class OptionsHelperService implements OnDestroy {
             connectorType,
         );
     }
+
     private canAddObjects() {
         return (
             this.data.parent &&
@@ -1428,9 +1454,7 @@ export class OptionsHelperService implements OnDestroy {
             o.virtual = true;
             return o;
         });
-        if (this.listener && this.listener.onVirtualNodes) {
-            this.listener.onVirtualNodes(objects);
-        }
+        this.virtualNodesAdded.emit(objects);
         if (this.list) {
             this.list.addVirtualNodes(objects);
         }
@@ -1481,6 +1505,7 @@ export class OptionsHelperService implements OnDestroy {
             );
         }
     }
+
     async getObjectsAsync(object: Node | any, resolveOriginals = false) {
         const nodes = NodeHelperService.getActionbarNodes(
             this.data.selectedObjects || this.data.activeObjects,
@@ -1510,7 +1535,8 @@ export class OptionsHelperService implements OnDestroy {
         }
         return nodes;
     }
-    public getObjects(object: Node | any) {
+
+    getObjects(object: Node | any) {
         return NodeHelperService.getActionbarNodes(
             this.data.selectedObjects || this.data.activeObjects,
             object,
@@ -1554,12 +1580,15 @@ export class OptionsHelperService implements OnDestroy {
         }
         return options;
     }
+
     getData() {
         return this.data;
     }
+
     setData(data: OptionData) {
         this.data = data;
     }
+
     private sortOptionsByGroup(options: OptionItem[]) {
         if (!options) {
             return null;
@@ -1694,8 +1723,8 @@ export class OptionsHelperService implements OnDestroy {
                 this.collectionService.removeFromCollection(o.ref.id, this.data.parent.ref.id),
             ),
         ).subscribe(
-            () => this.listener.onDelete({ objects, error: false, count: objects.length }),
-            (error) => this.listener.onDelete({ objects, error: true, count: objects.length }),
+            () => this.nodesDeleted.emit({ objects, error: false, count: objects.length }),
+            (error) => this.nodesDeleted.emit({ objects, error: true, count: objects.length }),
         );
     }
 
@@ -1709,7 +1738,7 @@ export class OptionsHelperService implements OnDestroy {
      * @param target
      * @param objects
      */
-    public filterOptions(options: OptionItem[], target: Target, objects: Node[] | any = null) {
+    filterOptions(options: OptionItem[], target: Target, objects: Node[] | any = null) {
         if (target === Target.List) {
             /*let optionsAlways = options.filter((o) => o.showAlways);
             const optionsOthers = options.filter((o) => !o.showAlways);
@@ -1723,6 +1752,7 @@ export class OptionsHelperService implements OnDestroy {
         options = this.sortOptionsByGroup(options);
         return options;
     }
+
     clearSubscription() {
         if (this.localSubscripitionDown) {
             this.localSubscripitionDown.unsubscribe();
@@ -1735,6 +1765,7 @@ export class OptionsHelperService implements OnDestroy {
             (s) => s !== this.localSubscripitionUp,
         );
     }
+
     initSubscription() {
         this.clearSubscription();
         this.localSubscripitionUp = fromEvent(document, 'keyup').subscribe((event) =>
@@ -1747,12 +1778,7 @@ export class OptionsHelperService implements OnDestroy {
         OptionsHelperService.subscriptionDown.push(this.localSubscripitionDown);
     }
 }
-export interface OptionsListener {
-    onVirtualNodes?: (nodes: Node[]) => void;
-    onRefresh?: (nodes: Node[] | void) => void;
-    onDelete?: (result: { objects: Node[] | any; count: number; error: boolean }) => void;
-    onDisplayTypeChange?: (displayType: NodeEntriesDisplayType) => void;
-}
+
 export interface OptionData {
     scope: Scope;
     activeObjects?: Node[] | any[];

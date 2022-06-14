@@ -54,6 +54,7 @@
   (sortChange)="setSorting($event)"
   (clickItem)="clickItem($event)"
   (dblClickItem)="onOpenNode.emit($event.element)"
+  (nodesDeleted)="onDelete($event.objects)"
 >
   <ng-template #empty>
     <h5 class="noElementsInfo" *ngIf="_searchQuery == null || _searchQuery == ''">

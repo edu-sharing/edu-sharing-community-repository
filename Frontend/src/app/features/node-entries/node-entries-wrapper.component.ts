@@ -9,12 +9,14 @@ import {
     Input,
     NgZone,
     OnChanges,
+    OnDestroy,
     Output,
     SimpleChange,
     TemplateRef,
     Type,
     ViewContainerRef,
 } from '@angular/core';
+import { Subject } from 'rxjs';
 import {
     CollectionReference,
     ListItem,
@@ -27,7 +29,6 @@ import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { OptionItem } from '../../core-ui-module/option-item';
 import {
     OptionsHelperService,
-    OptionsListener,
     OPTIONS_HELPER_CONFIG,
 } from '../../core-ui-module/options-helper.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
@@ -64,7 +65,7 @@ import { NodeDataSource } from './node-data-source';
     ],
 })
 export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
-    implements AfterViewInit, OnChanges, ListEventInterface<T>
+    implements AfterViewInit, OnChanges, OnDestroy, ListEventInterface<T>
 {
     @ContentChild('title') titleRef: TemplateRef<any>;
     @ContentChild('empty') emptyRef: TemplateRef<any>;
@@ -85,9 +86,15 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @Output() clickItem = new EventEmitter<NodeClickEvent<T>>();
     @Output() dblClickItem = new EventEmitter<NodeClickEvent<T>>();
     @Output() sortChange = new EventEmitter<ListSortConfig>();
+    @Output() virtualNodesAdded = this.optionsHelper.virtualNodesAdded;
+    @Output() nodesChanged = this.optionsHelper.nodesChanged;
+    @Output() nodesDeleted = this.optionsHelper.nodesDeleted;
+    @Output() displayTypeChanged = this.optionsHelper.displayTypeChanged;
+
+    customNodeListComponent: Type<NodeEntriesComponent<T>>;
     private componentRef: ComponentRef<any>;
-    public customNodeListComponent: Type<NodeEntriesComponent<T>>;
     private options: ListOptions;
+    private destroyed = new Subject<void>();
 
     constructor(
         private temporaryStorageService: TemporaryStorageService,
@@ -113,6 +120,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
             this.optionsHelper.refreshComponents();
         });
     }
+
     ngOnChanges(changes: { [key: string]: SimpleChange } = {}) {
         if (!this.componentRef) {
             this.init();
@@ -141,6 +149,12 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         // This might need wrapping with `setTimeout`.
         this.updateTemplates();
     }
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
+    }
+
     /**
      * Replaces this wrapper with the configured custom-node-list component.
      */
@@ -259,10 +273,6 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
             customOptions: config.customOptions,
         });
         this.optionsHelper.refreshComponents();
-    }
-
-    setOptionsListener(listener: OptionsListener): void {
-        this.optionsHelper.setListener(listener);
     }
 
     ngAfterViewInit(): void {
