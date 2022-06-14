@@ -3,7 +3,7 @@
   "EXTENSION_NOT_MATCH_INFO_OLD": "Bist Du sicher, dass Du die Dateiendung '{{extensionOld}}' entfernen möchtest?\n\n{{warning}}",
   "COMMON_API_ERROR": "Ein Fehler ist aufgetreten. Bitte versuche es erneut.",
   "RENDERSERVICE_API_ERROR": "Fehler beim Verbinden mit dem Renderingservice. Bitte melde diesen Fehler den Administrierenden",
-  "CONNECTOR_QUOTA_REACHED_MESSAGE": "Diese Funktion ist nicht mehr verfügbar, da Du das Speicherplatz-Quota vollständig überschritten hast.\n\nLöschen einige Dateien, um Speicherplatz zu schaffen und versuche es anschließend erneut.",
+  "CONNECTOR_QUOTA_REACHED_MESSAGE": "Diese Funktion ist nicht mehr verfügbar, da Du das Speicherplatz-Quota vollständig überschritten hast.\n\nLösche einige Dateien, um Speicherplatz zu schaffen und versuche es anschließend erneut.",
   "RESTRICTED_ACCESS_ERROR_MESSAGE": "Beim aktuellen Material handelt es sich um ein lizenziertes Material. Du besitzt jedoch keine Lizenz, um auf das Material zuzugreifen",
   "TOOLPERMISSION_ERROR": "Dir fehlt für diesen Vorgang die notwendige Berechtigung",
   "TOOLPERMISSION_ERROR_INLINE": "Du darfst diese Aktion nicht durchführen, da die Berechtigung \"{{permission}}\" fehlt.",
