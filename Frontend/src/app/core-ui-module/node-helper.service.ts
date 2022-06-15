@@ -791,6 +791,7 @@ export class NodeHelperService {
 export class LinkData {
     constructor(public link: string) {}
     lti: boolean;
+    parent: Node;
     consumerKey: string;
     sharedSecret: string;
 }
