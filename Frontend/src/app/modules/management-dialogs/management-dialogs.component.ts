@@ -395,7 +395,7 @@ export class WorkspaceManagementDialogsComponent  {
     this.closeUploadSelect();
     this.toast.showProgressDialog();
     const config = await this.mainNavService.observeMainNavConfig().pipe(first()).toPromise();
-    this.nodeService.createNode(config.create?.parent?.ref.id,RestConstants.CCM_TYPE_IO,urlData.aspects,urlData.properties,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(
+    this.nodeService.createNode(link.parent?.ref.id,RestConstants.CCM_TYPE_IO,urlData.aspects,urlData.properties,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(
       (data) => {
         this.showMetadataAfterUpload([data.node]);
         this.toast.closeModalDialog();
@@ -469,6 +469,7 @@ export class WorkspaceManagementDialogsComponent  {
     this.createMetadata=null;
     this.onCloseMetadata.emit(nodes);
     if(refresh) {
+        console.log('_nodeFromUpload', this._nodeFromUpload);
         if(this._nodeFromUpload) {
             this.onUploadFilesProcessed.emit(nodes);
         }
