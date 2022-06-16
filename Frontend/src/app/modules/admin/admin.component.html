@@ -750,7 +750,7 @@
       <div *ngIf="lucene.mode === 'ELASTIC' && searchResponse" class="elastic-response">
           <label for="elasticResponse">{{'ADMIN.BROWSER.ELASTIC_RESPONSE' | translate }}</label>
           <ngx-monaco-editor [options]="elasticResponseCodeOptions"
-                             [ngModel]="$any(searchResponse)?.elasticResponse"
+                             [ngModel]="elasticResponse.elasticResponse"
                              [ngModelOptions]="{standalone: true}"
                              id="elasticResponse"
           ></ngx-monaco-editor>
