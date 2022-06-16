@@ -11,10 +11,13 @@ import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.metadataset.v2.MetadataSet;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.NameSpaceTool;
 import org.edu_sharing.repository.server.tools.NodeTool;
 import org.edu_sharing.service.mime.MimeTypesV2;
@@ -157,7 +160,24 @@ public class NodeServiceHelper {
 			return true;
 		}
 	}
-	public static Serializable getPropertyNative(NodeRef nodeRef, String key){
+
+	/**
+	 * gets the native property
+	 * if a special runtime property (e.g. _DISPLAYNAME) is requested, it will also resolve it
+	 * WARNING: this method is not optimized for performance!
+	 */
+	public static Serializable getPropertyNativeWithMapping(NodeRef nodeRef, String key) throws Throwable {
+		if(key.endsWith(CCConstants.DISPLAYNAME_SUFFIX)) {
+			HashMap<String, Object> props = getProperties(nodeRef);
+			MetadataHelper.addVirtualDisplaynameProperties(
+					MetadataHelper.getMetadataset(nodeRef),
+					props
+			);
+			return (Serializable) props.get(key);
+		}
+		return getPropertyNative(nodeRef, key);
+	}
+		public static Serializable getPropertyNative(NodeRef nodeRef, String key){
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		return serviceRegistry.getNodeService().getProperty(nodeRef,QName.createQName(key));

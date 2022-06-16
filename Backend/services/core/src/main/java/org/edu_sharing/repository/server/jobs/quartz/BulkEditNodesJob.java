@@ -80,7 +80,7 @@ public class BulkEditNodesJob extends AbstractJob{
 	private String property;
 	@JobFieldDescription(description = "Value to replace target property with")
 	private Serializable value;
-	@JobFieldDescription(description = "property to copy value from, if mode == Replace. Hint: use \"parent::\" prefix to copy data from the primary parent", sampleValue = "cclom:title")
+	@JobFieldDescription(description = "property to copy value from, if mode == Replace. Hint: use \"parent::\" prefix to copy data from the primary parent. Also supports special attributes like _DISPLAYNAME (if available for the source property)", sampleValue = "cclom:title")
 	private String copy;
 	private boolean copyParent;
 	@JobFieldDescription(description = "token to replace, if mode == ReplaceToken")
@@ -204,13 +204,17 @@ public class BulkEditNodesJob extends AbstractJob{
 				org.alfresco.service.cmr.repository.NodeRef nodeRef = new org.alfresco.service.cmr.repository.NodeRef(ref.getStoreRef(), ref.getId());
 				logger.info("Bulk edit metadata for node " + ref.getId());
 				if (copy != null) {
-					if(copyParent) {
-						value = nodeService.getProperty(
-								nodeService.getPrimaryParent(nodeRef).getParentRef(),
-								QName.createQName(copy)
-						);
-					} else {
-						value = nodeService.getProperty(nodeRef, QName.createQName(copy));
+					try {
+						if (copyParent) {
+							value = NodeServiceHelper.getPropertyNativeWithMapping(
+									nodeService.getPrimaryParent(nodeRef).getParentRef(),
+									copy
+							);
+						} else {
+							value = NodeServiceHelper.getPropertyNativeWithMapping(nodeRef, copy);
+						}
+					} catch (Throwable t) {
+						logger.warn("Could not read copy property from source node: "+ t.getMessage());
 					}
 				}
 				if (mode.equals(Mode.Replace)) {

@@ -14,6 +14,7 @@ import { UIConstants } from '../../../../../core-module/ui/ui-constants';
 import { Toast } from '../../../../../core-ui-module/toast';
 import { CARD_DIALOG_DATA, configForNode } from '../../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../../card-dialog/card-dialog-ref';
+import {UIHelper} from "../../../../../core-ui-module/ui-helper";
 
 export interface NodeInfoDialogData {
     node: Node;
@@ -160,5 +161,10 @@ export class NodeInfoComponent implements OnInit {
                 this.saving = false;
                 this.openNode(node.node);
             });
+    }
+
+    copyNodeIdToClipboard() {
+        UIHelper.copyToClipboard(this._node.ref.id);
+        this.toast.toast('ADMIN.APPLICATIONS.COPIED_CLIPBOARD');
     }
 }

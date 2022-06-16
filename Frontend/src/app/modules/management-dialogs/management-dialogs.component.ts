@@ -431,7 +431,7 @@ export class WorkspaceManagementDialogsComponent {
         const config = await this.mainNavService.observeMainNavConfig().pipe(first()).toPromise();
         this.nodeService
             .createNode(
-                config.create?.parent?.ref.id,
+                link.parent?.ref.id,
                 RestConstants.CCM_TYPE_IO,
                 urlData.aspects,
                 urlData.properties,
@@ -510,6 +510,7 @@ export class WorkspaceManagementDialogsComponent {
         this.createMetadata = null;
         this.onCloseMetadata.emit(nodes);
         if (refresh) {
+        console.log('_nodeFromUpload', this._nodeFromUpload);
             if (this._nodeFromUpload) {
                 this.onUploadFilesProcessed.emit(nodes);
             }

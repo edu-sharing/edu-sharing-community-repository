@@ -17,9 +17,7 @@
   >
     <div *ngIf="selectedFiles.value?.length > 0">
       <div class="filename"><mat-icon>description</mat-icon> {{ selectedFiles.value[0].name }}</div>
-      <es-mat-link (click)="selectedFiles.next(null)">{{
-        'WORKSPACE.ADD_OBJECT_RESET' | translate
-      }}</es-mat-link>
+      <es-mat-link (click)="clearFile()">{{ 'WORKSPACE.ADD_OBJECT_RESET' | translate}}</es-mat-link>
     </div>
     <div *ngIf="!selectedFiles.value && !link">
       <div><i esIcon="cloud_upload"></i></div>
