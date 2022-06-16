@@ -69,6 +69,7 @@
         (menuOpened)="createMenu.updateOptions()"
         [matMenuTriggerFor]="createMenu.dropdown ? createMenu.dropdown.menu : null"
         [attr.aria-label]="'WORKSPACE.ADD' | translate"
+        data-test="top-bar-add-button"
       >
         <i esIcon="add"></i> <span>{{ 'WORKSPACE.ADD' | translate }}</span>
       </button>

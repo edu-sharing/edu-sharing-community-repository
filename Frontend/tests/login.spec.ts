@@ -1,4 +1,5 @@
 import { test } from '@playwright/test';
+import { defaultLogin } from './constants';
 import { GeneralPage } from './general.page';
 import { LoginPage } from './login.page';
 import { WorkspacePage } from './workspace.page';
@@ -14,13 +15,13 @@ test('should not have any warnings or errors', async ({ page }) => {
 test('should go to workspace after login', async ({ page }) => {
     await page.goto(LoginPage.url);
     await Promise.all([
-        new LoginPage(page).login('admin', 'admin'),
+        new LoginPage(page).login(defaultLogin),
         page.waitForNavigation({ url: WorkspacePage.url }),
     ]);
 });
 
 test('should show workspace scope after login', async ({ page }) => {
     await page.goto(LoginPage.url);
-    await new LoginPage(page).login('admin', 'admin');
+    await new LoginPage(page).login(defaultLogin);
     await new WorkspacePage(page).expectScopeButton();
 });

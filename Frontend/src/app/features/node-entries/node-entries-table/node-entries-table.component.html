@@ -103,7 +103,12 @@
         column | appListItemLabel
       }}</mat-header-cell>
     </ng-container>
-    <mat-cell *matCellDef="let node" #cell [class.mat-column-primary]="first">
+    <mat-cell
+      *matCellDef="let node"
+      #cell
+      [class.mat-column-primary]="first"
+      attr.data-test="table-cell-{{ column.name }}"
+    >
       <ng-container
         *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
       >

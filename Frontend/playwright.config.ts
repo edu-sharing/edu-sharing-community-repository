@@ -46,6 +46,8 @@ const config: PlaywrightTestConfig = {
 
         /* Collect trace when the failed test. See https://playwright.dev/docs/trace-viewer */
         trace: 'retain-on-failure',
+
+        // headless: false,
     },
 
     /* Configure projects for major browsers */
@@ -54,6 +56,9 @@ const config: PlaywrightTestConfig = {
             name: 'chromium',
             use: {
                 ...devices['Desktop Chrome'],
+                // launchOptions: {
+                //     args: ['--ozone-platform-hint=auto']
+                // }
             },
         },
 
