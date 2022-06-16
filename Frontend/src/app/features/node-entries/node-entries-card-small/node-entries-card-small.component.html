@@ -28,7 +28,7 @@
 <ng-template #image let-playAnimation="playAnimation">
   <div
     class="card-image-area"
-    (esDistinctClick)="
+    (click)="
       entriesService.clickItem.emit({
         element: node,
         source: ClickSource.Preview
@@ -51,7 +51,7 @@
 <ng-template #meta>
   <div
     class="card-meta"
-    (esDistinctClick)="
+    (click)="
       entriesService.clickItem.emit({
         element: node,
         source: ClickSource.Metadata
