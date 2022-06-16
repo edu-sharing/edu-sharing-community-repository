@@ -2,7 +2,7 @@ import { test } from '@playwright/test';
 import { CollectionsPage } from './collections.page';
 import { defaultLogin } from './constants';
 import { GeneralPage } from './general.page';
-import { getStorageStatePath } from './util';
+import { generateTestThingName, getStorageStatePath } from './util';
 
 test.use({ storageState: getStorageStatePath(defaultLogin) });
 
@@ -17,4 +17,12 @@ test('should not have any warnings or errors', async ({ page }) => {
         new GeneralPage(page).checkConsoleMessages(),
         page.goto(CollectionsPage.url),
     ]);
+});
+
+test('should create a collection', async ({ page }) => {
+    const collectionName = generateTestThingName('collection');
+    await page.goto(CollectionsPage.url);
+    const collectionsPage = new CollectionsPage(page);
+    await collectionsPage.addPrivateCollection(collectionName);
+    await collectionsPage.expectToBeOnCollectionPage(collectionName);
 });
