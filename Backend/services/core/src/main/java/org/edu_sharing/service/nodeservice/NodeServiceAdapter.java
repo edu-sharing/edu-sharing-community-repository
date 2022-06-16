@@ -5,12 +5,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
-import org.alfresco.service.cmr.repository.AssociationRef;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang3.NotImplementedException;
 import org.edu_sharing.repository.client.rpc.User;
@@ -81,7 +79,7 @@ public class NodeServiceAdapter implements NodeService {
         return null;
     }
 
-    @Override
+	@Override
 	public void setOwner(String nodeId, String username) {
 	}
 
@@ -137,7 +135,12 @@ public class NodeServiceAdapter implements NodeService {
 	public String[] getAspects(String storeProtocol, String storeId, String nodeId) {
 		return null;
 	}
-	
+
+	@Override
+	public ContentReader getContentReader(String storeProtocol, String storeId, String nodeId, String version, String contentProp) {
+		return null;
+	}
+
 	@Override
 	public void moveNode(String newParentId, String childAssocType, String nodeId) {
 	}
@@ -291,6 +294,11 @@ public class NodeServiceAdapter implements NodeService {
 	public boolean exists(String protocol, String store, String nodeId) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public String getPreviewUrl(String storeProtocol, String storeId, String nodeId, String version) {
+		return null;
 	}
 
 	@Override

@@ -61,15 +61,15 @@ import org.springframework.context.ApplicationContext;
 
 public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.NodeService {
 
-	private String appId;
-	private ContentService contentService;
-	private DictionaryService dictionaryService;
-	private final BehaviourFilter policyBehaviourFilter;
-	String repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
-	private ServiceRegistry serviceRegistry = null;
-	private NodeService nodeService = null;
-	private NodeService nodeServiceAlfresco = null;
-	private VersionService versionService;
+	protected String appId;
+	protected ContentService contentService;
+	protected DictionaryService dictionaryService;
+	protected final BehaviourFilter policyBehaviourFilter;
+	protected String repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
+	protected ServiceRegistry serviceRegistry = null;
+	protected NodeService nodeService = null;
+	protected NodeService nodeServiceAlfresco = null;
+	protected VersionService versionService;
 
 	Logger logger = Logger.getLogger(NodeServiceImpl.class);
 
@@ -216,7 +216,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public String getCompanyHome(){
 		return repositoryHelper.getCompanyHome().getId();
 	}
-	HashMap<String,Object> getToSafeProps(HashMap<String, String[]> props, String nodeType, String[] aspects, String parentId,String templateName) throws Throwable{
+
+	private HashMap<String,Object> getToSafeProps(HashMap<String, String[]> props, String nodeType, String[] aspects, String parentId,String templateName) throws Throwable{
 		String[] metadataSetIdArr = props.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
 
 		String metadataSetId = (metadataSetIdArr != null && metadataSetIdArr.length > 0) ? metadataSetIdArr[0] : null;
@@ -1206,7 +1207,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		return nodes.stream().map(NodeRef::getId).collect(Collectors.toList());
 	}
 
-	private String getPreviewUrl(String storeProtocol, String storeId, String nodeId, String version) {
+	@Override
+	public String getPreviewUrl(String storeProtocol, String storeId, String nodeId, String version) {
 		String previewURL = URLTool.getBaseUrl(true);
 		previewURL += "/preview?nodeId="+nodeId+"&storeProtocol="+storeProtocol+"&storeId="+storeId+"&dontcache="+System.currentTimeMillis();
 		if(version!=null){
@@ -1258,7 +1260,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				enable);
 
 	}
-	private ContentReader getContentReader(String storeProtocol, String storeId, String nodeId,String version,String contentProp){
+	@Override
+	public ContentReader getContentReader(String storeProtocol, String storeId, String nodeId, String version, String contentProp){
 		NodeRef nodeRef=new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);
 		if(version==null) {
 			ContentReader cr = contentService.getReader(nodeRef, QName.createQName(contentProp));
