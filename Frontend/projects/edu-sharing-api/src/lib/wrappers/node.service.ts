@@ -6,7 +6,7 @@ import { HOME_REPOSITORY } from '../constants';
 import { Node, NodeEntries } from '../models';
 
 export class NodeConstants {
-    public static SPACES_STORE_REF = "workspace://SpacesStore/";
+    public static SPACES_STORE_REF = 'workspace://SpacesStore/';
 }
 export class NodeTools {
     static createSpacesStoreRef(id: string) {
@@ -17,7 +17,7 @@ export class NodeTools {
     providedIn: 'root',
 })
 export class NodeService {
-    constructor(private nodeV1: NodeV1Service, private searchV1: SearchV1Service) { }
+    constructor(private nodeV1: NodeV1Service, private searchV1: SearchV1Service) {}
 
     getNode(repository: string, id: string): Observable<Node> {
         return this.nodeV1
@@ -30,28 +30,22 @@ export class NodeService {
     }
     /**
      * return the forked childs (variants) of this node
-     * @returns 
+     * @returns
      */
-    getForkedChilds(id: string,
-        { repository = HOME_REPOSITORY } = {},
-    ) {
-        return this.searchV1
-            .searchByProperty({
-                repository,
-                comparator: ['='],
-                contentType: 'FILES',
-                property: ['ccm:forked_origin'],
-                value: [NodeTools.createSpacesStoreRef(id)]
-            });
-    }
-    getPublishedCopies(id: string,
-        { repository = HOME_REPOSITORY } = {},
-    ) {
-        return this.nodeV1
-        .getPublishedCopies({
+    getForkedChilds(id: string, { repository = HOME_REPOSITORY } = {}) {
+        return this.searchV1.searchByProperty({
             repository,
-                node: id,
-            });
+            comparator: ['='],
+            contentType: 'FILES',
+            property: ['ccm:forked_origin'],
+            value: [NodeTools.createSpacesStoreRef(id)],
+        });
+    }
+    getPublishedCopies(id: string, { repository = HOME_REPOSITORY } = {}) {
+        return this.nodeV1.getPublishedCopies({
+            repository,
+            node: id,
+        });
     }
 
     /**

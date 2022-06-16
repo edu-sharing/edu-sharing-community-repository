@@ -19,9 +19,7 @@ import { LicenseSourceComponent } from './license/license-source/license-source.
 import { MapLinkComponent } from './map-link/map-link.component';
 import { SignupGroupComponent } from './signup-group/signup-group.component';
 import { NodeSearchSelectorComponent } from './node-search-selector/node-search-selector.component';
-import {
-    NodeRelationManagerComponent
-} from './node-relation-manager/node-relation-manager.component';
+import { NodeRelationManagerComponent } from './node-relation-manager/node-relation-manager.component';
 
 export const DECLARATIONS_MANAGEMENT_DIALOGS = [
     WorkspaceLicenseComponent,

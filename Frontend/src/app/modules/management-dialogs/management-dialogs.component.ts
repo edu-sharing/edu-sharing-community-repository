@@ -512,7 +512,7 @@ export class WorkspaceManagementDialogsComponent {
         this.createMetadata = null;
         this.onCloseMetadata.emit(nodes);
         if (refresh) {
-        console.log('_nodeFromUpload', this._nodeFromUpload);
+            console.log('_nodeFromUpload', this._nodeFromUpload);
             if (this._nodeFromUpload) {
                 this.onUploadFilesProcessed.emit(nodes);
             }
@@ -767,7 +767,7 @@ export class WorkspaceManagementDialogsComponent {
     closeRelations(changed: boolean) {
         this.nodeRelations = null;
         this.nodeRelationsChange.emit(null);
-        if(changed) {
+        if (changed) {
             this.onRefresh.emit();
         }
     }

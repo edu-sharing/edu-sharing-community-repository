@@ -234,7 +234,7 @@ export class MdsEditorWidgetChipsComponent
     }
 
     add(value: DisplayValue): void {
-        if(this.widget.definition.type === MdsWidgetType.SingleValueSuggestBadges) {
+        if (this.widget.definition.type === MdsWidgetType.SingleValueSuggestBadges) {
             this.chipsControl.setValue([]);
         }
         if (!this.chipsControl.value.some((v: DisplayValue) => v.key === value.key)) {

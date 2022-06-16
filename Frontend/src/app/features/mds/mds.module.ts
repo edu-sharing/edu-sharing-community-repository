@@ -44,7 +44,7 @@ import { MdsEditorWidgetVersionComponent } from './mds-editor/widgets/mds-editor
 import { MdsEditorWidgetTinyMCE } from './mds-editor/widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-tinymce.component';
 import { MdsViewerComponent } from './mds-viewer/mds-viewer.component';
 import { MdsWidgetComponent } from './mds-viewer/widget/mds-widget.component';
-import {MatFormFieldModule} from "@angular/material/form-field";
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 @NgModule({
     declarations: [

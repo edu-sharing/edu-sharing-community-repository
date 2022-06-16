@@ -171,7 +171,7 @@
         "VERSION_COMMENT": "Versionskommentar",
         "VERSION_NUMBER": "Versionsnummer",
         "VERSION_DATE": "Zeitpunkt der Veröffentlichung",
-                "VERSION_DATE_ABSOLUTE": "Veröffentlicht am",
+        "VERSION_DATE_ABSOLUTE": "Veröffentlicht am",
         "DOI_DISTINCT": "Neuen Handle erzeugen",
         "DOI_DISTINCT_INFO": "Ein neuer, eindeutiger Handle wird erzeugt. Zukünftige Versionen des Objektes haben eigenständige Identifikatoren. Beachten Sie, dass nach einmaliger Wahl dieser Option nachträglich keine aktualisierten Versionen des Elements unter dem gleichen Handle erfolgen können",
         "DOI_UPDATE": "Bestehenden Handle aktualisieren",

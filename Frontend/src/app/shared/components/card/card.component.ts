@@ -26,10 +26,10 @@ import { Helper } from '../../../core-module/rest/helper';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { CardService } from '../../../core-ui-module/card.service';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
-import {AuthorityNamePipe} from '../../pipes/authority-name.pipe';
-import {Observable, BehaviorSubject} from 'rxjs';
-import {UniversalNode} from '../../../common/definitions';
-import {KeyEvents} from '../../../core-module/ui/key-events';
+import { AuthorityNamePipe } from '../../pipes/authority-name.pipe';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { UniversalNode } from '../../../common/definitions';
+import { KeyEvents } from '../../../core-module/ui/key-events';
 
 /**
  * A common edu-sharing modal card
