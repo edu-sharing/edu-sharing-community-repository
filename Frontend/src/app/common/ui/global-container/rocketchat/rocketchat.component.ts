@@ -75,12 +75,10 @@ export class RocketchatComponent implements EventListener{
             setTimeout(() => this.initalize(), 100);
             return;
         }
-        this.connector.isLoggedIn(false).subscribe((login)=>{
-            if(login.remoteAuthentications && login.remoteAuthentications.ROCKETCHAT){
-                this._data=login.remoteAuthentications.ROCKETCHAT;
-                this.src=this.getFrameUrl();
-
-            }
-        });
+        const login = this.connector.getCurrentLogin();
+        if(login.remoteAuthentications && login.remoteAuthentications.ROCKETCHAT){
+            this._data=login.remoteAuthentications.ROCKETCHAT;
+            this.src=this.getFrameUrl();
+        }
     }
 }
