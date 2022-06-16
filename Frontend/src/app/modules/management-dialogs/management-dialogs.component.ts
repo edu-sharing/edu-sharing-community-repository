@@ -187,6 +187,8 @@ export class WorkspaceManagementDialogsComponent {
     @Input() nodeSidebar: Node;
     @Output() nodeSidebarChange = new EventEmitter<Node>();
     @Input() showUploadSelect = false;
+    @Input() nodeRelations: Node[];
+    @Output() nodeRelationsChange = new EventEmitter<Node[]>();
     @Output() showUploadSelectChange = new EventEmitter();
     @Output() onUploadSelectCanceled = new EventEmitter();
     @Output() onClose = new EventEmitter();
@@ -760,6 +762,14 @@ export class WorkspaceManagementDialogsComponent {
     closeSidebar() {
         this.nodeSidebar = null;
         this.nodeSidebarChange.emit(null);
+    }
+
+    closeRelations(changed: boolean) {
+        this.nodeRelations = null;
+        this.nodeRelationsChange.emit(null);
+        if(changed) {
+            this.onRefresh.emit();
+        }
     }
 
     displayNode(node: Node) {

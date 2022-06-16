@@ -1,6 +1,6 @@
 import { Component, ContentChild, Input, TemplateRef } from '@angular/core';
-import { UniversalNode } from '../../../../common/definitions';
-import { ListItem } from '../../../../core-module/core.module';
+import { UniversalNode } from '../../../common/definitions';
+import { ListItem } from '../../../core-module/ui/list-item';
 
 @Component({
     selector: 'es-node-row',

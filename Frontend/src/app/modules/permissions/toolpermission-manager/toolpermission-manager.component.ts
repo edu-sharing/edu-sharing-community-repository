@@ -53,6 +53,7 @@ export class ToolpermissionManagerComponent {
                 RestConstants.TOOLPERMISSION_LICENSE,
                 RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES,
                 RestConstants.TOOLPERMISSION_PUBLISH_COPY,
+                RestConstants.TOOLPERMISSION_MANAGE_RELATIONS,
                 RestConstants.TOOLPERMISSION_HANDLESERVICE,
                 RestConstants.TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS,
             ],
@@ -214,20 +215,20 @@ export class ToolpermissionManagerComponent {
         }
         if (
             this.allow[key] &&
-            this.permissions[key].effective != ToolpermissionManagerComponent.STATUS_DENIED
+            this.permissions[key]?.effective != ToolpermissionManagerComponent.STATUS_DENIED
         ) {
             return ToolpermissionManagerComponent.STATUS_ALLOWED;
         }
         if (
             !this.denyInit[key] &&
-            this.permissions[key].effective == ToolpermissionManagerComponent.STATUS_DENIED
+            this.permissions[key]?.effective == ToolpermissionManagerComponent.STATUS_DENIED
         ) {
             return ToolpermissionManagerComponent.STATUS_DENIED;
         }
         if (this.allow[key] != this.allowInit[key] || this.deny[key] != this.denyInit[key]) {
             return ToolpermissionManagerComponent.STATUS_UNKNOWN;
         }
-        return this.permissions[key].effective;
+        return this.permissions[key]?.effective;
     }
     isImplicit(key: string) {
         if (this._authority.authorityType == RestConstants.AUTHORITY_TYPE_EVERYONE) {

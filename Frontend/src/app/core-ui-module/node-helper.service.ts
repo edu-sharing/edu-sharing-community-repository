@@ -30,6 +30,7 @@ import { RestConnectorService } from '../core-module/rest/services/rest-connecto
 import { ListItem } from '../core-module/ui/list-item';
 import { RestNetworkService } from '../core-module/rest/services/rest-network.service';
 import { NodePersonNamePipe } from '../shared/pipes/node-person-name.pipe';
+import {UniversalNode} from '../common/definitions';
 import { FormBuilder } from '@angular/forms';
 import { SessionStorageService } from '../core-module/rest/services/session-storage.service';
 import { map } from 'rxjs/operators';
@@ -747,7 +748,7 @@ export class NodeHelperService {
         return node.hasOwnProperty('originalId') ? (node as any).originalId != null : true;
     }
 
-    isNodeCollection(node: Node | any) {
+    isNodeCollection(node: UniversalNode | any) {
         return (
             (node.aspects && node.aspects.indexOf(RestConstants.CCM_ASPECT_COLLECTION) !== -1) ||
             node.collection
@@ -810,7 +811,7 @@ export class NodeHelperService {
         return !!o.properties?.[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]?.[0];
     }
 
-    getNodeLink(mode: 'routerLink' | 'queryParams', node: Node) {
+    getNodeLink(mode: 'routerLink' | 'queryParams', node: UniversalNode) {
         if (!node?.ref) {
             return null;
         }
@@ -859,7 +860,7 @@ export class NodeHelperService {
     /**
      * Returns the full URL to a node, including the server origin and base href.
      */
-    getNodeUrl(node: Node): string {
+    getNodeUrl(node: UniversalNode): string {
         const link = this.getNodeLink('queryParams', node);
         if (link) {
             const urlTree = this.router.createUrlTree([this.getNodeLink('routerLink', node)], {

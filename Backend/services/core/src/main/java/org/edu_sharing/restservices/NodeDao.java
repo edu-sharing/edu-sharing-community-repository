@@ -136,6 +136,56 @@ public class NodeDao {
 		}
 		return nodeDao;
 	}
+
+	enum ExistingMode {
+		// Fallback if the original node does not exist
+		IfNotExists,
+		// Fallback if the user has no read permissions on original node
+		IfNoReadPermissions
+	}
+	/**
+	 * find any "existing" node
+	 * this means that if an original node is delivered, you might get a published copy if the original is deleted
+	 * @param repoDao the repo, this method will only return published copies for the home repo, not for remotes!
+	 * @param nodeId
+	 * @return
+	 * @throws DAOException
+	 */
+	public static NodeDao getAnyExistingNode(RepositoryDao repoDao, List<ExistingMode> mode, String nodeId)
+			throws DAOException {
+		if(repoDao.isHomeRepo()) {
+			boolean fetchCopy = false;
+			boolean exists = NodeServiceHelper.exists(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
+			boolean permission = PermissionServiceHelper.hasPermission(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), CCConstants.PERMISSION_READ);
+			if(mode.contains(ExistingMode.IfNotExists) && !exists){
+				fetchCopy = true;
+			}else if(exists && mode.contains(ExistingMode.IfNoReadPermissions) && !permission) {
+				fetchCopy = true;
+			}
+			if(fetchCopy){
+				// try to fetch a published copy
+				SortDefinition sort = new SortDefinition();
+				sort.addSortDefinitionEntry(new SortDefinition.SortDefinitionEntry(
+						CCConstants.getValidLocalName(CCConstants.LOM_PROP_LIFECYCLE_VERSION), false
+				));
+				String finalNodeId = nodeId;
+				List<org.alfresco.service.cmr.repository.NodeRef> list = AuthenticationUtil.runAsSystem(() -> NodeServiceFactory.getLocalService().getPublishedCopies(finalNodeId).stream().map(
+						id -> new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, id)
+				).collect(Collectors.toList())
+				);
+				if(!list.isEmpty()) {
+					list = NodeServiceFactory.getLocalService().sortNodeRefList(list,
+							null,
+							sort
+					);
+					nodeId = list.get(0).getId();
+				} else {
+					throw new DAOMissingException(new IllegalArgumentException("No remaining node found for id " + nodeId));
+				}
+			}
+		}
+		return getNode(repoDao, nodeId, Filter.createShowAllFilter());
+	}
 	public static NodeDao getNode(RepositoryDao repoDao, String nodeId)
 			throws DAOException {
 		return getNode(repoDao, nodeId, Filter.createShowAllFilter());

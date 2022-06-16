@@ -509,6 +509,10 @@ public class NodeServiceHelper {
 		NodeServiceHelper.setProperty(targetNode, property, NodeServiceHelper.getProperty(sourceNode, property));
 	}
 
+	public static boolean exists(NodeRef node) {
+		return NodeServiceFactory.getLocalService().exists(node.getStoreRef().getProtocol(), node.getStoreRef().getIdentifier(), node.getId());
+	}
+
 	/**
 	 * add virtual properties
 	 * @return
@@ -521,11 +525,6 @@ public class NodeServiceHelper {
 		);
 		return properties;
 	}
-
-    public static boolean exists(NodeRef ref) {
-		return NodeServiceFactory.getLocalService().exists(ref.getStoreRef().getProtocol(),
-				ref.getStoreRef().getIdentifier(), ref.getId());
-    }
 
 	public static void renameNode(NodeRef node, String newName) {
 		NodeServiceHelper.setProperty(node, CCConstants.CM_NAME, newName);

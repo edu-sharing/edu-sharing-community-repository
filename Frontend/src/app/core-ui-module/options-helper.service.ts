@@ -16,7 +16,9 @@ import {
 } from './option-item';
 import { UIHelper } from './ui-helper';
 import { UIService } from '../core-module/rest/services/ui.service';
-import { WorkspaceManagementDialogsComponent } from '../modules/management-dialogs/management-dialogs.component';
+import {
+    WorkspaceManagementDialogsComponent
+} from '../modules/management-dialogs/management-dialogs.component';
 import {
     Connector,
     Filetype,
@@ -1201,6 +1203,19 @@ export class OptionsHelperService implements OnDestroy {
         embedNode.group = DefaultGroups.View;
         embedNode.priority = 80;
 
+        const relationNode = new OptionItem('OPTIONS.RELATIONS', 'swap_horiz', async (node) => {
+            management.nodeRelations = await this.getObjectsAsync(node, true);
+        });
+        relationNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
+        relationNode.constrains = [Constrain.NoBulk, Constrain.User];
+        relationNode.scopes = [Scope.Render];
+        relationNode.toolpermissions = [RestConstants.TOOLPERMISSION_MANAGE_RELATIONS];
+        relationNode.permissions = [RestConstants.PERMISSION_WRITE];
+        relationNode.permissionsRightMode = NodesRightMode.Original;
+        relationNode.group = DefaultGroups.Edit;
+        relationNode.priority = 70;
+
+
         /**
          * if (this.isAllowedToEditCollection()) {
             this.optionsCollection.push(
@@ -1408,6 +1423,7 @@ export class OptionsHelperService implements OnDestroy {
         options.push(downloadNode);
         options.push(downloadMetadataNode);
         options.push(qrCodeNode);
+        options.push(relationNode);
         options.push(embedNode);
         options.push(linkMap);
         options.push(cutNodes);
@@ -1517,12 +1533,14 @@ export class OptionsHelperService implements OnDestroy {
                     if (n.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1) {
                         return this.nodeService.getNodeMetadata(
                             n.properties[RestConstants.CCM_PROP_IO_ORIGINAL][0],
-                        );
+                            [RestConstants.ALL]
+                        )
                     } else if (n.type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL) {
                         return this.nodeService.getNodeMetadata(
                             RestHelper.removeSpacesStoreRef(
                                 n.properties[RestConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET][0],
                             ),
+                            [RestConstants.ALL]
                         );
                     } else {
                         return of({

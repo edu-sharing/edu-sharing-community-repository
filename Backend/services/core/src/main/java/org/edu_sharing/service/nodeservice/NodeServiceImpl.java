@@ -106,7 +106,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			logger.error(e.getMessage(), e);
 			throw new RuntimeException(e.getMessage());
 		}
-		
+
 	}
 	public void updateNode(String nodeId, HashMap<String, String[]> props) throws Throwable{
 			String nodeType = getType(nodeId);
@@ -156,7 +156,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 		return result;
 	}
-	
+
 	private void resetVersion(NodeRef nodeRef) throws Throwable {
 		if(CCConstants.CCM_TYPE_IO.equals(getType(nodeRef.getId()))) {
 			HashMap<String, Object> props = new HashMap<String,Object>();
@@ -164,12 +164,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			updateNodeNative(nodeRef.getId(), props);
 		}
 	}
-	
+
 	public String createNode(String parentId, String nodeType, HashMap<String, String[]> props) throws Throwable{
 		HashMap<String,Object> toSafeProps = getToSafeProps(props,nodeType,null,parentId,null);
 		return createNodeBasic(parentId, nodeType, toSafeProps);
 	}
-	
+
 	@Override
 	public String createNode(String parentId, String nodeType, HashMap<String, String[]> props, String childAssociation)
 			throws Throwable {
@@ -218,9 +218,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 	HashMap<String,Object> getToSafeProps(HashMap<String, String[]> props, String nodeType, String[] aspects, String parentId,String templateName) throws Throwable{
 		String[] metadataSetIdArr = props.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
-		
+
 		String metadataSetId = (metadataSetIdArr != null && metadataSetIdArr.length > 0) ? metadataSetIdArr[0] : null;
-		
+
 		if(metadataSetId == null) {
 			Boolean forceMds = false;
 			try {
@@ -239,7 +239,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				props.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, new String[] {metadataSetId});
 			}
 		}
-		
+
 		MetadataSet mds = MetadataHelper.getMetadataset(getApplication(), metadataSetId);
 		HashMap<String,Object> toSafe = new HashMap<String,Object>();
 		for (MetadataWidget widget : (templateName==null ?
@@ -471,7 +471,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 		return resultProps;
 	}
-	
+
 	public String formatData(String type, String key, Object value, String metadataSetId) {
 		String returnValue = null;
 		if (key != null && value != null) {
@@ -489,7 +489,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			} else {
 				returnValue = getValue(type, key, value, metadataSetId);
 			}
-			
+
 			// like de_DE=null in gui
 			if (returnValue == null && value != null && !(value instanceof MLText || value instanceof List)) {
 				returnValue = value.toString();
@@ -497,7 +497,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 		return returnValue;
 	}
-	
+
 	protected String getValue(String type, String prop, Object _value, String metadataSetId) {
 
 		//MetadataSetModelProperty mdsmProp = getMetadataSetModelProperty(metadataSetId, type, prop);
@@ -577,7 +577,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			return _mlText.toString();
 		}
 	}
-	
+
 	@Override
 	public void updateNodeNative(String nodeId, HashMap<String, ?> _props) {
 		this.updateNodeNative(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId, _props);
@@ -672,7 +672,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 		return result;
 	}
-	
+
 	private MLText getMLText(HashMap i18nMap) {
 		MLText mlText = new MLText();
 		for (Object obj : i18nMap.keySet()) {
@@ -681,31 +681,31 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 		return mlText;
 	}
-	
+
 	@Override
 	public String getType(String storeProtocol,String storeId,String nodeId) {
 		return nodeService.getType(new NodeRef(new StoreRef(storeProtocol,storeId), nodeId)).toString();
 	}
-	
+
 	public ChildAssociationRef getParent(NodeRef nodeRef){
 		return nodeService.getPrimaryParent(nodeRef);
 	}
-	
+
 	public boolean isSubOf(String type, String parentType) throws Throwable {
 
 		boolean isSubOf = serviceRegistry.getDictionaryService().isSubClass(QName.createQName(type), QName.createQName(parentType));
 		return isSubOf;
 	}
-	
+
 	public void setOwner(String nodeId, String username) {
 		serviceRegistry.getOwnableService().setOwner(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), username);
 	}
-	
-	
+
+
 	/**
 	 * set's permission for one authority, leaves permissions already set for the authority
-	 * 
-	 * check ToolPermissions in the callers 
+	 *
+	 * check ToolPermissions in the callers
 	 */
 	public void setPermissions(String nodeId, String authority, String[] permissions, Boolean inheritPermission) throws Exception {
 
@@ -731,7 +731,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			return inbox.get(0).getChildRef().getId();
 		HashMap<String,Object> properties=new HashMap<>();
 		properties.put(CCConstants.CM_NAME,"Inbox");
-		properties.put(CCConstants.CCM_PROP_MAP_TYPE,CCConstants.CCM_VALUE_MAP_TYPE_USERINBOX);		
+		properties.put(CCConstants.CCM_PROP_MAP_TYPE,CCConstants.CCM_VALUE_MAP_TYPE_USERINBOX);
 		return createNodeBasic(userhome.getId(),CCConstants.CCM_TYPE_MAP,properties);
 	}
 	@Override
@@ -742,7 +742,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			return savedSearch.get(0).getChildRef().getId();
 		HashMap<String,Object> properties=new HashMap<>();
 		properties.put(CCConstants.CM_NAME,"SavedSearch");
-		properties.put(CCConstants.CCM_PROP_MAP_TYPE,CCConstants.CCM_VALUE_MAP_TYPE_USERSAVEDSEARCH);		
+		properties.put(CCConstants.CCM_PROP_MAP_TYPE,CCConstants.CCM_VALUE_MAP_TYPE_USERSAVEDSEARCH);
 		return createNodeBasic(userhome.getId(),CCConstants.CCM_TYPE_MAP,properties);
 	}
 
@@ -962,12 +962,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			RenderingTool.buildRenderingCache(nodeID);
 		}
 	}
-	
+
 	@Override
 	public void removeNode(String nodeID, String fromID){
 		this.removeNode(nodeID, fromID, true);
 	}
-	
+
 	@Override
 	public void removeNode(String nodeId, String parentId, boolean recycle) {
 		List<ChildAssociationRef> assocs = nodeService.getParentAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
@@ -1199,6 +1199,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 	@Override
 	public List<String> getPublishedCopies(String nodeId) {
+		nodeId = this.getOriginalNode(nodeId).getId();
 		Map<String, Object> filters = new HashMap<>();
 		filters.put(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
 		List<NodeRef> nodes = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO, filters);
@@ -1296,7 +1297,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public void addAspect(String nodeId, String aspect) {
 		apiClient.addAspect(nodeId, aspect);
 	}
-	
+
 	@Override
 	public void removeAspect(String nodeId, String aspect) {
 		apiClient.removeAspect(nodeId, aspect);
@@ -1309,16 +1310,16 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public String[] getAspects(String storeProtocol, String storeId, String nodeId){
 		return apiClient.getAspects(new NodeRef(new StoreRef(storeProtocol,storeId),nodeId));
 	}
-	
+
 	@Override
 	public void moveNode(String newParentId, String childAssocType, String nodeId) {
 		try{
 			apiClient.moveNode(newParentId, childAssocType, nodeId);
 		}catch(Exception e){
 			throw new RuntimeException(e);
-		}	
+		}
 	}
-	
+
 	@Override
 	public void revertVersion(String nodeId, String verLbl) throws Exception {
 		try{
@@ -1327,7 +1328,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	@Override
 	public HashMap<String, HashMap<String, Object>> getVersionHistory(String nodeId) throws Throwable {
 		return apiClient.getVersionHistory(nodeId);
@@ -1337,15 +1338,15 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public String importNode(String nodeId,String localParent) throws Throwable {
 		throw new Exception("Not supported for local repository");
 	}
-	
+
 	@Override
 	public User getOwner(String storeId, String storeProtocol, String nodeId){
 		return apiClient.getOwner(storeId, storeProtocol, nodeId);
 	}
-	
+
 	@Override
 	public void removeNode(String protocol, String store, String nodeId) {
-		apiClient.removeNode(new StoreRef(protocol, store), nodeId);		
+		apiClient.removeNode(new StoreRef(protocol, store), nodeId);
 	}
 	@Override
 	public boolean exists(String protocol, String store, String nodeId) {
@@ -1444,5 +1445,31 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	@Override
 	public Collection<NodeRef> getFrontpageNodes() throws Throwable {
 		return new NodeFrontpage().getNodesForCurrentUserAndConfig();
+	}
+
+
+	/**
+	 * maps to the original node id for:
+	 * collection refs
+	 * published copies
+	 * @param nodeId the source node to map
+	 * @return the mapped node ref
+	 */
+	@Override
+	public NodeRef getOriginalNode(String nodeId) {
+		if(!nodeService.exists(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId))) {
+			return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+		}
+		// Handle io references (i.e. collection refs)
+		// use the nodeServiceAlfresco since the nodeRef might be null if original was deleted
+		if(hasAspect(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
+			nodeId = (String) nodeServiceAlfresco.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL));
+		}
+		// handle copied nodes
+		NodeRef original = ((NodeRef)nodeServiceAlfresco.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), QName.createQName(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL)));
+		if(original != null) {
+			nodeId = original.getId();
+		}
+		return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
 	}
 }

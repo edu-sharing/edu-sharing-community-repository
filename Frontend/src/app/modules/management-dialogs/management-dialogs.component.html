@@ -28,7 +28,10 @@
   (onEditMetadata)="nodeMetadata = [$event]"
   (onClose)="closeSidebar()"
 ></es-workspace-metadata>
-
+<es-node-relation-manager *ngIf="nodeRelations"
+                       [nodes]="nodeRelations"
+                       (close)="closeRelations($event)"
+></es-node-relation-manager>
 <es-mds
   *ngIf="collectionWriteFeedback"
   customTitle="COLLECTIONS.FEEDBACK_TITLE"

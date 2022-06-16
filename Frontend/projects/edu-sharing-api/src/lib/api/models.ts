@@ -179,6 +179,8 @@ export { NodeRemote } from './models/node-remote';
 export { OrganizationEntries } from './models/organization-entries';
 export { RegisterExists } from './models/register-exists';
 export { RegisterInformation } from './models/register-information';
+export { NodeRelation } from './models/node-relation';
+export { RelationData } from './models/relation-data';
 export { RenderingDetailsEntry } from './models/rendering-details-entry';
 export { SearchResultNode } from './models/search-result-node';
 export { SearchParametersFacets } from './models/search-parameters-facets';

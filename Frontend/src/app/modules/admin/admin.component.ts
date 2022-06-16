@@ -60,9 +60,12 @@ import { AuthoritySearchMode } from '../../shared/components/authority-search-in
 import { PlatformLocation } from '@angular/common';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
-import {InteractionType, NodeEntriesDisplayType} from 'src/app/features/node-entries/entries-model';
-import {NodeDataSource} from "../../features/node-entries/node-data-source";
-import {WorkspaceExplorerComponent} from "../workspace/explorer/explorer.component";
+import {
+    InteractionType,
+    NodeEntriesDisplayType,
+} from 'src/app/features/node-entries/entries-model';
+import { NodeDataSource } from '../../features/node-entries/node-data-source';
+import { WorkspaceExplorerComponent } from '../workspace/explorer/explorer.component';
 
 type LuceneData = {
     mode: 'NODEREF' | 'SOLR' | 'ELASTIC';
@@ -86,8 +89,8 @@ type LuceneData = {
 export class AdminComponent implements OnInit, OnDestroy {
     readonly AuthoritySearchMode = AuthoritySearchMode;
     readonly SCOPES = Scope;
-  readonly InteractionType = InteractionType;
-  readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    readonly InteractionType = InteractionType;
+    readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
 
     constructor(
         private toast: Toast,
@@ -248,10 +251,8 @@ export class AdminComponent implements OnInit, OnDestroy {
     public xmlAppKeys: string[];
     public currentApp: string;
     currentAppXml: string;
-  public editableXmls=[
-    {name:'HOMEAPP',file:RestConstants.HOME_APPLICATION_XML},
-  ]
-  searchResponse = new NodeDataSource<Node>();
+    public editableXmls = [{ name: 'HOMEAPP', file: RestConstants.HOME_APPLICATION_XML }];
+    searchResponse = new NodeDataSource<Node>();
     searchColumns: ListItem[] = [];
     public selectedTemplate = '';
     public templates: string[];
@@ -303,7 +304,7 @@ export class AdminComponent implements OnInit, OnDestroy {
         }
     }
     public debugNode(node: Node) {
-    this.dialogs.openNodeInfoDialog({ node });
+        this.dialogs.openNodeInfoDialog({ node });
     }
     public getModeButton(mode = this.mode): any {
         return this.buttons[Helper.indexOfObjectArray(this.buttons, 'id', mode)];
@@ -314,12 +315,11 @@ export class AdminComponent implements OnInit, OnDestroy {
         this.node.getNodeMetadata(this.lucene.noderef, [RestConstants.ALL]).subscribe(
             (node) => {
                 this.globalProgress = false;
-            this.searchResponse.setData([node.node], {
-                        from: 0,
-                        count: 1,
-                        total: 1,
-                    },
-                };
+                this.searchResponse.setData([node.node], {
+                    from: 0,
+                    count: 1,
+                    total: 1,
+                });
             },
             (error) => {
                 this.globalProgress = false;
@@ -347,8 +347,9 @@ export class AdminComponent implements OnInit, OnDestroy {
                 .subscribe(
                     (data) => {
                         this.globalProgress = false;
-            this.searchResponse.setData(data.nodes, data.pagination);
-        }, (error: any) => {
+                        this.searchResponse.setData(data.nodes, data.pagination);
+                    },
+                    (error: any) => {
                         this.globalProgress = false;
                         this.toast.error(error);
                     },
@@ -357,8 +358,9 @@ export class AdminComponent implements OnInit, OnDestroy {
             this.admin.searchElastic(this.lucene.query).subscribe(
                 (data) => {
                     this.globalProgress = false;
-            this.searchResponse.setData(data.nodes, data.pagination);
-        }, (error: any) => {
+                    this.searchResponse.setData(data.nodes, data.pagination);
+                },
+                (error: any) => {
                     this.globalProgress = false;
                     this.toast.error(error);
                 },
@@ -1392,10 +1394,13 @@ export class AdminComponent implements OnInit, OnDestroy {
         this.globalProgress = false;
 
         this.searchColumns = WorkspaceExplorerComponent.getColumns(this.connector);
-        this.searchColumns.filter(s =>
-            [RestConstants.CM_NAME, RestConstants.NODE_ID, RestConstants.CM_CREATOR]
-                .includes(s.name)
-        ).forEach(s => s.visible = true);
+        this.searchColumns
+            .filter((s) =>
+                [RestConstants.CM_NAME, RestConstants.NODE_ID, RestConstants.CM_CREATOR].includes(
+                    s.name,
+                ),
+            )
+            .forEach((s) => (s.visible = true));
 
         this.route.queryParams.subscribe((data: any) => {
             if (data.mode) {

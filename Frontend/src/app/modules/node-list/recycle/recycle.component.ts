@@ -1,7 +1,7 @@
 import { Component, Input, ViewChild } from '@angular/core';
 import { ListItem, RestArchiveService } from '../../../core-module/core.module';
 import { RestConstants } from '../../../core-module/core.module';
-import { CustomOptions, OptionItem } from '../../../core-ui-module/option-item';
+import { CustomOptions, ElementType, OptionItem } from '../../../core-ui-module/option-item';
 import { RecycleRestoreComponent } from './restore/restore.component';
 import { TranslateService } from '@ngx-translate/core';
 import { Toast } from '../../../core-ui-module/toast';
@@ -57,6 +57,9 @@ export class RecycleMainComponent {
                 this.deleteSingle(node),
             ),
         );
+        this.options.addOptions.forEach((o) => {
+            o.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
+        });
     }
     public onSelection(data: Node[]) {
         this.selected = data;

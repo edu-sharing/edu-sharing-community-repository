@@ -1,13 +1,16 @@
-import { ComponentFactoryResolver, Injectable, ViewContainerRef } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { Node } from '../core-module/rest/data-object';
-import { RestConstants } from '../core-module/rest/rest-constants';
-import { RestUsageService } from '../core-module/rest/services/rest-usage.service';
-import { ListItem } from '../core-module/ui/list-item';
+import {ComponentFactoryResolver, Injectable, ViewContainerRef} from '@angular/core';
+import {Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
+import {Node} from '../core-module/rest/data-object';
+import {RestConstants} from '../core-module/rest/rest-constants';
+import {RestUsageService} from '../core-module/rest/services/rest-usage.service';
+import {ListItem} from '../core-module/ui/list-item';
 import { CommentsListComponent } from '../modules/management-dialogs/node-comments/comments-list/comments-list.component';
-import { SpinnerComponent } from '../shared/components/spinner/spinner.component';
-import { UIHelper } from './ui-helper';
+import {SpinnerComponent} from '../shared/components/spinner/spinner.component';
+import {UIHelper} from './ui-helper';
+import {
+    MdsNodeRelationsWidgetComponent
+} from '../common/ui/node-render/node-relations/node-relations-widget.component';
 import { replaceElementWithDiv } from '../features/mds/mds-editor/util/replace-element-with-div';
 import { MdsEditorWrapperComponent } from '../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { NodeEntriesDisplayType } from '../features/node-entries/entries-model';
@@ -45,15 +48,17 @@ export class RenderHelperService {
     }
 
     injectModuleInCollections(node: Node) {
-        let domContainer: Element;
         let domCollections: Element;
+        let parent: Element;
         try {
-            domContainer =
-                document.getElementsByClassName('node_collections_render')[0].parentElement;
-            domCollections = document.getElementsByTagName('collections')[0];
+            domCollections =
+                document.evaluate('//*[@id="edusharing_rendering_metadata"]//collections',
+                    document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue as Element
+            parent = domCollections.parentElement.parentElement;
         } catch (e) {
             return;
         }
+
         domCollections = replaceElementWithDiv(domCollections);
         UIHelper.injectAngularComponent(
             this.componentFactoryResolver,
@@ -65,7 +70,7 @@ export class RenderHelperService {
             (collections) => {
                 // @TODO: This does currently ignore the "hideIfEmpty" flag of the mds template
                 if (collections.length === 0) {
-                    domContainer.parentElement.removeChild(domContainer);
+                    parent.remove();
                     return;
                 }
                 const data = {
@@ -84,9 +89,32 @@ export class RenderHelperService {
                 entriesComponentRef.instance.ngOnChanges();
             },
             (error) => {
-                domContainer.parentElement.removeChild(domContainer);
+                parent.remove();
             },
         );
+    }
+    injectNodeRelationsWidget(node: Node) {
+        let domRelations;
+        try {
+            domRelations =
+                document.evaluate('//*[@id="edusharing_rendering_metadata"]//nodeRelations',
+                    document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue as Element
+        } catch (e) { }
+        if(domRelations) {
+            domRelations = replaceElementWithDiv(domRelations);
+            const component = UIHelper.injectAngularComponent(
+                this.componentFactoryResolver,
+                this.viewContainerRef,
+                MdsNodeRelationsWidgetComponent,
+                domRelations,
+                {
+                    node
+                },
+            );
+            component.instance.ngOnChanges();
+            return component;
+        }
+        return null;
     }
 
     injectMetadataEditor(node: Node, groupId = 'io_render') {

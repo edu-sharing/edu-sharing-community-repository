@@ -49,6 +49,13 @@ import { MatSortModule } from '@angular/material/sort';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { SharedModule } from '../shared/shared.module';
 import { ListItemsModule } from '../features/list-items/list-items.module';
+import {
+    MdsNodeRelationsWidgetComponent
+} from "../common/ui/node-render/node-relations/node-relations-widget.component";
+import {AppModule} from "../app.module";
+import {
+    NodeRowComponent
+} from "./components/node-row/node-row.component";
 
 @NgModule({
     declarations: [
@@ -59,6 +66,7 @@ import { ListItemsModule } from '../features/list-items/list-items.module';
         CustomNodeListWrapperComponent,
         VideoControlsComponent,
         InputPasswordComponent,
+        MdsNodeRelationsWidgetComponent,
         ToastMessageComponent,
         KeysPipe,
         PermissionNamePipe,
@@ -70,6 +78,7 @@ import { ListItemsModule } from '../features/list-items/list-items.module';
         DistinctClickDirective,
         DurationPipe,
         TitleDirective,
+        NodeRowComponent,
     ],
     imports: [
         SharedModule,
@@ -114,6 +123,7 @@ import { ListItemsModule } from '../features/list-items/list-items.module';
         ListOptionItemComponent,
         InputPasswordComponent,
         VideoControlsComponent,
+        NodeRowComponent,
         ImageConfigDirective,
         UserTileComponent,
         CollectionChooserComponent,

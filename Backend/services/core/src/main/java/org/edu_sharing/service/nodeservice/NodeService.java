@@ -188,4 +188,13 @@ public interface NodeService {
 	 * @return
 	 */
 	List<String> getPublishedCopies(String nodeId);
+
+
+	/**
+	 * Returns the original NodeRef of the given node id
+	 * This is used to return the original node of a linked node
+	 * @param nodeId
+	 * @return
+	 */
+    NodeRef getOriginalNode(String nodeId);
 }

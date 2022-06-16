@@ -672,6 +672,14 @@
 				]]></html>
 		</template>
 		<template>
+			<id>node_relations_render</id>
+			<caption>dialog_upload_tab_relations</caption>
+			<hideIfEmpty>true</hideIfEmpty>
+			<html><![CDATA[
+					<nodeRelations>
+				]]></html>
+		</template>
+		<template>
 			<id>node_comments_render</id>
 			<caption>dialog_upload_tab_comments</caption>
 			<html><![CDATA[
@@ -731,6 +739,11 @@
 		</template>
 		<template>
 			<id>mediacenter_filter</id>
+			<html><![CDATA[
+				]]></html>
+		</template>
+		<template>
+			<id>search_relation_node</id>
 			<html><![CDATA[
 				]]></html>
 		</template>
@@ -811,6 +824,7 @@
 				<view>node_general_render</view>
 				<view>node_contributor_render</view>
 				<view>node_collections_render</view>
+				<view>node_relations_render</view>
 				<view>node_comments_render</view>
 			</views>
 		</group>
@@ -833,6 +847,13 @@
 			<rendering>angular</rendering>
 			<views>
 				<view>node_map</view>
+			</views>
+		</group>
+		<group>
+			<id>search_relation_node</id>
+			<rendering>angular</rendering>
+			<views>
+				<view>search_relation_node</view>
 			</views>
 		</group>
 		<group>
@@ -887,6 +908,13 @@
 			<rendering>angular</rendering>
 			<views>
 				<view>mediacenter_filter</view>
+			</views>
+		</group>
+		<group>
+			<id>search_relation_node</id>
+			<rendering>angular</rendering>
+			<views>
+				<view>search_relation_node</view>
 			</views>
 		</group>
 	</groups>
@@ -955,6 +983,14 @@
 			<columns>
 				<column>displayName</column>
 				<column>groupType</column>
+			</columns>
+		</list>
+		<list>
+			<id>relationNodes</id>
+			<columns>
+				<column>cclom:title</column>
+				<column>cm:creator</column>
+				<column>cm:created</column>
 			</columns>
 		</list>
 	</lists>
@@ -1064,6 +1100,15 @@
 				<statement>(@cm\:name:"*${value}*" OR @cclom\:title:"*${value}*")</statement>
 			</property>
 		</query>
+		<query join="AND" id="search_relation_query" applyBasequery="true">
+			<basequery>TYPE:"ccm:io"</basequery>
+			<property name="ngsearchword">
+				<statement>(@sys\:node-uuid:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*")</statement>
+			</property>
+			<property name="sourceNode">
+				<statement>TYPE:"ccm:io" AND NOT @sys\:node-uuid:"${value}" AND NOT @ccm\:published_original:"${value}"</statement>
+			</property>
+		</query>
 		<query join="AND"  id="tools">
 			<basequery>ASPECT:"{http://www.campuscontent.de/model/1.0}tool_definition"</basequery>
 			<property name="toolname">
@@ -1088,6 +1133,23 @@
 				<statement>PATH:"${value}//*"</statement>
 				<preprocessor>node_path</preprocessor>
 				<mandatory>false</mandatory>
+			</property>
+		</query>
+		<query join="AND" id="search_relation_query">
+			<basequery>TYPE:"ccm:io" AND NOT ASPECT:"ccm:collection_io_reference"</basequery>
+			<property name="ngsearchword">
+				<statement>(@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*")</statement>
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+			</property>
+			<property name="sourceNode">
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+				<statement>TYPE:"ccm:io" AND NOT @sys\:node-uuid:"${value}"</statement>
+			</property>
+			<property name="ccm:taxonid">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
 			</property>
 		</query>
 	</queries>
