@@ -448,6 +448,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 mdsWidgetComponent.finishEdit(injected.instance);
             })
         });
+        return injected;
     }
 
     isInHiddenState() {

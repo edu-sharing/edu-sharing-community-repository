@@ -19,6 +19,8 @@ import {NodeHelperService} from '../../../../core-ui-module/node-helper.service'
 import {RestHelper} from '../../../../core-module/rest/rest-helper';
 import {RestConstants} from '../../../../core-module/rest/rest-constants';
 import { MdsWidgetType } from '../../types/types';
+import {UIHelper} from "../../../../core-ui-module/ui-helper";
+import {UIService} from "../../../../core-module/rest/services/ui.service";
 
 @Component({
     selector: 'es-mds-widget',
@@ -33,6 +35,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
         MdsWidgetType.Textarea,
         MdsWidgetType.Singleoption,
         MdsWidgetType.SingleValueTree,
+        MdsWidgetType.SingleValueSuggestBadges,
         MdsWidgetType.MultiValueBadges,
         MdsWidgetType.MultiValueFixedBadges,
         MdsWidgetType.MultiValueSuggestBadges,
@@ -56,6 +59,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
     constructor(
         mdsEditorInstance: MdsEditorInstanceService,
         translate: TranslateService,
+        private ui: UIService,
         private viewInstance: ViewInstanceService,
     ) {
         super(mdsEditorInstance, translate);
@@ -87,6 +91,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
                 return 'vcard';
             case 'multivalueFixedBadges':
             case 'multivalueSuggestBadges':
+            case 'singlevalueSuggestBadges':
             case 'multivalueBadges':
             case 'singlevalueTree':
             case 'multivalueTree':
@@ -216,5 +221,12 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
             nodes?.length === 1 && RestHelper.hasAccessPermission(nodes[0], RestConstants.ACCESS_WRITE) &&
             this.supportsInlineEditing()
         );
+    }
+
+    async focus() {
+        if (this.isEditable()) {
+            const result = await this.view.injectEditField(this, this.editWrapper.nativeElement.children[0]);
+            await this.ui.scrollSmoothElementToChild(result.htmlElement);
+        }
     }
 }
