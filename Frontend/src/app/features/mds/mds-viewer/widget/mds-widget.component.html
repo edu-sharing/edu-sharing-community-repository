@@ -6,6 +6,8 @@
   [wrapInFormField]="false"
   [wrapInGroup]="false"
   [valueType]="valueType"
+  matRipple
+  [matRippleDisabled]="true"
 >
   <div class="edit-wrapper">
     <div *ngIf="!isEmpty() || !widget.definition.hideIfEmpty" class="widget-wrapper">

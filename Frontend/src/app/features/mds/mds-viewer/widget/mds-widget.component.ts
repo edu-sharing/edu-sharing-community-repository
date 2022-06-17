@@ -21,6 +21,7 @@ import {RestConstants} from '../../../../core-module/rest/rest-constants';
 import { MdsWidgetType } from '../../types/types';
 import {UIHelper} from "../../../../core-ui-module/ui-helper";
 import {UIService} from "../../../../core-module/rest/services/ui.service";
+import {MatRipple} from "@angular/material/core";
 
 @Component({
     selector: 'es-mds-widget',
@@ -48,6 +49,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
     @Input() view: MdsEditorViewComponent;
 
     @ViewChild('editWrapper') editWrapper: ElementRef;
+    @ViewChild(MatRipple) matRipple: MatRipple;
 
     get headingLevel() {
         return this.viewInstance.headingLevel;
@@ -225,8 +227,12 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
 
     async focus() {
         if (this.isEditable()) {
-            const result = await this.view.injectEditField(this, this.editWrapper.nativeElement.children[0]);
-            await this.ui.scrollSmoothElementToChild(result.htmlElement);
+            this.matRipple.launch({
+
+            });
+            await this.ui.scrollSmoothElementToChild(this.editWrapper.nativeElement);
+            //const result = await this.view.injectEditField(this, this.editWrapper.nativeElement.children[0]);
+            //await this.ui.scrollSmoothElementToChild(result.htmlElement);
         }
     }
 }
