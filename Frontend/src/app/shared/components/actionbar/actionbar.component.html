@@ -34,6 +34,7 @@
     [attr.aria-label]="'OPTIONS.SHOW_ALL_OPTIONS' | translate"
     [matMenuTriggerFor]="dropdownRef.menu"
     *ngIf="canShowDropdown()"
+    data-test="more-actions-button"
   >
     <i esIcon="more_vert" [aria]="false"></i>
   </button>

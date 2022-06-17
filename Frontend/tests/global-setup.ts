@@ -8,10 +8,12 @@ async function saveLogin(
     baseURL: string,
     credentials: LoginCredentials,
 ): Promise<void> {
+    // Reuse existing session if not older than 10 minutes
     const storageStatePath = getStorageStatePath(credentials);
     if (await fileExistsAndIsNoOlderThan(storageStatePath, 600)) {
         return;
     }
+    // Login
     const page = await browser.newPage();
     await page.goto(baseURL);
     await page.locator('input[name="username"]').fill(credentials.username);
@@ -20,10 +22,19 @@ async function saveLogin(
         page.locator('input[type="password"]').press('Enter'),
         page.waitForNavigation(),
     ]);
+    // Disable tutorials
+    await page.evaluate(() => {
+        window.localStorage.setItem('TUTORIAL.SEARCH.TUTORIAL_HEADING', 'true');
+    });
+    // Save session to file
     const storageState = await page.context().storageState({ path: storageStatePath });
+    // (Re)set user preferences
     const context = await request.newContext({ baseURL, storageState });
     await context.put('./rest/iam/v1/people/-home-/-me-/preferences', {
-        data: { language: 'en' },
+        data: {
+            language: 'en',
+            accessibility_toastDuration: 1,
+        },
     });
 }
 
@@ -47,6 +58,10 @@ async function fileExistsAndIsNoOlderThan(path: string, seconds: number): Promis
             throw e;
         }
     }
+}
+
+function getOrigin(url: string): string {
+    return new URL(url).origin;
 }
 
 export default globalSetup;

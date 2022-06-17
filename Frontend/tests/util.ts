@@ -10,3 +10,7 @@ export function getStorageStatePath(loginCredentials: LoginCredentials): string 
 export function generateTestThingName(thing: string): string {
     return `Test ${thing} ${new Date().getTime()}`;
 }
+
+export function getBaseName(filename: string): string {
+    return filename.split('.')[0];
+}

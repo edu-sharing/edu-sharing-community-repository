@@ -152,6 +152,7 @@
         (click)="openMenu(node)"
         [matMenuTriggerFor]="dropdown.menu"
         [attr.aria-label]="'OPTIONS_FOR' | translate: { element: (node | nodeTitle) }"
+        data-test="card-options-button"
       >
         <i esIcon="more_vert"></i>
       </button>
