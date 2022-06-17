@@ -1,7 +1,7 @@
 import { InjectionToken } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
-import { Observable } from 'rxjs';
+import {Observable, of} from 'rxjs';
 import { map } from 'rxjs/operators';
 import { RestHelper } from '../../../core-module/core.module';
 import { DialogButton } from '../../../core-module/ui/dialog-button';
@@ -60,6 +60,9 @@ export function configForNodes(
     nodes: Node[],
     translate: TranslateService,
 ): Observable<Partial<CardDialogConfig>> {
+    if(nodes.length === 1) {
+        return of(configForNode(nodes[0]));
+    }
     return translate.get('CARD_SUBTITLE_MULTIPLE', { count: nodes.length }).pipe(
         map((subtitle) => ({
             avatar: null,
