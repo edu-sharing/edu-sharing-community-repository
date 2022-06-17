@@ -166,7 +166,7 @@ mat-button-toggle-group{
             opacity: 0.9;
         }
         &.mat-tab-disabled {
-            // Disabled styles are already reflected via label color, don't further reduce contrast. 
+            // Disabled styles are already reflected via label color, don't further reduce contrast.
             opacity: 1;
         }
         .tab-icon{
@@ -256,6 +256,11 @@ mat-button-toggle-group{
 .mat-form-field.mat-form-field-no-padding{
     .mat-form-field-wrapper {
         padding-bottom: 0;
+    }
+}
+.mat-form-field.mat-form-field-max-width{
+    .mat-form-field-wrapper {
+        width: 100%;
     }
 }
 // form border on hover
@@ -426,7 +431,7 @@ button{
     }
     &.mat-focus-indicator.mat-active::before {
         content: '';
-    } 
+    }
     &.mat-focus-indicator::before {
         top: 0;
         left: 0;
