@@ -416,8 +416,12 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
             title: 'COLLECTIONS.TITLE',
             currentScope: 'collections',
             searchEnabled: false,
-            onCreate: (nodes) => this.addNodesToCollection(nodes),
-        })
+            // onCreate: (nodes) => this.addNodesToCollection(nodes),
+        });
+        // @TODO: check if this is the ideal trigger event
+        this.mainNavService.getDialogs().onUploadFilesProcessed.subscribe(
+            (nodes) => this.addNodesToCollection(nodes)
+        );
         this.mainNavUpdateTrigger.subscribe(() => {
             this.mainNavService.patchMainNavConfig({
                 create: {
