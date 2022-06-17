@@ -1,4 +1,4 @@
-import {forkJoin as observableForkJoin, fromEvent, of, Subscription} from 'rxjs';
+import {forkJoin, forkJoin as observableForkJoin, fromEvent, of, Subscription} from 'rxjs';
 import {RestNetworkService} from '../core-module/rest/services/rest-network.service';
 import {RestConnectorsService} from '../core-module/rest/services/rest-connectors.service';
 import {RestConstants} from '../core-module/rest/rest-constants';
@@ -497,19 +497,22 @@ export class OptionsHelperService implements OnDestroy {
      }
         */
         const debugNode = new OptionItem('OPTIONS.DEBUG', 'build', async (object) => {
-            let node = this.getObjects(object)[0];
-            if (node.authorityName) {
+            let nodes = this.getObjects(object);
+            console.info(nodes);
+            if (nodes.some(n => n.authorityName)) {
                 try {
-                    node = (await this.nodeService.getNodeMetadata(
-                        node.ref?.id || node.properties?.[RestConstants.NODE_ID]?.[0],
-                        [RestConstants.ALL]
-                    ).toPromise()).node;
+                    nodes = (await forkJoin(
+                        nodes.map(n => this.nodeService.getNodeMetadata(
+                                n.ref?.id || n.properties?.[RestConstants.NODE_ID]?.[0],
+                                [RestConstants.ALL]
+                            )
+                    )).toPromise()).map(n => n.node);
                 } catch (e) {
-                    console.info(node);
+                    console.info(nodes);
                     console.warn(e);
                 }
             }
-            this.dialogs.openNodeInfoDialog({ node });
+            this.dialogs.openNodeInfoDialog({ nodes });
         });
         debugNode.elementType = [
             ElementType.Node,
@@ -523,7 +526,7 @@ export class OptionsHelperService implements OnDestroy {
             ElementType.MapRef
         ];
         debugNode.onlyDesktop = true;
-        debugNode.constrains = [Constrain.AdminOrDebug, Constrain.NoBulk];
+        debugNode.constrains = [Constrain.AdminOrDebug];
         debugNode.group = DefaultGroups.View;
         debugNode.priority = 10;
 
