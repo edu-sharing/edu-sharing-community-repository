@@ -75,11 +75,15 @@ export class AdminConfigComponent {
         this.adminService
             .getConfigFile(AdminConfigComponent.OVERRIDE_CONFIG_FILE, 'NODE')
             .subscribe((c) => (this.configs.nodeOverride = c));
-        this.setEditSupported(false);
-        this.adminService.getConfigMerged().subscribe((merged) => {
-            this.configs.parsed = JSON.stringify(merged, null, 2);
-            this.setEditSupported(merged?.security?.configuration?.inlineEditing);
-        });
+        this.adminService.getConfigMerged().subscribe(
+            (merged) => {
+                this.configs.parsed = JSON.stringify(merged, null, 2);
+                this.setEditSupported(merged?.security?.configuration?.inlineEditing);
+            },
+            (error) => {
+                this.setEditSupported(false);
+            },
+        );
     }
     setEditSupported(status: boolean) {
         this.editSupported = status;
