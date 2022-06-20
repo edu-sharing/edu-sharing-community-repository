@@ -161,8 +161,8 @@
     "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" darf angezeigt und durchsucht werden",
     "TOOLPERMISSION_CREATE_MAP_LINK": "Ordner anlegen, welche auf andere Ordner verweisen/verlinken",
     "TOOLPERMISSION_SIGNUP_GROUP": "Zu einer Organisation/Gruppe einschreiben (gilt nur für seperat dafür freigegebene Organisationen/Gruppen)",
-        "TOOLPERMISSION_COLLECTION_PROPOSAL": "Vorschlagen von Materialien für Sammlungen, für welche der Nutzer keine Schreibrechte hat",
-        "TOOLPERMISSION_MANAGE_RELATIONS": "Verwalten und erstellen von Beziehungen zwischen Elementen"
+    "TOOLPERMISSION_COLLECTION_PROPOSAL": "Vorschlagen von Materialien für Sammlungen, für welche der Nutzer keine Schreibrechte hat",
+    "TOOLPERMISSION_MANAGE_RELATIONS": "Verwalten und erstellen von Beziehungen zwischen Elementen"
   },
   "NO_WRITE_PERMISSIONS": "Keine Rechte für diesen Vorgang",
   "NODE_SEARCH": "Elemente suchen...",
@@ -656,8 +656,8 @@
     "LIST_SETTINGS": "Liste konfigurieren",
     "METADATA_SIDEBAR": "Materialinformationen",
     "ACCESSIBILITY": "Barrierefreiheit",
-        "LTI": "In LTI Plattform übernehmen",
-        "RELATIONS": "Beziehungen verwalten"
+    "LTI": "In LTI Plattform übernehmen",
+    "RELATIONS": "Beziehungen verwalten"
   },
   "LTI": {
     "REGISTERED": {
@@ -818,42 +818,42 @@
       "NO_PERSON_INVITED": "Keine Personen gewählt"
     }
   },
-    "NODE_SEARCH_SELECTOR": {
-      "MORE_FILTERS": "Erweiterte Suchfilter",
-      "NO_MATCHES": "Keine Elemente entsprechen der Suchanfrage",
-      "NO_PERMISSIONS": "Ihre Berechtigungen an diesem Element sind unzureichend"
-    },
-    "NODE_RELATIONS": {
-      "TITLE": "Beziehungen verwalten",
-        "CREATE_RELATION": "Neue Beziehung erstellen",
-        "RELATION_TYPE_LABEL": "Art der Beziehung",
-        "RELATION_SEARCH_LABEL": "Suchen nach Ziel-Element",
-        "EXISTING_RELATIONS": "Bestehende Beziehungen",
-        "NO_RELATIONS": "Für dieses Element existieren noch keine Beziehungen.",
-        "SWAP": "Umkehren",
-        "RESELECT": "Zurücksetzen",
-        "CREATE_CONFIRM": "Beziehung erstellen",
-        "NO_PERMISSIONS": "Sie können dieses Element aufgrund unzureichender Rechte nicht in Beziehung setzen",
-        "RELATION_CREATED": "Zeitpunkt",
-        "RELATION_CREATOR": "Ersteller",
-        "VARIANT_CREATED": "Zeitpunkt",
-        "VARIANT_CREATOR": "Ersteller",
-        "OPEN_NODE": "Element anzeigen",
-        "REMOVE_RELATION": "Beziehung entfernen",
-        "RESTORE_RELATION": "Beziehung wiederherstellen",
-        "CURRENT_VERSION": "Diese Version",
-        "RELATION_EXISTS": "Diese Beziehung existiert bereits und kann nicht erneut hinzugefügt werden",
-        "RELATION_COPY_HINT": "Es werden Beziehungen einer veröffentlichten Kopie verwaltet. Beachten Sie, dass diese Beziehungen für alle veröffentlichten Versionen als auch das Originalelement gelten.",
-        "RELATION_TYPE": {
-          "VERSIONS": "Versionen",
-          "FORKED_CHILDS": "Hat Varianten",
-          "isPartOf": "ist Teil von",
-          "isBasedOn": "basiert auf",
-          "references": "bezieht sich auf",
-          "hasPart": "besitzt Teil",
-          "isBasisFor": "ist Basis von"
-        }
-    },
+  "NODE_SEARCH_SELECTOR": {
+    "MORE_FILTERS": "Erweiterte Suchfilter",
+    "NO_MATCHES": "Keine Elemente entsprechen der Suchanfrage",
+    "NO_PERMISSIONS": "Ihre Berechtigungen an diesem Element sind unzureichend"
+  },
+  "NODE_RELATIONS": {
+    "TITLE": "Beziehungen verwalten",
+    "CREATE_RELATION": "Neue Beziehung erstellen",
+    "RELATION_TYPE_LABEL": "Art der Beziehung",
+    "RELATION_SEARCH_LABEL": "Suchen nach Ziel-Element",
+    "EXISTING_RELATIONS": "Bestehende Beziehungen",
+    "NO_RELATIONS": "Für dieses Element existieren noch keine Beziehungen.",
+    "SWAP": "Umkehren",
+    "RESELECT": "Zurücksetzen",
+    "CREATE_CONFIRM": "Beziehung erstellen",
+    "NO_PERMISSIONS": "Sie können dieses Element aufgrund unzureichender Rechte nicht in Beziehung setzen",
+    "RELATION_CREATED": "Zeitpunkt",
+    "RELATION_CREATOR": "Ersteller",
+    "VARIANT_CREATED": "Zeitpunkt",
+    "VARIANT_CREATOR": "Ersteller",
+    "OPEN_NODE": "Element anzeigen",
+    "REMOVE_RELATION": "Beziehung entfernen",
+    "RESTORE_RELATION": "Beziehung wiederherstellen",
+    "CURRENT_VERSION": "Diese Version",
+    "RELATION_EXISTS": "Diese Beziehung existiert bereits und kann nicht erneut hinzugefügt werden",
+    "RELATION_COPY_HINT": "Es werden Beziehungen einer veröffentlichten Kopie verwaltet. Beachten Sie, dass diese Beziehungen für alle veröffentlichten Versionen als auch das Originalelement gelten.",
+    "RELATION_TYPE": {
+      "VERSIONS": "Versionen",
+      "FORKED_CHILDS": "Hat Varianten",
+      "isPartOf": "ist Teil von",
+      "isBasedOn": "basiert auf",
+      "references": "bezieht sich auf",
+      "hasPart": "besitzt Teil",
+      "isBasisFor": "ist Basis von"
+    }
+  },
   "VCARD": {
     "Givenname": "Vorname",
     "Surname": "Nachname",

@@ -4,7 +4,7 @@ import {
     Component,
     EventEmitter,
     OnInit,
-    Output
+    Output,
 } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
@@ -37,9 +37,7 @@ export class MdsEditorWidgetFileUploadComponent implements OnInit, NativeWidgetC
 
     @Output() onSetLink = new EventEmitter<string>();
 
-    constructor(
-        private changeDetectorRef: ChangeDetectorRef
-    ) {}
+    constructor(private changeDetectorRef: ChangeDetectorRef) {}
 
     ngOnInit(): void {}
 

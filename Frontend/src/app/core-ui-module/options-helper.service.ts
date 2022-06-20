@@ -16,9 +16,7 @@ import {
 } from './option-item';
 import { UIHelper } from './ui-helper';
 import { UIService } from '../core-module/rest/services/ui.service';
-import {
-    WorkspaceManagementDialogsComponent
-} from '../modules/management-dialogs/management-dialogs.component';
+import { WorkspaceManagementDialogsComponent } from '../modules/management-dialogs/management-dialogs.component';
 import {
     Connector,
     Filetype,
@@ -1215,7 +1213,6 @@ export class OptionsHelperService implements OnDestroy {
         relationNode.group = DefaultGroups.Edit;
         relationNode.priority = 70;
 
-
         /**
          * if (this.isAllowedToEditCollection()) {
             this.optionsCollection.push(
@@ -1533,14 +1530,14 @@ export class OptionsHelperService implements OnDestroy {
                     if (n.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1) {
                         return this.nodeService.getNodeMetadata(
                             n.properties[RestConstants.CCM_PROP_IO_ORIGINAL][0],
-                            [RestConstants.ALL]
-                        )
+                            [RestConstants.ALL],
+                        );
                     } else if (n.type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL) {
                         return this.nodeService.getNodeMetadata(
                             RestHelper.removeSpacesStoreRef(
                                 n.properties[RestConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET][0],
                             ),
-                            [RestConstants.ALL]
+                            [RestConstants.ALL],
                         );
                     } else {
                         return of({

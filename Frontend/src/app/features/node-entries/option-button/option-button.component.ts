@@ -17,6 +17,7 @@ import { OptionItem } from '../../../core-ui-module/option-item';
             [class.display-none]="!optionIsShown(option, node)"
             [disabled]="!optionIsValid(option, node)"
             (click)="optionIsShown(option, node) ? option.callback(node) : null"
+            attr.data-test="option-button-{{ option.name }}"
         >
             <i esIcon="{{ option.icon }}" [aria]="false"></i>
         </button>

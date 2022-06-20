@@ -34,7 +34,12 @@
       (onCancel)="newCollectionCancel()"
     >
       <div class="createCollection collectionShadow">
-        <button mat-button class="collection-item clickable" (click)="setCollectionType('MY')">
+        <button
+          mat-button
+          class="collection-item clickable"
+          (click)="setCollectionType('MY')"
+          data-test="create-private-collection-button"
+        >
           <div class="iconLeft"><i esIcon="lock" style="color: #995b5b"></i></div>
           <div class="content">
             <div class="title">{{ 'COLLECTIONS.CREATE.PRIVATE' | translate }}</div>
@@ -211,6 +216,7 @@
                 [(ngModel)]="currentCollection.title"
                 autofocus
                 autocomplete="off"
+                data-test="new-collection-name-input"
               />
             </mat-form-field>
             <mat-form-field

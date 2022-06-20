@@ -218,6 +218,7 @@
       *ngFor="let option of entriesService.globalOptions"
       (click)="option.callback()"
       class="global-option-btn"
+      attr.data-test="card-button-{{ option.name }}"
     >
       <ng-container
         *ngTemplateOutlet="globalOption; context: { option: this.option }"

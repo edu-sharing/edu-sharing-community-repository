@@ -49,13 +49,9 @@ import { MatSortModule } from '@angular/material/sort';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { SharedModule } from '../shared/shared.module';
 import { ListItemsModule } from '../features/list-items/list-items.module';
-import {
-    MdsNodeRelationsWidgetComponent
-} from "../common/ui/node-render/node-relations/node-relations-widget.component";
-import {AppModule} from "../app.module";
-import {
-    NodeRowComponent
-} from "./components/node-row/node-row.component";
+import { MdsNodeRelationsWidgetComponent } from '../common/ui/node-render/node-relations/node-relations-widget.component';
+import { AppModule } from '../app.module';
+import { NodeRowComponent } from './components/node-row/node-row.component';
 
 @NgModule({
     declarations: [

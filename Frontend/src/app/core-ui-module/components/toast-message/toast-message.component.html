@@ -1,6 +1,13 @@
 <div class="toast-group">
-  <span class="mat-simple-snackbar-message" *ngIf="data.html" [innerHTML]="data.message"></span>
-  <span class="mat-simple-snackbar-message" *ngIf="!data.html">{{ data.message }}</span>
+  <span
+    class="mat-simple-snackbar-message"
+    *ngIf="data.html"
+    [innerHTML]="data.message"
+    data-test="toast-message"
+  ></span>
+  <span class="mat-simple-snackbar-message" *ngIf="!data.html" data-test="toast-message">{{
+    data.message
+  }}</span>
   <button
     mat-button
     class="mat-simple-snackbar-action"

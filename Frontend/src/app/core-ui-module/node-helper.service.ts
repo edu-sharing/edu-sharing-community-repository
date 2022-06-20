@@ -30,7 +30,7 @@ import { RestConnectorService } from '../core-module/rest/services/rest-connecto
 import { ListItem } from '../core-module/ui/list-item';
 import { RestNetworkService } from '../core-module/rest/services/rest-network.service';
 import { NodePersonNamePipe } from '../shared/pipes/node-person-name.pipe';
-import {UniversalNode} from '../common/definitions';
+import { UniversalNode } from '../common/definitions';
 import { FormBuilder } from '@angular/forms';
 import { SessionStorageService } from '../core-module/rest/services/session-storage.service';
 import { map } from 'rxjs/operators';

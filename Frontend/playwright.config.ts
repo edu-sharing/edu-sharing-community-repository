@@ -20,10 +20,12 @@ const config: PlaywrightTestConfig = {
          * Maximum time expect() should wait for the condition to be met.
          * For example in `await expect(locator).toHaveText();`
          */
-        timeout: 5000,
+        // TODO: less strict timeouts for parallel runs
+        timeout: 5 * 1000,
     },
 
-    /* Run tests in files in parallel */
+    /* Run tests in files in parallel. */
+    /* This causes `beforeAll` and `afterAll` hooks to be executed for each test. */
     fullyParallel: true,
     /* Fail the build on CI if you accidentally left test.only in the source code. */
     forbidOnly: !!process.env.CI,
@@ -46,6 +48,8 @@ const config: PlaywrightTestConfig = {
 
         /* Collect trace when the failed test. See https://playwright.dev/docs/trace-viewer */
         trace: 'retain-on-failure',
+
+        // headless: false,
     },
 
     /* Configure projects for major browsers */
@@ -54,6 +58,9 @@ const config: PlaywrightTestConfig = {
             name: 'chromium',
             use: {
                 ...devices['Desktop Chrome'],
+                // launchOptions: {
+                //     args: ['--ozone-platform-hint=auto'],
+                // },
             },
         },
 

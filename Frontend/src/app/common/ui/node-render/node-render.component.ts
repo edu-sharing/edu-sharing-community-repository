@@ -485,7 +485,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
                             this.postprocessHtml();
                             this.handleProposal();
                             this.addCollections();
-                    this.addNodeRelations();
+                            this.addNodeRelations();
                             this.addVideoControls();
                             this.linkSearchableWidgets();
                             this.addComments();

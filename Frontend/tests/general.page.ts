@@ -13,6 +13,10 @@ export class GeneralPage {
         await Promise.race([timeout(seconds * 1000), this.checkConsoleMessagesIndefinitely()]);
     }
 
+    async expectToastMessage(message: string | RegExp) {
+        await expect(this.page.locator('[data-test="toast-message"]')).toHaveText(message);
+    }
+
     private async checkConsoleMessagesIndefinitely(): Promise<void> {
         const msg = await this.page.waitForEvent('console', { timeout: 0 });
         expect(msg.type()).not.toBe('warning');
