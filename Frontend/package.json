@@ -18,6 +18,7 @@
     "check:format": "prettier --check src projects/*/src",
     "fix:format": "prettier --write src projects/*/src",
     "test": "ng test",
+    "e2e": "playwright test",
     "test:edu-sharing-frontend": "ng test angular-edusharing",
     "test:edu-sharing-api": "ng test edu-sharing-api",
     "docs": "typedoc --mode file --experimentalDecorators --excludePrivate --ignoreCompilerErrors --target 'ES6' --module 'commonjs' --out docs src",

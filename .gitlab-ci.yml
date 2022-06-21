@@ -51,3 +51,24 @@ check linting:
   needs: []
   script:
     - npm run check:lint
+
+# e2e:
+#   <<: *frontend_job
+#   stage: test
+#   needs: []
+#   image: mcr.microsoft.com/playwright:v1.22.0-focal
+#   variables:
+#     NODE_VERSION: 16  # Matches the preinstalled version of node in the image.
+#     # Test against external frontend.
+#     # E2E_TEST_BASE_URL: http://192.168.16.171/edu-sharing/ 
+#     BACKEND_URL: http://192.168.16.171
+#   script:
+#     - node -v
+#     - npm -v
+#     - npm start &
+#     - sleep 120
+#     - npm run e2e
+#   artifacts:
+#     paths:
+#       - Frontend/playwright-report/
+#     when: on_failure

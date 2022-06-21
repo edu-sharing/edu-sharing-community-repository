@@ -32,7 +32,8 @@ const config: PlaywrightTestConfig = {
     /* Fail the build on CI if you accidentally left test.only in the source code. */
     forbidOnly: CI,
     /* Retry on CI only */
-    retries: CI ? 2 : 0,
+    // retries: CI ? 2 : 0,
+    retries: 0,
     /* Opt out of parallel tests on CI. */
     /* Also on E2E_TEST_DEV, since action- and expect timeouts will be exceeded with parallel runs. */
     workers: CI || E2E_TEST_DEV ? 1 : undefined,
@@ -47,12 +48,12 @@ const config: PlaywrightTestConfig = {
         actionTimeout: E2E_TEST_DEV ? 3 * 1000 : undefined,
 
         /* Base URL to use in actions like `await page.goto('/')`. */
-        baseURL: 'http://localhost:4200/edu-sharing/',
+        baseURL: process.env.E2E_TEST_BASE_URL ?? 'http://localhost:4200/edu-sharing/',
 
         /* Collect trace. See https://playwright.dev/docs/trace-viewer */
         trace: (() => {
             if (E2E_TEST_DEV) return 'on';
-            else if (CI) return 'on-first-retry';
+            // else if (CI) return 'on-first-retry';
             else return 'retain-on-failure';
         })(),
 
