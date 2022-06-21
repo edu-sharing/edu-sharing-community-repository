@@ -5,7 +5,10 @@ import { devices } from '@playwright/test';
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
-// require('dotenv').config();
+require('dotenv').config();
+
+const CI = readBool(process.env.CI);
+const E2E_TEST_DEV = readBool(process.env.E2E_TEST_DEV);
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -20,36 +23,40 @@ const config: PlaywrightTestConfig = {
          * Maximum time expect() should wait for the condition to be met.
          * For example in `await expect(locator).toHaveText();`
          */
-        // TODO: less strict timeouts for parallel runs
-        timeout: 5 * 1000,
+        timeout: E2E_TEST_DEV ? 5 * 1000 : undefined,
     },
 
     /* Run tests in files in parallel. */
     /* This causes `beforeAll` and `afterAll` hooks to be executed for each test. */
     fullyParallel: true,
     /* Fail the build on CI if you accidentally left test.only in the source code. */
-    forbidOnly: !!process.env.CI,
+    forbidOnly: CI,
     /* Retry on CI only */
-    retries: process.env.CI ? 2 : 0,
+    retries: CI ? 2 : 0,
     /* Opt out of parallel tests on CI. */
-    workers: process.env.CI ? 1 : undefined,
+    /* Also on E2E_TEST_DEV, since action- and expect timeouts will be exceeded with parallel runs. */
+    workers: CI || E2E_TEST_DEV ? 1 : undefined,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-    reporter: 'html',
+    reporter: [['list'], ['html']],
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
         // Tell all tests to load signed-in state from 'storageState.json'.
         // storageState: 'playwright/storageState.json',
 
         /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
-        actionTimeout: 3 * 1000,
+        actionTimeout: E2E_TEST_DEV ? 3 * 1000 : undefined,
 
         /* Base URL to use in actions like `await page.goto('/')`. */
         baseURL: 'http://localhost:4200/edu-sharing/',
 
-        /* Collect trace when the failed test. See https://playwright.dev/docs/trace-viewer */
-        trace: 'retain-on-failure',
+        /* Collect trace. See https://playwright.dev/docs/trace-viewer */
+        trace: (() => {
+            if (E2E_TEST_DEV) return 'on';
+            else if (CI) return 'on-first-retry';
+            else return 'retain-on-failure';
+        })(),
 
-        // headless: false,
+        headless: !E2E_TEST_DEV,
     },
 
     /* Configure projects for major browsers */
@@ -58,9 +65,15 @@ const config: PlaywrightTestConfig = {
             name: 'chromium',
             use: {
                 ...devices['Desktop Chrome'],
-                // launchOptions: {
-                //     args: ['--ozone-platform-hint=auto'],
-                // },
+                ...[
+                    readBool(process.env.E2E_TEST_WAYLAND)
+                        ? {
+                              launchOptions: {
+                                  args: ['--ozone-platform-hint=auto'],
+                              },
+                          }
+                        : {},
+                ],
             },
         },
 
@@ -116,5 +129,9 @@ const config: PlaywrightTestConfig = {
     //   port: 3000,
     // },
 };
+
+function readBool(s: string): boolean {
+    return ['1', 'true', 'yes'].includes(s?.toLowerCase());
+}
 
 export default config;
