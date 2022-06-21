@@ -1,11 +1,12 @@
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { forwardRef, ModuleWithProviders, NgModule, Provider } from '@angular/core';
+import { forwardRef, isDevMode, ModuleWithProviders, NgModule, Provider } from '@angular/core';
 import { ApiRequestConfiguration } from './api-request-configuration';
 import { ApiInterceptor } from './api.interceptor';
 import {
     EduSharingApiConfigurationParams,
     getConfigProvider,
 } from './edu-sharing-api-configuration';
+import { TimingInterceptor } from './timing.iterceptor';
 
 // Note that interceptors provided here will also be called on all requests by the app module using
 // this library.
@@ -21,6 +22,12 @@ import {
 export const API_INTERCEPTOR_PROVIDER: Provider = {
     provide: HTTP_INTERCEPTORS,
     useExisting: forwardRef(() => ApiInterceptor),
+    multi: true,
+};
+
+export const TIMING_INTERCEPTOR_PROVIDER: Provider = {
+    provide: HTTP_INTERCEPTORS,
+    useExisting: forwardRef(() => TimingInterceptor),
     multi: true,
 };
 
@@ -45,6 +52,7 @@ export class EduSharingApiModule {
                 ApiRequestConfiguration,
                 ApiInterceptor,
                 API_INTERCEPTOR_PROVIDER,
+                ...(isDevMode() ? [TimingInterceptor, TIMING_INTERCEPTOR_PROVIDER] : []),
                 getConfigProvider(params),
             ],
         };
