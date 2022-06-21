@@ -90,6 +90,21 @@
         "eduVideoThumbnail",
         "directAccessUrl"
       ]
+    },
+    {
+      "transformerName": "EduSharingH5pThumbnailExecutor",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "application/zip", "targetMediaType": "image/png"},
+        {"sourceMediaType": "application/gzip", "targetMediaType": "image/png"},
+
+        {"sourceMediaType": "application/zip", "priority": 49, "targetMediaType": "image/jpeg"},
+        {"sourceMediaType": "application/gzip", "targetMediaType": "image/jpeg"}
+      ],
+      "transformOptions": [
+        "eduVideoThumbnail",
+        "directAccessUrl"
+      ]
     }
+
   ]
 }

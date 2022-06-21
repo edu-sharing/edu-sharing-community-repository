@@ -593,43 +593,6 @@
         </property>
    	 </bean>
     -->
-    
-    <!--bean id="transformer.worker.ESVideoTransformerWorker" class="org.edu_sharing.alfresco.transformer.VideoTransformerWorker">
-    	<property name="mimetypeService" ref="mimetypeService"/>
-    	 <property name="transformerConfig">
-         <ref bean="transformerConfig" />
-      </property>
-      <property name="nodeService">
-    	   <ref bean="NodeService" />
-      </property>
-       <property name="transactionService">
-    	   <ref bean="TransactionService" />
-      </property>
-    </bean-->
-    <!--<bean id="transformer.worker.ESH5PTransformerWorker" class="org.edu_sharing.alfresco.transformer.H5PTransformerWorker">
-        <property name="mimetypeService" ref="mimetypeService"/>
-        <property name="transformerConfig">
-            <ref bean="transformerConfig" />
-        </property>
-        <property name="nodeService">
-            <ref bean="NodeService" />
-        </property>
-        <property name="transactionService">
-            <ref bean="TransactionService" />
-        </property>
-    </bean>
-    <bean id="transformer.ESH5PTransformer" class="org.alfresco.repo.content.transform.ProxyContentTransformer" parent="baseContentTransformer">
-        <property name="worker">
-            <ref bean="transformer.worker.ESH5PTransformerWorker" />
-        </property>
-    </bean>
-    -->
-
-    <!--bean id="transformer.ESVideoTransformer" class="org.alfresco.repo.content.transform.ProxyContentTransformer" parent="baseContentTransformer">
-      <property name="worker">
-         <ref bean="transformer.worker.ESVideoTransformerWorker" />
-      </property>
-   </bean-->
 
     <!-- <bean id="transformer.worker.ESCollectionRefTransformerWorker" class="org.edu_sharing.alfresco.transformer.CollectionRefTransformerWorker">
     	<property name="mimetypeService" ref="mimetypeService"/>

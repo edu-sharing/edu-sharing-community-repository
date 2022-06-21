@@ -6,15 +6,10 @@ import java.awt.Image;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 import javax.imageio.ImageIO;
 
-import org.apache.activemq.util.ByteArrayInputStream;
-import org.apache.catalina.util.IOTools;
 
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
@@ -103,7 +98,7 @@ public class ImageTool {
 	 * @throws IOException 
 	 */
 	public static InputStream autoRotateImage(InputStream is,int maxSize) throws IOException{
-		byte[] data=org.apache.poi.util.IOUtils.toByteArray(is);
+		byte[] data=is.readAllBytes();
 		try{
 			BufferedImage image=ImageIO.read(new ByteArrayInputStream(data));
 			ByteArrayOutputStream os=new ByteArrayOutputStream();

@@ -2,6 +2,7 @@ package org.edu_sharing.alfresco.transformer;
 
 import org.alfresco.transformer.AbstractTransformerController;
 import org.alfresco.transformer.probes.ProbeTestTransform;
+import org.edu_sharing.alfresco.transformer.executors.H5pThumbnailExecutor;
 import org.edu_sharing.alfresco.transformer.executors.VideoThumbnailExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,12 +19,21 @@ public class EduSharingController extends AbstractTransformerController {
     @Autowired
     VideoThumbnailExecutor videoThumbnailExecutor;
 
+    @Autowired
+    H5pThumbnailExecutor h5pThumbnailExecutor;
+
 
     @Override
     public void transformImpl(String transformName, String sourceMimetype, String targetMimetype, Map<String, String> transformOptions, File sourceFile, File targetFile) {
         if(transformName.equals(VideoThumbnailExecutor.ID)){
             try {
                 this.videoThumbnailExecutor.transform(transformName,sourceMimetype,targetMimetype,transformOptions,sourceFile,targetFile);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }else if(transformName.equals(H5pThumbnailExecutor.ID)){
+            try {
+                this.h5pThumbnailExecutor.transform(transformName,sourceMimetype,targetMimetype,transformOptions,sourceFile,targetFile);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -37,10 +47,6 @@ public class EduSharingController extends AbstractTransformerController {
         return "edu-sharing transformations";
     }
 
-    @Override
-    protected String getTransformerName(File sourceFile, String sourceMimetype, String targetMimetype, Map<String, String> transformOptions) {
-        return VideoThumbnailExecutor.ID;
-    }
 
     @Override
     public ProbeTestTransform getProbeTestTransform() {
