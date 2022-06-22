@@ -1,7 +1,7 @@
 import { Injectable, Injector } from '@angular/core';
 import { Toast } from './toast';
 import { Location } from '@angular/common';
-import {DialogButton, RestConstants} from '../core-module/core.module';
+import { DialogButton, RestConstants } from '../core-module/core.module';
 import { ApiErrorResponse } from 'ngx-edu-sharing-api';
 import { HttpRequest } from '@angular/common/http';
 
@@ -17,7 +17,7 @@ export class ErrorHandlerService {
     }
 
     handleError(error: ApiErrorResponse, req: HttpRequest<unknown>): void {
-        console.log('handleError', error, req);
+        // console.log('handleError', error, req);
         if (req.method === 'GET' && req.url === this.getApiUrl('/config/v1/values')) {
             this.showConfigurationErrorNotice(error);
         } else if (
@@ -26,11 +26,7 @@ export class ErrorHandlerService {
                 req.url === this.getApiUrl('/authentication/v1/validateSession') ||
                 req.url === this.getApiUrl('/iam/v1/people/-home-/-me-'))
         ) {
-            if(req.url === this.getApiUrl('/iam/v1/people/-home-/-me-') && error.status === RestConstants.HTTP_UNAUTHORIZED) {
-                // ignore -> there is no guest available
-            } else {
-                this.showReloadNotice();
-            }
+            this.showReloadNotice();
         } else {
             this.toast.error(error);
         }
@@ -45,7 +41,7 @@ export class ErrorHandlerService {
             'API_ERROR.RELOAD_NOTICE_TITLE',
             'API_ERROR.RELOAD_NOTICE',
             [
-                new DialogButton('API_ERROR.RELOAD_BUTTON_LABEL', DialogButton.TYPE_PRIMARY, () =>
+                new DialogButton('API_ERROR.RELOAD_BUTTON_LABEL', { color: 'primary' }, () =>
                     location.reload(),
                 ),
             ],

@@ -903,8 +903,12 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_NODES = "TOOLPERMISSION_GLOBAL_STATISTICS_NODES";
 
-	public final static String CCM_VALUE_TOOLPERMISSION_RATE_READ = "TOOLPERMISSION_RATE_READ";
+	public final static String CCM_VALUE_TOOLPERMISSION_RATE = "TOOLPERMISSION_RATE";
 	public final static String CCM_VALUE_TOOLPERMISSION_RATE_WRITE = "TOOLPERMISSION_RATE_WRITE";
+	public final static String CCM_VALUE_TOOLPERMISSION_RATE_READ = "TOOLPERMISSION_RATE_READ";
+
+
+	public final static String CCM_VALUE_TOOLPERMISSION_MANAGE_RELATIONS = "TOOLPERMISSION_MANAGE_RELATIONS";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_VIDEO_AUDIO_CUT = "TOOLPERMISSION_VIDEO_AUDIO_CUT";
 
@@ -1681,6 +1685,8 @@ public class CCConstants {
 	public final static String PERMISSION_COMMENT = "Comment";
 
 	public final static String PERMISSION_RATE = "Rate";
+	public final static String PERMISSION_RATE_READ = "RateRead";
+	public final static String PERMISSION_RELATION = "Relation";
 
 	// collection feedback permission
 	public final static String PERMISSION_FEEDBACK = "Feedback";
@@ -1896,6 +1902,8 @@ public class CCConstants {
 			permission.add(PERMISSION_READ_ALL);
 			permission.add(PERMISSION_COMMENT);
 			permission.add(PERMISSION_RATE);
+			permission.add(PERMISSION_RATE_READ);
+			permission.add(PERMISSION_RELATION);
 			permission.add(PERMISSION_WRITE);
 			permission.add(PERMISSION_DELETE);
 			permission.add(PERMISSION_DELETE_CHILDREN);

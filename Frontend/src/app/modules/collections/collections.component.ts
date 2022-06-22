@@ -1,91 +1,85 @@
-import {forkJoin as observableForkJoin,  Observable, Subject } from 'rxjs';
+import { Location } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import {
-    AfterViewInit,
     Component,
     ContentChild,
     ElementRef,
-    EventEmitter, OnDestroy,
+    EventEmitter,
+    OnDestroy,
     OnInit,
     TemplateRef,
-    ViewChild
+    ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { TranslationsService } from '../../translations/translations.service';
+import { TranslateService } from '@ngx-translate/core';
+import { forkJoin as observableForkJoin, Subject } from 'rxjs';
+import { first } from 'rxjs/operators';
+import {
+    DropSource,
+    DropTarget,
+    ListEventInterface,
+    ListSortConfig,
+    NodeEntriesDisplayType,
+} from 'src/app/features/node-entries/entries-model';
+import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
+import { ActionbarHelperService } from '../../common/services/actionbar-helper';
+import { BridgeService } from '../../core-bridge-module/bridge.service';
 import * as EduData from '../../core-module/core.module';
 import {
-    Collection,
+    AbstractList,
+    CollectionFeedback,
+    CollectionReference,
+    ConfigurationHelper,
     ConfigurationService,
     DialogButton,
     FrameEventsService,
     ListItem,
+    ListItemSort,
     LoginResult,
-    MdsMetadataset,
+    MdsMetadatasets,
+    Mediacenter,
     Node,
     NodeRef,
+    NodesRightMode,
     NodeWrapper,
+    Permission,
+    ProposalNode,
+    RequestObject,
     RestCollectionService,
     RestConnectorService,
     RestConstants,
     RestHelper,
     RestIamService,
     RestMdsService,
+    RestMediacenterService,
+    RestNetworkService,
     RestNodeService,
     RestOrganizationService,
     TemporaryStorageService,
     UIService,
-    CollectionReference,
-    CollectionFeedback,
-    NodesRightMode,
-    Permission,
-    MdsMetadatasets,
-    ConfigurationHelper,
-    RestNetworkService,
-    SortDefault,
-    RequestObject,
-    RestMediacenterService, Mediacenter,
-    AbstractList, ProposalNode, ListItemSort,
 } from '../../core-module/core.module';
-import { Toast } from '../../core-ui-module/toast';
-import {CustomOptions, DefaultGroups, OptionItem, Scope} from '../../core-ui-module/option-item';
-import { NodeRenderComponent } from '../../common/ui/node-render/node-render.component';
-import { UIHelper } from '../../core-ui-module/ui-helper';
+import { Helper } from '../../core-module/rest/helper';
+import { MdsHelper } from '../../core-module/rest/mds-helper';
+import { ColorHelper, PreferredColor } from '../../core-module/ui/color-helper';
 import { UIConstants } from '../../core-module/ui/ui-constants';
 import { ListTableComponent } from '../../core-ui-module/components/list-table/list-table.component';
-import {NodeHelperService} from '../../core-ui-module/node-helper.service';
-import { TranslateService } from '@ngx-translate/core';
-import { Location } from '@angular/common';
-import { Helper } from '../../core-module/rest/helper';
-import { MainNavComponent } from '../../main/navigation/main-nav/main-nav.component';
-import {ColorHelper, PreferredColor} from '../../core-module/ui/color-helper';
-import { ActionbarHelperService } from '../../common/services/actionbar-helper';
-import { MdsHelper } from '../../core-module/rest/mds-helper';
-import { BridgeService } from '../../core-bridge-module/bridge.service';
-import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-toggle';
-import { HttpClient } from '@angular/common/http';
-import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../core-ui-module/options-helper.service';
-import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
-import {DropAction, DropData} from '../../core-ui-module/directives/drag-nodes/drag-nodes';
+import { NodeHelperService } from '../../core-ui-module/node-helper.service';
+import { OptionItem, Scope } from '../../core-ui-module/option-item';
 import {
-    ManagementEvent,
-    ManagementEventType
-} from '../management-dialogs/management-dialogs.component';
-import {CustomNodeListWrapperComponent} from '../../core-ui-module/components/custom-node-list-wrapper/custom-node-list-wrapper.component';
-import {
-    SortEvent,
-} from '../../core-ui-module/components/sort-dropdown/sort-dropdown.component';
-import {DataSource} from '@angular/cdk/collections';
-import {NodeDataSource} from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
-import {
-    NodeEntriesWrapperComponent
-} from '../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
-import {Sort} from '@angular/material/sort';
-import {first} from 'rxjs/operators';
-import {
-    DropSource, DropTarget,
-    ListEventInterface, ListSortConfig, NodeEntriesDisplayType
-} from '../../core-ui-module/components/node-entries-wrapper/entries-model';
+    OptionsHelperService,
+    OPTIONS_HELPER_CONFIG,
+} from '../../core-ui-module/options-helper.service';
+import { Toast } from '../../core-ui-module/toast';
+import { UIHelper } from '../../core-ui-module/ui-helper';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
+import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';
+import { SortEvent } from '../../shared/components/sort-dropdown/sort-dropdown.component';
+import { TranslationsService } from '../../translations/translations.service';
+import {
+    ManagementEvent,
+    ManagementEventType,
+} from '../management-dialogs/management-dialogs.component';
 
 // component class
 @Component({
@@ -93,10 +87,17 @@ import { MainNavService } from '../../main/navigation/main-nav.service';
     templateUrl: 'collections.component.html',
     styleUrls: ['collections.component.scss'],
     // provide a new instance so to not get conflicts with other service instances
-    providers: [OptionsHelperService, {provide: OPTIONS_HELPER_CONFIG, useValue: {
-            subscribeEvents: false
-        }}]})
-export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestroy {
+    providers: [
+        OptionsHelperService,
+        {
+            provide: OPTIONS_HELPER_CONFIG,
+            useValue: {
+                subscribeEvents: false,
+            },
+        },
+    ],
+})
+export class CollectionsMainComponent implements OnInit, OnDestroy {
     static INDEX_MAPPING = [
         RestConstants.COLLECTIONSCOPE_MY,
         RestConstants.COLLECTIONSCOPE_ORGA,
@@ -104,9 +105,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
         RestConstants.COLLECTIONSCOPE_TYPE_MEDIA_CENTER,
         RestConstants.COLLECTIONSCOPE_ALL,
     ];
-    private static PROPERTY_FILTER = [
-        RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR,
-    ];
+    private static PROPERTY_FILTER = [RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR];
     private static DEFAULT_REQUEST = {
         sortBy: [
             RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
@@ -124,7 +123,6 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
     @ViewChild('listCollections') listCollections: ListTableComponent;
     @ViewChild('listReferences') listReferences: ListEventInterface<CollectionReference>;
     @ContentChild('collectionContentTemplate') collectionContentTemplateRef: TemplateRef<any>;
-
 
     dataSourceCollections = new NodeDataSource<Node>();
     dataSourceReferences = new NodeDataSource<CollectionReference>();
@@ -158,38 +156,27 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
     infoMessage: string;
     infoButtons: DialogButton[];
     infoClose: Function;
-    nodeReport: Node;
     collectionsColumns: ListItem[] = [];
     referencesColumns: ListItem[] = [];
-    createSubCollectionOptionItem = new OptionItem(
-        'OPTIONS.NEW_COLLECTION',
-        'layers',
-        () => this.onCreateCollection(),
+    createSubCollectionOptionItem = new OptionItem('OPTIONS.NEW_COLLECTION', 'layers', () =>
+        this.onCreateCollection(),
     );
-    addMaterialSearchOptionItem = new OptionItem(
-        'OPTIONS.SEARCH_OBJECT',
-        'redo',
-        () => {
-            UIHelper.getCommonParameters(this.route).subscribe(params => {
-                params.addToCollection = this.collectionContent.node.ref.id;
-                this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
-                    queryParams: params,
-                });
+    addMaterialSearchOptionItem = new OptionItem('OPTIONS.SEARCH_OBJECT', 'redo', () => {
+        UIHelper.getCommonParameters(this.route).subscribe((params) => {
+            params.addToCollection = this.collectionContent.node.ref.id;
+            this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
+                queryParams: params,
             });
-        }
-    );
-    addMaterialBinaryOptionItem = new OptionItem(
-        'OPTIONS.ADD_OBJECT',
-        'cloud_upload',
-        () => {
-            this.mainNavService.getMainNav().topBar.createMenu.openUploadSelect();
-        },
-    );
+        });
+    });
+    addMaterialBinaryOptionItem = new OptionItem('OPTIONS.ADD_OBJECT', 'cloud_upload', () => {
+        this.mainNavService.getMainNav().topBar.createMenu.openUploadSelect();
+    });
     collectionProposals: AbstractList<ProposalNode>;
     proposalColumns = [
         new ListItem('NODE', RestConstants.CM_PROP_TITLE),
-        new ListItem('NODE_PROPOSAL', RestConstants.CM_CREATOR, { showLabel: true}),
-        new ListItem('NODE_PROPOSAL', RestConstants.CM_PROP_C_CREATED, { showLabel: true}),
+        new ListItem('NODE_PROPOSAL', RestConstants.CM_CREATOR, { showLabel: true }),
+        new ListItem('NODE_PROPOSAL', RestConstants.CM_PROP_C_CREATED, { showLabel: true }),
     ];
     tutorialElement: ElementRef;
     permissions: Permission[];
@@ -200,8 +187,12 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
             // new ListItemSort('NODE', RestConstants.LOM_PROP_TITLE),
             new ListItemSort('NODE', RestConstants.CM_MODIFIED_DATE),
             new ListItemSort('NODE', RestConstants.CM_PROP_C_CREATED),
-            new ListItemSort('NODE', RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION, 'ascending'),
-        ]
+            new ListItemSort(
+                'NODE',
+                RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION,
+                'ascending',
+            ),
+        ],
     };
     sortCollections: ListSortConfig = {
         active: null,
@@ -210,8 +201,12 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
             new ListItemSort('NODE', RestConstants.CM_PROP_TITLE),
             new ListItemSort('NODE', RestConstants.CM_PROP_C_CREATED),
             new ListItemSort('NODE', RestConstants.CM_MODIFIED_DATE),
-            new ListItemSort('NODE', RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION, 'ascending'),
-        ]
+            new ListItemSort(
+                'NODE',
+                RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION,
+                'ascending',
+            ),
+        ],
     };
     // FIXME: `collectionShare` is expected to be of type `Node[]` by `workspace-management` but is
     // of type `Node` here.
@@ -237,9 +232,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
         this.selectTab(CollectionsMainComponent.INDEX_MAPPING[pos]);
     }
     get tabSelectedIndex() {
-        let pos = CollectionsMainComponent.INDEX_MAPPING.indexOf(
-            this.tabSelected,
-        );
+        let pos = CollectionsMainComponent.INDEX_MAPPING.indexOf(this.tabSelected);
         if (this.isGuest) {
             pos -= 2;
         }
@@ -287,12 +280,9 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     private collectionContentOriginal: any;
-    private filteredOutCollections: Array<EduData.Collection> = new Array<
-        EduData.Collection
-        >();
-    private filteredOutReferences: Array<
-        EduData.CollectionReference
-        > = new Array<EduData.CollectionReference>();
+    private filteredOutCollections: Array<EduData.Collection> = new Array<EduData.Collection>();
+    private filteredOutReferences: Array<EduData.CollectionReference> =
+        new Array<EduData.CollectionReference>();
     private collectionIdParamSubscription: any;
     private contentDetailObject: any = null;
     // real parentCollectionId is only available, if user was browsing
@@ -355,19 +345,27 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
             this.connector.isLoggedIn().subscribe(
                 (data: LoginResult) => {
                     if (data.isValidLogin && data.currentScope == null) {
-                        this.addMaterialBinaryOptionItem.isEnabled = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES);
-                        this.createSubCollectionOptionItem.isEnabled = this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS);
+                        this.addMaterialBinaryOptionItem.isEnabled =
+                            this.connector.hasToolPermissionInstant(
+                                RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES,
+                            );
+                        this.createSubCollectionOptionItem.isEnabled =
+                            this.connector.hasToolPermissionInstant(
+                                RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS,
+                            );
                         this.isGuest = data.isGuest;
                         this.mainNavUpdateTrigger.next();
                         this.mediacenterService.getMediacenters().subscribe((mediacenters) => {
-                            this.adminMediacenters = mediacenters.filter((m)=>m.administrationAccess);
+                            this.adminMediacenters = mediacenters.filter(
+                                (m) => m.administrationAccess,
+                            );
                         });
                         this.collectionService
                             .getCollectionSubcollections(
                                 RestConstants.ROOT,
                                 RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL,
                             )
-                            .subscribe(data => {
+                            .subscribe((data) => {
                                 this.hasEditorial = data.collections.length > 0;
                             });
                         this.collectionService
@@ -375,13 +373,13 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
                                 RestConstants.ROOT,
                                 RestConstants.COLLECTIONSCOPE_TYPE_MEDIA_CENTER,
                             )
-                            .subscribe(data => {
-                                this.hasMediacenter =
-                                    data.collections.length > 0;
+                            .subscribe((data) => {
+                                this.hasMediacenter = data.collections.length > 0;
                             });
                         this.mdsService.getSets().subscribe(
                             (data: MdsMetadatasets) => {
-                                const mdsSets = ConfigurationHelper.filterValidMds(RestConstants.HOME_REPOSITORY,
+                                const mdsSets = ConfigurationHelper.filterValidMds(
+                                    RestConstants.HOME_REPOSITORY,
                                     data.metadatasets,
                                     this.config,
                                 );
@@ -395,10 +393,12 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
                                     //this.sortCollections = info.default;
                                     this.initialize();
                                 });
-                            },(e) => {
+                            },
+                            (e) => {
                                 console.warn(e);
                                 this.initialize();
-                            });
+                            },
+                        );
                     } else {
                         RestHelper.goToLogin(this.router, this.config);
                     }
@@ -407,9 +407,9 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
             );
         });
         this.mainNavService.getDialogs().onEvent.subscribe((event: ManagementEvent) => {
-            if(event.event === ManagementEventType.AddCollectionNodes){
-                if(event.data.collection.ref.id === this.collectionContent.node.ref.id) {
-                    console.log('add virtual', event.data.references)
+            if (event.event === ManagementEventType.AddCollectionNodes) {
+                if (event.data.collection.ref.id === this.collectionContent.node.ref.id) {
+                    console.log('add virtual', event.data.references);
                     this.listReferences.addVirtualNodes(event.data.references);
                 }
             }
@@ -421,10 +421,10 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     ngOnDestroy() {
-        this.temporaryStorageService.set(TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE, this.dataSourceReferences);
-    }
-
-    ngAfterViewInit() {
+        this.temporaryStorageService.set(
+            TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE,
+            this.dataSourceReferences,
+        );
     }
 
     private registerMainNav(): void {
@@ -433,16 +433,16 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
             currentScope: 'collections',
             searchEnabled: false,
             onCreate: (nodes) => this.addNodesToCollection(nodes),
-        })
+        });
         this.mainNavUpdateTrigger.subscribe(() => {
             this.mainNavService.patchMainNavConfig({
                 create: {
                     allowed: this.createAllowed(),
                     allowBinary: !this.isRootLevelCollection() && this.isAllowedToEditCollection(),
                     parent: this.collectionContent?.node ?? null,
-                }
+                },
             });
-        })
+        });
     }
 
     isMobile() {
@@ -455,7 +455,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
 
     navigate(id = '', addToOther = '', feedback = false) {
         const params: any = {};
-        UIHelper.getCommonParameters(this.route).subscribe(params => {
+        UIHelper.getCommonParameters(this.route).subscribe((params) => {
             params.scope = this.tabSelected;
             params.id = id;
             if (feedback) {
@@ -475,10 +475,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     selectTab(tab: string) {
-        if (
-            this.tabSelected != tab ||
-            this.getCollectionId() != RestConstants.ROOT
-        ) {
+        if (this.tabSelected != tab || this.getCollectionId() != RestConstants.ROOT) {
             this.tabSelected = tab;
             this.setCollectionId(RestConstants.ROOT);
             this.parentCollectionId = new EduData.Reference(
@@ -550,7 +547,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     navigateToSearch() {
-        UIHelper.getCommonParameters(this.route).subscribe(params => {
+        UIHelper.getCommonParameters(this.route).subscribe((params) => {
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
                 queryParams: params,
             });
@@ -559,7 +556,8 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
 
     isBrightColor() {
         return (
-            ColorHelper.getPreferredColor(this.collectionContent?.node?.collection?.color) === PreferredColor.White
+            ColorHelper.getPreferredColor(this.collectionContent?.node?.collection?.color) ===
+            PreferredColor.White
         );
     }
 
@@ -568,9 +566,9 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
     }
     dropOnRef = (target: Node, source: DropSource<Node>) => {
         return;
-    }
+    };
     dropOnCollection = (target: Node, source: DropSource<Node>) => {
-        if(source.element[0] === target) {
+        if (source.element[0] === target) {
             return;
         }
         this.toast.showProgressDialog();
@@ -580,16 +578,18 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
                 this.toast.closeModalDialog();
                 return;
             }
-            this.nodeService.moveNode(target?.ref?.id || RestConstants.COLLECTIONHOME, source.element[0].ref.id).subscribe(
-                () => {
-                    this.toast.closeModalDialog();
-                    this.refreshContent();
-                },
-                error => {
-                    this.handleError(error);
-                    this.toast.closeModalDialog();
-                },
-            );
+            this.nodeService
+                .moveNode(target?.ref?.id || RestConstants.COLLECTIONHOME, source.element[0].ref.id)
+                .subscribe(
+                    () => {
+                        this.toast.closeModalDialog();
+                        this.refreshContent();
+                    },
+                    (error) => {
+                        this.handleError(error);
+                        this.toast.closeModalDialog();
+                    },
+                );
         } else {
             UIHelper.addToCollection(
                 this.nodeHelper,
@@ -599,7 +599,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
                 target,
                 source.element,
                 false,
-                nodes => {
+                (nodes) => {
                     if (source.mode === 'copy') {
                         this.toast.closeModalDialog();
                         this.refreshContent();
@@ -617,7 +617,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
                                 this.toast.closeModalDialog();
                                 this.refreshContent();
                             },
-                            error => {
+                            (error) => {
                                 this.handleError(error);
                                 this.toast.closeModalDialog();
                             },
@@ -628,7 +628,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
                 },
             );
         }
-    }
+    };
     addNodesToCollection(nodes: Node[]) {
         this.toast.showProgressDialog();
         UIHelper.addToCollection(
@@ -639,7 +639,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
             this.collectionContent.node,
             nodes,
             false,
-            refNodes => {
+            (refNodes) => {
                 this.refreshContent();
                 this.toast.closeModalDialog();
             },
@@ -648,10 +648,12 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
 
     canDropOnCollection = (target: DropTarget, source: DropSource<Node>) => {
         // drop to "home"
-        if(target === 'MY_FILES') {
-            return source.mode === 'move' &&
+        if (target === 'MY_FILES') {
+            return (
+                source.mode === 'move' &&
                 source.element[0].aspects.indexOf(RestConstants.CCM_ASPECT_COLLECTION) !== -1 &&
-                this.nodeHelper.getNodesRight(source.element, RestConstants.ACCESS_WRITE);
+                this.nodeHelper.getNodesRight(source.element, RestConstants.ACCESS_WRITE)
+            );
         }
         if (source.element[0].ref.id === (target as Node).ref.id) {
             return false;
@@ -659,37 +661,33 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
         if ((target as Node).ref.id === this.collectionContent.node.ref.id) {
             return false;
         }
-        if(source.element[0].collection && source.mode === 'copy') {
+        if (source.element[0].collection && source.mode === 'copy') {
             return false;
         }
         // do not allow to move anything else than editorial collections into editorial collections (if the source is a collection)
         if (source.element[0].collection?.hasOwnProperty('childCollectionsCount')) {
             if (
-                (source.element[0].collection.type ===
-                    RestConstants.COLLECTIONTYPE_EDITORIAL &&
-                    (target as Node).collection.type !==
-                    RestConstants.COLLECTIONTYPE_EDITORIAL) ||
-                (source.element[0].collection.type !==
-                    RestConstants.COLLECTIONTYPE_EDITORIAL &&
-                    (target as Node).collection.type ===
-                    RestConstants.COLLECTIONTYPE_EDITORIAL)
+                (source.element[0].collection.type === RestConstants.COLLECTIONTYPE_EDITORIAL &&
+                    (target as Node).collection.type !== RestConstants.COLLECTIONTYPE_EDITORIAL) ||
+                (source.element[0].collection.type !== RestConstants.COLLECTIONTYPE_EDITORIAL &&
+                    (target as Node).collection.type === RestConstants.COLLECTIONTYPE_EDITORIAL)
             ) {
                 return false;
             }
         }
         if (
-            source.mode === 'copy' &&
-            !this.nodeHelper.getNodesRight(
-                source.element,
-                RestConstants.ACCESS_CC_PUBLISH,
-                NodesRightMode.Original,
-            )
-            || source.mode === 'move' &&
-            !this.nodeHelper.getNodesRight(
-                source.element,
-                RestConstants.ACCESS_WRITE,
-                NodesRightMode.Original,
-            )
+            (source.mode === 'copy' &&
+                !this.nodeHelper.getNodesRight(
+                    source.element,
+                    RestConstants.ACCESS_CC_PUBLISH,
+                    NodesRightMode.Original,
+                )) ||
+            (source.mode === 'move' &&
+                !this.nodeHelper.getNodesRight(
+                    source.element,
+                    RestConstants.ACCESS_WRITE,
+                    NodesRightMode.Original,
+                ))
         ) {
             return false;
         }
@@ -727,11 +725,11 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
                         this.collectionContent.node.ref.repo,
                     )
                     .subscribe(
-                        result => {
+                        (result) => {
                             this.isLoading = false;
                             this.navigate(this.parentCollectionId.id);
                         },
-                        error => {
+                        (error) => {
                             this.isLoading = false;
                             this.toast.error(null, 'COLLECTIONS.ERROR_DELETE');
                         },
@@ -773,10 +771,8 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
         }
 
         // set correct scope
-        const request: RequestObject = Helper.deepCopy(
-            CollectionsMainComponent.DEFAULT_REQUEST,
-        );
-        if(this.sortCollections) {
+        const request: RequestObject = Helper.deepCopy(CollectionsMainComponent.DEFAULT_REQUEST);
+        if (this.sortCollections) {
             request.sortBy = [this.sortCollections.active];
             request.sortAscending = [this.sortCollections.direction === 'asc'];
         } else {
@@ -795,23 +791,27 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
                 this.collectionContent.node.ref.repo,
             )
             .subscribe(
-                collection => {
+                (collection) => {
                     // transfere sub collections and content
-                    this.dataSourceCollections.setData(collection.collections, collection.pagination);
+                    this.dataSourceCollections.setData(
+                        collection.collections,
+                        collection.pagination,
+                    );
                     this.dataSourceCollections.setCanLoadMore(false);
                     if (this.isRootLevelCollection()) {
                         this.finishCollectionLoading(callback);
                         return;
                     }
-                    if(this.isAllowedToEditCollection()) {
-                        this.collectionService.
-                        getCollectionProposals(this.collectionContent.node.ref.id).subscribe((proposals) => {
-                            proposals.nodes = proposals.nodes.map((p) => {
-                                p.proposalCollection = this.collectionContent.node;
-                                return p;
+                    if (this.isAllowedToEditCollection()) {
+                        this.collectionService
+                            .getCollectionProposals(this.collectionContent.node.ref.id)
+                            .subscribe((proposals) => {
+                                proposals.nodes = proposals.nodes.map((p) => {
+                                    p.proposalCollection = this.collectionContent.node;
+                                    return p;
+                                });
+                                this.collectionProposals = proposals;
                             });
-                            this.collectionProposals = proposals;
-                        })
                     }
                     const requestRefs = this.getReferencesRequest();
                     requestRefs.count = null;
@@ -822,7 +822,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
                             requestRefs,
                             this.collectionContent.node.ref.repo,
                         )
-                        .subscribe(refs => {
+                        .subscribe((refs) => {
                             this.dataSourceReferences.setData(refs.references, refs.pagination);
                             this.finishCollectionLoading(callback);
                         });
@@ -834,9 +834,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     async loadMoreReferences(loadAll = false) {
-        if (
-            !(await this.dataSourceReferences.hasMore()) || this.dataSourceReferences.isLoading
-        ) {
+        if (!(await this.dataSourceReferences.hasMore()) || this.dataSourceReferences.isLoading) {
             return;
         }
         const request = this.getReferencesRequest();
@@ -852,22 +850,17 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
                 request,
                 this.collectionContent.node.ref.repo,
             )
-            .subscribe(refs => {
+            .subscribe((refs) => {
                 this.dataSourceReferences.appendData(refs.references);
                 this.dataSourceReferences.isLoading = false;
             });
     }
 
     async loadMoreCollections() {
-        if (
-            !await this.dataSourceCollections.hasMore() ||
-            this.dataSourceCollections.isLoading
-        ) {
+        if (!(await this.dataSourceCollections.hasMore()) || this.dataSourceCollections.isLoading) {
             return;
         }
-        const request: any = Helper.deepCopy(
-            CollectionsMainComponent.DEFAULT_REQUEST,
-        );
+        const request: any = Helper.deepCopy(CollectionsMainComponent.DEFAULT_REQUEST);
         request.offset = (await this.dataSourceCollections.getData()).length;
         this.dataSourceCollections.isLoading = true;
         this.collectionService
@@ -878,20 +871,18 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
                 request,
                 this.collectionContent.node.ref.repo,
             )
-            .subscribe(refs => {
+            .subscribe((refs) => {
                 this.dataSourceCollections.appendData(refs.collections);
                 this.dataSourceCollections.isLoading = false;
             });
     }
 
     getScope() {
-        return this.tabSelected
-            ? this.tabSelected
-            : RestConstants.COLLECTIONSCOPE_ALL;
+        return this.tabSelected ? this.tabSelected : RestConstants.COLLECTIONSCOPE_ALL;
     }
 
     onCreateCollection() {
-        UIHelper.getCommonParameters(this.route).subscribe(params => {
+        UIHelper.getCommonParameters(this.route).subscribe((params) => {
             this.router.navigate(
                 [
                     UIConstants.ROUTER_PREFIX + 'collections/collection',
@@ -931,35 +922,25 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
             this.dialogButtons = [];
             if (this.isAllowedToDeleteNodes([content])) {
                 this.dialogButtons.push(
-                    new DialogButton(
-                        'OPTIONS.REMOVE_REF',
-                        DialogButton.TYPE_CANCEL,
-                        () =>
-                            this.deleteFromCollection(() => this.closeDialog()),
+                    new DialogButton('OPTIONS.REMOVE_REF', { color: 'standard' }, () =>
+                        this.deleteFromCollection(() => this.closeDialog()),
                     ),
                 );
             }
             this.dialogButtons.push(
-                new DialogButton(
-                    'COLLECTIONS.OPEN_MISSING',
-                    DialogButton.TYPE_PRIMARY,
-                    () => this.onContentClick(content, true),
+                new DialogButton('COLLECTIONS.OPEN_MISSING', { color: 'primary' }, () =>
+                    this.onContentClick(content, true),
                 ),
             );
             return;
         }
-        this.nodeService
-            .getNodeMetadata(content.ref.id)
-            .subscribe((data: NodeWrapper) => {
-                this.contentDetailObject = data.node;
+        this.nodeService.getNodeMetadata(content.ref.id).subscribe((data: NodeWrapper) => {
+            this.contentDetailObject = data.node;
 
-                // remember the scroll Y before displaying content
-                this.lastScrollY = window.scrollY;
-                this.router.navigate([
-                    UIConstants.ROUTER_PREFIX + 'render',
-                    content.ref.id,
-                ]);
-            });
+            // remember the scroll Y before displaying content
+            this.lastScrollY = window.scrollY;
+            this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', content.ref.id]);
+        });
     }
 
     contentDetailBack(event: any): void {
@@ -981,8 +962,8 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
         if (id == null) {
             id = RestConstants.ROOT;
         }
-        this.createSubCollectionOptionItem.name = 'OPTIONS.' +
-            (this.isRootLevelCollection() ? 'NEW_COLLECTION' : 'NEW_SUB_COLLECTION');
+        this.createSubCollectionOptionItem.name =
+            'OPTIONS.' + (this.isRootLevelCollection() ? 'NEW_COLLECTION' : 'NEW_SUB_COLLECTION');
         if (id == '-root-') {
             // display root collections with tabs
             this.setCollectionId(RestConstants.ROOT);
@@ -992,20 +973,25 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
             this.isLoading = true;
 
             this.collectionService.getCollection(id).subscribe(
-                ({collection}) => {
+                ({ collection }) => {
                     // set the collection and load content data by refresh
                     this.setCollectionId(null);
-                    const orderCollections = collection.properties[RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE];
-                    this.sortCollections.active = orderCollections?.[0] || RestConstants.CM_MODIFIED_DATE;
-                    this.sortCollections.direction = orderCollections?.[1] === 'true' ? 'asc' : 'desc';
+                    const orderCollections =
+                        collection.properties[
+                            RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE
+                        ];
+                    this.sortCollections.active =
+                        orderCollections?.[0] || RestConstants.CM_MODIFIED_DATE;
+                    this.sortCollections.direction =
+                        orderCollections?.[1] === 'true' ? 'asc' : 'desc';
 
                     const refMode = collection.collection.orderMode;
                     const refAscending = collection.collection.orderAscending;
                     // cast old order mode to new parameter
-                    this.sortReferences.active = (
-                        ((refMode === RestConstants.COLLECTION_ORDER_MODE_CUSTOM ?
-                            RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION : refMode) || RestConstants.CM_MODIFIED_DATE) as any
-                    );
+                    this.sortReferences.active = ((refMode ===
+                    RestConstants.COLLECTION_ORDER_MODE_CUSTOM
+                        ? RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION
+                        : refMode) || RestConstants.CM_MODIFIED_DATE) as any;
                     this.sortReferences.direction = refAscending ? 'asc' : 'desc';
                     this.collectionContent.node = collection;
                     this.mainNavUpdateTrigger.next();
@@ -1013,22 +999,31 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
                     this.renderBreadcrumbs();
 
                     this.refreshContent(callback);
-                    if(this.feedbackAllowed() && this.params.feedback === 'true') {
+                    if (this.feedbackAllowed() && this.params.feedback === 'true') {
                         this.mainNavService.getDialogs().collectionWriteFeedback = collection;
-                        this.mainNavService.getDialogs().collectionWriteFeedbackChange.pipe(first()).subscribe(() => {
-                            if(this.params.feedbackClose === 'true') {
-                                window.close();
-                            }
-                        })
+                        this.mainNavService
+                            .getDialogs()
+                            .collectionWriteFeedbackChange.pipe(first())
+                            .subscribe(() => {
+                                if (this.params.feedbackClose === 'true') {
+                                    window.close();
+                                }
+                            });
                     }
-                    if(this.collectionContent.node.access.indexOf(RestConstants.ACCESS_CHANGE_PERMISSIONS) !== -1) {
+                    if (
+                        this.collectionContent.node.access.indexOf(
+                            RestConstants.ACCESS_CHANGE_PERMISSIONS,
+                        ) !== -1
+                    ) {
                         this.nodeService.getNodePermissions(id).subscribe((permissions) => {
-                            this.permissions = permissions.permissions.localPermissions.permissions.
-                            concat(permissions.permissions.inheritedPermissions);
+                            this.permissions =
+                                permissions.permissions.localPermissions.permissions.concat(
+                                    permissions.permissions.inheritedPermissions,
+                                );
                         });
                     }
                 },
-                error => {
+                (error) => {
                     if (id != '-root-') {
                         this.navigate();
                     }
@@ -1051,18 +1046,13 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     showTabs() {
-        return (
-            this.isRootLevelCollection() && (!this.isGuest || this.hasEditorial)
-        );
+        return this.isRootLevelCollection() && (!this.isGuest || this.hasEditorial);
     }
 
     getCollectionViewType() {
         // on mobile, we will always show the small collection list
         if (
-            UIHelper.evaluateMediaQuery(
-                UIConstants.MEDIA_QUERY_MAX_WIDTH,
-                UIConstants.MOBILE_WIDTH,
-            )
+            UIHelper.evaluateMediaQuery(UIConstants.MEDIA_QUERY_MAX_WIDTH, UIConstants.MOBILE_WIDTH)
         ) {
             return ListTableComponent.VIEW_TYPE_GRID_SMALL;
         }
@@ -1086,13 +1076,11 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     private initialize() {
-        this.optionsService.clearComponents(
-            this.actionbarReferences,
-        );
+        this.optionsService.clearComponents(this.actionbarReferences);
 
         // load user profile
         this.iamService.getCurrentUserAsync().then(
-            iamUser => {
+            (iamUser) => {
                 // WIN
 
                 this.person = iamUser.person;
@@ -1100,9 +1088,9 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
                 // set app to ready state
                 this.isReady = true;
                 // subscribe to parameters of url
-                this.route.queryParams.subscribe(params => {
+                this.route.queryParams.subscribe((params) => {
                     const diffs = Helper.getDifferentKeys(this.params, params);
-                    if(Object.keys(diffs).length === 1 && diffs.viewType) {
+                    if (Object.keys(diffs).length === 1 && diffs.viewType) {
                         this.params = params;
                         this.viewTypeNodes = diffs.viewType;
                         return;
@@ -1154,22 +1142,20 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
                     this.showCollection = id !== '-root-';
                     this.displayCollectionById(id, async () => {
                         if (params.content) {
-                            for (const content of (await this.dataSourceReferences.getData())) {
+                            for (const content of await this.dataSourceReferences.getData()) {
                                 if (content.ref.id === params.content) {
                                     this.contentDetailObject = content;
                                     break;
                                 }
                             }
                         }
-                        this.frame.broadcastEvent(
-                            FrameEventsService.EVENT_INVALIDATE_HEIGHT,
-                        );
+                        this.frame.broadcastEvent(FrameEventsService.EVENT_INVALIDATE_HEIGHT);
                     });
                     this.mainNavUpdateTrigger.next();
                     // }
                 });
             },
-            error => {
+            (error) => {
                 // FAIL
                 this.toast.error(error);
                 this.isReady = true;
@@ -1186,9 +1172,8 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
             )
             .subscribe(
                 () => {
-                    this.toast.toast('COLLECTIONS.REMOVED_FROM_COLLECTION');
+                    this.afterDeleteFromCollection();
                     this.toast.closeModalDialog();
-                    this.refreshContent();
                     if (callback) {
                         callback();
                     }
@@ -1198,6 +1183,11 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
                     this.toast.error(error);
                 },
             );
+    }
+
+    afterDeleteFromCollection() {
+        this.toast.toast('COLLECTIONS.REMOVED_FROM_COLLECTION');
+        this.refreshContent();
     }
 
     private deleteMultiple(nodes: Node[], position = 0, error = false) {
@@ -1211,10 +1201,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
         }
         this.toast.showProgressDialog();
         this.collectionService
-            .removeFromCollection(
-                nodes[position].ref.id,
-                this.collectionContent.node.ref.id,
-            )
+            .removeFromCollection(nodes[position].ref.id, this.collectionContent.node.ref.id)
             .subscribe(
                 () => {
                     this.deleteMultiple(nodes, position + 1, error);
@@ -1251,9 +1238,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
             )
             .subscribe(
                 () => {
-                    this.collectionContentOriginal = Helper.deepCopy(
-                        this.collectionContent,
-                    );
+                    this.collectionContentOriginal = Helper.deepCopy(this.collectionContent);
                     this.infoTitle = null;
                     this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_CUSTOM');
                     this.toast.closeModalDialog();
@@ -1274,9 +1259,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
             )
             .subscribe(
                 () => {
-                    this.collectionContentOriginal = Helper.deepCopy(
-                        this.collectionContent,
-                    );
+                    this.collectionContentOriginal = Helper.deepCopy(this.collectionContent);
                     this.infoTitle = null;
                     this.sortCollections.customSortingInProgress = false;
                     this.toast.toast('COLLECTIONS.TOAST.SORT_SAVED_CUSTOM');
@@ -1305,10 +1288,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
             scope: Scope.CollectionsCollection,
             activeObjects: [this.collectionContent.node],
         });
-        this.optionsService.initComponents(
-            this.actionbarCollection,
-            this.listReferences,
-        );
+        this.optionsService.initComponents(this.actionbarCollection, this.listReferences);
         this.optionsService.refreshComponents();
     }
 
@@ -1320,9 +1300,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
         };
         this.collectionContent.node.ref = {} as NodeRef;
         this.collectionContent.node.ref.id = id;
-        this.collectionContent.node.aspects = [
-            RestConstants.CCM_ASPECT_COLLECTION,
-        ];
+        this.collectionContent.node.aspects = [RestConstants.CCM_ASPECT_COLLECTION];
         this.mainNavUpdateTrigger.next();
     }
 
@@ -1332,9 +1310,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     private finishCollectionLoading(callback?: () => void) {
-        this.collectionContentOriginal = Helper.deepCopy(
-            this.collectionContent,
-        );
+        this.collectionContentOriginal = Helper.deepCopy(this.collectionContent);
         this.mainNavService.getMainNav()?.refreshBanner();
 
         // Cannot trivially reference the add button for the tutorial with
@@ -1360,7 +1336,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
             this.listReferences?.initOptionsGenerator({
                 scope: Scope.CollectionsReferences,
                 actionbar: this.actionbarReferences,
-                parent: this.collectionContent.node
+                parent: this.collectionContent.node,
             });
         });
     }
@@ -1368,11 +1344,13 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
     async setCollectionSort(sort: ListSortConfig) {
         this.sortCollections = sort;
         try {
-            await this.nodeService.editNodeProperty(
-                this.collectionContent.node.ref.id,
-                RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE,
-                [this.sortCollections.active, (this.sortCollections.direction === 'asc') + '']
-            ).toPromise();
+            await this.nodeService
+                .editNodeProperty(
+                    this.collectionContent.node.ref.id,
+                    RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE,
+                    [this.sortCollections.active, (this.sortCollections.direction === 'asc') + ''],
+                )
+                .toPromise();
         } catch (e) {
             this.toast.error(e);
         }
@@ -1382,7 +1360,8 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
                 type: this.translationService.instant('NODE.' + sort.active),
             });
         }
-        this.sortCollections.customSortingInProgress = this.sortCollections.active === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION;
+        this.sortCollections.customSortingInProgress =
+            this.sortCollections.active === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION;
         if (this.sortCollections.customSortingInProgress) {
             this.toggleCollectionsOrder();
         }
@@ -1391,23 +1370,26 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
         const diff = Helper.getKeysWithDifferentValues(this.sortReferences, sort);
         this.sortReferences = sort;
         // auto activate the custom sorting when the users switches to "custom order"
-        if(diff.includes('active')) {
-            this.sortReferences.customSortingInProgress = this.sortReferences.active === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION;
+        if (diff.includes('active')) {
+            this.sortReferences.customSortingInProgress =
+                this.sortReferences.active === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION;
         }
         this.toggleReferencesOrder();
         if (this.sortReferences.customSortingInProgress) {
             await this.loadMoreReferences(true);
         }
-        if(diff.includes('customSortingInProgress') && sort.customSortingInProgress) {
+        if (diff.includes('customSortingInProgress') && sort.customSortingInProgress) {
             return;
         }
 
         try {
-            await this.nodeService.editNodeProperty(
-                this.collectionContent.node.ref.id,
-                RestConstants.CCM_PROP_COLLECTION_ORDER_MODE,
-                [sort.active, (sort.direction === 'asc') + '']
-            ).toPromise();
+            await this.nodeService
+                .editNodeProperty(
+                    this.collectionContent.node.ref.id,
+                    RestConstants.CCM_PROP_COLLECTION_ORDER_MODE,
+                    [sort.active, (sort.direction === 'asc') + ''],
+                )
+                .toPromise();
         } catch (e) {
             this.toast.error(e);
         }
@@ -1417,7 +1399,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
     private getReferencesRequest(): RequestObject {
         return {
             sortBy: [this.sortReferences.active],
-            sortAscending: [this.sortReferences.direction === 'asc']
+            sortAscending: [this.sortReferences.direction === 'asc'],
         };
     }
 

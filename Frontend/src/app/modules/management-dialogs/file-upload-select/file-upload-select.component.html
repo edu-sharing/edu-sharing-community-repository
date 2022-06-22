@@ -29,7 +29,7 @@
         <div><i esIcon="cloud_upload"></i></div>
         <div *ngIf="supportsDrop">
           {{ 'WORKSPACE.ADD_OBJECT_MESSAGE' | translate }}
-          <es-mat-link (click)="selectFile()">{{
+          <es-mat-link (click)="selectFile()" data-test="browse-files-button">{{
             'WORKSPACE.ADD_OBJECT_BROWSE' | translate
           }}</es-mat-link>
         </div>
@@ -52,7 +52,10 @@
           />
         </mat-form-field>
       </div>
-      <es-spinner-small *ngIf="loadingWebsiteInformation" class="loading-website-information-spinner"></es-spinner-small>
+      <es-spinner-small
+        *ngIf="loadingWebsiteInformation"
+        class="loading-website-information-spinner"
+      ></es-spinner-small>
       <es-info-message *ngIf="showInvalidUrlMessage" mode="error">
         {{ 'WORKSPACE.LINK_INVALID_INFO' | translate }}
       </es-info-message>
@@ -119,7 +122,7 @@
       <div *ngIf="showPicker" class="location">
         <div class="caption">{{ 'WORKSPACE.FILE_LOCATION' | translate }}</div>
         <div class="picker-group">
-          <div class="no-breadcrumbs" *ngIf="!_parent">
+          <div class="no-breadcrumbs" *ngIf="!parent">
             {{ 'STORAGE_LOCATION_UNSET' | translate }}
           </div>
           <es-breadcrumbs

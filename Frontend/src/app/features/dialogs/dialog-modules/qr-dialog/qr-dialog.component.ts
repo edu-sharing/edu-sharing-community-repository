@@ -1,7 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
-import { CardDialogContentComponent, CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
+import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 
 export interface QrDialogData {
     node: Node;
@@ -12,7 +12,7 @@ export interface QrDialogData {
     templateUrl: './qr-dialog.component.html',
     styleUrls: ['./qr-dialog.component.scss'],
 })
-export class QrDialogComponent implements OnInit, CardDialogContentComponent<QrDialogData, void> {
+export class QrDialogComponent implements OnInit {
     url: string;
 
     constructor(

@@ -1,19 +1,18 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 
 import { RestLtiService } from '../../../core-module/rest/services/rest-lti.service';
 import { LTIRegistrationToken, LTIRegistrationTokens } from '../../../core-module/rest/data-object';
 import { Toast } from '../../../core-ui-module/toast';
 import { AdminComponent } from '../admin.component';
-import {UIHelper} from '../../../core-ui-module/ui-helper';
-import {DialogButton} from '../../../core-module/ui/dialog-button';
+import { UIHelper } from '../../../core-ui-module/ui-helper';
+import { DialogButton } from '../../../core-module/ui/dialog-button';
 
 @Component({
-  selector: 'es-lti-admin',
-  templateUrl: './lti-admin.component.html',
-  styleUrls: ['./lti-admin.component.scss']
+    selector: 'es-lti-admin',
+    templateUrl: './lti-admin.component.html',
+    styleUrls: ['./lti-admin.component.scss'],
 })
 export class LtiAdminComponent implements OnInit {
-
     @Output() onRefreshAppList = new EventEmitter<void>();
 
     /**
@@ -34,32 +33,36 @@ export class LtiAdminComponent implements OnInit {
     keyId: string;
     authTokenUrl: string;
 
-  constructor( private ltiService: RestLtiService, private toast: Toast) { }
+    constructor(private ltiService: RestLtiService, private toast: Toast) {}
 
-  ngOnInit(): void {
-      this.refresh();
-  }
+    ngOnInit(): void {
+        this.refresh();
+    }
 
     remove(element: LTIRegistrationToken) {
-      this.toast.showConfigurableDialog({
-          title: 'ADMIN.LTI.REMOVE_TITLE',
-          message: 'ADMIN.LTI.REMOVE_MESSAGE',
-          messageParameters: element,
-          buttons: [
-              new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.toast.closeModalDialog()),
-              new DialogButton('ADMIN.APPLICATIONS.REMOVE', DialogButton.TYPE_DANGER, () => {
-                  this.ltiService.removeToken(element.token).subscribe((t: void) => {
-                      this.refresh();
-                  });
-                  this.toast.closeModalDialog()
-              })
-          ],
-          isCancelable: true,
-      });
+        this.toast.showConfigurableDialog({
+            title: 'ADMIN.LTI.REMOVE_TITLE',
+            message: 'ADMIN.LTI.REMOVE_MESSAGE',
+            messageParameters: element,
+            buttons: [
+                new DialogButton('CANCEL', { color: 'standard' }, () =>
+                    this.toast.closeModalDialog(),
+                ),
+                new DialogButton('ADMIN.APPLICATIONS.REMOVE', { color: 'danger' }, () => {
+                    this.ltiService.removeToken(element.token).subscribe((t: void) => {
+                        this.refresh();
+                    });
+                    this.toast.closeModalDialog();
+                }),
+            ],
+            isCancelable: true,
+        });
     }
 
     refresh() {
-        this.ltiService.getTokensCall(false).subscribe((t: LTIRegistrationTokens) => {this.tokens = t; });
+        this.ltiService.getTokensCall(false).subscribe((t: LTIRegistrationTokens) => {
+            this.tokens = t;
+        });
     }
 
     generate() {
@@ -70,15 +73,27 @@ export class LtiAdminComponent implements OnInit {
     }
 
     saveAdvanced() {
-        this.ltiService.registrationAdvanced(this.platformId, this.clientId, this.deploymentId,
-            this.authenticationRequestUrl, this.keysetUrl, this.keyId, this.authTokenUrl).subscribe( (t: void) => {
-            this.toast.toast('ADMIN.LTI.DATA.CREATED', null);
-            this.toast.closeModalDialog();
-            this.onRefreshAppList.emit();
-        }, (error: any) => {
-            this.toast.error(error);
-            this.toast.closeModalDialog();
-        });
+        this.ltiService
+            .registrationAdvanced(
+                this.platformId,
+                this.clientId,
+                this.deploymentId,
+                this.authenticationRequestUrl,
+                this.keysetUrl,
+                this.keyId,
+                this.authTokenUrl,
+            )
+            .subscribe(
+                (t: void) => {
+                    this.toast.toast('ADMIN.LTI.DATA.CREATED', null);
+                    this.toast.closeModalDialog();
+                    this.onRefreshAppList.emit();
+                },
+                (error: any) => {
+                    this.toast.error(error);
+                    this.toast.closeModalDialog();
+                },
+            );
     }
 
     copyUrl(element: LTIRegistrationToken) {

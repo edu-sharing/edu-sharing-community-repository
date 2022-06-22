@@ -1,5 +1,3 @@
-import {FileUploadComponent} from './file-upload.component';
+import { FileUploadComponent } from './file-upload.component';
 
-export const DECLARATIONS_FILE_UPLOAD= [
-  FileUploadComponent
-];
+export const DECLARATIONS_FILE_UPLOAD = [FileUploadComponent];

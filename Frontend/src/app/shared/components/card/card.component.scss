@@ -1,10 +1,10 @@
-@import "../../../core-ui-module/styles/variables";
-@import "variables";
+@import '../../../core-ui-module/styles/variables';
+@import 'variables';
 
-@mixin content{
-  overflow-y: auto;
-  @include iosScrolling();
-  background-color: #fff;
+@mixin content {
+    overflow-y: auto;
+    @include iosScrolling();
+    background-color: #fff;
 }
 
 // Maximize both horizontally and vertically.
@@ -13,16 +13,16 @@
 // order to maintain a consistent look, i.e., the dialog should not go edge-to-edge horizontally but
 // have borders vertically.
 @mixin maximize {
-  padding: 0px;
-  // When we show the mobile (bottom) nav bar, we can draw over the top bar since all important
-  // functions are accessible via the bottom bar.
-  @media screen and (max-width: $mobileTabSwitchWidth) {
-    top: 0px;
-  }
-  .mat-card {
-    height: 100%;
-    width: 100%;
-  }
+    padding: 0px;
+    // When we show the mobile (bottom) nav bar, we can draw over the top bar since all important
+    // functions are accessible via the bottom bar.
+    @media screen and (max-width: $mobileTabSwitchWidth) {
+        top: 0px;
+    }
+    .mat-card {
+        height: 100%;
+        width: 100%;
+    }
 }
 
 // Draw over everything and darken the background if visible.
@@ -33,230 +33,240 @@
 // dialog. It is also triggered automatically in case the viewport's height becomes to small to
 // comfortably fit the dialog.
 @mixin modal {
-  @include darken();
-  @include blurBackground();
-  @include setZIndex($dialogZIndex);
-  height: 100%;
+    @include darken();
+    @include blurBackground();
+    @include setZIndex($dialogZIndex);
+    height: 100%;
 }
 
 @mixin no-modal {
-  padding: #{$nonModalPadding};
-  top: #{$mainnavHeight};
-  height: unset;
-  @media screen and (max-width: $mobileTabSwitchWidth){
-    bottom: #{$mobileTabNavHeight};
-  }
-  @include setZIndex($dialogNonModalZIndex)
+    padding: #{$nonModalPadding};
+    top: #{$mainnavHeight};
+    height: unset;
+    @media screen and (max-width: $mobileTabSwitchWidth) {
+        bottom: #{$mobileTabNavHeight};
+    }
+    @include setZIndex($dialogNonModalZIndex);
 }
 
 @mixin setZIndex($baseZIndex) {
-  @for $p from 0 through 50 {
-    &[priority="#{$p}"] {
-      z-index: $baseZIndex + $p;
+    @for $p from 0 through 50 {
+        &[priority='#{$p}'] {
+            z-index: $baseZIndex + $p;
+        }
     }
-  }
 }
 
-:host ::ng-deep .card-dialog{
-  top: 0px;
-  bottom: 0px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  &[modal=always] {
-    @include modal();
-  }
-  @media (max-height: $mobileHeightWithKeyboard) {
-    @include modal();
-  }
-  @media (min-height: $mobileHeightWithKeyboard) {
-    &:not([modal=always]) {
-      @include no-modal();
-    }
-  }
-  @each $name, $value in $heights {
-    &[height=#{$name}] {
-      .mat-card {
-        height: $value;
-      }
-    }
-  }
-  @each $name, $value in $widths {
-    &[width=#{$name}] {
-      .mat-card {
-        width: $value;
-      }
-      @media (max-width: $value + 2*$nonModalPadding) {
-        @include maximize();
-      }
-    }
-  }
-  .mat-card {
+:host ::ng-deep .card-dialog {
+    top: 0px;
+    bottom: 0px;
     display: flex;
-    flex-direction: column;
-    max-width: 100%;
-    max-height: 100%;
-    position: relative;
-    padding: 0;
-    @include materialShadowLarge();
-    .mat-card-header {
-      flex-shrink: 0;
-      background-color: $actionDialogBackground;
-      display: flex;
-      align-items: center;
-      height: $titleHeight;
-      padding-top: 15px;
-      position: relative;
-      .mat-card-header-text {
-        width: calc(100% - 32px);
-        mat-card-title{
-          &.no-subtitle{
-            margin-bottom: 5px;
-          }
+    align-items: center;
+    justify-content: center;
+    &[modal='always'] {
+        @include modal();
+    }
+    @media (max-height: $mobileHeightWithKeyboard) {
+        @include modal();
+    }
+    @media (min-height: $mobileHeightWithKeyboard) {
+        &:not([modal='always']) {
+            @include no-modal();
         }
-      }
-      .cancel {
-        position: absolute;
-        right: 0;
-        top: 0;
-        padding:2px;
-        background: linear-gradient(to right,rgba(red($actionDialogBackground),green($actionDialogBackground),blue($actionDialogBackground),0.0001) 0,$actionDialogBackground 15px);
-        >button {
-          border-radius: 50%;
-          height: 66px;
-          &.cdk-keyboard-focused {
-            outline-offset: -2px;
-          }
+    }
+    @each $name, $value in $heights {
+        &[height='#{$name}'] {
+            .mat-card {
+                height: $value;
+            }
         }
-      }
-      .avatar {
+    }
+    @each $name, $value in $widths {
+        &[width='#{$name}'] {
+            .mat-card {
+                width: $value;
+            }
+            @media (max-width: $value + 2*$nonModalPadding) {
+                @include maximize();
+            }
+        }
+    }
+    .mat-card {
         display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-left: 20px;
-        margin-top: -10px;
-        background-color: #fff;
-        > img {
-          width: 24px;
-          height: 24px;
-        }
-        >  i {
-          color: $primary;
-        }
-      }
-      .mat-card-title, .mat-card-subtitle{
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .mat-card-title{
-        color: $textMain;
-      }
-    }
-    background-color: $backgroundColor;
-    border-radius: 2px;
-    mat-card-actions {
-      background-color: #fff;
-      border-top:1px solid $cardSeparatorLineColor;
-      display: flex;
-      margin: 0;
-      padding: 17px 20px;
-      flex-wrap: wrap;
-      .buttons {
-        flex-grow: 1;
-        display: flex;
-        justify-content: flex-end;
-        button {
-          &:not(:last-child) {
-            margin-right: 10px;
-          }
-          padding: 0 2rem;
-          font-weight: 600;
-        }
-      }
-    }
-    mat-card-content {
-      margin: 0;
-      position: relative;
-      flex-grow: 1;
-
-    }
-    &:not(.card-tabbed) mat-card-content {
-      @include content();
-    }
-    &.card-tabbed mat-card-content {
-      display: flex;
-      flex-direction: column;
-      min-height: 0px;
-      mat-tab-group {
-        min-height: 0px;
-        flex-grow: 1;
-        .mat-tab-body-wrapper {
-          flex-grow: 1;
-          // mat-tab-body already defines some styling for content. Uncomment
-          // when encountering any problems.
-          // @include content();
-        }
-      }
-    }
-    .card-content-padding {
-      padding: $cardPadding;
-    }
-  }
-  .card-jumpmarks {
-    margin-left: $jumpmarksWidth;
-    .jumpmarks {
-      position: absolute;
-      z-index: $dialogZIndex+2;
-      top: 0;
-      left: -$jumpmarksWidth - 5px;
-      width: $jumpmarksWidth;
-      background-color: $workspaceTreeBackground;
-      border-radius: 3pt;
-      padding: 10px 0;
-      button {
-        border-radius: 0;
-        margin: 0;
-        padding: 10px 5px;
-        width: 100%;
-        transition: all $transitionNormal;
-        white-space: normal;
-        .mat-button-wrapper{
-          justify-content: flex-start;
-          text-align: start;
-          line-height: 1.5;
-          text-transform: unset;
-          > i {
-            text-align: center;
+        flex-direction: column;
+        max-width: 100%;
+        max-height: 100%;
+        position: relative;
+        padding: 0;
+        @include materialShadowLarge();
+        .mat-card-header {
             flex-shrink: 0;
-          }
+            background-color: $actionDialogBackground;
+            display: flex;
+            align-items: center;
+            height: $titleHeight;
+            padding-top: 15px;
+            position: relative;
+            .mat-card-header-text {
+                width: calc(100% - 32px);
+                mat-card-title {
+                    &.no-subtitle {
+                        margin-bottom: 5px;
+                    }
+                }
+            }
+            .cancel {
+                position: absolute;
+                right: 0;
+                top: 0;
+                padding: 2px;
+                background: linear-gradient(
+                    to right,
+                    rgba(
+                            red($actionDialogBackground),
+                            green($actionDialogBackground),
+                            blue($actionDialogBackground),
+                            0.0001
+                        )
+                        0,
+                    $actionDialogBackground 15px
+                );
+                > button {
+                    border-radius: 50%;
+                    height: 66px;
+                    &.cdk-keyboard-focused {
+                        outline-offset: -2px;
+                    }
+                }
+            }
+            .avatar {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-left: 20px;
+                margin-top: -10px;
+                background-color: #fff;
+                > img {
+                    width: 24px;
+                    height: 24px;
+                }
+                > i {
+                    color: $primary;
+                }
+            }
+            .mat-card-title,
+            .mat-card-subtitle {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .mat-card-title {
+                color: $textMain;
+            }
         }
-      }
-      button.active {
-        background: $workspaceTreeSelectedBackgroundEffect;
-        background-color: $workspaceTreeSelectedBackground;
-      }
+        background-color: $backgroundColor;
+        border-radius: 2px;
+        mat-card-actions {
+            background-color: #fff;
+            border-top: 1px solid $cardSeparatorLineColor;
+            display: flex;
+            margin: 0;
+            padding: 17px 20px;
+            flex-wrap: wrap;
+            .buttons {
+                flex-grow: 1;
+                display: flex;
+                justify-content: flex-end;
+                button {
+                    &:not(:last-child) {
+                        margin-right: 10px;
+                    }
+                    padding: 0 2rem;
+                    font-weight: 600;
+                }
+            }
+        }
+        mat-card-content {
+            margin: 0;
+            position: relative;
+            flex-grow: 1;
+        }
+        &:not(.card-tabbed) mat-card-content {
+            @include content();
+        }
+        &.card-tabbed mat-card-content {
+            display: flex;
+            flex-direction: column;
+            min-height: 0px;
+            mat-tab-group {
+                min-height: 0px;
+                flex-grow: 1;
+                .mat-tab-body-wrapper {
+                    flex-grow: 1;
+                    // mat-tab-body already defines some styling for content. Uncomment
+                    // when encountering any problems.
+                    // @include content();
+                }
+            }
+        }
+        .card-content-padding {
+            padding: $cardPadding;
+        }
     }
-  }
+    .card-jumpmarks {
+        margin-left: $jumpmarksWidth;
+        .jumpmarks {
+            position: absolute;
+            z-index: $dialogZIndex + 2;
+            top: 0;
+            left: -$jumpmarksWidth - 5px;
+            width: $jumpmarksWidth;
+            background-color: $workspaceTreeBackground;
+            border-radius: 3pt;
+            padding: 10px 0;
+            button {
+                border-radius: 0;
+                margin: 0;
+                padding: 10px 5px;
+                width: 100%;
+                transition: all $transitionNormal;
+                white-space: normal;
+                .mat-button-wrapper {
+                    justify-content: flex-start;
+                    text-align: start;
+                    line-height: 1.5;
+                    text-transform: unset;
+                    > i {
+                        text-align: center;
+                        flex-shrink: 0;
+                    }
+                }
+            }
+            button.active {
+                background: $workspaceTreeSelectedBackgroundEffect;
+                background-color: $workspaceTreeSelectedBackground;
+            }
+        }
+    }
 
-  @media screen and (max-width: ($mobileWidth - $mobileStage*3)) {
-    mat-card-actions {
-      // when screen is small, all buttons should have the same size to prevent long texts to let short text to be too small
-      > div {
-        width: 100%;
-      }
-      button {
-        width: 0;
-        flex-grow: 1;
-      }
+    @media screen and (max-width: ($mobileWidth - $mobileStage*3)) {
+        mat-card-actions {
+            // when screen is small, all buttons should have the same size to prevent long texts to let short text to be too small
+            > div {
+                width: 100%;
+            }
+            button {
+                width: 0;
+                flex-grow: 1;
+            }
+        }
     }
-  }
-  @media all and (max-width: 50 + 700 + $jumpmarksWidth){
-    .card-jumpmarks{
-      margin-left: 0;
-      .jumpmarks{
-        display: none;
-      }
+    @media all and (max-width: 50 + 700 + $jumpmarksWidth) {
+        .card-jumpmarks {
+            margin-left: 0;
+            .jumpmarks {
+                display: none;
+            }
+        }
     }
-  }
 }

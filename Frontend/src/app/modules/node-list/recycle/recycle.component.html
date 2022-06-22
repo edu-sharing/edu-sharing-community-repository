@@ -1,17 +1,27 @@
-<es-node-list #list
-[isInsideWorkspace]="isInsideWorkspace"
-[parent]="this"
-[actionbar]="actionbar"
-[customOptions]="options"
-[columns]="columns"
-[reload]="reload"
-[sortBy]="sortBy"
-[sortAscending]="sortAscending"
-[selected]="selected"
-(onSelectionChanged)="onSelection($event)"
-[searchLabel]="'RECYCLE.SEARCH_ARCHIVE'"
-[searchWorkspace]="searchWorkspace"
+<es-node-list
+  #list
+  [isInsideWorkspace]="isInsideWorkspace"
+  [parent]="this"
+  [actionbar]="actionbar"
+  [customOptions]="options"
+  [columns]="columns"
+  [reload]="reload"
+  [sortBy]="sortBy"
+  [sortAscending]="sortAscending"
+  [selected]="selected"
+  (onSelectionChanged)="onSelection($event)"
+  [searchLabel]="'RECYCLE.SEARCH_ARCHIVE'"
+  [searchWorkspace]="searchWorkspace"
 ></es-node-list>
-<es-recycle-delete-confirmation *ngIf="toDelete" [node]="toDelete" (onClose)="finishDelete()" (onDelete)="deleteNodesWithoutConfirmation()"></es-recycle-delete-confirmation>
-<es-recycle-restore-info *ngIf="restoreResult" [results]="restoreResult" (onClose)="finishRestore()" (onRestoreFolder)="restoreNodesEvent($event)"></es-recycle-restore-info>
-
+<es-recycle-delete-confirmation
+  *ngIf="toDelete"
+  [node]="toDelete"
+  (onClose)="finishDelete()"
+  (onDelete)="deleteNodesWithoutConfirmation()"
+></es-recycle-delete-confirmation>
+<es-recycle-restore-info
+  *ngIf="restoreResult"
+  [results]="restoreResult"
+  (onClose)="finishRestore()"
+  (onRestoreFolder)="restoreNodesEvent($event)"
+></es-recycle-restore-info>

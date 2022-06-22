@@ -27,9 +27,21 @@
     min-height: 0;
     overflow: auto;
     flex-grow: 1;
+    position: relative;
     & ::ng-deep > * {
         min-height: 100%;
         flex-grow: 1;
     }
 }
 
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba($color: white, $alpha: 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

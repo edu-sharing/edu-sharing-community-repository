@@ -1,22 +1,16 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal, ComponentType } from '@angular/cdk/portal';
-import { Injectable, InjectionToken, Injector } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, skipWhile, takeUntil, tap } from 'rxjs/operators';
-import {
-    CardDialogCardConfig,
-    CardDialogConfig,
-    CardDialogContentComponent,
-    CardDialogState,
-    CARD_DIALOG_DATA,
-    ViewMode,
-} from './card-dialog-config';
+import { CardDialogConfig, CARD_DIALOG_DATA } from './card-dialog-config';
 import { CardDialogContainerComponent } from './card-dialog-container/card-dialog-container.component';
 import { CardDialogRef } from './card-dialog-ref';
+import { CardDialogState, ViewMode } from './card-dialog-state';
 
-export const CARD_DIALOG_STATE = new InjectionToken<CardDialogState>('CardDialogState');
-export const CARD_DIALOG_OVERLAY_REF = new InjectionToken<CardDialogState>('CardDialogOverlayRef');
+// export const CARD_DIALOG_STATE = new InjectionToken<CardDialogState>('CardDialogState');
+// export const CARD_DIALOG_OVERLAY_REF = new InjectionToken<CardDialogState>('CardDialogOverlayRef');
 
 /**
  * Provides cards for modal dialogs via overlays, similar to `MatDialog`.
@@ -31,33 +25,19 @@ export class CardDialogService {
         private breakpointObserver: BreakpointObserver,
     ) {}
 
-    open<T extends CardDialogContentComponent<D, R>, D, R>(
-        component: ComponentType<T>,
-        config?: CardDialogConfig<T['data']>,
-    ): CardDialogRef<R> {
-        const cardConfig = this.applyCardConfigDefaults(config?.cardConfig);
-        const overlayRef = this.createOverlay(cardConfig);
-        const cardState = new CardDialogState({ cardConfig });
-        this.registerSizeAndPositionSwitch(cardState, cardConfig, overlayRef);
-        const containerInjector = Injector.create({
+    open<T, D, R>(component: ComponentType<T>, config?: CardDialogConfig<D>): CardDialogRef<D, R> {
+        config = this.applyCardConfigDefaults(config);
+        const overlayRef = this.createOverlay(config);
+        const state = new CardDialogState();
+        const containerRef = overlayRef.attach(new ComponentPortal(CardDialogContainerComponent));
+        const dialogRef = new CardDialogRef<D, R>(overlayRef, containerRef.instance, config, state);
+        containerRef.instance.dialogRef = dialogRef;
+        this.registerSizeAndPositionSwitch(overlayRef, dialogRef);
+        const contentInjector = Injector.create({
             parent: this.injector,
             providers: [
-                {
-                    provide: CARD_DIALOG_STATE,
-                    useValue: cardState,
-                },
-                { provide: CARD_DIALOG_OVERLAY_REF, useValue: overlayRef },
-            ],
-        });
-        const containerRef = overlayRef.attach(
-            new ComponentPortal(CardDialogContainerComponent, undefined, containerInjector),
-        );
-        const dialogRef = new CardDialogRef<R>(overlayRef, cardState, containerRef.instance);
-        const contentInjector = Injector.create({
-            parent: containerInjector,
-            providers: [
                 { provide: CARD_DIALOG_DATA, useValue: config.data },
-                // { provide: CardDialogRef, useValue: dialogRef },
+                { provide: CardDialogRef, useValue: dialogRef },
             ],
         });
         containerRef.instance.attachComponentPortal(
@@ -68,14 +48,14 @@ export class CardDialogService {
         return dialogRef;
     }
 
-    private applyCardConfigDefaults(config: CardDialogCardConfig = {}): CardDialogCardConfig {
+    private applyCardConfigDefaults<D>(config: CardDialogConfig<D> = {}): CardDialogConfig<D> {
         return {
-            ...new CardDialogCardConfig(),
+            ...new CardDialogConfig<D>(),
             ...config,
         };
     }
 
-    private createOverlay(config: CardDialogCardConfig): OverlayRef {
+    private createOverlay(config: CardDialogConfig): OverlayRef {
         return this.overlay.create({
             hasBackdrop: true,
             panelClass: 'card-dialog-pane',
@@ -94,22 +74,18 @@ export class CardDialogService {
         });
     }
 
-    private registerSizeAndPositionSwitch(
-        state: CardDialogState,
-        config: CardDialogCardConfig,
-        overlayRef: OverlayRef,
-    ): void {
+    private registerSizeAndPositionSwitch(overlayRef: OverlayRef, dialogRef: CardDialogRef): void {
         this.createViewModeObservable()
             .pipe(
                 takeUntil(overlayRef.detachments()),
-                tap((mode) => state.updateViewMode(mode)),
+                tap((viewMode) => dialogRef.patchState({ viewMode })),
                 // Don't need to reset, when we haven't switched to mobile view yet.
                 skipWhile((mode) => mode === 'default'),
             )
             .subscribe((mode) => {
                 switch (mode) {
                     case 'default':
-                        this.resetSizeAndPosition(config, overlayRef);
+                        this.resetSizeAndPosition(dialogRef.config, overlayRef);
                         break;
                     case 'mobile':
                         this.setMobileSizeAndPosition(overlayRef);
@@ -124,7 +100,7 @@ export class CardDialogService {
             .pipe(map(({ matches }) => (matches ? 'mobile' : 'default')));
     }
 
-    private resetSizeAndPosition(config: CardDialogCardConfig, overlayRef: OverlayRef): void {
+    private resetSizeAndPosition(config: CardDialogConfig, overlayRef: OverlayRef): void {
         overlayRef.updateSize({
             height: config.height,
             minHeight: config.minHeight,

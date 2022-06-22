@@ -1,26 +1,61 @@
 <es-global-progress *ngIf="isLoading"></es-global-progress>
-<es-card *ngIf="!isLoading"
-      role="main" esSkipTarget="MAIN_CONTENT"
-      avatar="assets/images/app-icon.svg"
-      [buttons]="updateButtons()"
-      title="{{(state=='request' || state=='done-reset' ? 'REGISTER.REQUEST.TITLE' : state=='reset-password' ? 'REGISTER.RESET.TITLE' : 'REGISTER.TITLE') | translate}}"
-      subtitle="{{'REGISTER.ORGANIZATION_TITLE' | translate}}"
-      width="normal"
-      height="large"
-      (onCancel)="cancel()"
-      [isCancelable]="false"
+<es-card
+  *ngIf="!isLoading"
+  role="main"
+  esSkipTarget="MAIN_CONTENT"
+  avatar="assets/images/app-icon.svg"
+  [buttons]="updateButtons()"
+  title="{{
+    (state == 'request' || state == 'done-reset'
+      ? 'REGISTER.REQUEST.TITLE'
+      : state == 'reset-password'
+      ? 'REGISTER.RESET.TITLE'
+      : 'REGISTER.TITLE'
+    ) | translate
+  }}"
+  subtitle="{{ 'REGISTER.ORGANIZATION_TITLE' | translate }}"
+  width="normal"
+  height="large"
+  (onCancel)="cancel()"
+  [isCancelable]="false"
 >
-    <div class="register-content card-content-padding">
-        <h1 esTitle class="cdk-visually-hidden">{{ 'REGISTER.TITLE' | translate }}</h1>
-        <es-register-form [class.display-none]="!(state=='register')" (onRegisterDone)="onRegisterDone()" #registerForm></es-register-form>
-        <es-register-done *ngIf="state=='done' || state=='done-reset'" (onModify)="modifyData()" [inputState]="state" #registerDone></es-register-done>
-        <es-register-request *ngIf="state=='request'" (onDone)="onPasswordRequested()" #request></es-register-request>
-        <es-register-reset-password *ngIf="state=='reset-password'" #resetPassword></es-register-reset-password>
-        <div *ngIf="state != 'register' && state != 'done' && state != 'done-reset' && state != 'request' && canRegister()" class="register">
-            {{'LOGIN.REGISTER_TEXT' | translate}}
-            <button mat-button color="primary" (click)="linkRegister()">{{'LOGIN.REGISTER_LINK' | translate}} <i esIcon="arrow_forward"></i></button>
-        </div>
+  <div class="register-content card-content-padding">
+    <h1 esTitle class="cdk-visually-hidden">{{ 'REGISTER.TITLE' | translate }}</h1>
+    <es-register-form
+      [class.display-none]="!(state == 'register')"
+      (onRegisterDone)="onRegisterDone()"
+      #registerForm
+    ></es-register-form>
+    <es-register-done
+      *ngIf="state == 'done' || state == 'done-reset'"
+      (onModify)="modifyData()"
+      [inputState]="state"
+      #registerDone
+    ></es-register-done>
+    <es-register-request
+      *ngIf="state == 'request'"
+      (onDone)="onPasswordRequested()"
+      #request
+    ></es-register-request>
+    <es-register-reset-password
+      *ngIf="state == 'reset-password'"
+      #resetPassword
+    ></es-register-reset-password>
+    <div
+      *ngIf="
+        state != 'register' &&
+        state != 'done' &&
+        state != 'done-reset' &&
+        state != 'request' &&
+        canRegister()
+      "
+      class="register"
+    >
+      {{ 'LOGIN.REGISTER_TEXT' | translate }}
+      <button mat-button color="primary" (click)="linkRegister()">
+        {{ 'LOGIN.REGISTER_LINK' | translate }} <i esIcon="arrow_forward"></i>
+      </button>
     </div>
-    <div class="card-action">
-    </div>
+  </div>
+  <div class="card-action"></div>
 </es-card>

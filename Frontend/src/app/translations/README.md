@@ -12,6 +12,7 @@ If possible, use the `translate` directive:
 ```html
 <div translate [translateParams]="{value: 'world'}">HELLO</div>
 ```
+
 ... or the `translate` pipe:
 
 ```html

@@ -1,32 +1,22 @@
-import {
-  Component,
-  OnInit
-} from '@angular/core';
-import { CordovaService } from "../../common/services/cordova.service";
-import {UIConstants} from '../../core-module/ui/ui-constants';
-import {Router} from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { CordovaService } from '../../common/services/cordova.service';
+import { UIConstants } from '../../core-module/ui/ui-constants';
+import { Router } from '@angular/router';
 
 @Component({
-  selector: 'es-startup',
-  template: ''
+    selector: 'es-startup',
+    template: '',
 })
 export class StartupComponent {
-    constructor(private cordova : CordovaService,private router:Router) {
-
-        if (this.cordova.isRunningCordova()){
-
+    constructor(private cordova: CordovaService, private router: Router) {
+        if (this.cordova.isRunningCordova()) {
             // wait until cordova device init is ready
-            this.cordova.subscribeServiceReady().subscribe(()=>{
-
+            this.cordova.subscribeServiceReady().subscribe(() => {
                 // per default go to app
-                this.router.navigate([UIConstants.ROUTER_PREFIX,'app'],{replaceUrl:true});
-
+                this.router.navigate([UIConstants.ROUTER_PREFIX, 'app'], { replaceUrl: true });
             });
-
-        }
-        else{
-            this.router.navigate([UIConstants.ROUTER_PREFIX,'login'],{replaceUrl:true});
+        } else {
+            this.router.navigate([UIConstants.ROUTER_PREFIX, 'login'], { replaceUrl: true });
         }
     }
 }
-

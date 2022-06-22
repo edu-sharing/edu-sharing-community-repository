@@ -1,51 +1,50 @@
-@import "../../core-ui-module/styles/variables";
+@import '../../core-ui-module/styles/variables';
 
 $repoTabBarHeight: 48px;
 $toolbarHeight: 65px;
 
-$sidenavWidth:300px;
+$sidenavWidth: 300px;
 $sidenavTopBaseOffset: $repoTabBarHeight + $toolbarHeight;
-.switchToCollections{
-    font-weight:bold;
+.switchToCollections {
+    font-weight: bold;
     flex-grow: 1;
 }
-.extendedSearch{
+.extendedSearch {
     text-transform: uppercase;
     padding-top: 3px;
     flex-grow: 1;
 }
-.repository{
-    width:calc(100% - 10px);
-    margin:3px;
+.repository {
+    width: calc(100% - 10px);
+    margin: 3px;
 }
-.moreRepositories{
+.moreRepositories {
     z-index: 15;
-    .collection{
+    .collection {
         position: absolute;
-        right:20px;
-        top:$mainnavHeight;
-        width:calc(25% - 20px);
+        right: 20px;
+        top: $mainnavHeight;
+        width: calc(25% - 20px);
         text-transform: uppercase;
-        &.no-mainnav{
-            top:0;
+        &.no-mainnav {
+            top: 0;
         }
     }
-
 }
-.repositoryList{
+.repositoryList {
     padding: 15px $cardPadding 0 $cardPadding;
-    >label{
-        float:left;
-        width:100%;
+    > label {
+        float: left;
+        width: 100%;
         padding-bottom: 10px;
     }
 }
-.rowRepositories{
+.rowRepositories {
     position: fixed;
-    top:$mainnavHeight;
+    top: $mainnavHeight;
     width: 100%;
     z-index: 13;
-    >div {
+    > div {
         width: 100%;
         margin-bottom: 0;
         ul {
@@ -53,22 +52,22 @@ $sidenavTopBaseOffset: $repoTabBarHeight + $toolbarHeight;
         }
     }
 }
-.rowRepositories.no-mainnav{
-    top:0;
+.rowRepositories.no-mainnav {
+    top: 0;
 }
-.sidenav .row{
-    margin:0 -30px;
+.sidenav .row {
+    margin: 0 -30px;
     margin-top: 0;
 }
-.repositoryActive{
+.repositoryActive {
     background: $workspaceTreeSelectedBackgroundEffect;
     background-color: $itemSelectedBackground;
 }
-.collectionsHeading .toggle{
+.collectionsHeading .toggle {
     text-transform: uppercase;
     padding: 0 10px;
 }
-.heading{
+.heading {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -103,34 +102,35 @@ $sidenavTopBaseOffset: $repoTabBarHeight + $toolbarHeight;
             }
         }
     }
-    >div{
+    > div {
         display: inline-flex;
-        >span{
+        > span {
             padding-left: 3px;
         }
-        >i{
+        > i {
             font-size: 20px;
             padding-left: 5px;
         }
     }
 }
-.collections{
-    margin-bottom:25px;
+.collections {
+    margin-bottom: 25px;
 }
-.switchToCollections a, .switchToSearch a{
+.switchToCollections a,
+.switchToSearch a {
     padding: 5px;
 }
 
-es-sort-dropdown{
+es-sort-dropdown {
     position: absolute;
     right: 250px;
 }
-.extendedSearch{
+.extendedSearch {
     button {
         margin-left: -16px;
     }
-    .mobile{
-        display:none!important;
+    .mobile {
+        display: none !important;
     }
 }
 
@@ -142,17 +142,18 @@ es-sort-dropdown{
     }
 }
 
-.noResults,.noResultsMatched{
+.noResults,
+.noResultsMatched {
     color: $noResultsColor;
     text-align: center;
     padding-top: 30px;
     font-size: 120%;
-    i{
+    i {
         font-size: 60px;
         width: 100%;
     }
 }
-.noResultsMatched{
+.noResultsMatched {
     padding-bottom: 70px;
 }
 
@@ -169,15 +170,15 @@ es-sort-dropdown{
     height: 100%;
     padding: 25px;
     padding-bottom: 0;
-    text-transform:uppercase;
-    font-size:1.1em;
+    text-transform: uppercase;
+    font-size: 1.1em;
     color: rgba(255, 255, 255, 0.7);
     font-weight: 400;
 }
 
 .main_view_selector.active {
     font-weight: 600;
-    border-bottom: 5px solid #F90;
+    border-bottom: 5px solid #f90;
     color: rgba(255, 255, 255, 1);
 }
 
@@ -192,14 +193,16 @@ es-sort-dropdown{
         min-height: 100%;
         width: calc(100% - 20px);
     }
-    .contentSidenav{
+    .contentSidenav {
         margin-left: $sidenavWidth + 10px;
-        width:calc(100% - 20px - #{$sidenavWidth});
+        width: calc(100% - 20px - #{$sidenavWidth});
     }
 }
 
-md-sidenav-container,.sidenav,#top {
-    background-color:$backgroundColor;
+md-sidenav-container,
+.sidenav,
+#top {
+    background-color: $backgroundColor;
 }
 
 #facettes {
@@ -207,11 +210,14 @@ md-sidenav-container,.sidenav,#top {
     margin-bottom: 50px;
 }
 
-
-
-a, a:hover, a:visited, a:active, button {
+a,
+a:hover,
+a:visited,
+a:active,
+button {
     color: $primary;
-    i, span {
+    i,
+    span {
         vertical-align: middle;
     }
 }
@@ -236,7 +242,6 @@ a, a:hover, a:visited, a:active, button {
     display: flex;
     background: $primary;
     justify-content: space-between;
-
 }
 
 #searchTerm {
@@ -253,20 +258,20 @@ a, a:hover, a:visited, a:active, button {
 }
 
 #searchTerm::-webkit-input-placeholder {
-    color:    #fff;
-    opacity:  0.5;
+    color: #fff;
+    opacity: 0.5;
 }
 #searchTerm:-moz-placeholder {
-    color:    #fff;
-    opacity:  0.5;
+    color: #fff;
+    opacity: 0.5;
 }
 #searchTerm::-moz-placeholder {
-    color:    #fff;
-    opacity:  0.5;
+    color: #fff;
+    opacity: 0.5;
 }
 #searchTerm:-ms-input-placeholder {
-    color:  #fff;
-    opacity:  0.5;
+    color: #fff;
+    opacity: 0.5;
 }
 
 #searchTerm:read-only {
@@ -295,13 +300,9 @@ a, a:hover, a:visited, a:active, button {
     margin-right: 2%;
 }
 
-
-
 #portalinfobutton {
     margin-right: 10px;
 }
-
-
 
 .top {
     position: fixed;
@@ -311,16 +312,16 @@ a, a:hover, a:visited, a:active, button {
     // pointer events on this container and explicitly enable them again on the underlying `div`
     // using `pointer-events: auto`.
     pointer-events: none;
-    top: $mainnavHeight+48px;
+    top: $mainnavHeight + 48px;
     z-index: 12;
-    width:100%;
-    &.no-mainnav{
+    width: 100%;
+    &.no-mainnav {
         top: 48px;
     }
-    es-actionbar{
+    es-actionbar {
         margin-right: -5px;
     }
-    >div {
+    > div {
         pointer-events: auto; // See above.
         height: $secondaryBarHeight;
         background-color: #fff;
@@ -330,22 +331,22 @@ a, a:hover, a:visited, a:active, button {
         @include materialShadow();
     }
 }
-es-small-collection{
+es-small-collection {
     position: absolute;
     top: 0;
     left: $sidenavWidth;
     width: calc(100% - #{$sidenavWidth});
 }
-.topNoRepositories{
+.topNoRepositories {
     top: $mainnavHeight;
-    &.no-mainnav{
-        top:0;
+    &.no-mainnav {
+        top: 0;
     }
 }
-.mdsSelect{
-    float:left;
-    width:100%;
-    >div {
+.mdsSelect {
+    float: left;
+    width: 100%;
+    > div {
         width: 100%;
         padding: 10px 15px;
         margin-top: 20px;
@@ -353,7 +354,8 @@ es-small-collection{
         > div {
             display: table;
             width: 100%;
-            .material-icons, select {
+            .material-icons,
+            select {
                 display: table-cell;
             }
             .material-icons {
@@ -371,7 +373,7 @@ es-small-collection{
         }
     }
 }
-.sidenav{
+.sidenav {
     position: fixed;
     display: flex;
     flex-direction: column;
@@ -384,7 +386,7 @@ es-small-collection{
     height: calc(100% - #{$mainnavHeight} - #{$sidenavTopBaseOffset});
     transition: $transitionNormal all ease;
     @include iosScrolling();
-    &.no-mainnav{
+    &.no-mainnav {
         top: $sidenavTopBaseOffset;
         height: calc(100% - #{$sidenavTopBaseOffset});
     }
@@ -396,15 +398,15 @@ es-small-collection{
         }
     }
 }
-.sidenavHidden{
+.sidenavHidden {
     transform: translateX(-100%);
     display: none;
 }
-.sidenavNoRepositories{
+.sidenavNoRepositories {
     top: $mainnavHeight + $toolbarHeight;
     // This brakes when the site has a custom header, that adds to the page height.
     height: calc(100% - #{$mainnavHeight} - #{$toolbarHeight});
-    &.no-mainnav{
+    &.no-mainnav {
         top: $toolbarHeight;
         height: calc(100% - #{$toolbarHeight});
     }
@@ -414,27 +416,26 @@ es-small-collection{
 }
 
 .results {
-    margin-top:$mainnavHeight+130px;
+    margin-top: $mainnavHeight + 130px;
     padding-bottom: 20px;
     text-align: left;
     min-height: 1000px;
     display: inline-block;
     width: 100%;
-    &.no-mainnav{
+    &.no-mainnav {
         margin-top: 130px;
     }
 }
-.resultsNoRepositories{
-    margin-top: $mainnavHeight+85px;
-    &.no-mainnav{
+.resultsNoRepositories {
+    margin-top: $mainnavHeight + 85px;
+    &.no-mainnav {
         margin-top: 85px;
     }
 }
 
 .a11y-hidden-label {
-    display: none
+    display: none;
 }
-
 
 .filter_label {
     display: block;
@@ -512,74 +513,76 @@ es-node-entries-wrapper {
     height: inherit;
     cursor: pointer;
 }
-.tabsRepositories,.moreRepositories{
-    img{
+.tabsRepositories,
+.moreRepositories {
+    img {
         height: 20px;
         position: relative;
         top: 5px;
         padding-right: 5px;
-        opacity: .75;
+        opacity: 0.75;
         transition: $transitionNormal all;
     }
-    .active img{
+    .active img {
         opacity: 1;
     }
-    .s4{
-        width:30.333%;
+    .s4 {
+        width: 30.333%;
     }
-    .s1{
-        min-width:50px;
+    .s1 {
+        min-width: 50px;
     }
 }
-.content_wrapper_grouped{
+.content_wrapper_grouped {
     margin-right: 0;
 }
-.searchGrouped{
-    >div{
-        float:left;
-        width:100%;
+.searchGrouped {
+    > div {
+        float: left;
+        width: 100%;
     }
-    es-listTable,.noResults{
-        width:calc(100% + #{$cardWidth + 60px});
+    es-listTable,
+    .noResults {
+        width: calc(100% + #{$cardWidth + 60px});
         float: left;
         overflow: hidden;
-        height: $cardHeight+15px;
+        height: $cardHeight + 15px;
         margin-top: 10px;
         margin-bottom: 15px;
     }
-    listTable.list{
-        width:calc(100% - 10px);
-        height:$listItemHeight*5;
+    listTable.list {
+        width: calc(100% - 10px);
+        height: $listItemHeight * 5;
     }
-    .noResults{
+    .noResults {
         width: 100%;
         height: auto;
     }
-    .heading{
-        float:left;
+    .heading {
+        float: left;
         margin-top: 5px;
-        img{
+        img {
             padding-right: 5px;
             max-height: 16px;
         }
-        span{
+        span {
             position: relative;
-            top:-3px;
+            top: -3px;
         }
     }
-    .more{
-        float:right;
+    .more {
+        float: right;
         text-transform: uppercase;
         font-weight: bold;
         margin-right: 20px;
     }
 }
-.sidenav-container{
+.sidenav-container {
     es-mds-editor-wrapper {
         display: block;
         margin-top: 15px;
     }
-    .apply{
+    .apply {
         background-color: $backgroundColor;
         display: flex;
         justify-content: flex-end;
@@ -601,16 +604,16 @@ es-node-entries-wrapper {
             margin-right: 3px;
         }
     }
-    .empty{
-        margin-top:20px;
+    .empty {
+        margin-top: 20px;
         text-align: center;
         color: $textLight;
-        width:100%;
+        width: 100%;
     }
     .savedSearch {
-        display:flex;
+        display: flex;
         flex-direction: column;
-        listtable{
+        listtable {
             flex-grow: 1;
         }
         .manageSavedSearch {
@@ -619,18 +622,18 @@ es-node-entries-wrapper {
         }
     }
     form {
-        padding:10px 20px;
-        input[type=search] {
+        padding: 10px 20px;
+        input[type='search'] {
             margin-bottom: 0;
         }
     }
-    .manageSavedSearch{
+    .manageSavedSearch {
         text-transform: uppercase;
     }
-    listtable{
+    listtable {
         width: 100%;
     }
-    .saved-search-toggle{
+    .saved-search-toggle {
         text-align: right;
         margin: 10px 4px;
     }
@@ -638,15 +641,15 @@ es-node-entries-wrapper {
 div.dialog.darken {
     z-index: 1040;
 }
-:host ::ng-deep{
-    .sidenav .list > div{
+:host ::ng-deep {
+    .sidenav .list > div {
         margin-bottom: 20px;
     }
     .sidenav-container es-actionbar {
         .action-always-caption {
             display: inline-block !important;
         }
-        .moreOpen{
+        .moreOpen {
             left: 0px;
             top: -56px;
             width: 220px;
@@ -654,9 +657,9 @@ div.dialog.darken {
     }
     es-mds {
         .mdsEmbeddedGroup {
-            float:left;
+            float: left;
             width: 100%;
-            padding:0 20px 20px;
+            padding: 0 20px 20px;
             /* margin-bottom: 40px; */
         }
     }
@@ -666,11 +669,12 @@ div.dialog.darken {
         }
     }
 }
-.rowFrame, .searchUngrouped listtable {
+.rowFrame,
+.searchUngrouped listtable {
     background-color: #fff !important;
 }
 @media all and (max-width: $mobileWidth) {
-    .switchToCollections{
+    .switchToCollections {
         display: none;
     }
     .content_wrapper {
@@ -678,48 +682,49 @@ div.dialog.darken {
     }
 }
 @media all and (max-width: $mobileWidth - $mobileStage*3) {
-    .extendedSearch{
-        span{
-            display:none
+    .extendedSearch {
+        span {
+            display: none;
         }
-        .mobile{
-            display:inline-block;
+        .mobile {
+            display: inline-block;
         }
     }
 }
 @media (pointer: coarse) {
-    :host ::ng-deep .collections{
-        .list{
-            width:max-content;
+    :host ::ng-deep .collections {
+        .list {
+            width: max-content;
         }
     }
-    .collections{
+    .collections {
         overflow-x: auto;
         @include iosScrolling();
     }
 }
 @media all and (max-width: $mobileWidth) {
-    .contentSidenav{
-        width:calc(100% - 20px)!important;
-        margin-left: 10px!important;
+    .contentSidenav {
+        width: calc(100% - 20px) !important;
+        margin-left: 10px !important;
     }
 }
 @media all and (max-width: $mobileWidth+$mobileStage*1) {
-    :host ::ng-deep .collections{
-        .list{
-            width:max-content;
+    :host ::ng-deep .collections {
+        .list {
+            width: max-content;
         }
     }
     es-small-collection {
         left: 0;
         width: 100%;
     }
-    .tabsRepositories,.moreRepositories{
-        .repositoryTitle{
+    .tabsRepositories,
+    .moreRepositories {
+        .repositoryTitle {
             display: none;
         }
     }
-    .moreRepositories .collection-item{
+    .moreRepositories .collection-item {
         text-align: center;
     }
 
@@ -738,29 +743,30 @@ div.dialog.darken {
         display: none;
     }
 }
-@media print{
-    .sidenav,.top{
+@media print {
+    .sidenav,
+    .top {
         display: none;
     }
-    .rowRepositories{
+    .rowRepositories {
         position: absolute;
     }
-    .contentSidenav{
+    .contentSidenav {
         margin-left: 0;
     }
 }
 
 @media all and (max-width: $mobileTabSwitchWidth) {
-    .results{
+    .results {
         margin-bottom: $mobileTabNavHeight;
     }
-    .sidenav{
+    .sidenav {
         height: calc(100% - #{$mainnavHeight} - #{$mobileTabNavHeight} - 105px);
     }
-    .sidenavNoRepositories{
+    .sidenavNoRepositories {
         height: calc(100% - #{$mainnavHeight} - #{$mobileTabNavHeight} - 65px - 70px);
     }
-    .sidenav-container .apply{
-        bottom:$mobileTabNavHeight;
+    .sidenav-container .apply {
+        bottom: $mobileTabNavHeight;
     }
 }

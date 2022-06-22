@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatRadioButton } from '@angular/material/radio';
-import {MatSlideToggle} from '@angular/material/slide-toggle';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
 
 /**
  * Multi-line labels and descriptions for `MatCheckbox` and `MatRadioButton`.

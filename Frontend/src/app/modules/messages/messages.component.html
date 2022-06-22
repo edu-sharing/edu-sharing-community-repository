@@ -1,12 +1,16 @@
 <div class="message-bg">
-    <div *ngIf="message" class="message-container">
-        <img *ngIf="error == '404'" src="assets/images/message/404.svg" alt="">
-        <img *ngIf="error == '500'" src="assets/images/message/500.svg" alt="">
-        <img *ngIf="error != '500' && error != '404'" src="assets/images/message/invalid.svg" alt="">
-        <div>
-            <h1 esTitle>{{message | translate}}</h1>
-            <h2>{{messageDetail | translate: { text: messageText } }}</h2>
-            <div class="link"><a tabindex="0" (click)="openSearch()" (keyup.enter)="openSearch()" class="clickable">{{'MESSAGES.GO_TO_SEARCH' | translate}}</a></div>
-        </div>
+  <div *ngIf="message" class="message-container">
+    <img *ngIf="error == '404'" src="assets/images/message/404.svg" alt="" />
+    <img *ngIf="error == '500'" src="assets/images/message/500.svg" alt="" />
+    <img *ngIf="error != '500' && error != '404'" src="assets/images/message/invalid.svg" alt="" />
+    <div>
+      <h1 esTitle>{{ message | translate }}</h1>
+      <h2>{{ messageDetail | translate: { text: messageText } }}</h2>
+      <div class="link">
+        <a tabindex="0" (click)="openSearch()" (keyup.enter)="openSearch()" class="clickable">{{
+          'MESSAGES.GO_TO_SEARCH' | translate
+        }}</a>
+      </div>
     </div>
+  </div>
 </div>

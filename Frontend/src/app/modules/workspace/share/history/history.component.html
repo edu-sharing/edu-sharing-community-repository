@@ -1,39 +1,52 @@
 <es-card
-        title="{{'WORKSPACE.SHARE.HISTORY.TITLE' | translate }}"
-        height="xlarge"
-        width="small"
-        [node]="_node"
-        [isCancelable]="true"
-        (onCancel)="close()"
-        [buttons]="buttons"
+  title="{{ 'WORKSPACE.SHARE.HISTORY.TITLE' | translate }}"
+  height="xlarge"
+  width="small"
+  [node]="_node"
+  [isCancelable]="true"
+  (onCancel)="close()"
+  [buttons]="buttons"
 >
   <div class="card-content">
     <es-spinner *ngIf="loading"></es-spinner>
     <div *ngIf="(!history || !history.length) && !loading" class="empty">
-      {{'WORKSPACE.SHARE.HISTORY.EMPTY' | translate }}
+      {{ 'WORKSPACE.SHARE.HISTORY.EMPTY' | translate }}
     </div>
     <div *ngFor="let entry of history" class="groupHistory">
       <div class="heading">
-        <div class="name"><i class="material-icons">person</i> {{entry.user}}</div>
-        <div class="date">{{entry.date}}</div>
+        <div class="name"><i class="material-icons">person</i> {{ entry.user }}</div>
+        <div class="date">{{ entry.date }}</div>
       </div>
       <div class="content">
         <div class="group added" *ngIf="entry.added.length">
-          <div class="type"><i class="material-icons">add_circle_outline</i> {{'WORKSPACE.SHARE.HISTORY.ADDED' | translate}}</div>
+          <div class="type">
+            <i class="material-icons">add_circle_outline</i>
+            {{ 'WORKSPACE.SHARE.HISTORY.ADDED' | translate }}
+          </div>
           <div *ngFor="let add of entry.added" class="entry">
-            <span class="name">{{ add.name }}</span> <span class="permissions">({{add.permissions}})</span>
+            <span class="name">{{ add.name }}</span>
+            <span class="permissions">({{ add.permissions }})</span>
           </div>
         </div>
         <div class="group changed" *ngIf="entry.modified.length">
-          <div class="type"><i class="material-icons">autorenew</i> {{'WORKSPACE.SHARE.HISTORY.CHANGED' | translate}}</div>
+          <div class="type">
+            <i class="material-icons">autorenew</i>
+            {{ 'WORKSPACE.SHARE.HISTORY.CHANGED' | translate }}
+          </div>
           <div *ngFor="let changed of entry.modified" class="entry">
-            <span class="name">{{ changed.name }}</span> <span class="permissionsOld">({{changed.oldPermissions}})</span> <span class="permissions">({{changed.permissions}})</span>
+            <span class="name">{{ changed.name }}</span>
+            <span class="permissionsOld">({{ changed.oldPermissions }})</span>
+            <span class="permissions">({{ changed.permissions }})</span>
           </div>
         </div>
         <div class="group removed" *ngIf="entry.removed.length">
-          <div class="type"><i class="material-icons">remove_circle_outline</i> {{'WORKSPACE.SHARE.HISTORY.REMOVED' | translate}}</div>
+          <div class="type">
+            <i class="material-icons">remove_circle_outline</i>
+            {{ 'WORKSPACE.SHARE.HISTORY.REMOVED' | translate }}
+          </div>
           <div *ngFor="let remove of entry.removed" class="entry">
-            <span class="name">{{ remove.name }}</span> <span class="permissions">({{remove.permissions}})</span>
+            <span class="name">{{ remove.name }}</span>
+            <span class="permissions">({{ remove.permissions }})</span>
           </div>
         </div>
       </div>

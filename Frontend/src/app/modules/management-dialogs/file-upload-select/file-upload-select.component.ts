@@ -4,8 +4,10 @@ import {
     ElementRef,
     EventEmitter,
     Input,
+    OnChanges,
     OnInit,
     Output,
+    SimpleChanges,
     ViewChild,
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
@@ -39,7 +41,7 @@ import { Toast } from '../../../core-ui-module/toast';
         trigger('openOverlay', UIAnimation.openOverlay()),
     ],
 })
-export class WorkspaceFileUploadSelectComponent implements OnInit {
+export class WorkspaceFileUploadSelectComponent implements OnInit, OnChanges {
     @ViewChild('fileSelect') file: ElementRef;
     @ViewChild('link') linkRef: ElementRef;
 
@@ -68,10 +70,7 @@ export class WorkspaceFileUploadSelectComponent implements OnInit {
      * @type {boolean}
      */
     @Input() showLti = true;
-    @Input() set parent(parent: Node) {
-        this._parent = parent;
-        this.getBreadcrumbs(parent).subscribe((breadcrumbs) => (this.breadcrumbs = breadcrumbs));
-    }
+    @Input() parent: Node;
 
     @Output() parentChange = new EventEmitter();
     @Output() onCancel = new EventEmitter();
@@ -92,7 +91,6 @@ export class WorkspaceFileUploadSelectComponent implements OnInit {
     ltiConsumerKey: string;
     ltiSharedSecret: string;
     // private ltiTool: Node;
-    _parent: Node;
     buttons: DialogButton[];
     user: IamUser;
     readonly linkControl = new FormControl('');
@@ -122,6 +120,13 @@ export class WorkspaceFileUploadSelectComponent implements OnInit {
 
     ngOnInit(): void {
         this.registerLink();
+    }
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes?.parent) {
+            this.getBreadcrumbs(this.parent).subscribe(
+                (breadcrumbs) => (this.breadcrumbs = breadcrumbs),
+            );
+        }
     }
 
     private registerLink(): void {
@@ -209,6 +214,7 @@ export class WorkspaceFileUploadSelectComponent implements OnInit {
         this.onLinkSelected.emit({
             link: this.linkControl.value,
             lti: this.ltiActivated,
+            parent: this.parent,
             consumerKey: this.ltiConsumerKey,
             sharedSecret: this.ltiSharedSecret,
         });
@@ -256,18 +262,15 @@ export class WorkspaceFileUploadSelectComponent implements OnInit {
 
     parentChoosed(event: Node[]) {
         this.showSaveParent = true;
-        this._parent = event[0];
-        this.parentChange.emit(this._parent);
+        this.parent = event[0];
+        this.parentChange.emit(this.parent);
         this.chooseParent = false;
     }
 
     updateButtons() {
-        const ok = new DialogButton('OK', DialogButton.TYPE_PRIMARY, () => this.setLink());
-        ok.disabled = this.disabled || (this.showPicker && !this._parent);
-        this.buttons = [
-            new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.cancel()),
-            ok,
-        ];
+        const ok = new DialogButton('OK', { color: 'primary' }, () => this.setLink());
+        ok.disabled = this.disabled || (this.showPicker && !this.parent);
+        this.buttons = [new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel()), ok];
     }
 
     private cleanupUrlForLti(link: string) {
@@ -332,8 +335,8 @@ export class WorkspaceFileUploadSelectComponent implements OnInit {
 
     async setSaveParent(status: boolean) {
         if (status) {
-            await this.storageService.set('defaultInboxFolder', this._parent.ref.id);
-            this.toast.toast('TOAST.STORAGE_LOCATION_SAVED', { name: this._parent.name });
+            await this.storageService.set('defaultInboxFolder', this.parent.ref.id);
+            this.toast.toast('TOAST.STORAGE_LOCATION_SAVED', { name: this.parent.name });
         } else {
             await this.storageService.delete('defaultInboxFolder');
             this.toast.toast('TOAST.STORAGE_LOCATION_RESET');

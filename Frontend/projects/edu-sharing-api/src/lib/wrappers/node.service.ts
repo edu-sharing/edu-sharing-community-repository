@@ -5,6 +5,14 @@ import { NodeV1Service, SearchV1Service } from '../api/services';
 import { HOME_REPOSITORY } from '../constants';
 import { Node, NodeEntries } from '../models';
 
+export class NodeConstants {
+    public static SPACES_STORE_REF = 'workspace://SpacesStore/';
+}
+export class NodeTools {
+    static createSpacesStoreRef(id: string) {
+        return NodeConstants.SPACES_STORE_REF + id;
+    }
+}
 @Injectable({
     providedIn: 'root',
 })
@@ -19,6 +27,25 @@ export class NodeService {
                 propertyFilter: ['-all-'],
             })
             .pipe(map((nodeEntry) => nodeEntry.node));
+    }
+    /**
+     * return the forked childs (variants) of this node
+     * @returns
+     */
+    getForkedChilds(id: string, { repository = HOME_REPOSITORY } = {}) {
+        return this.searchV1.searchByProperty({
+            repository,
+            comparator: ['='],
+            contentType: 'FILES',
+            property: ['ccm:forked_origin'],
+            value: [NodeTools.createSpacesStoreRef(id)],
+        });
+    }
+    getPublishedCopies(id: string, { repository = HOME_REPOSITORY } = {}) {
+        return this.nodeV1.getPublishedCopies({
+            repository,
+            node: id,
+        });
     }
 
     /**

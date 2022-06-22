@@ -32,6 +32,8 @@ import java.util.*;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigValue;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 
 import org.alfresco.service.ServiceRegistry;
@@ -51,6 +53,10 @@ import org.quartz.SchedulerFactory;
 import org.quartz.Trigger;
 import org.quartz.TriggerListener;
 import org.quartz.TriggerUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.quartz.SchedulerFactoryBean;
+import org.springframework.scheduling.quartz.SpringBeanJobFactory;
+import org.springframework.stereotype.Component;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -60,15 +66,25 @@ import org.springframework.context.ApplicationContext;
 /**
  * @author rudi start jobs, start scheduling of an job, stop scheduling of a job
  */
+@Component
 public class JobHandler {
 
 	public static final Object KEY_RESULT_DATA = "JOB_RESULT_DATA";
 	private static final int MAX_JOB_LOG_COUNT = 20; // maximal number of jobs to store for history and gui
 	private static List<JobInfo> jobs = new ArrayList<>();
 
-	ApplicationContext eduApplicationContext = null;
+	//private final ApplicationContext eduApplicationContext = null;
 
-	JobClusterLocker jobClusterLocker = null;
+	private final JobClusterLocker jobClusterLocker;
+
+	@Autowired
+	public JobHandler(JobClusterLocker jobClusterLocker, SchedulerFactoryBean schedulerFactoryBean) throws Exception {
+		this.jobClusterLocker = jobClusterLocker;
+		this.schedulerFactoryBean = schedulerFactoryBean;
+		init();
+	}
+
+	private final SchedulerFactoryBean schedulerFactoryBean;
 
 	public boolean cancelJob(String jobName) throws SchedulerException {
 		boolean result=quartzScheduler.interrupt(jobName, null);
@@ -159,7 +175,7 @@ public class JobHandler {
 
 	Logger logger = Logger.getLogger(JobHandler.class);
 
-	static JobHandler instance = null;
+	//static JobHandler instance = null;
 
 	List<JobConfig> jobConfigList = new ArrayList<>();
 
@@ -180,22 +196,20 @@ public class JobHandler {
 
 	public static final String FILE_DATA = "FILE_DATA";
 
-	/**
-	 * Singelton
-	 */
-	protected JobHandler() throws Exception {
-		init(org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext());
-	}
+//	/**
+//	 * Singelton
+//	 */
+//	protected JobHandler() throws Exception {
+//		init(org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext());
+//	}
+//
+//	@Autowired
+//	protected JobHandler(ApplicationContext applicationContext) throws Exception {
+//		init(applicationContext);
+//	}
 
-	protected JobHandler(ApplicationContext applicationContext) throws Exception {
-		init(applicationContext);
-	}
-
-	private void init(ApplicationContext applicationContext) throws Exception{
-		this.eduApplicationContext = applicationContext;
-		this.jobClusterLocker = (JobClusterLocker)eduApplicationContext.getBean("jobClusterLocker");
-		SchedulerFactory schedFact = new org.quartz.impl.StdSchedulerFactory();
-		quartzScheduler = schedFact.getScheduler();
+	private void init() throws Exception{
+		quartzScheduler = schedulerFactoryBean.getScheduler();
 		quartzScheduler.addGlobalTriggerListener(new TriggerListener() {
 			@Override
 			public String getName() {
@@ -481,7 +495,6 @@ public class JobHandler {
 		trigger.setName(triggerName);
 
 		final String jobListenerName = jobName;
-		
 		JobDetail jobDetail = new JobDetail(jobName, null, jobClass) {
 			@Override
 			public String[] getJobListenerNames() {
@@ -489,7 +502,6 @@ public class JobHandler {
 			}
 		};
 		jobDetail.setJobDataMap(jdm);
-
 		ImmediateJobListener iJobListener = new ImmediateJobListener(jobListenerName);
 
 		quartzScheduler.addJobListener(iJobListener);
@@ -542,17 +554,19 @@ public class JobHandler {
 	}
 
 	public static JobHandler getInstance() throws Exception {
-		if (instance == null) {
-			instance = new JobHandler();
-		}
-		return instance;
+//		if (instance == null) {
+//			instance = new JobHandler();
+//		}
+//		return instance;
+		return getInstance(org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext());
 	}
 
 	public static JobHandler getInstance(ApplicationContext applicationContext) throws Exception {
-		if (instance == null) {
-			instance = new JobHandler(applicationContext);
-		}
-		return instance;
+//		if (instance == null) {
+//			instance = new JobHandler(applicationContext);
+//		}
+//		return instance;
+		return applicationContext.getBean(JobHandler.class);
 	}
 
 	public void shutDown() {

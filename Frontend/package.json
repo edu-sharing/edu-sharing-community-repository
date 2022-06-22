@@ -13,16 +13,20 @@
     "build": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build --configuration production --delete-output-path false --base-href /edu-sharing/",
     "prebuild-dev": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build edu-sharing-api --configuration development",
     "build-dev": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build --delete-output-path false --base-href /edu-sharing/",
-    "check:lint": "ng lint --max-warnings=379",
+    "check:lint": "ng lint --max-warnings=835",
     "fix:lint": "ng lint --fix",
+    "check:format": "prettier --check src projects/*/src",
+    "fix:format": "prettier --write src projects/*/src",
     "test": "ng test",
+    "e2e": "playwright test",
     "test:edu-sharing-frontend": "ng test angular-edusharing",
     "test:edu-sharing-api": "ng test edu-sharing-api",
     "docs": "typedoc --mode file --experimentalDecorators --excludePrivate --ignoreCompilerErrors --target 'ES6' --module 'commonjs' --out docs src",
     "print-licenses": "node licenses.js",
     "start-storybook": "start-storybook -p 4300 -s ./src/assets",
     "build-storybook": "build-storybook -s ./src/assets",
-    "postinstall": "ngcc --async=false"
+    "postinstall": "ngcc --async=false",
+    "prepare": "cd .. && husky install Frontend/.husky && cd Frontend/src/app/core-module && git config core.hooksPath ../../../.husky || true"
   },
   "private": true,
   "dependencies": {
@@ -67,6 +71,7 @@
     "@angular/cli": "^13.3.4",
     "@angular/compiler-cli": "~13.3.5",
     "@babel/core": "^7.8.7",
+    "@playwright/test": "^1.22.2",
     "@storybook/angular": "^5.3.14",
     "@types/core-js": "^2.5.2",
     "@types/jasmine": "~3.8.0",
@@ -81,6 +86,7 @@
     "dotenv": "^10.0.0",
     "eslint": "^8.4.0",
     "eslint-plugin-only-warn": "^1.0.3",
+    "husky": "^7.0.4",
     "jasmine-core": "~3.8.0",
     "jasmine-spec-reporter": "~5.0.0",
     "karma": "~6.3.4",
@@ -90,9 +96,14 @@
     "karma-jasmine": "~4.0.0",
     "karma-jasmine-html-reporter": "~1.7.0",
     "license-checker": "^25.0.1",
+    "lint-staged": "^12.1.7",
     "ng-packagr": "^13.3.1",
+    "prettier": "^2.5.1",
     "ts-node": "~8.6.2",
     "typedoc": "^0.16.9",
     "typescript": "~4.6.4"
+  },
+  "lint-staged": {
+    "*.{js,css,md,ts,html,scss}": "prettier --write"
   }
 }

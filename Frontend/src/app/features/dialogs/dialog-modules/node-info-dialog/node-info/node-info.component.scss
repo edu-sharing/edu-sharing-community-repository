@@ -1,0 +1,68 @@
+@import '../../../../../core-ui-module/styles/variables';
+
+:host ::ng-deep {
+    .breadcrumb {
+        flex-wrap: wrap;
+        max-height: unset !important;
+    }
+}
+img {
+    max-width: 140px;
+}
+div {
+    margin: 0 5px;
+    padding-bottom: 5px;
+    > span {
+        display: flex;
+        &.node-id {
+            align-items: center;
+        }
+    }
+    > span:first-child {
+        font-weight: bold;
+    }
+    .inherited,
+    .local {
+        padding: 10px 20px 0 20px;
+        .authority {
+            font-weight: bold;
+        }
+        .permissions {
+            padding: 0 10px;
+        }
+    }
+}
+.edit {
+    display: flex;
+    justify-content: flex-end;
+    i {
+        @include clickable();
+    }
+}
+.aspects {
+    white-space: pre-line;
+}
+.children {
+    flex-direction: column;
+}
+.property {
+    margin: 0 10px;
+    > div {
+        display: flex;
+        > mat-form-field {
+            flex-grow: 1;
+            margin-right: 20px;
+        }
+    }
+}
+.property-add {
+    display: flex;
+    mat-form-field {
+        display: flex;
+        width: 100%;
+    }
+}
+.json {
+    white-space: pre;
+    font-family: 'Lucida Console', monospace;
+}

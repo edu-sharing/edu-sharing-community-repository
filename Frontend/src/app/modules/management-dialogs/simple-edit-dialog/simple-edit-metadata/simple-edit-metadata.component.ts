@@ -42,7 +42,7 @@ export class SimpleEditMetadataComponent {
      * return true if data is valid, false otherwise
      */
     validate() {
-        if(!this.mds.mdsEditorInstance.getIsValid()) {
+        if (!this.mds.mdsEditorInstance.getIsValid()) {
             this.mds.mdsEditorInstance.showMissingRequiredWidgets();
             return false;
         }

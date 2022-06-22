@@ -1,4 +1,4 @@
-import {filter} from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl, ValidatorFn, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
@@ -34,11 +34,9 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
             initialValue = initialValue.map((v) => DateHelper.formatDateByPattern(v, 'y-M-d'));
         }
         this.formControl = new FormControl(initialValue[0] ?? null, this.getValidators());
-        this.formControl.valueChanges.pipe(
-            filter((value) => value !== null))
-            .subscribe((value) => {
-                this.setValue([value]);
-            });
+        this.formControl.valueChanges.pipe(filter((value) => value !== null)).subscribe((value) => {
+            this.setValue([value]);
+        });
         if (this.widget.definition.id === 'cm:name') {
             this.fileNameChecker = new FileNameChecker(
                 this.formControl,
@@ -132,15 +130,15 @@ class FileNameChecker {
             'EXTENSION_NOT_MATCH',
             message,
             [
-                new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => {
+                new DialogButton('CANCEL', { color: 'standard' }, () => {
                     callbacks.onCancel();
                     this.toast.closeModalDialog();
                 }),
-                new DialogButton('EXTENSION_KEEP', DialogButton.TYPE_CANCEL, () => {
+                new DialogButton('EXTENSION_KEEP', { color: 'standard' }, () => {
                     callbacks.onRevert();
                     this.toast.closeModalDialog();
                 }),
-                new DialogButton('EXTENSION_CHANGE', DialogButton.TYPE_PRIMARY, () => {
+                new DialogButton('EXTENSION_CHANGE', { color: 'primary' }, () => {
                     callbacks.onAccept();
                     this.toast.closeModalDialog();
                 }),
@@ -164,15 +162,19 @@ class FileNameChecker {
         }
         const oldComponents = oldValue.split('.');
         const newComponents = newValue.split('.');
-        if (oldComponents.length === 1 && newComponents.length !== 1 ||
-            oldComponents.length !== 1 && newComponents.length === 1) {
+        if (
+            (oldComponents.length === 1 && newComponents.length !== 1) ||
+            (oldComponents.length !== 1 && newComponents.length === 1)
+        ) {
             return true;
-        } else if(oldComponents.length === 1 && newComponents.length === 1) {
+        } else if (oldComponents.length === 1 && newComponents.length === 1) {
             return false;
         } else {
             // Whether the extension has changed
-            return oldComponents[oldComponents.length - 1]?.toLowerCase() !==
-                newComponents[newComponents.length - 1]?.toLowerCase();
+            return (
+                oldComponents[oldComponents.length - 1]?.toLowerCase() !==
+                newComponents[newComponents.length - 1]?.toLowerCase()
+            );
         }
     }
 

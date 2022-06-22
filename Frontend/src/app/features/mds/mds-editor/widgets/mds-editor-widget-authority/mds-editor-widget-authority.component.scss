@@ -3,7 +3,7 @@
 mat-form-field {
     width: 100%;
 }
-.mat-chip-label{
+.mat-chip-label {
     @include limitLineLength(200px);
 }
 

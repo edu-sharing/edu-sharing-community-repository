@@ -5,6 +5,7 @@ import org.dspace.xoai.dataprovider.DataProvider;
 import org.dspace.xoai.dataprovider.exceptions.OAIException;
 import org.dspace.xoai.dataprovider.handlers.results.ListSetsResult;
 import org.dspace.xoai.dataprovider.model.Context;
+import org.dspace.xoai.dataprovider.model.MetadataFormat;
 import org.dspace.xoai.dataprovider.model.Set;
 import org.dspace.xoai.dataprovider.parameters.OAIRequest;
 import org.dspace.xoai.dataprovider.repository.Repository;
@@ -55,7 +56,7 @@ public class EduOai {
                 return getSets().stream().anyMatch((set) -> set.getSpec().equals(setSpec));
             }
         };
-        provider=new DataProvider(Context.context().withMetadataFormat(metadataPrefix,TransformerFactory.newInstance().newTransformer()),
+        provider=new DataProvider(Context.context().withMetadataFormat(metadataPrefix, MetadataFormat.identity()),
                 Repository.repository().withSetRepository(setRepository).withItemRepository(itemRepository).withConfiguration(configuration).withResumptionTokenFormatter(new SimpleResumptionTokenFormat()));
 
     }

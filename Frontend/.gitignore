@@ -48,3 +48,9 @@ node/
 
 # generated sources
 src/app/rest
+
+# Playwright tests
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/playwright/storage/*.json

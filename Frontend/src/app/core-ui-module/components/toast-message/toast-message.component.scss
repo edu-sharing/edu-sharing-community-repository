@@ -1,12 +1,13 @@
-@import "../../styles/variables";
+@import '../../styles/variables';
 
-.toast-group{
+.toast-group {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
     padding: 0 20px;
-    > button{
+    > button {
+        flex-shrink: 0;
         font-weight: bold;
         color: #fff;
     }

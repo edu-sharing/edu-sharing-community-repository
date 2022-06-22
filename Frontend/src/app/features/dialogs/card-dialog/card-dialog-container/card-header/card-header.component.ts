@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { CardAvatar } from './card-avatar';
 
-
 @Component({
     selector: 'es-card-header',
     templateUrl: './card-header.component.html',
@@ -14,8 +13,9 @@ export class CardHeaderComponent {
     @Input() title: string;
     @Input() subtitle?: string;
     @Input() avatar?: CardAvatar;
-    @Input() disableClose: boolean = false;
-    @Output() triggerClose: EventEmitter<void> = new EventEmitter();
+    @Input() showCloseButton: boolean = true;
+    @Input() disableCloseButton: boolean = false;
+    @Output() closeButtonClick: EventEmitter<void> = new EventEmitter();
 
     getIconImageUrl(): string {
         if (this.avatar?.kind === 'image') {
@@ -34,6 +34,6 @@ export class CardHeaderComponent {
     }
 
     onClose(): void {
-        this.triggerClose.emit();
+        this.closeButtonClick.emit();
     }
 }

@@ -1,9 +1,14 @@
-import {Component, EventEmitter, HostListener, Input, OnInit, Output} from '@angular/core';
-import {MatTabChangeEvent} from '@angular/material/tabs';
-import {TranslateService} from '@ngx-translate/core';
+import { Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
+import { MatTabChangeEvent } from '@angular/material/tabs';
+import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
-import {BehaviorSubject, Observable, Subject} from 'rxjs';
-import {map, skip, switchMap, takeUntil, tap} from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { map, skip, switchMap, takeUntil, tap } from 'rxjs/operators';
+import {
+    InteractionType,
+    ListSortConfig,
+    NodeEntriesDisplayType,
+} from '../../../features/node-entries/entries-model';
 import {
     DialogButton,
     ListItem,
@@ -12,18 +17,13 @@ import {
     RestCollectionService,
     RestConnectorService,
     RestConstants,
-    RestNodeService, SessionStorageService,
+    RestNodeService,
+    SessionStorageService,
 } from '../../../core-module/core.module';
-import {Toast} from '../../../core-ui-module/toast';
-import {UIHelper} from '../../../core-ui-module/ui-helper';
-import {
-    InteractionType, ListSortConfig,
-    NodeEntriesDisplayType
-} from '../../../core-ui-module/components/node-entries-wrapper/entries-model';
-import {
-    NodeDataSource
-} from '../../../core-ui-module/components/node-entries-wrapper/node-data-source';
-import {WorkspaceExplorerComponent} from '../../../modules/workspace/explorer/explorer.component';
+import { Toast } from '../../../core-ui-module/toast';
+import { UIHelper } from '../../../core-ui-module/ui-helper';
+import { WorkspaceExplorerComponent } from '../../../modules/workspace/explorer/explorer.component';
+import { NodeDataSource } from '../../../features/node-entries/node-data-source';
 
 @Component({
     selector: 'es-file-chooser',
@@ -169,7 +169,11 @@ export class FileChooserComponent implements OnInit {
         }
     }
     folderIsWritable() {
-        return this.path$?.value?.[this.path$?.value?.length - 1]?.access?.indexOf(RestConstants.ACCESS_WRITE) !== -1;
+        return (
+            this.path$?.value?.[this.path$?.value?.length - 1]?.access?.indexOf(
+                RestConstants.ACCESS_WRITE,
+            ) !== -1
+        );
     }
 
     private registerObservables(): void {
@@ -196,7 +200,7 @@ export class FileChooserComponent implements OnInit {
     }
 
     private initialize() {
-        if(!this._collections) {
+        if (!this._collections) {
             this.columns = WorkspaceExplorerComponent.getColumns(this.connector);
             this.columns = this.columns.map((c, i) => {
                 c.visible = i === 0;
@@ -206,9 +210,9 @@ export class FileChooserComponent implements OnInit {
                 active: this.columns[0].name,
                 direction: 'asc',
                 allowed: true,
-                columns: RestConstants.POSSIBLE_SORT_BY_FIELDS.filter(
-                    (s) => this.columns.some(c => c.name === s.name)
-                )
+                columns: RestConstants.POSSIBLE_SORT_BY_FIELDS.filter((s) =>
+                    this.columns.some((c) => c.name === s.name),
+                ),
             };
         }
         if (this.homeDirectory) {
@@ -281,7 +285,10 @@ export class FileChooserComponent implements OnInit {
                 // When `scope` is not set, we didn't get the children of our home directory but
                 // instead a path relative to root. This happens for the admin user.
                 if (!data.scope) {
-                    this.homeOverride = { label: null, icon: data.scope === 'SHARED_FILES' ? 'group' : 'person' }
+                    this.homeOverride = {
+                        label: null,
+                        icon: data.scope === 'SHARED_FILES' ? 'group' : 'person',
+                    };
                 }
             }),
         );
@@ -327,7 +334,7 @@ export class FileChooserComponent implements OnInit {
                         }
                         this.showList({
                             pagination: data.pagination,
-                            nodes: list
+                            nodes: list,
                         });
                     }),
                     map(() => {}),
@@ -415,7 +422,7 @@ export class FileChooserComponent implements OnInit {
 
     updateButtons() {
         this.buttons = [
-            new DialogButton(this.translate.instant('CANCEL'), DialogButton.TYPE_CANCEL, () =>
+            new DialogButton(this.translate.instant('CANCEL'), { color: 'standard' }, () =>
                 this.cancel(),
             ),
         ];
@@ -428,15 +435,16 @@ export class FileChooserComponent implements OnInit {
             }
             confirmButton = new DialogButton(
                 this.translate.instant('APPLY'),
-                DialogButton.TYPE_PRIMARY,
+                { color: 'primary' },
                 () => this.chooseDirectory(),
             );
-            confirmButton.disabled = (!this.path$.value.length && !this.canSelectHome) || !this.folderIsWritable();
+            confirmButton.disabled =
+                (!this.path$.value.length && !this.canSelectHome) || !this.folderIsWritable();
         } else if (this.collections && !this.selectedFiles.length) {
             this.defaultSubtitle = null;
             confirmButton = new DialogButton(
                 'SELECT_ROOT_DISABLED',
-                DialogButton.TYPE_PRIMARY,
+                { color: 'primary' },
                 () => {},
             );
             confirmButton.disabled = true;
@@ -446,7 +454,7 @@ export class FileChooserComponent implements OnInit {
                 this.translate.instant(this._collections ? 'SELECT_COLLECTION' : 'SELECT_FILE', {
                     name: this.defaultSubtitle,
                 }),
-                DialogButton.TYPE_PRIMARY,
+                { color: 'primary' },
                 () => this.chooseFile(),
             );
             confirmButton.disabled =
@@ -459,6 +467,6 @@ export class FileChooserComponent implements OnInit {
     }
 
     checkColumnState(event: ListItem[]) {
-        this.dialogWidth = event.filter(i => i.visible).length > 1 ? 'xxlarge' : 'normal';
+        this.dialogWidth = event.filter((i) => i.visible).length > 1 ? 'xxlarge' : 'normal';
     }
 }

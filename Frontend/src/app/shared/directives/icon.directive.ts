@@ -72,7 +72,7 @@ export class IconDirective implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         if (this.altTextSpan) {
-            this.altTextSpan.remove()
+            this.altTextSpan.remove();
         }
     }
 

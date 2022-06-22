@@ -10,12 +10,8 @@ export class CardActionsComponent {
     @Input() additionalContent: TemplateRef<any>;
 
     @Input() set buttons(buttons: DialogButton[]) {
-        // tslint:disable-next-line:no-bitwise
-        this.buttonsRight = buttons?.filter((b) => (b.type & DialogButton.TYPE_SECONDARY) === 0);
-        // tslint:disable-next-line:no-bitwise
-        this.buttonsLeft = buttons?.filter(
-            (b) => (b.type & DialogButton.TYPE_SECONDARY) === DialogButton.TYPE_SECONDARY,
-        );
+        this.buttonsRight = buttons?.filter((button) => button.position === 'standard');
+        this.buttonsLeft = buttons?.filter((button) => button.position === 'opposite');
     }
 
     buttonsRight: DialogButton[];

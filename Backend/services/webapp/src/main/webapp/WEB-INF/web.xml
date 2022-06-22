@@ -252,8 +252,12 @@
    <filter-mapping>
 	      <filter-name>Edu Context Management Filter</filter-name>
    		  <url-pattern>/rest/*</url-pattern>
-   </filter-mapping> 
-   <filter-mapping>
+   </filter-mapping>
+  <filter-mapping>
+    <filter-name>Edu Context Management Filter</filter-name>
+    <url-pattern>/graphql</url-pattern>
+  </filter-mapping>
+  <filter-mapping>
 	      <filter-name>Edu Context Management Filter</filter-name>
    		  <url-pattern>/renderingproxy/*</url-pattern>
    </filter-mapping>    
@@ -311,6 +315,10 @@
        <filter-name>Edu-Sharing Guest Filter</filter-name>
        <url-pattern>/rest/*</url-pattern>
    </filter-mapping>
+  <filter-mapping>
+    <filter-name>Edu-Sharing Guest Filter</filter-name>
+    <url-pattern>/graphql</url-pattern>
+  </filter-mapping>
     <filter-mapping>
         <filter-name>Edu-Sharing Guest Filter</filter-name>
         <url-pattern>/eduservlet/redirect</url-pattern>
@@ -362,6 +370,10 @@
 	      <filter-name>Edu-Sharing Authentication Rest Filter</filter-name>
 	      <url-pattern>/rest/*</url-pattern>
    </filter-mapping>
+  <filter-mapping>
+    <filter-name>Edu-Sharing Authentication Rest Filter</filter-name>
+    <url-pattern>/graphql</url-pattern>
+  </filter-mapping>
    
    <filter-mapping>
        <filter-name>Edu-Sharing Authentication Filter</filter-name>
@@ -617,6 +629,16 @@
     	<servlet-name>Monitoring</servlet-name>
     	<servlet-class>org.edu_sharing.service.monitoring.MonitoringServlet</servlet-class>
     </servlet>
+
+    <servlet>
+        <servlet-name>GraphQL</servlet-name>
+        <servlet-class>org.edu_sharing.graphql.web.GraphQLServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>GraphQL</servlet-name>
+        <url-pattern>/graphql</url-pattern>
+    </servlet-mapping>
 
     <servlet-mapping>
        <servlet-name>Monitoring</servlet-name>

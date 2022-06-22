@@ -709,7 +709,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         // @TODO: remove all of this from/to multivalue
         ValueTool.getMultivalue(props);
-        PropertiesGetInterceptor.PropertiesContext propertiesContext = PropertiesInterceptorFactory.getPropertiesContext(alfNodeRef,props,eduNodeRef.getAspects());
+        PropertiesGetInterceptor.PropertiesContext propertiesContext = PropertiesInterceptorFactory.getPropertiesContext(
+                alfNodeRef,props,eduNodeRef.getAspects(),
+                sourceAsMap
+        )
+                ;
         for (PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
             props = new HashMap<>(i.beforeDeliverProperties(propertiesContext));
         }

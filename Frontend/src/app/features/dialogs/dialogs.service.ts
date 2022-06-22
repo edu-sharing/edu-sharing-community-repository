@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { Node } from 'ngx-edu-sharing-api';
-import { RestHelper } from '../../core-module/core.module';
-import { CardDialogCardConfig } from './card-dialog/card-dialog-config';
+import { configForNode } from './card-dialog/card-dialog-config';
 import { CardDialogRef } from './card-dialog/card-dialog-ref';
 import { CardDialogService } from './card-dialog/card-dialog.service';
 import { NodeEmbedDialogData } from './dialog-modules/node-embed-dialog/node-embed-dialog.component';
+import { NodeInfoDialogData } from './dialog-modules/node-info-dialog/node-info/node-info.component';
+import { NodeReportDialogData } from './dialog-modules/node-report-dialog/node-report/node-report.component';
 import { QrDialogData } from './dialog-modules/qr-dialog/qr-dialog.component';
 
 @Injectable({
@@ -14,49 +14,66 @@ import { QrDialogData } from './dialog-modules/qr-dialog/qr-dialog.component';
 export class DialogsService {
     constructor(private cardDialog: CardDialogService, private translate: TranslateService) {}
 
-    async openQrDialog(data: QrDialogData): Promise<CardDialogRef<void>> {
+    async openQrDialog(data: QrDialogData): Promise<CardDialogRef<QrDialogData, void>> {
         const { QrDialogComponent } = await import('./dialog-modules/qr-dialog/qr-dialog.module');
         return this.cardDialog.open(QrDialogComponent, {
-            cardConfig: {
-                title: 'OPTIONS.QR_CODE',
-                ...this.cardWithNode(data.node),
-            },
+            title: 'OPTIONS.QR_CODE',
+            ...configForNode(data.node),
+            contentPadding: 0,
             data,
         });
     }
 
-    async openNodeEmbedDialog(data: NodeEmbedDialogData): Promise<CardDialogRef<void>> {
+    async openNodeEmbedDialog(
+        data: NodeEmbedDialogData,
+    ): Promise<CardDialogRef<NodeEmbedDialogData, void>> {
         const { NodeEmbedDialogComponent } = await import(
             './dialog-modules/node-embed-dialog/node-embed-dialog.module'
         );
         return this.cardDialog.open(NodeEmbedDialogComponent, {
-            cardConfig: {
-                title: 'OPTIONS.EMBED',
-                ...this.cardWithNode(data.node),
-                // Set size via NodeEmbedDialogComponent, so it can choose fitting values for its
-                // responsive layouts.
-            },
+            title: 'OPTIONS.EMBED',
+            ...configForNode(data.node),
+            // Set size via NodeEmbedDialogComponent, so it can choose fitting values for its
+            // responsive layouts.
+            contentPadding: 0,
             data,
         });
     }
 
-    private cardWithNode(node: Node): Partial<CardDialogCardConfig> {
-        return {
-            avatar: { kind: 'image', url: node.iconURL },
-            subtitle: RestHelper.getTitle(node),
-        };
+    async openNodeReportDialog(
+        data: NodeReportDialogData,
+    ): Promise<CardDialogRef<NodeReportDialogData, void>> {
+        const { NodeReportComponent } = await import(
+            './dialog-modules/node-report-dialog/node-report-dialog.module'
+        );
+        return this.cardDialog.open(NodeReportComponent, {
+            title: 'NODE_REPORT.TITLE',
+            ...configForNode(data.node),
+            data,
+        });
     }
 
-    // private cardWithNodes(nodes: Node[]): Partial<CardDialogCardConfig> {
-    //     if (nodes.length === 0) {
-    //         return {};
-    //     } else if (nodes.length === 1) {
-    //         return this.cardWithNode(nodes[0]);
-    //     } else {
-    //         return {
-    //             avatar: null,
-    //             subtitle: this.translate.get('CARD_SUBTITLE_MULTIPLE', { count: nodes.length }),
-    //         };
-    //     }
-    // }
+    async openNodeInfoDialog(
+        data: NodeInfoDialogData,
+    ): Promise<CardDialogRef<NodeInfoDialogData, void>> {
+        const { NodeInfoComponent } = await import(
+            './dialog-modules/node-info-dialog/node-info-dialog.module'
+        );
+        return this.cardDialog.open(NodeInfoComponent, {
+            // Header will be configured by the component
+            data,
+        });
+    }
+
+    async openNodeStoreDialog(): Promise<CardDialogRef<void, void>> {
+        const { SearchNodeStoreComponent } = await import(
+            './dialog-modules/node-store-dialog/node-store-dialog.module'
+        );
+        return this.cardDialog.open(SearchNodeStoreComponent, {
+            title: 'SEARCH.NODE_STORE.TITLE',
+            width: 400,
+            minHeight: 'min(95%, 600px)',
+            contentPadding: 0,
+        });
+    }
 }

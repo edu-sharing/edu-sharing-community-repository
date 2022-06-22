@@ -11,10 +11,10 @@
 >
   <ng-template #beforeButton>
     <div *ngIf="!this.path$.value.length && !this.canSelectHome" class="no-permissions">
-      {{ 'WORKSPACE.FILE_CHOOSER.HOME_FOLDER_NO_PERMISSIONS' | translate}}
+      {{ 'WORKSPACE.FILE_CHOOSER.HOME_FOLDER_NO_PERMISSIONS' | translate }}
     </div>
     <div *ngIf="!folderIsWritable()" class="no-permissions">
-      {{ 'WORKSPACE.FILE_CHOOSER.NO_WRITE_PERMISSIONS' | translate}}
+      {{ 'WORKSPACE.FILE_CHOOSER.NO_WRITE_PERMISSIONS' | translate }}
     </div>
   </ng-template>
   <mat-tab-group
@@ -25,7 +25,7 @@
     <mat-tab *ngFor="let tab of tabs">
       <ng-template mat-tab-label>
         <i [esIcon]="tab.homeIcon" class="tab-icon"></i>
-        <span class="tab-label">{{tab.label | translate}}</span>
+        <span class="tab-label">{{ tab.label | translate }}</span>
       </ng-template>
       <ng-container *ngTemplateOutlet="tabContent; context: tab"></ng-container>
     </mat-tab>
@@ -48,7 +48,8 @@
         <mat-form-field floatLabel="always">
           <mat-label></mat-label>
           <i esIcon="search" matPrefix></i>
-          <input matInput
+          <input
+            matInput
             type="search"
             name="search"
             placeholder="{{ 'NODE_SEARCH' | translate }}"

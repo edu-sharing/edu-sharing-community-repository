@@ -1,201 +1,204 @@
-@import "../app/core-ui-module/styles/variables";
-.clickable{
-  @include clickable();
+@import '../app/core-ui-module/styles/variables';
+.clickable {
+    @include clickable();
 }
 /**
   ios fix for wrong positioned input cursor
   nop: when enabled, it will break positio
   font-smoothing: antialiased;n fixed dialog layouts.
 */
-  //html,body{ @include iosScrolling(); }
+//html,body{ @include iosScrolling(); }
 
-html,body{
-  height:100%;
-  font-family:'open_sansregular',sans-serif!important;
-  font-size:10pt;
-  -webkit-font-smoothing: antialiased;
+html,
+body {
+    height: 100%;
+    font-family: 'open_sansregular', sans-serif !important;
+    font-size: 10pt;
+    -webkit-font-smoothing: antialiased;
 }
 // storybook no background
 body:not(.sb-show-main) {
-  background-color: $backgroundColor;
+    background-color: $backgroundColor;
 }
-a{
-  color:$primary;
-  &.cdk-keyboard-focused {
-    @include setGlobalKeyboardFocus();
-  }
-}
-.action-title{
-  background-color: $actionDialogBackground;
-}
-.unclickable{
-  pointer-events: none;
-}
-.blue-label{
-  color:$primary;
-  font-weight: bold;
-  font-size: 80%;
-}
-.seperator-line{
-  display: flex;
-  color:$textMediumLight;
-  &:before,&:after{
-    display: flex;
-    flex-grow: 1;
-    content:'';
-    width:0;
-    height:1px;
-    background-color: $genericSeperatorLineColor;
-    margin: 9px 10px;
-  }
-  &:before{
-    margin-left: 0;
-  }
-  &:after{
-    margin-right: 0;
-  }
-}
-.center{
-  margin: 0 auto;
-}
-.badge{
-  border-radius: 16px;
-  min-height: 32px;
-  color: $primary;
-  background-color: $buttonHoverBackground;
-  padding: 6px 13px;
-  height:auto;
-  margin-right: 10px;
-  margin-top: 10px;
-  display: inline-flex;
-  align-items: center;
-  &:focus{
-    @include setGlobalInsetFocus();
-  }
-  span{
-    display:table-cell;
-    vertical-align: middle;
-    word-break: break-all;
-  }
-  i{
-    font-size: 18px;
-    position: relative;
-    top: 0;
-    left: 7px;
-    display:table-cell;
-    vertical-align: middle;
-    &:focus{
-      @include focusShadow();
+a {
+    color: $primary;
+    &.cdk-keyboard-focused {
+        @include setGlobalKeyboardFocus();
     }
-  }
-  .badgeIconLeft{
-    left:0;
-  }
 }
-.mat-chip-group{
-  display: flex;
-  flex-direction: column;
-  >.secondary{
+.action-title {
+    background-color: $actionDialogBackground;
+}
+.unclickable {
+    pointer-events: none;
+}
+.blue-label {
+    color: $primary;
+    font-weight: bold;
     font-size: 80%;
-    color: $textLight;
-    margin-top: -3px;
-    min-height: 3px;
-  }
 }
-.workflowStatus{
-  width:80px;
-  color:#fff;
-  font-weight:bold;
-  font-size:8pt;
-  border-radius: 2px;
-  text-align: center;
+.seperator-line {
+    display: flex;
+    color: $textMediumLight;
+    &:before,
+    &:after {
+        display: flex;
+        flex-grow: 1;
+        content: '';
+        width: 0;
+        height: 1px;
+        background-color: $genericSeperatorLineColor;
+        margin: 9px 10px;
+    }
+    &:before {
+        margin-left: 0;
+    }
+    &:after {
+        margin-right: 0;
+    }
 }
-.completer-row{
-  color:$textPrimary!important;
-  background: #fff!important;
+.center {
+    margin: 0 auto;
+}
+.badge {
+    border-radius: 16px;
+    min-height: 32px;
+    color: $primary;
+    background-color: $buttonHoverBackground;
+    padding: 6px 13px;
+    height: auto;
+    margin-right: 10px;
+    margin-top: 10px;
+    display: inline-flex;
+    align-items: center;
+    &:focus {
+        @include setGlobalInsetFocus();
+    }
+    span {
+        display: table-cell;
+        vertical-align: middle;
+        word-break: break-all;
+    }
+    i {
+        font-size: 18px;
+        position: relative;
+        top: 0;
+        left: 7px;
+        display: table-cell;
+        vertical-align: middle;
+        &:focus {
+            @include focusShadow();
+        }
+    }
+    .badgeIconLeft {
+        left: 0;
+    }
+}
+.mat-chip-group {
+    display: flex;
+    flex-direction: column;
+    > .secondary {
+        font-size: 80%;
+        color: $textLight;
+        margin-top: -3px;
+        min-height: 3px;
+    }
+}
+.workflowStatus {
+    width: 80px;
+    color: #fff;
+    font-weight: bold;
+    font-size: 8pt;
+    border-radius: 2px;
+    text-align: center;
+}
+.completer-row {
+    color: $textPrimary !important;
+    background: #fff !important;
 }
 .completer-selected-row,
-.completer-row:hover{
-  color:$textOnPrimary!important;
-  background: $primary!important;
+.completer-row:hover {
+    color: $textOnPrimary !important;
+    background: $primary !important;
 }
-.completer-dropdown{
-  @include materialShadow();
-  border:none!important;
-  margin-top:-20px!important;
+.completer-dropdown {
+    @include materialShadow();
+    border: none !important;
+    margin-top: -20px !important;
 }
-.card-action .card-title,.card-action .card-cancel{
-  font-size:12pt;
-  position: relative;
-  top:-25px;
+.card-action .card-title,
+.card-action .card-cancel {
+    font-size: 12pt;
+    position: relative;
+    top: -25px;
 }
-.noElementsInfo{
-  color:#767676;
-  font-size:110%;
-  width: 100%;
-  float: left;
-  text-align: center;
-  padding-top:10px;
+.noElementsInfo {
+    color: #767676;
+    font-size: 110%;
+    width: 100%;
+    float: left;
+    text-align: center;
+    padding-top: 10px;
 }
 .uppercase {
-  text-transform: uppercase;
+    text-transform: uppercase;
 }
-.input-hint-bottom{
-  margin-top:-15px;
-  color:$textLight;
-  font-size: 0.8em;
+.input-hint-bottom {
+    margin-top: -15px;
+    color: $textLight;
+    font-size: 0.8em;
 }
-.focus-underline{
-  cursor: pointer;
-  &:focus{
-    box-shadow: none !important;
-    @include removeDefaultFocus();
-    padding-bottom: 2px;
-    border-bottom: 1px solid $focusColor;
-  }
+.focus-underline {
+    cursor: pointer;
+    &:focus {
+        box-shadow: none !important;
+        @include removeDefaultFocus();
+        padding-bottom: 2px;
+        border-bottom: 1px solid $focusColor;
+    }
 }
 .btn-circle {
-  padding: 10px;
-  height: 44px;
-  color: $primary;
-  background-color: #fff;
-  border-radius: 50%;
-  @include clickable();
-  @include materialShadowBottom();
-  margin-left: 8px;
-  float: left;
-  &:focus{
-    @include setGlobalInsetFocus();
-  }
-  i{
-    background-color: rgba(255,255,255,0.75);
-    border-radius:5pt;
-  }
+    padding: 10px;
+    height: 44px;
+    color: $primary;
+    background-color: #fff;
+    border-radius: 50%;
+    @include clickable();
+    @include materialShadowBottom();
+    margin-left: 8px;
+    float: left;
+    &:focus {
+        @include setGlobalInsetFocus();
+    }
+    i {
+        background-color: rgba(255, 255, 255, 0.75);
+        border-radius: 5pt;
+    }
 }
 .toolpermission-missing {
-  display: flex;
-  white-space: pre-line;
-  margin: 10px;
-  padding:10px;
-  border:1px solid rgba(0,0,0,.25);
+    display: flex;
+    white-space: pre-line;
+    margin: 10px;
+    padding: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.25);
 }
 mat-label .required-marker {
     color: darken($colorStatusNegative, 20%);
 }
 ::placeholder {
-  color: $placeholderColor;
-  // By default, Firefox reduces opacity of placeholders.
-  opacity: 1;
+    color: $placeholderColor;
+    // By default, Firefox reduces opacity of placeholders.
+    opacity: 1;
 }
 @media screen and (max-width: $mobileWidth) {
-  .hidemobile {
-    display: none;
-  }
-
+    .hidemobile {
+        display: none;
+    }
 }
 
-input[type=checkbox]:not(:checked), input[type=checkbox]:checked {
-  &.mat-checkbox-input {
-    left: 50%; // Undo materialize styling and reapply standard material style.
-  }
+input[type='checkbox']:not(:checked),
+input[type='checkbox']:checked {
+    &.mat-checkbox-input {
+        left: 50%; // Undo materialize styling and reapply standard material style.
+    }
 }

@@ -1,10 +1,10 @@
-import {first, catchError, filter, map, takeUntil, tap} from 'rxjs/operators';
-import {trigger} from '@angular/animations';
-import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
-import {Router} from '@angular/router';
-import {Options} from '@angular-slider/ngx-slider';
-import {of, ReplaySubject} from 'rxjs';
-import {BridgeService} from '../../../core-bridge-module/bridge.service';
+import { first, catchError, filter, map, takeUntil, tap } from 'rxjs/operators';
+import { trigger } from '@angular/animations';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Router } from '@angular/router';
+import { Options } from '@angular-slider/ngx-slider';
+import { of, ReplaySubject } from 'rxjs';
+import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
     NodesRightMode,
     RestCollectionService,
@@ -13,14 +13,14 @@ import {
     TemporaryStorageService,
     UIConstants,
 } from '../../../core-module/core.module';
-import {Node} from '../../../core-module/rest/data-object';
-import {RestConstants} from '../../../core-module/rest/rest-constants';
-import {RestNodeService} from '../../../core-module/rest/services/rest-node.service';
-import {UIAnimation} from '../../../core-module/ui/ui-animation';
-import {Toast} from '../../toast';
-import {UIHelper} from '../../ui-helper';
-import {DurationPipe} from './duration.pipe';
-import {NodeHelperService} from '../../node-helper.service';
+import { Node } from '../../../core-module/rest/data-object';
+import { RestConstants } from '../../../core-module/rest/rest-constants';
+import { RestNodeService } from '../../../core-module/rest/services/rest-node.service';
+import { UIAnimation } from '../../../core-module/ui/ui-animation';
+import { Toast } from '../../toast';
+import { UIHelper } from '../../ui-helper';
+import { DurationPipe } from './duration.pipe';
+import { NodeHelperService } from '../../node-helper.service';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
 interface VideoControlsValues {
     startTime: number;
@@ -96,19 +96,31 @@ export class VideoControlsComponent implements OnInit, OnDestroy {
         } else {
             // Not an individual object, choose new location first.
             this.mainNav.getDialogs().addToCollection = [this.node];
-            this.mainNav.getDialogs().onStoredAddToCollection.pipe(first()).pipe(
+            this.mainNav
+                .getDialogs()
+                .onStoredAddToCollection.pipe(first())
+                .pipe
                 // takeUntil(this.destroyed$)
-            ).pipe(filter((ref) => ref.references.some((r) => r.originalId === this.node.ref.id)))
-                .subscribe(async ({references}) => {
-                const node = await this.writeVideoControlsValues(references[0], this.values, false);
-                this.node = node;
-                this.updateCurrentNode.emit(node);
-            });
+                ()
+                .pipe(
+                    filter((ref) => ref.references.some((r) => r.originalId === this.node.ref.id)),
+                )
+                .subscribe(async ({ references }) => {
+                    const node = await this.writeVideoControlsValues(
+                        references[0],
+                        this.values,
+                        false,
+                    );
+                    this.node = node;
+                    this.updateCurrentNode.emit(node);
+                });
         }
     }
 
     onValueChange(value: number, type: 'start' | 'end') {
-        if(type === 'start' && value !== this.previousValues?.startTime
+        if (
+            type === 'start' &&
+            value !== this.previousValues?.startTime
             // || type === 'end' && value !== this.previousValues?.endTime
         ) {
             this.video.currentTime = value;
@@ -132,10 +144,14 @@ export class VideoControlsComponent implements OnInit, OnDestroy {
             return false;
         } else {
             if (this.isCollectionRef(node)) {
-                if(this.isOwner(node)) {
+                if (this.isOwner(node)) {
                     return this.nodeHelper.getNodesRight([node], RestConstants.ACCESS_WRITE);
                 } else {
-                    return this.nodeHelper.getNodesRight([node], RestConstants.ACCESS_CC_PUBLISH, NodesRightMode.Original);
+                    return this.nodeHelper.getNodesRight(
+                        [node],
+                        RestConstants.ACCESS_CC_PUBLISH,
+                        NodesRightMode.Original,
+                    );
                 }
             } else {
                 return this.nodeHelper.getNodesRight([node], RestConstants.ACCESS_CC_PUBLISH);
@@ -166,15 +182,16 @@ export class VideoControlsComponent implements OnInit, OnDestroy {
         }
         return values;
     }
-    convertStringToTime(str: string){
+    convertStringToTime(str: string) {
         const splitted = str.split(':');
-        if(splitted.length === 2){
-            return parseInt(splitted[0], 10)*60 +
-                parseInt(splitted[1], 10);
-        } else if(splitted.length === 3){
-            return parseInt(splitted[0], 10)*3600 +
-                parseInt(splitted[1], 10)*60 +
-                parseInt(splitted[2], 10);
+        if (splitted.length === 2) {
+            return parseInt(splitted[0], 10) * 60 + parseInt(splitted[1], 10);
+        } else if (splitted.length === 3) {
+            return (
+                parseInt(splitted[0], 10) * 3600 +
+                parseInt(splitted[1], 10) * 60 +
+                parseInt(splitted[2], 10)
+            );
         }
         return 0;
     }
@@ -182,7 +199,7 @@ export class VideoControlsComponent implements OnInit, OnDestroy {
     private writeVideoControlsValues(
         node: Node,
         values: VideoControlsValues,
-        showMessage = true
+        showMessage = true,
     ): Promise<Node | null> {
         this.isLoading = true;
         const props = {
@@ -202,7 +219,7 @@ export class VideoControlsComponent implements OnInit, OnDestroy {
             .pipe(
                 tap({
                     next: () => {
-                        if(showMessage) {
+                        if (showMessage) {
                             this.toast.toast('VIDEO_CONTROLS.SAVED');
                         }
                     },
@@ -256,6 +273,9 @@ export class VideoControlsComponent implements OnInit, OnDestroy {
     }
 
     isOwner(node: Node) {
-        return node.properties[RestConstants.CM_CREATOR][0] === this.connector.getCurrentLogin().authorityName;
+        return (
+            node.properties[RestConstants.CM_CREATOR][0] ===
+            this.connector.getCurrentLogin().authorityName
+        );
     }
 }

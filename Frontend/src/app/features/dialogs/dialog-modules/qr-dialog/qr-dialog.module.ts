@@ -8,13 +8,10 @@ export { QrDialogComponent };
 
 @NgModule({
     declarations: [QrDialogComponent, QrContentComponent],
-    imports: [
-        CommonModule,
-        QRCodeModule,
-    ],
+    imports: [CommonModule, QRCodeModule],
     exports: [
         // Export for embed app
-        QrContentComponent
-    ]
+        QrContentComponent,
+    ],
 })
 export class QrDialogModule {}

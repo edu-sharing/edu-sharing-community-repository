@@ -1,164 +1,165 @@
-@import "../../../core-ui-module/styles/variables";
+@import '../../../core-ui-module/styles/variables';
 
-.topFrame{
-  position:fixed;
-  z-index:1;
-  width: 100%;
-  padding: 15px 10px;
-  display:flex;
-  align-items: center;
-  .info{
-    flex-grow: 1;
-    color:$textPrimary;
-    font-weight:bold;
-    line-height: 1.5em;
-    margin: 0 20px;
-    a{
-      text-transform: uppercase;
-    }
-    @include limitLineCount(3);
-  }
-  es-actionbar{
-    min-width: 170px;
-    display: flex;
-    justify-content: flex-end;
-  }
-}
-.org-signup{
-  .warning-email{
-    display: flex;
-    margin-bottom: 20px;
-  }
-  mat-form-field, es-input-password{
+.topFrame {
+    position: fixed;
+    z-index: 1;
     width: 100%;
-  }
-  es-input-password {
+    padding: 15px 10px;
     display: flex;
-    margin-top: 20px;
-  }
+    align-items: center;
+    .info {
+        flex-grow: 1;
+        color: $textPrimary;
+        font-weight: bold;
+        line-height: 1.5em;
+        margin: 0 20px;
+        a {
+            text-transform: uppercase;
+        }
+        @include limitLineCount(3);
+    }
+    es-actionbar {
+        min-width: 170px;
+        display: flex;
+        justify-content: flex-end;
+    }
+}
+.org-signup {
+    .warning-email {
+        display: flex;
+        margin-bottom: 20px;
+    }
+    mat-form-field,
+    es-input-password {
+        width: 100%;
+    }
+    es-input-password {
+        display: flex;
+        margin-top: 20px;
+    }
 }
 .org-signup-list {
-  h5{
-    display: flex;
-    justify-content: center;
-    text-align: center;
-    color: $noResultsColor;
-  }
-  .actionbar {
-    display: flex;
-    width: 100%;
-    height: 45px;
-    justify-content: flex-end;
-  }
+    h5 {
+        display: flex;
+        justify-content: center;
+        text-align: center;
+        color: $noResultsColor;
+    }
+    .actionbar {
+        display: flex;
+        width: 100%;
+        height: 45px;
+        justify-content: flex-end;
+    }
 }
 ::ng-deep {
-  .org-signup es-input-password{
-    mat-form-field{
-      width: 100%;
+    .org-signup es-input-password {
+        mat-form-field {
+            width: 100%;
+        }
     }
-  }
 }
-.memberActions{
-  height:50px;
-  display: table;
-  margin-bottom: 10px;
+.memberActions {
+    height: 50px;
+    display: table;
+    margin-bottom: 10px;
 }
-.memberActions input{
-  margin-left:10px;
-  width:100%;
+.memberActions input {
+    margin-left: 10px;
+    width: 100%;
 }
-.memberActionBar{
-  position: absolute;
-  top: 25px;
-  right: 40px;
+.memberActionBar {
+    position: absolute;
+    top: 25px;
+    right: 40px;
 }
-.memberItem{
-  display: table-cell;
+.memberItem {
+    display: table-cell;
 }
-.memberInput{
-  width:280px;
+.memberInput {
+    width: 280px;
 }
-:host ::ng-deep{
-  .card-status{
-    mat-checkbox{
-      display: flex;
-      margin-bottom: 20px;
+:host ::ng-deep {
+    .card-status {
+        mat-checkbox {
+            display: flex;
+            margin-bottom: 20px;
+        }
     }
-  }
-  .card-edit {
+    .card-edit {
+        mat-form-field {
+            width: 100%;
+        }
+        .folder-path {
+            display: flex;
+            flex-direction: column;
+            ::ng-deep {
+                .breadcrumb {
+                    flex-wrap: wrap;
+                }
+            }
+        }
+        .group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+
+            .mat-form-field-wrapper {
+                padding-bottom: 0;
+            }
+        }
+    }
+}
+.editSystemName {
+    margin-bottom: 10px;
+}
+.noElements {
+    width: 100%;
+    text-align: center;
+    padding-top: 10px;
+    color: $noResultsColor;
+    font-size: $fontSizeLarge;
+}
+.infoText {
+    padding: 5px 15px;
+}
+#orgType {
+    margin-bottom: 1.5em;
+}
+.folderLocation {
+    color: $primary;
+}
+
+$addToWidth: 400px;
+.list {
+    overflow-y: auto;
+    position: fixed;
+    top: $mainnavHeight + 105px;
+    width: 100%;
+    height: calc(100% - #{$mainnavHeight + 105px});
+}
+.searchEmbedded {
+    padding: 10px;
     mat-form-field {
-      width: 100%;
+        width: 100%;
     }
-      .folder-path{
-          display: flex;
-          flex-direction: column;
-          ::ng-deep {
-              .breadcrumb {
-                  flex-wrap: wrap;
-              }
-          }
-      }
-    .group {
-      display: flex;
-      align-items: center;
-      margin-bottom: 20px;
-
-      .mat-form-field-wrapper {
-        padding-bottom: 0;
-      }
-    }
-  }
 }
-.editSystemName{
-  margin-bottom: 10px;
+.listEmbedded {
+    top: 250px;
+    height: calc(100% - 310px);
+    width: $addToWidth;
 }
-.noElements{
-  width:100%;
-  text-align: center;
-  padding-top:10px;
-  color:$noResultsColor;
-  font-size: $fontSizeLarge;
+.formEmbedded {
+    width: $addToWidth;
 }
-.infoText{
-  padding:5px 15px;
+label.search {
+    position: relative;
+    top: 8px;
+    left: 82px;
 }
-#orgType{
-  margin-bottom: 1.5em;
-}
-.folderLocation{
-  color: $primary;
-}
-
-$addToWidth:400px;
-.list{
-  overflow-y: auto;
-  position:fixed;
-  top: $mainnavHeight + 105px;
-  width:100%;
-  height: calc(100% - #{$mainnavHeight + 105px});
-}
-.searchEmbedded{
-  padding:10px;
-  mat-form-field{
-    width:100%;
-  }
-}
-.listEmbedded{
-  top: 250px;
-  height: calc(100% - 310px);
-  width:$addToWidth;
-}
-.formEmbedded{
-  width:$addToWidth;
-}
-label.search{
-  position:relative;
-  top:8px;
-  left:82px;
-}
-.currentMembers{
-  margin-top: -10px;
-  margin-bottom: 10px;
+.currentMembers {
+    margin-top: -10px;
+    margin-bottom: 10px;
 }
 .addTo {
     position: fixed;
@@ -176,11 +177,10 @@ label.search{
         justify-content: space-between;
     }
 }
-.addToList{
-  height: calc(100% - 37px);
-  overflow-y: auto;
-
+.addToList {
+    height: calc(100% - 37px);
+    overflow-y: auto;
 }
-#groupType{
-  margin-bottom:20px;
+#groupType {
+    margin-bottom: 20px;
 }

@@ -2,6 +2,8 @@
 
 export {
     About,
+    Connector,
+    ConnectorList,
     Mds as MdsDefinition,
     MdsGroup,
     MdsSort,
@@ -15,6 +17,7 @@ export {
     NodeRef,
     Organization,
     Person,
+    RelationData,
     SearchResultNode as SearchResults,
     StreamEntry,
     UserProfile,

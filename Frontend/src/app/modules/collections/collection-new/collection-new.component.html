@@ -4,64 +4,94 @@
   class="collections-master-div"
   [class.collections-master-div-mainnav]="mainnav"
 >
+  <es-global-progress *ngIf="isLoading"></es-global-progress>
 
-<es-global-progress *ngIf="isLoading"></es-global-progress>
-
-<div *ngIf="!isLoading" class="createContainer">
-  <div class="createProgress" *ngIf="newCollectionStep!=STEP_NEW">
-    <div *ngFor="let step of availableSteps;let i=index;"
-         (click)="i<currentStepPosition() ? newCollectionStep=step : null"
-         [class.current]="step==newCollectionStep"
-         [class.finished]="i<currentStepPosition()">
-      <div class="circle"></div><i [esIcon]="STEP_ICONS[step]"></i><div class="label">{{ 'COLLECTIONS.STEP.'+step | translate }}</div>
-      <div class="connection"></div>
+  <div *ngIf="!isLoading" class="createContainer">
+    <div class="createProgress" *ngIf="newCollectionStep != STEP_NEW">
+      <div
+        *ngFor="let step of availableSteps; let i = index"
+        (click)="i < currentStepPosition() ? (newCollectionStep = step) : null"
+        [class.current]="step == newCollectionStep"
+        [class.finished]="i < currentStepPosition()"
+      >
+        <div class="circle"></div>
+        <i [esIcon]="STEP_ICONS[step]"></i>
+        <div class="label">{{ 'COLLECTIONS.STEP.' + step | translate }}</div>
+        <div class="connection"></div>
+      </div>
+      <div class="finish">
+        <div class="circle"></div>
+        <div class="label">{{ 'COLLECTIONS.STEP.DONE' | translate }}</div>
+      </div>
     </div>
-    <div class="finish">
-      <div class="circle"></div><div class="label">{{ 'COLLECTIONS.STEP.DONE' | translate }}</div>
-    </div>
-  </div>
-  <es-card *ngIf="(newCollectionStep==STEP_NEW)"
-        class="collection-new-container"
-        width="normal"
-        height="auto"
-        modal="auto"
-        title="{{'COLLECTIONS.CREATE_TYPE' | translate}}"
-        (onCancel)="newCollectionCancel()">
-    <div class="createCollection collectionShadow">
-      <button mat-button class="collection-item clickable" (click)="setCollectionType('MY')">
-        <div class="iconLeft"><i esIcon="lock" style="color:#995b5b;"></i></div>
-        <div class="content">
-          <div class="title">{{'COLLECTIONS.CREATE.PRIVATE' | translate}}</div>
-          <div class="description">{{'COLLECTIONS.CREATE.PRIVATE_DESCRIPTION' | translate}}</div>
-        </div>
-        <i esIcon="keyboard_arrow_right" class="next"></i>
-      </button>
-      <button mat-button class="collection-item clickable" *ngIf="canInvite" (click)="setCollectionType('CUSTOM')">
-        <div class="iconLeft"><i esIcon="group" style="color:#4F7899;"></i></div>
-        <div class="content">
-          <div class="title">{{'COLLECTIONS.CREATE.SHARED' | translate}}</div>
-          <div class="description">{{'COLLECTIONS.CREATE.SHARED_DESCRIPTION' | translate}}</div>
-        </div>
-        <i esIcon="keyboard_arrow_right" class="next"></i>
-      </button>
-      <button mat-button class="collection-item clickable" *ngIf="shareToAll && canInvite" (click)="setCollectionType('EDU_ALL')">
-        <div class="iconLeft"> <i esIcon="public" style="color:#5C998F;"></i></div>
-        <div class="content">
-          <div class="title">{{'COLLECTIONS.CREATE.PUBLIC' | translate}}</div>
-          <div class="description">{{'COLLECTIONS.CREATE.PUBLIC_DESCRIPTION' | translate}}</div>
-        </div>
-        <i esIcon="keyboard_arrow_right" class="next"></i>
-      </button>
-      <div class="group" *ngIf="createEditorial && shareToAll">
-        <button mat-button class="collection-item clickable" *ngIf="createEditorial" (click)="setCollectionType('EDITORIAL')">
-          <div class="iconLeft"><i esIcon="star" style="color:#E9B42A;"></i></div>
+    <es-card
+      *ngIf="newCollectionStep == STEP_NEW"
+      class="collection-new-container"
+      width="normal"
+      height="auto"
+      modal="auto"
+      title="{{ 'COLLECTIONS.CREATE_TYPE' | translate }}"
+      (onCancel)="newCollectionCancel()"
+    >
+      <div class="createCollection collectionShadow">
+        <button
+          mat-button
+          class="collection-item clickable"
+          (click)="setCollectionType('MY')"
+          data-test="create-private-collection-button"
+        >
+          <div class="iconLeft"><i esIcon="lock" style="color: #995b5b"></i></div>
           <div class="content">
-            <div class="title">{{'COLLECTIONS.CREATE.EDITORIAL' | translate}}</div>
-            <div class="description">{{'COLLECTIONS.CREATE.EDITORIAL_DESCRIPTION' | translate}}</div>
+            <div class="title">{{ 'COLLECTIONS.CREATE.PRIVATE' | translate }}</div>
+            <div class="description">
+              {{ 'COLLECTIONS.CREATE.PRIVATE_DESCRIPTION' | translate }}
+            </div>
           </div>
           <i esIcon="keyboard_arrow_right" class="next"></i>
         </button>
-        <!--
+        <button
+          mat-button
+          class="collection-item clickable"
+          *ngIf="canInvite"
+          (click)="setCollectionType('CUSTOM')"
+        >
+          <div class="iconLeft"><i esIcon="group" style="color: #4f7899"></i></div>
+          <div class="content">
+            <div class="title">{{ 'COLLECTIONS.CREATE.SHARED' | translate }}</div>
+            <div class="description">{{ 'COLLECTIONS.CREATE.SHARED_DESCRIPTION' | translate }}</div>
+          </div>
+          <i esIcon="keyboard_arrow_right" class="next"></i>
+        </button>
+        <button
+          mat-button
+          class="collection-item clickable"
+          *ngIf="shareToAll && canInvite"
+          (click)="setCollectionType('EDU_ALL')"
+        >
+          <div class="iconLeft"><i esIcon="public" style="color: #5c998f"></i></div>
+          <div class="content">
+            <div class="title">{{ 'COLLECTIONS.CREATE.PUBLIC' | translate }}</div>
+            <div class="description">{{ 'COLLECTIONS.CREATE.PUBLIC_DESCRIPTION' | translate }}</div>
+          </div>
+          <i esIcon="keyboard_arrow_right" class="next"></i>
+        </button>
+        <div class="group" *ngIf="createEditorial && shareToAll">
+          <button
+            mat-button
+            class="collection-item clickable"
+            *ngIf="createEditorial"
+            (click)="setCollectionType('EDITORIAL')"
+          >
+            <div class="iconLeft"><i esIcon="star" style="color: #e9b42a"></i></div>
+            <div class="content">
+              <div class="title">{{ 'COLLECTIONS.CREATE.EDITORIAL' | translate }}</div>
+              <div class="description">
+                {{ 'COLLECTIONS.CREATE.EDITORIAL_DESCRIPTION' | translate }}
+              </div>
+            </div>
+            <i esIcon="keyboard_arrow_right" class="next"></i>
+          </button>
+          <!--
         <div class="collection-item clickable" *ngIf="createCurriculum" (click)="setCollectionType('CURRICULUM')">
           <div class="iconLeft"><i esIcon="school" style="color:#995C99;">school</i></div>
           <div class="content">
@@ -70,247 +100,321 @@
           </div>
           <i esIcon="keyboard_arrow_right" class="next"></i>
         </div>
-        -->
-        </div>
-          <button mat-button class="collection-item clickable" *ngIf="createMediacenter" (click)="setCollectionType('MEDIA_CENTER')">
-              <div class="iconLeft"><i esIcon="business" style="color:#4e4b99;"></i></div>
-              <div class="content">
-                  <div class="title">{{'COLLECTIONS.CREATE.MEDIA_CENTER' | translate}}</div>
-                  <div class="description">{{'COLLECTIONS.CREATE.MEDIA_CENTER_DESCRIPTION' | translate}}</div>
-              </div>
-              <i esIcon="keyboard_arrow_right" class="next"></i>
-          </button>
+        --></div>
+        <button
+          mat-button
+          class="collection-item clickable"
+          *ngIf="createMediacenter"
+          (click)="setCollectionType('MEDIA_CENTER')"
+        >
+          <div class="iconLeft"><i esIcon="business" style="color: #4e4b99"></i></div>
+          <div class="content">
+            <div class="title">{{ 'COLLECTIONS.CREATE.MEDIA_CENTER' | translate }}</div>
+            <div class="description">
+              {{ 'COLLECTIONS.CREATE.MEDIA_CENTER_DESCRIPTION' | translate }}
+            </div>
+          </div>
+          <i esIcon="keyboard_arrow_right" class="next"></i>
+        </button>
       </div>
-  </es-card>
-  <es-card *ngIf="newCollectionStep==STEP_GENERAL"
-        [buttons]="buttons"
-        [isCancelable]="true"
-        (onCancel)="newCollectionCancel()"
-        title="{{ 'collectionNew_preview' | translate }}"
-        [subtitle]="currentCollection.title"
-        modal="auto"
-        width="xsmall" height="auto">
-        <div class="collection-general">
-          <div class="collectionImage">
-
-              <div class='image-upload-field'>
-                  <input #file type='file' accept="image/*" name='userFile' (change)="imageDataChanged($event)"
-                  class="image-upload-field-input">
-              </div>
-              <div class="button-icon">
-                <es-actionbar [options]="imageOptions"
-                              appearance="round"
-                              [numberOfAlwaysVisibleOptions]="0"
-                              [numberOfAlwaysVisibleOptionsMobile]="0"
-                ></es-actionbar>
-              </div>
-
-              <!-- Making the image area clickable poses a violation of accessibility rules. Merge
-              christopher/fix/image-click-areas to remove. -->
-              <div *ngIf="!imageData && !(currentCollection.preview && !currentCollection.preview.isIcon)" (keyup.enter)="file.click()" (click)="file.click()" class="card-collection-icon-container">
-                  <div class="card-image-distance"></div>
-                  <div class="card-image-icon-container" [style.background-color]="currentCollection.collection.color">
-                      <i esIcon="layers"></i>
-                  </div>
-              </div>
-
-              <div *ngIf="!imageData && (currentCollection.preview && !currentCollection.preview.isIcon)" (keyup.enter)="file.click()" (click)="file.click()" class="card-collection-icon-container">
-                  <img class="blurred-image" [src]="currentCollection.preview.url+'&crop=true&width=350&height=240'">
-                  <img [src]="currentCollection.preview.url+'&crop=true&width=350&height=240'" class="card-image-preview"/>
-              </div>
-
-              <div *ngIf="imageData" class="card-collection-image-container" (keyup.enter)="file.click()" (click)="file.click()">
-                  <div class="card-image-container">
-                      <img [src]="imageData" class="blurred-image">
-                      <img [src]="imageData" class="card-image-preview">
-                  </div>
-              </div>
-
+    </es-card>
+    <es-card
+      *ngIf="newCollectionStep == STEP_GENERAL"
+      [buttons]="buttons"
+      [isCancelable]="true"
+      (onCancel)="newCollectionCancel()"
+      title="{{ 'collectionNew_preview' | translate }}"
+      [subtitle]="currentCollection.title"
+      modal="auto"
+      width="xsmall"
+      height="auto"
+    >
+      <div class="collection-general">
+        <div class="collectionImage">
+          <div class="image-upload-field">
+            <input
+              #file
+              type="file"
+              accept="image/*"
+              name="userFile"
+              (change)="imageDataChanged($event)"
+              class="image-upload-field-input"
+            />
+          </div>
+          <div class="button-icon">
+            <es-actionbar
+              [options]="imageOptions"
+              appearance="round"
+              [numberOfAlwaysVisibleOptions]="0"
+              [numberOfAlwaysVisibleOptionsMobile]="0"
+            ></es-actionbar>
           </div>
 
-          <div class="collection-new-preview-infoarea" [style.background-color]="currentCollection.collection.color" [class.dark-color]="isBrightColor()">
-            <div class="collection-new-bg"></div>
-            <div class="dialog-basic-area dialog-input-area">
-                <mat-form-field [class.mat-form-field-bright]="!isBrightColor()"
-                                [class.mat-form-field-dark]="isBrightColor()">
-                    <mat-label>{{'collectionNew_placeholderTitle' | translate }}</mat-label>
-                    <!-- Autofocus and autocomplete don't work well together here, because the
-                    autocomplete list will open before the card animation finishes. -->
-                    <input matInput class="title" [(ngModel)]="currentCollection.title" autofocus autocomplete="off">
-                </mat-form-field>
-                  <mat-form-field [class.mat-form-field-bright]="!isBrightColor()"
-                                  [class.mat-form-field-dark]="isBrightColor()">
-                      <mat-label>{{'collectionNew_placeholderDescription' | translate }}</mat-label>
-                      <textarea matInput
-                                [(ngModel)]="currentCollection.collection.description"
-                                ></textarea>
-                  </mat-form-field>
+          <!-- Making the image area clickable poses a violation of accessibility rules. Merge
+              christopher/fix/image-click-areas to remove. -->
+          <div
+            *ngIf="!imageData && !(currentCollection.preview && !currentCollection.preview.isIcon)"
+            (keyup.enter)="file.click()"
+            (click)="file.click()"
+            class="card-collection-icon-container"
+          >
+            <div class="card-image-distance"></div>
+            <div
+              class="card-image-icon-container"
+              [style.background-color]="currentCollection.collection.color"
+            >
+              <i esIcon="layers"></i>
             </div>
-            <div class="collection-new-owner">
-              <ng-container *ngIf="!authorFreetext">
-                  <i esIcon="person"></i>
-                  <span>{{user | authorityName}}</span>
-                  <button
-                    *ngIf="authorFreetextAllowed"
-                    mat-icon-button
-                    [attr.aria-label]="'EDIT' | translate: {thing: ('COLLECTIONS.NEW.AUTHOR_FREETEXT' | translate)}"
-                    (click)="switchToAuthorFreetext()"
-                  >
-                    <i esIcon="edit"></i>
-                  </button>
-              </ng-container>
-              <ng-container *ngIf="authorFreetext">
-                  <i esIcon="person"></i>
-                  <mat-form-field class="mat-form-field-no-padding" [class.mat-form-field-bright]="!isBrightColor()">
-                      <mat-label id="collection-new-author-freetext-label">
-                        {{'COLLECTIONS.NEW.AUTHOR_FREETEXT' | translate }}
-                      </mat-label>
-                      <input #authorFreetextInput matInput
-                             [disabled]="!authorFreetextAllowed"
-                             [(ngModel)]="currentCollection.collection.authorFreetext">
-                  </mat-form-field>
-                  <button
-                    mat-icon-button
-                    [attr.aria-label]="'CANCEL' | translate"
-                    aria-describedby="collection-new-author-freetext-label"
-                    (click)="cancelAuthorFreetext()"
-                  ><i esIcon="close"></i></button>
-              </ng-container>
-            </div>
+          </div>
 
-              <div class="dialog-basic-area dialog-color-group">
-                  <div
-                      id="collection-new-color-picker-label"
-                      class="collection-new-preview-infoline"
-                  >
-                      {{ 'collectionNew_setColor' | translate }}
-                  </div>
-                  <ul
-                      class="color-group"
-                      aria-labelledby="collection-new-color-picker-label"
-                      tabindex="0"
-                      role="listbox"
-                      aria-orientation="horizontal"
-                      cdkMonitorElementFocus
-                      (keydown.arrowright)="setColorByDirection($event)"
-                      (keydown.arrowup)="setColorByDirection($event)"
-                      (keydown.arrowleft)="setColorByDirection($event)"
-                      (keydown.arrowdown)="setColorByDirection($event)"
-                      [attr.aria-activedescendant]="
-                        COLORS.indexOf(currentCollection.collection.color) !== -1
-                        ? 'collection-new-color-picker-option-' + COLORS.indexOf(currentCollection.collection.color)
-                        : null"
-                      >
-                      <li
-                        id="collection-new-color-picker-option-{{index}}"
-                        *ngFor="let color of COLORS; let index = index"
-                        role="option"
-                        class="color-option"
-                        [ngClass]="{'color-selected': (currentCollection.collection.color === color)}"
-                        [attr.aria-selected]="currentCollection.collection.color === color"
-                        [style.background-color]="color"
-                        (click)="setColor(color)"
-                      >
-                        <span class="cdk-visually-hidden">
-                          {{ 'collectionNew_colorIndex' | translate: { index: index + 1 } }}
-                        </span>
-                      </li>
-                  </ul>
-              </div>
+          <div
+            *ngIf="!imageData && currentCollection.preview && !currentCollection.preview.isIcon"
+            (keyup.enter)="file.click()"
+            (click)="file.click()"
+            class="card-collection-icon-container"
+          >
+            <img
+              class="blurred-image"
+              [src]="currentCollection.preview.url + '&crop=true&width=350&height=240'"
+            />
+            <img
+              [src]="currentCollection.preview.url + '&crop=true&width=350&height=240'"
+              class="card-image-preview"
+            />
+          </div>
+
+          <div
+            *ngIf="imageData"
+            class="card-collection-image-container"
+            (keyup.enter)="file.click()"
+            (click)="file.click()"
+          >
+            <div class="card-image-container">
+              <img [src]="imageData" class="blurred-image" />
+              <img [src]="imageData" class="card-image-preview" />
+            </div>
           </div>
         </div>
-  </es-card>
-  <es-card *ngIf="newCollectionStep==STEP_METADATA"
-        title="{{ 'COLLECTIONS.STEP.METADATA' | translate }}"
-        [subtitle]="currentCollection.title"
-        [isCancelable]="true"
-        (onCancel)="newCollectionCancel()"
-        modal="auto"
-        width="large"
-        height="xlarge"
-        [buttons]="buttons"
-        class="collection-metadata">
+
+        <div
+          class="collection-new-preview-infoarea"
+          [style.background-color]="currentCollection.collection.color"
+          [class.dark-color]="isBrightColor()"
+        >
+          <div class="collection-new-bg"></div>
+          <div class="dialog-basic-area dialog-input-area">
+            <mat-form-field
+              [class.mat-form-field-bright]="!isBrightColor()"
+              [class.mat-form-field-dark]="isBrightColor()"
+            >
+              <mat-label>{{ 'collectionNew_placeholderTitle' | translate }}</mat-label>
+              <!-- Autofocus and autocomplete don't work well together here, because the
+                    autocomplete list will open before the card animation finishes. -->
+              <input
+                matInput
+                class="title"
+                [(ngModel)]="currentCollection.title"
+                autofocus
+                autocomplete="off"
+                data-test="new-collection-name-input"
+              />
+            </mat-form-field>
+            <mat-form-field
+              [class.mat-form-field-bright]="!isBrightColor()"
+              [class.mat-form-field-dark]="isBrightColor()"
+            >
+              <mat-label>{{ 'collectionNew_placeholderDescription' | translate }}</mat-label>
+              <textarea matInput [(ngModel)]="currentCollection.collection.description"></textarea>
+            </mat-form-field>
+          </div>
+          <div class="collection-new-owner">
+            <ng-container *ngIf="!authorFreetext">
+              <i esIcon="person"></i>
+              <span>{{ user | authorityName }}</span>
+              <button
+                *ngIf="authorFreetextAllowed"
+                mat-icon-button
+                [attr.aria-label]="
+                  'EDIT' | translate: { thing: ('COLLECTIONS.NEW.AUTHOR_FREETEXT' | translate) }
+                "
+                (click)="switchToAuthorFreetext()"
+              >
+                <i esIcon="edit"></i>
+              </button>
+            </ng-container>
+            <ng-container *ngIf="authorFreetext">
+              <i esIcon="person"></i>
+              <mat-form-field
+                class="mat-form-field-no-padding"
+                [class.mat-form-field-bright]="!isBrightColor()"
+              >
+                <mat-label id="collection-new-author-freetext-label">
+                  {{ 'COLLECTIONS.NEW.AUTHOR_FREETEXT' | translate }}
+                </mat-label>
+                <input
+                  #authorFreetextInput
+                  matInput
+                  [disabled]="!authorFreetextAllowed"
+                  [(ngModel)]="currentCollection.collection.authorFreetext"
+                />
+              </mat-form-field>
+              <button
+                mat-icon-button
+                [attr.aria-label]="'CANCEL' | translate"
+                aria-describedby="collection-new-author-freetext-label"
+                (click)="cancelAuthorFreetext()"
+              >
+                <i esIcon="close"></i>
+              </button>
+            </ng-container>
+          </div>
+
+          <div class="dialog-basic-area dialog-color-group">
+            <div id="collection-new-color-picker-label" class="collection-new-preview-infoline">
+              {{ 'collectionNew_setColor' | translate }}
+            </div>
+            <ul
+              class="color-group"
+              aria-labelledby="collection-new-color-picker-label"
+              tabindex="0"
+              role="listbox"
+              aria-orientation="horizontal"
+              cdkMonitorElementFocus
+              (keydown.arrowright)="setColorByDirection($event)"
+              (keydown.arrowup)="setColorByDirection($event)"
+              (keydown.arrowleft)="setColorByDirection($event)"
+              (keydown.arrowdown)="setColorByDirection($event)"
+              [attr.aria-activedescendant]="
+                COLORS.indexOf(currentCollection.collection.color) !== -1
+                  ? 'collection-new-color-picker-option-' +
+                    COLORS.indexOf(currentCollection.collection.color)
+                  : null
+              "
+            >
+              <li
+                id="collection-new-color-picker-option-{{ index }}"
+                *ngFor="let color of COLORS; let index = index"
+                role="option"
+                class="color-option"
+                [ngClass]="{ 'color-selected': currentCollection.collection.color === color }"
+                [attr.aria-selected]="currentCollection.collection.color === color"
+                [style.background-color]="color"
+                (click)="setColor(color)"
+              >
+                <span class="cdk-visually-hidden">
+                  {{ 'collectionNew_colorIndex' | translate: { index: index + 1 } }}
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </es-card>
+    <es-card
+      *ngIf="newCollectionStep == STEP_METADATA"
+      title="{{ 'COLLECTIONS.STEP.METADATA' | translate }}"
+      [subtitle]="currentCollection.title"
+      [isCancelable]="true"
+      (onCancel)="newCollectionCancel()"
+      modal="auto"
+      width="large"
+      height="xlarge"
+      [buttons]="buttons"
+      class="collection-metadata"
+    >
       <div class="card-content">
-        <es-mds-editor-wrapper #mds
-          [groupId]="'collection_'+newCollectionType.toLowerCase()"
+        <es-mds-editor-wrapper
+          #mds
+          [groupId]="'collection_' + newCollectionType.toLowerCase()"
           [setId]="mdsSet"
           [editorMode]="'form'"
           [embedded]="true"
           [currentValues]="properties"
         ></es-mds-editor-wrapper>
       </div>
-  </es-card>
-  <es-card *ngIf="newCollectionStep==STEP_EDITORIAL_GROUPS"
-        title="{{ 'COLLECTIONS.STEP.EDITORIAL_GROUPS' | translate }}"
-        [subtitle]="currentCollection.title"
-        [isCancelable]="true"
-        (onCancel)="newCollectionCancel()"
-         modal="auto"
-        width="large"
-        height="xxlarge"
-        [buttons]="buttons"
-        class="collection-metadata">
-    <div class="editorial-group">
-      <div class="editorial-list">
-        <div class="noGroups" *ngIf="editorialGroups.length==0">{{'COLLECTIONS.NO_EDITORIAL_GROUPS' | translate}}</div>
-        <div class="noPermission" *ngIf="!shareToAll">
-          <h4>{{'TOOLPERMISSION_ERROR_HEADER' | translate}}</h4>
-          <h5>{{'TOOLPERMISSION.TOOLPERMISSION_INVITE_ALLAUTHORITIES' | translate}}</h5>
+    </es-card>
+    <es-card
+      *ngIf="newCollectionStep == STEP_EDITORIAL_GROUPS"
+      title="{{ 'COLLECTIONS.STEP.EDITORIAL_GROUPS' | translate }}"
+      [subtitle]="currentCollection.title"
+      [isCancelable]="true"
+      (onCancel)="newCollectionCancel()"
+      modal="auto"
+      width="large"
+      height="xxlarge"
+      [buttons]="buttons"
+      class="collection-metadata"
+    >
+      <div class="editorial-group">
+        <div class="editorial-list">
+          <div class="noGroups" *ngIf="editorialGroups.length == 0">
+            {{ 'COLLECTIONS.NO_EDITORIAL_GROUPS' | translate }}
+          </div>
+          <div class="noPermission" *ngIf="!shareToAll">
+            <h4>{{ 'TOOLPERMISSION_ERROR_HEADER' | translate }}</h4>
+            <h5>{{ 'TOOLPERMISSION.TOOLPERMISSION_INVITE_ALLAUTHORITIES' | translate }}</h5>
+          </div>
+          <es-listTable
+            *ngIf="editorialGroups.length != 0 && shareToAll"
+            [nodes]="$any(editorialGroups)"
+            [columns]="editorialColumns"
+            [selectedNodes]="$any(editorialGroupsSelected)"
+            [hasCheckbox]="true"
+            [hasIcon]="true"
+            [hasHeading]="false"
+            (selectionChanged)="editorialGroupsSelected = $event"
+            [icon]="'star'"
+          ></es-listTable>
         </div>
-        <es-listTable
-          *ngIf="editorialGroups.length!=0 && shareToAll"
-          [nodes]="$any(editorialGroups)"
-          [columns]="editorialColumns"
-          [selectedNodes]="$any(editorialGroupsSelected)"
-          [hasCheckbox]="true"
-          [hasIcon]="true"
-          [hasHeading]="false"
-          (selectionChanged)="editorialGroupsSelected=$event"
-          [icon]="'star'"
-        ></es-listTable>
+        <div class="editorial-public">
+          <mat-slide-toggle [(ngModel)]="editorialPublic">
+            <es-multi-line-label>
+              <ng-container slot="label">
+                {{ 'COLLECTIONS.EDITORIAL_PUBLIC' | translate }}
+              </ng-container>
+              <ng-container slot="description">
+                {{ 'COLLECTIONS.EDITORIAL_PUBLIC_INFO' | translate }}
+              </ng-container>
+            </es-multi-line-label>
+          </mat-slide-toggle>
+        </div>
       </div>
-      <div class="editorial-public">
-        <mat-slide-toggle [(ngModel)]="editorialPublic">
-          <es-multi-line-label>
-            <ng-container slot="label">
-              {{'COLLECTIONS.EDITORIAL_PUBLIC' | translate}}
-            </ng-container>
-            <ng-container slot="description">
-              {{'COLLECTIONS.EDITORIAL_PUBLIC_INFO' | translate}}
-            </ng-container>
-          </es-multi-line-label>
-        </mat-slide-toggle>
-      </div>
-    </div>
-  </es-card>
-  <es-card *ngIf="newCollectionStep==STEP_PERMISSIONS"
-        title="{{ 'COLLECTIONS.EDIT_PERMISSIONS' | translate }}"
-        modal="auto"
-        [isCancelable]="true"
-        (onCancel)="newCollectionCancel()"
-        [buttons]="buttons"
-        width="normal"
-        height="large"
-        [subtitle]="currentCollection.title" class="collection-permission-container">
+    </es-card>
+    <es-card
+      *ngIf="newCollectionStep == STEP_PERMISSIONS"
+      title="{{ 'COLLECTIONS.EDIT_PERMISSIONS' | translate }}"
+      modal="auto"
+      [isCancelable]="true"
+      (onCancel)="newCollectionCancel()"
+      [buttons]="buttons"
+      width="normal"
+      height="large"
+      [subtitle]="currentCollection.title"
+      class="collection-permission-container"
+    >
       <div class="card-content">
-          <div class="title">{{'COLLECTIONS.EDIT_PERMISSIONS_SUBTEXT' | translate}}</div>
-          <div class="description">{{'COLLECTIONS.EDIT_PERMISSIONS_DESCRIPTION' | translate}}</div>
+        <div class="title">{{ 'COLLECTIONS.EDIT_PERMISSIONS_SUBTEXT' | translate }}</div>
+        <div class="description">{{ 'COLLECTIONS.EDIT_PERMISSIONS_DESCRIPTION' | translate }}</div>
         <div class="dialog-basic-area permissionsBtn">
-          <button mat-raised-button (click)="editPermissions()"><i esIcon="person_add"></i>{{'COLLECTIONS.EXTENDED_PERMISSIONS_BUTTON' | translate}}</button>
+          <button mat-raised-button (click)="editPermissions()">
+            <i esIcon="person_add"></i>{{ 'COLLECTIONS.EXTENDED_PERMISSIONS_BUTTON' | translate }}
+          </button>
         </div>
-        <div class="status">{{('COLLECTIONS.PERMISSIONS_STATUS_'+getShareStatus()) | translate}}</div>
+        <div class="status">
+          {{ 'COLLECTIONS.PERMISSIONS_STATUS_' + getShareStatus() | translate }}
+        </div>
       </div>
-  </es-card>
+    </es-card>
+  </div>
 </div>
-
-</div>
-<es-workspace-share #share
-                 *ngIf="showPermissions"
-                 [nodeId]="editPermissionsId"
-                 [node]="editPermissionsDummy"
-                 [sendMessages]="true"
-                 [sendToApi]="false"
-                 [currentPermissions]="permissions"
-                 (onClose)="setPermissions($event)"
+<es-workspace-share
+  #share
+  *ngIf="showPermissions"
+  [nodeId]="editPermissionsId"
+  [node]="editPermissionsDummy"
+  [sendMessages]="true"
+  [sendToApi]="false"
+  [currentPermissions]="permissions"
+  (onClose)="setPermissions($event)"
 >
 </es-workspace-share>

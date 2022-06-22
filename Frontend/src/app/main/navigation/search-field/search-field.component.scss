@@ -94,7 +94,7 @@ mat-form-field {
 .search-input {
     color: $workspaceTopBarInputText;
     flex-grow: 1;
-    background: none;
+    -webkit-appearance: none; // Fix white background on Safari
     width: unset;
     min-width: 0;
     flex: 1 0 0;

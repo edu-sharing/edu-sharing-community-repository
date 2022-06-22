@@ -1,12 +1,12 @@
-import {forkJoin as observableForkJoin, BehaviorSubject, Observable} from 'rxjs';
+import { forkJoin as observableForkJoin, BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
-import {NativeWidgetComponent} from '../../mds-editor-view/mds-editor-view.component';
-import {FileChangeEvent} from '@angular/compiler-cli/src/perform_watch';
-import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
-import {RestNodeService} from '../../../../../core-module/rest/services/rest-node.service';
-import {Node} from '../../../../../core-module/rest/data-object';
+import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
+import { FileChangeEvent } from '@angular/compiler-cli/src/perform_watch';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { RestNodeService } from '../../../../../core-module/rest/services/rest-node.service';
+import { Node } from '../../../../../core-module/rest/data-object';
 
 @Component({
     selector: 'es-mds-editor-widget-preview',
@@ -33,13 +33,14 @@ export class MdsEditorWidgetPreviewComponent implements OnInit, NativeWidgetComp
     ngOnInit(): void {
         this.mdsEditorValues.nodes$.subscribe((nodes) => {
             if (nodes?.length === 1) {
-                this.nodeSrc = nodes[0].preview.url + '&crop=true&width=400&height=300&dontcache=:cache';
+                this.nodeSrc =
+                    nodes[0].preview.url + '&crop=true&width=400&height=300&dontcache=:cache';
                 this.node = nodes[0];
                 this.updateSrc();
                 // we need to reload the image since we don't know if the image (e.g. video file) is still being processed
                 // FIXME: this will run forever!
                 setInterval(() => {
-                    if(this.file) {
+                    if (this.file) {
                         return;
                     }
                     this.updateSrc();
@@ -53,8 +54,10 @@ export class MdsEditorWidgetPreviewComponent implements OnInit, NativeWidgetComp
         this.updateSrc();
     }
     updateSrc() {
-        if(this.file) {
-            this.src = this.sanitizer.bypassSecurityTrustResourceUrl(window.URL.createObjectURL(this.file));
+        if (this.file) {
+            this.src = this.sanitizer.bypassSecurityTrustResourceUrl(
+                window.URL.createObjectURL(this.file),
+            );
         } else {
             this.src = this.nodeSrc.replace(':cache', new Date().getTime().toString());
         }
@@ -62,13 +65,19 @@ export class MdsEditorWidgetPreviewComponent implements OnInit, NativeWidgetComp
     }
     onSaveNode(nodes: Node[]) {
         if (this.delete) {
-            return observableForkJoin(nodes.map((n) => this.nodeService.deleteNodePreview(n.ref.id))).pipe(
-                map(() => nodes)).toPromise();
+            return observableForkJoin(
+                nodes.map((n) => this.nodeService.deleteNodePreview(n.ref.id)),
+            )
+                .pipe(map(() => nodes))
+                .toPromise();
         }
-        if(this.file == null) {
+        if (this.file == null) {
             return null;
         }
-        return observableForkJoin(nodes.map((n) => this.nodeService.uploadNodePreview(n.ref.id, this.file))).pipe(
-                map(() => nodes)).toPromise();
+        return observableForkJoin(
+            nodes.map((n) => this.nodeService.uploadNodePreview(n.ref.id, this.file)),
+        )
+            .pipe(map(() => nodes))
+            .toPromise();
     }
 }

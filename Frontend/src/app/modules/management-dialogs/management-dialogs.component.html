@@ -1,75 +1,78 @@
 <es-workspace-license
   *ngIf="nodeLicense"
   [nodes]="nodeLicense"
-  (onLoading)="globalProgress=$event"
+  (onLoading)="globalProgress = $event"
   (onCancel)="closeLicense()"
-  (openContributor)="nodeContributor=$event[0]"
+  (openContributor)="nodeContributor = $event[0]"
   (onDone)="updateLicense($any($event))"
 ></es-workspace-license>
 <es-add-stream
   *ngIf="addNodesStream"
   [nodes]="addNodesStream"
-  (onLoading)="globalProgress=$event"
+  (onLoading)="globalProgress = $event"
   (onCancel)="closeStream()"
   (onDone)="closeStream()"
 ></es-add-stream>
-<es-signup-group *ngIf="signupGroup"
-    (onCancel)="signupGroup = false; signupGroupChange.emit(false)"
+<es-signup-group
+  *ngIf="signupGroup"
+  (onCancel)="signupGroup = false; signupGroupChange.emit(false)"
 >
 </es-signup-group>
-<es-workspace-metadata *ngIf="nodeSidebar"
-                    [@fromRight]="nodeSidebar"
-                    class="metadata-sidebar"
-                    [node]="nodeSidebar"
-                    (onRestore)="restoreVersion($event)"
-                    (onDisplay)="displayNode($event)"
-                    (onEditMetadata)="nodeMetadata=[$event]"
-                    (onClose)="closeSidebar()"
+<es-workspace-metadata
+  *ngIf="nodeSidebar"
+  [@fromRight]="nodeSidebar"
+  class="metadata-sidebar"
+  [node]="nodeSidebar"
+  (onRestore)="restoreVersion($event)"
+  (onDisplay)="displayNode($event)"
+  (onEditMetadata)="nodeMetadata = [$event]"
+  (onClose)="closeSidebar()"
 ></es-workspace-metadata>
-
+<es-node-relation-manager
+  *ngIf="nodeRelations"
+  [nodes]="nodeRelations"
+  (close)="closeRelations($event)"
+></es-node-relation-manager>
 <es-mds
-        *ngIf="collectionWriteFeedback"
-        customTitle="COLLECTIONS.FEEDBACK_TITLE"
-        [embedded]="false"
-        [displayJumpmarks]="false"
-        [invalidate]="true"
-        [currentValues]="{}"
-        groupId="collection_feedback"
-        labelPositive="COLLECTIONS.FEEDBACK_SAVE"
-        (onCancel)="closeCollectionWriteFeedback()"
-        (onDone)="addCollectionFeedback($event)"
+  *ngIf="collectionWriteFeedback"
+  customTitle="COLLECTIONS.FEEDBACK_TITLE"
+  [embedded]="false"
+  [displayJumpmarks]="false"
+  [invalidate]="true"
+  [currentValues]="{}"
+  groupId="collection_feedback"
+  labelPositive="COLLECTIONS.FEEDBACK_SAVE"
+  (onCancel)="closeCollectionWriteFeedback()"
+  (onDone)="addCollectionFeedback($event)"
 ></es-mds>
 <es-simple-edit-dialog
-    *ngIf="_nodeSimpleEdit"
-    [nodes]="_nodeSimpleEdit"
-    [fromUpload]="_nodeFromUpload"
-    (onOpenMetadata)="_nodeMetadata = $event"
-    (onOpenInvite)="nodeShare = $event"
-    (onOpenLicense)="nodeLicense = $event"
-    (onCancel)="closeSimpleEdit(false)"
-    (onClose)="closeSimpleEdit(true, $event)"
-    (onDone)="closeSimpleEdit(true, $event)"
-    ></es-simple-edit-dialog>
+  *ngIf="_nodeSimpleEdit"
+  [nodes]="_nodeSimpleEdit"
+  [fromUpload]="_nodeFromUpload"
+  (onOpenMetadata)="_nodeMetadata = $event"
+  (onOpenInvite)="nodeShare = $event"
+  (onOpenLicense)="nodeLicense = $event"
+  (onCancel)="closeSimpleEdit(false)"
+  (onClose)="closeSimpleEdit(true, $event)"
+  (onDone)="closeSimpleEdit(true, $event)"
+></es-simple-edit-dialog>
 <es-view-collection-feedback
-    *ngIf="collectionViewFeedback"
-    [collection]="collectionViewFeedback"
-    (onClose)="closeCollectionViewFeedback()"
-    ></es-view-collection-feedback>
+  *ngIf="collectionViewFeedback"
+  [collection]="collectionViewFeedback"
+  (onClose)="closeCollectionViewFeedback()"
+></es-view-collection-feedback>
 <es-collections-manage-pinning
-        *ngIf="addPinnedCollection"
-        [addCollection]="addPinnedCollection"
-        (onClose)="closePinnedCollection()"
+  *ngIf="addPinnedCollection"
+  [addCollection]="addPinnedCollection"
+  (onClose)="closePinnedCollection()"
 ></es-collections-manage-pinning>
-<es-workspace-share *ngIf="nodeShare"
-                 [nodes]="nodeShare"
-                 [sendMessages]="true"
-                 (onLoading)="globalProgress=$event"
-                 (onClose)="closeShare()"
+<es-workspace-share
+  *ngIf="nodeShare"
+  [nodes]="nodeShare"
+  [sendMessages]="true"
+  (onLoading)="globalProgress = $event"
+  (onClose)="closeShare()"
 ></es-workspace-share>
-<es-node-info *ngIf="nodeDebug"
-           [node]="$any(nodeDebug)"
-           (onClose)="closeDebug()"
-></es-node-info>
 <!-- <es-card
         *ngIf="qr"
         [node]="qr.node"
@@ -82,59 +85,55 @@
     <qrcode [qrdata]="qr.data" elementType="img" [margin]="2" [width]="512" errorCorrectionLevel="M"></qrcode>
 </es-card> -->
 <es-card
-    *ngIf="_nodeDelete"
-    title="{{ nodeDeleteTitle | translate }}"
-    height="auto"
-    [isCancelable]="true"
-    (onCancel)="_nodeDelete = null"
-    [buttons]="nodeDeleteButtons"
-    [node]="_nodeDelete">
-    <div class="card-content-padding">
-        {{ nodeDeleteMessage | translate:nodeDeleteMessageParams }}
-        <div *ngIf="nodeDeleteBlock" class="delete-block-checkbox">
-          <mat-checkbox [(ngModel)]="nodeDeleteBlockStatus">
-            <es-multi-line-label>
-              <ng-container slot="label">
-                {{'WORKSPACE.DELETE_IMPORT_BLOCK' | translate}}
-              </ng-container>
-              <ng-container slot="description">
-                {{'WORKSPACE.DELETE_IMPORT_BLOCK_INFO' | translate}}
-              </ng-container>
-            </es-multi-line-label>
-          </mat-checkbox>
-        </div>
+  *ngIf="_nodeDelete"
+  title="{{ nodeDeleteTitle | translate }}"
+  height="auto"
+  [isCancelable]="true"
+  (onCancel)="_nodeDelete = null"
+  [buttons]="nodeDeleteButtons"
+  [node]="_nodeDelete"
+>
+  <div class="card-content-padding">
+    {{ nodeDeleteMessage | translate: nodeDeleteMessageParams }}
+    <div *ngIf="nodeDeleteBlock" class="delete-block-checkbox">
+      <mat-checkbox [(ngModel)]="nodeDeleteBlockStatus">
+        <es-multi-line-label>
+          <ng-container slot="label">
+            {{ 'WORKSPACE.DELETE_IMPORT_BLOCK' | translate }}
+          </ng-container>
+          <ng-container slot="description">
+            {{ 'WORKSPACE.DELETE_IMPORT_BLOCK_INFO' | translate }}
+          </ng-container>
+        </es-multi-line-label>
+      </mat-checkbox>
     </div>
+  </div>
 </es-card>
-<es-workspace-workflow *ngIf="nodeWorkflow"
-                    [nodes]="nodeWorkflow"
-                    (onLoading)="globalProgress=$event"
-                    (onDone)="closeWorkflow($event)"
-                    (onClose)="closeWorkflow()"
+<es-workspace-workflow
+  *ngIf="nodeWorkflow"
+  [nodes]="nodeWorkflow"
+  (onLoading)="globalProgress = $event"
+  (onDone)="closeWorkflow($event)"
+  (onClose)="closeWorkflow()"
 ></es-workspace-workflow>
-<es-workspace-share-link *ngIf="nodeShareLink"
-                      [node]="nodeShareLink"
-                      (onLoading)="globalProgress=$event"
-                      (onClose)="closeShareLink()"
+<es-workspace-share-link
+  *ngIf="nodeShareLink"
+  [node]="nodeShareLink"
+  (onLoading)="globalProgress = $event"
+  (onClose)="closeShareLink()"
 ></es-workspace-share-link>
-<es-node-report
-  *ngIf="nodeReport"
-  [node]="nodeReport"
-  (onLoading)="globalProgress=$event"
-  (onCancel)="closeReport()"
-  (onDone)="closeReport()"
-></es-node-report>
 <es-node-variant
-        *ngIf="nodeVariant"
-        [node]="nodeVariant"
-        (onLoading)="globalProgress=$event"
-        (onCancel)="closeVariant()"
-        (onDone)="closeVariant()"
+  *ngIf="nodeVariant"
+  [node]="nodeVariant"
+  (onLoading)="globalProgress = $event"
+  (onCancel)="closeVariant()"
+  (onDone)="closeVariant()"
 ></es-node-variant>
 <es-map-link
-        *ngIf="linkMap"
-        [node]="linkMap"
-        (onCancel)="closeLinkMap()"
-        (onDone)="closeLinkMap($event)"
+  *ngIf="linkMap"
+  [node]="linkMap"
+  (onCancel)="closeLinkMap()"
+  (onDone)="closeLinkMap($event)"
 ></es-map-link>
 <es-collection-chooser
   class="dialog-right scrollWithBanner"
@@ -142,67 +141,77 @@
   [@fromRight]="addToCollection"
   [title]="'WORKSPACE.SELECT_COLLECTION'"
   (onCancel)="cancelAddToCollection()"
-  (onDrop)="addToCollectionList($event.target,$event.source,false)"
+  (onDrop)="addToCollectionList($event.target, $event.source, false)"
   (onCreateCollection)="addToCollectionCreate($event)"
   (onChoose)="addToCollectionList($event)"
 >
   <ng-template #beforeRecent let-currentRoot>
-    <ng-container *ngTemplateOutlet="collectionChooserBeforeRecentRef; context: { $implicit: currentRoot }"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="collectionChooserBeforeRecentRef; context: { $implicit: currentRoot }"
+    ></ng-container>
   </ng-template>
 </es-collection-chooser>
-<es-workspace-lti-tools *ngIf="showLtiTools"
-                     [refresh]="ltiToolRefresh"
-                     [(currentTool)]="currentLtiTool"
-                     (onClose)="closeLtiTools()"
-                     (onEdit)="editLti($event)"
-                     (onCreateLtiObject)="createLtiObject($event)"
-                     (onCreate)="createLti($event)"
-                     (onOpenConfig)="openLtiConfig($event)"
+<es-workspace-lti-tools
+  *ngIf="showLtiTools"
+  [refresh]="ltiToolRefresh"
+  [(currentTool)]="currentLtiTool"
+  (onClose)="closeLtiTools()"
+  (onEdit)="editLti($event)"
+  (onCreateLtiObject)="createLtiObject($event)"
+  (onCreate)="createLti($event)"
+  (onOpenConfig)="openLtiConfig($event)"
 ></es-workspace-lti-tools>
 
-<es-workspace-lti-tool-configs *ngIf="ltiToolConfig"
-                            [tool]="ltiToolConfig"
-                            (onClose)="closeLtiToolConfig()"
-                            (onEdit)="editLti($event)"
-                            (onCreate)="createLti($event)"
+<es-workspace-lti-tool-configs
+  *ngIf="ltiToolConfig"
+  [tool]="ltiToolConfig"
+  (onClose)="closeLtiToolConfig()"
+  (onEdit)="editLti($event)"
+  (onCreate)="createLti($event)"
 ></es-workspace-lti-tool-configs>
-<es-workspace-create-lti *ngIf="ltiObject"
-                      [tool]="ltiObject"
-                      [parent]="parent"
-                      (onCancel)="ltiObject=null"
-                      (onCreate)="createLtiNodeObject($event)"
+<es-workspace-create-lti
+  *ngIf="ltiObject"
+  [tool]="ltiObject"
+  [parent]="parent"
+  (onCancel)="ltiObject = null"
+  (onCreate)="createLtiNodeObject($event)"
 ></es-workspace-create-lti>
-<es-mds-editor-wrapper *ngIf="_nodeMetadata || createMetadata"
-     [nodes]="_nodeMetadata"
-     [create]="createMetadata"
-     [parentNode]="metadataParent"
-     [bulkBehaviour]="_nodeFromUpload ? BulkBehaviour.Replace : BulkBehaviour.Default"
-     (onCancel)="closeEditor(false)"
-     (onDone)="closeEditor(true,$any($event))"
-     (openLicense)="nodeLicense=_nodeMetadata;editorPending=true;"
-     (openTemplate)="nodeTemplate=_nodeMetadata[0]"
-     (openContributor)="nodeContributor=_nodeMetadata[0];editorPending=true;"
+<es-mds-editor-wrapper
+  *ngIf="_nodeMetadata || createMetadata"
+  [nodes]="_nodeMetadata"
+  [create]="createMetadata"
+  [parentNode]="metadataParent"
+  [bulkBehaviour]="_nodeFromUpload ? BulkBehaviour.Replace : BulkBehaviour.Default"
+  (onCancel)="closeEditor(false)"
+  (onDone)="closeEditor(true, $any($event))"
+  (openLicense)="nodeLicense = _nodeMetadata; editorPending = true"
+  (openTemplate)="nodeTemplate = _nodeMetadata[0]"
+  (openContributor)="nodeContributor = _nodeMetadata[0]; editorPending = true"
 ></es-mds-editor-wrapper>
-<es-node-template *ngIf="nodeTemplate"
-     [nodeId]="nodeTemplate.ref.id"
-     (onClose)="closeTemplate()"
+<es-node-template
+  *ngIf="nodeTemplate"
+  [nodeId]="nodeTemplate.ref.id"
+  (onClose)="closeTemplate()"
 ></es-node-template>
-<es-workspace-file-upload *ngIf="filesToUpload"
-                       [current]="parent"
-                       [files]="filesToUpload"
-                       (onDone)="uploadDone($event)"
+<es-workspace-file-upload
+  *ngIf="filesToUpload"
+  [current]="parent"
+  [files]="filesToUpload"
+  (onDone)="uploadDone($event)"
 ></es-workspace-file-upload>
-<es-workspace-file-upload-select *ngIf="showUploadSelect"
-                              [isFileOver]="fileIsOver"
-                              [(parent)]="parent"
-                              [showPicker]="uploadShowPicker"
-                              [multiple]="uploadMultiple"
-                              (onCancel)="cancelUploadSelect()"
-                              (onFileSelected)="uploadFile($event)"
-                              (onLinkSelected)="createUrlLink($event)"
+<es-workspace-file-upload-select
+  *ngIf="showUploadSelect"
+  [isFileOver]="fileIsOver"
+  [(parent)]="parent"
+  [showPicker]="uploadShowPicker"
+  [multiple]="uploadMultiple"
+  (onCancel)="cancelUploadSelect()"
+  (onFileSelected)="uploadFile($event)"
+  (onLinkSelected)="createUrlLink($event)"
 ></es-workspace-file-upload-select>
-<es-workspace-contributor *ngIf="nodeContributor"
-                       [node]="nodeContributor"
-                       (onLoading)="globalProgress=$event"
-                       (onClose)="closeContributor($event)"
+<es-workspace-contributor
+  *ngIf="nodeContributor"
+  [node]="nodeContributor"
+  (onLoading)="globalProgress = $event"
+  (onClose)="closeContributor($event)"
 ></es-workspace-contributor>

@@ -7,8 +7,9 @@ $mainMenuSelectedBackground: linear-gradient(
         $mainMenuAccentColor 0,
         $mainMenuAccentColor 5px,
         rgba(0, 0, 0, 0) 5px,
-        rgba(0, 0, 0, 0) 5px,
-    ) no-repeat;
+        rgba(0, 0, 0, 0) 5px
+    )
+    no-repeat;
 
 // We cannot use `:host` here, since the `mat-menu` elements are rearranged
 // outside of the original container. Hence we rely on the `.mat-dropdown-menu`
@@ -27,13 +28,13 @@ $mainMenuSelectedBackground: linear-gradient(
                     color: $mainMenuForegroundColor;
                     @if variable-exists(mainMenuForegroundColorIcon) {
                         > i {
-                            color:$mainMenuForegroundColorIcon;
+                            color: $mainMenuForegroundColorIcon;
                         }
                     }
                 }
             }
             &.mat-menu-item-selected {
-               background: $mainMenuSelectedBackground;
+                background: $mainMenuSelectedBackground;
             }
             &:hover:not([disabled]),
             &.cdk-keyboard-focused {
@@ -42,7 +43,7 @@ $mainMenuSelectedBackground: linear-gradient(
                     color: $mainMenuHoverForegroundColor;
                     @if variable-exists(mainMenuHoverForegroundColorIcon) {
                         > i {
-                            color:$mainMenuHoverForegroundColorIcon;
+                            color: $mainMenuHoverForegroundColorIcon;
                         }
                     }
                 }

@@ -31,7 +31,8 @@
     height: 100%;
 }
 
-.breadcrumbFrame, .searchInputFrame {
+.breadcrumbFrame,
+.searchInputFrame {
     flex-shrink: 0;
     padding: 11px;
     margin: 0;
@@ -42,7 +43,7 @@
     @include materialShadowBottom();
 }
 
-.searchInputFrame{
+.searchInputFrame {
     padding-top: 10px;
     padding-bottom: 0;
     height: auto;
@@ -54,7 +55,7 @@
     mat-form-field {
         display: flex;
         flex-grow: 1;
-        padding:0 10px;
+        padding: 0 10px;
         ::ng-deep {
             .mat-form-field-wrapper {
                 width: 100%;

@@ -23,7 +23,7 @@ import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
 import { Toast } from '../../../core-ui-module/toast';
 import {
     NodeHelperService,
-    WorkflowDefinitionStatus
+    WorkflowDefinitionStatus,
 } from '../../../core-ui-module/node-helper.service';
 
 type WorkflowReceiver = UserSimple | Group;
@@ -145,7 +145,7 @@ export class WorkspaceWorkflowComponent implements OnChanges {
             if (!hasPermission) {
                 return;
             }
-        } else if(this.status.hasReceiver) {
+        } else if (this.status.hasReceiver) {
             this.toast.error(null, 'WORKSPACE.WORKFLOW.NO_RECEIVER');
             return;
         }
@@ -185,10 +185,8 @@ export class WorkspaceWorkflowComponent implements OnChanges {
             } else {
                 this.history = [];
                 this.receivers = [];
-                ({
-                    current: this.status,
-                    initial: this.initialStatus,
-                } = this.nodeHelper.getDefaultWorkflowStatus(true));
+                ({ current: this.status, initial: this.initialStatus } =
+                    this.nodeHelper.getDefaultWorkflowStatus(true));
             }
         } else {
             this.history = histories[0];
@@ -198,10 +196,8 @@ export class WorkspaceWorkflowComponent implements OnChanges {
             if (!this.receivers || (this.receivers.length === 1 && !this.receivers[0])) {
                 this.receivers = [];
             }
-            ({ current: this.status, initial: this.initialStatus } = this.nodeHelper.getWorkflowStatus(
-                this.nodes[0],
-                true
-            ));
+            ({ current: this.status, initial: this.initialStatus } =
+                this.nodeHelper.getWorkflowStatus(this.nodes[0], true));
         }
     }
 
@@ -274,10 +270,10 @@ export class WorkspaceWorkflowComponent implements OnChanges {
     }
 
     private updateButtons() {
-        const save = new DialogButton('SAVE', DialogButton.TYPE_PRIMARY, () => this.saveWorkflow());
+        const save = new DialogButton('SAVE', { color: 'primary' }, () => this.saveWorkflow());
         save.disabled = this.loading || !this.hasChanges();
         this.buttons = [
-            new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.cancel()),
+            new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel()),
             save,
         ];
     }
@@ -321,11 +317,11 @@ export class WorkspaceWorkflowComponent implements OnChanges {
                 user: new AuthorityNamePipe(this.translate).transform(receiver, null),
             };
             this.dialogButtons = [
-                new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => {
+                new DialogButton('CANCEL', { color: 'standard' }, () => {
                     this.dialogTitle = null;
                     resolve(false);
                 }),
-                new DialogButton('WORKSPACE.WORKFLOW.PROCEED', DialogButton.TYPE_PRIMARY, () => {
+                new DialogButton('WORKSPACE.WORKFLOW.PROCEED', { color: 'primary' }, () => {
                     this.dialogTitle = null;
                     resolve(true);
                 }),

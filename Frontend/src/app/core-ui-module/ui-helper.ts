@@ -1,9 +1,9 @@
-import {forkJoin as observableForkJoin, Observable, Observer, of} from 'rxjs';
-import {catchError, first} from 'rxjs/operators';
-import {OPEN_URL_MODE, UIConstants} from '../core-module/ui/ui-constants';
-import {ConfigurationService} from '../core-module/rest/services/configuration.service';
-import {TranslateService} from '@ngx-translate/core';
-import {ActivatedRoute, NavigationExtras, Router} from '@angular/router';
+import { forkJoin as observableForkJoin, Observable, Observer, of } from 'rxjs';
+import { catchError, first, take } from 'rxjs/operators';
+import { OPEN_URL_MODE, UIConstants } from '../core-module/ui/ui-constants';
+import { ConfigurationService } from '../core-module/rest/services/configuration.service';
+import { TranslateService } from '@ngx-translate/core';
+import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
 import {
     CollectionReference,
     Connector,
@@ -15,11 +15,11 @@ import {
     ParentList,
     Permission,
 } from '../core-module/rest/data-object';
-import {RestConstants} from '../core-module/rest/rest-constants';
-import {RestNodeService} from '../core-module/rest/services/rest-node.service';
-import {Toast} from './toast';
-import {RestHelper} from '../core-module/rest/rest-helper';
-import {UIService} from '../core-module/rest/services/ui.service';
+import { RestConstants } from '../core-module/rest/rest-constants';
+import { RestNodeService } from '../core-module/rest/services/rest-node.service';
+import { Toast } from './toast';
+import { RestHelper } from '../core-module/rest/rest-helper';
+import { UIService } from '../core-module/rest/services/ui.service';
 import {
     ComponentFactoryResolver,
     ComponentRef,
@@ -30,45 +30,36 @@ import {
     Type,
     ViewContainerRef,
 } from '@angular/core';
-import {RestCollectionService} from '../core-module/rest/services/rest-collection.service';
-import {RestConnectorsService} from '../core-module/rest/services/rest-connectors.service';
-import {FrameEventsService} from '../core-module/rest/services/frame-events.service';
-import {ListItem} from '../core-module/ui/list-item';
-import {BridgeService} from '../core-bridge-module/bridge.service';
-import {OptionItem} from './option-item';
-import {RestConnectorService} from '../core-module/rest/services/rest-connector.service';
-import {RouterHelper} from './router.helper';
-import {PlatformLocation} from '@angular/common';
-import {MessageType} from '../core-module/ui/message-type';
-import {Helper} from '../core-module/rest/helper';
-import {NodeHelperService} from './node-helper.service';
-import {RestIamService} from '../core-module/rest/services/rest-iam.service';
-import {DialogButton} from '../core-module/ui/dialog-button';
-import {LoginInfo} from 'ngx-edu-sharing-api';
+import { RestCollectionService } from '../core-module/rest/services/rest-collection.service';
+import { RestConnectorsService } from '../core-module/rest/services/rest-connectors.service';
+import { FrameEventsService } from '../core-module/rest/services/frame-events.service';
+import { ListItem } from '../core-module/ui/list-item';
+import { BridgeService } from '../core-bridge-module/bridge.service';
+import { OptionItem } from './option-item';
+import { RestConnectorService } from '../core-module/rest/services/rest-connector.service';
+import { RouterHelper } from './router.helper';
+import { PlatformLocation } from '@angular/common';
+import { MessageType } from '../core-module/ui/message-type';
+import { Helper } from '../core-module/rest/helper';
+import { NodeHelperService } from './node-helper.service';
+import { RestIamService } from '../core-module/rest/services/rest-iam.service';
+import { DialogButton } from '../core-module/ui/dialog-button';
+import { LoginInfo } from 'ngx-edu-sharing-api';
 
 export class UIHelper {
     static COPY_URL_PARAMS = ['mainnav', 'reurl', 'reurlTypes', 'reurlCreate', 'applyDirectories'];
     public static evaluateMediaQuery(type: string, value: number) {
-        if (type == UIConstants.MEDIA_QUERY_MAX_WIDTH)
-            return value > window.innerWidth;
-        if (type == UIConstants.MEDIA_QUERY_MIN_WIDTH)
-            return value < window.innerWidth;
-        if (type == UIConstants.MEDIA_QUERY_MAX_HEIGHT)
-            return value > window.innerHeight;
-        if (type == UIConstants.MEDIA_QUERY_MIN_HEIGHT)
-            return value < window.innerHeight;
+        if (type == UIConstants.MEDIA_QUERY_MAX_WIDTH) return value > window.innerWidth;
+        if (type == UIConstants.MEDIA_QUERY_MIN_WIDTH) return value < window.innerWidth;
+        if (type == UIConstants.MEDIA_QUERY_MAX_HEIGHT) return value > window.innerHeight;
+        if (type == UIConstants.MEDIA_QUERY_MIN_HEIGHT) return value < window.innerHeight;
         console.warn('Unsupported media query ' + type);
         return true;
     }
 
     public static getBlackWhiteContrast(color: string) {}
-    static changeQueryParameter(
-        router: Router,
-        route: ActivatedRoute,
-        name: string,
-        value: any,
-    ) {
-        route.queryParams.subscribe((data: any) => {
+    static changeQueryParameter(router: Router, route: ActivatedRoute, name: string, value: any) {
+        route.queryParams.pipe(take(1)).subscribe((data: any) => {
             let queryParams: any = {};
             for (let key in data) {
                 queryParams[key] = data[key];
@@ -107,7 +98,8 @@ export class UIHelper {
     static isEmail(mail: string) {
         if (!mail) return false;
         if (mail.trim()) {
-            const EMAIL_REGEXP = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            const EMAIL_REGEXP =
+                /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
             if (mail && !EMAIL_REGEXP.test(mail)) {
                 return false;
             } else {
@@ -205,19 +197,13 @@ export class UIHelper {
             queryParams: {
                 query: converted.query,
                 reurl: reurl,
-                repository:
-                    node.properties[
-                        RestConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY
-                    ],
+                repository: node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_REPOSITORY],
                 mds: node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_MDS],
                 parameters: JSON.stringify(converted.parameters),
             },
         });
     }
-    public static goToNode(
-        router: Router,
-        node: Node,
-    ) {
+    public static goToNode(router: Router, node: Node) {
         router.navigate([UIConstants.ROUTER_PREFIX, 'node', node.ref.id]);
     }
     public static goToCollection(
@@ -226,8 +212,11 @@ export class UIHelper {
         mode: null | 'new' | 'edit' = null,
         extras: NavigationExtras = {},
     ) {
-        if(mode === 'new' || mode === 'edit') {
-            router.navigate([UIConstants.ROUTER_PREFIX, 'collections', 'collection', mode, node.ref.id], extras);
+        if (mode === 'new' || mode === 'edit') {
+            router.navigate(
+                [UIConstants.ROUTER_PREFIX, 'collections', 'collection', mode, node.ref.id],
+                extras,
+            );
         } else {
             extras.queryParams = { id: node.ref.id };
             router.navigate([UIConstants.ROUTER_PREFIX, 'collections'], extras);
@@ -243,26 +232,22 @@ export class UIHelper {
         mode: 'REDIRECT' | 'WINDOW',
         extras: NavigationExtras = {},
     ) {
-        if(!extras.queryParams) {
+        if (!extras.queryParams) {
             extras.queryParams = {};
         }
-        if(mode === 'REDIRECT') {
+        if (mode === 'REDIRECT') {
             extras.queryParams.reurl = window.location.href;
         } else {
             extras.queryParams.reurl = 'WINDOW';
         }
-        if(mode === 'REDIRECT') {
-            return router.navigate([
-                    UIConstants.ROUTER_PREFIX +
-                    'search'
-                ], extras
-            );
+        if (mode === 'REDIRECT') {
+            return router.navigate([UIConstants.ROUTER_PREFIX + 'search'], extras);
         } else {
-            return window.open(platformLocation.getBaseHrefFromDOM() + router.createUrlTree([
-                UIConstants.ROUTER_PREFIX + 'search'
-                ], extras).toString(),
+            return window.open(
+                platformLocation.getBaseHrefFromDOM() +
+                    router.createUrlTree([UIConstants.ROUTER_PREFIX + 'search'], extras).toString(),
                 '_blank',
-                'toolbar=no,scrollbars=yes,resizable=yes'
+                'toolbar=no,scrollbars=yes,resizable=yes',
             );
         }
     }
@@ -280,23 +265,21 @@ export class UIHelper {
         node: Node,
         extras: NavigationExtras = {},
     ) {
-        nodeService
-            .getNodeParents(node.ref.id)
-            .subscribe((data: ParentList) => {
-                extras.queryParams = {
-                    id: node.parent.id,
-                    file: node.ref.id,
-                    root: data.scope,
-                };
-                router.navigate(
-                    [
-                        UIConstants.ROUTER_PREFIX +
-                            'workspace/' +
-                            (login.currentScope ? login.currentScope : 'files'),
-                    ],
-                    extras,
-                );
-            });
+        nodeService.getNodeParents(node.ref.id).subscribe((data: ParentList) => {
+            extras.queryParams = {
+                id: node.parent.id,
+                file: node.ref.id,
+                root: data.scope,
+            };
+            router.navigate(
+                [
+                    UIConstants.ROUTER_PREFIX +
+                        'workspace/' +
+                        (login.currentScope ? login.currentScope : 'files'),
+                ],
+                extras,
+            );
+        });
     }
     /**
      * Navigate to the workspace
@@ -317,9 +300,7 @@ export class UIHelper {
             [
                 UIConstants.ROUTER_PREFIX +
                     'workspace/' +
-                    (login && login.currentScope
-                        ? login.currentScope
-                        : 'files'),
+                    (login && login.currentScope ? login.currentScope : 'files'),
             ],
             extras,
         );
@@ -370,15 +351,17 @@ export class UIHelper {
         } else if (type == RestConstants.COLLECTIONTYPE_MEDIA_CENTER) {
             scope = 'MEDIA_CENTER';
         }
-        if(asProposal) {
-            bridge.showTemporaryMessage(MessageType.info,
+        if (asProposal) {
+            bridge.showTemporaryMessage(
+                MessageType.info,
                 'WORKSPACE.TOAST.PROPOSED_FOR_COLLECTION',
-                {count: count, collection: RestHelper.getTitle(node)},
+                { count: count, collection: RestHelper.getTitle(node) },
             );
         } else {
-            bridge.showTemporaryMessage(MessageType.info,
+            bridge.showTemporaryMessage(
+                MessageType.info,
                 'WORKSPACE.TOAST.ADDED_TO_COLLECTION_' + scope,
-                {count: count, collection: RestHelper.getTitle(node)},
+                { count: count, collection: RestHelper.getTitle(node) },
                 {
                     link: {
                         caption: 'WORKSPACE.TOAST.VIEW_COLLECTION',
@@ -389,10 +372,7 @@ export class UIHelper {
         }
     }
 
-    static prepareMetadatasets(
-        translate: TranslateService,
-        mdsSets: MdsInfo[],
-    ) {
+    static prepareMetadatasets(translate: TranslateService, mdsSets: MdsInfo[]) {
         for (let i = 0; i < mdsSets.length; i++) {
             if (mdsSets[i].id == 'mds')
                 mdsSets[i].name = translate.instant('DEFAULT_METADATASET', {
@@ -411,43 +391,47 @@ export class UIHelper {
         callback: (nodes: CollectionReference[]) => void = null,
         allowDuplicate = false,
     ) {
-        observableForkJoin(nodes.map(node =>
-            collectionService.addNodeToCollection(
-                collection.ref.id,
-                node.ref.id,
-                node.ref.repo,
-                allowDuplicate,
-                asProposal
-                ).pipe(
-                    catchError(error => of({error, node}),)
-                )
-        )).subscribe((results) => {
+        observableForkJoin(
+            nodes.map((node) =>
+                collectionService
+                    .addNodeToCollection(
+                        collection.ref.id,
+                        node.ref.id,
+                        node.ref.repo,
+                        allowDuplicate,
+                        asProposal,
+                    )
+                    .pipe(catchError((error) => of({ error, node }))),
+            ),
+        ).subscribe((results) => {
             const success: NodeWrapper[] = results.filter((r) => !(r as any).error);
-            const failed: { node: Node, error: any }[] = (
-                results.filter((r) => !!(r as any).error) as {node: Node, error: any}[]
-            );
-            if(success.length > 0) {
+            const failed: { node: Node; error: any }[] = results.filter(
+                (r) => !!(r as any).error,
+            ) as { node: Node; error: any }[];
+            if (success.length > 0) {
                 UIHelper.showAddedToCollectionInfo(
                     bridge,
                     router,
                     collection,
                     success.length,
-                    asProposal
+                    asProposal,
                 );
             }
-            if(failed.length > 0) {
-                const duplicated = failed.filter(({error}) => error.status === RestConstants.DUPLICATE_NODE_RESPONSE);
+            if (failed.length > 0) {
+                const duplicated = failed.filter(
+                    ({ error }) => error.status === RestConstants.DUPLICATE_NODE_RESPONSE,
+                );
                 if (duplicated.length > 0 && !asProposal) {
                     bridge.showModalDialog({
                         title: 'COLLECTIONS.ADD_TO.DUPLICATE_TITLE',
                         message: 'COLLECTIONS.ADD_TO.DUPLICATE_MESSAGE',
-                        messageParameters: {count: duplicated.length},
+                        messageParameters: { count: duplicated.length },
                         isCancelable: true,
                         buttons: DialogButton.getYesNo(
                             () => {
                                 bridge.closeModalDialog();
                                 if (callback) {
-                                    callback(results.map(n => n.node as CollectionReference));
+                                    callback(results.map((n) => n.node as CollectionReference));
                                 }
                             },
                             () => {
@@ -458,13 +442,13 @@ export class UIHelper {
                                     router,
                                     bridge,
                                     collection,
-                                    duplicated.map(d => d.node),
+                                    duplicated.map((d) => d.node),
                                     false,
                                     callback,
-                                    true
-                                )
-                            }
-                        )
+                                    true,
+                                );
+                            },
+                        ),
                     });
                     return;
                 } else {
@@ -476,7 +460,7 @@ export class UIHelper {
             }
 
             if (callback) {
-                callback(success.map(n => n.node as CollectionReference));
+                callback(success.map((n) => n.node as CollectionReference));
             }
         });
     }
@@ -494,10 +478,7 @@ export class UIHelper {
         if (connectorType == null) {
             connectorType = connector.connectorSupportsEdit(node);
         }
-        let isCordova = connector
-            .getRestConnector()
-            .getBridgeService()
-            .isRunningCordova();
+        let isCordova = connector.getRestConnector().getBridgeService().isRunningCordova();
         if (win == null && newWindow) {
             win = UIHelper.getNewWindow(connector.getRestConnector());
         }
@@ -510,11 +491,10 @@ export class UIHelper {
                     return;
                 }
                 iam.getCurrentUserAsync().then(
-                    user => {
+                    (user) => {
                         if (
                             user.person.quota.enabled &&
-                            user.person.quota.sizeCurrent >=
-                                user.person.quota.sizeQuota
+                            user.person.quota.sizeCurrent >= user.person.quota.sizeQuota
                         ) {
                             toast.showModalDialog(
                                 'CONNECTOR_QUOTA_REACHED_TITLE',
@@ -527,34 +507,30 @@ export class UIHelper {
                             if (win) win.close();
                             return;
                         }
-                        connector
-                            .generateToolUrl(connectorType, type, node)
-                            .subscribe(
-                                (url: string) => {
-                                    if (win) {
-                                        win.location.href = url;
-                                    } else if (isCordova) {
-                                        UIHelper.openUrl(
-                                            url,
-                                            connector
-                                                .getRestConnector()
-                                                .getBridgeService(),
-                                            OPEN_URL_MODE.Blank,
-                                        );
-                                    } else {
-                                        window.location.replace(url);
-                                    }
-                                    if (win) {
-                                        events.addWindow(win);
-                                    }
-                                },
-                                error => {
-                                    toast.error(null, error);
-                                    if (win) win.close();
-                                },
-                            );
+                        connector.generateToolUrl(connectorType, type, node).subscribe(
+                            (url: string) => {
+                                if (win) {
+                                    win.location.href = url;
+                                } else if (isCordova) {
+                                    UIHelper.openUrl(
+                                        url,
+                                        connector.getRestConnector().getBridgeService(),
+                                        OPEN_URL_MODE.Blank,
+                                    );
+                                } else {
+                                    window.location.replace(url);
+                                }
+                                if (win) {
+                                    events.addWindow(win);
+                                }
+                            },
+                            (error) => {
+                                toast.error(null, error);
+                                if (win) win.close();
+                            },
+                        );
                     },
-                    error => {
+                    (error) => {
                         toast.error(null, error);
                         if (win) win.close();
                     },
@@ -568,9 +544,7 @@ export class UIHelper {
     }
 
     static setFocusOnCard() {
-        let elements = document
-            .getElementsByClassName('card')[0]
-            .getElementsByTagName('*');
+        let elements = document.getElementsByClassName('card')[0].getElementsByTagName('*');
         this.focusElements(elements);
     }
     static setFocusOnDropdown(ref: ElementRef) {
@@ -602,22 +576,13 @@ export class UIHelper {
         replaceUrl = false,
     ) {
         let defaultLocation = configService.instant('loginDefaultLocation', 'workspace');
-        if(!defaultLocation.match(/https?:\/\/*/)) {
+        if (!defaultLocation.match(/https?:\/\/*/)) {
             defaultLocation = UIConstants.ROUTER_PREFIX + defaultLocation;
         }
-        RouterHelper.navigateToAbsoluteUrl(
-            platformLocation,
-            router,
-            defaultLocation,
-            replaceUrl,
-        );
+        RouterHelper.navigateToAbsoluteUrl(platformLocation, router, defaultLocation, replaceUrl);
     }
 
-    static openUrl(
-        url: string,
-        bridge: BridgeService,
-        mode = OPEN_URL_MODE.Current,
-    ) {
+    static openUrl(url: string, bridge: BridgeService, mode = OPEN_URL_MODE.Current) {
         if (bridge.isRunningCordova()) {
             if (mode == OPEN_URL_MODE.BlankSystemBrowser) {
                 return bridge.getCordova().openBrowser(url);
@@ -636,19 +601,15 @@ export class UIHelper {
 
     static filterValidOptions(ui: UIService, options: OptionItem[]) {
         if (options == null) return null;
-        options = options.filter(value => value != null);
+        options = options.filter((value) => value != null);
         let optionsFiltered: OptionItem[] = [];
         for (let option of options) {
             if (
                 (!option.onlyMobile || (option.onlyMobile && ui.isMobile())) &&
-                (!option.onlyDesktop ||
-                    (option.onlyDesktop && !ui.isMobile())) &&
+                (!option.onlyDesktop || (option.onlyDesktop && !ui.isMobile())) &&
                 (!option.mediaQueryType ||
                     (option.mediaQueryType &&
-                        UIHelper.evaluateMediaQuery(
-                            option.mediaQueryType,
-                            option.mediaQueryValue,
-                        )))
+                        UIHelper.evaluateMediaQuery(option.mediaQueryType, option.mediaQueryValue)))
             )
                 optionsFiltered.push(option);
         }
@@ -695,11 +656,11 @@ export class UIHelper {
         if (targetElement == null) {
             return null;
         }
-        const factory = componentFactoryResolver.resolveComponentFactory(
-            componentName,
-        );
+        const factory = componentFactoryResolver.resolveComponentFactory(componentName);
         const component: ComponentRef<T> = viewContainerRef.createComponent(
-            factory, undefined, injector,
+            factory,
+            undefined,
+            injector,
         );
         if (bindings) {
             const instance: { [key: string]: any } = component.instance;
@@ -718,8 +679,7 @@ export class UIHelper {
         }
 
         // 3. Get DOM element from component
-        const domElem = (component.hostView as EmbeddedViewRef<any>)
-            .rootNodes[0] as HTMLElement;
+        const domElem = (component.hostView as EmbeddedViewRef<any>).rootNodes[0] as HTMLElement;
         domElem.style.display = 'none';
         if (replace) {
             targetElement.innerHTML = null;
@@ -739,11 +699,11 @@ export class UIHelper {
     static getCommonParameters(route: ActivatedRoute) {
         return new Observable<any>((observer: Observer<any>) => {
             route.queryParams
-                .pipe().pipe(
-                first())
-                .subscribe(queryParams => {
+                .pipe()
+                .pipe(first())
+                .subscribe((queryParams) => {
                     let result: any = {};
-                    UIHelper.COPY_URL_PARAMS.forEach(params => {
+                    UIHelper.COPY_URL_PARAMS.forEach((params) => {
                         if (queryParams[params]) {
                             result[params] = queryParams[params];
                         }
@@ -781,8 +741,7 @@ export class UIHelper {
                         observer.next(clz[componentName]);
                         observer.complete();
                         clearInterval(interval);
-                    }
-                    else if(!clz) {
+                    } else if (!clz) {
                         clearInterval(interval);
                     }
                 }, 1000 / 60);
@@ -798,21 +757,18 @@ export class UIHelper {
         document.execCommand('Copy', false, null);
     }
     static copyToClipboard(text: string) {
-        let input = document.createElement(
-            'textarea',
-        ) as HTMLTextAreaElement;
+        let input = document.createElement('textarea') as HTMLTextAreaElement;
         input.innerHTML = text;
         document.body.appendChild(input);
         UIHelper.copyElementToClipboard(input);
         document.body.removeChild(input);
     }
 
-
     static mergePermissions(source: Permission[], add: Permission[]) {
         const merge = source;
         for (const p2 of add) {
             // do only add new, unique permissions
-            if (merge.filter(p1 => Helper.objectEquals(p1, p2)).length === 0) {
+            if (merge.filter((p1) => Helper.objectEquals(p1, p2)).length === 0) {
                 merge.push(p2);
             }
         }
@@ -825,23 +781,20 @@ export class UIHelper {
      * @param source
      * @param add
      */
-    static mergePermissionsWithHighestPermission(
-        source: Permission[],
-        add: Permission[],
-    ) {
+    static mergePermissionsWithHighestPermission(source: Permission[], add: Permission[]) {
         const result = Helper.deepCopyArray(source);
         for (const p2 of add) {
             const map = source.filter(
-                s =>
+                (s) =>
                     s.authority.authorityName === p2.authority.authorityName &&
                     s.authority.authorityType === s.authority.authorityType,
             );
             if (map.length === 1) {
                 const perm1 = map[0].permissions.filter(
-                    p => RestConstants.BASIC_PERMISSIONS.indexOf(p) !== -1,
+                    (p) => RestConstants.BASIC_PERMISSIONS.indexOf(p) !== -1,
                 );
                 const perm2 = p2.permissions.filter(
-                    p => RestConstants.BASIC_PERMISSIONS.indexOf(p) !== -1,
+                    (p) => RestConstants.BASIC_PERMISSIONS.indexOf(p) !== -1,
                 );
                 if (UIHelper.permissionIsGreaterThan(perm2[0], perm1[0])) {
                     result.splice(result.indexOf(map[0]), 1);
@@ -863,8 +816,8 @@ export class UIHelper {
 
     static isParentElementOfElement(target: HTMLElement, possibleParent: HTMLElement) {
         let e = target;
-        while(e != null) {
-            if(e === possibleParent) {
+        while (e != null) {
+            if (e === possibleParent) {
                 return true;
             }
             e = e.parentElement;

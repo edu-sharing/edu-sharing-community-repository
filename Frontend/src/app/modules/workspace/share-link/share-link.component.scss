@@ -1,72 +1,72 @@
-@import "../../../core-ui-module/styles/variables";
+@import '../../../core-ui-module/styles/variables';
 
-.group{
-  display:flex;
-  flex-direction: column;
-  width: 100%;
-  padding: $cardPadding;
-  .info-checkbox{
-    padding-bottom: 10px;
-  }
-  .configuration-link{
-    position: relative;
-    margin-bottom: 20px;
-  }
-  .info-left{
-    width:100%;
-  }
-  .info-right{
-    position: relative;
-    text-align: right;
-    .switch{
-      float:right;
+.group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: $cardPadding;
+    .info-checkbox {
+        padding-bottom: 10px;
     }
-  }
+    .configuration-link {
+        position: relative;
+        margin-bottom: 20px;
+    }
+    .info-left {
+        width: 100%;
+    }
+    .info-right {
+        position: relative;
+        text-align: right;
+        .switch {
+            float: right;
+        }
+    }
+}
+.copyLink {
+    padding-left: 10px;
+    margin-top: 10px;
+}
+.heading {
+    font-weight: bold;
+}
+.link {
+    background-color: $backgroundColor;
+    padding: $cardPadding;
+}
 
+.link-info,
+.link-downloads {
+    display: block;
+    width: 100%;
+    line-height: 1.5;
 }
-.copyLink{
-  padding-left: 10px;
-  margin-top: 10px;
+.link-info {
+    padding: 10px 0 5px;
 }
-.heading{
-  font-weight: bold;
+es-input-password {
+    margin-top: 10px;
 }
-.link{
-  background-color: $backgroundColor;
-  padding: $cardPadding;
+.link-activate {
+    color: black;
 }
-
-.link-info,.link-downloads{
-  display: block;
-  width:100%;
-  line-height: 1.5;
+:host ::ng-deep {
+    .datepickerShareLink .datepicker-calendar {
+        margin-left: 50px;
+    }
+    .ngx-datepicker-container {
+        z-index: 1;
+    }
 }
-.link-info{
-  padding: 10px 0 5px;
+.link-title {
+    margin-top: 10px;
 }
-es-input-password{
-  margin-top: 10px;
+.link-info {
+    display: flex;
+    .linkInput {
+        flex-grow: 1;
+    }
 }
-.link-activate{
-  color: black;
-}
-:host ::ng-deep{
-  .datepickerShareLink .datepicker-calendar {
-    margin-left: 50px;
-  }
-  .ngx-datepicker-container{
-    z-index: 1;
-  }
-}
-.link-title{
-  margin-top: 10px;
-}
-.link-info{
-  display: flex;
-  .linkInput{
-    flex-grow: 1;
-  }
-}
-.link-disabled{
-  filter:blur(2px);
+.link-disabled {
+    filter: blur(2px);
 }

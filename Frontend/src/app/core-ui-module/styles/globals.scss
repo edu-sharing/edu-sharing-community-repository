@@ -3,13 +3,13 @@
   carefully choose what to place here since this will be included in all projects
   use non-common class names to prevent conflicts with other included files
 */
-@import "variables";
+@import 'variables';
 
-.display-none{
-  display: none!important;
+.display-none {
+    display: none !important;
 }
-.opacity-invisible{
-  opacity:0;
+.opacity-invisible {
+    opacity: 0;
 }
 .mat-heading-1,
 .mat-heading-2,
@@ -17,119 +17,119 @@
 .mat-heading-4,
 .mat-heading-5,
 .mat-heading-6 {
-  display: flex;
-  align-items: center;
-  i {
-    margin: 0 5px;
-  }
-  >span{
-    flex-grow: 1;
-  }
-}
-.mat-heading-1{
-  color:$textLight;
-  font-size: 220%;
-}
-.mat-heading-2{
-  color:$textLight;
-  font-size: 180%;
-}
-.mat-heading-3{
-  color:$textLight;
-  font-size: 150%;
-}
-.mat-heading-4{
-  color:$textLight;
-  font-size: 120%;
-  font-weight: bold;
-}
-.mat-heading-5{
-  color:$textLight;
-  font-size: 100%;
-  line-height: 1.3;
-  font-weight: bold;
-}
-.mat-heading-6{
-  color:$textLight;
-  font-weight: bold;
-  font-size: 90%;
-}
-.mat-heading-underline{
-  width: 100%;
-  border-bottom: 1px solid $textVeryLight;
-}
-.profile-gradient{
-  background: linear-gradient(to bottom, transparent 0,rgba(0,0,0,.5) 100%);
-  width: 100%;
-  height: 100%;
-  left: 0;
-  top: 0;
-  position: absolute;
-}
-.blurred-image{
-    @include blurImage();
-}
-.authority-search-input-option{
-  >span {
     display: flex;
     align-items: center;
-    .material-icons{
-      color: $textLight;
-      margin-right: 10px;
+    i {
+        margin: 0 5px;
     }
-    div {
-      line-height: 100%;
-      font-size: 100%;
+    > span {
+        flex-grow: 1;
     }
-    .small {
-      font-size: 90%;
-      color: $textLight;
-      padding-top: 3px;
+}
+.mat-heading-1 {
+    color: $textLight;
+    font-size: 220%;
+}
+.mat-heading-2 {
+    color: $textLight;
+    font-size: 180%;
+}
+.mat-heading-3 {
+    color: $textLight;
+    font-size: 150%;
+}
+.mat-heading-4 {
+    color: $textLight;
+    font-size: 120%;
+    font-weight: bold;
+}
+.mat-heading-5 {
+    color: $textLight;
+    font-size: 100%;
+    line-height: 1.3;
+    font-weight: bold;
+}
+.mat-heading-6 {
+    color: $textLight;
+    font-weight: bold;
+    font-size: 90%;
+}
+.mat-heading-underline {
+    width: 100%;
+    border-bottom: 1px solid $textVeryLight;
+}
+.profile-gradient {
+    background: linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, 0.5) 100%);
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    position: absolute;
+}
+.blurred-image {
+    @include blurImage();
+}
+.authority-search-input-option {
+    > span {
+        display: flex;
+        align-items: center;
+        .material-icons {
+            color: $textLight;
+            margin-right: 10px;
+        }
+        div {
+            line-height: 100%;
+            font-size: 100%;
+        }
+        .small {
+            font-size: 90%;
+            color: $textLight;
+            padding-top: 3px;
+        }
     }
-  }
 }
 ngx-slider.ngx-slider {
-  .ngx-slider-bar {
-    background: #e1e1e1;
-    border-radius: 2px;
-  }
-  .ngx-slider-selection {
-    background-color: $primary;
-  }
-  .ngx-slider-pointer {
-    background-color: $primary;
-  }
-  .ngx-slider-pointer.ngx-slider-active:after {
-    background-color: $primaryDark;
-  }
-  .ngx-slider-tick.ngx-slider-selected {
-    background-color: $primaryMediumLight;
-  }
-  .ngx-slider-bubble {
-    color: $primaryDark;
-  }
-  .ngx-slider-bubble.ngx-slider-limit {
-    display: none;
-    color: $primaryDark;
-  }
+    .ngx-slider-bar {
+        background: #e1e1e1;
+        border-radius: 2px;
+    }
+    .ngx-slider-selection {
+        background-color: $primary;
+    }
+    .ngx-slider-pointer {
+        background-color: $primary;
+    }
+    .ngx-slider-pointer.ngx-slider-active:after {
+        background-color: $primaryDark;
+    }
+    .ngx-slider-tick.ngx-slider-selected {
+        background-color: $primaryMediumLight;
+    }
+    .ngx-slider-bubble {
+        color: $primaryDark;
+    }
+    .ngx-slider-bubble.ngx-slider-limit {
+        display: none;
+        color: $primaryDark;
+    }
 }
 ngx-slider.ngx-slider-small {
-  .ngx-slider-bubble {
-    font-size: $fontSizeSmall;
-  }
-  .ngx-slider-bar {
-    height: 2px;
-  }
-  .ngx-slider-pointer {
-    width: 16px;
-    height: 16px;
-    top:-7px
-  }
-  .ngx-slider-pointer:after {
-    display: none;
-    /*width: 4px;
+    .ngx-slider-bubble {
+        font-size: $fontSizeSmall;
+    }
+    .ngx-slider-bar {
+        height: 2px;
+    }
+    .ngx-slider-pointer {
+        width: 16px;
+        height: 16px;
+        top: -7px;
+    }
+    .ngx-slider-pointer:after {
+        display: none;
+        /*width: 4px;
     height: 4px;
     top: 6px;
     left: 6px;*/
-  }
+    }
 }

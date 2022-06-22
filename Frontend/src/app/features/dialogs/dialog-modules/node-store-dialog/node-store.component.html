@@ -1,0 +1,20 @@
+<div class="actions">
+  <es-actionbar></es-actionbar>
+</div>
+
+<!-- Manually hide the table to also hide the header when there are no elements. -->
+<div class="noElementsInfo noElements" *ngIf="list.isEmpty()">
+  {{ 'SEARCH.NODE_STORE.LIST_EMPTY' | translate }}
+</div>
+
+<es-node-entries-wrapper
+  [class.display-none]="list.isEmpty()"
+  [dataSource]="list"
+  [columns]="columns"
+  [displayType]="NodeEntriesDisplayType.Table"
+  [elementInteractionType]="InteractionType.Emitter"
+  [sort]="sortPolicySubject | async"
+  (clickItem)="onClick($event.element)"
+  (dblClickItem)="openNode($event.element)"
+  (sortChange)="changeSort($event)"
+></es-node-entries-wrapper>

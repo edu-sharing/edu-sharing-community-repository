@@ -1,16 +1,18 @@
 <es-card-header
   [id]="id"
-  [title]="cardConfig.title | translate"
-  [subtitle]="cardConfig.subtitle | translate"
-  [avatar]="cardConfig.avatar"
-  (triggerClose)="close()"
+  [title]="config.title | translate"
+  [subtitle]="config.subtitle | translate"
+  [avatar]="config.avatar"
+  (closeButtonClick)="onCloseButtonClick()"
+  [showCloseButton]="shouldShowCloseButton()"
+  [disableCloseButton]="isLoading"
 ></es-card-header>
 
-<div class="card-content">
+<div class="card-content" [style.padding.px]="config.contentPadding" [attr.aria-hidden]="isLoading">
   <ng-template cdkPortalOutlet></ng-template>
+  <div *ngIf="isLoading" class="loading-overlay">
+    <es-spinner></es-spinner>
+  </div>
 </div>
 
-<es-card-actions
-  *ngIf="cardConfig.buttons && cardConfig.buttons.length > 0"
-  [buttons]="cardConfig.buttons"
-></es-card-actions>
+<es-card-actions *ngIf="buttons && buttons.length > 0" [buttons]="buttons"></es-card-actions>

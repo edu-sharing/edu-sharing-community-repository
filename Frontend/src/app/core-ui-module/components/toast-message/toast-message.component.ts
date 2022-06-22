@@ -7,15 +7,15 @@ import {
     ViewChild,
     ElementRef,
     HostListener,
-    Inject
+    Inject,
 } from '@angular/core';
-import {MAT_SNACK_BAR_DATA, MatSnackBar} from '@angular/material/snack-bar';
-import {Toast, ToastDuration, ToastMessage} from '../../toast';
+import { MAT_SNACK_BAR_DATA, MatSnackBar } from '@angular/material/snack-bar';
+import { Toast, ToastDuration, ToastMessage } from '../../toast';
 
 @Component({
     selector: 'es-toast-message',
     templateUrl: 'toast-message.component.html',
-    styleUrls: ['toast-message.component.scss']
+    styleUrls: ['toast-message.component.scss'],
 })
 /**
  * A basic link that should be used whenever a button is not the best solution but rather a link is preferable
@@ -23,12 +23,10 @@ import {Toast, ToastDuration, ToastMessage} from '../../toast';
  */
 export class ToastMessageComponent {
     readonly TOAST_DURATION = ToastDuration;
-    @Output() click=new EventEmitter();
+    @Output() click = new EventEmitter();
     constructor(
         @Inject(MAT_SNACK_BAR_DATA) public data: ToastMessage,
         public snackBar: MatSnackBar,
         public toast: Toast,
-    ) {
-    }
-
+    ) {}
 }

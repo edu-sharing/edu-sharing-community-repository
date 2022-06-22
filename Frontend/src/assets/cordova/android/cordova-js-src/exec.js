@@ -17,7 +17,7 @@
  * specific language governing permissions and limitations
  * under the License.
  *
-*/
+ */
 
 /**
  * Execute a cordova command.  It is up to the native side whether this action
@@ -40,7 +40,7 @@ var cordova = require('cordova'),
     channel = require('cordova/channel'),
     jsToNativeModes = {
         PROMPT: 0,
-        JS_OBJECT: 1
+        JS_OBJECT: 1,
     },
     nativeToJsModes = {
         // Polls for messages using the JS->Native bridge.
@@ -52,9 +52,9 @@ var cordova = require('cordova'),
         // listeners (both through addEventListener and window.ononline) as well
         // as set the navigator property itself.
         ONLINE_EVENT: 2,
-        EVAL_BRIDGE: 3
+        EVAL_BRIDGE: 3,
     },
-    jsToNativeBridgeMode,  // Set lazily.
+    jsToNativeBridgeMode, // Set lazily.
     nativeToJsBridgeMode = nativeToJsModes.EVAL_BRIDGE,
     pollEnabled = false,
     bridgeSecret = -1;
@@ -62,7 +62,13 @@ var cordova = require('cordova'),
 var messagesFromNative = [];
 var isProcessing = false;
 var resolvedPromise = typeof Promise == 'undefined' ? null : Promise.resolve();
-var nextTick = resolvedPromise ? function(fn) { resolvedPromise.then(fn); } : function(fn) { setTimeout(fn); };
+var nextTick = resolvedPromise
+    ? function (fn) {
+          resolvedPromise.then(fn);
+      }
+    : function (fn) {
+          setTimeout(fn);
+      };
 
 function androidExec(success, fail, service, action, args) {
     if (bridgeSecret < 0) {
@@ -91,13 +97,13 @@ function androidExec(success, fail, service, action, args) {
     var callbackId = service + cordova.callbackId++,
         argsJson = JSON.stringify(args);
     if (success || fail) {
-        cordova.callbacks[callbackId] = {success:success, fail:fail};
+        cordova.callbacks[callbackId] = { success: success, fail: fail };
     }
 
     var msgs = nativeApiProvider.get().exec(bridgeSecret, service, action, callbackId, argsJson);
     // If argsJson was received by Java as null, try again with the PROMPT bridge mode.
     // This happens in rare circumstances, such as when certain Unicode characters are passed over the bridge on a Galaxy S2.  See CB-2666.
-    if (jsToNativeBridgeMode == jsToNativeModes.JS_OBJECT && msgs === "@Null arguments.") {
+    if (jsToNativeBridgeMode == jsToNativeModes.JS_OBJECT && msgs === '@Null arguments.') {
         androidExec.setJsToNativeBridgeMode(jsToNativeModes.PROMPT);
         androidExec(success, fail, service, action, args);
         androidExec.setJsToNativeBridgeMode(jsToNativeModes.JS_OBJECT);
@@ -108,7 +114,7 @@ function androidExec(success, fail, service, action, args) {
     }
 }
 
-androidExec.init = function() {
+androidExec.init = function () {
     //CB-11828
     //This failsafe checks the version of Android and if it's Jellybean, it switches it to
     //using the Online Event bridge for communicating from Native to JS
@@ -117,7 +123,7 @@ androidExec.init = function() {
     var check = navigator.userAgent.toLowerCase().match(/android\s[0-9].[0-9]/);
     var version_code = check && check[0].match(/4.[0-3].*/);
     if (version_code != null && nativeToJsBridgeMode == nativeToJsModes.EVAL_BRIDGE) {
-      nativeToJsBridgeMode = nativeToJsModes.ONLINE_EVENT;
+        nativeToJsBridgeMode = nativeToJsModes.ONLINE_EVENT;
     }
 
     bridgeSecret = +prompt('', 'gap_init:' + nativeToJsBridgeMode);
@@ -170,7 +176,7 @@ hookOnlineApis();
 androidExec.jsToNativeModes = jsToNativeModes;
 androidExec.nativeToJsModes = nativeToJsModes;
 
-androidExec.setJsToNativeBridgeMode = function(mode) {
+androidExec.setJsToNativeBridgeMode = function (mode) {
     if (mode == jsToNativeModes.JS_OBJECT && !window._cordovaNative) {
         mode = jsToNativeModes.PROMPT;
     }
@@ -178,7 +184,7 @@ androidExec.setJsToNativeBridgeMode = function(mode) {
     jsToNativeBridgeMode = mode;
 };
 
-androidExec.setNativeToJsBridgeMode = function(mode) {
+androidExec.setNativeToJsBridgeMode = function (mode) {
     if (mode == nativeToJsBridgeMode) {
         return;
     }
@@ -218,7 +224,7 @@ function buildPayload(payload, message) {
         payload.push(window.atob(message.slice(1)));
     } else if (payloadKind == 'M') {
         var multipartMessages = message.slice(1);
-        while (multipartMessages !== "") {
+        while (multipartMessages !== '') {
             var spaceIdx = multipartMessages.indexOf(' ');
             var msgLen = +multipartMessages.slice(0, spaceIdx);
             var multipartMessage = multipartMessages.substr(spaceIdx + 1, msgLen);
@@ -248,7 +254,7 @@ function processMessage(message) {
         buildPayload(payload, payloadMessage);
         cordova.callbackFromNative(callbackId, success, status, payload, keepCallback);
     } else {
-        console.log("processMessage failed: invalid message: " + JSON.stringify(message));
+        console.log('processMessage failed: invalid message: ' + JSON.stringify(message));
     }
 }
 

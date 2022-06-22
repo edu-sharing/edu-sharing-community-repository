@@ -1,5 +1,3 @@
-import {ShareAppComponent} from "./share-app.component";
+import { ShareAppComponent } from './share-app.component';
 
-export const DECLARATIONS_SHARE_APP = [
-  ShareAppComponent
-];
+export const DECLARATIONS_SHARE_APP = [ShareAppComponent];

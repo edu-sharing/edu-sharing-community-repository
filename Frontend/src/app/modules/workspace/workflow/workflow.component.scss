@@ -1,83 +1,83 @@
-@import "../../../core-ui-module/styles/variables";
+@import '../../../core-ui-module/styles/variables';
 
-h2{
+h2 {
     text-align: center;
     padding-top: 5%;
     font-size: 120% !important;
-    color:$textLight;
+    color: $textLight;
 }
-.workflow-content{
+.workflow-content {
     padding: $cardPadding;
 }
-.global{
+.global {
     margin-top: 35px;
     margin-bottom: 20px;
 }
-.comment{
+.comment {
     width: 100%;
 }
-.receivers{
+.receivers {
     margin-bottom: 10px;
     width: 100%;
-    >mat-chip-list{
+    > mat-chip-list {
         float: left;
         margin-bottom: 10px;
     }
 }
-.historyLabel{
+.historyLabel {
     font-weight: bold;
-    padding-top:30px;
+    padding-top: 30px;
 }
 es-workflow-list {
     display: flex;
-    padding:0 $cardPadding $cardPadding $cardPadding;
+    padding: 0 $cardPadding $cardPadding $cardPadding;
 }
-:host ::ng-deep es-authority-search-input .mat-form-field-wrapper{
+:host ::ng-deep es-authority-search-input .mat-form-field-wrapper {
     padding-bottom: 0;
 }
-.inputs{
-    display:flex;
+.inputs {
+    display: flex;
     align-items: center;
-    width:100%;
+    width: 100%;
     margin-bottom: 20px;
-    es-authority-search-input{
+    es-authority-search-input {
         display: flex;
-        width:0;
+        width: 0;
         flex-grow: 1;
     }
     .btn-flat {
         min-width: 150px;
         display: flex;
         align-items: center;
-        .right{
+        .right {
             position: relative;
-            left:2px;
+            left: 2px;
         }
     }
-    >div{
+    > div {
         display: flex;
         margin-left: 20px;
     }
-    .selected{
-        float:right;
-        top:0;
-        left:7px;
+    .selected {
+        float: right;
+        top: 0;
+        left: 7px;
     }
-    .collection-item{
-        height:40px;
+    .collection-item {
+        height: 40px;
         line-height: 3rem;
         display: flex;
         align-items: center;
     }
-    .collection-item.disabled{
+    .collection-item.disabled {
         /*filter:blur(1px);*/
-        color:$textVeryLight;
-        i{
-            filter:saturate(0.5) contrast(0.5);
+        color: $textVeryLight;
+        i {
+            filter: saturate(0.5) contrast(0.5);
             opacity: 0.5;
         }
     }
-    .statusIcon{
+    .statusIcon {
         border-radius: 50%;
         width: 12px;
         height: 12px;
@@ -88,8 +88,8 @@ es-workflow-list {
         top: 0;
     }
 }
-.chooseStatus{
-    position:absolute;
+.chooseStatus {
+    position: absolute;
     right: 30px;
     min-width: 200px;
     top: 10px;

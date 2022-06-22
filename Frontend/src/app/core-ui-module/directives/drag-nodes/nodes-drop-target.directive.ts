@@ -1,10 +1,4 @@
-import {
-    Directive,
-    EventEmitter,
-    HostListener,
-    Input,
-    Output,
-} from '@angular/core';
+import { Directive, EventEmitter, HostListener, Input, Output } from '@angular/core';
 import {
     DragData,
     dragNodesTransferType,
@@ -49,9 +43,7 @@ export class NodesDropTargetDirective {
      *
      * Output events are *only* fired, when this function evaluates to `true`.
      */
-    @Input('esNodesDropTarget') canDrop:
-        | boolean
-        | ((dragData: DragData) => boolean);
+    @Input('esNodesDropTarget') canDrop: boolean | ((dragData: DragData) => boolean);
     @Input() nodesDragAllowedActions: DropAction[] = ['move', 'copy'];
 
     @Output() nodesDragEnter = new EventEmitter<DragEvent>();
@@ -159,10 +151,7 @@ export class NodesDropTargetDirective {
             (event.ctrlKey || this.ui.isShiftCmd())
         ) {
             return 'copy';
-        } else if (
-            this.nodesDragAllowedActions.includes('link') &&
-            event.altKey
-        ) {
+        } else if (this.nodesDragAllowedActions.includes('link') && event.altKey) {
             return 'link';
         } else {
             return 'move';

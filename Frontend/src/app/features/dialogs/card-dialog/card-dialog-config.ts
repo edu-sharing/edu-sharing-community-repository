@@ -1,15 +1,20 @@
 import { InjectionToken } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { TranslateService } from '@ngx-translate/core';
+import { Node } from 'ngx-edu-sharing-api';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { RestHelper } from '../../../core-module/core.module';
 import { DialogButton } from '../../../core-module/ui/dialog-button';
 import { CardAvatar } from './card-dialog-container/card-header/card-avatar';
 
 export const CARD_DIALOG_DATA = new InjectionToken<any>('CardDialogData');
 
-export class CardDialogCardConfig {
+export class CardDialogConfig<D = unknown> {
     title?: string;
     subtitle?: string;
     avatar?: CardAvatar;
     buttons?: DialogButton[];
+    contentPadding?: number = 25;
     width?: number;
     minWidth?: number | string;
     maxWidth?: number | string = '95%';
@@ -17,6 +22,7 @@ export class CardDialogCardConfig {
     minHeight?: number | string;
     maxHeight?: number | string = '95%';
     closable?: Closable = Closable.Casual;
+    data?: D;
 }
 
 /**
@@ -43,40 +49,21 @@ export enum Closable {
     Disabled,
 }
 
-export type ViewMode = 'mobile' | 'default';
-
-export class CardDialogState {
-    cardConfig$: Observable<CardDialogCardConfig>;
-    viewMode$: Observable<ViewMode>;
-
-    get cardConfig() {
-        return this.cardConfigSubject.value;
-    }
-
-    private cardConfigSubject: BehaviorSubject<CardDialogCardConfig>;
-    private viewModeSubject: BehaviorSubject<ViewMode>;
-
-    constructor({ cardConfig }: { cardConfig: CardDialogCardConfig }) {
-        this.cardConfigSubject = new BehaviorSubject(cardConfig);
-        this.cardConfig$ = this.cardConfigSubject.asObservable();
-        this.viewModeSubject = new BehaviorSubject<ViewMode>(null);
-        this.viewMode$ = this.viewModeSubject.asObservable();
-    }
-
-    patchCardConfig(config: Partial<CardDialogCardConfig>): void {
-        this.cardConfigSubject.next({ ...this.cardConfigSubject.value, ...config });
-    }
-
-    updateViewMode(mode: ViewMode): void {
-        this.viewModeSubject.next(mode);
-    }
+export function configForNode(node: Node): Partial<CardDialogConfig> {
+    return {
+        avatar: { kind: 'image', url: node.iconURL },
+        subtitle: RestHelper.getTitle(node),
+    };
 }
 
-export class CardDialogConfig<D> {
-    data?: D;
-    cardConfig?: CardDialogCardConfig;
-}
-
-export interface CardDialogContentComponent<D = {}, R = void> {
-    data: D;
+export function configForNodes(
+    nodes: Node[],
+    translate: TranslateService,
+): Observable<Partial<CardDialogConfig>> {
+    return translate.get('CARD_SUBTITLE_MULTIPLE', { count: nodes.length }).pipe(
+        map((subtitle) => ({
+            avatar: null,
+            subtitle,
+        })),
+    );
 }

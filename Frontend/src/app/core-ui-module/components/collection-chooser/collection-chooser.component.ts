@@ -1,16 +1,19 @@
 import {
-    Component, ContentChild,
+    Component,
+    ContentChild,
     EventEmitter,
     HostListener,
     Input,
     OnInit,
-    Output, TemplateRef,
+    Output,
+    TemplateRef,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
     ListItem,
-    Node, RequestObject,
+    Node,
+    RequestObject,
     RestCollectionService,
     RestConnectorService,
     RestConstants,
@@ -57,10 +60,8 @@ export class CollectionChooserComponent implements OnInit {
     breadcrumbs: Node[];
     listLatest: Node[];
     listMy: Node[];
-    createCollectionOptionItem = new OptionItem(
-        'OPTIONS.NEW_COLLECTION',
-        'add',
-        () => this.createCollection(),
+    createCollectionOptionItem = new OptionItem('OPTIONS.NEW_COLLECTION', 'add', () =>
+        this.createCollection(),
     );
 
     private hasMoreToLoad: boolean;
@@ -84,7 +85,9 @@ export class CollectionChooserComponent implements OnInit {
     ) {
         // http://plnkr.co/edit/btpW3l0jr5beJVjohy1Q?p=preview
         this.sortBy = [RestConstants.CM_MODIFIED_DATE];
-        this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS).subscribe((tp) => this.canCreate = tp);
+        this.connector
+            .hasToolPermission(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS)
+            .subscribe((tp) => (this.canCreate = tp));
     }
 
     ngOnInit(): void {
@@ -103,9 +106,7 @@ export class CollectionChooserComponent implements OnInit {
     }
 
     createCollection() {
-        this.onCreateCollection.emit(
-            this.currentRoot ? this.currentRoot : null,
-        );
+        this.onCreateCollection.emit(this.currentRoot ? this.currentRoot : null);
     }
 
     loadLatest(reset = false) {
@@ -120,24 +121,31 @@ export class CollectionChooserComponent implements OnInit {
             sortBy: this.sortBy,
             offset: this.listLatest.length,
             sortAscending: false,
-            propertyFilter: [RestConstants.ALL]
+            propertyFilter: [RestConstants.ALL],
         };
         let requestCall;
-        if(this.lastSearchQuery) {
+        if (this.lastSearchQuery) {
             requestCall = this.collectionApi.search(this.lastSearchQuery, request);
         } else {
-            requestCall = this.collectionApi.getCollectionSubcollections(RestConstants.ROOT,
-                RestConstants.COLLECTIONSCOPE_RECENT, [], request);
+            requestCall = this.collectionApi.getCollectionSubcollections(
+                RestConstants.ROOT,
+                RestConstants.COLLECTIONSCOPE_RECENT,
+                [],
+                request,
+            );
         }
-        requestCall.subscribe(data => {
+        requestCall.subscribe(
+            (data) => {
                 this.isLoadingLatest = false;
                 this.hasMoreToLoad = data.collections.length > 0;
                 this.showMore = !!this.lastSearchQuery;
                 this.listLatest = this.listLatest.concat(data.collections);
-            }, (error) => {
+            },
+            (error) => {
                 this.isLoadingLatest = false;
                 this.hasMoreToLoad = false;
-            });
+            },
+        );
     }
 
     cancel() {
@@ -146,9 +154,7 @@ export class CollectionChooserComponent implements OnInit {
 
     navigateBack() {
         if (this.breadcrumbs.length > 1)
-            this.currentRoot = this.breadcrumbs[
-                this.breadcrumbs.length - 2
-            ] as any;
+            this.currentRoot = this.breadcrumbs[this.breadcrumbs.length - 2] as any;
         else this.currentRoot = null;
         this.loadMy();
     }
@@ -169,9 +175,7 @@ export class CollectionChooserComponent implements OnInit {
     }
     hasWritePermissions = (node: Node) => this.hasWritePermissionsInternal(node);
 
-    hasWritePermissionsInternal(
-        node: Node,
-    ): {
+    hasWritePermissionsInternal(node: Node): {
         status: boolean;
         message?: string;
         button?: {
@@ -187,8 +191,12 @@ export class CollectionChooserComponent implements OnInit {
                     icon: 'home'
                 } };
         }*/
-        if (!this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_PROPOSAL) &&
-            node.access.indexOf(RestConstants.ACCESS_WRITE) === -1) {
+        if (
+            !this.connector.hasToolPermissionInstant(
+                RestConstants.TOOLPERMISSION_COLLECTION_PROPOSAL,
+            ) &&
+            node.access.indexOf(RestConstants.ACCESS_WRITE) === -1
+        ) {
             return { status: false, message: 'NO_WRITE_PERMISSIONS' };
         }
         return { status: true };
@@ -221,14 +229,14 @@ export class CollectionChooserComponent implements OnInit {
                     count: RestConstants.COUNT_UNLIMITED,
                 },
             )
-            .subscribe(data => {
+            .subscribe((data) => {
                 this.isLoadingMy = false;
                 this.listMy = this.listMy.concat(data.collections);
             });
         if (this.currentRoot) {
             this.node
                 .getNodeParents(this.currentRoot.ref.id, false)
-                .subscribe(list => (this.breadcrumbs = list.nodes.reverse()));
+                .subscribe((list) => (this.breadcrumbs = list.nodes.reverse()));
         }
     }
 }
