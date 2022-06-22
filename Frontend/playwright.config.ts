@@ -52,9 +52,8 @@ const config: PlaywrightTestConfig = {
 
         /* Collect trace. See https://playwright.dev/docs/trace-viewer */
         trace: (() => {
-            if (E2E_TEST_DEV) return 'on';
-            // else if (CI) return 'on-first-retry';
-            else return 'retain-on-failure';
+            if (CI) return 'retain-on-failure';
+            else return 'on';
         })(),
 
         headless: !E2E_TEST_DEV,
