@@ -71,6 +71,7 @@ public class SitemapServlet extends HttpServlet{
         SearchToken token=new SearchToken();
         token.setContentType(SearchService.ContentType.FILES);
         token.setMaxResult(0);
+        token.setExcludes(Arrays.asList(new String[]{"preview"}));
         SearchResultNodeRef resultFiles = search.searchV2(getMds(request), MetadataSetV2.DEFAULT_CLIENT_QUERY, getSearchAllCriterias(), token);
         token.setContentType(SearchService.ContentType.COLLECTIONS);
         SearchResultNodeRef resultCollections = search.searchV2(getMds(request), MetadataSetV2.DEFAULT_CLIENT_QUERY, getSearchAllCriterias(), token);
@@ -111,6 +112,7 @@ public class SitemapServlet extends HttpServlet{
             token.setContentType(SearchService.ContentType.FILES);
         token.setMaxResult(NODES_PER_MAP);
         token.setFrom(from);
+        token.setExcludes(Arrays.asList(new String[]{"preview"}));
         SortDefinition sort = new SortDefinition();
         sort.addSortDefinitionEntry(new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CM_PROP_C_CREATED),true));
         token.setSortDefinition(sort);

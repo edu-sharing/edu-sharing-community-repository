@@ -45,6 +45,8 @@ public class SearchToken implements Serializable {
 	private List<String> permissions;
 	private boolean resolveCollections = false;
 
+	List<String> excludes = new ArrayList<>();
+
 	public ContentType getContentType(){
 		if(contentType==null)
 			return ContentType.FILES;
@@ -280,5 +282,13 @@ public class SearchToken implements Serializable {
 
 	public void setResolveCollections(boolean resolveCollections) {
 		this.resolveCollections = resolveCollections;
+	}
+
+	public List<String> getExcludes() {
+		return excludes;
+	}
+
+	public void setExcludes(List<String> excludes) {
+		this.excludes = excludes;
 	}
 }
