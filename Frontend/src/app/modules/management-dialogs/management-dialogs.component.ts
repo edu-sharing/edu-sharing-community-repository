@@ -440,7 +440,6 @@ export class WorkspaceManagementDialogsComponent  {
             this.onUploadFilesProcessed.emit(this.nodeLicense);
         this._nodeFromUpload = false;
     }
-    console.log('closeLicense', this.editorPending, this.reopenSimpleEdit);
       if(this.editorPending){
           this.editorPending=false;
           this._nodeMetadata=this.nodeLicense;
