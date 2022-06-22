@@ -63,7 +63,7 @@ public class MediacenterServiceImpl implements MediacenterService {
         RunAsWork<Integer> runAs = new RunAsWork<Integer>() {
             @Override
             public Integer doWork() throws Exception {
-                List<List<String>> records = new CSVTool().getRecords(csv, CSVTool.ENC_ISO);
+                List<List<String>> records = new CSVTool().getRecords(csv, CSVTool.ENC_UTF8);
 
                 int counter = 0;
                 for (List<String> record : records) {
