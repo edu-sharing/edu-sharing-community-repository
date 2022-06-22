@@ -476,6 +476,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         if (!parameters) {
             parameters = await this.getMdsValues();
         }
+        if(repository !== this.currentRepository) {
+            parameters = null;
+        }
         this.scrollTo();
         const result = await this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
             queryParams: {
