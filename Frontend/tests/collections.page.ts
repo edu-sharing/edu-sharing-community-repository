@@ -84,6 +84,14 @@ export class CollectionsPage {
         );
     }
 
+    async goToElementInWorkspace(pattern: string | RegExp) {
+        await this.getElement(pattern).locator('[data-test="card-options-button"]').click();
+        await Promise.all([
+            this.page.locator('[data-test="menu-item-OPTIONS.SHOW_IN_FOLDER"]').click(),
+            this.page.waitForNavigation({ url: /\/workspace/ }),
+        ]);
+    }
+
     private getElement(pattern: string | RegExp): Locator {
         return this.page.locator('[role="listitem"]', { hasText: pattern });
     }

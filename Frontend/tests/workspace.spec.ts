@@ -28,3 +28,7 @@ test('should create and delete a folder', async ({ page }) => {
 
 // TODO: test create link
 // TODO: test upload file
+// TODO: show in folder
+//   - is selected
+// TODO: sidebar
+//   - changes when selecting new element

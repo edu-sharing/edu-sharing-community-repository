@@ -28,4 +28,10 @@ export class WorkspacePage {
         await this.page.locator('[data-test="menu-item-OPTIONS.DELETE"]').click();
         await this.page.locator('[data-test="dialog-button-YES_DELETE"]').click();
     }
+
+    async deleteSelectedElement() {
+        await this.page.locator('[data-test="more-actions-button"]').click();
+        await this.page.locator('[data-test="menu-item-OPTIONS.DELETE"]').click();
+        await this.page.locator('[data-test="dialog-button-YES_DELETE"]').click();
+    }
 }
