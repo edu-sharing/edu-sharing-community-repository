@@ -55,7 +55,6 @@ export class CollectionsPage {
         await this.page.locator('[data-test="card-button-OPTIONS.ADD_OBJECT"]').click();
         const [fileChooser] = await Promise.all([
             this.page.waitForEvent('filechooser'),
-            // Opens the file chooser.
             this.page.locator('[data-test="browse-files-button"]').click(),
         ]);
         await fileChooser.setFiles(testFilesFolder + fileName);
