@@ -1,6 +1,6 @@
-<div *ngIf="data" class="main">
+<div *ngIf="data" class="main" data-test="workspace-sidebar">
   <div class="header">
-    <div class="name">{{ data.name }}</div>
+    <div class="name" data-test="workspace-sidebar-element-name">{{ data.name }}</div>
     <div class="close">
       <button mat-icon-button (click)="close()"><i class="material-icons">close</i></button>
     </div>

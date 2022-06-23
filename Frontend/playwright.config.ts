@@ -45,16 +45,15 @@ const config: PlaywrightTestConfig = {
         // storageState: 'playwright/storageState.json',
 
         /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
-        actionTimeout: E2E_TEST_DEV ? 3 * 1000 : undefined,
+        actionTimeout: E2E_TEST_DEV ? 5 * 1000 : undefined,
 
         /* Base URL to use in actions like `await page.goto('/')`. */
         baseURL: process.env.E2E_TEST_BASE_URL ?? 'http://localhost:4200/edu-sharing/',
 
         /* Collect trace. See https://playwright.dev/docs/trace-viewer */
         trace: (() => {
-            if (E2E_TEST_DEV) return 'on';
-            // else if (CI) return 'on-first-retry';
-            else return 'retain-on-failure';
+            if (CI) return 'retain-on-failure';
+            else return 'on';
         })(),
 
         headless: !E2E_TEST_DEV,

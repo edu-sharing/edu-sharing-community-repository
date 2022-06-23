@@ -3,6 +3,7 @@ import { CollectionsPage } from './collections.page';
 import { defaultLogin, testFile1 } from './constants';
 import { GeneralPage } from './general.page';
 import { generateTestThingName, getBaseName, getStorageStatePath } from './util';
+import { WorkspacePage } from './workspace.page';
 
 test.use({ storageState: getStorageStatePath(defaultLogin) });
 
@@ -66,6 +67,7 @@ test.describe('Empty collection', () => {
         const elementName = getBaseName(testFile1);
         const collectionsPage = new CollectionsPage(page);
 
+        // TODO: make sure the element is available
         await collectionsPage.addElementToCurrentCollection(elementName);
         await collectionsPage.expectToBeOnCollectionPage(collectionName);
         await collectionsPage.expectToHaveElement(elementName);
@@ -83,6 +85,7 @@ test.describe('Collection with 1 element', () => {
 
         await page.goto(CollectionsPage.url);
         await collectionsPage.addPrivateCollection(collectionName);
+        // TODO: make sure the element is available
         await collectionsPage.addElementToCurrentCollection(elementName);
     });
 
@@ -92,5 +95,17 @@ test.describe('Collection with 1 element', () => {
         await collectionsPage.removeElementFromCurrentCollection(elementName);
         await collectionsPage.expectToBeOnCollectionPage(collectionName);
         await collectionsPage.expectNotToHaveElement(elementName);
+    });
+
+    test('should remove an element from workspace', async ({ page }) => {
+        const collectionsPage = new CollectionsPage(page);
+        const workspacePage = new WorkspacePage(page);
+        const collectionPageUrl = page.url();
+
+        await collectionsPage.goToElementInWorkspace(elementName);
+        await workspacePage.deleteSelectedElement();
+        await Promise.all([page.goBack(), page.waitForNavigation({ url: collectionPageUrl })]);
+        // TODO expect "element deleted" banner
+        expect(false).toBeTrue();
     });
 });
