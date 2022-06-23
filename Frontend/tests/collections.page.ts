@@ -1,6 +1,7 @@
 import { expect, Locator, Page } from '@playwright/test';
 import { testFilesFolder } from './constants';
 import { GeneralPage } from './general.page';
+import { sleep } from './util';
 
 export class CollectionsPage {
     static readonly url = './components/collections';
@@ -28,6 +29,7 @@ export class CollectionsPage {
 
     async expectToHaveElement(name: string) {
         await expect(this.getElement(name)).toBeVisible();
+        // await expect(this.getElement(name)).toHaveCount(count);
     }
 
     async expectNotToHaveElement(name: string) {
@@ -51,13 +53,20 @@ export class CollectionsPage {
         await this.generalPage.expectToastMessage('Element(s) moved to recycle');
     }
 
-    async uploadFileToCurrentCollection(fileName: string) {
+    async uploadFileToCurrentCollection(
+        fileName: string,
+        { editMetadata = false, delayEditMetadata = 0 } = {},
+    ) {
         await this.page.locator('[data-test="card-button-OPTIONS.ADD_OBJECT"]').click();
         const [fileChooser] = await Promise.all([
             this.page.waitForEvent('filechooser'),
             this.page.locator('[data-test="browse-files-button"]').click(),
         ]);
         await fileChooser.setFiles(testFilesFolder + fileName);
+        if (editMetadata) {
+            await this.page.locator('[data-test="more-metadata-button"]').click();
+            await sleep(delayEditMetadata);
+        }
         await this.page.locator('[data-test="dialog-button-SAVE"]').click();
         await this.generalPage.expectToastMessage(
             /1 element\(s\) have been added to the collection/,

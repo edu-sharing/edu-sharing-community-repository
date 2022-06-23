@@ -13,7 +13,12 @@
           {{ 'SIMPLE_EDIT.METADATA.TITLE' | translate }}
         </h3>
         <div>
-          <button mat-button color="primary" (click)="openMetadata()">
+          <button
+            mat-button
+            color="primary"
+            (click)="openMetadata()"
+            data-test="more-metadata-button"
+          >
             <i esIcon="edit"></i> {{ 'SIMPLE_EDIT.METADATA.MORE' | translate }}
           </button>
         </div>

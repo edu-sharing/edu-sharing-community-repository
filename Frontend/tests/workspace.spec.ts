@@ -73,6 +73,14 @@ test.describe('Folder with 1 element', () => {
         await renderPage.expectToBeOnPage();
     });
 
+    test('should open element via menu', async ({ page }) => {
+        const workspacePage = new WorkspacePage(page);
+        const renderPage = new RenderPage(page);
+
+        await workspacePage.openElementViaMenu(elementName);
+        await renderPage.expectToBeOnPage();
+    });
+
     test('should show element in folder', async ({ page }) => {
         const workspacePage = new WorkspacePage(page);
         const renderPage = new RenderPage(page);
@@ -84,11 +92,43 @@ test.describe('Folder with 1 element', () => {
     });
 
     test('should delete element', async ({ page }) => {
-        // TODO
+        const workspacePage = new WorkspacePage(page);
+
+        await workspacePage.deleteElement(elementName);
+        await workspacePage.expectElement(elementName, 0);
+    });
+
+    test('should show in sidebar', async ({ page }) => {
+        const workspacePage = new WorkspacePage(page);
+
+        await workspacePage.selectElement(elementName);
+        await workspacePage.toggleSidebar();
+        await workspacePage.expectSidebarToShow(elementName);
     });
 });
 
-// TODO: show in folder
-//   - is selected
-// TODO: sidebar
-//   - changes when selecting new element
+test.describe('Folder with 2 elements', () => {
+    const elementName1 = 'example.org';
+    const elementName2 = 'example.com';
+
+    test.beforeEach(async ({ page }) => {
+        const folderName = generateTestThingName('folder');
+        const workspacePage = new WorkspacePage(page);
+
+        await page.goto(WorkspacePage.url);
+        await workspacePage.createFolder(folderName);
+        await workspacePage.openElement(folderName);
+        await workspacePage.createLinkElement('http://example.org');
+        await workspacePage.createLinkElement('http://example.com');
+    });
+
+    test('should update sidebar when selecting element', async ({ page }) => {
+        const workspacePage = new WorkspacePage(page);
+
+        await workspacePage.selectElement(elementName1);
+        await workspacePage.toggleSidebar();
+        await workspacePage.expectSidebarToShow(elementName1);
+        await workspacePage.selectElement(elementName2);
+        await workspacePage.expectSidebarToShow(elementName2);
+    });
+});

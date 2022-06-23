@@ -63,6 +63,19 @@ test.describe('Empty collection', () => {
         await collectionsPage.expectToHaveElement(getBaseName(testFile1));
     });
 
+    test('should upload an element with metadata editor', async ({ page }) => {
+        const collectionsPage = new CollectionsPage(page);
+
+        await collectionsPage.uploadFileToCurrentCollection(testFile1, {
+            editMetadata: true,
+            // There is a bug that only occurs when slightly waiting before opening the metadata
+            // editor. We want to test for this bug here.
+            delayEditMetadata: 2000,
+        });
+        await collectionsPage.expectToBeOnCollectionPage(collectionName);
+        await collectionsPage.expectToHaveElement(getBaseName(testFile1));
+    });
+
     test('should add an existing element', async ({ page }) => {
         const elementName = getBaseName(testFile1);
         const collectionsPage = new CollectionsPage(page);

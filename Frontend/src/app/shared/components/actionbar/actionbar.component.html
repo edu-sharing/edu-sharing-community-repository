@@ -51,6 +51,7 @@
       [attr.aria-label]="option.name | translate"
       (click)="click(option)"
       [class.disabled]="!option.isEnabled"
+      attr.data-test="toggle-{{ option.name }}"
     >
       <i [esIcon]="option.icon" [aria]="false"></i>
     </button>

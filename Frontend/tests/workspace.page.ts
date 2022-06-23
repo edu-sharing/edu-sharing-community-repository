@@ -14,13 +14,6 @@ export class WorkspacePage {
         await expect(mainNavScopeButton).toHaveText(/Workspace/);
     }
 
-    async createFolder(name: string) {
-        await this.page.locator('[data-test="top-bar-add-button"]').click();
-        await this.page.locator('[data-test="menu-item-WORKSPACE.ADD_FOLDER"]').click();
-        await this.page.locator('[data-test="add-folder-name-input"]').fill(name);
-        await this.page.locator('[data-test="dialog-button-SAVE"]').click();
-    }
-
     async expectElement(name: string, count = 1) {
         const row = this.getElementRow(name);
         await expect(row).toHaveCount(count);
@@ -38,8 +31,28 @@ export class WorkspacePage {
         await expect(sidebarElementName).toHaveText(pattern);
     }
 
+    async createFolder(name: string) {
+        await this.page.locator('[data-test="top-bar-add-button"]').click();
+        await this.page.locator('[data-test="menu-item-WORKSPACE.ADD_FOLDER"]').click();
+        await this.page.locator('[data-test="add-folder-name-input"]').fill(name);
+        await this.page.locator('[data-test="dialog-button-SAVE"]').click();
+    }
+
+    async selectElement(pattern: string | RegExp) {
+        const row = this.getElementRow(pattern);
+        await row.click();
+    }
+
     async openElement(pattern: string | RegExp) {
         await Promise.all([this.getElementRow(pattern).dblclick(), this.page.waitForNavigation()]);
+    }
+
+    async openElementViaMenu(pattern: string | RegExp) {
+        await this.getElementRow(pattern).click({ button: 'right' });
+        await Promise.all([
+            this.page.locator('[data-test="menu-item-OPTIONS.SHOW"]').click(),
+            this.page.waitForNavigation(),
+        ]);
     }
 
     async deleteElement(name: string) {
@@ -72,6 +85,10 @@ export class WorkspacePage {
         await this.page.locator('[data-test="url-input"]').type(url);
         await this.page.locator('[data-test="dialog-button-OK"]').click();
         await this.page.locator('[data-test="dialog-button-SAVE"]').click();
+    }
+
+    async toggleSidebar() {
+        await this.page.locator('[data-test="toggle-OPTIONS.METADATA_SIDEBAR"]').click();
     }
 
     private getElementRow(pattern: string | RegExp): Locator {

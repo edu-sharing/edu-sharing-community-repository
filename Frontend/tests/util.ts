@@ -15,6 +15,10 @@ export function getBaseName(filename: string): string {
     return filename.split('.')[0];
 }
 
+export async function sleep(ms: number) {
+    return new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
+}
+
 // Cannot use since Playwright doesn't support decorators.
 //
 // export function testStep() {
