@@ -52,7 +52,7 @@ export class EduSharingApiModule {
                 ApiRequestConfiguration,
                 ApiInterceptor,
                 API_INTERCEPTOR_PROVIDER,
-                ...(isDevMode() ? [TimingInterceptor, TIMING_INTERCEPTOR_PROVIDER] : []),
+                // ...(isDevMode() ? [TimingInterceptor, TIMING_INTERCEPTOR_PROVIDER] : []),
                 getConfigProvider(params),
             ],
         };

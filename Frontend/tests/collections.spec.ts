@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { CollectionsPage } from './collections.page';
 import { defaultLogin, testFile1 } from './constants';
 import { GeneralPage } from './general.page';
@@ -85,8 +85,7 @@ test.describe('Collection with 1 element', () => {
 
         await page.goto(CollectionsPage.url);
         await collectionsPage.addPrivateCollection(collectionName);
-        // TODO: make sure the element is available
-        await collectionsPage.addElementToCurrentCollection(elementName);
+        await collectionsPage.uploadFileToCurrentCollection(testFile1);
     });
 
     test('should remove an element from the collection', async ({ page }) => {
@@ -106,6 +105,6 @@ test.describe('Collection with 1 element', () => {
         await workspacePage.deleteSelectedElement();
         await Promise.all([page.goBack(), page.waitForNavigation({ url: collectionPageUrl })]);
         // TODO expect "element deleted" banner
-        expect(false).toBeTrue();
+        expect(false).toBeTruthy();
     });
 });

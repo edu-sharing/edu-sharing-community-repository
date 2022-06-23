@@ -1,5 +1,6 @@
 import type { PlaywrightTestConfig } from '@playwright/test';
 import { devices } from '@playwright/test';
+import _ from 'lodash';
 
 /**
  * Read environment variables from file.
@@ -7,36 +8,77 @@ import { devices } from '@playwright/test';
  */
 require('dotenv').config();
 
-const CI = readBool(process.env.CI);
-const E2E_TEST_DEV = readBool(process.env.E2E_TEST_DEV);
+/**
+ * Config overrides for running in CI.
+ *
+ * Activated by environment variable `CI`.
+ */
+const ciConfig: Partial<PlaywrightTestConfig> = {
+    // expect: {
+    //     timeout: 10 * 1000,
+    // },
+    /* Opt out of parallel tests on CI. */
+    workers: 1,
+    /* Fail the build on CI if you accidentally left test.only in the source code. */
+    forbidOnly: true,
+    /* Retry on CI only */
+    // retries: 2,
+    use: {
+        actionTimeout: 10 * 1000,
+        trace: 'retain-on-failure',
+    },
+};
 
 /**
+ * Config overrides for developing tests.
+ *
+ * Activated by environment variable `E2E_TEST_DEV`.
+ *
+ * Small timeouts for early failure and headed browser.
+ *
+ * Include
+ * ```ts
+ * await page.pause()
+ * ```
+ * in any test to launch the Playwright debugger interface.
+ */
+const devConfig: Partial<PlaywrightTestConfig> = {
+    // expect: {
+    //     timeout: 5 * 1000,
+    // },
+    // Opt out of parallel tests since timeouts are likely to be exceeded
+    workers: 1,
+    use: {
+        actionTimeout: 5 * 1000,
+        trace: 'on',
+        headless: false,
+    },
+};
+
+/**
+ * Default configuration.
+ *
  * See https://playwright.dev/docs/test-configuration.
  */
 const config: PlaywrightTestConfig = {
     testDir: './tests',
     globalSetup: require.resolve('./tests/global-setup'),
     /* Maximum time one test can run for. */
-    timeout: 30 * 1000,
+    timeout: 60 * 1000,
     expect: {
         /**
-         * Maximum time expect() should wait for the condition to be met.
-         * For example in `await expect(locator).toHaveText();`
+         * Maximum time expect() should wait for the condition to be met. For example in `await
+         * expect(locator).toHaveText();`
          */
-        timeout: E2E_TEST_DEV ? 5 * 1000 : undefined,
+        // timeout: undefined,
     },
 
     /* Run tests in files in parallel. */
     /* This causes `beforeAll` and `afterAll` hooks to be executed for each test. */
     fullyParallel: true,
-    /* Fail the build on CI if you accidentally left test.only in the source code. */
-    forbidOnly: CI,
-    /* Retry on CI only */
-    // retries: CI ? 2 : 0,
-    retries: 0,
-    /* Opt out of parallel tests on CI. */
-    /* Also on E2E_TEST_DEV, since action- and expect timeouts will be exceeded with parallel runs. */
-    workers: CI || E2E_TEST_DEV ? 1 : undefined,
+    forbidOnly: false,
+    /* Run tests in parallel. */
+    // workers: undefined,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
     reporter: [['list'], ['html']],
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -45,18 +87,15 @@ const config: PlaywrightTestConfig = {
         // storageState: 'playwright/storageState.json',
 
         /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
-        actionTimeout: E2E_TEST_DEV ? 5 * 1000 : undefined,
+        /* We don't set action timeouts for the default config since parallel runs can increase run
+         * times considerably. */
+        // actionTimeout: undefined,
 
         /* Base URL to use in actions like `await page.goto('/')`. */
         baseURL: process.env.E2E_TEST_BASE_URL ?? 'http://localhost:4200/edu-sharing/',
 
         /* Collect trace. See https://playwright.dev/docs/trace-viewer */
-        trace: (() => {
-            if (CI) return 'retain-on-failure';
-            else return 'on';
-        })(),
-
-        headless: !E2E_TEST_DEV,
+        trace: 'on',
     },
 
     /* Configure projects for major browsers */
@@ -65,15 +104,13 @@ const config: PlaywrightTestConfig = {
             name: 'chromium',
             use: {
                 ...devices['Desktop Chrome'],
-                ...[
-                    readBool(process.env.E2E_TEST_WAYLAND)
-                        ? {
-                              launchOptions: {
-                                  args: ['--ozone-platform-hint=auto'],
-                              },
-                          }
-                        : {},
-                ],
+                ...(readBool(process.env.E2E_TEST_WAYLAND)
+                    ? {
+                          launchOptions: {
+                              args: ['--ozone-platform-hint=auto'],
+                          },
+                      }
+                    : {}),
             },
         },
 
@@ -132,6 +169,12 @@ const config: PlaywrightTestConfig = {
 
 function readBool(s: string): boolean {
     return ['1', 'true', 'yes'].includes(s?.toLowerCase());
+}
+
+if (readBool(process.env.CI)) {
+    _.merge(config, ciConfig);
+} else if (readBool(process.env.E2E_TEST_DEV)) {
+    _.merge(config, devConfig);
 }
 
 export default config;
