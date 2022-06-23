@@ -132,6 +132,7 @@ export class SearchFieldService {
                     this.enableFiltersAndSuggestionsSubject.value ? inputString : null,
                 ),
                 map((inputString) => (inputString?.length >= 3 ? inputString : null)),
+                filter(() => !!this.categoriesSubject.value),
                 debounce((inputString) => (inputString ? timer(200) : EMPTY)),
                 switchMap((inputString) =>
                     inputString
