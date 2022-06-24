@@ -70,17 +70,13 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 
 		public void addToRequest(HttpRequestBase request) {
 			for(String header : Collections.list(req.getHeaderNames())) {
-				if(header.equalsIgnoreCase("X-B3-SpanId")) {
-					request.setHeader("X-B3-ParentSpanId", req.getHeader(header));
-				} else if(header.equalsIgnoreCase("X-B3-ParentSpanId")) {
-					// ignore
-				} else if(
-						header.toUpperCase().startsWith("X-B3-") ||
-						header.toUpperCase().startsWith("X-OT-") ||
-						header.equalsIgnoreCase("X-Request-Id")
+				if(
+					header.toUpperCase().startsWith("X-B3-") ||
+					header.toUpperCase().startsWith("X-OT-") ||
+					header.equalsIgnoreCase("X-Request-Id")
 				) {
-				request.setHeader(header, req.getHeader(header));
-			}
+					request.setHeader(header, req.getHeader(header));
+				}
 			}
 		}
 	}
