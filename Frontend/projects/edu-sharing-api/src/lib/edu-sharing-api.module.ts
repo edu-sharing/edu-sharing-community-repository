@@ -1,5 +1,5 @@
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { forwardRef, isDevMode, ModuleWithProviders, NgModule, Provider } from '@angular/core';
+import { forwardRef, ModuleWithProviders, NgModule, Provider } from '@angular/core';
 import { ApiRequestConfiguration } from './api-request-configuration';
 import { ApiInterceptor } from './api.interceptor';
 import {
