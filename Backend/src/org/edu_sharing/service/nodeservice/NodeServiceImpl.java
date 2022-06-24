@@ -197,10 +197,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			assocName = QName.createValidLocalName(assocName);
 		}
 		assocName = "{" + CCConstants.NAMESPACE_CCM + "}" + assocName;
-		Map<String, Object> propsConverted =
-				_props.entrySet().stream()
-						.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
-								(e1, e2) -> e2, HashMap::new));
+		Map<String, Object> propsConverted = new HashMap<>();
+		propsConverted.putAll(_props);
 		for (PropertiesSetInterceptor i : PropertiesInterceptorFactory.getPropertiesSetInterceptors()) {
 			try {
 				propsConverted = i.beforeSetProperties(
