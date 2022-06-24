@@ -1,8 +1,8 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { CollectionsPage } from './collections.page';
-import { defaultLogin, testFile1 } from './constants';
+import { defaultLogin } from './constants';
 import { GeneralPage } from './general.page';
-import { generateTestThingName, getBaseName, getStorageStatePath } from './util';
+import { generateTestFile, generateTestThingName, getStorageStatePath, InlineFile } from './util';
 import { WorkspacePage } from './workspace.page';
 
 test.use({ storageState: getStorageStatePath(defaultLogin) });
@@ -56,32 +56,36 @@ test.describe('Empty collection', () => {
     });
 
     test('should upload an element', async ({ page }) => {
+        const testFile = generateTestFile();
         const collectionsPage = new CollectionsPage(page);
 
-        await collectionsPage.uploadFileToCurrentCollection(testFile1);
+        await collectionsPage.uploadFileToCurrentCollection(testFile);
         await collectionsPage.expectToBeOnCollectionPage(collectionName);
-        await collectionsPage.expectToHaveElement(getBaseName(testFile1));
+        await collectionsPage.expectToHaveElement(testFile.name);
     });
 
     test('should upload an element with metadata editor', async ({ page }) => {
+        const testFile = generateTestFile();
         const collectionsPage = new CollectionsPage(page);
 
-        await collectionsPage.uploadFileToCurrentCollection(testFile1, {
+        await collectionsPage.uploadFileToCurrentCollection(testFile, {
             editMetadata: true,
             // There is a bug that only occurs when slightly waiting before opening the metadata
             // editor. We want to test for this bug here.
             delayEditMetadata: 2000,
         });
         await collectionsPage.expectToBeOnCollectionPage(collectionName);
-        await collectionsPage.expectToHaveElement(getBaseName(testFile1));
+        await collectionsPage.expectToHaveElement(testFile.name);
     });
 
     test('should add an existing element', async ({ page }) => {
-        const elementName = getBaseName(testFile1);
+        const elementName = 'example.org';
         const collectionsPage = new CollectionsPage(page);
 
         // TODO: make sure the element is available
-        await collectionsPage.addElementToCurrentCollection(elementName);
+        await collectionsPage.addElementToCurrentCollection(elementName, {
+            searchForElement: false,
+        });
         await collectionsPage.expectToBeOnCollectionPage(collectionName);
         await collectionsPage.expectToHaveElement(elementName);
     });
@@ -89,32 +93,32 @@ test.describe('Empty collection', () => {
 
 test.describe('Collection with 1 element', () => {
     let collectionName: string;
-    let elementName: string;
+    let testFile: InlineFile;
 
     test.beforeEach(async ({ page }) => {
+        testFile = generateTestFile();
         collectionName = generateTestThingName('collection');
-        elementName = getBaseName(testFile1);
         const collectionsPage = new CollectionsPage(page);
 
         await page.goto(CollectionsPage.url);
         await collectionsPage.addPrivateCollection(collectionName);
-        await collectionsPage.uploadFileToCurrentCollection(testFile1);
+        await collectionsPage.uploadFileToCurrentCollection(testFile);
     });
 
     test('should remove an element from the collection', async ({ page }) => {
         const collectionsPage = new CollectionsPage(page);
 
-        await collectionsPage.removeElementFromCurrentCollection(elementName);
+        await collectionsPage.removeElementFromCurrentCollection(testFile.name);
         await collectionsPage.expectToBeOnCollectionPage(collectionName);
-        await collectionsPage.expectNotToHaveElement(elementName);
+        await collectionsPage.expectNotToHaveElement(testFile.name);
     });
 
-    test('should remove an element from workspace', async ({ page }) => {
+    test('should mark an element as removed from workspace', async ({ page }) => {
         const collectionsPage = new CollectionsPage(page);
         const workspacePage = new WorkspacePage(page);
         const collectionPageUrl = page.url();
 
-        await collectionsPage.goToElementInWorkspace(elementName);
+        await collectionsPage.goToElementInWorkspace(testFile.name);
         await workspacePage.deleteSelectedElement();
         await Promise.all([page.goBack(), page.waitForNavigation({ url: collectionPageUrl })]);
         // TODO expect "element deleted" banner

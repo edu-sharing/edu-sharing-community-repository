@@ -1,7 +1,6 @@
 import { expect, Locator, Page } from '@playwright/test';
-import { testFilesFolder } from './constants';
 import { GeneralPage } from './general.page';
-import { sleep } from './util';
+import { InlineFile, sleep } from './util';
 
 export class CollectionsPage {
     static readonly url = './components/collections';
@@ -27,13 +26,12 @@ export class CollectionsPage {
         }
     }
 
-    async expectToHaveElement(name: string) {
-        await expect(this.getElement(name)).toBeVisible();
-        // await expect(this.getElement(name)).toHaveCount(count);
+    async expectToHaveElement(pattern: string | RegExp) {
+        await expect(this.getElement(pattern)).toBeVisible();
     }
 
-    async expectNotToHaveElement(name: string) {
-        await expect(this.getElement(name)).not.toBeVisible();
+    async expectNotToHaveElement(pattern: string | RegExp) {
+        await expect(this.getElement(pattern)).not.toBeVisible();
     }
 
     async addPrivateCollection(name: string) {
@@ -54,7 +52,7 @@ export class CollectionsPage {
     }
 
     async uploadFileToCurrentCollection(
-        fileName: string,
+        file: InlineFile,
         { editMetadata = false, delayEditMetadata = 0 } = {},
     ) {
         await this.page.locator('[data-test="card-button-OPTIONS.ADD_OBJECT"]').click();
@@ -62,7 +60,7 @@ export class CollectionsPage {
             this.page.waitForEvent('filechooser'),
             this.page.locator('[data-test="browse-files-button"]').click(),
         ]);
-        await fileChooser.setFiles(testFilesFolder + fileName);
+        await fileChooser.setFiles(file);
         if (editMetadata) {
             await this.page.locator('[data-test="more-metadata-button"]').click();
             await sleep(delayEditMetadata);
@@ -73,10 +71,13 @@ export class CollectionsPage {
         );
     }
 
-    async addElementToCurrentCollection(pattern: string | RegExp) {
+    async addElementToCurrentCollection(name: string, { searchForElement = true } = {}) {
         await this.page.locator('[data-test="card-button-OPTIONS.SEARCH_OBJECT"]').click();
+        if (searchForElement) {
+            await this.generalPage.searchInTopBar(name);
+        }
         await Promise.all([
-            this.getElement(pattern)
+            this.getElement(name)
                 .locator('[data-test="option-button-SEARCH.ADD_INTO_COLLECTION_SHORT"]')
                 .first()
                 .click(),
@@ -101,6 +102,6 @@ export class CollectionsPage {
     }
 
     private getElement(pattern: string | RegExp): Locator {
-        return this.page.locator('[role="listitem"]', { hasText: pattern });
+        return this.generalPage.getCardElement(pattern);
     }
 }

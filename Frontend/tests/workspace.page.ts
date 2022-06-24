@@ -1,6 +1,7 @@
 import { expect, Locator, Page } from '@playwright/test';
 import { testFilesFolder } from './constants';
 import { GeneralPage } from './general.page';
+import { InlineFile } from './util';
 
 export class WorkspacePage {
     static readonly url = './components/workspace';
@@ -68,14 +69,18 @@ export class WorkspacePage {
         await this.page.locator('[data-test="dialog-button-YES_DELETE"]').click();
     }
 
-    async uploadFile(fileName: string) {
+    async uploadFile(fileOrFilename: string | InlineFile) {
         await this.page.locator('[data-test="top-bar-add-button"]').click();
         await this.page.locator('[data-test="menu-item-OPTIONS.ADD_OBJECT"]').click();
         const [fileChooser] = await Promise.all([
             this.page.waitForEvent('filechooser'),
             this.page.locator('[data-test="browse-files-button"]').click(),
         ]);
-        await fileChooser.setFiles(testFilesFolder + fileName);
+        if (typeof fileOrFilename === 'string') {
+            await fileChooser.setFiles(testFilesFolder + fileOrFilename);
+        } else {
+            await fileChooser.setFiles(fileOrFilename);
+        }
         await this.page.locator('[data-test="dialog-button-SAVE"]').click();
     }
 

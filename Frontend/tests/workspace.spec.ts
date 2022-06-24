@@ -1,8 +1,8 @@
 import { test } from '@playwright/test';
-import { defaultLogin, testFile1 } from './constants';
+import { defaultLogin } from './constants';
 import { GeneralPage } from './general.page';
 import { RenderPage } from './render.page';
-import { generateTestThingName, getStorageStatePath } from './util';
+import { generateTestFile, generateTestThingName, getStorageStatePath } from './util';
 import { WorkspacePage } from './workspace.page';
 
 test.use({ storageState: getStorageStatePath(defaultLogin) });
@@ -38,10 +38,11 @@ test.describe('Empty folder', () => {
     });
 
     test('should upload a file', async ({ page }) => {
+        const testFile = generateTestFile();
         const workspacePage = new WorkspacePage(page);
 
-        await workspacePage.uploadFile(testFile1);
-        await workspacePage.expectElement(testFile1);
+        await workspacePage.uploadFile(testFile);
+        await workspacePage.expectElement(testFile.name);
     });
 
     test('should create a link element', async ({ page }) => {

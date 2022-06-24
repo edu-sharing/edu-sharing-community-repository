@@ -1,4 +1,4 @@
-import { expect, Page } from '@playwright/test';
+import { expect, Locator, Page } from '@playwright/test';
 
 export class GeneralPage {
     constructor(private readonly page: Page) {}
@@ -15,6 +15,18 @@ export class GeneralPage {
 
     async expectToastMessage(message: string | RegExp) {
         await expect(this.page.locator('[data-test="toast-message"]')).toHaveText(message);
+    }
+
+    async searchInTopBar(searchString: string) {
+        await this.page.locator('[data-test="top-bar-search-field"]').type(searchString);
+        await Promise.all([
+            this.page.waitForNavigation(),
+            this.page.locator('[data-test="top-bar-search-field"]').press('Enter'),
+        ]);
+    }
+
+    getCardElement(pattern: string | RegExp): Locator {
+        return this.page.locator('[role="listitem"]', { hasText: pattern });
     }
 
     private async checkConsoleMessagesIndefinitely(): Promise<void> {
