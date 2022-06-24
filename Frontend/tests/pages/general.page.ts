@@ -1,4 +1,5 @@
 import { expect, Locator, Page } from '@playwright/test';
+import { testStep } from '../util/test-step';
 
 export class GeneralPage {
     constructor(private readonly page: Page) {}
@@ -9,14 +10,22 @@ export class GeneralPage {
      * Defaults to 12 seconds to wait for a warning about constant change detection, which is
      * printed after 10 seconds.
      */
+    @testStep({ failOnConsoleError: true, failOnConsoleWarning: true })
     async checkConsoleMessages(seconds: number = 12) {
-        await Promise.race([timeout(seconds * 1000), this.checkConsoleMessagesIndefinitely()]);
+        await sleep(seconds * 1000);
     }
 
+    @testStep()
+    async sleep(seconds: number) {
+        await sleep(seconds * 1000);
+    }
+
+    @testStep()
     async expectToastMessage(message: string | RegExp) {
         await expect(this.page.locator('[data-test="toast-message"]')).toHaveText(message);
     }
 
+    @testStep()
     async searchInTopBar(searchString: string) {
         await this.page.locator('[data-test="top-bar-search-field"]').type(searchString);
         await Promise.all([
@@ -28,17 +37,8 @@ export class GeneralPage {
     getCardElement(pattern: string | RegExp): Locator {
         return this.page.locator('[role="listitem"]', { hasText: pattern });
     }
-
-    private async checkConsoleMessagesIndefinitely(): Promise<void> {
-        const msg = await this.page.waitForEvent('console', { timeout: 0 });
-        expect(msg.type()).not.toBe('warning');
-        expect(msg.type()).not.toBe('error');
-        await this.checkConsoleMessagesIndefinitely();
-    }
 }
 
-function timeout(ms: number): Promise<void> {
-    return new Promise((resolve) => {
-        setTimeout(() => resolve(), ms);
-    });
+function sleep(ms: number) {
+    return new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
 }

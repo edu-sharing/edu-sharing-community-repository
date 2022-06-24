@@ -1,6 +1,6 @@
 import { expect, Locator, Page } from '@playwright/test';
+import { testStep } from '../util/test-step';
 import { GeneralPage } from './general.page';
-import { InlineFile, sleep } from './util';
 
 export class SearchPage {
     static readonly url = './components/search';
@@ -9,6 +9,7 @@ export class SearchPage {
 
     constructor(private readonly page: Page) {}
 
+    @testStep()
     async goto({ expectMaterials = true } = {}) {
         await this.page.goto(SearchPage.url);
         if (expectMaterials) {
@@ -18,19 +19,23 @@ export class SearchPage {
         }
     }
 
+    @testStep()
     async expectScopeButton() {
         const mainNavScopeButton = this.page.locator('[data-test="main-nav-scope-button"]');
         await expect(mainNavScopeButton).toHaveText(/Search/);
     }
 
+    @testStep()
     async expectToHaveElement(pattern: string | RegExp) {
         await expect(this.getElement(pattern)).toBeVisible();
     }
 
+    @testStep()
     async expectNotToHaveElement(pattern: string | RegExp) {
         await expect(this.getElement(pattern)).not.toBeVisible();
     }
 
+    @testStep()
     async expectNoSearchResults() {
         await expect(this.page.locator('text=No results for this search query.')).toBeVisible();
     }

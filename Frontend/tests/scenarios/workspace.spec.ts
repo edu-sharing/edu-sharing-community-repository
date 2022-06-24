@@ -1,9 +1,9 @@
 import { test } from '@playwright/test';
-import { defaultLogin } from './constants';
-import { GeneralPage } from './general.page';
-import { RenderPage } from './render.page';
-import { generateTestFile, generateTestThingName, getStorageStatePath } from './util';
-import { WorkspacePage } from './workspace.page';
+import { defaultLogin } from '../util/constants';
+import { GeneralPage } from '../pages/general.page';
+import { RenderPage } from '../pages/render.page';
+import { generateTestFile, generateTestThingName, getStorageStatePath } from '../util/util';
+import { WorkspacePage } from '../pages/workspace.page';
 
 test.use({ storageState: getStorageStatePath(defaultLogin) });
 

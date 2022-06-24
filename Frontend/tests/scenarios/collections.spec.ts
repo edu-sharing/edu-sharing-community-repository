@@ -1,9 +1,14 @@
 import { expect, test } from '@playwright/test';
-import { CollectionsPage } from './collections.page';
-import { defaultLogin } from './constants';
-import { GeneralPage } from './general.page';
-import { generateTestFile, generateTestThingName, getStorageStatePath, InlineFile } from './util';
-import { WorkspacePage } from './workspace.page';
+import { CollectionsPage } from '../pages/collections.page';
+import { defaultLogin } from '../util/constants';
+import { GeneralPage } from '../pages/general.page';
+import {
+    generateTestFile,
+    generateTestThingName,
+    getStorageStatePath,
+    InlineFile,
+} from '../util/util';
+import { WorkspacePage } from '../pages/workspace.page';
 
 test.use({ storageState: getStorageStatePath(defaultLogin) });
 
@@ -72,7 +77,7 @@ test.describe('Empty collection', () => {
             editMetadata: true,
             // There is a bug that only occurs when slightly waiting before opening the metadata
             // editor. We want to test for this bug here.
-            delayEditMetadata: 2000,
+            delayEditMetadataSeconds: 2,
         });
         await collectionsPage.expectToBeOnCollectionPage(collectionName);
         await collectionsPage.expectToHaveElement(testFile.name);

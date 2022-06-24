@@ -29,20 +29,3 @@ export function generateTestFile(): InlineFile {
 export function getBaseName(filename: string): string {
     return filename.split('.')[0];
 }
-
-export async function sleep(ms: number) {
-    return new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
-}
-
-// Cannot use since Playwright doesn't support decorators.
-//
-// export function testStep() {
-//     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-//         const originalFunction = descriptor.value;
-//         descriptor.value = async function (this: any, ...args: any[]) {
-//             await test.step(propertyKey, async () => {
-//                 await originalFunction.apply(this, args);
-//             });
-//         };
-//     };
-// }

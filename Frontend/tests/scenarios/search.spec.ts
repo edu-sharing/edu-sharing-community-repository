@@ -1,10 +1,10 @@
 import { test } from '@playwright/test';
-import { CollectionsPage } from './collections.page';
-import { defaultLogin } from './constants';
-import { GeneralPage } from './general.page';
-import { SearchPage } from './search.page';
-import { generateTestFile, generateTestThingName, getStorageStatePath, sleep } from './util';
-import { WorkspacePage } from './workspace.page';
+import { CollectionsPage } from '../pages/collections.page';
+import { GeneralPage } from '../pages/general.page';
+import { SearchPage } from '../pages/search.page';
+import { WorkspacePage } from '../pages/workspace.page';
+import { defaultLogin } from '../util/constants';
+import { generateTestFile, generateTestThingName, getStorageStatePath } from '../util/util';
 
 test.use({ storageState: getStorageStatePath(defaultLogin) });
 
@@ -22,6 +22,7 @@ test('should show search scope', async ({ page }) => {
 });
 
 test('should show a file uploaded to a collection', async ({ page }) => {
+    // esTest(page, async () => {
     const testFile = generateTestFile();
     const collectionName = generateTestThingName('collection');
     const collectionsPage = new CollectionsPage(page);
@@ -33,11 +34,12 @@ test('should show a file uploaded to a collection', async ({ page }) => {
     await collectionsPage.uploadFileToCurrentCollection(testFile);
 
     // Wait for the search index to settle
-    await sleep(5000);
+    await generalPage.sleep(10);
     await searchPage.goto();
-    await searchPage.expectToHaveElement(testFile.name);
+    // await searchPage.expectToHaveElement(testFile.name);
     await generalPage.searchInTopBar(testFile.name);
     await searchPage.expectToHaveElement(testFile.name);
+    // }));
 });
 
 test('should not show a file uploaded to a collection and then deleted', async ({ page }) => {
@@ -55,9 +57,8 @@ test('should not show a file uploaded to a collection and then deleted', async (
     await collectionsPage.goToElementInWorkspace(testFile.name);
     await workspacePage.deleteSelectedElement();
 
-    // Wait for the search index to settle. Wait a little longer than with the positive test above
-    // to be sure.
-    await sleep(10000);
+    // Wait for the search index to settle
+    await generalPage.sleep(10);
     await searchPage.goto();
     await searchPage.expectNotToHaveElement(testFile.name);
     await generalPage.searchInTopBar(testFile.name);

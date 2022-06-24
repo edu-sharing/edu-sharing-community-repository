@@ -54,3 +54,4 @@ src/app/rest
 /playwright-report/
 /playwright/.cache/
 /playwright/storage/*.json
+/playwright/out
