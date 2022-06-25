@@ -1,0 +1,11 @@
+{{- if .Values.global.cluster.istio.enabled }}
+{{- if .Capabilities.APIVersions.Has "networking.istio.io/v1beta1" }}
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: {{ include "edusharing_repository_service.name" . }}
+  labels: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
+spec:
+  host: {{ include "edusharing_repository_service.name" . }}
+{{- end }}
+{{- end }}

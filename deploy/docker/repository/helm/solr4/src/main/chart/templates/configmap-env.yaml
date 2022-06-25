@@ -18,8 +18,7 @@ data:
     {{- if .Values.config.metrics }}
     -javaagent:/opt/alfresco/tomcat/agent/jmx_prometheus_javaagent.jar=9090:/opt/alfresco/tomcat/agent/jmx-exporter-config.yaml
     {{- end }}
-  JPDA_ADDRESS: {{ if .Values.global.cluster.istio.enabled }}"127.0.0.1:5005"{{ else }}"0.0.0.0:5005"{{ end }}
-  REPOSITORY_SEARCH_SOLR4_BIND: {{ if .Values.global.cluster.istio.enabled }}"127.0.0.1"{{ else }}"0.0.0.0"{{ end }}
+  JPDA_ADDRESS: "0.0.0.0:5005"
   REPOSITORY_SEARCH_SOLR4_HOST: {{ include "edusharing_repository_search_solr4.name" . | quote }}
   REPOSITORY_SEARCH_SOLR4_PORT: {{ .Values.service.port.api | quote }}
   REPOSITORY_SERVICE_HOST: {{ .Values.config.repository.host | quote }}

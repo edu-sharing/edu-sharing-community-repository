@@ -5,7 +5,7 @@ metadata:
   labels: {{ include "edusharing_rediscluster.labels.app" . | nindent 4 }}
 data:
   ALLOW_EMPTY_PASSWORD: "yes"
-  REDIS_ALLOW_REMOTE_CONNECTIONS: "{{ if .Values.global.cluster.istio.enabled }}no{{ else }}yes{{ end }}"
+  REDIS_ALLOW_REMOTE_CONNECTIONS: "yes"
   REDIS_CLUSTER_DYNAMIC_IPS: "yes"
   REDIS_CLUSTER_INIT: {{ .Release.IsInstall | quote }}
   REDIS_CLUSTER_REPLICAS: {{ .Values.config.cluster.replicas | quote }}

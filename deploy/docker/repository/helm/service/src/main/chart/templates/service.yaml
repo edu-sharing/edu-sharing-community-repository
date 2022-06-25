@@ -22,6 +22,7 @@ metadata:
 spec:
   type: ClusterIP
   clusterIP: None
+  publishNotReadyAddresses: true
   selector: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
   ports:
   - name: http-api-external

@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "edusharing_rendering_service.name" . }}-env
-  labels: {{ include "edusharing_rendering_service.labels.app" . | nindent 4 }}
+  name: {{ include "edusharing_services_rendering.name" . }}-env
+  labels: {{ include "edusharing_services_rendering.labels.app" . | nindent 4 }}
 data:
   CACHE_CLUSTER: {{ .Values.config.cache.cluster | quote }}
   CACHE_DATABASE: {{ .Values.config.cache.database | quote }}
@@ -14,7 +14,6 @@ data:
   SERVICES_RENDERING_DATABASE_HOST: {{ .Values.config.database.host | quote }}
   SERVICES_RENDERING_DATABASE_NAME: {{ .Values.config.database.database | quote }}
   SERVICES_RENDERING_DATABASE_PORT: {{ .Values.config.database.port | quote }}
-  SERVICES_RENDERING_SERVICE_BIND: {{ if .Values.global.cluster.istio.enabled }}"127.0.0.1"{{ else }}"0.0.0.0"{{ end }}
   SERVICES_RENDERING_SERVICE_GDPR_ENABLED: {{ .Values.config.gdpr.enabled | quote }}
   {{- with .Values.config.gdpr.modules }}
   SERVICES_RENDERING_SERVICE_GDPR_MODULES: '"{{- join "\",\"" . }}"'
@@ -24,7 +23,7 @@ data:
     {{ $url.regex | quote }} => ["name" => {{ $url.name | quote }}, "url" => {{ $url.ref | quote }}],
   {{- end }}
   SERVICES_RENDERING_SERVICE_HOST_EXTERNAL: {{ .Values.ingress.hosts | first | quote }}
-  SERVICES_RENDERING_SERVICE_HOST_INTERNAL: {{ include "edusharing_rendering_service.name" . | quote }}
+  SERVICES_RENDERING_SERVICE_HOST_INTERNAL: {{ include "edusharing_services_rendering.name" . | quote }}
   SERVICES_RENDERING_SERVICE_PATH_EXTERNAL: {{ .Values.ingress.paths | first | quote }}
   SERVICES_RENDERING_SERVICE_PLUGINS: |-
   {{- range $ununsed, $plugin := .Values.config.plugins }}

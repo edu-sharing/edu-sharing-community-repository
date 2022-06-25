@@ -9,5 +9,4 @@ data:
     {{- range $key, $value := .Values.config.extra }}
     {{ $key }} = '{{ $value }}'
     {{- end }}
-    listen_addresses = '{{ if .Values.global.cluster.istio.enabled }}127.0.0.1{{ else }}0.0.0.0{{ end }}'
 {{- end }}
