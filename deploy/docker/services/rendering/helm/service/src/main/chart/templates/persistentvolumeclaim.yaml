@@ -2,8 +2,8 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "edusharing_rendering_service.pvc.share.config" . }}
-  labels: {{ include "edusharing_rendering_service.labels.app" . | nindent 4 }}
+  name: {{ include "edusharing_services_rendering.pvc.share.config" . }}
+  labels: {{ include "edusharing_services_rendering.labels.app" . | nindent 4 }}
   annotations:
     "helm.sh/resource-policy": keep
 spec: {{ merge .Values.persistence.share.config.spec .Values.global.cluster.storage.share.spec | toYaml | nindent 2 }}
@@ -13,8 +13,8 @@ spec: {{ merge .Values.persistence.share.config.spec .Values.global.cluster.stor
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "edusharing_rendering_service.pvc.share.data" . }}
-  labels: {{ include "edusharing_rendering_service.labels.app" . | nindent 4 }}
+  name: {{ include "edusharing_services_rendering.pvc.share.data" . }}
+  labels: {{ include "edusharing_services_rendering.labels.app" . | nindent 4 }}
   annotations:
     "helm.sh/resource-policy": keep
 spec: {{ merge .Values.persistence.share.data.spec .Values.global.cluster.storage.share.spec | toYaml | nindent 2 }}

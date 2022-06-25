@@ -133,7 +133,7 @@ spec:
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         args:
         - --redis.addr=redis://127.0.0.1:6379
-        - --web.listen-address={{ if .Values.global.cluster.istio.enabled }}127.0.0.1{{ end }}:9114
+        - --web.listen-address=:9114
         - --web.telemetry-path=/metrics
         ports:
         - name: metrics
