@@ -1,8 +1,5 @@
 {
   "transformOptions": {
-    "embedMetadata": [
-      { "value": { "name": "metadata" } }
-  	],
     "eduVideoThumbnail": [
       {
         "group": {
@@ -73,6 +70,9 @@
           "name": "directAccessUrl"
         }
       }
+    ],
+    "metadataOptions": [
+      {"value": {"name": "extractMapping"}}
     ]
   },
   "transformers": [
@@ -103,6 +103,19 @@
       "transformOptions": [
         "eduVideoThumbnail",
         "directAccessUrl"
+      ]
+    },
+    {
+      "transformerName": "EduSharingVideoMetadataExecutor",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "video/quicktime", "targetMediaType": "alfresco-metadata-extract"},
+        {"sourceMediaType": "video/x-matroska", "targetMediaType": "alfresco-metadata-extract"},
+        {"sourceMediaType": "video/mp4", "targetMediaType": "alfresco-metadata-extract"},
+        {"sourceMediaType": "video/quicktime", "targetMediaType": "alfresco-metadata-extract"},
+        {"sourceMediaType": "video/x-matroska", "targetMediaType": "alfresco-metadata-extract"}
+      ],
+      "transformOptions": [
+        "metadataOptions"
       ]
     }
 

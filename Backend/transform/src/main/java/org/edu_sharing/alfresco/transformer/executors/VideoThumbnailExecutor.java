@@ -4,6 +4,7 @@ import org.alfresco.transform.exceptions.TransformException;
 import org.alfresco.transformer.executors.AbstractCommandExecutor;
 import org.alfresco.transformer.executors.RuntimeExec;
 import org.apache.commons.lang3.StringUtils;
+import org.edu_sharing.alfresco.transformer.extractors.VideoMetadataExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,8 @@ public class VideoThumbnailExecutor extends AbstractCommandExecutor {
     private static final Logger logger = LoggerFactory.getLogger(VideoThumbnailExecutor.class);
 
     public static String ID = "EduSharingVideoThumbnailExecutor";
+
+    VideoMetadataExtractor videoMetadataExtractor = new VideoMetadataExtractor(LoggerFactory.getLogger(VideoMetadataExtractor.class));
 
     @Override
     protected RuntimeExec createTransformCommand() {
@@ -96,6 +99,15 @@ public class VideoThumbnailExecutor extends AbstractCommandExecutor {
         }catch (IOException e){
             logger.error(e.getMessage(),e);
         }
+    }
+
+    @Override
+    public void extractMetadata(String transformName, String sourceMimetype, String targetMimetype, Map<String, String> transformOptions, File sourceFile, File targetFile) throws Exception {
+        logger.info("sourceMimetype:"+sourceMimetype+" targetMimetype:"+targetMimetype+" sourceFile:"+sourceFile +" targetFile:"+targetFile);
+        if(transformOptions != null)
+            transformOptions.entrySet().stream().forEach(e -> logger.info("o:"+ e.getKey() + " "+e.getValue()));
+
+        videoMetadataExtractor.extractMetadata(sourceMimetype,transformOptions,sourceFile,targetFile);
     }
 
     @Override
