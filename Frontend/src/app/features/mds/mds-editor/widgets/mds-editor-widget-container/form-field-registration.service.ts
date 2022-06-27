@@ -1,6 +1,4 @@
-import {
-    Injectable
-} from '@angular/core';
+import { Injectable } from '@angular/core';
 import { MatFormField } from '@angular/material/form-field';
 
 // This is a Service-Directive combination to get hold of the `MatFormField` before it initializes

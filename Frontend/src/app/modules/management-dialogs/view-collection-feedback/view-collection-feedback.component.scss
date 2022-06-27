@@ -1,44 +1,44 @@
-@import "../../../core-ui-module/styles/variables";
+@import '../../../core-ui-module/styles/variables';
 
-.feedback{
-  .feedback-container:not(:last-child){
-    border-bottom: 1px solid $genericSeperatorLineColor;
-    margin-bottom:30px;
-  }
-  .empty{
-    text-align: center;
-    padding-top: 10%;
-    font-size: 120%;
-    color:$textLight;
-  }
-  .main-data{
-    font-size: 110%;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    padding:10px;
-    >.author{
-      display: flex;
-      align-items: center;
-      flex-grow: 1;
-      >es-user-avatar{
-        height: 22px;
-        margin-right: 10px;
-      }
+.feedback {
+    .feedback-container:not(:last-child) {
+        border-bottom: 1px solid $genericSeperatorLineColor;
+        margin-bottom: 30px;
     }
-    >.date{
-      color: $textLight;
+    .empty {
+        text-align: center;
+        padding-top: 10%;
+        font-size: 120%;
+        color: $textLight;
     }
-  }
-  .meta-data{
-    padding:10px 10px 30px 10px;
-  }
+    .main-data {
+        font-size: 110%;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        > .author {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+            > es-user-avatar {
+                height: 22px;
+                margin-right: 10px;
+            }
+        }
+        > .date {
+            color: $textLight;
+        }
+    }
+    .meta-data {
+        padding: 10px 10px 30px 10px;
+    }
 }
 
-:host ::ng-deep{
-  es-mds-widget{
-    .widget-label{
-      text-transform: uppercase;
+:host ::ng-deep {
+    es-mds-widget {
+        .widget-label {
+            text-transform: uppercase;
+        }
     }
-  }
 }

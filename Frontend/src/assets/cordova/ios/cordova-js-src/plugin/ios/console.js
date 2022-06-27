@@ -17,7 +17,7 @@
  * specific language governing permissions and limitations
  * under the License.
  *
-*/
+ */
 
 //------------------------------------------------------------------------------
 
@@ -56,7 +56,7 @@ console.useLogger = function (value) {
 
     if (UseLogger) {
         if (logger.useConsole()) {
-            throw new Error("console and logger are too intertwingly");
+            throw new Error('console and logger are too intertwingly');
         }
     }
 
@@ -64,53 +64,53 @@ console.useLogger = function (value) {
 };
 
 //------------------------------------------------------------------------------
-console.log = function() {
+console.log = function () {
     if (logger.useConsole()) return;
     logger.log.apply(logger, [].slice.call(arguments));
 };
 
 //------------------------------------------------------------------------------
-console.error = function() {
+console.error = function () {
     if (logger.useConsole()) return;
     logger.error.apply(logger, [].slice.call(arguments));
 };
 
 //------------------------------------------------------------------------------
-console.warn = function() {
+console.warn = function () {
     if (logger.useConsole()) return;
     logger.warn.apply(logger, [].slice.call(arguments));
 };
 
 //------------------------------------------------------------------------------
-console.info = function() {
+console.info = function () {
     if (logger.useConsole()) return;
     logger.info.apply(logger, [].slice.call(arguments));
 };
 
 //------------------------------------------------------------------------------
-console.debug = function() {
+console.debug = function () {
     if (logger.useConsole()) return;
     logger.debug.apply(logger, [].slice.call(arguments));
 };
 
 //------------------------------------------------------------------------------
-console.assert = function(expression) {
+console.assert = function (expression) {
     if (expression) return;
 
     var message = logger.format.apply(logger.format, [].slice.call(arguments, 1));
-    console.log("ASSERT: " + message);
+    console.log('ASSERT: ' + message);
 };
 
 //------------------------------------------------------------------------------
-console.clear = function() {};
+console.clear = function () {};
 
 //------------------------------------------------------------------------------
-console.dir = function(object) {
-    console.log("%o", object);
+console.dir = function (object) {
+    console.log('%o', object);
 };
 
 //------------------------------------------------------------------------------
-console.dirxml = function(node) {
+console.dirxml = function (node) {
     console.log(node.innerHTML);
 };
 
@@ -127,20 +127,20 @@ console.groupCollapsed = console.log;
 console.groupEnd = noop;
 
 //------------------------------------------------------------------------------
-console.time = function(name) {
+console.time = function (name) {
     Timers[name] = new Date().valueOf();
 };
 
 //------------------------------------------------------------------------------
-console.timeEnd = function(name) {
+console.timeEnd = function (name) {
     var timeStart = Timers[name];
     if (!timeStart) {
-        console.warn("unknown timer: " + name);
+        console.warn('unknown timer: ' + name);
         return;
     }
 
     var timeElapsed = new Date().valueOf() - timeStart;
-    console.log(name + ": " + timeElapsed + "ms");
+    console.log(name + ': ' + timeElapsed + 'ms');
 };
 
 //------------------------------------------------------------------------------
@@ -159,18 +159,22 @@ console.count = noop;
 console.exception = console.log;
 
 //------------------------------------------------------------------------------
-console.table = function(data, columns) {
-    console.log("%o", data);
+console.table = function (data, columns) {
+    console.log('%o', data);
 };
 
 //------------------------------------------------------------------------------
 // return a new function that calls both functions passed as args
 //------------------------------------------------------------------------------
 function wrappedOrigCall(orgFunc, newFunc) {
-    return function() {
+    return function () {
         var args = [].slice.call(arguments);
-        try { orgFunc.apply(WinConsole, args); } catch (e) {}
-        try { newFunc.apply(console,    args); } catch (e) {}
+        try {
+            orgFunc.apply(WinConsole, args);
+        } catch (e) {}
+        try {
+            newFunc.apply(console, args);
+        } catch (e) {}
     };
 }
 
@@ -180,7 +184,7 @@ function wrappedOrigCall(orgFunc, newFunc) {
 // with one that calls both
 //------------------------------------------------------------------------------
 for (var key in console) {
-    if (typeof WinConsole[key] == "function") {
+    if (typeof WinConsole[key] == 'function') {
         console[key] = wrappedOrigCall(WinConsole[key], console[key]);
     }
 }

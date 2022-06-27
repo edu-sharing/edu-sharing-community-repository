@@ -1,0 +1,22 @@
+<div *ngIf="avatar" class="card-dialog-avatar">
+  <i *ngIf="avatar.kind === 'icon'" [esIcon]="avatar.icon"></i>
+  <img *ngIf="avatar.kind === 'image'" [src]="avatar.url" alt="" esImage-config />
+</div>
+
+<div class="card-dialog-header-text">
+  <p id="card-dialog-title-{{ id }}" class="card-dialog-title">{{ title }}</p>
+  <p id="card-dialog-subtitle-{{ id }}" class="card-dialog-subtitle" *ngIf="subtitle">
+    {{ subtitle }}
+  </p>
+</div>
+
+<div class="card-dialog-close-button-box" *ngIf="showCloseButton">
+  <button
+    class="card-dialog-close-button"
+    mat-icon-button
+    [disabled]="disableCloseButton"
+    (click)="onClose()"
+  >
+    <i esIcon="close" [aria]="true"></i>
+  </button>
+</div>

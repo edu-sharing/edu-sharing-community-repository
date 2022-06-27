@@ -1,35 +1,49 @@
-<es-card title="{{'NODE_VARIANT.TITLE' | translate}}" [node]="_node" width="normal" height="normal"
-      [buttons]="buttons"
-      (onCancel)="cancel()"
+<es-card
+  title="{{ 'NODE_VARIANT.TITLE' | translate }}"
+  [node]="_node"
+  width="normal"
+  height="normal"
+  [buttons]="buttons"
+  (onCancel)="cancel()"
 >
-    <div *ngIf="_node" class="variant-content">
-        <label for="variantName">{{'NODE_VARIANT.NEW_VARIANT' | translate}}</label>
-        <input type="text" id="variantName" [(ngModel)]="variantName">
-        <es-info-message *ngIf="licenseWarning" mode="warning" message="{{'NODE_VARIANT.WARNING.'+licenseWarning | translate}}">
-            <div>
-                <button mat-button color="primary" *ngIf="getLicenseUrl()" (click)="openLicense()">{{'NODE_VARIANT.WARNING.LINK' | translate}}</button>
-            </div>
-        </es-info-message>
-        <div class="breadcrumb-style">
-            <div class="group-left">
-                <div class="breadcrumb-info">{{'NODE_VARIANT.BREADCRUMB_INFO' | translate}}</div>
-                <es-breadcrumbs
-                        short="always"
-                        [breadcrumbsAsNode]="breadcrumbs"
-                        [home]="'WORKSPACE.MY_FILES'"
-                        [clickable]="false"
-                ></es-breadcrumbs>
-            </div>
-            <div class="btn-choose"></div><button mat-raised-button (click)="chooseDirectory=true">{{'NODE_VARIANT.CHOOSE' | translate}}</button></div>
+  <div *ngIf="_node" class="variant-content">
+    <label for="variantName">{{ 'NODE_VARIANT.NEW_VARIANT' | translate }}</label>
+    <input type="text" id="variantName" [(ngModel)]="variantName" />
+    <es-info-message
+      *ngIf="licenseWarning"
+      mode="warning"
+      message="{{ 'NODE_VARIANT.WARNING.' + licenseWarning | translate }}"
+    >
+      <div>
+        <button mat-button color="primary" *ngIf="getLicenseUrl()" (click)="openLicense()">
+          {{ 'NODE_VARIANT.WARNING.LINK' | translate }}
+        </button>
+      </div>
+    </es-info-message>
+    <div class="breadcrumb-style">
+      <div class="group-left">
+        <div class="breadcrumb-info">{{ 'NODE_VARIANT.BREADCRUMB_INFO' | translate }}</div>
+        <es-breadcrumbs
+          short="always"
+          [breadcrumbsAsNode]="breadcrumbs"
+          [home]="'WORKSPACE.MY_FILES'"
+          [clickable]="false"
+        ></es-breadcrumbs>
+      </div>
+      <div class="btn-choose"></div>
+      <button mat-raised-button (click)="chooseDirectory = true">
+        {{ 'NODE_VARIANT.CHOOSE' | translate }}
+      </button>
     </div>
+  </div>
 </es-card>
 <es-file-chooser
-        *ngIf="chooseDirectory"
-        [title]="'NODE_VARIANT.FILE_PICKER_TITLE'"
-        [pickDirectory]="true"
-        [isCancelable]="true"
-        [writeRequired]="true"
-        [priority]="1"
-        (onCancel)="chooseDirectory=false"
-        (onChoose)="setDirectory($event)"
+  *ngIf="chooseDirectory"
+  [title]="'NODE_VARIANT.FILE_PICKER_TITLE'"
+  [pickDirectory]="true"
+  [isCancelable]="true"
+  [writeRequired]="true"
+  [priority]="1"
+  (onCancel)="chooseDirectory = false"
+  (onChoose)="setDirectory($event)"
 ></es-file-chooser>

@@ -1,8 +1,8 @@
-@import "../../../../core-ui-module/styles/variables.scss";
+@import '../../../../core-ui-module/styles/variables.scss';
 
-.widget-label{
-  font-size: 90%;
-  opacity: 0.8;
+.widget-label {
+    font-size: 90%;
+    opacity: 0.8;
 }
 .edit-wrapper {
     display: flex;
@@ -13,41 +13,42 @@
     > button {
         margin-left: 10px;
     }
-    transition: $transitionNormal all;;
+    transition: $transitionNormal all;
     .widget-wrapper {
         padding: 2px 5px;
     }
     .value-wrapper-edit:hover {
-        outline: 1px solid $cardSeperatorLineColor;
+        outline: 1px solid $cardSeparatorLineColor;
         cursor: text;
     }
 }
-.widget-data{
-  padding:4px 0 10px 0;
-  word-break: break-word;
-  &.widget-type-slider {
-    opacity: 0.8;
-    .slider-value {
-      opacity: 0.9;
-      font-weight: bold;
+.widget-data {
+    padding: 4px 0 10px 0;
+    word-break: break-word;
+    &.widget-type-slider {
+        opacity: 0.8;
+        .slider-value {
+            opacity: 0.9;
+            font-weight: bold;
+        }
     }
-  }
-  &.widget-type-array, &.widget-type-vcard {
-    .array-entry{
-      display: inline;
-      &:not(:last-child):after{
-        content: ', ';
-        padding-right: 0.3em;
-          display: inline;
-          align-items: flex-end;
-      }
+    &.widget-type-array,
+    &.widget-type-vcard {
+        .array-entry {
+            display: inline;
+            &:not(:last-child):after {
+                content: ', ';
+                padding-right: 0.3em;
+                display: inline;
+                align-items: flex-end;
+            }
+        }
     }
-  }
-  &.widget-link{
-    text-decoration: underline;
-    cursor: pointer;
-  }
+    &.widget-link {
+        text-decoration: underline;
+        cursor: pointer;
+    }
 }
-.widget-type-text >div{
-  white-space: pre-line;
+.widget-type-text > div {
+    white-space: pre-line;
 }

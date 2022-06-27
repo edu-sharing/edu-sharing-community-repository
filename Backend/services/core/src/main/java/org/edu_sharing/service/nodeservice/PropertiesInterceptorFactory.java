@@ -82,11 +82,12 @@ public class PropertiesInterceptorFactory {
         propertiesSetInterceptors = null;
     }
 
-    public static PropertiesGetInterceptor.PropertiesContext getPropertiesContext(NodeRef nodeRef, Map<String,Object> properties, List<String> aspects){
+    public static PropertiesGetInterceptor.PropertiesContext getPropertiesContext(NodeRef nodeRef, Map<String,Object> properties, List<String> aspects, Map<String, Object> elasticsearchSource){
         PropertiesGetInterceptor.PropertiesContext propertiesContext = new PropertiesGetInterceptor.PropertiesContext();
         propertiesContext.setProperties(properties);
         propertiesContext.setAspects(aspects);
         propertiesContext.setNodeRef(nodeRef);
+        propertiesContext.setElasticsearchSource(elasticsearchSource);
         propertiesContext.setSource(CallSourceHelper.getCallSource());
         return propertiesContext;
     }

@@ -127,10 +127,13 @@ export class SearchFieldFacetsComponent implements OnInit, OnDestroy {
 
     isEmpty() {
         this.mdsEditorInstance.suggestionsSubject.value;
-        if(!this.mdsEditorInstance.suggestionsSubject.value) {
+        if (!this.mdsEditorInstance.suggestionsSubject.value) {
             return true;
         }
-        return Object.keys(this.mdsEditorInstance.suggestionsSubject.value)
-            .filter(key => this.mdsEditorInstance.suggestionsSubject.value[key].values.length).length === 0;
+        return (
+            Object.keys(this.mdsEditorInstance.suggestionsSubject.value).filter(
+                (key) => this.mdsEditorInstance.suggestionsSubject.value[key].values.length,
+            ).length === 0
+        );
     }
 }

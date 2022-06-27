@@ -1,21 +1,27 @@
-<es-card *ngIf="deleteResult"
-         title="{{'PERMISSIONS.DELETE.RESULTS' | translate}}"
-         icon="delete"
-         width="large"
-         height="xxlarge"
-         [isCancelable]="false"
-         [buttons]="deleteButtons"
+<es-card
+  *ngIf="deleteResult"
+  title="{{ 'PERMISSIONS.DELETE.RESULTS' | translate }}"
+  icon="delete"
+  width="large"
+  height="xxlarge"
+  [isCancelable]="false"
+  [buttons]="deleteButtons"
 >
   <div class="card-result">
     <textarea matInput [ngModel]="deleteResult" readonly></textarea>
-    <mat-hint>{{'PERMISSIONS.DELETE.RESULTS_HINT' | translate}}</mat-hint>
+    <mat-hint>{{ 'PERMISSIONS.DELETE.RESULTS_HINT' | translate }}</mat-hint>
   </div>
 </es-card>
 <div class="wrapper">
-  <h2 class="mat-heading-2 mat-heading-underline">{{'PERMISSIONS.DELETE.MAIN_HEADING' | translate}}</h2>
+  <h2 class="mat-heading-2 mat-heading-underline">
+    {{ 'PERMISSIONS.DELETE.MAIN_HEADING' | translate }}
+  </h2>
   <div class="group">
     <es-spinner *ngIf="loading"></es-spinner>
-    <h3 class="mat-heading-3 mat-heading-underline" *ngIf="!loading" ><span>{{'PERMISSIONS.DELETE.USER_LIST' | translate}}</span><button mat-icon-button (click)="refresh()"><i esIcon="refresh" ></i></button></h3>
+    <h3 class="mat-heading-3 mat-heading-underline" *ngIf="!loading">
+      <span>{{ 'PERMISSIONS.DELETE.USER_LIST' | translate }}</span
+      ><button mat-icon-button (click)="refresh()"><i esIcon="refresh"></i></button>
+    </h3>
     <div class="user-list" *ngIf="users && users.length">
       <es-listTable
         [nodes]="$any(users)"
@@ -27,157 +33,279 @@
         [isLoading]="loading"
         [columns]="columns"
         [totalCount]="users.length"
-        (selectionChanged)="selectedUsers=$event"
+        (selectionChanged)="selectedUsers = $event"
       ></es-listTable>
     </div>
   </div>
-  <es-info-message mode="info" *ngIf="!loading && !(users && users.length)" message="{{'PERMISSIONS.DELETE.STATE.NO_USERS' | translate}}"></es-info-message>
+  <es-info-message
+    mode="info"
+    *ngIf="!loading && !(users && users.length)"
+    message="{{ 'PERMISSIONS.DELETE.STATE.NO_USERS' | translate }}"
+  ></es-info-message>
   <div *ngIf="!loading && users && users.length && options">
     <div class="group group-jobs" *ngIf="jobs?.length">
-      <h3 class="mat-heading-3 mat-heading-underline">{{'PERMISSIONS.DELETE.JOBS.CAPTION' | translate}}</h3>
+      <h3 class="mat-heading-3 mat-heading-underline">
+        {{ 'PERMISSIONS.DELETE.JOBS.CAPTION' | translate }}
+      </h3>
       <mat-form-field>
-        <mat-label>{{'PERMISSIONS.DELETE.JOBS.TITLE' | translate}}</mat-label>
+        <mat-label>{{ 'PERMISSIONS.DELETE.JOBS.TITLE' | translate }}</mat-label>
         <mat-select [(ngModel)]="job">
-          <mat-option [value]="'NONE'">{{'PERMISSIONS.DELETE.JOBS.DEFAULT' | translate}}</mat-option>
-          <mat-option [value]="j" *ngFor="let j of jobs">{{j.description}}</mat-option>
+          <mat-option [value]="'NONE'">{{
+            'PERMISSIONS.DELETE.JOBS.DEFAULT' | translate
+          }}</mat-option>
+          <mat-option [value]="j" *ngFor="let j of jobs">{{ j.description }}</mat-option>
         </mat-select>
       </mat-form-field>
     </div>
     <ng-container *ngIf="job === 'NONE'">
       <div class="group">
-        <h3 class="mat-heading-3 mat-heading-underline">{{'PERMISSIONS.DELETE.HOME_FOLDER.CAPTION' | translate}}</h3>
+        <h3 class="mat-heading-3 mat-heading-underline">
+          {{ 'PERMISSIONS.DELETE.HOME_FOLDER.CAPTION' | translate }}
+        </h3>
         <div class="side-by-side">
           <div>
-            <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.HOME_FOLDER.FOLDERS_CAPTION' | translate}}</h4>
-            <mat-radio-group [(ngModel)]="options.homeFolder.folders" (ngModelChange)="updateForm()">
-              <mat-radio-button *ngFor="let mode of deleteModes" [value]="mode">{{'PERMISSIONS.DELETE.DELETE_MODE.'+mode | translate}}</mat-radio-button>
+            <h4 class="mat-heading-4">
+              {{ 'PERMISSIONS.DELETE.HOME_FOLDER.FOLDERS_CAPTION' | translate }}
+            </h4>
+            <mat-radio-group
+              [(ngModel)]="options.homeFolder.folders"
+              (ngModelChange)="updateForm()"
+            >
+              <mat-radio-button *ngFor="let mode of deleteModes" [value]="mode">{{
+                'PERMISSIONS.DELETE.DELETE_MODE.' + mode | translate
+              }}</mat-radio-button>
             </mat-radio-group>
-            <es-info-message *ngIf="options.homeFolder.folders === 'none'" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.HOME_FOLDER_NONE' | translate}}"></es-info-message>
-            <es-info-message *ngIf="options.homeFolder.folders === 'delete'" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.HOME_FOLDER_DELETE' | translate}}"></es-info-message>
+            <es-info-message
+              *ngIf="options.homeFolder.folders === 'none'"
+              mode="warning"
+              message="{{ 'PERMISSIONS.DELETE.STATE.HOME_FOLDER_NONE' | translate }}"
+            ></es-info-message>
+            <es-info-message
+              *ngIf="options.homeFolder.folders === 'delete'"
+              mode="warning"
+              message="{{ 'PERMISSIONS.DELETE.STATE.HOME_FOLDER_DELETE' | translate }}"
+            ></es-info-message>
           </div>
           <div>
-            <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.HOME_FOLDER.PRIVATE_FILES_CAPTION' | translate}}</h4>
-            <mat-radio-group [(ngModel)]="options.homeFolder.privateFiles" (ngModelChange)="updateForm()">
-              <mat-radio-button *ngFor="let mode of deleteModes" [value]="mode">{{'PERMISSIONS.DELETE.DELETE_MODE.'+mode | translate}}</mat-radio-button>
+            <h4 class="mat-heading-4">
+              {{ 'PERMISSIONS.DELETE.HOME_FOLDER.PRIVATE_FILES_CAPTION' | translate }}
+            </h4>
+            <mat-radio-group
+              [(ngModel)]="options.homeFolder.privateFiles"
+              (ngModelChange)="updateForm()"
+            >
+              <mat-radio-button *ngFor="let mode of deleteModes" [value]="mode">{{
+                'PERMISSIONS.DELETE.DELETE_MODE.' + mode | translate
+              }}</mat-radio-button>
             </mat-radio-group>
           </div>
           <div>
-            <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.HOME_FOLDER.CC_FILES_CAPTION' | translate}}</h4>
-            <mat-radio-group [(ngModel)]="options.homeFolder.ccFiles" (ngModelChange)="updateForm()">
-              <mat-radio-button *ngFor="let mode of deleteModes" [value]="mode">{{'PERMISSIONS.DELETE.DELETE_MODE.'+mode | translate}}</mat-radio-button>
+            <h4 class="mat-heading-4">
+              {{ 'PERMISSIONS.DELETE.HOME_FOLDER.CC_FILES_CAPTION' | translate }}
+            </h4>
+            <mat-radio-group
+              [(ngModel)]="options.homeFolder.ccFiles"
+              (ngModelChange)="updateForm()"
+            >
+              <mat-radio-button *ngFor="let mode of deleteModes" [value]="mode">{{
+                'PERMISSIONS.DELETE.DELETE_MODE.' + mode | translate
+              }}</mat-radio-button>
             </mat-radio-group>
           </div>
         </div>
         <div class="structure">
-          <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.HOME_FOLDER.FOLDER_STRUCTURE_CAPTION' | translate}}</h4>
-          <mat-radio-group [(ngModel)]="options.homeFolder.keepFolderStructure" [disabled]="!allAssigning()">
-            <mat-radio-button [value]="false">{{'PERMISSIONS.DELETE.FOLDER_STRUCTURE_DISINTEGRATE' | translate}}</mat-radio-button>
-            <mat-radio-button [value]="true">{{'PERMISSIONS.DELETE.FOLDER_STRUCTURE_KEEP' | translate}}</mat-radio-button>
+          <h4 class="mat-heading-4">
+            {{ 'PERMISSIONS.DELETE.HOME_FOLDER.FOLDER_STRUCTURE_CAPTION' | translate }}
+          </h4>
+          <mat-radio-group
+            [(ngModel)]="options.homeFolder.keepFolderStructure"
+            [disabled]="!allAssigning()"
+          >
+            <mat-radio-button [value]="false">{{
+              'PERMISSIONS.DELETE.FOLDER_STRUCTURE_DISINTEGRATE' | translate
+            }}</mat-radio-button>
+            <mat-radio-button [value]="true">{{
+              'PERMISSIONS.DELETE.FOLDER_STRUCTURE_KEEP' | translate
+            }}</mat-radio-button>
           </mat-radio-group>
         </div>
       </div>
       <div class="group">
-        <h3 class="mat-heading-3 mat-heading-underline">{{'PERMISSIONS.DELETE.SHARED_FOLDERS.CAPTION' | translate}}</h3>
+        <h3 class="mat-heading-3 mat-heading-underline">
+          {{ 'PERMISSIONS.DELETE.SHARED_FOLDERS.CAPTION' | translate }}
+        </h3>
         <div class="side-by-side">
           <div>
-            <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.SHARED_FOLDERS.FOLDERS_CAPTION' | translate}}</h4>
+            <h4 class="mat-heading-4">
+              {{ 'PERMISSIONS.DELETE.SHARED_FOLDERS.FOLDERS_CAPTION' | translate }}
+            </h4>
             <mat-radio-group [(ngModel)]="options.sharedFolders.folders">
-              <mat-radio-button *ngFor="let mode of deleteModesFolder" [value]="mode">{{'PERMISSIONS.DELETE.DELETE_MODE.'+mode | translate}}</mat-radio-button>
+              <mat-radio-button *ngFor="let mode of deleteModesFolder" [value]="mode">{{
+                'PERMISSIONS.DELETE.DELETE_MODE.' + mode | translate
+              }}</mat-radio-button>
             </mat-radio-group>
           </div>
           <div>
-            <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.SHARED_FOLDERS.PRIVATE_FILES_CAPTION' | translate}}</h4>
+            <h4 class="mat-heading-4">
+              {{ 'PERMISSIONS.DELETE.SHARED_FOLDERS.PRIVATE_FILES_CAPTION' | translate }}
+            </h4>
             <mat-radio-group [(ngModel)]="options.sharedFolders.privateFiles">
-              <mat-radio-button *ngFor="let mode of deleteModes" [value]="mode">{{'PERMISSIONS.DELETE.DELETE_MODE.'+mode | translate}}</mat-radio-button>
+              <mat-radio-button *ngFor="let mode of deleteModes" [value]="mode">{{
+                'PERMISSIONS.DELETE.DELETE_MODE.' + mode | translate
+              }}</mat-radio-button>
             </mat-radio-group>
           </div>
           <div>
-            <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.SHARED_FOLDERS.CC_FILES_CAPTION' | translate}}</h4>
+            <h4 class="mat-heading-4">
+              {{ 'PERMISSIONS.DELETE.SHARED_FOLDERS.CC_FILES_CAPTION' | translate }}
+            </h4>
             <mat-radio-group [(ngModel)]="options.sharedFolders.ccFiles">
-              <mat-radio-button *ngFor="let mode of deleteModes" [value]="mode">{{'PERMISSIONS.DELETE.DELETE_MODE.'+mode | translate}}</mat-radio-button>
+              <mat-radio-button *ngFor="let mode of deleteModes" [value]="mode">{{
+                'PERMISSIONS.DELETE.DELETE_MODE.' + mode | translate
+              }}</mat-radio-button>
             </mat-radio-group>
           </div>
         </div>
-        <div class="move" *ngIf="options.sharedFolders.privateFiles == 'assign' || options.sharedFolders.ccFiles == 'assign'">
-          <mat-checkbox [(ngModel)]="options.sharedFolders.move">{{'PERMISSIONS.DELETE.MOVE_SHARED_FILES' | translate}}</mat-checkbox>
+        <div
+          class="move"
+          *ngIf="
+            options.sharedFolders.privateFiles == 'assign' ||
+            options.sharedFolders.ccFiles == 'assign'
+          "
+        >
+          <mat-checkbox [(ngModel)]="options.sharedFolders.move">{{
+            'PERMISSIONS.DELETE.MOVE_SHARED_FILES' | translate
+          }}</mat-checkbox>
         </div>
       </div>
       <div class="group">
-        <h3 class="mat-heading-3 mat-heading-underline">{{'PERMISSIONS.DELETE.COLLECTIONS.CAPTION' | translate}}</h3>
+        <h3 class="mat-heading-3 mat-heading-underline">
+          {{ 'PERMISSIONS.DELETE.COLLECTIONS.CAPTION' | translate }}
+        </h3>
         <div class="side-by-side">
           <div>
-            <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.COLLECTIONS.PRIVATE_COLLECTIONS_CAPTION' | translate}}</h4>
+            <h4 class="mat-heading-4">
+              {{ 'PERMISSIONS.DELETE.COLLECTIONS.PRIVATE_COLLECTIONS_CAPTION' | translate }}
+            </h4>
             <mat-radio-group [(ngModel)]="options.collections.privateCollections">
-              <mat-radio-button *ngFor="let mode of deleteModes" [value]="mode">{{'PERMISSIONS.DELETE.DELETE_MODE.'+mode | translate}}</mat-radio-button>
+              <mat-radio-button *ngFor="let mode of deleteModes" [value]="mode">{{
+                'PERMISSIONS.DELETE.DELETE_MODE.' + mode | translate
+              }}</mat-radio-button>
             </mat-radio-group>
           </div>
           <div>
-            <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.COLLECTIONS.PUBLIC_COLLECTIONS_CAPTION' | translate}}</h4>
+            <h4 class="mat-heading-4">
+              {{ 'PERMISSIONS.DELETE.COLLECTIONS.PUBLIC_COLLECTIONS_CAPTION' | translate }}
+            </h4>
             <mat-radio-group [(ngModel)]="options.collections.publicCollections">
-              <mat-radio-button *ngFor="let mode of deleteModes" [value]="mode">{{'PERMISSIONS.DELETE.DELETE_MODE.'+mode | translate}}</mat-radio-button>
+              <mat-radio-button *ngFor="let mode of deleteModes" [value]="mode">{{
+                'PERMISSIONS.DELETE.DELETE_MODE.' + mode | translate
+              }}</mat-radio-button>
             </mat-radio-group>
           </div>
         </div>
       </div>
       <div class="group">
         <div *ngIf="hasAssigning()" class="assigning">
-          <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.RECEIVER_CAPTION' | translate}}</h4>
+          <h4 class="mat-heading-4">{{ 'PERMISSIONS.DELETE.RECEIVER_CAPTION' | translate }}</h4>
           <!-- @TODO: The component does currently not support searching ONLY for users -->
           <es-authority-search-input
-            (onChooseAuthority)="receiver=$event"
+            (onChooseAuthority)="receiver = $event"
             [globalSearchAllowed]="true"
             [showRecent]="false"
-            placeholder="{{'PERMISSIONS.DELETE.RECEIVER' | translate}}"
+            placeholder="{{ 'PERMISSIONS.DELETE.RECEIVER' | translate }}"
           ></es-authority-search-input>
           <mat-chip-list>
-            <mat-chip *ngIf="receiver" (removed)="receiver=null">
-              <span>{{receiver | authorityName}}</span>
+            <mat-chip *ngIf="receiver" (removed)="receiver = null">
+              <span>{{ receiver | authorityName }}</span>
               <i matChipRemove esIcon="cancel"></i>
             </mat-chip>
           </mat-chip-list>
-          <h4 class="mat-heading-4">{{'PERMISSIONS.DELETE.RECEIVER_GROUP_CAPTION' | translate}}</h4>
+          <h4 class="mat-heading-4">
+            {{ 'PERMISSIONS.DELETE.RECEIVER_GROUP_CAPTION' | translate }}
+          </h4>
           <es-authority-search-input
             [mode]="AuthoritySearchMode.Organizations"
-            hint="{{'PERMISSIONS.DELETE.RECEIVER_GROUP_HINT' | translate}}"
+            hint="{{ 'PERMISSIONS.DELETE.RECEIVER_GROUP_HINT' | translate }}"
             [showRecent]="false"
-            (onChooseAuthority)="receiverGroup=$event"
-            placeholder="{{'PERMISSIONS.DELETE.RECEIVER_GROUP' | translate}}"
+            (onChooseAuthority)="receiverGroup = $event"
+            placeholder="{{ 'PERMISSIONS.DELETE.RECEIVER_GROUP' | translate }}"
           ></es-authority-search-input>
           <mat-chip-list>
-            <mat-chip *ngIf="receiverGroup" (removed)="receiverGroup=null">
-              <span>{{receiverGroup | authorityName}}</span>
+            <mat-chip *ngIf="receiverGroup" (removed)="receiverGroup = null">
+              <span>{{ receiverGroup | authorityName }}</span>
               <i matChipRemove esIcon="cancel"></i>
             </mat-chip>
           </mat-chip-list>
         </div>
       </div>
       <div class="info-wrapper">
-        <es-info-message *ngIf="missingAssigning()" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.NO_RECEIVER' | translate}}"></es-info-message>
-        <es-info-message *ngIf="options.collections.privateCollections=='delete' || options.collections.publicCollections=='delete'" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.DELETE_COLLECTIONS' | translate}}"></es-info-message>
-        <es-info-message *ngIf="!isValid()" mode="warning" message="{{'PERMISSIONS.DELETE.STATE.NON_CONFORM' | translate}}"></es-info-message>
+        <es-info-message
+          *ngIf="missingAssigning()"
+          mode="warning"
+          message="{{ 'PERMISSIONS.DELETE.STATE.NO_RECEIVER' | translate }}"
+        ></es-info-message>
+        <es-info-message
+          *ngIf="
+            options.collections.privateCollections == 'delete' ||
+            options.collections.publicCollections == 'delete'
+          "
+          mode="warning"
+          message="{{ 'PERMISSIONS.DELETE.STATE.DELETE_COLLECTIONS' | translate }}"
+        ></es-info-message>
+        <es-info-message
+          *ngIf="!isValid()"
+          mode="warning"
+          message="{{ 'PERMISSIONS.DELETE.STATE.NON_CONFORM' | translate }}"
+        ></es-info-message>
       </div>
       <div class="group group-metadata" *ngIf="hasAssigning()">
-        <h3 class="mat-heading-3 mat-heading-underline">{{'PERMISSIONS.DELETE.METADATA.CAPTION' | translate}}</h3>
-        <mat-checkbox [(ngModel)]="options.cleanupMetadata">{{'PERMISSIONS.DELETE.METADATA.DELETE' | translate}}</mat-checkbox>
-        <mat-hint>{{'PERMISSIONS.DELETE.METADATA.HINT' | translate}}</mat-hint>
+        <h3 class="mat-heading-3 mat-heading-underline">
+          {{ 'PERMISSIONS.DELETE.METADATA.CAPTION' | translate }}
+        </h3>
+        <mat-checkbox [(ngModel)]="options.cleanupMetadata">{{
+          'PERMISSIONS.DELETE.METADATA.DELETE' | translate
+        }}</mat-checkbox>
+        <mat-hint>{{ 'PERMISSIONS.DELETE.METADATA.HINT' | translate }}</mat-hint>
       </div>
       <div class="group group-interactions">
-        <h3 class="mat-heading-3 mat-heading-underline">{{'PERMISSIONS.DELETE.USER_INTERACTIONS.CAPTION' | translate}}</h3>
-        <mat-checkbox [(ngModel)]="options.stream.delete">{{'PERMISSIONS.DELETE.USER_INTERACTIONS.STREAM' | translate}}</mat-checkbox>
-        <mat-hint>{{'PERMISSIONS.DELETE.USER_INTERACTIONS.STREAM_HINT' | translate}}</mat-hint>
-        <mat-checkbox [(ngModel)]="options.comments.delete">{{'PERMISSIONS.DELETE.USER_INTERACTIONS.COMMENTS' | translate}}</mat-checkbox>
-        <mat-hint>{{'PERMISSIONS.DELETE.USER_INTERACTIONS.COMMENTS_HINT' | translate}}</mat-hint>
-        <mat-checkbox [(ngModel)]="options.ratings.delete">{{'PERMISSIONS.DELETE.USER_INTERACTIONS.RATINGS' | translate}}</mat-checkbox>
-        <mat-hint>{{'PERMISSIONS.DELETE.USER_INTERACTIONS.RATINGS_HINT' | translate}}</mat-hint>
-        <mat-checkbox [(ngModel)]="options.collectionFeedback.delete">{{'PERMISSIONS.DELETE.USER_INTERACTIONS.COLLECTION_FEEDBACK' | translate}}</mat-checkbox>
-        <mat-hint>{{'PERMISSIONS.DELETE.USER_INTERACTIONS.COLLECTION_FEEDBACK_HINT' | translate}}</mat-hint>
-        <mat-checkbox [(ngModel)]="options.statistics.delete">{{'PERMISSIONS.DELETE.USER_INTERACTIONS.STATISTICS' | translate}}</mat-checkbox>
-        <mat-hint>{{'PERMISSIONS.DELETE.USER_INTERACTIONS.STATISTICS_HINT' | translate}}</mat-hint>
-        <es-info-message mode="info" message="{{'PERMISSIONS.DELETE.STATE.ASSIGNING_DELETED_USER' | translate}}"></es-info-message>
+        <h3 class="mat-heading-3 mat-heading-underline">
+          {{ 'PERMISSIONS.DELETE.USER_INTERACTIONS.CAPTION' | translate }}
+        </h3>
+        <mat-checkbox [(ngModel)]="options.stream.delete">{{
+          'PERMISSIONS.DELETE.USER_INTERACTIONS.STREAM' | translate
+        }}</mat-checkbox>
+        <mat-hint>{{ 'PERMISSIONS.DELETE.USER_INTERACTIONS.STREAM_HINT' | translate }}</mat-hint>
+        <mat-checkbox [(ngModel)]="options.comments.delete">{{
+          'PERMISSIONS.DELETE.USER_INTERACTIONS.COMMENTS' | translate
+        }}</mat-checkbox>
+        <mat-hint>{{ 'PERMISSIONS.DELETE.USER_INTERACTIONS.COMMENTS_HINT' | translate }}</mat-hint>
+        <mat-checkbox [(ngModel)]="options.ratings.delete">{{
+          'PERMISSIONS.DELETE.USER_INTERACTIONS.RATINGS' | translate
+        }}</mat-checkbox>
+        <mat-hint>{{ 'PERMISSIONS.DELETE.USER_INTERACTIONS.RATINGS_HINT' | translate }}</mat-hint>
+        <mat-checkbox [(ngModel)]="options.collectionFeedback.delete">{{
+          'PERMISSIONS.DELETE.USER_INTERACTIONS.COLLECTION_FEEDBACK' | translate
+        }}</mat-checkbox>
+        <mat-hint>{{
+          'PERMISSIONS.DELETE.USER_INTERACTIONS.COLLECTION_FEEDBACK_HINT' | translate
+        }}</mat-hint>
+        <mat-checkbox [(ngModel)]="options.statistics.delete">{{
+          'PERMISSIONS.DELETE.USER_INTERACTIONS.STATISTICS' | translate
+        }}</mat-checkbox>
+        <mat-hint>{{
+          'PERMISSIONS.DELETE.USER_INTERACTIONS.STATISTICS_HINT' | translate
+        }}</mat-hint>
+        <es-info-message
+          mode="info"
+          message="{{ 'PERMISSIONS.DELETE.STATE.ASSIGNING_DELETED_USER' | translate }}"
+        ></es-info-message>
       </div>
     </ng-container>
   </div>
   <div class="group group-buttons" *ngIf="!loading">
-    <button mat-raised-button color="primary" [disabled]="!canSubmit()" (click)="prepareStart()">{{'PERMISSIONS.DELETE.START' | translate}}</button>
+    <button mat-raised-button color="primary" [disabled]="!canSubmit()" (click)="prepareStart()">
+      {{ 'PERMISSIONS.DELETE.START' | translate }}
+    </button>
   </div>
 </div>

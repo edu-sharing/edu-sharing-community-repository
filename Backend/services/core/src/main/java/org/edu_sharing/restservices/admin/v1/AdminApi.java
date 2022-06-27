@@ -1536,6 +1536,26 @@ public class AdminApi {
 			return ErrorResponse.createResponse(t);
 		}
 	}
+
+	@GET
+	@Path("/plugins")
+	@Operation(summary = "get enabled system plugins")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = PluginStatus[].class))),
+			@ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+	public Response getEnabledPlugins(@Context HttpServletRequest req) {
+		try {
+			Collection<PluginStatus> plugins=AdminServiceFactory.getInstance().getPlugins();
+			return Response.ok().entity(plugins).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
 	@GET
 	@Path("/config/merged")
 	@Operation(description = "Get the fully merged & parsed (lightbend) backend config")

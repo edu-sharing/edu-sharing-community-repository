@@ -18,10 +18,26 @@
             "tsConfig": "tsconfig.app.json",
             "baseHref": "/edu-sharing/",
             "assets": [
-              { "glob": "**/*", "input": "src/assets/", "output": "/assets/" },
-              { "glob": "**/*", "input": "node_modules/ngx-monaco-editor/assets/monaco", "output": "/assets/monaco/" },
-              { "glob": "**/*", "input": "node_modules/tinymce", "output": "/tinymce/" },
-              { "glob": "**/*", "input": "node_modules/tinymce-i18n/langs5", "output": "/tinymce/langs/" }
+              {
+                "glob": "**/*",
+                "input": "src/assets/",
+                "output": "/assets/"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/ngx-monaco-editor/assets/monaco",
+                "output": "/assets/monaco/"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/tinymce",
+                "output": "/tinymce/"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/tinymce-i18n/langs5",
+                "output": "/tinymce/langs/"
+              }
             ],
             "styles": [
               "src/app/core-ui-module/styles/core-base.scss",
@@ -40,7 +56,10 @@
             "buildOptimizer": false,
             "sourceMap": true,
             "optimization": false,
-            "namedChunks": true
+            "namedChunks": true,
+            "allowedCommonJsDependencies": [
+              "@cordobo/qrcode"
+            ]
           },
           "configurations": {
             "production": {
@@ -158,6 +177,118 @@
               "projects/edu-sharing-api/**/*.html"
             ],
             "cache": true
+          }
+        }
+      }
+    },
+    "embed": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        },
+        "@schematics/angular:application": {
+          "strict": true
+        }
+      },
+      "root": "projects/embed",
+      "sourceRoot": "projects/embed/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/embed",
+            "index": "projects/embed/src/index.html",
+            "main": "projects/embed/src/main.ts",
+            "polyfills": "projects/embed/src/polyfills.ts",
+            "tsConfig": "projects/embed/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "projects/embed/src/favicon.ico",
+              "projects/embed/src/assets"
+            ],
+            "styles": [
+              "projects/embed/src/styles.scss"
+            ],
+            "scripts": []
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kb",
+                  "maximumError": "1mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "2kb",
+                  "maximumError": "4kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/embed/src/environments/environment.ts",
+                  "with": "projects/embed/src/environments/environment.prod.ts"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "configurations": {
+            "production": {
+              "browserTarget": "embed:build:production"
+            },
+            "development": {
+              "browserTarget": "embed:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "embed:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/embed/src/test.ts",
+            "polyfills": "projects/embed/src/polyfills.ts",
+            "tsConfig": "projects/embed/tsconfig.spec.json",
+            "karmaConfig": "projects/embed/karma.conf.js",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "projects/embed/src/favicon.ico",
+              "projects/embed/src/assets"
+            ],
+            "styles": [
+              "projects/embed/src/styles.scss"
+            ],
+            "scripts": []
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/embed/**/*.ts",
+              "projects/embed/**/*.html"
+            ]
           }
         }
       }

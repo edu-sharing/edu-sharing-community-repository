@@ -2,6 +2,7 @@
 /* eslint-disable */
 import { Collection } from './collection';
 import { Content } from './content';
+import { Contributor } from './contributor';
 import { License } from './license';
 import { NodeLtiDeepLink } from './node-lti-deep-link';
 import { NodeRef } from './node-ref';
@@ -15,11 +16,13 @@ export interface Node {
     collection: Collection;
     commentCount?: number;
     content?: Content;
+    contributors?: Array<Contributor>;
     createdAt: string;
     createdBy: Person;
     downloadUrl: string;
     iconURL?: string;
     isDirectory?: boolean;
+    isPublic?: boolean;
     license?: License;
     mediatype?: string;
     metadataset?: string;

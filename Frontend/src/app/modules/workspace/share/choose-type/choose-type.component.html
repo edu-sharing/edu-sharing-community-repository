@@ -1,21 +1,45 @@
-<div class="dialog" (click)="cancel()"></div>
-<div class="more-open" #dropdown>
-  <button mat-button class="mat-button-no-uppercase" (click)="setType('Consumer')">
-    <div><i esIcon="remove_red_eye"></i> {{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</div>
-    <i esIcon="check" class="selected" *ngIf="contains('Consumer')"></i>
-    <p>{{'WORKSPACE.SHARE.TYPE_VIEWER_DESCRIPTION' | translate}}</p></button>
-  <button mat-button class="mat-button-no-uppercase" (click)="setType('Collaborator')">
-    <div><i esIcon="edit"></i> {{'WORKSPACE.SHARE.TYPE_COWORKER' | translate}}</div>
-    <i esIcon="check" class="selected" *ngIf="contains('Collaborator')"></i>
-    <p>{{'WORKSPACE.SHARE.TYPE_COWORKER_DESCRIPTION' | translate}}</p></button>
-  <button mat-button class="mat-button-no-uppercase" (click)="setType('Coordinator')">
-    <div><i esIcon="work"></i> {{'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate}}</div>
-    <i esIcon="check" class="selected" *ngIf="contains('Coordinator')"></i>
-    <p>{{'WORKSPACE.SHARE.TYPE_COORDINATOR_DESCRIPTION' | translate}}</p></button>
-  <div class="publish-toggle" *ngIf="!isDirectory && canPublish">
-      <mat-slide-toggle  [ngModel]="publish" [disabled]="publishDisabled" (change)="setPublish($event)" class="collection-item" title="{{'WORKSPACE.SHARE.PUBLISHER_TOOLTIP' | translate}}">
-          <div class="toggle"><i class="material-icons">public</i><span>{{'WORKSPACE.SHARE.PUBLISHER' | translate}}</span></div>
-      </mat-slide-toggle>
+<div class="dialog" (click)="_cancel()"></div>
+<div
+  role="menu"
+  class="more-open"
+  cdkTrapFocus
+  [cdkTrapFocusAutoCapture]="true"
+  id="es-workspace-share-choose-type-menu"
+  [attr.aria-label]="ariaLabel"
+>
+  <button
+    *ngFor="let option of _options"
+    esWorkspaceShareFocusableOption
+    role="menuitemradio"
+    mat-button
+    class="mat-button-no-uppercase"
+    (click)="_setType(option.id)"
+    [attr.aria-checked]="_contains(option.id)"
+    [attr.aria-label]="option.label | translate"
+    [attr.aria-description]="option.description | translate"
+    [attr.cdkFocusInitial]="_contains(option.id) ? '' : null"
+  >
+    <div><i [esIcon]="option.icon"></i> {{ option.label | translate }}</div>
+    <i icon="check" class="selected" *ngIf="_contains(option.id)"></i>
+    <p>{{ option.description | translate }}</p>
+  </button>
+  <hr class="cdk-visually-hidden" />
+  <div class="publish-toggle" *ngIf="true">
+    <!-- <div class="publish-toggle" *ngIf="!isDirectory && canPublish"> -->
+    <mat-slide-toggle
+      #slideToggle
+      esWorkspaceShareFocusableOption
+      [customFocusFunction]="slideToggle.focus.bind(slideToggle)"
+      [ngModel]="_publish"
+      [disabled]="_publishDisabled"
+      (change)="_setPublish($event)"
+      class="collection-item"
+      title="{{ 'WORKSPACE.SHARE.PUBLISHER_TOOLTIP' | translate }}"
+    >
+      <div class="toggle">
+        <i class="material-icons">public</i
+        ><span>{{ 'WORKSPACE.SHARE.PUBLISHER' | translate }}</span>
+      </div>
+    </mat-slide-toggle>
   </div>
 </div>
-

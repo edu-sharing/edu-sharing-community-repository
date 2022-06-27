@@ -1,10 +1,13 @@
-@import "../../../core-ui-module/styles/variables";
+@import '../../../core-ui-module/styles/variables';
 
 i {
     vertical-align: middle;
 }
 
-a, a:hover, a:visited, a:active {
+a,
+a:hover,
+a:visited,
+a:active {
     color: #fff;
     text-decoration: none;
 }
@@ -12,293 +15,294 @@ a, a:hover, a:visited, a:active {
 .pointed {
     cursor: pointer;
 }
-.previous,.next{
-  position: fixed;
-  left: 0;
-  top: 50%;
-  background: #585858;
-  border-radius: 2px;
-  padding:2px;
-  z-index: 5;
-  border: none;
-  &.cdk-keyboard-focused {
-    @include setGlobalKeyboardFocus();
-  }
-}
-.next{
-  left:auto;
-  right:0;
-}
-.previous i,.next i{
-  font-size: 30px;
-  color:#fff;
-}
-:host ::ng-deep{
-  a.edusharing_rendering_content{
-    background-color: $primary;
-    // `&.cdk-keyboard-focused` would be better, but we cannot trivially apply the
-    // `cdkMonitorElementFocus` directive here.
-    &:focus {
-      @include setGlobalKeyboardFocus();
+.previous,
+.next {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    background: #585858;
+    border-radius: 2px;
+    padding: 2px;
+    z-index: 5;
+    border: none;
+    &.cdk-keyboard-focused {
+        @include setGlobalKeyboardFocus();
     }
-  }
-  .edusharing_rendering_metadata_body comments .group{
-    padding: 0 10px;
-  }
-  .edusharing_rendering_metadata_body [data-element=collections] .list{
-    padding-top:15px;
-    .cardContainer{
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-  }
-  .more{
-    color: white !important;
-  }
-  .edusharing_rendering_metadata_body{
-    .mdsWidgetMultivalue .mdsValueClickable {
-      background-color: $buttonHoverBackground;
-      border: 1px solid $primary;
-      color: $primary;
-      font-weight: 400;
-    }
-  }
-  // Again, `&.cdk-keyboard-focused` would be better.
-  .edusharing_rendering_metadata_body .mds_license a:focus {
-    @include setGlobalKeyboardFocus();
-  }
 }
-.topBar{
-  background:#383838;
-  color: #ffffff;
-  -webkit-box-shadow: 0px 3px 5px 0px rgba(0,0,0,0.25);
-  -moz-box-shadow: 0px 3px 5px 0px rgba(0,0,0,0.25);
-  box-shadow: 0px 3px 5px 0px rgba(0,0,0,0.25);
-  padding: 5px 20px;
-  top: 0;
-  left:0;
-  height: $mainnavHeight;
-  z-index: 10;
-  position: fixed;
-  width: 100%;
-  line-height: 62px;
+.next {
+    left: auto;
+    right: 0;
 }
-.actionbarFrame{
-  position: relative;
-  top:5px;
+.previous i,
+.next i {
+    font-size: 30px;
+    color: #fff;
+}
+:host ::ng-deep {
+    a.edusharing_rendering_content {
+        background-color: $primary;
+        // `&.cdk-keyboard-focused` would be better, but we cannot trivially apply the
+        // `cdkMonitorElementFocus` directive here.
+        &:focus {
+            @include setGlobalKeyboardFocus();
+        }
+    }
+    .edusharing_rendering_metadata_body comments .group {
+        padding: 0 10px;
+    }
+    .edusharing_rendering_metadata_body [data-element='collections'] .list {
+        padding-top: 15px;
+        .cardContainer {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+    }
+    .more {
+        color: white !important;
+    }
+    .edusharing_rendering_metadata_body {
+        .mdsWidgetMultivalue .mdsValueClickable {
+            background-color: $buttonHoverBackground;
+            border: 1px solid $primary;
+            color: $primary;
+            font-weight: 400;
+        }
+    }
+    // Again, `&.cdk-keyboard-focused` would be better.
+    .edusharing_rendering_metadata_body .mds_license a:focus {
+        @include setGlobalKeyboardFocus();
+    }
+}
+.topBar {
+    background: #383838;
+    color: #ffffff;
+    -webkit-box-shadow: 0px 3px 5px 0px rgba(0, 0, 0, 0.25);
+    -moz-box-shadow: 0px 3px 5px 0px rgba(0, 0, 0, 0.25);
+    box-shadow: 0px 3px 5px 0px rgba(0, 0, 0, 0.25);
+    padding: 5px 20px;
+    top: 0;
+    left: 0;
+    height: $mainnavHeight;
+    z-index: 10;
+    position: fixed;
+    width: 100%;
+    line-height: 62px;
+}
+.actionbarFrame {
+    position: relative;
+    top: 5px;
 }
 .displayBar {
-  display: flex;
-  height: 100%;
-  > button, > .actionbar-container {
-    flex-grow: 2;
-    flex-basis: 0;
-    text-align: center;
+    display: flex;
     height: 100%;
-  }
-  .showDetails{
-    flex-grow: 1!important;
-  }
+    > button,
+    > .actionbar-container {
+        flex-grow: 2;
+        flex-basis: 0;
+        text-align: center;
+        height: 100%;
+    }
+    .showDetails {
+        flex-grow: 1 !important;
+    }
 }
 ::ng-deep .displayBar > button:first-child .mat-button-wrapper {
-  justify-content: flex-start !important;
+    justify-content: flex-start !important;
 }
 
 .displayBar > .actionbar-container:last-child {
-  position: relative;
-  top: -5px;
-  text-align: right;
-  align-items: center;
-  justify-content: right;
-  display: grid;
+    position: relative;
+    top: -5px;
+    text-align: right;
+    align-items: center;
+    justify-content: right;
+    display: grid;
 }
 
 #nodeRenderContentWrapper {
-  background: #ebebeb;
-  position: absolute;
-  top:$mainnavHeight;
-  width:100%;
+    background: #ebebeb;
+    margin-top: $mainnavHeight;
+    width: 100%;
 }
 
-#nodeRenderContent,.nodeRenderLoading {
-  height: auto;
-  position: relative;
-  width:100%;
-  overflow-x: hidden;
+#nodeRenderContent,
+.nodeRenderLoading {
+    height: auto;
+    position: relative;
+    width: 100%;
+    overflow-x: hidden;
 }
 
 #sequence {
-  padding: 30px 20px;
-  min-width: 100%;
-  text-align: center;
-  overflow:hidden;
-  position:relative;
-  white-space: nowrap;
-  .itemTitle {
-    color: #585858;
-    display: inline-block;
-    width: 100px;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
+    padding: 30px 20px;
+    min-width: 100%;
     text-align: center;
-    margin-bottom: -2px;
-  }
-  .wrapperouter {
-    display: inline-block;
-    position:relative;
-    margin: 0 10px;
-  .wrapper {
-    margin: 3px;
-    @include materialShadow();
-    img {
-      margin-bottom: -5px;
-      height: 75px;
-      width: 100px;
-      object-fit: cover;
+    overflow: hidden;
+    position: relative;
+    white-space: nowrap;
+    .itemTitle {
+        color: #585858;
+        display: inline-block;
+        width: 100px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        text-align: center;
+        margin-bottom: -2px;
     }
-  }
-  .wrapper.selected {
-    margin: 0;
-    border: 3px solid $primaryMediumLight;
-    @include materialShadowMediumLarge();
-  }
-  .wrapper.selected:after {
-    content: '';
-    position: absolute;
-    left: 43px;
-    top: 100px;
-    width: 0;
-    height: 0;
-    border-left: 10px solid transparent;
-    border-right: 10px solid transparent;
-    border-top: 10px solid $primaryMediumLight;
-    clear: both;
-  }
-  }
+    .wrapperouter {
+        display: inline-block;
+        position: relative;
+        margin: 0 10px;
+        .wrapper {
+            margin: 3px;
+            @include materialShadow();
+            img {
+                margin-bottom: -5px;
+                height: 75px;
+                width: 100px;
+                object-fit: cover;
+            }
+        }
+        .wrapper.selected {
+            margin: 0;
+            border: 3px solid $primaryMediumLight;
+            @include materialShadowMediumLarge();
+        }
+        .wrapper.selected:after {
+            content: '';
+            position: absolute;
+            left: 43px;
+            top: 100px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid $primaryMediumLight;
+            clear: both;
+        }
+    }
 }
 .scroller {
-  position: absolute;
-  top: calc(8px + #{$mainnavHeight});
-  padding: 5px 10px;
-  background-color: rgba(0, 0, 0, 0.6);
-  color: #fff;
+    position: absolute;
+    top: calc(8px + #{$mainnavHeight});
+    padding: 5px 10px;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: #fff;
 }
 .scroller.left {
-  left: 0;
+    left: 0;
 }
 .scroller.right {
-  right: 0;
+    right: 0;
 }
 
-.nodeRenderLoading{
-  height: calc(100vh - #{$mainnavHeight});
-  overflow: hidden;
-  es-spinner{
-    position: relative;
-    top: 50px;
-  }
+.nodeRenderLoading {
+    height: calc(100vh - #{$mainnavHeight});
+    overflow: hidden;
+    es-spinner {
+        position: relative;
+        top: 50px;
+    }
 }
-.edusharing_rendering_content_wrapper{
-  padding-left:20px;
+.edusharing_rendering_content_wrapper {
+    padding-left: 20px;
 }
 
-.edusharing_rendering_metadata_top{
-  padding: 20px;
+.edusharing_rendering_metadata_top {
+    padding: 20px;
 }
 #edusharing_rendering_metadata_top_toggle {
-  color: $primary;
-  top: 10px;
-  position: relative;
+    color: $primary;
+    top: 10px;
+    position: relative;
 }
-a.edusharing_rendering_content{
-  background-color: $primary;
+a.edusharing_rendering_content {
+    background-color: $primary;
 }
-.edusharing_rendering_wrapper{
-  text-transform: uppercase;
+.edusharing_rendering_wrapper {
+    text-transform: uppercase;
 }
-.edusharing_rendering_content_wrapper{
-  min-height:500px;
+.edusharing_rendering_content_wrapper {
+    min-height: 500px;
 }
 
 .edusharing_rendering_content {
-  height: calc(100% - #{$mainnavHeight} - 130px) !important;
+    height: calc(100% - #{$mainnavHeight} - 130px) !important;
 }
 
 :host ::ng-deep {
-  .mdsWidget .comment .avatarCircle{
-    cursor:default!important;;
-  }
-  .node-comments{
-    margin:15px;
-    color: $primary;
-    display: flex;
-    align-items:center;
-    min-width: 160px;
-    justify-content: flex-end;
-    .item {
-      display: flex;
-      @include clickable();
-      &:focus{
-        @include setGlobalFocus();
-      }
-      >i{
-        padding-left: 5px;
-      }
-      >div{
-        margin:0 10px;
-        span{
-          text-transform: uppercase;
-        }
-      }
+    .mdsWidget .comment .avatarCircle {
+        cursor: default !important;
     }
-
-  }
+    .node-comments {
+        margin: 15px;
+        color: $primary;
+        display: flex;
+        align-items: center;
+        min-width: 160px;
+        justify-content: flex-end;
+        .item {
+            display: flex;
+            @include clickable();
+            &:focus {
+                @include setGlobalFocus();
+            }
+            > i {
+                padding-left: 5px;
+            }
+            > div {
+                margin: 0 10px;
+                span {
+                    text-transform: uppercase;
+                }
+            }
+        }
+    }
 }
 div.download {
-  margin-top: -8px;
+    margin-top: -8px;
 }
 
-
-.similarNodes{
-  display: flex;
-  flex-direction:column;
-  padding:20px;
-  width:100%;
-  background-color:#FFF;
-  es-listTable{
-    /*margin:auto;*/
-  }
-  .caption{
-    padding-bottom: 10px;
-    color:$textLight;
-    font-weight: bold;
-    display:block;
-  }
+.similarNodes {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    width: 100%;
+    background-color: #fff;
+    es-listTable {
+        /*margin:auto;*/
+    }
+    .caption {
+        padding-bottom: 10px;
+        color: $textLight;
+        font-weight: bold;
+        display: block;
+    }
 }
 
 @media (pointer: coarse) {
-  #sequence {
-    overflow-x: auto;
-    @include iosScrolling();
-  }
-  .scroller{
-    display: none;
-  }
+    #sequence {
+        overflow-x: auto;
+        @include iosScrolling();
+    }
+    .scroller {
+        display: none;
+    }
 }
 @media screen and (max-width: $mobileWidth) {
-  div.download i {
-    font-size: 120%;
-  }
-  .render-back{
-    display: none;
-  }
-  :host ::ng-deep .node-comments{
-    min-width: unset;
-    padding-right: 10px;
-    > div > div > span{
-      display:none;
+    div.download i {
+        font-size: 120%;
     }
-  }
+    .render-back {
+        display: none;
+    }
+    :host ::ng-deep .node-comments {
+        min-width: unset;
+        padding-right: 10px;
+        > div > div > span {
+            display: none;
+        }
+    }
 }

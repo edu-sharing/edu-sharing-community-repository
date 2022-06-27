@@ -1,33 +1,32 @@
-import {forkJoin as observableForkJoin, BehaviorSubject, Observable, Subscriber} from 'rxjs';
-import {filter} from 'rxjs/operators';
+import { forkJoin as observableForkJoin, BehaviorSubject, Observable, Subscriber } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
-import {MdsEditorInstanceService} from '../../mds-editor-instance.service';
-import {RestConstants} from '../../../../../core-module/rest/rest-constants';
-import {VCard} from '../../../../../core-module/ui/VCard';
-import {UIService} from '../../../../../core-module/rest/services/ui.service';
-import {Node, NodeWrapper} from '../../../../../core-module/rest/data-object';
-import {RestIamService} from '../../../../../core-module/rest/services/rest-iam.service';
-import {NativeWidgetComponent} from '../../mds-editor-view/mds-editor-view.component';
-import {Helper} from '../../../../../core-module/rest/helper';
-import {Values} from '../../../types/types';
-import {RestNodeService} from '../../../../../core-module/rest/services/rest-node.service';
-import {RestHelper} from '../../../../../core-module/rest/rest-helper';
-import {RestConnectorService} from '../../../../../core-module/rest/services/rest-connector.service';
-import {RestUtilitiesService} from '../../../../../core-module/rest/services/rest-utilities.service';
-import {Toast} from '../../../../../core-ui-module/toast';
-import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
-import {NodeHelperService} from '../../../../../core-ui-module/node-helper.service';
-import {distinctUntilChanged} from 'rxjs/operators';
+import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
+import { RestConstants } from '../../../../../core-module/rest/rest-constants';
+import { VCard } from '../../../../../core-module/ui/VCard';
+import { UIService } from '../../../../../core-module/rest/services/ui.service';
+import { Node, NodeWrapper } from '../../../../../core-module/rest/data-object';
+import { RestIamService } from '../../../../../core-module/rest/services/rest-iam.service';
+import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
+import { Helper } from '../../../../../core-module/rest/helper';
+import { Values } from '../../../types/types';
+import { RestNodeService } from '../../../../../core-module/rest/services/rest-node.service';
+import { RestHelper } from '../../../../../core-module/rest/rest-helper';
+import { RestConnectorService } from '../../../../../core-module/rest/services/rest-connector.service';
+import { RestUtilitiesService } from '../../../../../core-module/rest/services/rest-utilities.service';
+import { Toast } from '../../../../../core-ui-module/toast';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { NodeHelperService } from '../../../../../core-ui-module/node-helper.service';
+import { distinctUntilChanged } from 'rxjs/operators';
 import { DialogsService } from '../../../../../modules/management-dialogs/dialogs.service';
 
-
 interface Childobject {
-    icon: string,
-    name: string,
+    icon: string;
+    name: string;
     link?: string;
-    node?: Node,
-    file?: File,
-    properties?: Values
+    node?: Node;
+    file?: File;
+    properties?: Values;
 }
 interface ChildobjectEdit {
     child: Childobject;
@@ -48,6 +47,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
     _edit: ChildobjectEdit;
     childrenDelete: Node[] = [];
     isSupported: boolean;
+    nodes: Node[];
     constructor(
         private mdsEditorValues: MdsEditorInstanceService,
         private nodeApi: RestNodeService,
@@ -59,24 +59,29 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
     ) {}
 
     ngOnInit(): void {
-        this.mdsEditorValues.nodes$.pipe(
-            distinctUntilChanged((a ,b) => a?.[0]?.ref?.id === b?.[0]?.ref?.id),
-            filter((n) => n != null)
-        ).subscribe(async (nodes) => {
-            if (nodes?.length === 1) {
-                this.children = (await this.nodeApi.getNodeChildobjects(nodes[0].ref.id).toPromise()).nodes.map((n) => {
-                    return {
-                        icon: n.iconURL,
-                        name: RestHelper.getTitle(n),
-                        node: n,
-                        properties: n.properties,
-                    }
-                });
-                this.isSupported = nodes[0].type === RestConstants.CCM_TYPE_IO;
-            } else {
-                this.isSupported = false;
-            }
-        });
+        this.mdsEditorValues.nodes$
+            .pipe(
+                distinctUntilChanged((a, b) => a?.[0]?.ref?.id === b?.[0]?.ref?.id),
+                filter((n) => n != null),
+            )
+            .subscribe(async (nodes) => {
+                if (nodes?.length === 1) {
+                    this.children = (
+                        await this.nodeApi.getNodeChildobjects(nodes[0].ref.id).toPromise()
+                    ).nodes.map((n) => {
+                        return {
+                            icon: n.iconURL,
+                            name: RestHelper.getTitle(n),
+                            node: n,
+                            properties: n.properties,
+                        };
+                    });
+                    this.nodes = nodes;
+                    this.isSupported = nodes[0].type === RestConstants.CCM_TYPE_IO;
+                } else {
+                    this.isSupported = false;
+                }
+            });
     }
     onChange(): void {
         this.hasChanges.next(true);
@@ -141,7 +146,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
     setProperties(props: Values, edit?: ChildobjectEdit) {
         edit = edit ?? this._edit;
         // keep any existing license data
-        if(props) {
+        if (props) {
             if (!edit.child.properties) {
                 edit.child.properties = edit.properties;
             }
@@ -188,81 +193,87 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
     }
     remove(child: Childobject) {
         this.children.splice(this.children.indexOf(child), 1);
-        if(child.node) {
+        if (child.node) {
             this.childrenDelete.push(child.node);
         }
         this.onChange();
     }
     async onSaveNode(nodes: Node[]) {
         await observableForkJoin(
-            this.children.map((child) =>
-                new Observable<Node>((observer) => {
-                if (child.file) {
-                    this.nodeApi
-                        .createNode(
-                            nodes[0].ref.id,
-                            RestConstants.CCM_TYPE_IO,
-                            [RestConstants.CCM_ASPECT_IO_CHILDOBJECT],
-                            this.getProperties(child),
-                            true,
-                            '',
-                            RestConstants.CCM_ASSOC_CHILDIO,
-                        )
-                        .subscribe((data: NodeWrapper) => {
+            this.children.map(
+                (child) =>
+                    new Observable<Node>((observer) => {
+                        if (child.file) {
                             this.nodeApi
-                                .uploadNodeContent(
-                                    data.node.ref.id,
-                                    child.file,
-                                    RestConstants.COMMENT_MAIN_FILE_UPLOAD,
+                                .createNode(
+                                    nodes[0].ref.id,
+                                    RestConstants.CCM_TYPE_IO,
+                                    [RestConstants.CCM_ASPECT_IO_CHILDOBJECT],
+                                    this.getProperties(child),
+                                    true,
+                                    '',
+                                    RestConstants.CCM_ASSOC_CHILDIO,
                                 )
-                                .subscribe(
-                                    () => {
-                                        observer.complete();
-                                    },
-                                    (error) => {
-                                        if (
-                                            RestHelper.errorMatchesAny(
-                                                error,
-                                                RestConstants.CONTENT_QUOTA_EXCEPTION,
-                                            )
-                                        ) {
-                                            this.nodeApi
-                                                .deleteNode(data.node.ref.id, false)
-                                                .subscribe(() => {
-                                                    observer.complete();
-                                                });
-                                            this.toast.error(null, 'MDS.ADD_CHILD_OBJECT_QUOTA_REACHED', {
-                                                name: child.name,
-                                            });
-                                        }
-                                    },
-                                );
-                        });
-                } else if (child.link) {
-                    let properties: any = {};
-                    properties[RestConstants.CCM_PROP_IO_WWWURL] = [child.link];
-                    this.nodeApi
-                        .createNode(
-                            nodes[0].ref.id,
-                            RestConstants.CCM_TYPE_IO,
-                            [RestConstants.CCM_ASPECT_IO_CHILDOBJECT],
-                            this.getProperties(child),
-                            true,
-                            RestConstants.COMMENT_MAIN_FILE_UPLOAD,
-                            RestConstants.CCM_ASSOC_CHILDIO,
-                        )
-                        .subscribe(() => {
-                        });
-                } else {
-                    this.nodeApi
-                        .editNodeMetadata(child.node.ref.id, this.getProperties(child))
-                        .subscribe(() => {
-                            observer.complete();
-                        });
-                }
-            }))).toPromise();
-            await this.deleteChildren();
-            return nodes;
+                                .subscribe((data: NodeWrapper) => {
+                                    this.nodeApi
+                                        .uploadNodeContent(
+                                            data.node.ref.id,
+                                            child.file,
+                                            RestConstants.COMMENT_MAIN_FILE_UPLOAD,
+                                        )
+                                        .subscribe(
+                                            () => {
+                                                observer.complete();
+                                            },
+                                            (error) => {
+                                                if (
+                                                    RestHelper.errorMatchesAny(
+                                                        error,
+                                                        RestConstants.CONTENT_QUOTA_EXCEPTION,
+                                                    )
+                                                ) {
+                                                    this.nodeApi
+                                                        .deleteNode(data.node.ref.id, false)
+                                                        .subscribe(() => {
+                                                            observer.complete();
+                                                        });
+                                                    this.toast.error(
+                                                        null,
+                                                        'MDS.ADD_CHILD_OBJECT_QUOTA_REACHED',
+                                                        {
+                                                            name: child.name,
+                                                        },
+                                                    );
+                                                }
+                                            },
+                                        );
+                                });
+                        } else if (child.link) {
+                            let properties: any = {};
+                            properties[RestConstants.CCM_PROP_IO_WWWURL] = [child.link];
+                            this.nodeApi
+                                .createNode(
+                                    nodes[0].ref.id,
+                                    RestConstants.CCM_TYPE_IO,
+                                    [RestConstants.CCM_ASPECT_IO_CHILDOBJECT],
+                                    this.getProperties(child),
+                                    true,
+                                    RestConstants.COMMENT_MAIN_FILE_UPLOAD,
+                                    RestConstants.CCM_ASSOC_CHILDIO,
+                                )
+                                .subscribe(() => {});
+                        } else {
+                            this.nodeApi
+                                .editNodeMetadata(child.node.ref.id, this.getProperties(child))
+                                .subscribe(() => {
+                                    observer.complete();
+                                });
+                        }
+                    }),
+            ),
+        ).toPromise();
+        await this.deleteChildren();
+        return nodes;
     }
     drop(event: CdkDragDrop<string[]>) {
         moveItemInArray(this.children, event.previousIndex, event.currentIndex);
@@ -270,8 +281,10 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
     }
 
     private async deleteChildren() {
-        if(this.childrenDelete.length) {
-            await observableForkJoin(this.childrenDelete.map((node) => this.nodeApi.deleteNode(node.ref.id, false))).toPromise();
+        if (this.childrenDelete.length) {
+            await observableForkJoin(
+                this.childrenDelete.map((node) => this.nodeApi.deleteNode(node.ref.id, false)),
+            ).toPromise();
         }
     }
 }

@@ -142,21 +142,36 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 
 		boolean noAuthenticationNeeded=false;
 		for(String endpoint : AUTHLESS_ENDPOINTS){
-			if(httpReq.getPathInfo().startsWith(endpoint)){
+			String pathInfo = httpReq.getPathInfo();
+			if(pathInfo == null){
+				continue;
+			}
+
+			if(pathInfo.startsWith(endpoint)){
 				noAuthenticationNeeded=true;
 				break;
 			}
 		}
 		boolean adminRequired=false;
 		for(String endpoint : ADMIN_ENDPOINTS){
-			if(httpReq.getPathInfo().startsWith(endpoint)){
+			String pathInfo = httpReq.getPathInfo();
+			if(pathInfo == null){
+				continue;
+			}
+
+			if(pathInfo.startsWith(endpoint)){
 				adminRequired=true;
 				break;
 			}
 		}
 
 		for(String endpoint : DISABLED_ENDPOINTS){
-			if(httpReq.getPathInfo().startsWith(endpoint)){
+			String pathInfo = httpReq.getPathInfo();
+			if(pathInfo == null){
+				continue;
+			}
+
+			if(pathInfo.startsWith(endpoint)){
 				httpResp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				httpResp.flushBuffer();
 				httpResp.getWriter().print("This endpoint is disabled via config");

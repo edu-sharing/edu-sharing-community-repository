@@ -1,5 +1,3 @@
-import {ProfilesComponent} from "./profiles.component";
+import { ProfilesComponent } from './profiles.component';
 
-export const DECLARATIONS_PROFILES = [
-  ProfilesComponent
-];
+export const DECLARATIONS_PROFILES = [ProfilesComponent];

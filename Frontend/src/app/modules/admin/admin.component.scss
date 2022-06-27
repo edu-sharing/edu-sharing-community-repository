@@ -1,16 +1,15 @@
-@import "../../core-ui-module/styles/variables";
+@import '../../core-ui-module/styles/variables';
 
-
-$sidenavWidth:250px;
-$sidenavWidthMobile:66px;
+$sidenavWidth: 250px;
+$sidenavWidthMobile: 66px;
 .main-nav-placeholder {
     height: $mainnavHeight;
 }
-.main{
+.main {
     display: flex;
     width: 100%;
     min-height: 100%;
-    .main-nav{
+    .main-nav {
         position: fixed;
         display: flex;
         flex-direction: column;
@@ -18,7 +17,7 @@ $sidenavWidthMobile:66px;
         height: calc(100% - #{$mainnavHeight});
         overflow-y: auto;
         width: $sidenavWidth;
-        >div {
+        > div {
             height: 100%;
             .button {
                 display: flex;
@@ -28,7 +27,7 @@ $sidenavWidthMobile:66px;
                 i {
                     margin-right: 10px;
                 }
-                &:hover{
+                &:hover {
                     background-color: $itemSelectedBackground;
                 }
                 &.active {
@@ -39,77 +38,80 @@ $sidenavWidthMobile:66px;
             }
         }
     }
-    .main-content{
-        padding:20px;
+    .main-content {
+        padding: 20px;
         width: 100%;
         margin-left: $sidenavWidth;
         flex-grow: 1;
-        .btn-flat{
+        .btn-flat {
             min-height: 36px;
             height: auto;
         }
     }
     // has own padding cause of tabs
-    .main-content-statistics{
-        padding:0;
+    .main-content-statistics {
+        padding: 0;
     }
 }
-.tabs{
+.tabs {
     display: flex;
     overflow-x: auto;
 }
-.inputGroupGrow{
+.inputGroupGrow {
     display: flex;
     align-items: center;
     margin-bottom: 20px;
-    >*{
-        width:0;
+    > * {
+        width: 0;
         flex-grow: 1;
         display: flex;
-        margin:0 10px;
+        margin: 0 10px;
     }
-    >input{
+    > input {
         margin-bottom: 0;
     }
 }
-.heading{
-    color:$textLight;
+.heading {
+    color: $textLight;
     text-transform: uppercase;
     font-weight: bold;
     font-size: 110%;
-    width:100%;
-    border-bottom: 1px solid $cardSeperatorLineColor;
+    width: 100%;
+    border-bottom: 1px solid $cardSeparatorLineColor;
     margin: 20px 0;
-    padding:0 10px;
-    i{
-        font-size:13pt;
+    padding: 0 10px;
+    i {
+        font-size: 13pt;
     }
-    span{
+    span {
         position: relative;
         top: -3px;
         margin-left: 10px;
     }
 }
-.frontpage,.global-config{
+.frontpage,
+.global-config {
     display: flex;
     justify-content: center;
-    es-admin-frontpage,es-admin-config{
+    es-admin-frontpage,
+    es-admin-config {
         width: 100%;
     }
 }
-.info{
+.info {
     max-width: 800px;
     margin: auto;
-    .version{
+    .version {
         white-space: pre-line;
-        padding:0 20px;
+        padding: 0 20px;
     }
-    .checks, .checks-toolpermissions{
+    .checks,
+    .checks-toolpermissions {
         position: relative;
-        .info{
-            padding:5px 20px 25px 20px;
+        .info {
+            padding: 5px 20px 25px 20px;
         }
-        .tp-name{
+        .tp-name {
             font-size: $fontSizeSmall;
             color: $textLight;
             padding-bottom: 10px;
@@ -119,31 +121,31 @@ $sidenavWidthMobile:66px;
             flex-direction: row;
             background-color: lighten($colorStatusPositive, 40%);
             padding: 10px 10px;
-            margin:2px 0;
-            .data{
+            margin: 2px 0;
+            .data {
                 flex-grow: 1;
             }
-            >div{
+            > div {
                 display: flex;
                 flex-direction: column;
-                div:first-child{
+                div:first-child {
                     flex-grow: 1;
                 }
-                .description{
+                .description {
                     white-space: pre-line;
                 }
-                >div{
-                    display:flex;
+                > div {
+                    display: flex;
                     flex-direction: row;
                     align-items: center;
-                    >div{
+                    > div {
                         display: flex;
                         flex-direction: column;
                     }
-                    .material-icons{
+                    .material-icons {
                         margin-right: 5px;
                     }
-                    .solution-link{
+                    .solution-link {
                         color: $primaryDark;
                         text-transform: uppercase;
                         font-weight: bold;
@@ -166,25 +168,25 @@ $sidenavWidthMobile:66px;
         }
     }
 }
-.config{
-    .xml{
+.config {
+    .xml {
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: center;
-        >div {
+        > div {
             padding: 30px 20px;
         }
     }
 }
-.applications{
-    .app-list{
+.applications {
+    .app-list {
         display: flex;
         flex-direction: column;
-        >div {
+        > div {
             display: flex;
             align-items: center;
-            border-bottom: 1px solid $cardSeperatorLineColor;
+            border-bottom: 1px solid $cardSeparatorLineColor;
             div {
                 width: 0;
                 flex-grow: 2;
@@ -202,7 +204,7 @@ $sidenavWidthMobile:66px;
             }
         }
     }
-    .app-type{
+    .app-type {
         display: flex;
         align-items: center;
         h6 {
@@ -210,29 +212,29 @@ $sidenavWidthMobile:66px;
             flex-grow: 1;
         }
     }
-    .btn{
+    .btn {
         margin-bottom: 15px;
     }
-    .table{
+    .table {
         padding-bottom: 20px;
     }
-    .register-app{
+    .register-app {
         display: flex;
         flex-direction: column;
-        margin:30px 0;
-        >div{
+        margin: 30px 0;
+        > div {
             display: flex;
-            padding:10px 0;
-            >mat-form-field{
-                flex-grow:1;
+            padding: 10px 0;
+            > mat-form-field {
+                flex-grow: 1;
                 margin-right: 20px;
             }
-            >div{
+            > div {
                 align-self: center;
             }
         }
-        mat-label{
-            margin:10px 0;
+        mat-label {
+            margin: 10px 0;
         }
         mat-radio-group {
             margin: 10px 0;
@@ -241,25 +243,26 @@ $sidenavWidthMobile:66px;
             }
         }
     }
-    .materialize-textarea{
-        height:150px;
+    .materialize-textarea {
+        height: 150px;
     }
-    .useFile{
-        color:$textLight;
-        float:left;
+    .useFile {
+        color: $textLight;
+        float: left;
     }
-    .btn,.btn-flat{
-        float:right;
+    .btn,
+    .btn-flat {
+        float: right;
     }
-    .warning{
-        width:100%;
+    .warning {
+        width: 100%;
         text-align: center;
         font-style: italic;
         padding-bottom: 20px;
     }
-    .property{
-        width:100%;
-        float:left;
+    .property {
+        width: 100%;
+        float: left;
         font-weight: bold;
     }
     max-width: 1000px;
@@ -267,39 +270,45 @@ $sidenavWidthMobile:66px;
 }
 .toolkit .inputGroup,
 .jobs .inputGroup,
-.import .inputGroup{
-    padding:20px 0;
+.import .inputGroup {
+    padding: 20px 0;
     display: flex;
     align-items: center;
-    >a,>div,>button{
+    > a,
+    > div,
+    > button {
         display: flex;
     }
-    .file,.directory{
+    .file,
+    .directory {
         display: inline-block;
         padding: 0 10px;
         vertical-align: middle;
     }
 }
-.import{
+.import {
     max-width: 800px;
     margin: auto;
-    mat-radio-button{
+    mat-radio-button {
         margin-right: 20px;
     }
-    .collections,.csv,.oai{
-        padding-bottom:50px;
+    .collections,
+    .csv,
+    .oai {
+        padding-bottom: 50px;
     }
-    .oai{
+    .oai {
         max-width: 500px;
-        .oaiSave,.oaiForce{
+        .oaiSave,
+        .oaiForce {
             width: 100%;
         }
-        mat-form-field{
+        mat-form-field {
             width: 100%;
-            margin:5px 0;
+            margin: 5px 0;
         }
     }
-    >.btn{
+    > .btn {
         margin-top: 20px;
     }
     .actions {
@@ -311,55 +320,56 @@ $sidenavWidthMobile:66px;
         }
     }
 }
-.table{
-    display:table;
-    width:100%;
+.table {
+    display: table;
+    width: 100%;
 }
-.tableRow{
-    display:table-row;
-    background-color: lighten($colorStatusPositive,50%);
-    div{
-        display:table-cell;
-        padding:5px 10px;
+.tableRow {
+    display: table-row;
+    background-color: lighten($colorStatusPositive, 50%);
+    div {
+        display: table-cell;
+        padding: 5px 10px;
         vertical-align: middle;
         word-break: break-all;
-        border-bottom: 1px solid $cardSeperatorLineColor;
-        .material-icons{
-            color:$textLight;
+        border-bottom: 1px solid $cardSeparatorLineColor;
+        .material-icons {
+            color: $textLight;
         }
     }
-    &.table-not-executed{
-        background-color: lighten($warningMedium,50%);
+    &.table-not-executed {
+        background-color: lighten($warningMedium, 50%);
     }
 }
-.header{
+.header {
     color: $textLight;
     background-color: transparent;
 }
-.update{
-    .tableRow div{
+.update {
+    .tableRow div {
         min-width: 160px;
     }
     max-width: 1000px;
     margin: auto;
-    .hint{
+    .hint {
         font-weight: bold;
         text-align: center;
-        padding:0 0 40px;
+        padding: 0 0 40px;
     }
-    .test a{
+    .test a {
         text-transform: uppercase;
     }
 }
-.toolkit{
+.toolkit {
     max-width: 1200px;
-    a.btn, button{
-        float:right;
+    a.btn,
+    button {
+        float: right;
     }
-    .group .inputGroup{
-        padding:0;
+    .group .inputGroup {
+        padding: 0;
     }
-    .catalina{
+    .catalina {
         margin-bottom: 40px;
         button {
             margin-bottom: 10px;
@@ -370,99 +380,99 @@ $sidenavWidthMobile:66px;
                 min-height: 600px;
             }
         }
-
     }
-    .caches{
-        input{
-            width:200px;
+    .caches {
+        input {
+            width: 200px;
         }
-        .cacheGroup,.propertyGroup{
+        .cacheGroup,
+        .propertyGroup {
             width: 100%;
         }
-        .inputGroup .btn-flat{
-            margin:0 5px;
+        .inputGroup .btn-flat {
+            margin: 0 5px;
         }
-        .propertyGroup{
+        .propertyGroup {
             padding-top: 30px;
             display: flex;
             align-items: center;
-            >input{
+            > input {
                 margin-bottom: 0;
             }
-            >a{
+            > a {
                 margin-left: 10px;
             }
         }
     }
-    .group{
-        padding:20px 0;
-        float:left;
-        width:100%;
-        .info{
-            float:left;
+    .group {
+        padding: 20px 0;
+        float: left;
+        width: 100%;
+        .info {
+            float: left;
             padding-top: 10px;
             margin-bottom: 10px;
         }
-        .btn-flat{
-            float:right;
+        .btn-flat {
+            float: right;
         }
-        .cacheInfo{
+        .cacheInfo {
             max-width: 250px;
-            float:left;
+            float: left;
         }
     }
 }
-.browser{
-    mat-radio-group{
-        mat-radio-button{
-            padding:0 10px;
+.browser {
+    mat-radio-group {
+        mat-radio-button {
+            padding: 0 10px;
         }
     }
-    .dsl-query{
+    .dsl-query {
         flex-direction: column;
         > label {
             padding-bottom: 5px;
         }
-        ngx-monaco-editor{
+        ngx-monaco-editor {
             resize: vertical;
             overflow: auto;
         }
     }
-    .elastic-response{
+    .elastic-response {
         padding-top: 20px;
-        ngx-monaco-editor{
+        ngx-monaco-editor {
             resize: vertical;
             overflow: auto;
         }
     }
-    .lucenePaging{
+    .lucenePaging {
         max-width: 700px;
         margin: auto;
-        a{
+        a {
             flex-grow: initial;
             width: auto;
         }
     }
-    .luceneAuthorities{
+    .luceneAuthorities {
         margin-bottom: 20px;
     }
-    .search-list{
+    .search-list {
         padding: 20px 0 40px 0;
-        es-actionbar{
+        es-actionbar {
             display: flex;
             align-items: flex-end;
             justify-content: flex-end;
             width: 100%;
             height: 40px;
         }
-        .no-results{
+        .no-results {
             display: flex;
             justify-content: center;
             color: $textLight;
             font-size: 120%;
         }
     }
-    .export-properties{
+    .export-properties {
         min-height: 150px;
     }
 }
@@ -470,14 +480,14 @@ $sidenavWidthMobile:66px;
 .foldertemplates {
     max-width: 900px;
     margin: auto;
-    .eduGroupsSelected{
+    .eduGroupsSelected {
         margin: 20px 10px;
     }
     .group {
         float: left;
         margin-top: 20px;
-        .upload-hint{
-            display:inline-block;
+        .upload-hint {
+            display: inline-block;
             margin-top: 10px;
         }
         .btn-flat {
@@ -485,35 +495,35 @@ $sidenavWidthMobile:66px;
         }
     }
 }
-.statistics{
+.statistics {
     display: flex;
     justify-content: center;
-    es-admin-statistics{
+    es-admin-statistics {
         width: 100%;
     }
 }
-.jobs{
+.jobs {
     max-width: 1200px;
     display: flex;
     align-items: center;
     flex-direction: column;
-    .jobParams{
+    .jobParams {
         min-height: 250px;
     }
-    .group{
+    .group {
         position: relative;
-        float:left;
-        width:100%;
-        .autocomplete{
+        float: left;
+        width: 100%;
+        .autocomplete {
             flex-direction: column;
-            >es-autocomplete {
+            > es-autocomplete {
                 width: calc(100% - 18px);
             }
-            >div{
-                margin:0 20px;
+            > div {
+                margin: 0 20px;
             }
         }
-        mat-form-field{
+        mat-form-field {
             width: 100%;
         }
     }
@@ -529,17 +539,17 @@ $sidenavWidthMobile:66px;
 
                 .param-name {
                     font-weight: bold;
-                    span{
+                    span {
                         color: $textLight;
                         font-size: $fontSizeSmall;
                     }
                 }
                 .param-value {
                     min-width: 30%;
-                    .param-table{
+                    .param-table {
                         margin: 5px;
                         padding: 5px;
-                        border:1px solid $inputBorderColor;
+                        border: 1px solid $inputBorderColor;
                     }
                 }
 
@@ -554,97 +564,98 @@ $sidenavWidthMobile:66px;
             margin-top: 10px;
         }
     }
-    .job-class{
+    .job-class {
         font-size: 90%;
         color: $textLight;
     }
-    .no-jobs{
+    .no-jobs {
         font-size: 120%;
-        color:$textVeryLight;
+        color: $textVeryLight;
         text-align: center;
     }
-    .job{
-        &:not(:last-child){
-            border-bottom: 1px solid $cardSeperatorLineColor;
+    .job {
+        &:not(:last-child) {
+            border-bottom: 1px solid $cardSeparatorLineColor;
         }
-        display:flex;
-        width:100%;
-        >div{
+        display: flex;
+        width: 100%;
+        > div {
             width: 100%;
         }
 
-        .job-main{
-            padding:10px 20px;
+        .job-main {
+            padding: 10px 20px;
         }
-        .row-detail{
+        .row-detail {
             background-color: #fff;
             padding-bottom: 10px;
-            width:100%;
-            .log{
+            width: 100%;
+            .log {
                 font-weight: bold;
-                padding:10px 10px;
+                padding: 10px 10px;
             }
-            .job-col{
+            .job-col {
                 width: 100%;
             }
-            .job-row{
-                padding:2px 20px;
+            .job-row {
+                padding: 2px 20px;
                 width: 100%;
             }
         }
-        .log-filters{
-            padding:10px 0!important;
+        .log-filters {
+            padding: 10px 0 !important;
             justify-content: space-between;
-            mat-form-field{
+            mat-form-field {
                 width: 100%;
-                .mat-form-field-wrapper{
+                .mat-form-field-wrapper {
                     width: 100%;
                 }
             }
         }
-        .log-level,.log-filter{
-            min-width:70px;
+        .log-level,
+        .log-filter {
+            min-width: 70px;
             color: $textLight;
             font-weight: bold;
             text-transform: uppercase;
             max-width: 500px;
-            input{
+            input {
                 margin-bottom: 0;
             }
         }
-        .log-date{
-            min-width:100px;
+        .log-date {
+            min-width: 100px;
             color: $textLight;
         }
-        .log-class{
-            min-width:170px;
-            max-width:170px;
+        .log-class {
+            min-width: 170px;
+            max-width: 170px;
             @include shortenText();
             color: $textLight;
         }
-        .log-message{
+        .log-message {
             white-space: pre-wrap;
             word-break: break-all;
         }
-        .name{
+        .name {
             font-weight: bold;
         }
-        .class{
-            color:$textVeryLight;
+        .class {
+            color: $textVeryLight;
         }
-        .job-row{
+        .job-row {
             display: flex;
             flex-direction: row;
             align-items: center;
         }
-        .job-col{
+        .job-col {
             display: flex;
             flex-direction: column;
         }
-        .col-name{
+        .col-name {
             flex-grow: 1;
         }
-        .col-time{
+        .col-time {
             text-align: right;
         }
         .job-status {
@@ -653,75 +664,74 @@ $sidenavWidthMobile:66px;
             es-spinner-small {
                 margin: 0 10px;
             }
-
         }
-        .col-more{
+        .col-more {
             justify-content: center;
             padding-left: 20px;
-            width:40px;
-            color:$textLight;
+            width: 40px;
+            color: $textLight;
         }
-        .status-fine{
+        .status-fine {
             background-color: #dcffd8;
         }
-        .status-aborted{
+        .status-aborted {
             background-color: #eee;
         }
-        .status-warning{
+        .status-warning {
             background-color: #ffffd8;
         }
-        .status-error{
+        .status-error {
             background-color: #ffdcd8;
         }
     }
 }
 .card-xml {
-    .warning{
-        padding:10px 0;
+    .warning {
+        padding: 10px 0;
     }
     .mat-input-group {
         width: 100%;
-        margin:15px 0;
+        margin: 15px 0;
     }
-    .add-property{
+    .add-property {
         display: flex;
         flex-direction: column;
     }
 }
-:host ::ng-deep{
-    .preloader-wrapper.small{
-        width:16px;
-        height:16px;
+:host ::ng-deep {
+    .preloader-wrapper.small {
+        width: 16px;
+        height: 16px;
     }
-    .inputGroupGrow{
-        .mat-form-field-wrapper{
+    .inputGroupGrow {
+        .mat-form-field-wrapper {
             width: 100%;
             margin-bottom: 0;
         }
     }
-    .jobs .log-filters .mat-form-field-wrapper{
+    .jobs .log-filters .mat-form-field-wrapper {
         width: 100%;
     }
 }
-.reload{
+.reload {
     display: flex;
     width: 100%;
     justify-content: flex-end;
-    color:$textLight;
+    color: $textLight;
     padding-bottom: 10px;
     position: absolute;
-    top:-47px;
+    top: -47px;
 }
-.row{
+.row {
     position: fixed;
     top: $mainnavHeight;
     width: 100%;
     height: 48px;
     z-index: 50;
 }
-.s12{
+.s12 {
     position: fixed;
-    z-index:10;
+    z-index: 10;
 }
 @media all and (max-width: $mobileWidth+$mobileStage*1) {
     .main {
@@ -731,7 +741,7 @@ $sidenavWidthMobile:66px;
             }
             width: $sidenavWidthMobile;
         }
-        .main-content{
+        .main-content {
             margin-left: $sidenavWidthMobile;
         }
     }
@@ -739,35 +749,37 @@ $sidenavWidthMobile:66px;
 
 @media all and (max-width: $mobileWidth+$mobileStage*3) {
     .applications {
-        .file{
+        .file {
             display: none;
         }
         .tableRow div {
             padding: 5px 2px;
         }
     }
-    .update{
-        .description{
+    .update {
+        .description {
             display: none;
         }
-        .tableRow div{
+        .tableRow div {
             min-width: initial;
         }
-        .run{
-            min-width: 160px!important;
+        .run {
+            min-width: 160px !important;
         }
     }
 }
 @media all and (max-width: $mobileWidth+$mobileStage*5) {
-    .applications{
-        .type,.repoType,.subtype{
+    .applications {
+        .type,
+        .repoType,
+        .subtype {
             display: none;
         }
     }
-    .jobs{
-        .log-class,.log-level{
+    .jobs {
+        .log-class,
+        .log-level {
             display: none;
         }
     }
 }
-

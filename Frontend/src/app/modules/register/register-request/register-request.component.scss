@@ -1,25 +1,25 @@
-@import "../../../core-ui-module/styles/variables";
+@import '../../../core-ui-module/styles/variables';
 
-mat-form-field{
-  width: 100%;
+mat-form-field {
+    width: 100%;
 }
-.header{
-  margin: 20px 0 38px 0;
-  text-align: center;
-  img {
-    width: auto;
-    height: 51px;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-  }
-  h4.headline {
-    margin-top: 8px;
-    font-weight: bold;
-  }
+.header {
+    margin: 20px 0 38px 0;
+    text-align: center;
+    img {
+        width: auto;
+        height: 51px;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+    h4.headline {
+        margin-top: 8px;
+        font-weight: bold;
+    }
 }
 p.info {
-  white-space: pre-line;
-  margin-bottom: 10px;
+    white-space: pre-line;
+    margin-bottom: 10px;
 }

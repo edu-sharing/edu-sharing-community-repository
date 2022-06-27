@@ -6,11 +6,11 @@ import { environment } from './environments/environment';
 import { AppModule } from './app/';
 
 if (environment.production) {
-  enableProdMode();
+    enableProdMode();
 }
 
 if (environment.traceChangeDetection) {
-  (Error as any).stackTraceLimit = Infinity;
+    (Error as any).stackTraceLimit = Infinity;
 }
 
 platformBrowserDynamic().bootstrapModule(AppModule);

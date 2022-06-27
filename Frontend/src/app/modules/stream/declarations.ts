@@ -1,5 +1,3 @@
-import {StreamComponent} from "./stream.component";
+import { StreamComponent } from './stream.component';
 
-export const DECLARATIONS_STREAM = [
-  StreamComponent
-];
+export const DECLARATIONS_STREAM = [StreamComponent];

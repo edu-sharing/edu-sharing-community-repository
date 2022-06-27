@@ -709,7 +709,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         // @TODO: remove all of this from/to multivalue
         ValueTool.getMultivalue(props);
-        PropertiesGetInterceptor.PropertiesContext propertiesContext = PropertiesInterceptorFactory.getPropertiesContext(alfNodeRef,props,eduNodeRef.getAspects());
+        PropertiesGetInterceptor.PropertiesContext propertiesContext = PropertiesInterceptorFactory.getPropertiesContext(
+                alfNodeRef,props,eduNodeRef.getAspects(),
+                sourceAsMap
+        )
+                ;
         for (PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
             props = new HashMap<>(i.beforeDeliverProperties(propertiesContext));
         }
@@ -747,16 +751,20 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         HashMap<String, Boolean> permissions = new HashMap<>();
         permissions.put(CCConstants.PERMISSION_READ, true);
-
+        String guestUser = ApplicationInfoList.getHomeRepository().getGuest_username();
         long millis = System.currentTimeMillis();
-
+        eduNodeRef.setPublic(false);
         Map<String,List<String>> permissionsElastic = (Map) sourceAsMap.get("permissions");
         String owner = (String)sourceAsMap.get("owner");
         for(Map.Entry<String,List<String>> entry : permissionsElastic.entrySet()){
             if("read".equals(entry.getKey())){
                 continue;
             }
-
+            if(!eduNodeRef.getPublic() && guestUser != null && entry.getValue().contains(CCConstants.AUTHORITY_GROUP_EVERYONE)) {
+                PermissionReference pr = permissionModel.getPermissionReference(null,entry.getKey());
+                Set<PermissionReference> granteePermissions = permissionModel.getGranteePermissions(pr);
+                eduNodeRef.setPublic(granteePermissions.stream().anyMatch(p -> p.getName().equals(CCConstants.PERMISSION_READ_ALL)));
+            }
             if(authorities.stream().anyMatch(s -> entry.getValue().contains(s))
                     || entry.getValue().contains(user) ){
                 //get fine grained permissions

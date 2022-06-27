@@ -1,120 +1,115 @@
-@import "../../core-ui-module/styles/variables";
+@import '../../core-ui-module/styles/variables';
 
 #topWrapper {
-  padding-top:$mainnavHeight + 70px;
-  width:75%;
-  position: relative;
-  margin: auto;
-  display:flex;
-  justify-content: space-between;
-
+    padding-top: $mainnavHeight + 70px;
+    width: 75%;
+    position: relative;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
 }
 #chart {
-  position: relative;
-  .chart {
     position: relative;
-    z-index: 1;
-    height: 250px;
-    width: 400px;
-    border: 0;
-  }
+    .chart {
+        position: relative;
+        z-index: 1;
+        height: 250px;
+        width: 400px;
+        border: 0;
+    }
 }
 
 #sum {
-  z-index: 1;
-  width: 100%;
-  height: 100%;
-  text-align: center;
-  margin-top: 41px;
-  position: absolute;
-  top:0;
-  left:0;
-  color: $textLight;
-  .label{
-
-  }
-  .count {
-  font-size: 20px;
-    font-weight: 800;
-  }
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    margin-top: 41px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: $textLight;
+    .label {
+    }
+    .count {
+        font-size: 20px;
+        font-weight: 800;
+    }
 }
 
 #register-service {
-  margin-right: 50px;
-  flex: 1
+    margin-right: 50px;
+    flex: 1;
 }
 
 #registered-services {
-  margin: auto;
-  margin-top: 50px;
-  width:75%;
+    margin: auto;
+    margin-top: 50px;
+    width: 75%;
 
-  i {
-    line-height: inherit;
-  }
+    i {
+        line-height: inherit;
+    }
 }
 
-.tableRow{
-  display:table-row;
-  background-color: #fff;
-  cursor: pointer;
-  div {
-    display:table-cell;
-    padding:5px 10px;
-    vertical-align: middle;
-    word-break: break-all;
-    border-bottom: 1px solid $cardSeperatorLineColor;
-    .material-icons{
-      color:$textLight;
+.tableRow {
+    display: table-row;
+    background-color: #fff;
+    cursor: pointer;
+    div {
+        display: table-cell;
+        padding: 5px 10px;
+        vertical-align: middle;
+        word-break: break-all;
+        border-bottom: 1px solid $cardSeparatorLineColor;
+        .material-icons {
+            color: $textLight;
+        }
     }
-  }
-
 }
 
 .active {
-  background-color: $primaryLight;
+    background-color: $primaryLight;
 }
 
-
-
-.header{
-  color: $textLight;
-  background-color: transparent;
+.header {
+    color: $textLight;
+    background-color: transparent;
 }
 
 .interface {
-  width: 44px;
-  text-align: center;
+    width: 44px;
+    text-align: center;
 }
 
 .service-logo {
-text-align: center;
+    text-align: center;
 }
 
 .interface.header {
-  padding: 0 !important;
-  span {
-    display: inline-block;
-    transform: translateX(10px) rotate(-45deg);
-    transform-origin: bottom left;
-    white-space: nowrap;
-    text-align: left;
-    width: 16px;
-  }
+    padding: 0 !important;
+    span {
+        display: inline-block;
+        transform: translateX(10px) rotate(-45deg);
+        transform-origin: bottom left;
+        white-space: nowrap;
+        text-align: left;
+        width: 16px;
+    }
 }
 
-
 .service-logo {
-  max-height: 20px;
-  max-width: 50px;
+    max-height: 20px;
+    max-width: 50px;
 }
 
 #chartAggregated {
-  padding-top: 48px;
+    padding-top: 48px;
 }
 
 @media screen and (max-width: ($mobileWidth + $mobileStage*5)) {
-  #topWrapper,#registered-services{
-    width:90%;
-  }
+    #topWrapper,
+    #registered-services {
+        width: 90%;
+    }
 }

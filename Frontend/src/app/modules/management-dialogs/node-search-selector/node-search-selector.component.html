@@ -1,0 +1,54 @@
+<mat-form-field>
+  <mat-label>{{ label }}</mat-label>
+  <i esIcon="search" matPrefix></i>
+  <input
+    type="search"
+    matInput
+    #inputElement
+    [matAutocomplete]="autoGroup"
+    name="authoritySearch"
+    [formControl]="input"
+  />
+  <mat-autocomplete
+    #autoGroup="matAutocomplete"
+    class="mat-autocomplete-high"
+    (optionSelected)="setOption($event)"
+  >
+    <mat-option *ngIf="(searchResult$ | async)?.length === 0" [disabled]="true">
+      <div class="no-match">{{ 'NODE_SEARCH_SELECTOR.NO_MATCHES' | translate }}</div>
+    </mat-option>
+    <mat-option
+      class="node-row-option"
+      *ngFor="let suggestion of searchResult$ | async"
+      [value]="suggestion"
+      [disabled]="!hasPermissions(suggestion)"
+    >
+      <div *ngIf="!hasPermissions(suggestion)" class="missing-permissions">
+        <ng-container
+          *ngTemplateOutlet="noPermissionsRef; context: { node: suggestion }"
+        ></ng-container>
+        <ng-container *ngIf="!noPermissionsRef">
+          <i esIcon="security"></i>
+          <span>{{ 'NODE_SEARCH_SELECTOR.NO_PERMISSIONS' | translate }}</span>
+        </ng-container>
+      </div>
+      <es-node-row [node]="suggestion" [columns]="columns"></es-node-row>
+    </mat-option>
+  </mat-autocomplete>
+</mat-form-field>
+<div class="more clickable" *ngIf="hasMds" (click)="showMds = !showMds">
+  <span>{{ 'NODE_SEARCH_SELECTOR.MORE_FILTERS' | translate }}</span>
+  <button mat-icon-button color="primary" (click)="showMds = !showMds; $event.stopPropagation()">
+    <i [esIcon]="'keyboard_arrow_' + (showMds ? 'up' : 'down')"></i>
+  </button>
+</div>
+<div [@switchDialog]="showMds">
+  <es-mds-editor-wrapper
+    #mds
+    [embedded]="true"
+    [editorMode]="'search'"
+    [groupId]="groupId"
+    [currentValues]="{}"
+    (onMdsLoaded)="onMdsLoaded()"
+  ></es-mds-editor-wrapper>
+</div>

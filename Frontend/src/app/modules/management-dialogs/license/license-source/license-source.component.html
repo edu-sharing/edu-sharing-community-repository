@@ -1,20 +1,40 @@
-<a href="javascript:" id="reference-info-expander" class="clickable" (click)="showCcAuthor=!showCcAuthor;">
+<a
+  href="javascript:"
+  id="reference-info-expander"
+  class="clickable"
+  (click)="showCcAuthor = !showCcAuthor"
+>
   <i esIcon="{{ showCcAuthor ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}"></i>
-  {{ 'WORKSPACE.LICENSE.CC.NAME_AUTHOR' | translate}}
+  {{ 'WORKSPACE.LICENSE.CC.NAME_AUTHOR' | translate }}
 </a>
 <div *ngIf="showCcAuthor" [@cardAnimation]="showCcAuthor">
   <div class="ccAuthorGroup" role="group" aria-labelledby="reference-info-expander">
     <mat-form-field>
-      <mat-label>{{'WORKSPACE.LICENSE.CC.TITLE_OF_WORK' | translate}}</mat-label>
-      <input matInput id="CC_TITLE" [ngModel]="ccTitleOfWork" (ngModelChange)="ccTitleOfWorkChange.emit($event)">
+      <mat-label>{{ 'WORKSPACE.LICENSE.CC.TITLE_OF_WORK' | translate }}</mat-label>
+      <input
+        matInput
+        id="CC_TITLE"
+        [ngModel]="ccTitleOfWork"
+        (ngModelChange)="ccTitleOfWorkChange.emit($event)"
+      />
     </mat-form-field>
     <mat-form-field>
-      <mat-label>{{'WORKSPACE.LICENSE.CC.SOURCE_URL' | translate}}</mat-label>
-      <input matInput id="CC_URL" [ngModel]="ccSourceUrl" (ngModelChange)="ccSourceUrlChange.emit($event)">
+      <mat-label>{{ 'WORKSPACE.LICENSE.CC.SOURCE_URL' | translate }}</mat-label>
+      <input
+        matInput
+        id="CC_URL"
+        [ngModel]="ccSourceUrl"
+        (ngModelChange)="ccSourceUrlChange.emit($event)"
+      />
     </mat-form-field>
     <mat-form-field>
-      <mat-label>{{'WORKSPACE.LICENSE.CC.PROFILE_URL' | translate}}</mat-label>
-      <input matInput id="CC_PROFILE" [ngModel]="ccProfileUrl" (ngModelChange)="ccProfileUrlChange.emit($event)">
+      <mat-label>{{ 'WORKSPACE.LICENSE.CC.PROFILE_URL' | translate }}</mat-label>
+      <input
+        matInput
+        id="CC_PROFILE"
+        [ngModel]="ccProfileUrl"
+        (ngModelChange)="ccProfileUrlChange.emit($event)"
+      />
     </mat-form-field>
   </div>
 </div>

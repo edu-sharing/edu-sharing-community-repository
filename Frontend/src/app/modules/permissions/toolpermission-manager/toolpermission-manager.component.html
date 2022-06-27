@@ -1,55 +1,126 @@
-<es-card title="{{'PERMISSIONS.TOOLPERMISSIONS.TITLE' | translate }}"
-      [subtitle]="name"
-      [buttons]="buttons"
-      width="xlarge"
-      [isCancelable]="changing.length==0"
-      (onCancel)="close()"
-      height="xlarge">
-    <div class="heading-group">
-      <div class="heading" *ngIf="!isLoading">
-        <div class="name">{{(_authority.authorityType=='GROUP' ? 'PERMISSIONS.TOOLPERMISSIONS.MEMBERS_ALLOWED' : _authority.authorityType=='EVERYONE' ? 'PERMISSIONS.TOOLPERMISSIONS.EVERYONE_ALLOWED' : 'PERMISSIONS.TOOLPERMISSIONS.USER_ALLOWED') | translate}}:</div>
-        <div class="checkboxDiv">{{'PERMISSIONS.TOOLPERMISSIONS.ALLOW' | translate}}</div>
-        <div class="checkboxDiv" *ngIf="_authority.authorityType!='EVERYONE'">{{'PERMISSIONS.TOOLPERMISSIONS.DENY' | translate}}</div>
-        <div class="result">{{'PERMISSIONS.TOOLPERMISSIONS.RESULT' | translate}}</div>
+<es-card
+  title="{{ 'PERMISSIONS.TOOLPERMISSIONS.TITLE' | translate }}"
+  [subtitle]="name"
+  [buttons]="buttons"
+  width="xlarge"
+  [isCancelable]="changing.length == 0"
+  (onCancel)="close()"
+  height="xlarge"
+>
+  <div class="heading-group">
+    <div class="heading" *ngIf="!isLoading">
+      <div class="name">
+        {{
+          (_authority.authorityType == 'GROUP'
+            ? 'PERMISSIONS.TOOLPERMISSIONS.MEMBERS_ALLOWED'
+            : _authority.authorityType == 'EVERYONE'
+            ? 'PERMISSIONS.TOOLPERMISSIONS.EVERYONE_ALLOWED'
+            : 'PERMISSIONS.TOOLPERMISSIONS.USER_ALLOWED'
+          ) | translate
+        }}:
       </div>
-      <!--<div class="fade"></div>-->
+      <div class="checkboxDiv">{{ 'PERMISSIONS.TOOLPERMISSIONS.ALLOW' | translate }}</div>
+      <div class="checkboxDiv" *ngIf="_authority.authorityType != 'EVERYONE'">
+        {{ 'PERMISSIONS.TOOLPERMISSIONS.DENY' | translate }}
+      </div>
+      <div class="result">{{ 'PERMISSIONS.TOOLPERMISSIONS.RESULT' | translate }}</div>
     </div>
-    <div class="toolpermissions">
-        <form>
-        <es-spinner *ngIf="isLoading"></es-spinner>
-        <div class="table" *ngIf="!isLoading">
-          <div *ngFor="let group of getGroups()" class="group">
-            <div class="card-title-element"><i [esIcon]="group.icon"></i>{{'PERMISSIONS.TOOLPERMISSIONS.GROUP.'+group.name | translate}}</div>
-            <div class="groupTable" *ngFor="let key of getToolpermissionsForGroup(group)">
-              <div class="name">
-                  <div *ngIf="group.name!='CONNECTORS' && group.name!='REPOSITORIES'">{{'TOOLPERMISSION.'+key | translate}}</div>
-                  <div *ngIf="group.name=='CONNECTORS'">{{('TOOLPERMISSION.TOOLPERMISSION_CONNECTOR'+(getTpSafe(key) ? '_SAFE' : '')) | translate:{connector:getTpConnector(key)} }}</div>
-                  <div *ngIf="group.name=='REPOSITORIES'">{{('TOOLPERMISSION.TOOLPERMISSION_REPOSITORY') | translate:{repository:getTpRepository(key)} }}</div>
-                  <div class="technicalName">{{key}}</div>
+    <!--<div class="fade"></div>-->
+  </div>
+  <div class="toolpermissions">
+    <form>
+      <es-spinner *ngIf="isLoading"></es-spinner>
+      <div class="table" *ngIf="!isLoading">
+        <div *ngFor="let group of getGroups()" class="group">
+          <div class="card-title-element">
+            <i [esIcon]="group.icon"></i
+            >{{ 'PERMISSIONS.TOOLPERMISSIONS.GROUP.' + group.name | translate }}
+          </div>
+          <div class="groupTable" *ngFor="let key of getToolpermissionsForGroup(group)">
+            <div class="name">
+              <div *ngIf="group.name != 'CONNECTORS' && group.name != 'REPOSITORIES'">
+                {{ 'TOOLPERMISSION.' + key | translate }}
               </div>
-              <div class="checkboxDiv checkboxInput"><mat-checkbox [disabled]="changing.indexOf(key)!=-1" [(ngModel)]="allow[key]" name="allow{{key}}" (change)="deny[key]=false;change(key)"></mat-checkbox></div>
-              <div class="checkboxDiv checkboxInput" *ngIf="_authority.authorityType!='EVERYONE'"><mat-checkbox [disabled]="changing.indexOf(key)!=-1" [(ngModel)]="deny[key]" name="deny{{key}}" (change)="allow[key]=false;change(key)"></mat-checkbox></div>              <div class="result" [class.allowed]="getEffective(key)=='ALLOWED'" [class.denied]="getEffective(key)!='ALLOWED'">
-                <div *ngIf="changing.indexOf(key)!=-1"><es-spinner-small></es-spinner-small></div>
-                <div *ngIf="changing.indexOf(key)==-1"  [title]="isImplicit(key) ? getImplicitDetail(key) : ''">
-                    <div class="text">{{'PERMISSIONS.TOOLPERMISSIONS.STATUS_'+getEffective(key) | translate}}</div>
-                    <i *ngIf="isImplicit(key)" esIcon="edu-inherit" class="inherit" ></i>
-                    <i *ngIf="getEffective(key)=='UNKNOWN'" class="inherit" esIcon="warning" title="{{'PERMISSIONS.TOOLPERMISSIONS.INHERIT_UNKNOWN' | translate}}"></i>
+              <div *ngIf="group.name == 'CONNECTORS'">
+                {{
+                  'TOOLPERMISSION.TOOLPERMISSION_CONNECTOR' + (getTpSafe(key) ? '_SAFE' : '')
+                    | translate: { connector: getTpConnector(key) }
+                }}
+              </div>
+              <div *ngIf="group.name == 'REPOSITORIES'">
+                {{
+                  'TOOLPERMISSION.TOOLPERMISSION_REPOSITORY'
+                    | translate: { repository: getTpRepository(key) }
+                }}
+              </div>
+              <div class="technicalName">{{ key }}</div>
+              <es-info-message *ngIf="permissions[key]?.systemManaged" mode="warning">
+                {{ 'PERMISSIONS.TOOLPERMISSIONS.SYSTEM_MANAGED_WARNING' | translate }}
+              </es-info-message>
+            </div>
+            <div class="checkboxDiv checkboxInput">
+              <mat-checkbox
+                [disabled]="changing.indexOf(key) != -1"
+                [(ngModel)]="allow[key]"
+                name="allow{{ key }}"
+                (change)="deny[key] = false; change(key)"
+              ></mat-checkbox>
+            </div>
+            <div class="checkboxDiv checkboxInput" *ngIf="_authority.authorityType != 'EVERYONE'">
+              <mat-checkbox
+                [disabled]="changing.indexOf(key) != -1"
+                [(ngModel)]="deny[key]"
+                name="deny{{ key }}"
+                (change)="allow[key] = false; change(key)"
+              ></mat-checkbox>
+            </div>
+            <div
+              class="result"
+              [class.allowed]="getEffective(key) == 'ALLOWED'"
+              [class.denied]="getEffective(key) != 'ALLOWED'"
+            >
+              <div *ngIf="changing.indexOf(key) != -1"><es-spinner-small></es-spinner-small></div>
+              <div
+                *ngIf="changing.indexOf(key) == -1"
+                [title]="isImplicit(key) ? getImplicitDetail(key) : ''"
+              >
+                <div class="text">
+                  {{ 'PERMISSIONS.TOOLPERMISSIONS.STATUS_' + getEffective(key) | translate }}
                 </div>
+                <i *ngIf="isImplicit(key)" esIcon="edu-inherit" class="inherit"></i>
+                <i
+                  *ngIf="getEffective(key) == 'UNKNOWN'"
+                  class="inherit"
+                  esIcon="warning"
+                  title="{{ 'PERMISSIONS.TOOLPERMISSIONS.INHERIT_UNKNOWN' | translate }}"
+                ></i>
               </div>
             </div>
           </div>
-            <div class="group-add" *ngIf="_authority.authorityType=='EVERYONE'">
-                <div class="card-title-element"><i class="material-icons">add</i>{{'PERMISSIONS.TOOLPERMISSIONS.GROUP.ADD' | translate}}</div>
-                <div class="add">
-                    <mat-form-field>
-                      <mat-label>{{'PERMISSIONS.TOOLPERMISSIONS.GROUP.ADD_LABEL' | translate}}</mat-label>
-                      <input matInput name="addName" [(ngModel)]="addName">
-                    </mat-form-field>
-                    <es-spinner-small *ngIf="creatingToolpermission"></es-spinner-small>
-                    <button mat-raised-button color="primary" *ngIf="!creatingToolpermission" (click)="createToolpermission()" [class.disabled]="!addName.trim()">{{'PERMISSIONS.TOOLPERMISSIONS.ADD' | translate}}</button>
-                </div>
-            </div>
         </div>
-        </form>
+        <div class="group-add" *ngIf="_authority.authorityType == 'EVERYONE'">
+          <div class="card-title-element">
+            <i class="material-icons">add</i
+            >{{ 'PERMISSIONS.TOOLPERMISSIONS.GROUP.ADD' | translate }}
+          </div>
+          <div class="add">
+            <mat-form-field>
+              <mat-label>{{ 'PERMISSIONS.TOOLPERMISSIONS.GROUP.ADD_LABEL' | translate }}</mat-label>
+              <input matInput name="addName" [(ngModel)]="addName" />
+            </mat-form-field>
+            <es-spinner-small *ngIf="creatingToolpermission"></es-spinner-small>
+            <button
+              mat-raised-button
+              color="primary"
+              *ngIf="!creatingToolpermission"
+              (click)="createToolpermission()"
+              [class.disabled]="!addName.trim()"
+            >
+              {{ 'PERMISSIONS.TOOLPERMISSIONS.ADD' | translate }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
   </div>
 </es-card>

@@ -64,7 +64,7 @@ $previewHeight: 160px;
     color: $textVeryLight !important;
     cursor: default;
 }
-.import-blocked{
+.import-blocked {
     text-decoration: line-through;
     opacity: 0.75;
 }
@@ -160,24 +160,26 @@ $badgeWidth: 250px;
     word-break: break-all;
 }
 :host ::ng-deep {
-    .list .node-row{
-        es-node-url, es-node-url > *{
+    .list .node-row {
+        es-node-url,
+        es-node-url > * {
             display: block;
             width: 100%;
             height: 100%;
         }
     }
     // focus handling
-    .list{
-        *:focus{
+    .list {
+        *:focus {
             @include removeDefaultFocus();
         }
         &.cdk-keyboard-focused {
             button:focus {
                 @include setGlobalKeyboardFocus();
             }
-            .cardList, .cardSmallList {
-                es-list-option-item >div:focus,
+            .cardList,
+            .cardSmallList {
+                es-list-option-item > div:focus,
                 .row:focus,
                 .row es-node-url > *:focus {
                     @include setGlobalKeyboardFocus();
@@ -192,11 +194,11 @@ $badgeWidth: 250px;
         }
     }
     .headingGroup .heading,
-    .tableList .node-row es-node-url > *{
+    .tableList .node-row es-node-url > * {
         /* fallback for unset/unknown fields */
         > div {
             width: 120px;
-            &.row_1{
+            &.row_1 {
                 flex-grow: 1;
             }
         }
@@ -344,7 +346,7 @@ $badgeWidth: 250px;
             word-break: break-all;
         }
 
-        .group_authorityname{
+        .group_authorityname {
             width: 180px;
         }
 
@@ -417,7 +419,7 @@ $badgeWidth: 250px;
         }
     }
 }
-.tableList .rowFrame.selected{
+.tableList .rowFrame.selected {
     background: $workspaceSelectedBackgroundEffect;
     background-color: $listItemSelectedBackground;
 }
@@ -444,9 +446,7 @@ $badgeWidth: 250px;
 @mixin hoverHighlightFloat {
     .rowFrame {
         position: relative;
-        transition:
-            z-index $transitionNormal step-start,
-            transform $transitionNormal,
+        transition: z-index $transitionNormal step-start, transform $transitionNormal,
             box-shadow $transitionNormal;
         &:hover {
             transform: translateY(-10px);
@@ -456,7 +456,7 @@ $badgeWidth: 250px;
     }
 }
 
-.list .tableList{
+.list .tableList {
     @include hoverHighlightColor();
 }
 .list .cardList {
@@ -571,11 +571,11 @@ $badgeWidth: 250px;
 }
 :host ::ng-deep {
     .list .nodeCollection .row {
-        es-node-url > * .column{
+        es-node-url > * .column {
             color: #fff !important;
         }
 
-        &.dark-color es-node-url > * .column{
+        &.dark-color es-node-url > * .column {
             color: #000 !important;
         }
     }
@@ -652,13 +652,13 @@ $badgeWidth: 250px;
 
 @keyframes OrderAnimationList {
     0% {
-        transform: translate(0, -.05em);
+        transform: translate(0, -0.05em);
     }
     50% {
-        transform: translate(0, .05em);
+        transform: translate(0, 0.05em);
     }
     100% {
-        transform: translate(0, -.05em);
+        transform: translate(0, -0.05em);
     }
 }
 
@@ -666,7 +666,8 @@ $badgeWidth: 250px;
     $orderAnimationTime: 0.5s;
     animation-iteration-count: infinite;
     animation-duration: $orderAnimationTime;
-    .cardList &, .cardSmallList & {
+    .cardList &,
+    .cardSmallList & {
         animation-name: OrderAnimationCards;
     }
     .tableList & {
@@ -736,11 +737,7 @@ $badgeWidth: 250px;
     align-items: flex-end;
     padding-bottom: 10px;
     @include clickable();
-    background: linear-gradient(
-        to bottom,
-        rgba(0, 0, 0, 0.001) 0,
-        rgba(0, 0, 0, 0.9) 100%
-    );
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.001) 0, rgba(0, 0, 0, 0.9) 100%);
     .nodeRating {
         flex-grow: 1;
     }
@@ -777,8 +774,8 @@ $badgeWidth: 250px;
 .node_counts_download_material,
 .node_counts_view_material_embedded,
 .node_counts_view_material_play_media,
-.node_counts_overall{
-    .rowInner{
+.node_counts_overall {
+    .rowInner {
         max-height: unset;
     }
 }
@@ -797,19 +794,19 @@ a.rowInner {
         word-break: normal;
         overflow-wrap: break-word;
     }
-  .row_1 {
-      top: 1.5em;
-      font-size: 110%;
+    .row_1 {
+        top: 1.5em;
+        font-size: 110%;
 
-      .rowInner {
-          @include limitLineCount(2, 1.25);
-          justify-content: center;
-          /*display: flex;
+        .rowInner {
+            @include limitLineCount(2, 1.25);
+            justify-content: center;
+            /*display: flex;
           justify-content: center;
           align-items: center;
           height: 2.45em;*/
-      }
-  }
+        }
+    }
 }
 .row_1,
 .node_ccm_commonlicense_key,
@@ -838,18 +835,17 @@ a.rowInner {
     float: left;
     margin: 6px;
     position: relative;
-    es-list-option-item{
+    es-list-option-item {
         height: 0; // size is done via flex-grow
         flex-grow: 1;
     }
-
 }
-.tableList{
+.tableList {
     // limit line height to 2 lines
     es-list-base {
         @include limitLineCount(2, 1.25);
     }
-    .nodeDeleted{
+    .nodeDeleted {
         display: none;
     }
 
@@ -859,7 +855,6 @@ a.rowInner {
         top: 25px;
         left: 25px;
     }
-
 }
 .cardList .item {
     @include materialShadow();
@@ -939,7 +934,7 @@ a.rowInner {
     float: left;
     margin: 6px !important;
     // safari height fix
-    es-list-option-item{
+    es-list-option-item {
         height: 0;
         flex-grow: 1;
     }
@@ -1237,8 +1232,8 @@ a.rowInner {
         font-size: 20px;
     }
 }
-.cardList .item-order-overlay{
-    background-color: rgba(255,255,255,.95);
+.cardList .item-order-overlay {
+    background-color: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(5px);
     width: auto;
     height: 60px;
@@ -1249,17 +1244,17 @@ a.rowInner {
     border-radius: 5px;
     top: math.div($previewHeight - 60px, 2);
 }
-.cardSmallList .item-order-overlay{
-    background-color: rgba(255,255,255,.95);
+.cardSmallList .item-order-overlay {
+    background-color: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(5px);
     height: 40px;
     bottom: 0;
     width: 100%;
 }
-.tableList .item-order-overlay{
+.tableList .item-order-overlay {
     background-color: transparent;
     right: 10px;
-    width: 20px!important;
+    width: 20px !important;
 }
 
 @media all {
@@ -1294,7 +1289,7 @@ a.rowInner {
     .cardList > .item-container {
         width: 100%;
         height: 160px;
-        > es-list-option-item{
+        > es-list-option-item {
             height: 120px;
         }
         box-shadow: none;
@@ -1305,7 +1300,7 @@ a.rowInner {
             left: 0;
         }
         &:not(.option-item-container):not(:last-child) {
-            border-bottom: 1px solid $cardSeperatorLineColor;
+            border-bottom: 1px solid $cardSeparatorLineColor;
         }
     }
     .cardList > .option-item-container {
@@ -1315,7 +1310,6 @@ a.rowInner {
             margin-bottom: unset;
             margin-right: 10px;
         }
-
     }
     .cardList .row {
         padding: 0 10px;

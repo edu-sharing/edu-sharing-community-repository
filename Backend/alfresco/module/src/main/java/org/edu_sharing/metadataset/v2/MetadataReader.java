@@ -402,8 +402,14 @@ public class MetadataReader {
 				Node data=list2.item(j);
 				String name=data.getNodeName();
 				String value=data.getTextContent();
-				if(name.equals("id"))
-					widget.setId(value);			
+				if(name.equals("id")) {
+					Node rel = data.getAttributes().getNamedItem("rel");
+					if(rel == null) {
+						widget.setId(value);
+					} else {
+						widget.getIds().put(MetadataWidget.IdRelation.valueOf(rel.getNodeValue()), value);
+					}
+				}
 				if(name.equals("icon"))
 					widget.setIcon(value);			
 				if(name.equals("template"))

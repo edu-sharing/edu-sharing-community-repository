@@ -1,11 +1,7 @@
+import { animate, sequence, style, transition, trigger } from '@angular/animations';
+import { SelectionModel } from '@angular/cdk/collections';
 import {
-    animate,
-    sequence,
-    style,
-    transition,
-    trigger,
-} from '@angular/animations';
-import {
+    AfterViewInit,
     ChangeDetectionStrategy,
     ChangeDetectorRef,
     Component,
@@ -14,26 +10,29 @@ import {
     EventEmitter,
     HostListener,
     Input,
+    OnChanges,
+    OnDestroy,
     Output,
+    QueryList,
+    Renderer2,
+    SimpleChanges,
     TemplateRef,
     ViewChild,
-    ViewContainerRef,
-    SimpleChanges,
-    OnChanges,
-    Renderer2,
-    Sanitizer,
     ViewChildren,
-    QueryList,
-    AfterViewInit,
+    ViewContainerRef,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
+import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import {
-    OptionsHelperService,
-    OPTIONS_HELPER_CONFIG,
-} from '../../options-helper.service';
-import { ActionbarComponent } from '../../../common/ui/actionbar/actionbar.component';
+    ListEventInterface,
+    ListOptions,
+    ListOptionsConfig,
+    NodeEntriesDisplayType,
+} from 'src/app/features/node-entries/entries-model';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
@@ -48,32 +47,26 @@ import {
     RestConstants,
     RestHelper,
     RestLocatorService,
-    RestNetworkService, SessionStorageService,
+    RestNetworkService,
+    SessionStorageService,
     TemporaryStorageService,
     UIService,
 } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
-import {ColorHelper, PreferredColor} from '../../../core-module/ui/color-helper';
+import { ColorHelper, PreferredColor } from '../../../core-module/ui/color-helper';
 import { KeyEvents } from '../../../core-module/ui/key-events';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
+import { MainNavService } from '../../../main/navigation/main-nav.service';
+import { ActionbarComponent } from '../../../shared/components/actionbar/actionbar.component';
+import { NodeUrlComponent } from '../../../shared/components/node-url/node-url.component';
+import { NodeTitlePipe } from '../../../shared/pipes/node-title.pipe';
 import { DistinctClickEvent } from '../../directives/distinct-click.directive';
 import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
-import {CustomOptions, OptionItem, Scope, Target} from '../../option-item';
+import { NodeHelperService } from '../../node-helper.service';
+import { CustomOptions, OptionItem, Scope, Target } from '../../option-item';
+import { OptionsHelperService, OPTIONS_HELPER_CONFIG } from '../../options-helper.service';
 import { Toast } from '../../toast';
-import {NodeHelperService} from '../../node-helper.service';
-import {DomSanitizer} from '@angular/platform-browser';
-import {CollectionChooserComponent} from '../collection-chooser/collection-chooser.component';
-import {NodeTitlePipe} from '../../pipes/node-title.pipe';
-import {NodeUrlComponent} from '../node-url/node-url.component';
-import {SelectionModel} from '@angular/cdk/collections';
-import {
-    ListEventInterface,
-    ListOptions,
-    ListOptionsConfig, NodeEntriesDisplayType
-} from '../node-entries-wrapper/entries-model';
-import { MainNavService } from '../../../main/navigation/main-nav.service';
-
 
 @Component({
     selector: 'es-listTable',
@@ -89,10 +82,7 @@ import { MainNavService } from '../../../main/navigation/main-nav.service';
         },
     ],
     animations: [
-        trigger(
-            'openOverlay',
-            UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST),
-        ),
+        trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST)),
         trigger(
             'openOverlayBottom',
             UIAnimation.openOverlayBottom(UIAnimation.ANIMATION_TIME_FAST),
@@ -100,18 +90,12 @@ import { MainNavService } from '../../../main/navigation/main-nav.service';
         trigger('orderAnimation', [
             transition(':enter', [
                 sequence([
-                    animate(
-                        UIAnimation.ANIMATION_TIME_SLOW + 'ms ease',
-                        style({ opacity: 0 }),
-                    ),
+                    animate(UIAnimation.ANIMATION_TIME_SLOW + 'ms ease', style({ opacity: 0 })),
                 ]),
             ]),
             transition(':leave', [
                 sequence([
-                    animate(
-                        UIAnimation.ANIMATION_TIME_SLOW + 'ms ease',
-                        style({ opacity: 1 }),
-                    ),
+                    animate(UIAnimation.ANIMATION_TIME_SLOW + 'ms ease', style({ opacity: 1 })),
                 ]),
             ]),
         ]),
@@ -122,7 +106,9 @@ import { MainNavService } from '../../../main/navigation/main-nav.service';
 /**
  * A provider to render multiple Nodes as a list
  */
-export class ListTableComponent implements OnChanges, AfterViewInit, EventListener, ListEventInterface<Node> {
+export class ListTableComponent
+    implements OnChanges, OnDestroy, AfterViewInit, EventListener, ListEventInterface<Node>
+{
     public static readonly VIEW_TYPE_LIST = 0;
     public static readonly VIEW_TYPE_GRID = 1;
     public static readonly VIEW_TYPE_GRID_SMALL = 2;
@@ -140,12 +126,10 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         // remove all non-virtual nodes which are replaced by the virtual nodes (virtual have higher prio)
         // also validate that this is only enabled for regular nodes
         if (nodes && nodes.length && nodes[0].ref && nodes[0].ref.id) {
-            const virtual = nodes.filter(n => n.virtual);
-            nodes = nodes.filter(
-                n => n.virtual || !virtual.find(v => v.ref.id === n.ref.id),
-            );
+            const virtual = nodes.filter((n) => n.virtual);
+            nodes = nodes.filter((n) => n.virtual || !virtual.find((v) => v.ref.id === n.ref.id));
         }
-        if(this._nodes?.length && nodes?.length > this._nodes?.length) {
+        if (this._nodes?.length && nodes?.length > this._nodes?.length) {
             const pos = this._nodes.length;
             setTimeout(() => {
                 // handle focus
@@ -224,11 +208,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
 
     @Input() set hasCheckbox(hasCheckbox: boolean) {
         this._hasCheckbox = hasCheckbox;
-        if (
-            !hasCheckbox &&
-            this.selectedNodes &&
-            this.selectedNodes.length > 1
-        ) {
+        if (!hasCheckbox && this.selectedNodes && this.selectedNodes.length > 1) {
             // use a timeout to prevent a ExpressionChangedAfterItHasBeenCheckedError in the parent component
             setTimeout(() => {
                 this.selectedNodes = [];
@@ -255,9 +235,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
     /**
      * A custom function to validate if a given node has permissions or should be displayed as "disabled".
      */
-    @Input() validatePermissions: (
-        node: Node,
-    ) => {
+    @Input() validatePermissions: (node: Node) => {
         status: boolean;
         message?: string;
         button?: {
@@ -502,6 +480,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
     columnsVisible: ListItem[];
     currentDragColumn: ListItem;
     private repositories: Repository[];
+    private destroyed = new Subject<void>();
 
     constructor(
         private ui: UIService,
@@ -531,11 +510,14 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
             () => this.closeReorder(false),
             () => this.closeReorder(true),
         );
-        this.reorderButtons.splice(0, 0,
-            new DialogButton('RESET', + DialogButton.TYPE_CANCEL + DialogButton.TYPE_SECONDARY, () => {
-            this.sessionStorage.delete('workspaceColumns');
-            this.onInvalidateColumns.emit();
-        }));
+        this.reorderButtons.splice(
+            0,
+            0,
+            new DialogButton('RESET', { color: 'standard', position: 'opposite' }, () => {
+                this.sessionStorage.delete('workspaceColumns');
+                this.onInvalidateColumns.emit();
+            }),
+        );
         this.id = Math.random();
         frame.addListener(this);
         // wait for all bindings to finish
@@ -550,13 +532,21 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         if (changes.viewType && typeof changes.viewType.currentValue === 'string') {
             this.viewType = parseInt(changes.viewType.currentValue, 10);
         }
-        if(changes.orderElementsActive) {
+        if (changes.orderElementsActive) {
             this.clearSelection();
         }
     }
 
     ngAfterViewInit(): void {
         this.optionsHelper.initComponents(this.actionbar, this);
+        this.optionsHelper.nodesDeleted
+            .pipe(takeUntil(this.destroyed))
+            .subscribe((nodes) => this.removeNodes(nodes.error, nodes.objects));
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
     }
 
     setViewType(viewType: number) {
@@ -564,7 +554,12 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         // store in url for remembering layout
         const params: any = {};
         params[UIConstants.QUERY_PARAM_LIST_VIEW_TYPE] = this.viewType;
-        this.router.navigate([], {relativeTo: this.route, queryParamsHandling: 'merge', queryParams: params, skipLocationChange: true});
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParamsHandling: 'merge',
+            queryParams: params,
+            skipLocationChange: true,
+        });
         this.changes.detectChanges();
     }
 
@@ -573,12 +568,10 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
             return;
         }
         this.locator.setRoute(this.route).subscribe(() => {
-            this.network
-                .getRepositories()
-                .subscribe((data: NetworkRepositories) => {
-                    this.repositories = data.repositories;
-                    this.changeDetectorRef.detectChanges();
-                });
+            this.network.getRepositories().subscribe((data: NetworkRepositories) => {
+                this.repositories = data.repositories;
+                this.changeDetectorRef.detectChanges();
+            });
         });
     }
 
@@ -610,9 +603,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         if (!color) {
             return true;
         }
-        return (
-            ColorHelper.getPreferredColor(color) === PreferredColor.White
-        );
+        return ColorHelper.getPreferredColor(color) === PreferredColor.White;
     }
 
     toggleAll(): void {
@@ -678,16 +669,15 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
     }
 
     isReference(node: Node): boolean {
-        return (
-            node.aspects &&
-            node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1
-        );
+        return node.aspects && node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1;
     }
 
     isDeleted(node: any): boolean {
-        return this.isReference(node)
-            && node.aspects.indexOf(RestConstants.CCM_ASPECT_REMOTEREPOSITORY) === -1
-            && !node.originalId;
+        return (
+            this.isReference(node) &&
+            node.aspects.indexOf(RestConstants.CCM_ASPECT_REMOTEREPOSITORY) === -1 &&
+            !node.originalId
+        );
     }
 
     askCCPublish(event: any, node: Node): void {
@@ -696,16 +686,14 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
     }
 
     getItemCssClass(item: ListItem): string {
-        let css = (
+        let css =
             item.type.toLowerCase() +
             '_' +
-            item.name
-                .toLowerCase()
-                .replace(':', '_')
-                .replace('.', '_')
-        ) + ' type_' + item.type.toLowerCase();
-        if(item.config?.showLabel) {
-            css += ' item_with_label'
+            item.name.toLowerCase().replace(':', '_').replace('.', '_') +
+            ' type_' +
+            item.type.toLowerCase();
+        if (item.config?.showLabel) {
+            css += ' item_with_label';
         }
         return css;
     }
@@ -746,9 +734,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
             name += RestHelper.getName(node);
         }
         this.currentDrag = name;
-        this.currentDragCount = this.selectedNodes.length
-            ? this.selectedNodes.length
-            : 1;
+        this.currentDragCount = this.selectedNodes.length ? this.selectedNodes.length : 1;
         try {
             event.dataTransfer.setDragImage(this.drag.nativeElement, 100, 20);
         } catch (e) {
@@ -758,11 +744,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
     }
 
     canDropNodes(target: Node, { event, nodes, dropAction }: DragData): boolean {
-        if (
-            this.orderElements &&
-            this.isNodesDragSource &&
-            this.selectedNodes.length === 1
-        ) {
+        if (this.orderElements && this.isNodesDragSource && this.selectedNodes.length === 1) {
             return true;
         }
         return this.canDrop({ event, nodes, dropAction, target });
@@ -802,7 +784,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
     }
 
     onNodesDrop({ event, nodes, dropAction }: DragData, target: Node) {
-        if(this.orderElementsActive) {
+        if (this.orderElementsActive) {
             return;
         }
         if (dropAction === 'link') {
@@ -816,10 +798,10 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
 
     onDistinctClick(event: DistinctClickEvent, node: Node, region?: string) {
         // in link mode, we will not emit any events
-        if(this.createLink) {
+        if (this.createLink) {
             return;
         }
-        if(this.orderElementsActive){
+        if (this.orderElementsActive) {
             return;
         }
         if (!this.isClickable) {
@@ -828,17 +810,13 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         }
         if (event.pointerType === 'touch' || event.pointerType === 'pen') {
             this.doubleClickRow.emit(node);
-        } else  if (!this.selectOnClick) {
+        } else if (!this.selectOnClick) {
             // Propagate event
             this.clickRowSender(node, region);
             this.refreshAvailableOptions(node);
         } else if (this.hasCheckbox && event.event.ctrlKey) {
             this.toggleSelection(node);
-        } else if (
-            this.hasCheckbox &&
-            event.event.shiftKey &&
-            this.selectedNodes.length > 0
-        ) {
+        } else if (this.hasCheckbox && event.event.shiftKey && this.selectedNodes.length > 0) {
             // Select from-to range via shift key.
             this.expandNodeSelection(node);
         } else {
@@ -857,11 +835,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
     }
 
     onCheckboxClick(node: Node) {
-        if (
-            this.ui.isShiftCmd() &&
-            this.selectedNodes.length > 0 &&
-            !this.isSelected(node)
-        ) {
+        if (this.ui.isShiftCmd() && this.selectedNodes.length > 0 && !this.isSelected(node)) {
             this.expandNodeSelection(node);
         } else {
             this.toggleSelection(node);
@@ -884,9 +858,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
     }
 
     private filterCallbacks(options: OptionItem[], node: Node): OptionItem[] {
-        return options.filter(
-            option => !option.showCallback || option.showCallback(node),
-        );
+        return options.filter((option) => !option.showCallback || option.showCallback(node));
     }
 
     private selectAll(): void {
@@ -908,10 +880,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
     }
 
     noPermissions(node: Node): boolean {
-        return (
-            this.validatePermissions != null &&
-            this.validatePermissions(node).status === false
-        );
+        return this.validatePermissions != null && this.validatePermissions(node).status === false;
     }
 
     closeReorder(save: boolean): void {
@@ -919,7 +888,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         this.reorderDialogChange.emit(false);
         if (save) {
             this.columns = this.columnsAll;
-            this.sessionStorage.set('workspaceColumns',this.columnsAll);
+            this.sessionStorage.set('workspaceColumns', this.columnsAll);
         } else {
             this.columns = this.columnsOriginal;
         }
@@ -964,9 +933,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         }
         event.preventDefault();
         event.stopPropagation();
-        this.columnsAll[
-            this.columnsAll.indexOf(this.currentDragColumn)
-        ].visible = false;
+        this.columnsAll[this.columnsAll.indexOf(this.currentDragColumn)].visible = false;
         this.columns = this.columnsAll;
         this.currentDragColumn = null;
     }
@@ -997,8 +964,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
     canBeSorted(sortBy: any): boolean {
         return (
             this.possibleSortByFields &&
-            this.possibleSortByFields.filter(p => p.name === sortBy.name)
-                .length > 0
+            this.possibleSortByFields.filter((p) => p.name === sortBy.name).length > 0
         );
     }
 
@@ -1015,15 +981,10 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         return result;
     }
 
-    setSortingIntern(
-        sortBy: ListItem,
-        isPrimaryElement: boolean,
-        target: HTMLElement,
-    ): void {
+    setSortingIntern(sortBy: ListItem, isPrimaryElement: boolean, target: HTMLElement): void {
         if (
             isPrimaryElement &&
-            window.innerWidth <
-                UIConstants.MOBILE_WIDTH + UIConstants.MOBILE_STAGE * 4
+            window.innerWidth < UIConstants.MOBILE_WIDTH + UIConstants.MOBILE_STAGE * 4
         ) {
             if (this.sortByMobile) {
                 this.triggerSortDropdownMenu(target);
@@ -1046,9 +1007,9 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
             left: targetRect.left + 'px',
             width: targetRect.width + 'px',
             height: targetRect.height + 'px',
-        }
+        };
         for (const [key, value] of Object.entries(menuTriggerStyle)) {
-            this.renderer.setStyle(this.sortDropdownMenuTrigger.nativeElement, key, value)
+            this.renderer.setStyle(this.sortDropdownMenuTrigger.nativeElement, key, value);
         }
         this.sortDropdownMenuTrigger.nativeElement.click();
     }
@@ -1094,7 +1055,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         this.dropdownLeft = event.clientX + 'px';
         this.dropdownTop = event.clientY + 'px';
         let nodes = [node];
-        if(this.getSelectedPos(node) !== -1) {
+        if (this.getSelectedPos(node) !== -1) {
             nodes = this.selectedNodes;
         } else {
             this.setSelectionToSingleNode(node);
@@ -1106,10 +1067,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         return node.reference ? node.reference : node;
     }
 
-    showDropdown(
-        openMenu = false,
-        event: any = null,
-    ): void {
+    showDropdown(openMenu = false, event: any = null): void {
         if (openMenu) {
             if (event) {
                 if (event.clientX + event.clientY) {
@@ -1129,7 +1087,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
 
     doubleClick(node: Node): void {
         // click events are not supported if createLink = true
-        if(this.createLink) {
+        if (this.createLink) {
             return;
         }
         this.doubleClickRow.emit(node);
@@ -1192,10 +1150,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
     }
 
     getLRMIAttribute(data: any, item: ListItem): string {
-        return this.nodeHelper.getLRMIAttribute(
-            data,
-            item,
-        );
+        return this.nodeHelper.getLRMIAttribute(data, item);
     }
 
     getLRMIProperty(data: any, item: ListItem): string {
@@ -1206,10 +1161,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         if (!this.selectedNodes || !this.selectedNodes.length) {
             return -1;
         }
-        return RestHelper.getRestObjectPositionInArray(
-            selected,
-            this.selectedNodes,
-        );
+        return RestHelper.getRestObjectPositionInArray(selected, this.selectedNodes);
     }
 
     optionIsValid(optionItem: OptionItem, node: Node): boolean {
@@ -1230,13 +1182,10 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         this.optionsHelper.setData({
             scope: this.scope,
             activeObjects: this.selectedNodes,
-            selectedObjects: this.orderElementsActive ? []: this.selectedNodes,
+            selectedObjects: this.orderElementsActive ? [] : this.selectedNodes,
             allObjects: this._nodes,
             parent: this.parent,
             customOptions: this._customOptions,
-        });
-        this.optionsHelper.setListener({
-            onDelete: nodes => this.removeNodes(nodes.error, nodes.objects),
         });
         // only refresh global if no node was given
         this.optionsHelper.refreshComponents();
@@ -1247,10 +1196,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
             return;
         }
         for (const object of objects) {
-            const p = RestHelper.getRestObjectPositionInArray(
-                object,
-                this._nodes,
-            );
+            const p = RestHelper.getRestObjectPositionInArray(object, this._nodes);
             if (p !== -1) {
                 this._nodes.splice(p, 1);
             }
@@ -1260,9 +1206,9 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         this.nodesChange.emit(this._nodes);
         this.refreshAvailableOptions();
     }
-    replaceNodes(newObjects: Node[], localArray: Node[]){
+    replaceNodes(newObjects: Node[], localArray: Node[]) {
         newObjects?.forEach((o: any) => {
-            const index = localArray.findIndex(n => n.ref.id === o.ref.id);
+            const index = localArray.findIndex((n) => n.ref.id === o.ref.id);
             if (index === -1) {
                 console.warn(
                     'tried to update node which not exist inside the list -> falling back to full reload',
@@ -1285,7 +1231,9 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
             return o;
         });
         // remove the elements which will get added so they will replace the current state
-        this._nodes = this._nodes.filter((n) => objects.find((o: Node) => o.ref.id === n.ref.id) == null);
+        this._nodes = this._nodes.filter(
+            (n) => objects.find((o: Node) => o.ref.id === n.ref.id) == null,
+        );
         this._nodes = objects.concat(this._nodes);
         this.nodesChange.emit(this._nodes);
         this.selectedNodes = objects;
@@ -1304,18 +1252,20 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
     }
 
     getPreviewSrc(node: any) {
-        if(!this.isCollection(node) || !node.preview.isIcon) {
-            if(node.preview.data) {
+        if (!this.isCollection(node) || !node.preview.isIcon) {
+            if (node.preview.data) {
                 return this.sanitizer.bypassSecurityTrustResourceUrl(
-                    'data:' + node.preview.mimetype + ';base64,' + node.preview.data
+                    'data:' + node.preview.mimetype + ';base64,' + node.preview.data,
                 );
             } else {
-                return node.preview.url + (
-                    ((
-                        this.isHomeNode(node) ||
-                        RestNetworkService.getRepository(node)?.repositoryType === RestConstants.REPOSITORY_TYPE_ALFRESCO
-                    ) &&
-                        this.animateNode !== node) ? '&crop=true&maxWidth=300&maxHeight=300' : ''
+                return (
+                    node.preview.url +
+                    ((this.isHomeNode(node) ||
+                        RestNetworkService.getRepository(node)?.repositoryType ===
+                            RestConstants.REPOSITORY_TYPE_ALFRESCO) &&
+                    this.animateNode !== node
+                        ? '&crop=true&maxWidth=300&maxHeight=300'
+                        : '')
                 );
             }
         }
@@ -1327,13 +1277,17 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
     }
 
     getPrimaryTitle(node: Node) {
-        if([RestConstants.CM_PROP_TITLE, RestConstants.LOM_PROP_TITLE].indexOf(this.columnsVisible[0]?.name) !== -1) {
+        if (
+            [RestConstants.CM_PROP_TITLE, RestConstants.LOM_PROP_TITLE].indexOf(
+                this.columnsVisible[0]?.name,
+            ) !== -1
+        ) {
             return new NodeTitlePipe(this.translate).transform(node);
         }
         return node.name;
     }
 
-    getRowId(node: Node|any, rowIndex: number): string {
+    getRowId(node: Node | any, rowIndex: number): string {
         return `list-table-node-${node.ref?.id || node.authorityName}-row-${rowIndex + 1}`;
     }
 
@@ -1343,7 +1297,6 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
             .filter((_, index) => index > 0)
             .join(' ');
     }
-
 
     /*
         from list event interface
@@ -1378,5 +1331,4 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         await this.optionsHelper.initComponents(this.actionbar, this);
         this.optionsHelper.refreshComponents();
     }
-
 }

@@ -1,4 +1,4 @@
-import { Node } from "../../../core-module/core.module";
+import { Node } from '../../../core-module/core.module';
 
 export type DropAction = 'move' | 'copy' | 'link';
 

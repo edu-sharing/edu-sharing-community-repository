@@ -1,90 +1,161 @@
-<input #fileSelect type="file" style="display:none" id="fileSelect" [multiple]="multiple" (change)="filesSelected($event)" />
-<es-card title="{{'WORKSPACE.ADD_OBJECT_TITLE' | translate }}"
-      [priority]="priority"
-      subtitle="{{'WORKSPACE.ADD_OBJECT_SUBTITLE' | translate }}"
-      icon="cloud_upload"
-      width="normal"
-      height="xlarge"
-      [buttons]="buttons"
-      (onCancel)="cancel()"
+<input
+  #fileSelect
+  type="file"
+  style="display: none"
+  id="fileSelect"
+  [multiple]="multiple"
+  (change)="filesSelected($event)"
+/>
+<es-card
+  title="{{ 'WORKSPACE.ADD_OBJECT_TITLE' | translate }}"
+  [priority]="priority"
+  subtitle="{{ 'WORKSPACE.ADD_OBJECT_SUBTITLE' | translate }}"
+  icon="cloud_upload"
+  width="normal"
+  height="xlarge"
+  [buttons]="buttons"
+  (onCancel)="cancel()"
 >
-        <div class="card-content-padding file-upload-content">
-            <div class="dropArea" [class.dropActive]="isFileOver" fileDrop
-                 (onFileDrop)="onDrop($event)"
-                 (click)="selectFile()"
-                 (fileOver)="isFileOver=$event">
-                <div><i esIcon="cloud_upload"></i></div>
-                <div *ngIf="supportsDrop">{{ 'WORKSPACE.ADD_OBJECT_MESSAGE' | translate}}
-                    <es-mat-link (click)="selectFile()">{{ 'WORKSPACE.ADD_OBJECT_BROWSE' | translate}}</es-mat-link>
-                </div>
-            </div>
-            <div class="quota" *ngIf="user && user.person.quota.enabled">
-                <es-user-quota [quota]="user.person.quota"></es-user-quota>
-            </div>
-            <div class="seperator-line uppercase">{{ 'WORKSPACE.SELECT_ORG' | translate}}</div>
-            <div class="link">
-                <div class="link-info">
-                    <mat-form-field>
-                        <mat-label>{{ 'WORKSPACE.SELECT_LINK' | translate}}</mat-label>
-                        <input matInput [(ngModel)]="link" (keyup.enter)="setLink()" placeholder="http://" autocomplete="off">
-                    </mat-form-field>
-                </div>
-                <div class="lti" *ngIf="showLti && configService.instant('upload.lti.enabled', false)">
-                    <div><mat-slide-toggle class="toggle-reverse" [disabled]="!ltiAllowed" [(ngModel)]="ltiActivated">{{ 'WORKSPACE.ADD_OBJECT_LTI' | translate}}</mat-slide-toggle></div>
-                    <div class="lti-data" *ngIf="ltiAllowed && ltiActivated">
-                        <div class="heading">{{'WORKSPACE.LTI_HEADING' | translate}}</div>
-                        <div class="info">{{'WORKSPACE.LTI_INFO' | translate}}</div>
-                        <div class="inputs">
-                            <mat-form-field>
-                                <mat-label>{{'WORKSPACE.LTI_CONSUMER_KEY' | translate}}</mat-label>
-                                <input matInput id="consumerKey" [(ngModel)]="ltiConsumerKey">
-                            </mat-form-field>
-                            <mat-form-field>
-                                <mat-label>{{'WORKSPACE.LTI_SHARED_SECRET' | translate}}</mat-label>
-                                <input matInput id="sharedSecret" [(ngModel)]="ltiSharedSecret">
-                            </mat-form-field>
-                        </div>
-                        <div class="info info-privacy" innerHTML="{{'WORKSPACE.LTI_INFO_PRIVACY' | translate}}"></div>
-                    </div>
-                    <!--
+  <div class="card-content-padding file-upload-content">
+    <div *ngIf="!hideFileUpload" @openOverlay>
+      <div
+        class="dropArea"
+        [class.dropActive]="isFileOver"
+        fileDrop
+        (onFileDrop)="onDrop($event)"
+        (click)="selectFile()"
+        (fileOver)="isFileOver = $event"
+      >
+        <div><i esIcon="cloud_upload"></i></div>
+        <div *ngIf="supportsDrop">
+          {{ 'WORKSPACE.ADD_OBJECT_MESSAGE' | translate }}
+          <es-mat-link (click)="selectFile()" data-test="browse-files-button">{{
+            'WORKSPACE.ADD_OBJECT_BROWSE' | translate
+          }}</es-mat-link>
+        </div>
+      </div>
+      <div class="quota" *ngIf="user && user.person.quota.enabled">
+        <es-user-quota [quota]="user.person.quota"></es-user-quota>
+      </div>
+      <div class="seperator-line uppercase">{{ 'WORKSPACE.SELECT_ORG' | translate }}</div>
+    </div>
+    <div class="link">
+      <div class="link-info">
+        <mat-form-field>
+          <mat-label>{{ 'WORKSPACE.SELECT_LINK' | translate }}</mat-label>
+          <input
+            matInput
+            [formControl]="linkControl"
+            (keyup.enter)="setLink()"
+            placeholder="http://"
+            autocomplete="off"
+            data-test="url-input"
+          />
+        </mat-form-field>
+      </div>
+      <es-spinner-small
+        *ngIf="loadingWebsiteInformation"
+        class="loading-website-information-spinner"
+      ></es-spinner-small>
+      <es-info-message *ngIf="showInvalidUrlMessage" mode="error">
+        {{ 'WORKSPACE.LINK_INVALID_INFO' | translate }}
+      </es-info-message>
+      <div class="link-details" *ngIf="websiteInformation?.page">
+        <div class="page-infos">
+          <div class="title">
+            <ng-container *ngIf="websiteInformation.title">
+              {{ websiteInformation.title }} -
+            </ng-container>
+            {{ websiteInformation.page }}
+          </div>
+          <div class="description">{{ websiteInformation.description }}</div>
+        </div>
+        <ng-container *ngIf="websiteInformation.duplicateNodes?.length">
+          <es-info-message mode="warning">
+            {{ 'WORKSPACE.LINK_DUPLICATES_INFO' | translate }}
+          </es-info-message>
+          <div class="duplicate-nodes">
+            <es-node-url
+              *ngFor="let node of websiteInformation.duplicateNodes"
+              [node]="node"
+              [queryParams]="{ closeOnBack: true }"
+              target="_blank"
+            >
+              <es-node-row [node]="node" [columns]="columns"></es-node-row>
+            </es-node-url>
+          </div>
+        </ng-container>
+      </div>
+      <div class="lti" *ngIf="showLti && configService.instant('upload.lti.enabled', false)">
+        <div>
+          <mat-slide-toggle
+            class="toggle-reverse"
+            [disabled]="!ltiAllowed"
+            [(ngModel)]="ltiActivated"
+            >{{ 'WORKSPACE.ADD_OBJECT_LTI' | translate }}</mat-slide-toggle
+          >
+        </div>
+        <div class="lti-data" *ngIf="ltiAllowed && ltiActivated">
+          <div class="heading">{{ 'WORKSPACE.LTI_HEADING' | translate }}</div>
+          <div class="info">{{ 'WORKSPACE.LTI_INFO' | translate }}</div>
+          <div class="inputs">
+            <mat-form-field>
+              <mat-label>{{ 'WORKSPACE.LTI_CONSUMER_KEY' | translate }}</mat-label>
+              <input matInput id="consumerKey" [(ngModel)]="ltiConsumerKey" />
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>{{ 'WORKSPACE.LTI_SHARED_SECRET' | translate }}</mat-label>
+              <input matInput id="sharedSecret" [(ngModel)]="ltiSharedSecret" />
+            </mat-form-field>
+          </div>
+          <div
+            class="info info-privacy"
+            innerHTML="{{ 'WORKSPACE.LTI_INFO_PRIVACY' | translate }}"
+          ></div>
+        </div>
+        <!--
                     <div *ngIf="ltiActivated && ltiAllowed && ltiTool" class="toolInfo">
                         <img [src]="ltiTool.preview.url+'&crop=true&width=50&height=50'">
                         <div class="title">{{ltiTool.title}}</div>
                     </div>
                     -->
-            </div>
-            <div *ngIf="showPicker" class="location">
-                <div class="caption">{{'WORKSPACE.FILE_LOCATION' | translate}}</div>
-                <div class="picker-group">
-                    <div class="no-breadcrumbs" *ngIf="!_parent">
-                        {{'STORAGE_LOCATION_UNSET' | translate}}
-                    </div>
-                    <es-breadcrumbs *ngIf="breadcrumbs"
-                            short="always"
-                            [clickable]="false"
-                            [breadcrumbsAsNode]="breadcrumbs.nodes"
-                            [home]="breadcrumbs.homeLabel"
-                            [homeIcon]="breadcrumbs.homeIcon"
-                    ></es-breadcrumbs>
-                    <div class="change">
-                        <button mat-button color="primary" (click)="chooseParent=true">{{'CHANGE_STORAGE_LOCATION' | translate}}</button>
-                    </div>
-                </div>
-              <mat-checkbox
-                *ngIf="showSaveParent"
-                [(ngModel)]="saveParent"
-                (ngModelChange)="setSaveParent($event)"
-              >{{'STORAGE_LOCATION_SAVE' | translate}}
-              </mat-checkbox>
-            </div>
+      </div>
+      <div *ngIf="showPicker" class="location">
+        <div class="caption">{{ 'WORKSPACE.FILE_LOCATION' | translate }}</div>
+        <div class="picker-group">
+          <div class="no-breadcrumbs" *ngIf="!parent">
+            {{ 'STORAGE_LOCATION_UNSET' | translate }}
+          </div>
+          <es-breadcrumbs
+            *ngIf="breadcrumbs"
+            short="always"
+            [clickable]="false"
+            [breadcrumbsAsNode]="breadcrumbs.nodes"
+            [home]="breadcrumbs.homeLabel"
+            [homeIcon]="breadcrumbs.homeIcon"
+          ></es-breadcrumbs>
+          <div class="change">
+            <button mat-button color="primary" (click)="chooseParent = true">
+              {{ 'CHANGE_STORAGE_LOCATION' | translate }}
+            </button>
+          </div>
         </div>
+        <mat-checkbox
+          *ngIf="showSaveParent"
+          [(ngModel)]="saveParent"
+          (ngModelChange)="setSaveParent($event)"
+          >{{ 'STORAGE_LOCATION_SAVE' | translate }}
+        </mat-checkbox>
+      </div>
     </div>
+  </div>
 </es-card>
-<es-file-chooser *ngIf="chooseParent"
-              [isCancelable]="true"
-              [pickDirectory]="true"
-              [title]="'WORKSPACE.CHOOSE_LOCATION_TITLE'"
-              [subtitle]="'WORKSPACE.CHOOSE_LOCATION_DESCRIPTION'"
-              (onCancel)="chooseParent=false"
-              (onChoose)="parentChoosed($event)"
+<es-file-chooser
+  *ngIf="chooseParent"
+  [isCancelable]="true"
+  [pickDirectory]="true"
+  [title]="'WORKSPACE.CHOOSE_LOCATION_TITLE'"
+  [subtitle]="'WORKSPACE.CHOOSE_LOCATION_DESCRIPTION'"
+  (onCancel)="chooseParent = false"
+  (onChoose)="parentChoosed($event)"
 ></es-file-chooser>

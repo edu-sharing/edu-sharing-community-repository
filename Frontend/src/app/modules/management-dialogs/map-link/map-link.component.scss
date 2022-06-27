@@ -1,37 +1,36 @@
-@import "../../../core-ui-module/styles/variables";
+@import '../../../core-ui-module/styles/variables';
 
-
-.card-content-padding{
-  >es-info-message{
-    display: flex;
-    margin-bottom: 20px;
-  }
-  >mat-form-field{
-    display: inline;
-    width: 100%;
-  }
-  .breadcrumb-style{
-    margin: 20px $cardPadding*-1;
-    padding: 20px $cardPadding;
-    //padding-right: 30px;
-    background: $cardLightBackground;
-    display: flex;
-    flex-direction: column;
-    width: calc(100% + #{$cardPadding*2});
-    .breadcrumb-group{
-      display: flex;
-      >es-breadcrumbs {
+.card-content-padding {
+    > es-info-message {
+        display: flex;
+        margin-bottom: 20px;
+    }
+    > mat-form-field {
+        display: inline;
+        width: 100%;
+    }
+    .breadcrumb-style {
+        margin: 20px $cardPadding * -1;
+        padding: 20px $cardPadding;
+        //padding-right: 30px;
+        background: $cardLightBackground;
+        display: flex;
+        flex-direction: column;
+        width: calc(100% + #{$cardPadding * 2});
+        .breadcrumb-group {
+            display: flex;
+            > es-breadcrumbs {
+                flex-grow: 1;
+            }
+        }
+        .breadcrumb-info {
+            margin: 3px 3px 15px;
+        }
+    }
+    .btn-choose {
         flex-grow: 1;
-      }
+        > button {
+            margin-top: 10px;
+        }
     }
-    .breadcrumb-info{
-      margin: 3px 3px 15px;
-    }
-  }
-  .btn-choose{
-    flex-grow: 1;
-    > button {
-      margin-top: 10px;
-    }
-  }
 }

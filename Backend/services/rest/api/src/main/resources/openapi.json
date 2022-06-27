@@ -606,6 +606,9 @@
           "isDirectory": {
             "type": "boolean"
           },
+          "isPublic": {
+            "type": "boolean"
+          },
           "license": {
             "$ref": "#/components/schemas/License"
           },
@@ -2682,6 +2685,9 @@
           "isDirectory": {
             "type": "boolean"
           },
+          "isPublic": {
+            "type": "boolean"
+          },
           "license": {
             "$ref": "#/components/schemas/License"
           },
@@ -2815,6 +2821,9 @@
             "type": "string"
           },
           "isDirectory": {
+            "type": "boolean"
+          },
+          "isPublic": {
             "type": "boolean"
           },
           "license": {
@@ -3457,6 +3466,20 @@
               "$ref": "#/components/schemas/PersonDeleteResult"
             },
             "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "PluginStatus": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -5448,6 +5471,12 @@
         "properties": {
           "description": {
             "type": "string"
+          },
+          "duplicateNodes": {
+            "items": {
+              "$ref": "#/components/schemas/Node"
+            },
+            "type": "array"
           },
           "keywords": {
             "items": {
@@ -9245,6 +9274,77 @@
           }
         },
         "summary": "Test a mail template",
+        "tags": [
+          "ADMIN v1"
+        ]
+      }
+    },
+    "/admin/v1/plugins": {
+      "get": {
+        "operationId": "getEnabledPlugins",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "get enabled system plugins",
         "tags": [
           "ADMIN v1"
         ]

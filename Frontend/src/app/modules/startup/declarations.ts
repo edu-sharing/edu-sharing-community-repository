@@ -1,5 +1,3 @@
-import {StartupComponent} from './startup.component';
+import { StartupComponent } from './startup.component';
 
-export const DECLARATIONS_STARTUP = [
-  StartupComponent
-];
+export const DECLARATIONS_STARTUP = [StartupComponent];

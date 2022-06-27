@@ -1,4 +1,4 @@
-@import "../../../core-ui-module/styles/variables";
+@import '../../../core-ui-module/styles/variables';
 
 $licenseInfoHeight: 40px;
 
@@ -36,7 +36,7 @@ $licenseInfoHeight: 40px;
             overflow: hidden;
             @include unselectableText();
             > .profile {
-                z-index: 2;
+                z-index: 1;
                 left: 0;
                 width: 100%;
                 text-align: center;
@@ -44,7 +44,7 @@ $licenseInfoHeight: 40px;
                 a {
                     color: unset;
                 }
-                es-user-avatar{
+                es-user-avatar {
                     display: flex;
                     justify-content: center;
                 }
@@ -74,13 +74,7 @@ $licenseInfoHeight: 40px;
         font-size: 90%;
         @include clickable();
     }
-
 }
 :host ::ng-deep .mat-button:hover .mat-button-focus-overlay {
     opacity: 0;
 }
-
-
-
-
-

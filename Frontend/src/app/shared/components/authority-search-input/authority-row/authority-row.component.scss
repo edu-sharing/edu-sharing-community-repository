@@ -1,79 +1,78 @@
-@import "../../../../../app/core-ui-module/styles/variables";
+@import '../../../../../app/core-ui-module/styles/variables';
 
-.suggestion-content{
-  width: 100%;
-  display: flex;
-  align-items: center;
-  padding: 10px 0;
-  >i{
-    color: #6d6d6d;
-    font-size: 30px;
-  }
-  .text-content {
+.suggestion-content {
+    width: 100%;
     display: flex;
-    flex-grow: 1;
-    min-width: 0;
-    justify-content: center;
-    > .data {
-      flex-grow: 1;
-      margin: 0 15px;
-      width: 0;
-      >div{
-        color:$textMain;
-        line-height: 1.6em;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      >.primary{
-        font-size: 110%;
-      }
-      >.secondary{
-        font-size: 90%;
-        color:$textLight;
-      }
+    align-items: center;
+    padding: 10px 0;
+    > i {
+        color: #6d6d6d;
+        font-size: 30px;
     }
-    > .secondary-data {
-      display: flex;
-      flex-direction: column;
-      max-width: 30%;
-      > .affiliation {
-        color: $textMediumLight;
-        text-transform: uppercase;
-        font-size: $fontSizeXSmall;
-        @include limitLineCount(1, 2);
-        word-break: break-all;
+    .text-content {
         display: flex;
-        justify-content: flex-end;
-      }
-
-      > .parent-orgs {
-        color: $textMediumLight;
-        font-size: $fontSizeXSmall;
-        line-height: 1.6em;
-        display: flex;
-        justify-content: flex-end;
-        margin-bottom: 5px;
-        > span {
-          overflow: hidden;
-          text-overflow: ellipsis;
+        flex-grow: 1;
+        min-width: 0;
+        justify-content: center;
+        > .data {
+            flex-grow: 1;
+            margin: 0 15px;
+            width: 0;
+            > div {
+                color: $textMain;
+                line-height: 1.6em;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            > .primary {
+                font-size: 110%;
+            }
+            > .secondary {
+                font-size: 90%;
+                color: $textLight;
+            }
         }
-      }
+        > .secondary-data {
+            display: flex;
+            flex-direction: column;
+            max-width: 30%;
+            > .affiliation {
+                color: $textMediumLight;
+                text-transform: uppercase;
+                font-size: $fontSizeXSmall;
+                @include limitLineCount(1, 2);
+                word-break: break-all;
+                display: flex;
+                justify-content: flex-end;
+            }
+
+            > .parent-orgs {
+                color: $textMediumLight;
+                font-size: $fontSizeXSmall;
+                line-height: 1.6em;
+                display: flex;
+                justify-content: flex-end;
+                margin-bottom: 5px;
+                > span {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+            }
+        }
     }
-  }
 }
 @media screen and (max-width: $mobileWidth) {
-  .suggestion-content .text-content{
-    flex-direction: column;
-    >.data{
-      width: 100%;
+    .suggestion-content .text-content {
+        flex-direction: column;
+        > .data {
+            width: 100%;
+        }
+        > .secondary-data {
+            max-width: unset;
+            margin: 3px 15px 0 15px;
+            > * {
+                justify-content: flex-start !important;
+            }
+        }
     }
-    >.secondary-data{
-      max-width: unset;
-      margin: 3px 15px 0 15px;
-      > * {
-        justify-content: flex-start!important;
-      }
-    }
-  }
 }
-

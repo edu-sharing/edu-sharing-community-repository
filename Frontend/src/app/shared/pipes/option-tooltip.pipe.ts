@@ -5,7 +5,7 @@ import { KeyCombination, OptionItem } from '../../core-ui-module/option-item';
 @Pipe({ name: 'optionTooltip' })
 export class OptionTooltipPipe implements PipeTransform {
     constructor(private translate: TranslateService) {}
-    
+
     transform(option: OptionItem, args: string[] = null): string {
         return (
             this.translate.instant(option.name) +

@@ -346,7 +346,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				sender.applyToMap("inviter.", replace);
 				MailTemplate.applyNodePropertiesToMap("node.", props, replace);
 				replace.put("name", name.trim());
-				replace.put("message", _mailText.trim());
+				replace.put("message", _mailText.replace("\n", "<br />").trim());
 				replace.put("permissions", permText.trim());
 				MailTemplate.addContentLinks(appInfo, _nodeId, replace, "link");
 				String template="invited";

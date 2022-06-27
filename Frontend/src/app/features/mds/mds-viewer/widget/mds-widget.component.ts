@@ -6,18 +6,18 @@ import {
     OnChanges,
     OnInit,
     SimpleChanges,
-    ViewChild
+    ViewChild,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { DateHelper } from '../../../../core-ui-module/DateHelper';
-import { FormatSizePipe } from '../../../../core-ui-module/pipes/file-size.pipe';
+import { FormatSizePipe } from '../../../../shared/pipes/file-size.pipe';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor/mds-editor-instance.service';
 import { MdsEditorViewComponent } from '../../mds-editor/mds-editor-view/mds-editor-view.component';
 import { ViewInstanceService } from '../../mds-editor/mds-editor-view/view-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../../mds-editor/widgets/mds-editor-widget-base';
-import {NodeHelperService} from '../../../../core-ui-module/node-helper.service';
-import {RestHelper} from '../../../../core-module/rest/rest-helper';
-import {RestConstants} from '../../../../core-module/rest/rest-constants';
+import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
+import { RestHelper } from '../../../../core-module/rest/rest-helper';
+import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { MdsWidgetType } from '../../types/types';
 
 @Component({
@@ -64,7 +64,6 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
     ngOnChanges(changes: SimpleChanges): void {
         this.value = this.getNodeValue();
     }
-
 
     ngOnInit() {
         this.value = this.getNodeValue();
@@ -157,11 +156,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
     }
 
     isEmpty() {
-        return (
-            this.value?.every((v) => !v) ||
-            this.value?.length === 0 ||
-            !this.value
-        );
+        return this.value?.every((v) => !v) || this.value?.length === 0 || !this.value;
     }
 
     formatDate() {
@@ -213,7 +208,8 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
         return (
             this.mdsEditorInstance.editorMode === 'inline' &&
             this.widget.definition.interactionType === 'Input' &&
-            nodes?.length === 1 && RestHelper.hasAccessPermission(nodes[0], RestConstants.ACCESS_WRITE) &&
+            nodes?.length === 1 &&
+            RestHelper.hasAccessPermission(nodes[0], RestConstants.ACCESS_WRITE) &&
             this.supportsInlineEditing()
         );
     }

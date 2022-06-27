@@ -24,6 +24,7 @@ import { NodeV1Service } from './services/node-v-1.service';
 import { OrganizationV1Service } from './services/organization-v-1.service';
 import { RatingV1Service } from './services/rating-v-1.service';
 import { RegisterV1Service } from './services/register-v-1.service';
+import { RelationV1Service } from './services/relation-v-1.service';
 import { RenderingV1Service } from './services/rendering-v-1.service';
 import { SearchV1Service } from './services/search-v-1.service';
 import { SharingV1Service } from './services/sharing-v-1.service';
@@ -61,6 +62,7 @@ import { UsageV1Service } from './services/usage-v-1.service';
         OrganizationV1Service,
         RatingV1Service,
         RegisterV1Service,
+        RelationV1Service,
         RenderingV1Service,
         SearchV1Service,
         SharingV1Service,

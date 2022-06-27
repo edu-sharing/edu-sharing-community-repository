@@ -1,11 +1,4 @@
-import {
-    Component,
-    ElementRef,
-    EventEmitter,
-    Input,
-    Output,
-    ViewChild,
-} from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { UIHelper } from '../../ui-helper';
 import { FloatLabelType } from '@angular/material/form-field';
 
@@ -43,7 +36,7 @@ export class InputPasswordComponent {
 
     passwordStrength: string;
     showPassword = false;
-    
+
     private _value: string;
 
     getInputType(): string {

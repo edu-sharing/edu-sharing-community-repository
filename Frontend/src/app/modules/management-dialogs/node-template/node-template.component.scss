@@ -1,59 +1,58 @@
-@import "../../../core-ui-module/styles/variables";
+@import '../../../core-ui-module/styles/variables';
 
-.template-content{
-  padding: $cardPadding;
+.template-content {
+    padding: $cardPadding;
 }
-.no-scroll{
-  overflow: hidden;
+.no-scroll {
+    overflow: hidden;
 }
 .template-disabled {
-  background: rgba(255, 255, 255, 1);
-  height: calc(100% - 30px);
-  position: absolute;
-  top: 120px;
-  left: 0;
+    background: rgba(255, 255, 255, 1);
+    height: calc(100% - 30px);
+    position: absolute;
+    top: 120px;
+    left: 0;
 
-  .disabled-info{
-    padding: 20% 10%;
-    text-align: center;
-    font-size: 140%;
-    color:$textLight;
-  }
+    .disabled-info {
+        padding: 20% 10%;
+        text-align: center;
+        font-size: 140%;
+        color: $textLight;
+    }
 }
 
-.enable-toggle{
-  margin-bottom: 20px;
-  padding:20px $cardPadding;
-  background: $actionDialogBackground;
-  border-bottom: 1px solid $cardSeperatorLineColor;
-  display: flex;
-  flex-direction: row-reverse;
+.enable-toggle {
+    margin-bottom: 20px;
+    padding: 20px $cardPadding;
+    background: $actionDialogBackground;
+    border-bottom: 1px solid $cardSeparatorLineColor;
+    display: flex;
+    flex-direction: row-reverse;
 
-  label{
-    float: right;
-    margin-right: -8px;
-  }
-  strong{
-    font-weight: bold;
-    letter-spacing: 0.25px;
-  }
+    label {
+        float: right;
+        margin-right: -8px;
+    }
+    strong {
+        font-weight: bold;
+        letter-spacing: 0.25px;
+    }
 }
 
-.node-status{
-  padding-right: 80px;
+.node-status {
+    padding-right: 80px;
 }
 @media screen and (max-width: $mobileWidth) {
-//  TODO: Raus
+    //  TODO: Raus
 }
 @media screen and (max-width: $mobileWidth - $mobileStage*2) {
-
-  .node-status{
-    p{
-      display: none;
+    .node-status {
+        p {
+            display: none;
+        }
+        strong {
+            font-weight: normal;
+            letter-spacing: normal;
+        }
     }
-    strong{
-      font-weight: normal;
-      letter-spacing: normal;
-    }
-  }
 }

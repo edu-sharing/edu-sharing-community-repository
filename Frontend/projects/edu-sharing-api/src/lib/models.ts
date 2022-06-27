@@ -2,6 +2,8 @@
 
 export {
     About,
+    Connector,
+    ConnectorList,
     Mds as MdsDefinition,
     MdsGroup,
     MdsSort,
@@ -15,11 +17,13 @@ export {
     NodeRef,
     Organization,
     Person,
+    RelationData,
     SearchResultNode as SearchResults,
     StreamEntry,
     UserProfile,
     UserQuota,
     UserStatus,
+    WebsiteInformation,
 } from './api/models';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MdsView } from './api/models';

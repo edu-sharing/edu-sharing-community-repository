@@ -35,7 +35,7 @@ mat-tab-group {
         margin-top: $mainnavHeight + 48px;
     }
     &.collectionsContainerNoSidebar {
-        padding:0 10%;
+        padding: 0 10%;
         grid-template-columns: auto;
     }
 }
@@ -115,13 +115,13 @@ section {
     width: 90px;
     height: 90px;
     border-radius: 50%;
-    background-color: rgba(0,0,0,.1);
+    background-color: rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
     @include unselectableText();
     > i {
-        color:#fff;
+        color: #fff;
         font-size: 45px;
     }
 }
@@ -158,7 +158,7 @@ section {
 
 .collection-nocontent-big {
     font-size: $fontSizeLarge;
-    color:$textLight;
+    color: $textLight;
     margin-top: 20px;
     text-align: center;
     width: 100%;
@@ -227,8 +227,8 @@ section {
 .collection-option {
     position: absolute;
     top: -23px;
-    left:0;
-    right:0;
+    left: 0;
+    right: 0;
     display: flex;
     justify-content: center;
     z-index: 1;
@@ -253,7 +253,7 @@ section {
         height: 100%;
         align-items: center;
         justify-content: center;
-        background-color: rgba(255,255,255,0.75);
+        background-color: rgba(255, 255, 255, 0.75);
         backdrop-filter: blur(10px);
     }
 }
@@ -310,33 +310,34 @@ section {
     background: #fff;
     @include materialShadow();
 }
-.collections-header-textarea{
-    background-color: rgba(0,0,0,0.15);
-    &.collections-header-textarea-bright{
+.collections-header-textarea {
+    background-color: rgba(0, 0, 0, 0.15);
+    &.collections-header-textarea-bright {
         background-color: rgba(255, 255, 255, 0.15);
     }
-    .collection-label,.collection-metadata{
+    .collection-label,
+    .collection-metadata {
         margin: 18px 0 0;
         padding-top: 18px;
-        border-top: 1px solid rgba(0,0,0,.25);
+        border-top: 1px solid rgba(0, 0, 0, 0.25);
         opacity: 0.8;
         font-size: 90%;
     }
-    .collection-content{
-        margin-top:5px;
+    .collection-content {
+        margin-top: 5px;
     }
-    .collection-permissions.collection-content{
+    .collection-permissions.collection-content {
         display: flex;
         flex-direction: column;
-        > div{
+        > div {
             display: flex;
             align-items: center;
-            padding:3px 0;
-            >es-user-avatar{
+            padding: 3px 0;
+            > es-user-avatar {
                 height: 24px;
                 margin-right: 9px;
             }
-            >span{
+            > span {
                 @include limitLineCount(2, 1.25);
             }
         }
@@ -347,7 +348,7 @@ section {
         .tab-label {
             display: none;
         }
-        .mat-tab-label-active .tab-label{
+        .mat-tab-label-active .tab-label {
             display: flex;
         }
     }

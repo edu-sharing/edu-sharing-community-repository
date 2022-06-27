@@ -16,6 +16,8 @@ import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceReadOnly;
 import org.edu_sharing.service.rating.RatingService;
 import org.edu_sharing.service.rating.RatingServiceAdapter;
+import org.edu_sharing.service.relations.RelationService;
+import org.edu_sharing.service.relations.RelationServiceAdadapter;
 import org.edu_sharing.service.rendering.RenderingService;
 import org.edu_sharing.service.rendering.RenderingServiceImpl;
 import org.edu_sharing.service.search.SearchService;
@@ -35,6 +37,9 @@ public abstract class Provider {
     }
     public RatingService getRatingService(){
         return new RatingServiceAdapter(appId);
+    }
+    public RelationService getRelationService(){
+        return new RelationServiceAdadapter(appId);
     }
     public CommentService getCommentService(){
         return new CommentServiceAdapter(appId);

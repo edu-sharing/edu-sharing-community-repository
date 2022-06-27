@@ -1,139 +1,141 @@
-@import "../../../core-ui-module/styles/variables";
+@import '../../../core-ui-module/styles/variables';
 
-:host ::ng-deep{
-  .table .allowed #Mask{
-    fill:$colorStatusPositive;
-  }
-  .table .denied #Mask{
-    fill:$colorStatusNegative;
-  }
+:host ::ng-deep {
+    .table .allowed #Mask {
+        fill: $colorStatusPositive;
+    }
+    .table .denied #Mask {
+        fill: $colorStatusNegative;
+    }
 }
-.card-scroll{
-  top:0;
-  height:calc(100% - 67px);
+.card-scroll {
+    top: 0;
+    height: calc(100% - 67px);
 }
-$headingHeight:60px;
+$headingHeight: 60px;
 .heading-group {
-  width: 100%;
-  background-color: #fff;
-  height: $headingHeight;
-  .fade {
-    position: absolute;
-    z-index: 100;
-    left: 0;
-    top: 108px;
     width: 100%;
-    height: 20px;
-    background: linear-gradient(to bottom, #fff 15%, rgba(255, 255, 255, 0.0001));
-  }
+    background-color: #fff;
+    height: $headingHeight;
+    .fade {
+        position: absolute;
+        z-index: 100;
+        left: 0;
+        top: 108px;
+        width: 100%;
+        height: 20px;
+        background: linear-gradient(to bottom, #fff 15%, rgba(255, 255, 255, 0.0001));
+    }
 }
-.toolpermissions{
-  .groupTable{
-    padding: 0 $cardPadding;
-  }
+.toolpermissions {
+    .groupTable {
+        padding: 0 $cardPadding;
+    }
 }
-.heading,.groupTable{
-  display:flex;
+.heading,
+.groupTable {
+    display: flex;
 }
-.heading{
-  font-weight: bold;
-  color: $textLight;
-  margin:0 $cardPadding;
+.heading {
+    font-weight: bold;
+    color: $textLight;
+    margin: 0 $cardPadding;
 }
-.table{
-  display:flex;
-  flex-direction: column;
-  width:100%;
-  margin-top: -10px;
+.table {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: -10px;
 }
-.group{
-  display:flex;
-  flex-direction: column;
+.group {
+    display: flex;
+    flex-direction: column;
 }
-.group-add{
-  display:flex;
-  flex-direction: column;
-  >.add{
+.group-add {
+    display: flex;
+    flex-direction: column;
+    > .add {
+        display: flex;
+        align-items: center;
+        padding: 20px 0;
+        > mat-form-field {
+            flex-grow: 1;
+            width: auto;
+            margin: 0 30px;
+        }
+        > button {
+            margin: 0 30px;
+        }
+    }
+}
+.groupName {
+    color: $textLight;
+    font-weight: bold;
+    text-align: left;
+    padding: 10px 20px;
+}
+.name {
+    flex-grow: 1;
+    text-align: left;
+    align-self: center;
+    padding: 10px 0;
+    word-break: break-word;
+    .technicalName {
+        font-size: 70%;
+        word-break: break-all;
+        color: $textVeryLight;
+        font-style: italic;
+    }
+}
+.checkboxDiv {
+    width: 75px;
+    min-width: 75px;
+    align-self: center;
+}
+.checkboxInput {
+    padding-top: 7px;
+}
+.checkboxDiv,
+.result {
+    text-align: center;
+}
+:host ::ng-deep {
+    .result es-spinner-small .preloader-wrapper.small {
+        width: 20px;
+        height: 20px;
+    }
+    .mat-checkbox-inner-container {
+        margin: 0;
+    }
+    .add .mat-form-field-wrapper {
+        padding: 0;
+    }
+}
+.heading .result {
+    justify-content: center;
+}
+.result {
+    width: 100px;
+    min-width: 100px;
     display: flex;
     align-items: center;
-    padding:20px 0;
-    >mat-form-field{
-      flex-grow: 1;
-      width: auto;
-      margin: 0 30px;
+    > div {
+        display: flex;
+        .text {
+            white-space: pre-wrap;
+        }
+        .inherit {
+            cursor: default;
+            padding-left: 10px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+        }
     }
-    >button{
-      margin: 0 30px;
-    }
-  }
 }
-.groupName{
-  color:$textLight;
-  font-weight: bold;
-  text-align: left;
-  padding: 10px 20px;
+.allowed {
+    color: $colorStatusPositive;
 }
-.name{
-  flex-grow: 1;
-  text-align:left;
-  align-self: center;
-  padding:10px 0;
-  word-break: break-word;
-  .technicalName{
-    font-size:70%;
-    word-break: break-all;
-    color:$textVeryLight;
-    font-style: italic;
-  }
-}
-.checkboxDiv{
-  width:75px;
-  min-width:75px;
-  align-self: center;
-}
-.checkboxInput{
-  padding-top: 7px;
-}
-.checkboxDiv,.result{
-  text-align: center;
-}
-:host ::ng-deep{
-  .result es-spinner-small .preloader-wrapper.small{
-    width:20px;
-    height:20px;
-  }
-  .mat-checkbox-inner-container{
-    margin: 0;
-  }
-  .add .mat-form-field-wrapper{
-    padding: 0;
-  }
-}
-.heading .result{
-  justify-content: center;
-}
-.result{
-  width: 100px;
-  min-width: 100px;
-  display:flex;
-  align-items: center;
-  >div {
-    display: flex;
-    .text {
-      white-space: pre-wrap;
-    }
-    .inherit {
-      cursor: default;
-      padding-left: 10px;
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-    }
-  }
-}
-.allowed{
-  color:$colorStatusPositive;
-}
-.denied{
-  color:$colorStatusNegative;
+.denied {
+    color: $colorStatusNegative;
 }

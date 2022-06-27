@@ -20,6 +20,7 @@
           [class.mat-menu-item-selected]="option.isSelected"
           [disabled]="!option.isEnabled"
           (click)="click(option)"
+          attr.data-test="menu-item-{{ option.name }}"
         >
           <i [esIcon]="option.icon"></i> {{ option.name | translate }}
         </button>

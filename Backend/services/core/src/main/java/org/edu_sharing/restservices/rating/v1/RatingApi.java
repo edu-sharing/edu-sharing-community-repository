@@ -8,16 +8,20 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.log4j.Logger;
-import org.edu_sharing.restservices.ApiService;
-import org.edu_sharing.restservices.RatingDao;
-import org.edu_sharing.restservices.RepositoryDao;
-import org.edu_sharing.restservices.RestConstants;
+import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.shared.ErrorResponse;
+import org.edu_sharing.service.NotAnAdminException;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
+import org.edu_sharing.service.rating.Rating;
+import org.edu_sharing.service.rating.RatingDetails;
+import org.edu_sharing.service.rating.RatingHistory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.util.Date;
+import java.util.List;
 
 @Path("/rating/v1")
 @Tag(name= "RATING v1" )
@@ -74,4 +78,58 @@ public class RatingApi {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
 		}
     }
+
+	@GET
+	@Path("/ratings/{repository}/{node}/history")
+	@Operation(summary = "get the range of nodes which had tracked actions since a given timestamp", description = "requires admin")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = RatingHistory[].class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+	public Response getAccumulatedRatings(@Context HttpServletRequest req,
+							  @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+							  @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+							  @Parameter(description = "date range from", required = false) @QueryParam("dateFrom") Long dateFrom
+	) {
+		try {
+			if (!AuthorityServiceHelper.isAdmin()) {
+				throw new NotAnAdminException();
+			}
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			List<RatingHistory> ratings = new RatingDao(repoDao).getAccumulatedRatingHistory(node, dateFrom == null ? null : new Date(dateFrom));
+			return Response.ok().entity(ratings).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+	@GET
+	@Path("/ratings/{repository}/nodes/altered")
+	@Operation(summary = "get the range of nodes which had tracked actions since a given timestamp", description = "requires admin")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = String[].class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
+	public Response getNodesAlteredInRange(@Context HttpServletRequest req,
+										   @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+										   @Parameter(description = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom
+	) {
+		try {
+			if (!AuthorityServiceHelper.isAdmin()) {
+				throw new NotAnAdminException();
+			}
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			List<String> ratings = new RatingDao(repoDao).getAlteredNodes(new Date(dateFrom));
+			return Response.ok().entity(ratings).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
 }

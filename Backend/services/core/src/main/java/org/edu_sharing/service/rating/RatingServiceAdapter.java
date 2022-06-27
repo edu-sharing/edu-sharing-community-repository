@@ -2,6 +2,7 @@ package org.edu_sharing.service.rating;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
 import java.util.List;
@@ -37,6 +38,16 @@ public class RatingServiceAdapter implements RatingService {
 
     @Override
     public RatingDetails getAccumulatedRatings(String nodeId, Date after){
+        return null;
+    }
+
+    @Override
+    public List<String> getAlteredNodeIds(@NotNull Date after) {
+        return null;
+    }
+
+    @Override
+    public List<RatingHistory> getAccumulatedRatingHistory(String nodeId, Date after) {
         return null;
     }
 }

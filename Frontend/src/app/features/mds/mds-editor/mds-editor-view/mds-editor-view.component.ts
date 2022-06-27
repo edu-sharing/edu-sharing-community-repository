@@ -18,15 +18,15 @@ import {
     ViewContainerRef,
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import {BehaviorSubject, combineLatest, Observable, ReplaySubject} from 'rxjs';
-import {filter, first, map, takeUntil} from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, ReplaySubject } from 'rxjs';
+import { filter, first, map, takeUntil } from 'rxjs/operators';
 import { Node } from '../../../../core-module/core.module';
 import { UIAnimation } from '../../../../core-module/ui/ui-animation';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { MdsWidgetComponent } from '../../mds-viewer/widget/mds-widget.component';
 import { MdsEditorCardComponent } from '../mds-editor-card/mds-editor-card.component';
 import { MdsEditorCoreComponent } from '../mds-editor-core/mds-editor-core.component';
-import {GeneralWidget, MdsEditorInstanceService, Widget} from '../mds-editor-instance.service';
+import { GeneralWidget, MdsEditorInstanceService, Widget } from '../mds-editor-instance.service';
 import {
     Constraints,
     InputStatus,
@@ -59,11 +59,9 @@ import { MdsEditorWidgetTextComponent } from '../widgets/mds-editor-widget-text/
 import { MdsEditorWidgetTreeComponent } from '../widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetVersionComponent } from '../widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 import { ViewInstanceService } from './view-instance.service';
-import {MdsEditorWidgetBase} from '../widgets/mds-editor-widget-base';
-import {MdsEditorWidgetVCardComponent} from '../widgets/mds-editor-widget-vcard/mds-editor-widget-vcard.component';
-import {
-    MdsEditorWidgetTinyMCE
-} from '../widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-tinymce.component';
+import { MdsEditorWidgetBase } from '../widgets/mds-editor-widget-base';
+import { MdsEditorWidgetVCardComponent } from '../widgets/mds-editor-widget-vcard/mds-editor-widget-vcard.component';
+import { MdsEditorWidgetTinyMCE } from '../widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-tinymce.component';
 import { EditorMode } from '../../types/mds-types';
 
 export interface NativeWidgetComponent {
@@ -120,6 +118,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         [MdsWidgetType.CheckboxHorizontal]: MdsEditorWidgetCheckboxesComponent,
         [MdsWidgetType.CheckboxVertical]: MdsEditorWidgetCheckboxesComponent,
         [MdsWidgetType.MultiValueBadges]: MdsEditorWidgetChipsComponent,
+        [MdsWidgetType.SingleValueSuggestBadges]: MdsEditorWidgetChipsComponent,
         [MdsWidgetType.MultiValueSuggestBadges]: MdsEditorWidgetChipsComponent,
         [MdsWidgetType.MultiValueFixedBadges]: MdsEditorWidgetChipsComponent,
         [MdsWidgetType.MultiValueAuthorityBadges]: MdsEditorWidgetAuthorityComponent,
@@ -174,9 +173,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
     getWidgets() {
         return (this.mdsEditorInstance.widgets.value as GeneralWidget[])
             .concat(this.mdsEditorInstance.nativeWidgets.value)
-            .filter((w) =>
-                w.viewId === this.view.id
-            );
+            .filter((w) => w.viewId === this.view.id);
     }
     ngOnInit(): void {
         this.html = this.getHtml();
@@ -240,7 +237,10 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 // Native widgets don't support dynamic conditions yet and don't necessarily have a
                 // `widget` object.
                 const WidgetComponent = MdsEditorViewComponent.nativeWidgets[widgetName];
-                if(this.mdsEditorInstance.editorMode === 'inline' && !WidgetComponent?.constraints?.supportsInlineEditing) {
+                if (
+                    this.mdsEditorInstance.editorMode === 'inline' &&
+                    !WidgetComponent?.constraints?.supportsInlineEditing
+                ) {
                     // native widgets not (yet) supported for inline editing
                     continue;
                 } else {
@@ -250,9 +250,14 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 if (widgets.length >= 1) {
                     // Possibly inject multiple widgets to allow dynamic switching via conditions.
                     for (const widget of widgets) {
-                        this.injectWidget(widget, element, this.mdsEditorInstance.editorMode, widgets.length === 1 ? 'replace' : 'append');
+                        this.injectWidget(
+                            widget,
+                            element,
+                            this.mdsEditorInstance.editorMode,
+                            widgets.length === 1 ? 'replace' : 'append',
+                        );
                     }
-                    if(element.parentNode) {
+                    if (element.parentNode) {
                         // remove the dummy element because it is now replaced with div containers
                         element.parentNode.removeChild(element);
                     }
@@ -339,9 +344,14 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         });
     }
 
-    private injectWidget(widget: Widget, element: Element, editorMode = this.mdsEditorInstance.editorMode, mode: 'append' | 'replace' = 'replace'): {
-        htmlElement: HTMLElement,
-        instance: MdsEditorWidgetBase,
+    private injectWidget(
+        widget: Widget,
+        element: Element,
+        editorMode = this.mdsEditorInstance.editorMode,
+        mode: 'append' | 'replace' = 'replace',
+    ): {
+        htmlElement: HTMLElement;
+        instance: MdsEditorWidgetBase;
     } {
         return this.ngZone.runOutsideAngular<any>(() => {
             element = replaceElementWithDiv(element, mode);
@@ -359,7 +369,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                         widgetName: widget.definition.caption,
                         reason: `Widget for type ${widget.definition.type} is not implemented`,
                     },
-                    {replace: false},
+                    { replace: false },
                     this.injector,
                 ).instance;
             } else if (WidgetComponent === null) {
@@ -376,9 +386,9 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                         widget,
                         view: this,
                     },
-                    {replace: false},
+                    { replace: false },
                     this.injector,
-                ).instance
+                ).instance,
             };
         });
     }
@@ -389,10 +399,10 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         } else if (this.view.rel === 'suggestions') {
             return MdsEditorViewComponent.suggestionWidgetComponents[
                 widget.definition.type as MdsWidgetType
-                ];
+            ];
         } else if (widget.definition.interactionType === 'None' || editorMode === 'inline') {
             // if inline editing -> we don't hide any widget so it can be edited
-            if(editorMode === 'inline') {
+            if (editorMode === 'inline') {
                 widget.definition.hideIfEmpty = false;
             }
             return MdsWidgetComponent;
@@ -430,14 +440,9 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
     async injectEditField(mdsWidgetComponent: MdsWidgetComponent, targetElement: Element) {
         const widget = this.mdsEditorInstance.createWidget(
             mdsWidgetComponent.widget.definition,
-            this.view.id
+            this.view.id,
         );
-        const injected = this.injectWidget(
-            widget,
-            targetElement,
-            'nodes',
-            'replace'
-        );
+        const injected = this.injectWidget(widget, targetElement, 'nodes', 'replace');
         widget.initWithNodes(this.mdsEditorInstance.nodes$.value);
         // timeout to wait for view inflation and set the focus
         await this.applicationRef.tick();
@@ -445,20 +450,18 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
             injected.instance.focus();
             injected.instance.onBlur.pipe(first()).subscribe(() => {
                 mdsWidgetComponent.finishEdit(injected.instance);
-            })
+            });
         });
     }
 
     isInHiddenState() {
-        if(this.isHidden) {
+        if (this.isHidden) {
             return true;
         }
-        if(this.mdsEditorInstance.shouldShowExtendedWidgets$.value) {
+        if (this.mdsEditorInstance.shouldShowExtendedWidgets$.value) {
             return false;
         }
-        return this.getWidgets().filter((w) =>
-            !(w as Widget).definition?.isExtended
-        ).length === 0;
+        return this.getWidgets().filter((w) => !(w as Widget).definition?.isExtended).length === 0;
     }
 }
 

@@ -70,9 +70,9 @@ export class LoadingScreenService {
      *
      * The task is registered at the time the pipe is created and will be marked as done when the
      * observable either completes or throws an error.
-     * 
+     *
      * Use this function with observables that emit once and then complete.
-     * 
+     *
      * @param params See `addLoadingTask`
      */
     showUntilFinished<T>(

@@ -4,4 +4,4 @@
  * Applying this to properties of an API model lets us narrow down property types but ensures that
  * we don't add or redefine properties which are incompatible with the original model.
  */
- export type Narrow<P, T> = T extends P ? T : P;
+export type Narrow<P, T> = T extends P ? T : P;

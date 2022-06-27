@@ -1,0 +1,110 @@
+@import '../../../core-ui-module/styles/variables';
+$defaultColumnWidth: 120px;
+$rowHeight: 58px;
+
+:host {
+    display: flex;
+    flex-direction: column;
+    ::ng-deep {
+        mat-cell es-node-url {
+            width: 100%;
+            a {
+                color: #000;
+            }
+            &.cdk-keyboard-focused {
+                @include setGlobalKeyboardFocus('border');
+            }
+        }
+        es-list-text {
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            display: flex;
+            width: 100%;
+            height: $rowHeight;
+            align-items: center;
+        }
+    }
+}
+mat-header-cell,
+mat-cell {
+    margin: 0 3px;
+    // do not fix the "primary/title" column
+    &:not(.mat-column-primary) {
+        flex: 0 $defaultColumnWidth;
+    }
+    &.mat-column-select {
+        flex: 0 54px;
+    }
+    &.mat-column-icon {
+        flex: 0 65px;
+        justify-content: center;
+    }
+    &.mat-column-actions {
+        flex: 0 50px;
+        display: flex;
+        justify-content: flex-end;
+        padding-right: 5px;
+    }
+}
+
+.mat-row {
+    cursor: pointer;
+    &.mat-row-drop-allowed {
+        border: 2px dashed $colorStatusPositive;
+        cursor: inherit;
+    }
+    &.mat-row-drop-blocked {
+        border: 2px dashed $colorStatusNegative;
+        cursor: inherit;
+    }
+    &.mat-row-virtual {
+        background: linear-gradient(
+            to right,
+            $nodeVirtualColor 0,
+            $nodeVirtualColor 5px,
+            rgba(255, 255, 255, 0.0001) 5px
+        );
+    }
+    &.mat-row-virtual-seperator {
+        border-bottom: 2px dashed lighten($nodeVirtualColor, 10%);
+    }
+    &:hover {
+        background-color: $listItemSelectedBackground;
+    }
+    &.mat-row-selected {
+        background: $listItemSelectedBackgroundEffect;
+    }
+}
+.dropdown-dummy {
+    position: fixed;
+}
+.cell-icon {
+    > .icon-bg {
+        width: 30px;
+        height: 30px;
+        padding: 3px;
+        margin: 1px 0;
+        background-color: #fff;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        @include materialShadowSmall();
+        > img {
+            width: 18px;
+            height: auto;
+        }
+        > i {
+            color: #666;
+            font-size: 18px;
+        }
+    }
+}
+.mat-column-link {
+    flex: 0 60px;
+    a {
+        display: flex;
+        justify-content: center;
+    }
+}

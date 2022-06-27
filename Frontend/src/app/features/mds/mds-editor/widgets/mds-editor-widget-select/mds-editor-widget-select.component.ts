@@ -1,10 +1,10 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatTooltip } from '@angular/material/tooltip';
 import { skip } from 'rxjs/operators';
 import { MdsWidgetValue } from '../../../types/types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
-import {MatSelect} from '@angular/material/select';
+import { MatSelect } from '@angular/material/select';
 
 @Component({
     selector: 'es-mds-editor-widget-select',

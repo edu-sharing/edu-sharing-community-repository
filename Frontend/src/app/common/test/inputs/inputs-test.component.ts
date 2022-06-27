@@ -1,10 +1,13 @@
-import {Component} from "@angular/core";
-import {Collection, RestCollectionService, RestConnectorService} from "../../../core-module/core.module";
+import { Component } from '@angular/core';
+import {
+    Collection,
+    RestCollectionService,
+    RestConnectorService,
+} from '../../../core-module/core.module';
 
 @Component({
-  selector: 'es-inputs-test',
-  styleUrls: ['./inputs-test.component.scss'],
-  templateUrl: './inputs-test.component.html',
+    selector: 'es-inputs-test',
+    styleUrls: ['./inputs-test.component.scss'],
+    templateUrl: './inputs-test.component.html',
 })
-export class InputsTestComponent {
-}
+export class InputsTestComponent {}

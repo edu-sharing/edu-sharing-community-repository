@@ -109,9 +109,7 @@ import org.edu_sharing.alfresco.fixes.VirtualEduGroupFolderTool;
 import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.metadataset.v2.MetadataKey;
 import org.edu_sharing.metadataset.v2.MetadataSet;
-import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.exception.CCException;
 import org.edu_sharing.repository.client.rpc.ACE;
@@ -860,7 +858,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	}
 	public boolean downloadAllowed(String nodeId,Serializable commonLicenseKey,String editorType){
 		// when there is a signed request from the connector, the download (binary content delivery) is allowed
-		if(ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get())) {
+		if(ContextManagementFilter.accessTool.get() != null && ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getType())) {
 			return true;
 		}
 		boolean downloadAllowed;
@@ -1137,7 +1135,8 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			propsOutput = new HashMap<>(i.beforeDeliverProperties(PropertiesInterceptorFactory.getPropertiesContext(
 					nodeRef,
 					propsOutput,
-					Arrays.asList(aspects))
+					Arrays.asList(aspects),
+					null)
 			));
 		}
 
@@ -1378,7 +1377,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				properties.put(CCConstants.CC_CACHE_MILLISECONDS_KEY, new Long(mdate.getTime()).toString());
 				for(PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
 					properties = new HashMap<>(i.beforeCacheProperties(PropertiesInterceptorFactory.getPropertiesContext(nodeRef, properties,
-									aspects.stream().map(QName::toString).collect(Collectors.toList()))));
+									aspects.stream().map(QName::toString).collect(Collectors.toList()), null)));
 				}
 				repCache.put(nodeRef.getId(), properties);
 			}

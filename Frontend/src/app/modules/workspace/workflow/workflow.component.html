@@ -1,6 +1,10 @@
-<es-card title="{{'WORKSPACE.WORKFLOW.TITLE' | translate}}" [node]="nodes" width="large" height="xlarge"
-      [buttons]="buttons"
-      (onCancel)="cancel()"
+<es-card
+  title="{{ 'WORKSPACE.WORKFLOW.TITLE' | translate }}"
+  [node]="nodes"
+  width="large"
+  height="xlarge"
+  [buttons]="buttons"
+  (onCancel)="cancel()"
 >
   <es-spinner *ngIf="loading"></es-spinner>
   <div class="workflow-content" *ngIf="!loading">
@@ -12,20 +16,27 @@
         [showRecent]="false"
         (onChooseAuthority)="addSuggestion($event)"
         [placeholder]="'WORKSPACE.WORKFLOW.RECEIVERS'"
-        hint="{{'WORKSPACE.WORKFLOW.RECEIVERS_HINT' | translate}}"
+        hint="{{ 'WORKSPACE.WORKFLOW.RECEIVERS_HINT' | translate }}"
       ></es-authority-search-input>
       <div class="status">
-        <button mat-raised-button (click)="chooseStatus=true">
-          <i class="align-icon statusIcon" [style.background-color]="status.color">&nbsp;</i> {{'WORKFLOW.'+status.id | translate}}
-          <i class="material-icons align-icon right">keyboard_arrow_down</i></button>
+        <button mat-raised-button (click)="chooseStatus = true">
+          <i class="align-icon statusIcon" [style.background-color]="status.color">&nbsp;</i>
+          {{ 'WORKFLOW.' + status.id | translate }}
+          <i class="material-icons align-icon right">keyboard_arrow_down</i>
+        </button>
       </div>
       <div *ngIf="chooseStatus" class="chooseStatus">
-        <div class="dialog" (click)="chooseStatus=false"></div>
+        <div class="dialog" (click)="chooseStatus = false"></div>
         <div class="moreOpen collection">
-          <a class="collection-item" *ngFor="let s of validStatus"
-             (click)="setStatus(s)" [class.disabled]="!isAllowedAsNext(s)">
-            <i class="align-icon statusIcon" [style.background-color]="s.color">&nbsp;</i> {{'WORKFLOW.'+s.id | translate}}
-            <i class="material-icons selected" *ngIf="status==s">check</i>
+          <a
+            class="collection-item"
+            *ngFor="let s of validStatus"
+            (click)="setStatus(s)"
+            [class.disabled]="!isAllowedAsNext(s)"
+          >
+            <i class="align-icon statusIcon" [style.background-color]="s.color">&nbsp;</i>
+            {{ 'WORKFLOW.' + s.id | translate }}
+            <i class="material-icons selected" *ngIf="status == s">check</i>
           </a>
         </div>
       </div>
@@ -35,22 +46,26 @@
     </div>-->
     <div class="receivers">
       <mat-chip-list *ngIf="status.hasReceiver">
-        <mat-chip *ngFor="let receiver of receivers" (removed)="removeReceiver(receiver)" class="badge">
+        <mat-chip
+          *ngFor="let receiver of receivers"
+          (removed)="removeReceiver(receiver)"
+          class="badge"
+        >
           <div class="mat-chip-group">
-            <span class="primary">{{receiver | authorityName}}</span>
-            <span class="secondary">{{receiver | permissionName:{field:'secondary'} }}</span>
+            <span class="primary">{{ receiver | authorityName }}</span>
+            <span class="secondary">{{ receiver | permissionName: { field: 'secondary' } }}</span>
           </div>
           <i matChipRemove esIcon="cancel"></i>
         </mat-chip>
       </mat-chip-list>
     </div>
     <mat-form-field class="comment">
-      <mat-label>{{'WORKSPACE.WORKFLOW.COMMENT' | translate}}</mat-label>
-      <input matInput [(ngModel)]="comment">
-      <mat-hint>{{'WORKSPACE.WORKFLOW.COMMENT_INFO' | translate}}</mat-hint>
+      <mat-label>{{ 'WORKSPACE.WORKFLOW.COMMENT' | translate }}</mat-label>
+      <input matInput [(ngModel)]="comment" />
+      <mat-hint>{{ 'WORKSPACE.WORKFLOW.COMMENT_INFO' | translate }}</mat-hint>
     </mat-form-field>
     <div class="historyLabel" *ngIf="history.length">
-      {{'WORKSPACE.WORKFLOW.HISTORY' | translate}}
+      {{ 'WORKSPACE.WORKFLOW.HISTORY' | translate }}
     </div>
   </div>
   <es-workflow-list [history]="history"></es-workflow-list>
@@ -62,5 +77,5 @@
   [messageParameters]="dialogMessageParameters"
   [buttons]="dialogButtons"
   [priority]="1"
-  (onCancel)="dialogTitle=null"
+  (onCancel)="dialogTitle = null"
 ></es-modal-dialog>

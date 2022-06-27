@@ -25,7 +25,17 @@ es-input-fill-progress {
         .extended-toggle {
             padding: 0 10px 0 25px;
             height: 39px;
-            background: linear-gradient(to right,rgba(red($workspaceMetadataBackground),green($workspaceMetadataBackground),blue($workspaceMetadataBackground),0.0001) 0,$workspaceMetadataBackground 15px);
+            background: linear-gradient(
+                to right,
+                rgba(
+                        red($workspaceMetadataBackground),
+                        green($workspaceMetadataBackground),
+                        blue($workspaceMetadataBackground),
+                        0.0001
+                    )
+                    0,
+                $workspaceMetadataBackground 15px
+            );
         }
     }
     .heading {

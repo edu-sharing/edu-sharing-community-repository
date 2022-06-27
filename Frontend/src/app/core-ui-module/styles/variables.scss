@@ -1,4 +1,4 @@
-@use "sass:map";
+@use 'sass:map';
 @import 'branding';
 
 // All variables can be overridden in `branding.scss`.
@@ -69,7 +69,7 @@ $tableIconSize: 38px !default;
 $actionDialogBackground: #eee !default;
 $cardLightBackground: #f9f9f9 !default;
 $searchInputBorderColor: #ccc !default;
-$cardSeperatorLineColor: #ccc !default;
+$cardSeparatorLineColor: #ccc !default;
 $genericSeperatorLineColor: #ececec !default;
 $inputBorderColor: #9e9e9e !default;
 $commentsActionsSeperatorLineColor: $backgroundColor !default;

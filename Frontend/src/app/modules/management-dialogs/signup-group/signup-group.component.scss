@@ -1,65 +1,67 @@
-@import "../../../core-ui-module/styles/variables";
+@import '../../../core-ui-module/styles/variables';
 
-.select-group{
-  h4, h5{
-    padding: 0 $cardPadding;
-    display: flex;
-    justify-content: center;
-    text-align: center;
-  }
-  h4{
-    margin-top: 20%;
-    color: $textLight;
-  }
-  h5{
-    padding: $cardPadding;
-  }
-  button{
-    width: 100%;
-    border-radius: 0;
-    padding:0 $cardPadding;
-    &.is-member {
-        app-authority-row {
-            opacity: 0.75;
-            filter: grayscale(100%);
-            backdrop-filter: grayscale(100%);
+.select-group {
+    h4,
+    h5 {
+        padding: 0 $cardPadding;
+        display: flex;
+        justify-content: center;
+        text-align: center;
+    }
+    h4 {
+        margin-top: 20%;
+        color: $textLight;
+    }
+    h5 {
+        padding: $cardPadding;
+    }
+    button {
+        width: 100%;
+        border-radius: 0;
+        padding: 0 $cardPadding;
+        &.is-member {
+            app-authority-row {
+                opacity: 0.75;
+                filter: grayscale(100%);
+                backdrop-filter: grayscale(100%);
+            }
+        }
+        &.selected {
+            background: $listItemSelectedBackgroundEffect;
+        }
+        ::ng-deep {
+            .mat-button-wrapper {
+                text-transform: none;
+                justify-content: initial;
+            }
+        }
+        es-authority-row {
+            display: flex;
+            width: 100%;
+            text-align: left;
         }
     }
-    &.selected{
-      background: $listItemSelectedBackgroundEffect;
-    }
-    ::ng-deep{
-      .mat-button-wrapper{
-        text-transform: none;
-        justify-content: initial;
-      }
-    }
-    es-authority-row{
-      display: flex;
-      width: 100%;
-      text-align: left;
-    }
-  }
 }
-.confirm-group{
-  display: flex;
-  flex-direction: column;
-  h4, h5{
+.confirm-group {
     display: flex;
-    justify-content: center;
-    text-align: center;
-  }
-  h4{
-    margin-bottom: 25px;
-  }
-  es-input-password{
-    display: flex;
-    margin-top: 20px;
-    width: 100%;
-    ::ng-deep{
-      mat-form-field{
-        width: 100%;
-      }
+    flex-direction: column;
+    h4,
+    h5 {
+        display: flex;
+        justify-content: center;
+        text-align: center;
     }
-  }
+    h4 {
+        margin-bottom: 25px;
+    }
+    es-input-password {
+        display: flex;
+        margin-top: 20px;
+        width: 100%;
+        ::ng-deep {
+            mat-form-field {
+                width: 100%;
+            }
+        }
+    }
 }

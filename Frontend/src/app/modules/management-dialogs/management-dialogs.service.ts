@@ -12,7 +12,7 @@ export interface DialogRef<R> {
 
 /**
  * Provides access to dialogs via a global component.
- * 
+ *
  * @deprecated will be replaced by overlay-based dialogs available through `DialogsService`.
  */
 @Injectable({

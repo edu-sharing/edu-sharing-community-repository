@@ -4,6 +4,7 @@
 	<widgets>
 		<widget>
 			<id>cm:name</id>
+			<id rel="graphql">info.filename</id>
 			<caption>cm_name</caption>
 			<placeholder>cm_name_placeholder</placeholder>
 			<bottomCaption>cm_name_bottom</bottomCaption>
@@ -13,6 +14,7 @@
 		</widget>
 		<widget>
 			<id>cclom:title</id>
+			<id rel="graphql">lom.general.title</id>
 			<caption>cm_title</caption>
 			<placeholder>cm_title_placeholder</placeholder>
 			<bottomCaption>cm_title_bottom</bottomCaption>
@@ -22,6 +24,7 @@
 		</widget>
 		<widget>
 			<id>cclom:title</id>
+			<id rel="graphql">lom.general.title</id>
 			<caption>cm_title_wwwurl</caption>
 			<placeholder>cm_title_placeholder</placeholder>
 			<type>text</type>
@@ -29,6 +32,7 @@
 		</widget>
 		<widget>
 			<id>virtual:mediatype</id>
+			<id rel="graphql">content.mediatype</id>
 			<caption>virtual_mediatype</caption>
 			<type>text</type>
 			<hideIfEmpty>false</hideIfEmpty>
@@ -37,6 +41,7 @@
 		</widget>
 		<widget>
 			<id>ccm:wwwurl</id>
+			<id rel="graphql">info.url</id>
 			<caption>cm_wwwurl</caption>
 			<placeholder>cm_wwwurl_placeholder</placeholder>
 			<type>text</type>
@@ -45,6 +50,7 @@
 		</widget>
 		<widget>
 			<id>cclom:general_description</id>
+			<id rel="graphql">lom.general.description</id>
 			<type>textarea</type>
 			<caption>lom_prop_educational_description</caption>
 			<placeholder>lom_prop_educational_description_placeholder</placeholder>
@@ -52,12 +58,14 @@
 		</widget>
 		<widget>
 			<id>cm:description</id>
+			<id rel="graphql">lom.general.description</id>
 			<type>text</type>
 			<caption>lom_prop_educational_description</caption>
 			<placeholder>lom_prop_educational_description_placeholder</placeholder>
 		</widget>
 		<widget>
 			<id>cclom:general_keyword</id>
+			<id rel="graphql">lom.general.keyword</id>
 			<type>multivalueSuggestBadges</type>
 			<caption>lom_prop_general_keyword</caption>
 			<placeholder>lom_prop_general_keyword_placeholder</placeholder>
@@ -66,24 +74,28 @@
 		</widget>
 		<widget>
 			<id>cclom:general_keyword</id>
-			<template>search_suggestions</template>
+			<id rel="graphql">lom.general.keyword</id>
 			<type>multivalueSuggestBadges</type>
 			<caption>lom_prop_general_keyword_tagcloud</caption>
+			<template>search_suggestions</template>
 		</widget>
 		<widget>
 			<id>cclom:general_keyword</id>
+			<id rel="graphql">lom.general.keyword</id>
 			<type>multivalueSuggestBadges</type>
 			<caption>lom_prop_general_keyword</caption>
 			<template>search</template>
 		</widget>
 		<widget>
 			<id>ccm:author_freetext</id>
+			<id rel="graphql">lom.rights.author</id>
 			<type>textarea</type>
 			<caption>lom_prop_author_freetext</caption>
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
 			<id>ccm:educationallearningresourcetype</id>
+			<id rel="graphql">lom.educational.0.learningResourceType</id>
 			<type>multivalueFixedBadges</type>
 			<caption>lom_prop_educationallearningresourcetype</caption>
 			<placeholder>lom_prop_educationallearningresourcetype_placeholder</placeholder>
@@ -94,6 +106,7 @@
 		</widget>
 		<widget>
 			<id>ccm:restricted_access</id>
+			<id rel="graphql">lom.rights.restrictedAccess</id>
 			<type>checkbox</type>
 			<caption>cb_restricted_access</caption>
 			<bottomCaption>cb_restricted_access_info</bottomCaption>
@@ -171,12 +184,16 @@
 		</widget>
 		<widget>
 			<id>ccm:lifecyclecontributer_author</id>
+			<id rel="graphql">lom.lifecycle.contributor</id>
+			<filter rel="graphql">$.[?(@.role == "Author")]</filter>
+			<role>Author</role>
 			<caption>cb_contr_author</caption>
 			<type>vcard</type>
 			<icon>person</icon>
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_publisher</id>
 			<caption>cb_contr_publisher</caption>
 			<type>vcard</type>
@@ -184,6 +201,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_unknown</id>
 			<caption>cb_contr_unknown</caption>
 			<type>vcard</type>
@@ -191,6 +209,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_initiator</id>
 			<caption>cb_contr_initiator</caption>
 			<type>vcard</type>
@@ -198,6 +217,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_terminator</id>
 			<caption>cb_contr_terminator</caption>
 			<type>vcard</type>
@@ -205,6 +225,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_validator</id>
 			<caption>cb_contr_validator</caption>
 			<type>vcard</type>
@@ -212,6 +233,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_editor</id>
 			<caption>cb_contr_editor</caption>
 			<type>vcard</type>
@@ -219,6 +241,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_graphical_designer</id>
 			<caption>cb_contr_graphical_designer</caption>
 			<type>vcard</type>
@@ -226,6 +249,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_technical_implementer</id>
 			<caption>cb_contr_technical_implementer</caption>
 			<type>vcard</type>
@@ -233,6 +257,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_content_provider</id>
 			<caption>cb_contr_content_provider</caption>
 			<type>vcard</type>
@@ -240,6 +265,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_educational_validator</id>
 			<caption>cb_contr_educational_validator</caption>
 			<type>vcard</type>
@@ -247,6 +273,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_script_writer</id>
 			<caption>cb_contr_script_writer</caption>
 			<type>vcard</type>
@@ -254,6 +281,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_instructional_designer</id>
 			<caption>cb_contr_instructional_designer</caption>
 			<type>vcard</type>
@@ -261,6 +289,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:lifecyclecontributer_subject_matter_expert</id>
 			<caption>cb_contr_subject_matter_expert</caption>
 			<type>vcard</type>
@@ -268,6 +297,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:metadatacontributer_creator</id>
 			<caption>cb_contr_creator</caption>
 			<type>vcard</type>
@@ -275,6 +305,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:metadatacontributer_validator</id>
 			<caption>cb_contr_validator</caption>
 			<type>vcard</type>
@@ -282,6 +313,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 		</widget>
 		<widget>
+			<id rel="graphql">lom.lifecycle.contributor</id>
 			<id>ccm:metadatacontributer_provider</id>
 			<caption>cb_contr_provider</caption>
 			<type>vcard</type>
@@ -290,11 +322,13 @@
 		</widget>
 		<widget>
 			<id>cm:created</id>
+			<id rel="graphql">info.createDate</id>
 			<caption>cm_prop_created</caption>
 			<type>date</type>
 		</widget>
 		<widget>
 			<id>cm:modified</id>
+			<id rel="graphql">info.modifiedDate</id>
 			<caption>cm_prop_modified</caption>
 			<type>date</type>
 		</widget>
@@ -326,17 +360,20 @@
 		</widget>
 		<widget>
 			<id>sys:node-uuid</id>
+			<id rel="graphql">id</id>
 			<caption>lom_prop_general_identifier</caption>
 			<type>text</type>
 		</widget>
 		<widget>
 			<id>cclom:size</id>
+			<id rel="graphql">lom.technical.size</id>
 			<caption>lom_prop_size</caption>
 			<type>number</type>
 			<format>bytes</format>
 		</widget>
 		<widget>
 			<id>ccm:educationaltypicalagerange</id>
+			<id rel="graphql">lom.educational.0.typicalAgeRangeNominal</id>
 			<caption>lom_prop_educational_typicalagerange</caption>
 			<type>range</type>
 			<min>0</min>
@@ -344,12 +381,14 @@
 		</widget>
 		<widget>
 			<id>ccm:taxonid</id>
+			<id rel="graphql">lom.classification.taxon</id>
 			<caption>input_taxonentry</caption>
 			<type>multivalueTree</type>
 			<valuespace>eaf_discipline.xml</valuespace>
 		</widget>
 		<widget>
 			<id>ccm:educationalcontext</id>
+			<id rel="graphql">lom.educational.0.context</id>
 			<caption>school_context_type_of_school</caption>
 			<type>multivalueFixedBadges</type>
 			<valuespace>context.xml</valuespace>
@@ -357,6 +396,7 @@
 		</widget>
 		<widget>
 			<id>ccm:imported_object_appname</id>
+			<id rel="graphql">importedObject.appName</id>
 			<caption>lom_prop_imported_object_appname</caption>
 			<type>text</type>
 			<hideIfEmpty>true</hideIfEmpty>
@@ -406,6 +446,7 @@
 		</widget>
 		<widget>
 			<id>cclom:classification_keyword</id>
+			<id rel="graphql">lom.classification.keyword</id>
 			<type>multivalueFixedBadges</type>
 			<caption>lom_prop_classification_keyword</caption>
 			<placeholder>lom_prop_classification_keyword_placeholder</placeholder>
@@ -672,6 +713,14 @@
 				]]></html>
 		</template>
 		<template>
+			<id>node_relations_render</id>
+			<caption>dialog_upload_tab_relations</caption>
+			<hideIfEmpty>true</hideIfEmpty>
+			<html><![CDATA[
+					<nodeRelations>
+				]]></html>
+		</template>
+		<template>
 			<id>node_comments_render</id>
 			<caption>dialog_upload_tab_comments</caption>
 			<html><![CDATA[
@@ -731,6 +780,11 @@
 		</template>
 		<template>
 			<id>mediacenter_filter</id>
+			<html><![CDATA[
+				]]></html>
+		</template>
+		<template>
+			<id>search_relation_node</id>
 			<html><![CDATA[
 				]]></html>
 		</template>
@@ -811,6 +865,7 @@
 				<view>node_general_render</view>
 				<view>node_contributor_render</view>
 				<view>node_collections_render</view>
+				<view>node_relations_render</view>
 				<view>node_comments_render</view>
 			</views>
 		</group>
@@ -833,6 +888,13 @@
 			<rendering>angular</rendering>
 			<views>
 				<view>node_map</view>
+			</views>
+		</group>
+		<group>
+			<id>search_relation_node</id>
+			<rendering>angular</rendering>
+			<views>
+				<view>search_relation_node</view>
 			</views>
 		</group>
 		<group>
@@ -887,6 +949,13 @@
 			<rendering>angular</rendering>
 			<views>
 				<view>mediacenter_filter</view>
+			</views>
+		</group>
+		<group>
+			<id>search_relation_node</id>
+			<rendering>angular</rendering>
+			<views>
+				<view>search_relation_node</view>
 			</views>
 		</group>
 	</groups>
@@ -955,6 +1024,14 @@
 			<columns>
 				<column>displayName</column>
 				<column>groupType</column>
+			</columns>
+		</list>
+		<list>
+			<id>relationNodes</id>
+			<columns>
+				<column>cclom:title</column>
+				<column>cm:creator</column>
+				<column>cm:created</column>
 			</columns>
 		</list>
 	</lists>
@@ -1064,6 +1141,15 @@
 				<statement>(@cm\:name:"*${value}*" OR @cclom\:title:"*${value}*")</statement>
 			</property>
 		</query>
+		<query join="AND" id="search_relation_query" applyBasequery="true">
+			<basequery>TYPE:"ccm:io"</basequery>
+			<property name="ngsearchword">
+				<statement>(@sys\:node-uuid:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*")</statement>
+			</property>
+			<property name="sourceNode">
+				<statement>TYPE:"ccm:io" AND NOT @sys\:node-uuid:"${value}" AND NOT @ccm\:published_original:"${value}"</statement>
+			</property>
+		</query>
 		<query join="AND"  id="tools">
 			<basequery>ASPECT:"{http://www.campuscontent.de/model/1.0}tool_definition"</basequery>
 			<property name="toolname">
@@ -1088,6 +1174,23 @@
 				<statement>PATH:"${value}//*"</statement>
 				<preprocessor>node_path</preprocessor>
 				<mandatory>false</mandatory>
+			</property>
+		</query>
+		<query join="AND" id="search_relation_query">
+			<basequery>TYPE:"ccm:io" AND NOT ASPECT:"ccm:collection_io_reference"</basequery>
+			<property name="ngsearchword">
+				<statement>(@sys\:node-uuid:"${value}" OR TEXT:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*")</statement>
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+			</property>
+			<property name="sourceNode">
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+				<statement>TYPE:"ccm:io" AND NOT @sys\:node-uuid:"${value}"</statement>
+			</property>
+			<property name="ccm:taxonid">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
 			</property>
 		</query>
 	</queries>

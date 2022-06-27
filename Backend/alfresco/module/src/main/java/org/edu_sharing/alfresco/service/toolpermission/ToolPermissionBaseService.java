@@ -225,21 +225,34 @@ public class ToolPermissionBaseService {
         for(String toolPermission : toolPermissions){
             getToolPermissionNodeId(toolPermission, true);
         }
-        List<? extends Config> list = LightbendConfigLoader.get().getConfigList("repository.toolpermissions.create");
+        List<? extends Config> list = LightbendConfigLoader.get().getConfigList("repository.toolpermissions.managed");
         if(!list.isEmpty()) {
             list.forEach((value) -> {
                 try {
                     String id = value.getString("id");
-                    String nodeid = getToolPermissionNodeId(id, false);
+                    // String nodeid = getToolPermissionNodeId(id, false);
                     // only create and set permissions if not yet exists
-                    if(nodeid == null) {
-                        nodeid = getToolPermissionNodeId(id, true);
+                    // if(nodeid == null) {
+                    logger.info("auto-configure toolpermission " + id);
+                    String nodeid = getToolPermissionNodeId(id, true);
+                    permissionService.deletePermissions(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeid));
+                    nodeService.setProperty(
+                            new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeid),
+                            QName.createQName(CCConstants.CCM_PROP_TOOLPERMISSION_SYSTEM_MANAGED),
+                            true
+                    );
+                    if(value.hasPath("allowed")) {
                         List<String> allowed = value.getStringList("allowed");
-                        if (allowed != null) {
-                            for (String authority : allowed) {
-                                permissionService.setPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeid),
-                                        authority, CCConstants.PERMISSION_READ, true);
-                            }
+                        for (String authority : allowed) {
+                            permissionService.setPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeid),
+                                    authority, CCConstants.PERMISSION_READ, true);
+                        }
+                    }
+                    if(value.hasPath("denied")) {
+                        List<String> denied = value.getStringList("denied");
+                        for (String authority : denied) {
+                            permissionService.setPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeid),
+                                    authority, CCConstants.PERMISSION_DENY, true);
                         }
                     }
                 } catch (Throwable e) {
@@ -362,13 +375,18 @@ public class ToolPermissionBaseService {
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COMMENT_WRITE);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_USER);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_NODES);
-        toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_RATE_READ);
+        toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_RATE);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_RATE_WRITE);
+        toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_RATE_READ);
+        toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_MANAGE_RELATIONS);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_VIDEO_AUDIO_CUT);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_MEDIACENTER_MANAGE);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_PUBLISH_COPY);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_MAP_LINK);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_SIGNUP_GROUP);
+
+        toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS);
+
 
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PROPOSAL);

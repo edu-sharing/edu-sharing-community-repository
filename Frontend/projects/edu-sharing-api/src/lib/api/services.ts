@@ -18,6 +18,7 @@ export { NodeV1Service } from './services/node-v-1.service';
 export { OrganizationV1Service } from './services/organization-v-1.service';
 export { RatingV1Service } from './services/rating-v-1.service';
 export { RegisterV1Service } from './services/register-v-1.service';
+export { RelationV1Service } from './services/relation-v-1.service';
 export { RenderingV1Service } from './services/rendering-v-1.service';
 export { SearchV1Service } from './services/search-v-1.service';
 export { SharingV1Service } from './services/sharing-v-1.service';

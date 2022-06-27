@@ -1,7 +1,7 @@
-import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute, Params, Router, RoutesRecognized} from '@angular/router';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Params, Router, RoutesRecognized } from '@angular/router';
 import { TranslationsService } from '../../translations/translations.service';
-import * as EduData from '../../core-module/core.module'; //
+import * as EduData from '../../core-module/core.module';
 import {
     Connector,
     ConnectorList,
@@ -19,56 +19,44 @@ import {
     RestNodeService,
     RestSearchService,
     STREAM_STATUS,
-    TemporaryStorageService
+    TemporaryStorageService,
 } from '../../core-module/core.module'; //
-import {Toast} from '../../core-ui-module/toast'; //
+import { Toast } from '../../core-ui-module/toast'; //
 import {
     CustomOptions,
     DefaultGroups,
     OptionItem,
     Scope,
-    Target
+    Target,
 } from '../../core-ui-module/option-item';
-import {UIHelper} from '../../core-ui-module/ui-helper';
-import {UIConstants} from '../../core-module/ui/ui-constants';
-import {Observable, Subscription} from 'rxjs';
-import {UIAnimation} from '../../core-module/ui/ui-animation';
-import {trigger} from '@angular/animations';
-import {CordovaService} from '../../common/services/cordova.service';
+import { UIHelper } from '../../core-ui-module/ui-helper';
+import { UIConstants } from '../../core-module/ui/ui-constants';
+import { Observable, Subscription } from 'rxjs';
+import { UIAnimation } from '../../core-module/ui/ui-animation';
+import { trigger } from '@angular/animations';
+import { CordovaService } from '../../common/services/cordova.service';
 import * as moment from 'moment';
-import {ActionbarHelperService} from '../../common/services/actionbar-helper';
-import {MainNavComponent} from '../../main/navigation/main-nav/main-nav.component';
-import {BridgeService} from '../../core-bridge-module/bridge.service';
-import {NodeHelperService} from '../../core-ui-module/node-helper.service';
-import {filter, pairwise} from 'rxjs/operators';
-import {OptionsHelperService} from '../../core-ui-module/options-helper.service';
-import {ActionbarComponent} from '../../common/ui/actionbar/actionbar.component';
-import {
-    ListEventInterface,
-    ListOptions, ListOptionsConfig, NodeEntriesDisplayType
-} from '../../core-ui-module/components/node-entries-wrapper/entries-model';
-import {SelectionModel} from '@angular/cdk/collections';
+import { ActionbarHelperService } from '../../common/services/actionbar-helper';
+import { BridgeService } from '../../core-bridge-module/bridge.service';
+import { NodeHelperService } from '../../core-ui-module/node-helper.service';
+import { filter, pairwise } from 'rxjs/operators';
+import { OptionsHelperService } from '../../core-ui-module/options-helper.service';
 import { StreamEntry, StreamV1Service } from 'ngx-edu-sharing-api';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
-
 
 @Component({
     selector: 'es-stream',
     templateUrl: 'stream.component.html',
     styleUrls: ['stream.component.scss'],
-    animations: [
-        trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST)),
-    ],
-    providers: [
-        OptionsHelperService
-    ]
+    animations: [trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
+    providers: [OptionsHelperService],
 })
 export class StreamComponent implements OnInit, AfterViewInit {
     connectorList: ConnectorList;
     createConnectorName: string;
     createConnectorType: Connector;
-    createAllowed: boolean ;
+    createAllowed: boolean;
     showCreate = false;
     public collectionNodes: EduData.Node[];
     public tabSelected: string = RestConstants.COLLECTIONSCOPE_MY;
@@ -80,11 +68,8 @@ export class StreamComponent implements OnInit, AfterViewInit {
     streamsRelevant: Node[];
     customOptions: CustomOptions = {
         useDefaultOptions: true,
-        supportedOptions: [
-            'OPTIONS.COLLECTION',
-            'OPTIONS.ADD_NODE_STORE'
-        ],
-        addOptions: []
+        supportedOptions: ['OPTIONS.COLLECTION', 'OPTIONS.ADD_NODE_STORE'],
+        addOptions: [],
     };
     pageOffset: number;
     imagesToLoad = -1;
@@ -94,7 +79,7 @@ export class StreamComponent implements OnInit, AfterViewInit {
     amountToRandomize: number;
 
     markOption = new OptionItem('STREAM.OBJECT.OPTION.MARK', 'toc', (node: any) => {
-        this.updateStatus(this.currentStreamObject.id, STREAM_STATUS.PROGRESS).subscribe( () => {
+        this.updateStatus(this.currentStreamObject.id, STREAM_STATUS.PROGRESS).subscribe(() => {
             // this.updateDataFromJSON(STREAM_STATUS.OPEN);
             this.streams = this.streams.filter((n) => n.id !== node.id);
             this.toast.toast('STREAM.TOAST.MARKED');
@@ -102,7 +87,7 @@ export class StreamComponent implements OnInit, AfterViewInit {
     });
 
     removeOption = new OptionItem('STREAM.OBJECT.OPTION.REMOVE', 'delete', (node: any) => {
-        this.updateStatus(this.currentStreamObject.id, STREAM_STATUS.DONE).subscribe( () => {
+        this.updateStatus(this.currentStreamObject.id, STREAM_STATUS.DONE).subscribe(() => {
             this.streams = this.streams.filter((n) => n.id !== node.id);
             this.toast.toast('STREAM.TOAST.REMOVED');
         });
@@ -114,7 +99,7 @@ export class StreamComponent implements OnInit, AfterViewInit {
     mode = 'new';
     options: OptionItem[];
     private currentStreamObject: StreamEntry;
-    doSearch({query}: { query: string; cleared: boolean; }) {
+    doSearch({ query }: { query: string; cleared: boolean }) {
         this.searchQuery = query;
         // TODO: Search for the given query doch nicht erledigt
     }
@@ -138,24 +123,28 @@ export class StreamComponent implements OnInit, AfterViewInit {
         private collectionService: RestCollectionService,
         private loadingScreen: LoadingScreenService,
         private mainNavService: MainNavService,
-        private translations: TranslationsService) {
+        private translations: TranslationsService,
+    ) {
         const loadingTask = this.loadingScreen.addLoadingTask();
         this.translations.waitForInit().subscribe(() => {
-            this.connector.isLoggedIn().subscribe(data => {
-                this.dateToDisplay = moment().locale(this.translations.getLanguage()).format('dddd, DD. MMMM YYYY');
+            this.connector.isLoggedIn().subscribe((data) => {
+                this.dateToDisplay = moment()
+                    .locale(this.translations.getLanguage())
+                    .format('dddd, DD. MMMM YYYY');
                 this.createAllowed = data.statusCode == RestConstants.STATUS_CODE_OK;
                 loadingTask.done();
             });
-            this.connectors.list().subscribe(list => {
+            this.connectors.list().subscribe((list) => {
                 this.connectorList = list;
             });
         });
         this.amountToRandomize = 4;
         this.setStreamMode();
-        this.routerSubscription = this.router.events.pipe(
-            filter(e => e instanceof RoutesRecognized),
-            pairwise(),
-        )
+        this.routerSubscription = this.router.events
+            .pipe(
+                filter((e) => e instanceof RoutesRecognized),
+                pairwise(),
+            )
             .subscribe((e: any[]) => {
                 document.cookie = 'scroll=' + 'noScroll';
                 if (/components\/render/.test(e[0].urlAfterRedirects)) {
@@ -192,18 +181,24 @@ export class StreamComponent implements OnInit, AfterViewInit {
 
     setStreamMode() {
         this.route.queryParams.subscribe((params: Params) => {
-            if (params.mode === 'new' || params.mode === 'seen' || params.mode === 'relevant' || params.mode === 'marked') {
+            if (
+                params.mode === 'new' ||
+                params.mode === 'seen' ||
+                params.mode === 'relevant' ||
+                params.mode === 'marked'
+            ) {
                 this.mode = params.mode;
                 this.init();
-            }
-            else {
+            } else {
                 this.goToOption('new');
             }
         });
     }
 
     seen(id: any) {
-        this.updateStatus(id, STREAM_STATUS.READ).subscribe(data => this.getStreamDataByStatus(STREAM_STATUS.OPEN));
+        this.updateStatus(id, STREAM_STATUS.READ).subscribe((data) =>
+            this.getStreamDataByStatus(STREAM_STATUS.OPEN),
+        );
     }
     init() {
         this.streams = [];
@@ -219,7 +214,12 @@ export class StreamComponent implements OnInit, AfterViewInit {
     }
     onScroll() {
         // this.updateDataFromJSON(STREAM_STATUS.OPEN);
-        const curStat = this.mode === 'new' ? STREAM_STATUS.OPEN : this.mode == 'marked' ? STREAM_STATUS.PROGRESS : STREAM_STATUS.READ;
+        const curStat =
+            this.mode === 'new'
+                ? STREAM_STATUS.OPEN
+                : this.mode == 'marked'
+                ? STREAM_STATUS.PROGRESS
+                : STREAM_STATUS.READ;
         const sortWay = this.mode === 'new' ? false : false;
         this.getStreamData(curStat, sortWay).subscribe((data) => {
             this.streams = this.streams.concat(data.stream);
@@ -246,7 +246,7 @@ export class StreamComponent implements OnInit, AfterViewInit {
         const pos = Number(this.getCookie('jumpToScrollPosition'));
         const whichScroll = this.getCookie('scroll');
         if (whichScroll !== 'noScroll') {
-            setTimeout(function() {
+            setTimeout(function () {
                 window.scrollTo(0, pos);
             }, 2900);
         }
@@ -287,11 +287,10 @@ export class StreamComponent implements OnInit, AfterViewInit {
             return o;
         });
         this.updateOptions(this.streams?.[0]);
-
     }
 
     goToOption(option: string) {
-        this.router.navigate(['./'], {queryParams: {mode: option}, relativeTo: this.route});
+        this.router.navigate(['./'], { queryParams: { mode: option }, relativeTo: this.route });
     }
 
     getStreamDataByStatus(streamStatus: any) {
@@ -314,19 +313,18 @@ export class StreamComponent implements OnInit, AfterViewInit {
         else {*/
         this.streams = [];
         this.isLoading = true;
-        this.getStreamData(streamStatus).subscribe(data => {
-            this.streams = data.stream.filter( (n) => n.nodes.length !== 0);
+        this.getStreamData(streamStatus).subscribe((data) => {
+            this.streams = data.stream.filter((n) => n.nodes.length !== 0);
             this.imagesToLoad = this.streams.length;
             this.isLoading = false;
             this.updateMenu();
             this.scrollToDown();
         });
         // }
-
     }
 
     randomizeTop(array: any, quantity: number) {
-        quantity = (quantity > 0) ? quantity - 1 : 0;
+        quantity = quantity > 0 ? quantity - 1 : 0;
         for (let i = quantity; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [array[i], array[j]] = [array[j], array[i]];
@@ -338,11 +336,9 @@ export class StreamComponent implements OnInit, AfterViewInit {
             this.seen(node.id);
             document.cookie = 'jumpToScrollPosition=' + window.pageYOffset;
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.nodes[0].ref.id]);
-        }
-        else {
+        } else {
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.ref.id]);
         }
-
     }
 
     private addToCollection(nodes: any) {
@@ -351,7 +347,6 @@ export class StreamComponent implements OnInit, AfterViewInit {
         this.collectionNodes = [].concat.apply([], result);
         */
         this.collectionNodes = nodes.nodes;
-
     }
 
     public getStreamData(streamStatus: string, sortAscendingCreated: boolean = false) {
@@ -362,7 +357,7 @@ export class StreamComponent implements OnInit, AfterViewInit {
             skipCount: this.streams?.length,
             maxItems: RestConnectorService.DEFAULT_NUMBER_PER_REQUEST,
             sortProperties: ['priority', 'created'],
-            sortAscending: [false, sortAscendingCreated]
+            sortAscending: [false, sortAscendingCreated],
         });
     }
 
@@ -387,27 +382,50 @@ export class StreamComponent implements OnInit, AfterViewInit {
         if (!this.cordova.isRunningCordova()) {
             win = window.open('');
         }
-        this.nodeService.createNode(RestConstants.INBOX, RestConstants.CCM_TYPE_IO, [], prop, false).subscribe(
-            (data: NodeWrapper) => {
-                this.editConnector(data.node, event.type, win, this.createConnectorType);
-                UIHelper.goToWorkspaceFolder(this.nodeService, this.router, null, RestConstants.INBOX);
-            },
-            (error: any) => {
-                win.close();
-                if (this.nodeHelper.handleNodeError(event.name, error) == RestConstants.DUPLICATE_NODE_RESPONSE) {
-                    this.createConnectorName = event.name;
-                }
-            }
-        );
-
+        this.nodeService
+            .createNode(RestConstants.INBOX, RestConstants.CCM_TYPE_IO, [], prop, false)
+            .subscribe(
+                (data: NodeWrapper) => {
+                    this.editConnector(data.node, event.type, win, this.createConnectorType);
+                    UIHelper.goToWorkspaceFolder(
+                        this.nodeService,
+                        this.router,
+                        null,
+                        RestConstants.INBOX,
+                    );
+                },
+                (error: any) => {
+                    win.close();
+                    if (
+                        this.nodeHelper.handleNodeError(event.name, error) ==
+                        RestConstants.DUPLICATE_NODE_RESPONSE
+                    ) {
+                        this.createConnectorName = event.name;
+                    }
+                },
+            );
     }
-    private editConnector(node: Node, type: Filetype= null, win: any = null, connectorType: Connector = null) {
-        UIHelper.openConnector(this.connectors, this.iam, this.event, this.toast, node, type, win, connectorType);
+    private editConnector(
+        node: Node,
+        type: Filetype = null,
+        win: any = null,
+        connectorType: Connector = null,
+    ) {
+        UIHelper.openConnector(
+            this.connectors,
+            this.iam,
+            this.event,
+            this.toast,
+            node,
+            type,
+            win,
+            connectorType,
+        );
     }
 
     private searchRelevant() {
         const request: RequestObject = {
-            propertyFilter: [RestConstants.ALL]
+            propertyFilter: [RestConstants.ALL],
         };
         this.isLoading = true;
         this.searchService.getRelevant(request).subscribe((relevant) => {
@@ -428,11 +446,14 @@ export class StreamComponent implements OnInit, AfterViewInit {
             scope: Scope.Stream,
             customOptions: this.customOptions,
             activeObjects: strm?.nodes,
-            selectedObjects: strm?.nodes
+            selectedObjects: strm?.nodes,
         });
         this.optionsHelper.refreshComponents();
         this.currentStreamObject = strm;
-        this.options = this.optionsHelper.getAvailableOptions(Target.ListDropdown, (strm?.nodes as unknown as Node[]));
+        this.options = this.optionsHelper.getAvailableOptions(
+            Target.ListDropdown,
+            strm?.nodes as unknown as Node[],
+        );
     }
 
     getStreamTitle(strm: StreamEntry) {
