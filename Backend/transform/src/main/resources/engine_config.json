@@ -112,7 +112,9 @@
         {"sourceMediaType": "video/x-matroska", "targetMediaType": "alfresco-metadata-extract"},
         {"sourceMediaType": "video/mp4", "targetMediaType": "alfresco-metadata-extract"},
         {"sourceMediaType": "video/quicktime", "targetMediaType": "alfresco-metadata-extract"},
-        {"sourceMediaType": "video/x-matroska", "targetMediaType": "alfresco-metadata-extract"}
+        {"sourceMediaType": "video/x-matroska", "targetMediaType": "alfresco-metadata-extract"},
+        {"sourceMediaType": "video/x-m4v",     "targetMediaType": "alfresco-metadata-extract"},
+        {"sourceMediaType": "video/x-flv",  "targetMediaType": "alfresco-metadata-extract"}
       ],
       "transformOptions": [
         "metadataOptions"
