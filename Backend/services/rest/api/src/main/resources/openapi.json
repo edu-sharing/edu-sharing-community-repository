@@ -19442,7 +19442,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "properties": {
                   "mcOrgs": {
@@ -19532,7 +19532,7 @@
         "operationId": "importMediacenters",
         "requestBody": {
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "properties": {
                   "mediacenters": {
@@ -19622,7 +19622,7 @@
         "operationId": "importOrganisations",
         "requestBody": {
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "properties": {
                   "organisations": {
