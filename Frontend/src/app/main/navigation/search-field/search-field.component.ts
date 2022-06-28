@@ -45,7 +45,9 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
      */
     @Input()
     set enableFiltersAndSuggestions(value: boolean) {
-        this.searchField.setEnableFiltersAndSuggestions(value);
+        // This feature is currently not ready for use. Some components are not available in the
+        // required Angular module and backends don't reliably provide the required data.
+        // this.searchField.setEnableFiltersAndSuggestions(value);
     }
     @Output() search = new EventEmitter<string>();
     @Output() clear = new EventEmitter<void>();

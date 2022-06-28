@@ -22,7 +22,6 @@ test('should show search scope', async ({ page }) => {
 });
 
 test('should show a file uploaded to a collection', async ({ page }) => {
-    // esTest(page, async () => {
     const testFile = generateTestFile();
     const collectionName = generateTestThingName('collection');
     const collectionsPage = new CollectionsPage(page);
@@ -39,7 +38,6 @@ test('should show a file uploaded to a collection', async ({ page }) => {
     // await searchPage.expectToHaveElement(testFile.name);
     await generalPage.searchInTopBar(testFile.name);
     await searchPage.expectToHaveElement(testFile.name);
-    // }));
 });
 
 test('should not show a file uploaded to a collection and then deleted', async ({ page }) => {
