@@ -56,6 +56,7 @@ import { DialogsService } from '../features/dialogs/dialogs.service';
 import { ListEventInterface, NodeEntriesDisplayType } from '../features/node-entries/entries-model';
 import { NodeEntriesDataType } from '../features/node-entries/node-entries.component';
 import { NodeStoreService } from '../modules/search/node-store.service';
+import {takeUntil} from "rxjs/operators";
 
 
 export class OptionsHelperConfig {
@@ -1143,13 +1144,28 @@ export class OptionsHelperService implements OnDestroy {
             this.infoToggle.isToggle = true;
             options.push(this.infoToggle);
          */
+        let metadataSidebarSubscription: Subscription;
         const metadataSidebar = new OptionItem('OPTIONS.METADATA_SIDEBAR', 'info_outline', (object) => {
             management.nodeSidebarChange.subscribe((change: Node) => {
                 metadataSidebar.icon = change ? 'info' : 'info_outline';
             });
             management.nodeSidebar = management.nodeSidebar ? null : this.getObjects(object)[0];
+            if(management.nodeSidebar == null) {
+                metadataSidebarSubscription?.unsubscribe();
+            } else {
+                metadataSidebarSubscription = this.list?.getSelection().changed.subscribe((selection) => {
+                    if(selection.source.selected.length === 0) {
+                        return;
+                    }
+                    if(management.nodeSidebar == null ) {
+                        metadataSidebarSubscription?.unsubscribe();
+                        return;
+                    }
+                    management.nodeSidebar = selection.source.selected[0] as Node;
+                    management.nodeSidebarChange.emit(management.nodeSidebar);
+                });
+            }
             management.nodeSidebarChange.emit(management.nodeSidebar);
-
         });
         metadataSidebar.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         metadataSidebar.scopes = [Scope.WorkspaceList];
