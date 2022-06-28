@@ -330,13 +330,22 @@ export class CollectionNewComponent implements EventListener, OnInit {
                             }
                         });
                     });
-                    this.iamService
-                        .searchGroups('*', true, RestConstants.GROUP_TYPE_EDITORIAL, '', {
-                            count: RestConstants.COUNT_UNLIMITED,
-                        })
-                        .subscribe((data: IamGroups) => {
-                            this.editorialGroups = data.groups;
-                        });
+                    if (
+                        this.connector.hasToolPermissionInstant(
+                            RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH,
+                        ) ||
+                        this.connector.hasToolPermissionInstant(
+                            RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE,
+                        )
+                    ) {
+                        this.iamService
+                            .searchGroups('*', true, RestConstants.GROUP_TYPE_EDITORIAL, '', {
+                                count: RestConstants.COUNT_UNLIMITED,
+                            })
+                            .subscribe((data: IamGroups) => {
+                                this.editorialGroups = data.groups;
+                            });
+                    }
                 });
             });
         });
