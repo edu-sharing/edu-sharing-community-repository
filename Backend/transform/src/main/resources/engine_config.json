@@ -81,10 +81,7 @@
       "supportedSourceAndTargetList": [
         {"sourceMediaType": "video/mp4", "targetMediaType": "image/png"},
         {"sourceMediaType": "video/quicktime", "targetMediaType": "image/png"},
-        {"sourceMediaType": "video/x-matroska", "targetMediaType": "image/png"},
-        {"sourceMediaType": "video/mp4", "targetMediaType": "image/jpeg"},
-        {"sourceMediaType": "video/quicktime", "targetMediaType": "image/jpeg"},
-        {"sourceMediaType": "video/x-matroska", "targetMediaType": "image/jpeg"}
+        {"sourceMediaType": "video/x-matroska", "targetMediaType": "image/png"}
       ],
       "transformOptions": [
         "eduVideoThumbnail",
@@ -109,12 +106,8 @@
       "transformerName": "EduSharingVideoMetadataExecutor",
       "supportedSourceAndTargetList": [
         {"sourceMediaType": "video/quicktime", "targetMediaType": "alfresco-metadata-extract"},
-        {"sourceMediaType": "video/x-matroska", "targetMediaType": "alfresco-metadata-extract"},
         {"sourceMediaType": "video/mp4", "targetMediaType": "alfresco-metadata-extract"},
-        {"sourceMediaType": "video/quicktime", "targetMediaType": "alfresco-metadata-extract"},
-        {"sourceMediaType": "video/x-matroska", "targetMediaType": "alfresco-metadata-extract"},
-        {"sourceMediaType": "video/x-m4v",     "targetMediaType": "alfresco-metadata-extract"},
-        {"sourceMediaType": "video/x-flv",  "targetMediaType": "alfresco-metadata-extract"}
+        {"sourceMediaType": "video/x-matroska", "targetMediaType": "alfresco-metadata-extract"}
       ],
       "transformOptions": [
         "metadataOptions"
