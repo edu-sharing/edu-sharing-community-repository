@@ -43,7 +43,10 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
      * Relies on active filters values being provided to `SearchFieldService` via `setFilterValues`
      * and `filterValuesChange` being handled.
      */
-    @Input() enableFiltersAndSuggestions: boolean;
+    @Input()
+    set enableFiltersAndSuggestions(value: boolean) {
+        this.searchField.setEnableFiltersAndSuggestions(value);
+    }
     @Output() search = new EventEmitter<string>();
     @Output() clear = new EventEmitter<void>();
 
@@ -77,7 +80,6 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
     constructor(private searchField: SearchFieldService) {}
 
     ngOnInit(): void {
-        this.searchField.setEnableFiltersAndSuggestions(this.enableFiltersAndSuggestions);
         this.inputControl.valueChanges.subscribe((inputString) => {
             if (inputString !== this.searchString) {
                 // The value was updated through user interaction and not by the component input

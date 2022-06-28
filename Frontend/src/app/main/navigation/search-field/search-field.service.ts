@@ -10,7 +10,7 @@ import {
     SearchService,
 } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, combineLatest, EMPTY, Observable, of, ReplaySubject, timer } from 'rxjs';
-import { debounce, filter, map, switchMap, tap } from 'rxjs/operators';
+import { debounce, filter, map, switchMap } from 'rxjs/operators';
 
 const NUMBER_OF_FACET_SUGGESTIONS = 5;
 
