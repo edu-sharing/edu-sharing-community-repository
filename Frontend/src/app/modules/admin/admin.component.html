@@ -747,12 +747,12 @@
           </div>
         </div>
       </div>
-      <div *ngIf="lucene.mode === 'ELASTIC' && searchResponse" class="elastic-response">
-          <label for="elasticResponse">{{'ADMIN.BROWSER.ELASTIC_RESPONSE' | translate }}</label>
+      <div *ngIf="lucene.mode === 'ELASTIC' && elasticResponse" class="elastic-response">
+          <label for="elasticResponseLabel">{{'ADMIN.BROWSER.ELASTIC_RESPONSE' | translate }}</label>
           <ngx-monaco-editor [options]="elasticResponseCodeOptions"
                              [ngModel]="elasticResponse.elasticResponse"
                              [ngModelOptions]="{standalone: true}"
-                             id="elasticResponse"
+                             id="elasticResponseLabel"
           ></ngx-monaco-editor>
       </div>
       <div *ngIf="lucene.mode=='NODEREF' || lucene.outputMode=='view'" class="search-list">
