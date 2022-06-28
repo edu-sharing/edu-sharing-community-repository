@@ -126,7 +126,7 @@ export class TranslationsService {
                     }
                     if (selectedLanguage === 'none') {
                         this.translate.setDefaultLang('none');
-                    } else if(selectedLanguage === 'de-informal') {
+                    } else if (selectedLanguage === 'de-informal') {
                         this.translate.setDefaultLang('de');
                     } else {
                         this.translate.setDefaultLang(supportedLanguages[0]);
