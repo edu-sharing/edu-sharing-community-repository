@@ -125,17 +125,17 @@
     "TOOLPERMISSION_INVITE_LINK": "Die Berechtigung zum Erstellen von Links auf Materialien",
     "TOOLPERMISSION_INVITE_HISTORY": "Die Berechtigung zum Anzeigen der Freigabe-Historie",
     "TOOLPERMISSION_INVITE_SHARE": "Die Berechtigung zum Freigeben von Materialien in gemeinsamen Ordnern",
-    "TOOLPERMISSION_INVITE_ALLAUTHORITIES": "Die Berechtigung zum Freigeben von Materialien an alle Nutzer",
+    "TOOLPERMISSION_INVITE_ALLAUTHORITIES": "Die Berechtigung zum Freigeben von Materialien an alle Nutzenden",
     "TOOLPERMISSION_PUBLISH_COPY": "Die Berechtigung zum Erstellen veröffentlichter Kopien von Materialien",
     "TOOLPERMISSION_COLLECTION_EDITORIAL": "Redaktionelle Sammlungen erstellen",
     "TOOLPERMISSION_LICENSE": "Lizenzdialog verwenden",
     "TOOLPERMISSION_INVITE_SAFE": "Die Berechtigung zum Freigeben von Materialien im Safe",
     "TOOLPERMISSION_INVITE_SHARE_SAFE": "Die Berechtigung zum Freigeben von Materialien in gemeinsamen Ordnern im Safe",
-    "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH": "Suchen und Einladen Nutzer außerhalb der Organisation",
-    "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SAFE": "Suchen und Einladen Nutzer außerhalb der Organisation im Safe",
-    "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE": "Suchen und Einladen Nutzer außerhalb der Organisation in gemeinsamen Ordnern",
-    "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY": "Suchen und Finden von Nutzern außerhalb der Organisation ohne Eingabe der gesamten Nutzer-ID",
-    "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE": "Suchen und Einladen Nutzer außerhalb der Organisation in gemeinsamen Ordnern im Safe",
+    "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH": "Suchen und Einladen Nutzender außerhalb der Organisation",
+    "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SAFE": "Suchen und Einladen Nutzender außerhalb der Organisation im Safe",
+    "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE": "Suchen und Einladen Nutzender außerhalb der Organisation in gemeinsamen Ordnern",
+    "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY": "Suchen und Finden von Nutzenden außerhalb der Organisation ohne Eingabe der gesamten Nutzenden-ID",
+    "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE": "Suchen und Einladen Nutzender außerhalb der Organisation in gemeinsamen Ordnern im Safe",
     "TOOLPERMISSION_COLLECTION_PINNING": "Sammlungen anpinnen und gepinnte Sammlungen verwalten",
     "TOOLPERMISSION_COLLECTION_CURRICULUM": "Lehrplansammlungen erstellen (aktuell nicht verwendet)",
     "TOOLPERMISSION_COLLECTION_FEEDBACK": "Feedback an anderen Sammlungen abgeben",
@@ -150,8 +150,8 @@
     "TOOLPERMISSION_USAGE_STATISTIC": "Informationen über die Verwendung aller Objekte dieses Repositories abfragen",
     "TOOLPERMISSION_COMMENT_WRITE": "Kommentare an Objekten verfassen",
     "TOOLPERMISSION_GLOBAL_STATISTICS_NODES": "Statistiken zur Verwendung von Materialien dieses Repositories anzeigen",
-    "TOOLPERMISSION_GLOBAL_STATISTICS_USER": "Statistiken zu Nutzer-Logins (Login, Logout) dieses Repositories anzeigen",
-    "TOOLPERMISSION_MEDIACENTER_MANAGE": "Ändern der Basisdaten (Anschrift, Kataloge) von Medienzentren, bei welchen der Nutzer Administrator ist",
+    "TOOLPERMISSION_GLOBAL_STATISTICS_USER": "Statistiken zu Nutzenden-Logins (Login, Logout) dieses Repositories anzeigen",
+    "TOOLPERMISSION_MEDIACENTER_MANAGE": "Ändern der Basisdaten (Anschrift, Kataloge) von Medienzentren, bei welchen die nutzende Person Verwaltungsrechte hat",
     "TOOLPERMISSION_VIDEO_AUDIO_CUT": "Video- & Audiodateien dürfen in Sammlungen beliebig zugeschnitten gespeichert werden",
     "TOOLPERMISSION_COLLECTION_CHANGE_OWNER": "Erlaubnis zum Ändern des Ersteller-Namens einer Sammlung",
     "TOOLPERMISSION_RATE_READ": "Die Berechtigung zum ansehen von Bewertungen von Materialien",
@@ -161,7 +161,8 @@
     "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" darf angezeigt und durchsucht werden",
     "TOOLPERMISSION_CREATE_MAP_LINK": "Ordner anlegen, welche auf andere Ordner verweisen/verlinken",
     "TOOLPERMISSION_SIGNUP_GROUP": "Zu einer Organisation/Gruppe einschreiben (gilt nur für seperat dafür freigegebene Organisationen/Gruppen)",
-    "TOOLPERMISSION_COLLECTION_PROPOSAL": "Vorschlagen von Materialien für Sammlungen, für welche der Nutzer keine Schreibrechte hat",
+    "TOOLPERMISSION_COLLECTION_PROPOSAL": "Vorschlagen von Materialien für Sammlungen, für welche die nutzende Person keine Schreibrechte hat",
+    "TOOLPERMISSION_RATE": "Die Berechtigung zum Bewerten von Materialien",
     "TOOLPERMISSION_MANAGE_RELATIONS": "Verwalten und erstellen von Beziehungen zwischen Elementen"
   },
   "NO_WRITE_PERMISSIONS": "Keine Rechte für diesen Vorgang",
@@ -225,7 +226,7 @@
     "COLLECTIONS": "Sammlungen",
     "STREAM": "Stream",
     "SECURE": "Safe",
-    "PERMISSIONS": "Nutzerverwaltung",
+    "PERMISSIONS": "Kontenverwaltung",
     "LOGIN": "Login",
     "ADMIN": "Admin-Tools",
     "WORKSPACE_SHORT": "Workspace",
@@ -233,7 +234,7 @@
     "COLLECTIONS_SHORT": "Sammlungen",
     "STREAM_SHORT": "Stream",
     "SECURE_SHORT": "Safe",
-    "PERMISSIONS_SHORT": "Nutzer",
+    "PERMISSIONS_SHORT": "Konten",
     "LOGIN_SHORT": "Login",
     "ADMIN_SHORT": "Admin"
   },
@@ -258,11 +259,11 @@
     "size": "Größe",
     "mediatype": "Dateityp",
     "ccm:commonlicense_key": "Lizenz",
-    "ccm:collection_ordered_position": "Benutzerdefiniert",
+    "ccm:collection_ordered_position": "individuell",
     "ccm:educationallearningresourcetype": "Medienart",
     "ccm:replicationsourceid": "Original-ID",
-    "ccm:educationalcontext": "Bildungsstufe",
-    "ccm:lifecyclecontributer_publisher": "Herausgeber",
+    "ccm:educationalcontext": "Bildungsbereich",
+    "ccm:lifecyclecontributer_publisher": "Herausgeber{{GENDER_SEPARATOR}}in",
     "ccm:lifecyclecontributer_publisherFN": "",
     "ccm:eaf_sequence_title": "Serientitel",
     "ccm:eaf_subtitle": "Untertitel",
@@ -303,7 +304,7 @@
   },
   "LICENSE": {
     "TITLE_OF_WORK": "Titel",
-    "LINK_AUTHOR": "Link zum Autor",
+    "LINK_AUTHOR": "Link zum/zur Autor{{GENDER_SEPARATOR}}in",
     "DESCRIPTION_REQUIRED": "Die Lizenzbeschreibung muss ausgefüllt sein",
     "NAMES": {
       "NONE": "Keine oder unbekannte Lizenz",
@@ -329,9 +330,9 @@
       "CC_SHARE_ND": "Keine Bearbeitung des Werks erlaubt.",
       "CC_SHARE_SA": "Bearbeitung erlaubt, wenn es unter gleichen Bedingungen weitergegeben wird.",
       "CC_COMMERCIAL_NC": "Keine kommerzielle Verwendung erlaubt.",
-      "CC_0": "Dieses Werk ist gemeinfrei.<br />Keine Attributierung und Namensnennung notwendig.<br />Kommerzielle Nutzung erlaubt.",
+      "CC_0": "Dieses Werk ist gemeinfrei.<br />Keine Attribuierung und Namensnennung notwendig.<br />Kommerzielle Nutzung erlaubt.",
       "COPYRIGHT_FREE": "Das Werk ist kostenfrei zugänglich.<br />Nutzung und Quellenangabe gemäß den allgemeingültigen gesetzlichen Regelungen (UrhG).",
-      "COPYRIGHT_LICENSE": "Das Werk darf ausschließlich vom lizenzierten Nutzerkreis gemäß den vertraglichen Bedingungen genutzt werden.<br />Keine Weitergabe an Dritte.<br />Quellenangabe gemäß der üblichen Praxis.",
+      "COPYRIGHT_LICENSE": "Das Werk darf ausschließlich von einer eingeschränkten Anzahl von Personen gemäß den vertraglichen Bedingungen genutzt werden.<br />Keine Weitergabe an Dritte.<br />Quellenangabe gemäß der üblichen Praxis.",
       "SCHULFUNK": "Zugangsbeschränkte und zeitlich begrenzte Bereitstellung als Schulfunksendung nach §47 UrhG.<br />Keine Weitergabe an Dritte.<br />Quellenangabe gemäß der üblichen Praxis.",
       "UNTERRICHTS_UND_LEHRMEDIEN": "Hersteller von Unterrichts- und Lehrmedien dürfen für solche Sammlungen bis zu 10 Prozent eines veröffentlichten Werkes vervielfältigen, verbreiten und öffentlich zugänglich machen.<br />§ 60a Absatz 2 und 3 ist entsprechend anzuwenden.<br />Unterrichts- und Lehrmedien im Sinne dieses Gesetzes sind Sammlungen, die Werke einer größeren Anzahl von Urhebern vereinigen und ausschließlich zur Veranschaulichung des Unterrichts und der Lehre an Bildungseinrichtungen (§ 60a) zu nicht kommerziellen Zwecken geeignet, bestimmt und entsprechend gekennzeichnet sind."
     },
@@ -352,10 +353,10 @@
     "ACCEPT": " Akzeptieren",
     "DECLINE": " Ablehnen & Verlassen",
     "REGION_LABEL": "Cookie-Hinweis",
-    "DESCRIPTION": "edu-sharing benutzt Cookies, um die Nutzerfreundlichkeit der Dienste zu verbessen.\nWenn Sie fortfahren möchten diese Seite zu verwenden, stimmen Sie der Nutzung von Cookies bitte zu.",
+    "DESCRIPTION": "edu-sharing benutzt Cookies, um die Benutzungsfreundlichkeit der Dienste zu verbessen.\nWenn Sie fortfahren möchten diese Seite zu verwenden, stimmen Sie der Nutzung von Cookies bitte zu.",
     "MORE_LINK": "Weitere Informationen",
     "DIALOG_TITLE": "Cookies",
-    "DIALOG_MESSAGE": "Die Internetseiten verwenden teilweise so genannte Cookies. Cookies richten auf Ihrem Rechner keinen Schaden an und enthalten keine Viren.\nCookies dienen dazu, unser Angebot nutzerfreundlicher, effektiver und sicherer zu machen.\nCookies sind kleine Textdateien, die auf Ihrem Rechner abgelegt werden und die Ihr Browser speichert. Die meisten der von uns verwendeten Cookies sind so genannte \"Session-Cookies\". Sie werden nach Ende Ihres Besuchs automatisch gelöscht. Andere Cookies bleiben auf Ihrem Endgerät gespeichert, bis Sie diese löschen.\nDiese Cookies ermöglichen es uns, Ihren Browser beim nächsten Besuch wiederzuerkennen.\nSie können Ihren Browser so einstellen, dass Sie über das Setzen von Cookies informiert werden und Cookies nur im Einzelfall erlauben, die Annahme von Cookies für bestimmte Fälle oder generell ausschließen sowie das automatische Löschen der Cookies beim Schließen des Browser aktivieren.\nBei der Deaktivierung von Cookies ist die Nutzung der Seite nicht möglich."
+    "DIALOG_MESSAGE": "Die Internetseiten verwenden teilweise so genannte Cookies. Cookies richten auf Ihrem Rechner keinen Schaden an und enthalten keine Viren.\nCookies dienen dazu, unser Angebot benutzungsfreundlicher, effektiver und sicherer zu machen.\nCookies sind kleine Textdateien, die auf Ihrem Rechner abgelegt werden und die Ihr Browser speichert. Die meisten der von uns verwendeten Cookies sind so genannte \"Session-Cookies\". Sie werden nach Ende Ihres Besuchs automatisch gelöscht. Andere Cookies bleiben auf Ihrem Endgerät gespeichert, bis Sie diese löschen.\nDiese Cookies ermöglichen es uns, Ihren Browser beim nächsten Besuch wiederzuerkennen.\nSie können Ihren Browser so einstellen, dass Sie über das Setzen von Cookies informiert werden und Cookies nur im Einzelfall erlauben, die Annahme von Cookies für bestimmte Fälle oder generell ausschließen sowie das automatische Löschen der Cookies beim Schließen des Browser aktivieren.\nBei der Deaktivierung von Cookies ist die Nutzung der Seite nicht möglich."
   },
   "QUOTA": {
     "TITLE": "Speicherplatz",
@@ -435,7 +436,7 @@
       "EDU_GROUPS": "Organisationen",
       "PUBLIC": "Öffentlich",
       "SHARED": "Freigegeben",
-      "CUSTOM": "Benutzerdefiniert",
+      "CUSTOM": "individuell",
       "TYPE_EDITORIAL": "Redaktionell",
       "TYPE_MEDIA_CENTER": "Medienzentrum"
     }
@@ -523,7 +524,7 @@
     "folderLocation": " Speicherort des gemeinsamen Ordners"
   },
   "USER": {
-    "authorityName": "Nutzername",
+    "authorityName": "Anmeldename",
     "firstName": "Vorname",
     "lastName": "Nachname",
     "email": "E-Mail",
@@ -535,14 +536,14 @@
       "teacher": "Lehrender / Lehrer",
       "student": "Lernender / Schüler",
       "employee": "Mitarbeiter",
-      "extern": "Externer Nutzer",
+      "extern": "Externe nutzende Person",
       "system": "Systemaccount",
       "function": "Funktionsaccount"
     }
   },
   "PROFILE_SETTINGS": {
     "SHOW_EMAIL_LABEL": "E-Mail öffentlich anzeigen",
-    "SHOW_EMAIL_TOOLTIP": "Steuert, ob andere Nutzer die E-Mail-Adresse sehen können, z.B. im Einlade-Dialog oder beim Aufrufen des Profils",
+    "SHOW_EMAIL_TOOLTIP": "Steuert, ob andere Nutzende die E-Mail-Adresse sehen können, z.B. im Einlade-Dialog oder beim Aufrufen des Profils",
     "SHOW_EMAIL": "E-Mail wird öffentlich angezeigt",
     "HIDE_EMAIL": "E-Mail wird nicht öffentlich angezeigt"
   },
@@ -674,9 +675,9 @@
     "SHOW_EXTENDED_FALSE": "Erweitere Infos ausgeblendet",
     "SHOW_EXTENDED_TRUE": "Erweitere Infos eingeblendet",
     "SHOW_EXTENDED_SEARCH": "Weitere Filter anzeigen",
-    "AUTHOR_LABEL": "Urheber{{GENDER_SEPARATOR}}in-Angabe",
-    "AUTHOR_FREETEXT": "Freie Urheber{{GENDER_SEPARATOR}}in-Angabe",
-    "AUTHOR_FREETEXT_PLACEHOLDER": "Wer sind die Urheber{{GENDER_SEPARATOR}}innen des Werks? Wie sollen sie genannt werden?",
+    "AUTHOR_LABEL": "Urheber-Angaben",
+    "AUTHOR_FREETEXT": "Freie Urheber-Angabe",
+    "AUTHOR_FREETEXT_PLACEHOLDER": "Wer sind die Urheber des Werks? Wie sollen sie genannt werden?",
     "AUTHOR_PERSON": "Autor{{GENDER_SEPARATOR}}innen & Beteiligte",
     "AUTHOR_UNSET": "<keine Angabe>",
     "LICENSE": "Lizenz",
@@ -710,7 +711,8 @@
     "SUGGEST_VALUE_SENT": "Der Vorschlag wurde eingereicht und wird durch die Redaktion geprüft. Der Vorschlag taucht erst auf, wenn er durch die Redaktion aktiviert wurde. Vielen Dank!",
     "NO_MATCHING_VALUES": "Keine passenden Werte",
     "NO_ARBITRARY_VALUES_NOTICE": "Für dieses Feld können Werte nicht frei gewählt werden. Bitte wählen Sie Werte aus der Liste.",
-    "DELETE_KEY_NOTICE": "Löschen mit Entf-Taste"
+    "DELETE_KEY_NOTICE": "Löschen mit Entf-Taste",
+    "SHOW_EXTENDED": "Erweitere Infos anzeigen"
   },
   "SIMPLE_EDIT": {
     "TITLE": "Schnell-Bearbeitung",
@@ -725,10 +727,10 @@
       "MORE": "Weitere Freigaben",
       "DEFAULT_GROUPS": "Allgemeine Gruppen",
       "RECENT_AUTHORITIES": "Zuletzt eingeladen",
-      "INFO": "Die ausgewählten Nutzer & Gruppen werden als Betrachter eingeladen.",
+      "INFO": "Die ausgewählten Nutzenden & Gruppen werden als Betrachter eingeladen.",
       "ERROR_MULTIPLE_PARENTS": "Das Festlegen von Berechtigungen ist nicht möglich, da die Elemente verschiedene Elternelemente besitzen",
       "ERROR_PERMISSION_MISSING": "Das Festlegen von Berechtigungen ist nicht möglich, da Sie unzureichende Rechte am Element besitzen",
-      "ERROR_TOOLPERMISSION_MISSING": "Das Festlegen von Berechtigungen ist nicht möglich, da ihr Profil die dafür notwendigen Rechte nicht besitzt",
+      "ERROR_TOOLPERMISSION_MISSING": "Das Festlegen von Berechtigungen ist nicht möglich, da Ihr Profil die dafür notwendigen Rechte nicht besitzt",
       "ERROR_INHERIT": "Das Festlegen von Berechtigungen ist in dieser Ansicht nicht möglich, da die Elemente bereits Einladungen vom übergeordneten Ordner erhalten:",
       "ERROR_HELP": "Bitte benutzen Sie die Option \"Weitere Freigaben\" zum Konfigurieren der Rechte",
       "UNSET": "Keine hinzufügen",
@@ -746,7 +748,7 @@
       "SOURCE_OWN": "Eigenes Material",
       "SOURCE_FOREIGN": "Fremdes Material",
       "SET_LICENSE": "Lizenz des Materials",
-      "ERROR_TOOLPERMISSION_MISSING": "Das Festlegen der Lizenz ist nicht möglich, da ihr Profil die dafür notwendigen Rechte nicht besitzt",
+      "ERROR_TOOLPERMISSION_MISSING": "Das Festlegen der Lizenz ist nicht möglich, da Ihr Profil die dafür notwendigen Rechte nicht besitzt",
       "INVALID_STATE": "Für die gewählten Elemente kann keine passenden Lizenz in diesem Dialog gefunden werden. Wählen Sie \"Lizenz ersetzen\", wenn Sie die Lizenz neu festlegen wollen.",
       "LICENSES": {
         "NONE": "Unlizenziert",
@@ -793,7 +795,7 @@
     "SAVED": "Änderungen wurden gespeichert."
   },
   "TOAST": {
-    "NODE_LOCKED": "Das gewünschte Dokument wird aktuell von einem anderen Nutzer verwendet und kann deshalb nicht geöffnet werden",
+    "NODE_LOCKED": "Das gewünschte Dokument wird aktuell von einer anderen Person verwendet und kann deshalb nicht geöffnet werden",
     "FIELD_REQUIRED": "Das Feld \"{{ name }}\" muss ausgefüllt sein",
     "NO_CONNECTION": "Instabile Internetverbindung, Inhalt konnte nicht geladen werden. Bitte später erneut versuchen",
     "RENDER_NOT_FOUND": "Das angeforderte Element wurde gelöscht oder existiert nicht",
@@ -811,7 +813,7 @@
     "TITLE": "Zum Stream hinzufügen",
     "AUDIENCE_TYPE": "Auf Stream von...",
     "AUDIENCE_EVERYONE": "Allen",
-    "AUDIENCE_EVERYONE_INFO": "Der Eintrag wird bei allen Nutzern auf dem Stream erscheinen",
+    "AUDIENCE_EVERYONE_INFO": "Der Eintrag wird bei allen Nutzenden auf dem Stream erscheinen",
     "AUDIENCE_CUSTOM": "Einzelnen Personen oder Gruppen",
     "SUCCESSFUL": "Element(e) wurden zum Stream hinzugefügt",
     "ERROR": {
@@ -916,13 +918,13 @@
     "DESCRIPTION": {
       "simple": "Der Zutritt zur gewählten Gruppe ist ohne Beschränkung möglich. Nach Bestätigung werden Sie automatisch Mitglied der Gruppe",
       "password": "Der gewählten Gruppe darf nur mit einem gültigen Passwort beigetreten werden. Geben Sie das Passwort unten ein, um Mitglied der Gruppe zu werden.",
-      "list": "Der Gruppen-Administrator wird über Ihre Beitrittsanfrage informiert. Sie erhalten eine E-Mail, sobald der Administrator Ihnen den Zugang genehmigt hat."
+      "list": "Die Gruppen-Verwaltung wird über Ihre Beitrittsanfrage informiert. Sie erhalten eine E-Mail, sobald die Administrierenden Ihnen den Zugang genehmigt haben."
     },
     "TOAST": {
       "InvalidPassword": "Das angegebene Passwort ist ungültig.",
       "AlreadyInList": "Sie sind bereits auf der Warteliste dieser Gruppe. Sie erhalten eine E-Mail-Benachrichtigung, sobald Sie freigeschaltet wurden.",
       "AlreadyMember": "Sie sind bereits Mitglied der gewählten Gruppe.",
-      "ADDED_TO_LIST": "Sie wurden auf die Warteliste gesetzt und der Gruppen-Administrator wird benachrichtigt. Sie erhalten eine E-Mail-Benachrichtung, sobald Sie freigeschaltet wurden.",
+      "ADDED_TO_LIST": "Sie wurden auf die Warteliste gesetzt und die Gruppen-Verwaltung wird benachrichtigt. Sie erhalten eine E-Mail-Benachrichtung, sobald Sie freigeschaltet wurden.",
       "ADDED_TO_GROUP": "Sie sind nun Mitglied der Gruppe {{group}}."
     }
   },
