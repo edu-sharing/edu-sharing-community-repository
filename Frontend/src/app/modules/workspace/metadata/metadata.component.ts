@@ -1,6 +1,8 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
+import { BehaviorSubject } from 'rxjs';
+import { distinctUntilChanged, filter, map } from 'rxjs/operators';
 import {
     ConfigurationHelper,
     ConfigurationService,
@@ -35,10 +37,10 @@ declare var Chart: any;
     templateUrl: 'metadata.component.html',
     styleUrls: ['metadata.component.scss'],
 })
-export class WorkspaceMetadataComponent {
+export class WorkspaceMetadataComponent implements OnInit {
     @Input() isAdmin: boolean;
     @Input() set node(node: Node) {
-        this.load(node);
+        this.nodeSubject.next(node);
     }
 
     @Output() onEditMetadata = new EventEmitter();
@@ -78,6 +80,7 @@ export class WorkspaceMetadataComponent {
     };
 
     private usages: Usage[];
+    private nodeSubject = new BehaviorSubject<Node>(null);
 
     constructor(
         private translate: TranslateService,
@@ -93,12 +96,23 @@ export class WorkspaceMetadataComponent {
         this.columnsCollections.push(new ListItem('COLLECTION', 'title'));
     }
 
-    private async load(node: Node) {
+    ngOnInit(): void {
+        this.nodeSubject
+            .pipe(
+                filter((node) => node !== null),
+                map((node) => node.ref.id),
+                distinctUntilChanged(),
+            )
+            .subscribe((nodeId) => this.load(nodeId));
+    }
+
+    private async load(nodeId: string) {
+        console.log('load');
         this.versions = null;
         this.versionsLoading = true;
         this.resetStats();
         this.nodeObject = (
-            await this.nodeApi.getNodeMetadata(node.ref.id, [RestConstants.ALL]).toPromise()
+            await this.nodeApi.getNodeMetadata(nodeId, [RestConstants.ALL]).toPromise()
         ).node;
         if (this.nodeObject.isDirectory) {
             this.tab = this.INFO;
