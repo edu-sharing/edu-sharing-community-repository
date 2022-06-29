@@ -87,6 +87,7 @@ public class SearchApi {
 			token.setMaxResult(maxItems != null ? maxItems : RestConstants.DEFAULT_MAX_ITEMS);
 			token.setContentType(contentType);
 			token.setResolveCollections(parameters.isResolveCollections());
+			token.setExcludes(parameters.getExcludes());
 			NodeSearch search = NodeDao.search(repoDao, mdsDao, query, parameters.getCriteria(), token, filter);
 
 		    	List<Node> data = null;//new ArrayList<Node>();
