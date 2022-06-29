@@ -18,7 +18,7 @@
     "check:format": "prettier --check src projects/*/src",
     "fix:format": "prettier --write src projects/*/src",
     "test": "ng test",
-    "pree2e": "rm -r playwright/out && tsc --incremental -p tests/tsconfig.json",
+    "pree2e": "rm -rf playwright/out && tsc --incremental -p tests/tsconfig.json",
     "e2e": "playwright test",
     "test:edu-sharing-frontend": "ng test angular-edusharing",
     "test:edu-sharing-api": "ng test edu-sharing-api",

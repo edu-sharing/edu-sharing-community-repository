@@ -1,54 +1,88 @@
-import { test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { CollectionsPage } from '../pages/collections.page';
 import { GeneralPage } from '../pages/general.page';
 import { SearchPage } from '../pages/search.page';
 import { WorkspacePage } from '../pages/workspace.page';
 import { defaultLogin } from '../util/constants';
-import { generateTestFile, generateTestThingName, getStorageStatePath } from '../util/util';
+import {
+    generateTestFile,
+    generateTestThingName,
+    getBaseName,
+    getStorageStatePath,
+} from '../util/util';
 
 test.use({ storageState: getStorageStatePath(defaultLogin) });
 
-test('should go to search page', async ({ page }) => {
-    const searchPage = new SearchPage(page);
+let generalPage: GeneralPage;
+let searchPage: SearchPage;
+let collectionsPage: CollectionsPage;
+let workspacePage: WorkspacePage;
 
+test.beforeEach(async ({ page }) => {
+    generalPage = new GeneralPage(page);
+    searchPage = new SearchPage(page);
+    collectionsPage = new CollectionsPage(page);
+    workspacePage = new WorkspacePage(page);
+});
+
+test('should go to search page', async () => {
     await searchPage.goto({ expectMaterials: true });
 });
 
-test('should show search scope', async ({ page }) => {
-    const searchPage = new SearchPage(page);
-
+test('should show search scope', async () => {
     await searchPage.goto();
     await searchPage.expectScopeButton();
 });
 
-test('should show a file uploaded to a collection', async ({ page }) => {
+test('should show an uploaded file', async () => {
     const testFile = generateTestFile();
-    const collectionName = generateTestThingName('collection');
-    const collectionsPage = new CollectionsPage(page);
-    const searchPage = new SearchPage(page);
-    const generalPage = new GeneralPage(page);
 
-    await page.goto(CollectionsPage.url);
-    await collectionsPage.addPrivateCollection(collectionName);
-    await collectionsPage.uploadFileToCurrentCollection(testFile);
-
-    // Wait for the search index to settle
-    await generalPage.sleep(10);
     await searchPage.goto();
-    // await searchPage.expectToHaveElement(testFile.name);
-    await generalPage.searchInTopBar(testFile.name);
+    await generalPage.uploadFile(testFile);
     await searchPage.expectToHaveElement(testFile.name);
 });
 
-test('should not show a file uploaded to a collection and then deleted', async ({ page }) => {
+test('should show an uploaded file after reload', async () => {
+    const testFile = generateTestFile();
+
+    await searchPage.goto();
+    await generalPage.uploadFile(testFile);
+    await searchPage.expectToEventuallyHaveElement(testFile.name);
+});
+
+test('should find an uploaded file', async () => {
+    const testFile = generateTestFile();
+
+    await searchPage.goto();
+    await generalPage.uploadFile(testFile);
+    await searchPage.expectToEventuallyFindBySearching(getBaseName(testFile.name));
+});
+
+// Depends on https://issues.edu-sharing.net/jira/browse/DESP-819
+test.skip('should find an uploaded file by full filename', async () => {
+    const testFile = generateTestFile();
+
+    await searchPage.goto();
+    await generalPage.uploadFile(testFile);
+    await searchPage.expectToEventuallyFindBySearching(testFile.name);
+});
+
+test('should show a file uploaded to a collection', async () => {
     const testFile = generateTestFile();
     const collectionName = generateTestThingName('collection');
-    const collectionsPage = new CollectionsPage(page);
-    const searchPage = new SearchPage(page);
-    const generalPage = new GeneralPage(page);
-    const workspacePage = new WorkspacePage(page);
 
-    await page.goto(CollectionsPage.url);
+    await collectionsPage.goto();
+    await collectionsPage.addPrivateCollection(collectionName);
+    await collectionsPage.uploadFileToCurrentCollection(testFile);
+
+    await searchPage.expectToEventuallyFindBySearching(getBaseName(testFile.name));
+});
+
+test('should not show a file uploaded to a collection and then deleted', async () => {
+    const testFile = generateTestFile();
+    const collectionName = generateTestThingName('collection');
+
+    await collectionsPage.goto();
     await collectionsPage.addPrivateCollection(collectionName);
     await collectionsPage.uploadFileToCurrentCollection(testFile);
 
@@ -56,17 +90,15 @@ test('should not show a file uploaded to a collection and then deleted', async (
     await workspacePage.deleteSelectedElement();
 
     // Wait for the search index to settle
-    await generalPage.sleep(10);
+    await generalPage.sleep(SearchPage.INDEX_UPDATE_TIMEOUT);
     await searchPage.goto();
     await searchPage.expectNotToHaveElement(testFile.name);
-    await generalPage.searchInTopBar(testFile.name);
+    await generalPage.searchInTopBar(getBaseName(testFile.name));
     await searchPage.expectNoSearchResults();
 });
 
-test('should show no results when searching for non-existent file', async ({ page }) => {
+test('should show no results when searching for non-existent file', async () => {
     const testFile = generateTestFile();
-    const searchPage = new SearchPage(page);
-    const generalPage = new GeneralPage(page);
 
     await searchPage.goto();
     await generalPage.searchInTopBar(testFile.name);

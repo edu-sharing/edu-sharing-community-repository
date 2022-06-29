@@ -11,6 +11,14 @@ export class CollectionsPage {
     constructor(private readonly page: Page) {}
 
     @testStep()
+    async goto() {
+        await Promise.all([
+            this.page.goto(CollectionsPage.url),
+            this.page.waitForNavigation({ url: CollectionsPage.url }),
+        ]);
+    }
+
+    @testStep()
     async expectScopeButton() {
         const mainNavScopeButton = this.page.locator('[data-test="main-nav-scope-button"]');
         await expect(mainNavScopeButton).toHaveText(/Collections/);
@@ -62,7 +70,7 @@ export class CollectionsPage {
     @testStep()
     async uploadFileToCurrentCollection(
         file: InlineFile,
-        { editMetadata = false, delayEditMetadataSeconds = 0 } = {},
+        { editMetadata = false, delayEditMetadata = 0 } = {},
     ) {
         await this.page.locator('[data-test="card-button-OPTIONS.ADD_OBJECT"]').click();
         const [fileChooser] = await Promise.all([
@@ -72,7 +80,7 @@ export class CollectionsPage {
         await fileChooser.setFiles(file);
         if (editMetadata) {
             await this.page.locator('[data-test="more-metadata-button"]').click();
-            await this.generalPage.sleep(delayEditMetadataSeconds);
+            await this.generalPage.sleep(delayEditMetadata);
         }
         await this.page.locator('[data-test="dialog-button-SAVE"]').click();
         await this.generalPage.expectToastMessage(

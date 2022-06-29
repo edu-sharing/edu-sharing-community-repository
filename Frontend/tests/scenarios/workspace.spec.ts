@@ -1,9 +1,9 @@
 import { test } from '@playwright/test';
-import { defaultLogin } from '../util/constants';
 import { GeneralPage } from '../pages/general.page';
 import { RenderPage } from '../pages/render.page';
-import { generateTestFile, generateTestThingName, getStorageStatePath } from '../util/util';
 import { WorkspacePage } from '../pages/workspace.page';
+import { defaultLogin } from '../util/constants';
+import { generateTestFile, generateTestThingName, getStorageStatePath } from '../util/util';
 
 test.use({ storageState: getStorageStatePath(defaultLogin) });
 
@@ -39,9 +39,10 @@ test.describe('Empty folder', () => {
 
     test('should upload a file', async ({ page }) => {
         const testFile = generateTestFile();
+        const generalPage = new GeneralPage(page);
         const workspacePage = new WorkspacePage(page);
 
-        await workspacePage.uploadFile(testFile);
+        await generalPage.uploadFile(testFile);
         await workspacePage.expectElement(testFile.name);
     });
 
@@ -92,6 +93,7 @@ test.describe('Folder with 1 element', () => {
         await workspacePage.expectSidebarToShow(elementName);
     });
 
+    // TODO: does not work for admin?
     test('should delete element', async ({ page }) => {
         const workspacePage = new WorkspacePage(page);
 

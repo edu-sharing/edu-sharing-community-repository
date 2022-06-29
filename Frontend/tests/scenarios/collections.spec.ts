@@ -77,7 +77,7 @@ test.describe('Empty collection', () => {
             editMetadata: true,
             // There is a bug that only occurs when slightly waiting before opening the metadata
             // editor. We want to test for this bug here.
-            delayEditMetadataSeconds: 2,
+            delayEditMetadata: 2000,
         });
         await collectionsPage.expectToBeOnCollectionPage(collectionName);
         await collectionsPage.expectToHaveElement(testFile.name);

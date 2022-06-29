@@ -1,5 +1,7 @@
 import { expect, Locator, Page } from '@playwright/test';
+import { testFilesFolder } from '../util/constants';
 import { testStep } from '../util/test-step';
+import { InlineFile } from '../util/util';
 
 export class GeneralPage {
     constructor(private readonly page: Page) {}
@@ -16,13 +18,19 @@ export class GeneralPage {
     }
 
     @testStep()
-    async sleep(seconds: number) {
-        await sleep(seconds * 1000);
+    async sleep(ms: number) {
+        await sleep(ms);
     }
 
     @testStep()
     async expectToastMessage(message: string | RegExp) {
         await expect(this.page.locator('[data-test="toast-message"]')).toHaveText(message);
+    }
+
+    @testStep()
+    async expectLoadingToFinish() {
+        await this.page.waitForLoadState('networkidle');
+        await expect(this.page.locator('[data-test="loading-spinner"]')).toHaveCount(0);
     }
 
     @testStep()
@@ -32,6 +40,22 @@ export class GeneralPage {
             this.page.waitForNavigation(),
             this.page.locator('[data-test="top-bar-search-field"]').press('Enter'),
         ]);
+    }
+
+    @testStep()
+    async uploadFile(fileOrFilename: string | InlineFile) {
+        await this.page.locator('[data-test="top-bar-add-button"]').click();
+        await this.page.locator('[data-test="menu-item-OPTIONS.ADD_OBJECT"]').click();
+        const [fileChooser] = await Promise.all([
+            this.page.waitForEvent('filechooser'),
+            this.page.locator('[data-test="browse-files-button"]').click(),
+        ]);
+        if (typeof fileOrFilename === 'string') {
+            await fileChooser.setFiles(testFilesFolder + fileOrFilename);
+        } else {
+            await fileChooser.setFiles(fileOrFilename);
+        }
+        await this.page.locator('[data-test="dialog-button-SAVE"]').click();
     }
 
     getCardElement(pattern: string | RegExp): Locator {

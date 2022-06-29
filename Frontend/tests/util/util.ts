@@ -26,6 +26,7 @@ export function generateTestFile(): InlineFile {
     };
 }
 
+/** Gets the filename without its extension. */
 export function getBaseName(filename: string): string {
     return filename.split('.')[0];
 }

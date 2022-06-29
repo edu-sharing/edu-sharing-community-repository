@@ -75,25 +75,13 @@ export class WorkspacePage {
 
     @testStep()
     async deleteSelectedElement() {
+        // When we delete an element while there are still requests in flight that fetch data on
+        // that element, these requests might return an error.
+        await this.page.waitForLoadState('networkidle');
+
         await this.page.locator('[data-test="more-actions-button"]').click();
         await this.page.locator('[data-test="menu-item-OPTIONS.DELETE"]').click();
         await this.page.locator('[data-test="dialog-button-YES_DELETE"]').click();
-    }
-
-    @testStep()
-    async uploadFile(fileOrFilename: string | InlineFile) {
-        await this.page.locator('[data-test="top-bar-add-button"]').click();
-        await this.page.locator('[data-test="menu-item-OPTIONS.ADD_OBJECT"]').click();
-        const [fileChooser] = await Promise.all([
-            this.page.waitForEvent('filechooser'),
-            this.page.locator('[data-test="browse-files-button"]').click(),
-        ]);
-        if (typeof fileOrFilename === 'string') {
-            await fileChooser.setFiles(testFilesFolder + fileOrFilename);
-        } else {
-            await fileChooser.setFiles(fileOrFilename);
-        }
-        await this.page.locator('[data-test="dialog-button-SAVE"]').click();
     }
 
     @testStep()
