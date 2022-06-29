@@ -36,6 +36,7 @@
     "@ngx-translate/core": "~11.0.1",
     "@storybook/addon-actions": "^5.3.14",
     "@storybook/addon-knobs": "^5.3.14",
+    "@types/uuid": "^8.3.4",
     "angularx-qrcode": "^2.1.0",
     "core-js": "^3.6.4",
     "material-design-icons": "^3.0.1",
@@ -49,6 +50,7 @@
     "rxjs": "^6.5.4",
     "rxjs-compat": "^6.5.4",
     "tslib": "^1.10.0",
+    "uuid": "^3.3.2",
     "zone.js": "~0.10.2"
   },
   "devDependencies": {
