@@ -24,7 +24,13 @@ async function testStepWrapper<R>(
     testFunction: () => Promise<R>,
     options: TestStepOptions,
 ): Promise<R> {
-    const result = await Promise.race([testFunction(), checkConsoleMessages(page, options)]);
+    const result = await Promise.race([
+        (async () => {
+            // await page.waitForLoadState('networkidle');
+            return testFunction();
+        })(),
+        checkConsoleMessages(page, options),
+    ]);
     return result as R; // checkConsoleMessages runs indefinitely and will never win the race.
 }
 

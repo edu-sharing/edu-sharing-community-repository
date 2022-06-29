@@ -77,7 +77,7 @@ export class WorkspacePage {
     async deleteSelectedElement() {
         // When we delete an element while there are still requests in flight that fetch data on
         // that element, these requests might return an error.
-        await this.page.waitForLoadState('networkidle');
+        // await this.page.waitForLoadState('networkidle');
 
         await this.page.locator('[data-test="more-actions-button"]').click();
         await this.page.locator('[data-test="menu-item-OPTIONS.DELETE"]').click();
