@@ -1,4 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import {
     ConfigurationHelper,
     ConfigurationService,
@@ -18,13 +20,10 @@ import {
     UsageList,
     Version,
 } from '../../../core-module/core.module';
-import { TranslateService } from '@ngx-translate/core';
-import { Toast } from '../../../core-ui-module/toast';
-import { VCard } from '../../../core-module/ui/VCard';
-import { Router } from '@angular/router';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
+import { VCard } from '../../../core-module/ui/VCard';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
+import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { FormatDatePipe } from '../../../shared/pipes/format-date.pipe';
 import { NodeImageSizePipe } from '../../../shared/pipes/node-image-size.pipe';
 
@@ -37,19 +36,32 @@ declare var Chart: any;
     styleUrls: ['metadata.component.scss'],
 })
 export class WorkspaceMetadataComponent {
-    public data: any;
-    INFO = 'INFO';
-    PROPERTIES = 'PROPERTIES';
-    VERSIONS = 'VERSIONS';
+    @Input() isAdmin: boolean;
+    @Input() set node(node: Node) {
+        this.load(node);
+    }
+
+    @Output() onEditMetadata = new EventEmitter();
+    @Output() onDownload = new EventEmitter();
+    @Output() onDisplay = new EventEmitter();
+    @Output() onClose = new EventEmitter();
+    @Output() onRestore = new EventEmitter();
+
+    readonly INFO = 'INFO';
+    readonly PROPERTIES = 'PROPERTIES';
+    readonly VERSIONS = 'VERSIONS';
+    data: any;
     tab = this.INFO;
     permissions: any;
-    private usages: Usage[];
     usagesCollection: Node[];
     nodeObject: Node;
     versions: Version[];
     versionsLoading = false;
     columns: ListItem[] = [];
     columnsCollections: ListItem[] = [];
+    statsTotalPoints: number;
+    forkedParent: Node;
+    forkedChilds: Node[];
     /*Chart.js*/
     canvas: any;
     ctx: any;
@@ -65,18 +77,22 @@ export class WorkspaceMetadataComponent {
         ],
     };
 
-    statsTotalPoints: number;
-    @Input() isAdmin: boolean;
-    forkedParent: Node;
-    forkedChilds: Node[];
-    @Input() set node(node: Node) {
-        this.load(node);
+    private usages: Usage[];
+
+    constructor(
+        private translate: TranslateService,
+        private config: ConfigurationService,
+        private nodeHelper: NodeHelperService,
+        private router: Router,
+        private iamApi: RestIamService,
+        private nodeApi: RestNodeService,
+        private searchApi: RestSearchService,
+        private usageApi: RestUsageService,
+    ) {
+        this.columns.push(new ListItem('NODE', RestConstants.CM_NAME));
+        this.columnsCollections.push(new ListItem('COLLECTION', 'title'));
     }
-    @Output() onEditMetadata = new EventEmitter();
-    @Output() onDownload = new EventEmitter();
-    @Output() onDisplay = new EventEmitter();
-    @Output() onClose = new EventEmitter();
-    @Output() onRestore = new EventEmitter();
+
     private async load(node: Node) {
         this.versions = null;
         this.versionsLoading = true;
@@ -178,6 +194,7 @@ export class WorkspaceMetadataComponent {
                 });
         });
     }
+
     isCurrentVersion(version: Version): boolean {
         if (!this.nodeObject) return false;
         const prop = this.nodeObject.properties[RestConstants.LOM_PROP_LIFECYCLE_VERSION];
@@ -185,26 +202,33 @@ export class WorkspaceMetadataComponent {
 
         return prop[0] == version.version.major + '.' + version.version.minor;
     }
+
     setTab(tab: string) {
         this.tab = tab;
     }
+
     display(version: string = null) {
         this.nodeObject.version = version;
         this.onDisplay.emit(this.nodeObject);
     }
+
     displayNode(node: Node) {
         this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.ref.id]);
     }
+
     displayCollection(collection: Node) {
         UIHelper.goToCollection(this.router, collection);
     }
+
     private openPermalink() {
         this.displayNode(this.nodeObject);
     }
+
     displayVersion(version: Version) {
         if (this.isCurrentVersion(version)) this.display();
         else this.display(version.version.major + '.' + version.version.minor);
     }
+
     private format(node: Node): any {
         const data: any = {};
         data.name = node.name;
@@ -250,35 +274,27 @@ export class WorkspaceMetadataComponent {
         }
         return data;
     }
-    public close() {
+
+    close() {
         this.onClose.emit();
     }
+
     edit() {
         this.onEditMetadata.emit(this.nodeObject);
     }
-    constructor(
-        private translate: TranslateService,
-        private config: ConfigurationService,
-        private nodeHelper: NodeHelperService,
-        private router: Router,
-        private iamApi: RestIamService,
-        private nodeApi: RestNodeService,
-        private searchApi: RestSearchService,
-        private usageApi: RestUsageService,
-        private toast: Toast,
-    ) {
-        this.columns.push(new ListItem('NODE', RestConstants.CM_NAME));
-        this.columnsCollections.push(new ListItem('COLLECTION', 'title'));
-    }
+
     restoreVersion(restore: Version) {
         this.onRestore.emit({ version: restore, node: this.nodeObject });
     }
+
     canRevert() {
         return this.nodeObject && this.nodeObject.access.indexOf(RestConstants.ACCESS_WRITE) != -1;
     }
+
     isAnimated() {
         return this.nodeHelper.hasAnimatedPreview(this.nodeObject);
     }
+
     private formatPermissions(login: IamUser, permissions: NodePermissions): any {
         const data: any = {};
         data.users = [];
@@ -325,11 +341,13 @@ export class WorkspaceMetadataComponent {
         }
         return false;
     }
+
     resetStats() {
         this.stats.labels = [];
         this.stats.points = [];
         this.statsTotalPoints = null;
     }
+
     getStats() {
         this.resetStats();
         this.stats.labels.push(this.translate.instant('WORKSPACE.METADATA.USAGE_TYPE.LMS'));
