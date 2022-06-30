@@ -20,6 +20,7 @@
     "test": "ng test",
     "pree2e": "rm -rf playwright/out && tsc --incremental -p tests/tsconfig.json",
     "e2e": "playwright test",
+    "e2e-watch-compile": "rm -rf playwright/out && tsc --watch -p tests/tsconfig.json",
     "test:edu-sharing-frontend": "ng test angular-edusharing",
     "test:edu-sharing-api": "ng test edu-sharing-api",
     "docs": "typedoc --mode file --experimentalDecorators --excludePrivate --ignoreCompilerErrors --target 'ES6' --module 'commonjs' --out docs src",
