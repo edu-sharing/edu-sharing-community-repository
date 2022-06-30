@@ -14,7 +14,11 @@ export function getStorageStatePath(loginCredentials: LoginCredentials): string 
 }
 
 export function generateTestThingName(thing: string): string {
-    return `Test ${thing} ${new Date().getTime()}`;
+    return (
+        `Test ${thing} ` +
+        new Date().getTime().toString(36) +
+        Math.random().toString(36).substring(7)
+    );
 }
 
 export function generateTestFile(): InlineFile {

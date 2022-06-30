@@ -1,8 +1,6 @@
 import { expect, Locator, Page } from '@playwright/test';
-import { testFilesFolder } from '../util/constants';
-import { GeneralPage } from './general.page';
-import { InlineFile } from '../util/util';
 import { testStep } from '../util/test-step';
+import { GeneralPage } from './general.page';
 
 export class WorkspacePage {
     static readonly url = './components/workspace';
@@ -10,6 +8,11 @@ export class WorkspacePage {
     private readonly generalPage = new GeneralPage(this.page);
 
     constructor(private readonly page: Page) {}
+
+    @testStep()
+    async goto() {
+        await Promise.all([this.page.goto(WorkspacePage.url), this.page.waitForNavigation()]);
+    }
 
     @testStep()
     async expectScopeButton() {
@@ -27,6 +30,12 @@ export class WorkspacePage {
     async expectElementToBeSelected(pattern: string | RegExp) {
         const row = this.getElementRow(pattern);
         await expect(row.locator('input[type="checkbox"]')).toBeChecked();
+    }
+
+    @testStep()
+    async expectElementNotToBeSelected(pattern: string | RegExp) {
+        const row = this.getElementRow(pattern);
+        await expect(row.locator('input[type="checkbox"]')).not.toBeChecked();
     }
 
     @testStep()

@@ -7,20 +7,29 @@ import { generateTestFile, generateTestThingName, getStorageStatePath } from '..
 
 test.use({ storageState: getStorageStatePath(defaultLogin) });
 
-test('should show workspace scope', async ({ page }) => {
-    await page.goto(WorkspacePage.url);
-    const workspacePage = new WorkspacePage(page);
+let generalPage: GeneralPage;
+let workspacePage: WorkspacePage;
+let renderPage: RenderPage;
+
+test.beforeEach(async ({ page }) => {
+    generalPage = new GeneralPage(page);
+    workspacePage = new WorkspacePage(page);
+    renderPage = new RenderPage(page);
+});
+
+test('should show workspace scope', async () => {
+    await workspacePage.goto();
     await workspacePage.expectScopeButton();
 });
 
-test('should not have any warnings or errors', async ({ page }) => {
-    await Promise.all([new GeneralPage(page).checkConsoleMessages(), page.goto(WorkspacePage.url)]);
+test('should not have any warnings or errors', async () => {
+    await Promise.all([generalPage.checkConsoleMessages(), workspacePage.goto()]);
 });
 
-test('should create and delete a folder', async ({ page }) => {
-    await page.goto(WorkspacePage.url);
+test('should create and delete a folder', async () => {
     const folderName = generateTestThingName('folder');
-    const workspacePage = new WorkspacePage(page);
+
+    await workspacePage.goto();
     await workspacePage.createFolder(folderName);
     await workspacePage.expectElement(folderName);
     await workspacePage.deleteElement(folderName);
@@ -28,113 +37,98 @@ test('should create and delete a folder', async ({ page }) => {
 });
 
 test.describe('Empty folder', () => {
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async () => {
         const folderName = generateTestThingName('folder');
-        const workspacePage = new WorkspacePage(page);
 
-        await page.goto(WorkspacePage.url);
+        await workspacePage.goto();
         await workspacePage.createFolder(folderName);
         await workspacePage.openElement(folderName);
     });
 
-    test('should upload a file', async ({ page }) => {
+    test('should upload a file', async () => {
         const testFile = generateTestFile();
-        const generalPage = new GeneralPage(page);
-        const workspacePage = new WorkspacePage(page);
 
         await generalPage.uploadFile(testFile);
         await workspacePage.expectElement(testFile.name);
     });
 
-    // FIXME: Fails, wrong element name?
-    test.skip('should create a link element', async ({ page }) => {
-        const workspacePage = new WorkspacePage(page);
-
+    test('should create a link element', async () => {
         await workspacePage.createLinkElement('http://example.org');
-        await workspacePage.expectElement('example.org');
+        await workspacePage.expectElement('Example Domain');
     });
 });
 
-// FIXME: Fails, wrong element name?
-test.describe.skip('Folder with 1 element', () => {
-    const elementName = 'example.org';
+test.describe('Folder with 1 element', () => {
+    const testFile = generateTestFile();
 
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async () => {
         const folderName = generateTestThingName('folder');
-        const workspacePage = new WorkspacePage(page);
 
-        await page.goto(WorkspacePage.url);
+        await workspacePage.goto();
         await workspacePage.createFolder(folderName);
         await workspacePage.openElement(folderName);
-        await workspacePage.createLinkElement('http://example.org');
+        await generalPage.uploadFile(testFile);
     });
 
-    test('should open element', async ({ page }) => {
-        const workspacePage = new WorkspacePage(page);
-        const renderPage = new RenderPage(page);
+    test('should be selected', async () => {
+        await workspacePage.expectElementToBeSelected(testFile.name);
+    });
 
-        await workspacePage.openElement(elementName);
+    test('should open element', async () => {
+        await workspacePage.openElement(testFile.name);
         await renderPage.expectToBeOnPage();
     });
 
-    test('should open element via menu', async ({ page }) => {
-        const workspacePage = new WorkspacePage(page);
-        const renderPage = new RenderPage(page);
-
-        await workspacePage.openElementViaMenu(elementName);
+    // FIXME: Fails in Edu-Sharing
+    test.skip('should open element via menu', async () => {
+        await workspacePage.openElementViaMenu(testFile.name);
         await renderPage.expectToBeOnPage();
     });
 
-    test('should show element in folder', async ({ page }) => {
-        const workspacePage = new WorkspacePage(page);
-        const renderPage = new RenderPage(page);
-
-        await workspacePage.openElement(elementName);
+    // FIXME: Fails in Edu-Sharing
+    test.skip('should show element in folder', async () => {
+        await workspacePage.openElement(testFile.name);
         await renderPage.goToElementInWorkspace();
-        await workspacePage.expectElementToBeSelected(elementName);
-        await workspacePage.expectSidebarToShow(elementName);
+        await workspacePage.expectElementToBeSelected(testFile.name);
+        await workspacePage.expectSidebarToShow(testFile.name);
     });
 
     // TODO: does not work for admin?
-    test('should delete element', async ({ page }) => {
-        const workspacePage = new WorkspacePage(page);
-
-        await workspacePage.deleteElement(elementName);
-        await workspacePage.expectElement(elementName, 0);
+    test('should delete element', async () => {
+        await workspacePage.deleteElement(testFile.name);
+        await workspacePage.expectElement(testFile.name, 0);
     });
 
-    test('should show in sidebar', async ({ page }) => {
-        const workspacePage = new WorkspacePage(page);
-
-        await workspacePage.selectElement(elementName);
+    test('should show in sidebar', async () => {
         await workspacePage.toggleSidebar();
-        await workspacePage.expectSidebarToShow(elementName);
+        await workspacePage.expectSidebarToShow(testFile.name);
     });
 });
 
-// FIXME: Fails, wrong element name?
-test.describe.skip('Folder with 2 elements', () => {
-    const elementName1 = 'example.org';
-    const elementName2 = 'example.com';
+test.describe('Folder with 2 elements', () => {
+    const testFile1 = generateTestFile();
+    const testFile2 = generateTestFile();
 
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async () => {
         const folderName = generateTestThingName('folder');
-        const workspacePage = new WorkspacePage(page);
 
-        await page.goto(WorkspacePage.url);
+        await workspacePage.goto();
         await workspacePage.createFolder(folderName);
         await workspacePage.openElement(folderName);
-        await workspacePage.createLinkElement('http://example.org');
-        await workspacePage.createLinkElement('http://example.com');
+        await generalPage.uploadFile(testFile1);
+        await generalPage.uploadFile(testFile2);
     });
 
-    test('should update sidebar when selecting element', async ({ page }) => {
-        const workspacePage = new WorkspacePage(page);
+    test('should select second element', async () => {
+        await workspacePage.expectElementNotToBeSelected(testFile1.name);
+        await workspacePage.expectElementToBeSelected(testFile2.name);
+    });
 
-        await workspacePage.selectElement(elementName1);
+    // FIXME: Fails in Edu-Sharing
+    test.skip('should update sidebar when selecting element', async () => {
         await workspacePage.toggleSidebar();
-        await workspacePage.expectSidebarToShow(elementName1);
-        await workspacePage.selectElement(elementName2);
-        await workspacePage.expectSidebarToShow(elementName2);
+        await workspacePage.expectSidebarToShow(testFile2.name);
+        await workspacePage.selectElement(testFile1.name);
+        await workspacePage.expectSidebarToShow(testFile1.name);
     });
 });
