@@ -79,8 +79,7 @@ test.describe('Folder with 1 element', () => {
         await renderPage.expectToBeOnPage();
     });
 
-    // FIXME: Fails in Edu-Sharing
-    test.skip('should open element via menu', async () => {
+    test('should open element via menu', async () => {
         await workspacePage.openElementViaMenu(testFile.name);
         await renderPage.expectToBeOnPage();
     });
