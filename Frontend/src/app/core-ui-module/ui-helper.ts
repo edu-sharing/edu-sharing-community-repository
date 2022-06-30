@@ -271,7 +271,7 @@ export class UIHelper {
                 file: node.ref.id,
                 root: data.scope,
             };
-            router.navigate(
+            void router.navigate(
                 [
                     UIConstants.ROUTER_PREFIX +
                         'workspace/' +

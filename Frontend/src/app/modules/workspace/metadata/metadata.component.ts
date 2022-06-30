@@ -107,7 +107,6 @@ export class WorkspaceMetadataComponent implements OnInit {
     }
 
     private async load(nodeId: string) {
-        console.log('load');
         this.versions = null;
         this.versionsLoading = true;
         this.resetStats();
