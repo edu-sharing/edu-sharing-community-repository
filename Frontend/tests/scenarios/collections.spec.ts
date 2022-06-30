@@ -42,8 +42,7 @@ test('should create a collection', async ({ page }) => {
     await collectionsPage.expectToBeOnCollectionPage(collectionName);
 });
 
-// FIXME: Fails in Edu-Sharing. Works after navigating back from a collection.
-test.skip('should show a created a collection after reload', async ({ page }) => {
+test('should show a created a collection after reload', async ({ page }) => {
     const collectionName = generateTestThingName('collection');
     const collectionsPage = new CollectionsPage(page);
 
