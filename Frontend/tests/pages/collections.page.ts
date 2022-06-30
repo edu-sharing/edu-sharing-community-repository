@@ -5,6 +5,8 @@ import { GeneralPage } from './general.page';
 
 export class CollectionsPage {
     static readonly url = './components/collections';
+    /** The time after which we expect the search index to reflect any changes. */
+    static readonly INDEX_UPDATE_TIMEOUT = 15_000;
 
     private readonly generalPage = new GeneralPage(this.page);
 
@@ -119,6 +121,23 @@ export class CollectionsPage {
             this.page.locator('[data-test="menu-item-OPTIONS.SHOW_IN_FOLDER"]').click(),
             this.page.waitForNavigation({ url: /\/workspace/ }),
         ]);
+    }
+
+    // Not a test step since exclusively composed of other test steps.
+    async expectToEventuallyHaveElement(name: string) {
+        await expect
+            .poll(
+                async () => {
+                    await this.goto();
+                    await this.generalPage.expectLoadingToFinish();
+                    return this.generalPage.getCardElement(name).count();
+                },
+                {
+                    message: `expect to eventually have ${name}`,
+                    timeout: CollectionsPage.INDEX_UPDATE_TIMEOUT,
+                },
+            )
+            .toBe(1);
     }
 
     private getElement(pattern: string | RegExp): Locator {

@@ -50,8 +50,7 @@ test.skip('should show a created a collection after reload', async ({ page }) =>
     await page.goto(CollectionsPage.url);
     await collectionsPage.addPrivateCollection(collectionName);
 
-    await page.goto(CollectionsPage.url);
-    await collectionsPage.expectToHaveElement(collectionName);
+    await collectionsPage.expectToEventuallyHaveElement(collectionName);
 });
 
 test.describe('Empty collection', () => {
