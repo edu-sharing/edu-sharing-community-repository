@@ -28,6 +28,8 @@ public class ImportFactualTermsFromFileSax implements ContentHandler  {
     String current150g = null;
     String current150x = null;
 
+    String current913 = null;
+
     Set<String> symonyms = new HashSet<>();
 
     PersistenHandlerKeywordsDNBMarc persistentHandler;
@@ -127,8 +129,7 @@ public class ImportFactualTermsFromFileSax implements ContentHandler  {
 
         if(currentDatafieldTag != null && "913".equals(currentDatafieldTag)){
             if(localName.equals("subfield") && currentAtts != null && "a".equals(currentAtts.getValue("code"))){
-                logger.info("setting name:"+currentValue);
-                currentProperties.put(RecordHandlerKeywordsDNBMarc.NAME,currentValue);
+                current913 = currentValue;
             }
         }
 
@@ -146,8 +147,8 @@ public class ImportFactualTermsFromFileSax implements ContentHandler  {
 
         if(localName.equals("record")){
             currentProperties.put(RecordHandlerKeywordsDNBMarc.SYNONYMS,symonyms);
-            if(currentProperties.get(RecordHandlerKeywordsDNBMarc.NAME) == null && current150a != null){
 
+            if(current150a != null){
                 String value = current150a;
                 if(current150g != null){
                     value = value + " <"+current150g+">";
@@ -156,8 +157,15 @@ public class ImportFactualTermsFromFileSax implements ContentHandler  {
                 if(current150x != null){
                     value = value + " / "+current150x;
                 }
+                logger.info("setting name:"+value);
+                currentProperties.put(RecordHandlerKeywordsDNBMarc.NAME,value);
+            }
 
-                logger.info("missing 913 using 150:"+ value +" id:"+currentProperties.get(RecordHandlerKeywordsDNBMarc.ID));
+            if(currentProperties.get(RecordHandlerKeywordsDNBMarc.NAME) == null && current913 != null){
+
+                String value = current913;
+
+                logger.info("missing 150 using 913:"+ value +" id:"+currentProperties.get(RecordHandlerKeywordsDNBMarc.ID));
                 currentProperties.put(RecordHandlerKeywordsDNBMarc.NAME, value);
             }
             try {
@@ -180,9 +188,10 @@ public class ImportFactualTermsFromFileSax implements ContentHandler  {
 
             currentProperties.clear();
             symonyms.clear();
-            current150a = null;
+            current913 = null;
             current150g = null;
             current150x = null;
+            current150a = null;
         }
 
         if(openedElements.get(openedElements.size() - 1).equals(localName)){
