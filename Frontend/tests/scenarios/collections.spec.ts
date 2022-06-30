@@ -1,79 +1,88 @@
 import { expect, test } from '@playwright/test';
 import { CollectionsPage } from '../pages/collections.page';
-import { defaultLogin } from '../util/constants';
 import { GeneralPage } from '../pages/general.page';
+import { WorkspacePage } from '../pages/workspace.page';
+import { defaultLogin } from '../util/constants';
 import {
     generateTestFile,
     generateTestThingName,
     getStorageStatePath,
     InlineFile,
 } from '../util/util';
-import { WorkspacePage } from '../pages/workspace.page';
 
 test.use({ storageState: getStorageStatePath(defaultLogin) });
 
-test('should go to root collections page', async ({ page }) => {
-    const collectionsPage = new CollectionsPage(page);
+let generalPage: GeneralPage;
+let collectionsPage: CollectionsPage;
+let workspacePage: WorkspacePage;
 
-    await page.goto(CollectionsPage.url);
-    await collectionsPage.expectToBeOnRootCollectionPage();
+test.beforeEach(async ({ page }) => {
+    generalPage = new GeneralPage(page);
+    collectionsPage = new CollectionsPage(page);
+    workspacePage = new WorkspacePage(page);
 });
 
-test('should show collections scope', async ({ page }) => {
-    const collectionsPage = new CollectionsPage(page);
-
-    await page.goto(CollectionsPage.url);
-    await collectionsPage.expectScopeButton();
+test('should not have any warnings or errors', async () => {
+    await Promise.all([generalPage.checkConsoleMessages(), collectionsPage.goto()]);
 });
 
-test('should not have any warnings or errors', async ({ page }) => {
-    await Promise.all([
-        new GeneralPage(page).checkConsoleMessages(),
-        page.goto(CollectionsPage.url),
-    ]);
-});
+test.describe('Root collections page', () => {
+    test.beforeEach(async () => {
+        await collectionsPage.goto();
+    });
 
-test('should create a collection', async ({ page }) => {
-    const collectionName = generateTestThingName('collection');
-    const collectionsPage = new CollectionsPage(page);
+    test('should be root page', async () => {
+        await collectionsPage.expectToBeOnRootCollectionPage();
+    });
 
-    await page.goto(CollectionsPage.url);
-    await collectionsPage.addPrivateCollection(collectionName);
-    await collectionsPage.expectToBeOnCollectionPage(collectionName);
-});
+    test('should show collections scope', async () => {
+        await collectionsPage.expectScopeButton();
+    });
 
-test('should show a created a collection after reload', async ({ page }) => {
-    const collectionName = generateTestThingName('collection');
-    const collectionsPage = new CollectionsPage(page);
+    // FIXME: This needs more than 25 root collections as setup
+    test('should load more collections on scroll', async () => {
+        await generalPage.expectLoadingToFinish();
+        // FIXME: Page interaction outside test step
+        const elements = await generalPage.getCardElement('').count();
+        // FIXME: Playwright confuses test steps when inside `Promise.all`
+        await Promise.all([generalPage.scrollToLastCard(), generalPage.expectLoadingSpinner()]);
+        await generalPage.expectLoadingToFinish();
+        expect(await generalPage.getCardElement('').count()).toBeGreaterThan(elements);
+    });
 
-    await page.goto(CollectionsPage.url);
-    await collectionsPage.addPrivateCollection(collectionName);
+    test('should create a collection', async () => {
+        const collectionName = generateTestThingName('collection');
 
-    await collectionsPage.expectToEventuallyHaveElement(collectionName);
+        await collectionsPage.addPrivateCollection(collectionName);
+        await collectionsPage.expectToBeOnCollectionPage(collectionName);
+    });
+
+    test('should show a created a collection after reload', async () => {
+        const collectionName = generateTestThingName('collection');
+
+        await collectionsPage.addPrivateCollection(collectionName);
+        await collectionsPage.expectToEventuallyHaveElement(collectionName);
+    });
 });
 
 test.describe('Empty collection', () => {
     let collectionName: string;
 
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async () => {
         collectionName = generateTestThingName('collection');
-        const collectionsPage = new CollectionsPage(page);
 
-        await page.goto(CollectionsPage.url);
+        await collectionsPage.goto();
         await collectionsPage.addPrivateCollection(collectionName);
     });
 
     // FIXME: Fails in Edu-Sharing.
-    test.skip('should delete a collection', async ({ page }) => {
-        const collectionsPage = new CollectionsPage(page);
-
+    test.skip('should delete a collection', async () => {
         await collectionsPage.deleteCurrentCollection();
         await collectionsPage.expectToBeOnRootCollectionPage();
     });
 
-    test('should upload an element', async ({ page }) => {
+    test('should upload an element', async () => {
         const testFile = generateTestFile();
-        const collectionsPage = new CollectionsPage(page);
 
         await collectionsPage.uploadFileToCurrentCollection(testFile);
         await collectionsPage.expectToBeOnCollectionPage(collectionName);
@@ -81,9 +90,8 @@ test.describe('Empty collection', () => {
     });
 
     // FIXME: Fails in Edu-Sharing.
-    test.skip('should upload an element with metadata editor', async ({ page }) => {
+    test.skip('should upload an element with metadata editor', async () => {
         const testFile = generateTestFile();
-        const collectionsPage = new CollectionsPage(page);
 
         await collectionsPage.uploadFileToCurrentCollection(testFile, {
             editMetadata: true,
@@ -96,9 +104,8 @@ test.describe('Empty collection', () => {
     });
 
     // FIXME: Fails, probably due to the element not being available.
-    test.skip('should add an existing element', async ({ page }) => {
+    test.skip('should add an existing element', async () => {
         const elementName = 'example.org';
-        const collectionsPage = new CollectionsPage(page);
 
         // TODO: make sure the element is available
         await collectionsPage.addElementToCurrentCollection(elementName, {
@@ -113,19 +120,16 @@ test.describe('Collection with 1 element', () => {
     let collectionName: string;
     let testFile: InlineFile;
 
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async () => {
         testFile = generateTestFile();
         collectionName = generateTestThingName('collection');
-        const collectionsPage = new CollectionsPage(page);
 
-        await page.goto(CollectionsPage.url);
+        await collectionsPage.goto();
         await collectionsPage.addPrivateCollection(collectionName);
         await collectionsPage.uploadFileToCurrentCollection(testFile);
     });
 
-    test('should remove an element from the collection', async ({ page }) => {
-        const collectionsPage = new CollectionsPage(page);
-
+    test('should remove an element from the collection', async () => {
         await collectionsPage.removeElementFromCurrentCollection(testFile.name);
         await collectionsPage.expectToBeOnCollectionPage(collectionName);
         await collectionsPage.expectNotToHaveElement(testFile.name);
@@ -133,12 +137,11 @@ test.describe('Collection with 1 element', () => {
 
     // FIXME: Fails in Edu-Sharing.
     test.skip('should mark an element as removed from workspace', async ({ page }) => {
-        const collectionsPage = new CollectionsPage(page);
-        const workspacePage = new WorkspacePage(page);
         const collectionPageUrl = page.url();
 
         await collectionsPage.goToElementInWorkspace(testFile.name);
         await workspacePage.deleteSelectedElement();
+        // FIXME: page interaction outside test step
         await Promise.all([page.goBack(), page.waitForNavigation({ url: collectionPageUrl })]);
         // TODO expect "element deleted" banner
         expect(false).toBeTruthy();

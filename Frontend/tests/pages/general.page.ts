@@ -34,6 +34,13 @@ export class GeneralPage {
     }
 
     @testStep()
+    async expectLoadingSpinner() {
+        // FIXME: `toBeVisible` would be a better condition, but this fails currently, maybe because
+        // to loading spinner is outside the screen.
+        await expect(this.page.locator('[data-test="loading-spinner"]')).not.toHaveCount(0);
+    }
+
+    @testStep()
     async searchInTopBar(searchString: string) {
         await this.page.locator('[data-test="top-bar-search-field"]').type(searchString);
         await Promise.all([
@@ -56,6 +63,11 @@ export class GeneralPage {
             await fileChooser.setFiles(fileOrFilename);
         }
         await this.page.locator('[data-test="dialog-button-SAVE"]').click();
+    }
+
+    @testStep()
+    async scrollToLastCard() {
+        await this.getCardElement('').last().scrollIntoViewIfNeeded();
     }
 
     getCardElement(pattern: string | RegExp): Locator {
