@@ -74,6 +74,9 @@ export class SearchPage {
                 },
                 {
                     message: `expect to eventually find ${pattern} by searching`,
+                    // FIXME: This might be to short for parallel tests when action times increase.
+                    // However, `expect.poll` seems to be broken when disabling the timeout by
+                    // setting it to 0.
                     timeout: SearchPage.INDEX_UPDATE_TIMEOUT,
                 },
             )

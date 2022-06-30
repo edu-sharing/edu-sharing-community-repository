@@ -70,7 +70,7 @@ test.skip('should find an uploaded file by full filename', async () => {
     await searchPage.expectToEventuallyFindBySearching(testFile.name);
 });
 
-// FIXME: flaky
+// FIXME: flaky when run in parallel (poll timeout too small?)
 test('should show a file uploaded to a collection', async () => {
     const testFile = generateTestFile();
     const collectionName = generateTestThingName('collection');
@@ -83,6 +83,8 @@ test('should show a file uploaded to a collection', async () => {
 });
 
 // FIXME: flaky
+//
+// 500 response
 test('should not show a file uploaded to a collection and then deleted', async () => {
     const testFile = generateTestFile();
     const collectionName = generateTestThingName('collection');
