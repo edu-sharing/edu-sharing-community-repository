@@ -9,7 +9,7 @@ export function testStep(options: Partial<TestStepOptions> = {}) {
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
         const originalFunction = descriptor.value;
         descriptor.value = async function (this: any, ...args: any[]) {
-            await test.step(propertyKey, async () => {
+            await test.step(this.constructor.name + '.' + propertyKey, async () => {
                 await testStepWrapper(this.page, () => originalFunction.apply(this, args), {
                     ...new TestStepOptions(),
                     ...options,
