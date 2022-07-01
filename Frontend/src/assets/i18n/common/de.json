@@ -805,7 +805,7 @@
         "redo": "Übernehmen"
     },
     "FILL_STATUS": {
-        "MESSAGE": "Felder ausgefüllt",
+        "MESSAGE": "Feldern ausgefüllt",
         "REQUIRED": "erforderliche Felder",
         "REQUIREDPUBLISH": "für Veröffentlichung erforderliche Felder",
         "SHOW": "zeigen"
