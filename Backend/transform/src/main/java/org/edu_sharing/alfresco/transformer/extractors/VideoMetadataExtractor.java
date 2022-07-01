@@ -1,77 +1,85 @@
-package org.edu_sharing.alfresco.metadata;
+package org.edu_sharing.alfresco.transformer.extractors;
 
-import org.alfresco.repo.content.MimetypeMap;
-import org.alfresco.repo.content.metadata.AbstractMappingMetadataExtracter;
-import org.alfresco.service.cmr.repository.ContentReader;
-import org.alfresco.service.namespace.QName;
-import org.alfresco.util.TempFileProvider;
+import org.alfresco.transformer.metadataExtractors.AbstractMetadataExtractor;
 import org.apache.tika.io.TikaInputStream;
-import org.edu_sharing.repository.client.tools.CCConstants;
+import org.slf4j.Logger;
+
 
 import java.io.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class FFMPEGMetadataExtractor extends AbstractMappingMetadataExtracter {
 
-    static List<String> supportedMimeTypes = Arrays.asList(new String[]{
-            MimetypeMap.MIMETYPE_VIDEO_3GP, MimetypeMap.MIMETYPE_VIDEO_3GP2,
-            MimetypeMap.MIMETYPE_VIDEO_AVI, MimetypeMap.MIMETYPE_VIDEO_FLV,
-            MimetypeMap.MIMETYPE_VIDEO_MP4,MimetypeMap.MIMETYPE_VIDEO_MPG,
-            MimetypeMap.MIMETYPE_VIDEO_QUICKTIME,MimetypeMap.MIMETYPE_VIDEO_WMV,
-            "video/mp4v-es", "video/x-flv"});
-
-    public FFMPEGMetadataExtractor(){
-        super(new HashSet<>(supportedMimeTypes));
-    }
+/**
+ * @TODO att to engine_config.json
+ *
+ * {"sourceMediaType": "video/x-m4v",     "targetMediaType": "alfresco-metadata-extract"},
+ *         {"sourceMediaType": "video/3gpp",  "targetMediaType": "alfresco-metadata-extract"},
+ *         {"sourceMediaType": "video/3gpp2",  "targetMediaType": "alfresco-metadata-extract"},
+ *         {"sourceMediaType": "video/x-msvideo",  "targetMediaType": "alfresco-metadata-extract"},
+ *         {"sourceMediaType": "video/x-flv",  "targetMediaType": "alfresco-metadata-extract"},
+ *         {"sourceMediaType": "video/mpeg",  "targetMediaType": "alfresco-metadata-extract"},
+ *         {"sourceMediaType": "video/quicktime",  "targetMediaType": "alfresco-metadata-extract"},
+ *         {"sourceMediaType": "video/x-ms-wmv",  "targetMediaType": "alfresco-metadata-extract"},
+ *         {"sourceMediaType": "video/mp4v-es",  "targetMediaType": "alfresco-metadata-extract"},
+ *         {"sourceMediaType": "video/x-flv",  "targetMediaType": "alfresco-metadata-extract"}
+ *
+ *
+ *
+ * VideoMetadataExtractor_metadata_extract.properties
+ *         #
+ * # OfficeMetadataExtracter - default mapping
+ * #
+ * # author: Derek Hulley
+ *
+ * # Namespaces
+ * namespace.prefix.cclom=http://www.campuscontent.de/model/lom/1.0
+ * namespace.prefix.ccm=http://www.campuscontent.de/model/1.0
+ *
+ * # Mappings
+ * LENGTH=cclom:duration
+ * HEIGHT=ccm:width
+ * WIDTH=ccm:height
+ */
+public class VideoMetadataExtractor extends AbstractMetadataExtractor {
 
     static String KEY_WIDTH = "WIDTH";
     static String KEY_HEIGHT = "HEIGHT";
     static String KEY_LENGTH = "LENGTH";
 
-    @Override
-    protected Map<String, Serializable> extractRaw(ContentReader contentReader) throws Throwable {
-
-        Map<String,Serializable> result = new HashMap<>();
-
-        //use tika framework to write the file
-        TikaInputStream tis = TikaInputStream.get(contentReader.getContentInputStream());//TempFileProvider.createTempFile(contentReader.getContentInputStream(),"edu",".bin");
-        File tmpFile = tis.getFile();
-
-        try {
-            String resolution = getResolutionString(tmpFile.getCanonicalPath());
-
-            Integer resolutionX = null;
-            Integer resolutionY = null;
-            if (resolution != null && resolution.contains("x")) {
-                resolutionX = Integer.parseInt(resolution.split("x")[0]);
-                resolutionY = Integer.parseInt(resolution.split("x")[1]);
-            }
-            if (resolutionX != null && resolutionY != null) {
-                result.put(KEY_WIDTH, resolutionX);
-                result.put(KEY_HEIGHT, resolutionY);
-            }
-
-            long videoLength = getVideoLength(tmpFile.getCanonicalPath());
-            if (videoLength > 0) {
-                result.put(KEY_LENGTH, "PT" + videoLength + "S");
-            }
-
-            tis.close();
-        }finally {
-            tmpFile.delete();
-        }
-        return result;
+    public VideoMetadataExtractor(Logger logger) {
+        super(logger);
     }
 
     @Override
-    protected Map<String, Set<QName>> getDefaultMapping() {
-        Map<String,Set<QName>> map = new HashMap<>();
-        map.put(KEY_LENGTH, new HashSet<>(Arrays.asList(new QName[]{QName.createQName(CCConstants.LOM_PROP_TECHNICAL_DURATION)})));
-        map.put(KEY_WIDTH, new HashSet<>(Arrays.asList(new QName[]{QName.createQName(CCConstants.CCM_PROP_IO_WIDTH)})));
-        map.put(KEY_HEIGHT, new HashSet<>(Arrays.asList(new QName[]{QName.createQName(CCConstants.CCM_PROP_IO_HEIGHT)})));
-        return map;
+    public Map<String, Serializable> extractMetadata(String sourceMimetype, Map<String, String> transformOptions, File sourceFile) throws Exception {
+        return extractRaw(sourceFile);
+    }
+
+    protected Map<String, Serializable> extractRaw(File sourceFile) throws IOException,InterruptedException {
+
+        Map<String,Serializable> result = new HashMap<>();
+        String resolution = getResolutionString(sourceFile.getCanonicalPath());
+
+        Integer resolutionX = null;
+        Integer resolutionY = null;
+        if (resolution != null && resolution.contains("x")) {
+            resolutionX = Integer.parseInt(resolution.split("x")[0]);
+            resolutionY = Integer.parseInt(resolution.split("x")[1]);
+        }
+        if (resolutionX != null && resolutionY != null) {
+            result.put(KEY_WIDTH, resolutionX);
+            result.put(KEY_HEIGHT, resolutionY);
+        }
+
+        long videoLength = getVideoLength(sourceFile.getCanonicalPath());
+        if (videoLength > 0) {
+            result.put(KEY_LENGTH, "PT" + videoLength + "S");
+        }
+
+        return result;
     }
 
     String getResolutionString(String videoFilePath) throws IOException,InterruptedException{

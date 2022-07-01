@@ -25,6 +25,11 @@ public class EduSharingController extends AbstractTransformerController {
 
     @Override
     public void transformImpl(String transformName, String sourceMimetype, String targetMimetype, Map<String, String> transformOptions, File sourceFile, File targetFile) {
+
+        logger.info("sourceMimetype:"+sourceMimetype+" targetMimetype:"+targetMimetype+" sourceFile:"+sourceFile +" targetFile:"+targetFile);
+        if(transformOptions != null)
+            transformOptions.entrySet().stream().forEach(e -> logger.info("o:"+ e.getKey() + " "+e.getValue()));
+
         if(transformName.equals(VideoThumbnailExecutor.ID)){
             try {
                 this.videoThumbnailExecutor.transform(transformName,sourceMimetype,targetMimetype,transformOptions,sourceFile,targetFile);
@@ -37,10 +42,18 @@ public class EduSharingController extends AbstractTransformerController {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+        }else if(transformName.equals("EduSharingVideoMetadataExecutor")){
+            try{
+                this.videoThumbnailExecutor.extractMetadata(transformName,sourceMimetype,targetMimetype,transformOptions,
+                        sourceFile,targetFile);
+            }catch (Exception e){
+                throw new RuntimeException(e);
+            }
         }else{
             logger.error("unsupported transformer:" + transformName);
         }
     }
+
 
     @Override
     public String getTransformerName() {

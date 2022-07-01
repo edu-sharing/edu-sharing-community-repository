@@ -68,7 +68,5 @@
         </property>
     </bean>
 
-    <bean id="extracter.FFMPEG" class="org.edu_sharing.alfresco.metadata.FFMPEGMetadataExtractor" parent="esBaseMetadataExtracter">
-    </bean>
     -->
 </beans>
