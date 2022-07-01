@@ -12,8 +12,6 @@
 <mat-table
   [dataSource]="entriesService.dataSource"
   matSort
-  cdkDropList
-  [cdkDropListSortPredicate]="sortPredicate"
   esInfiniteScroll
   (scrolled)="loadData()"
 >
@@ -153,16 +151,17 @@
     mat-row
     matRipple
     cdkDrag
-    esDragCursor
+    esNodesDrag
     [cdkDragDisabled]="!entriesService.dragDrop?.dragAllowed || ui.isMobile()"
-    [cdkDragData]="node"
-    (cdkDragStarted)="dragSource = node"
-    (cdkDragExited)="dragExit($event)"
-    (cdkDragDropped)="drop($event)"
+    [cdkDragData]="getDragData(node)"
+    (cdkDragStarted)="onDragStarted(node)"
+    (cdkDragEnded)="onDragEnded()"
+    [esNodesDropTarget]="node"
+    [canDropNodes]="canDrop"
+    (nodeDropped)="drop($event)"
     class="mat-row"
-    [class.mat-row-drop-allowed]="getDragState()?.element === node && getDragState().dropAllowed"
-    [class.mat-row-drop-blocked]="getDragState()?.element === node && !getDragState().dropAllowed"
     [class.mat-row-selected]="entriesService.selection.isSelected(node)"
+    [class.selected-when-dragging]="isDragging && entriesService.selection.isSelected(node)"
     [class.mat-row-virtual]="node.virtual"
     [class.mat-row-virtual-seperator]="
       node.virtual && !last && !$any(entriesService.dataSource.getData()[i + 1]).virtual
@@ -171,6 +170,12 @@
     (contextmenu)="onRowContextMenu({ event: $event, node: node })"
     (keydown.ContextMenu)="onRowContextMenu({ event: $event, node: node })"
   >
+    <es-drag-preview
+      *cdkDragPreview
+      [node]="node"
+      [selected]="entriesService.selection.selected"
+      [item]="entriesService.columns[0]"
+    ></es-drag-preview>
   </mat-row>
 </mat-table>
 <ng-container *ngIf="entriesService.dataSource.isLoading">

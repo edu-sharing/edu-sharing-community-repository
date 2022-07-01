@@ -42,6 +42,9 @@
     padding-block-end: 1em;
     > .card-grid-drag-wrapper {
         position: relative;
+        // .cdk-drag-placeholder ~ .card-grid-drop-blocked-container {
+        //     display: none;
+        // }
         .card-grid-drop-allowed-container,
         .card-grid-drop-blocked-container {
             position: absolute;
@@ -74,6 +77,9 @@
                 color: $colorStatusNegative;
             }
         }
+        .selected-when-dragging {
+            opacity: 0.5; // Same as .cdk-drag-placeholder
+        }
         &.card-grid-drop-blocked {
             outline: 2px dashed $colorStatusNegative;
         }
@@ -104,12 +110,8 @@
             &:nth-of-type(5n) {
                 animation-delay: math.div(-$orderAnimationTime, 8);
             }
-            &.cdk-drop-list-dragging {
-                opacity: 0.75;
-                outline: 3px solid $primary;
-                > *:last-child {
-                    display: none;
-                }
+            .cdk-drag-placeholder {
+                display: none;
             }
         }
     }
@@ -165,4 +167,15 @@
             }
         }
     }
+}
+
+.card-drag-preview {
+    width: 250px;
+}
+
+// Disable animations for rearranging. We misuse `entered` events for doing the rearranging, so the
+// preview animation would go to the wrong position (see
+// https://stackblitz.com/edit/drag-drop-dashboard).
+::ng-deep .es-card-grid-rearrange-drag-preview.cdk-drag-animating {
+    transition: none;
 }

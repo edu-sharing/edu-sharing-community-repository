@@ -6,6 +6,8 @@ import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.
 import { ListItemSort, ListItem, Node } from '../../core-module/core.module';
 import { DropAction } from '../../core-ui-module/directives/drag-nodes/drag-nodes';
 import { OptionItem, Scope, CustomOptions, Target } from '../../core-ui-module/option-item';
+import { CanDrop } from '../../shared/directives/nodes-drop-target.directive';
+import { DragData } from '../../services/nodes-drag-drop.service';
 
 export type NodeRoot =
     | 'MY_FILES'
@@ -48,14 +50,14 @@ export type DropTarget = Node | NodeRoot;
 
 export interface DropSource<T extends NodeEntriesDataType> {
     element: T[];
-    sourceList: ListEventInterface<T>;
+    // sourceList: ListEventInterface<T>;
     mode: DropAction;
 }
 
 export interface ListDragGropConfig<T extends NodeEntriesDataType> {
     dragAllowed: boolean;
-    dropAllowed?: (target: DropTarget, source: DropSource<NodeEntriesDataType>) => boolean;
-    dropped?: (target: DropTarget, source: DropSource<NodeEntriesDataType>) => void;
+    dropAllowed?: (dragData: DragData<T>) => CanDrop;
+    dropped?: (target: Node, source: DropSource<NodeEntriesDataType>) => void;
 }
 
 export enum ClickSource {

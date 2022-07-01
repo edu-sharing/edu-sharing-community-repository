@@ -191,7 +191,7 @@
           [esNodesDragSource]="dragDrop ? selectedNodes : null"
           (nodesDragStart)="onNodesDragStart($event, node)"
           (nodesDragEnd)="onNodesDragEnd()"
-          [esNodesDropTarget]="canDropNodes.bind(this, node)"
+          [esLegacyNodesDropTarget]="canDropNodes.bind(this, node)"
           [nodesDragAllowedActions]="['move', 'copy']"
           (nodesDragEnter)="onNodesDragEnter(node)"
           (nodesHoveringChange)="onNodesHoveringChange($event, node)"

@@ -7,9 +7,11 @@
       color="primary"
       matTooltip="{{ 'RATING.LIKES' | translate }}"
     >
-      <i [esIcon]="'edu-thumb_up' + (!node.rating.user ? '_off' : '')"></i>
+      <i [esIcon]="'edu-thumb_up' + (!node.rating?.user ? '_off' : '')"></i>
     </button>
-    <span matTooltip="{{ 'RATING.COUNT_LIKES' | translate }}">{{ node.rating.overall.count }}</span>
+    <span matTooltip="{{ 'RATING.COUNT_LIKES' | translate }}">{{
+      node.rating?.overall.count
+    }}</span>
   </div>
   <div *ngIf="mode === 'stars'" class="stars" mat-icon-button color="primary">
     <button

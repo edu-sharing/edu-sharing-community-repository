@@ -7,9 +7,10 @@ import {
 } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
 import { OptionItem } from '../../../core-ui-module/option-item';
-import { DropData, DragData } from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
 import { WorkspaceMainComponent } from '../workspace.component';
 import { DropSource, NodeRoot } from 'src/app/features/node-entries/entries-model';
+import { DragData } from '../../../services/nodes-drag-drop.service';
+import { CanDrop } from '../../../shared/directives/nodes-drop-target.directive';
 
 @Component({
     selector: 'es-workspace-tree',
@@ -52,10 +53,9 @@ export class WorkspaceTreeComponent {
     readonly MY_SHARED_FILES = 'MY_SHARED_FILES';
     readonly TO_ME_SHARED_FILES = 'TO_ME_SHARED_FILES';
     readonly WORKFLOW_RECEIVE = 'WORKFLOW_RECEIVE';
-    readonly RECYCLE = 'RECYCLE';
+    readonly RECYCLE: 'RECYCLE' = 'RECYCLE';
 
     reload: Boolean;
-    dragHover: string;
 
     _path: string[][] = [];
     // just for highlighting, does not open nodes!
@@ -67,6 +67,10 @@ export class WorkspaceTreeComponent {
         private connector: RestConnectorService,
         private storage: TemporaryStorageService,
     ) {}
+
+    canDropOnRecycle = (dragData: DragData<'RECYCLE'>): CanDrop => {
+        return { accept: dragData.action === 'move' };
+    };
 
     setRoot(root: string) {
         this.onSetRoot.emit(root);
@@ -102,22 +106,9 @@ export class WorkspaceTreeComponent {
         }
     }
 
-    onNodesHoveringChange(nodesHovering: boolean, target: string) {
-        if (nodesHovering) {
-            this.dragHover = target;
-        } else {
-            // The enter event of another node might have fired before this leave
-            // event and already updated `dragHover`. Only set it to null if that is
-            // not the case.
-            if (this.dragHover === target) {
-                this.dragHover = null;
-            }
-        }
-    }
-
-    onNodesDrop({ nodes }: DragData, target: string) {
-        if (target == this.RECYCLE) {
-            this.onDeleteNodes.emit(nodes);
+    onNodesDrop(dragData: DragData<'RECYCLE'>) {
+        if (dragData.target === this.RECYCLE && dragData.action === 'move') {
+            this.onDeleteNodes.emit(dragData.draggedNodes);
         }
     }
 

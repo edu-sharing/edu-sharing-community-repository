@@ -20,14 +20,7 @@
     }
     .sub-tree-element {
         height: 52px;
-        &.drop-target {
-            border: 2px dashed $colorStatusPositive;
-        }
-        &.cdk-drop-list-dragging {
-            > *:first-child {
-                display: none;
-            }
-        }
+        border: 2px solid transparent;
     }
 }
 .spinner {

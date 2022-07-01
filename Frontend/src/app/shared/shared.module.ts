@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -45,12 +46,13 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
 import { WorkspaceCreateConnector } from './dialogs/create-connector/create-connector.component';
 import { BorderBoxObserverDirective } from './directives/border-box-observer.directive';
 import { CheckTextOverflowDirective } from './directives/check-text-overflow.directive';
-import { DragCursorDirective } from './directives/drag-cursor.directive';
 import { ElementRefDirective } from './directives/element-ref.directive';
 import { EscapeHtmlPipe } from './directives/escape-html.pipe';
 import { FileDropDirective } from './directives/file-drop';
 import { IconDirective } from './directives/icon.directive';
 import { InfiniteScrollDirective } from './directives/infinite-scroll.directive';
+import { NodesDragDirective } from './directives/nodes-drag.directive';
+import { NodesDropTargetDirective } from './directives/nodes-drop-target.directive';
 import { OnAttributeChangeDirective } from './directives/on-attribute-change.directive';
 import { RegisterCustomPropertyDirective } from './directives/register-custom-property.directive';
 import { SkipTargetDirective } from './directives/skip-target.directive';
@@ -81,7 +83,6 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         BreadcrumbsComponent,
         CardComponent,
         CheckTextOverflowDirective,
-        DragCursorDirective,
         DropdownComponent,
         ElementRefDirective,
         EscapeHtmlPipe,
@@ -112,6 +113,8 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         UserAvatarComponent,
         VCardNamePipe,
         WorkspaceCreateConnector,
+        NodesDragDirective,
+        NodesDropTargetDirective,
     ],
     imports: [
         A11yModule,
@@ -147,7 +150,6 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         CardComponent,
         CheckTextOverflowDirective,
         CommonModule,
-        DragCursorDirective,
         DragDropModule,
         DropdownComponent,
         ElementRefDirective,
@@ -203,6 +205,9 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         UserAvatarComponent,
         VCardNamePipe,
         WorkspaceCreateConnector,
+        NodesDragDirective,
+        NodesDropTargetDirective,
+        MatBadgeModule,
     ],
 })
 export class SharedModule {}

@@ -1,5 +1,4 @@
 import { trigger } from '@angular/animations';
-import { CdkDragDrop, CdkDragEnter, CdkDragExit } from '@angular/cdk/drag-drop';
 import {
     Component,
     EventEmitter,
@@ -29,8 +28,9 @@ import {
     OptionsHelperService,
     OPTIONS_HELPER_CONFIG,
 } from '../../../core-ui-module/options-helper.service';
+import { DragData } from '../../../services/nodes-drag-drop.service';
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
-import { DragCursorDirective } from '../../../shared/directives/drag-cursor.directive';
+import { canDropOnNode } from '../workspace-utils';
 
 @Component({
     selector: 'es-workspace-sub-tree',
@@ -260,26 +260,15 @@ export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
                 this.loading = false;
             });
     }
-    getDragState() {
-        return DragCursorDirective.dragState;
-    }
-    dragExit(event: CdkDragExit<any>) {
-        DragCursorDirective.dragState.element = null;
-    }
 
-    dragEnter(event: CdkDragEnter<any>) {
-        DragCursorDirective.dragState.element = event.container.data;
-        DragCursorDirective.dragState.dropAllowed = true;
-    }
-    drop(event: CdkDragDrop<Node, any>) {
+    canDropOnNode = canDropOnNode;
+    onDropped(dragData: DragData<Node>) {
         this.onDrop.emit({
-            target: event.container.data,
+            target: dragData.target,
             source: {
-                element: [event.item.data || event.previousContainer.data],
-                sourceList: null,
-                mode: DragCursorDirective.dragState.mode,
+                element: dragData.draggedNodes,
+                mode: dragData.action,
             },
         });
-        DragCursorDirective.dragState.element = null;
     }
 }

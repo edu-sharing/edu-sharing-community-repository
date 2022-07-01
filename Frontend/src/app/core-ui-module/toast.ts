@@ -448,7 +448,9 @@ export class Toast implements OnDestroy {
         try {
             error = json.error + ': ' + json.message;
         } catch (e) {
-            console.error(errorObject);
+            if (errorObject) {
+                console.error(errorObject);
+            }
             error = errorObject?.toString();
         }
         if (message === 'COMMON_API_ERROR') {
@@ -563,7 +565,7 @@ export class Toast implements OnDestroy {
             message = 'TOAST.NO_CONNECTION';
             dialogTitle = null;
         }
-        if(errorObject?.traceId) {
+        if (errorObject?.traceId) {
             dialogTitle = this.translate.instant(dialogTitle) + ' (' + errorObject.traceId + ')';
             message = this.translate.instant(message) + '\n(' + errorObject.traceId + ')';
         }

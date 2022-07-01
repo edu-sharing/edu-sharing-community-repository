@@ -202,3 +202,12 @@ input[type='checkbox']:checked {
         left: 50%; // Undo materialize styling and reapply standard material style.
     }
 }
+
+.es-nodes-active-drop-target-accept {
+    outline: 2px dashed $colorStatusPositive;
+    outline-offset: -2px;
+}
+.es-nodes-active-drop-target-deny {
+    outline: 2px dashed $colorStatusNegative;
+    outline-offset: -2px;
+}

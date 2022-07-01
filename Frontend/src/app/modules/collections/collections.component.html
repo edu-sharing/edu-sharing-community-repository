@@ -79,7 +79,7 @@
   <ng-template #collectionContentTemplateRefDefault> </ng-template>
 </div>
 
-<div class="alignWithBanner" cdkDropListGroup>
+<div class="alignWithBanner" cdkDropList>
   <div class="collections-footer-group">
     <div
       [class.collectionsContainerTabs]="showTabs()"
@@ -246,6 +246,7 @@
             [breadcrumbsAsNode]="path"
             [invisibleDescription]="true"
             (onDrop)="dropOnCollection($event.target, $event.source)"
+            [canDropNodes]="canDropOnBreadcrumb"
           ></es-breadcrumbs>
         </div>
         <div

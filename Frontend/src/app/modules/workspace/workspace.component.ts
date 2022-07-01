@@ -52,9 +52,12 @@ import { Toast } from '../../core-ui-module/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
+import { DragData } from '../../services/nodes-drag-drop.service';
 import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';
+import { CanDrop } from '../../shared/directives/nodes-drop-target.directive';
 import { TranslationsService } from '../../translations/translations.service';
 import { WorkspaceExplorerComponent } from './explorer/explorer.component';
+import { canDragDrop, canDropOnNode } from './workspace-utils';
 
 @Component({
     selector: 'es-workspace-main',
@@ -321,22 +324,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     }
 
     handleDrop(event: { target: DropTarget; source: DropSource<Node> }) {
-        for (const s of event.source.element) {
-            if (
-                (event.target as Node).ref?.id === s.ref.id ||
-                (event.target as Node).ref?.id === s.parent.id
-            ) {
-                this.toast.error(null, 'WORKSPACE.SOURCE_TARGET_IDENTICAL');
-                return;
-            }
-        }
-        if (event.target !== 'MY_FILES' && !(event.target as Node).isDirectory) {
-            this.toast.error(null, 'WORKSPACE.TARGET_NO_DIRECTORY');
-            return;
-        }
-        if (event.source.mode === 'link') {
-            this.toast.error(null, 'WORKSPACE.FEATURE_NOT_IMPLEMENTED');
-        } else if (event.source.mode === 'copy') {
+        if (event.source.mode === 'copy') {
             this.copyNode(event.target, event.source.element);
         } else {
             this.moveNode(event.target, event.source.element);
@@ -353,10 +341,24 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         */
     }
 
-    canDropBreadcrumbs = (event: any) => {
-        return event.target === 'HOME'
-            ? this.root === 'MY_FILES'
-            : event.target?.ref?.id !== this.currentFolder.ref.id;
+    handleDropOnBreadcrumb(event: { target: Node | 'HOME'; source: DropSource<Node> }) {
+        if (event.target === 'HOME') {
+            this.handleDrop({ target: this.root, source: event.source });
+        } else {
+            this.handleDrop(event as { target: Node; source: DropSource<Node> });
+        }
+    }
+
+    canDropOnBreadcrumb = (dragData: DragData<'HOME' | Node>): CanDrop => {
+        if (dragData.target === 'HOME') {
+            if (this.root === 'MY_FILES') {
+                return canDragDrop(dragData);
+            } else {
+                return { accept: false, denyExplicit: false };
+            }
+        } else {
+            return canDropOnNode(dragData as DragData<Node>);
+        }
     };
 
     private moveNode(target: DropTarget, source: Node[], position = 0) {
