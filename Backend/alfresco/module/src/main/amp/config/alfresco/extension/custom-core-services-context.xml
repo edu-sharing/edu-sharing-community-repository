@@ -594,26 +594,6 @@
    	 </bean>
     -->
 
-    <!-- <bean id="transformer.worker.ESCollectionRefTransformerWorker" class="org.edu_sharing.alfresco.transformer.CollectionRefTransformerWorker">
-    	<property name="mimetypeService" ref="mimetypeService"/>
-    	 <property name="transformerConfig">
-         <ref bean="transformerConfig" />
-      </property>
-      <property name="nodeService">
-    	   <ref bean="NodeService" />
-      </property>
-       <property name="contentService">
-            <ref bean="contentService" />
-        </property>
-    </bean>
-
-    <bean id="transformer.ESCollectionRefTransformer" class="org.alfresco.repo.content.transform.ProxyContentTransformer" parent="baseContentTransformer">
-      <property name="worker">
-         <ref bean="transformer.worker.ESCollectionRefTransformerWorker" />
-      </property>
-   </bean>
-   -->
-
     <bean id="eduNodeServiceInterceptor" class="org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor" init-method="init">
       <property name="nodeService">
          <ref bean="mlAwareNodeService" />
