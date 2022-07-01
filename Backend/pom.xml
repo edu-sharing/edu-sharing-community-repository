@@ -51,6 +51,7 @@
     <module>alfresco</module>
     <module>services</module>
     <module>tomcat</module>
+    <module>transform</module>
   </modules>
 
 </project>
