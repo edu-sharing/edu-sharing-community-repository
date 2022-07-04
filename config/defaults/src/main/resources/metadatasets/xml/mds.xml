@@ -1076,6 +1076,11 @@
 				<multiple>true</multiple>
 				<multiplejoin>OR</multiplejoin>
 			</property>
+			<property name="virtual:reurlTypes">
+				<statement>@cclom\:format:"${value}*"</statement>
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
 		</query>
 		<query join="AND" id="sharedToMe">
 			<basequery>(TYPE:"ccm:io" OR TYPE:"ccm:map") AND NOT ASPECT:"ccm:collection_io_reference" AND NOT ASPECT:"ccm:collection"</basequery>
@@ -1248,6 +1253,11 @@
 			<property name="workflow">
 				<statement>@ccm\:wf_status:"${value}"</statement>
 				<statement value="100_unchecked">@ccm\:wf_status:"${value}" or ISNULL:@ccm\:wf_status</statement>
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="virtual:reurlTypes">
+				<statement>{"wildcard": {"properties.cclom:format": "${valueRaw}*" }}</statement>
 				<multiple>true</multiple>
 				<multiplejoin>OR</multiplejoin>
 			</property>

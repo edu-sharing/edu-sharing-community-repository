@@ -1348,6 +1348,12 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 RestSearchService.convertCritierias(properties, this.getActiveMds().currentWidgets),
             );
         }
+        if (this.oldParams.reurlTypes) {
+            criterias = criterias.concat({
+                property: 'virtual:reurlTypes',
+                values: this.oldParams.reurlTypes.split(','),
+            });
+        }
         return criterias;
     }
 
