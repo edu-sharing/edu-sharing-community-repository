@@ -455,6 +455,11 @@
 			<suggestDisplayProperty>ccm:classification_keyword_display</suggestDisplayProperty>
 			<textEscapingPolicy>all</textEscapingPolicy>
 		</widget>
+		<widget>
+			<id>virtual:user_files</id>
+			<caption>virtual_user_files</caption>
+			<type>checkbox</type>
+		</widget>
 	</widgets>
 	<templates>
 		<template>
@@ -786,6 +791,7 @@
 		<template>
 			<id>search_relation_node</id>
 			<html><![CDATA[
+				<virtual:user_files>
 				]]></html>
 		</template>
 	</templates>
@@ -1153,6 +1159,10 @@
 			</property>
 			<property name="sourceNode">
 				<statement>TYPE:"ccm:io" AND NOT @sys\:node-uuid:"${value}" AND NOT @ccm\:published_original:"${value}"</statement>
+			</property>
+			<property name="virtual:user_files">
+				<statement value="false">TYPE:"ccm:io"</statement>
+				<statement value="true">CREATOR:"${authority}" OR OWNER:"${authority}"</statement>
 			</property>
 		</query>
 		<query join="AND"  id="tools">
