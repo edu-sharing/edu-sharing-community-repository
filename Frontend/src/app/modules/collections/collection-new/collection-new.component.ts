@@ -193,7 +193,6 @@ export class CollectionNewComponent implements EventListener, OnInit {
 
     onEvent(event: string, data: any): void {
         if (event === FrameEventsService.EVENT_APPLY_NODE) {
-            console.log(data);
             const imageData = data.preview?.data;
             if (imageData) {
                 this.imageData = imageData;
@@ -204,6 +203,7 @@ export class CollectionNewComponent implements EventListener, OnInit {
                         this.imageFile = blob as File;
                     });
             } else {
+                console.info(data);
                 this.toast.error(null, 'COLLECTIONS.TOAST.ERROR_IMAGE_APPLY');
             }
             this.imageWindow?.close();
@@ -912,9 +912,6 @@ export class CollectionNewComponent implements EventListener, OnInit {
 
     updateImageOptions() {
         this.imageOptions = [
-            new OptionItem('COLLECTIONS.NEW.IMAGE.UPLOAD', 'file_upload', () =>
-                this.imageFileRef.nativeElement.click(),
-            ),
             new OptionItem('COLLECTIONS.NEW.IMAGE.SEARCH', 'search', () => {
                 this.imageWindow = UIHelper.openSearchWithReurl(
                     this.platformLocation,
@@ -922,7 +919,8 @@ export class CollectionNewComponent implements EventListener, OnInit {
                     'WINDOW',
                     { queryParams: { reurlCreate: false, reurlTypes: ['image'] } },
                 ) as Window;
-                /*this.router.navigate([], {
+                /*this.route
+                r.navigate([], {
                         relativeTo: this.route,
                         queryParams: {
                             collection: JSON.stringify(this.currentCollection)
@@ -930,6 +928,9 @@ export class CollectionNewComponent implements EventListener, OnInit {
                     }).then(() => {
                     });*/
             }),
+            new OptionItem('COLLECTIONS.NEW.IMAGE.UPLOAD', 'file_upload', () =>
+                this.imageFileRef.nativeElement.click(),
+            ),
         ];
         this.imageOptions[0].group = DefaultGroups.Edit;
         this.imageOptions[1].group = DefaultGroups.Edit;
