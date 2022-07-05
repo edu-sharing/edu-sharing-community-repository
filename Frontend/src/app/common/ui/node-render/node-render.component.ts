@@ -554,7 +554,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     }
   }
 
-    private initOptions() {
+    private async initOptions() {
         this.optionsHelper.setData({
             scope: Scope.Render,
             activeObjects: [this._node],
@@ -564,15 +564,20 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                 useDefaultOptions: true,
                 addOptions: this.currentOptions
             },
+            postPrepareOptions: (options, objects) => {
+                if(this.version && this.version !== RestConstants.NODE_VERSION_CURRENT) {
+                    options.filter(o => o.name === 'OPTIONS.OPEN')[0].isEnabled = false;
+                }
+            }
         });
-        this.optionsHelper.initComponents(this.mainNavRef, this.actionbar);
+        await this.optionsHelper.initComponents(this.mainNavRef, this.actionbar);
         this.optionsHelper.setListener({
             onRefresh: () => this.refresh(),
             onDelete: (result) => this.onDelete(result),
         });
         this.optionsHelper.refreshComponents();
         this.postprocessHtml();
-        this.isBuildingPage=false;
+        this.isBuildingPage = false;
     }
 
   private isCollectionRef() {

@@ -68,6 +68,9 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
     @Output() onDone = new EventEmitter<Node[]|Values>();
     @Output() onMdsLoaded = new EventEmitter();
     @Output() openContributor = new EventEmitter();
+    /**
+     * @DEPRECATED old mds only
+     */
     @Output() openLicense = new EventEmitter();
     @Output() openTemplate = new EventEmitter();
 

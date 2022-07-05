@@ -611,6 +611,22 @@ public class NodeDao {
         return result;
     }
     public static List<Node> convertToRest(RepositoryDao repoDao, List<NodeRef> list, Filter propFilter, Function<NodeDao, NodeDao> transform){
+		if(AuthenticationUtil.isRunAsUserTheSystemUser()) {
+			return list.stream().map(nodeRef -> {
+				try {
+					NodeDao nodeDao = NodeDao.getNode(repoDao, nodeRef.getId(), propFilter);
+					if (transform != null) {
+						nodeDao = transform.apply(nodeDao);
+					}
+					return nodeDao.asNode();
+				} catch (DAOMissingException daoException) {
+					logger.warn("Missing node " + nodeRef.getId() + " tried to fetch, skipping fetch", daoException);
+					return null;
+				} catch (DAOException e) {
+					throw new RuntimeException(e);
+				}
+			}).filter(Objects::nonNull).collect(Collectors.toList());
+		}
 		final String user = AuthenticationUtil.getFullyAuthenticatedUser();
 		final Context context = Context.getCurrentInstance();
 		final String scope = NodeServiceInterceptor.getEduSharingScope();
