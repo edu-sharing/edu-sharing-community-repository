@@ -1329,4 +1329,8 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
             .filter((_, index) => index > 0)
             .join(' ');
     }
+
+    getShownOptions(node: Node) {
+        return this._options?.filter(o => this.optionIsShown(o, node));
+    }
 }
