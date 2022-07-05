@@ -40,6 +40,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -81,6 +82,14 @@ public class MigrationJob extends AbstractJob {
     String protocolFile = tempDir + "/" + "MigrationJob.txt";
     private Client client;
     private String url;
+
+    List<String> cleanAuthorityDisplayname = LightbendConfigLoader.get().hasPath("migrationjob.cleanAuthorityDisplayname")
+            ? LightbendConfigLoader.get().getStringList("migrationjob.cleanAuthorityDisplayname")
+            : new ArrayList<>();
+
+    boolean useIdForSchoolMapping = LightbendConfigLoader.get().hasPath("migrationjob.useIdForSchoolMapping")
+            ? LightbendConfigLoader.get().getBoolean("migrationjob.useIdForSchoolMapping")
+            : true;
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -201,7 +210,7 @@ public class MigrationJob extends AbstractJob {
                         }
                         else if (isEduGroup) {
 
-                            String resultEduGroup = getIdmMappingEduGroup(authorityName, authorityNameDN);
+                            String resultEduGroup = getIdmMappingEduGroup(authorityName, authorityNameDN, MigrationJob.this.useIdForSchoolMapping);
 
                             if (resultEduGroup != null && !resultEduGroup.trim().equals("")) {
                                 logger.info(";would_migrate_school;" + authorityNodeRef + ";" + authorityName + ";"
@@ -348,14 +357,29 @@ public class MigrationJob extends AbstractJob {
 
     }
 
-    private String getIdmMappingEduGroup(String authorityName, String authorityNameDN) throws UnsupportedEncodingException {
+    private String getIdmMappingEduGroup(String authorityName, String authorityNameDN, boolean useAuthorityName) throws UnsupportedEncodingException {
 
-        String cleanedAuthorityName = authorityNameDN.replace("Hamburg - ", "");
-        cleanedAuthorityName = cleanedAuthorityName.replace("BSB - ", "");
+        //String cleanedAuthorityName = authorityNameDN.replace("Hamburg - ", "");
+        //cleanedAuthorityName = cleanedAuthorityName.replace("BSB - ", "");
+        WebTarget webTargetEduGroup = null;
+        if(useAuthorityName){
+            String id = authorityName.replace("GROUP_","");
+            logger.info("asking for school with id:" + id);
+            webTargetEduGroup = client
+                    .target("http://localhost:8085/migration/mappingSchoolById?esLegacyId="
+                            + URLEncoder.encode(id, "UTF-8") + "&url=" + url);
+        }else{
 
-        WebTarget webTargetEduGroup = client
-                .target("http://localhost:8085/migration/mappingSchool?schoolName="
-                        + URLEncoder.encode(cleanedAuthorityName, "UTF-8") + "&url=" + url);
+            String cleanedAuthorityName = new String(authorityNameDN);
+            for(String clean : cleanAuthorityDisplayname){
+                cleanedAuthorityName = cleanedAuthorityName.replace(clean,"");
+            }
+
+
+            webTargetEduGroup = client
+                    .target("http://localhost:8085/migration/mappingSchool?schoolName="
+                            + URLEncoder.encode(cleanedAuthorityName, "UTF-8") + "&url=" + url);
+        }
 
         String resultEduGroup = null;
         try {
@@ -363,14 +387,15 @@ public class MigrationJob extends AbstractJob {
                     .invoke(String.class);
         } catch (NotFoundException e) {
             logger.error(
-                    ";error_missing_mapping_school" + authorityName + ";" + authorityNameDN + ";" + e.getMessage());
+                    ";error_missing_mapping_school" + authorityName + ";" + authorityNameDN + ";" + e.getMessage()+";"+useAuthorityName);
         }
         if(resultEduGroup==null || resultEduGroup.trim().isEmpty()){
             logger.error(
-                    ";error_missing_mapping_school" + authorityName + ";" + authorityNameDN + ";result from idm is null");
+                    ";error_missing_mapping_school" + authorityName + ";" + authorityNameDN + ";result from idm is null;"+useAuthorityName);
         }
         return resultEduGroup;
     }
+
 
     private String getIdmMapping(String authority) {
 
