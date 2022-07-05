@@ -1,6 +1,7 @@
 package org.edu_sharing.service.search;
 
 import com.google.gson.Gson;
+import com.hazelcast.map.impl.query.Query;
 import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.vcard.VCard;
 import net.sourceforge.cardme.vcard.types.ExtendedType;
@@ -501,9 +502,14 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 : getReadPermissionsQuery();
         queryBuilderGlobalConditions = queryBuilderGlobalConditions.must(QueryBuilders.matchQuery("nodeRef.storeRef.protocol", "workspace"));
         if(permissions != null){
+            BoolQueryBuilder permissionsFilter = QueryBuilders.boolQuery().must(queryBuilderGlobalConditions);
+            String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
+            permissionsFilter.should(QueryBuilders.matchQuery("owner", user));
             for(String permission : permissions){
-                queryBuilderGlobalConditions = QueryBuilders.boolQuery().must(queryBuilderGlobalConditions).must(getPermissionsQuery("permissions." + permission));
+                permissionsFilter.should(getPermissionsQuery("permissions." + permission));
+                // queryBuilderGlobalConditions = QueryBuilders.boolQuery().must(queryBuilderGlobalConditions).must(getPermissionsQuery("permissions." + permission));
             }
+            queryBuilderGlobalConditions = permissionsFilter;
         }
 
         if(NodeServiceInterceptor.getEduSharingScope() == null){

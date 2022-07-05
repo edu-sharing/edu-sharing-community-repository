@@ -197,6 +197,12 @@
       </dependency>
 
       <dependency>
+        <groupId>org.ow2.asm</groupId>
+        <artifactId>asm</artifactId>
+        <version>9.2</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.aspectj</groupId>
         <artifactId>aspectjweaver</artifactId>
         <version>1.8.9</version>
@@ -791,6 +797,12 @@
         <groupId>edu.uoc.elc.lti</groupId>
         <artifactId>spring-boot-lti-advantage</artifactId>
         <version>0.0.10</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework.data</groupId>
+        <artifactId>spring-data-mongodb</artifactId>
+        <version>3.4.1</version>
       </dependency>
 
       <dependency>

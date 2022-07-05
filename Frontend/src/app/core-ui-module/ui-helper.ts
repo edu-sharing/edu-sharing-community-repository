@@ -204,7 +204,7 @@ export class UIHelper {
         });
     }
     public static goToNode(router: Router, node: Node) {
-        router.navigate([UIConstants.ROUTER_PREFIX, 'node', node.ref.id]);
+        router.navigate([UIConstants.ROUTER_PREFIX, 'render', node.ref.id]);
     }
     public static goToCollection(
         router: Router,
@@ -271,7 +271,7 @@ export class UIHelper {
                 file: node.ref.id,
                 root: data.scope,
             };
-            router.navigate(
+            void router.navigate(
                 [
                     UIConstants.ROUTER_PREFIX +
                         'workspace/' +

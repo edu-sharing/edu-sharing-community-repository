@@ -1,11 +1,13 @@
 import { Page } from '@playwright/test';
-import { LoginCredentials } from './util';
+import { testStep } from '../util/test-step';
+import { LoginCredentials } from '../util/util';
 
 export class LoginPage {
     static readonly url = './components/login';
 
     constructor(private readonly page: Page) {}
 
+    @testStep()
     async login({ username, password }: LoginCredentials) {
         await this.page.locator('input[name="username"]').click();
         await this.page.locator('input[name="username"]').fill(username);

@@ -1,7 +1,7 @@
 import { Browser, chromium, FullConfig, request } from '@playwright/test';
 import * as fs from 'fs';
-import { defaultLogin } from './constants';
-import { getStorageStatePath, LoginCredentials } from './util';
+import { defaultLogin } from './util/constants';
+import { getStorageStatePath, LoginCredentials } from './util/util';
 
 async function saveLogin(
     browser: Browser,
@@ -40,7 +40,7 @@ async function saveLogin(
 
 async function globalSetup(config: FullConfig) {
     const browser = await chromium.launch();
-    const baseURL = config.projects[0].use.baseURL;
+    const baseURL = config.projects[0].use.baseURL as string;
     // await saveLogin(browser, baseURL, 'admin', 'admin');
     await saveLogin(browser, baseURL, defaultLogin);
     await browser.close();
@@ -51,7 +51,7 @@ async function fileExistsAndIsNoOlderThan(path: string, seconds: number): Promis
         const stat = await fs.promises.lstat(path);
         const diffMs = new Date().getTime() - stat.ctime.getTime();
         return diffMs <= seconds * 1000;
-    } catch (e) {
+    } catch (e: any) {
         if (e.code === 'ENOENT') {
             return false;
         } else {

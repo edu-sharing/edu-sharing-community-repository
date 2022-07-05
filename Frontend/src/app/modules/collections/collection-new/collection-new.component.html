@@ -7,11 +7,11 @@
   <es-global-progress *ngIf="isLoading"></es-global-progress>
 
   <div *ngIf="!isLoading" class="createContainer">
-    <div class="createProgress" *ngIf="newCollectionStep != STEP_NEW">
+    <div class="createProgress" *ngIf="newCollectionStep !== STEP_NEW">
       <div
         *ngFor="let step of availableSteps; let i = index"
         (click)="i < currentStepPosition() ? (newCollectionStep = step) : null"
-        [class.current]="step == newCollectionStep"
+        [class.current]="step === newCollectionStep"
         [class.finished]="i < currentStepPosition()"
       >
         <div class="circle"></div>
@@ -25,7 +25,7 @@
       </div>
     </div>
     <es-card
-      *ngIf="newCollectionStep == STEP_NEW"
+      *ngIf="newCollectionStep === STEP_NEW"
       class="collection-new-container"
       width="normal"
       height="auto"
@@ -119,7 +119,7 @@
       </div>
     </es-card>
     <es-card
-      *ngIf="newCollectionStep == STEP_GENERAL"
+      *ngIf="newCollectionStep === STEP_GENERAL"
       [buttons]="buttons"
       [isCancelable]="true"
       (onCancel)="newCollectionCancel()"
@@ -175,10 +175,10 @@
           >
             <img
               class="blurred-image"
-              [src]="currentCollection.preview.url + '&crop=true&width=350&height=240'"
+              [src]="currentCollection.preview.url + '&crop=true&width=300&height=300'"
             />
             <img
-              [src]="currentCollection.preview.url + '&crop=true&width=350&height=240'"
+              [src]="currentCollection.preview.url + '&crop=true&maxWidth=300&maxHeight=300'"
               class="card-image-preview"
             />
           </div>
@@ -311,7 +311,7 @@
       </div>
     </es-card>
     <es-card
-      *ngIf="newCollectionStep == STEP_METADATA"
+      *ngIf="newCollectionStep === STEP_METADATA"
       title="{{ 'COLLECTIONS.STEP.METADATA' | translate }}"
       [subtitle]="currentCollection.title"
       [isCancelable]="true"
@@ -334,7 +334,7 @@
       </div>
     </es-card>
     <es-card
-      *ngIf="newCollectionStep == STEP_EDITORIAL_GROUPS"
+      *ngIf="newCollectionStep === STEP_EDITORIAL_GROUPS"
       title="{{ 'COLLECTIONS.STEP.EDITORIAL_GROUPS' | translate }}"
       [subtitle]="currentCollection.title"
       [isCancelable]="true"
@@ -347,7 +347,7 @@
     >
       <div class="editorial-group">
         <div class="editorial-list">
-          <div class="noGroups" *ngIf="editorialGroups.length == 0">
+          <div class="noGroups" *ngIf="editorialGroups.length === 0">
             {{ 'COLLECTIONS.NO_EDITORIAL_GROUPS' | translate }}
           </div>
           <div class="noPermission" *ngIf="!shareToAll">
@@ -355,7 +355,7 @@
             <h5>{{ 'TOOLPERMISSION.TOOLPERMISSION_INVITE_ALLAUTHORITIES' | translate }}</h5>
           </div>
           <es-listTable
-            *ngIf="editorialGroups.length != 0 && shareToAll"
+            *ngIf="editorialGroups.length !== 0 && shareToAll"
             [nodes]="$any(editorialGroups)"
             [columns]="editorialColumns"
             [selectedNodes]="$any(editorialGroupsSelected)"
@@ -381,7 +381,7 @@
       </div>
     </es-card>
     <es-card
-      *ngIf="newCollectionStep == STEP_PERMISSIONS"
+      *ngIf="newCollectionStep === STEP_PERMISSIONS"
       title="{{ 'COLLECTIONS.EDIT_PERMISSIONS' | translate }}"
       modal="auto"
       [isCancelable]="true"

@@ -91,6 +91,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     readonly SCOPES = Scope;
     readonly InteractionType = InteractionType;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    elasticResponse: NodeListElastic;
 
     constructor(
         private toast: Toast,
@@ -358,6 +359,7 @@ export class AdminComponent implements OnInit, OnDestroy {
             this.admin.searchElastic(this.lucene.query).subscribe(
                 (data) => {
                     this.globalProgress = false;
+                    this.elasticResponse = data;
                     this.searchResponse.setData(data.nodes, data.pagination);
                 },
                 (error: any) => {
