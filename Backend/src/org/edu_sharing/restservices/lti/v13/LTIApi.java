@@ -268,6 +268,7 @@ public class LTIApi {
         String nonce = jws.getBody().get("nonce", String.class);
         String sessionNonce = new HttpSessionOIDCLaunchSession(req).getNonce();
         if(!nonce.equals(sessionNonce)){
+            logger.error("nonce:"+nonce+ " sessionNonce:"+sessionNonce);
             throw new IllegalStateException("nonce is invalid");
         }
 
@@ -392,6 +393,15 @@ public class LTIApi {
                 nodeId = splitted[splitted.length -1].split("\\?")[0];
             }
             String targetLink = ApplicationInfoList.getHomeRepository().getClientBaseUrl() + "/components/render/"+ nodeId +"?closeOnBack=true";
+
+            Map<String,String> lauchPresentation = jws.getBody().get(LTIConstants.RESOURCE_LINK_LAUNCH_PRESENTATION,Map.class);
+            if(lauchPresentation != null && lauchPresentation.containsKey("document_target")){
+                String documentTarget = lauchPresentation.get("document_target");
+                if(documentTarget != null && (documentTarget.equals("iframe") || documentTarget.equals("frame")) ){
+                    //@TODO version???
+                    targetLink = ApplicationInfoList.getHomeRepository().getClientBaseUrl() +"/eduservlet/render?node_id="+nodeId+ "&version=-1";
+                }
+            }
 
             if(ApplicationInfoList.getRepositoryInfoById(ltiSessionObject.getEduSharingAppId()).isLtiUsagesEnabled()){
                 Usage usage = usageService.getUsage(ltiSessionObject.getEduSharingAppId(), ltiSessionObject.getContextId(), nodeId, null);
