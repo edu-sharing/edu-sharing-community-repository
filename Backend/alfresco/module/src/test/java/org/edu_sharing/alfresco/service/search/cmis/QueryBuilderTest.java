@@ -68,7 +68,7 @@ public class QueryBuilderTest {
   @Test
   void selectWithJoinFields(){
 
-    String expected = "SELECT iometadata.ccm:original FROM ccm:io AS io JOIN null AS iometadata ON iometadata.cmis:objectId = io.cmis:objectId";
+    String expected = "SELECT iometadata.ccm:original FROM ccm:io AS io LEFT JOIN null AS iometadata ON iometadata.cmis:objectId = io.cmis:objectId";
 
     Mockito.when(dictionaryService.getProperty(ArgumentMatchers.notNull())).thenReturn(propertyDefinition);
     Mockito.when(propertyDefinition.getContainerClass().getName().getLocalName()).thenReturn("iometadata");

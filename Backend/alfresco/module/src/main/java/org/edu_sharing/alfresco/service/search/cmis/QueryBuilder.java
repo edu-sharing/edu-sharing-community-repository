@@ -54,12 +54,11 @@ public class QueryBuilder {
             where = "WHERE " + buildWhere(whereStatement, tableAlias, joinTables);
         }
 
-        // TODO alf 5 does not support left outer joins but alf 7 does!
         String join = joinTables.stream()
                 .map(qName -> {
                     String joinTable=CCConstants.getValidLocalName(qName.toString());
                     String joinTableAlias = qName.getLocalName();
-                    return String.format("JOIN %s AS %s ON %s.cmis:objectId = %s.cmis:objectId", joinTable, joinTableAlias, joinTableAlias, tableAlias);
+                    return String.format("LEFT JOIN %s AS %s ON %s.cmis:objectId = %s.cmis:objectId", joinTable, joinTableAlias, joinTableAlias, tableAlias);
                 })
                 .collect(Collectors.joining(" "));
 
