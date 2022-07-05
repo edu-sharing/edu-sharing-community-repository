@@ -3469,6 +3469,12 @@
             },
             "type": "array"
           },
+          "excludes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
           "facets": {
             "items": {
               "type": "string"
