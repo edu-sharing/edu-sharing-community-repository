@@ -5,124 +5,127 @@
       <button mat-icon-button (click)="close()"><i class="material-icons">close</i></button>
     </div>
   </div>
-  <div class="row" *ngIf="!data.isDirectory">
-    <div class="col s12">
-      <ul class="tabs">
-        <li class="clickable tab col s4" (click)="setTab(INFO)" title="Info">
-          <a [class.active]="tab == INFO"><i esIcon="info_outline" [aria]="true"></i></a>
-        </li>
-        <!--Icon for Usages-->
-        <li class="clickable tab col s4" (click)="setTab(PROPERTIES)">
-          <a [class.active]="tab == PROPERTIES"
-            ><i esIcon="equalizer"></i>
-            <div class="value-properties">{{ statsTotalPoints }}</div></a
-          >
-        </li>
-        <li class="clickable tab col s4" (click)="setTab(VERSIONS)">
-          <a [class.active]="tab == VERSIONS"><i esIcon="restore"></i></a>
+  <es-spinner *ngIf="loading"></es-spinner>
+  <ng-container *ngIf="!loading">
+    <div class="row" *ngIf="!data.isDirectory">
+      <div class="col s12">
+        <ul class="tabs">
+          <li class="clickable tab col s4" (click)="setTab(INFO)" title="Info">
+            <a [class.active]="tab == INFO"><i esIcon="info_outline" [aria]="true"></i></a>
+          </li>
+          <!--Icon for Usages-->
+          <li class="clickable tab col s4" (click)="setTab(PROPERTIES)">
+            <a [class.active]="tab == PROPERTIES"
+              ><i esIcon="equalizer"></i>
+              <div class="value-properties">{{ statsTotalPoints }}</div></a
+            >
+          </li>
+          <li class="clickable tab col s4" (click)="setTab(VERSIONS)">
+            <a [class.active]="tab == VERSIONS"><i esIcon="restore"></i></a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <es-workspace-metadata-block
+      *ngIf="tab == INFO"
+      class="content"
+      [node]="nodeObject"
+      (onDisplay)="display()"
+      (onEditMetadata)="edit()"
+    ></es-workspace-metadata-block>
+    <!--Usages Info -->
+    <div [class.hiddendiv]="tab != PROPERTIES" class="content">
+      <div class="description">{{ 'WORKSPACE.METADATA.USAGE_COUNT_TITLE' | translate }}</div>
+
+      <canvas id="myChart" width="270" height="200"></canvas>
+      <ul class="statistic-value">
+        <li *ngFor="let point of stats.points; let i = index" class="point">
+          <i class="material-icons">{{ stats.pointsIcons[i] }}</i> {{ point }}
         </li>
       </ul>
-    </div>
-  </div>
-
-  <es-workspace-metadata-block
-    *ngIf="tab == INFO"
-    class="content"
-    [node]="nodeObject"
-    (onDisplay)="display()"
-    (onEditMetadata)="edit()"
-  ></es-workspace-metadata-block>
-  <!--Usages Info -->
-  <div [class.hiddendiv]="tab != PROPERTIES" class="content">
-    <div class="description">{{ 'WORKSPACE.METADATA.USAGE_COUNT_TITLE' | translate }}</div>
-
-    <canvas id="myChart" width="270" height="200"></canvas>
-    <ul class="statistic-value">
-      <li *ngFor="let point of stats.points; let i = index" class="point">
-        <i class="material-icons">{{ stats.pointsIcons[i] }}</i> {{ point }}
-      </li>
-    </ul>
-    <div class="description usage-count">
-      {{ 'WORKSPACE.METADATA.USAGE_COUNT' | translate }}
-      <span class="usage-counter">{{ statsTotalPoints }}</span>
-    </div>
-    <div class="description collections" *ngIf="usagesCollection && usagesCollection.length">
-      {{ 'WORKSPACE.METADATA.COLLECTIONS' | translate: { count: usagesCollection.length } }}
-    </div>
-    <es-listTable
-      *ngIf="usagesCollection && usagesCollection.length"
-      [nodes]="usagesCollection"
-      [columns]="columnsCollections"
-      [viewType]="0"
-      [hasHeading]="false"
-      [hasIcon]="true"
-      [isClickable]="true"
-      (clickRow)="displayCollection($event.node)"
-    ></es-listTable>
-    <div class="description forkedParend" *ngIf="forkedParent">
-      {{ 'WORKSPACE.METADATA.FORKED_PARENT' | translate }}
-    </div>
-    <es-listTable
-      *ngIf="forkedParent"
-      [nodes]="[forkedParent]"
-      [columns]="columns"
-      [viewType]="0"
-      [hasHeading]="false"
-      [hasIcon]="true"
-      [isClickable]="true"
-      (clickRow)="displayNode($event.node)"
-    ></es-listTable>
-    <div class="description forkedParend" *ngIf="forkedChilds && forkedChilds.length">
-      {{ 'WORKSPACE.METADATA.FORKED_CHILDS' | translate: { count: forkedChilds.length } }}
-    </div>
-    <es-listTable
-      *ngIf="forkedChilds && forkedChilds.length"
-      [nodes]="forkedChilds"
-      [columns]="columns"
-      [viewType]="0"
-      [hasHeading]="false"
-      [hasIcon]="true"
-      [isClickable]="true"
-      (clickRow)="displayNode($event.node)"
-    ></es-listTable>
-
-    <!--<div class="value">{{usageCount}}</div>-->
-    <!--<div class="description"><a class="clickable" (click)="openPermalink()">{{'WORKSPACE.METADATA.PERMALINK' | translate}}</a></div>-->
-  </div>
-
-  <div *ngIf="tab == VERSIONS" class="content">
-    <div *ngIf="versionsLoading" class="center"><es-spinner></es-spinner></div>
-    <div
-      *ngFor="let version of versions"
-      class="version"
-      [class.versionMain]="isCurrentVersion(version)"
-    >
-      <div class="versionTitle">
-        <span *ngIf="isCurrentVersion(version)">{{
-          'WORKSPACE.METADATA.CURRENT_VERSION' | translate
-        }}</span>
-        <span *ngIf="!isCurrentVersion(version)">{{
-          'WORKSPACE.METADATA.VERSION' | translate
-        }}</span>
-        ({{ version.version.major }}.{{ version.version.minor }})
+      <div class="description usage-count">
+        {{ 'WORKSPACE.METADATA.USAGE_COUNT' | translate }}
+        <span class="usage-counter">{{ statsTotalPoints }}</span>
       </div>
-      <div class="versionAuthor">
-        {{ version.modifiedBy.firstName }} {{ version.modifiedBy.lastName }}
+      <div class="description collections" *ngIf="usagesCollection && usagesCollection.length">
+        {{ 'WORKSPACE.METADATA.COLLECTIONS' | translate: { count: usagesCollection.length } }}
       </div>
-      <div class="versionDate">{{ version.modifiedAt | formatDate }}</div>
-      <div class="versionComment">{{ version | versionComment }}</div>
-      <div class="btn-flat btn-shadow btn-icon btnVersion" (click)="displayVersion(version)">
-        <i class="material-icons">remove_red_eye</i>
-        {{ 'WORKSPACE.METADATA.VIEW_VERSION' | translate }}
+      <es-listTable
+        *ngIf="usagesCollection && usagesCollection.length"
+        [nodes]="usagesCollection"
+        [columns]="columnsCollections"
+        [viewType]="0"
+        [hasHeading]="false"
+        [hasIcon]="true"
+        [isClickable]="true"
+        (clickRow)="displayCollection($event.node)"
+      ></es-listTable>
+      <div class="description forkedParend" *ngIf="forkedParent">
+        {{ 'WORKSPACE.METADATA.FORKED_PARENT' | translate }}
       </div>
+      <es-listTable
+        *ngIf="forkedParent"
+        [nodes]="[forkedParent]"
+        [columns]="columns"
+        [viewType]="0"
+        [hasHeading]="false"
+        [hasIcon]="true"
+        [isClickable]="true"
+        (clickRow)="displayNode($event.node)"
+      ></es-listTable>
+      <div class="description forkedParend" *ngIf="forkedChilds && forkedChilds.length">
+        {{ 'WORKSPACE.METADATA.FORKED_CHILDS' | translate: { count: forkedChilds.length } }}
+      </div>
+      <es-listTable
+        *ngIf="forkedChilds && forkedChilds.length"
+        [nodes]="forkedChilds"
+        [columns]="columns"
+        [viewType]="0"
+        [hasHeading]="false"
+        [hasIcon]="true"
+        [isClickable]="true"
+        (clickRow)="displayNode($event.node)"
+      ></es-listTable>
+
+      <!--<div class="value">{{usageCount}}</div>-->
+      <!--<div class="description"><a class="clickable" (click)="openPermalink()">{{'WORKSPACE.METADATA.PERMALINK' | translate}}</a></div>-->
+    </div>
+
+    <div *ngIf="tab == VERSIONS" class="content">
+      <div *ngIf="versionsLoading" class="center"><es-spinner></es-spinner></div>
       <div
-        *ngIf="!isCurrentVersion(version)"
-        class="btn-flat btn-shadow btn-icon-only"
-        [class.disabled]="!canRevert()"
-        (click)="restoreVersion(version)"
+        *ngFor="let version of versions"
+        class="version"
+        [class.versionMain]="isCurrentVersion(version)"
       >
-        <i class="material-icons">restore</i>
+        <div class="versionTitle">
+          <span *ngIf="isCurrentVersion(version)">{{
+            'WORKSPACE.METADATA.CURRENT_VERSION' | translate
+          }}</span>
+          <span *ngIf="!isCurrentVersion(version)">{{
+            'WORKSPACE.METADATA.VERSION' | translate
+          }}</span>
+          ({{ version.version.major }}.{{ version.version.minor }})
+        </div>
+        <div class="versionAuthor">
+          {{ version.modifiedBy.firstName }} {{ version.modifiedBy.lastName }}
+        </div>
+        <div class="versionDate">{{ version.modifiedAt | formatDate }}</div>
+        <div class="versionComment">{{ version | versionComment }}</div>
+        <div class="btn-flat btn-shadow btn-icon btnVersion" (click)="displayVersion(version)">
+          <i class="material-icons">remove_red_eye</i>
+          {{ 'WORKSPACE.METADATA.VIEW_VERSION' | translate }}
+        </div>
+        <div
+          *ngIf="!isCurrentVersion(version)"
+          class="btn-flat btn-shadow btn-icon-only"
+          [class.disabled]="!canRevert()"
+          (click)="restoreVersion(version)"
+        >
+          <i class="material-icons">restore</i>
+        </div>
       </div>
     </div>
-  </div>
+  </ng-container>
 </div>

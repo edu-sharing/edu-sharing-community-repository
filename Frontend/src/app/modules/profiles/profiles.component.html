@@ -260,7 +260,7 @@
             <button
               mat-raised-button
               color="primary"
-              [disabled]="!oldPassword.trim() || newPassword.passwordStrength == 'weak'"
+              [disabled]="!oldPassword.trim() || newPassword.passwordStrength === 'weak'"
               (click)="savePassword()"
             >
               {{ 'SAVE' | translate }}

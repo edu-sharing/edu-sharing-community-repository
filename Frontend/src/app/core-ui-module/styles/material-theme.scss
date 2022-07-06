@@ -263,6 +263,11 @@ mat-button-toggle-group {
         padding-bottom: 0;
     }
 }
+.mat-form-field.mat-form-field-max-width {
+    .mat-form-field-wrapper {
+        width: 100%;
+    }
+}
 // form border on hover
 .mat-form-field-appearance-outline .mat-form-field-outline-thick {
     color: $primaryMediumLight;

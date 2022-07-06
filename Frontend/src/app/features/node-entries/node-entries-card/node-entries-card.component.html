@@ -58,7 +58,7 @@
       <div
         class="node-comments"
         *ngIf="node.type === 'ccm:io'"
-        (esDistinctClick)="
+        (click)="
           entriesService.clickItem.emit({
             element: node,
             source: ClickSource.Comments

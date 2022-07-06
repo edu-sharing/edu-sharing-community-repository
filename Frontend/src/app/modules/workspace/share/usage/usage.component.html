@@ -35,9 +35,9 @@
           (keyup.enter)="remove(usage)"
           (click)="remove(usage)"
           title="{{
-            (usage.type == 'INDIRECT' ? 'WORKSPACE.SHARE.USAGE_INDIRECT' : '') | translate
+            (usage.type === 'INDIRECT' ? 'WORKSPACE.SHARE.USAGE_INDIRECT' : '') | translate
           }}"
-          [class.disabled]="usage.type == 'INDIRECT'"
+          [class.disabled]="usage.type === 'INDIRECT'"
           [class.opacity-invisible]="!showDelete"
         >
           <i class="material-icons" *ngIf="!isDeleted(usage)">cancel</i>

@@ -23,14 +23,14 @@
     <div id="chartService" *ngIf="statsUrlMaterials">
       <ul class="tabs">
         <li class="clickable tab" (click)="tab = 'LICENSES'">
-          <a [class.active]="tab == 'LICENSES'">{{ 'SERVICES.TAB.LICENSES' | translate }}</a>
+          <a [class.active]="tab === 'LICENSES'">{{ 'SERVICES.TAB.LICENSES' | translate }}</a>
         </li>
         <li class="clickable tab" (click)="tab = 'MATERIALS'">
-          <a [class.active]="tab == 'MATERIALS'">{{ 'SERVICES.TAB.MATERIALS' | translate }}</a>
+          <a [class.active]="tab === 'MATERIALS'">{{ 'SERVICES.TAB.MATERIALS' | translate }}</a>
         </li>
       </ul>
-      <iframe *ngIf="tab == 'LICENSES'" class="chart" [src]="statsUrlLicenses"></iframe>
-      <iframe *ngIf="tab == 'MATERIALS'" class="chart" [src]="statsUrlMaterials"></iframe>
+      <iframe *ngIf="tab === 'LICENSES'" class="chart" [src]="statsUrlLicenses"></iframe>
+      <iframe *ngIf="tab === 'MATERIALS'" class="chart" [src]="statsUrlMaterials"></iframe>
     </div>
   </div>
 </div>

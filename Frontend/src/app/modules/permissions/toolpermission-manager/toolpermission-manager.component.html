@@ -11,16 +11,16 @@
     <div class="heading" *ngIf="!isLoading">
       <div class="name">
         {{
-          (_authority.authorityType == 'GROUP'
+          (_authority.authorityType === 'GROUP'
             ? 'PERMISSIONS.TOOLPERMISSIONS.MEMBERS_ALLOWED'
-            : _authority.authorityType == 'EVERYONE'
+            : _authority.authorityType === 'EVERYONE'
             ? 'PERMISSIONS.TOOLPERMISSIONS.EVERYONE_ALLOWED'
             : 'PERMISSIONS.TOOLPERMISSIONS.USER_ALLOWED'
           ) | translate
         }}:
       </div>
       <div class="checkboxDiv">{{ 'PERMISSIONS.TOOLPERMISSIONS.ALLOW' | translate }}</div>
-      <div class="checkboxDiv" *ngIf="_authority.authorityType != 'EVERYONE'">
+      <div class="checkboxDiv" *ngIf="_authority.authorityType !== 'EVERYONE'">
         {{ 'PERMISSIONS.TOOLPERMISSIONS.DENY' | translate }}
       </div>
       <div class="result">{{ 'PERMISSIONS.TOOLPERMISSIONS.RESULT' | translate }}</div>
@@ -38,16 +38,16 @@
           </div>
           <div class="groupTable" *ngFor="let key of getToolpermissionsForGroup(group)">
             <div class="name">
-              <div *ngIf="group.name != 'CONNECTORS' && group.name != 'REPOSITORIES'">
+              <div *ngIf="group.name !== 'CONNECTORS' && group.name !== 'REPOSITORIES'">
                 {{ 'TOOLPERMISSION.' + key | translate }}
               </div>
-              <div *ngIf="group.name == 'CONNECTORS'">
+              <div *ngIf="group.name === 'CONNECTORS'">
                 {{
                   'TOOLPERMISSION.TOOLPERMISSION_CONNECTOR' + (getTpSafe(key) ? '_SAFE' : '')
                     | translate: { connector: getTpConnector(key) }
                 }}
               </div>
-              <div *ngIf="group.name == 'REPOSITORIES'">
+              <div *ngIf="group.name === 'REPOSITORIES'">
                 {{
                   'TOOLPERMISSION.TOOLPERMISSION_REPOSITORY'
                     | translate: { repository: getTpRepository(key) }
@@ -66,7 +66,7 @@
                 (change)="deny[key] = false; change(key)"
               ></mat-checkbox>
             </div>
-            <div class="checkboxDiv checkboxInput" *ngIf="_authority.authorityType != 'EVERYONE'">
+            <div class="checkboxDiv checkboxInput" *ngIf="_authority.authorityType !== 'EVERYONE'">
               <mat-checkbox
                 [disabled]="changing.indexOf(key) != -1"
                 [(ngModel)]="deny[key]"
@@ -76,8 +76,8 @@
             </div>
             <div
               class="result"
-              [class.allowed]="getEffective(key) == 'ALLOWED'"
-              [class.denied]="getEffective(key) != 'ALLOWED'"
+              [class.allowed]="getEffective(key) === 'ALLOWED'"
+              [class.denied]="getEffective(key) !== 'ALLOWED'"
             >
               <div *ngIf="changing.indexOf(key) != -1"><es-spinner-small></es-spinner-small></div>
               <div
@@ -89,7 +89,7 @@
                 </div>
                 <i *ngIf="isImplicit(key)" esIcon="edu-inherit" class="inherit"></i>
                 <i
-                  *ngIf="getEffective(key) == 'UNKNOWN'"
+                  *ngIf="getEffective(key) === 'UNKNOWN'"
                   class="inherit"
                   esIcon="warning"
                   title="{{ 'PERMISSIONS.TOOLPERMISSIONS.INHERIT_UNKNOWN' | translate }}"
@@ -98,7 +98,7 @@
             </div>
           </div>
         </div>
-        <div class="group-add" *ngIf="_authority.authorityType == 'EVERYONE'">
+        <div class="group-add" *ngIf="_authority.authorityType === 'EVERYONE'">
           <div class="card-title-element">
             <i class="material-icons">add</i
             >{{ 'PERMISSIONS.TOOLPERMISSIONS.GROUP.ADD' | translate }}

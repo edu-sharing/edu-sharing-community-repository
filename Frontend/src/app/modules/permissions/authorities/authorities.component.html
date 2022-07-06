@@ -1,6 +1,6 @@
 <div class="topFrame">
   <div class="info">
-    <div *ngIf="_mode != 'ORG' && !embedded">
+    <div *ngIf="_mode !== 'ORG' && !embedded">
       <div *ngIf="!org">
         {{ 'PERMISSIONS.INFO_GLOBAL_' + _mode | translate }}
         <br />
@@ -154,7 +154,7 @@
         <label>{{ 'PERMISSIONS.INTERNAL_NAME' | translate }}</label>
         <div class="infoText">{{ edit.authorityName }}</div>
       </div>
-      <div *ngIf="_mode == 'GROUP'">
+      <div *ngIf="_mode === 'GROUP'">
         <mat-form-field>
           <mat-label>{{ 'GROUP.displayName' | translate }}</mat-label>
           <input
@@ -194,7 +194,7 @@
           </mat-select>
         </mat-form-field>
       </div>
-      <div *ngIf="_mode == 'ORG'">
+      <div *ngIf="_mode === 'ORG'">
         <mat-form-field>
           <mat-label>{{ 'ORG.displayName' | translate }}</mat-label>
           <input
@@ -231,7 +231,7 @@
           ></es-breadcrumbs>
         </div>
       </div>
-      <div *ngIf="_mode == 'USER'">
+      <div *ngIf="_mode === 'USER'">
         <mat-form-field *ngIf="!editId">
           <mat-label>{{ 'USER.authorityName' | translate }}</mat-label>
           <input
@@ -414,7 +414,7 @@
   [dataSource]="dataSource"
   (fetchData)="loadAuthorities($event)"
   (clickItem)="onClick($event)"
-  [checkbox]="_mode != 'ORG'"
+  [checkbox]="_mode !== 'ORG'"
   [sort]="sortConfig"
   (sortChange)="changeSort($event)"
 >

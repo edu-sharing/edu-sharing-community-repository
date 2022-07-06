@@ -330,7 +330,7 @@
         </div>
         <div *ngFor="let key of usages | keys" class="usage">
           <es-workspace-share-usages
-            *ngIf="key != 'null'"
+            *ngIf="key !== 'null'"
             class="usageEntry"
             [name]="key"
             [usages]="usages[key]"
@@ -378,7 +378,7 @@
         <div *ngFor="let permission of permissionsGroup.concat(permissionsUser)">
           <div class="advancedAuthority">
             <i class="type material-icons">{{
-              permission.authority.authorityType == 'USER' ? 'person' : 'group'
+              permission.authority.authorityType === 'USER' ? 'person' : 'group'
             }}</i
             >{{ permission | permissionName }}
           </div>
@@ -398,21 +398,21 @@
   </mat-tab-group>
   <div class="state" *ngIf="initialState && buttons">
     <div
-      *ngIf="getState() == 'PRIVATE'"
+      *ngIf="getState() === 'PRIVATE'"
       [class.state-changed]="isStateModified()"
       class="show-state"
     >
       <i esIcon="lock"></i><span> {{ 'WORKSPACE.SHARE.STATE.PRIVATE' | translate }}</span>
     </div>
     <div
-      *ngIf="getState() == 'SHARED'"
+      *ngIf="getState() === 'SHARED'"
       [class.state-changed]="isStateModified()"
       class="show-state"
     >
       <i esIcon="group"></i><span> {{ 'WORKSPACE.SHARE.STATE.SHARED' | translate }}</span>
     </div>
     <div
-      *ngIf="getState() == 'PUBLIC'"
+      *ngIf="getState() === 'PUBLIC'"
       [class.state-changed]="isStateModified()"
       class="show-state"
     >

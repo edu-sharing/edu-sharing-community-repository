@@ -112,25 +112,25 @@
     <div class="custom-group-data-table">
       <mat-table
         [dataSource]="customGroupData"
-        [class.mat-table-clickable]="singleMode == 'NODES'"
+        [class.mat-table-clickable]="singleMode === 'NODES'"
         *ngIf="customGroupData && !customGroupLoading"
       >
         <ng-container *ngFor="let key of customGroupRows" [matColumnDef]="key">
           <mat-header-cell *matHeaderCellDef>
-            <span *ngIf="key == 'action' || key == 'count' || key == customGroup">{{
+            <span *ngIf="key === 'action' || key === 'count' || key == customGroup">{{
               'ADMIN.STATISTICS.HEADERS.' + key | translate
             }}</span>
-            <span *ngIf="!(key == 'action' || key == 'count' || key == customGroup)">{{
+            <span *ngIf="!(key === 'action' || key === 'count' || key == customGroup)">{{
               customGroupLabels[key] || key
             }}</span>
           </mat-header-cell>
           <mat-cell *matCellDef="let element">
-            <span *ngIf="key == 'action'">{{
+            <span *ngIf="key === 'action'">{{
               'ADMIN.STATISTICS.ACTIONS.' + element[key] | translate
             }}</span>
-            <span *ngIf="key == 'count'">{{ element[key] }}</span>
+            <span *ngIf="key === 'count'">{{ element[key] }}</span>
             <span *ngIf="key == customGroup">{{ element.displayValue }}</span>
-            <span *ngIf="!(key == 'action' || key == 'count' || key == customGroup)">{{
+            <span *ngIf="!(key === 'action' || key === 'count' || key == customGroup)">{{
               element.entry.groups[element['action']]
                 ? element.entry.groups[element['action']][customUnfold][key]
                 : 0
@@ -214,7 +214,7 @@
     <div class="single-data-table">
       <mat-table
         [dataSource]="singleData"
-        [class.mat-table-clickable]="singleMode == 'NODES'"
+        [class.mat-table-clickable]="singleMode === 'NODES'"
         *ngIf="singleData && !singleLoading"
       >
         <ng-container *ngFor="let key of singleDataRows" [matColumnDef]="key">
@@ -225,24 +225,24 @@
             *matCellDef="let element"
             (click)="openNode(element.entry ? element.entry : null)"
           >
-            <span *ngIf="key == 'action'">{{
+            <span *ngIf="key === 'action'">{{
               'ADMIN.STATISTICS.ACTIONS.' + element[key] | translate
             }}</span>
-            <span *ngIf="key == 'date'">{{
+            <span *ngIf="key === 'date'">{{
               element[key] | formatDate: { time: true, relative: false }
             }}</span>
-            <span *ngIf="key == 'authority'">{{ element.authority.hash | slice: 0:8 }}</span>
-            <span *ngIf="key == 'authority_organization'">
+            <span *ngIf="key === 'authority'">{{ element.authority.hash | slice: 0:8 }}</span>
+            <span *ngIf="key === 'authority_organization'">
               <div *ngFor="let org of element.authority.organization">
                 {{ org | authorityName }}
               </div>
             </span>
-            <span *ngIf="key == 'authority_mediacenter'">
+            <span *ngIf="key === 'authority_mediacenter'">
               <div *ngFor="let med of element.authority.mediacenter">
                 {{ med | authorityName }}
               </div>
             </span>
-            <span *ngIf="key == 'node'">{{ element[key] }}</span>
+            <span *ngIf="key === 'node'">{{ element[key] }}</span>
             <span
               *ngIf="
                 !(

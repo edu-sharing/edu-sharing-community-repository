@@ -402,7 +402,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
             ];
         } else if (widget.definition.interactionType === 'None' || editorMode === 'inline') {
             // if inline editing -> we don't hide any widget so it can be edited
-            if (editorMode === 'inline') {
+            if (editorMode === 'inline' && widget.definition.interactionType !== 'None') {
                 widget.definition.hideIfEmpty = false;
             }
             return MdsWidgetComponent;
@@ -452,6 +452,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 mdsWidgetComponent.finishEdit(injected.instance);
             });
         });
+        return injected;
     }
 
     isInHiddenState() {

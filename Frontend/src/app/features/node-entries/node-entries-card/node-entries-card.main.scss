@@ -224,6 +224,9 @@ $optionBarHeight: 50px;
                 es-list-base,
                 es-node-url a es-list-base {
                     @include limitLineCount(2, 1.25);
+                    > es-list-text {
+                        word-break: break-word;
+                    }
                 }
             }
             es-node-url {

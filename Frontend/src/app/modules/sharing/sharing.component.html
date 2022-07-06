@@ -86,7 +86,7 @@
           <i class="material-icons">cloud_download</i
           >{{
             'SHARING.' +
-              (sharingInfo.node.mediatype == 'link'
+              (sharingInfo.node.mediatype === 'link'
                 ? 'LINK'
                 : sharingInfo.node.isDirectory && childs.length > 1
                 ? 'DOWNLOAD_ZIP'

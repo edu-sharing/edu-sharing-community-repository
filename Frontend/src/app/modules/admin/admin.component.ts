@@ -305,7 +305,7 @@ export class AdminComponent implements OnInit, OnDestroy {
         }
     }
     public debugNode(node: Node) {
-        this.dialogs.openNodeInfoDialog({ node });
+        this.dialogs.openNodeInfoDialog({ nodes: [node] });
     }
     public getModeButton(mode = this.mode): any {
         return this.buttons[Helper.indexOfObjectArray(this.buttons, 'id', mode)];

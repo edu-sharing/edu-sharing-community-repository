@@ -27,7 +27,7 @@
               <mat-chip *ngFor="let receiver of history[i + 1].receiver" class="badge">
                 <i
                   class="badgeIconLeft"
-                  [esIcon]="receiver.authorityType == 'USER' ? 'person' : 'group'"
+                  [esIcon]="receiver.authorityType === 'USER' ? 'person' : 'group'"
                 ></i>
                 <div class="mat-chip-group">
                   <span class="primary">{{ receiver | authorityName }}</span>
@@ -71,7 +71,7 @@
               <mat-chip *ngFor="let receiver of entry.receiver" class="badge">
                 <i
                   class="badgeIconLeft"
-                  [esIcon]="receiver.authorityType == 'USER' ? 'person' : 'group'"
+                  [esIcon]="receiver.authorityType === 'USER' ? 'person' : 'group'"
                 ></i>
                 <div class="mat-chip-group">
                   <span class="primary">{{ receiver | authorityName }}</span>

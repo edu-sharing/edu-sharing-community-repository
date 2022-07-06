@@ -17,7 +17,7 @@
             (keyup.enter)="goToOption('new')"
             (click)="goToOption('new')"
           >
-            <a class="table-tab-title-short" [class.active]="mode == 'new'"
+            <a class="table-tab-title-short" [class.active]="mode === 'new'"
               ><i class="material-icons">date_range</i
               ><span>{{ 'STREAM.MENU.NEW' | translate }}</span></a
             >
@@ -28,7 +28,7 @@
             (keyup.enter)="goToOption('relevant')"
             (click)="goToOption('relevant')"
           >
-            <a class="table-tab-title-short" [class.active]="mode == 'relevant'"
+            <a class="table-tab-title-short" [class.active]="mode === 'relevant'"
               ><i class="material-icons">trending_up</i
               ><span>{{ 'STREAM.MENU.RELEVANT' | translate }}</span></a
             >
@@ -39,7 +39,7 @@
             (keyup.enter)="goToOption('marked')"
             (click)="goToOption('marked')"
           >
-            <a class="table-tab-title-short" [class.active]="mode == 'marked'"
+            <a class="table-tab-title-short" [class.active]="mode === 'marked'"
               ><i class="material-icons">toc</i
               ><span>{{ 'STREAM.MENU.MARKED' | translate }}</span></a
             >
@@ -50,7 +50,7 @@
             (keyup.enter)="goToOption('seen')"
             (click)="goToOption('seen')"
           >
-            <a class="table-tab-title-short" [class.active]="mode == 'seen'"
+            <a class="table-tab-title-short" [class.active]="mode === 'seen'"
               ><i class="material-icons">history</i
               ><span>{{ 'STREAM.MENU.READ' | translate }}</span></a
             >
@@ -64,7 +64,7 @@
         class="choose-menu"
         (click)="goToOption('new')"
         (keyup.enter)="goToOption('new')"
-        [ngClass]="mode == 'new' ? 'm-active' : 'm-inactive'"
+        [ngClass]="mode === 'new' ? 'm-active' : 'm-inactive'"
       >
         <i aria-hidden="true" class="menuic material-icons">date_range</i>
         <div class="menu-icon-text">{{ 'STREAM.MENU.NEW' | translate }}</div>
@@ -74,7 +74,7 @@
         class="choose-menu"
         (click)="goToOption('relevant')"
         (keyup.enter)="goToOption('relevant')"
-        [ngClass]="mode == 'relevant' ? 'm-active' : 'm-inactive'"
+        [ngClass]="mode === 'relevant' ? 'm-active' : 'm-inactive'"
       >
         <i aria-hidden="true" class="menuic material-icons">trending_up</i>
         <div class="menu-icon-text">{{ 'STREAM.MENU.RELEVANT' | translate }}</div>
@@ -84,7 +84,7 @@
         class="choose-menu"
         (click)="goToOption('marked')"
         (keyup.enter)="goToOption('new')"
-        [ngClass]="mode == 'marked' ? 'm-active' : 'm-inactive'"
+        [ngClass]="mode === 'marked' ? 'm-active' : 'm-inactive'"
       >
         <i aria-hidden="true" class="menuic material-icons">toc</i>
         <div class="menu-icon-text">{{ 'STREAM.MENU.MARKED' | translate }}</div>
@@ -94,7 +94,7 @@
         class="choose-menu"
         (click)="goToOption('seen')"
         (keyup.enter)="goToOption('seen')"
-        [ngClass]="mode == 'seen' ? 'm-active' : 'm-inactive'"
+        [ngClass]="mode === 'seen' ? 'm-active' : 'm-inactive'"
       >
         <i aria-hidden="true" class="menuic material-icons">history</i>
         <div class="menu-icon-text">{{ 'STREAM.MENU.READ' | translate }}</div>
@@ -103,16 +103,16 @@
     <div class="col s12 m7 l6 remove-horizontal-padding">
       <div class="margin-show">
         <div class="stream-header-left stream-marginfix">
-          <div *ngIf="mode == 'new'" class="stream-title s10 m12">
+          <div *ngIf="mode === 'new'" class="stream-title s10 m12">
             {{ 'STREAM.MENU.NEW' | translate }}
           </div>
-          <div *ngIf="mode == 'seen'" class="stream-title s10 m12">
+          <div *ngIf="mode === 'seen'" class="stream-title s10 m12">
             {{ 'STREAM.MENU.READ' | translate }}
           </div>
-          <div *ngIf="mode == 'relevant'" class="stream-title s10 m12">
+          <div *ngIf="mode === 'relevant'" class="stream-title s10 m12">
             {{ 'STREAM.MENU.RELEVANT' | translate }}
           </div>
-          <div *ngIf="mode == 'marked'" class="stream-title s10 m12">
+          <div *ngIf="mode === 'marked'" class="stream-title s10 m12">
             {{ 'STREAM.MENU.MARKED' | translate }}
           </div>
 
@@ -127,7 +127,7 @@
         <div class="stream-emptytxt" *ngIf="streams.length === 0 && !isLoading">
           {{ 'STREAM.OBJECT.NOMATERIALS' | translate }}
         </div>
-        <div *ngIf="mode == 'relevant'" class="stream-boxes">
+        <div *ngIf="mode === 'relevant'" class="stream-boxes">
           <div *ngFor="let node of streamsRelevant" class="stream-box">
             <div class="row row-nomargin">
               <div class="stream-box-icon col s1">
@@ -164,7 +164,7 @@
             </div>
           </div>
         </div>
-        <div *ngIf="mode != 'relevant'" class="stream-boxes">
+        <div *ngIf="mode !== 'relevant'" class="stream-boxes">
           <div
             *ngFor="let strm of streams"
             [ngClass]="strm.nodes.length === 0 ? 'hide' : 'stream-box'"

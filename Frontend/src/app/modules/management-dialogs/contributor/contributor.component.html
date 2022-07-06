@@ -243,7 +243,7 @@
           <mat-label>{{ 'WORKSPACE.CONTRIBUTOR.SCOPE' | translate }}</mat-label>
           <mat-select id="scope" [(ngModel)]="editScopeNew">
             <mat-option
-              *ngFor="let role of editMode == 'lifecycle' ? rolesLifecycle : rolesMetadata"
+              *ngFor="let role of editMode === 'lifecycle' ? rolesLifecycle : rolesMetadata"
               value="{{ role }}"
               >{{ 'WORKSPACE.CONTRIBUTOR.TYPE.' + role.toUpperCase() | translate }}</mat-option
             >
@@ -271,7 +271,7 @@
           <mat-label>{{ 'VCARD.Org' | translate }}</mat-label>
           <input
             matInput
-            [disabled]="editType == 'org' || editDisabled"
+            [disabled]="editType === 'org' || editDisabled"
             id="orgName"
             [(ngModel)]="edit.org"
           />

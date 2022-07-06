@@ -53,6 +53,9 @@ export class EmbedComponent implements EventListener {
         (window as any).ngEmbed = this;
         // disable the cookie info when in embedded context
         this.mainNavService.getCookieInfo().show = false;
+        this.mainNavService.patchMainNavConfig({
+            currentScope: 'embed',
+        });
         this.event.addListener(this);
         this.toast.showProgressDialog();
         this.translations.waitForInit().subscribe(() => {

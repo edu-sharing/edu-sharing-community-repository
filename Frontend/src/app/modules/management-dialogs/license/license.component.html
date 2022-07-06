@@ -107,7 +107,7 @@
           }}</mat-option>
         </mat-select>
       </mat-form-field>
-      <div *ngIf="primaryType == 'CC_BY'" class="cc">
+      <div *ngIf="primaryType === 'CC_BY'" class="cc">
         <h5 class="ccAbout">
           <a class="focus-underline" [href]="getLicenseUrlVersion('CC_BY_ABOUT')" target="_blank">{{
             'WORKSPACE.LICENSE.CC.ABOUT' | translate
@@ -135,7 +135,7 @@
           </mat-radio-group>
         </div>
       </div>
-      <mat-radio-group [(ngModel)]="type" *ngIf="primaryType == 'COPYRIGHT'" class="copyright">
+      <mat-radio-group [(ngModel)]="type" *ngIf="primaryType === 'COPYRIGHT'" class="copyright">
         <div *ngIf="isAllowedLicense('COPYRIGHT_FREE')">
           <mat-radio-button value="COPYRIGHT_FREE">
             <es-multi-line-label>
@@ -161,7 +161,7 @@
           </mat-radio-button>
         </div>
       </mat-radio-group>
-      <mat-radio-group [(ngModel)]="type" *ngIf="primaryType == 'CC_0'" class="cc">
+      <mat-radio-group [(ngModel)]="type" *ngIf="primaryType === 'CC_0'" class="cc">
         <div *ngIf="isAllowedLicense('CC_0')">
           <mat-radio-button value="CC_0">
             <es-multi-line-label>
@@ -215,7 +215,7 @@
                 <input type="checkbox" class="filled-in" [(ngModel)]="eduDownload" id="DOWNLOAD"><label for="DOWNLOAD">{{'WORKSPACE.LICENSE.EDU.DOWNLOAD' | translate}}</label>
 
               </div>-->
-      <div *ngIf="primaryType == 'CUSTOM'" class="custom">
+      <div *ngIf="primaryType === 'CUSTOM'" class="custom">
         <mat-form-field>
           <mat-label>{{ 'LICENSE.GROUPS.CUSTOM' | translate }}</mat-label>
           <textarea
@@ -241,9 +241,9 @@
       [(ccProfileUrl)]="ccProfileUrl"
     ></es-license-source>
     <div class="currentLicense">
-      <h4 *ngIf="type != 'MULTI'">{{ 'WORKSPACE.LICENSE.CURRENT' | translate }}</h4>
-      <img *ngIf="type != 'MULTI'" class="currentLicenseIcon" src="{{ getLicenseIcon() }}" />
-      <div class="license-additional-data" *ngIf="type == 'CC_BY' || type == 'CC_BY_SA'">
+      <h4 *ngIf="type !== 'MULTI'">{{ 'WORKSPACE.LICENSE.CURRENT' | translate }}</h4>
+      <img *ngIf="type !== 'MULTI'" class="currentLicenseIcon" src="{{ getLicenseIcon() }}" />
+      <div class="license-additional-data" *ngIf="type === 'CC_BY' || type === 'CC_BY_SA'">
         <div *ngIf="ccVersion != '4.0'" class="licenseLocale">
           <mat-form-field>
             <mat-label>{{ 'WORKSPACE.LICENSE.LOCALE' | translate }}</mat-label>
@@ -268,7 +268,7 @@
       </div>
       <div class="licenseName">
         <h4>{{ getLicenseName() }}</h4>
-        <div class="oerStatus" *ngIf="getLicenseProperty() != 'MULTI'">
+        <div class="oerStatus" *ngIf="getLicenseProperty() !== 'MULTI'">
           <span class="oer" *ngIf="isOerLicense()">{{ 'WORKSPACE.LICENSE.OER' | translate }}</span>
           <span class="notOer" *ngIf="!isOerLicense()">{{
             'WORKSPACE.LICENSE.NOT_OER' | translate
@@ -276,17 +276,17 @@
         </div>
       </div>
       <div class="currentLicenseDescription">
-        <div class="customLicenseDescription" *ngIf="primaryType == 'CUSTOM'">
+        <div class="customLicenseDescription" *ngIf="primaryType === 'CUSTOM'">
           {{ rightsDescription }}
         </div>
         <div
-          *ngIf="primaryType != 'CUSTOM' && primaryType != 'COPYRIGHT'"
+          *ngIf="primaryType !== 'CUSTOM' && primaryType !== 'COPYRIGHT'"
           innerHTML="{{ 'LICENSE.DESCRIPTION.' + primaryType | translate }}"
         ></div>
-        <div *ngIf="primaryType == 'COPYRIGHT'">
+        <div *ngIf="primaryType === 'COPYRIGHT'">
           <div innerHTML="{{ 'LICENSE.DESCRIPTION.' + copyrightType | translate }}"></div>
         </div>
-        <div *ngIf="primaryType == 'CC_BY'">
+        <div *ngIf="primaryType === 'CC_BY'">
           <div *ngIf="ccShare">
             {{ 'LICENSE.DESCRIPTION.CC_SHARE_' + ccShare | translate }}
           </div>
@@ -300,7 +300,7 @@
             }}.
           </div>
         </div>
-        <div *ngIf="primaryType == 'CC_BY' || primaryType == 'CC_0'" class="licenseUrl">
+        <div *ngIf="primaryType === 'CC_BY' || primaryType === 'CC_0'" class="licenseUrl">
           <a [href]="getLicenseUrl()" target="_blank">{{ 'WORKSPACE.LICENSE.MORE' | translate }}</a>
         </div>
       </div>

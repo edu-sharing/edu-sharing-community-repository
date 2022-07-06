@@ -320,10 +320,10 @@
                   *ngIf="isRootLevelCollection() || true"
                   class="collection-nocontent-container collection-nocontent-big"
                 >
-                  <ng-container *ngIf="tabSelected == 'EDU_GROUPS'">
+                  <ng-container *ngIf="tabSelected === 'EDU_GROUPS'">
                     {{ 'collections_noOrgaCollections' | translate }}
                   </ng-container>
-                  <ng-container *ngIf="tabSelected == 'EDU_ALL'">
+                  <ng-container *ngIf="tabSelected === 'EDU_ALL'">
                     {{ 'collections_noCollections' | translate }}
                   </ng-container>
                 </div>

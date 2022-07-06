@@ -67,7 +67,7 @@
         </button>
       </div>
     </div>
-    <div *ngIf="config.frontpage.mode != 'collection'">
+    <div *ngIf="config.frontpage.mode !== 'collection'">
       <div class="group">
         <mat-form-field>
           <mat-label>{{ 'ADMIN.FRONTPAGE.TOTAL_COUNT_LABEL' | translate }}</mat-label>
@@ -119,7 +119,7 @@
               }}</mat-option>
             </mat-select>
           </mat-form-field>
-          <mat-form-field *ngIf="query.condition.type == 'TOOLPERMISSION'">
+          <mat-form-field *ngIf="query.condition.type === 'TOOLPERMISSION'">
             <mat-label>{{ 'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_VALUE' | translate }}</mat-label>
             <mat-hint>{{
               'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_VALUE_HINT' | translate

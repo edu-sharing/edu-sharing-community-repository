@@ -53,6 +53,7 @@ export class WorkspaceMetadataComponent implements OnInit {
     readonly PROPERTIES = 'PROPERTIES';
     readonly VERSIONS = 'VERSIONS';
     data: any;
+    loading = true;
     tab = this.INFO;
     permissions: any;
     usagesCollection: Node[];
@@ -100,19 +101,24 @@ export class WorkspaceMetadataComponent implements OnInit {
         this.nodeSubject
             .pipe(
                 filter((node) => node !== null),
-                map((node) => node.ref.id),
+                // map((node) => node.ref.id),
+                // TODO: check if distinct still working
                 distinctUntilChanged(),
             )
-            .subscribe((nodeId) => this.load(nodeId));
+            .subscribe((node) => this.load(node));
     }
 
-    private async load(nodeId: string) {
+    private async load(node: Node) {
         this.versions = null;
         this.versionsLoading = true;
         this.resetStats();
+        this.loading = true;
+        // use temporary the given data to show headers
+        this.data = this.format(node);
         this.nodeObject = (
-            await this.nodeApi.getNodeMetadata(nodeId, [RestConstants.ALL]).toPromise()
+            await this.nodeApi.getNodeMetadata(node.ref.id, [RestConstants.ALL]).toPromise()
         ).node;
+        this.loading = false;
         if (this.nodeObject.isDirectory) {
             this.tab = this.INFO;
         }
@@ -387,54 +393,56 @@ export class WorkspaceMetadataComponent implements OnInit {
             Math.max(parseInt(a), parseInt(b)),
         );
         this.canvas = document.getElementById('myChart');
-        this.ctx = this.canvas.getContext('2d');
-        // FontFamily
-        Chart.defaults.global.defaultFontFamily = 'open_sansregular';
-        const myChart = new Chart(this.ctx, {
-            type: 'bar',
-            data: {
-                labels: this.stats.labels,
-                datasets: [
-                    {
-                        data: this.stats.points,
-                        backgroundColor: this.stats.colors,
-                        borderWidth: 0.2,
-                    },
-                ],
-            },
-            options: {
-                responsive: false,
-                legend: {
-                    display: false,
-                },
-                mode: 'index',
-                layout: {
-                    padding: {
-                        left: 0,
-                        right: 0,
-                        top: 20,
-                        bottom: 0,
-                    },
-                },
-                scales: {
-                    xAxes: [
+        if (this.canvas) {
+            this.ctx = this.canvas.getContext('2d');
+            // FontFamily
+            Chart.defaults.global.defaultFontFamily = 'open_sansregular';
+            const myChart = new Chart(this.ctx, {
+                type: 'bar',
+                data: {
+                    labels: this.stats.labels,
+                    datasets: [
                         {
-                            ticks: {
-                                display: false,
-                            },
-                        },
-                    ],
-                    yAxes: [
-                        {
-                            ticks: {
-                                beginAtZero: true,
-                                max: Math.max(Math.round(statsMax * 1.25), 6),
-                            },
+                            data: this.stats.points,
+                            backgroundColor: this.stats.colors,
+                            borderWidth: 0.2,
                         },
                     ],
                 },
-            },
-        });
+                options: {
+                    responsive: false,
+                    legend: {
+                        display: false,
+                    },
+                    mode: 'index',
+                    layout: {
+                        padding: {
+                            left: 0,
+                            right: 0,
+                            top: 20,
+                            bottom: 0,
+                        },
+                    },
+                    scales: {
+                        xAxes: [
+                            {
+                                ticks: {
+                                    display: false,
+                                },
+                            },
+                        ],
+                        yAxes: [
+                            {
+                                ticks: {
+                                    beginAtZero: true,
+                                    max: Math.max(Math.round(statsMax * 1.25), 6),
+                                },
+                            },
+                        ],
+                    },
+                },
+            });
+        }
     }
 
     canEdit() {

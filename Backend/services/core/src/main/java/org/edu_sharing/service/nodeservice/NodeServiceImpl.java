@@ -183,7 +183,6 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	@Override
 	public String createNodeBasic(StoreRef store, String parentID, String nodeTypeString, String childAssociation, HashMap<String, ?> _props) {
 		childAssociation = (childAssociation == null) ? CCConstants.CM_ASSOC_FOLDER_CONTAINS : childAssociation;
-		Map<QName, Serializable> properties = transformPropMap(_props);
 
 		NodeRef parentNodeRef = new NodeRef(store, parentID);
 		QName nodeType = QName.createQName(nodeTypeString);
@@ -198,6 +197,24 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			assocName = QName.createValidLocalName(assocName);
 		}
 		assocName = "{" + CCConstants.NAMESPACE_CCM + "}" + assocName;
+		Map<String, Object> propsConverted = new HashMap<>();
+		propsConverted.putAll(_props);
+		for (PropertiesSetInterceptor i : PropertiesInterceptorFactory.getPropertiesSetInterceptors()) {
+			try {
+				propsConverted = i.beforeSetProperties(
+						PropertiesInterceptorFactory.getPropertiesContext(
+								null,
+								propsConverted,
+								Collections.emptyList(),
+								null
+						)
+				);
+			} catch (Throwable e) {
+				logger.warn("Error while calling interceptor " + i.getClass().getName() + ": " + e.toString());
+			}
+		}
+		Map<QName, Serializable> properties = transformPropMap(propsConverted);
+
 
 		ChildAssociationRef childRef = nodeService.createNode(parentNodeRef, QName.createQName(childAssociation), QName.createQName(assocName), nodeType,
 				properties);

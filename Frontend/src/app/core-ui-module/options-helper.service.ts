@@ -1,4 +1,4 @@
-import { forkJoin as observableForkJoin, fromEvent, of, Subscription } from 'rxjs';
+import { forkJoin, forkJoin as observableForkJoin, fromEvent, of, Subscription } from 'rxjs';
 import { RestNetworkService } from '../core-module/rest/services/rest-network.service';
 import { RestConnectorsService } from '../core-module/rest/services/rest-connectors.service';
 import { RestConstants } from '../core-module/rest/rest-constants';
@@ -63,6 +63,7 @@ import { DialogsService } from '../features/dialogs/dialogs.service';
 import { ListEventInterface, NodeEntriesDisplayType } from '../features/node-entries/entries-model';
 import { NodeEntriesDataType } from '../features/node-entries/node-entries.component';
 import { NodeStoreService } from '../modules/search/node-store.service';
+import { takeUntil } from 'rxjs/operators';
 
 export class OptionsHelperConfig {
     subscribeEvents? = true;
@@ -563,23 +564,26 @@ export class OptionsHelperService implements OnDestroy {
      }
         */
         const debugNode = new OptionItem('OPTIONS.DEBUG', 'build', async (object) => {
-            let node = this.getObjects(object)[0];
-            if (node.authorityName) {
+            let nodes = this.getObjects(object);
+            console.info(nodes);
+            if (nodes.some((n) => n.authorityName)) {
                 try {
-                    node = (
-                        await this.nodeService
-                            .getNodeMetadata(
-                                node.ref?.id || node.properties?.[RestConstants.NODE_ID]?.[0],
-                                [RestConstants.ALL],
-                            )
-                            .toPromise()
-                    ).node;
+                    nodes = (
+                        await forkJoin(
+                            nodes.map((n) =>
+                                this.nodeService.getNodeMetadata(
+                                    n.ref?.id || n.properties?.[RestConstants.NODE_ID]?.[0],
+                                    [RestConstants.ALL],
+                                ),
+                            ),
+                        ).toPromise()
+                    ).map((n) => n.node);
                 } catch (e) {
-                    console.info(node);
+                    console.info(nodes);
                     console.warn(e);
                 }
             }
-            this.dialogs.openNodeInfoDialog({ node });
+            this.dialogs.openNodeInfoDialog({ nodes });
         });
         debugNode.elementType = [
             ElementType.Node,
@@ -593,7 +597,7 @@ export class OptionsHelperService implements OnDestroy {
             ElementType.MapRef,
         ];
         debugNode.onlyDesktop = true;
-        debugNode.constrains = [Constrain.AdminOrDebug, Constrain.NoBulk];
+        debugNode.constrains = [Constrain.AdminOrDebug];
         debugNode.group = DefaultGroups.View;
         debugNode.priority = 10;
 
@@ -1375,6 +1379,7 @@ export class OptionsHelperService implements OnDestroy {
             this.infoToggle.isToggle = true;
             options.push(this.infoToggle);
          */
+        let metadataSidebarSubscription: Subscription;
         const metadataSidebar = new OptionItem(
             'OPTIONS.METADATA_SIDEBAR',
             'info_outline',
@@ -1383,6 +1388,23 @@ export class OptionsHelperService implements OnDestroy {
                     metadataSidebar.icon = change ? 'info' : 'info_outline';
                 });
                 management.nodeSidebar = management.nodeSidebar ? null : this.getObjects(object)[0];
+                if (management.nodeSidebar == null) {
+                    metadataSidebarSubscription?.unsubscribe();
+                } else {
+                    metadataSidebarSubscription = this.list
+                        ?.getSelection()
+                        .changed.subscribe((selection) => {
+                            if (selection.source.selected.length === 0) {
+                                return;
+                            }
+                            if (management.nodeSidebar == null) {
+                                metadataSidebarSubscription?.unsubscribe();
+                                return;
+                            }
+                            management.nodeSidebar = selection.source.selected[0] as Node;
+                            management.nodeSidebarChange.emit(management.nodeSidebar);
+                        });
+                }
                 management.nodeSidebarChange.emit(management.nodeSidebar);
             },
         );

@@ -1,7 +1,7 @@
 <es-spinner *ngIf="loading"></es-spinner>
 <div class="done-info" *ngIf="!loading">
-  <img *ngIf="inputState == 'done'" src="assets/images/register/register-confirm.svg" alt="" />
-  <img *ngIf="inputState != 'done'" src="assets/images/register/register-mail.svg" alt="" />
+  <img *ngIf="inputState === 'done'" src="assets/images/register/register-confirm.svg" alt="" />
+  <img *ngIf="inputState !== 'done'" src="assets/images/register/register-mail.svg" alt="" />
   <h4>{{ 'REGISTER.DONE.TITLE' | translate }}</h4>
   <p class="mail-info">
     {{ 'REGISTER.DONE.MAIL_INFO' | translate }}
@@ -10,7 +10,8 @@
   </p>
   <p>
     {{
-      (inputState == 'done-reset' ? 'REGISTER.REQUEST' : 'REGISTER.DONE') + '.MAIL_NOTE' | translate
+      (inputState === 'done-reset' ? 'REGISTER.REQUEST' : 'REGISTER.DONE') + '.MAIL_NOTE'
+        | translate
     }}
   </p>
   <div *ngIf="!keyUrl" class="keyForm">

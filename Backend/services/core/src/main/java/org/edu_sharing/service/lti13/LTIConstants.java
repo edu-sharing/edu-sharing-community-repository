@@ -68,6 +68,8 @@ public class LTIConstants {
 
     public static final String DEEP_LINK_CONTEXT = "https://purl.imsglobal.org/spec/lti/claim/context";
 
+    public static final String RESOURCE_LINK_LAUNCH_PRESENTATION = "https://purl.imsglobal.org/spec/lti/claim/launch_presentation";
+
 
 
     /**
