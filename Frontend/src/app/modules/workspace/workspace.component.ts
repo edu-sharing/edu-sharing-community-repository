@@ -69,8 +69,6 @@ import { WorkspaceExplorerComponent } from './explorer/explorer.component';
     ],
 })
 export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy {
-    @ViewChild('explorer') explorer: WorkspaceExplorerComponent;
-    @ViewChild('actionbar') actionbarRef: ActionbarComponent;
     private static VALID_ROOTS = [
         'MY_FILES',
         'SHARED_FILES',
@@ -87,6 +85,9 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         '-to_me_shared_files-',
         '-workflow_receive-',
     ];
+
+    @ViewChild('explorer') explorer: WorkspaceExplorerComponent;
+    @ViewChild('actionbar') actionbarRef: ActionbarComponent;
 
     cardHasOpenModals$: Observable<boolean>;
     private isRootFolder: boolean;
@@ -119,24 +120,24 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         this.currentFolderSubject.next(value);
     }
     private searchQuerySubject = new BehaviorSubject<{ node: Node; query: string }>(null);
-    public get searchQuery(): { node: Node; query: string } {
+    get searchQuery(): { node: Node; query: string } {
         return this.searchQuerySubject.value;
     }
-    public set searchQuery(value: { node: Node; query: string }) {
+    set searchQuery(value: { node: Node; query: string }) {
         this.searchQuerySubject.next(value);
     }
 
-    public globalProgress = false;
-    public editNodeDeleteOnCancel = false;
+    globalProgress = false;
+    editNodeDeleteOnCancel = false;
     notAllowedReason: string;
     user: IamUser;
-    public isSafe = false;
+    isSafe = false;
     isLoggedIn = false;
-    public addNodesToCollection: Node[];
-    public addNodesStream: Node[];
-    public variantNode: Node;
-    public mainnav = true;
-    public isBlocked = false;
+    addNodesToCollection: Node[];
+    addNodesStream: Node[];
+    variantNode: Node;
+    mainnav = true;
+    isBlocked = false;
 
     customOptions: CustomOptions = {
         useDefaultOptions: true,
@@ -146,63 +147,16 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
 
     dataSource = new NodeDataSource<Node>();
     private reurl: string;
-    public showLtiTools = false;
+    showLtiTools = false;
     private oldParams: Params;
     selectedNodeTree: string;
-    public contributorNode: Node;
-    public shareLinkNode: Node;
+    contributorNode: Node;
+    shareLinkNode: Node;
     displayType: NodeEntriesDisplayType = null;
     reorderDialog: boolean;
     private readonly destroyed$ = new Subject<void>();
     private loadingTask = this.loadingScreen.addLoadingTask();
-    @HostListener('window:beforeunload', ['$event'])
-    beforeunloadHandler(event: any) {
-        if (this.isSafe) {
-            this.connector.logout().toPromise();
-        }
-    }
-    private handleScroll(event: Event) {
-        const scroll = window.pageYOffset || document.documentElement.scrollTop;
-        if (scroll > 0) {
-            this.storage.set('workspace_scroll', scroll);
-        }
-    }
-    @HostListener('document:keyup', ['$event'])
-    handleKeyboardEventUp(event: KeyboardEvent) {
-        if (event.keyCode === 91 || event.keyCode === 93) {
-        }
-    }
-    @HostListener('document:keydown', ['$event'])
-    handleKeyboardEvent(event: KeyboardEvent) {
-        if (event.keyCode === 91 || event.keyCode === 93) {
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
-        const clip = this.storage.get('workspace_clipboard') as ClipboardObject;
-        const fromInputField = KeyEvents.eventFromInputField(event);
-    }
-    onEvent(event: string, data: any): void {
-        if (event === FrameEventsService.EVENT_REFRESH) {
-            this.refresh();
-        }
-    }
 
-    ngOnInit(): void {
-        this.registerScroll();
-        this.registerUpdateMainNav();
-    }
-
-    ngOnDestroy(): void {
-        this.destroyed$.next();
-        this.destroyed$.complete();
-        this.storage.remove('workspace_clipboard');
-        if (this.currentFolder) {
-            this.storage.set(this.getLastLocationStorageId(), this.currentFolder.ref.id);
-        }
-        // close sidebar, if open
-        this.mainNavService.getDialogs().closeSidebar();
-    }
     constructor(
         private toast: Toast,
         private route: ActivatedRoute,
@@ -228,11 +182,64 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     ) {
         this.event.addListener(this);
         this.translations.waitForInit().subscribe(() => {
-            this.initialize();
+            void this.initialize();
         });
         this.connector.setRoute(this.route);
         this.globalProgress = true;
         this.cardHasOpenModals$ = this.card.hasOpenModals.pipe(delay(0));
+    }
+
+    ngOnInit(): void {
+        this.registerScroll();
+        this.registerUpdateMainNav();
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed$.next();
+        this.destroyed$.complete();
+        this.storage.remove('workspace_clipboard');
+        if (this.currentFolder) {
+            this.storage.set(this.getLastLocationStorageId(), this.currentFolder.ref.id);
+        }
+        // close sidebar, if open
+        this.mainNavService.getDialogs().closeSidebar();
+    }
+
+    @HostListener('window:beforeunload', ['$event'])
+    beforeunloadHandler(event: any) {
+        if (this.isSafe) {
+            void this.connector.logout().toPromise();
+        }
+    }
+
+    @HostListener('document:keyup', ['$event'])
+    handleKeyboardEventUp(event: KeyboardEvent) {
+        if (event.keyCode === 91 || event.keyCode === 93) {
+        }
+    }
+
+    @HostListener('document:keydown', ['$event'])
+    handleKeyboardEvent(event: KeyboardEvent) {
+        if (event.keyCode === 91 || event.keyCode === 93) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
+        const clip = this.storage.get('workspace_clipboard') as ClipboardObject;
+        const fromInputField = KeyEvents.eventFromInputField(event);
+    }
+
+    private handleScroll(event: Event) {
+        const scroll = window.pageYOffset || document.documentElement.scrollTop;
+        if (scroll > 0) {
+            this.storage.set('workspace_scroll', scroll);
+        }
+    }
+
+    onEvent(event: string, data: any): void {
+        if (event === FrameEventsService.EVENT_REFRESH) {
+            this.refresh();
+        }
     }
 
     /**
@@ -312,6 +319,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             connectorType,
         );
     }
+
     handleDrop(event: { target: DropTarget; source: DropSource<Node> }) {
         for (const s of event.source.element) {
             if (
@@ -344,11 +352,13 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         ]
         */
     }
+
     canDropBreadcrumbs = (event: any) => {
         return event.target === 'HOME'
             ? this.root === 'MY_FILES'
             : event.target?.ref?.id !== this.currentFolder.ref.id;
     };
+
     private moveNode(target: DropTarget, source: Node[], position = 0) {
         this.globalProgress = true;
         if (position >= source.length) {
@@ -369,6 +379,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
                 },
             );
     }
+
     private copyNode(target: DropTarget, source: Node[], position = 0) {
         this.globalProgress = true;
         if (position >= source.length) {
@@ -389,6 +400,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
                 },
             );
     }
+
     private finishMoveCopy(target: DropTarget, source: Node[], copy: boolean) {
         this.toast.closeModalDialog();
         const info: any = {
@@ -402,6 +414,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         this.globalProgress = false;
         this.refresh();
     }
+
     private async initialize() {
         this.user = await this.iam.getCurrentUserAsync();
         this.route.params.subscribe(async (routeParams: Params) => {
@@ -515,23 +528,25 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             });
         });
     }
-    public resetWorkspace() {
+
+    resetWorkspace() {
         if (this.mainNavService.getDialogs().nodeSidebar && this.parameterNode) {
             this.setSelection([this.parameterNode]);
         }
     }
 
-    public doSearch(query: any) {
+    doSearch(query: any) {
         const id = this.currentFolder
             ? this.currentFolder.ref.id
             : this.searchQuery && this.searchQuery.node
             ? this.searchQuery.node.ref.id
             : null;
-        this.routeTo(this.root, id, query.query);
+        void this.routeTo(this.root, id, query.query);
         if (!query.cleared) {
             this.ui.hideKeyboardIfMobile();
         }
     }
+
     private doSearchFromRoute(params: any, node: Node | any) {
         node = this.isRootFolder ? null : node;
         this.searchQuery = {
@@ -546,6 +561,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         this.path = [];
         this.setSelection([]);
     }
+
     private deleteDone() {
         this.closeMetadata();
         this.refresh();
@@ -583,6 +599,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             );
         }
     }
+
     // returns either the passed node as list, or the current selection if the passed node is invalid (actionbar)
     private getNodeList(node: Node): Node[] {
         if (Array.isArray(node)) {
@@ -602,6 +619,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
                 .subscribe((node: NodeWrapper) => this.sharedFolders.push(node.node));
         }
     }
+
     setRoot(root: NodeRoot) {
         this.root = root;
         this.searchQuery = null;
@@ -614,23 +632,29 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         this.explorer.nodeEntries.getSelection().select(...nodes);
         this.setFixMobileNav();
     }
+
     private setFixMobileNav() {
         this.mainNavService
             .getMainNav()
             .setFixMobileElements(this.explorer.nodeEntries.getSelection().selected?.length > 0);
     }
+
     private updateLicense() {
         this.closeMetadata();
     }
+
     private closeMetadata() {
         this.mainNavService.getDialogs().closeSidebar();
     }
+
     private openDirectory(id: string) {
         this.routeTo(this.root, id);
     }
+
     searchGlobal(query: string) {
         this.routeTo(this.root, null, query);
     }
+
     private openDirectoryFromRoute(params: any = null) {
         let id = params?.id;
         this.closeMetadata();
@@ -723,6 +747,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             this.updateNodeByParams(params, node);
         }
     }
+
     openNode(node: Node, useConnector = true) {
         if (this.nodeHelper.isSavedSearchObject(node)) {
             UIHelper.routeToSearchNode(this.router, null, node);
@@ -734,6 +759,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             this.displayNode(node);
         }
     }
+
     openBreadcrumb(position: number) {
         console.log(position);
         this.searchQuery = null;
@@ -785,7 +811,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         if (this.displayType !== null) {
             params.displayType = this.displayType;
         }
-        this.router
+        void this.router
             .navigate(['./'], { queryParams: params, relativeTo: this.route })
             .then((result: boolean) => {
                 if (!result) {
@@ -850,7 +876,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         return this.getRootFolderId();
     }
 
-    public listLTI() {
+    listLTI() {
         this.showLtiTools = true;
     }
 
@@ -953,7 +979,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     setDisplayType(displayType: NodeEntriesDisplayType, refreshRoute = true) {
         this.displayType = displayType;
         if (refreshRoute) {
-            this.router.navigate(['./'], {
+            void this.router.navigate(['./'], {
                 relativeTo: this.route,
                 replaceUrl: true,
                 queryParamsHandling: 'merge',

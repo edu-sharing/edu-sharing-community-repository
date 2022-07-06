@@ -1498,7 +1498,7 @@ export class OptionsHelperService implements OnDestroy {
     }
 
     private goToWorkspace(node: Node | any) {
-        if (node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1) {
+        if (node.aspects.includes(RestConstants.CCM_ASPECT_IO_REFERENCE)) {
             this.nodeService
                 .getNodeMetadata(node.properties[RestConstants.CCM_PROP_IO_ORIGINAL][0])
                 .subscribe((org) =>

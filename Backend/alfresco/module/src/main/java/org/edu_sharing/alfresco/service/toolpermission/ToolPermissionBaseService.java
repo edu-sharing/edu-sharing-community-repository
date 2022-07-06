@@ -241,6 +241,7 @@ public class ToolPermissionBaseService {
                             QName.createQName(CCConstants.CCM_PROP_TOOLPERMISSION_SYSTEM_MANAGED),
                             true
                     );
+
                     if(value.hasPath("allowed")) {
                         List<String> allowed = value.getStringList("allowed");
                         for (String authority : allowed) {

@@ -61,8 +61,8 @@ const devConfig: Partial<PlaywrightTestConfig> = {
  * See https://playwright.dev/docs/test-configuration.
  */
 const config: PlaywrightTestConfig = {
-    testDir: './tests',
-    globalSetup: require.resolve('./tests/global-setup'),
+    testDir: './playwright/out',
+    globalSetup: require.resolve('./playwright/out/global-setup'),
     /* Maximum time one test can run for. */
     timeout: 60 * 1000,
     expect: {

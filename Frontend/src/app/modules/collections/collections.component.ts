@@ -966,6 +966,8 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
             'OPTIONS.' + (this.isRootLevelCollection() ? 'NEW_COLLECTION' : 'NEW_SUB_COLLECTION');
         if (id == '-root-') {
             // display root collections with tabs
+            this.sortCollections.active = RestConstants.CM_MODIFIED_DATE;
+            this.sortCollections.direction = 'desc';
             this.setCollectionId(RestConstants.ROOT);
             this.refreshContent(callback);
         } else {

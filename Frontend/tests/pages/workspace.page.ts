@@ -1,7 +1,6 @@
 import { expect, Locator, Page } from '@playwright/test';
-import { testFilesFolder } from './constants';
+import { testStep } from '../util/test-step';
 import { GeneralPage } from './general.page';
-import { InlineFile } from './util';
 
 export class WorkspacePage {
     static readonly url = './components/workspace';
@@ -10,21 +9,36 @@ export class WorkspacePage {
 
     constructor(private readonly page: Page) {}
 
+    @testStep()
+    async goto() {
+        await Promise.all([this.page.goto(WorkspacePage.url), this.page.waitForNavigation()]);
+    }
+
+    @testStep()
     async expectScopeButton() {
         const mainNavScopeButton = this.page.locator('[data-test="main-nav-scope-button"]');
         await expect(mainNavScopeButton).toHaveText(/Workspace/);
     }
 
+    @testStep()
     async expectElement(name: string, count = 1) {
         const row = this.getElementRow(name);
         await expect(row).toHaveCount(count);
     }
 
+    @testStep()
     async expectElementToBeSelected(pattern: string | RegExp) {
         const row = this.getElementRow(pattern);
         await expect(row.locator('input[type="checkbox"]')).toBeChecked();
     }
 
+    @testStep()
+    async expectElementNotToBeSelected(pattern: string | RegExp) {
+        const row = this.getElementRow(pattern);
+        await expect(row.locator('input[type="checkbox"]')).not.toBeChecked();
+    }
+
+    @testStep()
     async expectSidebarToShow(pattern: string | RegExp) {
         const sidebar = this.page.locator('[data-test="workspace-sidebar"]');
         const sidebarElementName = sidebar.locator('[data-test="workspace-sidebar-element-name"]');
@@ -32,6 +46,7 @@ export class WorkspacePage {
         await expect(sidebarElementName).toHaveText(pattern);
     }
 
+    @testStep()
     async createFolder(name: string) {
         await this.page.locator('[data-test="top-bar-add-button"]').click();
         await this.page.locator('[data-test="menu-item-WORKSPACE.ADD_FOLDER"]').click();
@@ -39,15 +54,18 @@ export class WorkspacePage {
         await this.page.locator('[data-test="dialog-button-SAVE"]').click();
     }
 
+    @testStep()
     async selectElement(pattern: string | RegExp) {
         const row = this.getElementRow(pattern);
         await row.click();
     }
 
+    @testStep()
     async openElement(pattern: string | RegExp) {
         await Promise.all([this.getElementRow(pattern).dblclick(), this.page.waitForNavigation()]);
     }
 
+    @testStep()
     async openElementViaMenu(pattern: string | RegExp) {
         await this.getElementRow(pattern).click({ button: 'right' });
         await Promise.all([
@@ -56,6 +74,7 @@ export class WorkspacePage {
         ]);
     }
 
+    @testStep()
     async deleteElement(name: string) {
         const row = this.getElementRow(name);
         await row.click({ button: 'right' });
@@ -63,27 +82,18 @@ export class WorkspacePage {
         await this.page.locator('[data-test="dialog-button-YES_DELETE"]').click();
     }
 
+    @testStep()
     async deleteSelectedElement() {
+        // When we delete an element while there are still requests in flight that fetch data on
+        // that element, these requests might return an error.
+        // await this.page.waitForLoadState('networkidle');
+
         await this.page.locator('[data-test="more-actions-button"]').click();
         await this.page.locator('[data-test="menu-item-OPTIONS.DELETE"]').click();
         await this.page.locator('[data-test="dialog-button-YES_DELETE"]').click();
     }
 
-    async uploadFile(fileOrFilename: string | InlineFile) {
-        await this.page.locator('[data-test="top-bar-add-button"]').click();
-        await this.page.locator('[data-test="menu-item-OPTIONS.ADD_OBJECT"]').click();
-        const [fileChooser] = await Promise.all([
-            this.page.waitForEvent('filechooser'),
-            this.page.locator('[data-test="browse-files-button"]').click(),
-        ]);
-        if (typeof fileOrFilename === 'string') {
-            await fileChooser.setFiles(testFilesFolder + fileOrFilename);
-        } else {
-            await fileChooser.setFiles(fileOrFilename);
-        }
-        await this.page.locator('[data-test="dialog-button-SAVE"]').click();
-    }
-
+    @testStep()
     async createLinkElement(url: string) {
         await this.page.locator('[data-test="top-bar-add-button"]').click();
         await this.page.locator('[data-test="menu-item-OPTIONS.ADD_OBJECT"]').click();
@@ -92,6 +102,7 @@ export class WorkspacePage {
         await this.page.locator('[data-test="dialog-button-SAVE"]').click();
     }
 
+    @testStep()
     async toggleSidebar() {
         await this.page.locator('[data-test="toggle-OPTIONS.METADATA_SIDEBAR"]').click();
     }

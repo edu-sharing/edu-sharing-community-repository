@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "target": "es2018",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "outDir": "../playwright/out",
+    "lib": ["es2018", "DOM", "DOM.Iterable"],
+    "types": ["node"],
+    "typeRoots": ["./node_modules/@types"],
+    "experimentalDecorators": true,
+    "strict": true
+  },
+  "files": ["global-setup.ts"],
+  "include": ["**/*.spec.ts"]
+}

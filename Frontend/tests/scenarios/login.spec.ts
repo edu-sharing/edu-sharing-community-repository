@@ -1,8 +1,8 @@
 import { test } from '@playwright/test';
-import { defaultLogin } from './constants';
-import { GeneralPage } from './general.page';
-import { LoginPage } from './login.page';
-import { WorkspacePage } from './workspace.page';
+import { defaultLogin } from '../util/constants';
+import { GeneralPage } from '../pages/general.page';
+import { LoginPage } from '../pages/login.page';
+import { WorkspacePage } from '../pages/workspace.page';
 
 test('should redirect to login page', async ({ page }) => {
     await Promise.all([page.goto('.'), page.waitForNavigation({ url: LoginPage.url })]);
