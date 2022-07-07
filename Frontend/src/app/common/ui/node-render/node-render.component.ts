@@ -626,7 +626,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         }
     }
 
-    private initOptions() {
+    private async initOptions() {
         this.optionsHelper.setData({
             scope: Scope.Render,
             activeObjects: [this._node],
@@ -636,8 +636,13 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
                 useDefaultOptions: true,
                 addOptions: this.currentOptions,
             },
+            postPrepareOptions: (options, objects) => {
+                if (this.version && this.version !== RestConstants.NODE_VERSION_CURRENT) {
+                    options.filter((o) => o.name === 'OPTIONS.OPEN')[0].isEnabled = false;
+                }
+            },
         });
-        this.optionsHelper.initComponents(this.actionbar);
+        await this.optionsHelper.initComponents(this.actionbar);
         this.optionsHelper.refreshComponents();
         this.postprocessHtml();
         this.isBuildingPage = false;

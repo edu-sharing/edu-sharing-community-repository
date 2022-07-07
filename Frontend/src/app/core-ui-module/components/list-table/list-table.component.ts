@@ -1331,4 +1331,8 @@ export class ListTableComponent
         await this.optionsHelper.initComponents(this.actionbar, this);
         this.optionsHelper.refreshComponents();
     }
+
+    getShownOptions(node: Node) {
+        return this._options?.filter((o) => this.optionIsShown(o, node));
+    }
 }

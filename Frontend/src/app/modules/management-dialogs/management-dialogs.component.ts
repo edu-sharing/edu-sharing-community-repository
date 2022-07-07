@@ -220,6 +220,7 @@ export class WorkspaceManagementDialogsComponent {
     public ltiObject: Node;
     currentLtiTool: Node;
     ltiToolRefresh: Boolean;
+    reopenSimpleEdit = false;
     @Input() nodeDeleteOnCancel: boolean;
     @Output() nodeDeleteOnCancelChange = new EventEmitter();
     private nodeLicenseOnUpload = false;
@@ -326,8 +327,13 @@ export class WorkspaceManagementDialogsComponent {
         ).subscribe(
             (nodes: NodeWrapper[]) => {
                 this.onRefresh.emit(nodes.map((n) => n.node));
+                const previousNodes = this.nodeShare;
                 this.nodeShare = null;
                 this.nodeShareChange.emit(null);
+                if (this.reopenSimpleEdit) {
+                    this.reopenSimpleEdit = false;
+                    this._nodeSimpleEdit = previousNodes;
+                }
                 this.toast.closeModalDialog();
             },
             (error) => {
@@ -481,6 +487,9 @@ export class WorkspaceManagementDialogsComponent {
         if (this.editorPending) {
             this.editorPending = false;
             this._nodeMetadata = this.nodeLicense;
+        } else if (this.reopenSimpleEdit) {
+            this.reopenSimpleEdit = false;
+            this._nodeSimpleEdit = this.nodeLicense;
         }
         this.nodeLicense = null;
         this.nodeLicenseOnUpload = false;
@@ -507,10 +516,15 @@ export class WorkspaceManagementDialogsComponent {
             return;
         }
         this.setNodeDeleteOnCancel(false);
+        const previousNodes = this._nodeMetadata;
         this._nodeMetadata = null;
         this.nodeMetadataChange.emit(null);
         this.createMetadata = null;
         this.onCloseMetadata.emit(nodes);
+        if (this.reopenSimpleEdit) {
+            this.reopenSimpleEdit = false;
+            this._nodeSimpleEdit = previousNodes;
+        }
         if (refresh) {
             console.log('_nodeFromUpload', this._nodeFromUpload);
             if (this._nodeFromUpload) {

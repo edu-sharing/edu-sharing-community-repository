@@ -589,6 +589,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         if (!parameters) {
             parameters = await this.getMdsValues();
         }
+        if (repository !== this.currentRepository) {
+            parameters = null;
+        }
         this.scrollTo();
         UIHelper.getCommonParameters(this.activatedRoute).subscribe(async (queryParams) => {
             queryParams.addToCollection = this.addToCollection ? this.addToCollection.ref.id : null;

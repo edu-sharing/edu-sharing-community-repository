@@ -778,6 +778,7 @@
   "SHARING": {
     "TITLE": "Dateifreigabe",
     "DOWNLOAD": "Herunterladen",
+    "OPEN": "Öffnen",
     "DOWNLOAD_ZIP": "Als Zip Herunterladen",
     "LINK": "Zur Originalseite springen",
     "INVITED_AND_CREATED_BY": "Erstellt und freigegeben von {{inviter}}",
@@ -896,7 +897,7 @@
     "redo": "Übernehmen"
   },
   "FILL_STATUS": {
-    "MESSAGE": "Felder ausgefüllt",
+    "MESSAGE": "Feldern ausgefüllt",
     "REQUIRED": "erforderliche Felder",
     "REQUIREDPUBLISH": "für Veröffentlichung erforderliche Felder",
     "SHOW": "zeigen"

@@ -2,7 +2,7 @@ import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@
 import { FormControl } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete/autocomplete';
 import { forkJoin, Observable, of } from 'rxjs';
-import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
+import { catchError, debounceTime, map, startWith, switchMap } from 'rxjs/operators';
 import {
     Authority,
     AuthorityProfile,
@@ -145,6 +145,11 @@ export class AuthoritySearchInputComponent {
                         label: 'WORKSPACE.INVITE_LOCAL_RESULTS',
                         values: this.convertData(authorities),
                     })),
+                    catchError((err) =>
+                        of({
+                            values: [],
+                        } as SuggestionGroup),
+                    ),
                 ),
         );
         if (this.globalSearchAllowed) {

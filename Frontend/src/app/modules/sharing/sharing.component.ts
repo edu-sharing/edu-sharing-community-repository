@@ -6,16 +6,18 @@ import { RestNodeService } from '../../core-module/core.module';
 import { RestConstants } from '../../core-module/core.module';
 import { RestConnectorService } from '../../core-module/core.module';
 import { Node, NodeList, LoginResult, SharingInfo, Person } from '../../core-module/core.module';
-import { CustomOptions, OptionItem } from '../../core-ui-module/option-item';
+import { CustomOptions, DefaultGroups, OptionItem } from '../../core-ui-module/option-item';
 import { TemporaryStorageService } from '../../core-module/core.module';
-import { ConfigurationService } from '../../core-module/core.module';
-import { UIConstants } from '../../core-module/ui/ui-constants';
+import { ConfigurationHelper, ConfigurationService } from '../../core-module/core.module';
+import { OPEN_URL_MODE, UIConstants } from '../../core-module/ui/ui-constants';
 import { RestMdsService } from '../../core-module/core.module';
 import { RestHelper } from '../../core-module/core.module';
 import { RestSharingService } from '../../core-module/core.module';
 import { Toast } from '../../core-ui-module/toast';
-import { ConfigurationHelper } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
+import { UIHelper } from '../../core-ui-module/ui-helper';
+import { BridgeService } from '../../core-bridge-module/bridge.service';
+import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 
 @Component({
     selector: 'es-sharing',
@@ -44,6 +46,8 @@ export class SharingComponent {
         private connector: RestConnectorService,
         private nodeService: RestNodeService,
         private sharingService: RestSharingService,
+        private bridge: BridgeService,
+        private nodeHelperService: NodeHelperService,
         private storage: TemporaryStorageService,
         private toast: Toast,
         private config: ConfigurationService,
@@ -52,11 +56,25 @@ export class SharingComponent {
         this.columns.push(new ListItem('NODE', RestConstants.CM_NAME));
         this.columns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
         this.columns.push(new ListItem('NODE', RestConstants.SIZE));
-        this.options.addOptions.push(
-            new OptionItem('SHARING.DOWNLOAD', 'cloud_download', (node: Node) =>
-                this.download(node),
-            ),
+        const download = new OptionItem('SHARING.DOWNLOAD', 'cloud_download', (node: Node) =>
+            this.download(node),
         );
+        download.group = DefaultGroups.Primary;
+        download.showAlways = true;
+        const open = new OptionItem('SHARING.OPEN', 'open_in_new', (node: Node) => {
+            console.log(node);
+            UIHelper.openUrl(
+                node.properties[RestConstants.CCM_PROP_IO_WWWURL][0],
+                this.bridge,
+                OPEN_URL_MODE.BlankSystemBrowser,
+            );
+        });
+        open.group = DefaultGroups.Primary;
+        open.showAlways = true;
+        download.customShowCallback = (nodes: Node[]) => nodes?.[0]?.mediatype !== 'link';
+        open.customShowCallback = (nodes: Node[]) => nodes?.[0]?.mediatype === 'link';
+        this.options.addOptions.push(download);
+        this.options.addOptions.push(open);
         this.translations.waitForInit().subscribe(() => {
             this.route.queryParams.subscribe((params) => {
                 this.params = params;

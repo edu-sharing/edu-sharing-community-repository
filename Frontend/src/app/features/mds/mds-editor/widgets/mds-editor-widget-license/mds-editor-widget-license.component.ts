@@ -92,12 +92,18 @@ export class MdsEditorWidgetLicenseComponent
             this.mainnav.getDialogs(),
             'licenseComponent',
         ).subscribe(() => (this.mainnav.getDialogs().licenseComponent.priority = 2));
+        // @TODO: With the rebuild to individual dialogs, we should handle this with scoped services!
+        const oldState = this.mainnav.getDialogs().reopenSimpleEdit;
+        if (this.mainnav.getDialogs().reopenSimpleEdit) {
+            this.mainnav.getDialogs().reopenSimpleEdit = false;
+        }
         this.mainnav
             .getDialogs()
             .onRefresh.pipe(first())
             .subscribe((nodes: Node[]) => {
                 this.nodes = nodes;
                 this.mdsEditorValues.updateNodes(this.nodes);
+                this.mainnav.getDialogs().reopenSimpleEdit = oldState;
             });
     }
 

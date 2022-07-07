@@ -459,7 +459,7 @@
             </div>
           </ng-container>
           <ng-container *ngIf="!orderElementsActive && viewType !== 2">
-            <div class="more column" *ngIf="_options && _options.length > 1">
+            <div class="more column" *ngIf="_options && getShownOptions(node)?.length > 1">
               <button
                 mat-icon-button
                 color="primary"
@@ -474,16 +474,16 @@
             </div>
             <div
               class="more moreSingle column"
-              *ngIf="_options && _options.length == 1 && optionIsShown(_options[0], node)"
+              *ngIf="_options && getShownOptions(node)?.length === 1"
             >
               <button
                 mat-icon-button
                 color="primary"
-                [class.disabled]="!optionIsValid(_options[0], node)"
-                matTooltip="{{ _options[0].name | translate }}"
-                (click)="callOption(_options[0], node); $event.stopPropagation()"
+                [class.disabled]="!optionIsValid(getShownOptions(node)[0], node)"
+                matTooltip="{{ getShownOptions(node)[0].name | translate }}"
+                (click)="callOption(getShownOptions(node)[0], node); $event.stopPropagation()"
               >
-                <i esIcon="{{ _options[0].icon }}"></i>
+                <i esIcon="{{ getShownOptions(node)[0].icon }}"></i>
               </button>
             </div>
           </ng-container>

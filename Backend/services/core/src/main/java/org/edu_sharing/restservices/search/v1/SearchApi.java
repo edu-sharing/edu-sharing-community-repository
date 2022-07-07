@@ -98,6 +98,7 @@ public class SearchApi {
 			token.setContentType(contentType);
 			token.setResolveCollections(parameters.isResolveCollections());
 			token.setReturnSuggestion(parameters.isReturnSuggestions());
+			token.setExcludes(parameters.getExcludes());
 			NodeSearch search = NodeDao.search(repoDao, mdsDao, query, parameters.getCriteria(), token, filter);
 
 		    	List<Node> data = null;//new ArrayList<Node>();

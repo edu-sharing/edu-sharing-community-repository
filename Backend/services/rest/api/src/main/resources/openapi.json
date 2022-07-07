@@ -3877,6 +3877,12 @@
             },
             "type": "array"
           },
+          "excludes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
           "facetLimit": {
             "default": 10,
             "format": "int32",
