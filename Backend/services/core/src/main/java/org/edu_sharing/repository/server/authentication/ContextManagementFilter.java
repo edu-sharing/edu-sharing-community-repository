@@ -44,47 +44,39 @@ import org.springframework.context.ApplicationContext;
 
 
 public class ContextManagementFilter implements javax.servlet.Filter {
-	public static class B3 {
-		private final HttpServletRequest req;
+	public interface B3 {
+		public String getTraceId();
 
-		public B3(HttpServletRequest req) {
-			this.req = req;
-		}
+		public String getSpanId();
 
-		public String getTraceId() {
-			return req.getHeader("X-B3-TraceId");
-		}
+		public boolean isSampled();
 
-		public String getSpanId() {
-			return req.getHeader("X-B3-SpanId");
-		}
-
-		public boolean isSampled() {
-			return "1".equals(req.getHeader("X-B3-Sampled"));
-		}
-
-		public String toString() {
-			if(getTraceId() != null) {
-				return "TraceId: " + getTraceId();
-			}
-			return "";
-		}
-
-		public void addToRequest(HttpRequestBase request) {
-			for(String header : Collections.list(req.getHeaderNames())) {
-				if(
-					header.toUpperCase().startsWith("X-B3-") ||
-					header.toUpperCase().startsWith("X-OT-") ||
-					header.equalsIgnoreCase("X-Request-Id")
-				) {
-					request.setHeader(header, req.getHeader(header));
-				}
-			}
-		}
+		public void addToRequest(HttpRequestBase request);
 	}
 	// stores the currently accessing tool type, e.g. CONNECTOR
 	public static ThreadLocal<ApplicationInfo> accessTool = new ThreadLocal<>();
-	public static ThreadLocal<B3> b3 = new ThreadLocal<>();
+	public static ThreadLocal<B3> b3 = ThreadLocal.withInitial(() ->
+			new B3() {
+
+				@Override
+				public String getTraceId() {
+					return null;
+				}
+
+				@Override
+				public String getSpanId() {
+					return null;
+				}
+
+				@Override
+				public boolean isSampled() {
+					return false;
+				}
+
+				@Override
+				public void addToRequest(HttpRequestBase request) {
+				}
+			});
 
 	Logger logger = Logger.getLogger(ContextManagementFilter.class);
 
@@ -110,9 +102,48 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 		logger.debug("thread:"+Thread.currentThread().getId() +" "+((HttpServletRequest)req).getServletPath()+" starting");
 
 		try {
+			final HttpServletRequest http = (HttpServletRequest) req;
 
-			Context.newInstance((HttpServletRequest)req , (HttpServletResponse)res, context);
-			b3.set(new B3((HttpServletRequest)req));
+			Context.newInstance(http , (HttpServletResponse)res, context);
+			b3.set(new B3() {
+
+				@Override
+				public String getTraceId() {
+					return http.getHeader("X-B3-TraceId");
+				}
+
+				@Override
+				public String getSpanId() {
+					return http.getHeader("X-B3-SpanId");
+				}
+
+				@Override
+				public boolean isSampled() {
+					return "1".equals(http.getHeader("X-B3-Sampled"));
+				}
+
+				@Override
+				public String toString() {
+					if (getTraceId() != null) {
+						return "TraceId: " + getTraceId();
+					}
+					return "";
+				}
+
+				@Override
+				public void addToRequest(HttpRequestBase request) {
+					for (String header : Collections.list(http.getHeaderNames())) {
+						if (
+								header.toUpperCase().startsWith("X-B3-") ||
+										header.toUpperCase().startsWith("X-OT-") ||
+										header.equalsIgnoreCase("X-Request-Id")
+						) {
+							request.setHeader(header, http.getHeader(header));
+						}
+					}
+				}
+			});
+
 			if(b3.get().getTraceId() != null) {
 				MDC.put("TraceId", b3.get().getTraceId());
 			}
