@@ -36,7 +36,9 @@ $mainMenuSelectedBackground: linear-gradient(
                background: $mainMenuSelectedBackground;
             }
             &.cdk-focused {
-                background-color: $mainMenuBackgroundColor;
+                @if variable-exists(mainMenuBackgroundColor) {
+                    background-color: $mainMenuBackgroundColor;
+                }
             }
             &:hover:not([disabled]),
             &.cdk-key-focused {
