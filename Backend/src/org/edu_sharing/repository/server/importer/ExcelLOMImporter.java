@@ -274,7 +274,7 @@ public class ExcelLOMImporter {
 	private void addToCollections(ChildAssociationRef newNode, LinkedHashSet<String> collectionsForNode, Boolean addToCollection){
 		String wwwUrl = (String)serviceRegistry.getNodeService().getProperty(newNode.getChildRef(),QName.createQName(CCConstants.CCM_PROP_IO_WWWURL));
 		String nodeName = (String)serviceRegistry.getNodeService().getProperty(newNode.getChildRef(), ContentModel.PROP_NAME);
-		if(collectionsForNode != null){
+		if(collectionsForNode != null && collectionsForNode.size() > 1){
 
 			String parentCollection = collectionsForNode.stream().findFirst().get();
 			String targetCollection = collectionsForNode.stream().skip(collectionsForNode.size() -1).findFirst().get();
@@ -318,7 +318,7 @@ public class ExcelLOMImporter {
 				}
 			}
 		}else{
-			logger.info(" collectionsToImportTo.get(wwwUrl) is null " + wwwUrl);
+			this.logger.info("addToCollections expects two collection to be defined in excelsheet;" + wwwUrl);
 		}
 	}
 
