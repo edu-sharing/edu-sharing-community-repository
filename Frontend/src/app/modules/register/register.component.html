@@ -40,6 +40,7 @@
     <es-register-reset-password
       *ngIf="state === 'reset-password'"
       #resetPassword
+      [params]="params"
     ></es-register-reset-password>
     <div
       *ngIf="

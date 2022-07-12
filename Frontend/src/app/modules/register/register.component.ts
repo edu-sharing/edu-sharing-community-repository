@@ -32,7 +32,7 @@ export class RegisterComponent {
     public isLoading = true;
     state: 'register' | 'request' | 'reset-password' | 'done' | 'done-reset' = 'register';
     buttons: DialogButton[];
-    private params: Params;
+    params: Params;
 
     public cancel() {
         RestHelper.goToLogin(this.router, this.configService, null, null);
@@ -120,15 +120,13 @@ export class RegisterComponent {
 
     private setParams() {
         this.route.params.subscribe((params) => {
+            this.params = params;
             if (params.email) {
                 this.registerDone.email = params.email;
             }
             if (params.key) {
                 if (this.registerDone) {
                     this.registerDone.keyUrl = params.key;
-                }
-                if (this.resetPassword) {
-                    this.resetPassword.key = params.key;
                 }
             }
         });
