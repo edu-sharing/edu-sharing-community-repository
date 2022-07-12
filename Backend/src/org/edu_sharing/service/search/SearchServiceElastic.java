@@ -134,8 +134,49 @@ public class SearchServiceElastic extends SearchServiceImpl {
         String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
         BoolQueryBuilder audienceQueryBuilder = getPermissionsQuery("permissions.read");
         audienceQueryBuilder.should(QueryBuilders.matchQuery("owner", user));
+
+        //enhance to collection permissions
+        MatchQueryBuilder collectionTypeProposal = QueryBuilders.matchQuery("collections.relation.type", "ccm:collection_proposal");
+        BoolQueryBuilder collectionPermissions = getPermissionsQuery("collections.permissions.read");
+        collectionPermissions.should(QueryBuilders.matchQuery("collections.owner", user));
+        collectionPermissions.mustNot(collectionTypeProposal);
+
+        BoolQueryBuilder proposalPermissions = getPermissionsQuery("collections.permissions.Coordinator",getUserAuthorities().stream().filter(a -> !a.equals(CCConstants.AUTHORITY_GROUP_EVERYONE)).collect(Collectors.toSet()));
+        proposalPermissions.should(QueryBuilders.matchQuery("collections.owner", user));
+        proposalPermissions.must(collectionTypeProposal);
+
+        BoolQueryBuilder subPermissions = QueryBuilders.boolQuery().minimumShouldMatch(1)
+                .should(collectionPermissions)
+                .should(proposalPermissions);
+
+
+        BoolQueryBuilder audienceQueryBuilderCollections = QueryBuilders.boolQuery()
+                .mustNot(QueryBuilders.termQuery("properties.ccm:restricted_access",true))
+                .must(subPermissions);
+        audienceQueryBuilder.should(audienceQueryBuilderCollections);
+
         return audienceQueryBuilder;
     }
+
+    private BoolQueryBuilder getGlobalConditions(List<String> authorityScope, List<String> permissions) {
+        BoolQueryBuilder queryBuilderGlobalConditions = (authorityScope != null && authorityScope.size() > 0)
+                ? getPermissionsQuery("permissions.read",new HashSet<>(authorityScope))
+                : getReadPermissionsQuery();
+        queryBuilderGlobalConditions = queryBuilderGlobalConditions.must(QueryBuilders.matchQuery("nodeRef.storeRef.protocol", "workspace"));
+        if(permissions != null){
+            for(String permission : permissions){
+                queryBuilderGlobalConditions = QueryBuilders.boolQuery().must(queryBuilderGlobalConditions).must(getPermissionsQuery("permissions." + permission));
+            }
+        }
+
+        if(NodeServiceInterceptor.getEduSharingScope() == null){
+            queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.existsQuery("properties.ccm:eduscopename"));
+        }else{
+            queryBuilderGlobalConditions = queryBuilderGlobalConditions.must(QueryBuilders.termQuery("properties.ccm:eduscopename.keyword",NodeServiceInterceptor.getEduSharingScope()));
+        }
+        return queryBuilderGlobalConditions;
+    }
+
     @Override
     public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String,String[]> criterias,
                                         SearchToken searchToken) throws Throwable {
@@ -162,21 +203,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
             searchSourceBuilder.fetchSource(null,searchToken.getExcludes().toArray(new String[]{}));
 
             QueryBuilder metadataQueryBuilder = MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReaderV2.QUERY_SYNTAX_DSL),queryData,criterias);
-            BoolQueryBuilder queryBuilder = (searchToken.getAuthorityScope() != null && searchToken.getAuthorityScope().size() > 0)
-                    ? QueryBuilders.boolQuery().must(metadataQueryBuilder).must(getPermissionsQuery("permissions.read",new HashSet<>(searchToken.getAuthorityScope())))
-                    : QueryBuilders.boolQuery().must(metadataQueryBuilder).must(getReadPermissionsQuery());
-            queryBuilder = queryBuilder.must(QueryBuilders.matchQuery("nodeRef.storeRef.protocol", "workspace"));
-            if(searchToken.getPermissions() != null){
-                for(String permission : searchToken.getPermissions()){
-                    queryBuilder = QueryBuilders.boolQuery().must(queryBuilder).must(getPermissionsQuery("permissions." + permission));
-                }
-            }
-
-            if(NodeServiceInterceptor.getEduSharingScope() == null){
-                queryBuilder = queryBuilder.mustNot(QueryBuilders.existsQuery("properties.ccm:eduscopename"));
-            }else{
-                queryBuilder = queryBuilder.must(QueryBuilders.termQuery("properties.ccm:eduscopename.keyword",NodeServiceInterceptor.getEduSharingScope()));
-            }
+            BoolQueryBuilder queryBuilder =  QueryBuilders.boolQuery()
+                    .must(getGlobalConditions(searchToken.getAuthorityScope(),searchToken.getPermissions()))
+                    .must(metadataQueryBuilder);
 
             if(searchToken.getFacettes() != null) {
                 for (String facette : searchToken.getFacettes()) {
@@ -273,6 +302,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
         Set<String> authorities = serviceRegistry.getAuthorityService().getAuthorities();
         if(!authorities.contains(CCConstants.AUTHORITY_GROUP_EVERYONE))
             authorities.add(CCConstants.AUTHORITY_GROUP_EVERYONE);
+        if(!AuthenticationUtil.isRunAsUserTheSystemUser()) {
+            authorities.add(AuthenticationUtil.getFullyAuthenticatedUser());
+        }
         return authorities;
     }
 
