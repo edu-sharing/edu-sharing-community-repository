@@ -308,6 +308,51 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return authorities;
     }
 
+    public boolean isAllowedToRead(String nodeId){
+        boolean result = hasReadPermissionOnNode(nodeId);
+        if(result) return true;
+
+        BoolQueryBuilder checkIsChildObjectQuery = QueryBuilders.boolQuery()
+                .must(QueryBuilders.termQuery("properties.sys:node-uuid", nodeId))
+                .must(QueryBuilders.termQuery("aspects","ccm:io_childobject"));
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.query(checkIsChildObjectQuery);
+        SearchRequest request = new SearchRequest("workspace");
+        request.source(searchSourceBuilder);
+        try {
+            SearchResponse searchResult = client.search(request, RequestOptions.DEFAULT);
+            boolean isChildObject = searchResult.getHits().getTotalHits().value > 0;
+            if(!isChildObject) return false;
+
+            Map parentRef = (Map) searchResult.getHits().getAt(0).getSourceAsMap().get("parentRef");
+            String parentId = (String) parentRef.get("id");
+            return hasReadPermissionOnNode(parentId);
+        } catch (IOException e) {
+            logger.error(e.getMessage(),e);
+            return false;
+        }
+    }
+    private boolean hasReadPermissionOnNode(String nodeId){
+        try {
+
+            BoolQueryBuilder query = QueryBuilders.boolQuery()
+                    .must(getReadPermissionsQuery())
+                    .must(QueryBuilders.termQuery("properties.sys:node-uuid", nodeId));
+            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+            searchSourceBuilder.query(query);
+            searchSourceBuilder.size(0);
+            SearchRequest request = new SearchRequest("workspace");
+            request.source(searchSourceBuilder);
+            SearchResponse searchResult = client.search(request, RequestOptions.DEFAULT);
+            return searchResult.getHits().getTotalHits().value > 0;
+
+        } catch (IOException e) {
+            logger.error(e.getMessage(),e);
+        }
+
+        return false;
+    }
+
     private NodeRef transformSearchHit(Set<String> authorities, String user, SearchHit hit, boolean resolveCollections) {
         return this.transform(authorities,user,hit.getSourceAsMap(), resolveCollections);
     }
