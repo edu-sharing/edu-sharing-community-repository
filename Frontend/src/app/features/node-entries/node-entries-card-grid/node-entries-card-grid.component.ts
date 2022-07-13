@@ -3,6 +3,7 @@ import {
     Component,
     ElementRef,
     Input,
+    NgZone,
     OnChanges,
     QueryList,
     SimpleChanges,
@@ -62,6 +63,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
         public entriesService: NodeEntriesService<T>,
         public templatesService: NodeEntriesTemplatesService,
         public ui: UIService,
+        private ngZone: NgZone,
     ) {}
 
     ngOnChanges(changes: SimpleChanges): void {}
@@ -103,6 +105,11 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
             this.entriesService.dataSource.getData(),
             $event.item.data,
             $event.container.data,
+        );
+        // `CdkDrag` doesn't really want us to rearrange the items while dragging. Its cached
+        // element positions get out of sync unless we update them manually.
+        this.ngZone.runOutsideAngular(() =>
+            setTimeout(() => this.dropLists?.forEach((list) => list._dropListRef['_cacheItems']())),
         );
     }
 
