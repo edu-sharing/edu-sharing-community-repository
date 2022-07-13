@@ -382,38 +382,54 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId,List<String> types,RecurseMode recurseMode) {
 		// this method uses nodeServiceAlfresco instead of nodeService
 		// to prevent that recursive fetch data of user homes will fetch (and also produce duplicates) of the shared org folders
-		List<ChildAssociationRef> assocs;
-		NodeRef nodeRef = new NodeRef(store, nodeId);
-		if(types==null){
-			assocs = nodeServiceAlfresco.getChildAssocs(nodeRef);
+
+		List<NodeRef> result = new ArrayList<>();
+		try {
+			NodeRef nodeRef = new NodeRef(store, nodeId);
+			//logger.info("nodeRef:"+ nodeRef +"path: " + nodeServiceAlfresco.getPath(nodeRef).toDisplayPath(serviceRegistry.getNodeService(),serviceRegistry.getPermissionService()));
+			logger.debug("nodeRef:"+ nodeRef +"path: " + nodeServiceAlfresco.getPath(nodeRef).toPrefixString(serviceRegistry.getNamespaceService()));
+			List<ChildAssociationRef> assocs;
+			if (types == null) {
+				assocs = nodeServiceAlfresco.getChildAssocs(nodeRef);
+			} else {
+				Set<QName> typesConverted = types.stream().map(QName::createQName).collect(Collectors.toSet());
+				assocs = nodeServiceAlfresco.getChildAssocs(nodeRef, typesConverted);
+			}
+
+			for (ChildAssociationRef assoc : assocs) {
+				if(assoc.isPrimary()){
+					result.add(assoc.getChildRef());
+				}else{
+					logger.warn("ignoring non primary association parent:" + assoc.getParentRef() +" child:"+assoc.getChildRef());
+				}
+			}
+			List<ChildAssociationRef> maps;
+			if (recurseMode.equals(RecurseMode.Folders)) {
+				maps = nodeServiceAlfresco.getChildAssocs(nodeRef, new HashSet<>(Arrays.asList(QName.createQName(CCConstants.CCM_TYPE_MAP), QName.createQName(CCConstants.CM_TYPE_FOLDER))));
+			} else if (recurseMode.equals(RecurseMode.All)) {
+				// in theory, every object may have children, so we need to access all of them
+				maps = nodeServiceAlfresco.getChildAssocs(nodeRef);
+			} else {
+				throw new IllegalArgumentException("invalid RecurseMode");
+			}
+			String user = AuthenticationUtil.getFullyAuthenticatedUser();
+			// run in parallel to increase performance
+			maps.parallelStream().forEach((map) -> {
+				if(map.isPrimary()){
+					AuthenticationUtil.runAs(() -> result.addAll(getChildrenRecursive(store, map.getChildRef().getId(), types, recurseMode))
+							, user);
+				}else{
+					logger.warn("ignoring non primary association for recursive traversing parent:" + map.getParentRef() +" child:"+map.getChildRef());
+				}
+			});
+
+
+			logger.info("Get children recursive finished with " + result.size() + " nodes");
+			return result;
+		}catch (Exception e){
+			logger.error(e.getMessage(),e);
+			return result;
 		}
-		else {
-			Set<QName> typesConverted = types.stream().map(QName::createQName).collect(Collectors.toSet());
-			assocs = nodeServiceAlfresco.getChildAssocs(nodeRef, typesConverted);
-		}
-		List<NodeRef> result=new ArrayList<>();
-		for(ChildAssociationRef assoc : assocs){
-			result.add(assoc.getChildRef());
-		}
-		List<ChildAssociationRef> maps;
-		if(recurseMode.equals(RecurseMode.Folders)) {
-			maps = nodeServiceAlfresco.getChildAssocs(nodeRef, new HashSet<>(Arrays.asList(QName.createQName(CCConstants.CCM_TYPE_MAP), QName.createQName(CCConstants.CM_TYPE_FOLDER))));
-		}
-		else if(recurseMode.equals(RecurseMode.All)){
-			// in theory, every object may have children, so we need to access all of them
-			maps = nodeServiceAlfresco.getChildAssocs(nodeRef);
-		}
-		else{
-			throw new IllegalArgumentException("invalid RecurseMode");
-		}
-		String user = AuthenticationUtil.getFullyAuthenticatedUser();
-		// run in parallel to increase performance
-		maps.parallelStream().forEach((map)->{
-			AuthenticationUtil.runAs(()->result.addAll(getChildrenRecursive(store,map.getChildRef().getId(),types,recurseMode))
-			,user);
-		});
-		logger.info("Get children recursive finished with "+result.size()+" nodes");
-		return result;
 	}
 
 		@Override

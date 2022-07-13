@@ -1095,6 +1095,9 @@ export class OptionsHelperService implements OnDestroy {
         options.push(configureList);
         options.push(metadataSidebar);
 
+        if(this.data.postPrepareOptions) {
+            this.data.postPrepareOptions(options, objects);
+        }
         return options;
     }
 
@@ -1357,5 +1360,9 @@ export interface OptionData {
     allObjects?: Node[] | any[];
     parent?: Node|any;
     customOptions?: CustomOptions;
+    /**
+     * custom interceptor to modify the default options array
+     */
+    postPrepareOptions?: (options: OptionItem[], objects: Node[]) => void;
 }
 

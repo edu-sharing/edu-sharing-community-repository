@@ -284,20 +284,20 @@
               </button>
             </div>
           </ng-container>
-          <div class="more column" *ngIf="_options && _options.length>1" >
+          <div class="more column" *ngIf="_options && getShownOptions(node)?.length > 1" >
             <button mat-icon-button
                     (click)="setSelectionToSingleNode(node); showDropdown(true,$event); $event.stopPropagation();"
             >
               <i icon="more_vert" [aria]="true"></i>
             </button>
           </div>
-          <div class="more moreSingle column" *ngIf="_options && _options.length==1 && optionIsShown(_options[0],node)">
+          <div class="more moreSingle column" *ngIf="_options && getShownOptions(node)?.length === 1">
             <button mat-icon-button
-                    [class.disabled]="!optionIsValid(_options[0],node)"
-                    matTooltip="{{_options[0].name | translate}}"
-                    (click)="callOption(_options[0],node);$event.stopPropagation();"
+                    [class.disabled]="!optionIsValid(getShownOptions(node)[0],node)"
+                    matTooltip="{{getShownOptions(node)[0].name | translate}}"
+                    (click)="callOption(getShownOptions(node)[0],node);$event.stopPropagation();"
             >
-              <i icon="{{_options[0].icon}}"></i>
+              <i icon="{{getShownOptions(node)[0].icon}}"></i>
             </button></div>
         </div>
       </div>

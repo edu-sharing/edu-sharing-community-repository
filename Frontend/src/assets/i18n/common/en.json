@@ -693,6 +693,7 @@
     "SHARING": {
         "TITLE": "Download Page",
         "DOWNLOAD": "Download",
+        "OPEN": "Open",
         "DOWNLOAD_ZIP": "Download as Zip",
         "LINK": "To original page",
         "INVITED_AND_CREATED_BY": "Created and shared by {{inviter}}",

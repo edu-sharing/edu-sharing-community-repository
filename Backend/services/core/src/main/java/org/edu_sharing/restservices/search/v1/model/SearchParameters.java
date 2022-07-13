@@ -3,6 +3,7 @@ package org.edu_sharing.restservices.search.v1.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 ;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
@@ -16,6 +17,8 @@ public class SearchParameters {
 	private List<MdsQueryCriteria> criteria;
 	private List<String> facets;
 	private boolean resolveCollections = false;
+
+	private List<String> excludes = new ArrayList<>();
 
 	@Schema(required = true, description = "")
 	@JsonProperty("criteria")
@@ -52,5 +55,13 @@ public class SearchParameters {
 
 	public void setResolveCollections(boolean resolveCollections) {
 		this.resolveCollections = resolveCollections;
+	}
+
+	public void setExcludes(List<String> excludes) {
+		this.excludes = excludes;
+	}
+
+	public List<String> getExcludes() {
+		return excludes;
 	}
 }

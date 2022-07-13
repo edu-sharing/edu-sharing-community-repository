@@ -1,7 +1,7 @@
 package org.edu_sharing.repository.update;
 
 import java.io.PrintWriter;
-import java.util.HashMap;
+import java.util.*;
 
 import javax.transaction.UserTransaction;
 
@@ -19,6 +19,8 @@ public abstract class UpdateAbstract implements Update {
 	
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+
+	static Set<String> currentlyRunningUpdates = Collections.synchronizedSet(new HashSet<>());
 	
 	protected void logInfo(String message){
 		logger.info(message);
@@ -49,9 +51,59 @@ public abstract class UpdateAbstract implements Update {
 	}
 
 	protected void executeWithProtocolEntry() {
+		if (currentlyRunningUpdates.contains(this.getId())) {
+			logger.error("update " + this.getId() + " is already running. stop processing");
+			return;
+		}
+		logger.info("started " + this.getId());
+		currentlyRunningUpdates.add(this.getId());
+		try {
+
+			Protocol protocol = new Protocol();
+			HashMap<String, Object> updateInfo = null;
+
+			try {
+				updateInfo = protocol.getSysUpdateEntry(this.getId());
+			} catch (Throwable e) {
+				// TODO Auto-generated catch block
+				logError(e.getMessage(), e);
+			}
+			if (updateInfo == null) {
+				UserTransaction transaction = serviceRegistry.getTransactionService().getNonPropagatingUserTransaction();
+				try {
+					transaction.begin();
+					run();
+					// this may cause a currently unknown rollback of the whole transaction
+					//protocol.writeSysUpdateEntry(getId());
+					transaction.commit();
+					protocol.writeSysUpdateEntry(getId());
+				} catch (Throwable e) {
+					this.logError(e.getMessage(), e);
+					try {
+						transaction.rollback();
+					} catch (Exception e2) {
+						this.logError(e.getMessage(), e2);
+					}
+				}
+			} else {
+				logInfo("update" + this.getId() + " already done at " + updateInfo.get(CCConstants.CCM_PROP_SYSUPDATE_DATE));
+			}
+		}finally {
+			currentlyRunningUpdates.remove(this.getId());
+		}
+	}
+
+	public void executeWithProtocolEntryNoGlobalTx(){
+		if (currentlyRunningUpdates.contains(this.getId())) {
+			logger.error("update " + this.getId() + " is already running. stop processing");
+			return;
+		}
+		logger.info("started " + this.getId());
+		currentlyRunningUpdates.add(this.getId());
+		try {
 			Protocol protocol = new Protocol();
 			HashMap<String,Object> updateInfo = null;
-			
+
 			try {
 				updateInfo = protocol.getSysUpdateEntry(this.getId());
 			} catch (Throwable e) {
@@ -59,50 +111,21 @@ public abstract class UpdateAbstract implements Update {
 				logError(e.getMessage(), e);
 			}
 			if(updateInfo == null){
-				UserTransaction transaction = serviceRegistry.getTransactionService().getNonPropagatingUserTransaction();
-				try{
-				    transaction.begin();
-				    run();
-				    // this may cause a currently unknown rollback of the whole transaction
-				    //protocol.writeSysUpdateEntry(getId());
-				    transaction.commit();
-					protocol.writeSysUpdateEntry(getId());
-				}catch(Throwable e){
-					this.logError(e.getMessage(), e);
-					try{
-						transaction.rollback();
-					}catch(Exception e2){
-						this.logError(e.getMessage(), e2);
+				boolean result = runAndReport();
+				if(result) {
+					try {
+						protocol.writeSysUpdateEntry(getId());
+					} catch (Throwable throwable) {
+						logError("error writing protocol entry",throwable);
 					}
+				}else{
+					logError("Update failed or not completed",null);
 				}
 			}else{
 				logInfo("update" +this.getId()+ " already done at "+updateInfo.get(CCConstants.CCM_PROP_SYSUPDATE_DATE));
 			}
-	}
-
-	public void executeWithProtocolEntryNoGlobalTx(){
-		Protocol protocol = new Protocol();
-		HashMap<String,Object> updateInfo = null;
-
-		try {
-			updateInfo = protocol.getSysUpdateEntry(this.getId());
-		} catch (Throwable e) {
-			// TODO Auto-generated catch block
-			logError(e.getMessage(), e);
-		}
-		if(updateInfo == null){
-			boolean result = runAndReport();
-			if(result) {
-				try {
-					protocol.writeSysUpdateEntry(getId());
-				} catch (Throwable throwable) {
-					logError("error writing protocol entry",throwable);
-				}
-			}else{
-				logError("Update failed or not completed",null);
-			}
-		}else{
-			logInfo("update" +this.getId()+ " already done at "+updateInfo.get(CCConstants.CCM_PROP_SYSUPDATE_DATE));
+		}finally {
+			currentlyRunningUpdates.remove(this.getId());
 		}
 	}
 

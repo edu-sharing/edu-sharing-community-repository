@@ -158,6 +158,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
             SearchRequest searchRequest = new SearchRequest("workspace");
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+            searchSourceBuilder.fetchSource(null,searchToken.getExcludes().toArray(new String[]{}));
 
             QueryBuilder metadataQueryBuilder = MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL),queryData,criterias);
             BoolQueryBuilder queryBuilder = (searchToken.getAuthorityScope() != null && searchToken.getAuthorityScope().size() > 0)
@@ -211,11 +212,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
 
 
-
+            logger.info("query: "+searchSourceBuilder.toString());
             SearchResponse searchResponse = LogTime.log("Searching elastic", () -> client.search(searchRequest, RequestOptions.DEFAULT));
 
 
-            logger.info("query: "+searchSourceBuilder.toString());
             SearchHits hits = searchResponse.getHits();
             logger.info("result count: "+hits.getTotalHits());
 
