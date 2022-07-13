@@ -3,8 +3,8 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ include "edusharing_rendering_service.name" . }}
-  labels: {{ include "edusharing_rendering_service.labels.app" . | nindent 4 }}
+  name: {{ include "edusharing_services_rendering.name" . }}
+  labels: {{ include "edusharing_services_rendering.labels.app" . | nindent 4 }}
     app.kubernetes.io/component: "metrics"
 spec:
   endpoints:
@@ -13,7 +13,7 @@ spec:
     interval: {{ .Values.global.metrics.scrape.interval }}
     scrapeTimeout: {{ .Values.global.metrics.scrape.timeout }}
   selector:
-    matchLabels: {{ include "edusharing_rendering_service.labels.app" . | nindent 6 }}
+    matchLabels: {{ include "edusharing_services_rendering.labels.app" . | nindent 6 }}
       app.kubernetes.io/component: "metrics"
   namespaceSelector:
     matchNames:

@@ -3,8 +3,8 @@
 apiVersion: networking.istio.io/v1beta1
 kind: Gateway
 metadata:
-  name: {{ include "edusharing_rendering_service.name" . }}
-  labels: {{ include "edusharing_rendering_service.labels.app" . | nindent 4 }}
+  name: {{ include "edusharing_services_rendering.name" . }}
+  labels: {{ include "edusharing_services_rendering.labels.app" . | nindent 4 }}
 spec:
   selector: {{ toYaml .Values.global.cluster.istio.gateway.selector | nindent 4 }}
   servers:
@@ -15,9 +15,9 @@ spec:
     hosts: {{ toYaml .Values.ingress.hosts | nindent 6 }}
   {{- range .Values.ingress.tls }}
   - port:
-    number: 443
-    name: https
-    protocol: HTTPS
+      number: 443
+      name: https
+      protocol: HTTPS
     tls:
       mode: SIMPLE
       credentialName: {{ .secretName }}

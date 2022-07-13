@@ -1,37 +1,37 @@
-{{- define "edusharing_rendering_service.chart" -}}
+{{- define "edusharing_services_rendering.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "edusharing_rendering_service.name" -}}
+{{- define "edusharing_services_rendering.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "edusharing_rendering_service.labels" -}}
-{{ include "edusharing_rendering_service.labels.instance" . }}
-helm.sh/chart: {{ include "edusharing_rendering_service.chart" . }}
+{{- define "edusharing_services_rendering.labels" -}}
+{{ include "edusharing_services_rendering.labels.instance" . }}
+helm.sh/chart: {{ include "edusharing_services_rendering.chart" . }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
-{{- define "edusharing_rendering_service.labels.instance" -}}
-{{ include "edusharing_rendering_service.labels.app" . }}
-{{ include "edusharing_rendering_service.labels.version" . }}
+{{- define "edusharing_services_rendering.labels.instance" -}}
+{{ include "edusharing_services_rendering.labels.app" . }}
+{{ include "edusharing_services_rendering.labels.version" . }}
 {{- end -}}
 
-{{- define "edusharing_rendering_service.labels.version" -}}
+{{- define "edusharing_services_rendering.labels.version" -}}
 version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end -}}
 
-{{- define "edusharing_rendering_service.labels.app" -}}
-app: {{ include "edusharing_rendering_service.name" . }}
-app.kubernetes.io/name: {{ include "edusharing_rendering_service.name" . }}
+{{- define "edusharing_services_rendering.labels.app" -}}
+app: {{ include "edusharing_services_rendering.name" . }}
+app.kubernetes.io/name: {{ include "edusharing_services_rendering.name" . }}
 {{- end -}}
 
-{{- define "edusharing_rendering_service.pvc.share.config" -}}
-share-config-{{ include "edusharing_rendering_service.name" . }}
+{{- define "edusharing_services_rendering.pvc.share.config" -}}
+share-config-{{ include "edusharing_services_rendering.name" . }}
 {{- end -}}
 
-{{- define "edusharing_rendering_service.pvc.share.data" -}}
-share-data-{{ include "edusharing_rendering_service.name" . }}
+{{- define "edusharing_services_rendering.pvc.share.data" -}}
+share-data-{{ include "edusharing_services_rendering.name" . }}
 {{- end -}}

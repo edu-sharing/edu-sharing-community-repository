@@ -12,8 +12,7 @@ spec:
   - route:
     - destination:
         host: {{ include "edusharing_repository_service.name" . }}
-        port:
-          number: {{ .Values.service.port.api.internal }}
+      weight: 100
 ---
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
@@ -34,6 +33,7 @@ spec:
         host: {{ include "edusharing_repository_service.name" $ }}
         port:
           number: {{ $.Values.service.port.api.external }}
+      weight: 100
   {{- end }}
 {{- end }}
 {{- end }}

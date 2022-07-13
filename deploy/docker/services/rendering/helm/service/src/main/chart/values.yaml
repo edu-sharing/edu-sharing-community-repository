@@ -113,7 +113,7 @@ config:
     driver: pgsql
     host: edusharing-rendering-postgresql
     port: 5432
-    database: rendering
+    database: rendering;sslmode=disabled
     username: rendering
     password: rendering
     patroni: {}

@@ -16,10 +16,12 @@ RUN set -eux \
         libpq-dev \
         libxml2-dev \
         libzip-dev \
+        mariadb-client \
         postgresql-client \
         redis-tools \
         wait-for-it \
         xmlstarlet \
+        zip \
     && docker-php-ext-install -j$(nproc) soap \
     && docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/ \
     && docker-php-ext-install -j$(nproc) gd \
@@ -35,7 +37,6 @@ RUN set -eux \
     && a2enmod headers \
     && ln -s $PHP_INI_DIR/php.ini-production $PHP_INI_DIR/php.ini \
     && apt-get clean \
-    && docker-php-source delete \
     && rm -r /var/lib/apt/lists/*
 
 RUN set -eux \
@@ -43,8 +44,7 @@ RUN set -eux \
     && mkdir -p /usr/src/php/ext/redis \
     && tar -C /usr/src/php/ext/redis -xzf /tmp/phpredis.tar.gz --strip 1 \
     && rm -r /tmp/phpredis.tar.gz \
-    && docker-php-ext-install redis \
-    && docker-php-source delete
+    && docker-php-ext-install redis
 
 ########################################################################################################################
 

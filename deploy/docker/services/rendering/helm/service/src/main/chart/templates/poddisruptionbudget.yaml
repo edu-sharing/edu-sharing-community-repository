@@ -2,10 +2,10 @@
 apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:
-  name: {{ include "edusharing_rendering_service.name" . }}
-  labels: {{ include "edusharing_rendering_service.labels.app" . | nindent 4 }}
+  name: {{ include "edusharing_services_rendering.name" . }}
+  labels: {{ include "edusharing_services_rendering.labels.app" . | nindent 4 }}
 spec:
   maxUnavailable: {{ if .Values.autoscaling.enabled }}1{{ else }}0{{ end }}
   selector:
-    matchLabels: {{ include "edusharing_rendering_service.labels.app" . | nindent 6 }}
+    matchLabels: {{ include "edusharing_services_rendering.labels.app" . | nindent 6 }}
 {{- end }}

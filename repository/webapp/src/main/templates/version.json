@@ -7,7 +7,10 @@
       }
     },
     "commit": {
-      "id": "${git.commit.id}"
+      "id": "${git.commit.id}",
+      "timestamp": {
+        "datetime": "${git.commit.timestamp.datetime}"
+      }
     },
     "dirty": "${git.dirty}"
   },

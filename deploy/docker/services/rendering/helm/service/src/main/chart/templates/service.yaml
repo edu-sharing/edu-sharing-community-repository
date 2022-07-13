@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "edusharing_rendering_service.name" . }}
-  labels: {{ include "edusharing_rendering_service.labels.app" . | nindent 4 }}
+  name: {{ include "edusharing_services_rendering.name" . }}
+  labels: {{ include "edusharing_services_rendering.labels.app" . | nindent 4 }}
 spec:
   type: ClusterIP
-  selector: {{ include "edusharing_rendering_service.labels.app" . | nindent 4 }}
+  selector: {{ include "edusharing_services_rendering.labels.app" . | nindent 4 }}
   ports:
   - name: http-api-external
     port: {{ .Values.service.port.api.external }}
@@ -17,12 +17,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "edusharing_rendering_service.name" . }}-headless
-  labels: {{ include "edusharing_rendering_service.labels.app" . | nindent 4 }}
+  name: {{ include "edusharing_services_rendering.name" . }}-headless
+  labels: {{ include "edusharing_services_rendering.labels.app" . | nindent 4 }}
 spec:
   type: ClusterIP
   clusterIP: None
-  selector: {{ include "edusharing_rendering_service.labels.app" . | nindent 4 }}
+  publishNotReadyAddresses: true
+  selector: {{ include "edusharing_services_rendering.labels.app" . | nindent 4 }}
   ports:
   - name: http-api-external
     port: {{ .Values.service.port.api.external }}
@@ -33,12 +34,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "edusharing_rendering_service.name" . }}-metrics
-  labels: {{ include "edusharing_rendering_service.labels.app" . | nindent 4 }}
+  name: {{ include "edusharing_services_rendering.name" . }}-metrics
+  labels: {{ include "edusharing_services_rendering.labels.app" . | nindent 4 }}
     app.kubernetes.io/component: "metrics"
 spec:
   type: ClusterIP
-  selector: {{ include "edusharing_rendering_service.labels.app" . | nindent 4 }}
+  selector: {{ include "edusharing_services_rendering.labels.app" . | nindent 4 }}
   ports:
     - name: http-metrics
       port: {{ .Values.service.port.metrics }}

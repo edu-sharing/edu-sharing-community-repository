@@ -2,14 +2,14 @@
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "edusharing_rendering_service.name" . }}
-  labels: {{ include "edusharing_rendering_service.labels.app" . | nindent 4 }}
+  name: {{ include "edusharing_services_rendering.name" . }}
+  labels: {{ include "edusharing_services_rendering.labels.app" . | nindent 4 }}
 spec:
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   scaleTargetRef:
     apiVersion: apps/v1
     kind: StatefulSet
-    name: {{ include "edusharing_rendering_service.name" . }}
+    name: {{ include "edusharing_services_rendering.name" . }}
   targetCPUUtilizationPercentage: {{ .Values.autoscaling.targetCPU }}
 {{- end }}

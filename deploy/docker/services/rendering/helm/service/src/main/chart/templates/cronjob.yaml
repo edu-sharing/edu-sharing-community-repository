@@ -5,8 +5,8 @@ apiVersion: batch/v1beta1
 {{- end }}
 kind: CronJob
 metadata:
-  name: {{ include "edusharing_rendering_service.name" . }}-cachecleaner
-  labels: {{ include "edusharing_rendering_service.labels.app" . | nindent 4 }}
+  name: {{ include "edusharing_services_rendering.name" . }}-cachecleaner
+  labels: {{ include "edusharing_services_rendering.labels.app" . | nindent 4 }}
     app.kubernetes.io/component: cachecleaner
 spec:
   concurrencyPolicy: Forbid
@@ -26,7 +26,7 @@ spec:
         spec:
           restartPolicy: OnFailure
           containers:
-          - name: {{ include "edusharing_rendering_service.name" . }}-job-cachecleaner
+          - name: {{ include "edusharing_services_rendering.name" . }}-job-cachecleaner
             image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/{{ .Values.image.prefix }}-deploy-docker-services-rendering-build-service:{{ .Values.image.tag }}
             imagePullPolicy: {{ .Values.global.image.pullPolicy }}
             args: ["php", "func/classes.new/Helper/cacheCleaner.php"]
@@ -41,9 +41,9 @@ spec:
             {{- end }}
             envFrom:
             - configMapRef:
-                name: {{ include "edusharing_rendering_service.name" . }}-env
+                name: {{ include "edusharing_services_rendering.name" . }}-env
             - secretRef:
-                name: {{ include "edusharing_rendering_service.name" . }}-env
+                name: {{ include "edusharing_services_rendering.name" . }}-env
             volumeMounts:
             - name: share-config
               mountPath: /var/cache/esrender/config
@@ -74,7 +74,7 @@ spec:
           volumes:
           - name: share-config
             persistentVolumeClaim:
-              claimName: {{ include "edusharing_rendering_service.pvc.share.config" . }}
+              claimName: {{ include "edusharing_services_rendering.pvc.share.config" . }}
           - name: share-data
             persistentVolumeClaim:
-              claimName: {{ include "edusharing_rendering_service.pvc.share.data" . }}
+              claimName: {{ include "edusharing_services_rendering.pvc.share.data" . }}

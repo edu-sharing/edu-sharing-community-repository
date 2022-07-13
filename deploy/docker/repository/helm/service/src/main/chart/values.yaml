@@ -153,7 +153,7 @@ config:
     username: repository
     password: repository
     protocol: postgresql
-    options: ""
+    options: "?sslmode=disable"
     patroni: {}
 
     pool:
