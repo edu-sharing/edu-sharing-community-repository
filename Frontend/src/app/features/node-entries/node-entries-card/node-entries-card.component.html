@@ -7,6 +7,7 @@
   (keydown.ContextMenu)="openContextmenu($event)"
 >
   <button
+    *ngIf="dropdown"
     #menuTrigger="matMenuTrigger"
     mat-button
     class="dropdown-dummy cdk-visually-hidden"
@@ -147,6 +148,7 @@
       ></es-option-button>
       <div class="card-options-spacer"></div>
       <button
+        *ngIf="dropdown"
         mat-icon-button
         color="primary"
         (click)="openMenu(node)"

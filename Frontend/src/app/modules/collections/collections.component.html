@@ -293,7 +293,7 @@
                 customSortingInProgress: sortCollections.customSortingInProgress,
                 columns: sortCollections.columns,
                 allowed:
-                  !isMobile() &&
+                  !isMobileWidth() &&
                   dataSourceCollections.getData()?.length > 1 &&
                   isUserAllowedToEdit(collectionContent.node) &&
                   !sortReferences?.customSortingInProgress
@@ -385,7 +385,7 @@
                 customSortingInProgress: sortReferences.customSortingInProgress,
                 columns: sortReferences.columns,
                 allowed:
-                  !isMobile() &&
+                  !isMobileWidth() &&
                   dataSourceReferences.getData()?.length > 1 &&
                   isUserAllowedToEdit(collectionContent.node) &&
                   !sortCollections?.customSortingInProgress

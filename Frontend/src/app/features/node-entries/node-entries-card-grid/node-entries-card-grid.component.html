@@ -58,10 +58,10 @@
           *ngIf="displayType === NodeEntriesDisplayType.Grid"
           #item
           [node]="node"
-          [dropdown]="dropdown"
           role="listitem"
           cdkDrag
           [cdkDragData]="i"
+          [cdkDragStartDelay]="getDragStartDelay()"
           cdkDragPreviewClass="es-card-grid-rearrange-drag-preview"
           (cdkDragEntered)="onRearrangeDragEntered($event)"
           (cdkDragStarted)="onRearrangeDragStarted()"
@@ -74,6 +74,7 @@
           role="listitem"
           cdkDrag
           [cdkDragData]="i"
+          [cdkDragStartDelay]="getDragStartDelay()"
           cdkDragPreviewClass="es-card-grid-rearrange-drag-preview"
           (cdkDragEntered)="onRearrangeDragEntered($event)"
           (cdkDragStarted)="onRearrangeDragStarted()"
@@ -122,7 +123,6 @@
               <es-node-entries-card
                 *cdkDragPreview
                 [node]="node"
-                [dropdown]="dropdown"
                 [matBadge]="
                   entriesService.selection.selected.length > 1
                     ? entriesService.selection.selected.length

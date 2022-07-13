@@ -451,10 +451,6 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
         });
     }
 
-    isMobile() {
-        return this.uiService.isMobile();
-    }
-
     isMobileWidth() {
         return window.innerWidth < UIConstants.MOBILE_WIDTH;
     }

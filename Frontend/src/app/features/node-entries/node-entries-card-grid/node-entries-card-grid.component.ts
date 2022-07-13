@@ -117,6 +117,14 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
         this.globalCursorStyle = null;
     }
 
+    getDragStartDelay(): number {
+        if (this.ui.isMobile()) {
+            return 500;
+        } else {
+            return null;
+        }
+    }
+
     private refreshDropLists() {
         this.dropLists = this.dropListsQuery.toArray();
     }
