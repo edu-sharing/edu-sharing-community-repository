@@ -118,6 +118,7 @@
             class="card-image-icon-container"
           >
             <img
+              *ngIf="collectionContent?.node?.preview?.url"
               class="collection-header-image"
               [src]="
                     collectionContent?.node?.preview?.url + '&crop=true&width=400&height=350'
