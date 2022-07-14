@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.AuthenticationService;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.log4j.Logger;
 import org.apache.log4j.MDC;
@@ -43,38 +42,31 @@ import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 
 public class ContextManagementFilter implements javax.servlet.Filter {
 	public interface B3 {
-		public String getTraceId();
+		default String getTraceId() {
+			return null;
+		}
 
-		public String getSpanId();
+		default String getClientTraceId() {
+			return null;
+		}
 
-		public boolean isSampled();
+		default String getSpanId() {
+			return null;
+		}
 
-		public void addToRequest(HttpRequestBase request);
+		default boolean isSampled() {
+			return false;
+		}
+
+		default void addToRequest(HttpRequestBase request) {
+
+		}
 	}
 	// stores the currently accessing tool type, e.g. CONNECTOR
 	public static ThreadLocal<String> accessToolType = new ThreadLocal<>();
 	public static ThreadLocal<B3> b3 = ThreadLocal.withInitial(() ->
-			new B3() {
-
-				@Override
-				public String getTraceId() {
-					return null;
-				}
-
-				@Override
-				public String getSpanId() {
-					return null;
-				}
-
-				@Override
-				public boolean isSampled() {
-					return false;
-				}
-
-				@Override
-				public void addToRequest(HttpRequestBase request) {
-				}
-			});
+			new B3() {}
+	);
 
 	Logger logger = Logger.getLogger(ContextManagementFilter.class);
 
@@ -106,6 +98,11 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 				}
 
 				@Override
+				public String getClientTraceId() {
+					return http.getHeader("X-Client-Trace-Id");
+				}
+
+				@Override
 				public String getSpanId() {
 					return http.getHeader("X-B3-SpanId");
 				}
@@ -129,7 +126,8 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 						if (
 								header.toUpperCase().startsWith("X-B3-") ||
 										header.toUpperCase().startsWith("X-OT-") ||
-										header.equalsIgnoreCase("X-Request-Id")
+										header.equalsIgnoreCase("X-Request-Id") ||
+										header.equalsIgnoreCase("X-Client-Trace-Id")
 						) {
 							request.setHeader(header, http.getHeader(header));
 						}
@@ -139,6 +137,9 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 
 			if(b3.get().getTraceId() != null) {
 				MDC.put("TraceId", b3.get().getTraceId());
+			}
+			if(b3.get().getClientTraceId() != null) {
+				MDC.put("ClientTraceId", b3.get().getClientTraceId());
 			}
 			if(b3.get().getSpanId() != null) {
 				MDC.put("SpanId", b3.get().getSpanId());
