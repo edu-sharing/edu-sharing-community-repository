@@ -107,8 +107,10 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         );
         */
         this.entriesService.selection.changed.subscribe(() => {
-            this.optionsHelper.getData().selectedObjects = this.entriesService.selection.selected;
-            this.optionsHelper.getData().activeObjects = this.entriesService.selection.selected;
+            if(this.optionsHelper.getData()) {
+                this.optionsHelper.getData().selectedObjects = this.entriesService.selection.selected;
+                this.optionsHelper.getData().activeObjects = this.entriesService.selection.selected;
+            }
             this.optionsHelper.refreshComponents();
         });
     }
