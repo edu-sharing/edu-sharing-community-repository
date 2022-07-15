@@ -294,7 +294,11 @@ export class CollectionNewComponent implements EventListener, OnInit {
               });
 
           });
-          this.iamService.searchGroups("*",true,RestConstants.GROUP_TYPE_EDITORIAL, '', {count:RestConstants.COUNT_UNLIMITED}).subscribe((data:IamGroups)=>{
+          this.iamService.searchGroups("*",true,RestConstants.GROUP_TYPE_EDITORIAL, '', {
+              count:RestConstants.COUNT_UNLIMITED,
+              sortBy: [RestConstants.CM_PROP_AUTHORITY_DISPLAYNAME],
+              sortAscending: [true]
+          }).subscribe((data:IamGroups)=>{
             this.editorialGroups.setData(data.groups, data.pagination);
           });
 
