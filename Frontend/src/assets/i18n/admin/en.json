@@ -147,7 +147,6 @@
                 "mail.smtp.username": "User name for authentication on the mail server",
                 "mail.smtp.passwd": "Password for authentication on the mail server",
                 "mail.smtp.from": "Displayed e-mail address of the sender. Recommended \"noreply@yourdomain.com\"",
-                "mail.admin": "Deprecated",
                 "mail.addReplyTo": "If true (default), the Reply-To address of the user who triggered the event is appended"
             }
         },
