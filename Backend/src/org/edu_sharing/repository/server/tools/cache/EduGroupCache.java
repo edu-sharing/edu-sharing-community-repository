@@ -74,7 +74,10 @@ public class EduGroupCache {
 
 	public static void remove(NodeRef nodeRef) {
 		synchronized(EduGroupCache.cache){
-			EduGroupCache.cacheWithFolderAsKey.remove((NodeRef)EduGroupCache.cache.get(nodeRef).get(QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR)));
+			NodeRef nodeRefFolder = (NodeRef)EduGroupCache.cache.get(nodeRef).get(QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
+			if(nodeRefFolder != null) {
+				EduGroupCache.cacheWithFolderAsKey.remove(nodeRefFolder);
+			}
 			EduGroupCache.cache.remove(nodeRef);
 		}		
 	}
