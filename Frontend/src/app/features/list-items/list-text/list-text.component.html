@@ -127,6 +127,14 @@
     <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ 'NODE.cclom:duration' | translate }}:</span>
     {{ $any(getNode()) | formatDuration }}
   </span>
+  <span
+    *ngSwitchCase="'ccm:collection_proposal_status'"
+    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
+  >
+    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ 'NODE.ccm:collection_proposal_status' | translate }}:</span>
+    <!-- use node instead of getNode() to access the raw proposal data! -->
+    {{ ('PROPOSAL_STATUS.' + $any(node).properties['ccm:collection_proposal_status']?.[0]) | translate:{fallback: ''} }}
+  </span>
   <span *ngSwitchDefault [matTooltip]="provideLabel ? (getI18n(item) | translate) : null">
     <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
     <ng-container

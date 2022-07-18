@@ -16,9 +16,10 @@
       mat-button
       color="primary"
     >
-      {{ 'NODE.' + entriesService.sort.active | translate }}
+      <span *ngIf="entriesService.sort.active">{{ 'NODE.' + entriesService.sort.active | translate }}</span>
+      <span *ngIf="!entriesService.sort.active">{{ 'SORT_BY' | translate }}</span>
       <i
-        *ngIf="entriesService.sort.active !== 'ccm:collection_ordered_position'"
+        *ngIf="entriesService.sort.active && entriesService.sort.active !== 'ccm:collection_ordered_position'"
         [esIcon]="'arrow_' + (entriesService.sort.direction === 'asc' ? 'upward' : 'downward')"
       ></i>
     </button>
@@ -155,7 +156,8 @@
   *ngIf="
     !entriesService.dataSource.isLoading &&
     entriesService.dataSource.getCanLoadMore() &&
-    entriesService.dataSource.hasMore()
+    entriesService.dataSource.hasMore() &&
+    entriesGlobalService.paginationStrategy === PaginationStrategy.InfiniteScroll
   "
 >
   <div class="load-more">

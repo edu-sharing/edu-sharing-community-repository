@@ -94,7 +94,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         private viewContainerRef: ViewContainerRef,
         private ngZone: NgZone,
         private entriesService: NodeEntriesService<T>,
-        private optionsHelper: OptionsHelperService,
+        public optionsHelper: OptionsHelperService,
         private nodeHelperService: NodeHelperService,
         private mainNav: MainNavService,
         private templatesService: NodeEntriesTemplatesService,

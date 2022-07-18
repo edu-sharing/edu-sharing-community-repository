@@ -1,4 +1,10 @@
 <ng-container [ngSwitch]="widgetType">
+  <ng-container
+    *ngSwitchCase="'Custom'"
+  >
+    <ng-container *ngTemplateOutlet="customTemplate; context: {item, node, provideLabel, forceText}">
+    </ng-container>
+  </ng-container>
   <es-list-collection-info
     *ngSwitchCase="'CollectionInfo'"
     [item]="item"

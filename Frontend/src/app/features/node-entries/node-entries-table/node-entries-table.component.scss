@@ -15,7 +15,7 @@ $rowHeight: 58px;
                 @include setGlobalKeyboardFocus('border');
             }
         }
-        es-list-text {
+        es-list-base {
             white-space: nowrap;
             text-overflow: ellipsis;
             overflow: hidden;

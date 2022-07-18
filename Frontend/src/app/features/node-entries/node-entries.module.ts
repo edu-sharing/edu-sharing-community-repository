@@ -14,6 +14,7 @@ import { NodeRatingComponent } from './node-rating/node-rating.component';
 import { OptionButtonComponent } from './option-button/option-button.component';
 import { NodeImagePipe } from './preview-image/node-image.pipe';
 import { PreviewImageComponent } from './preview-image/preview-image.component';
+import {NodeEntriesGlobalService} from "./node-entries-global.service";
 
 @NgModule({
     declarations: [
@@ -32,6 +33,9 @@ import { PreviewImageComponent } from './preview-image/preview-image.component';
         FocusStateDirective,
     ],
     imports: [SharedModule, ListItemsModule],
+    providers: [
+        NodeEntriesGlobalService
+    ],
     exports: [NodeEntriesWrapperComponent, ListItemLabelPipe],
 })
 export class NodeEntriesModule {}

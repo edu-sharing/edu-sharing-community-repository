@@ -98,17 +98,19 @@
           [node]="node"
           [mode]="first ? 'link' : 'wrapper'"
         >
-          <es-list-text
+          <es-list-base
+            [forceText]="true"
             [node]="node"
             [item]="column"
             esCheckTextOverflow
             #text="esCheckTextOverflow"
             [matTooltip]="text.hasTextOverflow() ? cell.innerText : null"
-          ></es-list-text>
+          ></es-list-base>
         </es-node-url>
       </ng-container>
-      <es-list-text
+      <es-list-base
         *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink"
+        [forceText]="true"
         [node]="node"
         [item]="column"
         (click)="entriesService.clickItem.emit({element: node, source: ClickSource.Metadata, attribute: column})"
@@ -116,7 +118,7 @@
         esCheckTextOverflow
         #text="esCheckTextOverflow"
         [matTooltip]="text.hasTextOverflow() ? cell.innerText : null"
-      ></es-list-text>
+      ></es-list-base>
     </mat-cell>
   </ng-container>
   <mat-header-row mat-header-row *matHeaderRowDef="getVisibleColumns()"></mat-header-row>

@@ -21,6 +21,7 @@ import { NodeEntriesDisplayType } from '../entries-model';
 
 import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
 import { Node } from 'ngx-edu-sharing-api'
+import {NodeEntriesGlobalService, PaginationStrategy} from "../node-entries-global.service";
 
 
 @Component({
@@ -30,6 +31,7 @@ import { Node } from 'ngx-edu-sharing-api'
 })
 export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    readonly PaginationStrategy = PaginationStrategy;
     readonly Target = Target;
     @ViewChild('grid') gridRef: ElementRef;
     @ViewChildren('item', { read: ElementRef }) itemRefs: QueryList<ElementRef<HTMLElement>>;
@@ -57,6 +59,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
 
     constructor(
         public entriesService: NodeEntriesService<T>,
+        public entriesGlobalService: NodeEntriesGlobalService,
         public templatesService: NodeEntriesTemplatesService,
         public ui: UIService,
     ) {}
