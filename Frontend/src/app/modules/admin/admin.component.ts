@@ -12,7 +12,16 @@ import {
 import {TranslateService} from '@ngx-translate/core';
 import {SessionStorageService} from '../../core-module/core.module';
 import {RestConnectorService} from '../../core-module/core.module';
-import {Component, ViewChild, ElementRef, ViewContainerRef, ComponentFactoryResolver, OnDestroy, OnInit} from '@angular/core';
+import {
+    Component,
+    ViewChild,
+    ElementRef,
+    ViewContainerRef,
+    ComponentFactoryResolver,
+    OnDestroy,
+    OnInit,
+    AfterViewInit
+} from '@angular/core';
 import {
     LoginResult,
     ServerUpdate,
@@ -52,6 +61,10 @@ import { DialogsService } from '../../features/dialogs/dialogs.service';
 import {InteractionType, NodeEntriesDisplayType} from 'src/app/features/node-entries/entries-model';
 import {NodeDataSource} from "../../features/node-entries/node-data-source";
 import {WorkspaceExplorerComponent} from "../workspace/explorer/explorer.component";
+import {
+    NodeEntriesWrapperComponent
+} from "../../features/node-entries/node-entries-wrapper.component";
+import {ActionbarComponent} from "../../shared/components/actionbar/actionbar.component";
 
 
 type LuceneData = {
@@ -75,11 +88,13 @@ type LuceneData = {
     trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))
   ]
 })
-export class AdminComponent implements OnInit, OnDestroy {
+export class AdminComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly AuthoritySearchMode = AuthoritySearchMode;
   readonly SCOPES = Scope;
   readonly InteractionType = InteractionType;
   readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+  @ViewChild('searchResults') nodeEntriesSearchResult: NodeEntriesWrapperComponent<Node>;
+  @ViewChild('actionbarComponent') actionbarComponent: ActionbarComponent;
   elasticResponse: NodeListElastic;
 
   constructor(private toast: Toast,
@@ -275,39 +290,43 @@ export class AdminComponent implements OnInit, OnDestroy {
             this.toast.error(error);
         });
     }
-  public searchNodes() {
-    this.storage.set('admin_lucene',this.lucene);
-    const authorities=[];
-    if(this.lucene.authorities) {
-      for(const auth of this.lucene.authorities) {
-        authorities.push(auth.authorityName);
+  public async searchNodes() {
+      this.storage.set('admin_lucene', this.lucene);
+      const authorities = [];
+      if (this.lucene.authorities) {
+          for (const auth of this.lucene.authorities) {
+              authorities.push(auth.authorityName);
+          }
       }
-    }
-    const request= {
-      offset:this.lucene.offset ? this.lucene.offset : 0,
-      count:this.lucene.count,
-      propertyFilter:[RestConstants.ALL]
-    };
-    this.globalProgress=true;
-    if(this.lucene.mode === 'SOLR') {
-        this.admin.searchLucene(this.lucene.query, this.lucene.store, authorities, request).subscribe((data) => {
-            this.globalProgress = false;
-            this.searchResponse.setData(data.nodes, data.pagination);
-        }, (error: any) => {
-            this.globalProgress = false;
-            this.toast.error(error);
-        });
-    } else if (this.lucene.mode === 'ELASTIC') {
-        this.admin.searchElastic(this.lucene.query).subscribe((data) => {
-            this.globalProgress = false;
-            console.log(data);
-            this.searchResponse.setData(data.nodes, data.pagination);
-            this.elasticResponse = data;
-        }, (error: any) => {
-            this.globalProgress = false;
-            this.toast.error(error);
-        });
-    }
+      await this.nodeEntriesSearchResult.initOptionsGenerator({
+          actionbar: this.actionbarComponent,
+          scope: Scope.Admin
+      });
+      const request = {
+          offset: this.lucene.offset ? this.lucene.offset : 0,
+          count: this.lucene.count,
+          propertyFilter: [RestConstants.ALL]
+      };
+      this.globalProgress = true;
+      if (this.lucene.mode === 'SOLR') {
+          this.admin.searchLucene(this.lucene.query, this.lucene.store, authorities, request).subscribe((data) => {
+              this.globalProgress = false;
+              this.searchResponse.setData(data.nodes, data.pagination);
+          }, (error: any) => {
+              this.globalProgress = false;
+              this.toast.error(error);
+          });
+      } else if (this.lucene.mode === 'ELASTIC') {
+          this.admin.searchElastic(this.lucene.query).subscribe((data) => {
+              this.globalProgress = false;
+              console.log(data);
+              this.searchResponse.setData(data.nodes, data.pagination);
+              this.elasticResponse = data;
+          }, (error: any) => {
+              this.globalProgress = false;
+              this.toast.error(error);
+          });
+      }
   }
   public addLuceneAuthority(authority:Authority) {
     if(!this.lucene.authorities)
@@ -1313,6 +1332,9 @@ export class AdminComponent implements OnInit, OnDestroy {
         } catch (e) {
 
         }
+    }
+
+    ngAfterViewInit(): void {
     }
 }
 
