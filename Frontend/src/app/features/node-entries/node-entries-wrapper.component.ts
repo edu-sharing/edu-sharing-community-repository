@@ -110,6 +110,8 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
             if(this.optionsHelper.getData()) {
                 this.optionsHelper.getData().selectedObjects = this.entriesService.selection.selected;
                 this.optionsHelper.getData().activeObjects = this.entriesService.selection.selected;
+            } else {
+                console.warn('optionsHelper is not initalized correctly; data is empty');
             }
             this.optionsHelper.refreshComponents();
         });
