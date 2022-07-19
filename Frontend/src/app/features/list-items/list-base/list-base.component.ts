@@ -13,7 +13,7 @@ export class ListBaseComponent extends ListWidget implements OnChanges {
      */
     @Input() forceText = false;
     widgetType: ListWidgetType;
-    customTemplate: TemplateRef<any>;
+    customTemplate: TemplateRef<unknown>;
     constructor(
         private nodeEntriesGlobalService: NodeEntriesGlobalService,
     ) {

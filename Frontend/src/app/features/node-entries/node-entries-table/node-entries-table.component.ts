@@ -15,9 +15,10 @@ import { DragCursorDirective } from '../../../core-ui-module/directives/drag-cur
 import { NodeEntriesService } from '../../../core-ui-module/node-entries.service';
 import { Target } from '../../../core-ui-module/option-item';
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
-import { InteractionType, ClickSource } from '../entries-model';
+import { InteractionType, ClickSource, NodeEntriesDisplayType } from '../entries-model';
 
 import {NodeEntriesDataType} from '../node-entries.component';
+import {NodeEntriesGlobalService, PaginationStrategy} from "../node-entries-global.service";
 
 @Component({
     selector: 'es-node-entries-table',
@@ -28,6 +29,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType> implements
     readonly InteractionType = InteractionType;
     readonly ClickSource = ClickSource;
     readonly Target = Target;
+    readonly PaginationStrategy = PaginationStrategy;
 
     @ViewChild(MatSort) sort: MatSort;
     @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -49,6 +51,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType> implements
 
     constructor(
                 public entriesService: NodeEntriesService<T>,
+                public entriesGlobalService: NodeEntriesGlobalService,
                 private applicationRef: ApplicationRef,
                 private toast: Toast,
                 public ui: UIService,
@@ -212,7 +215,8 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType> implements
     loadData() {
         if (this.entriesService.dataSource.hasMore()) {
             this.entriesService.fetchData.emit({
-                offset: this.entriesService.dataSource.getData().length
+                offset: this.entriesService.dataSource.getData().length,
+                reset: false
             });
         }
     }

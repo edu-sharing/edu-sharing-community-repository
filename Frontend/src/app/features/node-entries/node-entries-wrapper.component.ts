@@ -12,7 +12,7 @@ import {
     Output,
     SimpleChange,
     TemplateRef,
-    Type,
+    Type, ViewChild,
     ViewContainerRef,
 } from '@angular/core';
 import {
@@ -49,7 +49,7 @@ import { NodeDataSource } from './node-data-source';
 
 @Component({
     selector: 'es-node-entries-wrapper',
-    template: ` <es-node-entries *ngIf="!customNodeListComponent"> </es-node-entries>`,
+    template: ` <es-node-entries #nodeEntriesComponent *ngIf="!customNodeListComponent"> </es-node-entries>`,
     providers: [
         NodeEntriesService,
         OptionsHelperService,
@@ -68,6 +68,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @ContentChild('title') titleRef: TemplateRef<any>;
     @ContentChild('empty') emptyRef: TemplateRef<any>;
     @ContentChild('actionArea') actionAreaRef: TemplateRef<any>;
+    @ViewChild('nodeEntriesComponent') nodeEntriesComponentRef: NodeEntriesComponent<T>;
     @Input() dataSource: NodeDataSource<T>;
     @Input() columns: ListItem[];
     @Input() configureColumns: boolean;
@@ -84,7 +85,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @Output() clickItem = new EventEmitter<NodeClickEvent<T>>();
     @Output() dblClickItem = new EventEmitter<NodeClickEvent<T>>();
     @Output() sortChange = new EventEmitter<ListSortConfig>();
-    private componentRef: ComponentRef<any>;
+    private componentRef: ComponentRef<NodeEntriesComponent<T>>;
     public customNodeListComponent: Type<NodeEntriesComponent<T>>;
     private options: ListOptions;
 
@@ -254,6 +255,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
 
     async initOptionsGenerator(config: ListOptionsConfig) {
         await this.optionsHelper.initComponents(config.actionbar, this);
+        this.entriesService.scope = config.scope;
         this.optionsHelper.setData({
             scope: config.scope,
             activeObjects: this.entriesService.selection.selected,
@@ -274,5 +276,14 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.templatesService.title = this.titleRef;
         this.templatesService.empty = this.emptyRef;
         this.templatesService.actionArea = this.actionAreaRef;
+    }
+
+    /**
+     * reset the pagination to the first page
+     * hint: this will do nothing in case the paginationStrategy !== Pagination
+     */
+    resetPagination() {
+        console.log(this.nodeEntriesComponentRef);
+        this.nodeEntriesComponentRef?.paginator?.firstPage();
     }
 }
