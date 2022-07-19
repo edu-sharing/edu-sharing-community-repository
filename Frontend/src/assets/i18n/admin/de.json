@@ -162,7 +162,6 @@
                 "mail.smtp.username": "Nutzername für die Authentifizierung am Mailserver",
                 "mail.smtp.passwd": "Passwort für die AUthentifizierung am Mailserver",
                 "mail.smtp.from": "Angezeigte E-Mailadresse des Absenders. Empfohlen \"noreply@yourdomain.com\"",
-                "mail.admin": "Deprecated",
                 "mail.addReplyTo": "Wenn true (Standard), wird als Reply-To Adresse der jeweilige Nutzer, der das Event ausgelöst hat, angehangen"
             }
         },
