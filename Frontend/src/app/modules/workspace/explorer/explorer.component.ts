@@ -171,8 +171,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             this.sort.columns = RestConstants.POSSIBLE_SORT_BY_FIELDS_SOLR;
         }
         this.storage.get(SessionStorageService.KEY_WORKSPACE_SORT + root, null).subscribe((data) => {
-            console.log(data);
-            if (data?.sortBy != null && false) {
+            if (data?.sortBy != null) {
                 this.sort.active = data.sortBy;
                 this.sort.direction = data.sortAscending ? 'asc' : 'desc';
             } else {
