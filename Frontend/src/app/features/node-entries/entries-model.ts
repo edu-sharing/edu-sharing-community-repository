@@ -75,6 +75,11 @@ export type NodeClickEvent<T extends NodeEntriesDataType> = {
 export type FetchEvent = {
     offset: number,
     amount?: number;
+    /**
+     * is a reset of the current data required?
+     * this should be true if this was a pagination request
+     */
+    reset?: boolean;
 }
 export type GridConfig = {
     maxRows?: number

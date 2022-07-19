@@ -14,7 +14,7 @@
            cdkDropList
            [cdkDropListSortPredicate]="dragEnter"
            esInfiniteScroll
-           (scrolled)="loadData()"
+           (scrolled)="entriesGlobalService.getPaginationStrategy(entriesService.scope) === PaginationStrategy.InfiniteScroll ? loadData() : null"
 >
   <!-- Checkbox Column -->
   <ng-container matColumnDef="select">

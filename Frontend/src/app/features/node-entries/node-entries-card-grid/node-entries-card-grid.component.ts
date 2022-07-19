@@ -92,6 +92,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
         if (this.entriesService.dataSource.hasMore()) {
             this.entriesService.fetchData.emit({
                 offset: this.entriesService.dataSource.getData().length,
+                reset: false
             });
         }
         if (byButtonClick) {

@@ -82,7 +82,7 @@
       #grid
       (esBorderBoxObserver)="onGridSizeChanges()"
       esInfiniteScroll
-      (scrolled)="loadData()"
+      (scrolled)="entriesGlobalService.getPaginationStrategy(entriesService.scope) === PaginationStrategy.InfiniteScroll ? loadData() : null"
     >
       <ng-container *ngTemplateOutlet="list"></ng-container>
     </div>
@@ -157,7 +157,7 @@
     !entriesService.dataSource.isLoading &&
     entriesService.dataSource.getCanLoadMore() &&
     entriesService.dataSource.hasMore() &&
-    entriesGlobalService.paginationStrategy === PaginationStrategy.InfiniteScroll
+    entriesGlobalService.getPaginationStrategy(entriesService.scope) === PaginationStrategy.InfiniteScroll
   "
 >
   <div class="load-more">

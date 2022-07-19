@@ -1,8 +1,8 @@
 import {
-    AfterViewInit,
+    AfterViewInit, ApplicationRef, ChangeDetectorRef,
     Component,
     ContentChild, HostListener, Input,
-    OnChanges,
+    OnChanges, OnDestroy,
     SimpleChanges,
     TemplateRef, ViewChild
 } from '@angular/core';
@@ -13,10 +13,11 @@ import { NodeEntriesDisplayType } from './entries-model';
 
 import {NodeEntriesTemplatesService} from './node-entries-templates.service';
 import {NodeEntriesGlobalService, PaginationStrategy} from "./node-entries-global.service";
-import {MatPaginator} from "@angular/material/paginator";
+import {MatPaginator, PageEvent} from "@angular/material/paginator";
 import {TranslateService} from "@ngx-translate/core";
 import {takeUntil} from "rxjs/operators";
 import {Subject} from "rxjs";
+import {TranslationsService} from "../../translations/translations.service";
 
 @Component({
     selector: 'es-node-entries',
@@ -24,7 +25,7 @@ import {Subject} from "rxjs";
     styleUrls: ['node-entries.component.scss'],
 
 })
-export class NodeEntriesComponent<T extends NodeEntriesDataType> implements OnChanges, AfterViewInit {
+export class NodeEntriesComponent<T extends NodeEntriesDataType> implements OnChanges, AfterViewInit, OnDestroy {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly PaginationStrategy = PaginationStrategy;
     private readonly destroyed$ = new Subject();
@@ -53,20 +54,21 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType> implements OnCh
         public entriesGlobalService: NodeEntriesGlobalService,
         public entriesService: NodeEntriesService<T>,
         public templatesService: NodeEntriesTemplatesService,
+        public changeDetectorRef: ChangeDetectorRef,
         public translate: TranslateService,
+        public translations: TranslationsService,
     ) {
-
     }
 
     ngOnChanges(changes: SimpleChanges): void {
     }
 
     async ngAfterViewInit() {
-        console.log(this.paginator);
         if (this.paginator) {
-            this.paginator._intl.itemsPerPageLabel = await this.translate.get('PAGINATOR.itemsPerPageLabel').toPromise();
-            this.paginator._intl.nextPageLabel = await this.translate.get('PAGINATOR.nextPageLabel').toPromise();
-            this.paginator._intl.previousPageLabel = await this.translate.get('PAGINATOR.previousPageLabel').toPromise();
+            await this.translations.waitForInit().toPromise();
+            this.paginator._intl.itemsPerPageLabel = this.translate.instant('PAGINATOR.itemsPerPageLabel');
+            this.paginator._intl.nextPageLabel = this.translate.instant('PAGINATOR.nextPageLabel');
+            this.paginator._intl.previousPageLabel = this.translate.instant('PAGINATOR.previousPageLabel');
             this.paginator._intl.getRangeLabel = (page, pageSize, length) => (
                 this.translate.instant('PAGINATOR.getRangeLabel',
                     {page: (page + 1),
@@ -75,12 +77,16 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType> implements OnCh
                         pageCount: Math.ceil(length / pageSize)}
                 )
             );
-            this.paginator.length = this.entriesService.dataSource.getTotal();
-            this.entriesService.dataSource.connect()
-                .pipe(
+            this.paginator.length = this.entriesService.dataSource?.getTotal();
+            this.entriesService.dataSource$.pipe(
+                takeUntil(this.destroyed$)
+            ).subscribe((dataSource) => {
+                this.paginator.length = dataSource?.getTotal();
+                dataSource?.connectPagination().pipe(
                     takeUntil(this.destroyed$)
-                ).subscribe((data) => {
+                ).subscribe(() => {
                     this.paginator.length = this.entriesService.dataSource.getTotal();
+                });
             });
         }
     }
@@ -88,6 +94,14 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType> implements OnCh
     ngOnDestroy(): void {
         this.destroyed$.next();
         this.destroyed$.complete();
+    }
+
+    openPage(page: PageEvent) {
+        this.entriesService.fetchData.emit({
+            offset: page.pageIndex * page.pageSize,
+            amount: page.pageSize,
+            reset: true
+        });
     }
 }
 export type NodeEntriesDataType = Node | GenericAuthority;

@@ -9,11 +9,14 @@
   <ng-container *ngIf="entriesService.dataSource.isEmpty() && !entriesService.dataSource.isLoading">
     <ng-container *ngTemplateOutlet="templatesService.empty"></ng-container>
   </ng-container>
-  <ng-container *ngIf="
-  entriesGlobalService.paginationStrategy === PaginationStrategy.Paginator">
-    <mat-paginator #paginator
-                   [pageSizeOptions]="entriesGlobalService.paginatorSizeOptions"
-                   [class.display-none]="entriesService.dataSource.isLoading || entriesService.dataSource.isEmpty()"
-    ></mat-paginator>
-  </ng-container>
 </ng-container>
+<!-- @TODO: hiding it via ngIf would be better, but we need to access the reference in ts file -->
+  <mat-paginator #paginator
+                 [pageSizeOptions]="entriesGlobalService.paginatorSizeOptions"
+                 [class.display-none]="!entriesService.dataSource ||
+                 entriesGlobalService.getPaginationStrategy(entriesService.scope) !== PaginationStrategy.Paginator ||
+                 entriesService.dataSource.isLoading ||
+                 entriesService.dataSource.isEmpty() ||
+                 !entriesService.dataSource.getCanLoadMore()"
+                 (page)="openPage($event)"
+  ></mat-paginator>

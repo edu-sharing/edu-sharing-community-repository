@@ -73,7 +73,12 @@ import { LoadingScreenService } from '../../main/loading-screen/loading-screen.s
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { Values } from '../../features/mds/types/types';
-import { NodeEntriesDisplayType, InteractionType, ListSortConfig } from 'src/app/features/node-entries/entries-model';
+import {
+    NodeEntriesDisplayType,
+    InteractionType,
+    ListSortConfig,
+    FetchEvent
+} from 'src/app/features/node-entries/entries-model';
 import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-entries-wrapper.component';
 
@@ -520,10 +525,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         return false;
     }
 
-    getMoreResults() {
+    getMoreResults(event: FetchEvent) {
         if (this.searchService.complete == false) {
             //this.searchService.skipcount = this.searchService.searchResult.length;
-            this.getSearch();
+            this.getSearch(null, false, event);
         }
     }
 
@@ -616,6 +621,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     getSearch(
         searchString: string = null,
         init = false,
+        event: FetchEvent = null,
     ) {
         if ((this.isSearching && init) || this.repositoryIds.length == 0) {
             /*setTimeout(
@@ -651,7 +657,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 ? this.repositoryIds
                 : [{ id: this.currentRepository, enabled: true }];
         this.searchField.setFilterValues(this.currentValues);
-        this.searchRepository(repos, criterias, init);
+        this.searchRepository(repos, criterias, init, event);
 
         if (init) {
             this.searchService.dataSourceCollections.reset();
@@ -1115,20 +1121,24 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         repos: any[],
         criteria: SearchRequestCriteria[],
         init: boolean,
+        event: FetchEvent = null,
         position = 0,
-        count = 0,
         tryFrontpage = true
     ) {
+        console.log(event);
         if (position > 0 && position >= repos.length) {
-            this.searchService.numberofresults = count;
+            this.searchService.numberofresults = event?.amount;
             this.searchService.dataSourceSearchResult[0].isLoading = false;
             this.isSearching = false;
             return;
         }
+        if(event?.reset) {
+            this.searchService.dataSourceSearchResult[0].reset();
+        }
         this.searchService.dataSourceSearchResult[0].isLoading = true;
         let repo = repos[position];
         if (!repo.enabled) {
-            this.searchRepository(repos, criteria, init, position + 1, count);
+            this.searchRepository(repos, criteria, init, event, position + 1);
             return;
         }
 
@@ -1159,6 +1169,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             }
         }
         let properties = [RestConstants.ALL];
+        const count = (event?.amount || this.connector.numberPerRequest);
         const request = {
             sortBy,
             sortAscending,
@@ -1168,12 +1179,12 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     ? Math.max(
                     5,
                     Math.round(
-                        this.connector.numberPerRequest /
+                        count /
                         (this.repositories.length - 1),
                     ),
                     )
-                    : null,
-            offset: this.searchService.dataSourceSearchResult[position]?.getData()?.length || 0,
+                    : count,
+            offset: event?.offset || 0,
             propertyFilter: [properties],
         };
         let permissions: string[];
@@ -1214,7 +1225,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             }
             queryRequest.subscribe(
                 async (data: SearchList) => {
-                    if (!this.searchService.dataSourceSearchResult[position]) {
+                    if (!this.searchService.dataSourceSearchResult[position] || event?.reset) {
                         this.searchService.dataSourceSearchResult[position] = new NodeDataSource<Node>();
                         this.searchService.dataSourceSearchResult[position].setData(data.nodes, data.pagination);
                     } else {
@@ -1232,18 +1243,18 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                         repos,
                         criteria,
                         init,
+                        event,
                         position + 1,
-                        count + data.pagination.total,
                     );
                 }, error => {
-                    if(useFrontpage && tryFrontpage && count === 0){
+                    if(useFrontpage && tryFrontpage && event.offset === 0){
                         console.warn('Could not fetch frontpage data, will fallback to a regular search', error);
                         this.searchRepository(
                             repos,
                             criteria,
                             init,
+                            event,
                             position,
-                            count,
                             false
                         );
                         error.preventDefault();
@@ -1253,8 +1264,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                         repos,
                         criteria,
                         init,
+                        event,
                         position + 1,
-                        count,
                     );
                 },
             );

@@ -6,7 +6,7 @@ import { GenericAuthority, Pagination, Node } from 'src/app/core-module/core.mod
 
 export class NodeDataSource<T extends Node|GenericAuthority> extends DataSource<T> {
     private dataStream = new BehaviorSubject<T[]>([]);
-    private pagination: Pagination;
+    private pagination$ = new BehaviorSubject<Pagination>(null);
     public isLoading: boolean;
     private displayCountSubject = new BehaviorSubject<number | null>(null);
     private canLoadMore = true;
@@ -23,6 +23,10 @@ export class NodeDataSource<T extends Node|GenericAuthority> extends DataSource<
 
     connect(): Observable<T[]> {
         return this.dataStream;
+    }
+
+    connectPagination(): Observable<Pagination> {
+        return this.pagination$;
     }
 
     disconnect() {}
@@ -43,7 +47,7 @@ export class NodeDataSource<T extends Node|GenericAuthority> extends DataSource<
     }
 
     setPagination(pagination: Pagination) {
-        this.pagination = pagination;
+        this.pagination$.next(pagination);
     }
 
     reset() {
@@ -52,10 +56,10 @@ export class NodeDataSource<T extends Node|GenericAuthority> extends DataSource<
     }
 
     hasMore() {
-        if (!this.pagination) {
+        if (!this.pagination$.value) {
             return undefined;
         }
-        return this.pagination.total > this.getData()?.length;
+        return this.pagination$.value.total > this.getData()?.length;
     }
 
     getData() {
@@ -67,7 +71,7 @@ export class NodeDataSource<T extends Node|GenericAuthority> extends DataSource<
     }
 
     getTotal() {
-        return this.pagination?.total ?? this.getData()?.length ?? 0;
+        return this.pagination$.value?.total ?? this.getData()?.length ?? 0;
     }
 
     /**

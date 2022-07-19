@@ -1,27 +1,39 @@
 import { Injectable, TemplateRef } from '@angular/core';
 import {ListItem, ListItemType} from "../../core-module/ui/list-item";
+import {Scope} from "../../core-ui-module/option-item";
 
 export type CustomFieldInfo = {
     type: ListItemType,
         name: string,
-        templateRef: TemplateRef<any>
+        templateRef: TemplateRef<unknown>
 };
 export enum PaginationStrategy {
     InfiniteScroll,
     Paginator
 }
 
+type PaginationScope = Scope | 'DEFAULT';
 /**
  * this service is intented to add custom behaviour to the global tables & grid views
  */
 @Injectable()
 export class NodeEntriesGlobalService {
     private customFields: CustomFieldInfo[] = [];
-    public paginationStrategy = PaginationStrategy.InfiniteScroll;
+    private paginationStrategy: {[key in PaginationScope]?: PaginationStrategy} = {
+        [Scope.WorkspaceList]: PaginationStrategy.InfiniteScroll,
+        [Scope.Search]: PaginationStrategy.InfiniteScroll,
+        DEFAULT: PaginationStrategy.InfiniteScroll,
+    };
     public paginatorSizeOptions = [25, 50, 75, 100];
 
     constructor() {}
 
+    public setPaginationStrategy(scope: PaginationScope, strategy: PaginationStrategy) {
+        this.paginationStrategy[scope] = strategy;
+    }
+    public getPaginationStrategy(scope: Scope): PaginationStrategy{
+        return this.paginationStrategy[scope] ?? this.paginationStrategy['DEFAULT'];
+    }
     public getCustomFieldTemplate(item: ListItem) {
         return this.customFields.filter(c => c.type === item.type && c.name === item.name)?.[0]?.templateRef;
     }
