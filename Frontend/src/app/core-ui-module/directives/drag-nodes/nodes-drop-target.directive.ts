@@ -146,10 +146,7 @@ export class NodesDropTargetDirective {
     }
 
     private getDropAction(event: DragEvent): DropAction {
-        if (
-            this.nodesDragAllowedActions.includes('copy') &&
-            (event.ctrlKey || this.ui.isShiftCmd())
-        ) {
+        if (this.nodesDragAllowedActions.includes('copy') && event.ctrlKey) {
             return 'copy';
         } else if (this.nodesDragAllowedActions.includes('link') && event.altKey) {
             return 'link';

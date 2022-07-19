@@ -31,7 +31,7 @@
     <mat-cell *matCellDef="let node">
       <mat-checkbox
         [checked]="entriesService.selection.isSelected(node)"
-        (change)="entriesService.handleSelectionEvent(node)"
+        (change)="entriesService.onCheckboxChanged(node, $event.checked)"
         aria-label="{{ 'SELECT' | translate: { element: (node | nodeTitle) } }}"
       ></mat-checkbox>
     </mat-cell>
@@ -51,12 +51,16 @@
       </ng-container>
       <div
         *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink"
-        (click)="entriesService.clickItem.emit({ element: node, source: ClickSource.Icon })"
+        (click)="
+          entriesService.onClicked({ event: $event, element: node, source: ClickSource.Icon })
+        "
         (dblclick)="entriesService.dblClickItem.emit({ element: node, source: ClickSource.Icon })"
       >
         <ng-container
           *ngTemplateOutlet="icon; context: { node: this.node }"
-          (click)="entriesService.clickItem.emit({ element: node, source: ClickSource.Icon })"
+          (click)="
+            entriesService.onClicked({ event: $event, element: node, source: ClickSource.Icon })
+          "
           (dblclick)="entriesService.dblClickItem.emit({ element: node, source: ClickSource.Icon })"
         ></ng-container>
       </div>
@@ -127,7 +131,8 @@
         [node]="node"
         [item]="column"
         (click)="
-          entriesService.clickItem.emit({
+          entriesService.onClicked({
+            event: $event,
             element: node,
             source: ClickSource.Metadata,
             attribute: column
