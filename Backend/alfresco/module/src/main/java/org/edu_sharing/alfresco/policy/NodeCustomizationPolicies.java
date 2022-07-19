@@ -822,6 +822,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 				GetMethod method = new GetMethod(url.toString());
 				int timeout = (int) ((splash.getDouble("wait") + splash.getDouble("timeout")) * 1000);
 				client.getHttpConnectionManager().getParams().setConnectionTimeout(timeout);
+				client.getHttpConnectionManager().getParams().setSoTimeout(timeout);
 				int statusCode = client.executeMethod(method);
 				if (statusCode == HttpStatus.SC_OK) {
 					return method.getResponseBody();
