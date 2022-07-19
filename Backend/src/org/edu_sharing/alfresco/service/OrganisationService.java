@@ -58,13 +58,8 @@ public class OrganisationService {
 		orgName+=(scope==null || scope.isEmpty() ? "" : "_"+scope);
         groupDisplayName+=(scope==null || scope.isEmpty() ? "" : "_"+scope);
         String groupName = eduAuthorityService.createOrUpdateGroup(AuthorityService.ORG_GROUP_PREFIX + orgName, groupDisplayName, null, true);
-		
-		String authorityAdmins = eduAuthorityService.createOrUpdateGroup(AuthorityService.ADMINISTRATORS_GROUP, groupDisplayName + AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX, groupName, true);
 
-		addAspect(PermissionService.GROUP_PREFIX + authorityAdmins, CCConstants.CCM_ASPECT_GROUPEXTENSION);
-
-		nodeService.setProperty(authorityService.getAuthorityNodeRef(PermissionService.GROUP_PREFIX + authorityAdmins), QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE),
-				AuthorityService.ADMINISTRATORS_GROUP_TYPE);
+		String authorityAdminGroup = createOrganizationAdminGroup(groupDisplayName, groupName);
 
 		NodeRef companyHome = repositoryHelper.getCompanyHome();
 
@@ -86,18 +81,32 @@ public class OrganisationService {
 		bindEduGroupFolder(groupName, orgFolder);
 
 		permissionService.setPermission(orgFolder, PermissionService.GROUP_PREFIX + groupName, PermissionService.CONSUMER, true);
-		permissionService.setPermission(orgFolder, PermissionService.GROUP_PREFIX + authorityAdmins, PermissionService.COORDINATOR, true);
+		permissionService.setPermission(orgFolder, PermissionService.GROUP_PREFIX + authorityAdminGroup, PermissionService.COORDINATOR, true);
 
 		if(scope!=null && !scope.isEmpty()){
 			nodeService.setProperty(authorityService.getAuthorityNodeRef(PermissionService.GROUP_PREFIX + groupName), QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME),
 					CCConstants.CCM_VALUE_SCOPE_SAFE);
-			nodeService.setProperty(authorityService.getAuthorityNodeRef(PermissionService.GROUP_PREFIX + authorityAdmins), QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME),
+			nodeService.setProperty(authorityService.getAuthorityNodeRef(PermissionService.GROUP_PREFIX + authorityAdminGroup), QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME),
 					CCConstants.CCM_VALUE_SCOPE_SAFE);
 			nodeService.setProperty(orgFolder, QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME),
 					CCConstants.CCM_VALUE_SCOPE_SAFE);
 		}
 
 		return groupName;
+	}
+
+	public String createOrganizationAdminGroup(String orgAuthorityName) {
+		return createOrganizationAdminGroup(authorityService.getAuthorityDisplayName(orgAuthorityName),
+				orgAuthorityName.replace(PermissionService.GROUP_PREFIX,""));
+	}
+	private String createOrganizationAdminGroup(String groupDisplayName, String groupName) {
+		String authorityAdmins = eduAuthorityService.createOrUpdateGroup(AuthorityService.ADMINISTRATORS_GROUP, groupDisplayName + AuthorityService.ADMINISTRATORS_GROUP_DISPLAY_POSTFIX, groupName, true);
+
+		addAspect(PermissionService.GROUP_PREFIX + authorityAdmins, CCConstants.CCM_ASPECT_GROUPEXTENSION);
+
+		nodeService.setProperty(authorityService.getAuthorityNodeRef(PermissionService.GROUP_PREFIX + authorityAdmins), QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE),
+				AuthorityService.ADMINISTRATORS_GROUP_TYPE);
+		return authorityAdmins;
 	}
 
 	public void syncOrganisationFolder(String authorityName){
@@ -288,35 +297,40 @@ public class OrganisationService {
 		List<ChildAssociationRef> childAssocs = nodeService.getChildAssocs(parent);
 		for(ChildAssociationRef childRef : childAssocs) {
 
-			Set<AccessPermission> allSetPerms = permissionService.getAllSetPermissions(childRef.getChildRef());
-
-			boolean isAlreadySet = false;
-			for(AccessPermission perm : allSetPerms) {
-				if(perm.getAuthority().equals(adminAuthority)
-						&& perm.getPermission().equals(PermissionService.COORDINATOR)
-						&& !perm.isInherited()) {
-					isAlreadySet = true;
-				}
-			}
-			if(!isAlreadySet) {
-				logger.debug("will set org admingroup as Coordnator for:" +
-						childRef.getChildRef() +" "+
-						nodeService.getProperty(childRef.getChildRef(),ContentModel.PROP_NAME));
-				if (execute) {
-					this.transactionService.getRetryingTransactionHelper().doInTransaction(()-> {
-						try {
-							policyBehaviourFilter.disableBehaviour(childRef.getChildRef());
-							permissionService.setPermission(childRef.getChildRef(), adminAuthority, PermissionService.COORDINATOR, true);
-						} finally {
-							policyBehaviourFilter.enableBehaviour(childRef.getChildRef());
-						}
-						return null;
-					});
-				}
-			}
+			NodeRef nodeRef = childRef.getChildRef();
+			setOrgAdminPermissionsOnNode(adminAuthority, execute, nodeRef);
 
 			if(nodeService.getType(childRef.getChildRef()).equals(QName.createQName(CCConstants.CCM_TYPE_MAP))) {
 				setOrgAdminPermissions(childRef.getChildRef(), adminAuthority,execute);
+			}
+		}
+	}
+
+	public void setOrgAdminPermissionsOnNode(String adminAuthority, boolean execute, NodeRef nodeRef) {
+		Set<AccessPermission> allSetPerms = permissionService.getAllSetPermissions(nodeRef);
+
+		boolean isAlreadySet = false;
+		for(AccessPermission perm : allSetPerms) {
+			if(perm.getAuthority().equals(adminAuthority)
+					&& perm.getPermission().equals(PermissionService.COORDINATOR)
+					&& !perm.isInherited()) {
+				isAlreadySet = true;
+			}
+		}
+		if(!isAlreadySet) {
+			logger.debug("will set org admingroup as Coordnator for:" +
+					nodeRef +" "+
+					nodeService.getProperty(nodeRef,ContentModel.PROP_NAME));
+			if (execute) {
+				this.transactionService.getRetryingTransactionHelper().doInTransaction(()-> {
+					try {
+						policyBehaviourFilter.disableBehaviour(nodeRef);
+						permissionService.setPermission(nodeRef, adminAuthority, PermissionService.COORDINATOR, true);
+					} finally {
+						policyBehaviourFilter.enableBehaviour(nodeRef);
+					}
+					return null;
+				});
 			}
 		}
 	}
