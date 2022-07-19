@@ -7,6 +7,7 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -64,10 +65,14 @@ public class FixOrganisationAdminGroup extends AbstractJob{
                     logger.info("created admin group " + orgAdminGroup +" for org "+ org);
                 }
                 //set permissions for org admin group on folder
-                NodeRef orgFolder = authorityService.getAuthorityNodeRef(org);
+                NodeRef orgNodeRef = authorityService.getAuthorityNodeRef(org);
+                NodeRef orgFolder = (NodeRef)nodeService.getProperty(orgNodeRef, QName.createQName(OrganisationService.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
                 if(orgFolder != null){
                     //checks before set
-                    eduOrganisationService.setOrgAdminPermissionsOnNode(orgAdminGroup,true,orgFolder);
+                    String orgAdminAuthorityName = (!orgAdminGroup.startsWith(PermissionService.GROUP_PREFIX))
+                            ? PermissionService.GROUP_PREFIX + orgAdminGroup
+                            : orgAdminGroup;
+                    eduOrganisationService.setOrgAdminPermissionsOnNode(orgAdminAuthorityName,true,orgFolder);
                 }else logger.error("no organisation folder found for "+org);
             }
             return null;
