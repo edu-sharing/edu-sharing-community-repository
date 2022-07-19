@@ -17,14 +17,20 @@ import java.util.Map;
 public class MetadataElasticSearchHelper extends MetadataSearchHelper {
     public static QueryBuilder getElasticSearchQuery(MetadataQueries queries,MetadataQuery query, Map<String,String[]> parameters) throws IllegalArgumentException {
 
-        /**
-         * @TODO basequery
-         * quickfix: take the basequery of the query instead of the global basequery,
-         * cause collection request needs solr basequery
-         */
-        String baseQuery = query.getBasequery().get(null);
-        WrapperQueryBuilder baseQueryBuilder = QueryBuilders.wrapperQuery(baseQuery);
-
+        String baseQuery = replaceCommonQueryVariables(query.getBasequery().get(null));
+        String baseQueryConditional = replaceCommonQueryVariables(
+                query.findBasequery(parameters == null ? null : parameters.keySet())
+        );
+        QueryBuilder baseQueryBuilder;
+        if(baseQuery.equals(baseQueryConditional)) {
+            baseQueryBuilder = QueryBuilders.wrapperQuery(baseQuery);
+        } else {
+            baseQueryBuilder = QueryBuilders.boolQuery().must(
+                    QueryBuilders.wrapperQuery(baseQuery)
+            ).must(
+                    QueryBuilders.wrapperQuery(baseQueryConditional)
+            );
+        }
 
         BoolQueryBuilder result = QueryBuilders.boolQuery();
         result.must(baseQueryBuilder);
