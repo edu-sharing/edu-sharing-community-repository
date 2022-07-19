@@ -59,21 +59,26 @@ public class FixOrganisationAdminGroup extends AbstractJob{
             logger.info("found "+allOrganisations.size()+" organisations");
             for(String org : allOrganisations){
                 //create org admin group
-                String orgAdminGroup = eduOrganisationService.getOrganisationAdminGroup(org);
-                if(orgAdminGroup == null){
-                    orgAdminGroup =  eduOrganisationService.createOrganizationAdminGroup(org);
-                    logger.info("created admin group " + orgAdminGroup +" for org "+ org);
+                try {
+                    logger.info("org:" + org);
+                    String orgAdminGroup = eduOrganisationService.getOrganisationAdminGroup(org);
+                    if (orgAdminGroup == null) {
+                        orgAdminGroup = eduOrganisationService.createOrganizationAdminGroup(org);
+                        logger.info("created admin group " + orgAdminGroup + " for org " + org);
+                    }
+                    //set permissions for org admin group on folder
+                    NodeRef orgNodeRef = authorityService.getAuthorityNodeRef(org);
+                    NodeRef orgFolder = (NodeRef) nodeService.getProperty(orgNodeRef, QName.createQName(OrganisationService.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
+                    if (orgFolder != null) {
+                        //checks before set
+                        String orgAdminAuthorityName = (!orgAdminGroup.startsWith(PermissionService.GROUP_PREFIX))
+                                ? PermissionService.GROUP_PREFIX + orgAdminGroup
+                                : orgAdminGroup;
+                        eduOrganisationService.setOrgAdminPermissionsOnNode(orgAdminAuthorityName, true, orgFolder);
+                    } else logger.error("no organisation folder found for " + org);
+                }catch (IllegalArgumentException e){
+                    logger.error(e.getMessage());
                 }
-                //set permissions for org admin group on folder
-                NodeRef orgNodeRef = authorityService.getAuthorityNodeRef(org);
-                NodeRef orgFolder = (NodeRef)nodeService.getProperty(orgNodeRef, QName.createQName(OrganisationService.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
-                if(orgFolder != null){
-                    //checks before set
-                    String orgAdminAuthorityName = (!orgAdminGroup.startsWith(PermissionService.GROUP_PREFIX))
-                            ? PermissionService.GROUP_PREFIX + orgAdminGroup
-                            : orgAdminGroup;
-                    eduOrganisationService.setOrgAdminPermissionsOnNode(orgAdminAuthorityName,true,orgFolder);
-                }else logger.error("no organisation folder found for "+org);
             }
             return null;
         });

@@ -256,7 +256,7 @@ public class OrganisationService {
 	 */
 	public String getOrganisationAdminGroup(String organisationName) {
 		String authorityName = getAuthorityName(organisationName);
-
+		logger.debug("organisationName:"+organisationName +"authorityName:"+authorityName);
 		NodeRef eduGroupNodeRef =authorityService.getAuthorityNodeRef(authorityName);
 		List<ChildAssociationRef> childGroups = nodeService.getChildAssocs(eduGroupNodeRef);
 		for(ChildAssociationRef childGroup : childGroups){
