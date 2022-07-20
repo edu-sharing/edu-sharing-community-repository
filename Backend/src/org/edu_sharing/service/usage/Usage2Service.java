@@ -31,6 +31,7 @@ import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.webservices.usage2.Usage2Exception;
 import org.springframework.context.ApplicationContext;
 
@@ -268,9 +269,11 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 	public List<Usage> getUsageByParentNodeId(String repoId, String user, String parentNodeId) throws UsageException {
 		logger.info("starting");
 
-		if(!this.serviceRegistry.getPermissionService().
-				hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentNodeId),
-						PermissionService.READ).equals(AccessStatus.ALLOWED)){
+
+		if(!PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,
+				StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+				parentNodeId,
+				PermissionService.READ)){
 			return new ArrayList<Usage>();
 		}
 
