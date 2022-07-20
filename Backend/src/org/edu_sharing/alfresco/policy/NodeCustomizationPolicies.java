@@ -1,11 +1,5 @@
 package org.edu_sharing.alfresco.policy;
 
-import java.io.ByteArrayInputStream;
-import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import com.typesafe.config.Config;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.ContentServicePolicies.OnContentUpdatePolicy;
@@ -37,6 +31,7 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.metadataset.v2.MetadataReaderV2;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -44,9 +39,13 @@ import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
-import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.quartz.Scheduler;
 import org.springframework.security.crypto.codec.Base64;
+
+import java.io.ByteArrayInputStream;
+import java.io.Serializable;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 
@@ -564,8 +563,31 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 					}
 				}
 			}
-			nodeService.setProperties(ref, ioColRefProperties);
+			try {
+				nodeService.setProperties(ref, ioColRefProperties);
+			}catch(DuplicateChildNodeNameException e){
+				logger.error(e.getMessage() +" try to rename");
+				String originalName = (String)ioColRefProperties.get(ContentModel.PROP_NAME);
+				for(int i = 2; i < 42;i++){
+					ioColRefProperties.put(ContentModel.PROP_NAME, renameNode(originalName,i));
+					try{
+						nodeService.setProperties(ref, ioColRefProperties);
+						break;
+					}catch (DuplicateChildNodeNameException ex){
+						logger.debug(e.getMessage()+" - will rename " +originalName +" "+i);
+					}
+				}
+			}
+
 			new RepositoryCache().remove(ref.getId());
+	}
+
+	public static String renameNode(String oldName,int number){
+		String[] split=oldName.split("\\.");
+		int i=split.length-2;
+		i=Math.max(0, i);
+		split[i]+=" - "+number;
+		return String.join(".",split);
 	}
 
 	private static String propertyToString(Object p){
