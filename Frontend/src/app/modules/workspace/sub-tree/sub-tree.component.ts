@@ -24,10 +24,7 @@ import {
 import { Helper } from '../../../core-module/rest/helper';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { OptionItem, Scope } from '../../../core-ui-module/option-item';
-import {
-    OptionsHelperService,
-    OPTIONS_HELPER_CONFIG,
-} from '../../../core-ui-module/options-helper.service';
+import { OptionsHelperService } from '../../../core-ui-module/options-helper.service';
 import { DragData } from '../../../services/nodes-drag-drop.service';
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
 import { canDropOnNode } from '../workspace-utils';
@@ -40,15 +37,7 @@ import { canDropOnNode } from '../workspace-utils';
         trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST)),
         trigger('open', UIAnimation.openOverlay()),
     ],
-    providers: [
-        OptionsHelperService,
-        {
-            provide: OPTIONS_HELPER_CONFIG,
-            useValue: {
-                subscribeEvents: false,
-            },
-        },
-    ],
+    providers: [OptionsHelperService],
 })
 export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
     private static MAX_FOLDER_COUNT = 100;

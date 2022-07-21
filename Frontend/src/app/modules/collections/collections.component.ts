@@ -65,10 +65,7 @@ import { UIConstants } from '../../core-module/ui/ui-constants';
 import { ListTableComponent } from '../../core-ui-module/components/list-table/list-table.component';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { OptionItem, Scope } from '../../core-ui-module/option-item';
-import {
-    OptionsHelperService,
-    OPTIONS_HELPER_CONFIG,
-} from '../../core-ui-module/options-helper.service';
+import { OptionsHelperService } from '../../core-ui-module/options-helper.service';
 import { Toast } from '../../core-ui-module/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
@@ -89,15 +86,7 @@ import {
     templateUrl: 'collections.component.html',
     styleUrls: ['collections.component.scss'],
     // provide a new instance so to not get conflicts with other service instances
-    providers: [
-        OptionsHelperService,
-        {
-            provide: OPTIONS_HELPER_CONFIG,
-            useValue: {
-                subscribeEvents: false,
-            },
-        },
-    ],
+    providers: [OptionsHelperService],
 })
 export class CollectionsMainComponent implements OnInit, OnDestroy {
     static INDEX_MAPPING = [

@@ -375,6 +375,7 @@
                 direction: searchService.sort?.direction,
                 columns: searchService.sort?.columns
               }"
+              [globalKeyboardShortcuts]="true"
               (sortChange)="updateSort($event)"
               [displayType]="searchService.displayType"
               (fetchData)="getMoreResults()"

@@ -73,10 +73,7 @@ import { CoreModule } from '../app/core-module/core.module';
 import { ModalTestComponent } from '../app/common/test/modal/modal-test.component';
 import { MatProgressSpinner, MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AppModule } from '../app';
-import {
-    OPTIONS_HELPER_CONFIG,
-    OptionsHelperService,
-} from '../app/core-ui-module/options-helper.service';
+import { OptionsHelperService } from '../app/core-ui-module/options-helper.service';
 import { NgModule } from '@angular/core';
 import { CollectionChooserComponent } from '../app/core-ui-module/components/collection-chooser/collection-chooser.component';
 import { ListTableComponent } from '../app/core-ui-module/components/list-table/list-table.component';
