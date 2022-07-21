@@ -551,6 +551,16 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			props.addAll(MetadataReaderV2.getWidgetsByNode(ref,"de_DE").stream().
 					map(MetadataWidget::getId).map(CCConstants::getValidGlobalName).
 					collect(Collectors.toList()));
+
+			if(after != null){
+				for(Map.Entry<QName,Serializable> entry : after.entrySet()){
+					if(entry.getKey().getLocalName().startsWith("lifecyclecontributer")
+							|| entry.getKey().getLocalName().startsWith("metadatacontributer")){
+						props.add(entry.getKey().toString());
+					}
+				}
+			}
+
 			for (QName prop : after.keySet()) {
 				// the prop is contained in the mds of the node or a SAFE_PROP, than check if it still the original one -> replace it on the ref
 				if (props.contains(prop.toString())) {
