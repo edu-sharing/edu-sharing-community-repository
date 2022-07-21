@@ -1,26 +1,26 @@
-import { CdkDragDrop, CdkDragEnter, CdkDragExit, moveItemInArray } from '@angular/cdk/drag-drop';
+import { CdkDragEnter, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import {
     Component,
     ElementRef,
     Input,
+    NgZone,
     OnChanges,
     QueryList,
     SimpleChanges,
     ViewChild,
     ViewChildren,
 } from '@angular/core';
+import { Node } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, map, switchMap, take } from 'rxjs/operators';
-import { UIService, ListItemSort, RestConstants } from '../../../core-module/core.module';
-import { SortEvent } from '../../../shared/components/sort-dropdown/sort-dropdown.component';
-import { DragCursorDirective } from '../../../shared/directives/drag-cursor.directive';
+import { ListItemSort, RestConstants, UIService } from '../../../core-module/core.module';
 import { NodeEntriesService } from '../../../core-ui-module/node-entries.service';
 import { Target } from '../../../core-ui-module/option-item';
+import { DragData } from '../../../services/nodes-drag-drop.service';
+import { SortEvent } from '../../../shared/components/sort-dropdown/sort-dropdown.component';
 import { NodeEntriesDisplayType } from '../entries-model';
-
 import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
-import { Node } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-node-entries-card-grid',
@@ -30,9 +30,13 @@ import { Node } from 'ngx-edu-sharing-api';
 export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Target = Target;
+    @ViewChildren(CdkDropList) dropListsQuery: QueryList<CdkDropList>;
     @ViewChild('grid') gridRef: ElementRef;
     @ViewChildren('item', { read: ElementRef }) itemRefs: QueryList<ElementRef<HTMLElement>>;
     @Input() displayType: NodeEntriesDisplayType;
+
+    isDragging = false; // Drag-and-drop, not rearrange
+    dropLists: CdkDropList[];
 
     private readonly nodes$ = this.entriesService.dataSource$.pipe(
         switchMap((dataSource) => dataSource?.connect()),
@@ -53,11 +57,13 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
                 this.getVisibleNodes(nodes, itemsPerRow, maxRows),
             ),
         );
+    private globalCursorStyle: HTMLStyleElement;
 
     constructor(
         public entriesService: NodeEntriesService<T>,
         public templatesService: NodeEntriesTemplatesService,
         public ui: UIService,
+        private ngZone: NgZone,
     ) {}
 
     ngOnChanges(changes: SimpleChanges): void {}
@@ -66,14 +72,6 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
         this.entriesService.sort.active = sort.name;
         this.entriesService.sort.direction = sort.ascending ? 'asc' : 'desc';
         this.entriesService.sortChange.emit(this.entriesService.sort);
-    }
-
-    reorder(drag: CdkDragDrop<number>) {
-        moveItemInArray(
-            this.entriesService.dataSource.getData(),
-            drag.previousContainer.data,
-            drag.container.data,
-        );
     }
 
     loadData(byButtonClick = false) {
@@ -93,6 +91,49 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
         if (byButtonClick) {
             this.focusFirstNewItemWhenLoaded();
         }
+    }
+
+    onCustomSortingInProgressChange() {
+        this.entriesService.sortChange.emit(this.entriesService.sort);
+        setTimeout(() => {
+            this.refreshDropLists();
+        });
+    }
+
+    onRearrangeDragEntered($event: CdkDragEnter) {
+        moveItemInArray(
+            this.entriesService.dataSource.getData(),
+            $event.item.data,
+            $event.container.data,
+        );
+        // `CdkDrag` doesn't really want us to rearrange the items while dragging. Its cached
+        // element positions get out of sync unless we update them manually.
+        this.ngZone.runOutsideAngular(() =>
+            setTimeout(() => this.dropLists?.forEach((list) => list._dropListRef['_cacheItems']())),
+        );
+    }
+
+    onRearrangeDragStarted() {
+        this.globalCursorStyle = document.createElement('style');
+        document.body.appendChild(this.globalCursorStyle);
+        this.globalCursorStyle.innerHTML = `* {cursor: grabbing !important; }`;
+    }
+
+    onRearrangeDragEnded() {
+        document.body.removeChild(this.globalCursorStyle);
+        this.globalCursorStyle = null;
+    }
+
+    getDragStartDelay(): number {
+        if (this.ui.isMobile()) {
+            return 500;
+        } else {
+            return null;
+        }
+    }
+
+    private refreshDropLists() {
+        this.dropLists = this.dropListsQuery.toArray();
     }
 
     private focusFirstNewItemWhenLoaded() {
@@ -151,32 +192,37 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
         );
     }
 
-    dragEnter(drag: CdkDragEnter<T>) {
-        const allowed = this.entriesService.dragDrop.dropAllowed?.(drag.container.data, {
-            element: [drag.item.data],
-            sourceList: this.entriesService.list,
-            mode: DragCursorDirective.dragState.mode,
+    canDropNodes = (dragData: DragData<T>) => this.entriesService.dragDrop.dropAllowed?.(dragData);
+
+    onNodesDropped(dragData: DragData<Node>) {
+        this.entriesService.dragDrop.dropped(dragData.target, {
+            element: dragData.draggedNodes,
+            mode: dragData.action,
         });
-
-        DragCursorDirective.dragState.element = drag.container.data;
-        DragCursorDirective.dragState.dropAllowed = allowed;
     }
 
-    drop(drop: CdkDragDrop<T, any>) {
-        this.entriesService.dragDrop.dropped(drop.container.data, {
-            element: [drop.item.data],
-            sourceList: this.entriesService.list,
-            mode: DragCursorDirective.dragState.mode,
-        });
-        DragCursorDirective.dragState.element = null;
+    getDragEnabled(): boolean {
+        return this.entriesService.dragDrop?.dragAllowed && !this.ui.isMobile();
     }
 
-    dragExit(exit: CdkDragExit<T> | any) {
-        console.log(exit);
-        DragCursorDirective.dragState.element = null;
+    getDragData(node: T): T[] {
+        const selection = this.entriesService.selection;
+        if (selection.isSelected(node)) {
+            return selection.selected;
+        } else {
+            return [node];
+        }
     }
 
-    getDragState() {
-        return DragCursorDirective.dragState;
+    onDragStarted(node: T) {
+        if (!this.entriesService.selection.isSelected(node)) {
+            this.entriesService.selection.clear();
+            this.entriesService.selection.select(node);
+        }
+        this.isDragging = true;
+    }
+
+    onDragEnded() {
+        this.isDragging = false;
     }
 }

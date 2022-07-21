@@ -1,4 +1,5 @@
 @use 'sass:map';
+@use 'sass:color';
 @import 'branding';
 
 // All variables can be overridden in `branding.scss`.
@@ -45,8 +46,8 @@ $listItemSelectedBackgroundEffect: linear-gradient(
         to right,
         $primary 0,
         $primary 5px,
-        rgba(red($primary), green($primary), blue($primary), 0.15) 5px,
-        rgba(red($primary), green($primary), blue($primary), 0.15) 5px
+        color.mix($primary, $backgroundColor, $weight: 15%) 5px,
+        color.mix($primary, $backgroundColor, $weight: 15%) 5px
     )
     no-repeat !default;
 $workspaceTreeBackground: #f7f7f7 !default;

@@ -1,4 +1,4 @@
-<div class="frame" cdkDropListGroup>
+<div class="frame" cdkDropList [cdkDropListSortingDisabled]="true">
   <div *ngIf="isBlocked" class="isBlocked">{{ 'NO_PERMISSIONS_FOR_SCOPE' | translate }}</div>
   <div *ngIf="!isBlocked" [class.hide]="globalProgress">
     <div class="dialog" *ngIf="showSelectRoot" (click)="showSelectRoot = false"></div>
@@ -68,7 +68,8 @@
           [breadcrumbsAsNode]="path"
           [searchQuery]="searchQuery ? searchQuery.query : null"
           [home]="'WORKSPACE.' + root"
-          (onDrop)="handleDrop($event)"
+          [canDropNodes]="canDropOnBreadcrumb"
+          (onDrop)="handleDropOnBreadcrumb($event)"
           (onClick)="openBreadcrumb($event)"
         ></es-breadcrumbs>
       </div>

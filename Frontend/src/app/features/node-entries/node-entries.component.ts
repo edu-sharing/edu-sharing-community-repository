@@ -27,7 +27,7 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType> implements OnCh
     handleKeyboardEvent(event: KeyboardEvent): void {
         if (
             event.code === 'KeyA' &&
-            (event.ctrlKey || this.uiService.isAppleCmd()) &&
+            (event.ctrlKey || event.metaKey) &&
             !KeyEvents.eventFromInputField(event)
         ) {
             if (this.entriesService.selection.isEmpty()) {

@@ -7,6 +7,7 @@
   (keydown.ContextMenu)="openContextmenu($event)"
 >
   <button
+    *ngIf="dropdown"
     #menuTrigger="matMenuTrigger"
     mat-button
     class="dropdown-dummy cdk-visually-hidden"
@@ -59,7 +60,8 @@
         class="node-comments"
         *ngIf="node.type === 'ccm:io'"
         (click)="
-          entriesService.clickItem.emit({
+          entriesService.onClicked({
+            event: $event,
             element: node,
             source: ClickSource.Comments
           })
@@ -88,7 +90,7 @@
     <div class="card-top-bar-checkbox">
       <mat-checkbox
         [checked]="entriesService.selection.isSelected(node)"
-        (change)="entriesService.handleSelectionEvent(node)"
+        (change)="entriesService.onCheckboxChanged(node, $event.checked)"
         aria-label="{{ 'SELECT' | translate: { element: (node | nodeTitle) } }}"
       ></mat-checkbox>
     </div>
@@ -112,7 +114,8 @@
     *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink"
     class="clickable"
     (click)="
-      entriesService.clickItem.emit({
+      entriesService.onClicked({
+        event: $event,
         element: node,
         source: ClickSource.Metadata
       })
@@ -147,6 +150,7 @@
       ></es-option-button>
       <div class="card-options-spacer"></div>
       <button
+        *ngIf="dropdown"
         mat-icon-button
         color="primary"
         (click)="openMenu(node)"

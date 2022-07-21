@@ -585,7 +585,7 @@ export class ListTableComponent
     handleKeyboardEvent(event: KeyboardEvent): void {
         if (
             event.code === 'KeyA' &&
-            (event.ctrlKey || this.ui.isAppleCmd()) &&
+            (event.ctrlKey || event.metaKey) &&
             !KeyEvents.eventFromInputField(event) &&
             !this.preventKeyevents
         ) {
@@ -835,7 +835,7 @@ export class ListTableComponent
     }
 
     onCheckboxClick(node: Node) {
-        if (this.ui.isShiftCmd() && this.selectedNodes.length > 0 && !this.isSelected(node)) {
+        if (this.ui.shiftKeyPressed && this.selectedNodes.length > 0 && !this.isSelected(node)) {
             this.expandNodeSelection(node);
         } else {
             this.toggleSelection(node);

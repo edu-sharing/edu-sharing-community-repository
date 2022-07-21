@@ -381,6 +381,8 @@
     "PASTE_MOVE": "verschoben",
     "SOURCE_TARGET_IDENTICAL": "Die Quelle und Ziel des Vorgangs sind identisch",
     "TARGET_NO_DIRECTORY": "Das Ziel muss ein Verzeichnis sein",
+    "TARGET_NO_WRITE_PERMISSIONS": "Sie haben nicht die nötigen Rechte, um Dateien in dieses Verzeichnis zu verschieben",
+    "SOURCE_NO_WRITE_PERMISSIONS": "Sie haben nicht die nötigen Rechte, um die gewählten Dateien in ein anderes Verzeichnis zu verschieben",
     "DRAG_DROP_TITLE": "Elementoperation",
     "DRAG_DROP_MESSAGE": "Element {{source}} nach {{target}} kopieren oder verschieben?",
     "DRAG_DROP_COPY": "Kopieren",

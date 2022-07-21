@@ -1,5 +1,5 @@
 @mixin clickable() {
-    cursor: pointer !important;
+    cursor: pointer;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;

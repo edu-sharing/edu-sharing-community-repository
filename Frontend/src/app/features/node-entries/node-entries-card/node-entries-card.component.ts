@@ -66,6 +66,11 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
     openContextmenu(event: MouseEvent | Event) {
         event.stopPropagation();
         event.preventDefault();
+        if (!this.dropdown) {
+            // Call `preventDefault()` even when there is no menu, so we can use `cdkDrag` with a
+            // start delay without being interrupted by the standard long-tap action.
+            return;
+        }
         if (event instanceof MouseEvent) {
             ({ clientX: this.dropdownLeft, clientY: this.dropdownTop } = event);
         } else {

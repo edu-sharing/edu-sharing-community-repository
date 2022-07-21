@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 @import '../../../core-ui-module/styles/variables';
 $defaultColumnWidth: 120px;
 $rowHeight: 58px;
@@ -50,14 +52,6 @@ mat-cell {
 
 .mat-row {
     cursor: pointer;
-    &.mat-row-drop-allowed {
-        border: 2px dashed $colorStatusPositive;
-        cursor: inherit;
-    }
-    &.mat-row-drop-blocked {
-        border: 2px dashed $colorStatusNegative;
-        cursor: inherit;
-    }
     &.mat-row-virtual {
         background: linear-gradient(
             to right,
@@ -74,6 +68,9 @@ mat-cell {
     }
     &.mat-row-selected {
         background: $listItemSelectedBackgroundEffect;
+    }
+    &.selected-when-dragging {
+        opacity: 0.5; // Same as .cdk-drag-placeholder
     }
 }
 .dropdown-dummy {

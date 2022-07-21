@@ -1,5 +1,3 @@
-import { CdkDragDrop, CdkDragExit, CdkDropList } from '@angular/cdk/drag-drop';
-import { CdkDrag } from '@angular/cdk/drag-drop/directives/drag';
 import { CdkOverlayOrigin } from '@angular/cdk/overlay';
 import {
     AfterViewInit,
@@ -15,13 +13,13 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Toast } from 'src/app/core-ui-module/toast';
-import { UIService, ListItem, Node } from '../../../core-module/core.module';
-import { DragCursorDirective } from '../../../shared/directives/drag-cursor.directive';
+import { ListItem, Node, UIService } from '../../../core-module/core.module';
 import { NodeEntriesService } from '../../../core-ui-module/node-entries.service';
 import { Target } from '../../../core-ui-module/option-item';
+import { DragData } from '../../../services/nodes-drag-drop.service';
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
-import { InteractionType, ClickSource } from '../entries-model';
-
+import { CanDrop } from '../../../shared/directives/nodes-drop-target.directive';
+import { ClickSource, InteractionType } from '../entries-model';
 import { NodeEntriesDataType } from '../node-entries.component';
 
 @Component({
@@ -52,7 +50,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     ready = false;
     error: Observable<any>;
     pageSizeOptions = [25, 50, 100];
-    dragSource: T;
+    isDragging = false;
 
     constructor(
         public entriesService: NodeEntriesService<T>,
@@ -63,7 +61,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     ) {}
 
     ngAfterViewInit(): void {
-        Promise.resolve().then(() => {
+        void Promise.resolve().then(() => {
             this.ready = true;
             this.registerSortChanges();
         });
@@ -187,37 +185,36 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
          */
     }
 
-    sortPredicate = (index: number) => {
-        const currentTarget = this.entriesService.dataSource.getData()[index];
-        if (DragCursorDirective.dragState.element !== currentTarget) {
-            this.ngZone.run(() => {
-                this.dragEnter(currentTarget as Node);
-            });
-        }
-        return false;
+    canDrop = (dragData: DragData<T>): CanDrop => {
+        return this.entriesService.dragDrop.dropAllowed?.(dragData);
     };
 
-    private dragEnter = (target: Node) => {
-        const allowed = this.entriesService.dragDrop.dropAllowed?.(target, {
-            element: [this.dragSource],
-            sourceList: this.entriesService.list,
-            mode: DragCursorDirective.dragState.mode,
+    drop(dragData: DragData<Node>) {
+        this.entriesService.dragDrop.dropped(dragData.target, {
+            element: dragData.draggedNodes,
+            mode: dragData.action,
         });
-        DragCursorDirective.dragState.element = target;
-        DragCursorDirective.dragState.dropAllowed = allowed;
-    };
-
-    drop(drop: CdkDragDrop<T, any>) {
-        this.entriesService.dragDrop.dropped(DragCursorDirective.dragState.element, {
-            element: [this.dragSource],
-            sourceList: this.entriesService.list,
-            mode: DragCursorDirective.dragState.mode,
-        });
-        DragCursorDirective.dragState.element = null;
     }
 
-    dragExit(exit: CdkDragExit<T> | any) {
-        DragCursorDirective.dragState.element = null;
+    getDragData(node: T): T[] {
+        const selection = this.entriesService.selection;
+        if (selection.isSelected(node)) {
+            return selection.selected;
+        } else {
+            return [node];
+        }
+    }
+
+    onDragStarted(node: T) {
+        if (!this.entriesService.selection.isSelected(node)) {
+            this.entriesService.selection.clear();
+            this.entriesService.selection.select(node);
+        }
+        this.isDragging = true;
+    }
+
+    onDragEnded() {
+        this.isDragging = false;
     }
 
     loadData() {
@@ -226,10 +223,6 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
                 offset: this.entriesService.dataSource.getData().length,
             });
         }
-    }
-
-    getDragState() {
-        return DragCursorDirective.dragState;
     }
 
     async openMenu(node: T) {

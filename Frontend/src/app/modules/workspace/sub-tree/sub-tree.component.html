@@ -14,44 +14,41 @@
   <div *ngIf="_nodes && _nodes.length" [@open]="_nodes && _nodes.length">
     <div *ngFor="let node of _nodes; let i = index" (contextmenu)="contextMenu($event, node)">
       <div
-        cdkDropList
-        cdkDropListOrientation="horizontal"
         class="sub-tree-element"
-        [class.drop-target]="getDragState()?.element === node"
-        [cdkDropListData]="node"
-        (cdkDropListEntered)="dragEnter($event)"
-        (cdkDropListExited)="dragExit($event)"
-        (cdkDropListDropped)="drop($event)"
+        cdkDrag
+        [cdkDragData]="[node]"
+        esNodesDrag
+        [esNodesDropTarget]="node"
+        [canDropNodes]="canDropOnNode"
+        (nodeDropped)="onDropped($event)"
       >
-        <div cdkDrag esDragCursor>
-          <div [matMenuTriggerFor]="dropdown.menu"></div>
+        <div [matMenuTriggerFor]="dropdown.menu"></div>
+        <div
+          [style.paddingLeft.px]="depth * 20"
+          class="node waves-effect"
+          [class.nodeSelected]="isSelected(node)"
+          [class.hover]="dragHover == node"
+        >
           <div
-            [style.paddingLeft.px]="depth * 20"
-            class="node waves-effect"
-            [class.nodeSelected]="isSelected(node)"
-            [class.hover]="dragHover == node"
+            class="fade-right"
+            *ngIf="loadingStates[i]"
+            [class.fade-right-selected]="isSelected(node)"
+          ></div>
+          <i *ngIf="!isOpen(node)" class="arrow material-icons" (click)="openOrCloseTree(node)">
+            keyboard_arrow_right
+          </i>
+          <i
+            *ngIf="isOpen(node)"
+            [class.opacity-invisible]="!_hasChilds[getPathOpen(node)]"
+            class="arrow material-icons arrow"
+            (click)="_hasChilds[getPathOpen(node)] ? openOrCloseTree(node) : null"
           >
-            <div
-              class="fade-right"
-              *ngIf="loadingStates[i]"
-              [class.fade-right-selected]="isSelected(node)"
-            ></div>
-            <i *ngIf="!isOpen(node)" class="arrow material-icons" (click)="openOrCloseTree(node)">
-              keyboard_arrow_right
-            </i>
-            <i
-              *ngIf="isOpen(node)"
-              [class.opacity-invisible]="!_hasChilds[getPathOpen(node)]"
-              class="arrow material-icons arrow"
-              (click)="_hasChilds[getPathOpen(node)] ? openOrCloseTree(node) : null"
-            >
-              keyboard_arrow_down
-            </i>
-            <!--
+            keyboard_arrow_down
+          </i>
+          <!--
           <i class="material-icons">folder</i>-->
-            <img src="{{ node.iconURL }}" alt="{{ node.name }}" (click)="openOrCloseNode(node)" />
-            <span class="name" (click)="openOrCloseNode(node)">{{ node.name }}</span>
-          </div>
+          <img src="{{ node.iconURL }}" alt="{{ node.name }}" (click)="openOrCloseNode(node)" />
+          <span class="name" (click)="openOrCloseNode(node)">{{ node.name }}</span>
         </div>
       </div>
       <es-workspace-sub-tree

@@ -181,7 +181,7 @@
           [class.dark-color]="getIsDarkColor(node)"
           [class.import-blocked]="
             node.properties && node.properties['ccm:importblocked']
-              ? node.properties['ccm:importblocked'][0] == 'true'
+              ? node.properties['ccm:importblocked'][0] === 'true'
               : false
           "
           (esDistinctClick)="onDistinctClick($event, node)"
@@ -191,7 +191,7 @@
           [esNodesDragSource]="dragDrop ? selectedNodes : null"
           (nodesDragStart)="onNodesDragStart($event, node)"
           (nodesDragEnd)="onNodesDragEnd()"
-          [esNodesDropTarget]="canDropNodes.bind(this, node)"
+          [esLegacyNodesDropTarget]="canDropNodes.bind(this, node)"
           [nodesDragAllowedActions]="['move', 'copy']"
           (nodesDragEnter)="onNodesDragEnter(node)"
           (nodesHoveringChange)="onNodesHoveringChange($event, node)"
@@ -289,7 +289,7 @@
                 <a
                   *ngIf="
                     node.properties['ccm:questionsallowed'] &&
-                    node.properties['ccm:questionsallowed'][0] == 'true'
+                    node.properties['ccm:questionsallowed'][0] === 'true'
                   "
                   (click)="askCCPublish($event, node)"
                   ><i esIcon="message"></i> {{ 'ASK_CC_PUBLISH' | translate }}</a

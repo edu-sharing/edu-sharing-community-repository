@@ -40,6 +40,7 @@ import {
 import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-entries-wrapper.component';
 import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 import { NodeEntriesDataType } from 'src/app/features/node-entries/node-entries.component';
+import { canDropOnNode } from '../workspace-utils';
 
 @Component({
     selector: 'es-workspace-explorer',
@@ -395,13 +396,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             }
         });
     }
-    canDrop = (target: DropTarget, source: DropSource<Node>) => {
-        return (
-            (target as Node).isDirectory &&
-            (target as Node).access?.includes(RestConstants.ACCESS_WRITE) &&
-            source.element.every((s) => s.access.includes(RestConstants.ACCESS_WRITE))
-        );
-    };
+    canDrop = canDropOnNode;
     drop = (target: DropTarget, source: DropSource<Node>) => {
         this.onDrop.emit({
             target,

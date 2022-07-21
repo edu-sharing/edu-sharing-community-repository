@@ -1,14 +1,9 @@
 import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
-import { Node, RestNodeService, RestConstants } from '../../../core-module/core.module';
-import {
-    DragData,
-    DragNodeTarget,
-    DropData,
-} from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
 import { Params, QueryParamsHandling } from '@angular/router';
-import { CdkDragDrop, CdkDragEnter, CdkDragExit } from '@angular/cdk/drag-drop';
-import { DragCursorDirective } from '../../directives/drag-cursor.directive';
 import { DropSource } from 'src/app/features/node-entries/entries-model';
+import { Node, RestConstants, RestNodeService } from '../../../core-module/core.module';
+import { DragData, NodesDragDropService } from '../../../services/nodes-drag-drop.service';
+import { CanDrop } from '../../directives/nodes-drop-target.directive';
 
 /**
  * Breadcrumbs for nodes or collections.
@@ -73,7 +68,9 @@ export class BreadcrumbsComponent {
      * Set the breadcrumb list as a @Node array.
      */
     @Input() set breadcrumbsAsNode(nodes: Node[]) {
-        if (nodes == null) return;
+        if (nodes == null) {
+            return;
+        }
         this.nodes = nodes;
         this.addSearch();
     }
@@ -83,12 +80,16 @@ export class BreadcrumbsComponent {
      * The breadcrumb nodes will get async resolved via API.
      */
     @Input() set breadcrumbsForId(id: string) {
-        if (id == null) return;
+        if (id == null) {
+            return;
+        }
         this.node.getNodeParents(id, false, [RestConstants.ALL]).subscribe((nodes) => {
             this.nodes = nodes.nodes.reverse();
             this.addSearch();
         });
     }
+
+    @Input() canDropNodes: (dragData: DragData<'HOME' | Node>) => CanDrop;
 
     /**
      * A breadcrumb is clicked.
@@ -99,13 +100,14 @@ export class BreadcrumbsComponent {
     /**
      * Called when an item is dropped on the breadcrumbs.
      */
-    @Output() onDrop = new EventEmitter<{ target: Node; source: DropSource<Node> }>();
+    @Output() onDrop = new EventEmitter<{ target: Node | 'HOME'; source: DropSource<Node> }>();
 
+    readonly HOME = 'HOME' as 'HOME';
     nodes: Node[] = [];
 
     private _searchQuery: string;
 
-    constructor(private node: RestNodeService) {}
+    constructor(private node: RestNodeService, private nodesDragDrop: NodesDragDropService) {}
 
     openBreadcrumb(position: number) {
         this.onClick.emit(position);
@@ -131,27 +133,37 @@ export class BreadcrumbsComponent {
         }
     }
 
-    drop(event: CdkDragDrop<Node | any>) {
+    onDropped(dragData: DragData<'HOME' | Node>) {
         this.onDrop.emit({
-            target: event.container.data,
+            target: dragData.target,
             source: {
-                element: [event.item.data],
-                sourceList: null,
-                mode: DragCursorDirective.dragState.mode,
+                element: dragData.draggedNodes,
+                mode: dragData.action,
             },
         });
-        DragCursorDirective.dragState.element = null;
-    }
-    getDragState() {
-        return DragCursorDirective.dragState;
     }
 
-    dragExit(event: CdkDragExit<any>) {
-        DragCursorDirective.dragState.element = null;
-    }
+    // drop(event: CdkDragDrop<Node | any>) {
+    //     // this.onDrop.emit({
+    //     //     target: event.container.data,
+    //     //     source: {
+    //     //         element: [event.item.data],
+    //     //         sourceList: null,
+    //     //         mode: DragCursorDirective.dragState.mode,
+    //     //     },
+    //     // });
+    //     // DragCursorDirective.dragState.element = null;
+    // }
+    // getDragState() {
+    //     return {} as any;
+    // }
 
-    dragEnter(event: CdkDragEnter<any>) {
-        DragCursorDirective.dragState.element = event.container.data;
-        DragCursorDirective.dragState.dropAllowed = true;
-    }
+    // dragExit(event: CdkDragExit<any>) {
+    //     // DragCursorDirective.dragState.element = null;
+    // }
+
+    // dragEnter(event: CdkDragEnter<any>) {
+    //     // DragCursorDirective.dragState.element = event.container.data;
+    //     // DragCursorDirective.dragState.dropAllowed = true;
+    // }
 }
