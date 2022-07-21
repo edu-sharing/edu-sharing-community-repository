@@ -203,6 +203,11 @@ input[type='checkbox']:checked {
     }
 }
 
+.cdk-drag:not(.cdk-drag-disabled) {
+    // Fixes a bug where Firefox won't fire mouseenter/-leave events while dragging. The bug only
+    // occurs in combination with `overflow: hidden`.
+    user-select: none;
+}
 .es-nodes-active-drop-target-accept {
     outline: 2px dashed $colorStatusPositive;
     outline-offset: -2px;
