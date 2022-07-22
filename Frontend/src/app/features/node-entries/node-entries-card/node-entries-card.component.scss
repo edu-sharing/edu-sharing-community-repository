@@ -18,6 +18,10 @@ $collectionIconSize: 40px;
             }
         }
     }
+    .card-meta, .card-options {
+        // used to prevent coloring in case of collections
+        background-color: $backgroundColor;
+    }
 }
 :host ::ng-deep {
     .grid-card {
