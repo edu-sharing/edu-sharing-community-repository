@@ -2,7 +2,6 @@
   class="grid-card"
   [class.grid-card-collection]="nodeHelper.isNodeCollection(node)"
   [class.grid-card-virtual]="node.virtual"
-  [style.background-color]="nodeHelper.isNodeCollection(node) ? node.collection.color : null"
   (contextmenu)="openContextmenu($event)"
   (keydown.ContextMenu)="openContextmenu($event)"
 >
@@ -16,7 +15,10 @@
     tabindex="-1"
     aria-hidden="true"
   ></button>
-  <div class="card-top-bar">
+  <div class="card-top-bar"
+       [style.background-color]="nodeHelper.isNodeCollection(node) ? node.collection.color : null"
+  >
+    <div class="card-top-bar-collection-color" *ngIf="nodeHelper.isNodeCollection(node)"></div>
     <div class="card-top-bar-type">
       <ng-container *ngIf="nodeHelper.isNodeCollection(node)">
         <i
@@ -159,7 +161,9 @@
   </div>
 </div>
 <ng-template #image let-playAnimation="playAnimation">
-  <div class="card-image-area">
+  <div class="card-image-area"
+       [style.background-color]="nodeHelper.isNodeCollection(node) ? node.collection.color : null"
+  >
     <es-preview-image
       *ngIf="!(nodeHelper.isNodeCollection(node) && node.preview.isIcon)"
       [node]="node"
