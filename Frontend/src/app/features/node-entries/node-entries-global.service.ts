@@ -24,15 +24,23 @@ export class NodeEntriesGlobalService {
         [Scope.Search]: PaginationStrategy.InfiniteScroll,
         DEFAULT: PaginationStrategy.InfiniteScroll,
     };
-    public paginatorSizeOptions = [25, 50, 75, 100];
+    private paginatorSizeOptions: {[key in PaginationScope]?: number[]} = {
+        DEFAULT: [25, 50, 75, 100],
+    };
 
     constructor() {}
 
     public setPaginationStrategy(scope: PaginationScope, strategy: PaginationStrategy) {
         this.paginationStrategy[scope] = strategy;
     }
-    public getPaginationStrategy(scope: Scope): PaginationStrategy{
+    public getPaginationStrategy(scope: Scope) {
         return this.paginationStrategy[scope] ?? this.paginationStrategy['DEFAULT'];
+    }
+    public setPaginatorSizeOptions(scope: PaginationScope, size: number[]) {
+        this.paginatorSizeOptions[scope] = size;
+    }
+    public getPaginatorSizeOptions(scope: Scope) {
+        return this.paginatorSizeOptions[scope] ?? this.paginatorSizeOptions['DEFAULT'];
     }
     public getCustomFieldTemplate(item: ListItem) {
         return this.customFields.filter(c => c.type === item.type && c.name === item.name)?.[0]?.templateRef;
