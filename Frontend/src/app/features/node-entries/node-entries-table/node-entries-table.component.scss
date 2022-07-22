@@ -39,13 +39,16 @@ mat-cell {
     }
     &.mat-column-select {
         flex: 0 54px;
+        min-width: 54px;
     }
     &.mat-column-icon {
         flex: 0 65px;
+        min-width: 65px;
         justify-content: center;
     }
     &.mat-column-actions {
         flex: 0 50px;
+        min-width: 50px;
         display: flex;
         justify-content: flex-end;
         padding-right: 5px;
