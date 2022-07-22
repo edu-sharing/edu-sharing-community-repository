@@ -1,5 +1,6 @@
 @import '../../../core-ui-module/styles/variables';
 $defaultColumnWidth: 120px;
+$minColumnWidth: 30%;
 $rowHeight: 58px;
 
 :host {
@@ -32,6 +33,9 @@ mat-cell {
     // do not fix the "primary/title" column
     &:not(.mat-column-primary) {
         flex: 0 $defaultColumnWidth;
+    }
+    &.mat-column-primary {
+        min-width: $minColumnWidth;
     }
     &.mat-column-select {
         flex: 0 54px;
