@@ -18,7 +18,13 @@ $collectionIconSize: 40px;
             }
         }
     }
-    .card-meta, .card-options {
+    .card-options {
+        // used to prevent coloring in case of collections
+        background-color: $backgroundColor;
+    }
+}
+.grid-card:not(:hover) {
+    .card-meta {
         // used to prevent coloring in case of collections
         background-color: $backgroundColor;
     }

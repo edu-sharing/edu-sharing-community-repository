@@ -175,7 +175,7 @@
 </ng-template>
 <ng-template #meta let-link="link">
   <div class="card-meta">
-    <div *ngFor="let displayPart of getVisibleColumns(); let first = first" class="card-meta-row">
+    <div *ngFor="let displayPart of getVisibleColumns(); let first = first" class="card-meta-row" [class.card-meta-row-primary]="first">
       <ng-container *ngIf="first">
         <es-node-url
           *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
