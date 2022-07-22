@@ -71,6 +71,8 @@ import { LoadingScreenService } from '../../main/loading-screen/loading-screen.s
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { NodeEntriesDisplayType, ListEventInterface, ListSortConfig, DropSource, DropTarget } from 'src/app/features/node-entries/entries-model';
 import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
+import {InfobarComponent} from "../../common/ui/infobar/infobar.component";
+import {CollectionInfoBarComponent} from "./collection-info-bar/collection-info-bar.component";
 
 // component class
 @Component({
@@ -104,7 +106,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
 
-    @ViewChild('actionbarCollection') actionbarCollection: ActionbarComponent;
+    @ViewChild('infobar') infobar: CollectionInfoBarComponent;
     @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
     @ViewChild('listCollections') listCollections: ListTableComponent;
     @ViewChild('listReferences') listReferences: ListEventInterface<CollectionReference>;
@@ -1294,7 +1296,7 @@ export class CollectionsMainComponent implements OnInit, AfterViewInit, OnDestro
             activeObjects: [this.collectionContent.node],
         });
         this.optionsService.initComponents(
-            this.actionbarCollection,
+            this.infobar.actionbar,
             this.listReferences,
         );
         this.optionsService.refreshComponents();
