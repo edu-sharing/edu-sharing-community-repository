@@ -395,7 +395,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                                 this.mainnav = params.mainnav === 'false' ? false : true;
 
                                 if (params.file) {
-                                    this.node.getNodeMetadata(params.file).subscribe((data: NodeWrapper) => {
+                                    this.node.getNodeMetadata(params.file, [RestConstants.ALL]).subscribe((data: NodeWrapper) => {
                                         this.setSelection([data.node]);
                                         this.parameterNode = data.node;
                                         this.mainNavRef.management.nodeSidebar = data.node;
