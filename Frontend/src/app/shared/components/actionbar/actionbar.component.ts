@@ -5,7 +5,7 @@ import { UIService } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
-import { KeyCombination, OptionItem } from '../../../core-ui-module/option-item';
+import { OptionItem } from '../../../core-ui-module/option-item';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 
 @Component({

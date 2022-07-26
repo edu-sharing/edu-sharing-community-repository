@@ -12,6 +12,10 @@ import { QrDialogData } from './dialog-modules/qr-dialog/qr-dialog.component';
     providedIn: 'root',
 })
 export class DialogsService {
+    get openDialogs() {
+        return this.cardDialog.openDialogs;
+    }
+
     constructor(private cardDialog: CardDialogService, private translate: TranslateService) {}
 
     async openQrDialog(data: QrDialogData): Promise<CardDialogRef<QrDialogData, void>> {

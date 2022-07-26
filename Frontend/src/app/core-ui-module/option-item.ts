@@ -6,6 +6,7 @@
 
  */
 import { NodesRightMode } from '../core-module/rest/data-object';
+import { KeyboardShortcutCondition } from '../services/keyboard-shortcuts.service';
 
 export class OptionItem {
     /**
@@ -111,8 +112,8 @@ export class OptionItem {
      */
     public group: OptionGroup;
 
-    public key: string;
-    public keyCombination: KeyCombination[];
+    public keyboardShortcut: KeyboardShortcutCondition;
+
     /**
      * Or concat of supported element types for the action
      */
@@ -222,9 +223,7 @@ export enum Constrain {
     ReurlMode, // Only visible when a reurl is present (called to pick object from lms)
     LTIMode, // Only visible when a lti session is present (called to pick object from lti platform)
 }
-export enum KeyCombination {
-    CtrlOrAppleCmd,
-}
+
 export enum Target {
     List, // Target is the ListTableComponent
     ListDropdown,

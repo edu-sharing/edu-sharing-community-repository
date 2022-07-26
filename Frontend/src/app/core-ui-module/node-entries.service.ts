@@ -51,6 +51,7 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     set gridConfig(value: GridConfig) {
         this.gridConfig$.next(value);
     }
+    globalKeyboardShortcuts: boolean;
 
     constructor(private uiService: UIService) {}
 
@@ -71,6 +72,22 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
         if (checked !== this.selection.isSelected(node)) {
             this.selection.toggle(node);
         }
+    }
+
+    toggleSelectAll() {
+        if (this.isAllSelected()) {
+            this.selection.clear();
+        } else {
+            this.selectAll();
+        }
+    }
+
+    private selectAll() {
+        this.selection.select(...this.dataSource.getData());
+    }
+
+    private isAllSelected(): boolean {
+        return this.dataSource.getData().every((node) => this.selection.isSelected(node));
     }
 
     private expandSelectionTo(node: T) {

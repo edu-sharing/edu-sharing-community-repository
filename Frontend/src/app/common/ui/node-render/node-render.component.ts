@@ -62,10 +62,7 @@ import {
 import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { VideoControlsComponent } from '../../../core-ui-module/components/video-controls/video-controls.component';
 import { ActionbarComponent } from '../../../shared/components/actionbar/actionbar.component';
-import {
-    OPTIONS_HELPER_CONFIG,
-    OptionsHelperService,
-} from '../../../core-ui-module/options-helper.service';
+import { OptionsHelperService } from '../../../core-ui-module/options-helper.service';
 import { RestTrackingService } from '../../../core-module/rest/services/rest-tracking.service';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { CardComponent } from '../../../shared/components/card/card.component';
@@ -81,15 +78,7 @@ import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
     selector: 'es-node-render',
     templateUrl: 'node-render.component.html',
     styleUrls: ['node-render.component.scss'],
-    providers: [
-        OptionsHelperService,
-        {
-            provide: OPTIONS_HELPER_CONFIG,
-            useValue: {
-                subscribeEvents: true,
-            },
-        },
-    ],
+    providers: [OptionsHelperService],
     animations: [trigger('fadeFast', UIAnimation.fade(UIAnimation.ANIMATION_TIME_FAST))],
 })
 export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
@@ -194,6 +183,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
             show: false,
             currentScope: 'render',
         });
+        this.optionsHelper.registerGlobalKeyboardShortcuts();
         this.optionsHelper.nodesChanged
             .pipe(takeUntil(this.destroyed$))
             .subscribe(() => this.refresh());

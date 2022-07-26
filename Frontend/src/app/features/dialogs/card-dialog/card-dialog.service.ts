@@ -19,6 +19,8 @@ import { CardDialogState, ViewMode } from './card-dialog-state';
     providedIn: 'root',
 })
 export class CardDialogService {
+    readonly openDialogs: CardDialogRef[] = [];
+
     constructor(
         private injector: Injector,
         private overlay: Overlay,
@@ -45,6 +47,7 @@ export class CardDialogService {
         );
         // Notify the dialog container that the content has been attached.
         containerRef.instance.initializeWithAttachedContent();
+        this.registerOpenDialog<T, D, R>(dialogRef);
         return dialogRef;
     }
 
@@ -92,6 +95,16 @@ export class CardDialogService {
                         break;
                 }
             });
+    }
+
+    private registerOpenDialog<T, D, R>(dialogRef: CardDialogRef<D, R>) {
+        this.openDialogs.push(dialogRef);
+        dialogRef.afterClosed().subscribe(() => {
+            const index = this.openDialogs.indexOf(dialogRef);
+            if (index >= 0) {
+                this.openDialogs.splice(index, 1);
+            }
+        });
     }
 
     private createViewModeObservable(): Observable<ViewMode> {

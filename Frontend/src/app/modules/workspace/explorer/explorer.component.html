@@ -51,6 +51,7 @@
     dropAllowed: canDrop,
     dropped: drop
   }"
+  [globalKeyboardShortcuts]="true"
   (sortChange)="setSorting($event)"
   (clickItem)="clickItem($event)"
   (dblClickItem)="onOpenNode.emit($event.element)"

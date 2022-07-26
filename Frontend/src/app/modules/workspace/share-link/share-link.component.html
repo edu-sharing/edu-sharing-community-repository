@@ -44,17 +44,17 @@
 
         <div class="info-right">
           <mat-slide-toggle
-            [(ngModel)]="password"
+            [(ngModel)]="passwordEnabled"
             (change)="setPassword()"
             [disabled]="!enabled"
           ></mat-slide-toggle>
         </div>
         <es-input-password
-          *ngIf="password"
+          *ngIf="passwordEnabled"
           (change)="setPassword()"
           [(value)]="passwordString"
           label="{{
-            (edit
+            (passwordAlreadySet
               ? 'WORKSPACE.SHARE_LINK.PASSWORD_PLACEHOLDER_EDIT'
               : 'WORKSPACE.SHARE_LINK.PASSWORD_PLACEHOLDER'
             ) | translate

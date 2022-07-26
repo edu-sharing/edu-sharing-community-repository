@@ -32,6 +32,13 @@ import { NodeImageSizePipe } from '../../../shared/pipes/node-image-size.pipe';
 // Charts.js
 declare var Chart: any;
 
+interface Stats {
+    labels: string[];
+    colors: string[];
+    points: number[];
+    pointsIcons: string[];
+}
+
 @Component({
     selector: 'es-workspace-metadata',
     templateUrl: 'metadata.component.html',
@@ -65,10 +72,7 @@ export class WorkspaceMetadataComponent implements OnInit {
     statsTotalPoints: number;
     forkedParent: Node;
     forkedChilds: Node[];
-    /*Chart.js*/
-    canvas: any;
-    ctx: any;
-    stats: any = {
+    stats: Stats = {
         labels: [],
         points: [],
         pointsIcons: ['input', 'layers', 'cloud_download', 'remove_red_eye'],
@@ -377,75 +381,80 @@ export class WorkspaceMetadataComponent implements OnInit {
         this.stats.points.push(this.usages.length - this.usagesCollection.length);
         this.stats.points.push(this.usagesCollection.length);
         this.stats.points.push(
-            this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_DOWNLOADS]
-                ? this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_DOWNLOADS]
-                : 0,
+            propertyToNumber(this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_DOWNLOADS]),
         );
         this.stats.points.push(
-            this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_VIEWS]
-                ? this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_VIEWS]
-                : 0,
+            propertyToNumber(this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_VIEWS]),
         );
-        this.statsTotalPoints = this.stats.points.reduce(
-            (a: any, b: any) => parseInt(a) + parseInt(b),
-        );
-        const statsMax = this.stats.points.reduce((a: any, b: any) =>
-            Math.max(parseInt(a), parseInt(b)),
-        );
-        this.canvas = document.getElementById('myChart');
-        if (this.canvas) {
-            this.ctx = this.canvas.getContext('2d');
-            // FontFamily
-            Chart.defaults.global.defaultFontFamily = 'open_sansregular';
-            const myChart = new Chart(this.ctx, {
-                type: 'bar',
-                data: {
-                    labels: this.stats.labels,
-                    datasets: [
+        this.statsTotalPoints = this.stats.points.reduce((a, b) => a + b);
+        this.drawBarChart();
+    }
+
+    private drawBarChart() {
+        const canvas = document.getElementById('myChart') as HTMLCanvasElement;
+        if (!canvas) {
+            return;
+        }
+        const ctx = canvas.getContext('2d');
+        // FontFamily
+        Chart.defaults.global.defaultFontFamily = 'open_sansregular';
+        const statsMax = Math.max(...this.stats.points);
+        const myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: this.stats.labels,
+                datasets: [
+                    {
+                        data: this.stats.points,
+                        backgroundColor: this.stats.colors,
+                        borderWidth: 0.2,
+                    },
+                ],
+            },
+            options: {
+                responsive: false,
+                legend: {
+                    display: false,
+                },
+                mode: 'index',
+                layout: {
+                    padding: {
+                        left: 0,
+                        right: 0,
+                        top: 20,
+                        bottom: 0,
+                    },
+                },
+                scales: {
+                    xAxes: [
                         {
-                            data: this.stats.points,
-                            backgroundColor: this.stats.colors,
-                            borderWidth: 0.2,
+                            ticks: {
+                                display: false,
+                            },
+                        },
+                    ],
+                    yAxes: [
+                        {
+                            ticks: {
+                                beginAtZero: true,
+                                max: Math.max(Math.round(statsMax * 1.25), 6),
+                            },
                         },
                     ],
                 },
-                options: {
-                    responsive: false,
-                    legend: {
-                        display: false,
-                    },
-                    mode: 'index',
-                    layout: {
-                        padding: {
-                            left: 0,
-                            right: 0,
-                            top: 20,
-                            bottom: 0,
-                        },
-                    },
-                    scales: {
-                        xAxes: [
-                            {
-                                ticks: {
-                                    display: false,
-                                },
-                            },
-                        ],
-                        yAxes: [
-                            {
-                                ticks: {
-                                    beginAtZero: true,
-                                    max: Math.max(Math.round(statsMax * 1.25), 6),
-                                },
-                            },
-                        ],
-                    },
-                },
-            });
-        }
+            },
+        });
     }
 
     canEdit() {
         return this.nodeObject && this.nodeObject.access.indexOf(RestConstants.ACCESS_WRITE) !== -1;
+    }
+}
+
+function propertyToNumber(property: string[]): number {
+    if (property?.length > 0) {
+        return parseInt(property[0]);
+    } else {
+        return 0;
     }
 }
