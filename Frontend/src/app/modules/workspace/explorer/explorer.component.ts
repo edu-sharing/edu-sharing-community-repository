@@ -41,6 +41,7 @@ import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-
 import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 import { NodeEntriesDataType } from 'src/app/features/node-entries/node-entries.component';
 import { canDropOnNode } from '../workspace-utils';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
     selector: 'es-workspace-explorer',
@@ -142,10 +143,14 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
 
     @ViewChild('list') list: ListTableComponent;
     @ViewChild(NodeEntriesWrapperComponent) nodeEntries: NodeEntriesWrapperComponent<Node>;
-    public _dataSource: NodeDataSource<Node>;
+    readonly dataSourceSubject = new BehaviorSubject<NodeDataSource<Node>>(null);
     @Input() customOptions: CustomOptions;
-    @Input() set dataSource(dataSource: NodeDataSource<Node>) {
-        this._dataSource = dataSource;
+    @Input()
+    get dataSource() {
+        return this.dataSourceSubject.value;
+    }
+    set dataSource(dataSource: NodeDataSource<Node>) {
+        this.dataSourceSubject.next(dataSource);
     }
     @Output() nodesChange = new EventEmitter<Node[]>();
     sort: ListSortConfig = {
@@ -208,18 +213,18 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     }
     public load(reset: boolean) {
         if (this._node == null && !this._searchQuery) return;
-        if (this._dataSource.isLoading) {
+        if (this.dataSource.isLoading) {
             setTimeout(() => this.load(reset), 10);
             return;
         }
         if (reset) {
-            this._dataSource = new NodeDataSource<Node>();
+            this.dataSource = new NodeDataSource<Node>();
             this.nodeEntries.getSelection().clear();
             this.onReset.emit();
-        } else if (this._dataSource.isFullyLoaded()) {
+        } else if (this.dataSource.isFullyLoaded()) {
             return;
         }
-        this._dataSource.isLoading = true;
+        this.dataSource.isLoading = true;
         // ignore virtual (new) added/uploaded elements
         const offset = this.getRealNodeCount();
         const request: any = {
@@ -293,7 +298,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     ngOnDestroy(): void {
         this.temporaryStorage.set(
             TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE,
-            this._dataSource,
+            this.dataSource,
         );
     }
 
@@ -308,16 +313,16 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             this.toast.error(null, 'WORKSPACE.TOAST.NOT_FOUND', { id: this._node.ref.id });
         else this.toast.error(error);
 
-        this._dataSource.isLoading = false;
+        this.dataSource.isLoading = false;
     }
     private addNodes(data: NodeList, wasSearch: boolean) {
         if (this.lastRequestSearch !== wasSearch) {
             return;
         }
-        this._dataSource.isLoading = false;
+        this.dataSource.isLoading = false;
         if (data && data.nodes) {
-            this._dataSource.appendData(data.nodes);
-            this._dataSource.setPagination(data.pagination);
+            this.dataSource.appendData(data.nodes);
+            this.dataSource.setPagination(data.pagination);
         }
     }
     constructor(
@@ -374,7 +379,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
                 this._node = null;
                 return;
             }
-            if (this._dataSource.isLoading) {
+            if (this.dataSource.isLoading) {
                 setTimeout(() => this.setNode(current), 10);
                 return;
             }
@@ -405,7 +410,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     };
 
     private getRealNodeCount() {
-        return this._dataSource?.getData().filter((n) => !n.virtual).length;
+        return this.dataSource?.getData().filter((n) => !n.virtual).length;
     }
 
     initColumns() {
@@ -438,7 +443,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     }
 
     onDelete(nodes: Node[]): void {
-        this._dataSource.removeData(nodes);
+        this.dataSource.removeData(nodes);
         this.nodeEntries?.getSelection().clear();
     }
 

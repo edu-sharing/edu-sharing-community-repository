@@ -465,6 +465,7 @@
       "NO_WRITE_PERMISSION": "Sie haben unzureichende Rechte, um Dateien am aktuellen Ort abzulegen.",
       "ONGOING_UPLOAD": "Ein Upload-Vorgang läuft bereits. Bitte warten Sie, bis der Vorgang abgeschlossen ist",
       "NOT_FOUND": "Die gewünschte Ordner-ID {{id}} wurde nicht gefunden. Eventuell wurde sie gelöscht.",
+      "ELEMENT_NOT_IN_FOLDER": "Das Element konnte in diesem Ordner nicht gefunden werden",
       "LICENSE_UPDATED": "Lizenzinformationen wurden aktualisiert",
       "CONTRIBUTOR_UPDATED": "Informationen zu Beteiligten wurden aktualisiert",
       "WORKFLOW_UPDATED": "Informationen zum Workflow wurden aktualisiert",

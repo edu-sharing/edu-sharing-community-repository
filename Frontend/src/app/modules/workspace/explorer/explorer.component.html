@@ -37,7 +37,7 @@
   (loadMore)="load(false)"></es-listTable>
   -->
 <es-node-entries-wrapper
-  [dataSource]="_dataSource"
+  [dataSource]="dataSource"
   [columns]="columns"
   [configureColumns]="true"
   (columnsChange)="saveColumns($event)"

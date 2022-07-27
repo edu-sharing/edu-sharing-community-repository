@@ -4,7 +4,7 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { delay, filter, first, switchMap } from 'rxjs/operators';
 import {
     DropSource,
     DropTarget,
@@ -462,7 +462,6 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         } else {
             needsUpdate = true;
         }
-        this.oldParams = params;
         if (params.displayType != null) {
             this.setDisplayType(
                 parseInt(params[UIConstants.QUERY_PARAM_LIST_VIEW_TYPE], 10),
@@ -489,12 +488,8 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
 
         this.initMainNav();
 
-        if (params.file) {
-            this.node.getNodeMetadata(params.file, [RestConstants.ALL]).subscribe((paramNode) => {
-                this.setSelection([paramNode.node]);
-                this.parameterNode = paramNode.node;
-                this.mainNavService.getDialogs().nodeSidebar = paramNode.node;
-            });
+        if (params.file && params.file !== this.oldParams?.file) {
+            void this.showNodeInCurrentFolder(params.file);
         }
 
         if (!needsUpdate) {
@@ -514,6 +509,33 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         if (params.showAlpha) {
             this.showAlpha();
         }
+        this.oldParams = params;
+    }
+
+    private async showNodeInCurrentFolder(id: string) {
+        // TODO: Consider moving this to `NodeDataSource`. We would need to make sure that the
+        // dataSource is not replaced by explorer, however.
+        const visibleNodes = await this.explorer.dataSourceSubject
+            .pipe(
+                filter(notNull),
+                switchMap((dataSource) => dataSource.connect()),
+                first((data) => data?.length > 1),
+            )
+            .toPromise();
+        let node = visibleNodes.find((node) => node.ref.id === id);
+        if (!node) {
+            ({ node } = await this.node.getNodeMetadata(id, [RestConstants.ALL]).toPromise());
+            if (node.parent?.id === this.currentFolder?.ref.id) {
+                this.explorer.dataSource.appendData([node], 'before');
+                // FIXME: The appended node will show up a second time when loading more data.
+            } else {
+                this.toast.error(null, 'WORKSPACE.TOAST.ELEMENT_NOT_IN_FOLDER');
+                return;
+            }
+        }
+        this.setSelection([node]);
+        this.parameterNode = node;
+        this.mainNavService.getDialogs().nodeSidebar = node;
     }
 
     resetWorkspace() {
@@ -1005,4 +1027,8 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     onDeleteNodes(nodes: Node[]): void {
         this.mainNavService.getDialogs().nodeDelete = nodes;
     }
+}
+
+function notNull<T>(value?: T): boolean {
+    return value !== undefined && value !== null;
 }
