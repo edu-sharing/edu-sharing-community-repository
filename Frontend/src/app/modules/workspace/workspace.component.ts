@@ -402,116 +402,118 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
 
     private async initialize() {
         this.user = await this.iam.getCurrentUserAsync();
-        this.route.params.subscribe(async (routeParams: Params) => {
-            this.isSafe = routeParams.mode === 'safe';
-            const login = await this.connector.isLoggedIn().toPromise();
-            if (login.statusCode !== RestConstants.STATUS_CODE_OK) {
-                RestHelper.goToLogin(this.router, this.config);
-                return;
-            }
-            await this.prepareActionbar();
-            this.loadFolders(this.user);
+        this.route.params.subscribe((routeParams: Params) => this.handleParamsUpdate(routeParams));
+        this.route.queryParams.subscribe((params: Params) => this.handleQueryParamsUpdate(params));
+    }
 
-            let valid = true;
-            if (!login.isValidLogin || login.isGuest) {
-                valid = false;
-            }
-            this.isBlocked = !this.connector.hasToolPermissionInstant(
-                RestConstants.TOOLPERMISSION_WORKSPACE,
+    private async handleParamsUpdate(routeParams: Params) {
+        this.isSafe = routeParams.mode === 'safe';
+        const login = await this.connector.isLoggedIn().toPromise();
+        if (login.statusCode !== RestConstants.STATUS_CODE_OK) {
+            RestHelper.goToLogin(this.router, this.config);
+            return;
+        }
+        await this.prepareActionbar();
+        this.loadFolders(this.user);
+
+        let valid = true;
+        if (!login.isValidLogin || login.isGuest) {
+            valid = false;
+        }
+        this.isBlocked = !this.connector.hasToolPermissionInstant(
+            RestConstants.TOOLPERMISSION_WORKSPACE,
+        );
+        if (this.isSafe && login.currentScope !== RestConstants.SAFE_SCOPE) {
+            valid = false;
+        }
+        if (!this.isSafe && login.currentScope != null) {
+            this.connector.logout().subscribe(
+                () => {
+                    this.goToLogin();
+                },
+                (error: any) => {
+                    this.toast.error(error);
+                    this.goToLogin();
+                },
             );
-            if (this.isSafe && login.currentScope !== RestConstants.SAFE_SCOPE) {
-                valid = false;
-            }
-            if (!this.isSafe && login.currentScope != null) {
-                this.connector.logout().subscribe(
-                    () => {
-                        this.goToLogin();
-                    },
-                    (error: any) => {
-                        this.toast.error(error);
-                        this.goToLogin();
-                    },
-                );
-                return;
-            }
-            if (!valid) {
-                this.goToLogin();
-                return;
-            }
-            this.connector.scope = this.isSafe ? RestConstants.SAFE_SCOPE : null;
-            this.isLoggedIn = true;
-            this.globalProgress = false;
-            this.route.queryParams.subscribe((params: Params) => {
-                let needsUpdate = false;
-                if (this.oldParams) {
-                    for (const key of Object.keys(this.oldParams).concat(Object.keys(params))) {
-                        if (params[key] === this.oldParams[key]) {
-                            continue;
-                        }
-                        if (key === UIConstants.QUERY_PARAM_LIST_VIEW_TYPE) {
-                            continue;
-                        }
-                        needsUpdate = true;
-                    }
-                } else {
-                    needsUpdate = true;
-                }
-                this.oldParams = params;
-                if (params.displayType != null) {
-                    this.setDisplayType(
-                        parseInt(params[UIConstants.QUERY_PARAM_LIST_VIEW_TYPE], 10),
-                        false,
-                    );
-                } else {
-                    this.setDisplayType(
-                        this.config.instant(
-                            'workspaceViewType',
-                            NodeEntriesDisplayType.Table,
-                        ) as NodeEntriesDisplayType,
-                        false,
-                    );
-                }
-                if (params.root && WorkspaceMainComponent.VALID_ROOTS.indexOf(params.root) !== -1) {
-                    this.root = params.root;
-                } else {
-                    this.root = 'MY_FILES';
-                }
-                if (params.reurl) {
-                    this.reurl = params.reurl;
-                }
-                this.mainnav = params.mainnav === 'false' ? false : true;
+            return;
+        }
+        if (!valid) {
+            this.goToLogin();
+            return;
+        }
+        this.connector.scope = this.isSafe ? RestConstants.SAFE_SCOPE : null;
+        this.isLoggedIn = true;
+        this.globalProgress = false;
+    }
 
-                this.initMainNav();
+    private handleQueryParamsUpdate(params: Params) {
+        let needsUpdate = false;
+        if (this.oldParams) {
+            for (const key of Object.keys(this.oldParams).concat(Object.keys(params))) {
+                if (params[key] === this.oldParams[key]) {
+                    continue;
+                }
+                if (key === UIConstants.QUERY_PARAM_LIST_VIEW_TYPE) {
+                    continue;
+                }
+                needsUpdate = true;
+            }
+        } else {
+            needsUpdate = true;
+        }
+        this.oldParams = params;
+        if (params.displayType != null) {
+            this.setDisplayType(
+                parseInt(params[UIConstants.QUERY_PARAM_LIST_VIEW_TYPE], 10),
+                false,
+            );
+        } else {
+            this.setDisplayType(
+                this.config.instant(
+                    'workspaceViewType',
+                    NodeEntriesDisplayType.Table,
+                ) as NodeEntriesDisplayType,
+                false,
+            );
+        }
+        if (params.root && WorkspaceMainComponent.VALID_ROOTS.indexOf(params.root) !== -1) {
+            this.root = params.root;
+        } else {
+            this.root = 'MY_FILES';
+        }
+        if (params.reurl) {
+            this.reurl = params.reurl;
+        }
+        this.mainnav = params.mainnav === 'false' ? false : true;
 
-                if (params.file) {
-                    this.node
-                        .getNodeMetadata(params.file, [RestConstants.ALL])
-                        .subscribe((paramNode) => {
-                            this.setSelection([paramNode.node]);
-                            this.parameterNode = paramNode.node;
-                            this.mainNavService.getDialogs().nodeSidebar = paramNode.node;
-                        });
-                }
+        this.initMainNav();
 
-                if (!needsUpdate) {
-                    return;
-                }
-                this.createAllowed = this.root === 'MY_FILES';
-                let lastLocation = this.storage.pop(this.getLastLocationStorageId(), null);
-                if (this.isSafe) {
-                    // clear lastLocation, this is another folder than the safe
-                    lastLocation = null;
-                }
-                if (!params.id && !params.query && lastLocation) {
-                    this.openDirectory(lastLocation);
-                } else {
-                    this.openDirectoryFromRoute(params);
-                }
-                if (params.showAlpha) {
-                    this.showAlpha();
-                }
+        if (params.file) {
+            this.node.getNodeMetadata(params.file, [RestConstants.ALL]).subscribe((paramNode) => {
+                this.setSelection([paramNode.node]);
+                this.parameterNode = paramNode.node;
+                this.mainNavService.getDialogs().nodeSidebar = paramNode.node;
             });
-        });
+        }
+
+        if (!needsUpdate) {
+            return;
+        }
+        this.createAllowed = this.root === 'MY_FILES';
+        let lastLocation = this.storage.pop(this.getLastLocationStorageId(), null);
+        if (this.isSafe) {
+            // clear lastLocation, this is another folder than the safe
+            lastLocation = null;
+        }
+        if (!params.id && !params.query && lastLocation) {
+            this.openDirectory(lastLocation);
+        } else {
+            this.openDirectoryFromRoute(params);
+        }
+        if (params.showAlpha) {
+            this.showAlpha();
+        }
     }
 
     resetWorkspace() {
