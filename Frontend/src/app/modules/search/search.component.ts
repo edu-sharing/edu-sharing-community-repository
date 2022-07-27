@@ -1161,6 +1161,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     this.searchService.skipcount[position] += data.nodes.length;
                     this.searchService.resultCount.materials =
                         data.pagination.total;
+                    this.searchService.isFrontpage = useFrontpage && tryFrontpage;
                     this.processSearchResult(data, init);
                     this.searchService.showchosenfilters = true;
                     this.searchRepository(
