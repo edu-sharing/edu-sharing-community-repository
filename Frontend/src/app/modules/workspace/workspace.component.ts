@@ -215,23 +215,6 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         }
     }
 
-    @HostListener('document:keyup', ['$event'])
-    handleKeyboardEventUp(event: KeyboardEvent) {
-        if (event.keyCode === 91 || event.keyCode === 93) {
-        }
-    }
-
-    @HostListener('document:keydown', ['$event'])
-    handleKeyboardEvent(event: KeyboardEvent) {
-        if (event.keyCode === 91 || event.keyCode === 93) {
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
-        const clip = this.storage.get('workspace_clipboard') as ClipboardObject;
-        const fromInputField = KeyEvents.eventFromInputField(event);
-    }
-
     private handleScroll(event: Event) {
         const scroll = window.pageYOffset || document.documentElement.scrollTop;
         if (scroll > 0) {
