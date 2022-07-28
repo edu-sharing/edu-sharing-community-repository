@@ -79,7 +79,7 @@
   <ng-template #collectionContentTemplateRefDefault> </ng-template>
 </div>
 
-<div class="alignWithBanner" cdkDropListGroup>
+<div class="alignWithBanner" cdkDropList>
   <div class="collections-footer-group">
     <div
       [class.collectionsContainerTabs]="showTabs()"
@@ -246,6 +246,7 @@
             [breadcrumbsAsNode]="path"
             [invisibleDescription]="true"
             (onDrop)="dropOnCollection($event.target, $event.source)"
+            [canDropNodes]="canDropOnBreadcrumb"
           ></es-breadcrumbs>
         </div>
         <div
@@ -292,7 +293,7 @@
                 customSortingInProgress: sortCollections.customSortingInProgress,
                 columns: sortCollections.columns,
                 allowed:
-                  !isMobile() &&
+                  !isMobileWidth() &&
                   dataSourceCollections.getData()?.length > 1 &&
                   isUserAllowedToEdit(collectionContent.node) &&
                   !sortReferences?.customSortingInProgress
@@ -384,7 +385,7 @@
                 customSortingInProgress: sortReferences.customSortingInProgress,
                 columns: sortReferences.columns,
                 allowed:
-                  !isMobile() &&
+                  !isMobileWidth() &&
                   dataSourceReferences.getData()?.length > 1 &&
                   isUserAllowedToEdit(collectionContent.node) &&
                   !sortCollections?.customSortingInProgress
@@ -395,6 +396,7 @@
                   ? [addMaterialSearchOptionItem, addMaterialBinaryOptionItem]
                   : []
               "
+              [globalKeyboardShortcuts]="true"
               (fetchData)="loadMoreReferences()"
               (nodesDeleted)="afterDeleteFromCollection()"
             >

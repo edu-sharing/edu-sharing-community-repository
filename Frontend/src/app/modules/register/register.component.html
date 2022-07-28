@@ -40,13 +40,14 @@
     <es-register-reset-password
       *ngIf="state === 'reset-password'"
       #resetPassword
+      [params]="params"
     ></es-register-reset-password>
     <div
       *ngIf="
-        state != 'register' &&
-        state != 'done' &&
-        state != 'done-reset' &&
-        state != 'request' &&
+        state !== 'register' &&
+        state !== 'done' &&
+        state !== 'done-reset' &&
+        state !== 'request' &&
         canRegister()
       "
       class="register"

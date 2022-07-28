@@ -51,22 +51,57 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     set gridConfig(value: GridConfig) {
         this.gridConfig$.next(value);
     }
+    globalKeyboardShortcuts: boolean;
 
     constructor(private uiService: UIService) {}
 
-    handleSelectionEvent(node: T) {
-        if (this.selection.isSelected(node)) {
-            this.selection.toggle(node);
+    onClicked({ event, ...data }: NodeClickEvent<T> & { event: MouseEvent }) {
+        if (event.ctrlKey || event.metaKey) {
+            this.selection.toggle(data.element);
+        } else if (event.shiftKey) {
+            this.expandSelectionTo(data.element);
         } else {
-            if (this.uiService.isShiftCmd()) {
-                const selected = this.selection.selected
-                    .map((s) => this.dataSource.getData().indexOf(s))
-                    .sort((a, b) => (a > b ? 1 : -1));
-                for (let i = selected[0]; i <= this.dataSource.getData().indexOf(node); i++) {
-                    this.selection.select(this.dataSource.getData()[i]);
-                }
-            } else {
-                this.selection.toggle(node);
+            this.clickItem.emit(data);
+        }
+    }
+
+    onCheckboxChanged(node: T, checked: boolean) {
+        if (this.uiService.shiftKeyPressed) {
+            this.expandSelectionTo(node);
+        }
+        if (checked !== this.selection.isSelected(node)) {
+            this.selection.toggle(node);
+        }
+    }
+
+    toggleSelectAll() {
+        if (this.isAllSelected()) {
+            this.selection.clear();
+        } else {
+            this.selectAll();
+        }
+    }
+
+    private selectAll() {
+        this.selection.select(...this.dataSource.getData());
+    }
+
+    private isAllSelected(): boolean {
+        return this.dataSource.getData().every((node) => this.selection.isSelected(node));
+    }
+
+    private expandSelectionTo(node: T) {
+        const nodeIndex = this.dataSource.getData().indexOf(node);
+        const selectionIndexes = this.selection.selected
+            .map((node) => this.dataSource.getData().indexOf(node))
+            .filter((index) => index >= 0);
+        if (Math.min(...selectionIndexes) < nodeIndex) {
+            for (let i = Math.min(...selectionIndexes) + 1; i <= nodeIndex; i++) {
+                this.selection.select(this.dataSource.getData()[i]);
+            }
+        } else if (Math.max(...selectionIndexes) > nodeIndex) {
+            for (let i = nodeIndex; i < Math.max(...selectionIndexes); i++) {
+                this.selection.select(this.dataSource.getData()[i]);
             }
         }
     }

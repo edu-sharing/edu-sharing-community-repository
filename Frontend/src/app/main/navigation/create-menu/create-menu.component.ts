@@ -42,15 +42,11 @@ import {
     Constrain,
     DefaultGroups,
     ElementType,
-    KeyCombination,
     OptionItem,
     Scope,
     Target,
 } from '../../../core-ui-module/option-item';
-import {
-    OptionsHelperService,
-    OPTIONS_HELPER_CONFIG,
-} from '../../../core-ui-module/options-helper.service';
+import { OptionsHelperService } from '../../../core-ui-module/options-helper.service';
 import { Toast } from '../../../core-ui-module/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import {
@@ -65,15 +61,7 @@ import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.
     templateUrl: 'create-menu.component.html',
     styleUrls: ['create-menu.component.scss'],
     animations: [trigger('dialog', UIAnimation.switchDialog(UIAnimation.ANIMATION_TIME_FAST))],
-    providers: [
-        OptionsHelperService,
-        {
-            provide: OPTIONS_HELPER_CONFIG,
-            useValue: {
-                subscribeEvents: false,
-            },
-        },
-    ],
+    providers: [OptionsHelperService],
 })
 export class CreateMenuComponent implements OnInit, OnDestroy {
     @ViewChild('dropdown', { static: true }) dropdown: DropdownComponent;
@@ -228,8 +216,10 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                 RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS,
                 RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES,
             ];
-            pasteNodes.key = 'KeyV';
-            pasteNodes.keyCombination = [KeyCombination.CtrlOrAppleCmd];
+            pasteNodes.keyboardShortcut = {
+                keyCode: 'KeyV',
+                modifiers: ['Ctrl/Cmd'],
+            };
             pasteNodes.group = DefaultGroups.Primary;
             this.options.push(pasteNodes);
         }

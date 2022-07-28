@@ -1,22 +1,27 @@
-import { forkJoin, forkJoin as observableForkJoin, fromEvent, of, Subscription } from 'rxjs';
-import { RestNetworkService } from '../core-module/rest/services/rest-network.service';
-import { RestConnectorsService } from '../core-module/rest/services/rest-connectors.service';
-import { RestConstants } from '../core-module/rest/rest-constants';
-import { ActionbarComponent } from '../shared/components/actionbar/actionbar.component';
+import { PlatformLocation } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { EventEmitter, Injectable, NgZone, OnDestroy } from '@angular/core';
+import { ActivatedRoute, Params, Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import {
-    Constrain,
-    CustomOptions,
-    DefaultGroups,
-    ElementType,
-    HideMode,
-    KeyCombination,
-    OptionItem,
-    Scope,
-    Target,
-} from './option-item';
-import { UIHelper } from './ui-helper';
-import { UIService } from '../core-module/rest/services/ui.service';
-import { WorkspaceManagementDialogsComponent } from '../modules/management-dialogs/management-dialogs.component';
+    forkJoin,
+    forkJoin as observableForkJoin,
+    fromEvent,
+    of,
+    Subject,
+    Subscription,
+} from 'rxjs';
+import { isArray } from 'rxjs/internal/util/isArray';
+import { takeUntil } from 'rxjs/operators';
+import { BridgeService } from '../core-bridge-module/bridge.service';
+import {
+    ConfigurationService,
+    FrameEventsService,
+    RestCollectionService,
+    RestConnectorService,
+    RestHelper,
+    RestIamService,
+} from '../core-module/core.module';
 import {
     Connector,
     Filetype,
@@ -26,49 +31,41 @@ import {
     ProposalNode,
 } from '../core-module/rest/data-object';
 import { Helper } from '../core-module/rest/helper';
+import { RestConstants } from '../core-module/rest/rest-constants';
+import { RestConnectorsService } from '../core-module/rest/services/rest-connectors.service';
+import { RestNetworkService } from '../core-module/rest/services/rest-network.service';
+import { RestNodeService } from '../core-module/rest/services/rest-node.service';
 import {
     ClipboardObject,
     TemporaryStorageService,
 } from '../core-module/rest/services/temporary-storage.service';
-import { BridgeService } from '../core-bridge-module/bridge.service';
+import { UIService } from '../core-module/rest/services/ui.service';
 import { MessageType } from '../core-module/ui/message-type';
-import {
-    EventEmitter,
-    Inject,
-    Injectable,
-    InjectionToken,
-    OnDestroy,
-    Optional,
-} from '@angular/core';
-import { CardComponent } from '../shared/components/card/card.component';
-import { TranslateService } from '@ngx-translate/core';
-import { RestNodeService } from '../core-module/rest/services/rest-node.service';
-import {
-    ConfigurationService,
-    FrameEventsService,
-    RestCollectionService,
-    RestConnectorService,
-    RestHelper,
-    RestIamService,
-} from '../core-module/core.module';
-import { Toast } from './toast';
-import { HttpClient } from '@angular/common/http';
-import { ActivatedRoute, Params, Router } from '@angular/router';
-import { DropdownComponent } from '../shared/components/dropdown/dropdown.component';
-import { ConfigOptionItem, NodeHelperService } from './node-helper.service';
-import { PlatformLocation } from '@angular/common';
-import { isArray } from 'rxjs/internal/util/isArray';
-import { MainNavService } from '../main/navigation/main-nav.service';
 import { DialogsService } from '../features/dialogs/dialogs.service';
 import { ListEventInterface, NodeEntriesDisplayType } from '../features/node-entries/entries-model';
 import { NodeEntriesDataType } from '../features/node-entries/node-entries.component';
+import { MainNavService } from '../main/navigation/main-nav.service';
+import { WorkspaceManagementDialogsComponent } from '../modules/management-dialogs/management-dialogs.component';
 import { NodeStoreService } from '../modules/search/node-store.service';
-import { takeUntil } from 'rxjs/operators';
-
-export class OptionsHelperConfig {
-    subscribeEvents? = true;
-}
-export const OPTIONS_HELPER_CONFIG = new InjectionToken<OptionsHelperConfig>('OptionsHelperConfig');
+import {
+    KeyboardShortcutsService,
+    matchesShortcutCondition,
+} from '../services/keyboard-shortcuts.service';
+import { ActionbarComponent } from '../shared/components/actionbar/actionbar.component';
+import { DropdownComponent } from '../shared/components/dropdown/dropdown.component';
+import { ConfigOptionItem, NodeHelperService } from './node-helper.service';
+import {
+    Constrain,
+    CustomOptions,
+    DefaultGroups,
+    ElementType,
+    HideMode,
+    OptionItem,
+    Scope,
+    Target,
+} from './option-item';
+import { Toast } from './toast';
+import { UIHelper } from './ui-helper';
 
 @Injectable()
 export class OptionsHelperService implements OnDestroy {
@@ -79,8 +76,6 @@ export class OptionsHelperService implements OnDestroy {
         ElementType.NodePublishedCopy,
     ];
     static ElementTypesAddToCollection = [ElementType.Node, ElementType.NodePublishedCopy];
-    private static subscriptionUp: Subscription[] = [];
-    private static subscriptionDown: Subscription[] = [];
 
     readonly virtualNodesAdded = new EventEmitter<Node[]>();
     readonly nodesChanged = new EventEmitter<Node[] | void>();
@@ -91,9 +86,7 @@ export class OptionsHelperService implements OnDestroy {
     }>();
     readonly displayTypeChanged = new EventEmitter<NodeEntriesDisplayType>();
 
-    private localSubscripitionUp: Subscription;
-    private localSubscripitionDown: Subscription;
-    private appleCmd: boolean;
+    private keyboardShortcutsSubscription: Subscription;
     private globalOptions: OptionItem[];
     private list: ListEventInterface<NodeEntriesDataType>;
     private subscriptions: Subscription[] = [];
@@ -101,6 +94,7 @@ export class OptionsHelperService implements OnDestroy {
     private dropdown: DropdownComponent;
     private queryParams: Params;
     private data: OptionData;
+    private destroyed = new Subject<void>();
 
     constructor(
         private networkService: RestNetworkService,
@@ -124,69 +118,29 @@ export class OptionsHelperService implements OnDestroy {
         private bridge: BridgeService,
         private nodeStore: NodeStoreService,
         private dialogs: DialogsService,
-        @Optional() @Inject(OPTIONS_HELPER_CONFIG) config: OptionsHelperConfig,
+        private keyboardShortcuts: KeyboardShortcutsService,
+        private ngZone: NgZone,
     ) {
-        if (config == null) {
-            config = new OptionsHelperConfig();
-        }
         this.route.queryParams.subscribe((queryParams) => (this.queryParams = queryParams));
-        // @HostListener decorator unfortunately does not work in services
-        if (config.subscribeEvents) {
-            this.initSubscription();
-        }
     }
 
     ngOnDestroy(): void {
-        this.clearSubscription();
+        this.destroyed.next();
+        this.destroyed.complete();
     }
 
-    handleKeyboardEventUp(event: any) {
-        if (event.keyCode === 91 || event.keyCode === 93) {
-            this.appleCmd = false;
-        }
-    }
-
-    handleKeyboardEvent(event: KeyboardEvent) {
-        if (event.keyCode === 91 || event.keyCode === 93) {
-            this.appleCmd = true;
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
-        // do nothing if a modal dialog is still open
-        if (CardComponent.getNumberOfOpenCards() > 0) {
-            return;
-        }
-        // check if it was triggered from a valid component
-        if (
-            !event.composedPath().some((t) => {
-                const name = (t as HTMLElement)?.nodeName;
-                return ['LISTTABLE', 'ACTIONBAR', 'APP-NODE-ENTRIES'].indexOf(name) !== -1;
-            })
-        ) {
-            return;
-        }
-        if (this.globalOptions) {
-            const option = this.globalOptions.filter((o: OptionItem) => {
-                if (!o.isEnabled) {
-                    return false;
-                }
-                if (o.key !== event.code && o.key !== event.key) {
-                    return false;
-                }
-                if (o.keyCombination) {
-                    if (o.keyCombination.indexOf(KeyCombination.CtrlOrAppleCmd) !== -1) {
-                        if (!(event.ctrlKey || this.appleCmd)) {
-                            return false;
-                        }
-                    }
-                }
-                return true;
-            });
-            if (option.length === 1) {
-                option[0].callback(null);
+    private handleKeyboardEvent(event: KeyboardEvent) {
+        if (this.globalOptions && !this.keyboardShortcuts.shouldIgnoreShortcut(event)) {
+            const matchedOption = this.globalOptions.find(
+                (option: OptionItem) =>
+                    option.isEnabled &&
+                    option.keyboardShortcut &&
+                    matchesShortcutCondition(event, option.keyboardShortcut),
+            );
+            if (matchedOption) {
                 event.preventDefault();
                 event.stopPropagation();
+                this.ngZone.run(() => matchedOption.callback(null));
             }
         }
     }
@@ -1064,8 +1018,10 @@ export class OptionsHelperService implements OnDestroy {
         cutNodes.scopes = [Scope.WorkspaceList, Scope.WorkspaceTree];
         cutNodes.permissions = [RestConstants.ACCESS_WRITE];
         cutNodes.permissionsMode = HideMode.Disable;
-        cutNodes.key = 'KeyX';
-        cutNodes.keyCombination = [KeyCombination.CtrlOrAppleCmd];
+        cutNodes.keyboardShortcut = {
+            keyCode: 'KeyX',
+            modifiers: ['Ctrl/Cmd'],
+        };
         cutNodes.group = DefaultGroups.FileOperations;
         cutNodes.priority = 10;
 
@@ -1083,8 +1039,10 @@ export class OptionsHelperService implements OnDestroy {
         copyNodes.elementType = [ElementType.Node, ElementType.SavedSearch, ElementType.MapRef];
         copyNodes.constrains = [Constrain.HomeRepository, Constrain.User];
         copyNodes.scopes = [Scope.WorkspaceList, Scope.WorkspaceTree];
-        copyNodes.key = 'KeyC';
-        copyNodes.keyCombination = [KeyCombination.CtrlOrAppleCmd];
+        copyNodes.keyboardShortcut = {
+            keyCode: 'KeyC',
+            modifiers: ['Ctrl/Cmd'],
+        };
         copyNodes.group = DefaultGroups.FileOperations;
         copyNodes.priority = 20;
 
@@ -1103,8 +1061,10 @@ export class OptionsHelperService implements OnDestroy {
             RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES,
         ];
         pasteNodes.scopes = [Scope.WorkspaceList];
-        pasteNodes.key = 'KeyV';
-        pasteNodes.keyCombination = [KeyCombination.CtrlOrAppleCmd];
+        pasteNodes.keyboardShortcut = {
+            keyCode: 'KeyV',
+            modifiers: ['Ctrl/Cmd'],
+        };
         pasteNodes.group = DefaultGroups.FileOperations;
 
         const deleteNode = new OptionItem('OPTIONS.DELETE', 'delete', (object) => {
@@ -1118,7 +1078,9 @@ export class OptionsHelperService implements OnDestroy {
         ];
         deleteNode.permissions = [RestConstants.PERMISSION_DELETE];
         deleteNode.permissionsMode = HideMode.Hide;
-        deleteNode.key = 'Delete';
+        deleteNode.keyboardShortcut = {
+            keyCode: 'Delete',
+        };
         deleteNode.group = DefaultGroups.Delete;
         deleteNode.priority = 10;
 
@@ -1793,29 +1755,14 @@ export class OptionsHelperService implements OnDestroy {
         return options;
     }
 
-    clearSubscription() {
-        if (this.localSubscripitionDown) {
-            this.localSubscripitionDown.unsubscribe();
-            this.localSubscripitionUp.unsubscribe();
-        }
-        OptionsHelperService.subscriptionDown = OptionsHelperService.subscriptionDown.filter(
-            (s) => s !== this.localSubscripitionDown,
-        );
-        OptionsHelperService.subscriptionUp = OptionsHelperService.subscriptionUp.filter(
-            (s) => s !== this.localSubscripitionUp,
-        );
-    }
-
-    initSubscription() {
-        this.clearSubscription();
-        this.localSubscripitionUp = fromEvent(document, 'keyup').subscribe((event) =>
-            this.handleKeyboardEventUp(event),
-        );
-        OptionsHelperService.subscriptionUp.push(this.localSubscripitionUp);
-        this.localSubscripitionDown = fromEvent(document, 'keydown').subscribe(
-            (event: KeyboardEvent) => this.handleKeyboardEvent(event),
-        );
-        OptionsHelperService.subscriptionDown.push(this.localSubscripitionDown);
+    registerGlobalKeyboardShortcuts() {
+        this.ngZone.runOutsideAngular(() => {
+            if (!this.keyboardShortcutsSubscription) {
+                this.keyboardShortcutsSubscription = fromEvent(document, 'keydown')
+                    .pipe(takeUntil(this.destroyed))
+                    .subscribe((event: KeyboardEvent) => this.handleKeyboardEvent(event));
+            }
+        });
     }
 }
 

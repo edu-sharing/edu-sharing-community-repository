@@ -1,18 +1,9 @@
-import {
-    AfterViewInit,
-    Component,
-    ContentChild,
-    HostListener,
-    Input,
-    OnChanges,
-    SimpleChanges,
-    TemplateRef,
-} from '@angular/core';
-import { UIService, GenericAuthority, Node } from '../../core-module/core.module';
-import { KeyEvents } from '../../core-module/ui/key-events';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subject } from 'rxjs';
+import { GenericAuthority, Node } from '../../core-module/core.module';
 import { NodeEntriesService } from '../../core-ui-module/node-entries.service';
+import { KeyboardShortcutsService } from '../../services/keyboard-shortcuts.service';
 import { NodeEntriesDisplayType } from './entries-model';
-
 import { NodeEntriesTemplatesService } from './node-entries-templates.service';
 
 @Component({
@@ -20,32 +11,43 @@ import { NodeEntriesTemplatesService } from './node-entries-templates.service';
     templateUrl: 'node-entries.component.html',
     styleUrls: ['node-entries.component.scss'],
 })
-export class NodeEntriesComponent<T extends NodeEntriesDataType> implements OnChanges {
+export class NodeEntriesComponent<T extends NodeEntriesDataType> implements OnInit, OnDestroy {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
 
-    @HostListener('document:keydown', ['$event'])
-    handleKeyboardEvent(event: KeyboardEvent): void {
-        if (
-            event.code === 'KeyA' &&
-            (event.ctrlKey || this.uiService.isAppleCmd()) &&
-            !KeyEvents.eventFromInputField(event)
-        ) {
-            if (this.entriesService.selection.isEmpty()) {
-                this.entriesService.selection.select(...this.entriesService.dataSource.getData());
-            } else {
-                this.entriesService.selection.clear();
-            }
-            event.preventDefault();
-            event.stopPropagation();
+    private destroyed = new Subject<void>();
+
+    constructor(
+        public entriesService: NodeEntriesService<T>,
+        public templatesService: NodeEntriesTemplatesService,
+        private globalKeyboardShortcuts: KeyboardShortcutsService,
+    ) {}
+
+    ngOnInit(): void {
+        if (this.entriesService.globalKeyboardShortcuts) {
+            this.registerGlobalKeyboardShortcuts();
         }
     }
 
-    constructor(
-        private uiService: UIService,
-        public entriesService: NodeEntriesService<T>,
-        public templatesService: NodeEntriesTemplatesService,
-    ) {}
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
+    }
 
-    ngOnChanges(changes: SimpleChanges): void {}
+    private registerGlobalKeyboardShortcuts() {
+        this.globalKeyboardShortcuts.register(
+            [
+                {
+                    modifiers: ['Ctrl/Cmd'],
+                    keyCode: 'KeyA',
+                    ignoreWhen: (event) =>
+                        // SmallGrid doesn't support selection
+                        this.entriesService.displayType === NodeEntriesDisplayType.SmallGrid,
+                    callback: () => this.entriesService.toggleSelectAll(),
+                },
+            ],
+            { until: this.destroyed },
+        );
+    }
 }
+
 export type NodeEntriesDataType = Node | GenericAuthority;

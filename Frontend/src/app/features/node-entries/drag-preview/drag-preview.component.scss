@@ -1,0 +1,35 @@
+@use 'sass:color';
+@import '../../../core-ui-module/styles/variables';
+
+.drag-preview {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 48px;
+    padding: 0 12px;
+    background-color: color.mix($primary, $backgroundColor, $weight: 15%);
+}
+
+.drag-preview-icon {
+    width: 30px;
+    height: 30px;
+    padding: 3px;
+    margin: 1px 0;
+    background-color: #fff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    @include materialShadowSmall();
+    > img {
+        width: 18px;
+        height: auto;
+    }
+}
+
+.drag-preview-text {
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

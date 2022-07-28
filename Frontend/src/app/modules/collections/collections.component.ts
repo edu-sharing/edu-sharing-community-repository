@@ -65,16 +65,15 @@ import { UIConstants } from '../../core-module/ui/ui-constants';
 import { ListTableComponent } from '../../core-ui-module/components/list-table/list-table.component';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { OptionItem, Scope } from '../../core-ui-module/option-item';
-import {
-    OptionsHelperService,
-    OPTIONS_HELPER_CONFIG,
-} from '../../core-ui-module/options-helper.service';
+import { OptionsHelperService } from '../../core-ui-module/options-helper.service';
 import { Toast } from '../../core-ui-module/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
+import { DragData } from '../../services/nodes-drag-drop.service';
 import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';
 import { SortEvent } from '../../shared/components/sort-dropdown/sort-dropdown.component';
+import { CanDrop } from '../../shared/directives/nodes-drop-target.directive';
 import { TranslationsService } from '../../translations/translations.service';
 import {
     ManagementEvent,
@@ -87,15 +86,7 @@ import {
     templateUrl: 'collections.component.html',
     styleUrls: ['collections.component.scss'],
     // provide a new instance so to not get conflicts with other service instances
-    providers: [
-        OptionsHelperService,
-        {
-            provide: OPTIONS_HELPER_CONFIG,
-            useValue: {
-                subscribeEvents: false,
-            },
-        },
-    ],
+    providers: [OptionsHelperService],
 })
 export class CollectionsMainComponent implements OnInit, OnDestroy {
     static INDEX_MAPPING = [
@@ -449,10 +440,6 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
         });
     }
 
-    isMobile() {
-        return this.uiService.isMobile();
-    }
-
     isMobileWidth() {
         return window.innerWidth < UIConstants.MOBILE_WIDTH;
     }
@@ -571,7 +558,7 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
     dropOnRef = (target: Node, source: DropSource<Node>) => {
         return;
     };
-    dropOnCollection = (target: Node, source: DropSource<Node>) => {
+    dropOnCollection = (target: Node | 'HOME', source: DropSource<Node>) => {
         if (source.element[0] === target) {
             return;
         }
@@ -582,19 +569,18 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
                 this.toast.closeModalDialog();
                 return;
             }
-            this.nodeService
-                .moveNode(target?.ref?.id || RestConstants.COLLECTIONHOME, source.element[0].ref.id)
-                .subscribe(
-                    () => {
-                        this.toast.closeModalDialog();
-                        this.refreshContent();
-                    },
-                    (error) => {
-                        this.handleError(error);
-                        this.toast.closeModalDialog();
-                    },
-                );
-        } else {
+            const targetId = target === 'HOME' ? RestConstants.COLLECTIONHOME : target.ref.id;
+            this.nodeService.moveNode(targetId, source.element[0].ref.id).subscribe(
+                () => {
+                    this.toast.closeModalDialog();
+                    this.refreshContent();
+                },
+                (error) => {
+                    this.handleError(error);
+                    this.toast.closeModalDialog();
+                },
+            );
+        } else if (target !== 'HOME') {
             UIHelper.addToCollection(
                 this.nodeHelper,
                 this.collectionService,
@@ -650,68 +636,87 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
         );
     }
 
-    canDropOnCollection = (target: DropTarget, source: DropSource<Node>) => {
-        // drop to "home"
-        if (target === 'MY_FILES') {
-            return (
-                source.mode === 'move' &&
-                source.element[0].aspects.indexOf(RestConstants.CCM_ASPECT_COLLECTION) !== -1 &&
-                this.nodeHelper.getNodesRight(source.element, RestConstants.ACCESS_WRITE)
-            );
+    canDropOnBreadcrumb = (dragData: DragData<'HOME' | Node>): CanDrop => {
+        if (dragData.target === 'HOME') {
+            // TODO: explicitDeny and reason
+            if (dragData.action !== 'move') {
+                return { accept: false };
+            } else if (
+                dragData.draggedNodes.some(
+                    (node) => !node.aspects.includes(RestConstants.CCM_ASPECT_COLLECTION),
+                )
+            ) {
+                return { accept: false };
+            } else if (
+                !this.nodeHelper.getNodesRight(dragData.draggedNodes, RestConstants.ACCESS_WRITE)
+            ) {
+                return { accept: false };
+            } else {
+                return { accept: true };
+            }
+        } else {
+            return this.canDropOnCollection(dragData as DragData<Node>);
         }
-        if (source.element[0].ref.id === (target as Node).ref.id) {
-            return false;
+    };
+
+    canDropOnCollection = (dragData: DragData<Node>): CanDrop => {
+        // TODO: explicitDeny and reason
+        if (dragData.draggedNodes[0].ref.id === (dragData.target as Node).ref.id) {
+            return { accept: false };
         }
-        if ((target as Node).ref.id === this.collectionContent.node.ref.id) {
-            return false;
+        if ((dragData.target as Node).ref.id === this.collectionContent.node.ref.id) {
+            return { accept: false };
         }
-        if (source.element[0].collection && source.mode === 'copy') {
-            return false;
+        if (dragData.draggedNodes[0].collection && dragData.action === 'copy') {
+            return { accept: false };
         }
         // do not allow to move anything else than editorial collections into editorial collections (if the source is a collection)
-        if (source.element[0].collection?.hasOwnProperty('childCollectionsCount')) {
+        if (dragData.draggedNodes[0].collection?.hasOwnProperty('childCollectionsCount')) {
             if (
-                (source.element[0].collection.type === RestConstants.COLLECTIONTYPE_EDITORIAL &&
-                    (target as Node).collection.type !== RestConstants.COLLECTIONTYPE_EDITORIAL) ||
-                (source.element[0].collection.type !== RestConstants.COLLECTIONTYPE_EDITORIAL &&
-                    (target as Node).collection.type === RestConstants.COLLECTIONTYPE_EDITORIAL)
+                (dragData.draggedNodes[0].collection.type ===
+                    RestConstants.COLLECTIONTYPE_EDITORIAL &&
+                    (dragData.target as Node).collection.type !==
+                        RestConstants.COLLECTIONTYPE_EDITORIAL) ||
+                (dragData.draggedNodes[0].collection.type !==
+                    RestConstants.COLLECTIONTYPE_EDITORIAL &&
+                    (dragData.target as Node).collection.type ===
+                        RestConstants.COLLECTIONTYPE_EDITORIAL)
             ) {
-                return false;
+                return { accept: false };
             }
         }
         if (
-            (source.mode === 'copy' &&
+            (dragData.action === 'copy' &&
                 !this.nodeHelper.getNodesRight(
-                    source.element,
+                    dragData.draggedNodes,
                     RestConstants.ACCESS_CC_PUBLISH,
                     NodesRightMode.Original,
                 )) ||
-            (source.mode === 'move' &&
+            (dragData.action === 'move' &&
                 !this.nodeHelper.getNodesRight(
-                    source.element,
+                    dragData.draggedNodes,
                     RestConstants.ACCESS_WRITE,
                     NodesRightMode.Original,
                 ))
         ) {
-            return false;
+            return { accept: false };
         }
 
         if (
             !this.nodeHelper.getNodesRight(
-                [target],
+                [dragData.target],
                 RestConstants.ACCESS_WRITE,
                 NodesRightMode.Local,
             )
         ) {
-            return false;
+            return { accept: false };
         }
-
-        return true;
+        return { accept: true };
     };
 
-    canDropOnRef(target: Node, source: DropSource<Node>) {
+    canDropOnRef(dragData: DragData): CanDrop {
         // do not allow to drop here
-        return false;
+        return { accept: false };
     }
 
     collectionDelete(): void {

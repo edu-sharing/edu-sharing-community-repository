@@ -76,6 +76,17 @@
     overflow-y: auto;
 }
 
+.content-properties:not([hidden]) {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 12px;
+}
+
+p.description {
+    margin-top: 0;
+    margin-bottom: 12px;
+}
+
 /*Value show in memu-tabs*/
 .value-properties {
     float: right;
@@ -84,18 +95,14 @@
 }
 // Statiskik Canvas
 canvas {
-    margin: 20px 0;
+    align-self: flex-start;
 }
 es-listTable {
     float: left;
     width: 100%;
-    padding: 10px 0 30px;
 }
 .statistic-value {
     margin-left: 20px;
-    margin-top: -14px;
-    margin-bottom: 10px;
-    width: 110%;
 
     .point {
         display: flex;
@@ -114,10 +121,6 @@ es-listTable {
     }
 }
 
-.usage-count {
-    margin: 20px 0;
-    float: left;
-}
 .usage-counter {
     font-weight: bold;
 }

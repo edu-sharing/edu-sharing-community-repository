@@ -10,6 +10,7 @@ import {
     NgZone,
     OnChanges,
     OnDestroy,
+    OnInit,
     Output,
     SimpleChange,
     TemplateRef,
@@ -27,10 +28,7 @@ import {
 import { NodeEntriesService } from '../../core-ui-module/node-entries.service';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { OptionItem } from '../../core-ui-module/option-item';
-import {
-    OptionsHelperService,
-    OPTIONS_HELPER_CONFIG,
-} from '../../core-ui-module/options-helper.service';
+import { OptionsHelperService } from '../../core-ui-module/options-helper.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { NodeEntriesTemplatesService } from '../node-entries/node-entries-templates.service';
@@ -52,20 +50,10 @@ import { NodeDataSource } from './node-data-source';
 @Component({
     selector: 'es-node-entries-wrapper',
     template: ` <es-node-entries *ngIf="!customNodeListComponent"> </es-node-entries>`,
-    providers: [
-        NodeEntriesService,
-        OptionsHelperService,
-        NodeEntriesTemplatesService,
-        {
-            provide: OPTIONS_HELPER_CONFIG,
-            useValue: {
-                subscribeEvents: false,
-            },
-        },
-    ],
+    providers: [NodeEntriesService, OptionsHelperService, NodeEntriesTemplatesService],
 })
 export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
-    implements AfterViewInit, OnChanges, OnDestroy, ListEventInterface<T>
+    implements AfterViewInit, OnInit, OnChanges, OnDestroy, ListEventInterface<T>
 {
     @ContentChild('title') titleRef: TemplateRef<any>;
     @ContentChild('empty') emptyRef: TemplateRef<any>;
@@ -82,6 +70,13 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @Input() sort: ListSortConfig;
     @Input() dragDrop: ListDragGropConfig<T>;
     @Input() gridConfig: GridConfig;
+    /**
+     * Handle page-wide keyboard shortcuts in this node-entries instance.
+     *
+     * This should be set to true if this instance represents the page's main content. Only set to
+     * true for one instance per page.
+     */
+    @Input() globalKeyboardShortcuts: boolean;
     @Output() fetchData = new EventEmitter<FetchEvent>();
     @Output() clickItem = new EventEmitter<NodeClickEvent<T>>();
     @Output() dblClickItem = new EventEmitter<NodeClickEvent<T>>();
@@ -121,6 +116,12 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         });
     }
 
+    ngOnInit(): void {
+        if (this.globalKeyboardShortcuts) {
+            this.optionsHelper.registerGlobalKeyboardShortcuts();
+        }
+    }
+
     ngOnChanges(changes: { [key: string]: SimpleChange } = {}) {
         if (!this.componentRef) {
             this.init();
@@ -142,6 +143,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.clickItem = this.clickItem;
         this.entriesService.dblClickItem = this.dblClickItem;
         this.entriesService.fetchData = this.fetchData;
+        this.entriesService.globalKeyboardShortcuts = this.globalKeyboardShortcuts;
 
         if (this.componentRef) {
             this.componentRef.instance.changeDetectorRef?.detectChanges();

@@ -347,7 +347,7 @@
           </div>
           <div
             [class.display-none]="
-              currentRepository == '-all-' &&
+              currentRepository === '-all-' &&
               groupResults &&
               !searchService.dataSourceSearchResult[0]?.isLoading
             "
@@ -375,6 +375,7 @@
                 direction: searchService.sort?.direction,
                 columns: searchService.sort?.columns
               }"
+              [globalKeyboardShortcuts]="true"
               (sortChange)="updateSort($event)"
               [displayType]="searchService.displayType"
               (fetchData)="getMoreResults()"
@@ -387,7 +388,7 @@
                       *ngIf="
                         searchService.dataSourceSearchResult[0] &&
                         !searchService.dataSourceSearchResult[0]?.isEmpty() &&
-                        currentRepository != '-all-'
+                        currentRepository !== '-all-'
                       "
                     >
                       ({{ searchService.dataSourceSearchResult[0]?.getTotal() }})

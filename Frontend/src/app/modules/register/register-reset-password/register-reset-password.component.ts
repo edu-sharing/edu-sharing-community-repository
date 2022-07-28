@@ -34,8 +34,7 @@ import { RestRegisterService } from '../../../core-module/core.module';
 })
 export class RegisterResetPasswordComponent {
     public new_password = '';
-    public key: string;
-
+    @Input() params: Params;
     public buttonCheck() {
         if (
             UIHelper.getPasswordStrengthString(this.new_password) != 'weak' &&
@@ -48,8 +47,7 @@ export class RegisterResetPasswordComponent {
     }
     public newPassword() {
         this.toast.showProgressDialog();
-        console.log('reset pass');
-        this.register.resetPassword(this.key, this.new_password).subscribe(
+        this.register.resetPassword(this.params.key, this.new_password).subscribe(
             () => {
                 this.toast.closeModalDialog();
                 this.toast.toast('REGISTER.RESET.TOAST');
