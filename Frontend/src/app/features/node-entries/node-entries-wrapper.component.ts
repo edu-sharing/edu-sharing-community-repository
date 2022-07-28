@@ -218,16 +218,6 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
                 this.nodeHelperService.copyDataToNode(d as Node, hits[0] as Node);
             }
         });
-        nodes?.forEach((node) => {
-            if (
-                !this.dataSource
-                    .getData()
-                    .filter((n) => (n as Node).ref.id === (node as Node).ref.id).length
-            ) {
-                (node as Node).virtual = true;
-                this.dataSource.appendData([node], 'before');
-            }
-        });
     }
 
     showReorderColumnsDialog(): void {}

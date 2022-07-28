@@ -12,8 +12,9 @@ import {
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { ConnectorService } from 'ngx-edu-sharing-api';
+import * as rxjs from 'rxjs';
 import { Observable, Subject } from 'rxjs';
-import { delay, takeUntil } from 'rxjs/operators';
+import { delay, take, takeUntil } from 'rxjs/operators';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
@@ -314,6 +315,29 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         this.uploadSelectDialogRef.afterClosed().subscribe((files) => {
             if (files) {
                 this.uploadFiles(files);
+            } else {
+                // When `files` is not set, that can either mean that the dialog was canceled or
+                // that a link was entered, which causes an edit dialog to be opened by the
+                // management dialogs component. When that edit dialog is confirmed or canceled, the
+                // `onUploadFilesProcessed` event is fired. When either of this happens, the link
+                // creation is completed.
+                //
+                // FIXME: This kind of logic should be cleanly separated. Either
+                // - the management-dialogs service should process file uploads and edit dialogs and
+                //   should, for both links and uploads, notify us only after the edit dialog was
+                //   closed by the user, or
+                // - we handle the edit dialog here as a response to the user either uploading files
+                //   or entering a link.
+                rxjs.merge(
+                    this.dialogs.getDialogsComponent().onUploadFilesProcessed,
+                    this.dialogs.getDialogsComponent().onUploadSelectCanceled,
+                )
+                    .pipe(take(1))
+                    .subscribe((nodes) => {
+                        if (nodes) {
+                            this.onCreate.emit(nodes);
+                        }
+                    });
             }
             this.uploadSelectDialogRef = null;
         });
