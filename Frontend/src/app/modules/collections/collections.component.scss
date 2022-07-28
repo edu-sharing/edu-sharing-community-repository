@@ -26,16 +26,17 @@ mat-tab-group {
     margin-top: $mainnavHeight;
     min-height: calc(100vh - #{$mainnavHeight});
 
-    .collections-right {
-        > es-spinner {
-            text-align: center;
-        }
-    }
     &.collectionsContainerTabs {
         margin-top: $mainnavHeight + 48px;
     }
+
+    es-collection-content {
+        display: block;
+        padding-top: 30px;
+    }
+
     &.collectionsContainerNoSidebar {
-        padding:0 10%;
+        padding: 0 10%;
         grid-template-columns: auto;
     }
 }
@@ -97,25 +98,6 @@ section {
     height: 100%;
     object-fit: cover;
 }
-.collection-nocontent-container {
-    text-align: left;
-    float: left;
-    width: 100%;
-}
-
-.collection-nocontent-big {
-    font-size: $fontSizeLarge;
-    color:$textLight;
-    margin-top: 20px;
-    text-align: center;
-    width: 100%;
-}
-
-.collection-nocontent-small {
-    padding: 16px;
-    padding-top: 0px;
-    padding-left: 0px;
-}
 
 .icon-bottom {
     vertical-align: bottom;
@@ -148,31 +130,6 @@ section {
 .table-tab-title-short {
     display: none;
 }
-.collections-cards-div {
-    display: flex;
-    flex-direction: column;
-    .heading-group {
-        display: flex;
-        align-items: center;
-        > h2 {
-            flex-grow: 1;
-            margin: 5px 10px 0 0;
-        }
-        mat-slide-toggle {
-            margin-right: 20px;
-        }
-    }
-}
-.actionbarMaterials {
-    position: sticky;
-    top: $mainnavHeight;
-    display: flex;
-    justify-content: flex-end;
-    padding: 20px 30px;
-    margin: -20px -20px 0;
-    z-index: 2;
-    background-color: $backgroundColor;
-}
 .content-header {
     display: flex;
     width: 100%;
@@ -191,6 +148,7 @@ section {
     background: #fff;
     @include materialShadow();
 }
+
 @media only screen and (max-width: $mobileWidth+$mobileStage*3) {
     :host ::ng-deep {
         .tab-label {

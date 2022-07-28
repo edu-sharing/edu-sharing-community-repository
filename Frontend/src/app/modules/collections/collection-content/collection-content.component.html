@@ -1,0 +1,177 @@
+<div
+  role="main"
+  esSkipTarget="MAIN_CONTENT"
+  class="collections-master-div"
+>
+
+  <section class="collections-cards-div">
+    <!-- COLLECTION CARDS -->
+    <es-node-entries-wrapper
+      [dataSource]="dataSourceCollections"
+      [columns]="collectionsColumns"
+      [displayType]="NodeEntriesDisplayType.SmallGrid"
+        [globalOptions]="createAllowed() ? [createSubCollectionOptionItem] : []"
+        [dragDrop]="{
+                dragAllowed: isAllowedToEditCollection(),
+                dropAllowed: canDropOnCollection,
+                dropped: dropOnCollection
+              }"
+        [sort]="{
+                active: sortCollections.active,
+                direction: sortCollections.direction,
+                customSortingInProgress: sortCollections.customSortingInProgress,
+                columns: sortCollections.columns,
+                allowed: !isMobile() && dataSourceCollections.getData()?.length > 1 &&
+                          isUserAllowedToEdit(collection) && !sortReferences?.customSortingInProgress
+              }"
+        (sortChange)="setCollectionSort($event)"
+
+    >
+      <ng-template #title>
+        <div class="heading-group">
+          <h2
+            class="mat-heading-3"
+            *ngIf="isAllowedToEditCollection() || !dataSourceCollections.isEmpty()"
+          >
+            <ng-container *ngIf="isRootLevel">{{
+              'COLLECTIONS.TAB.' + scope + '_LONG' | translate
+              }}</ng-container>
+            <ng-container *ngIf="!isRootLevel">{{
+              'COLLECTION.INFO_REFERENCES_MULTI' | translate
+              }}</ng-container>
+          </h2>
+        </div>
+      </ng-template>
+      <ng-template #empty>
+        <div
+          *ngIf="!createAllowed()"
+          class="collection-nocontent-container collection-nocontent-big"
+        >
+          <ng-container *ngTemplateOutlet="emptyRef"></ng-container>
+        </div>
+      </ng-template>
+    </es-node-entries-wrapper>
+    <!-- when empty at root level -->
+  </section>
+  <ng-container *ngIf="!isRootLevel">
+    <section
+      *ngIf="!dataSourceCollectionProposals?.isEmpty()"
+      class="collections-cards-div"
+    >
+      <div class="content-header heading-group">
+        <h2 class="mat-heading-3">
+          {{ 'COLLECTIONS.PROPOSALS.TITLE' | translate }}
+        </h2>
+      </div>
+
+      <es-node-entries-wrapper
+        [elementInteractionType]="InteractionType.DefaultActionLink"
+        [dataSource]="dataSourceCollectionProposals"
+        [displayType]="NodeEntriesDisplayType.Grid"
+        [columns]="proposalColumns"
+        (clickItem)="onContentClick($event.element)"
+        class="no-padding"
+      ></es-node-entries-wrapper>
+    </section>
+    <section
+      class="collections-cards-div"
+      *ngIf="!isRootLevel"
+    >
+      <es-actionbar
+        #actionbarReferences
+        class="actionbarMaterials"
+        [numberOfAlwaysVisibleOptions]="1"
+      ></es-actionbar>
+      <es-node-entries-wrapper
+        #listReferences
+        [dataSource]="dataSourceReferences"
+        [columns]="referencesColumns"
+        [displayType]="NodeEntriesDisplayType.Grid"
+        [dragDrop]="{
+                dragAllowed: isAllowedToEditCollection(),
+                dropAllowed: canDropOnRef,
+                dropped: dropOnRef
+              }"
+        [sort]="{
+                active: sortReferences.active,
+                direction: sortReferences.direction,
+                customSortingInProgress: sortReferences.customSortingInProgress,
+                columns: sortReferences.columns,
+                allowed: !isMobile() && dataSourceReferences.getData()?.length > 1 &&
+                          isUserAllowedToEdit(collection) && !sortCollections?.customSortingInProgress
+              }"
+        (sortChange)="setReferenceSort($event)"
+        [globalOptions]="
+                      isUserAllowedToEdit(collection)
+                          ? [addMaterialSearchOptionItem, addMaterialBinaryOptionItem]
+                          : []
+                  "
+        (fetchData)="loadMoreReferences($event)"
+      >
+        <ng-template #empty>
+          <div
+            *ngIf="dataSourceReferences.isEmpty() &&
+              dataSourceCollections.isEmpty()"
+            class="section-headline collection-nocontent-container"
+          >
+            <div class="collection-nocontent-big">
+              {{ 'collections_noContentAvailable' | translate }}
+            </div>
+            <div
+              class="collection-nocontent-small"
+              *ngIf="isUserAllowedToEdit(collection)"
+            >
+              {{ 'collections_howToAddContent' | translate }}
+            </div>
+          </div>
+        </ng-template>
+        <ng-template #title>
+          <div class="content-header heading-group">
+            <h2 class="mat-heading-3">
+              {{ 'collections_content' | translate }}
+            </h2>
+          </div>
+        </ng-template>
+      </es-node-entries-wrapper>
+      <!--
+    <es-custom-node-list-wrapper
+  #listReferences
+      [parent]="collection"
+      [optionItems]="
+                isUserAllowedToEdit(collection)
+                    ? [addMaterialSearchOptionItem, addMaterialBinaryOptionItem]
+                    : []
+            "
+      [hasHeading]="false"
+      [viewType]="viewTypeNodes"
+      [dragDrop]="true"
+      [hasIcon]="true"
+      [orderElements]="sortReferences?.customActive"
+      [orderElementsActive]="sortReferences?.customActive"
+      [columns]="referencesColumns"
+      [mainNav]="mainNavRef"
+      [actionbar]="actionbarReferences"
+      [scope]="SCOPES.CollectionsReferences"
+      [isClickable]="true"
+      [hasCheckbox]="!sortReferences?.customActive && !reurl"
+      [canDrop]="canDropOnRef"
+      (clickRow)="onContentClick($event.node)"
+      (onRequestRefresh)="refreshContent()"
+      [canDelete]="canDelete"
+      (onDelete)="deleteReference($event)"
+      [createLink]="true"
+      [nodes]="$any(collectionContent.references)"
+      (nodesChange)="collectionContent.references = $any($event)"
+      [isLoading]="collectionContent.referencesLoading"
+      [hasMore]="
+                collectionContent.references.length <
+                collectionContent.referencesPagination.total
+            "
+      (loadMore)="loadMoreReferences()"
+      class="no-padding"
+    ></es-custom-node-list-wrapper>
+    -->
+      <!-- NO CONTENT NOTICE -->
+    </section>
+  </ng-container>
+</div>

@@ -1,0 +1,47 @@
+@import '../../../core-ui-module/styles/variables';
+
+.collections-cards-div {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 30px;
+    .heading-group {
+        display: flex;
+        align-items: center;
+        > h2 {
+            flex-grow: 1;
+            margin: 5px 10px 0 0;
+        }
+        mat-slide-toggle {
+            margin-right: 20px;
+        }
+    }
+}
+.collection-nocontent-container {
+    text-align: left;
+    float: left;
+    width: 100%;
+}
+
+.collection-nocontent-big {
+    font-size: $fontSizeLarge;
+    color:$textLight;
+    margin: 40px 20px;
+    text-align: center;
+    width: 100%;
+}
+
+.collection-nocontent-small {
+    padding: 16px;
+    color: $textMediumLight;
+}
+
+.actionbarMaterials {
+    position: sticky;
+    top: $mainnavHeight;
+    display: flex;
+    justify-content: flex-end;
+    padding: 20px 30px;
+    margin: -20px -20px 0;
+    z-index: 2;
+    background-color: $backgroundColor;
+}

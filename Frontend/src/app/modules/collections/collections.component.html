@@ -65,7 +65,7 @@
   <!-- collection header -->
   <ng-container
     [ngTemplateOutlet]="collectionContentTemplateRef ? collectionContentTemplateRef : collectionContentTemplateRefDefault"
-    [ngTemplateOutletContext]="{$implicit: null, collection: collectionContent, permissions: permissions, isLoading: isLoading, tabSelected: tabSelected}"></ng-container>
+    [ngTemplateOutletContext]="{$implicit: null, collection: collection, permissions: collectionContentRef?.permissions, isLoading: isLoading, tabSelected: tabSelected}"></ng-container>
   <ng-template #collectionContentTemplateRefDefault>
   </ng-template>
 </div>
@@ -73,29 +73,50 @@
 <div class="alignWithBanner"
      cdkDropListGroup
 >
-  <div class="collections-footer-group">
-    <div [class.collectionsContainerTabs]="showTabs()"
-         [class.collectionsContainerNoSidebar]="isRootLevelCollection() || isLoading"
-         class="collectionsContainer"
+  <div [class.collectionsContainerTabs]="showTabs()"
+       [class.collectionsContainerNoSidebar]="isRootLevelCollection() || isLoading"
+       class="collectionsContainer"
+  >
+
+    <es-collection-info-bar
+      #infobar
+      *ngIf="!isLoading && !isRootLevelCollection() && collection"
+      [collection]="collection"
+      [permissions]="collectionContentRef?.permissions"
+      (edit)="collectionEdit()"
+    ></es-collection-info-bar>
+    <!-- <div *ngIf="isLoading" class="collection-loading"><es-spinner-small></es-spinner-small></div> -->
+    <div
+      class="collections-right"
     >
-      <div class="collections-header" *ngIf="!isLoading">
-        <es-collection-info-bar
-          #infobar
-          *ngIf="!isRootLevelCollection()"
-          [collection]="collectionContent.node"
-          [permissions]="permissions"
-          (edit)="collectionEdit()"
-        ></es-collection-info-bar>
-        <!-- <div *ngIf="isLoading" class="collection-loading"><es-spinner-small></es-spinner-small></div> -->
-      </div>
-      <div class="collections-right">
-        <section
-          *ngIf="isLoading || !isReady"
-          class="collections-loading-div"
-          style="padding-top: 24px;text-align: center;"
-        >
-          <es-spinner></es-spinner>
-        </section>
+      <section
+        *ngIf="isLoading || !isReady"
+        class="collections-loading-div"
+        style="padding-top: 24px;text-align: center;"
+      >
+        <es-spinner></es-spinner>
+      </section>
+      <h1
+        *ngIf="isRootLevelCollection()"
+        esTitle
+        class="cdk-visually-hidden"
+      >{{ 'COLLECTIONS.TITLE' | translate }}</h1>
+      <a
+        *ngIf="!isLoading && isGuest"
+        mat-button
+        color="primary"
+        class="switchToSearch"
+        title="{{ 'COLLECTIONS.TO_SEARCH' | translate }}"
+        tabindex="0"
+        (click)="navigateToSearch()"
+        [routerLink]="['/' + ROUTER_PREFIX + 'search']"
+      >
+        {{ 'COLLECTIONS.TO_SEARCH' | translate }}
+        <i esIcon="arrow_forward"></i>
+      </a>
+      <ng-container
+        *ngIf="collection"
+      >
         <div
           role="navigation"
           [attr.aria-label]="'NAV.COLLECTIONS' | translate"
@@ -108,236 +129,36 @@
             [homeRouterLink]="{routerLink: ['.'], queryParams: { scope: tabSelected } }"
             [breadcrumbsAsNode]="path"
             [invisibleDescription]="true"
-            (onDrop)="dropOnCollection($event.target, $event.source)"
+            (onDrop)="collectionContentComponent.dropOnCollection($event.target, $event.source)"
           ></es-breadcrumbs>
         </div>
-        <div
-          role="main"
-          esSkipTarget="MAIN_CONTENT"
-          class="collections-master-div"
+        <es-collection-content
+          #collectionContentComponent
+          [collection]="collection"
+          [infobar]="infobar"
+          [scope]="getScope()"
+          [isRootLevel]="isRootLevelCollection()"
+          [createAllowed]="createAllowed"
           [class.collections-master-div-notabs]="!showTabs()"
         >
-          <h1
-            *ngIf="isRootLevelCollection()"
-            esTitle
-            class="cdk-visually-hidden"
-          >{{ 'COLLECTIONS.TITLE' | translate }}</h1>
-          <!-- breadcrumbs -->
-          <a
-            *ngIf="!isLoading && isGuest"
-            mat-button
-            color="primary"
-            class="switchToSearch"
-            title="{{ 'COLLECTIONS.TO_SEARCH' | translate }}"
-            tabindex="0"
-            (click)="navigateToSearch()"
-            [routerLink]="['/' + ROUTER_PREFIX + 'search']"
-          >
-            {{ 'COLLECTIONS.TO_SEARCH' | translate }}
-            <i esIcon="arrow_forward"></i>
-          </a>
-
-          <!-- content (collection cards) if not error -->
-
-          <section class="collections-cards-div" *ngIf="!isLoading">
-            <!-- COLLECTION CARDS -->
-            <es-node-entries-wrapper
-              [dataSource]="dataSourceCollections"
-              [columns]="collectionsColumns"
-              [displayType]="NodeEntriesDisplayType.SmallGrid"
-              [globalOptions]="createAllowed() ? [createSubCollectionOptionItem] : []"
-              [dragDrop]="{
-                dragAllowed: isAllowedToEditCollection(),
-                dropAllowed: canDropOnCollection,
-                dropped: dropOnCollection
-              }"
-              [sort]="{
-                active: sortCollections.active,
-                direction: sortCollections.direction,
-                customSortingInProgress: sortCollections.customSortingInProgress,
-                columns: sortCollections.columns,
-                allowed: !isMobile() && dataSourceCollections.getData()?.length > 1 &&
-                          isUserAllowedToEdit(collectionContent.node) && !sortReferences?.customSortingInProgress
-              }"
-              (sortChange)="setCollectionSort($event)"
-
-            >
-              <ng-template #title>
-                <div class="heading-group">
-                  <h2
-                    class="mat-heading-3"
-                    *ngIf="isAllowedToEditCollection() || !dataSourceCollections.isEmpty()"
-                  >
-                    <ng-container *ngIf="isRootLevelCollection()">{{
-                      'COLLECTIONS.TAB.' + tabSelected + '_LONG' | translate
-                      }}</ng-container>
-                    <ng-container *ngIf="!isRootLevelCollection()">{{
-                      'COLLECTION.INFO_REFERENCES_MULTI' | translate
-                      }}</ng-container>
-                  </h2>
-                </div>
-              </ng-template>
-              <ng-template #empty>
-                <div
-                  *ngIf="isRootLevelCollection() || true"
-                  class="collection-nocontent-container collection-nocontent-big"
-                >
-                  <ng-container *ngIf="tabSelected == 'EDU_GROUPS'">
-                    {{ 'collections_noOrgaCollections' | translate }}
-                  </ng-container>
-                  <ng-container *ngIf="tabSelected == 'EDU_ALL'" >
-                    {{ 'collections_noCollections' | translate }}
-                  </ng-container>
-                </div>
-              </ng-template>
-            </es-node-entries-wrapper>
-            <!-- when empty at root level -->
-          </section>
-
-          <section
-            *ngIf="!isLoading && collectionProposals?.nodes?.length"
-            class="collections-cards-div"
-          >
-            <div class="content-header heading-group">
-              <h2 class="mat-heading-3">
-                {{ 'COLLECTIONS.PROPOSALS.TITLE' | translate }}
-              </h2>
-            </div>
-
-            <es-custom-node-list-wrapper
-              [parent]="collectionContent.node"
-              [hasHeading]="false"
-              [viewType]="1"
-              [dragDrop]="false"
-              [hasIcon]="true"
-              [columns]="proposalColumns"
-              [scope]="SCOPES.CollectionsReferences"
-              [isClickable]="true"
-              (clickRow)="onContentClick($event.node)"
-              [createLink]="true"
-              [nodes]="$any(collectionProposals.nodes)"
-              (nodesChange)="collectionProposals.nodes = $any($event)"
-              class="no-padding"
-            ></es-custom-node-list-wrapper>
-          </section>
-          <section
-            class="collections-cards-div"
-            *ngIf="!isLoading && isReady && !isRootLevelCollection()"
-          >
-            <es-actionbar
-              #actionbarReferences
-              class="actionbarMaterials"
-              [numberOfAlwaysVisibleOptions]="1"
-              [class.display-none]="listReferences.getSelection().isEmpty()"
-            ></es-actionbar>
-            <es-node-entries-wrapper
-              #listReferences
-              [dataSource]="dataSourceReferences"
-              [columns]="referencesColumns"
-              [displayType]="NodeEntriesDisplayType.Grid"
-              [dragDrop]="{
-                dragAllowed: isAllowedToEditCollection(),
-                dropAllowed: canDropOnRef,
-                dropped: dropOnRef
-              }"
-              [sort]="{
-                active: sortReferences.active,
-                direction: sortReferences.direction,
-                customSortingInProgress: sortReferences.customSortingInProgress,
-                columns: sortReferences.columns,
-                allowed: !isMobile() && dataSourceReferences.getData()?.length > 1 &&
-                          isUserAllowedToEdit(collectionContent.node) && !sortCollections?.customSortingInProgress
-              }"
-              (sortChange)="setReferenceSort($event)"
-              [globalOptions]="
-                      isUserAllowedToEdit(collectionContent.node)
-                          ? [addMaterialSearchOptionItem, addMaterialBinaryOptionItem]
-                          : []
-                  "
-              (fetchData)="loadMoreReferences()"
-            >
-              <ng-template #title>
-                <div class="content-header heading-group">
-                  <h2 class="mat-heading-3">
-                    {{ 'collections_content' | translate }}
-                  </h2>
-                </div>
-              </ng-template>
-            </es-node-entries-wrapper>
-            <!--
-          <es-custom-node-list-wrapper
-        #listReferences
-            [parent]="collectionContent.node"
-            [optionItems]="
-                      isUserAllowedToEdit(collectionContent.node)
-                          ? [addMaterialSearchOptionItem, addMaterialBinaryOptionItem]
-                          : []
-                  "
-            [hasHeading]="false"
-            [viewType]="viewTypeNodes"
-            [dragDrop]="true"
-            [hasIcon]="true"
-            [orderElements]="sortReferences?.customActive"
-            [orderElementsActive]="sortReferences?.customActive"
-            [columns]="referencesColumns"
-            [mainNav]="mainNavRef"
-            [actionbar]="actionbarReferences"
-            [scope]="SCOPES.CollectionsReferences"
-            [isClickable]="true"
-            [hasCheckbox]="!sortReferences?.customActive && !reurl"
-            [canDrop]="canDropOnRef"
-            (clickRow)="onContentClick($event.node)"
-            (onRequestRefresh)="refreshContent()"
-            [canDelete]="canDelete"
-            (onDelete)="deleteReference($event)"
-            [createLink]="true"
-            [nodes]="$any(collectionContent.references)"
-            (nodesChange)="collectionContent.references = $any($event)"
-            [isLoading]="collectionContent.referencesLoading"
-            [hasMore]="
-                      collectionContent.references.length <
-                      collectionContent.referencesPagination.total
-                  "
-            (loadMore)="loadMoreReferences()"
-            class="no-padding"
-          ></es-custom-node-list-wrapper>
-          -->
-            <!-- NO CONTENT NOTICE -->
-            <div
-              *ngIf="dataSourceReferences.isEmpty() &&
-              dataSourceCollections.isEmpty()"
-              class="section-headline collection-nocontent-container"
-            >
-              <div class="collection-nocontent-big">
-                {{ 'collections_noContentAvailable' | translate }}
-              </div>
-              <div
-                class="collection-nocontent-small"
-                *ngIf="isUserAllowedToEdit(collectionContent.node)"
-              >
-                {{ 'collections_howToAddContent' | translate }}
-              </div>
-            </div>
-          </section>
-        </div>
-
-        <es-modal-dialog
-          [title]="dialogTitle"
-          [isCancelable]="dialogCancelable"
-          (onCancel)="closeDialog()"
-          [message]="dialogMessage"
-          [buttons]="dialogButtons"
-        ></es-modal-dialog>
-
-        <es-workspace-management
-          [(addToCollection)]="addToOther"
-          [(nodeShare)]="collectionShare"
-          (onCloseAddToCollection)="closeAddToOther()"
-        ></es-workspace-management>
-      </div>
+          <ng-template #empty>
+            <ng-container *ngIf="isRootLevelCollection()">
+              <ng-container *ngIf="tabSelected === 'EDU_GROUPS'">
+                {{ 'COLLECTIONS.EMPTY.SHARED' | translate }}
+              </ng-container>
+              <ng-container *ngIf="tabSelected === 'EDU_ALL'" >
+                {{ 'COLLECTIONS.EMPTY.PUBLIC' | translate }}
+              </ng-container>
+            </ng-container>
+            <ng-container *ngIf="!isRootLevelCollection()">
+              {{ 'COLLECTIONS.EMPTY.SUBCOLLECTIONS' | translate }}
+            </ng-container>
+          </ng-template>
+        </es-collection-content>
+      </ng-container>
     </div>
-    <es-footer [scope]="'collections'"></es-footer>
   </div>
+  <es-footer [scope]="'collections'"></es-footer>
 </div>
 <ng-template #sortTool let-columns="columns" let-sortInfo="sortInfo" let-callback="callback" let-toggleCallback="toggleCallback">
   <mat-slide-toggle *ngIf="sortInfo.name === 'ccm:collection_ordered_position'" [(ngModel)]="sortInfo.customActive" (ngModelChange)="toggleCallback.emit($event)">

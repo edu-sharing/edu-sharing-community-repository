@@ -139,7 +139,7 @@ export class SimpleEditDialogComponent  {
       title: 'SIMPLE_EDIT.DIRTY.TITLE',
       message: 'SIMPLE_EDIT.DIRTY.MESSAGE',
       isCancelable: true,
-      dialogType: CardType.Question,
+      cardType: CardType.Question,
       buttons: [
           new DialogButton('DISCARD',{ color: 'standard' }, () => {
             this.toast.closeModalDialog();

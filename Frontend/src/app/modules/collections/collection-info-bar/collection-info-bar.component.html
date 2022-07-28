@@ -95,10 +95,12 @@
     </div>
     <div class="collection-permissions collection-label"></div>
     <div class="collections-metadata">
-      <es-mds-viewer *ngIf="collection?.properties"
-                     [data]="collection.properties"
-                     groupId="collection_sidebar"
-                     [headingLevel]="2"
+      <es-mds-viewer
+        #mds
+        *ngIf="collection?.properties"
+        groupId="collection_sidebar"
+        [data]="collection.properties"
+        [headingLevel]="2"
       ></es-mds-viewer>
     </div>
 

@@ -1,4 +1,3 @@
-// component class
 import {
     Component,
     EventEmitter,
@@ -15,6 +14,7 @@ import {RestConstants} from "../../../core-module/rest/rest-constants";
 import {Permission} from "../../../core-module/rest/data-object";
 import {NodeHelperService} from "../../../core-ui-module/node-helper.service";
 import {ActionbarComponent} from "../../../shared/components/actionbar/actionbar.component";
+import {MdsViewerComponent} from "../../../features/mds/mds-viewer/mds-viewer.component";
 
 @Component({
     selector: 'es-collection-info-bar',
@@ -23,6 +23,7 @@ import {ActionbarComponent} from "../../../shared/components/actionbar/actionbar
 })
 export class CollectionInfoBarComponent{
     @ViewChild('actionbar') actionbar: ActionbarComponent;
+    @ViewChild('mds') mds: MdsViewerComponent;
     @Input() collection: Node;
     @Input() permissions: Permission[];
     @Output() edit = new EventEmitter<void>();
