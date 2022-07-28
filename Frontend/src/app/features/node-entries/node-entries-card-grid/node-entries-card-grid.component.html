@@ -45,6 +45,7 @@
     *ngIf="entriesService.sort?.customSortingInProgress"
     role="list"
     class="card-grid card-grid-reorder"
+    cdkDropListGroup
   >
     <ng-container *ngIf="visibleNodes$ | async as nodes">
       <div

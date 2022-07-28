@@ -35,7 +35,7 @@ export enum InteractionType {
 export type ListOptions = { [key in Target]?: OptionItem[] };
 export type ListOptionsConfig = {
     scope: Scope,
-    actionbar: ActionbarComponent,
+    actionbar?: ActionbarComponent,
     parent?: Node,
     customOptions?: CustomOptions,
 };
@@ -101,7 +101,7 @@ export interface ListEventInterface<T extends NodeEntriesDataType> {
     /**
      * activate option (dropdown) generation
      */
-    initOptionsGenerator(actionbar: ListOptionsConfig): void | Promise<void>;
+    initOptionsGenerator(config: ListOptionsConfig): void | Promise<void>;
 
     getSelection(): SelectionModel<T>;
 }

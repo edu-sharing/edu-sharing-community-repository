@@ -36,12 +36,8 @@
 }
 
 .actionbarMaterials {
-    position: sticky;
-    top: $mainnavHeight;
     display: flex;
     justify-content: flex-end;
     padding: 20px 30px;
     margin: -20px -20px 0;
-    z-index: 2;
-    background-color: $backgroundColor;
 }

@@ -142,6 +142,15 @@ section {
         float: left;
         width: 100%;
     }
+    es-collection-content {
+        .actionbarMaterials {
+            position: sticky;
+            top: $mainnavHeight;
+            z-index: 2;
+            background-color: $backgroundColor;
+        }
+
+    }
 }
 .breadcrumb-space {
     padding: 15px 30px;

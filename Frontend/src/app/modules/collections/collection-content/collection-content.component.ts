@@ -1,10 +1,12 @@
 import {
     Component,
     ContentChild,
+    EventEmitter,
     Input,
     OnChanges,
     OnDestroy,
     OnInit,
+    Output,
     SimpleChanges,
     TemplateRef,
     ViewChild,
@@ -33,6 +35,7 @@ import {
     InteractionType,
     ListEventInterface,
     ListSortConfig,
+    NodeClickEvent,
     NodeEntriesDisplayType
 } from "src/app/features/node-entries/entries-model";
 import {RestConnectorService} from "../../../core-module/rest/services/rest-connector.service";
@@ -86,6 +89,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     readonly InteractionType = InteractionType;
 
     @Input() collection: Node;
+    /**
+     * you can subscribe to the clickItem event in case if you want to use emitter
+     */
+    @Input() interactionType: InteractionType = InteractionType.DefaultActionLink;
     @Input() scope: string;
     /**
      * reference to the infobar component
@@ -95,10 +102,12 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     @Input() infobar: CollectionInfoBarComponent;
     @Input() isRootLevel: boolean;
     @Input() createAllowed: () => boolean;
+    @Output() clickItem = new EventEmitter<NodeClickEvent<Node | CollectionReference>>();
     @ContentChild('empty') emptyRef: TemplateRef<unknown>;
     @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
     @ViewChild('listCollections') listCollections: ListTableComponent;
     @ViewChild('listReferences') listReferences: ListEventInterface<CollectionReference>;
+    @ViewChild('listProposals') listProposals: ListEventInterface<ProposalNode>;
 
     private mainNavUpdateTrigger = new Subject<void>();
     sortCollectionColumns: ListItemSort[] = [
@@ -159,8 +168,8 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
     proposalColumns = [
         new ListItem('NODE', RestConstants.CM_PROP_TITLE),
-        new ListItem('NODE_PROPOSAL', RestConstants.CM_CREATOR, { showLabel: true}),
-        new ListItem('NODE_PROPOSAL', RestConstants.CM_PROP_C_CREATED, { showLabel: true}),
+        new ListItem('NODE_PROPOSAL', RestConstants.CM_CREATOR, { showLabel: false}),
+        new ListItem('NODE_PROPOSAL', RestConstants.CM_PROP_C_CREATED, { showLabel: false}),
     ];
     private contentNode: Node;
     permissions: Permission[];
@@ -198,6 +207,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 if(event.data.collection.ref.id === this.collection.ref.id) {
                     this.listReferences.addVirtualNodes(event.data.references);
                 }
+                this.refreshProposals();
             }
         });
         this.authenticationService
@@ -452,10 +462,14 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
 
-    onContentClick(content: any, force = false): void {
-        this.contentNode = content;
+    onContentClick(event: NodeClickEvent<CollectionReference | ProposalNode>, force = false): void {
+        this.contentNode = event.element;
         let buttons: DialogButton[] = [];
-        if (this.isAllowedToDeleteNodes([content])) {
+        if(event.element.type ===  RestConstants.CCM_TYPE_COLLECTION_PROPOSAL) {
+            this.clickElementEvent(event);
+            return;
+        }
+        if (this.isAllowedToDeleteNodes([event.element])) {
             buttons.push(
                 new DialogButton(
                     'OPTIONS.REMOVE_REF',
@@ -469,10 +483,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             new DialogButton(
                 'COLLECTIONS.OPEN_MISSING',
                 { color: 'primary' },
-                () => this.onContentClick(content, true),
+                () => this.onContentClick(event, true),
             ),
         );
-        if (content.originalId == null && !force) {
+        if ((event.element as CollectionReference).originalId == null && !force) {
             this.toast.showConfigurableDialog({
                 title: 'COLLECTIONS.ORIGINAL_MISSING',
                 message: 'COLLECTIONS.ORIGINAL_MISSING_INFO',
@@ -481,15 +495,23 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             })
             return;
         }
-        this.nodeService
-            .getNodeMetadata(content.ref.id)
-            .subscribe((data: NodeWrapper) => {
-                this.contentNode = data.node;
-                this.router.navigate([
-                    UIConstants.ROUTER_PREFIX + 'render',
-                    content.ref.id,
-                ]);
-            });
+        this.clickElementEvent(event);
+    }
+
+    private clickElementEvent(event: NodeClickEvent<CollectionReference | ProposalNode>) {
+        if (this.interactionType === InteractionType.DefaultActionLink) {
+            this.nodeService
+                .getNodeMetadata(event.element.ref.id)
+                .subscribe((data: NodeWrapper) => {
+                    this.contentNode = data.node;
+                    this.router.navigate([
+                        UIConstants.ROUTER_PREFIX + 'render',
+                        event.element.ref.id,
+                    ]);
+                });
+        } else {
+            this.clickItem.emit(event)
+        }
     }
 
     private isAllowedToDeleteNodes(nodes: Node[]) {
@@ -555,8 +577,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     private refreshContent() {
-        this.dataSourceCollectionProposals.reset();
-        this.dataSourceCollectionProposals.isLoading = true;
         this.dataSourceCollections.reset();
         this.dataSourceReferences.reset();
         this.dataSourceCollections.isLoading = true;
@@ -594,16 +614,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                         this.finishCollectionLoading();
                         return;
                     }
-                    if(this.isAllowedToEditCollection()) {
-                        this.collectionService.
-                        getCollectionProposals(this.collection.ref.id).subscribe((proposals) => {
-                            proposals.nodes = proposals.nodes.map((p) => {
-                                p.proposalCollection = this.collection;
-                                return p;
-                            });
-                            this.dataSourceCollectionProposals.setData(proposals.nodes, proposals.pagination);
-                        })
-                    }
+                    this.refreshProposals();
                     const requestRefs = this.getReferencesRequest();
                     requestRefs.count = null;
                     this.collectionService
@@ -889,5 +900,25 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             );
     }
 
-
+    private refreshProposals() {
+        this.dataSourceCollectionProposals.reset();
+        this.dataSourceCollectionProposals.isLoading = true;
+        if(this.isAllowedToEditCollection()) {
+            this.collectionService.
+            getCollectionProposals(this.collection.ref.id).subscribe((proposals) => {
+                proposals.nodes = proposals.nodes.map((p) => {
+                    p.proposalCollection = this.collection;
+                    return p;
+                });
+                this.dataSourceCollectionProposals.setData(proposals.nodes, proposals.pagination);
+                this.dataSourceCollectionProposals.setCanLoadMore(false);
+                this.dataSourceCollectionProposals.isLoading = false;
+                setTimeout(() => {
+                    this.listProposals?.initOptionsGenerator({
+                        scope: Scope.CollectionsProposals
+                    });
+                });
+            })
+        }
+    }
 }
