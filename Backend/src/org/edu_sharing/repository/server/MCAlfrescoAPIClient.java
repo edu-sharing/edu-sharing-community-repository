@@ -3525,43 +3525,31 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				(String) nodeService.getProperty(
 						new NodeRef(storeRef, nodeId),
 						QName.createQName(CCConstants.CM_NAME));
-		for(int i=0;i<=11;i++) {
-			String name=originalName;
-			if(i>0) {
-				name = NodeServiceHelper.renameNode(name, i);
-				if(i>10) {
-					logger.info("Node " + name +" already exists, falling back to uuid " + nodeId);
-					// fallback
-					name = nodeId;
-				}
-			}
-			if(nodeService.getChildByName(new NodeRef(storeRef, newParentId), ContentModel.ASSOC_CONTAINS, name) != null ||
-					nodeService.getChildByName(NodeServiceHelper.getPrimaryParent(new NodeRef(storeRef, nodeId)), ContentModel.ASSOC_CONTAINS, name) != null) {
-				logger.debug("Node " + name +" already exists, retrying...");
-				continue;
-			}
-			if(i>0) {
-				nodeService.setProperty(new NodeRef(storeRef, nodeId),
-						QName.createQName(CCConstants.CM_NAME),name);
-			}
-			try {
-				nodeService.moveNode(
-						new NodeRef(storeRef, nodeId),
-						new NodeRef(storeRef, newParentId),
-						QName.createQName(childAssocType),
-						QName.createQName(CCConstants.NAMESPACE_CCM, name));
 
-				// remove from cache so that the new primary parent will be refreshed
-				Cache repCache = new RepositoryCache();
-				repCache.remove(nodeId);
-				return;
-			}catch(DuplicateChildNodeNameException e){
-				logger.warn("Node renaming to " + name + " throwed " + e.getName());
-				// let the loop run
-			}
+		nodeService.setProperty(new NodeRef(storeRef, nodeId), QName.createQName(CCConstants.CM_NAME), UUID.randomUUID().toString());
+		nodeService.moveNode(
+				new NodeRef(storeRef, nodeId),
+				new NodeRef(storeRef, newParentId),
+				QName.createQName(childAssocType),
+				QName.createQName(CCConstants.NAMESPACE_CCM, nodeId));
+
+		String name = originalName;
+		int i = 1;
+		int maxRetries = 10;
+		while (nodeService.getChildByName(new NodeRef(storeRef, newParentId), ContentModel.ASSOC_CONTAINS, name) != null && i <= maxRetries) {
+			name = NodeServiceHelper.renameNode(originalName, i++);
 		}
-		throw new RuntimeException("Could not move node, creating new node at location " +newParentId + " failed, renaming failed for " + nodeId);
+
+		boolean canApplyName = i <= maxRetries;
+		if (canApplyName) {
+			nodeService.setProperty(new NodeRef(storeRef, nodeId), QName.createQName(CCConstants.CM_NAME), name);
+		}
+
+		// remove from cache so that the new primary parent will be refreshed
+		Cache repCache = new RepositoryCache();
+		repCache.remove(nodeId);
 	}
+
 
 	/**
 	 * @param nodeId : the id of the node to copy
