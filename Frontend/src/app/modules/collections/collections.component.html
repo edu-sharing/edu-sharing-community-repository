@@ -336,7 +336,7 @@
           </section>
 
           <section
-            *ngIf="!isLoading && collectionProposals?.nodes?.length"
+            *ngIf="!isLoading && !dataSourceCollectionProposals.isEmpty()"
             class="collections-cards-div"
           >
             <div class="content-header heading-group">
@@ -345,21 +345,16 @@
               </h2>
             </div>
 
-            <es-custom-node-list-wrapper
-              [parent]="collectionContent.node"
-              [hasHeading]="false"
-              [viewType]="1"
-              [dragDrop]="false"
-              [hasIcon]="true"
+            <es-node-entries-wrapper
+              [elementInteractionType]="InteractionType.DefaultActionLink"
+              #listProposals
+              [dataSource]="dataSourceCollectionProposals"
+              [displayType]="NodeEntriesDisplayType.Grid"
               [columns]="proposalColumns"
-              [scope]="SCOPES.CollectionsReferences"
-              [isClickable]="true"
-              (clickRow)="onContentClick($event.node)"
-              [createLink]="true"
-              [nodes]="$any(collectionProposals.nodes)"
-              (nodesChange)="collectionProposals.nodes = $any($event)"
+              [globalOptions]=""
+              (clickItem)="onContentClick($event)"
               class="no-padding"
-            ></es-custom-node-list-wrapper>
+            ></es-node-entries-wrapper>
           </section>
           <section
             class="collections-cards-div"
