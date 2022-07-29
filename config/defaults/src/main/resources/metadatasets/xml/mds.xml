@@ -1152,19 +1152,6 @@
 				<statement>(@cm\:name:"*${value}*" OR @cclom\:title:"*${value}*")</statement>
 			</property>
 		</query>
-		<query join="AND" id="search_relation_query" applyBasequery="true">
-			<basequery>TYPE:"ccm:io"</basequery>
-			<property name="ngsearchword">
-				<statement>(@sys\:node-uuid:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*")</statement>
-			</property>
-			<property name="sourceNode">
-				<statement>TYPE:"ccm:io" AND NOT @sys\:node-uuid:"${value}" AND NOT @ccm\:published_original:"${value}"</statement>
-			</property>
-			<property name="virtual:user_files">
-				<statement value="false">TYPE:"ccm:io"</statement>
-				<statement value="true">CREATOR:"${authority}" OR OWNER:"${authority}"</statement>
-			</property>
-		</query>
 		<query join="AND"  id="tools">
 			<basequery>ASPECT:"{http://www.campuscontent.de/model/1.0}tool_definition"</basequery>
 			<property name="toolname">
@@ -1199,18 +1186,26 @@
 				<multiplejoin>AND</multiplejoin>
 			</property>
 			<property name="sourceNode">
-				<multiple>true</multiple>
-				<multiplejoin>AND</multiplejoin>
-				<statement>TYPE:"ccm:io" AND NOT @sys\:node-uuid:"${value}"</statement>
+				<statement>TYPE:"ccm:io" AND NOT @sys\:node-uuid:"${value}" AND NOT @ccm\:published_original:"${value}"</statement>
 			</property>
 			<property name="ccm:taxonid">
 				<multiple>true</multiple>
 				<multiplejoin>OR</multiplejoin>
 			</property>
+			<property name="virtual:user_files">
+				<statement value="false">TYPE:"ccm:io"</statement>
+				<statement value="true">CREATOR:"${authority}" OR OWNER:"${authority}"</statement>
+			</property>
 		</query>
 	</queries>
 	<queries syntax="dsl">
-		<basequery></basequery>
+		<basequery>
+			{"bool":
+			{"must":[
+			{"term":{"nodeRef.storeRef.protocol":"workspace"}}
+			]
+			}}
+		</basequery>
 		<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
 
 		<query join="AND" id="ngsearch">
@@ -1218,12 +1213,11 @@
 			<!--basequery>ISNULL:@ccm\:tool_category</basequery-->
 			<basequery>
 				{"bool":
-				{"must":[{"term":{"nodeRef.storeRef.protocol":"workspace"}}],
-				 "must_not":[{"term":{"aspects":"ccm:metadataPresettingTemplate"}},
-							 {"term":{"aspects":"ccm:io_childobject"}},
-							 {"wildcard":{"properties.cm:name.keyword":"._*"}},
-							 {"term":{"aspects":"ccm:collection_io_reference"}},
-				             {"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}]
+				"must_not":[{"term":{"aspects":"ccm:metadataPresettingTemplate"}},
+				{"term":{"aspects":"ccm:io_childobject"}},
+				{"wildcard":{"properties.cm:name.keyword":"._*"}},
+				{"term":{"aspects":"ccm:collection_io_reference"}},
+				{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}]
 				}
 				}</basequery>
 			<property name="ngsearchword">
@@ -1276,6 +1270,54 @@
 			<basequery>{"term":{"type":"ccm:io"}}</basequery>
 			<property name="ngsearchword">
 				<statement>{"bool":{"should":[{"wildcard":{"properties.cm:name":{"value":"*${value}*"}}},{"wildcard":{"properties.ccm.replicationsourceid":{"value":"*${value}*"}}}]}}</statement>
+			</property>
+		</query>
+		<query join="AND" id="search_relation_query">
+			<basequery>{"term":{"type":"ccm:io"}}</basequery>
+			<property name="ngsearchword">
+				<statement>
+					{
+					"simple_query_string" : {
+					"query": "${value}*",
+					"fields": [
+					"properties.cm:name.keyword^4",
+					"properties.cclom:title^4",
+					"properties.cclom:general_description^2",
+					"properties.cclom:general_keyword^2",
+					"content.fulltext",
+					"nodeRef.id",
+					"i18n.de_DE.ccm:taxonid^3",
+					"i18n.de_DE.ccm:educationallearningresourcetype^3",
+					"i18n.de_DE.ccm:educationalcontext^3",
+					"i18n.de_DE.ccm:educationalintendedenduserrole^3"
+					],
+					"default_operator": "and"
+					}}
+				</statement>
+				<exactMatching>false</exactMatching>
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+			</property>
+			<property name="sourceNode">
+				<statement>{"bool": {
+					"must_not": [
+					{"match": {"nodeRef.id": "${valueRaw}"}},
+					{"match": {"properties.ccm:published_original.keyword": "${valueRaw}"}}
+					]}}</statement>
+			</property>
+			<property name="ccm:taxonid">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="virtual:user_files">
+				<statement value="false">{"term":{"type":"ccm:io"}}</statement>
+				<statement value="true">{"bool": {
+					"should": [
+					{"match": {"properties.cm:creator.keyword": "${authority}"}},
+					{"match": {"owner": "${authority}"}}
+					]
+					}}
+				</statement>
 			</property>
 		</query>
 	</queries>
