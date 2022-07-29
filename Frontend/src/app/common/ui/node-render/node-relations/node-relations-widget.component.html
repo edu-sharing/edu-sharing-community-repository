@@ -2,7 +2,7 @@
   <es-spinner *ngIf="loading"></es-spinner>
   <ng-container *ngIf="!loading">
     <div class="relations-group versions" *ngIf="versions?.length">
-      <h5 class="mat-heading-5">{{ 'NODE_RELATIONS.RELATION_TYPE.VERSIONS' | translate }}</h5>
+      <h5 class="relations-heading">{{ 'NODE_RELATIONS.RELATION_TYPE.VERSIONS' | translate }}</h5>
       <div class="relation-nodes version">
         <es-node-url
           class="relation-node"
@@ -39,7 +39,7 @@
       {{ 'NODE_RELATIONS.NO_RELATIONS' | translate }}
     </div>
     <div class="relations-group" *ngFor="let key of getRelationKeys()">
-      <h5 class="mat-heading-5">{{ 'NODE_RELATIONS.RELATION_TYPE.' + key | translate }}</h5>
+      <h5 class="relations-heading">{{ 'NODE_RELATIONS.RELATION_TYPE.' + key | translate }}</h5>
       <div class="relation-nodes">
         <es-node-url
           class="relation-node"
@@ -64,7 +64,9 @@
       </div>
     </div>
     <ng-container *ngIf="forkedChilds?.length">
-      <h5 class="mat-heading-5">{{ 'NODE_RELATIONS.RELATION_TYPE.FORKED_CHILDS' | translate }}</h5>
+      <h5 class="relations-heading">
+        {{ 'NODE_RELATIONS.RELATION_TYPE.FORKED_CHILDS' | translate }}
+      </h5>
       <div class="relation-nodes version">
         <es-node-url
           class="relation-node"
