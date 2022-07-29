@@ -70,6 +70,12 @@ public class LTIConstants {
 
     public static final String RESOURCE_LINK_LAUNCH_PRESENTATION = "https://purl.imsglobal.org/spec/lti/claim/launch_presentation";
 
+    public static final String LTI_REGISTRATION_TOOL_CONFIGURATION = "https://purl.imsglobal.org/spec/lti-tool-configuration";
+
+    public static final String LTI_REGISTRATION_SCOPE_NEW = "NEW";
+
+    public static final String LTI_REGISTRATION_SCOPE_UPDATE = "UPDATE";
+
 
 
     /**

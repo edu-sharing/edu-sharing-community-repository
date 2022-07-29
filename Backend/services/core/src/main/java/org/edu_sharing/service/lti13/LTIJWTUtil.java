@@ -177,6 +177,36 @@ public class LTIJWTUtil {
         return jwt;
     }
 
+    public static String sign(String string, ApplicationInfo appInfo){
+        Key privateKey = null;
+        try {
+            privateKey = new Signing().getPemPrivateKey(appInfo.getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM);
+        } catch (GeneralSecurityException e) {
+            throw new RuntimeException(e);
+        }
+
+
+
+        return Jwts.builder().setPayload(string).signWith(privateKey).compact();
+    }
+
+    public static Jwt validateJWT(String jwt, ApplicationInfo appInfo){
+        return Jwts.parser().setSigningKeyResolver(new SigningKeyResolverAdapter(){
+            @Override
+            public Key resolveSigningKey(JwsHeader header, Claims claims) {
+                try {
+                    return new Signing().getPemPublicKey(
+                            appInfo.getPublicKey(),
+                            CCConstants.SECURITY_KEY_ALGORITHM);
+                } catch (GeneralSecurityException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).parse(jwt);
+    }
+
+
+
     private List<Map<String, Object>> generateContentItems(Node[] nodes){
         List<Map<String, Object>> deepLinks = new ArrayList<>();
         for(Node node : nodes){

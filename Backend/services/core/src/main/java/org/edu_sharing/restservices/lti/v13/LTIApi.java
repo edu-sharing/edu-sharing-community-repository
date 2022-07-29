@@ -134,7 +134,7 @@ public class LTIApi {
 
         } catch (Throwable e) {
             logger.error(e.getMessage(),e);
-            return processError(req,e,"LTI_ERROR");
+            return ApiTool.processError(req,e,"LTI_ERROR");
         }
     }
 
@@ -154,36 +154,7 @@ public class LTIApi {
         }
     }
 
-    private String getHTML(String formTargetUrl, Map<String,String> params, String errorMessage){
-        return this.getHTML(formTargetUrl,params,errorMessage,null);
-    }
-    /**
-     * @TODO use template engine?
-     * @param formTargetUrl
-     * @param params
-     * @return
-     */
-    private String getHTML(String formTargetUrl, Map<String,String> params, String message, String javascript){
-        StringBuilder sb = new StringBuilder();
-        sb.append("<html><body>");
-        if(javascript != null){
-            sb.append("<script type=\"text/javascript\">"+javascript+"</script>");
-        }
-        if(message == null) {
-            String FORMNAME = "ltiform";
-            sb.append("<script type=\"text/javascript\">window.onload=function(){document.forms[\""+FORMNAME+"\"].submit();}</script>");
-            sb.append("<form action=\"" + formTargetUrl + "\" method=\"post\" name=\"" + FORMNAME + "\"");
-            for (Map.Entry<String, String> entry : params.entrySet()) {
-                sb.append("<input type=\"hidden\" id=\"" + entry.getKey() + "\" name=\"" + entry.getKey() + "\" value=\"" + entry.getValue() + "\" class=\"form-control\"/>");
-            }
-            sb.append("<input type=\"submit\" value=\"Submit POST\" class=\"btn btn-primary\">")
-                    .append("</form>");
-        }else {
-            sb.append(message);
-        }
-        sb.append("</body></html>");
-        return sb.toString();
-    }
+
 
 
     @POST
@@ -208,7 +179,7 @@ public class LTIApi {
             return ltiLaunch(idToken, state, req, null);
         }catch(Exception e){
             logger.error(e.getMessage(),e);
-            return processError(req,e,"LTI_ERROR");
+            return ApiTool.processError(req,e,"LTI_ERROR");
         }
     }
 
@@ -235,7 +206,7 @@ public class LTIApi {
             return ltiLaunch(idToken, state, req, nodeId);
         }catch(Exception e){
             logger.error(e.getMessage(),e);
-            return processError(req,e,"LTI_ERROR");
+            return ApiTool.processError(req,e,"LTI_ERROR");
         }
     }
 
@@ -418,16 +389,6 @@ public class LTIApi {
         }
     }
 
-    private Response processError(HttpServletRequest req, Throwable e, String errorType){
-        try {
-            return Response.seeOther(new URI(req.getScheme() +"://"
-                            + req.getServerName()
-                            + "/edu-sharing/components/messages/"+errorType+"/"+ URLEncoder.encode(e.getMessage())))
-                    .build();
-        } catch (URISyntaxException ex) {
-            return Response.status(Response.Status.OK).entity(getHTML(null,null,"error:" + ex.getMessage())).build();
-        }
-    }
 
     @GET
     @Path("/generateDeepLinkingResponse")
@@ -562,7 +523,7 @@ public class LTIApi {
                    .build();
         }catch(Throwable e){
            logger.error(e.getMessage(),e);
-           return processError(req,e,"LTI_REG_ERROR");
+           return ApiTool.processError(req,e,"LTI_REG_ERROR");
        }
 
     }

@@ -4,12 +4,16 @@ import com.google.gson.Gson;
 import com.nimbusds.jose.jwk.AsymmetricJWK;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
+import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.impl.DefaultClaims;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -17,7 +21,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.service.admin.AdminServiceFactory;
 import org.edu_sharing.service.admin.SystemFolder;
-import org.edu_sharing.service.authority.AuthorityServiceHelper;
+import org.edu_sharing.service.lti13.LTIConstants;
 import org.edu_sharing.service.lti13.RepoTools;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
@@ -26,12 +30,11 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class RegistrationService {
@@ -171,7 +174,7 @@ public class RegistrationService {
         toolConfig.put("domain",homeApp.getDomain());
         toolConfig.put("messages",messages);
         toolConfig.put("claims", claimsSupported);
-        jsonResponse.put("https://purl.imsglobal.org/spec/lti-tool-configuration",toolConfig);
+        jsonResponse.put(LTIConstants.LTI_REGISTRATION_TOOL_CONFIGURATION,toolConfig);
         //jsonResponse.put("token_endpoint_auth_method","private_key_jwt");
         HttpPost post = new HttpPost();
         post.setEntity(new StringEntity(jsonResponse.toJSONString()));
@@ -244,7 +247,7 @@ public class RegistrationService {
         HashMap<String,String> properties = new HashMap<>();
         String appId = new RepoTools().getAppId(platformId,clientId,deploymentId);
         properties.put(ApplicationInfo.KEY_APPID, appId);
-        properties.put(ApplicationInfo.KEY_TYPE, "lti");
+        properties.put(ApplicationInfo.KEY_TYPE, ApplicationInfo.TYPE_LTIPLATFORM);
         properties.put(ApplicationInfo.KEY_LTI_DEPLOYMENT_ID, deploymentId);
         properties.put(ApplicationInfo.KEY_LTI_ISS, platformId);
         properties.put(ApplicationInfo.KEY_LTI_CLIENT_ID, clientId);
@@ -276,5 +279,110 @@ public class RegistrationService {
         } catch (Throwable e) {
             logger.error(e.getMessage(),e);
         }
+    }
+
+    public ApplicationInfo ltiDynamicToolRegistration(JSONObject registrationPayload, Jwt registrationToken) throws Exception{
+
+        List<String> responseTypes = (List<String>)registrationPayload.get("response_types");
+        String initiateLoginUri = (String)registrationPayload.get("initiate_login_uri");
+        List<String> redirectUris = (List<String>)registrationPayload.get("redirect_uris");
+        String clientName =  (String)registrationPayload.get("client_name");
+        String jwksuri = (String)registrationPayload.get("jwks_uri");
+        String tokenEndpointAuthMethod = (String)registrationPayload.get("token_endpoint_auth_method");
+        String applicationType =  (String)registrationPayload.get("application_type");
+        String logoUri = (String)registrationPayload.get("'logo_uri'");
+
+        JSONObject ltiToolConfig = (JSONObject)registrationPayload.get(LTIConstants.LTI_REGISTRATION_TOOL_CONFIGURATION);
+        String domain = (String)ltiToolConfig.get("domain");
+        String targetLinkUri =  (String)ltiToolConfig.get("target_link_uri");
+        JSONObject customParameters = (JSONObject)ltiToolConfig.get("custom_parameters");
+        List<String> claims = (List<String>)ltiToolConfig.get("claims");
+        String description =  (String)ltiToolConfig.get("description");
+
+
+        // Validate domain and target link.
+        if (domain == null || domain.trim().isEmpty()) {
+            throw new Exception("missing_domain");
+        }
+
+        if(targetLinkUri != null){
+            if(!targetLinkUri.contains(domain)){
+                throw new Exception("domain_targetlinkuri_mismatch");
+            }
+        }
+
+        if(!responseTypes.contains("id_token")){
+            throw new Exception("invalid_response_types");
+        }
+
+        if(redirectUris == null || redirectUris.size() == 0){
+            throw new Exception("missing_redirect_uris");
+        }
+
+        if(!tokenEndpointAuthMethod.equals("private_key_jwt")){
+            throw new Exception("invalid_token_endpoint_auth_method");
+        }
+
+        if (!"web".equals(applicationType)) {
+            throw new Exception("invalid_application_type");
+        }
+
+        DefaultClaims body = (DefaultClaims)registrationToken.getBody();
+
+        return registerTool(domain, (String) body.get("sub"),initiateLoginUri,jwksuri,targetLinkUri, StringUtils.join(redirectUris,","), logoUri);
+    }
+
+    public ApplicationInfo registerTool(String domain, String clientId, String initiateLoginUri, String jwksuri, String targetLinkUri, String redirectUris, String logoUri) throws Exception {
+        HashMap<String,String> properties = new HashMap<>();
+
+        Integer lastDeploymentId = 0;
+        for(ApplicationInfo a : ApplicationInfoList.getApplicationInfos().values()) {
+            String firstRedirectUrl = redirectUris.split(",")[0];
+            String firstRedirectUrlExisting = (a.getLtitoolRedirectUrls() != null) ? a.getLtitoolRedirectUrls().split(",")[0] : null;
+            if (ApplicationInfo.TYPE_LTITOOL.equals(a.getType()) && firstRedirectUrl.equals(firstRedirectUrlExisting)) {
+                try {
+                    int dId = Integer.parseInt(a.getLtiDeploymentId());
+                    if (lastDeploymentId < dId) {
+                        lastDeploymentId = dId;
+                    }
+
+                } catch (Exception e) {
+                }
+            }
+        }
+        lastDeploymentId++;
+
+
+        String appId = new RepoTools().getAppId(domain, clientId, Integer.toString(lastDeploymentId));
+        properties.put(ApplicationInfo.KEY_APPID, appId);
+        properties.put(ApplicationInfo.KEY_TYPE, ApplicationInfo.TYPE_LTITOOL);
+        properties.put(ApplicationInfo.KEY_LTI_CLIENT_ID, clientId);
+        properties.put(ApplicationInfo.KEY_LTITOOL_LOGININITIATIONS_URL, initiateLoginUri);
+        properties.put(ApplicationInfo.KEY_LTITOOL_TARGET_LINK_URI,targetLinkUri);
+        properties.put(ApplicationInfo.KEY_LTITOOL_REDIRECT_URLS,redirectUris);
+        properties.put(ApplicationInfo.KEY_LOGO,logoUri);
+        properties.put(ApplicationInfo.KEY_LTI_KEYSET_URL,jwksuri);
+        properties.put(ApplicationInfo.KEY_LTI_DEPLOYMENT_ID, Integer.toString(lastDeploymentId));
+
+
+        JWKSet publicKeys = JWKSet.load(new URL(jwksuri));
+        if(publicKeys == null){
+            throw new Exception("no public key found");
+        }
+        JWK jwk = publicKeys.getKeys().get(0);
+
+        if(jwk == null){
+            throw new Exception("no public key found for jwksuri:" + jwksuri);
+        }
+
+        String pubKeyString = "-----BEGIN PUBLIC KEY-----\n"
+                + new String(new Base64().encode(((AsymmetricJWK) jwk).toPublicKey().getEncoded())) + "-----END PUBLIC KEY-----";
+        properties.put(ApplicationInfo.KEY_PUBLIC_KEY, pubKeyString);
+        AdminServiceFactory.getInstance().addApplication(properties);
+        return ApplicationInfoList.getRepositoryInfoById(appId);
+    }
+
+    public static String generateNewClientId(){
+        return RandomStringUtils.random(15, true, true);
     }
 }

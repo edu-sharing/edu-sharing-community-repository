@@ -144,6 +144,13 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	public static final String KEY_LTI_SYNCREADERS = "lti_sync_readers";
 
+	public static final String KEY_LTITOOL_LOGININITIATIONS_URL = "ltitool_initiate_login_uri";
+
+	public static final String KEY_LTITOOL_REDIRECT_URLS = "ltitool_redirect_urls";
+
+	public static final String KEY_LTITOOL_TARGET_LINK_URI = "ltitool_target_link_uri";
+
+
 
 	/**
 	 * property file vals
@@ -151,6 +158,9 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	public static final String TYPE_REPOSITORY = "REPOSITORY";
 	public static final String TYPE_LMS = "LMS";
 	public static final String TYPE_CMS = "CMS";
+	public static final String TYPE_LTIPLATFORM = "lti";
+	public static final String TYPE_LTITOOL = "ltitool";
+
 
 	/**
 	 * SERVICE = renderservice -> reserved, no other system can use this
@@ -366,6 +376,12 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	private String ltiSyncReaders;
 
+	private String ltitoolLoginInitiationsUrl;
+
+	private String ltitoolRedirectUrls;
+
+	private String ltitoolTargetLinkUri;
+
 
 	/**
 	 * der Anfangsteil des alfresco Intergity Pattern:
@@ -530,6 +546,10 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		ltiKid = properties.getProperty(KEY_LTI_KID);
 		ltiUsagesEnabled = properties.getProperty(KEY_LTI_USAGES_ENABLED);
 		ltiSyncReaders = properties.getProperty(KEY_LTI_SYNCREADERS);
+
+		ltitoolRedirectUrls = properties.getProperty(KEY_LTITOOL_REDIRECT_URLS);
+		ltitoolLoginInitiationsUrl = properties.getProperty(KEY_LTITOOL_LOGININITIATIONS_URL);
+		ltitoolTargetLinkUri = properties.getProperty(KEY_LTITOOL_TARGET_LINK_URI);
 	}
 	
 	public String getXml() {
@@ -1052,4 +1072,15 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		else return new Boolean(this.ltiSyncReaders);
 	}
 
+	public String getLtitoolLoginInitiationsUrl() {
+		return ltitoolLoginInitiationsUrl;
+	}
+
+	public String getLtitoolTargetLinkUri() {
+		return ltitoolTargetLinkUri;
+	}
+
+	public String getLtitoolRedirectUrls() {
+		return ltitoolRedirectUrls;
+	}
 }

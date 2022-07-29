@@ -124,7 +124,9 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 				"/lti/v13/oidc/login_initiations",
 				"/lti/v13/lti13",
 				"/lti/v13/registration/dynamic",
-				"/lti/v13/jwks"});
+				"/lti/v13/jwks",
+				"/ltiplatform/v13/openid-configuration",
+				"/ltiplatform/v13/openid-registration"});
 		List<String> ADMIN_ENDPOINTS=Arrays.asList(new String[]{"/admin", "/bulk","/lti/v13/registration/static","/lti/v13/registration/url"});
 		List<String> DISABLED_ENDPOINTS=new ArrayList<>();
 
