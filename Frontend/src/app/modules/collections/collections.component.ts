@@ -883,7 +883,7 @@ export class CollectionsMainComponent {
         if (id == null) {
             id = RestConstants.ROOT;
         }
-        if (id == '-root-') {
+        if (id == RestConstants.ROOT) {
             // display root collections with tabs
             this.setCollectionId(RestConstants.ROOT);
             this.refreshContent(callback);
@@ -916,7 +916,7 @@ export class CollectionsMainComponent {
                     }
                 },
                 error => {
-                    if (id != '-root-') {
+                    if (id != RestConstants.ROOT) {
                         this.navigate();
                     }
                     if (error.status == 404) {
