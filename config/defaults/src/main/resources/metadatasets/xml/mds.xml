@@ -1302,7 +1302,7 @@
 				<statement>{"bool": {
 					"must_not": [
 					{"match": {"nodeRef.id": "${valueRaw}"}},
-					{"match": {"properties.ccm:published_original.keyword": "${valueRaw}"}}
+					{"wildcard": {"properties.ccm:published_original.keyword": "*${valueRaw}"}}
 					]}}</statement>
 			</property>
 			<property name="ccm:taxonid">

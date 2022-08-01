@@ -4,6 +4,7 @@ import { map } from 'rxjs/operators';
 import { NodeV1Service, SearchV1Service } from '../api/services';
 import { HOME_REPOSITORY } from '../constants';
 import { Node, NodeEntries } from '../models';
+import { RestHelper } from '../../../../../src/app/core-module/rest/rest-helper';
 
 export class NodeConstants {
     public static SPACES_STORE_REF = 'workspace://SpacesStore/';
@@ -32,7 +33,13 @@ export class NodeService {
      * return the forked childs (variants) of this node
      * @returns
      */
-    getForkedChilds(id: string, { repository = HOME_REPOSITORY } = {}) {
+    getForkedChilds(node: Node, { repository = HOME_REPOSITORY } = {}) {
+        let id = node.ref.id;
+        // if it's a published copy, use the original node id
+        // since variants are always forked from their
+        if (node.properties?.['ccm:published_original']) {
+            id = RestHelper.removeSpacesStoreRef(node.properties['ccm:published_original'][0]);
+        }
         return this.searchV1.searchByProperty({
             repository,
             comparator: ['='],
