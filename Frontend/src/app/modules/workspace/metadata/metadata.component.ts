@@ -28,6 +28,7 @@ import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { FormatDatePipe } from '../../../shared/pipes/format-date.pipe';
 import { NodeImageSizePipe } from '../../../shared/pipes/node-image-size.pipe';
+import { NodeService } from 'ngx-edu-sharing-api';
 
 // Charts.js
 declare var Chart: any;
@@ -94,6 +95,7 @@ export class WorkspaceMetadataComponent implements OnInit {
         private router: Router,
         private iamApi: RestIamService,
         private nodeApi: RestNodeService,
+        private nodeService: NodeService,
         private searchApi: RestSearchService,
         private usageApi: RestUsageService,
     ) {
@@ -193,18 +195,9 @@ export class WorkspaceMetadataComponent implements OnInit {
         const request = {
             propertyFilter: [RestConstants.ALL],
         };
-        this.searchApi
-            .searchByProperties(
-                [RestConstants.CCM_PROP_FORKED_ORIGIN],
-                [RestHelper.createSpacesStoreRef(this.nodeObject)],
-                ['='],
-                RestConstants.COMBINE_MODE_AND,
-                RestConstants.CONTENT_TYPE_FILES,
-                request,
-            )
-            .subscribe((childs) => {
-                this.forkedChilds = childs.nodes;
-            });
+        this.nodeService.getForkedChilds(node).subscribe((childs) => {
+            this.forkedChilds = childs.nodes;
+        });
         this.usageApi.getNodeUsages(this.nodeObject.ref.id).subscribe((usages: UsageList) => {
             this.usages = usages.usages;
             this.usageApi
