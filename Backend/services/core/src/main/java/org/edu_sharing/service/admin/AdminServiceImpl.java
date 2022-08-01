@@ -416,7 +416,7 @@ public class AdminServiceImpl implements AdminService  {
 	public void removeApplication(ApplicationInfo info) throws Exception{
 		String[] split=getAppPropertiesApplications().split(",");
 		List<String> apps=new ArrayList<>(Arrays.asList(split));
-		int pos=apps.indexOf(info.getAppFile());
+		int pos=apps.indexOf(info.getAppFileName());
 		if(pos==-1)
 			throw new Exception("AppInfo file "+info.getAppFile()+" was not found in registry");
 		apps.remove(pos);
