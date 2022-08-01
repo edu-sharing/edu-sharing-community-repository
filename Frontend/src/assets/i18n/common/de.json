@@ -413,6 +413,7 @@
   },
   "COMMENTS_SINGLE": "Kommentar",
   "COMMENTS_MULTIPLE": "Kommentare",
+  "PUBLISHED_COPY_TOOLTIP": "Veröffentlichte Kopie",
   "NODE_COMMENTS": {
     "TITLE": "Kommentare",
     "NEW_COMMENT_PLACEHOLDER": "Neuer Kommentar...",
@@ -850,6 +851,7 @@
     "RELATION_TYPE": {
       "VERSIONS": "Versionen",
       "FORKED_CHILDS": "Hat Varianten",
+      "FORKED_ORIGIN": "Ist Variante von",
       "isPartOf": "ist Teil von",
       "isBasedOn": "basiert auf",
       "references": "bezieht sich auf",
