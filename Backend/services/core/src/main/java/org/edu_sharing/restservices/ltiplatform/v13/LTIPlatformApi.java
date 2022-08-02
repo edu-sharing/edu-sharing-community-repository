@@ -261,9 +261,10 @@ public class LTIPlatformApi {
             ors.setToken_endpoint_auth_method((String)registrationPayload.get("token_endpoint_auth_method"));
             ors.setLogo_uri(appInfo.getLogo());
             ors.setScope((String)registrationPayload.get("scope"));
+
             OpenIdRegistrationResult.LTIToolConfiguration ltiToolConfiguration = new OpenIdRegistrationResult.LTIToolConfiguration();
             //ltiToolConfiguration.setVersion();
-            //ltiToolConfiguration.setDeployment_id();
+            ltiToolConfiguration.setDeployment_id(appInfo.getLtiDeploymentId());
             ltiToolConfiguration.setTarget_link_uri(appInfo.getLtitoolTargetLinkUri());
             ltiToolConfiguration.setDomain(appInfo.getDomain());
             //ltiToolConfiguration.setDescription();
