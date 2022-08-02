@@ -74,13 +74,7 @@
         ></es-breadcrumbs>
       </div>
     </div>
-    <es-recycle
-      *ngIf="root === 'RECYCLE'"
-      class="explorer"
-      [actionbar]="actionbar"
-      [searchWorkspace]="searchQuery ? searchQuery.query : null"
-      [isInsideWorkspace]="true"
-    ></es-recycle>
+    <es-recycle *ngIf="root === 'RECYCLE'" class="explorer" [actionbar]="actionbar"></es-recycle>
     <div class="actionbarFrame">
       <div class="mobile-move-top">
         <es-actionbar #actionbar></es-actionbar>
