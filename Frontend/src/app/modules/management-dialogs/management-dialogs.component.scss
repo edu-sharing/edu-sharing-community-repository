@@ -7,8 +7,8 @@ es-workspace-lti-tools {
     margin-top: 20px;
 }
 .metadata-sidebar {
-    min-width: 300px;
-    max-width: 300px;
+    min-width: 350px;
+    max-width: 350px;
     position: fixed;
     @include iosScrolling();
     @include materialShadow();

@@ -29,6 +29,11 @@ import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { FormatDatePipe } from '../../../shared/pipes/format-date.pipe';
 import { NodeImageSizePipe } from '../../../shared/pipes/node-image-size.pipe';
 import { NodeService } from 'ngx-edu-sharing-api';
+import { NodeDataSource } from '../../../features/node-entries/node-data-source';
+import {
+    InteractionType,
+    NodeEntriesDisplayType,
+} from '../../../features/node-entries/entries-model';
 
 // Charts.js
 declare var Chart: any;
@@ -57,6 +62,8 @@ export class WorkspaceMetadataComponent implements OnInit {
     @Output() onClose = new EventEmitter();
     @Output() onRestore = new EventEmitter();
 
+    readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    readonly InteractionType = InteractionType;
     readonly INFO = 'INFO';
     readonly PROPERTIES = 'PROPERTIES';
     readonly VERSIONS = 'VERSIONS';
@@ -64,7 +71,7 @@ export class WorkspaceMetadataComponent implements OnInit {
     loading = true;
     tab = this.INFO;
     permissions: any;
-    usagesCollection: Node[];
+    usagesCollection = new NodeDataSource();
     nodeObject: Node;
     versions: Version[];
     versionsLoading = false;
@@ -72,7 +79,7 @@ export class WorkspaceMetadataComponent implements OnInit {
     columnsCollections: ListItem[] = [];
     statsTotalPoints: number;
     forkedParent: Node;
-    forkedChilds: Node[];
+    forkedChildren = new NodeDataSource();
     stats: Stats = {
         labels: [],
         points: [],
@@ -101,6 +108,8 @@ export class WorkspaceMetadataComponent implements OnInit {
     ) {
         this.columns.push(new ListItem('NODE', RestConstants.CM_NAME));
         this.columnsCollections.push(new ListItem('COLLECTION', 'title'));
+        this.columnsCollections.push(new ListItem('COLLECTION', 'info'));
+        this.columnsCollections.push(new ListItem('COLLECTION', 'scope'));
     }
 
     ngOnInit(): void {
@@ -176,7 +185,7 @@ export class WorkspaceMetadataComponent implements OnInit {
         });
         this.usages = null;
         this.forkedParent = null;
-        this.forkedChilds = null;
+        this.forkedChildren.reset();
         if (this.nodeObject.properties[RestConstants.CCM_PROP_FORKED_ORIGIN]) {
             this.nodeApi
                 .getNodeMetadata(
@@ -196,16 +205,18 @@ export class WorkspaceMetadataComponent implements OnInit {
             propertyFilter: [RestConstants.ALL],
         };
         this.nodeService.getForkedChilds(node).subscribe((childs) => {
-            this.forkedChilds = childs.nodes;
+            this.forkedChildren.setData(childs.nodes);
         });
         this.usageApi.getNodeUsages(this.nodeObject.ref.id).subscribe((usages: UsageList) => {
             this.usages = usages.usages;
             this.usageApi
                 .getNodeUsagesCollection(this.nodeObject.ref.id)
                 .subscribe((collection) => {
-                    this.usagesCollection = collection
-                        .filter((c) => c.collectionUsageType === 'ACTIVE')
-                        .map((c) => c.collection);
+                    this.usagesCollection.setData(
+                        collection
+                            .filter((c) => c.collectionUsageType === 'ACTIVE')
+                            .map((c) => c.collection),
+                    );
                     this.getStats();
                 });
         });
@@ -371,8 +382,8 @@ export class WorkspaceMetadataComponent implements OnInit {
         this.stats.labels.push(this.translate.instant('WORKSPACE.METADATA.USAGE_TYPE.DOWNLOAD'));
         this.stats.labels.push(this.translate.instant('WORKSPACE.METADATA.USAGE_TYPE.VIEW'));
 
-        this.stats.points.push(this.usages.length - this.usagesCollection.length);
-        this.stats.points.push(this.usagesCollection.length);
+        this.stats.points.push(this.usages.length - this.usagesCollection.getData().length);
+        this.stats.points.push(this.usagesCollection.getData().length);
         this.stats.points.push(
             propertyToNumber(this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_DOWNLOADS]),
         );
@@ -441,6 +452,10 @@ export class WorkspaceMetadataComponent implements OnInit {
 
     canEdit() {
         return this.nodeObject && this.nodeObject.access.indexOf(RestConstants.ACCESS_WRITE) !== -1;
+    }
+
+    staticDataSource(node: Node) {
+        return new NodeDataSource([node]);
     }
 }
 
