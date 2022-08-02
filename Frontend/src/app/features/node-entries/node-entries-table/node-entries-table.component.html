@@ -12,6 +12,8 @@
 <mat-table
   [dataSource]="entriesService.dataSource"
   matSort
+  [matSortActive]="entriesService.sort?.active"
+  [matSortDirection]="entriesService.sort?.direction"
   esInfiniteScroll
   (scrolled)="loadData()"
 >
