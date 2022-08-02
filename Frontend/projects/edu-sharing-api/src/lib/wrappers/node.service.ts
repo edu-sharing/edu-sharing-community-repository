@@ -50,6 +50,7 @@ export class NodeService {
             comparator: ['='],
             contentType: 'FILES',
             property: ['ccm:forked_origin'],
+            propertyFilter: ['-all-'],
             value: [NodeTools.createSpacesStoreRef(id)],
         });
     }
