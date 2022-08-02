@@ -1,16 +1,11 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import {
-    Node,
-    RestConnectorService,
-    RestNodeService,
-    TemporaryStorageService,
-} from '../../../core-module/core.module';
+import { DropSource, NodeRoot } from 'src/app/features/node-entries/entries-model';
+import { Node } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
 import { OptionItem } from '../../../core-ui-module/option-item';
-import { WorkspaceMainComponent } from '../workspace.component';
-import { DropSource, NodeRoot } from 'src/app/features/node-entries/entries-model';
 import { DragData } from '../../../services/nodes-drag-drop.service';
 import { CanDrop } from '../../../shared/directives/nodes-drop-target.directive';
+import { WorkspaceMainComponent } from '../workspace.component';
 
 @Component({
     selector: 'es-workspace-tree',
@@ -27,18 +22,8 @@ export class WorkspaceTreeComponent {
             this.reload = new Boolean(true);
             return;
         }
-        this._path[0] = [];
-
-        for (const node of path) {
-            if (node && node.ref) this._path[0].push(node.ref.id);
-        }
-        this._selectedPath = this._path[0];
-    }
-    @Input() set current(current: string) {
-        // TODO: Using this fixes bug for AddDirectory, but constantly refreshes
-        //this.homeDirectory=new String(this.homeDirectory);
-        if (!current) return;
-        this._current = current;
+        const pathIds = path.map((node) => node.ref.id);
+        this.currentPath = pathIds;
     }
     @Input() options: OptionItem[] = [];
 
@@ -57,16 +42,9 @@ export class WorkspaceTreeComponent {
 
     reload: Boolean;
 
-    _path: string[][] = [];
-    // just for highlighting, does not open nodes!
-    _selectedPath: string[] = [];
-    private _current: string;
+    currentPath: string[] = [];
 
-    constructor(
-        private node: RestNodeService,
-        private connector: RestConnectorService,
-        private storage: TemporaryStorageService,
-    ) {}
+    constructor() {}
 
     canDropOnRecycle = (dragData: DragData<'RECYCLE'>): CanDrop => {
         return { accept: dragData.action === 'move' };
@@ -74,36 +52,7 @@ export class WorkspaceTreeComponent {
 
     setRoot(root: string) {
         this.onSetRoot.emit(root);
-        this._path = [];
-        /*
-    if(root==this.MY_FILES) {
-      this.onOpenPath.emit([this.homeDirectory]) ;
-    }
-    */
-    }
-
-    toggleTree(event: any) {
-        let id = event.node.ref.id;
-        let create = true;
-        for (let i = 0; i < this._path.length; i++) {
-            let pos = this._path[i].indexOf(id);
-            if (pos != -1) {
-                //this._path[i].splice(pos,this._path[i].length-pos);
-                this._path[i].splice(pos, 1);
-                create = false;
-                i--;
-            }
-            /*
-            if(event.parent.length){
-                let pos=this._path[i].indexOf(event.parent[event.parent.length-1]);
-            }
-            */
-        }
-        if (create) {
-            let path = Helper.deepCopy(event.parent);
-            path.push(id);
-            this._path.push(path);
-        }
+        this.currentPath = [];
     }
 
     onNodesDrop(dragData: DragData<'RECYCLE'>) {
@@ -121,7 +70,6 @@ export class WorkspaceTreeComponent {
     }
 
     openNode(event: Node) {
-        this._path.splice(1, this._path.length - 1);
         this.onOpenNode.emit(event);
     }
 }
