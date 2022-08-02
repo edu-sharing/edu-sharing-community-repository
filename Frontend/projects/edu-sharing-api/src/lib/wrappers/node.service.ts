@@ -4,7 +4,6 @@ import { map } from 'rxjs/operators';
 import { NodeV1Service, SearchV1Service } from '../api/services';
 import { HOME_REPOSITORY } from '../constants';
 import { Node, NodeEntries } from '../models';
-import { RestHelper } from '../../../../../src/app/core-module/rest/rest-helper';
 
 export class NodeConstants {
     public static SPACES_STORE_REF = 'workspace://SpacesStore/';
@@ -12,6 +11,12 @@ export class NodeConstants {
 export class NodeTools {
     static createSpacesStoreRef(id: string) {
         return NodeConstants.SPACES_STORE_REF + id;
+    }
+    static removeSpacesStoreRef(id: string) {
+        if (id.startsWith(NodeConstants.SPACES_STORE_REF)) {
+            return id.substr(NodeConstants.SPACES_STORE_REF.length);
+        }
+        return id;
     }
 }
 @Injectable({
@@ -38,7 +43,7 @@ export class NodeService {
         // if it's a published copy, use the original node id
         // since variants are always forked from their
         if (node.properties?.['ccm:published_original']) {
-            id = RestHelper.removeSpacesStoreRef(node.properties['ccm:published_original'][0]);
+            id = NodeTools.removeSpacesStoreRef(node.properties['ccm:published_original'][0]);
         }
         return this.searchV1.searchByProperty({
             repository,
