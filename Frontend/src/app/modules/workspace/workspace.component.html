@@ -43,7 +43,6 @@
     <div class="tree" *ngIf="isLoggedIn">
       <es-workspace-tree
         [class.tree-quota]="user.person.quota.enabled"
-        [current]="currentFolder ? currentFolder.ref.id : null"
         [path]="path"
         [selectedNode]="selectedNodeTree"
         [root]="root"
