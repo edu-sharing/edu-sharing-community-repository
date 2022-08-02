@@ -150,6 +150,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	public static final String KEY_LTITOOL_TARGET_LINK_URI = "ltitool_target_link_uri";
 
+	public static final String KEY_LTITOOL_CUSTOM_PARAMETERS = "ltitool_custom_parameters";
 
 
 	/**
@@ -382,6 +383,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	private String ltitoolTargetLinkUri;
 
+	private String ltitoolCustomParameters;
+
 
 	/**
 	 * der Anfangsteil des alfresco Intergity Pattern:
@@ -550,6 +553,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		ltitoolRedirectUrls = properties.getProperty(KEY_LTITOOL_REDIRECT_URLS);
 		ltitoolLoginInitiationsUrl = properties.getProperty(KEY_LTITOOL_LOGININITIATIONS_URL);
 		ltitoolTargetLinkUri = properties.getProperty(KEY_LTITOOL_TARGET_LINK_URI);
+		ltitoolCustomParameters = properties.getProperty(KEY_LTITOOL_CUSTOM_PARAMETERS);
 	}
 	
 	public String getXml() {
@@ -1083,4 +1087,6 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	public String getLtitoolRedirectUrls() {
 		return ltitoolRedirectUrls;
 	}
+
+	public String getLtitoolCustomParameters() {return ltitoolCustomParameters;}
 }

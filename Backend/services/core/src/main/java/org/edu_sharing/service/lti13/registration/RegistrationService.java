@@ -295,9 +295,9 @@ public class RegistrationService {
         JSONObject ltiToolConfig = (JSONObject)registrationPayload.get(LTIConstants.LTI_REGISTRATION_TOOL_CONFIGURATION);
         String domain = (String)ltiToolConfig.get("domain");
         String targetLinkUri =  (String)ltiToolConfig.get("target_link_uri");
-        JSONObject customParameters = (JSONObject)ltiToolConfig.get("custom_parameters");
         List<String> claims = (List<String>)ltiToolConfig.get("claims");
         String description =  (String)ltiToolConfig.get("description");
+        List<String> customParameters = (List<String>)ltiToolConfig.get("custom_parameters");
 
 
         // Validate domain and target link.
@@ -328,11 +328,13 @@ public class RegistrationService {
         }
 
         DefaultClaims body = (DefaultClaims)registrationToken.getBody();
+        String sub = (String) body.get("sub");
 
-        return registerTool(domain, (String) body.get("sub"),initiateLoginUri,jwksuri,targetLinkUri, StringUtils.join(redirectUris,","), logoUri);
+        return registerTool(domain, sub, initiateLoginUri, jwksuri, targetLinkUri, StringUtils.join(redirectUris,","), logoUri,
+                (customParameters != null) ? StringUtils.join(customParameters,",") : null);
     }
 
-    public ApplicationInfo registerTool(String domain, String clientId, String initiateLoginUri, String jwksuri, String targetLinkUri, String redirectUris, String logoUri) throws Exception {
+    public ApplicationInfo registerTool(String domain, String clientId, String initiateLoginUri, String jwksuri, String targetLinkUri, String redirectUris, String logoUri, String customParameters) throws Exception {
         HashMap<String,String> properties = new HashMap<>();
 
         Integer lastDeploymentId = 0;
@@ -360,9 +362,11 @@ public class RegistrationService {
         properties.put(ApplicationInfo.KEY_LTITOOL_LOGININITIATIONS_URL, initiateLoginUri);
         properties.put(ApplicationInfo.KEY_LTITOOL_TARGET_LINK_URI,targetLinkUri);
         properties.put(ApplicationInfo.KEY_LTITOOL_REDIRECT_URLS,redirectUris);
+        if(customParameters != null){properties.put(ApplicationInfo.KEY_LTITOOL_CUSTOM_PARAMETERS, customParameters);}
         properties.put(ApplicationInfo.KEY_LOGO,logoUri);
         properties.put(ApplicationInfo.KEY_LTI_KEYSET_URL,jwksuri);
         properties.put(ApplicationInfo.KEY_LTI_DEPLOYMENT_ID, Integer.toString(lastDeploymentId));
+
 
 
         JWKSet publicKeys = JWKSet.load(new URL(jwksuri));

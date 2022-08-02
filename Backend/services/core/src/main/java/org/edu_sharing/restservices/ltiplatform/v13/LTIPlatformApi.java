@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
@@ -19,11 +20,9 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.Signing;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.lti.v13.ApiTool;
-import org.edu_sharing.restservices.lti.v13.LTIApi;
-import org.edu_sharing.restservices.lti.v13.model.RegistrationUrl;
+import org.edu_sharing.restservices.ltiplatform.v13.model.ManualRegistrationData;
 import org.edu_sharing.restservices.ltiplatform.v13.model.OpenIdConfiguration;
 import org.edu_sharing.restservices.ltiplatform.v13.model.OpenIdRegistrationResult;
-import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.service.lti13.LTIConstants;
 import org.edu_sharing.service.lti13.LTIJWTUtil;
@@ -31,7 +30,6 @@ import org.edu_sharing.service.lti13.registration.RegistrationService;
 import org.edu_sharing.service.version.VersionService;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -302,5 +300,42 @@ public class LTIPlatformApi {
         }
 
         return Response.status(Response.Status.OK).build();
+    }
+
+
+    @POST
+    @Path("/manual-registration")
+
+    @Operation(summary = "manual registration endpoint for registration of tools.", description = "tool registration")
+    @Consumes({"application/json"})
+    @Produces({"application/json"})
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+                    @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response manualRegistration(
+            @Parameter(description = "registrationData" ,required=true ) ManualRegistrationData registrationData,
+            @Context HttpServletRequest req) {
+        try {
+            new RegistrationService().registerTool(
+                    registrationData.getToolUrl(),
+                    RegistrationService.generateNewClientId(),
+                    registrationData.getLoginInitiationUrl(),
+                    registrationData.getKeysetUrl(),
+                    null,
+                    StringUtils.join(registrationData.getRedirectionUrls(), ","),
+                    registrationData.getLogoUrl(),
+                    (registrationData.getCustomParameters() != null) ? StringUtils.join(registrationData.getCustomParameters(),",") : null);
+            return Response.ok().build();
+        }catch (Exception e){
+            return ErrorResponse.createResponse(e);
+        }
     }
 }
