@@ -100,8 +100,6 @@ export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
         );
         if (currentChildNode) {
             this.expandedNodes = [currentChildNode.ref.id];
-        } else {
-            this.expandedNodes = [];
         }
     }
 

@@ -18,10 +18,6 @@ export class WorkspaceTreeComponent {
     @Input() isSafe: boolean;
     @Input() selectedNode: string;
     @Input() set path(path: Node[]) {
-        if (path.length === 0) {
-            this.reload = new Boolean(true);
-            return;
-        }
         const pathIds = path.map((node) => node.ref.id);
         this.currentPath = pathIds;
     }
