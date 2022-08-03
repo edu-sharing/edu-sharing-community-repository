@@ -156,7 +156,7 @@ export class AdminFrontpageComponent {
         this.previewLoading = true;
         this.previewNodesDataSource.reset();
         this.previewError = null;
-        this.nodeService.getChildren(RestConstants.NODES_FRONTPAGE).subscribe(
+        this.nodeService.getChildren(RestConstants.NODES_FRONTPAGE, [RestConstants.ALL]).subscribe(
             (nodes) => {
                 this.previewLoading = false;
                 this.previewNodesDataSource.setData(nodes.nodes, nodes.pagination);
