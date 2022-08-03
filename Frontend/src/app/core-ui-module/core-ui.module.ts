@@ -52,6 +52,7 @@ import { ListItemsModule } from '../features/list-items/list-items.module';
 import { MdsNodeRelationsWidgetComponent } from '../common/ui/node-render/node-relations/node-relations-widget.component';
 import { AppModule } from '../app.module';
 import { NodeRowComponent } from './components/node-row/node-row.component';
+import { NodeEntriesModule } from '../features/node-entries/node-entries.module';
 
 @NgModule({
     declarations: [
@@ -77,6 +78,7 @@ import { NodeRowComponent } from './components/node-row/node-row.component';
         NodeRowComponent,
     ],
     imports: [
+        NodeEntriesModule,
         SharedModule,
         A11yModule,
         BrowserModule,

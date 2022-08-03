@@ -11,6 +11,7 @@ import {
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
+    GenericAuthority,
     ListItem,
     Node,
     RequestObject,
@@ -22,6 +23,12 @@ import {
 } from '../../../core-module/core.module';
 import { Toast } from '../../toast';
 import { OptionItem } from '../../option-item';
+import { NodeDataSource } from '../../../features/node-entries/node-data-source';
+import {
+    InteractionType,
+    ListSortConfig,
+    NodeEntriesDisplayType,
+} from '../../../features/node-entries/entries-model';
 
 /**
  * An edu-sharing sidebar dialog for adding data to a collection
@@ -32,6 +39,9 @@ import { OptionItem } from '../../option-item';
     styleUrls: ['collection-chooser.component.scss'],
 })
 export class CollectionChooserComponent implements OnInit {
+    readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    readonly InteractionType = InteractionType;
+    readonly COLLECTION_LATEST_DEFAULT_COUNT = 3;
     @ContentChild('beforeRecent') beforeRecentRef: TemplateRef<any>;
     /**
      * The caption of the dialog, will be translated automatically
@@ -41,8 +51,8 @@ export class CollectionChooserComponent implements OnInit {
     /**
      * Fired when an element is choosen, a (collection) Node will be send as a result
      */
-    @Output() onChoose = new EventEmitter();
-    @Output() onCreateCollection = new EventEmitter();
+    @Output() onChoose = new EventEmitter<Node>();
+    @Output() onCreateCollection = new EventEmitter<Node>();
     /**
      * Fired when a list of nodes is dropped on a collection item
      */
@@ -52,14 +62,12 @@ export class CollectionChooserComponent implements OnInit {
      */
     @Output() onCancel = new EventEmitter();
 
+    searchQueryInput = '';
     searchQuery = '';
-    lastSearchQuery = '';
-    isLoadingLatest = true;
-    isLoadingMy = true;
     currentRoot: Node;
     breadcrumbs: Node[];
-    listLatest: Node[];
-    listMy: Node[];
+    dataSourceLatest = new NodeDataSource();
+    dataSourceTree = new NodeDataSource();
     createCollectionOptionItem = new OptionItem('OPTIONS.NEW_COLLECTION', 'add', () =>
         this.createCollection(),
     );
@@ -68,6 +76,12 @@ export class CollectionChooserComponent implements OnInit {
     columns: ListItem[] = ListItem.getCollectionDefaults();
     sortBy: string[];
     sortAscending = false;
+    sort: ListSortConfig = {
+        columns: [],
+        allowed: false,
+        active: RestConstants.CM_MODIFIED_DATE,
+        direction: 'desc',
+    };
     /**
      * shall more than 5 recent collections be shown
      */
@@ -84,7 +98,6 @@ export class CollectionChooserComponent implements OnInit {
         private translate: TranslateService,
     ) {
         // http://plnkr.co/edit/btpW3l0jr5beJVjohy1Q?p=preview
-        this.sortBy = [RestConstants.CM_MODIFIED_DATE];
         this.connector
             .hasToolPermission(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS)
             .subscribe((tp) => (this.canCreate = tp));
@@ -110,22 +123,22 @@ export class CollectionChooserComponent implements OnInit {
     }
 
     loadLatest(reset = false) {
+        this.searchQuery = this.searchQueryInput;
         if (reset) {
-            this.listLatest = [];
-            this.lastSearchQuery = this.searchQuery;
+            this.dataSourceLatest.reset();
         } else if (!this.hasMoreToLoad) {
             return;
         }
-        this.isLoadingLatest = true;
+        this.dataSourceLatest.isLoading = true;
         const request = {
             sortBy: this.sortBy,
-            offset: this.listLatest.length,
+            offset: this.dataSourceLatest.getData().length,
             sortAscending: false,
             propertyFilter: [RestConstants.ALL],
         };
         let requestCall;
-        if (this.lastSearchQuery) {
-            requestCall = this.collectionApi.search(this.lastSearchQuery, request);
+        if (this.searchQuery) {
+            requestCall = this.collectionApi.search(this.searchQuery, request);
         } else {
             requestCall = this.collectionApi.getCollectionSubcollections(
                 RestConstants.ROOT,
@@ -136,13 +149,12 @@ export class CollectionChooserComponent implements OnInit {
         }
         requestCall.subscribe(
             (data) => {
-                this.isLoadingLatest = false;
+                this.dataSourceLatest.isLoading = false;
                 this.hasMoreToLoad = data.collections.length > 0;
-                this.showMore = !!this.lastSearchQuery;
-                this.listLatest = this.listLatest.concat(data.collections);
+                this.dataSourceLatest.appendData(data.collections);
             },
             (error) => {
-                this.isLoadingLatest = false;
+                this.dataSourceLatest.isLoading = false;
                 this.hasMoreToLoad = false;
             },
         );
@@ -173,17 +185,8 @@ export class CollectionChooserComponent implements OnInit {
         }
         return true;
     }
-    hasWritePermissions = (node: Node) => this.hasWritePermissionsInternal(node);
 
-    hasWritePermissionsInternal(node: Node): {
-        status: boolean;
-        message?: string;
-        button?: {
-            click: () => void;
-            caption: string;
-            icon: string;
-        };
-    } {
+    hasWritePermissions(node: Node) {
         /*if (this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_PROPOSAL)){
             return { status: false, message: 'COLLECTIONS.SUGGEST_ONLY', button: {
                     click: () => this.onChoose.emit(node),
@@ -197,27 +200,27 @@ export class CollectionChooserComponent implements OnInit {
             ) &&
             node.access.indexOf(RestConstants.ACCESS_WRITE) === -1
         ) {
-            return { status: false, message: 'NO_WRITE_PERMISSIONS' };
+            return { status: false, message: '' };
         }
         return { status: true };
     }
 
-    goIntoCollection(node: Node) {
-        this.currentRoot = node;
+    goIntoCollection(node: Node | GenericAuthority) {
+        this.currentRoot = node as Node;
         this.loadMy();
     }
 
-    clickCollection(node: Node) {
-        if (!this.checkPermissions(node)) {
+    clickCollection(node: Node | GenericAuthority) {
+        if (!this.checkPermissions(node as Node)) {
             return;
         }
-        this.onChoose.emit(node);
+        this.onChoose.emit(node as Node);
     }
 
     private loadMy() {
-        this.listMy = [];
+        this.dataSourceTree.reset();
         this.breadcrumbs = null;
-        this.isLoadingMy = true;
+        this.dataSourceTree.isLoading = true;
         this.collectionApi
             .getCollectionSubcollections(
                 this.currentRoot ? this.currentRoot.ref.id : RestConstants.ROOT,
@@ -230,8 +233,8 @@ export class CollectionChooserComponent implements OnInit {
                 },
             )
             .subscribe((data) => {
-                this.isLoadingMy = false;
-                this.listMy = this.listMy.concat(data.collections);
+                this.dataSourceTree.isLoading = false;
+                this.dataSourceTree.setData(data.collections);
             });
         if (this.currentRoot) {
             this.node
