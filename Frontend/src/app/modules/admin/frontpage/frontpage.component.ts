@@ -1,43 +1,26 @@
 import { RestAdminService } from '../../../core-module/rest/services/rest-admin.service';
 import { Component, EventEmitter, Output } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import {
-    NodeStatistics,
-    Node,
-    Statistics,
-    IamGroup,
-    Group,
-    Collection,
-} from '../../../core-module/rest/data-object';
+import { Node } from '../../../core-module/rest/data-object';
 import { ListItem } from '../../../core-module/ui/list-item';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
-import { RestHelper } from '../../../core-module/rest/rest-helper';
 import { ConfigurationService } from '../../../core-module/rest/services/configuration.service';
 import {
     DialogButton,
     RestCollectionService,
-    RestConnectorService,
     RestIamService,
     RestMdsService,
-    RestMediacenterService,
     RestNodeService,
 } from '../../../core-module/core.module';
-import { Helper } from '../../../core-module/rest/helper';
 import { Toast } from '../../../core-ui-module/toast';
-import { OptionItem } from '../../../core-ui-module/option-item';
-import {
-    AbstractControl,
-    FormBuilder,
-    FormControl,
-    FormGroup,
-    Validators,
-    ValidatorFn,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
-
-// Charts.js
-declare var Chart: any;
+import { NodeDataSource } from '../../../features/node-entries/node-data-source';
+import {
+    InteractionType,
+    NodeEntriesDisplayType,
+} from 'src/app/features/node-entries/entries-model';
 
 @Component({
     selector: 'es-admin-frontpage',
@@ -45,13 +28,15 @@ declare var Chart: any;
     styleUrls: ['frontpage.component.scss'],
 })
 export class AdminFrontpageComponent {
+    readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    readonly InteractionType = InteractionType;
     @Output() onOpenNode = new EventEmitter();
     previewLoading = true;
     config: any;
     modes = ['collection', 'rating', 'views', 'downloads'];
     conditionTypes = ['TOOLPERMISSION'];
     form: FormGroup;
-    previewNodes: Node[];
+    previewNodesDataSource = new NodeDataSource();
     previewColumns: ListItem[] = [];
     previewError: string;
     collectionName = '';
@@ -169,12 +154,12 @@ export class AdminFrontpageComponent {
 
     updatePreviews() {
         this.previewLoading = true;
-        this.previewNodes = [];
+        this.previewNodesDataSource.reset();
         this.previewError = null;
         this.nodeService.getChildren(RestConstants.NODES_FRONTPAGE).subscribe(
             (nodes) => {
                 this.previewLoading = false;
-                this.previewNodes = nodes.nodes;
+                this.previewNodesDataSource.setData(nodes.nodes, nodes.pagination);
             },
             (error) => {
                 if (UIHelper.errorContains(error, 'No Elasticsearch instance')) {
