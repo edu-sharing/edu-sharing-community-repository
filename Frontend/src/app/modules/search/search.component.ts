@@ -261,6 +261,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     ngAfterViewInit() {
         // Avoid changed-after-checked error
+        this.mainNavService.getMainNav().refreshBanner();
         setTimeout(() => {
             this.initAfterView();
         });

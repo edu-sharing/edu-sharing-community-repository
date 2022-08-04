@@ -117,6 +117,9 @@ export class MainNavService {
             ...new MainNavConfig(),
             ...config,
         });
+        setTimeout(() => {
+            this.getMainNav()?.refreshBanner();
+        });
     }
 
     /**
