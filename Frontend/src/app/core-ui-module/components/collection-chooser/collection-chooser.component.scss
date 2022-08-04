@@ -3,6 +3,10 @@
     display: flex;
     flex-direction: column;
     overscroll-behavior: contain;
+    es-node-entries-wrapper {
+        padding: 0 20px;
+        display: block;
+    }
 }
 .breadcrumbs {
     display: flex;

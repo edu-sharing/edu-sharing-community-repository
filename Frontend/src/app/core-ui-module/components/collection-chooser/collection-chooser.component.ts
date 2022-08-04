@@ -9,12 +9,10 @@ import {
     TemplateRef,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
 import {
     GenericAuthority,
     ListItem,
     Node,
-    RequestObject,
     RestCollectionService,
     RestConnectorService,
     RestConstants,
@@ -95,7 +93,6 @@ export class CollectionChooserComponent implements OnInit {
         private collectionApi: RestCollectionService,
         private node: RestNodeService,
         private toast: Toast,
-        private translate: TranslateService,
     ) {
         // http://plnkr.co/edit/btpW3l0jr5beJVjohy1Q?p=preview
         this.connector
@@ -153,7 +150,7 @@ export class CollectionChooserComponent implements OnInit {
                 this.hasMoreToLoad = data.collections.length > 0;
                 this.dataSourceLatest.appendData(data.collections);
             },
-            (error) => {
+            () => {
                 this.dataSourceLatest.isLoading = false;
                 this.hasMoreToLoad = false;
             },
@@ -194,15 +191,11 @@ export class CollectionChooserComponent implements OnInit {
                     icon: 'home'
                 } };
         }*/
-        if (
+        return !(
             !this.connector.hasToolPermissionInstant(
                 RestConstants.TOOLPERMISSION_COLLECTION_PROPOSAL,
-            ) &&
-            node.access.indexOf(RestConstants.ACCESS_WRITE) === -1
-        ) {
-            return { status: false, message: '' };
-        }
-        return { status: true };
+            ) && node.access.indexOf(RestConstants.ACCESS_WRITE) === -1
+        );
     }
 
     goIntoCollection(node: Node | GenericAuthority) {
