@@ -80,12 +80,6 @@
         .selected-when-dragging {
             opacity: 0.5; // Same as .cdk-drag-placeholder
         }
-        &.card-grid-drop-blocked {
-            outline: 2px dashed $colorStatusNegative;
-        }
-        &.card-grid-drop-allowed {
-            outline: 2px dashed $colorStatusPositive;
-        }
         &.cdk-drop-list-dragging {
             > *:first-child {
                 display: none;

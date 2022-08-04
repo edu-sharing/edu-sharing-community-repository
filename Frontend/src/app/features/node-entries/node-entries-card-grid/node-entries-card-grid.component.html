@@ -102,8 +102,6 @@
           [canDropNodes]="canDropNodes"
           (nodeDropped)="onNodesDropped($event)"
           #dropTarget="esNodesDropTarget"
-          [class.card-grid-drop-allowed]="dropTarget.active?.canDrop.accept"
-          [class.card-grid-drop-blocked]="dropTarget.active?.canDrop.denyExplicit"
         >
           <es-node-entries-card
             *ngIf="displayType === NodeEntriesDisplayType.Grid"
