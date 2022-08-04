@@ -175,10 +175,14 @@
           >
             <img
               class="blurred-image"
-              [src]="currentCollection.preview.url + '&crop=true&width=300&height=300'"
+              [src]="
+                currentCollection | appNodeImage: { maxWidth: 300, maxHeight: 300, crop: true }
+              "
             />
             <img
-              [src]="currentCollection.preview.url + '&crop=true&maxWidth=300&maxHeight=300'"
+              [src]="
+                currentCollection | appNodeImage: { maxWidth: 300, maxHeight: 300, crop: true }
+              "
               class="card-image-preview"
             />
           </div>

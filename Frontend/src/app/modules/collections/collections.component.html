@@ -120,7 +120,9 @@
           <div *ngIf="hasNonIconPreview()" class="card-image-icon-container">
             <img
               class="collection-header-image"
-              [src]="collectionContent?.node?.preview?.url + '&crop=true&width=400&height=350'"
+              [src]="
+                collectionContent?.node | appNodeImage: { crop: true, width: 400, height: 350 }
+              "
               role="presentation"
             />
           </div>

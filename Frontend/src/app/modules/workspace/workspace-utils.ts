@@ -3,7 +3,12 @@ import { DragData } from '../../services/nodes-drag-drop.service';
 import { CanDrop } from '../../shared/directives/nodes-drop-target.directive';
 
 export function canDropOnNode(dragData: DragData<Node>): CanDrop {
-    if (!dragData.target.isDirectory) {
+    if (dragData.draggedNodes.includes(dragData.target)) {
+        // When the target is the exact same object as one of the dragged nodes, the user is
+        // hovering over a placeholder of a dragged node. They likely want to cancel the drag
+        // operation, so we don't print an error message.
+        return { accept: false, denyExplicit: false };
+    } else if (!dragData.target.isDirectory) {
         return { accept: false, denyExplicit: false, denyReason: 'WORKSPACE.TARGET_NO_DIRECTORY' };
     } else if (dragData.draggedNodes.some((node) => node.ref.id === dragData.target.ref.id)) {
         return {
