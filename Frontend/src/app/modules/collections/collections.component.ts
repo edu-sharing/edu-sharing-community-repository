@@ -1467,6 +1467,13 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
                 });
         }
     }
+    isDeleted(node: CollectionReference) {
+        return (
+            node.aspects.includes(RestConstants.CCM_ASPECT_IO_REFERENCE) &&
+            !node.aspects.includes(RestConstants.CCM_ASPECT_REMOTEREPOSITORY) &&
+            !node.originalId
+        );
+    }
 }
 
 export interface SortInfo {
