@@ -2,7 +2,6 @@
   class="grid-card"
   [class.grid-card-collection]="nodeHelper.isNodeCollection(node)"
   [class.grid-card-virtual]="node.virtual"
-  [style.background-color]="nodeHelper.isNodeCollection(node) ? node.collection.color : null"
   (contextmenu)="openContextmenu($event)"
   (keydown.ContextMenu)="openContextmenu($event)"
 >
@@ -17,7 +16,11 @@
     tabindex="-1"
     aria-hidden="true"
   ></button>
-  <div class="card-top-bar">
+  <div
+    class="card-top-bar"
+    [style.background-color]="nodeHelper.isNodeCollection(node) ? node.collection.color : null"
+  >
+    <div class="card-top-bar-collection-color" *ngIf="nodeHelper.isNodeCollection(node)"></div>
     <div class="card-top-bar-type">
       <ng-container *ngIf="nodeHelper.isNodeCollection(node)">
         <i
@@ -176,7 +179,10 @@
     </div>
   </div>
   <ng-template #image let-playAnimation="playAnimation">
-    <div class="card-image-area">
+    <div
+      class="card-image-area"
+      [style.background-color]="nodeHelper.isNodeCollection(node) ? node.collection.color : null"
+    >
       <es-preview-image
         *ngIf="!(nodeHelper.isNodeCollection(node) && node.preview.isIcon)"
         [node]="node"
@@ -192,7 +198,11 @@
   </ng-template>
   <ng-template #meta let-link="link">
     <div class="card-meta">
-      <div *ngFor="let displayPart of getVisibleColumns(); let first = first" class="card-meta-row">
+      <div
+        *ngFor="let displayPart of getVisibleColumns(); let first = first"
+        class="card-meta-row"
+        [class.card-meta-row-primary]="first"
+      >
         <ng-container *ngIf="first">
           <es-node-url
             *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"

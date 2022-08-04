@@ -197,7 +197,7 @@
         "APPID": {
           "TITLE": "Bezeichnung des Home-Repositories",
           "STATUS_OK": "Dem System wurde ein eigener Identifier zugewiesen ({{id}}).",
-          "STATUS_WARN": "Dem System wurde keine ID zugewiesen, es verwendet den Standardwert ({{id}}).\nDamit dieses Repository fehlerfrei mit anderen Systemen kommunizieren kann, ist ein eindeutiger Identifier wichtig. Es wird empfohlen, einen möglichst eindeutigen Identifier zu benutzen (z.B. die Hauptdomain des Systems)",
+                    "STATUS_WARN": "Dem System wurde keine ID zugewiesen, es verwendet den Standardwert ({{id}}).\nDamit dieses Repository fehlerfrei mit anderen Systemen kommunizieren kann, ist ein eindeutiger Identifier wichtig. Es wird empfohlen, einen möglichst eindeutigen Identifier zu benutzen (z.B. die Hauptdomain des Systems).\n\nWichtig: Starten Sie nach Änderungen an der App-ID den Server neu!",
           "SOLUTION": "Wechseln Sie zu \"Grundkonfiguration\" und bearbeiten Sie das Feld \"appid\" in der homeApplication.properties.xml",
           "SOLUTION_LINK": "homeApplication.properties.xml bearbeiten"
         },

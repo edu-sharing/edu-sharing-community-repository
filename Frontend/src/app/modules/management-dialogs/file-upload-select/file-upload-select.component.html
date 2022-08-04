@@ -57,9 +57,9 @@
         *ngIf="loadingWebsiteInformation"
         class="loading-website-information-spinner"
       ></es-spinner-small>
-      <es-info-message *ngIf="showInvalidUrlMessage" mode="error">
+      <!--<es-info-message *ngIf="showInvalidUrlMessage" mode="error">
         {{ 'WORKSPACE.LINK_INVALID_INFO' | translate }}
-      </es-info-message>
+      </es-info-message>-->
       <div class="link-details" *ngIf="websiteInformation?.page">
         <div class="page-infos">
           <div class="title">

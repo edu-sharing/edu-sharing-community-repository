@@ -177,7 +177,7 @@
         "APPID": {
           "TITLE": "Name of the home repository",
           "STATUS_OK": "The system has been assigned its own identifier ({{id}}).",
-          "STATUS_WARN": "The system was not assigned an ID, it uses the default value ({{id}}).\nIn order for this repository to communicate with other systems without errors, a unique identifier is important. It is recommended that you use an identifier that is as unique as possible (for example, the main domain of the system)",
+                    "STATUS_WARN": "The system was not assigned an ID, it uses the default value ({{id}}).\nIn order for this repository to communicate with other systems without errors, a unique identifier is important. It is recommended that you use an identifier that is as unique as possible (for example, the main domain of the system)\n\nImportant: Restart your server after changing the app id.",
           "SOLUTION": "Switch to \"basic configuration\" and edit the \"appid\" field in the homeApplication.properties.xml",
           "SOLUTION_LINK": "Edit homeApplication.properties.xml"
         },

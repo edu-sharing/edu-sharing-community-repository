@@ -15,7 +15,12 @@
   [matSortActive]="entriesService.sort?.active"
   [matSortDirection]="entriesService.sort?.direction"
   esInfiniteScroll
-  (scrolled)="loadData()"
+  (scrolled)="
+    entriesGlobalService.getPaginationStrategy(entriesService.scope) ===
+    PaginationStrategy.InfiniteScroll
+      ? loadData()
+      : null
+  "
 >
   <!-- Checkbox Column -->
   <ng-container matColumnDef="select">
@@ -119,17 +124,19 @@
         *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
       >
         <es-node-url cdkMonitorSubtreeFocus [node]="node" [mode]="first ? 'link' : 'wrapper'">
-          <es-list-text
+          <es-list-base
+            [forceText]="true"
             [node]="node"
             [item]="column"
             esCheckTextOverflow
             #text="esCheckTextOverflow"
             [matTooltip]="text.hasTextOverflow() ? cell.innerText : null"
-          ></es-list-text>
+          ></es-list-base>
         </es-node-url>
       </ng-container>
-      <es-list-text
+      <es-list-base
         *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink"
+        [forceText]="true"
         [node]="node"
         [item]="column"
         (click)="
@@ -150,7 +157,7 @@
         esCheckTextOverflow
         #text="esCheckTextOverflow"
         [matTooltip]="text.hasTextOverflow() ? cell.innerText : null"
-      ></es-list-text>
+      ></es-list-base>
     </mat-cell>
   </ng-container>
   <mat-header-row mat-header-row *matHeaderRowDef="getVisibleColumns()"></mat-header-row>

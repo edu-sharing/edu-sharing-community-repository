@@ -378,7 +378,7 @@
               [globalKeyboardShortcuts]="true"
               (sortChange)="updateSort($event)"
               [displayType]="searchService.displayType"
-              (fetchData)="getMoreResults()"
+              (fetchData)="getMoreResults($event)"
             >
               <ng-template #title>
                 <div class="heading" *ngIf="!searchService.dataSourceSearchResult[0]?.isEmpty()">
