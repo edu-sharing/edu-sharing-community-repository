@@ -9,7 +9,7 @@ import java.util.List;
 
 public class RatingServiceAdapter implements RatingService {
 
-    private Logger logger= Logger.getLogger(RatingServiceAdapter.class);
+    private final Logger logger= Logger.getLogger(RatingServiceAdapter.class);
 
     public RatingServiceAdapter(String appId) {
 
@@ -49,5 +49,15 @@ public class RatingServiceAdapter implements RatingService {
     @Override
     public List<RatingHistory> getAccumulatedRatingHistory(String nodeId, Date after) {
         return null;
+    }
+
+    @Override
+    public void changeUserData(@NotNull String oldAuthority, @NotNull String newAuthority) {
+
+    }
+
+    @Override
+    public void deleteUserData(@NotNull String authority) {
+
     }
 }
