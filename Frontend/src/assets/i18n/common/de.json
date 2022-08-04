@@ -857,6 +857,11 @@
       "references": "bezieht sich auf",
       "hasPart": "besitzt Teil",
       "isBasisFor": "ist Basis von"
+    },
+    "RELATION_TYPE_FULLY": {
+      "isPartOf": "ist Teil von (isPartOf)",
+      "isBasedOn": "basiert auf (isBasedOn)",
+      "references": "bezieht sich auf (references)"
     }
   },
   "VCARD": {

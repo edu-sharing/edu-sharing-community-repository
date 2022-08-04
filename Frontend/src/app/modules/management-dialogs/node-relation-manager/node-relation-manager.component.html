@@ -17,7 +17,7 @@
         <mat-label>{{ 'NODE_RELATIONS.RELATION_TYPE_LABEL' | translate }}</mat-label>
         <mat-select formControlName="relation">
           <mat-option *ngFor="let key of Relations" [value]="key">
-            {{ 'NODE_RELATIONS.RELATION_TYPE.' + key | translate }}
+            {{ 'NODE_RELATIONS.RELATION_TYPE_FULLY.' + key | translate }}
           </mat-option>
         </mat-select>
       </mat-form-field>
