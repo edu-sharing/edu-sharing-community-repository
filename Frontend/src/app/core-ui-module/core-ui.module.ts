@@ -19,7 +19,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { CollectionChooserComponent } from './components/collection-chooser/collection-chooser.component';
-import { CustomNodeListWrapperComponent } from './components/custom-node-list-wrapper/custom-node-list-wrapper.component';
 import { InputPasswordComponent } from './components/input-password/input-password.component';
 import { ListOptionItemComponent } from './components/list-option-item/list-option-item.component';
 import { ListTableComponent } from './components/list-table/list-table.component';
@@ -60,7 +59,6 @@ import { NodeEntriesModule } from '../features/node-entries/node-entries.module'
         ListTableComponent,
         NodeEntriesDragDirective,
         UserTileComponent,
-        CustomNodeListWrapperComponent,
         VideoControlsComponent,
         InputPasswordComponent,
         MdsNodeRelationsWidgetComponent,
@@ -117,7 +115,6 @@ import { NodeEntriesModule } from '../features/node-entries/node-entries.module'
     exports: [
         SharedModule,
         ListTableComponent,
-        CustomNodeListWrapperComponent,
         ListOptionItemComponent,
         InputPasswordComponent,
         VideoControlsComponent,
