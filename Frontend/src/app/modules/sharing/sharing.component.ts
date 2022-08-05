@@ -15,7 +15,13 @@ import {
     SharingInfo,
     TemporaryStorageService,
 } from '../../core-module/core.module';
-import { CustomOptions, DefaultGroups, OptionItem, Scope } from '../../core-ui-module/option-item';
+import {
+    CustomOptions,
+    DefaultGroups,
+    ElementType,
+    OptionItem,
+    Scope,
+} from '../../core-ui-module/option-item';
 import { OPEN_URL_MODE, UIConstants } from '../../core-module/ui/ui-constants';
 import { Toast } from '../../core-ui-module/toast';
 import { Helper } from '../../core-module/rest/helper';
@@ -35,7 +41,7 @@ import { NodeEntriesWrapperComponent } from '../../features/node-entries/node-en
     templateUrl: 'sharing.component.html',
     styleUrls: ['sharing.component.scss'],
 })
-export class SharingComponent implements AfterViewInit {
+export class SharingComponent {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     @ViewChild('nodeEntries') nodeEntries: NodeEntriesWrapperComponent<Node>;
@@ -74,8 +80,9 @@ export class SharingComponent implements AfterViewInit {
         const download = new OptionItem('SHARING.DOWNLOAD', 'cloud_download', (node: Node) =>
             this.download(node),
         );
+        download.elementType = [ElementType.Node];
         download.group = DefaultGroups.Primary;
-        download.showAlways = true;
+        download.showAsAction = true;
         const open = new OptionItem('SHARING.OPEN', 'open_in_new', (node: Node) => {
             console.log(node);
             UIHelper.openUrl(
@@ -85,7 +92,7 @@ export class SharingComponent implements AfterViewInit {
             );
         });
         open.group = DefaultGroups.Primary;
-        open.showAlways = true;
+        open.showAsAction = true;
         download.customShowCallback = (nodes: Node[]) => nodes?.[0]?.mediatype !== 'link';
         open.customShowCallback = (nodes: Node[]) => nodes?.[0]?.mediatype === 'link';
         this.options.addOptions.push(download);
@@ -121,12 +128,6 @@ export class SharingComponent implements AfterViewInit {
         });
     }
 
-    ngAfterViewInit(): void {
-        this.nodeEntries.initOptionsGenerator({
-            scope: Scope.Sharing,
-            customOptions: this.options,
-        });
-    }
     validatePassword() {
         this.sharingService
             .getInfo(this.params.nodeId, this.params.token, this.passwordInput)
@@ -178,6 +179,12 @@ export class SharingComponent implements AfterViewInit {
             .subscribe((nodes) => {
                 this.nodesDataSource.setData(nodes.nodes);
                 this.nodesDataSource.isLoading = false;
+                setTimeout(() => {
+                    this.nodeEntries.initOptionsGenerator({
+                        scope: Scope.Sharing,
+                        customOptions: this.options,
+                    });
+                });
             });
     }
     inviterIsAuthor() {
