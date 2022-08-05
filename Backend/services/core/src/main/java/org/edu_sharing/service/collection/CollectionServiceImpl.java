@@ -801,7 +801,8 @@ public class CollectionServiceImpl implements CollectionService{
 				ref.getStoreRef().getIdentifier(),
 				ref.getId(),
 				CCConstants.CCM_PROP_MAP_COLLECTIONSCOPE,
-				result.toString());
+				result.toString(),
+				false);
 	}
 
 	public void setScope(Collection collection) throws Exception {
