@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { ConnectorService } from 'ngx-edu-sharing-api';
+import { ConnectorService, LtiPlatformService, Tools, Tool } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { Observable, Subject } from 'rxjs';
 import { delay, take, takeUntil } from 'rxjs/operators';
@@ -107,6 +107,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     createConnectorType: Connector;
     cardHasOpenModals$: Observable<boolean>;
     options: OptionItem[];
+    tools: Tools;
 
     private params: Params;
     private destroyed = new Subject<void>();
@@ -132,6 +133,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         private event: FrameEventsService,
         private cardService: CardService,
         private dialogs: ManagementDialogsService,
+        private ltiPlatformService: LtiPlatformService,
     ) {
         this.route.queryParams.subscribe((params) => {
             this.params = params;
@@ -150,6 +152,11 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             }
         });
         this.cardHasOpenModals$ = cardService.hasOpenModals.pipe(delay(0));
+
+        this.ltiPlatformService.getTools().subscribe((t) => {
+            this.tools = t;
+            this.updateOptions();
+        });
     }
 
     ngOnInit(): void {
@@ -281,6 +288,20 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                 camera.group = DefaultGroups.Create;
                 camera.priority = 20;
                 this.options.push(camera);
+            }
+
+            if (this.tools && this.tools.tools.length > 0) {
+                this.options = this.options.concat(
+                    this.tools.tools.map((tool, i) => {
+                        const option = new OptionItem('LTITOOL.' + tool.appId + '.NAME', '', () =>
+                            this.showCreateLtiTool(tool),
+                        );
+                        option.elementType = [ElementType.Unknown];
+                        option.group = DefaultGroups.CreateLtiTools;
+                        option.priority = i;
+                        return option;
+                    }),
+                );
             }
         }
         if (this.folder) {
@@ -450,6 +471,8 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             this.createConnectorName = null;
         }
     }
+
+    async showCreateLtiTool(tool: Tool) {}
 
     private openCamera() {
         this.bridge.getCordova().getPhotoFromCamera(

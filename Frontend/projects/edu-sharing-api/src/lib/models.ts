@@ -20,6 +20,8 @@ export {
     RelationData,
     SearchResultNode as SearchResults,
     StreamEntry,
+    Tools,
+    Tool,
     UserProfile,
     UserQuota,
     UserStatus,

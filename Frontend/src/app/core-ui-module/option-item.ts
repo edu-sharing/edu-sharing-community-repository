@@ -199,6 +199,7 @@ export class DefaultGroups {
     static Create = new OptionGroup('Create', 15);
     static View = new OptionGroup('View', 20);
     static CreateConnector = new OptionGroup('CreateConnector', 25);
+    static CreateLtiTools = new OptionGroup('CreateLtiTools', 28);
     static Reuse = new OptionGroup('Reuse', 30);
     static Edit = new OptionGroup('Edit', 40);
     static FileOperations = new OptionGroup('FileOperations', 50);
