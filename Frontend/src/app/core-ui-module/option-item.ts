@@ -170,6 +170,7 @@ export enum Scope {
     CollectionsCollection = 'CollectionsProposals',
     WorkspaceList = 'WorkspaceList',
     WorkspaceTree = 'WorkspaceTree',
+    Sharing = 'Sharing',
     Oer = 'Oer',
     UserManagement = 'UserManagement',
     Stream = 'Stream',
