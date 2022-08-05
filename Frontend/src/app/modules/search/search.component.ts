@@ -112,7 +112,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     @ViewChild('mdsMobile') mdsMobileRef: MdsEditorWrapperComponent;
     @ViewChild('mdsDesktop') mdsDesktopRef: MdsEditorWrapperComponent;
-    @ViewChild('list') list: ListTableComponent;
     @ViewChild('extendedSearch') extendedSearch: ElementRef;
     @ViewChild('toolbar') toolbar: any;
     @ViewChild('extendedSearchTabGroup') extendedSearchTabGroup: MatTabGroup;
@@ -414,7 +413,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             // showUser: this.mainnav,
             searchQueryChange: (searchQuery) => (this.searchService.searchTerm = searchQuery),
             onSearch: () => this.applyParameters('mainnav'),
-            onCreate: (nodes) => this.list.addVirtualNodes(nodes),
+            onCreate: (nodes) => this.nodeEntriesResults.addVirtualNodes(nodes),
         });
     }
 

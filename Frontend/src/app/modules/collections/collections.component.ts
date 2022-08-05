@@ -383,10 +383,6 @@ export class CollectionsMainComponent implements OnDestroy {
         this.navigate(collection.ref.id);
     }
 
-    canDelete(node: EduData.CollectionReference) {
-        return RestHelper.hasAccessPermission(node, 'Delete');
-    }
-
     refreshAll() {
         this.displayCollectionById(this.collection.ref.id);
     }

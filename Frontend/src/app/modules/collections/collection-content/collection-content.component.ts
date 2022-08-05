@@ -246,6 +246,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
         this.optionsService.clearComponents(this.actionbarReferences);
         this.registerMainNav();
+        this.mainNavUpdateTrigger.next();
     }
 
     ngOnChanges(changes: SimpleChanges) {
@@ -505,9 +506,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             );
         }
         buttons.push(
-            new DialogButton('COLLECTIONS.OPEN_MISSING', { color: 'primary' }, () =>
-                this.onContentClick(event, true),
-            ),
+            new DialogButton('COLLECTIONS.OPEN_MISSING', { color: 'primary' }, () => {
+                this.onContentClick(event, true);
+                this.toast.closeModalDialog();
+            }),
         );
         if ((event.element as CollectionReference).originalId == null && !force) {
             this.toast.showConfigurableDialog({
@@ -940,5 +942,17 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                     });
                 });
         }
+    }
+
+    canDelete(node: EduData.CollectionReference) {
+        return RestHelper.hasAccessPermission(node, 'Delete');
+    }
+
+    isDeleted(node: CollectionReference) {
+        return (
+            node.aspects.includes(RestConstants.CCM_ASPECT_IO_REFERENCE) &&
+            !node.aspects.includes(RestConstants.CCM_ASPECT_REMOTEREPOSITORY) &&
+            !node.originalId
+        );
     }
 }

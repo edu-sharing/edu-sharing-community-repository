@@ -70,7 +70,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
      */
     @ContentChild('actionArea') actionAreaRef: TemplateRef<any>;
     /**
-     * custom area for an overlay "above" each card (i.e. to show disabled infos), only for NodeEntriesDisplayType.SmallGrid
+     * custom area for an overlay "above" each card (i.e. to show disabled infos), only for NodeEntriesDisplayType.SmallGrid & odeEntriesDisplayType.Grid
      */
     @ContentChild('overlay') overlayRef: TemplateRef<any>;
     @ViewChild('nodeEntriesComponent') nodeEntriesComponentRef: NodeEntriesComponent<T>;

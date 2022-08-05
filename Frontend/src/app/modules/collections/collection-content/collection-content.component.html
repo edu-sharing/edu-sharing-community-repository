@@ -129,6 +129,25 @@
             </h2>
           </div>
         </ng-template>
+        <ng-template #overlay let-element="element">
+          <div class="node-deleted" *ngIf="isDeleted(element)">
+            <div>
+              <i esIcon="delete"></i>
+              <div class="headline">{{ 'ORIGINAL_DELETED' | translate }}</div>
+              <div class="subline">{{ 'ORIGINAL_DELETED_INFO' | translate }}</div>
+              <button
+                mat-button
+                color="primary"
+                (click)="
+                  deleteReference(element); $event.stopPropagation(); $event.preventDefault()
+                "
+                *ngIf="canDelete(element)"
+              >
+                {{ 'ORIGINAL_DELETE' | translate }}
+              </button>
+            </div>
+          </div>
+        </ng-template>
       </es-node-entries-wrapper>
       <!--
     <es-custom-node-list-wrapper
