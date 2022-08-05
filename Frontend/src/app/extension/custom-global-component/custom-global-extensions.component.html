@@ -1,0 +1,117 @@
+<ng-template #titleRef let-node="node" let-item="item">
+  <div>
+    <div class="{{ isCollection(node) ? 'cell-depth-' + getDepth(node)?.length : '' }}">
+      <span>{{ node | nodeTitle }}</span>
+    </div>
+    <div>
+      <ng-container *ngIf="node.aspects.includes('ccm:collection')">
+        <a
+          *ngIf="node.properties['cclom:location']?.[0]"
+          mat-button
+          color="primary"
+          target="_blank"
+          matTooltip="Themenseite öffnen"
+          [href]="replaceWordpressUrl(node.properties['cclom:location']?.[0])"
+          (click)="$event.stopPropagation()"
+          (contextmenu)="$event.stopPropagation()"
+        >
+          <i esIcon="open_in_new"></i>
+        </a>
+      </ng-container>
+      <ng-container *ngIf="node.aspects.includes('ccm:collection')">
+        <a
+          mat-flat-button
+          color="primary"
+          target="_blank"
+          routerLink="/components/collections"
+          matTooltip="Sammlung in edu-sharing öffnen"
+          [queryParams]="{ id: node.ref.id }"
+          (click)="$event.stopPropagation()"
+          (contextmenu)="$event.stopPropagation()"
+        >
+          <i esIcon="layers"></i>
+        </a>
+      </ng-container>
+      <a
+        *ngIf="node.properties['ccm:wwwurl']"
+        mat-button
+        color="primary"
+        target="_blank"
+        matTooltip="Seite öffnen"
+        [href]="node.properties['ccm:wwwurl'][0]"
+        (click)="$event.stopPropagation()"
+        (contextmenu)="$event.stopPropagation()"
+      >
+        <i esIcon="open_in_new"></i>
+      </a>
+    </div>
+  </div>
+</ng-template>
+<ng-template #virtualBuffetRef let-node="node">
+  <i
+    esIcon="delete"
+    class="icon-red"
+    *ngIf="getBuffetType(node) === 'rejected'"
+    matTooltip="Element wurde abgelehnt"
+  ></i>
+  <i
+    esIcon="inbox"
+    class="icon-yellow"
+    *ngIf="getBuffetType(node) === 'check'"
+    matTooltip="Prüfbuffet"
+  ></i>
+  <i
+    esIcon="search"
+    class="icon-green"
+    *ngIf="getBuffetType(node) === 'search'"
+    matTooltip="Suchbuffet"
+  ></i>
+  <i
+    esIcon="layers"
+    class="icon-green"
+    *ngIf="getBuffetType(node) === 'buffet'"
+    matTooltip="Redaktionsbuffet"
+  ></i>
+</ng-template>
+
+<ng-template #virtualPublicRef let-node="node">
+  <i
+    esIcon="lock"
+    class="icon-red"
+    *ngIf="!['search', 'buffet'].includes(getBuffetType(node))"
+    matTooltip="Privat oder noch nicht veröffentlicht"
+  ></i>
+  <i
+    esIcon="public"
+    class="icon-yellow"
+    *ngIf="['search', 'buffet'].includes(getBuffetType(node)) && !node.isPublic"
+    matTooltip="Inhalt ist in öffentlicher Sammlung, wurde aber noch nicht freigeschaltet. Bitte prüfen und im Inhaltepanel freischalten."
+  ></i>
+  <i
+    esIcon="public"
+    class="icon-green"
+    *ngIf="['search', 'buffet'].includes(getBuffetType(node)) && node.isPublic"
+    matTooltip="Öffentlich verfügbar"
+  ></i>
+</ng-template>
+<ng-template #virtualCollectionProposal let-node="node">
+  <ng-container *ngFor="let collection of getUsedInCollectionsProposals(node); let last = last">
+    {{ collection | nodeTitle }}<ng-container *ngIf="!last">, </ng-container>
+  </ng-container>
+</ng-template>
+
+<ng-template #virtualSourceRef let-node="node">
+  {{
+    node.properties['ccm:replicationsource'] && node.properties['ccm:replicationsourceuuid']
+      ? 'Crawler'
+      : 'Lokal/Redaktion'
+  }}
+</ng-template>
+<ng-template #virtualCollectionProposalTaxonid let-node="node">
+  {{ (node.usedInCollections?.[0]?.properties['ccm:taxonid_DISPLAYNAME']) }}
+</ng-template>
+<ng-template #virtualInCollections let-node="node">
+  <ng-container *ngFor="let collection of getUsedInCollections(node); let last = last">
+    {{ collection | nodeTitle }}<ng-container *ngIf="!last">, </ng-container>
+  </ng-container>
+</ng-template>

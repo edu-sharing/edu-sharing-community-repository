@@ -734,8 +734,8 @@ public class PersonDao {
 			);
 		}
 		String oldStatus= (String) userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS);
-		NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),getNodeId(),CCConstants.CM_PROP_PERSON_ESPERSONSTATUS,status.name());
-		NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),getNodeId(),CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE,new Date());
+		NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),getNodeId(),CCConstants.CM_PROP_PERSON_ESPERSONSTATUS,status.name(), false);
+		NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),getNodeId(),CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE,new Date(), false);
 		if(notifyMail){
 			Mail mail=new Mail();
 			Map<String, String> replace=new HashMap<>();
