@@ -331,10 +331,12 @@ public class RegistrationService {
         String sub = (String) body.get("sub");
 
         return registerTool(domain, sub, initiateLoginUri, jwksuri, targetLinkUri, StringUtils.join(redirectUris,","), logoUri,
-                (customParameters != null) ? StringUtils.join(customParameters,",") : null);
+                (customParameters != null) ? StringUtils.join(customParameters,",") : null, description);
     }
 
-    public ApplicationInfo registerTool(String domain, String clientId, String initiateLoginUri, String jwksuri, String targetLinkUri, String redirectUris, String logoUri, String customParameters) throws Exception {
+    public ApplicationInfo registerTool(String domain, String clientId, String initiateLoginUri, String jwksuri,
+                                        String targetLinkUri, String redirectUris, String logoUri,
+                                        String customParameters, String description) throws Exception {
         HashMap<String,String> properties = new HashMap<>();
 
         Integer lastDeploymentId = 0;
@@ -366,6 +368,7 @@ public class RegistrationService {
         properties.put(ApplicationInfo.KEY_LOGO,logoUri);
         properties.put(ApplicationInfo.KEY_LTI_KEYSET_URL,jwksuri);
         properties.put(ApplicationInfo.KEY_LTI_DEPLOYMENT_ID, Integer.toString(lastDeploymentId));
+        properties.put(ApplicationInfo.KEY_LTITOOL_DESCRIPTION, description);
 
 
 

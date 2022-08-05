@@ -20,9 +20,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.Signing;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.lti.v13.ApiTool;
-import org.edu_sharing.restservices.ltiplatform.v13.model.ManualRegistrationData;
-import org.edu_sharing.restservices.ltiplatform.v13.model.OpenIdConfiguration;
-import org.edu_sharing.restservices.ltiplatform.v13.model.OpenIdRegistrationResult;
+import org.edu_sharing.restservices.ltiplatform.v13.model.*;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.service.lti13.LTIConstants;
 import org.edu_sharing.service.lti13.LTIJWTUtil;
@@ -332,8 +330,45 @@ public class LTIPlatformApi {
                     null,
                     StringUtils.join(registrationData.getRedirectionUrls(), ","),
                     registrationData.getLogoUrl(),
-                    (registrationData.getCustomParameters() != null) ? StringUtils.join(registrationData.getCustomParameters(),",") : null);
+                    (registrationData.getCustomParameters() != null) ? StringUtils.join(registrationData.getCustomParameters(),",") : null,
+                    registrationData.getToolDescription());
             return Response.ok().build();
+        }catch (Exception e){
+            return ErrorResponse.createResponse(e);
+        }
+    }
+
+    @GET
+    @Path("/tools")
+    @Operation(summary = "List of tools registered")
+    @Consumes({ "application/json"})
+    @Produces({"application/json"})
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode="200", description= RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Tools.class))),
+                    @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = String.class)))
+            })
+    public Response tools(){
+
+        try {
+            Tools tools = new Tools();
+            for(ApplicationInfo appInfo : ApplicationInfoList.getApplicationInfos().values()){
+                if(appInfo.isLtiTool()){
+                    Tool tool = new Tool();
+                    tool.setAppId(appInfo.getAppId());
+                    tool.setDescription(appInfo.getLtitoolDescription());
+                    try {
+                        URI uri = new URI(appInfo.getLtitoolLoginInitiationsUrl());
+                        tool.setDomain(uri.getHost());
+                    }catch ( java.net.URISyntaxException e){}
+                    tools.getTools().add(tool);
+                }
+            }
+            return Response.ok(tools).build();
         }catch (Exception e){
             return ErrorResponse.createResponse(e);
         }
