@@ -192,21 +192,21 @@ public class SearchServiceOersiImpl extends SearchServiceAdapter {
       String licenseKey = null;
       Map<String, Object> license = (Map<String, Object>) oersiProperties.get(OERSI_PROPERTY_LICENSE);
       String licenseUrl = (String) license.get(OERSI_PROPERTY_LICENSE_ID);
-      if (licenseUrl.startsWith("https://creativecommons.org/licenses/by/")) {
+      if (licenseUrl.matches("https?:\\/\\/creativecommons.org\\/(?:licenses|licences)\\/by\\/.*")) {
         licenseKey = CCConstants.COMMON_LICENSE_CC_BY;
-      } else if (licenseUrl.startsWith("https://creativecommons.org/publicdomain/zero/1.0")) {
+      } else if (licenseUrl.matches("https?:\\/\\/creativecommons.org\\/(?:licenses|licences|publicdomain)\\/zero\\/1.0.*")) {
         licenseKey = CCConstants.COMMON_LICENSE_CC_ZERO;
-      } else if (licenseUrl.startsWith("https://creativecommons.org/licenses/by-sa/")) {
+      } else if (licenseUrl.matches("https?:\\/\\/creativecommons.org\\/(?:licenses|licences)\\/by-sa\\/.*")) {
         licenseKey = CCConstants.COMMON_LICENSE_CC_BY_SA;
-      } else if (licenseUrl.startsWith("https://creativecommons.org/licenses/by-nc/")) {
+      } else if (licenseUrl.matches("https?:\\/\\/creativecommons.org\\/(?:licenses|licences)\\/by-nc\\/.*")) {
         licenseKey = CCConstants.COMMON_LICENSE_CC_BY_NC;
-      } else if (licenseUrl.startsWith("https://creativecommons.org/licenses/by-nd/")) {
+      } else if (licenseUrl.matches("https?:\\/\\/creativecommons.org\\/(?:licenses|licences)\\/by-nd\\/.*")) {
         licenseKey = CCConstants.COMMON_LICENSE_CC_BY_ND;
-      } else if (licenseUrl.startsWith("https://creativecommons.org/licenses/by-nc-nd/")) {
+      } else if (licenseUrl.matches("https?:\\/\\/creativecommons.org\\/(?:licenses|licences)\\/by-nc-nd\\/.*")) {
         licenseKey = CCConstants.COMMON_LICENSE_CC_BY_NC_ND;
-      } else if (licenseUrl.startsWith("https://creativecommons.org/licenses/by-nc-sa/")) {
+      } else if (licenseUrl.matches("https?:\\/\\/creativecommons.org\\/(?:licenses|licences)\\/by-nc-sa\\/.*")) {
         licenseKey = CCConstants.COMMON_LICENSE_CC_BY_NC_SA;
-      } else if (licenseUrl.startsWith("https://creativecommons.org/publicdomain/mark/1.0")) {
+      } else if (licenseUrl.matches("https?:\\/\\/creativecommons.org\\/(?:licenses|licences|publicdomain)\\/mark\\/1.0.*")) {
         licenseKey = CCConstants.COMMON_LICENSE_PDM;
       }
       Matcher versionMatcher = Pattern.compile("https?:\\/\\/creativecommons.org\\/(?:licenses|licences|publicdomain)\\/(?:[a-zA-Z-]+)\\/([0-9.]+)(\\/.*)?").matcher(licenseUrl);
