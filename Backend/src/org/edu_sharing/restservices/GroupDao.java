@@ -3,7 +3,6 @@ package org.edu_sharing.restservices;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
-import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityType;
@@ -14,7 +13,6 @@ import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
@@ -34,7 +32,6 @@ import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.springframework.context.ApplicationContext;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
-import org.springframework.security.core.Authentication;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -394,11 +391,11 @@ public class GroupDao {
 				NodeServiceHelper.removeAspect(ref, CCConstants.CCM_ASPECT_GROUP_SIGNUP);
 			} else {
 				NodeServiceHelper.addAspect(ref, CCConstants.CCM_ASPECT_GROUP_SIGNUP);
-				NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD, details.getSignupMethod().toString());
+				NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_METHOD, details.getSignupMethod().toString(), false);
 				if (details.getSignupPassword() != null && !details.getSignupPassword().isEmpty()) {
 					NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_PASSWORD,
-							DigestUtils.sha1Hex(details.getSignupPassword())
-					);
+							DigestUtils.sha1Hex(details.getSignupPassword()),
+                            false);
 				}
 			}
 			return null;
@@ -427,7 +424,7 @@ public class GroupDao {
 						return GroupSignupResult.AlreadyInList;
 					}
 					list.add(userRef);
-					NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_LIST, list);
+					NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_LIST, list, false);
 					HashMap<String, String> replace = new HashMap<>();
 					replace.put("group", getDisplayName());
 					replace.put("firstName", NodeServiceHelper.getProperty(userRef, CCConstants.CM_PROP_PERSON_FIRSTNAME));
@@ -499,7 +496,7 @@ public class GroupDao {
 			userRefs = userRefs.stream().
 					filter((r) -> !r.equals(userRef.get())).
 					collect(Collectors.toCollection(ArrayList::new));
-			NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_LIST, userRefs);
+			NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_GROUP_SIGNUP_LIST, userRefs, false);
 			if(add) {
 				addMember(user);
 			}

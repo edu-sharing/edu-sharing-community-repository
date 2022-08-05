@@ -847,7 +847,7 @@ public class NodeDao {
 				NodeServiceHelper.setProperty(
 						new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, sourceId),
 						CCConstants.CCM_PROP_MAP_COLLECTIONLEVEL0,
-						true);
+						true, false);
 			}
 			return new NodeDao(repoDao, sourceId, Filter.createShowAllFilter());
 
@@ -981,7 +981,7 @@ public class NodeDao {
 		try {
 			is=ImageTool.autoRotateImage(is,ImageTool.MAX_THUMB_SIZE);
 			nodeService.setProperty(storeProtocol,storeId,nodeId,
-					CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_PREVIEW_CHANGED);
+					CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_PREVIEW_CHANGED, false);
 			nodeService.writeContent(storeRef, nodeId, is, mimetype, null,
 					isDirectory() ? CCConstants.CCM_PROP_MAP_ICON : CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
 			PreviewCache.purgeCache(nodeId);
@@ -1811,10 +1811,10 @@ public class NodeDao {
 			list.add(0, json.toString());
 			org.alfresco.service.cmr.repository.NodeRef nodeRef = new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
 					nodeId);
-			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_INSTRUCTIONS,history.getComment());
-			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_RECEIVER,receivers);
-			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_STATUS,history.getStatus());
-			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_PROTOCOL,list);
+			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_INSTRUCTIONS,history.getComment(), false);
+			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_RECEIVER,receivers, false);
+			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_STATUS,history.getStatus(), false);
+			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_PROTOCOL,list, false);
 			if(sendMail) {
 				receivers.forEach((receiver) -> {
 					MailTemplate.UserMail r = MailTemplate.getUserMailData(receiver);
@@ -2314,7 +2314,7 @@ public class NodeDao {
 		if(value==null){
 			nodeService.removeProperty(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), this.getId(), property);
 		}else {
-			nodeService.setProperty(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), this.getId(), property, value);
+			nodeService.setProperty(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), this.getId(), property, value, false);
 		}
 	}
 
@@ -2328,9 +2328,9 @@ public class NodeDao {
 					permissionService.createNotifyObject(newNode.getId(), new AuthenticationToolAPI().getCurrentUser(), CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
 					nodeService.addAspect(newNode.getId(), CCConstants.CCM_ASPECT_FORKED);
 					nodeService.setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_FORKED_ORIGIN,
-							new org.alfresco.service.cmr.repository.NodeRef(storeProtocol, storeId, source[0]));
+							new org.alfresco.service.cmr.repository.NodeRef(storeProtocol, storeId, source[0]), false);
 					nodeService.setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_FORKED_ORIGIN_VERSION,
-					nodeService.getProperty(storeProtocol, storeId, source[0], CCConstants.LOM_PROP_LIFECYCLE_VERSION));
+					nodeService.getProperty(storeProtocol, storeId, source[0], CCConstants.LOM_PROP_LIFECYCLE_VERSION), false);
 					AuthenticationUtil.runAsSystem(() -> {
 						permissionService.removeAllPermissions(newNode.getId());
 						// re-activate inherition

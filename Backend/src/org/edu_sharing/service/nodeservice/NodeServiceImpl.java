@@ -1085,10 +1085,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					policyBehaviourFilter.disableBehaviour(newNode);
 					// replace owner, creator & modifier
 					setPublishedCopyProperties(oldNodeRef, newNode, owner);
-					setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), oldNodeRef.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_MODE, "copy");
-					setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_DATE, new Date());
+					setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), oldNodeRef.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_MODE, "copy", false);
+					setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_DATE, new Date(), false);
 					setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL,
-							oldNodeRef);
+							oldNodeRef, false);
 					NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.LOM_PROP_LIFECYCLE_VERSION);
 					NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.CCM_PROP_IO_VERSION_COMMENT);
 					//deleteVersionHistory(newNode.getId());
@@ -1320,7 +1320,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 	@Override
 	public void removeProperty(String storeProtocol, String storeId, String nodeId, String property) {
-		nodeService.removeProperty(new NodeRef(new StoreRef(storeProtocol,storeId),nodeId),QName.createQName(property));
+		// when interceptors are active, use set instead to trigger interceptors
+		if(PropertiesInterceptorFactory.getPropertiesSetInterceptors().size() > 0) {
+			setProperty(storeProtocol, storeId, nodeId, property, null, true);
+		} else {
+			nodeService.removeProperty(new NodeRef(new StoreRef(storeProtocol, storeId), nodeId), QName.createQName(property));
+		}
 	}
 	@Override
 	public String[] getAspects(String storeProtocol, String storeId, String nodeId){
@@ -1387,24 +1392,25 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 	}
 
-	public void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value) {
+	public void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value, boolean skipDefinitionChecks) {
 		NodeRef nodeRef = new NodeRef(new StoreRef(protocol, storeId), nodeId);
 		property = NameSpaceTool.transformToLongQName(property);
 		QName prop = QName.createQName(property);
-		PropertyDefinition propertyDefinition = dictionaryService.getProperty(prop);
-		if(propertyDefinition == null){
-			logger.error("property" + property + " is not defined in content model");
-			return;
-		}
+		if(!skipDefinitionChecks) {
+			PropertyDefinition propertyDefinition = dictionaryService.getProperty(prop);
+			if (propertyDefinition == null) {
+				logger.error("property" + property + " is not defined in content model");
+				return;
+			}
 
-		if(!propertyDefinition.isMultiValued() && value instanceof Collection){
-			if(((Collection)value).stream().iterator().hasNext()) {
-				value = (Serializable) ((Collection) value).stream().iterator().next();
-			} else {
-				value = null;
+			if (!propertyDefinition.isMultiValued() && value instanceof Collection) {
+				if (((Collection) value).stream().iterator().hasNext()) {
+					value = (Serializable) ((Collection) value).stream().iterator().next();
+				} else {
+					value = null;
+				}
 			}
 		}
-
 		Map<String, Object> properties = null;
 		if(PropertiesInterceptorFactory.getPropertiesSetInterceptors().size() > 0) {
 			try {
