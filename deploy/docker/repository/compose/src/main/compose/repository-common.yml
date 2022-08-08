@@ -14,12 +14,19 @@ services:
     volumes:
       - "repository-database-volume-data:/bitnami/postgresql"
 
+  repository-mailcatcher:
+    image: "${docker.repository}/${docker.prefix}-deploy-docker-build-mailcatcher:${docker.tag}"
+    expose:
+      - "1025"
+    ports:
+      - "${COMMON_BIND_HOST:-127.0.0.1}:${REPOSITORY_MAILCATCHER_PORT_HTTP:-8025}:1080"
+
   repository-search-solr4:
     image: "${docker.repository}/${docker.prefix}-deploy-docker-repository-build-search-solr4:${docker.tag}"
     environment:
       CATALINA_OPTS: >-
-        -Xms${REPOSITORY_SEARCH_SOLR4_JAVA_XMS:-1g}
-        -Xmx${REPOSITORY_SEARCH_SOLR4_JAVA_XMX:-1g}
+        -Xms${REPOSITORY_SEARCH_SOLR4_JAVA_XMS:-512m}
+        -Xmx${REPOSITORY_SEARCH_SOLR4_JAVA_XMX:-512m}
         -Dcom.sun.management.jmxremote
         -Dcom.sun.management.jmxremote.authenticate=false
         -Dcom.sun.management.jmxremote.port=7199
@@ -46,8 +53,8 @@ services:
       CACHE_HOST: cache
       CACHE_PORT: "6379"
       CATALINA_OPTS: >-
-        -Xms${REPOSITORY_SERVICE_JAVA_XMS:-1g}
-        -Xmx${REPOSITORY_SERVICE_JAVA_XMX:-1g}
+        -Xms${REPOSITORY_SERVICE_JAVA_XMS:-2g}
+        -Xmx${REPOSITORY_SERVICE_JAVA_XMX:-4g}
         -Dcom.sun.management.jmxremote
         -Dcom.sun.management.jmxremote.authenticate=false
         -Dcom.sun.management.jmxremote.port=7199
@@ -71,6 +78,15 @@ services:
       REPOSITORY_SERVICE_HTTP_SERVER_CSP_FONT: "${REPOSITORY_SERVICE_HTTP_SERVER_CSP_FONT:-}"
       REPOSITORY_SERVICE_HTTP_SERVER_CSP_IMG: "${REPOSITORY_SERVICE_HTTP_SERVER_CSP_IMG:-}"
       REPOSITORY_SERVICE_HTTP_SERVER_CSP_SCRIPT: "${REPOSITORY_SERVICE_HTTP_SERVER_CSP_SCRIPT:-}"
+      REPOSITORY_SERVICE_MAIL_FROM: "${REPOSITORY_SERVICE_MAIL_FROM:-no-reply@edu-sharing.net}"
+      REPOSITORY_SERVICE_MAIL_ADDREPLYTO: "${REPOSITORY_SERVICE_MAIL_ADDREPLYTO:-true}"
+      REPOSITORY_SERVICE_MAIL_REGISTER_RECEIVER: "${REPOSITORY_SERVICE_MAIL_REGISTER_RECEIVER:-}"
+      REPOSITORY_SERVICE_MAIL_REPORT_RECEIVER: "${REPOSITORY_SERVICE_MAIL_REPORT_RECEIVER:-}"
+      REPOSITORY_SERVICE_MAIL_SERVER_SMTP_HOST: "${REPOSITORY_SERVICE_MAIL_SERVER_SMTP_HOST:-repository-mailcatcher}"
+      REPOSITORY_SERVICE_MAIL_SERVER_SMTP_PORT: "${REPOSITORY_SERVICE_MAIL_SERVER_SMTP_PORT:-1025}"
+      REPOSITORY_SERVICE_MAIL_SERVER_SMTP_USERNAME: "${REPOSITORY_SERVICE_MAIL_SERVER_SMTP_USERNAME:-}"
+      REPOSITORY_SERVICE_MAIL_SERVER_SMTP_PASSWORD: "${REPOSITORY_SERVICE_MAIL_SERVER_SMTP_PASSWORD:-}"
+      REPOSITORY_SERVICE_MAIL_SERVER_SMTP_AUTHTYPE: "${REPOSITORY_SERVICE_MAIL_SERVER_SMTP_AUTHTYPE:-}"
       REPOSITORY_SERVICE_PORT_EXTERNAL: "${REPOSITORY_SERVICE_PORT_HTTP:-8100}"
       REPOSITORY_SERVICE_HOST_INTERNAL: repository-service
       REPOSITORY_SERVICE_PORT_INTERNAL: "8080"

@@ -29,6 +29,16 @@ my_port_internal="${REPOSITORY_SERVICE_PORT_INTERNAL:-8080}"
 my_pool_internal="${REPOSITORY_SERVICE_POOL_INTERNAL:-200}"
 my_wait_internal="${REPOSITORY_SERVICE_WAIT_INTERNAL:--1}"
 
+my_mail_from="${REPOSITORY_SERVICE_MAIL_FROM:-}"
+my_mail_addreplyto="${REPOSITORY_SERVICE_MAIL_ADDREPLYTO:-}"
+my_mail_register_receiver="${REPOSITORY_SERVICE_MAIL_REGISTER_RECEIVER:-}"
+my_mail_report_receiver="${REPOSITORY_SERVICE_MAIL_REPORT_RECEIVER:-}"
+my_mail_server_smtp_host="${REPOSITORY_SERVICE_MAIL_SERVER_SMTP_HOST:-}"
+my_mail_server_smtp_port="${REPOSITORY_SERVICE_MAIL_SERVER_SMTP_PORT:-}"
+my_mail_server_smtp_username="${REPOSITORY_SERVICE_MAIL_SERVER_SMTP_USERNAME:-}"
+my_mail_server_smtp_password="${REPOSITORY_SERVICE_MAIL_SERVER_SMTP_PASSWORD:-}"
+my_mail_server_smtp_authtype="${REPOSITORY_SERVICE_MAIL_SERVER_SMTP_AUTHTYPE:-}"
+
 my_http_client_disablesni4hosts="${REPOSITORY_SERVICE_HTTP_CLIENT_DISABLE_SNI4HOSTS:-}"
 my_http_client_proxy_host="${REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_HOST:-}"
 my_http_client_proxy_nonproxyhosts="${REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_NONPROXYHOSTS:-}"
@@ -383,6 +393,49 @@ xmlstarlet ed -L \
 		--var entry '$prev' \
 		-i '$entry' -t attr -n "key" -v "remote_provider" \
 		${homeProp}
+}
+
+[[ -n "${my_mail_from}" ]] && {
+	hocon -f ${eduSConf} \
+		set "repository.mail.from" '"'"${my_mail_from}"'"'
+}
+
+[[ -n "${my_mail_addreplyto}" ]] && {
+	hocon -f ${eduSConf} \
+		set "repository.mail.addReplyTo" '"'"${my_mail_addreplyto}"'"'
+}
+
+[[ -n "${my_mail_register_receiver}" ]] && {
+	hocon -f ${eduSConf} \
+		set "repository.mail.register.receiver" '"'"${my_mail_register_receiver}"'"'
+}
+
+[[ -n "${my_mail_report_receiver}" ]] && {
+	hocon -f ${eduSConf} \
+		set "repository.mail.report.receiver" '"'"${my_mail_report_receiver}"'"'
+}
+
+[[ -n "${my_mail_server_smtp_host}" ]] && {
+	hocon -f ${eduSConf} \
+		set "repository.mail.server.smtp.host" '"'"${my_mail_server_smtp_host}"'"'
+}
+
+[[ -n "${my_mail_server_smtp_port}" ]] && {
+	hocon -f ${eduSConf} \
+		set "repository.mail.server.smtp.port" '"'"${my_mail_server_smtp_port}"'"'
+}
+
+[[ -n "${my_mail_server_smtp_username}" ]] && {
+	hocon -f ${eduSConf} \
+		set "repository.mail.server.smtp.username" '"'"${my_mail_server_smtp_username}"'"'
+}
+[[ -n "${my_mail_server_smtp_password}" ]] && {
+	hocon -f ${eduSConf} \
+		set "repository.mail.server.smtp.password" '"'"${my_mail_server_smtp_password}"'"'
+}
+[[ -n "${my_mail_server_smtp_authtype}" ]] && {
+	hocon -f ${eduSConf} \
+		set "repository.mail.server.smtp.authtype" '"'"${my_mail_server_smtp_authtype}"'"'
 }
 
 [[ -n "${my_http_client_disablesni4hosts}" ]] && {

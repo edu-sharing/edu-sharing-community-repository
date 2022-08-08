@@ -5,6 +5,9 @@ services:
   repository-database:
     image: "${docker.registry}/${docker.repository}/${docker.prefix}-deploy-docker-build-postgresql:${docker.tag}"
 
+  repository-mailcatcher:
+    image: "${docker.registry}/${docker.repository}/${docker.prefix}-deploy-docker-build-mailcatcher:${docker.tag}"
+
   repository-search-solr4:
     image: "${docker.registry}/${docker.repository}/${docker.prefix}-deploy-docker-repository-build-search-solr4:${docker.tag}"
 

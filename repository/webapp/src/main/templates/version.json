@@ -15,6 +15,16 @@
     "dirty": "${git.dirty}"
   },
   "maven": {
+    "bom": {
+      "bom": "${bom.bom.version}",
+      "repository": "${bom.repository.version}",
+      "repository-cluster": "${bom.repository-cluster.version}",
+      "repository-elastic": "${bom.repository-elastic.version}",
+      "repository-mongo": "${bom.repository-mongo.version}",
+      "repository-remote": "${bom.repository-remote.version}",
+      "repository-transform": "${bom.repository-transform.version}",
+      "services-rendering": "${bom.services-rendering.version}"
+    },
     "project": {
       "artifactId": "${project.artifactId}",
       "groupId": "${project.groupId}",
