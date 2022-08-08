@@ -2,6 +2,7 @@ package org.edu_sharing.alfresco.policy;
 
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -848,7 +849,9 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			try {
 				final StringBuilder url = new StringBuilder(playwright.getString("url") + "/v1/website?url=" + java.net.URLEncoder.encode(httpURL, "ISO-8859-1"));
 				playwright.entrySet().stream().filter((e) -> !"url".equals(e.getKey())).forEach((e) -> {
-					url.append("&").append(e.getKey()).append("=").append(e.getValue().unwrapped().toString());
+					try {
+						url.append("&").append(e.getKey()).append("=").append(java.net.URLEncoder.encode(e.getValue().unwrapped().toString(), "ISO-8859-1"));
+					}catch(UnsupportedEncodingException ignored) {}
 				});
 				HttpClient client = new HttpClient();
 				GetMethod method = new GetMethod(url.toString());
