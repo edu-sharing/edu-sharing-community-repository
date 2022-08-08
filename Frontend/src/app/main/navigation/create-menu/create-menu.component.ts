@@ -293,7 +293,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             if (this.tools && this.tools.tools.length > 0) {
                 this.options = this.options.concat(
                     this.tools.tools.map((tool, i) => {
-                        const option = new OptionItem('LTITOOL.' + tool.appId + '.NAME', '', () =>
+                        const option = new OptionItem(tool.name, '', () =>
                             this.showCreateLtiTool(tool),
                         );
                         option.elementType = [ElementType.Unknown];

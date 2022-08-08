@@ -1,7 +1,7 @@
 package org.edu_sharing.restservices.ltiplatform.v13.model;
 
 public class Tool {
-    String domain,description,appId;
+    String domain,description,appId,name;
 
     public String getDescription() {
         return description;
@@ -25,5 +25,13 @@ public class Tool {
 
     public void setDomain(String domain) {
         this.domain = domain;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
     }
 }

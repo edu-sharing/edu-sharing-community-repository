@@ -1,6 +1,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export interface ManualRegistrationData {
+    clientName?: string;
     customParameters?: Array<string>;
     keysetUrl?: string;
     loginInitiationUrl?: string;

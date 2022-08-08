@@ -26,6 +26,9 @@ public class ManualRegistrationData {
     @ApiModelProperty(notes = "The default target link uri to use unless defined otherwise in the message or link definition",required = true)
     String targetLinkUri;
 
+    @ApiModelProperty(name = "client_name", notes = "Name of the Tool to be presented to the End-User. Localized representations may be included as described in Section 2.1 of the [OIDC-Reg] specification. ",required = true)
+    String clientName;
+
     public String getToolName() {
         return toolName;
     }
@@ -98,4 +101,12 @@ public class ManualRegistrationData {
         return targetLinkUri;
     }
 
+
+    public void setClientName(String clientName) {
+        this.clientName = clientName;
+    }
+
+    public String getClientName() {
+        return clientName;
+    }
 }

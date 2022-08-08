@@ -331,12 +331,12 @@ public class RegistrationService {
         String sub = (String) body.get("sub");
 
         return registerTool(domain, sub, initiateLoginUri, jwksuri, targetLinkUri, StringUtils.join(redirectUris,","), logoUri,
-                (customParameters != null) ? StringUtils.join(customParameters,",") : null, description);
+                (customParameters != null) ? StringUtils.join(customParameters,",") : null, description, clientName);
     }
 
     public ApplicationInfo registerTool(String domain, String clientId, String initiateLoginUri, String jwksuri,
                                         String targetLinkUri, String redirectUris, String logoUri,
-                                        String customParameters, String description) throws Exception {
+                                        String customParameters, String description, String clientName) throws Exception {
         HashMap<String,String> properties = new HashMap<>();
 
         Integer lastDeploymentId = 0;
@@ -359,6 +359,7 @@ public class RegistrationService {
 
         String appId = new RepoTools().getAppId(domain, clientId, Integer.toString(lastDeploymentId));
         properties.put(ApplicationInfo.KEY_APPID, appId);
+        properties.put(ApplicationInfo.KEY_APPCAPTION,clientName);
         properties.put(ApplicationInfo.KEY_TYPE, ApplicationInfo.TYPE_LTITOOL);
         properties.put(ApplicationInfo.KEY_LTI_CLIENT_ID, clientId);
         properties.put(ApplicationInfo.KEY_LTITOOL_LOGININITIATIONS_URL, initiateLoginUri);

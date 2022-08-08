@@ -26501,11 +26501,11 @@
               "type" : "string"
             }
           },
-          "fullName" : {
-            "type" : "string"
-          },
           "volatile" : {
             "type" : "boolean"
+          },
+          "fullName" : {
+            "type" : "string"
           }
         }
       },
@@ -26547,10 +26547,10 @@
           "second" : {
             "type" : "object"
           },
-          "group" : {
+          "name" : {
             "type" : "string"
           },
-          "name" : {
+          "group" : {
             "type" : "string"
           }
         }
@@ -28731,6 +28731,9 @@
           },
           "targetLinkUri" : {
             "type" : "string"
+          },
+          "clientName" : {
+            "type" : "string"
           }
         }
       },
@@ -28922,6 +28925,9 @@
             "type" : "string"
           },
           "appId" : {
+            "type" : "string"
+          },
+          "name" : {
             "type" : "string"
           }
         }

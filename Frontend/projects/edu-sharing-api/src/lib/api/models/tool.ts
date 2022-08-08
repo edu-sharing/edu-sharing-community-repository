@@ -4,4 +4,5 @@ export interface Tool {
     appId?: string;
     description?: string;
     domain?: string;
+    name?: string;
 }

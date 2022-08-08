@@ -251,7 +251,7 @@ public class LTIPlatformApi {
             OpenIdRegistrationResult ors = new OpenIdRegistrationResult();
             ors.setClient_id(appInfo.getLtiClientId());
             ors.setApplication_type("web");
-            ors.setClient_name(appInfo.getAppId());
+            ors.setClient_name(appInfo.getAppCaption());
             ors.setInitiate_login_uri(appInfo.getLtitoolLoginInitiationsUrl());
             ors.setRedirect_uris(Arrays.asList(appInfo.getLtitoolRedirectUrls().split(",")));
             ors.setToken_endpoint_auth_method((String)registrationPayload.get("token_endpoint_auth_method"));
@@ -331,7 +331,8 @@ public class LTIPlatformApi {
                     StringUtils.join(registrationData.getRedirectionUrls(), ","),
                     registrationData.getLogoUrl(),
                     (registrationData.getCustomParameters() != null) ? StringUtils.join(registrationData.getCustomParameters(),",") : null,
-                    registrationData.getToolDescription());
+                    registrationData.getToolDescription(),
+                    registrationData.getClientName());
             return Response.ok().build();
         }catch (Exception e){
             return ErrorResponse.createResponse(e);
@@ -365,7 +366,9 @@ public class LTIPlatformApi {
                         URI uri = new URI(appInfo.getLtitoolLoginInitiationsUrl());
                         tool.setDomain(uri.getHost());
                     }catch ( java.net.URISyntaxException e){}
+                    tool.setName(appInfo.getAppCaption());
                     tools.getTools().add(tool);
+
                 }
             }
             return Response.ok(tools).build();
