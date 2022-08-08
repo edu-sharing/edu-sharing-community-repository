@@ -62,6 +62,13 @@ data:
   REPOSITORY_SERVICE_HTTP_SERVER_CSP_IMG: {{ .Values.config.http.server.csp.img | quote }}
   REPOSITORY_SERVICE_HTTP_SERVER_CSP_SCRIPT: {{ .Values.config.http.server.csp.script | quote }}
   REPOSITORY_SERVICE_HTTP_SERVER_SESSION_TIMEOUT: {{ .Values.config.http.server.session.timeout | quote }}
+  REPOSITORY_SERVICE_MAIL_FROM: {{ .Values.config.mail.from | quote }}
+  REPOSITORY_SERVICE_MAIL_ADDREPLYTO: {{ .Values.config.mail.addReplyTo | quote }}
+  REPOSITORY_SERVICE_MAIL_REGISTER_RECEIVER: {{ .Values.config.mail.register.receiver | quote }}
+  REPOSITORY_SERVICE_MAIL_REPORT_RECEIVER: {{ .Values.config.mail.report.receiver | quote }}
+  REPOSITORY_SERVICE_MAIL_SERVER_SMTP_HOST: {{ .Values.config.mail.server.smtp.host | quote }}
+  REPOSITORY_SERVICE_MAIL_SERVER_SMTP_PORT: {{ .Values.config.mail.server.smtp.port | quote }}
+  REPOSITORY_SERVICE_MAIL_SERVER_SMTP_AUTHTYPE: {{ .Values.config.mail.server.smtp.authtype | quote }}
   REPOSITORY_SERVICE_PATH_EXTERNAL: {{ .Values.ingress.paths | first | quote }}
   REPOSITORY_SERVICE_POOL_EXTERNAL: {{ .Values.config.connector.external.threads | quote }}
   REPOSITORY_SERVICE_POOL_INTERNAL: {{ .Values.config.connector.internal.threads | quote }}

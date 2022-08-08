@@ -24,6 +24,9 @@
     <docker.from.apache.server>
       dockerio.mirror.docker.edu-sharing.com/php:${php.version}-apache-bullseye
     </docker.from.apache.server>
+    <docker.from.mailcatcher>
+      dockerio.mirror.docker.edu-sharing.com/schickling/mailcatcher:master
+    </docker.from.mailcatcher>
     <docker.from.minideb>
       dockerio.mirror.docker.edu-sharing.com/bitnami/minideb:bullseye
     </docker.from.minideb>

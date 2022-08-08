@@ -118,6 +118,16 @@ my_auth_external="${my_base_external}/services/authentication"
 my_host_internal="${REPOSITORY_SERVICE_HOST_INTERNAL:-"localhost"}"
 my_port_internal="${REPOSITORY_SERVICE_PORT_INTERNAL:-8080}"
 
+my_mail_from="${REPOSITORY_SERVICE_MAIL_FROM:-}"
+my_mail_addreplyto="${REPOSITORY_SERVICE_MAIL_ADDREPLYTO:-}"
+my_mail_register_receiver="${REPOSITORY_SERVICE_MAIL_REGISTER_RECEIVER:-}"
+my_mail_report_receiver="${REPOSITORY_SERVICE_MAIL_REPORT_RECEIVER:-}"
+my_mail_server_smtp_host="${REPOSITORY_SERVICE_MAIL_SERVER_SMTP_HOST:-}"
+my_mail_server_smtp_port="${REPOSITORY_SERVICE_MAIL_SERVER_SMTP_PORT:-}"
+my_mail_server_smtp_username="${REPOSITORY_SERVICE_MAIL_SERVER_SMTP_USERNAME:-}"
+my_mail_server_smtp_password="${REPOSITORY_SERVICE_MAIL_SERVER_SMTP_PASSWORD:-}"
+my_mail_server_smtp_authtype="${REPOSITORY_SERVICE_MAIL_SERVER_SMTP_AUTHTYPE:-}"
+
 repository_database_driv="${REPOSITORY_DATABASE_DRIV:-"org.postgresql.Driver"}"
 repository_database_host="${REPOSITORY_DATABASE_HOST:-"127.0.0.1"}"
 repository_database_name="${REPOSITORY_DATABASE_NAME:-"repository"}"
@@ -245,6 +255,25 @@ info() {
   echo "  session:"
   echo ""
   echo "    timeout:             ${repository_httpserver_session_timeout}"
+  echo ""
+  echo "mail:"
+  echo ""
+  echo "  addReplyTo:            ${my_mail_addReplyTo}"
+  echo "  from:                  ${my_mail_from}"
+  echo ""
+  echo "  register:"
+  echo "    receiver:            ${my_mail_register_receiver}"
+  echo ""
+  echo "  report:"
+  echo "    receiver:            ${my_mail_report_receiver}"
+  echo ""
+  echo "  server:"
+  echo "    smtp:"
+  echo "      host:              ${my_mail_server_smtp_host}"
+  echo "      port:              ${my_mail_server_smtp_port}"
+  echo "      username:          ${my_mail_server_smtp_username}"
+  echo "      password:          ${my_mail_server_smtp_password}"
+  echo "      authtype:          ${my_mail_server_smtp_authtype}"
   echo ""
 
   if [[ -n $repository_contentstore || -n $repository_contentstore_deleted ]] ; then
@@ -610,6 +639,51 @@ config_edu_sharing() {
 	fi
 
 	echo "- update ${eduSConf}"
+
+  if [[ -n "${my_mail_from}" ]] ; then
+    hocon -f ${eduSConf} \
+      set "repository.mail.from" '"'"${my_mail_from}"'"'
+  fi
+
+  if [[ -n "${my_mail_addreplyto}" ]] ; then
+    hocon -f ${eduSConf} \
+      set "repository.mail.addReplyTo" '"'"${my_mail_addreplyto}"'"'
+  fi
+
+  if [[ -n "${my_mail_register_receiver}" ]] ; then
+    hocon -f ${eduSConf} \
+      set "repository.mail.register.receiver" '"'"${my_mail_register_receiver}"'"'
+  fi
+
+  if [[ -n "${my_mail_report_receiver}" ]] ; then
+    hocon -f ${eduSConf} \
+      set "repository.mail.report.receiver" '"'"${my_mail_report_receiver}"'"'
+  fi
+
+  if [[ -n "${my_mail_server_smtp_host}" ]] ; then
+    hocon -f ${eduSConf} \
+      set "repository.mail.server.smtp.host" '"'"${my_mail_server_smtp_host}"'"'
+  fi
+
+  if [[ -n "${my_mail_server_smtp_port}" ]] ; then
+    hocon -f ${eduSConf} \
+      set "repository.mail.server.smtp.port" '"'"${my_mail_server_smtp_port}"'"'
+  fi
+
+  if [[ -n "${my_mail_server_smtp_username}" ]] ; then
+    hocon -f ${eduSConf} \
+      set "repository.mail.server.smtp.username" '"'"${my_mail_server_smtp_username}"'"'
+  fi
+
+  if [[ -n "${my_mail_server_smtp_password}" ]] ; then
+    hocon -f ${eduSConf} \
+      set "repository.mail.server.smtp.password" '"'"${my_mail_server_smtp_password}"'"'
+  fi
+
+  if [[ -n "${my_mail_server_smtp_authtype}" ]] ; then
+    hocon -f ${eduSConf} \
+      set "repository.mail.server.smtp.authtype" '"'"${my_mail_server_smtp_authtype}"'"'
+  fi
 
 	if [[ -n "${repository_httpclient_disablesni4hosts}" ]] ; then
 		hocon -f ${eduSConf} \

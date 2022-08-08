@@ -2,7 +2,7 @@
 set -e
 set -o pipefail
 
-GIT_BRANCH="$(echo '${project.version}' | sed 's|[\/\.]|-|g')"
+GIT_BRANCH="$(echo '${project.version}' | sed 's|[\/\.]|-|g' | tr '[:upper:]' '[:lower:]')"
 export COMPOSE_NAME="${COMPOSE_PROJECT_NAME:-edusharing-docker-$GIT_BRANCH}"
 
 case "$(uname)" in

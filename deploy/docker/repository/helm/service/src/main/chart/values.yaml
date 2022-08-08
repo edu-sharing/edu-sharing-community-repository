@@ -195,6 +195,21 @@ config:
       session:
         timeout: 60
 
+  mail:
+    from: ""
+    addReplyTo: true
+    register:
+      receiver: ""
+    report:
+      receiver: ""
+    server:
+      smtp:
+        host: ""
+        port: ""
+        username: ""
+        password: ""
+        authtype: ""
+
   saml:
     enabled: false
 #    config: ""

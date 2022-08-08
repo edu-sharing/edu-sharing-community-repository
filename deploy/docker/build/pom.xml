@@ -39,6 +39,7 @@
   </build>
 
 <modules>  <module>apache_exporter</module>
+    <module>mailcatcher</module>
     <module>minideb</module>
     <module>postgresql</module>
     <module>postgresql_exporter</module>
