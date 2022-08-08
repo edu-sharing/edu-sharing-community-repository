@@ -69,6 +69,7 @@ import { OptionTooltipPipe } from './pipes/option-tooltip.pipe';
 import { ReplaceCharsPipe } from './pipes/replace-chars.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { VCardNamePipe } from './pipes/vcard-name.pipe';
+import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.component';
 
 @NgModule({
     declarations: [
@@ -115,6 +116,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         WorkspaceCreateConnector,
         NodesDragDirective,
         NodesDropTargetDirective,
+        CreateLtitoolComponent,
     ],
     imports: [
         A11yModule,
@@ -208,6 +210,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         NodesDragDirective,
         NodesDropTargetDirective,
         MatBadgeModule,
+        CreateLtitoolComponent,
     ],
 })
 export class SharedModule {}

@@ -108,6 +108,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     cardHasOpenModals$: Observable<boolean>;
     options: OptionItem[];
     tools: Tools;
+    createToolType: Tool;
 
     private params: Params;
     private destroyed = new Subject<void>();
@@ -472,7 +473,9 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         }
     }
 
-    async showCreateLtiTool(tool: Tool) {}
+    async showCreateLtiTool(tool: Tool) {
+        this.createToolType = tool;
+    }
 
     private openCamera() {
         this.bridge.getCordova().getPhotoFromCamera(
