@@ -6,7 +6,7 @@
       <i icon="extension"></i>
       <div>
         <div class="name-wrapper">
-          <div class="name">{{p.name}}</div>
+          <div class="name">{{('ADMIN.PLUGINS.PLUGIN_DETAILS.'+p.name+'.TITLE') | translate:{fallback: p.name} }}</div>
           <div class="version">{{p.version}}</div>
         </div>
         <div class="state"
