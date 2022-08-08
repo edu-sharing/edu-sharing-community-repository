@@ -136,7 +136,11 @@ export class AdminFrontpageComponent {
     this.previewLoading = true;
     this.previewNodes = [];
     this.previewError = null;
-    this.nodeService.getChildren(RestConstants.NODES_FRONTPAGE).subscribe((nodes) => {
+    this.nodeService
+        .getChildren(RestConstants.NODES_FRONTPAGE, [], {
+            propertyFilter: [RestConstants.ALL],
+        })
+        .subscribe((nodes) => {
       this.previewLoading = false;
       this.previewNodes = nodes.nodes;
     },(error)=> {

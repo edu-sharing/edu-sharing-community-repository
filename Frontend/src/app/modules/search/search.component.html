@@ -286,8 +286,12 @@
                         {{'SEARCH.QUERY_NO_RESULT' | translate}}
                     </div>
                   <div class="heading" *ngIf="searchService.searchResult.length">
-                    <h2>
-                      {{ 'SEARCH.MATERIALS' | translate }}
+                    <h2 *ngIf="searchService.isFrontpage">
+                      {{ 'SEARCH.FRONTPAGE' | translate }}
+                    </h2>
+                    <h2 *ngIf="!searchService.isFrontpage">
+                      {{ '' +
+                    'SEARCH.MATERIALS' | translate }}
                       <ng-container *ngIf="searchService.resultCount.materials && currentRepository!='-all-'">({{searchService.resultCount.materials}})</ng-container>
                     </h2>
                     <!-- TODO: make popup menu usable with keyboard -->
