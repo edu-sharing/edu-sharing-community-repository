@@ -16,7 +16,12 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.provider.ElasticSearchProvider;
+import org.edu_sharing.service.provider.Provider;
+import org.edu_sharing.service.provider.ProviderHelper;
+import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.stream.StreamServiceFactory;
 import org.edu_sharing.service.stream.StreamServiceHelper;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
@@ -143,7 +148,7 @@ public class NodeServiceInterceptor implements MethodInterceptor {
         NodeService nodeService = serviceRegistry.getNodeService();
         int i = 0;
         while(nodeId!=null) {
-            if (hasSignature(nodeId) || hasUsage(nodeId) || accessibleViaStream(nodeId)) {
+            if (hasSignature(nodeId) || hasUsage(nodeId) || accessibleViaStream(nodeId) || hasCollectionPermissions(nodeId)) {
                 logger.debug("Node "+nodeId+" -> will run as system");
                 return AuthenticationUtil.runAsSystem(() -> {
                     try {
@@ -196,5 +201,22 @@ public class NodeServiceInterceptor implements MethodInterceptor {
         }
         return false;*/
         return false;
+    }
+
+    public static boolean hasCollectionPermissions(String nodeId){
+        long test = System.currentTimeMillis();
+        Provider providerByApp = ProviderHelper.getProviderByApp(ApplicationInfoList.getHomeRepository());
+        if(!(providerByApp instanceof ElasticSearchProvider)){
+            logger.info("took:"+(System.currentTimeMillis() - test) +"ms");
+            return false;
+        }
+        if(!CallSourceHelper.getCallSource().equals(CallSourceHelper.CallSource.Render)
+                && !CallSourceHelper.getCallSource().equals(CallSourceHelper.CallSource.Preview)){
+            logger.info("took:"+(System.currentTimeMillis() - test) +"ms");
+            return false;
+        }
+        boolean result = ((SearchServiceElastic)providerByApp.getSearchService()).isAllowedToRead(nodeId);
+        logger.info("took:"+(System.currentTimeMillis() - test) +"ms");
+        return result;
     }
 }

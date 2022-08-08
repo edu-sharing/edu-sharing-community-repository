@@ -241,6 +241,7 @@ public class RepoFactory {
 			JobHandler.getInstance().refresh();
 		} catch (Exception ignored) {}
 		eduSharingProps = null;
+		ProviderHelper.clearCache();
 	}
 
 	public static List<MetadataSetInfo> getMetadataSetsForRepository(String repositoryId) throws Exception {

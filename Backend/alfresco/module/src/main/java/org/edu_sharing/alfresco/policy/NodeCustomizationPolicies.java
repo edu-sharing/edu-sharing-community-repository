@@ -36,6 +36,7 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -43,7 +44,6 @@ import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
-import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.quartz.Scheduler;
 import org.springframework.security.crypto.codec.Base64;
 
@@ -551,6 +551,16 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 			props.addAll(MetadataReader.getWidgetsByNode(ref,"de_DE").stream().
 					map(MetadataWidget::getId).map(CCConstants::getValidGlobalName).
 					collect(Collectors.toList()));
+
+			if(after != null){
+				for(Map.Entry<QName,Serializable> entry : after.entrySet()){
+					if(entry.getKey().getLocalName().startsWith("lifecyclecontributer")
+							|| entry.getKey().getLocalName().startsWith("metadatacontributer")){
+						props.add(entry.getKey().toString());
+					}
+				}
+			}
+
 			for (QName prop : after.keySet()) {
 				// the prop is contained in the mds of the node or a SAFE_PROP, than check if it still the original one -> replace it on the ref
 				if (props.contains(prop.toString())) {
@@ -563,8 +573,31 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 					}
 				}
 			}
-			nodeService.setProperties(ref, ioColRefProperties);
+			try {
+				nodeService.setProperties(ref, ioColRefProperties);
+			}catch(DuplicateChildNodeNameException e){
+				logger.error(e.getMessage() +" try to rename");
+				String originalName = (String)ioColRefProperties.get(ContentModel.PROP_NAME);
+				for(int i = 2; i < 42;i++){
+					ioColRefProperties.put(ContentModel.PROP_NAME, renameNode(originalName,i));
+					try{
+						nodeService.setProperties(ref, ioColRefProperties);
+						break;
+					}catch (DuplicateChildNodeNameException ex){
+						logger.debug(e.getMessage()+" - will rename " +originalName +" "+i);
+					}
+				}
+			}
+
 			new RepositoryCache().remove(ref.getId());
+	}
+
+	public static String renameNode(String oldName,int number){
+		String[] split=oldName.split("\\.");
+		int i=split.length-2;
+		i=Math.max(0, i);
+		split[i]+=" - "+number;
+		return String.join(".",split);
 	}
 
 	private static String propertyToString(Object p){
@@ -822,6 +855,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 				GetMethod method = new GetMethod(url.toString());
 				int timeout = (int) ((splash.getDouble("wait") + splash.getDouble("timeout")) * 1000);
 				client.getHttpConnectionManager().getParams().setConnectionTimeout(timeout);
+				client.getHttpConnectionManager().getParams().setSoTimeout(timeout);
 				int statusCode = client.executeMethod(method);
 				if (statusCode == HttpStatus.SC_OK) {
 					return method.getResponseBody();
