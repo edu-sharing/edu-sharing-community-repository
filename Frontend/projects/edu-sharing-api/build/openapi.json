@@ -28929,6 +28929,9 @@
           },
           "name" : {
             "type" : "string"
+          },
+          "logo" : {
+            "type" : "string"
           }
         }
       },
@@ -29175,16 +29178,16 @@
             "type" : "string",
             "enum" : [ "Input", "None" ]
           },
+          "required" : {
+            "type" : "string",
+            "writeOnly" : true,
+            "enum" : [ "mandatory", "mandatoryForPublish", "recommended", "optional", "ignore" ]
+          },
           "subwidgets" : {
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/MdsSubwidget"
             }
-          },
-          "required" : {
-            "type" : "string",
-            "writeOnly" : true,
-            "enum" : [ "mandatory", "mandatoryForPublish", "recommended", "optional", "ignore" ]
           },
           "id" : {
             "type" : "string"

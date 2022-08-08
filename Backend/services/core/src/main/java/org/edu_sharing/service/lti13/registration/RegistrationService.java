@@ -160,7 +160,8 @@ public class RegistrationService {
         jsonResponse.put("redirect_uris",ja);
         jsonResponse.put("client_name",homeApp.getAppCaption());
         jsonResponse.put("jwks_uri",homeApp.getClientBaseUrl()+"/rest/lti/v13/jwks");
-        String logo = homeApp.getClientBaseUrl()+"/assets/images/favicon.ico";
+        //alt: http://192.168.16.221/edu-sharing/assets/images/logo.svg
+        String logo = homeApp.getClientBaseUrl()+"/assets/images/app-icon.svg";
         jsonResponse.put("logo_uri",logo);
         jsonResponse.put("token_endpoint_auth_method", "private_key_jwt");
         JSONObject ltiDeepLink = new JSONObject();
@@ -290,7 +291,7 @@ public class RegistrationService {
         String jwksuri = (String)registrationPayload.get("jwks_uri");
         String tokenEndpointAuthMethod = (String)registrationPayload.get("token_endpoint_auth_method");
         String applicationType =  (String)registrationPayload.get("application_type");
-        String logoUri = (String)registrationPayload.get("'logo_uri'");
+        String logoUri = (String)registrationPayload.get("logo_uri");
 
         JSONObject ltiToolConfig = (JSONObject)registrationPayload.get(LTIConstants.LTI_REGISTRATION_TOOL_CONFIGURATION);
         String domain = (String)ltiToolConfig.get("domain");

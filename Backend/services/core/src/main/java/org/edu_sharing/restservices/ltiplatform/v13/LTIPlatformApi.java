@@ -367,6 +367,7 @@ public class LTIPlatformApi {
                         tool.setDomain(uri.getHost());
                     }catch ( java.net.URISyntaxException e){}
                     tool.setName(appInfo.getAppCaption());
+                    tool.setLogo(appInfo.getLogo());
                     tools.getTools().add(tool);
 
                 }
