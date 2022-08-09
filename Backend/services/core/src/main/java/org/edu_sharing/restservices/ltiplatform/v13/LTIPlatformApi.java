@@ -15,6 +15,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
+import org.edu_sharing.repository.server.AuthenticationTool;
+import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.Signing;
@@ -24,6 +26,7 @@ import org.edu_sharing.restservices.ltiplatform.v13.model.*;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.service.lti13.LTIConstants;
 import org.edu_sharing.service.lti13.LTIJWTUtil;
+import org.edu_sharing.service.lti13.RepoTools;
 import org.edu_sharing.service.lti13.registration.RegistrationService;
 import org.edu_sharing.service.version.VersionService;
 import org.json.simple.JSONObject;
@@ -88,6 +91,23 @@ public class LTIPlatformApi {
             if(!scope.equals("openid")) throw new Exception("invalid scope " +scope);
             if(!responseType.equals("id_token")) throw new Exception("unsupported response_type "+responseType);
             if(!responseMode.equals("form_post")){throw new Exception("invalid response_mode " +responseMode);}
+
+            if(!AuthenticationUtil.getFullyAuthenticatedUser().equals(loginHint)){
+                throw new Exception("wrong login_hint. does not match session login");
+            }
+
+            LoginInitiation loginInitiation = (LoginInitiation)req.getSession().getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
+
+            if(loginInitiation == null){
+                throw new Exception("lti lti session object found");
+            }
+
+            if(!loginInitiation.getParentId().equals(ltiMessageHint)){
+                throw new Exception("wrong context:" + ltiMessageHint);
+            }
+
+            //@todo maybe check appId
+           // new RepoTools().getAppId(null,clientId,d)
 
             /**
              * @TODO compare lti message hint with session value
@@ -332,7 +352,8 @@ public class LTIPlatformApi {
                     registrationData.getLogoUrl(),
                     (registrationData.getCustomParameters() != null) ? StringUtils.join(registrationData.getCustomParameters(),",") : null,
                     registrationData.getToolDescription(),
-                    registrationData.getClientName());
+                    registrationData.getClientName(),
+                    registrationData.getTargetLinkUriDeepLink());
             return Response.ok().build();
         }catch (Exception e){
             return ErrorResponse.createResponse(e);
@@ -368,6 +389,7 @@ public class LTIPlatformApi {
                     }catch ( java.net.URISyntaxException e){}
                     tool.setName(appInfo.getAppCaption());
                     tool.setLogo(appInfo.getLogo());
+                    tool.setCreateOption(appInfo.hasLtiToolCreateOption());
                     tools.getTools().add(tool);
 
                 }
@@ -377,4 +399,51 @@ public class LTIPlatformApi {
             return ErrorResponse.createResponse(e);
         }
     }
+
+
+    @GET
+    @Path("/generateLoginInitiationForm")
+    @Operation(summary = "generate a form used for Initiating Login from a Third Party")
+    @Consumes({ "text/html"})
+    @Produces({"text/html"})
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode="200", description= RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = String.class)))
+            })
+    public Response generateLoginInitiationForm(@Parameter(description = "appId of the tool",required=true) @QueryParam("appId") String appId,
+                                                @Parameter(description = "the folder id the lti node will be created in",required=true) @QueryParam("parentId") String parentId,
+                                                @Context HttpServletRequest req){
+
+        try {
+            for(ApplicationInfo appInfo : ApplicationInfoList.getApplicationInfos().values()){
+                if(appInfo.isLtiTool() && appInfo.getAppId().equals(appId)){
+                    Map<String,String> params = new HashMap<>();
+                    params.put("iss",ApplicationInfoList.getHomeRepository().getClientBaseUrl());
+                    params.put("target_link_uri",appInfo.getLtitoolTargetLinkUri() == null ? appInfo.getLtitoolTargetLinkUriDeepLink() : appInfo.getLtitoolTargetLinkUri());
+                    params.put("login_hint", AuthenticationUtil.getFullyAuthenticatedUser());
+                    params.put("lti_message_hint",parentId);
+                    params.put("client_id",appInfo.getLtiClientId());
+                    params.put("lti_deployment_id",appInfo.getLtiDeploymentId());
+                    String form = ApiTool.getHTML(appInfo.getLtitoolLoginInitiationsUrl(),params,null,null);
+
+                    LoginInitiation loginInitiation = new LoginInitiation();
+                    loginInitiation.setAppId(appInfo.getAppId());
+                    loginInitiation.setClientId(appInfo.getLtiClientId());
+                    loginInitiation.setParentId(parentId);
+                    req.getSession().setAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT,loginInitiation);
+
+                    return Response.status(Response.Status.OK).entity(form).build();
+                }
+            }
+            throw new Exception("no lti tool found for "+ appId);
+        }catch (Exception e){
+             return ApiTool.processError(req,e,"");
+        }
+    }
+
 }

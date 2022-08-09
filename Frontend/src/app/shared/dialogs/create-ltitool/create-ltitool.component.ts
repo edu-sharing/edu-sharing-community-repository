@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Tool } from 'ngx-edu-sharing-api';
 import { DialogButton } from '../../../core-module/ui/dialog-button';
+import { Node } from '../../../core-module/core.module';
 
 @Component({
     selector: 'es-create-ltitool',
@@ -9,6 +10,7 @@ import { DialogButton } from '../../../core-module/ui/dialog-button';
 })
 export class CreateLtitoolComponent implements OnInit {
     public _tool: Tool;
+    public _parent: Node;
     buttons: DialogButton[];
     @Output() onCancel = new EventEmitter();
     @Output() onCreate = new EventEmitter();
@@ -27,6 +29,10 @@ export class CreateLtitoolComponent implements OnInit {
         this._tool = tool;
     }
 
+    @Input() set parent(parent: Node) {
+        this._parent = parent;
+    }
+
     public cancel() {
         this.onCancel.emit();
     }
@@ -36,5 +42,15 @@ export class CreateLtitoolComponent implements OnInit {
             return;
         }
         this.onCreate.emit({ name: this._name, appId: this.tool.appId });
+    }
+
+    public open() {
+        window.open(
+            '/edu-sharing/rest/ltiplatform/v13/generateLoginInitiationForm?appId=' +
+                this._tool.appId +
+                '&parentId=' +
+                this._parent.ref.id,
+            '_self',
+        );
     }
 }

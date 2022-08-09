@@ -556,6 +556,26 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             );
     }
 
+    createLtiTool(event: any) {
+        const prop = RestHelper.createNameProperty(event.name);
+        this.nodeService
+            .createNode(this.getParent().ref.id, RestConstants.CCM_TYPE_IO, [], prop, false)
+            .subscribe(
+                (data: NodeWrapper) => {
+                    this.editConnector(data.node, event.type, null, this.createConnectorType);
+                    this.onCreate.emit([data.node]);
+                },
+                (error: any) => {
+                    if (
+                        this.nodeHelper.handleNodeError(event.name, error) ===
+                        RestConstants.DUPLICATE_NODE_RESPONSE
+                    ) {
+                        this.createConnectorName = event.name;
+                    }
+                },
+            );
+    }
+
     isAllowed() {
         return (
             this.allowed &&

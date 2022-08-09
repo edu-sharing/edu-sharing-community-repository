@@ -150,9 +150,15 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	public static final String KEY_LTITOOL_TARGET_LINK_URI = "ltitool_target_link_uri";
 
+
+	public static final String KEY_LTITOOL_TARGET_LINK_URI_DEEPLINK = "ltitool_target_link_uri_deeplink";
+
 	public static final String KEY_LTITOOL_CUSTOM_PARAMETERS = "ltitool_custom_parameters";
 
 	public static final String KEY_LTITOOL_DESCRIPTION = "ltitool_description";
+
+	//custom allow too to write content to edu-sharing
+	public static final String KEY_LTITOOL_CREATEOPTION = "ltitool_create_option";
 
 
 	/**
@@ -385,9 +391,13 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	private String ltitoolTargetLinkUri;
 
+	private String ltitoolTargetLinkUriDeepLink;
+
 	private String ltitoolCustomParameters;
 
 	private String ltitoolDescription;
+
+	private String ltitoolCreateOption;
 
 
 	/**
@@ -557,8 +567,10 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		ltitoolRedirectUrls = properties.getProperty(KEY_LTITOOL_REDIRECT_URLS);
 		ltitoolLoginInitiationsUrl = properties.getProperty(KEY_LTITOOL_LOGININITIATIONS_URL);
 		ltitoolTargetLinkUri = properties.getProperty(KEY_LTITOOL_TARGET_LINK_URI);
+		ltitoolTargetLinkUriDeepLink = properties.getProperty(KEY_LTITOOL_TARGET_LINK_URI_DEEPLINK);
 		ltitoolCustomParameters = properties.getProperty(KEY_LTITOOL_CUSTOM_PARAMETERS);
 		ltitoolDescription = properties.getProperty(KEY_LTITOOL_DESCRIPTION);
+		ltitoolCreateOption = properties.getProperty(KEY_LTITOOL_CREATEOPTION);
 	}
 	
 	public String getXml() {
@@ -1089,6 +1101,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		return ltitoolTargetLinkUri;
 	}
 
+	public String getLtitoolTargetLinkUriDeepLink() {return ltitoolTargetLinkUriDeepLink;}
+
 	public String getLtitoolRedirectUrls() {
 		return ltitoolRedirectUrls;
 	}
@@ -1100,4 +1114,9 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	}
 
 	public String getLtitoolDescription() {return ltitoolDescription;}
+
+	public boolean hasLtiToolCreateOption(){
+		return new Boolean(ltitoolCreateOption);
+	}
+
 }

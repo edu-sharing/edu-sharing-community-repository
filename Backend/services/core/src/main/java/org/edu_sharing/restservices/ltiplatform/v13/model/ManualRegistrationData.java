@@ -26,6 +26,9 @@ public class ManualRegistrationData {
     @ApiModelProperty(notes = "The default target link uri to use unless defined otherwise in the message or link definition",required = true)
     String targetLinkUri;
 
+    @ApiModelProperty(notes = "The target link uri to use for DeepLing Message",required = false)
+    String targetLinkUriDeepLink;
+
     @ApiModelProperty(name = "client_name", notes = "Name of the Tool to be presented to the End-User. Localized representations may be included as described in Section 2.1 of the [OIDC-Reg] specification. ",required = true)
     String clientName;
 
@@ -101,6 +104,9 @@ public class ManualRegistrationData {
         return targetLinkUri;
     }
 
+    public void setTargetLinkUriDeepLink(String targetLinkUriDeepLink) {this.targetLinkUriDeepLink = targetLinkUriDeepLink;}
+
+    public String getTargetLinkUriDeepLink() {return targetLinkUriDeepLink;}
 
     public void setClientName(String clientName) {
         this.clientName = clientName;

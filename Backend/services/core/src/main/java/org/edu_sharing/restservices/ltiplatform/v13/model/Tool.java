@@ -2,6 +2,7 @@ package org.edu_sharing.restservices.ltiplatform.v13.model;
 
 public class Tool {
     String domain,description,appId,name,logo;
+    boolean createOption = false;
 
     public String getDescription() {
         return description;
@@ -41,5 +42,13 @@ public class Tool {
 
     public void setLogo(String logo) {
         this.logo = logo;
+    }
+
+    public void setCreateOption(boolean createOption) {
+        this.createOption = createOption;
+    }
+
+    public boolean isCreateOption() {
+        return createOption;
     }
 }

@@ -29,7 +29,14 @@
   (onCreate)="createConnector($event)"
 ></es-workspace-create-connector>
 
-<es-create-ltitool *ngIf="createToolType != null" [tool]="createToolType"> </es-create-ltitool>
+<es-create-ltitool
+  *ngIf="createToolType != null"
+  [tool]="createToolType"
+  [parent]="_parent"
+  (onCancel)="createToolType = null"
+  (onCreate)="createLtiTool($event)"
+>
+</es-create-ltitool>
 
 <div
   *ngIf="!(cardHasOpenModals$ | async)"

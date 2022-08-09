@@ -103,7 +103,13 @@ public class LTIApi {
             if (this.logger.isInfoEnabled()) {
                 this.logger.info("OIDC launch received with " + loginRequest.toString());
             }
-            final URI uri = new URI(loginRequest.getTarget_link_uri());
+
+            String targetLinkUri = loginRequest.getTarget_link_uri();
+            if(targetLinkUri == null){
+                throw new Exception("Bad request targetLinkUri is null. check tool config on platform side.");
+            }
+
+            final URI uri = new URI(targetLinkUri);
 			/* commented in local because localhost resolves to 0:0:0:0*/
             String host = uri.getHost();
 			String remoteHost = new URI(req.getRequestURL().toString()).getHost();

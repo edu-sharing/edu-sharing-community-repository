@@ -299,6 +299,17 @@ public class RegistrationService {
         List<String> claims = (List<String>)ltiToolConfig.get("claims");
         String description =  (String)ltiToolConfig.get("description");
         List<String> customParameters = (List<String>)ltiToolConfig.get("custom_parameters");
+        JSONArray ltiToolConfigMessages = (JSONArray)ltiToolConfig.get("messages");
+        String targetLinkUriDL = null;
+        if(ltiToolConfigMessages != null){
+            for(int i = 0; i < ltiToolConfigMessages.size(); i++){
+                JSONObject message = (JSONObject)ltiToolConfigMessages.get(i);
+                String messageType = (String)message.get("type");
+                if("LtiDeepLinkingRequest".equals(messageType)){
+                    targetLinkUriDL = (String) message.get("target_link_uri");
+                }
+            }
+        }
 
 
         // Validate domain and target link.
@@ -332,12 +343,12 @@ public class RegistrationService {
         String sub = (String) body.get("sub");
 
         return registerTool(domain, sub, initiateLoginUri, jwksuri, targetLinkUri, StringUtils.join(redirectUris,","), logoUri,
-                (customParameters != null) ? StringUtils.join(customParameters,",") : null, description, clientName);
+                (customParameters != null) ? StringUtils.join(customParameters,",") : null, description, clientName, targetLinkUriDL);
     }
 
     public ApplicationInfo registerTool(String domain, String clientId, String initiateLoginUri, String jwksuri,
                                         String targetLinkUri, String redirectUris, String logoUri,
-                                        String customParameters, String description, String clientName) throws Exception {
+                                        String customParameters, String description, String clientName, String targetLinkUriDeepLink) throws Exception {
         HashMap<String,String> properties = new HashMap<>();
 
         Integer lastDeploymentId = 0;
@@ -365,6 +376,9 @@ public class RegistrationService {
         properties.put(ApplicationInfo.KEY_LTI_CLIENT_ID, clientId);
         properties.put(ApplicationInfo.KEY_LTITOOL_LOGININITIATIONS_URL, initiateLoginUri);
         properties.put(ApplicationInfo.KEY_LTITOOL_TARGET_LINK_URI,targetLinkUri);
+        if(targetLinkUriDeepLink != null){
+            properties.put(ApplicationInfo.KEY_LTITOOL_TARGET_LINK_URI_DEEPLINK,targetLinkUriDeepLink);
+        }
         properties.put(ApplicationInfo.KEY_LTITOOL_REDIRECT_URLS,redirectUris);
         if(customParameters != null){properties.put(ApplicationInfo.KEY_LTITOOL_CUSTOM_PARAMETERS, customParameters);}
         properties.put(ApplicationInfo.KEY_LOGO,logoUri);
