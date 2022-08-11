@@ -26,10 +26,9 @@ import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import { OPEN_URL_MODE } from '../../../core-module/ui/ui-constants';
 import { UniversalNode } from '../../../common/definitions';
-import { forkJoin, Observable } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { Toast } from '../../../core-ui-module/toast';
 import { first } from 'rxjs/operators';
-import 'rxjs-compat/add/observable/forkJoin';
 
 @Component({
     selector: 'es-node-relation-manager',
@@ -259,7 +258,7 @@ export class NodeRelationManagerComponent implements OnInit, OnChanges {
             // published original: we now need to switch to the original id!
             if (this.nodes[0].properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]) {
                 // switch to original node id!
-                this.nodes = await Observable.forkJoin(
+                this.nodes = await forkJoin(
                     this.nodes.map((n) =>
                         this.nodeService.getNode(
                             RestConstants.HOME_REPOSITORY,
