@@ -68,9 +68,11 @@ public class LTIConstants {
 
     public static final String DEEP_LINK_CONTEXT = "https://purl.imsglobal.org/spec/lti/claim/context";
 
-    public static final String RESOURCE_LINK_LAUNCH_PRESENTATION = "https://purl.imsglobal.org/spec/lti/claim/launch_presentation";
+    public static final String LTI_LAUNCH_PRESENTATION = "https://purl.imsglobal.org/spec/lti/claim/launch_presentation";
 
     public static final String LTI_REGISTRATION_TOOL_CONFIGURATION = "https://purl.imsglobal.org/spec/lti-tool-configuration";
+
+    public static final String LTI_TOOL_PLATFORM = "https://purl.imsglobal.org/spec/lti/claim/tool_platform";
 
     public static final String LTI_REGISTRATION_SCOPE_NEW = "NEW";
 

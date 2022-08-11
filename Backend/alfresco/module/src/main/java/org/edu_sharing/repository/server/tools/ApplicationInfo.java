@@ -1098,7 +1098,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	}
 
 	public String getLtitoolTargetLinkUri() {
-		return ltitoolTargetLinkUri;
+		return ltitoolTargetLinkUri == null ? ltitoolTargetLinkUriDeepLink : ltitoolTargetLinkUri;
 	}
 
 	public String getLtitoolTargetLinkUriDeepLink() {return ltitoolTargetLinkUriDeepLink;}

@@ -506,6 +506,10 @@ public class CCConstants {
 
 	public static final String CCM_PROP_TRACKING_VIEWS = "{http://www.campuscontent.de/model/1.0}tracking_views";
 
+	public static final String CCM_ASPECT_LTITOOL_NODE = "{http://www.campuscontent.de/model/1.0}ltitool_node";
+
+	public static final String CCM_PROP_LTITOOL_NODE_RESOURCELINK = "{http://www.campuscontent.de/model/1.0}ltitool_resourcelink";
+
 	public static final int HTTP_INSUFFICIENT_STORAGE = 503;
 
     public static final List<String> CHILDOBJECT_IGNORED_PARENT_PROPERTIES = Arrays.asList(

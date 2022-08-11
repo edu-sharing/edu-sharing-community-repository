@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {
+    ApplicationRef,
+    Component,
+    EventEmitter,
+    Input,
+    NgZone,
+    OnInit,
+    Output,
+} from '@angular/core';
 import { Tool } from 'ngx-edu-sharing-api';
 import { DialogButton } from '../../../core-module/ui/dialog-button';
 import { Node } from '../../../core-module/core.module';
@@ -16,11 +24,16 @@ export class CreateLtitoolComponent implements OnInit {
     @Output() onCreate = new EventEmitter();
     public _name = '';
 
-    constructor() {
+    constructor(private ngZone: NgZone) {
         this.buttons = [
             new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel()),
             new DialogButton('CREATE', { color: 'primary' }, () => this.create()),
         ];
+        (window as any)['angularComponentReference'] = {
+            component: this,
+            zone: this.ngZone,
+            loadAngularFunction: () => this.angularFunctionCalled(),
+        };
     }
 
     ngOnInit(): void {}
@@ -52,5 +65,9 @@ export class CreateLtitoolComponent implements OnInit {
                 this._parent.ref.id,
             '_self',
         );
+    }
+
+    public angularFunctionCalled() {
+        console.log('js function called ' + this._parent);
     }
 }

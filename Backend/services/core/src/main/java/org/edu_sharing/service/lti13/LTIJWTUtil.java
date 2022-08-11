@@ -1,6 +1,5 @@
 package org.edu_sharing.service.lti13;
 
-import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.AsymmetricJWK;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -10,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.Signing;
@@ -22,12 +20,10 @@ import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.PublicKey;
-import java.text.ParseException;
 import java.util.*;
 
 public class LTIJWTUtil {
@@ -265,7 +261,7 @@ public class LTIJWTUtil {
         return deepLink;
     }
 
-    public ApplicationInfo getPlatform() {
+    public ApplicationInfo getApplicationInfo() {
         return platform;
     }
 }

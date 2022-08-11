@@ -1,7 +1,7 @@
 package org.edu_sharing.restservices.ltiplatform.v13.model;
 
-public class LoginInitiation {
-    String parentId,clientId,appId;
+public class LoginInitiationSessionObject {
+    String parentId,clientId,appId,nodeId;
 
     public String getParentId() {
         return parentId;
@@ -25,5 +25,13 @@ public class LoginInitiation {
 
     public void setAppId(String appId) {
         this.appId = appId;
+    }
+
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
+    }
+
+    public String getNodeId() {
+        return nodeId;
     }
 }

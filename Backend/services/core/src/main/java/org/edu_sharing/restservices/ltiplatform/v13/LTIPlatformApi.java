@@ -1,8 +1,6 @@
 package org.edu_sharing.restservices.ltiplatform.v13;
 
-import io.jsonwebtoken.Jwt;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -10,27 +8,35 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.security.PersonService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
-import org.edu_sharing.repository.server.AuthenticationTool;
-import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.Signing;
+import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.lti.v13.ApiTool;
 import org.edu_sharing.restservices.ltiplatform.v13.model.*;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.service.lti13.LTIConstants;
 import org.edu_sharing.service.lti13.LTIJWTUtil;
-import org.edu_sharing.service.lti13.RepoTools;
 import org.edu_sharing.service.lti13.registration.RegistrationService;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.version.VersionService;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.springframework.extensions.surf.util.I18NUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -39,6 +45,7 @@ import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
+import java.security.Key;
 import java.util.*;
 
 @Path("/ltiplatform/v13")
@@ -49,6 +56,9 @@ public class LTIPlatformApi {
 
     Logger logger = Logger.getLogger(LTIPlatformApi.class);
 
+    ServiceRegistry serviceRegistry = (ServiceRegistry)AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
+    NodeService nodeService = serviceRegistry.getNodeService();
+    PersonService personService = serviceRegistry.getPersonService();
 
 
     @GET
@@ -92,22 +102,101 @@ public class LTIPlatformApi {
             if(!responseType.equals("id_token")) throw new Exception("unsupported response_type "+responseType);
             if(!responseMode.equals("form_post")){throw new Exception("invalid response_mode " +responseMode);}
 
-            if(!AuthenticationUtil.getFullyAuthenticatedUser().equals(loginHint)){
+            String username = AuthenticationUtil.getFullyAuthenticatedUser();
+
+            if(!username.equals(loginHint)){
                 throw new Exception("wrong login_hint. does not match session login");
             }
 
-            LoginInitiation loginInitiation = (LoginInitiation)req.getSession().getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
+            LoginInitiationSessionObject loginInitiationSessionObject = (LoginInitiationSessionObject)req.getSession().getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
 
-            if(loginInitiation == null){
+            if(loginInitiationSessionObject == null){
                 throw new Exception("lti lti session object found");
             }
 
-            if(!loginInitiation.getParentId().equals(ltiMessageHint)){
+            if(!loginInitiationSessionObject.getParentId().equals(ltiMessageHint)){
                 throw new Exception("wrong context:" + ltiMessageHint);
             }
 
-            //@todo maybe check appId
-           // new RepoTools().getAppId(null,clientId,d)
+            ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(loginInitiationSessionObject.getAppId());
+            if(appInfo == null){
+                throw new Exception("invalid request: application");
+            }
+
+            if(!appInfo.getLtiClientId().equals(clientId)){
+                throw new Exception("unauthorized_client");
+            }
+
+            if(!Arrays.asList(appInfo.getLtitoolRedirectUrls().split(",")).contains(redirect_uri)){
+                throw new Exception("invalid request: redirect_url");
+            }
+
+            if(responseMode == null || !responseMode.equals("form_post")){
+                throw new Exception("invalid request: response_mode");
+            }
+
+            ApplicationInfo homeApp = ApplicationInfoList.getHomeRepository();
+
+            Map<String,Object> context = new HashMap<>();
+            context.put("id", loginInitiationSessionObject.getParentId());
+            context.put("label",nodeService
+                    .getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, loginInitiationSessionObject.getParentId()), ContentModel.PROP_NAME));
+
+            String firstName = (String)nodeService.getProperty(personService.getPerson(username),ContentModel.PROP_FIRSTNAME);
+            String lastName = (String)nodeService.getProperty(personService.getPerson(username),ContentModel.PROP_LASTNAME);
+            String email = (String)nodeService.getProperty(personService.getPerson(username),ContentModel.PROP_EMAIL);
+
+            Map<String,Object> launchPresentation = new HashMap<>();
+            launchPresentation.put("locale", I18NUtil.getLocale());
+
+
+
+            Map<String,Object> toolPlatform = new HashMap<>();
+            toolPlatform.put("product_family_code","edu-sharing");
+            toolPlatform.put("version",VersionService.getVersion(VersionService.Type.REPOSITORY));
+            toolPlatform.put("guid",homeApp.getAppId());
+            toolPlatform.put("name",homeApp.getAppCaption());
+            toolPlatform.put("description",homeApp.getAppCaption());
+
+            Map<String,Object> deepLinkingSettings = new HashMap<>();
+            deepLinkingSettings.put("accept_types",Arrays.asList(new String[]{"ltiResourceLink"}));
+            deepLinkingSettings.put("accept_presentation_document_targets",Arrays.asList(new String[]{"iframe","window"}));
+            deepLinkingSettings.put("accept_copy_advice",false);
+            deepLinkingSettings.put("accept_multiple",true);
+            deepLinkingSettings.put("accept_unsigned",false);
+            deepLinkingSettings.put("auto_create",false);
+            deepLinkingSettings.put("can_confirm",false);
+            deepLinkingSettings.put("deep_link_return_url",homeApp.getClientBaseUrl()+"/rest/ltiplatform/v13/deeplinking-response/");
+            deepLinkingSettings.put("title",homeApp.getAppCaption());
+
+
+            Key platformPrivateKey = new Signing().getPemPrivateKey(homeApp.getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM);
+
+            Date now = new Date();
+            String jwt = Jwts.builder()
+                    .setHeaderParam(LTIConstants.TYP, LTIConstants.JWT)
+                    .setHeaderParam(LTIConstants.KID, homeApp.getLtiKid())
+                    .setHeaderParam(LTIConstants.ALG, LTIConstants.RS256)
+                    .claim("nonce",nonce)
+                    .setIssuer(RegistrationService.getLtiPlatformOpenIdConfiguration().getIssuer())
+                    .setIssuedAt(now)
+                    .setExpiration(new Date((now.getTime() + 1000)))
+                    .setAudience(clientId)
+                    .setSubject(username)
+                    .claim(LTIConstants.LTI_DEPLOYMENT_ID,appInfo.getLtiDeploymentId())
+                    .claim(LTIConstants.LTI_TARGET_LINK_URI,appInfo.getLtitoolTargetLinkUri())
+                    .claim(LTIConstants.DEEP_LINK_CONTEXT,context)
+                    .claim("given_name",firstName)
+                    .claim("family_name",lastName)
+                    .claim("email",email)
+                    .claim(LTIConstants.LTI_LAUNCH_PRESENTATION,launchPresentation)
+                    .claim(LTIConstants.LTI_TOOL_PLATFORM,toolPlatform)
+                    .claim(LTIConstants.LTI_VERSION, LTIConstants.LTI_VERSION_3)
+                    .claim(LTIConstants.LTI_MESSAGE_TYPE,LTIConstants.LTI_MESSAGE_TYPE_DEEP_LINKING)
+                    .claim(LTIConstants.DEEP_LINKING_SETTINGS,deepLinkingSettings)
+                    .claim("https://purl.imsglobal.org/spec/lti/claim/roles",new ArrayList<>())
+                    .signWith(platformPrivateKey,SignatureAlgorithm.RS256)
+                    .compact();
 
             /**
              * @TODO compare lti message hint with session value
@@ -118,7 +207,11 @@ public class LTIPlatformApi {
              * @TODO build id_token and send it to redirect_uri
              */
 
-            return null;
+            HashMap<String,String> formParams = new HashMap<>();
+            formParams.put("id_token",jwt);
+            formParams.put("state",state);
+            return  Response.ok(ApiTool.getHTML(redirect_uri,formParams)).build();
+
         } catch(Throwable e){
             return ApiTool.processError(req,e,"LTI_PLATFORM_AUTH_ERROR");
         }
@@ -193,34 +286,7 @@ public class LTIPlatformApi {
                     @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = String.class)))
             })
     public Response openidConfiguration(){
-        ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
-        OpenIdConfiguration oidconf = new OpenIdConfiguration();
-        oidconf.setIssuer(homeRepository.getDomain());
-        /**
-         * @TODO token stuff
-         */
-        //oidconf.setToken_endpoint();
-        oidconf.setToken_endpoint_auth_methods_supported(Arrays.asList("private_key_jwt"));
-        oidconf.setToken_endpoint_auth_signing_alg_values_supported(Arrays.asList(SignatureAlgorithm.RS256.getValue()));
-        oidconf.setJwks_uri(homeRepository.getClientBaseUrl()+"/rest/lti/v13/jwks");
-        oidconf.setAuthorization_endpoint(homeRepository.getClientBaseUrl()+"/rest/ltiplatform/v13/auth");
-        oidconf.setRegistration_endpoint(homeRepository.getClientBaseUrl()+"/rest/ltiplatform/v13/openid-registration");
-        oidconf.setToken_endpoint(homeRepository.getClientBaseUrl()+"/rest/ltiplatform/v13/token");
-        oidconf.setResponse_types_supported(Arrays.asList("id_token"));
-        oidconf.setClaims_supported(Arrays.asList("sub","iss","given_name","family_name","email"));
-
-        OpenIdConfiguration.LTIPlatformConfiguration ltiPlatformConfiguration = new OpenIdConfiguration.LTIPlatformConfiguration();
-        OpenIdConfiguration.LTIPlatformConfiguration.Message msgDeepLink = new OpenIdConfiguration.LTIPlatformConfiguration.Message();
-        msgDeepLink.setType("LtiDeepLinkingRequest");
-        OpenIdConfiguration.LTIPlatformConfiguration.Message msgResourceLink = new OpenIdConfiguration.LTIPlatformConfiguration.Message();
-        msgResourceLink.setType("LtiResourceLinkRequest");
-        ltiPlatformConfiguration.getMessages_supported().add(msgDeepLink);
-        ltiPlatformConfiguration.getMessages_supported().add(msgResourceLink);
-        ltiPlatformConfiguration.setProduct_family_code("edu-sharing");
-        ltiPlatformConfiguration.setVersion(VersionService.getVersionNoException(VersionService.Type.REPOSITORY));
-        oidconf.setLtiPlatformConfiguration(ltiPlatformConfiguration);
-
-
+        OpenIdConfiguration oidconf = RegistrationService.getLtiPlatformOpenIdConfiguration();
         return Response.status(Response.Status.OK).entity(oidconf).build();
     }
 
@@ -288,6 +354,7 @@ public class LTIPlatformApi {
             ors.setLtiToolConfiguration(ltiToolConfiguration);
             return Response.ok().entity(ors).build();
         } catch (Exception e) {
+            logger.error(e.getMessage(),e);
             return ErrorResponse.createResponse(e);
         }
     }
@@ -419,23 +486,38 @@ public class LTIPlatformApi {
                                                 @Parameter(description = "the folder id the lti node will be created in",required=true) @QueryParam("parentId") String parentId,
                                                 @Context HttpServletRequest req){
 
+
         try {
+            RepositoryDao repoDao = RepositoryDao.getHomeRepository();
+
+            if ("-userhome-".equals(parentId)) {
+                parentId = repoDao.getUserHome();
+            }
+            if ("-inbox-".equals(parentId)) {
+                parentId =repoDao.getUserInbox();
+            }
+            if ("-saved_search-".equals(parentId)) {
+                parentId = repoDao.getUserSavedSearch();
+            }
+
             for(ApplicationInfo appInfo : ApplicationInfoList.getApplicationInfos().values()){
                 if(appInfo.isLtiTool() && appInfo.getAppId().equals(appId)){
                     Map<String,String> params = new HashMap<>();
                     params.put("iss",ApplicationInfoList.getHomeRepository().getClientBaseUrl());
-                    params.put("target_link_uri",appInfo.getLtitoolTargetLinkUri() == null ? appInfo.getLtitoolTargetLinkUriDeepLink() : appInfo.getLtitoolTargetLinkUri());
+                    params.put("target_link_uri",appInfo.getLtitoolTargetLinkUri());
                     params.put("login_hint", AuthenticationUtil.getFullyAuthenticatedUser());
                     params.put("lti_message_hint",parentId);
                     params.put("client_id",appInfo.getLtiClientId());
                     params.put("lti_deployment_id",appInfo.getLtiDeploymentId());
-                    String form = ApiTool.getHTML(appInfo.getLtitoolLoginInitiationsUrl(),params,null,null);
+                    String form = ApiTool.getHTML(appInfo.getLtitoolLoginInitiationsUrl(),params);
 
-                    LoginInitiation loginInitiation = new LoginInitiation();
-                    loginInitiation.setAppId(appInfo.getAppId());
-                    loginInitiation.setClientId(appInfo.getLtiClientId());
-                    loginInitiation.setParentId(parentId);
-                    req.getSession().setAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT,loginInitiation);
+                    LoginInitiationSessionObject loginInitiationSessionObject = new LoginInitiationSessionObject();
+                    loginInitiationSessionObject.setAppId(appInfo.getAppId());
+                    loginInitiationSessionObject.setClientId(appInfo.getLtiClientId());
+
+
+                    loginInitiationSessionObject.setParentId(parentId);
+                    req.getSession().setAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT, loginInitiationSessionObject);
 
                     return Response.status(Response.Status.OK).entity(form).build();
                 }
@@ -443,6 +525,110 @@ public class LTIPlatformApi {
             throw new Exception("no lti tool found for "+ appId);
         }catch (Exception e){
              return ApiTool.processError(req,e,"");
+        }
+    }
+
+
+    @POST
+    @Path("/deeplinking-response")
+
+    @Operation(summary = "receiving deeplink response messages.", description = "deeplink response")
+    @Consumes({"application/x-www-form-urlencoded"})
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = String.class)))
+            })
+
+    public Response deepLinkingResponse(
+            @Parameter(description = "JWT",required=true) @FormParam("JWT") String jwt,
+            @Context HttpServletRequest req) {
+        try{
+
+            LTIJWTUtil jwtUtil = new LTIJWTUtil();
+            Jws<Claims> claims = jwtUtil.validateJWT(jwt);
+            ApplicationInfo appInfoTool = jwtUtil.getApplicationInfo();
+
+            /**
+             * @ToDo more validation?
+             */
+            if(!appInfoTool.isLtiTool()){
+                throw new Exception("application is no lti tool");
+            }
+
+            LoginInitiationSessionObject sessionObject = (LoginInitiationSessionObject)req.getSession().getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
+
+            if(sessionObject == null){
+                throw new Exception("missing login initiation session object");
+            }
+
+
+            List<Map<String,Object>> contentItems = (List<Map<String,Object>>)claims.getBody().get(LTIConstants.LTI_CONTENT_ITEMS);
+            if(contentItems == null || contentItems.size() == 0){
+                throw new Exception("missing lti content items");
+            }
+
+            String nodeId = sessionObject.getNodeId();
+            if(appInfoTool.hasLtiToolCreateOption()){
+
+                if(nodeId == null){
+                    throw new Exception("id from initial created node required");
+                }
+                if(contentItems.size() > 1) throw new Exception("only one node can be handled for lti tool: " + appInfoTool.getAppId());
+            }
+
+
+            for(Map<String,Object> contentItem : contentItems){
+                HashMap<String, String[]> properties = new HashMap<>();
+                String type = (String)contentItem.get("type");
+                if(!LTIConstants.DEEP_LINK_LTIRESOURCELINK.equals(type)){
+                    throw new Exception("unsupported lti type:"+type);
+                }
+
+                String url = (String)contentItem.get("url");
+                if(url == null){
+                    throw new Exception("missing resourcelink url");
+                }
+
+                String title = (String)contentItem.get("title");
+                properties.put(CCConstants.CCM_PROP_LTITOOL_NODE_RESOURCELINK,new String[]{url});
+                title = title != null ? title : url;
+                properties.put(CCConstants.CM_NAME,new String[]{EduSharingNodeHelper.cleanupCmName(title)} );
+                properties.put(CCConstants.LOM_PROP_GENERAL_TITLE,new String[]{title});
+
+                if(contentItem.containsKey("icon")){
+                    Map<String,Object> icon = (Map<String,Object>)contentItem.get("icon");
+                    String iconUrl = (String)icon.get("url");
+                    if(iconUrl != null){
+                        properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL,new String[]{iconUrl});
+                    }
+                }
+
+                org.edu_sharing.service.nodeservice.NodeService eduNodeService = NodeServiceFactory.getLocalService();
+                if(nodeId == null){
+                    nodeId = eduNodeService.createNode(sessionObject.getParentId(), CCConstants.CCM_TYPE_IO,properties);
+                }
+                if(eduNodeService.hasAspect("workspace","SpacesStore",nodeId,CCConstants.CCM_ASPECT_LTITOOL_NODE)){
+                    eduNodeService.addAspect(nodeId,CCConstants.CCM_ASPECT_LTITOOL_NODE);
+                }
+            }
+
+            String js =
+                    "function callAngularFunction() {" +
+                            "window.angularComponentReference.zone.run(() => { window.angularComponentReference.loadAngularFunction(); });" +
+                    "}"
+                    + "window.onload = function() {\n" +
+                    " callAngularFunction();\n" +
+                    "};";
+
+            return Response.ok().entity(ApiTool.getHTML(null,null,"wird geschlossen",js)).build();
+        } catch (Throwable e) {
+            return ApiTool.processError(req,e,"");
         }
     }
 

@@ -5,12 +5,12 @@ import com.nimbusds.jose.jwk.AsymmetricJWK;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.DefaultClaims;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.log4j.Logger;
@@ -19,19 +19,20 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.HttpQueryTool;
+import org.edu_sharing.restservices.ltiplatform.v13.model.OpenIdConfiguration;
 import org.edu_sharing.service.admin.AdminServiceFactory;
 import org.edu_sharing.service.admin.SystemFolder;
 import org.edu_sharing.service.lti13.LTIConstants;
 import org.edu_sharing.service.lti13.RepoTools;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
+import org.edu_sharing.service.version.VersionService;
+import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
@@ -42,6 +43,37 @@ public class RegistrationService {
     Logger logger = Logger.getLogger(RegistrationService.class);
 
     public static final long DYNAMIC_REGISTRATION_TOKEN_EXPIRY = TimeUnit.DAYS.toMillis(1);
+
+    @NotNull
+    public static OpenIdConfiguration getLtiPlatformOpenIdConfiguration() {
+        ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
+        OpenIdConfiguration oidconf = new OpenIdConfiguration();
+        oidconf.setIssuer(homeRepository.getDomain());
+        /**
+         * @TODO token stuff
+         */
+        //oidconf.setToken_endpoint();
+        oidconf.setToken_endpoint_auth_methods_supported(Arrays.asList("private_key_jwt"));
+        oidconf.setToken_endpoint_auth_signing_alg_values_supported(Arrays.asList(SignatureAlgorithm.RS256.getValue()));
+        oidconf.setJwks_uri(homeRepository.getClientBaseUrl()+"/rest/lti/v13/jwks");
+        oidconf.setAuthorization_endpoint(homeRepository.getClientBaseUrl()+"/rest/ltiplatform/v13/auth");
+        oidconf.setRegistration_endpoint(homeRepository.getClientBaseUrl()+"/rest/ltiplatform/v13/openid-registration");
+        oidconf.setToken_endpoint(homeRepository.getClientBaseUrl()+"/rest/ltiplatform/v13/token");
+        oidconf.setResponse_types_supported(Arrays.asList("id_token"));
+        oidconf.setClaims_supported(Arrays.asList("sub","iss","given_name","family_name","email"));
+
+        OpenIdConfiguration.LTIPlatformConfiguration ltiPlatformConfiguration = new OpenIdConfiguration.LTIPlatformConfiguration();
+        OpenIdConfiguration.LTIPlatformConfiguration.Message msgDeepLink = new OpenIdConfiguration.LTIPlatformConfiguration.Message();
+        msgDeepLink.setType("LtiDeepLinkingRequest");
+        OpenIdConfiguration.LTIPlatformConfiguration.Message msgResourceLink = new OpenIdConfiguration.LTIPlatformConfiguration.Message();
+        msgResourceLink.setType("LtiResourceLinkRequest");
+        ltiPlatformConfiguration.getMessages_supported().add(msgDeepLink);
+        ltiPlatformConfiguration.getMessages_supported().add(msgResourceLink);
+        ltiPlatformConfiguration.setProduct_family_code("edu-sharing");
+        ltiPlatformConfiguration.setVersion(VersionService.getVersionNoException(VersionService.Type.REPOSITORY));
+        oidconf.setLtiPlatformConfiguration(ltiPlatformConfiguration);
+        return oidconf;
+    }
 
 
     public DynamicRegistrationToken generate() throws Throwable{

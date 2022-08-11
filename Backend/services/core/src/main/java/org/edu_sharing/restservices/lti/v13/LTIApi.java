@@ -42,7 +42,6 @@ import org.edu_sharing.service.lti13.uoc.Config;
 import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
 import org.springframework.context.ApplicationContext;
-import org.springframework.extensions.surf.util.URLEncoder;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -51,8 +50,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.*;
@@ -249,7 +246,7 @@ public class LTIApi {
             throw new IllegalStateException("nonce is invalid");
         }
 
-        Tool tool = Config.getTool(ltijwtUtil.getPlatform(), req,false);
+        Tool tool = Config.getTool(ltijwtUtil.getApplicationInfo(), req,false);
 
         /**
          * Launch validation: validates authentication response, and specific message(deeplink,....) validation
@@ -371,7 +368,7 @@ public class LTIApi {
             }
             String targetLink = ApplicationInfoList.getHomeRepository().getClientBaseUrl() + "/components/render/"+ nodeId +"?closeOnBack=true";
 
-            Map<String,String> lauchPresentation = jws.getBody().get(LTIConstants.RESOURCE_LINK_LAUNCH_PRESENTATION,Map.class);
+            Map<String,String> lauchPresentation = jws.getBody().get(LTIConstants.LTI_LAUNCH_PRESENTATION,Map.class);
             if(lauchPresentation != null && lauchPresentation.containsKey("document_target")){
                 String documentTarget = lauchPresentation.get("document_target");
                 if(documentTarget != null && (documentTarget.equals("iframe") || documentTarget.equals("frame")) ){
