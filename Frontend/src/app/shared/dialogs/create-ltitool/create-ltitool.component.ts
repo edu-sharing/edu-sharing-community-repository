@@ -32,7 +32,7 @@ export class CreateLtitoolComponent implements OnInit {
         (window as any)['angularComponentReference'] = {
             component: this,
             zone: this.ngZone,
-            loadAngularFunction: () => this.angularFunctionCalled(),
+            loadAngularFunction: (nodeIds: string[]) => this.angularFunctionCalled(nodeIds),
         };
     }
 
@@ -63,11 +63,11 @@ export class CreateLtitoolComponent implements OnInit {
                 this._tool.appId +
                 '&parentId=' +
                 this._parent.ref.id,
-            '_self',
+            '_blank',
         );
     }
 
-    public angularFunctionCalled() {
-        console.log('js function called ' + this._parent);
+    public angularFunctionCalled(nodeIds: string[]) {
+        console.log('js function called ' + nodeIds);
     }
 }

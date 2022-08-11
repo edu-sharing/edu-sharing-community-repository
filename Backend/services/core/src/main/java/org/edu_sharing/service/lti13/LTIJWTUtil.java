@@ -99,7 +99,10 @@ public class LTIJWTUtil {
                 String tmpDeploymentId = deploymentId;
                 try {
 
-
+                    /**
+                     * @TODO: why this fallback is used
+                     * clientId vs audience (" audience of a token is the intended recipient of the token.")
+                     */
                     if(tmpClientId == null) tmpClientId = claims.getAudience();
                     if(tmpDeploymentId == null) tmpDeploymentId = claims.get(LTIConstants.LTI_DEPLOYMENT_ID, String.class);
                     // We are dealing with RS256 encryption, so we have some Oauth utils to manage the keys and
@@ -186,7 +189,7 @@ public class LTIJWTUtil {
         return Jwts.builder().setPayload(string).signWith(privateKey).compact();
     }
 
-    public static Jwt validateJWT(String jwt, ApplicationInfo appInfo){
+    public static Jws<Claims> validateJWT(String jwt, ApplicationInfo appInfo){
         return Jwts.parser().setSigningKeyResolver(new SigningKeyResolverAdapter(){
             @Override
             public Key resolveSigningKey(JwsHeader header, Claims claims) {
@@ -198,7 +201,7 @@ public class LTIJWTUtil {
                     throw new RuntimeException(e);
                 }
             }
-        }).parse(jwt);
+        }).parseClaimsJws(jwt);
     }
 
 

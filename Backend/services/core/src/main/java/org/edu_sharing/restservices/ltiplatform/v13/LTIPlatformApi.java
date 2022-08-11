@@ -550,9 +550,11 @@ public class LTIPlatformApi {
             @Context HttpServletRequest req) {
         try{
 
+            LoginInitiationSessionObject sessionObject = (LoginInitiationSessionObject)req.getSession().getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
             LTIJWTUtil jwtUtil = new LTIJWTUtil();
-            Jws<Claims> claims = jwtUtil.validateJWT(jwt);
-            ApplicationInfo appInfoTool = jwtUtil.getApplicationInfo();
+            //find out clientid/deploymentid
+            ApplicationInfo appInfoTool = ApplicationInfoList.getRepositoryInfoById(sessionObject.getAppId());
+            Jws<Claims> claims = jwtUtil.validateJWT(jwt,appInfoTool);
 
             /**
              * @ToDo more validation?
@@ -561,7 +563,6 @@ public class LTIPlatformApi {
                 throw new Exception("application is no lti tool");
             }
 
-            LoginInitiationSessionObject sessionObject = (LoginInitiationSessionObject)req.getSession().getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
 
             if(sessionObject == null){
                 throw new Exception("missing login initiation session object");
@@ -583,6 +584,7 @@ public class LTIPlatformApi {
             }
 
 
+            List<String> nodeIds = new ArrayList<>();
             for(Map<String,Object> contentItem : contentItems){
                 HashMap<String, String[]> properties = new HashMap<>();
                 String type = (String)contentItem.get("type");
@@ -616,17 +618,23 @@ public class LTIPlatformApi {
                 if(eduNodeService.hasAspect("workspace","SpacesStore",nodeId,CCConstants.CCM_ASPECT_LTITOOL_NODE)){
                     eduNodeService.addAspect(nodeId,CCConstants.CCM_ASPECT_LTITOOL_NODE);
                 }
+                nodeIds.add(nodeId);
             }
 
-            String js =
-                    "function callAngularFunction() {" +
-                            "window.angularComponentReference.zone.run(() => { window.angularComponentReference.loadAngularFunction(); });" +
+
+            String nodeIdsJS = (nodeIds.size() > 1) ? StringUtils.join(nodeIds.toArray(),"','") : nodeIds.get(0);
+            nodeIdsJS = "['"+nodeIdsJS+"']";
+
+            String closeAndInformAngular =
+                    "function callAngularFunction(nodeIds) {" +
+                            "window.opener.angularComponentReference.zone.run((nodeIds ) => { window.opener.angularComponentReference.loadAngularFunction(nodeIds); });" +
                     "}"
                     + "window.onload = function() {\n" +
-                    " callAngularFunction();\n" +
+                        " callAngularFunction("+nodeIdsJS+ ");\n" +
+                            "window.close();\n" +
                     "};";
 
-            return Response.ok().entity(ApiTool.getHTML(null,null,"wird geschlossen",js)).build();
+            return Response.ok().entity(ApiTool.getHTML(null,null,"no js active. please close tab.",closeAndInformAngular)).build();
         } catch (Throwable e) {
             return ApiTool.processError(req,e,"");
         }
