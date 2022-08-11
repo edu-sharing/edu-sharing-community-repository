@@ -428,7 +428,7 @@ export class NodeHelperService {
 
     addNodesToLTIPlatform(nodes: Node[]) {
 
-        let url = this.connector.createUrl('/lti/v13/generateDeepLinkingResponse', null, []);
+        let url = this.connector.createUrl('lti/v13/generateDeepLinkingResponse', null, []);
         nodes.forEach(n => {
             if (!url.includes('?')) {
                 url += '?nodeIds=' + n.ref.id;
