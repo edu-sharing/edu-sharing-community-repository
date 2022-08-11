@@ -86,13 +86,8 @@ public class RegistrationService {
 
     public void ltiDynamicRegistration(String openidConfiguration, String registrationToken, String eduSharingRegistrationToken) throws Throwable {
         //check repo lti kid is available
-        ApplicationInfo homeApp = ApplicationInfoList.getHomeRepository();
-        if(homeApp.getLtiKid() == null){
-            String kid = UUID.randomUUID().toString();
-            Map<String,String> newProps = new HashMap<>();
-            newProps.put(ApplicationInfo.KEY_LTI_KID, kid);
-            AdminServiceFactory.getInstance().updatePropertiesXML(homeApp.getAppFile(),newProps);
-        }
+        checkHomeAppKid();
+
 
         if(eduSharingRegistrationToken == null || eduSharingRegistrationToken.trim().equals("")){
             throw new Exception("no eduSharingRegistrationToken provided");
@@ -147,6 +142,7 @@ public class RegistrationService {
         }
 
         List<String> claimsSupported = (List<String>) oidConfig.get("claims_supported");
+        ApplicationInfo homeApp = ApplicationInfoList.getHomeRepository();
 
         JSONObject jsonResponse = new JSONObject();
         jsonResponse.put("application_type","web");
@@ -284,6 +280,8 @@ public class RegistrationService {
 
     public ApplicationInfo ltiDynamicToolRegistration(JSONObject registrationPayload, Jwt registrationToken) throws Exception{
 
+        checkHomeAppKid();
+
         List<String> responseTypes = (List<String>)registrationPayload.get("response_types");
         String initiateLoginUri = (String)registrationPayload.get("initiate_login_uri");
         List<String> redirectUris = (List<String>)registrationPayload.get("redirect_uris");
@@ -407,5 +405,15 @@ public class RegistrationService {
 
     public static String generateNewClientId(){
         return RandomStringUtils.random(15, true, true);
+    }
+
+    private void checkHomeAppKid() throws Exception{
+        ApplicationInfo homeApp = ApplicationInfoList.getHomeRepository();
+        if(homeApp.getLtiKid() == null){
+            String kid = UUID.randomUUID().toString();
+            Map<String,String> newProps = new HashMap<>();
+            newProps.put(ApplicationInfo.KEY_LTI_KID, kid);
+            AdminServiceFactory.getInstance().updatePropertiesXML(homeApp.getAppFileName(),newProps);
+        }
     }
 }
