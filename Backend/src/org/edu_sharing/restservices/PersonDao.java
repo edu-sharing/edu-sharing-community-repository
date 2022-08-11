@@ -211,14 +211,17 @@ public class PersonDao {
 		newUserInfo.put(CCConstants.PROP_USER_FIRSTNAME, profile.getFirstName());
 		newUserInfo.put(CCConstants.PROP_USER_LASTNAME, profile.getLastName());
 		newUserInfo.put(CCConstants.PROP_USER_EMAIL, profile.getEmail());
-        newUserInfo.put(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION, profile.getPrimaryAffiliation());
         newUserInfo.put(CCConstants.CM_PROP_PERSON_ABOUT, profile.getAbout());
         newUserInfo.put(CCConstants.CM_PROP_PERSON_SKILLS, profile.getSkills());
         newUserInfo.put(CCConstants.CM_PROP_PERSON_VCARD, profile.getVCard());
-		if(profile.getSizeQuota()>0)
-			newUserInfo.put(CCConstants.CM_PROP_PERSON_SIZE_QUOTA, ""+profile.getSizeQuota());
-		else
-			newUserInfo.put(CCConstants.CM_PROP_PERSON_SIZE_QUOTA, null);
+		if(AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
+			newUserInfo.put(CCConstants.CM_PROP_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION, profile.getPrimaryAffiliation());
+			if (profile.getSizeQuota() > 0) {
+				newUserInfo.put(CCConstants.CM_PROP_PERSON_SIZE_QUOTA, "" + profile.getSizeQuota());
+			} else {
+				newUserInfo.put(CCConstants.CM_PROP_PERSON_SIZE_QUOTA, null);
+			}
+		}
 		return newUserInfo;
 	}
 
