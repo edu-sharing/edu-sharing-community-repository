@@ -21,6 +21,10 @@ public class ApiTool {
         }
     }
 
+    public static String getHTML(String formTargetUrl, Map<String,String> params){
+        return getHTML(formTargetUrl,params,null,null);
+    }
+
     public static String getHTML(String formTargetUrl, Map<String,String> params, String errorMessage){
         return getHTML(formTargetUrl,params,errorMessage,null);
     }
@@ -39,7 +43,7 @@ public class ApiTool {
         if(message == null) {
             String FORMNAME = "ltiform";
             sb.append("<script type=\"text/javascript\">window.onload=function(){document.forms[\""+FORMNAME+"\"].submit();}</script>");
-            sb.append("<form action=\"" + formTargetUrl + "\" method=\"post\" name=\"" + FORMNAME + "\"");
+            sb.append("<form action=\"" + formTargetUrl + "\" method=\"post\" name=\"" + FORMNAME + "\">");
             for (Map.Entry<String, String> entry : params.entrySet()) {
                 sb.append("<input type=\"hidden\" id=\"" + entry.getKey() + "\" name=\"" + entry.getKey() + "\" value=\"" + entry.getValue() + "\" class=\"form-control\"/>");
             }
