@@ -461,7 +461,7 @@
 			<property name="ccm:educationalcontext">
 				<multiple>true</multiple>
 				<multiplejoin>OR</multiplejoin>
-				<statement>{"term":{"properties.ccm:educationalcontext.keyword":"${value}"}}</statement>
+				<statement>{"term":{"properties.ccm:educationalcontext.keyword":"${valueRaw}"}}</statement>
 			</property>
 			<property name="cclom:general_keyword">
 				<multiple>true</multiple>
