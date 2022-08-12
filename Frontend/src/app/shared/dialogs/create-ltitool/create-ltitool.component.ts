@@ -9,7 +9,14 @@ import {
 } from '@angular/core';
 import { Tool } from 'ngx-edu-sharing-api';
 import { DialogButton } from '../../../core-module/ui/dialog-button';
-import { Node } from '../../../core-module/core.module';
+import {
+    Node,
+    NodeWrapper,
+    RestConstants,
+    RestHelper,
+    RestNodeService,
+} from '../../../core-module/core.module';
+import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 
 @Component({
     selector: 'es-create-ltitool',
@@ -23,8 +30,15 @@ export class CreateLtitoolComponent implements OnInit {
     @Output() onCancel = new EventEmitter();
     @Output() onCreate = new EventEmitter();
     public _name = '';
+    public _nodeIds: string[];
+    public _titles: string[];
+    nodes: Node[] = [];
 
-    constructor(private ngZone: NgZone) {
+    constructor(
+        private ngZone: NgZone,
+        private nodeService: RestNodeService,
+        private nodeHelper: NodeHelperService,
+    ) {
         this.buttons = [
             new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel()),
             new DialogButton('CREATE', { color: 'primary' }, () => this.create()),
@@ -32,7 +46,8 @@ export class CreateLtitoolComponent implements OnInit {
         (window as any)['angularComponentReference'] = {
             component: this,
             zone: this.ngZone,
-            loadAngularFunction: (nodeIds: string[]) => this.angularFunctionCalled(nodeIds),
+            loadAngularFunction: (nodeIds: string[], titles: string[]) =>
+                this.angularFunctionCalled(nodeIds, titles),
         };
     }
 
@@ -47,27 +62,43 @@ export class CreateLtitoolComponent implements OnInit {
     }
 
     public cancel() {
-        this.onCancel.emit();
+        this.onCancel.emit({ nodes: this.nodes });
     }
 
     public create() {
-        if (!this._name.trim()) {
+        if (!this.nodes) {
             return;
         }
-        this.onCreate.emit({ name: this._name, appId: this.tool.appId });
+        this.onCreate.emit({ nodes: this.nodes });
     }
 
     public open() {
-        window.open(
+        /*window.open(
             '/edu-sharing/rest/ltiplatform/v13/generateLoginInitiationForm?appId=' +
                 this._tool.appId +
                 '&parentId=' +
                 this._parent.ref.id,
             '_blank',
+        );*/
+
+        this.angularFunctionCalled(
+            ['c6a08ed2-3962-41e7-81d5-a5a6fa691aae', '8b8b4d14-7b35-4de9-8ff2-a67336f63f92'],
+            ['citroen-e-berlingo-xl-siebensitzer2.jpg', 'Diff_ProtokollJob_Stadt Wesel.png'],
         );
     }
 
-    public angularFunctionCalled(nodeIds: string[]) {
-        console.log('js function called ' + nodeIds);
+    public angularFunctionCalled(nodeIds: string[], titles: string[]) {
+        console.log('js function called ' + nodeIds + ' titles:' + titles + ' test');
+        this._name = titles[0];
+
+        let idx = 0;
+        nodeIds.forEach((nodeId) => {
+            let node = new Node();
+            node.ref.id = nodeId;
+            node.name = titles[idx];
+            this.nodes[idx] = node;
+            idx++;
+        });
+        console.log(this.nodes);
     }
 }

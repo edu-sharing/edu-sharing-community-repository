@@ -33,7 +33,7 @@
   *ngIf="createToolType != null"
   [tool]="createToolType"
   [parent]="_parent"
-  (onCancel)="createToolType = null"
+  (onCancel)="cancelLtiTool($event)"
   (onCreate)="createLtiTool($event)"
 >
 </es-create-ltitool>

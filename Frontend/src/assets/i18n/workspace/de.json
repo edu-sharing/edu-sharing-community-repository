@@ -271,6 +271,14 @@
       "DELETE_CONFIG_TITLE": "Konfiguration Löschen?",
       "DELETE_CONFIG_MESSAGE": "Möchten Sie die gewählte Tool-Konfiguration wirklich löschen?\nJegliche bereits erstellte Objekte, die diese Konfiguration verwenden, werden unbrauchbar."
     },
+    "LTI_V13_PLATFORM": {
+      "NODE": {
+        "CREATE": {
+          "TITLE": "Neues LTI Tool Object erstellen/einbinden",
+          "NAME": "Tool: {{ltitool}}"
+        }
+      }
+    },
     "EDITOR": {
       "TITLE": "Allgemeine Informationen",
       "DESCRIPTION": "Beschreibung",

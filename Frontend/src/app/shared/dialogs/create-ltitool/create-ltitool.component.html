@@ -1,27 +1,37 @@
 <div *ngIf="_tool">
   <es-card
-    title="{{ 'CONNECTOR.' + _tool.appId + '.TITLE' | translate }}"
-    subtitle="{{ 'CONNECTOR.' + _tool.name + '.NAME' | translate }}"
+    title="{{ 'WORKSPACE.LTI_V13_PLATFORM.NODE.CREATE.TITLE' | translate }}"
+    subtitle="{{
+      'WORKSPACE.LTI_V13_PLATFORM.NODE.CREATE.NAME' | translate: { ltitool: _tool.name }
+    }}"
     height="auto"
     [icon]="'create'"
     [buttons]="buttons"
     [isCancelable]="true"
-    (onCancel)="cancel()"
   >
     <div class="card-content-padding">
       <form (ngSubmit)="create()">
-        <mat-form-field>
-          <mat-label>{{ 'CONNECTOR.' + _tool.appId + '.PLACEHOLDER' | translate }}</mat-label>
-          <input matInput type="text" #input [(ngModel)]="_name" name="filename" autofocus />
-        </mat-form-field>
-        <button mat-button color="primary" (click)="open()">
-          {{ 'LTI Tool öffnen' | translate }}
-          <i [esIcon]="_tool.createOption ? 'mode_edit' : 'search'"></i>
-        </button>
+        <ul>
+          <li *ngFor="let el of nodes; let i = index">
+            <mat-form-field style="width: 100%">
+              <mat-label>{{ 'NODE.cm:name' | translate }} </mat-label>
+              <input
+                matInput
+                type="text"
+                [ngModelOptions]="{ standalone: true }"
+                [(ngModel)]="nodes[i].name"
+                #input
+                name="filename"
+                autofocus
+              />
+            </mat-form-field>
+          </li>
+        </ul>
       </form>
+      <button mat-button color="primary" (click)="open()" *ngIf="nodes && nodes.length == 0">
+        {{ 'LTI Tool öffnen' | translate }}
+        <i [esIcon]="_tool.createOption ? 'mode_edit' : 'search'"></i>
+      </button>
     </div>
-    <!--iframe width="80%" src="https://redaktion-staging.openeduhub.net/edu-sharing/components/search"
-          onload='javascript:(function(o){o.style.height=o.contentWindow.document.body.scrollHeight+"px";}(this));' style="height:200px;width:100%;border:none;overflow:hidden;"></iframe>
--->
   </es-card>
 </div>

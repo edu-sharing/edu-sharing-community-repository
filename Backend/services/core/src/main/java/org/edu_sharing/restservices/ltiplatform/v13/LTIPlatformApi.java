@@ -585,6 +585,7 @@ public class LTIPlatformApi {
 
 
             List<String> nodeIds = new ArrayList<>();
+            List<String> titles = new ArrayList<>();
             for(Map<String,Object> contentItem : contentItems){
                 HashMap<String, String[]> properties = new HashMap<>();
                 String type = (String)contentItem.get("type");
@@ -612,28 +613,39 @@ public class LTIPlatformApi {
                 }
 
                 org.edu_sharing.service.nodeservice.NodeService eduNodeService = NodeServiceFactory.getLocalService();
+                String tmpNodeId = null;
                 if(nodeId == null){
-                    nodeId = eduNodeService.createNode(sessionObject.getParentId(), CCConstants.CCM_TYPE_IO,properties);
+                    tmpNodeId = eduNodeService.createNode(sessionObject.getParentId(), CCConstants.CCM_TYPE_IO,properties);
+                }else{
+                    eduNodeService.updateNode(nodeId,properties);
+                    tmpNodeId = nodeId;
                 }
-                if(eduNodeService.hasAspect("workspace","SpacesStore",nodeId,CCConstants.CCM_ASPECT_LTITOOL_NODE)){
-                    eduNodeService.addAspect(nodeId,CCConstants.CCM_ASPECT_LTITOOL_NODE);
+                if(eduNodeService.hasAspect("workspace","SpacesStore",tmpNodeId,CCConstants.CCM_ASPECT_LTITOOL_NODE)){
+                    eduNodeService.addAspect(tmpNodeId,CCConstants.CCM_ASPECT_LTITOOL_NODE);
                 }
-                nodeIds.add(nodeId);
+                nodeIds.add(tmpNodeId);
+                titles.add(title);
             }
 
 
             String nodeIdsJS = (nodeIds.size() > 1) ? StringUtils.join(nodeIds.toArray(),"','") : nodeIds.get(0);
             nodeIdsJS = "['"+nodeIdsJS+"']";
 
+            String titlesJS = (titles.size() > 1) ? StringUtils.join(titles.toArray(),"','") : titles.get(0);
+            titlesJS = "['"+titlesJS+"']";
+
             String closeAndInformAngular =
-                    "function callAngularFunction(nodeIds) {" +
-                            "window.opener.angularComponentReference.zone.run(() => { window.opener.angularComponentReference.loadAngularFunction(nodeIds); });" +
+                    "function callAngularFunction(nodeIds, titles) {" +
+                            "window.opener.angularComponentReference.zone.run(() => { window.opener.angularComponentReference.loadAngularFunction(nodeIds,titles); });" +
                     "}"
                     + "window.onload = function() {\n" +
                             " nodeIdArr="+nodeIdsJS+";"+
-                        " callAngularFunction(nodeIdArr);\n" +
+                            " titlesArr="+titlesJS+";"+
+                        " callAngularFunction(nodeIdArr,titlesArr);\n" +
                             "window.close();\n" +
                     "};";
+
+            //cleanup session object to prevent wrong context message
 
             return Response.ok().entity(ApiTool.getHTML(null,null,"no js active. please close tab.",closeAndInformAngular)).build();
         } catch (Throwable e) {

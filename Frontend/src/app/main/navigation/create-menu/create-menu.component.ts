@@ -557,23 +557,43 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     }
 
     createLtiTool(event: any) {
-        const prop = RestHelper.createNameProperty(event.name);
-        this.nodeService
-            .createNode(this.getParent().ref.id, RestConstants.CCM_TYPE_IO, [], prop, false)
-            .subscribe(
-                (data: NodeWrapper) => {
-                    this.editConnector(data.node, event.type, null, this.createConnectorType);
-                    this.onCreate.emit([data.node]);
-                },
-                (error: any) => {
-                    if (
-                        this.nodeHelper.handleNodeError(event.name, error) ===
-                        RestConstants.DUPLICATE_NODE_RESPONSE
-                    ) {
-                        this.createConnectorName = event.name;
-                    }
-                },
-            );
+        console.log('createLtiTool called' + event);
+        let nodes: Node[] = event.nodes;
+        if (nodes) {
+            nodes.forEach((n) => {
+                const prop = RestHelper.createNameProperty(n.name);
+                this.nodeService.editNodeMetadata(n.ref.id, prop).subscribe(
+                    (data: NodeWrapper) => {
+                        this.onCreate.emit([data.node]);
+                        this.createToolType = null;
+                    },
+                    (error: any) => {
+                        if (
+                            this.nodeHelper.handleNodeError(n.name, error) ===
+                            RestConstants.DUPLICATE_NODE_RESPONSE
+                        ) {
+                            this.createConnectorName = event.name;
+                        }
+                    },
+                );
+            });
+        }
+    }
+
+    cancelLtiTool(event: any) {
+        console.log('cancelLtiTool called' + event);
+        let nodes: Node[] = event.nodes;
+        if (nodes) {
+            nodes.forEach((n) => {
+                this.nodeService.deleteNode(n.ref.id, false).subscribe(
+                    (data: NodeWrapper) => {},
+                    (error) => {
+                        this.nodeHelper.handleNodeError(n.name, error);
+                    },
+                );
+            });
+        }
+        this.createToolType = null;
     }
 
     isAllowed() {
