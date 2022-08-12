@@ -73,17 +73,12 @@ export class CreateLtitoolComponent implements OnInit {
     }
 
     public open() {
-        /*window.open(
+        window.open(
             '/edu-sharing/rest/ltiplatform/v13/generateLoginInitiationForm?appId=' +
                 this._tool.appId +
                 '&parentId=' +
                 this._parent.ref.id,
             '_blank',
-        );*/
-
-        this.angularFunctionCalled(
-            ['c6a08ed2-3962-41e7-81d5-a5a6fa691aae', '8b8b4d14-7b35-4de9-8ff2-a67336f63f92'],
-            ['citroen-e-berlingo-xl-siebensitzer2.jpg', 'Diff_ProtokollJob_Stadt Wesel.png'],
         );
     }
 
