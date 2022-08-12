@@ -627,10 +627,11 @@ public class LTIPlatformApi {
 
             String closeAndInformAngular =
                     "function callAngularFunction(nodeIds) {" +
-                            "window.opener.angularComponentReference.zone.run((nodeIds ) => { window.opener.angularComponentReference.loadAngularFunction(nodeIds); });" +
+                            "window.opener.angularComponentReference.zone.run(() => { window.opener.angularComponentReference.loadAngularFunction(nodeIds); });" +
                     "}"
                     + "window.onload = function() {\n" +
-                        " callAngularFunction("+nodeIdsJS+ ");\n" +
+                            " nodeIdArr="+nodeIdsJS+";"+
+                        " callAngularFunction(nodeIdArr);\n" +
                             "window.close();\n" +
                     "};";
 
