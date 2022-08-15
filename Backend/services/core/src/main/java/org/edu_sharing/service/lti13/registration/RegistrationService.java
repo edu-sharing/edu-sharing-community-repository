@@ -372,14 +372,37 @@ public class RegistrationService {
         DefaultClaims body = (DefaultClaims)registrationToken.getBody();
         String sub = (String) body.get("sub");
 
-        return registerTool(domain, sub, initiateLoginUri, jwksuri, targetLinkUri, StringUtils.join(redirectUris,","), logoUri,
-                (customParameters != null) ? StringUtils.join(customParameters,",") : null, description, clientName, targetLinkUriDL);
+        return registerTool(sub, initiateLoginUri, jwksuri, targetLinkUri, StringUtils.join(redirectUris,","), logoUri,
+                (customParameters != null) ? StringUtils.join(customParameters,",") : null, description, clientName, targetLinkUriDL, null);
     }
 
-    public ApplicationInfo registerTool(String domain, String clientId, String initiateLoginUri, String jwksuri,
+    /**
+     *
+     * @param clientId
+     * @param initiateLoginUri
+     * @param jwksuri
+     * @param targetLinkUri
+     * @param redirectUris
+     * @param logoUri
+     * @param customParameters
+     * @param description
+     * @param clientName
+     * @param targetLinkUriDeepLink
+     * @param toolUrl  tool url will be used to find applications that can handle resourcelinks independent on appId. so that the existing resourcelinks still work when a tool application is removed and registered again.
+     * @return
+     * @throws Exception
+     */
+    public ApplicationInfo registerTool(String clientId, String initiateLoginUri, String jwksuri,
                                         String targetLinkUri, String redirectUris, String logoUri,
-                                        String customParameters, String description, String clientName, String targetLinkUriDeepLink) throws Exception {
+                                        String customParameters, String description, String clientName, String targetLinkUriDeepLink, String toolUrl) throws Exception {
         HashMap<String,String> properties = new HashMap<>();
+
+        /**
+         * fallback to required redrect Urls
+         */
+        if(toolUrl == null){
+            toolUrl = redirectUris.split(",")[0];
+        }
 
         Integer lastDeploymentId = 0;
         for(ApplicationInfo a : ApplicationInfoList.getApplicationInfos().values()) {
@@ -399,7 +422,11 @@ public class RegistrationService {
         lastDeploymentId++;
 
 
-        String appId = new RepoTools().getAppId(domain, clientId, Integer.toString(lastDeploymentId));
+        /**
+         * leave out the issuer here, cause edu-sharing as a platform generates a clientId and deploymentId.
+         * for tools no issuer is defined in standard.
+         */
+        String appId = new RepoTools().getAppId(null, clientId, Integer.toString(lastDeploymentId));
         properties.put(ApplicationInfo.KEY_APPID, appId);
         properties.put(ApplicationInfo.KEY_APPCAPTION,clientName);
         properties.put(ApplicationInfo.KEY_TYPE, ApplicationInfo.TYPE_LTITOOL);
@@ -415,6 +442,7 @@ public class RegistrationService {
         properties.put(ApplicationInfo.KEY_LTI_KEYSET_URL,jwksuri);
         properties.put(ApplicationInfo.KEY_LTI_DEPLOYMENT_ID, Integer.toString(lastDeploymentId));
         properties.put(ApplicationInfo.KEY_LTITOOL_DESCRIPTION, description);
+        properties.put(ApplicationInfo.KEY_LTITOOL_URL,toolUrl);
 
 
 

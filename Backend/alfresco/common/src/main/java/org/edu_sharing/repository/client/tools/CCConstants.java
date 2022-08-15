@@ -510,6 +510,8 @@ public class CCConstants {
 
 	public static final String CCM_PROP_LTITOOL_NODE_RESOURCELINK = "{http://www.campuscontent.de/model/1.0}ltitool_resourcelink";
 
+	public static final String CCM_PROP_LTITOOL_NODE_TOOLURL = "{http://www.campuscontent.de/model/1.0}ltitool_url";
+
 	public static final int HTTP_INSUFFICIENT_STORAGE = 503;
 
     public static final List<String> CHILDOBJECT_IGNORED_PARENT_PROPERTIES = Arrays.asList(

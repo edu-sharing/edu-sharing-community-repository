@@ -160,6 +160,9 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	//custom allow too to write content to edu-sharing
 	public static final String KEY_LTITOOL_CREATEOPTION = "ltitool_create_option";
 
+	//used to identify applications by resourcelinks
+	public static final String KEY_LTITOOL_URL = "ltitool_url";
+
 
 	/**
 	 * property file vals
@@ -399,6 +402,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	private String ltitoolCreateOption;
 
+	private String ltitoolUrl;
+
 
 	/**
 	 * der Anfangsteil des alfresco Intergity Pattern:
@@ -571,6 +576,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		ltitoolCustomParameters = properties.getProperty(KEY_LTITOOL_CUSTOM_PARAMETERS);
 		ltitoolDescription = properties.getProperty(KEY_LTITOOL_DESCRIPTION);
 		ltitoolCreateOption = properties.getProperty(KEY_LTITOOL_CREATEOPTION);
+		ltitoolUrl = properties.getProperty(KEY_LTITOOL_URL);
 	}
 	
 	public String getXml() {
@@ -1117,6 +1123,10 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	public boolean hasLtiToolCreateOption(){
 		return new Boolean(ltitoolCreateOption);
+	}
+
+	public String getLtitoolUrl(){
+		return ltitoolUrl;
 	}
 
 }

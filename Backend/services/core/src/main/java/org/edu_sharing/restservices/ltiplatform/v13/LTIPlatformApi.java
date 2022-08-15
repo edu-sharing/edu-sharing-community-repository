@@ -410,7 +410,6 @@ public class LTIPlatformApi {
             @Context HttpServletRequest req) {
         try {
             new RegistrationService().registerTool(
-                    registrationData.getToolUrl(),
                     RegistrationService.generateNewClientId(),
                     registrationData.getLoginInitiationUrl(),
                     registrationData.getKeysetUrl(),
@@ -420,7 +419,8 @@ public class LTIPlatformApi {
                     (registrationData.getCustomParameters() != null) ? StringUtils.join(registrationData.getCustomParameters(),",") : null,
                     registrationData.getToolDescription(),
                     registrationData.getClientName(),
-                    registrationData.getTargetLinkUriDeepLink());
+                    registrationData.getTargetLinkUriDeepLink(),
+                    registrationData.getToolUrl());
             return Response.ok().build();
         }catch (Exception e){
             return ErrorResponse.createResponse(e);
@@ -470,7 +470,7 @@ public class LTIPlatformApi {
 
     @GET
     @Path("/generateLoginInitiationForm")
-    @Operation(summary = "generate a form used for Initiating Login from a Third Party")
+    @Operation(summary = "generate a form used for Initiating Login from a Third Party. Use thes endpoint when starting a lti deeplink flow.")
     @Consumes({ "text/html"})
     @Produces({"text/html"})
     @ApiResponses(
@@ -483,7 +483,7 @@ public class LTIPlatformApi {
                     @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = String.class)))
             })
     public Response generateLoginInitiationForm(@Parameter(description = "appId of the tool",required=true) @QueryParam("appId") String appId,
-                                                @Parameter(description = "the folder id the lti node will be created in",required=true) @QueryParam("parentId") String parentId,
+                                                @Parameter(description = "the folder id the lti node will be created in. is required for lti deeplink.",required=false) @QueryParam("parentId") String parentId,
                                                 @Context HttpServletRequest req){
 
 
@@ -526,6 +526,26 @@ public class LTIPlatformApi {
         }catch (Exception e){
              return ApiTool.processError(req,e,"");
         }
+    }
+
+    @GET
+    @Path("/generateLoginInitiationFormResourceLink")
+    @Operation(summary = "generate a form used for Initiating Login from a Third Party. Use thes endpoint when starting a lti resourcelink flow.")
+    @Consumes({ "text/html"})
+    @Produces({"text/html"})
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode="200", description= RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = String.class)))
+            })
+    public Response generateLoginInitiationFormResourceLink(@Parameter(description = "appId of the tool",required=true) @QueryParam("appId") String appId,
+                                                @Parameter(description = "the nodeid of a node that contains a lti resourcelink. is required for lti resourcelink",required=false) @QueryParam("nodeId") String nodeId,
+                                                @Context HttpServletRequest req){
+        return null;
     }
 
 
@@ -599,7 +619,6 @@ public class LTIPlatformApi {
                 }
 
                 String title = (String)contentItem.get("title");
-                properties.put(CCConstants.CCM_PROP_LTITOOL_NODE_RESOURCELINK,new String[]{url});
                 title = title != null ? title : url;
                 properties.put(CCConstants.CM_NAME,new String[]{EduSharingNodeHelper.cleanupCmName(title)} );
                 properties.put(CCConstants.LOM_PROP_GENERAL_TITLE,new String[]{title});
@@ -622,6 +641,10 @@ public class LTIPlatformApi {
                 }
                 if(!eduNodeService.hasAspect("workspace","SpacesStore",tmpNodeId,CCConstants.CCM_ASPECT_LTITOOL_NODE)){
                     eduNodeService.addAspect(tmpNodeId,CCConstants.CCM_ASPECT_LTITOOL_NODE);
+                    HashMap<String,String[]> ltiAspectProps = new HashMap<>();
+                    ltiAspectProps.put(CCConstants.CCM_PROP_LTITOOL_NODE_RESOURCELINK,new String[]{url});
+                    ltiAspectProps.put(CCConstants.CCM_PROP_LTITOOL_NODE_TOOLURL,new String[]{appInfoTool.getLtitoolUrl()});
+                    eduNodeService.updateNode(nodeId,ltiAspectProps);
                 }
                 nodeIds.add(tmpNodeId);
                 titles.add(title);
