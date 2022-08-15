@@ -620,7 +620,7 @@ public class LTIPlatformApi {
                     eduNodeService.updateNode(nodeId,properties);
                     tmpNodeId = nodeId;
                 }
-                if(eduNodeService.hasAspect("workspace","SpacesStore",tmpNodeId,CCConstants.CCM_ASPECT_LTITOOL_NODE)){
+                if(!eduNodeService.hasAspect("workspace","SpacesStore",tmpNodeId,CCConstants.CCM_ASPECT_LTITOOL_NODE)){
                     eduNodeService.addAspect(tmpNodeId,CCConstants.CCM_ASPECT_LTITOOL_NODE);
                 }
                 nodeIds.add(tmpNodeId);
