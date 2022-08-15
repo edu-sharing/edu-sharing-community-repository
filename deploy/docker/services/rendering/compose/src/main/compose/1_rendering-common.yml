@@ -4,6 +4,7 @@ services:
 
   services-rendering-database:
     image: "${docker.repository}/${docker.prefix}-deploy-docker-build-postgresql:${docker.tag}"
+    container_name: "services-rendering-database_${COMPOSE_PROJECT_NAME}"
     environment:
       POSTGRESQL_DATABASE: "${SERVICES_RENDERING_DATABASE_NAME:-rendering}"
       POSTGRESQL_ROOT_PASSWORD: "${SERVICES_RENDERING_DATABASE_PASS:-rendering}"
@@ -16,6 +17,7 @@ services:
 
   services-rendering-service:
     image: "${docker.repository}/${docker.prefix}-deploy-docker-services-rendering-build-service:${docker.tag}"
+    container_name: "services-rendering-service_${COMPOSE_PROJECT_NAME}"
     environment:
       CACHE_CLUSTER: "false"
       CACHE_DATABASE: "0"
@@ -54,6 +56,7 @@ services:
 
   services-rendering-service-init:
     image: "${docker.repository}/${docker.prefix}-deploy-docker-services-rendering-build-service:${docker.tag}"
+    container_name: "services-rendering-service-init_${COMPOSE_PROJECT_NAME}"
     entrypoint: ["init.sh"]
     environment:
       SERVICES_RENDERING_SERVICE_HOST_INTERNAL: services-rendering-service

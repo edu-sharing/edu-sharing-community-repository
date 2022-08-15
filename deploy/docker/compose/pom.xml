@@ -48,7 +48,7 @@
                 edu_sharing-projects-community-deploy-docker-services-rendering-compose
               </includeArtifactIds>
               <excludes>META-INF/**</excludes>
-              <outputDirectory>${project.build.directory}/compose/services/rendering</outputDirectory>
+              <outputDirectory>${project.build.directory}/compose</outputDirectory>
             </configuration>
           </execution>
           <execution>
@@ -62,7 +62,7 @@
                 edu_sharing-projects-community-deploy-docker-repository-compose
               </includeArtifactIds>
               <excludes>META-INF/**</excludes>
-              <outputDirectory>${project.build.directory}/compose/repository</outputDirectory>
+              <outputDirectory>${project.build.directory}/compose</outputDirectory>
             </configuration>
           </execution>
         </executions>

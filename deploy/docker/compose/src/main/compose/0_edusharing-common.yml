@@ -4,6 +4,7 @@ services:
 
   cache:
     image: "${docker.repository}/${docker.prefix}-deploy-docker-build-redis:${docker.tag}"
+    container_name: "cache_${COMPOSE_PROJECT_NAME}"
     environment:
       ALLOW_EMPTY_PASSWORD: "yes"
     expose:
