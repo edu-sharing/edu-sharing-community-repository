@@ -7,6 +7,7 @@ import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.authority.AuthorityServiceImpl;
 import org.edu_sharing.service.nodeservice.NodeServiceImpl;
 
 import java.util.List;
@@ -28,5 +29,10 @@ public class InitHelper {
                 }
             }
         }
+    }
+
+    public static void initProxyUser(){
+        //init proxyuser
+        ((AuthorityServiceImpl)AuthorityServiceFactory.getLocalService()).createProxyUser();
     }
 }

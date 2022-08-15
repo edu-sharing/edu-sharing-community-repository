@@ -126,6 +126,7 @@ public class MCAlfrescoManager implements ServletContextListener {
 			// init the esuid for admin
 			createESUIDAdmin();
 
+			InitHelper.initProxyUser();
 			try {
 				InitHelper.initGroups();
 			}catch(Throwable t) {
