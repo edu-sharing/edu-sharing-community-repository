@@ -211,13 +211,44 @@ export class AuthoritySearchInputComponent {
         );
     }
     private getOrganizationsSuggestions(inputValue: string): Observable<SuggestionGroup[]> {
-        return this.organization.getOrganizations(inputValue).pipe(
-            map(({ organizations }) => [
-                {
-                    label: 'WORKSPACE.INVITE_LOCAL_RESULTS',
-                    values: this.convertData(organizations),
-                },
-            ]),
+        const observables: Observable<SuggestionGroup>[] = [];
+        observables.push(
+            this.organization.getOrganizations(inputValue).pipe(
+                map(({ organizations }) => {
+                    return {
+                        label: 'WORKSPACE.INVITE_LOCAL_RESULTS',
+                        values: this.convertData(organizations),
+                    }
+                }),
+            )
+        );
+        if (this.globalSearchAllowed) {
+            observables.push(
+                this.organization.getOrganizations(inputValue, false).pipe(
+                    map(({ organizations }) => {
+                        return {
+                            label: 'WORKSPACE.INVITE_GLOBAL_RESULTS',
+                            values: this.convertData(organizations),
+                        }
+                    }),
+                )
+            );
+        }
+        return forkJoin(observables).pipe(
+            // Filter double entries from global results
+            map((suggestionGroups) => {
+                if (suggestionGroups.length === 2) {
+                    suggestionGroups[1].values = suggestionGroups[1].values.filter(
+                        (globalSuggestion) =>
+                            suggestionGroups[0].values.every(
+                                (localSuggestion) => localSuggestion.id !== globalSuggestion.id,
+                            ),
+                    );
+                }
+                return suggestionGroups;
+            }),
+            // Filter empty lists
+            map((suggestionGroups) => suggestionGroups.filter((group) => group.values.length > 0)),
         );
     }
 
