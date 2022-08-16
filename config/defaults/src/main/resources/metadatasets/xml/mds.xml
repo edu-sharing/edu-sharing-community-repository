@@ -1211,24 +1211,51 @@
 		<query join="AND" id="ngsearch">
 			<!--TODO basequery-->
 			<!--basequery>ISNULL:@ccm\:tool_category</basequery-->
-			<basequery>
-				{"bool":
-				"must_not":[{"term":{"aspects":"ccm:metadataPresettingTemplate"}},
-				{"term":{"aspects":"ccm:io_childobject"}},
-				{"wildcard":{"properties.cm:name.keyword":"._*"}},
-				{"term":{"aspects":"ccm:collection_io_reference"}},
-				{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}]
-				}
-				}</basequery>
+			<basequery>{"bool":{
+				"must":[
+				{"term":{"type":"ccm:io"}},{"term":{"nodeRef.storeRef.protocol":"workspace"}}
+				],
+				"must_not":[
+				{"term":{"aspects":"ccm:metadataPresettingTemplate"}},{"term":{"aspects":"ccm:io_childobject"}},{"wildcard":{"properties.cm:name.keyword":"._*"}},
+				{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}
+				]
+				}}</basequery>
 			<property name="ngsearchword">
-				<statement>{"bool":{"should":[
-					{"wildcard":{"properties.cm:name":{"value":"*${value}*", "case_insensitive": true }}},
-					{"wildcard":{"properties.cclom:title.keyword":{"value":"*${value}*", "case_insensitive": true }}},
-					{"wildcard":{"properties.cclom:general_description":{"value":"*${value}*", "case_insensitive": true }}},
-					{"wildcard":{"properties.cclom:general_keyword":{"value":"*${value}*", "case_insensitive": true }}},
-					{"wildcard":{"content.fulltext":{"value":"*${value}*", "case_insensitive": true }}},
-					{"wildcard":{"nodeRef.id":{"value":"*${value}*", "case_insensitive": true }}}
-					]}}</statement>
+				<basequery>
+					{"bool": {
+					"must_not":[
+					{"term":{"aspects":"ccm:metadataPresettingTemplate"}},
+					{"term":{"aspects":"ccm:io_childobject"}},
+					{"wildcard":{"properties.cm:name.keyword":"._*"}},
+					{"term":{"aspects":"ccm:collection_io_reference"}},
+					{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}
+					]
+					}
+					}</basequery>
+				<statement>
+					{"bool":{"should":[
+					{
+					"simple_query_string": {
+					"query": "${valueRaw}",
+					"flags": "OR|AND|PHRASE|WHITESPACE",
+					"fields": [
+					"properties.cm:name^2",
+					"properties.cm:title^2",
+					"properties.cclom:title^5",
+					"properties.cclom:general_description^2",
+					"properties.cclom:general_keyword^4",
+					"properties.ccm:lifecyclecontributer_author^1",
+					"properties.ccm:lifecyclecontributer_publisher^1",
+					"properties.ccm:publisher^1",
+					"i18n.de_DE.ccm:taxonid^2",
+					"content.fulltext^1"
+					],
+					"default_operator": "and"
+					}
+					},
+					{"wildcard":{"nodeRef.id": {"value":"*${value}*", "case_insensitive": true }}}
+					]
+					}}</statement>
 				<exactMatching>false</exactMatching>
 				<multiple>true</multiple>
 				<multiplejoin>AND</multiplejoin>
