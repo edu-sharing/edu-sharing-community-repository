@@ -70,6 +70,7 @@ import { OptionTooltipPipe } from './pipes/option-tooltip.pipe';
 import { ReplaceCharsPipe } from './pipes/replace-chars.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { VCardNamePipe } from './pipes/vcard-name.pipe';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 @NgModule({
     declarations: [
@@ -169,6 +170,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         MatButtonModule,
         MatCardModule,
         MatCheckboxModule,
+        MatPaginatorModule,
         MatChipsModule,
         MatFormFieldModule,
         MatIconModule,

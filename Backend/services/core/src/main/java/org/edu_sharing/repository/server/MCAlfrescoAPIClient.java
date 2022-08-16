@@ -3550,6 +3550,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		repCache.remove(nodeId);
 	}
 
+
 	/**
 	 * @param nodeId : the id of the node to copy
 	 * @param toNodeId : the id of the target folder

@@ -17,12 +17,17 @@ import {
 import { NodeDataSource } from '../features/node-entries/node-data-source';
 import { NodeEntriesDataType } from '../features/node-entries/node-entries.component';
 
-import { OptionItem } from './option-item';
+import { OptionItem, Scope } from './option-item';
 
 @Injectable()
 export class NodeEntriesService<T extends NodeEntriesDataType> {
     list: ListEventInterface<T>;
     readonly dataSource$ = new BehaviorSubject<NodeDataSource<T> | null>(null);
+    /**
+     * scope the current list is in, e.g. workspace
+     * This is used for additional config injection based on the scope
+     */
+    scope: Scope;
     get dataSource(): NodeDataSource<T> {
         return this.dataSource$.value;
     }

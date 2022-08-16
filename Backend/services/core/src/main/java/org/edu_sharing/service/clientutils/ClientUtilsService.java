@@ -135,13 +135,16 @@ public class ClientUtilsService {
 					}
 				}
 			}
-			addDuplicateNodes(url, info);
 			return info;
-
 		} catch (Throwable e) {
 			logger.info(e.getMessage());
+			try {
+				addDuplicateNodes(url, info);
+			} catch (Throwable e2) {
+				logger.info(e2.getMessage());
+			}
+			return info;
 		}
-		return null;
 	}
 
 	private static void addDuplicateNodes(String url, WebsiteInformation info) throws DAOException {

@@ -3,59 +3,51 @@ import { UIHelper } from '../../core-ui-module/ui-helper';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Toast } from '../../core-ui-module/toast';
 import {
+    Application,
+    Authority,
+    CacheInfo,
     ConfigurationService,
     DialogButton,
     JobDescription,
     ListItem,
+    LoginResult,
+    Node,
     NodeListElastic,
+    NodeWrapper,
+    RestAdminService,
+    RestConnectorService,
+    RestConstants,
+    RestHelper,
     RestIamService,
     RestMediacenterService,
+    RestNetworkService,
+    RestNodeService,
+    RestOrganizationService,
+    RestSearchService,
+    ServerUpdate,
+    SessionStorageService,
 } from '../../core-module/core.module';
 import { TranslateService } from '@ngx-translate/core';
-import { SessionStorageService } from '../../core-module/core.module';
-import { RestConnectorService } from '../../core-module/core.module';
 import {
     Component,
-    ViewChild,
-    ElementRef,
-    ViewContainerRef,
     ComponentFactoryResolver,
+    ElementRef,
     OnDestroy,
     OnInit,
+    ViewChild,
+    ViewContainerRef,
 } from '@angular/core';
-import {
-    LoginResult,
-    ServerUpdate,
-    CacheInfo,
-    Application,
-    Node,
-    Authority,
-    NodeList,
-    NodeWrapper,
-    RestoreResult,
-} from '../../core-module/core.module';
-import { RestAdminService } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
-import { RestConstants } from '../../core-module/core.module';
 import { UIConstants } from '../../core-module/ui/ui-constants';
-import { RestNodeService } from '../../core-module/core.module';
 import { SuggestItem } from '../../common/ui/autocomplete/autocomplete.component';
-import { RestOrganizationService } from '../../core-module/core.module';
-import { RestSearchService } from '../../core-module/core.module';
-import { RestHelper } from '../../core-module/core.module';
 import { Observable, Observer } from 'rxjs';
-import { RestNetworkService } from '../../core-module/core.module';
-import { MainNavComponent } from '../../main/navigation/main-nav/main-nav.component';
 import { CustomHelper } from '../../common/custom-helper';
 import { DateHelper } from '../../core-ui-module/DateHelper';
 import { CsvHelper } from '../../core-module/csv.helper';
 import { trigger } from '@angular/animations';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
-import IEditorOptions = monaco.editor.IEditorOptions;
-import { NgxEditorModel } from 'ngx-monaco-editor';
 import { Scope } from '../../core-ui-module/option-item';
 import { AboutService } from 'ngx-edu-sharing-api';
-import { SkipTarget } from '../../main/navigation/skip-nav/skip-nav.service';
 import { AuthoritySearchMode } from '../../shared/components/authority-search-input/authority-search-input.component';
 import { PlatformLocation } from '@angular/common';
 import { MainNavService } from '../../main/navigation/main-nav.service';
@@ -66,6 +58,8 @@ import {
 } from 'src/app/features/node-entries/entries-model';
 import { NodeDataSource } from '../../features/node-entries/node-data-source';
 import { WorkspaceExplorerComponent } from '../workspace/explorer/explorer.component';
+import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';
+import { NodeEntriesWrapperComponent } from '../../features/node-entries/node-entries-wrapper.component';
 
 type LuceneData = {
     mode: 'NODEREF' | 'SOLR' | 'ELASTIC';
@@ -91,6 +85,8 @@ export class AdminComponent implements OnInit, OnDestroy {
     readonly SCOPES = Scope;
     readonly InteractionType = InteractionType;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    @ViewChild('searchResults') nodeEntriesSearchResult: NodeEntriesWrapperComponent<Node>;
+    @ViewChild('actionbarComponent') actionbarComponent: ActionbarComponent;
     elasticResponse: NodeListElastic;
 
     constructor(
@@ -328,7 +324,7 @@ export class AdminComponent implements OnInit, OnDestroy {
             },
         );
     }
-    public searchNodes() {
+    public async searchNodes() {
         this.storage.set('admin_lucene', this.lucene);
         const authorities = [];
         if (this.lucene.authorities) {
@@ -336,6 +332,10 @@ export class AdminComponent implements OnInit, OnDestroy {
                 authorities.push(auth.authorityName);
             }
         }
+        await this.nodeEntriesSearchResult.initOptionsGenerator({
+            actionbar: this.actionbarComponent,
+            scope: Scope.Admin,
+        });
         const request = {
             offset: this.lucene.offset ? this.lucene.offset : 0,
             count: this.lucene.count,

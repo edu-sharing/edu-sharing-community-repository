@@ -7,6 +7,7 @@ import {
     Sanitizer,
     ElementRef,
     EventEmitter,
+    ApplicationRef,
 } from '@angular/core';
 
 import { Router, Params, ActivatedRoute } from '@angular/router';
@@ -235,6 +236,7 @@ export class CollectionNewComponent implements EventListener, OnInit {
         private zone: NgZone,
         private sanitizer: DomSanitizer,
         private config: ConfigurationService,
+        private ref: ApplicationRef,
         private translations: TranslationsService,
         private translationService: TranslateService,
         private loadingScreen: LoadingScreenService,

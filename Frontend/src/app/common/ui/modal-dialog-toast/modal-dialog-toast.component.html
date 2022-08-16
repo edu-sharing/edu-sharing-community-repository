@@ -1,12 +1,22 @@
 <es-global-progress *ngIf="visible && progressType"></es-global-progress>
+<es-infobar
+  *ngIf="dialogType === DialogType.Infobar"
+  [title]="title"
+  [message]="message"
+  [messageParameters]="messageParameters"
+  [buttons]="buttons"
+  [isCancelable]="isCancelable"
+  (onCancel)="cancel()"
+>
+</es-infobar>
 <es-card
-  *ngIf="visible && !progressType"
+  *ngIf="visible && !progressType && dialogType === DialogType.ModalCard"
   title="{{ title | translate: messageParameters }}"
   (onCancel)="cancel()"
   [isCancelable]="isCancelable"
   [buttons]="buttons"
   [priority]="priority"
-  [type]="dialogType"
+  [type]="cardType"
   [node]="node"
   height="auto"
   [captureFocus]="!!input"

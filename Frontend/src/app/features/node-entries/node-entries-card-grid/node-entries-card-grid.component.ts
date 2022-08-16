@@ -21,6 +21,7 @@ import { DragData } from '../../../services/nodes-drag-drop.service';
 import { SortEvent } from '../../../shared/components/sort-dropdown/sort-dropdown.component';
 import { NodeEntriesDisplayType } from '../entries-model';
 import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
+import { NodeEntriesGlobalService, PaginationStrategy } from '../node-entries-global.service';
 
 @Component({
     selector: 'es-node-entries-card-grid',
@@ -29,6 +30,7 @@ import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
 })
 export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    readonly PaginationStrategy = PaginationStrategy;
     readonly Target = Target;
     @ViewChildren(CdkDropList) dropListsQuery: QueryList<CdkDropList>;
     @ViewChild('grid') gridRef: ElementRef;
@@ -61,6 +63,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
 
     constructor(
         public entriesService: NodeEntriesService<T>,
+        public entriesGlobalService: NodeEntriesGlobalService,
         public templatesService: NodeEntriesTemplatesService,
         public ui: UIService,
         private ngZone: NgZone,
@@ -86,6 +89,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
         if (this.entriesService.dataSource.hasMore()) {
             this.entriesService.fetchData.emit({
                 offset: this.entriesService.dataSource.getData().length,
+                reset: false,
             });
         }
         if (byButtonClick) {

@@ -2,6 +2,7 @@
 
 @import '../../../core-ui-module/styles/variables';
 $defaultColumnWidth: 120px;
+$minColumnWidth: 30%;
 $rowHeight: 58px;
 
 :host {
@@ -17,7 +18,7 @@ $rowHeight: 58px;
                 @include setGlobalKeyboardFocus('border');
             }
         }
-        es-list-text {
+        es-list-base {
             white-space: nowrap;
             text-overflow: ellipsis;
             overflow: hidden;
@@ -35,15 +36,21 @@ mat-cell {
     &:not(.mat-column-primary) {
         flex: 0 $defaultColumnWidth;
     }
+    &.mat-column-primary {
+        min-width: $minColumnWidth;
+    }
     &.mat-column-select {
         flex: 0 54px;
+        min-width: 54px;
     }
     &.mat-column-icon {
         flex: 0 65px;
+        min-width: 65px;
         justify-content: center;
     }
     &.mat-column-actions {
         flex: 0 50px;
+        min-width: 50px;
         display: flex;
         justify-content: flex-end;
         padding-right: 5px;
