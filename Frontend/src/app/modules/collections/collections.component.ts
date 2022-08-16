@@ -967,7 +967,7 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
         }
         this.createSubCollectionOptionItem.name =
             'OPTIONS.' + (this.isRootLevelCollection() ? 'NEW_COLLECTION' : 'NEW_SUB_COLLECTION');
-        if (id == '-root-') {
+        if (id == RestConstants.ROOT) {
             // display root collections with tabs
             this.sortCollections.active = RestConstants.CM_MODIFIED_DATE;
             this.sortCollections.direction = 'desc';
@@ -1029,7 +1029,7 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
                     }
                 },
                 (error) => {
-                    if (id != '-root-') {
+                    if (id != RestConstants.ROOT) {
                         this.navigate();
                     }
                     if (error.status == 404) {

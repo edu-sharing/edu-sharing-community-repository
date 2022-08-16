@@ -60,12 +60,21 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
 
     public static QueryBuilder getElasticSearchQuery(SearchToken searchToken, MetadataQueries queries,MetadataQuery query, Map<String,String[]> parameters, Boolean asFilter) throws IllegalArgumentException {
 
-        /**
-         * @TODO basequery
-         * quickfix: take the basequery of the query instead of the global basequery,
-         * cause collection request needs solr basequery
-         */
-        String baseQuery = query.getBasequery().get(null);
+        String baseQuery = replaceCommonQueryVariables(query.getBasequery().get(null));
+        String baseQueryConditional = replaceCommonQueryVariables(
+                query.findBasequery(parameters == null ? null : parameters.keySet())
+        );
+        QueryBuilder baseQueryBuilder;
+        if(baseQuery.equals(baseQueryConditional)) {
+            baseQueryBuilder = QueryBuilders.wrapperQuery(baseQuery);
+        } else {
+            baseQueryBuilder = QueryBuilders.boolQuery().must(
+                    QueryBuilders.wrapperQuery(baseQuery)
+            ).must(
+                    QueryBuilders.wrapperQuery(baseQueryConditional)
+            );
+        }
+
         BoolQueryBuilder result = QueryBuilders.boolQuery();
 
         if(asFilter == null || (asFilter.booleanValue() == query.getBasequeryAsFilter())){
@@ -152,14 +161,14 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
 
     private static BoolQueryBuilder applyCondition(MetadataQueryBase query, BoolQueryBuilder result) {
         for(MetadataQueryCondition condition : query.getConditions()){
-            boolean conditionState= MetadataHelper.checkConditionTrue(condition.getCondition());
+            boolean conditionState = MetadataHelper.checkConditionTrue(condition.getCondition());
             if(conditionState && condition.getQueryTrue()!=null) {
                 String conditionString = condition.getQueryTrue();
                 conditionString = replaceCommonQueryVariables(conditionString);
                 result.must(new ReadableWrapperQueryBuilder(conditionString));
             }
             if(!conditionState && condition.getQueryFalse()!=null) {
-                String conditionString =condition.getQueryFalse();
+                String conditionString = condition.getQueryFalse();
                 conditionString = replaceCommonQueryVariables(conditionString);
                 result.must(new ReadableWrapperQueryBuilder(conditionString));
             }
@@ -173,7 +182,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
         if (value == null)
             return "";
 
-        // invoke any preprocessors for this value
+        // invoke any preprocessors for this value0
         try {
             value = MetadataQueryPreprocessor.run(parameter, value);
         } catch (Exception e) {
@@ -181,6 +190,10 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
         }
 
         if (value.startsWith("\"") && value.endsWith("\"") || parameter.isExactMatching()) {
+            // clear value's '"'
+            if(value.startsWith("\"") && value.endsWith("\"")) {
+                value = value.substring(1, value.length() - 1);
+            }
             //String statement = parameter.getStatement(value).replace("${value}", QueryParser.escape(value));
             String statement = QueryUtils.replacerFromSyntax(parameter.getSyntax()).replaceString(
                     parameter.getStatement(value),
