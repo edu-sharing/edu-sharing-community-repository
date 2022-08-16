@@ -216,7 +216,7 @@ public class LTIPlatformApi {
             return  Response.ok(ApiTool.getHTML(redirect_uri,formParams)).build();
 
         } catch(Throwable e){
-            return ApiTool.processError(req,e,"LTI_PLATFORM_AUTH_ERROR");
+            return ApiTool.processError(req,e,"LTI_ERROR");
         }
     }
 
@@ -546,7 +546,7 @@ public class LTIPlatformApi {
             }
             throw new Exception("no lti tool found for "+ appId);
         }catch (Exception e){
-             return ApiTool.processError(req,e,"");
+             return ApiTool.processError(req,e,"LTI_ERROR");
         }
     }
 
@@ -597,7 +597,7 @@ public class LTIPlatformApi {
 
 
         }catch (Exception e){
-            return ApiTool.processError(req,e,"");
+            return ApiTool.processError(req,e,"LTI_ERROR");
         }
     }
 
@@ -770,7 +770,7 @@ public class LTIPlatformApi {
 
             return Response.ok().entity(ApiTool.getHTML(null,null,"no js active. please close tab.",closeAndInformAngular)).build();
         } catch (Throwable e) {
-            return ApiTool.processError(req,e,"");
+            return ApiTool.processError(req,e,"LTI_ERROR");
         }
     }
 
