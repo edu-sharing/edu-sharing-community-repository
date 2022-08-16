@@ -16,6 +16,7 @@ import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
+import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
 import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
@@ -227,26 +228,6 @@ public class SearchServiceElastic extends SearchServiceImpl {
         searchResultNodeRef.setNodeCount(0);
 
         return searchResultNodeRef;
-    }
-
-
-    private BoolQueryBuilder getGlobalConditions(List<String> authorityScope, List<String> permissions) {
-        BoolQueryBuilder queryBuilderGlobalConditions = (authorityScope != null && authorityScope.size() > 0)
-                ? getPermissionsQuery("permissions.read",new HashSet<>(authorityScope))
-                : getReadPermissionsQuery();
-        queryBuilderGlobalConditions = queryBuilderGlobalConditions.must(QueryBuilders.matchQuery("nodeRef.storeRef.protocol", "workspace"));
-        if(permissions != null){
-            for(String permission : permissions){
-                queryBuilderGlobalConditions = QueryBuilders.boolQuery().must(queryBuilderGlobalConditions).must(getPermissionsQuery("permissions." + permission));
-            }
-        }
-
-        if(NodeServiceInterceptor.getEduSharingScope() == null){
-            queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.existsQuery("properties.ccm:eduscopename"));
-        }else{
-            queryBuilderGlobalConditions = queryBuilderGlobalConditions.must(QueryBuilders.termQuery("properties.ccm:eduscopename.keyword",NodeServiceInterceptor.getEduSharingScope()));
-        }
-        return queryBuilderGlobalConditions;
     }
 
     @Override

@@ -78,7 +78,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
         BoolQueryBuilder result = QueryBuilders.boolQuery();
 
         if(asFilter == null || (asFilter.booleanValue() == query.getBasequeryAsFilter())){
-            WrapperQueryBuilder baseQueryBuilder = new ReadableWrapperQueryBuilder(baseQuery);
+            baseQueryBuilder = new ReadableWrapperQueryBuilder(baseQuery);
             result.must(baseQueryBuilder);
         }
 
