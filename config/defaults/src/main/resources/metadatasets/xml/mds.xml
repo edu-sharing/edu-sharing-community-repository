@@ -1212,7 +1212,7 @@
 			<basequery propertyNull="ngsearchword">
 			{"bool":{
 			"must":[
-			{"term":{"aspects":"ccm:collection"}}
+			{"term":{"aspects":"ccm:collection"}},{"term":{"nodeRef.storeRef.protocol":"workspace"}}
 			{"bool":{
 			"should":[
 			{"term":{"properties.ccm:collectionlevel0.keyword":"true"}},
@@ -1255,7 +1255,8 @@
 			<!--basequery>ISNULL:@ccm\:tool_category</basequery-->
 			<basequery>{"bool":{
 				"must":[
-				{"term":{"type":"ccm:io"}},{"term":{"nodeRef.storeRef.protocol":"workspace"}}
+				{"term":{"type":"ccm:io"}},
+				{"term":{"nodeRef.storeRef.protocol":"workspace"}}
 				],
 				"must_not":[
 				{"term":{"aspects":"ccm:metadataPresettingTemplate"}},
