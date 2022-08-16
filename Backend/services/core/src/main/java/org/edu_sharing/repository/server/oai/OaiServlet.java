@@ -75,7 +75,7 @@ public class OaiServlet extends HttpServlet{
             RepositoryConfiguration configuration = new RepositoryConfiguration().
                     withMaxListIdentifiers(itemsPerPage).withMaxListSets(itemsPerPage).
                     withMaxListRecords(itemsPerPage).withMaxListSets(itemsPerPage).
-                    withAdminEmail(new Mail().getConfig().getString("admin")).
+                    withAdminEmail(config.getString("adminEmail")).
                     withBaseUrl(URLTool.getBaseUrl() + "/eduservlet/oai/provider").
                     withGranularity(Granularity.valueOf(config.getString("granularity"))).
                     withDeleteMethod(DeletedRecord.fromValue(config.getString("delete"))).
