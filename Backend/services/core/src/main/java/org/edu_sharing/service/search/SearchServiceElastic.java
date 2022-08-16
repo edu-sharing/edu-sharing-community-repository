@@ -466,9 +466,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 sr.setNodeCount((int)total.longValue());
                 //client.close();
             } catch(ElasticsearchException e) {
-                logger.error("Error running query. The unwrapped query is logged below for debugging reasons");
+                logger.error("Error running query. The query is logged below for debugging reasons");
                 logger.error(e.getMessage(), e);
-                queryBuilder.toString();
+                logger.error(queryBuilder.toString());
                 throw e;
             }
 
