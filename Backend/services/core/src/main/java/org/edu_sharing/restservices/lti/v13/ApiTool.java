@@ -14,6 +14,7 @@ public class ApiTool {
         try {
             return Response.seeOther(new URI(req.getScheme() +"://"
                             + req.getServerName()
+                            +":"+req.getServerPort()
                             + "/edu-sharing/components/messages/"+errorType+"/"+ URLEncoder.encode(e.getMessage())))
                     .build();
         } catch (URISyntaxException ex) {
