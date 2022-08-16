@@ -5,6 +5,20 @@
   (contextmenu)="openContextmenu($event)"
   (keydown.ContextMenu)="openContextmenu($event)"
 >
+  <div
+    *ngIf="templatesService.overlay"
+    class="card-overlay"
+    (click)="
+      entriesService.clickItem.emit({
+        element: node,
+        source: ClickSource.Overlay
+      })
+    "
+  >
+    <ng-container
+      *ngTemplateOutlet="templatesService.overlay; context: { element: node }"
+    ></ng-container>
+  </div>
   <es-node-url
     *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
     mode="wrapper"

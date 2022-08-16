@@ -42,7 +42,7 @@
     <i [esIcon]="'keyboard_arrow_' + (showMds ? 'up' : 'down')"></i>
   </button>
 </div>
-<div [@switchDialog]="showMds">
+<div [@switchDialog]="showMds" class="mds-wrapper">
   <es-mds-editor-wrapper
     #mds
     [embedded]="true"

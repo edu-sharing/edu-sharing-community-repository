@@ -209,10 +209,14 @@ input[type='checkbox']:checked {
     user-select: none;
 }
 .es-nodes-active-drop-target-accept {
-    outline: 2px dashed $colorStatusPositive;
-    outline-offset: -2px;
+    @include afterPseudoElement {
+        outline: 2px dashed $colorStatusPositive;
+        outline-offset: -2px;
+    }
 }
 .es-nodes-active-drop-target-deny {
-    outline: 2px dashed $colorStatusNegative;
-    outline-offset: -2px;
+    @include afterPseudoElement {
+        outline: 2px dashed $colorStatusNegative;
+        outline-offset: -2px;
+    }
 }

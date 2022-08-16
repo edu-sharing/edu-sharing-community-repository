@@ -413,6 +413,7 @@
   },
   "COMMENTS_SINGLE": "Kommentar",
   "COMMENTS_MULTIPLE": "Kommentare",
+  "PUBLISHED_COPY_TOOLTIP": "Veröffentlichte Kopie",
   "NODE_COMMENTS": {
     "TITLE": "Kommentare",
     "NEW_COMMENT_PLACEHOLDER": "Neuer Kommentar...",
@@ -850,11 +851,17 @@
     "RELATION_TYPE": {
       "VERSIONS": "Versionen",
       "FORKED_CHILDS": "Hat Varianten",
+      "FORKED_ORIGIN": "Ist Variante von",
       "isPartOf": "ist Teil von",
       "isBasedOn": "basiert auf",
       "references": "bezieht sich auf",
       "hasPart": "besitzt Teil",
       "isBasisFor": "ist Basis von"
+    },
+    "RELATION_TYPE_FULLY": {
+      "isPartOf": "ist Teil von (isPartOf)",
+      "isBasedOn": "basiert auf (isBasedOn)",
+      "references": "bezieht sich auf (references)"
     }
   },
   "VCARD": {

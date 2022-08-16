@@ -1,18 +1,23 @@
-<es-node-list
+<es-node-entries-wrapper
   #list
-  [isInsideWorkspace]="isInsideWorkspace"
-  [parent]="this"
-  [actionbar]="actionbar"
-  [customOptions]="options"
   [columns]="columns"
-  [reload]="reload"
-  [sortBy]="sortBy"
-  [sortAscending]="sortAscending"
-  [selected]="selected"
-  (onSelectionChanged)="onSelection($event)"
-  [searchLabel]="'RECYCLE.SEARCH_ARCHIVE'"
-  [searchWorkspace]="searchWorkspace"
-></es-node-list>
+  [displayType]="NodeEntriesDisplayType.Table"
+  [elementInteractionType]="InteractionType.Emitter"
+  [sort]="sort"
+  [dataSource]="dataSource"
+  (sortChange)="updateSort($event)"
+  (clickItem)="click($event)"
+  (fetchData)="refresh($event)"
+>
+  <ng-template #empty>
+    <h3 *ngIf="!!searchQuery" class="empty mat-heading-3">
+      {{ 'RECYCLE.NO_RESULTS_MESSAGE' | translate }}
+    </h3>
+    <h3 *ngIf="!searchQuery" class="empty mat-heading-3">
+      {{ 'RECYCLE.ARCHIVE_EMPTY' | translate }}
+    </h3>
+  </ng-template>
+</es-node-entries-wrapper>
 <es-recycle-delete-confirmation
   *ngIf="toDelete"
   [node]="toDelete"

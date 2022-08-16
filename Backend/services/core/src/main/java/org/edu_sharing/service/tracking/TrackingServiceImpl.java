@@ -176,6 +176,8 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             try {
                 if (NodeServiceHelper.hasAspect(nodeRef, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
                     originalNodeRef = NodeServiceHelper.getProperty(nodeRef, CCConstants.CCM_PROP_IO_ORIGINAL);
+                } else if (NodeServiceHelper.hasAspect(nodeRef, CCConstants.CCM_ASPECT_PUBLISHED)) {
+                    originalNodeRef = ((NodeRef)NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL)).getId();
                 }
             }catch(Throwable ignored) { }
         String finalOriginalNodeRef = originalNodeRef;

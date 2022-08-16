@@ -35,7 +35,7 @@ export enum InteractionType {
 export type ListOptions = { [key in Target]?: OptionItem[] };
 export type ListOptionsConfig = {
     scope: Scope;
-    actionbar: ActionbarComponent;
+    actionbar?: ActionbarComponent;
     parent?: Node;
     customOptions?: CustomOptions;
 };
@@ -65,6 +65,7 @@ export enum ClickSource {
     Icon,
     Metadata,
     Comments,
+    Overlay,
 }
 
 export type NodeClickEvent<T extends NodeEntriesDataType> = {

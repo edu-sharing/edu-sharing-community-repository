@@ -416,7 +416,7 @@ public class AdminServiceImpl implements AdminService  {
 	public void removeApplication(ApplicationInfo info) throws Exception{
 		String[] split=getAppPropertiesApplications().split(",");
 		List<String> apps=new ArrayList<>(Arrays.asList(split));
-		int pos=apps.indexOf(info.getAppFile());
+		int pos=apps.indexOf(info.getAppFileName());
 		if(pos==-1)
 			throw new Exception("AppInfo file "+info.getAppFile()+" was not found in registry");
 		apps.remove(pos);
@@ -593,6 +593,7 @@ public class AdminServiceImpl implements AdminService  {
 				result.add(new ServerUpdateInfo(Release_4_2_PersonStatusUpdater.ID,Release_4_2_PersonStatusUpdater.description));
 				result.add(new ServerUpdateInfo(Release_5_0_NotifyRefactoring.ID,Release_5_0_NotifyRefactoring.description));
 				result.add(new ServerUpdateInfo(Release_5_0_Educontext_Default.ID,Release_5_0_Educontext_Default.description));
+				result.add(new ServerUpdateInfo(Release_8_0_Migrate_Database_Scripts.ID,Release_8_0_Migrate_Database_Scripts.description));
 
 		result=result.stream().map((r)->{
 			try {

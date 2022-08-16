@@ -196,19 +196,16 @@
     <h5 class="mat-heading-5 preview-error" *ngIf="previewError">
       {{ 'ADMIN.FRONTPAGE.PREVIEW_ERROR.' + previewError | translate }}
     </h5>
-    <es-custom-node-list-wrapper
+    <es-node-entries-wrapper
       *ngIf="!previewError"
-      [isLoading]="previewLoading"
-      [nodes]="previewNodes"
       [columns]="previewColumns"
-      [hasCheckbox]="false"
-      [hasIcon]="true"
-      [viewType]="1"
-      [isClickable]="true"
-      [createLink]="false"
-      (clickRow)="openNode($event)"
-      (doubleClickRow)="openNode($event)"
-    ></es-custom-node-list-wrapper>
+      [dataSource]="previewNodesDataSource"
+      [checkbox]="false"
+      [displayType]="NodeEntriesDisplayType.Grid"
+      [elementInteractionType]="InteractionType.Emitter"
+      (clickItem)="this.onOpenNode.emit($event.element)"
+      (dblClickItem)="this.onOpenNode.emit($event.element)"
+    ></es-node-entries-wrapper>
   </div>
   <h5
     class="mat-heading-5 preview-hint"

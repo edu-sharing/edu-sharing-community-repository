@@ -12,6 +12,8 @@
 <mat-table
   [dataSource]="entriesService.dataSource"
   matSort
+  [matSortActive]="entriesService.sort?.active"
+  [matSortDirection]="entriesService.sort?.direction"
   esInfiniteScroll
   (scrolled)="loadData()"
 >
@@ -168,8 +170,11 @@
     [class.mat-row-selected]="entriesService.selection.isSelected(node)"
     [class.selected-when-dragging]="isDragging && entriesService.selection.isSelected(node)"
     [class.mat-row-virtual]="node.virtual"
-    [class.mat-row-virtual-seperator]="
-      node.virtual && !last && !$any(entriesService.dataSource.getData()[i + 1]).virtual
+    [class.mat-row-virtual-first]="
+      node.virtual && !$any(entriesService.dataSource.getData()[i - 1])?.virtual
+    "
+    [class.mat-row-virtual-last]="
+      node.virtual && !$any(entriesService.dataSource.getData()[i + 1])?.virtual
     "
     *matRowDef="let node; let i = index; let last = last; columns: getVisibleColumns()"
     (contextmenu)="onRowContextMenu({ event: $event, node: node })"

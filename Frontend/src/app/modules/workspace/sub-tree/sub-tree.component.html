@@ -21,49 +21,30 @@
         [esNodesDropTarget]="node"
         [canDropNodes]="canDropOnNode"
         (nodeDropped)="onDropped($event)"
+        [style.paddingLeft.px]="(depth + 1) * 20"
+        [class.sub-tree-element-selected]="isSelected(node)"
+        (click)="openOrCloseNode(node)"
       >
-        <div [matMenuTriggerFor]="dropdown.menu"></div>
-        <div
-          [style.paddingLeft.px]="depth * 20"
-          class="node waves-effect"
-          [class.nodeSelected]="isSelected(node)"
-          [class.hover]="dragHover == node"
+        <button
+          class="expand-toggle"
+          (click)="toggleNodeExpansion($event, node)"
+          [class.opacity-invisible]="_hasChildren[node.ref.id] === false"
         >
-          <div
-            class="fade-right"
-            *ngIf="loadingStates[i]"
-            [class.fade-right-selected]="isSelected(node)"
-          ></div>
-          <i *ngIf="!isOpen(node)" class="arrow material-icons" (click)="openOrCloseTree(node)">
-            keyboard_arrow_right
-          </i>
-          <i
-            *ngIf="isOpen(node)"
-            [class.opacity-invisible]="!_hasChilds[getPathOpen(node)]"
-            class="arrow material-icons arrow"
-            (click)="_hasChilds[getPathOpen(node)] ? openOrCloseTree(node) : null"
-          >
-            keyboard_arrow_down
-          </i>
-          <!--
-          <i class="material-icons">folder</i>-->
-          <img src="{{ node.iconURL }}" alt="{{ node.name }}" (click)="openOrCloseNode(node)" />
-          <span class="name" (click)="openOrCloseNode(node)">{{ node.name }}</span>
-        </div>
+          <i *ngIf="!isOpen(node)" esIcon="keyboard_arrow_right"></i>
+          <i *ngIf="isOpen(node)" esIcon="keyboard_arrow_down"></i>
+        </button>
+        <img class="node-icon" src="{{ node.iconURL }}" alt="{{ node.name }}" />
+        <span class="name">{{ node.name }}</span>
       </div>
       <es-workspace-sub-tree
         class="sub-tree"
         *ngIf="isOpen(node)"
         [node]="node.ref.id"
-        [openPath]="openPath"
-        [selectedPath]="selectedPath"
-        [selectedNode]="selectedNode"
+        [currentPath]="currentPath"
         (onLoading)="setLoadingState($event, i)"
-        [parentPath]="getFullPath(node)"
         (onUpdateOptions)="updateOptions($event)"
-        (hasChilds)="_hasChilds[getPathOpen(node)] = $event"
+        (hasChildren)="_hasChildren[node.ref.id] = $event"
         (onClick)="openPathEvent($event)"
-        (onToggleTree)="toggleTreeEvent($event)"
         (onDrop)="dropToParent($event)"
         [depth]="depth + 1"
       ></es-workspace-sub-tree>
@@ -74,14 +55,14 @@
       class="more-items"
       (click)="loadAll()"
       *ngIf="moreItems > 0 && !loadingMore"
-      [style.marginLeft.px]="30 + depth * 20"
+      [style.marginLeft.px]="50 + depth * 20"
     >
       {{ 'WORKSPACE.TREE_MORE_ITEMS' | translate: { count: moreItems } }}
     </button>
     <es-spinner
       class="more-items-loading"
       *ngIf="loadingMore"
-      [style.marginLeft.px]="30 + depth * 20"
+      [style.marginLeft.px]="50 + depth * 20"
     ></es-spinner>
   </div>
   <div class="spinner" *ngIf="loading">

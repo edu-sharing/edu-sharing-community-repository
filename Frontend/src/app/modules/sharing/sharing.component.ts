@@ -1,23 +1,40 @@
-import { Component, ViewChild, HostListener, ElementRef } from '@angular/core';
-import { Router, ActivatedRoute, Params } from '@angular/router';
+import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslationsService } from '../../translations/translations.service';
-import { ListItem, RestSearchService } from '../../core-module/core.module';
-import { RestNodeService } from '../../core-module/core.module';
-import { RestConstants } from '../../core-module/core.module';
-import { RestConnectorService } from '../../core-module/core.module';
-import { Node, NodeList, LoginResult, SharingInfo, Person } from '../../core-module/core.module';
-import { CustomOptions, DefaultGroups, OptionItem } from '../../core-ui-module/option-item';
-import { TemporaryStorageService } from '../../core-module/core.module';
-import { ConfigurationHelper, ConfigurationService } from '../../core-module/core.module';
+import {
+    ConfigurationHelper,
+    ConfigurationService,
+    ListItem,
+    Node,
+    Person,
+    RestConnectorService,
+    RestConstants,
+    RestHelper,
+    RestNodeService,
+    RestSharingService,
+    SharingInfo,
+    TemporaryStorageService,
+} from '../../core-module/core.module';
+import {
+    CustomOptions,
+    DefaultGroups,
+    ElementType,
+    OptionItem,
+    Scope,
+} from '../../core-ui-module/option-item';
 import { OPEN_URL_MODE, UIConstants } from '../../core-module/ui/ui-constants';
-import { RestMdsService } from '../../core-module/core.module';
-import { RestHelper } from '../../core-module/core.module';
-import { RestSharingService } from '../../core-module/core.module';
 import { Toast } from '../../core-ui-module/toast';
 import { Helper } from '../../core-module/rest/helper';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
+import { NodeDataSource } from '../../features/node-entries/node-data-source';
+import {
+    InteractionType,
+    ListSortConfig,
+    NodeEntriesDisplayType,
+} from '../../features/node-entries/entries-model';
+import { NodeEntriesWrapperComponent } from '../../features/node-entries/node-entries-wrapper.component';
 
 @Component({
     selector: 'es-sharing',
@@ -25,16 +42,20 @@ import { NodeHelperService } from '../../core-ui-module/node-helper.service';
     styleUrls: ['sharing.component.scss'],
 })
 export class SharingComponent {
+    readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    readonly InteractionType = InteractionType;
+    @ViewChild('nodeEntries') nodeEntries: NodeEntriesWrapperComponent<Node>;
     loading = true;
-    loadingChildren = true;
     passwordInput: string;
     private params: Params;
     sharingInfo: SharingInfo;
-    childs: Node[];
+    nodesDataSource = new NodeDataSource<Node>();
     columns: ListItem[] = [];
-    sort = {
-        sortBy: RestConstants.CM_NAME,
-        sortAscending: true,
+    sort: ListSortConfig = {
+        allowed: true,
+        columns: RestConstants.POSSIBLE_SORT_BY_FIELDS,
+        active: RestConstants.CM_NAME,
+        direction: 'asc',
     };
     options: CustomOptions = {
         useDefaultOptions: false,
@@ -59,8 +80,9 @@ export class SharingComponent {
         const download = new OptionItem('SHARING.DOWNLOAD', 'cloud_download', (node: Node) =>
             this.download(node),
         );
+        download.elementType = [ElementType.Node];
         download.group = DefaultGroups.Primary;
-        download.showAlways = true;
+        download.showAsAction = true;
         const open = new OptionItem('SHARING.OPEN', 'open_in_new', (node: Node) => {
             console.log(node);
             UIHelper.openUrl(
@@ -70,7 +92,7 @@ export class SharingComponent {
             );
         });
         open.group = DefaultGroups.Primary;
-        open.showAlways = true;
+        open.showAsAction = true;
         download.customShowCallback = (nodes: Node[]) => nodes?.[0]?.mediatype !== 'link';
         open.customShowCallback = (nodes: Node[]) => nodes?.[0]?.mediatype === 'link';
         this.options.addOptions.push(download);
@@ -105,6 +127,7 @@ export class SharingComponent {
             });
         });
     }
+
     validatePassword() {
         this.sharingService
             .getInfo(this.params.nodeId, this.params.token, this.passwordInput)
@@ -128,7 +151,7 @@ export class SharingComponent {
             '&nodeId=' +
             encodeURIComponent(node);
         if (child == null && this.sharingInfo.node.isDirectory) {
-            const ids = RestHelper.getNodeIds(this.childs).join(',');
+            const ids = RestHelper.getNodeIds(this.nodesDataSource.getData()).join(',');
             url += '&childIds=' + encodeURIComponent(ids);
         } else {
             if (child != null) {
@@ -137,25 +160,31 @@ export class SharingComponent {
         }
         window.open(url);
     }
-    changeSort(sort: any) {
+    changeSort(sort: ListSortConfig) {
         this.sort = sort;
         this.loadChildren();
     }
     private loadChildren() {
         if (this.sharingInfo.password && !this.sharingInfo.passwordMatches) return;
-        this.loadingChildren = true;
-        this.childs = [];
+        this.nodesDataSource.reset();
+        this.nodesDataSource.isLoading = true;
         const request = {
             count: RestConstants.COUNT_UNLIMITED,
-            sortBy: [this.sort.sortBy],
-            sortAscending: [this.sort.sortAscending],
+            sortBy: [this.sort.active],
+            sortAscending: [this.sort.direction === 'asc'],
             propertyFilter: [RestConstants.ALL],
         };
         this.sharingService
             .getChildren(this.params.nodeId, this.params.token, this.passwordInput, request)
             .subscribe((nodes) => {
-                this.childs = nodes.nodes;
-                this.loadingChildren = false;
+                this.nodesDataSource.setData(nodes.nodes);
+                this.nodesDataSource.isLoading = false;
+                setTimeout(() => {
+                    this.nodeEntries.initOptionsGenerator({
+                        scope: Scope.Sharing,
+                        customOptions: this.options,
+                    });
+                });
             });
     }
     inviterIsAuthor() {

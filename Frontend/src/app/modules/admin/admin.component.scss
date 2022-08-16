@@ -238,6 +238,9 @@ $sidenavWidthMobile: 66px;
         }
         mat-radio-group {
             margin: 10px 0;
+            display: grid;
+            grid-gap: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             mat-radio-button {
                 margin: 0 10px;
             }

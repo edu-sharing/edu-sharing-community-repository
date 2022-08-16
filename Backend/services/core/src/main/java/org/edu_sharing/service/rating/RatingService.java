@@ -17,5 +17,10 @@ public interface RatingService {
 	RatingDetails getAccumulatedRatings(String nodeId, Date after);
 
 	List<String> getAlteredNodeIds(Date after);
+
 	List<RatingHistory> getAccumulatedRatingHistory(String nodeId, Date after);
+
+	void changeUserData(@NotNull String oldAuthority, @NotNull String newAuthority);
+
+	void deleteUserData(@NotNull String authority);
 }

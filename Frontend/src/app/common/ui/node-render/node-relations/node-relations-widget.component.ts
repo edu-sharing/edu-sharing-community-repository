@@ -5,6 +5,7 @@ import { Node } from '../../../../core-module/rest/data-object';
 import { RelationService, NodeService, RelationData } from 'ngx-edu-sharing-api';
 import { ListItem } from '../../../../core-module/ui/list-item';
 import { forkJoin as observableForkJoin } from 'rxjs';
+import { RestHelper } from '../../../../core-module/rest/rest-helper';
 
 @Component({
     selector: 'es-mds-node-relations-widget',
@@ -17,6 +18,7 @@ export class MdsNodeRelationsWidgetComponent implements OnInit, OnChanges {
     relations: RelationData[];
     columns = [new ListItem('NODE', RestConstants.LOM_PROP_TITLE)];
     versions: Node[];
+    forkedOrigin: Node;
     forkedChilds: Node[];
 
     constructor(
@@ -30,14 +32,36 @@ export class MdsNodeRelationsWidgetComponent implements OnInit, OnChanges {
     ngOnChanges(changes?: SimpleChanges) {
         if (this.node) {
             observableForkJoin([
-                this.nodeService.getForkedChilds(this.node.ref.id),
+                this.nodeService.getForkedChilds(this.node),
                 this.nodeService.getPublishedCopies(this.node.ref.id),
                 this.relationService.getRelations(this.node.ref.id),
-            ]).subscribe((result) => {
+            ]).subscribe(async (result) => {
                 this.forkedChilds = result[0].nodes;
                 this.versions = result[1].nodes.reverse();
                 this.relations = result[2].relations;
-                this.loading = false;
+                // is a forked child
+                if (this.node.properties[RestConstants.CCM_PROP_FORKED_ORIGIN]) {
+                    this.nodeService
+                        .getNode(
+                            RestConstants.HOME_REPOSITORY,
+                            RestHelper.removeSpacesStoreRef(
+                                this.node.properties[RestConstants.CCM_PROP_FORKED_ORIGIN][0],
+                            ),
+                        )
+                        .subscribe(
+                            (node) => {
+                                this.forkedOrigin = node;
+                                this.loading = false;
+                            },
+                            (error) => {
+                                // soft error, do not trigger toast
+                                error.preventDefault();
+                                this.loading = false;
+                            },
+                        );
+                } else {
+                    this.loading = false;
+                }
             });
         }
     }

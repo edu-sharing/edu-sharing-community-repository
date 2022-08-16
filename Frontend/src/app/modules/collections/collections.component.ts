@@ -17,6 +17,7 @@ import { first } from 'rxjs/operators';
 import {
     DropSource,
     DropTarget,
+    InteractionType,
     ListEventInterface,
     ListSortConfig,
     NodeEntriesDisplayType,
@@ -107,12 +108,14 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
     };
     readonly SCOPES = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    readonly InteractionType = InteractionType;
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
 
     @ViewChild('actionbarCollection') actionbarCollection: ActionbarComponent;
     @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
     @ViewChild('listCollections') listCollections: ListTableComponent;
     @ViewChild('listReferences') listReferences: ListEventInterface<CollectionReference>;
+    @ViewChild('listProposals') listProposals: ListEventInterface<ProposalNode>;
     @ContentChild('collectionContentTemplate') collectionContentTemplateRef: TemplateRef<any>;
 
     dataSourceCollections = new NodeDataSource<Node>();
@@ -163,11 +166,11 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
     addMaterialBinaryOptionItem = new OptionItem('OPTIONS.ADD_OBJECT', 'cloud_upload', () => {
         this.mainNavService.getMainNav().topBar.createMenu.openUploadSelect();
     });
-    collectionProposals: AbstractList<ProposalNode>;
+    dataSourceCollectionProposals = new NodeDataSource<ProposalNode>();
     proposalColumns = [
         new ListItem('NODE', RestConstants.CM_PROP_TITLE),
-        new ListItem('NODE_PROPOSAL', RestConstants.CM_CREATOR, { showLabel: true }),
-        new ListItem('NODE_PROPOSAL', RestConstants.CM_PROP_C_CREATED, { showLabel: true }),
+        new ListItem('NODE_PROPOSAL', RestConstants.CM_CREATOR, { showLabel: false }),
+        new ListItem('NODE_PROPOSAL', RestConstants.CM_PROP_C_CREATED, { showLabel: false }),
     ];
     tutorialElement: ElementRef;
     permissions: Permission[];
@@ -774,7 +777,6 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
             return;
         }
         this.isLoading = true;
-        this.collectionProposals = null;
         if (!this.loadingTask.isDone) {
             this.loadingTask.done();
         }
@@ -812,15 +814,7 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
                         return;
                     }
                     if (this.isAllowedToEditCollection()) {
-                        this.collectionService
-                            .getCollectionProposals(this.collectionContent.node.ref.id)
-                            .subscribe((proposals) => {
-                                proposals.nodes = proposals.nodes.map((p) => {
-                                    p.proposalCollection = this.collectionContent.node;
-                                    return p;
-                                });
-                                this.collectionProposals = proposals;
-                            });
+                        this.refreshProposals();
                     }
                     const requestRefs = this.getReferencesRequest();
                     requestRefs.count = null;
@@ -1446,6 +1440,39 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
         } else {
             return this.isAllowedToEditCollection();
         }
+    }
+
+    private refreshProposals() {
+        this.dataSourceCollectionProposals.reset();
+        this.dataSourceCollectionProposals.isLoading = true;
+        if (this.isAllowedToEditCollection()) {
+            this.collectionService
+                .getCollectionProposals(this.collectionContent.node.ref.id)
+                .subscribe((proposals) => {
+                    proposals.nodes = proposals.nodes.map((p) => {
+                        p.proposalCollection = this.collectionContent.node;
+                        return p;
+                    });
+                    this.dataSourceCollectionProposals.setData(
+                        proposals.nodes,
+                        proposals.pagination,
+                    );
+                    this.dataSourceCollectionProposals.setCanLoadMore(false);
+                    this.dataSourceCollectionProposals.isLoading = false;
+                    setTimeout(() => {
+                        this.listProposals?.initOptionsGenerator({
+                            scope: Scope.CollectionsProposals,
+                        });
+                    });
+                });
+        }
+    }
+    isDeleted(node: CollectionReference) {
+        return (
+            node.aspects.includes(RestConstants.CCM_ASPECT_IO_REFERENCE) &&
+            !node.aspects.includes(RestConstants.CCM_ASPECT_REMOTEREPOSITORY) &&
+            !node.originalId
+        );
     }
 }
 

@@ -341,6 +341,7 @@
   },
   "COMMENTS_SINGLE": "Comment",
   "COMMENTS_MULTIPLE": "Comments",
+  "PUBLISHED_COPY_TOOLTIP": "Published Copy",
   "NODE_COMMENTS": {
     "TITLE": "Comments",
     "NEW_COMMENT_PLACEHOLDER": "New comment...",

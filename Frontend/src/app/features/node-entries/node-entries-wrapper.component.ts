@@ -31,8 +31,8 @@ import { OptionItem } from '../../core-ui-module/option-item';
 import { OptionsHelperService } from '../../core-ui-module/options-helper.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { MainNavService } from '../../main/navigation/main-nav.service';
-import { NodeEntriesTemplatesService } from '../node-entries/node-entries-templates.service';
-import { NodeEntriesComponent, NodeEntriesDataType } from '../node-entries/node-entries.component';
+import { NodeEntriesTemplatesService } from './node-entries-templates.service';
+import { NodeEntriesComponent, NodeEntriesDataType } from './node-entries.component';
 import {
     FetchEvent,
     GridConfig,
@@ -55,9 +55,22 @@ import { NodeDataSource } from './node-data-source';
 export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     implements AfterViewInit, OnInit, OnChanges, OnDestroy, ListEventInterface<T>
 {
+    /**
+     * title (above) the table/grid
+     */
     @ContentChild('title') titleRef: TemplateRef<any>;
+    /**
+     * data shown when data source is empty
+     */
     @ContentChild('empty') emptyRef: TemplateRef<any>;
+    /**
+     * custom area for actions only for NodeEntriesDisplayType.SmallGrid (per card at the bottom)
+     */
     @ContentChild('actionArea') actionAreaRef: TemplateRef<any>;
+    /**
+     * custom area for an overlay "above" each card (i.e. to show disabled infos), only for NodeEntriesDisplayType.SmallGrid & odeEntriesDisplayType.Grid
+     */
+    @ContentChild('overlay') overlayRef: TemplateRef<any>;
     @Input() dataSource: NodeDataSource<T>;
     @Input() columns: ListItem[];
     @Input() configureColumns: boolean;
@@ -218,16 +231,6 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
                 this.nodeHelperService.copyDataToNode(d as Node, hits[0] as Node);
             }
         });
-        nodes?.forEach((node) => {
-            if (
-                !this.dataSource
-                    .getData()
-                    .filter((n) => (n as Node).ref.id === (node as Node).ref.id).length
-            ) {
-                (node as Node).virtual = true;
-                this.dataSource.appendData([node], 'before');
-            }
-        });
     }
 
     showReorderColumnsDialog(): void {}
@@ -286,5 +289,6 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.templatesService.title = this.titleRef;
         this.templatesService.empty = this.emptyRef;
         this.templatesService.actionArea = this.actionAreaRef;
+        this.templatesService.overlay = this.overlayRef;
     }
 }

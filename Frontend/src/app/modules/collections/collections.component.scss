@@ -343,6 +343,39 @@ section {
         }
     }
 }
+.node-deleted {
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(3px);
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+    div {
+        opacity: 1;
+        padding-bottom: 7px;
+    }
+    > div i {
+        font-size: 26pt;
+        color: $textPrimary;
+    }
+    .headline {
+        color: $textPrimary;
+        font-size: 120%;
+    }
+    .subline {
+        color: $textLight;
+        font-size: 90%;
+    }
+    a {
+        text-transform: uppercase;
+        font-weight: bold;
+        i {
+            position: relative;
+            top: 7px;
+        }
+    }
+}
 @media only screen and (max-width: $mobileWidth+$mobileStage*3) {
     :host ::ng-deep {
         .tab-label {
