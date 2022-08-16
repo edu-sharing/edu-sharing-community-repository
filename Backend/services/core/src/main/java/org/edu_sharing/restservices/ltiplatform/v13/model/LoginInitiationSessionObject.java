@@ -1,14 +1,19 @@
 package org.edu_sharing.restservices.ltiplatform.v13.model;
 
 public class LoginInitiationSessionObject {
-    String parentId,clientId,appId,nodeId;
 
-    public String getParentId() {
-        return parentId;
+    public static enum MessageType{resourcelink,deeplink}
+
+    String contextId,clientId,appId,nodeId,resourceLinkNodeId;
+
+    MessageType messageType;
+
+    public String getContextId() {
+        return contextId;
     }
 
-    public void setParentId(String parentId) {
-        this.parentId = parentId;
+    public void setContextId(String contextId) {
+        this.contextId = contextId;
     }
 
     public String getClientId() {
@@ -33,5 +38,21 @@ public class LoginInitiationSessionObject {
 
     public String getNodeId() {
         return nodeId;
+    }
+
+    public MessageType getMessageType() {
+        return messageType;
+    }
+
+    public void setMessageType(MessageType messageType) {
+        this.messageType = messageType;
+    }
+
+    public void setResourceLinkNodeId(String resourceLinkNodeId) {
+        this.resourceLinkNodeId = resourceLinkNodeId;
+    }
+
+    public String getResourceLinkNodeId() {
+        return resourceLinkNodeId;
     }
 }

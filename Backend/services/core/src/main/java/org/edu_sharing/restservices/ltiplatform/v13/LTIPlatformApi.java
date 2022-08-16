@@ -15,6 +15,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PersonService;
+import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
@@ -42,6 +43,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
@@ -90,6 +92,10 @@ public class LTIPlatformApi {
             @Context HttpServletRequest req){
 
         try {
+            /**
+             * validation
+             */
+
             if (isEmpty(scope)) throw new Exception("missing param scope");
             if (isEmpty(responseType)) throw new Exception("missing param response_type");
             if (isEmpty(loginHint)) throw new Exception("missing param login_hint");
@@ -114,7 +120,7 @@ public class LTIPlatformApi {
                 throw new Exception("lti lti session object found");
             }
 
-            if(!loginInitiationSessionObject.getParentId().equals(ltiMessageHint)){
+            if(!loginInitiationSessionObject.getContextId().equals(ltiMessageHint)){
                 throw new Exception("wrong context:" + ltiMessageHint);
             }
 
@@ -135,69 +141,66 @@ public class LTIPlatformApi {
                 throw new Exception("invalid request: response_mode");
             }
 
+            /**
+             * build LTI Message
+             */
+
             ApplicationInfo homeApp = ApplicationInfoList.getHomeRepository();
 
             Map<String,Object> context = new HashMap<>();
-            context.put("id", loginInitiationSessionObject.getParentId());
+            context.put("id", loginInitiationSessionObject.getContextId());
             context.put("label",nodeService
-                    .getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, loginInitiationSessionObject.getParentId()), ContentModel.PROP_NAME));
+                    .getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, loginInitiationSessionObject.getContextId()), ContentModel.PROP_NAME));
 
-            String firstName = (String)nodeService.getProperty(personService.getPerson(username),ContentModel.PROP_FIRSTNAME);
-            String lastName = (String)nodeService.getProperty(personService.getPerson(username),ContentModel.PROP_LASTNAME);
-            String email = (String)nodeService.getProperty(personService.getPerson(username),ContentModel.PROP_EMAIL);
 
             Map<String,Object> launchPresentation = new HashMap<>();
             launchPresentation.put("locale", I18NUtil.getLocale());
 
+            JwtBuilder jwtBuilder = getBasicLtiMessage(clientId, nonce, username, appInfo, homeApp, context);
+
+            if(LoginInitiationSessionObject.MessageType.deeplink.equals(loginInitiationSessionObject.getMessageType())){
+                Map<String,Object> deepLinkingSettings = new HashMap<>();
+                deepLinkingSettings.put("accept_types",Arrays.asList(new String[]{"ltiResourceLink"}));
+                deepLinkingSettings.put("accept_presentation_document_targets",Arrays.asList(new String[]{"iframe","window"}));
+                deepLinkingSettings.put("accept_copy_advice",false);
+                deepLinkingSettings.put("accept_multiple",true);
+                deepLinkingSettings.put("accept_unsigned",false);
+                deepLinkingSettings.put("auto_create",false);
+                deepLinkingSettings.put("can_confirm",false);
+                deepLinkingSettings.put("deep_link_return_url",homeApp.getClientBaseUrl()+"/rest/ltiplatform/v13/deeplinking-response/");
+                deepLinkingSettings.put("title",homeApp.getAppCaption());
+
+                jwtBuilder = jwtBuilder
+                        .claim(LTIConstants.LTI_TARGET_LINK_URI,appInfo.getLtitoolTargetLinkUri())
+                        .claim(LTIConstants.LTI_LAUNCH_PRESENTATION, launchPresentation)
+                        .claim(LTIConstants.DEEP_LINKING_SETTINGS,deepLinkingSettings)
+                        .claim(LTIConstants.LTI_MESSAGE_TYPE, LTIConstants.LTI_MESSAGE_TYPE_DEEP_LINKING);
+
+            }else if(LoginInitiationSessionObject.MessageType.resourcelink.equals(loginInitiationSessionObject.getMessageType())){
+                NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,loginInitiationSessionObject.getResourceLinkNodeId());
+                Map<String,String> claimResourceLink = new HashMap<>();
+                claimResourceLink.put("title",(String)nodeService.getProperty(nodeRef,ContentModel.PROP_NAME));
+                claimResourceLink.put("id",loginInitiationSessionObject.getResourceLinkNodeId());
+
+                launchPresentation.put("document_target","window");
+                launchPresentation.put("return_url",homeApp.getClientBaseUrl()+"/components/workspace?id=" + loginInitiationSessionObject.getContextId() + "&mainnav=true&displayType=0");
 
 
-            Map<String,Object> toolPlatform = new HashMap<>();
-            toolPlatform.put("product_family_code","edu-sharing");
-            toolPlatform.put("version",VersionService.getVersion(VersionService.Type.REPOSITORY));
-            toolPlatform.put("guid",homeApp.getAppId());
-            toolPlatform.put("name",homeApp.getAppCaption());
-            toolPlatform.put("description",homeApp.getAppCaption());
+                String resourceLink = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_RESOURCELINK));
+                jwtBuilder = jwtBuilder
+                        .claim(LTIConstants.LTI_TARGET_LINK_URI, resourceLink)
+                        .claim(LTIConstants.LTI_CLAIM_RESOURCE_LINK,claimResourceLink)
+                        .claim(LTIConstants.LTI_LAUNCH_PRESENTATION, launchPresentation)
+                        .claim(LTIConstants.LTI_MESSAGE_TYPE, LTIConstants.LTI_MESSAGE_TYPE_RESOURCE_LINK);
 
-            Map<String,Object> deepLinkingSettings = new HashMap<>();
-            deepLinkingSettings.put("accept_types",Arrays.asList(new String[]{"ltiResourceLink"}));
-            deepLinkingSettings.put("accept_presentation_document_targets",Arrays.asList(new String[]{"iframe","window"}));
-            deepLinkingSettings.put("accept_copy_advice",false);
-            deepLinkingSettings.put("accept_multiple",true);
-            deepLinkingSettings.put("accept_unsigned",false);
-            deepLinkingSettings.put("auto_create",false);
-            deepLinkingSettings.put("can_confirm",false);
-            deepLinkingSettings.put("deep_link_return_url",homeApp.getClientBaseUrl()+"/rest/ltiplatform/v13/deeplinking-response/");
-            deepLinkingSettings.put("title",homeApp.getAppCaption());
+            }else{
+                throw new Exception("unknown lti messagetype:" +loginInitiationSessionObject.getMessageType());
+            }
+
 
 
             Key platformPrivateKey = new Signing().getPemPrivateKey(homeApp.getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM);
-
-            Date now = new Date();
-            String jwt = Jwts.builder()
-                    .setHeaderParam(LTIConstants.TYP, LTIConstants.JWT)
-                    .setHeaderParam(LTIConstants.KID, homeApp.getLtiKid())
-                    .setHeaderParam(LTIConstants.ALG, LTIConstants.RS256)
-                    .claim("nonce",nonce)
-                    .setIssuer(RegistrationService.getLtiPlatformOpenIdConfiguration().getIssuer())
-                    .setIssuedAt(now)
-                    .setExpiration(new Date((now.getTime() + 1000)))
-                    .setAudience(clientId)
-                    .setSubject(username)
-                    .claim(LTIConstants.LTI_DEPLOYMENT_ID,appInfo.getLtiDeploymentId())
-                    .claim(LTIConstants.LTI_TARGET_LINK_URI,appInfo.getLtitoolTargetLinkUri())
-                    .claim(LTIConstants.DEEP_LINK_CONTEXT,context)
-                    .claim("given_name",firstName)
-                    .claim("family_name",lastName)
-                    .claim("email",email)
-                    .claim(LTIConstants.LTI_LAUNCH_PRESENTATION,launchPresentation)
-                    .claim(LTIConstants.LTI_TOOL_PLATFORM,toolPlatform)
-                    .claim(LTIConstants.LTI_VERSION, LTIConstants.LTI_VERSION_3)
-                    .claim(LTIConstants.LTI_MESSAGE_TYPE,LTIConstants.LTI_MESSAGE_TYPE_DEEP_LINKING)
-                    .claim(LTIConstants.DEEP_LINKING_SETTINGS,deepLinkingSettings)
-                    .claim("https://purl.imsglobal.org/spec/lti/claim/roles",new ArrayList<>())
-                    .signWith(platformPrivateKey,SignatureAlgorithm.RS256)
-                    .compact();
-
+            String jwt = jwtBuilder.signWith(platformPrivateKey,SignatureAlgorithm.RS256).compact();
             /**
              * @TODO compare lti message hint with session value
              */
@@ -215,6 +218,41 @@ public class LTIPlatformApi {
         } catch(Throwable e){
             return ApiTool.processError(req,e,"LTI_PLATFORM_AUTH_ERROR");
         }
+    }
+
+    private JwtBuilder getBasicLtiMessage(String clientId, String nonce, String username, ApplicationInfo appInfo, ApplicationInfo homeApp, Map<String, Object> context) throws Exception {
+        Map<String,Object> toolPlatform = new HashMap<>();
+        toolPlatform.put("product_family_code","edu-sharing");
+        toolPlatform.put("version",VersionService.getVersion(VersionService.Type.REPOSITORY));
+        toolPlatform.put("guid", homeApp.getAppId());
+        toolPlatform.put("name", homeApp.getAppCaption());
+        toolPlatform.put("description", homeApp.getAppCaption());
+
+
+        String firstName = (String)nodeService.getProperty(personService.getPerson(username),ContentModel.PROP_FIRSTNAME);
+        String lastName = (String)nodeService.getProperty(personService.getPerson(username),ContentModel.PROP_LASTNAME);
+        String email = (String)nodeService.getProperty(personService.getPerson(username),ContentModel.PROP_EMAIL);
+
+        Date now = new Date();
+        JwtBuilder jwtBuilder = Jwts.builder()
+                .setHeaderParam(LTIConstants.TYP, LTIConstants.JWT)
+                .setHeaderParam(LTIConstants.KID, homeApp.getLtiKid())
+                .setHeaderParam(LTIConstants.ALG, LTIConstants.RS256)
+                .claim("nonce", nonce)
+                .setIssuer(RegistrationService.getLtiPlatformOpenIdConfiguration().getIssuer())
+                .setIssuedAt(now)
+                .setExpiration(new Date((now.getTime() + 1000)))
+                .setAudience(clientId)
+                .setSubject(username)
+                .claim(LTIConstants.LTI_DEPLOYMENT_ID, appInfo.getLtiDeploymentId())
+                .claim(LTIConstants.DEEP_LINK_CONTEXT, context)
+                .claim("given_name",firstName)
+                .claim("family_name",lastName)
+                .claim("email",email)
+                .claim(LTIConstants.LTI_TOOL_PLATFORM,toolPlatform)
+                .claim(LTIConstants.LTI_VERSION, LTIConstants.LTI_VERSION_3)
+                .claim("https://purl.imsglobal.org/spec/lti/claim/roles",new ArrayList<>());
+        return jwtBuilder;
     }
 
     private boolean isEmpty( String value){
@@ -502,23 +540,7 @@ public class LTIPlatformApi {
 
             for(ApplicationInfo appInfo : ApplicationInfoList.getApplicationInfos().values()){
                 if(appInfo.isLtiTool() && appInfo.getAppId().equals(appId)){
-                    Map<String,String> params = new HashMap<>();
-                    params.put("iss",ApplicationInfoList.getHomeRepository().getClientBaseUrl());
-                    params.put("target_link_uri",appInfo.getLtitoolTargetLinkUri());
-                    params.put("login_hint", AuthenticationUtil.getFullyAuthenticatedUser());
-                    params.put("lti_message_hint",parentId);
-                    params.put("client_id",appInfo.getLtiClientId());
-                    params.put("lti_deployment_id",appInfo.getLtiDeploymentId());
-                    String form = ApiTool.getHTML(appInfo.getLtitoolLoginInitiationsUrl(),params);
-
-                    LoginInitiationSessionObject loginInitiationSessionObject = new LoginInitiationSessionObject();
-                    loginInitiationSessionObject.setAppId(appInfo.getAppId());
-                    loginInitiationSessionObject.setClientId(appInfo.getLtiClientId());
-
-
-                    loginInitiationSessionObject.setParentId(parentId);
-                    req.getSession().setAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT, loginInitiationSessionObject);
-
+                    String form = prepareLoginInitiation(parentId,null, appInfo, LoginInitiationSessionObject.MessageType.deeplink, req);
                     return Response.status(Response.Status.OK).entity(form).build();
                 }
             }
@@ -542,10 +564,79 @@ public class LTIPlatformApi {
                     @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = String.class)))
             })
-    public Response generateLoginInitiationFormResourceLink(@Parameter(description = "appId of the tool",required=true) @QueryParam("appId") String appId,
-                                                @Parameter(description = "the nodeid of a node that contains a lti resourcelink. is required for lti resourcelink",required=false) @QueryParam("nodeId") String nodeId,
+    public Response generateLoginInitiationFormResourceLink(@Parameter(description = "the nodeid of a node that contains a lti resourcelink. is required for lti resourcelink",required=false) @QueryParam("nodeId") String nodeId,
                                                 @Context HttpServletRequest req){
-        return null;
+        try{
+            NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+
+            if(!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_LTITOOL_NODE))){
+                throw new Exception("not an lti resoucelink:"+nodeId);
+            }
+
+            String resourceLink = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_RESOURCELINK));
+            if(resourceLink == null){
+                throw new Exception("lti resoucelink is null:"+nodeId);
+            }
+
+            String toolUrl = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_TOOLURL));
+            if(toolUrl == null){
+                throw new Exception("lti toolUrl is null:"+nodeId);
+            }
+
+            for(ApplicationInfo appInfo : ApplicationInfoList.getApplicationInfos().values()){
+                if(appInfo.isLtiTool() && toolUrl.equals(appInfo.getLtitoolUrl())){
+                    String form = prepareLoginInitiation(nodeService.getPrimaryParent(nodeRef).getParentRef().getId(),
+                            nodeId,
+                            appInfo,
+                            LoginInitiationSessionObject.MessageType.resourcelink,
+                            req);
+                    return Response.status(Response.Status.OK).entity(form).build();
+                }
+            }
+            throw new Exception("no lti tool found for toolUrl:"+ toolUrl);
+
+
+        }catch (Exception e){
+            return ApiTool.processError(req,e,"");
+        }
+    }
+
+    /**
+     * builds form and session data
+     * @param contextId
+     * @param appInfo
+     * @param messageType
+     * @param req
+     * @return
+     */
+    private String prepareLoginInitiation(String contextId,
+                                          String resourceLinkNodeId,
+                                          ApplicationInfo appInfo,
+                                          LoginInitiationSessionObject.MessageType messageType,
+                                          HttpServletRequest req) {
+        Map<String,String> params = new HashMap<>();
+        params.put("iss",ApplicationInfoList.getHomeRepository().getClientBaseUrl());
+        String targetLinkUrl = appInfo.getLtitoolTargetLinkUri();
+        if(messageType.equals(LoginInitiationSessionObject.MessageType.resourcelink)){
+            targetLinkUrl = (String)nodeService.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,resourceLinkNodeId),
+                    QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_RESOURCELINK));
+        }
+        params.put("target_link_uri", targetLinkUrl);
+        params.put("login_hint", AuthenticationUtil.getFullyAuthenticatedUser());
+        params.put("lti_message_hint", contextId);
+        params.put("client_id", appInfo.getLtiClientId());
+        params.put("lti_deployment_id", appInfo.getLtiDeploymentId());
+        String form = ApiTool.getHTML(appInfo.getLtitoolLoginInitiationsUrl(),params);
+
+        LoginInitiationSessionObject loginInitiationSessionObject = new LoginInitiationSessionObject();
+        loginInitiationSessionObject.setAppId(appInfo.getAppId());
+        loginInitiationSessionObject.setClientId(appInfo.getLtiClientId());
+        loginInitiationSessionObject.setContextId(contextId);
+        loginInitiationSessionObject.setResourceLinkNodeId(resourceLinkNodeId);
+        loginInitiationSessionObject.setMessageType(messageType);
+        req.getSession().setAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT, loginInitiationSessionObject);
+
+        return form;
     }
 
 
@@ -634,18 +725,25 @@ public class LTIPlatformApi {
                 org.edu_sharing.service.nodeservice.NodeService eduNodeService = NodeServiceFactory.getLocalService();
                 String tmpNodeId = null;
                 if(nodeId == null){
-                    tmpNodeId = eduNodeService.createNode(sessionObject.getParentId(), CCConstants.CCM_TYPE_IO,properties);
+                    tmpNodeId = eduNodeService.createNode(sessionObject.getContextId(), CCConstants.CCM_TYPE_IO,properties);
                 }else{
                     eduNodeService.updateNode(nodeId,properties);
                     tmpNodeId = nodeId;
                 }
-                if(!eduNodeService.hasAspect("workspace","SpacesStore",tmpNodeId,CCConstants.CCM_ASPECT_LTITOOL_NODE)){
-                    eduNodeService.addAspect(tmpNodeId,CCConstants.CCM_ASPECT_LTITOOL_NODE);
-                    HashMap<String,String[]> ltiAspectProps = new HashMap<>();
-                    ltiAspectProps.put(CCConstants.CCM_PROP_LTITOOL_NODE_RESOURCELINK,new String[]{url});
-                    ltiAspectProps.put(CCConstants.CCM_PROP_LTITOOL_NODE_TOOLURL,new String[]{appInfoTool.getLtitoolUrl()});
-                    eduNodeService.updateNode(nodeId,ltiAspectProps);
+
+                NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,tmpNodeId);
+                QName aspectLti = QName.createQName(CCConstants.CCM_ASPECT_LTITOOL_NODE);
+
+                if(!nodeService.hasAspect(nodeRef,aspectLti)){
+                    Map<QName, Serializable> ltiAspectProps = new HashMap<>();
+                    ltiAspectProps.put(QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_RESOURCELINK),url);
+                    ltiAspectProps.put(QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_TOOLURL),appInfoTool.getLtitoolUrl());
+                    nodeService.addAspect(nodeRef,aspectLti,ltiAspectProps);
                 }
+
+                String wwwurl = ApplicationInfoList.getHomeRepository().getClientBaseUrl()
+                        +"/rest/ltiplatform/v13/generateLoginInitiationFormResourceLink?nodeId="+tmpNodeId;
+                nodeService.setProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_WWWURL),wwwurl);
                 nodeIds.add(tmpNodeId);
                 titles.add(title);
             }
