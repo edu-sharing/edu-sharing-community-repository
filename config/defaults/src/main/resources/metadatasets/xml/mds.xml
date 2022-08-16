@@ -1208,6 +1208,48 @@
 		</basequery>
 		<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
 
+		<query join="AND" id="collections">
+			<basequery propertyNull="ngsearchword">
+			{"bool":{
+			"must":[
+			{"term":{"aspects":"ccm:collection"}}
+			{"bool":{
+			"should":[
+			{"term":{"properties.ccm:collectionlevel0.keyword":"true"}},
+			{"term":{"properties.ccm:collection_pinned_status":"true"}},
+			]
+			}}]
+			}}
+			</basequery>
+			<basequery>{"bool":{
+				"must":[
+				{"term":{"type":"ccm:map"}},{"term":{"aspects":"ccm:collection"}}
+				]
+				}}
+			</basequery>
+			<property name="ngsearchword">
+				<statement>
+					{"bool":{"should":[
+					{
+					"simple_query_string": {
+					"query": "${valueRaw}*",
+					"flags": "OR|AND|PREFIX|PHRASE|WHITESPACE",
+					"fields": [
+					"properties.cm:name^2",
+					"properties.cm:title^2",
+					"properties.cclom:title^5",
+					"properties.cclom:general_description^2",
+					"properties.cclom:general_keyword^4",
+					"i18n.de_DE.ccm:taxonid^2"
+					],
+					"default_operator": "and"
+					}
+					},
+					{"wildcard":{"nodeRef.id": {"value":"*${value}*", "case_insensitive": true }}}
+					]
+					}}</statement>
+			</property>
+		</query>
 		<query join="AND" id="ngsearch">
 			<!--TODO basequery-->
 			<!--basequery>ISNULL:@ccm\:tool_category</basequery-->
@@ -1236,8 +1278,8 @@
 					{"bool":{"should":[
 					{
 					"simple_query_string": {
-					"query": "${valueRaw}",
-					"flags": "OR|AND|PHRASE|WHITESPACE",
+					"query": "${valueRaw}*",
+					"flags": "OR|AND|PREFIX|PHRASE|WHITESPACE",
 					"fields": [
 					"properties.cm:name^2",
 					"properties.cm:title^2",

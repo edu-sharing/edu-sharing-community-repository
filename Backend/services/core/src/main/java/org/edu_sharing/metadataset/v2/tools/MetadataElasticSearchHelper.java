@@ -1,6 +1,7 @@
 package org.edu_sharing.metadataset.v2.tools;
 
 import com.sun.star.lang.IllegalArgumentException;
+
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
