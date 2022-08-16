@@ -27,10 +27,22 @@
             </mat-form-field>
           </li>
         </ul>
+        <mat-form-field style="width: 100%" *ngIf="_tool.customContentOption">
+          <mat-label>{{ 'NODE.cm:name' | translate }} </mat-label>
+          <input
+            matInput
+            type="text"
+            [ngModelOptions]="{ standalone: true }"
+            [(ngModel)]="_name"
+            #input
+            name="filename"
+            autofocus
+          />
+        </mat-form-field>
       </form>
       <button mat-button color="primary" (click)="open()" *ngIf="nodes && nodes.length == 0">
         {{ 'LTI Tool öffnen' | translate }}
-        <i [esIcon]="_tool.createOption ? 'mode_edit' : 'search'"></i>
+        <i [esIcon]="_tool.customContentOption ? 'mode_edit' : 'search'"></i>
       </button>
     </div>
   </es-card>

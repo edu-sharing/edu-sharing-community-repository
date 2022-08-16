@@ -273,9 +273,9 @@ export class NodeV1Service extends BaseService {
     }
 
     /**
-     * Path part for operation changeContent
+     * Path part for operation changeContent1
      */
-    static readonly ChangeContentPath = '/node/v1/nodes/{repository}/{node}/content';
+    static readonly ChangeContent1Path = '/node/v1/nodes/{repository}/{node}/content';
 
     /**
      * Change content of node.
@@ -283,11 +283,11 @@ export class NodeV1Service extends BaseService {
      * Change content of node.
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `changeContent()` instead.
+     * To access only the response body, use `changeContent1()` instead.
      *
      * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
      */
-    changeContent$Response(params: {
+    changeContent1$Response(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
@@ -311,7 +311,7 @@ export class NodeV1Service extends BaseService {
             file?: {};
         };
     }): Observable<StrictHttpResponse<NodeEntry>> {
-        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.ChangeContentPath, 'post');
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.ChangeContent1Path, 'post');
         if (params) {
             rb.path('repository', params.repository, {});
             rb.path('node', params.node, {});
@@ -341,11 +341,11 @@ export class NodeV1Service extends BaseService {
      * Change content of node.
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `changeContent$Response()` instead.
+     * To access the full response (for headers, for example), `changeContent1$Response()` instead.
      *
      * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
      */
-    changeContent(params: {
+    changeContent1(params: {
         /**
          * ID of repository (or &quot;-home-&quot; for home repository)
          */
@@ -369,7 +369,7 @@ export class NodeV1Service extends BaseService {
             file?: {};
         };
     }): Observable<NodeEntry> {
-        return this.changeContent$Response(params).pipe(
+        return this.changeContent1$Response(params).pipe(
             map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
         );
     }

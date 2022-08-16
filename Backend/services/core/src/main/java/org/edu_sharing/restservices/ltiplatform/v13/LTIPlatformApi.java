@@ -14,6 +14,8 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.security.AccessStatus;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang.StringUtils;
@@ -24,25 +26,29 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.security.AllSessions;
 import org.edu_sharing.repository.server.tools.security.Signing;
-import org.edu_sharing.restservices.RepositoryDao;
-import org.edu_sharing.restservices.RestConstants;
+import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.lti.v13.ApiTool;
 import org.edu_sharing.restservices.ltiplatform.v13.model.*;
+import org.edu_sharing.restservices.node.v1.model.NodeEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.service.lti13.LTIConstants;
 import org.edu_sharing.service.lti13.LTIJWTUtil;
 import org.edu_sharing.service.lti13.registration.RegistrationService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.version.VersionService;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.extensions.surf.util.I18NUtil;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -197,6 +203,22 @@ public class LTIPlatformApi {
                 throw new Exception("unknown lti messagetype:" +loginInitiationSessionObject.getMessageType());
             }
 
+
+            if(appInfo.hasLtiToolCustomContentOption()){
+                AccessStatus accessStatus = serviceRegistry.getPermissionService()
+                        .hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,loginInitiationSessionObject.getContentUrlNodeId()),
+                                PermissionService.WRITE_CONTENT);
+                if(accessStatus != null && accessStatus.equals(AccessStatus.ALLOWED)){
+                    Map<String,String> custom = new HashMap<>();
+                    custom.put(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID,appInfo.getAppId());
+                    custom.put(LTIPlatformConstants.CUSTOM_CLAIM_NODEID,loginInitiationSessionObject.getContentUrlNodeId());
+                    custom.put(LTIPlatformConstants.CUSTOM_CLAIM_USER,username);
+                    custom.put(LTIPlatformConstants.CUSTOM_CLAIM_CONTENTAPIURL,homeApp.getClientBaseUrl()+"/rest/ltiplatform/v13/content");
+                    jwtBuilder = jwtBuilder.claim(LTIConstants.LTI_CLAIM_CUSTOM,custom);
+                }else{
+                    logger.info("user "+username +" has no writeContent Permissions");
+                }
+            }
 
 
             Key platformPrivateKey = new Signing().getPemPrivateKey(homeApp.getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM);
@@ -494,7 +516,7 @@ public class LTIPlatformApi {
                     }catch ( java.net.URISyntaxException e){}
                     tool.setName(appInfo.getAppCaption());
                     tool.setLogo(appInfo.getLogo());
-                    tool.setCreateOption(appInfo.hasLtiToolCreateOption());
+                    tool.setCustomContentOption(appInfo.hasLtiToolCustomContentOption());
                     tools.getTools().add(tool);
 
                 }
@@ -521,7 +543,8 @@ public class LTIPlatformApi {
                     @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = String.class)))
             })
     public Response generateLoginInitiationForm(@Parameter(description = "appId of the tool",required=true) @QueryParam("appId") String appId,
-                                                @Parameter(description = "the folder id the lti node will be created in. is required for lti deeplink.",required=false) @QueryParam("parentId") String parentId,
+                                                @Parameter(description = "the folder id the lti node will be created in. is required for lti deeplink.",required=true) @QueryParam("parentId") String parentId,
+                                                @Parameter(description = "the nodeId when tool has custom content option.",required=false) @QueryParam("nodeId") String nodeId,
                                                 @Context HttpServletRequest req){
 
 
@@ -540,7 +563,7 @@ public class LTIPlatformApi {
 
             for(ApplicationInfo appInfo : ApplicationInfoList.getApplicationInfos().values()){
                 if(appInfo.isLtiTool() && appInfo.getAppId().equals(appId)){
-                    String form = prepareLoginInitiation(parentId,null, appInfo, LoginInitiationSessionObject.MessageType.deeplink, req);
+                    String form = prepareLoginInitiation(parentId,null, nodeId, appInfo, LoginInitiationSessionObject.MessageType.deeplink, req);
                     return Response.status(Response.Status.OK).entity(form).build();
                 }
             }
@@ -587,6 +610,7 @@ public class LTIPlatformApi {
                 if(appInfo.isLtiTool() && toolUrl.equals(appInfo.getLtitoolUrl())){
                     String form = prepareLoginInitiation(nodeService.getPrimaryParent(nodeRef).getParentRef().getId(),
                             nodeId,
+                            nodeId,
                             appInfo,
                             LoginInitiationSessionObject.MessageType.resourcelink,
                             req);
@@ -611,6 +635,7 @@ public class LTIPlatformApi {
      */
     private String prepareLoginInitiation(String contextId,
                                           String resourceLinkNodeId,
+                                          String contentUrlNodeId,
                                           ApplicationInfo appInfo,
                                           LoginInitiationSessionObject.MessageType messageType,
                                           HttpServletRequest req) {
@@ -634,9 +659,18 @@ public class LTIPlatformApi {
         loginInitiationSessionObject.setContextId(contextId);
         loginInitiationSessionObject.setResourceLinkNodeId(resourceLinkNodeId);
         loginInitiationSessionObject.setMessageType(messageType);
+        loginInitiationSessionObject.setContentUrlNodeId(contentUrlNodeId);
         req.getSession().setAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT, loginInitiationSessionObject);
+        //remember session in userLTISessions map to reuse in later backend call
+        if(contentUrlNodeId != null){
+            AllSessions.userLTISessions.put(getUserLTISessionKey(appInfo.getAppId(),AuthenticationUtil.getFullyAuthenticatedUser(),contentUrlNodeId), req.getSession());
+        }
 
         return form;
+    }
+
+    private String getUserLTISessionKey(String appId,String user,String contentUrlNodeId){
+        return appId+user+contentUrlNodeId;
     }
 
 
@@ -685,8 +719,8 @@ public class LTIPlatformApi {
                 throw new Exception("missing lti content items");
             }
 
-            String nodeId = sessionObject.getNodeId();
-            if(appInfoTool.hasLtiToolCreateOption()){
+            String nodeId = sessionObject.getContentUrlNodeId();
+            if(appInfoTool.hasLtiToolCustomContentOption()){
 
                 if(nodeId == null){
                     throw new Exception("id from initial created node required");
@@ -772,6 +806,129 @@ public class LTIPlatformApi {
         } catch (Throwable e) {
             return ApiTool.processError(req,e,"LTI_ERROR");
         }
+    }
+
+
+    @POST
+    @Path("/content")
+    @Consumes({ "multipart/form-data" })
+
+    @Operation(summary = "Custom edu-sharing endpoint to change content of node.", description = "Change content of node.")
+
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+                    @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response changeContent(
+            @Parameter(description = "jwt containing the claims appId, nodeId, user previously send with ResourceLinkRequest or DeeplinkRequest. Must be signed by tool", required=true ) @QueryParam("jwt")  String jwt,
+            @Parameter(description = "comment, leave empty = no new version, otherwise new version is generated", required=false ) @QueryParam("versionComment")  String versionComment,
+            @Parameter(description = "MIME-Type", required=true ) @QueryParam("mimetype")  String mimetype,
+            @FormDataParam("file") InputStream inputStream,
+            @Context HttpServletRequest req) {
+
+        try {
+
+            /**
+             * decode without validating signature to get appId
+             */
+            String[] chunks = jwt.split("\\.");
+            Base64.Decoder decoder = Base64.getUrlDecoder();
+
+            String header = new String(decoder.decode(chunks[0]));
+            String payload = new String(decoder.decode(chunks[1]));
+            JSONObject jsonObject = (JSONObject)new JSONParser().parse(payload);
+            String appId = (String)jsonObject.get("appId");
+            logger.info("appId tool:" + appId);
+            if(appId == null) throw new Exception("missing "+LTIPlatformConstants.CUSTOM_CLAIM_APP_ID);
+            ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
+            if(appInfo == null || !appInfo.isLtiTool()){
+                throw new Exception("application is no lti tool");
+            }
+
+            /**
+             * validate that this message was signed by the tool
+             */
+            Jws<Claims> jwtObj = LTIJWTUtil.validateJWT(jwt,appInfo);
+            //maybe obsolet:
+            String validatedAppId = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID,String.class);
+            if(!appId.equals(validatedAppId)){
+                throw new Exception("mismatch appId");
+            }
+
+            String user = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_USER, String.class);
+            if(user == null){
+                throw new Exception("missing "+LTIPlatformConstants.CUSTOM_CLAIM_USER);
+            }
+
+            String nodeId = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_NODEID, String.class);
+            if(nodeId == null){
+                throw new Exception("missing "+LTIPlatformConstants.CUSTOM_CLAIM_NODEID);
+            }
+
+            /**
+             * this is a backend call so we con not use this: req.getSession().getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
+             */
+            HttpSession session = AllSessions.userLTISessions.get(this.getUserLTISessionKey(appId,user,nodeId));
+            if(session == null){
+                throw new Exception("no session found");
+            }
+
+            LoginInitiationSessionObject sessionObject = (LoginInitiationSessionObject)session.getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
+            if(!appId.equals(sessionObject.getAppId())){
+                throw new Exception("wrong appId");
+            }
+
+
+            if(!user.equals(session.getAttribute(CCConstants.AUTH_USERNAME))){
+                throw new Exception("wrong user");
+            }
+
+            if(!nodeId.equals(sessionObject.getContentUrlNodeId())){
+                throw new Exception("wrong nodeId");
+            }
+
+            NodeEntry resp =  AuthenticationUtil.runAs(() -> {
+                RepositoryDao repoDao = RepositoryDao.getHomeRepository();
+                NodeDao nodeDao = NodeDao.getNode(repoDao, nodeId);
+                NodeDao newNode = nodeDao.changeContent(inputStream, mimetype, versionComment);
+                NodeEntry response = new NodeEntry();
+                response.setNode(newNode.asNode());
+                return response;
+            },user);
+
+
+            return Response.status(Response.Status.OK).entity(resp).build();
+
+        } catch (DAOValidationException t) {
+
+            logger.warn(t.getMessage(), t);
+            return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
+
+        } catch (DAOSecurityException t) {
+
+            logger.warn(t.getMessage(), t);
+            return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
+
+        } catch (DAOMissingException t) {
+
+            logger.warn(t.getMessage(), t);
+            return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
+
+        }catch(DAOVirusDetectedException t){
+            logger.warn(t.getMessage(),t);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+        } catch (Throwable t) {
+
+            logger.error(t.getMessage(), t);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+        }
+
     }
 
 }

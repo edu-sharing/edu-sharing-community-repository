@@ -5,8 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
+import javax.management.*;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.Engine;
@@ -98,10 +97,8 @@ public class TomcatUtil {
 	 
 	 
 	 public HashMap<Application,Integer> getSessionCount(String host) throws Exception{
-			MBeanServer mBeanServer = Registry.getRegistry(null, null).getMBeanServer();
-			org.apache.catalina.Server server = (org.apache.catalina.Server) mBeanServer.getAttribute(new ObjectName("Catalina", "type", "Server"), "managedResource");
-		
-			Service service = server.findService("Catalina");
+
+			Service service = getService();
 			
 			HashMap<Application,Integer> result = new HashMap<Application,Integer>();
 			
@@ -115,9 +112,22 @@ public class TomcatUtil {
 			
 			return result;
 	}
-	 
-	 
-	 public static List<Application> getApplications(Service service) {
+
+	public Session[] getSessions(String host, String webapp) throws Exception{
+		Service service = getService();
+		List<Application> apps = getApplications(service);
+		Application app = apps.stream().filter(a -> a.getName().equals(webapp)).findFirst().get();
+		return getTomcatSessions(service, host, "/" + app.getName());
+	}
+
+	private Service getService() throws MalformedObjectNameException, ReflectionException, AttributeNotFoundException, InstanceNotFoundException, MBeanException {
+		MBeanServer mBeanServer = Registry.getRegistry(null, null).getMBeanServer();
+		org.apache.catalina.Server server = (org.apache.catalina.Server) mBeanServer.getAttribute(new ObjectName("Catalina", "type", "Server"), "managedResource");
+
+		return server.findService("Catalina");
+	}
+
+	public static List<Application> getApplications(Service service) {
 	        Container[] contexts = getContexts(service);
 	        List<Application> result = new ArrayList<Application>();
 	        if (contexts != null) {

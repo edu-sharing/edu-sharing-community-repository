@@ -12799,6 +12799,380 @@
         }
       }
     },
+    "/ltiplatform/v13/content" : {
+      "post" : {
+        "tags" : [ "LTI Platform v13" ],
+        "summary" : "Custom edu-sharing endpoint to change content of node.",
+        "description" : "Change content of node.",
+        "operationId" : "changeContent",
+        "parameters" : [ {
+          "name" : "jwt",
+          "in" : "query",
+          "description" : "jwt containing the claims appId, nodeId, user previously send with ResourceLinkRequest or DeeplinkRequest. Must be signed by tool",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "versionComment",
+          "in" : "query",
+          "description" : "comment, leave empty = no new version, otherwise new version is generated",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "mimetype",
+          "in" : "query",
+          "description" : "MIME-Type",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "file" : {
+                    "type" : "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NodeEntry"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Preconditions are not present.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Authorization failed.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Session user has insufficient rights to perform this operation.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Ressources are not found.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Fatal error occured.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ltiplatform/v13/deeplinking-response" : {
+      "post" : {
+        "tags" : [ "LTI Platform v13" ],
+        "summary" : "receiving deeplink response messages.",
+        "description" : "deeplink response",
+        "operationId" : "deepLinkingResponse",
+        "requestBody" : {
+          "content" : {
+            "application/x-www-form-urlencoded" : {
+              "schema" : {
+                "required" : [ "JWT" ],
+                "type" : "object",
+                "properties" : {
+                  "JWT" : {
+                    "type" : "string",
+                    "description" : "JWT"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Preconditions are not present.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Authorization failed.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Session user has insufficient rights to perform this operation.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Ressources are not found.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Duplicate Entity/Node conflict (Node with same name exists)",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Fatal error occured.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ltiplatform/v13/generateLoginInitiationForm" : {
+      "get" : {
+        "tags" : [ "LTI Platform v13" ],
+        "summary" : "generate a form used for Initiating Login from a Third Party. Use thes endpoint when starting a lti deeplink flow.",
+        "operationId" : "generateLoginInitiationForm",
+        "parameters" : [ {
+          "name" : "appId",
+          "in" : "query",
+          "description" : "appId of the tool",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "parentId",
+          "in" : "query",
+          "description" : "the folder id the lti node will be created in. is required for lti deeplink.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "nodeId",
+          "in" : "query",
+          "description" : "the nodeId when tool has custom content option.",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Preconditions are not present.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Authorization failed.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Session user has insufficient rights to perform this operation.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Ressources are not found.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Fatal error occured.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ltiplatform/v13/generateLoginInitiationFormResourceLink" : {
+      "get" : {
+        "tags" : [ "LTI Platform v13" ],
+        "summary" : "generate a form used for Initiating Login from a Third Party. Use thes endpoint when starting a lti resourcelink flow.",
+        "operationId" : "generateLoginInitiationFormResourceLink",
+        "parameters" : [ {
+          "name" : "nodeId",
+          "in" : "query",
+          "description" : "the nodeid of a node that contains a lti resourcelink. is required for lti resourcelink",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Preconditions are not present.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Authorization failed.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Session user has insufficient rights to perform this operation.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Ressources are not found.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Fatal error occured.",
+            "content" : {
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/ltiplatform/v13/manual-registration" : {
       "post" : {
         "tags" : [ "LTI Platform v13" ],
@@ -15512,7 +15886,7 @@
         "tags" : [ "NODE v1" ],
         "summary" : "Change content of node.",
         "description" : "Change content of node.",
-        "operationId" : "changeContent",
+        "operationId" : "changeContent_1",
         "parameters" : [ {
           "name" : "repository",
           "in" : "path",
@@ -28732,6 +29106,9 @@
           "targetLinkUri" : {
             "type" : "string"
           },
+          "targetLinkUriDeepLink" : {
+            "type" : "string"
+          },
           "clientName" : {
             "type" : "string"
           }
@@ -28933,7 +29310,7 @@
           "logo" : {
             "type" : "string"
           },
-          "createOption" : {
+          "customContentOption" : {
             "type" : "boolean"
           }
         }

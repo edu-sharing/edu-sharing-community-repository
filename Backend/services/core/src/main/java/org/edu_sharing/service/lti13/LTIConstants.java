@@ -54,6 +54,8 @@ public class LTIConstants {
     public static final String DEEP_LINKING_SETTINGS = "https://purl.imsglobal.org/spec/lti-dl/claim/deep_linking_settings";
 
     public static final String LTI_CLAIM_RESOURCE_LINK = "https://purl.imsglobal.org/spec/lti/claim/resource_link";
+
+    public static final String LTI_CLAIM_CUSTOM = "https://purl.imsglobal.org/spec/lti/claim/custom";
     public static final String DEEP_LINK_RETURN_URL = "deep_link_return_url";
     public static final String DEEP_LINK_DATA = "data";
     public static final String DEEP_LINK_ACCEPT_TYPES = "accept_types";

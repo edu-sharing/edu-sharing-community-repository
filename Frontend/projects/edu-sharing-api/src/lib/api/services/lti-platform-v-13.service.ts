@@ -10,6 +10,7 @@ import { Observable } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
 
 import { ManualRegistrationData } from '../models/manual-registration-data';
+import { NodeEntry } from '../models/node-entry';
 import { OpenIdConfiguration } from '../models/open-id-configuration';
 import { OpenIdRegistrationResult } from '../models/open-id-registration-result';
 import { Tools } from '../models/tools';
@@ -235,6 +236,327 @@ export class LtiPlatformV13Service extends BaseService {
     authTokenEndpoint(params?: {}): Observable<any> {
         return this.authTokenEndpoint$Response(params).pipe(
             map((r: StrictHttpResponse<any>) => r.body as any),
+        );
+    }
+
+    /**
+     * Path part for operation changeContent
+     */
+    static readonly ChangeContentPath = '/ltiplatform/v13/content';
+
+    /**
+     * Custom edu-sharing endpoint to change content of node.
+     *
+     * Change content of node.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `changeContent()` instead.
+     *
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
+     */
+    changeContent$Response(params: {
+        /**
+         * jwt containing the claims appId, nodeId, user previously send with ResourceLinkRequest or DeeplinkRequest. Must be signed by tool
+         */
+        jwt: string;
+
+        /**
+         * comment, leave empty &#x3D; no new version, otherwise new version is generated
+         */
+        versionComment?: string;
+
+        /**
+         * MIME-Type
+         */
+        mimetype: string;
+        body?: {
+            file?: {};
+        };
+    }): Observable<StrictHttpResponse<NodeEntry>> {
+        const rb = new RequestBuilder(
+            this.rootUrl,
+            LtiPlatformV13Service.ChangeContentPath,
+            'post',
+        );
+        if (params) {
+            rb.query('jwt', params.jwt, {});
+            rb.query('versionComment', params.versionComment, {});
+            rb.query('mimetype', params.mimetype, {});
+            rb.body(params.body, 'multipart/form-data');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'text',
+                    accept: 'text/html',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<NodeEntry>;
+                }),
+            );
+    }
+
+    /**
+     * Custom edu-sharing endpoint to change content of node.
+     *
+     * Change content of node.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `changeContent$Response()` instead.
+     *
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
+     */
+    changeContent(params: {
+        /**
+         * jwt containing the claims appId, nodeId, user previously send with ResourceLinkRequest or DeeplinkRequest. Must be signed by tool
+         */
+        jwt: string;
+
+        /**
+         * comment, leave empty &#x3D; no new version, otherwise new version is generated
+         */
+        versionComment?: string;
+
+        /**
+         * MIME-Type
+         */
+        mimetype: string;
+        body?: {
+            file?: {};
+        };
+    }): Observable<NodeEntry> {
+        return this.changeContent$Response(params).pipe(
+            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
+        );
+    }
+
+    /**
+     * Path part for operation deepLinkingResponse
+     */
+    static readonly DeepLinkingResponsePath = '/ltiplatform/v13/deeplinking-response';
+
+    /**
+     * receiving deeplink response messages.
+     *
+     * deeplink response
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `deepLinkingResponse()` instead.
+     *
+     * This method sends `application/x-www-form-urlencoded` and handles request body of type `application/x-www-form-urlencoded`.
+     */
+    deepLinkingResponse$Response(params?: {
+        body?: {
+            /**
+             * JWT
+             */
+            JWT: string;
+        };
+    }): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(
+            this.rootUrl,
+            LtiPlatformV13Service.DeepLinkingResponsePath,
+            'post',
+        );
+        if (params) {
+            rb.body(params.body, 'application/x-www-form-urlencoded');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'text',
+                    accept: 'text/html',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<string>;
+                }),
+            );
+    }
+
+    /**
+     * receiving deeplink response messages.
+     *
+     * deeplink response
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `deepLinkingResponse$Response()` instead.
+     *
+     * This method sends `application/x-www-form-urlencoded` and handles request body of type `application/x-www-form-urlencoded`.
+     */
+    deepLinkingResponse(params?: {
+        body?: {
+            /**
+             * JWT
+             */
+            JWT: string;
+        };
+    }): Observable<string> {
+        return this.deepLinkingResponse$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
+        );
+    }
+
+    /**
+     * Path part for operation generateLoginInitiationForm
+     */
+    static readonly GenerateLoginInitiationFormPath =
+        '/ltiplatform/v13/generateLoginInitiationForm';
+
+    /**
+     * generate a form used for Initiating Login from a Third Party. Use thes endpoint when starting a lti deeplink flow.
+     *
+     *
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `generateLoginInitiationForm()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    generateLoginInitiationForm$Response(params: {
+        /**
+         * appId of the tool
+         */
+        appId: string;
+
+        /**
+         * the folder id the lti node will be created in. is required for lti deeplink.
+         */
+        parentId: string;
+
+        /**
+         * the nodeId when tool has custom content option.
+         */
+        nodeId?: string;
+    }): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(
+            this.rootUrl,
+            LtiPlatformV13Service.GenerateLoginInitiationFormPath,
+            'get',
+        );
+        if (params) {
+            rb.query('appId', params.appId, {});
+            rb.query('parentId', params.parentId, {});
+            rb.query('nodeId', params.nodeId, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'text',
+                    accept: 'text/html',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<string>;
+                }),
+            );
+    }
+
+    /**
+     * generate a form used for Initiating Login from a Third Party. Use thes endpoint when starting a lti deeplink flow.
+     *
+     *
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `generateLoginInitiationForm$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    generateLoginInitiationForm(params: {
+        /**
+         * appId of the tool
+         */
+        appId: string;
+
+        /**
+         * the folder id the lti node will be created in. is required for lti deeplink.
+         */
+        parentId: string;
+
+        /**
+         * the nodeId when tool has custom content option.
+         */
+        nodeId?: string;
+    }): Observable<string> {
+        return this.generateLoginInitiationForm$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
+        );
+    }
+
+    /**
+     * Path part for operation generateLoginInitiationFormResourceLink
+     */
+    static readonly GenerateLoginInitiationFormResourceLinkPath =
+        '/ltiplatform/v13/generateLoginInitiationFormResourceLink';
+
+    /**
+     * generate a form used for Initiating Login from a Third Party. Use thes endpoint when starting a lti resourcelink flow.
+     *
+     *
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `generateLoginInitiationFormResourceLink()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    generateLoginInitiationFormResourceLink$Response(params?: {
+        /**
+         * the nodeid of a node that contains a lti resourcelink. is required for lti resourcelink
+         */
+        nodeId?: string;
+    }): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(
+            this.rootUrl,
+            LtiPlatformV13Service.GenerateLoginInitiationFormResourceLinkPath,
+            'get',
+        );
+        if (params) {
+            rb.query('nodeId', params.nodeId, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'text',
+                    accept: 'text/html',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<string>;
+                }),
+            );
+    }
+
+    /**
+     * generate a form used for Initiating Login from a Third Party. Use thes endpoint when starting a lti resourcelink flow.
+     *
+     *
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `generateLoginInitiationFormResourceLink$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    generateLoginInitiationFormResourceLink(params?: {
+        /**
+         * the nodeid of a node that contains a lti resourcelink. is required for lti resourcelink
+         */
+        nodeId?: string;
+    }): Observable<string> {
+        return this.generateLoginInitiationFormResourceLink$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
         );
     }
 

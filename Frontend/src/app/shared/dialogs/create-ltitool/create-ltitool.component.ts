@@ -73,13 +73,36 @@ export class CreateLtitoolComponent implements OnInit {
     }
 
     public open() {
-        window.open(
-            '/edu-sharing/rest/ltiplatform/v13/generateLoginInitiationForm?appId=' +
-                this._tool.appId +
-                '&parentId=' +
-                this._parent.ref.id,
-            '_blank',
-        );
+        if (this._tool.customContentOption) {
+            if (this._name == undefined) {
+                return;
+            }
+            const properties = RestHelper.createNameProperty(this._name);
+            console.log('tool has create option');
+            this.nodeService
+                .createNode(this._parent.ref.id, RestConstants.CCM_TYPE_IO, [], properties)
+                .subscribe(
+                    (data: NodeWrapper) => {
+                        window.open(
+                            '/edu-sharing/rest/ltiplatform/v13/generateLoginInitiationForm?appId=' +
+                                this._tool.appId +
+                                '&parentId=' +
+                                this._parent.ref.id,
+                            +'&nodeId=' + data.node.ref.id,
+                            '_blank',
+                        );
+                    },
+                    (error: any) => {},
+                );
+        } else {
+            window.open(
+                '/edu-sharing/rest/ltiplatform/v13/generateLoginInitiationForm?appId=' +
+                    this._tool.appId +
+                    '&parentId=' +
+                    this._parent.ref.id,
+                '_blank',
+            );
+        }
     }
 
     public angularFunctionCalled(nodeIds: string[], titles: string[]) {

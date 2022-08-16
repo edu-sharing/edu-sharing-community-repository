@@ -8,6 +8,7 @@ export interface ManualRegistrationData {
     logoUrl?: string;
     redirectionUrls?: Array<string>;
     targetLinkUri?: string;
+    targetLinkUriDeepLink?: string;
     toolDescription?: string;
     toolName?: string;
     toolUrl?: string;

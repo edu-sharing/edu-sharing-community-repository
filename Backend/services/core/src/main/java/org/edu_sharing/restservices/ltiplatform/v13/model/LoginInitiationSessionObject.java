@@ -4,7 +4,7 @@ public class LoginInitiationSessionObject {
 
     public static enum MessageType{resourcelink,deeplink}
 
-    String contextId,clientId,appId,nodeId,resourceLinkNodeId;
+    String contextId,clientId,appId,resourceLinkNodeId,contentUrlNodeId;
 
     MessageType messageType;
 
@@ -32,13 +32,6 @@ public class LoginInitiationSessionObject {
         this.appId = appId;
     }
 
-    public void setNodeId(String nodeId) {
-        this.nodeId = nodeId;
-    }
-
-    public String getNodeId() {
-        return nodeId;
-    }
 
     public MessageType getMessageType() {
         return messageType;
@@ -54,5 +47,13 @@ public class LoginInitiationSessionObject {
 
     public String getResourceLinkNodeId() {
         return resourceLinkNodeId;
+    }
+
+    public void setContentUrlNodeId(String contentUrlNodeId) {
+        this.contentUrlNodeId = contentUrlNodeId;
+    }
+
+    public String getContentUrlNodeId() {
+        return contentUrlNodeId;
     }
 }

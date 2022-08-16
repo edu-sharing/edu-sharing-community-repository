@@ -158,7 +158,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	public static final String KEY_LTITOOL_DESCRIPTION = "ltitool_description";
 
 	//custom allow too to write content to edu-sharing
-	public static final String KEY_LTITOOL_CREATEOPTION = "ltitool_create_option";
+	public static final String KEY_LTITOOL_CUSTOMCONTENT_OPTION = "ltitool_customcontent_option";
 
 	//used to identify applications by resourcelinks
 	public static final String KEY_LTITOOL_URL = "ltitool_url";
@@ -400,7 +400,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	private String ltitoolDescription;
 
-	private String ltitoolCreateOption;
+	private String ltitoolCustomContentOption;
 
 	private String ltitoolUrl;
 
@@ -575,7 +575,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		ltitoolTargetLinkUriDeepLink = properties.getProperty(KEY_LTITOOL_TARGET_LINK_URI_DEEPLINK);
 		ltitoolCustomParameters = properties.getProperty(KEY_LTITOOL_CUSTOM_PARAMETERS);
 		ltitoolDescription = properties.getProperty(KEY_LTITOOL_DESCRIPTION);
-		ltitoolCreateOption = properties.getProperty(KEY_LTITOOL_CREATEOPTION);
+		ltitoolCustomContentOption = properties.getProperty(KEY_LTITOOL_CUSTOMCONTENT_OPTION);
 		ltitoolUrl = properties.getProperty(KEY_LTITOOL_URL);
 	}
 	
@@ -1121,8 +1121,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	public String getLtitoolDescription() {return ltitoolDescription;}
 
-	public boolean hasLtiToolCreateOption(){
-		return new Boolean(ltitoolCreateOption);
+	public boolean hasLtiToolCustomContentOption(){
+		return new Boolean(ltitoolCustomContentOption);
 	}
 
 	public String getLtitoolUrl(){

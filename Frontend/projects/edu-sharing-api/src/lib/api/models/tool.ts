@@ -2,7 +2,7 @@
 /* eslint-disable */
 export interface Tool {
     appId?: string;
-    createOption?: boolean;
+    customContentOption?: boolean;
     description?: string;
     domain?: string;
     logo?: string;
