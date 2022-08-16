@@ -54,6 +54,7 @@ import {
     DialogRef,
     ManagementDialogsService,
 } from '../../../modules/management-dialogs/management-dialogs.service';
+import { PasteService } from '../../../services/paste.service';
 import { CardComponent } from '../../../shared/components/card/card.component';
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
 
@@ -132,6 +133,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         private event: FrameEventsService,
         private cardService: CardService,
         private dialogs: ManagementDialogsService,
+        private paste: PasteService,
     ) {
         this.route.queryParams.subscribe((params) => {
             this.params = params;
@@ -156,6 +158,14 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         this.optionsService.virtualNodesAdded
             .pipe(takeUntil(this.destroyed))
             .subscribe((nodes) => this.onCreate.emit(nodes));
+        this.paste
+            .observeUrlPasteOnPage()
+            .pipe(takeUntil(this.destroyed))
+            .subscribe((url) => this.onUrlPasteOnPage(url));
+        this.paste
+            .observeNonTextPageOnPage()
+            .pipe(takeUntil(this.destroyed))
+            .subscribe(() => this.toast.error(null, 'CLIPBOARD_DATA_UNSUPPORTED'));
     }
 
     ngOnDestroy(): void {
@@ -163,41 +173,19 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         this.destroyed.complete();
     }
 
-    @HostListener('document:paste', ['$event'])
-    onDataPaste(event: ClipboardEvent) {
-        if (event.type === 'paste') {
-            if (!this.allowed || !this.allowBinary) {
-                return;
-            }
-            if (CardComponent.getNumberOfOpenCards() > 0) {
-                return;
-            }
-            if ((event.target as HTMLElement)?.tagName === 'INPUT') {
-                return;
-            }
-            if (event.clipboardData.items.length > 0) {
-                const item = event.clipboardData.items[0];
-                if (item.type === 'text/plain') {
-                    item.getAsString((data) => {
-                        if (data.toLowerCase().startsWith('http')) {
-                            // @TODO: Later we should find a way to prevent the event from propagating
-                            // this currently fails because getAsString is called async!
-                            this.managementService
-                                .getDialogsComponent()
-                                .createUrlLink(new LinkData(data));
-                            event.preventDefault();
-                            event.stopPropagation();
-                        } else {
-                            // this.toast.error(null, 'CLIPBOARD_DATA_UNSUPPORTED');
-                            // it is normal text, ignore it
-                            return;
-                        }
-                    });
-                } else {
-                    this.toast.error(null, 'CLIPBOARD_DATA_UNSUPPORTED');
-                }
-            }
+    private onUrlPasteOnPage(url: string) {
+        if (!this.allowed || !this.allowBinary) {
+            return;
         }
+        if (CardComponent.getNumberOfOpenCards() > 0) {
+            return;
+        }
+        // @TODO: Later we should find a way to prevent the event from propagating
+        // this currently fails because getAsString is called async!
+        void this.managementService.getDialogsComponent().createUrlLink({
+            ...new LinkData(url),
+            parent: this.getParent(),
+        });
     }
 
     updateOptions() {
