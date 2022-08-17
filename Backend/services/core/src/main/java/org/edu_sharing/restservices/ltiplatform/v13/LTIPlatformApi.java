@@ -19,6 +19,7 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -38,10 +39,13 @@ import org.edu_sharing.service.lti13.LTIJWTUtil;
 import org.edu_sharing.service.lti13.registration.RegistrationService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.version.VersionService;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.extensions.surf.util.I18NUtil;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -812,6 +816,7 @@ public class LTIPlatformApi {
     @POST
     @Path("/content")
     @Consumes({ "multipart/form-data" })
+    @Produces({"application/json"})
 
     @Operation(summary = "Custom edu-sharing endpoint to change content of node.", description = "Change content of node.")
 
@@ -829,11 +834,11 @@ public class LTIPlatformApi {
             @Parameter(description = "jwt containing the claims appId, nodeId, user previously send with ResourceLinkRequest or DeeplinkRequest. Must be signed by tool", required=true ) @QueryParam("jwt")  String jwt,
             @Parameter(description = "comment, leave empty = no new version, otherwise new version is generated", required=false ) @QueryParam("versionComment")  String versionComment,
             @Parameter(description = "MIME-Type", required=true ) @QueryParam("mimetype")  String mimetype,
-            @FormDataParam("file") InputStream inputStream,
+            //@Parameter(description = "file upload", schema = @Schema(description = "hello 123", name = "file", type = "string", format = "binary")) InputStream inputStream,
+            @Parameter(description = "file upload", schema = @Schema( name = "file", type = "string", format = "binary")) @FormDataParam("file") InputStream inputStream,
             @Context HttpServletRequest req) {
 
         try {
-
             /**
              * decode without validating signature to get appId
              */
@@ -929,6 +934,54 @@ public class LTIPlatformApi {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
         }
 
+    }
+
+
+    @PUT
+    @Path("/testToken")
+
+    @Operation(summary = "test creates a token signed with homeapp.", description = "test token.")
+
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response testToken(
+            @Parameter(description = "properties" ,required=true ) HashMap<String, String> properties,
+            @Context HttpServletRequest req) {
+
+
+
+        try {
+            if(!"admin".equals(AuthenticationUtil.getFullyAuthenticatedUser())){
+                throw new Exception("admin required");
+            }
+
+            Key issPrivateKey = new Signing().getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM);
+            JwtBuilder builder = Jwts.builder()
+                    .setHeaderParam("kid", ApplicationInfoList.getHomeRepository().getAppId())  // The key id used to sign this
+                    .setHeaderParam("typ", "JWT") // The type
+                    .setIssuer("ltiStarter")  //This is our own identifier, to know that we are the issuer.
+                    .setExpiration(DateUtils.addSeconds(new Date(), 360000000));
+
+            properties.entrySet().stream().forEach(e -> builder.claim(e.getKey(),e.getValue()));
+
+            String result = builder.signWith(SignatureAlgorithm.RS256, issPrivateKey)  //We sign it
+                    .compact();
+
+
+            return Response.status(Response.Status.OK).entity(result).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
     }
 
 }
