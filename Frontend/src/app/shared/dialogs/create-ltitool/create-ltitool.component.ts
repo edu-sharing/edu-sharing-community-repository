@@ -78,7 +78,7 @@ export class CreateLtitoolComponent implements OnInit {
                 return;
             }
             const properties = RestHelper.createNameProperty(this._name);
-            console.log('tool has create option');
+            console.log('tool has create option 123test');
             this.nodeService
                 .createNode(this._parent.ref.id, RestConstants.CCM_TYPE_IO, [], properties)
                 .subscribe(
@@ -87,8 +87,9 @@ export class CreateLtitoolComponent implements OnInit {
                             '/edu-sharing/rest/ltiplatform/v13/generateLoginInitiationForm?appId=' +
                                 this._tool.appId +
                                 '&parentId=' +
-                                this._parent.ref.id,
-                            +'&nodeId=' + data.node.ref.id,
+                                this._parent.ref.id +
+                                '&nodeId=' +
+                                data.node.ref.id,
                             '_blank',
                         );
                     },

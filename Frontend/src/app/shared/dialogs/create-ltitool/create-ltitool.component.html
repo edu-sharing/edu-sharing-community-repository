@@ -27,7 +27,10 @@
             </mat-form-field>
           </li>
         </ul>
-        <mat-form-field style="width: 100%" *ngIf="_tool.customContentOption">
+        <mat-form-field
+          style="width: 100%"
+          *ngIf="_tool.customContentOption && (!nodes || nodes.length == 0)"
+        >
           <mat-label>{{ 'NODE.cm:name' | translate }} </mat-label>
           <input
             matInput
