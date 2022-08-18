@@ -48,7 +48,7 @@ public class RegistrationService {
     public static OpenIdConfiguration getLtiPlatformOpenIdConfiguration() {
         ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
         OpenIdConfiguration oidconf = new OpenIdConfiguration();
-        oidconf.setIssuer(homeRepository.getDomain());
+        oidconf.setIssuer(homeRepository.getClientBaseUrl());
         /**
          * @TODO token stuff
          */
@@ -328,7 +328,7 @@ public class RegistrationService {
         String targetLinkUri =  (String)ltiToolConfig.get("target_link_uri");
         List<String> claims = (List<String>)ltiToolConfig.get("claims");
         String description =  (String)ltiToolConfig.get("description");
-        List<String> customParameters = (List<String>)ltiToolConfig.get("custom_parameters");
+        JSONObject customParameters = (JSONObject)ltiToolConfig.get("custom_parameters");
         JSONArray ltiToolConfigMessages = (JSONArray)ltiToolConfig.get("messages");
         String targetLinkUriDL = null;
         if(ltiToolConfigMessages != null){
@@ -372,8 +372,9 @@ public class RegistrationService {
         DefaultClaims body = (DefaultClaims)registrationToken.getBody();
         String sub = (String) body.get("sub");
 
+
         return registerTool(sub, initiateLoginUri, jwksuri, targetLinkUri, StringUtils.join(redirectUris,","), logoUri,
-                (customParameters != null) ? StringUtils.join(customParameters,",") : null, description, clientName, targetLinkUriDL, null);
+                (customParameters != null) ? customParameters.toJSONString() : null, description, clientName, targetLinkUriDL, null);
     }
 
     /**
