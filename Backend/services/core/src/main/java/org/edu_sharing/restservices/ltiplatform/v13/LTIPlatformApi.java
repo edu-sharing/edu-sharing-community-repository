@@ -19,6 +19,7 @@ import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
+import org.apache.catalina.Session;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
@@ -879,7 +880,10 @@ public class LTIPlatformApi {
         }catch(DAOVirusDetectedException t){
             logger.warn(t.getMessage(),t);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
-        } catch (Throwable t) {
+        }catch(ValidationException e){
+            logger.warn(e.getMessage(),e);
+            return Response.status(Response.Status.FORBIDDEN).entity(e.getMessage()).build();
+        }  catch (Throwable t) {
 
             logger.error(t.getMessage(), t);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
@@ -902,7 +906,7 @@ public class LTIPlatformApi {
         if(appId == null) throw new Exception("missing "+LTIPlatformConstants.CUSTOM_CLAIM_APP_ID);
         ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
         if(appInfo == null || !appInfo.isLtiTool()){
-            throw new Exception("application is no lti tool");
+            throw new ValidationException("application is no lti tool");
         }
 
         /**
@@ -912,17 +916,17 @@ public class LTIPlatformApi {
         //maybe obsolet:
         String validatedAppId = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID,String.class);
         if(!appId.equals(validatedAppId)){
-            throw new Exception("mismatch appId");
+            throw new ValidationException("mismatch appId");
         }
 
         String user = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_USER, String.class);
         if(user == null){
-            throw new Exception("missing "+LTIPlatformConstants.CUSTOM_CLAIM_USER);
+            throw new ValidationException("missing "+LTIPlatformConstants.CUSTOM_CLAIM_USER);
         }
 
         String nodeId = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_NODEID, String.class);
         if(nodeId == null){
-            throw new Exception("missing "+LTIPlatformConstants.CUSTOM_CLAIM_NODEID);
+            throw new ValidationException("missing "+LTIPlatformConstants.CUSTOM_CLAIM_NODEID);
         }
 
         /**
@@ -930,22 +934,24 @@ public class LTIPlatformApi {
          */
         HttpSession session = AllSessions.userLTISessions.get(this.getUserLTISessionKey(appId,user,nodeId));
         if(session == null){
-            throw new Exception("no session found");
+            throw new ValidationException("no session found");
         }
 
         LoginInitiationSessionObject sessionObject = (LoginInitiationSessionObject)session.getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
         if(!appId.equals(sessionObject.getAppId())){
-            throw new Exception("wrong appId");
+            throw new ValidationException("wrong appId");
         }
 
 
         if(!user.equals(session.getAttribute(CCConstants.AUTH_USERNAME))){
-            throw new Exception("wrong user");
+            throw new ValidationException("wrong user");
         }
 
         if(!nodeId.equals(sessionObject.getContentUrlNodeId())){
-            throw new Exception("wrong nodeId");
+            throw new ValidationException("wrong nodeId");
         }
+
+
 
         return jwtObj;
     }
@@ -985,12 +991,12 @@ public class LTIPlatformApi {
 
                 String toolUrl = (String)serviceRegistry.getNodeService().getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_TOOLURL));
                 if(toolUrl == null || !toolUrl.equals(appInfo.getLtitoolUrl())){
-                    throw new Exception("tool is not allowed to access this node");
+                    throw new ValidationException("tool is not allowed to access this node");
                 }
 
                 ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef, ContentModel.PROP_CONTENT);
                 if (reader == null) {
-                    throw new Exception("no content found");
+                    throw new ValidationException("no content found");
                 }
 
                 String mimetype = reader.getMimetype();
@@ -1014,9 +1020,19 @@ public class LTIPlatformApi {
 
 
             return null;
+        }catch(ValidationException e){
+            logger.warn(e.getMessage(),e);
+            return Response.status(Response.Status.FORBIDDEN).entity(e.getMessage()).build();
+        }catch (RuntimeException e){
+            if(e.getCause() != null && e.getCause() instanceof ValidationException){
+                logger.warn(e.getMessage(),e);
+                return Response.status(Response.Status.FORBIDDEN).entity(e.getCause().getMessage()).build();
+            }
+            logger.error(e.getMessage(),e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }catch (Exception e){
             logger.error(e.getMessage(),e);
-            return ApiTool.processError(req,e,"LTI_ERROR");
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
 
