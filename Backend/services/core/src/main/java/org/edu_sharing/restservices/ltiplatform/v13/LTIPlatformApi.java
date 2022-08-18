@@ -20,6 +20,8 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.apache.catalina.Session;
+import org.apache.catalina.session.StandardSession;
+import org.apache.catalina.session.StandardSessionFacade;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
@@ -56,6 +58,7 @@ import javax.ws.rs.core.Response;
 import java.io.DataInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
@@ -952,6 +955,14 @@ public class LTIPlatformApi {
         }
 
 
+        /**
+         * extend session runtime
+         */
+        Field facadeSessionField = StandardSessionFacade.class.getDeclaredField("session");
+        facadeSessionField.setAccessible(true);
+        StandardSession stdSession = (StandardSession) facadeSessionField.get(session);
+        stdSession.endAccess();
+        logger.info("last AccessTime:" + new Date(session.getLastAccessedTime()));
 
         return jwtObj;
     }
