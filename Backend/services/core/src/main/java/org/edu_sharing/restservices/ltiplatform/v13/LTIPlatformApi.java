@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -39,19 +40,19 @@ import org.edu_sharing.service.lti13.LTIJWTUtil;
 import org.edu_sharing.service.lti13.registration.RegistrationService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.version.VersionService;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.extensions.surf.util.I18NUtil;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.io.DataInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
@@ -212,16 +213,18 @@ public class LTIPlatformApi {
                 AccessStatus accessStatus = serviceRegistry.getPermissionService()
                         .hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,loginInitiationSessionObject.getContentUrlNodeId()),
                                 PermissionService.WRITE_CONTENT);
+                Map<String,String> custom = new HashMap<>();
+                custom.put(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID,appInfo.getAppId());
+                custom.put(LTIPlatformConstants.CUSTOM_CLAIM_NODEID,loginInitiationSessionObject.getContentUrlNodeId());
+                custom.put(LTIPlatformConstants.CUSTOM_CLAIM_USER,username);
+                custom.put(LTIPlatformConstants.CUSTOM_CLAIM_GET_CONTENTAPIURL,homeApp.getClientBaseUrl()+"/rest/ltiplatform/v13/content");
                 if(accessStatus != null && accessStatus.equals(AccessStatus.ALLOWED)){
-                    Map<String,String> custom = new HashMap<>();
-                    custom.put(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID,appInfo.getAppId());
-                    custom.put(LTIPlatformConstants.CUSTOM_CLAIM_NODEID,loginInitiationSessionObject.getContentUrlNodeId());
-                    custom.put(LTIPlatformConstants.CUSTOM_CLAIM_USER,username);
-                    custom.put(LTIPlatformConstants.CUSTOM_CLAIM_CONTENTAPIURL,homeApp.getClientBaseUrl()+"/rest/ltiplatform/v13/content");
+                    custom.put(LTIPlatformConstants.CUSTOM_CLAIM_POST_CONTENTAPIURL,homeApp.getClientBaseUrl()+"/rest/ltiplatform/v13/content");
                     jwtBuilder = jwtBuilder.claim(LTIConstants.LTI_CLAIM_CUSTOM,custom);
                 }else{
                     logger.info("user "+username +" has no writeContent Permissions");
                 }
+
             }
 
 
@@ -839,64 +842,12 @@ public class LTIPlatformApi {
             @Context HttpServletRequest req) {
 
         try {
-            /**
-             * decode without validating signature to get appId
-             */
-            String[] chunks = jwt.split("\\.");
-            Base64.Decoder decoder = Base64.getUrlDecoder();
 
-            String header = new String(decoder.decode(chunks[0]));
-            String payload = new String(decoder.decode(chunks[1]));
-            JSONObject jsonObject = (JSONObject)new JSONParser().parse(payload);
-            String appId = (String)jsonObject.get("appId");
-            logger.info("appId tool:" + appId);
-            if(appId == null) throw new Exception("missing "+LTIPlatformConstants.CUSTOM_CLAIM_APP_ID);
-            ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
-            if(appInfo == null || !appInfo.isLtiTool()){
-                throw new Exception("application is no lti tool");
-            }
-
-            /**
-             * validate that this message was signed by the tool
-             */
-            Jws<Claims> jwtObj = LTIJWTUtil.validateJWT(jwt,appInfo);
-            //maybe obsolet:
-            String validatedAppId = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID,String.class);
-            if(!appId.equals(validatedAppId)){
-                throw new Exception("mismatch appId");
-            }
-
+            Jws<Claims>  jwtObj = this.validateForCustomContent(jwt);
             String user = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_USER, String.class);
-            if(user == null){
-                throw new Exception("missing "+LTIPlatformConstants.CUSTOM_CLAIM_USER);
-            }
-
             String nodeId = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_NODEID, String.class);
-            if(nodeId == null){
-                throw new Exception("missing "+LTIPlatformConstants.CUSTOM_CLAIM_NODEID);
-            }
-
-            /**
-             * this is a backend call so we con not use this: req.getSession().getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
-             */
-            HttpSession session = AllSessions.userLTISessions.get(this.getUserLTISessionKey(appId,user,nodeId));
-            if(session == null){
-                throw new Exception("no session found");
-            }
-
-            LoginInitiationSessionObject sessionObject = (LoginInitiationSessionObject)session.getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
-            if(!appId.equals(sessionObject.getAppId())){
-                throw new Exception("wrong appId");
-            }
 
 
-            if(!user.equals(session.getAttribute(CCConstants.AUTH_USERNAME))){
-                throw new Exception("wrong user");
-            }
-
-            if(!nodeId.equals(sessionObject.getContentUrlNodeId())){
-                throw new Exception("wrong nodeId");
-            }
 
             NodeEntry resp =  AuthenticationUtil.runAs(() -> {
                 RepositoryDao repoDao = RepositoryDao.getHomeRepository();
@@ -936,12 +887,147 @@ public class LTIPlatformApi {
 
     }
 
+    private Jws<Claims> validateForCustomContent(String jwt) throws Exception{
+        /**
+         * decode without validating signature to get appId
+         */
+        String[] chunks = jwt.split("\\.");
+        Base64.Decoder decoder = Base64.getUrlDecoder();
+
+        String header = new String(decoder.decode(chunks[0]));
+        String payload = new String(decoder.decode(chunks[1]));
+        JSONObject jsonObject = (JSONObject)new JSONParser().parse(payload);
+        String appId = (String)jsonObject.get("appId");
+        logger.info("appId tool:" + appId);
+        if(appId == null) throw new Exception("missing "+LTIPlatformConstants.CUSTOM_CLAIM_APP_ID);
+        ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
+        if(appInfo == null || !appInfo.isLtiTool()){
+            throw new Exception("application is no lti tool");
+        }
+
+        /**
+         * validate that this message was signed by the tool
+         */
+        Jws<Claims> jwtObj = LTIJWTUtil.validateJWT(jwt,appInfo);
+        //maybe obsolet:
+        String validatedAppId = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID,String.class);
+        if(!appId.equals(validatedAppId)){
+            throw new Exception("mismatch appId");
+        }
+
+        String user = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_USER, String.class);
+        if(user == null){
+            throw new Exception("missing "+LTIPlatformConstants.CUSTOM_CLAIM_USER);
+        }
+
+        String nodeId = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_NODEID, String.class);
+        if(nodeId == null){
+            throw new Exception("missing "+LTIPlatformConstants.CUSTOM_CLAIM_NODEID);
+        }
+
+        /**
+         * this is a backend call so we con not use this: req.getSession().getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
+         */
+        HttpSession session = AllSessions.userLTISessions.get(this.getUserLTISessionKey(appId,user,nodeId));
+        if(session == null){
+            throw new Exception("no session found");
+        }
+
+        LoginInitiationSessionObject sessionObject = (LoginInitiationSessionObject)session.getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
+        if(!appId.equals(sessionObject.getAppId())){
+            throw new Exception("wrong appId");
+        }
+
+
+        if(!user.equals(session.getAttribute(CCConstants.AUTH_USERNAME))){
+            throw new Exception("wrong user");
+        }
+
+        if(!nodeId.equals(sessionObject.getContentUrlNodeId())){
+            throw new Exception("wrong nodeId");
+        }
+
+        return jwtObj;
+    }
+
+
+    @GET
+    @Path("/content")
+    @Consumes({ "application/json" })
+    @Produces({ "*/*" })
+    @Operation(summary = "Custom edu-sharing endpoint to get content of node.", description = "Get content of node.")
+
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = byte[].class))),
+                    @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class)))
+            })
+    public Response getContent(
+            @Parameter(description = "jwt containing the claims appId, nodeId, user previously send with ResourceLinkRequest or DeeplinkRequest. Must be signed by tool", required=true ) @QueryParam("jwt")  String jwt,
+            @Context HttpServletRequest req,
+            @Context HttpServletResponse resp){
+        try {
+            Jws<Claims> jwtObj = this.validateForCustomContent(jwt);
+            String nodeId = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_NODEID, String.class);
+
+            NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
+
+
+            String appId = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID, String.class);
+
+            ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
+
+            AuthenticationUtil.runAsSystem(() -> {
+
+                String toolUrl = (String)serviceRegistry.getNodeService().getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_TOOLURL));
+                if(toolUrl == null || !toolUrl.equals(appInfo.getLtitoolUrl())){
+                    throw new Exception("tool is not allowed to access this node");
+                }
+
+                ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef, ContentModel.PROP_CONTENT);
+                if (reader == null) {
+                    throw new Exception("no content found");
+                }
+
+                String mimetype = reader.getMimetype();
+
+                resp.setContentType((mimetype != null) ? mimetype : "application/octet-stream");
+                resp.setContentLength((int) reader.getContentData().getSize());
+
+                int length = 0;
+                byte[] bbuf = new byte[1024];
+                DataInputStream in = new DataInputStream(reader.getContentInputStream());
+                ServletOutputStream op = resp.getOutputStream();
+                while ((in != null) && ((length = in.read(bbuf)) != -1)) {
+                    op.write(bbuf, 0, length);
+                }
+
+                in.close();
+                op.flush();
+                op.close();
+                return null;
+            });
+
+
+            return null;
+        }catch (Exception e){
+            logger.error(e.getMessage(),e);
+            return ApiTool.processError(req,e,"LTI_ERROR");
+        }
+    }
+
+
+
 
     @PUT
     @Path("/testToken")
-
     @Operation(summary = "test creates a token signed with homeapp.", description = "test token.")
-
+    @Consumes({ "application/json"})
+    @Produces({"application/json"})
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = String.class))),

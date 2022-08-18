@@ -9,6 +9,8 @@ public class LTIPlatformConstants {
 
     public static final String CUSTOM_CLAIM_NODEID = "nodeId";
 
-    public static final String CUSTOM_CLAIM_CONTENTAPIURL = "contentApiUrl";
+    public static final String CUSTOM_CLAIM_POST_CONTENTAPIURL = "postContentApiUrl";
+
+    public static final String CUSTOM_CLAIM_GET_CONTENTAPIURL = "getContentApiUrl";
 
 }
