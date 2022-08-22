@@ -432,11 +432,10 @@ export class WorkspaceManagementDialogsComponent {
     public uploadFile(event: FileList) {
         this.onUploadFileSelected.emit(event);
     }
-    async createUrlLink(link: LinkData) {
+    createUrlLink(link: LinkData) {
         const urlData = this.nodeHelper.createUrlLink(link);
         this.closeUploadSelect();
         this.toast.showProgressDialog();
-        const config = await this.mainNavService.observeMainNavConfig().pipe(first()).toPromise();
         this.nodeService
             .createNode(
                 link.parent?.ref.id,
