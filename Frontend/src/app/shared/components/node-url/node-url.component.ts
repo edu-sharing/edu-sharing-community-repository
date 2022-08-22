@@ -24,7 +24,7 @@ const NODE_URL_TAG_NAME = 'es-node-url';
     styleUrls: ['node-url.component.scss'],
 })
 export class NodeUrlComponent implements AfterViewInit {
-    @ViewChild('link') link: ElementRef;
+    @ViewChild('link') link: ElementRef<HTMLAnchorElement>;
 
     @Input() listTable: ListTableComponent;
     @Input() node: Node;
@@ -114,6 +114,13 @@ export class NodeUrlComponent implements AfterViewInit {
 }
 
 function copyClickEvent(event: MouseEvent): MouseEvent {
+    // On Firefox, a middle click via neither the 'click', nor the 'auxclick' event cause a new tab
+    // to be opened when triggered programmatically. As a workaround, we simulate a ctrl click
+    // instead of a middle click. This matches Firefox's defaults, but we cannot account for
+    // changed middle-click behavior.
+    if (event.type === 'auxclick' && event.button === 1 && isFirefox()) {
+        return copyClickEvent({ ...event, type: 'click', ctrlKey: true, button: 0 });
+    }
     // It would seem better to use `event.type` instead of hard-coding 'click', but that doesn't
     // have the desired effect for non-click events when dispatched.
     return new MouseEvent('click', {
@@ -124,4 +131,8 @@ function copyClickEvent(event: MouseEvent): MouseEvent {
         altKey: event.altKey,
         metaKey: event.metaKey,
     });
+}
+
+function isFirefox(): boolean {
+    return navigator.userAgent.includes('Firefox');
 }

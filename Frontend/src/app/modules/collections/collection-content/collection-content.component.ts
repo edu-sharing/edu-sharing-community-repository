@@ -582,8 +582,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         // @TODO: check if this is the ideal trigger event
         this.mainNavService
             .getDialogs()
-            .onUploadFilesProcessed.subscribe((nodes) => this.addNodesToCollection(nodes));
-        this.mainNavUpdateTrigger.subscribe(async () => {
+            .onUploadFilesProcessed.pipe(takeUntil(this.destroyed$))
+            .subscribe((nodes) => this.addNodesToCollection(nodes));
+        this.mainNavUpdateTrigger.pipe(takeUntil(this.destroyed$)).subscribe(async () => {
             this.mainNavService.patchMainNavConfig({
                 create: {
                     allowed: this.createAllowed(),

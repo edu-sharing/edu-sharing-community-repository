@@ -27,8 +27,9 @@
 
     <div *ngIf="hasNonIconPreview()" class="card-image-icon-container">
       <img
+        *ngIf="collection?.preview?.url"
         class="collection-header-image"
-        [src]="collection?.preview?.url + '&crop=true&width=400&height=350'"
+        [src]="collection | appNodeImage: { crop: true, width: 400, height: 350 }"
         role="presentation"
       />
     </div>
