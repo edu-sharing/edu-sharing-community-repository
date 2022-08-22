@@ -13,7 +13,7 @@ import {
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { forkJoin as observableForkJoin, Subject } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { first, takeUntil } from 'rxjs/operators';
 import {
     DropSource,
     DropTarget,
@@ -296,6 +296,7 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
     private feedbacks: CollectionFeedback[];
     private params: Params;
     private loadingTask = this.loadingScreen.addLoadingTask();
+    private destroyed = new Subject<void>();
 
     // inject services
     constructor(
@@ -415,6 +416,8 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy() {
+        this.destroyed.next();
+        this.destroyed.complete();
         this.temporaryStorageService.set(
             TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE,
             this.dataSourceReferences,
@@ -431,8 +434,9 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
         // @TODO: check if this is the ideal trigger event
         this.mainNavService
             .getDialogs()
-            .onUploadFilesProcessed.subscribe((nodes) => this.addNodesToCollection(nodes));
-        this.mainNavUpdateTrigger.subscribe(() => {
+            .onUploadFilesProcessed.pipe(takeUntil(this.destroyed))
+            .subscribe((nodes) => this.addNodesToCollection(nodes));
+        this.mainNavUpdateTrigger.pipe(takeUntil(this.destroyed)).subscribe(() => {
             this.mainNavService.patchMainNavConfig({
                 create: {
                     allowed: this.createAllowed(),
