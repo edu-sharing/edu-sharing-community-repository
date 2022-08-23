@@ -213,7 +213,7 @@ public class LTIPlatformApi {
             }
 
 
-            if(appInfo.hasLtiToolCustomContentOption()){
+            if(appInfo.hasLtiToolCustomContentOption() && loginInitiationSessionObject.getContentUrlNodeId() != null){
                 AccessStatus accessStatus = serviceRegistry.getPermissionService()
                         .hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,loginInitiationSessionObject.getContentUrlNodeId()),
                                 PermissionService.WRITE_CONTENT);
@@ -249,6 +249,7 @@ public class LTIPlatformApi {
             return  Response.ok(ApiTool.getHTML(redirect_uri,formParams)).build();
 
         } catch(Throwable e){
+            logger.error(e.getMessage(),e);
             return ApiTool.processError(req,e,"LTI_ERROR");
         }
     }
@@ -730,14 +731,15 @@ public class LTIPlatformApi {
                 throw new Exception("missing lti content items");
             }
 
-            String nodeId = sessionObject.getContentUrlNodeId();
+            String nodeId = null;
+            /*String nodeId = sessionObject.getContentUrlNodeId();
             if(appInfoTool.hasLtiToolCustomContentOption()){
 
                 if(nodeId == null){
                     throw new Exception("id from initial created node required");
                 }
                 if(contentItems.size() > 1) throw new Exception("only one node can be handled for lti tool: " + appInfoTool.getAppId());
-            }
+            }*/
 
 
             List<String> nodeIds = new ArrayList<>();
@@ -1007,7 +1009,7 @@ public class LTIPlatformApi {
 
                 ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef, ContentModel.PROP_CONTENT);
                 if (reader == null) {
-                    throw new ValidationException("no content found");
+                    return Response.status(Response.Status.NOT_FOUND).entity("no content found").build();
                 }
 
                 String mimetype = reader.getMimetype();

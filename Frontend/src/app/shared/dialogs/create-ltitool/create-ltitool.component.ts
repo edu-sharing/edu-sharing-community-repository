@@ -73,7 +73,7 @@ export class CreateLtitoolComponent implements OnInit {
     }
 
     public open() {
-        if (this._tool.customContentOption) {
+        /*if (this._tool.customContentOption) {
             if (this._name == undefined) {
                 return;
             }
@@ -95,15 +95,15 @@ export class CreateLtitoolComponent implements OnInit {
                     },
                     (error: any) => {},
                 );
-        } else {
-            window.open(
-                '/edu-sharing/rest/ltiplatform/v13/generateLoginInitiationForm?appId=' +
-                    this._tool.appId +
-                    '&parentId=' +
-                    this._parent.ref.id,
-                '_blank',
-            );
-        }
+        } else {*/
+        window.open(
+            '/edu-sharing/rest/ltiplatform/v13/generateLoginInitiationForm?appId=' +
+                this._tool.appId +
+                '&parentId=' +
+                this._parent.ref.id,
+            '_blank',
+        );
+        //}
     }
 
     public angularFunctionCalled(nodeIds: string[], titles: string[]) {
