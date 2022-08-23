@@ -1199,6 +1199,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     customOptions: this.customOptions,
                     scope: Scope.Search,
                 });
+                this.searchService.isFrontpage = useFrontpage && tryFrontpage;
                 this.processSearchResult(data, init);
                 this.searchService.showchosenfilters = true;
                 this.searchRepository(repos, criteria, init, event, position + 1);

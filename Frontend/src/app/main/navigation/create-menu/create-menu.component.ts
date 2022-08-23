@@ -182,10 +182,20 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         }
         // @TODO: Later we should find a way to prevent the event from propagating
         // this currently fails because getAsString is called async!
-        void this.managementService.getDialogsComponent().createUrlLink({
+        this.managementService.getDialogsComponent().createUrlLink({
             ...new LinkData(url),
             parent: this.getParent(),
         });
+        // `onUploadFilesProcessed` will be fired when the quick edit dialog triggered by
+        // `createUrlLink` is confirmed or canceled.
+        this.dialogs
+            .getDialogsComponent()
+            .onUploadFilesProcessed.pipe(take(1))
+            .subscribe((nodes) => {
+                if (nodes) {
+                    this.onCreate.emit(nodes);
+                }
+            });
     }
 
     updateOptions() {

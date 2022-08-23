@@ -24,7 +24,7 @@ $path: '../../../assets/images/';
 .profiles-wrapper {
     display: flex;
     padding-top: $mainnavHeight;
-    height: calc(100% - #{$mainnavHeight});
+    height: calc(100vh - #{$mainnavHeight});
     align-items: center;
     .profiles {
         position: relative;

@@ -998,6 +998,14 @@ public class SearchServiceImpl implements SearchService {
 			searchParameters.setSkipCount(0);
 			searchParameters.setMaxItems(1);
 			MetadataQueryParameter parameter = mds.findQuery(queryId, MetadataReader.QUERY_SYNTAX_LUCENE).findParameterByName(parameterId);
+			if(parameter == null){
+				logger.warn("no parameter found for queryId:"+queryId+ " parameterId:" + parameterId);
+				return result;
+			}
+			if(value == null){
+				logger.warn("value is null queryId:"+queryId+ " parameterId:" + parameterId);
+				return result;
+			}
 			String luceneQuery = "(TYPE:\"" + CCConstants.CCM_TYPE_IO + "\"" +") AND ("+getLuceneSuggestionQuery(parameter, value)+")";
 			if(criterias != null && criterias.size() > 0 ) {
 

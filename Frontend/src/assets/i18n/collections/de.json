@@ -26,11 +26,11 @@
       "EDITORIAL_GROUPS": "Zuständige Redaktionsgruppe",
       "DONE": "Fertig"
     },
-      "EMPTY": {
-        "SHARED": "Sie wurden bisher zu keiner Sammlung eingeladen.",
-        "PUBLIC": "Es sind keine öffentlichen Sammlungen verfügbar.",
-        "SUBCOLLECTIONS": "Es sind keine Untersammlungen verfügbar."
-      },
+    "EMPTY": {
+      "SHARED": "Sie wurden bisher zu keiner Sammlung eingeladen.",
+      "PUBLIC": "Es sind keine öffentlichen Sammlungen verfügbar.",
+      "SUBCOLLECTIONS": "Es sind keine Untersammlungen verfügbar."
+    },
     "TAB": {
       "TYPE_EDITORIAL_LONG": "Redaktionell betreute Sammlungen",
       "TYPE_MEDIA_CENTER_LONG": "Vom Medienzentrum bereitgestellte Sammlungen",

@@ -147,7 +147,7 @@ public class AuthenticatorRemoteRepository {
 			personData = new HashMap<>();
 			personData.put(CCConstants.CM_PROP_PERSON_FIRSTNAME,ApplicationInfoList.getHomeRepository().getAppCaption());
 			personData.put(CCConstants.CM_PROP_PERSON_LASTNAME,"");
-			personData.put(CCConstants.CM_PROP_PERSON_EMAIL,new Mail().getConfig().getString("admin"));
+			personData.put(CCConstants.CM_PROP_PERSON_EMAIL,"");
 			esuid = username;
 		} else {
 			personData = AuthorityServiceFactory.getLocalService().getUserInfo(username);

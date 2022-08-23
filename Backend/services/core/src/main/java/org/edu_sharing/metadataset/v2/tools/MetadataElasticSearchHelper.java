@@ -1,6 +1,8 @@
 package org.edu_sharing.metadataset.v2.tools;
 
 import com.sun.star.lang.IllegalArgumentException;
+
+import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -10,11 +12,47 @@ import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.IncludeExclude;
+import org.elasticsearch.xcontent.ParseField;
+import org.elasticsearch.xcontent.XContentBuilder;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.*;
 
 public class MetadataElasticSearchHelper extends MetadataSearchHelper {
+    static Logger logger = Logger.getLogger(MetadataElasticSearchHelper.class);
+
+    /**
+     * make the query builder readable if print to string to improve debugging
+     */
+    public static class ReadableWrapperQueryBuilder extends WrapperQueryBuilder {
+        private static final ParseField QUERY_FIELD = new ParseField("query");
+        private final String _source;
+        private MetadataQueryParameter parameter;
+
+        public ReadableWrapperQueryBuilder(String source) {
+            super(source);
+            this._source = source;
+        }
+        public ReadableWrapperQueryBuilder(String source, MetadataQueryParameter parameter) {
+            this(source);
+            this.parameter = parameter;
+        }
+        @Override
+        protected void doXContent(XContentBuilder builder, Params params) throws IOException {
+            if(_source != null && builder.humanReadable()) {
+                try{
+                    new JSONObject(_source);
+                } catch(JSONException e){
+                    logger.warn("The given json is invalid: " + e.getMessage());
+                    logger.warn("Query: " + (parameter != null ? (parameter.getName() + ": ") : "") + _source);
+                }
+            }
+            super.doXContent(builder, params);
+        }
+    }
 
     public static QueryBuilder getElasticSearchQuery(SearchToken searchToken, MetadataQueries queries,MetadataQuery query, Map<String,String[]> parameters) throws IllegalArgumentException {
         return getElasticSearchQuery(searchToken, queries,query,parameters,true);
@@ -22,16 +60,25 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
 
     public static QueryBuilder getElasticSearchQuery(SearchToken searchToken, MetadataQueries queries,MetadataQuery query, Map<String,String[]> parameters, Boolean asFilter) throws IllegalArgumentException {
 
-        /**
-         * @TODO basequery
-         * quickfix: take the basequery of the query instead of the global basequery,
-         * cause collection request needs solr basequery
-         */
-        String baseQuery = query.getBasequery().get(null);
+        String baseQuery = replaceCommonQueryVariables(query.getBasequery().get(null));
+        String baseQueryConditional = replaceCommonQueryVariables(
+                query.findBasequery(parameters == null ? null : parameters.keySet())
+        );
+        QueryBuilder baseQueryBuilder;
+        if(baseQuery.equals(baseQueryConditional)) {
+            baseQueryBuilder = QueryBuilders.wrapperQuery(baseQuery);
+        } else {
+            baseQueryBuilder = QueryBuilders.boolQuery().must(
+                    QueryBuilders.wrapperQuery(baseQuery)
+            ).must(
+                    QueryBuilders.wrapperQuery(baseQueryConditional)
+            );
+        }
+
         BoolQueryBuilder result = QueryBuilders.boolQuery();
 
         if(asFilter == null || (asFilter.booleanValue() == query.getBasequeryAsFilter())){
-            WrapperQueryBuilder baseQueryBuilder = QueryBuilders.wrapperQuery(baseQuery);
+            baseQueryBuilder = new ReadableWrapperQueryBuilder(baseQuery);
             result.must(baseQueryBuilder);
         }
 
@@ -57,7 +104,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
             if(query.isApplyBasequery()){
                 if(queries.findBasequery(parameters.keySet())!=null &&
                         !queries.findBasequery(parameters.keySet()).isEmpty()) {
-                    result.must(QueryBuilders.wrapperQuery(queries.findBasequery(parameters.keySet())));
+                    result.must(new ReadableWrapperQueryBuilder(queries.findBasequery(parameters.keySet())));
                 }
                 result = applyCondition(queries, result);
             }
@@ -69,11 +116,11 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                 if (multipleJoin.equals("AND")) {
 
                     for(String value : values){
-                        boolQueryBuilder = boolQueryBuilder.must(QueryBuilders.wrapperQuery(replaceCommonQueryVariables(getStatmentForValue(parameter,value))));
+                        boolQueryBuilder = boolQueryBuilder.must(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatmentForValue(parameter,value)), parameter));
                     }
                 } else {
                     for(String value : values){
-                        boolQueryBuilder = boolQueryBuilder.should(QueryBuilders.wrapperQuery(replaceCommonQueryVariables(getStatmentForValue(parameter,value))));
+                        boolQueryBuilder = boolQueryBuilder.should(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatmentForValue(parameter,value)), parameter));
                     }
                 }
 
@@ -83,7 +130,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                     throw new InvalidParameterException("Trying to search for multiple values of a non-multivalue field "+parameter.getName());
                 }
 
-                queryBuilderParam = QueryBuilders.wrapperQuery(replaceCommonQueryVariables(getStatmentForValue(parameter,values[0])));
+                queryBuilderParam = new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatmentForValue(parameter,values[0])), parameter);
             }
 
             if(query.getJoin().equals("AND")){
@@ -114,16 +161,16 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
 
     private static BoolQueryBuilder applyCondition(MetadataQueryBase query, BoolQueryBuilder result) {
         for(MetadataQueryCondition condition : query.getConditions()){
-            boolean conditionState= MetadataHelper.checkConditionTrue(condition.getCondition());
+            boolean conditionState = MetadataHelper.checkConditionTrue(condition.getCondition());
             if(conditionState && condition.getQueryTrue()!=null) {
                 String conditionString = condition.getQueryTrue();
                 conditionString = replaceCommonQueryVariables(conditionString);
-                result.must(QueryBuilders.wrapperQuery(conditionString));
+                result.must(new ReadableWrapperQueryBuilder(conditionString));
             }
             if(!conditionState && condition.getQueryFalse()!=null) {
-                String conditionString =condition.getQueryFalse();
+                String conditionString = condition.getQueryFalse();
                 conditionString = replaceCommonQueryVariables(conditionString);
-                result.must(QueryBuilders.wrapperQuery(conditionString));
+                result.must(new ReadableWrapperQueryBuilder(conditionString));
             }
         }
         return result;
@@ -135,7 +182,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
         if (value == null)
             return "";
 
-        // invoke any preprocessors for this value
+        // invoke any preprocessors for this value0
         try {
             value = MetadataQueryPreprocessor.run(parameter, value);
         } catch (Exception e) {
@@ -143,6 +190,10 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
         }
 
         if (value.startsWith("\"") && value.endsWith("\"") || parameter.isExactMatching()) {
+            // clear value's '"'
+            if(value.startsWith("\"") && value.endsWith("\"")) {
+                value = value.substring(1, value.length() - 1);
+            }
             //String statement = parameter.getStatement(value).replace("${value}", QueryParser.escape(value));
             String statement = QueryUtils.replacerFromSyntax(parameter.getSyntax()).replaceString(
                     parameter.getStatement(value),
@@ -163,7 +214,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
             statement = QueryUtils.replacerFromSyntax(parameter.getSyntax(),true).replaceString(
                     statement,
                     "${valueRaw}", value);
-            boolQuery = boolQuery.must(QueryBuilders.wrapperQuery(statement));
+            boolQuery = boolQuery.must(new ReadableWrapperQueryBuilder(statement));
 
         }
         return boolQuery.toString();

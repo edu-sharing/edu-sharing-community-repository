@@ -41,6 +41,7 @@ export class SearchService {
     reinit = true;
     sidenavSet = false;
     sidenavOpened$ = new BehaviorSubject(false);
+    isFrontpage: boolean;
     set sidenavOpened(value: boolean) {
         this.sidenavOpened$.next(value);
     }

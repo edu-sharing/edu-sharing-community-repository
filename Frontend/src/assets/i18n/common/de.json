@@ -88,12 +88,12 @@
   "RADIO_BUTTON_SELECTED": "Optionsfeld ausgewählt",
   "RADIO_BUTTON_NOT_SELECTED": "Optionsfeld nicht ausgewählt",
   "DISABLED": "deaktiviert",
-    "PAGINATOR": {
-      "itemsPerPageLabel": "Einträge pro Seite:",
-      "nextPageLabel": "Nächste Seite",
-      "previousPageLabel": "Vorherige Seite",
-      "getRangeLabel": "Seite {{page}} von {{pageCount}}"
-    },
+  "PAGINATOR": {
+    "itemsPerPageLabel": "Einträge pro Seite:",
+    "nextPageLabel": "Nächste Seite",
+    "previousPageLabel": "Vorherige Seite",
+    "getRangeLabel": "Seite {{page}} von {{pageCount}}"
+  },
   "COLLECTION_CHOOSER": {
     "ADD_TO_RECENT_COLLECTION": "In zuletzt verwendete Sammlungen",
     "SEARCH_COLLECTIONS": "Sammlung suchen...",
@@ -217,7 +217,7 @@
     "JSON": "Gesamtes Objekt",
     "PERMISSIONS": "Berechtigungen",
     "PERMISSIONS_INHERITED": "Geerbte Berechtigungen",
-        "PERMISSIONS_INHERIT_DISABLED": "Vereerbung deaktiviert",
+    "PERMISSIONS_INHERIT_DISABLED": "Vereerbung deaktiviert",
     "PERMISSIONS_INHERIT_EMPTY": "Keine Berechtigungen vom Parent geerbt",
     "PERMISSIONS_LOCAL": "Explizite Berechtigungen",
     "PERMISSIONS_LOCAL_EMPTY": "Keine Berechtigungen am Objekt festgelegt",

@@ -382,7 +382,10 @@
             >
               <ng-template #title>
                 <div class="heading" *ngIf="!searchService.dataSourceSearchResult[0]?.isEmpty()">
-                  <h2>
+                  <h2 *ngIf="searchService.isFrontpage">
+                    {{ 'SEARCH.FRONTPAGE' | translate }}
+                  </h2>
+                  <h2 *ngIf="!searchService.isFrontpage">
                     {{ 'SEARCH.MATERIALS' | translate }}
                     <ng-container
                       *ngIf="
