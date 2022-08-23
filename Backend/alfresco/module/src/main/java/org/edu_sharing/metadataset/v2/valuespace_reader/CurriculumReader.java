@@ -7,6 +7,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataKey;
+import org.edu_sharing.metadataset.v2.ValuespaceData;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,7 +34,7 @@ public class CurriculumReader extends ValuespaceReader{
         }
     }
 
-    public List<MetadataKey> getValuespace(String locale) throws Exception {
+    public ValuespaceData getValuespace(String locale) throws Exception {
         List<MetadataKey> result = new ArrayList<>();
         JSONArray list = getApi();
         for (int i = 0; i < list.length(); i++) {
@@ -43,7 +44,7 @@ public class CurriculumReader extends ValuespaceReader{
                 result.add(convertEntry(entry));
             }
         }
-        return result;
+        return new ValuespaceData(null, result);
     }
 
     private MetadataKey convertEntry(JSONObject entry) throws JSONException {
