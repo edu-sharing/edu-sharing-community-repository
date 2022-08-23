@@ -1,5 +1,6 @@
 package org.edu_sharing.restservices.lti.v13;
 
+import org.apache.log4j.Logger;
 import org.springframework.extensions.surf.util.URLEncoder;
 
 import javax.servlet.http.HttpServletRequest;
@@ -8,9 +9,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
+
 public class ApiTool {
 
+    static Logger logger = Logger.getLogger(ApiTool.class);
+
     public static Response processError(HttpServletRequest req, Throwable e, String errorType){
+        if(e != null) logger.error(e.getMessage(),e);
         try {
             return Response.seeOther(new URI(req.getScheme() +"://"
                             + req.getServerName()
