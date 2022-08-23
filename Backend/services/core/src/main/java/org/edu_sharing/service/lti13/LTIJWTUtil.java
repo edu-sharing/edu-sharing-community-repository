@@ -1,5 +1,6 @@
 package org.edu_sharing.service.lti13;
 
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.AsymmetricJWK;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -20,10 +21,12 @@ import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.PublicKey;
+import java.text.ParseException;
 import java.util.*;
 
 public class LTIJWTUtil {
@@ -194,10 +197,19 @@ public class LTIJWTUtil {
             @Override
             public Key resolveSigningKey(JwsHeader header, Claims claims) {
                 try {
-                    return new Signing().getPemPublicKey(
+                    /*return new Signing().getPemPublicKey(
                             appInfo.getPublicKey(),
-                            CCConstants.SECURITY_KEY_ALGORITHM);
-                } catch (GeneralSecurityException e) {
+                            CCConstants.SECURITY_KEY_ALGORITHM);*/
+                    JWKSet publicKeys = JWKSet.load(new URL(appInfo.getLtiKeysetUrl()));
+                    JWK jwk = publicKeys.getKeyByKeyId(header.getKeyId());
+                    return ((AsymmetricJWK) jwk).toPublicKey();
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                } catch (JOSEException e) {
                     throw new RuntimeException(e);
                 }
             }
