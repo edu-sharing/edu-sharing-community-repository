@@ -503,16 +503,34 @@ public class MetadataReader {
 				if(name.equals("allowempty"))
 					widget.setAllowempty(value.equalsIgnoreCase("true"));
 			}
+			List <String> valuespaces = new ArrayList<>();
 			for(int j=0;j<list2.getLength();j++){
 				Node data=list2.item(j);
 				String name=data.getNodeName();
 				String value=data.getTextContent();
 				if(name.equals("valuespace"))
-					widget.setValues(getValuespace(value,widget,valuespaceI18n,valuespaceI18nPrefix));
+					valuespaces.add(value);
 				if(name.equals("values"))
 					widget.setValues(getValues(data.getChildNodes(),valuespaceI18n,valuespaceI18nPrefix));
 				if(name.equals("subwidgets"))
 					widget.setSubwidgets(getSubwidgets(data.getChildNodes()));
+			}
+			if(valuespaces.size() > 1) {
+				List<MetadataKey> keys = new ArrayList<>();
+				for (String v : valuespaces) {
+					ValuespaceData values = getValuespace(v, widget, valuespaceI18n, valuespaceI18nPrefix);
+					if(values.getTitle() == null) {
+						throw new IllegalArgumentException("Multiple valuespace entries are not supported by the given provider used for your vocabularies");
+					}
+					values.getEntries().stream().filter(e -> e.getParent() == null).forEach(e -> {
+						e.setParent(values.getTitle().getKey());
+					});
+					keys.add(values.getTitle());
+					keys.addAll(values.getEntries());
+				}
+				widget.setValues(keys);
+			} else if (valuespaces.size() == 1) {
+				widget.setValues(getValuespace(valuespaces.get(0),widget,valuespaceI18n,valuespaceI18nPrefix).getEntries());
 			}
 			widgets.add(widget);
 		}
@@ -545,32 +563,25 @@ public class MetadataReader {
 		}
 		return new MetadataCondition(node.getTextContent(),type,negate,dynamic,pattern);
 	}
-	private List<MetadataKey> getValuespace(String value,MetadataWidget widget, String valuespaceI18n, String valuespaceI18nPrefix) throws Exception {
+	private ValuespaceData getValuespace(String value, MetadataWidget widget, String valuespaceI18n, String valuespaceI18nPrefix) throws Exception {
 		if(value.startsWith("http://") || value.startsWith("https://")){
-			return sortValues(widget, getValuespaceExternal(value));
+			ValuespaceData valuespace = getValuespaceExternal(value);
+			valuespace.sort(widget);
+			return valuespace;
 		}
 		Document docValuespace = builder.parse(getFile(value,Filetype.VALUESPACE));
 		NodeList keysNode=(NodeList)xpath.evaluate("/valuespaces/valuespace[@property='"+widget.getId()+"']/key",docValuespace, XPathConstants.NODESET);
 		if(keysNode.getLength()==0){
 			throw new Exception("No valuespace found in file "+value+": Searching for a node named /valuespaces/valuespace[@property='"+widget.getId()+"']");
 		}
-		return sortValues(widget, getValues(keysNode,valuespaceI18n,valuespaceI18nPrefix));
+		ValuespaceData valuespace = new ValuespaceData(null, getValues(keysNode, valuespaceI18n, valuespaceI18nPrefix));
+		valuespace.sort(widget);
+		return valuespace;
 	}
 
-	private List<MetadataKey> sortValues(MetadataWidget widget, List<MetadataKey> list) {
-		if(!"default".equals(widget.getValuespaceSort())){
-			list.sort((o1, o2) -> {
-				if ("caption".equals(widget.getValuespaceSort())) {
-					return StringUtils.compareIgnoreCase(o1.getCaption(), o2.getCaption());
-				}
-				logger.error("Invalid value for valuespaceSort '" + widget.getValuespaceSort() + "' for widget '" + widget.getId() + "'");
-				return 0;
-			});
-		}
-		return list;
-	}
 
-	private List<MetadataKey> getValuespaceExternal(String value) throws Exception {
+
+	private ValuespaceData getValuespaceExternal(String value) throws Exception {
 		ValuespaceReader reader = ValuespaceReader.getSupportedReader(value);
 		if(reader != null) {
 			return reader.getValuespace(locale);

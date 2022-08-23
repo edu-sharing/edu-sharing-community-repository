@@ -7,6 +7,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataKey;
+import org.edu_sharing.metadataset.v2.ValuespaceData;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,7 +38,7 @@ public class OpenSALTReader extends ValuespaceReader{
         }
     }
 
-    public List<MetadataKey> getValuespace(String locale) throws Exception{
+    public ValuespaceData getValuespace(String locale) throws Exception{
         List<MetadataKey> result=new ArrayList<>();
         JSONObject list = getApi("CFPackages", uuid);
         JSONArray array = list.getJSONArray("CFItems");
@@ -56,7 +57,7 @@ public class OpenSALTReader extends ValuespaceReader{
             metadataKey.setPreceds(getAssocs(key,ASSOCIATION_PRECEDES,associations));
             result.add(metadataKey);
         }
-        return result;
+        return new ValuespaceData(null, result);
     }
     private List<String> getAssocs(String key, String assocName, JSONArray associations) throws IOException, JSONException {
         List<String> assocs=new ArrayList<>();

@@ -2,6 +2,7 @@ package org.edu_sharing.metadataset.v2.valuespace_reader;
 
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataKey;
+import org.edu_sharing.metadataset.v2.ValuespaceData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +47,7 @@ public abstract class ValuespaceReader {
         return matched;
     }
 
-    public abstract List<MetadataKey> getValuespace(String locale) throws Exception;
+    public abstract ValuespaceData getValuespace(String locale) throws Exception;
 
     protected abstract boolean supportsUrl();
 }

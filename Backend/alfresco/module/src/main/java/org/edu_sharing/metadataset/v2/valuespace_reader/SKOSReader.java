@@ -1,14 +1,13 @@
 package org.edu_sharing.metadataset.v2.valuespace_reader;
 
-import com.google.gson.JsonObject;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataKey;
+import org.edu_sharing.metadataset.v2.ValuespaceData;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,15 +35,17 @@ public class SKOSReader extends ValuespaceReader{
     }
 
     @Override
-    public List<MetadataKey> getValuespace(String locale) throws Exception {
-        return getValuespace(fetch(), null, locale);
+    public ValuespaceData getValuespace(String locale) throws Exception {
+        JSONObject primary = fetch();
+        MetadataKey title = convertEntry(primary, "title", null);
+        return new ValuespaceData(title, getValuespace(primary.getJSONArray("hasTopConcept"), null, locale));
     }
 
     public List<MetadataKey> getValuespace(JSONArray list, MetadataKey parent, String locale) throws Exception {
         List<MetadataKey> result = new ArrayList<>();
         for (int i = 0; i < list.length(); i++) {
             JSONObject entry = list.getJSONObject(i);
-            MetadataKey converted = convertEntry(entry, locale);
+            MetadataKey converted = convertEntry(entry, "prefLabel", locale);
             if(parent != null){
                 converted.setParent(parent.getKey());
             }
@@ -57,15 +58,15 @@ public class SKOSReader extends ValuespaceReader{
         return result;
     }
 
-    private MetadataKey convertEntry(JSONObject entry, String locale) throws JSONException {
+    private MetadataKey convertEntry(JSONObject entry, String labelId, String locale) throws JSONException {
         MetadataKey key = new MetadataKey();
         key.setKey(entry.getString("id"));
-        String de = entry.getJSONObject("prefLabel").getString("de");
+        String de = entry.getJSONObject(labelId).getString("de");
         key.setCaption(de);
         key.setLocale("de");
         if("en_US".equals(locale)) {
             try {
-                key.setCaption(entry.getJSONObject("prefLabel").getString("en"));
+                key.setCaption(entry.getJSONObject(labelId).getString("en"));
                 key.setLocale("en");
             }catch(JSONException ignored) { }
         }
@@ -95,7 +96,7 @@ public class SKOSReader extends ValuespaceReader{
         return key;
     }
 
-    private JSONArray fetch() throws IOException, JSONException {
+    private JSONObject fetch() throws IOException, JSONException {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         RequestConfig requestConfig = RequestConfig.custom().
                 setConnectTimeout(30000).
@@ -105,7 +106,7 @@ public class SKOSReader extends ValuespaceReader{
         CloseableHttpResponse result = httpclient.execute(request);
         String data=StreamUtils.copyToString(result.getEntity().getContent(), StandardCharsets.UTF_8);
         result.close();
-        return new JSONObject(data).getJSONArray("hasTopConcept");
+        return new JSONObject(data);
     }
 
     @Override
