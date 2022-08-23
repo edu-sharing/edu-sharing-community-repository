@@ -26,11 +26,11 @@
       "EDITORIAL_GROUPS": "Editors groups in charge",
       "DONE": "Done"
     },
-      "EMPTY": {
-        "SHARED": "You have not been invited to any collections yet.",
-        "PUBLIC": "There are no public collections available yet.",
-        "SUBCOLLECTIONS": "There are no sub-collections available yet."
-      },
+    "EMPTY": {
+      "SHARED": "You have not been invited to any collections yet.",
+      "PUBLIC": "There are no public collections available yet.",
+      "SUBCOLLECTIONS": "There are no sub-collections available yet."
+    },
     "TAB": {
       "TYPE_EDITORIAL_LONG": "editorially managed collections",
       "TYPE_MEDIA_CENTER_LONG": "collections provided by your media center",
