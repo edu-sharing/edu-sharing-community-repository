@@ -22,33 +22,33 @@
     },
     "PLUGINS": {
       "TITLE": "Erweiterungen",
-            "INFO":  "In dieser Liste werden Erweiterungen, die aktuell für auf diesem System verfügbar bzw. aktiv sind, angezeigt. Es handelt sich hierbei um zusätzliche Funktionskomponenten für das Repository.",
+      "INFO": "In dieser Liste werden Erweiterungen, die aktuell für auf diesem System verfügbar bzw. aktiv sind, angezeigt. Es handelt sich hierbei um zusätzliche Funktionskomponenten für das Repository.",
       "NO_DESCRIPTION": "Für dieses Plugin sind keine Details verfügbar",
       "ENABLED": "Aktiviert",
       "DISABLED": "Deaktiviert",
       "PLUGIN_DETAILS": {
         "edu_sharing-community-repository-backend-alfresco-module": {
-                    "TITLE": "edu-sharing Core",
-                    "DESCRIPTION": "Das Core-Modul von edu-sharing. Es erweitert das Basis-System um edu-sharing API's und Oberflächen sowie weitere Funktionalitäten"
+          "TITLE": "edu-sharing Core",
+          "DESCRIPTION": "Das Core-Modul von edu-sharing. Es erweitert das Basis-System um edu-sharing API's und Oberflächen sowie weitere Funktionalitäten"
         },
         "Alfresco Share Services AMP": {
-                    "TITLE": "Alfresco Share Service",
+          "TITLE": "Alfresco Share Service",
           "DESCRIPTION": "Dieses Alfresco-Modul stellt die Alfresco Share-Oberflächen bereit"
         },
         "edu_sharing-community-repository-plugin-elastic-backend-alfresco-module": {
-                    "TITLE": "edu-sharing Elasticsearch Plugin",
+          "TITLE": "edu-sharing Elasticsearch Plugin",
           "DESCRIPTION": "Das Elasticsearch-Modul transformiert die Objekte inkl. Statistiken und Metadaten in eine spezielle Elasticsearch-Indexstruktur und erlaubt effiziente und sehr detaillierte Suchqueries"
         },
         "alfresco-trashcan-cleaner project": {
-                    "TITLE": "Trashcan Cleaner",
+          "TITLE": "Trashcan Cleaner",
           "DESCRIPTION": "Der Trashcan-Cleaner löscht regelmäßig alte Inhalte im Papierkorb aller Nutzer"
         },
-                "edu_sharing-projects-community-repository-backend-alfresco-module": {
-                    "TITLE": "edu-sharing Customizing",
-                    "DESCRIPTION": "Dieses Modul beinhaltet ggf. projektspezifische Anpassungen"
-                },
+        "edu_sharing-projects-community-repository-backend-alfresco-module": {
+          "TITLE": "edu-sharing Customizing",
+          "DESCRIPTION": "Dieses Modul beinhaltet ggf. projektspezifische Anpassungen"
+        },
         "edu_sharing-enterprise-repository-plugin-transform-backend-alfresco-module": {
-                    "TITLE": "edu-sharing Transformer Plugin",
+          "TITLE": "edu-sharing Transformer Plugin",
           "DESCRIPTION": "Dieses Plugin trennt die Transformationsfunktionen (Screenshot & Volltext-Generierung von Dokumenten via LibreOffice) vom Repository-Server und erlaubt eine bessere, stabilere Verteilung der Workload"
         }
       },
