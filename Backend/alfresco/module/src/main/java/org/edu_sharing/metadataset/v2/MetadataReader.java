@@ -503,13 +503,19 @@ public class MetadataReader {
 				if(name.equals("allowempty"))
 					widget.setAllowempty(value.equalsIgnoreCase("true"));
 			}
-			List <String> valuespaces = new ArrayList<>();
+			List <ValuespaceInfo> valuespaces = new ArrayList<>();
 			for(int j=0;j<list2.getLength();j++){
 				Node data=list2.item(j);
 				String name=data.getNodeName();
 				String value=data.getTextContent();
-				if(name.equals("valuespace"))
-					valuespaces.add(value);
+				if(name.equals("valuespace")) {
+					Node type = data.getAttributes().getNamedItem("type");
+					valuespaces.add(
+							new ValuespaceInfo(
+									value,
+									type == null ? null : ValuespaceInfo.ValuespaceType.valueOf(type.getNodeValue())
+					));
+				}
 				if(name.equals("values"))
 					widget.setValues(getValues(data.getChildNodes(),valuespaceI18n,valuespaceI18nPrefix));
 				if(name.equals("subwidgets"))
@@ -517,7 +523,7 @@ public class MetadataReader {
 			}
 			if(valuespaces.size() > 1) {
 				List<MetadataKey> keys = new ArrayList<>();
-				for (String v : valuespaces) {
+				for (ValuespaceInfo v : valuespaces) {
 					ValuespaceData values = getValuespace(v, widget, valuespaceI18n, valuespaceI18nPrefix);
 					if(values.getTitle() == null) {
 						throw new IllegalArgumentException("Multiple valuespace entries are not supported by the given provider used for your vocabularies");
@@ -563,16 +569,21 @@ public class MetadataReader {
 		}
 		return new MetadataCondition(node.getTextContent(),type,negate,dynamic,pattern);
 	}
-	private ValuespaceData getValuespace(String value, MetadataWidget widget, String valuespaceI18n, String valuespaceI18nPrefix) throws Exception {
-		if(value.startsWith("http://") || value.startsWith("https://")){
-			ValuespaceData valuespace = getValuespaceExternal(value);
+	private ValuespaceData getValuespace(ValuespaceInfo info, MetadataWidget widget, String valuespaceI18n, String valuespaceI18nPrefix) throws Exception {
+		if(info.getValue().startsWith("http://") || info.getValue().startsWith("https://") ||
+				ValuespaceInfo.ValuespaceType.SKOS.equals(info.getType())
+		){
+			ValuespaceData valuespace = getValuespaceExternal(info);
+			if(valuespace == null) {
+				throw new Exception("No valuespace data found for " + info.getValue());
+			}
 			valuespace.sort(widget);
 			return valuespace;
 		}
-		Document docValuespace = builder.parse(getFile(value,Filetype.VALUESPACE));
+		Document docValuespace = builder.parse(getFile(info.getValue(),Filetype.VALUESPACE));
 		NodeList keysNode=(NodeList)xpath.evaluate("/valuespaces/valuespace[@property='"+widget.getId()+"']/key",docValuespace, XPathConstants.NODESET);
 		if(keysNode.getLength()==0){
-			throw new Exception("No valuespace found in file "+value+": Searching for a node named /valuespaces/valuespace[@property='"+widget.getId()+"']");
+			throw new Exception("No valuespace found in file "+info.getValue()+": Searching for a node named /valuespaces/valuespace[@property='"+widget.getId()+"']");
 		}
 		ValuespaceData valuespace = new ValuespaceData(null, getValues(keysNode, valuespaceI18n, valuespaceI18nPrefix));
 		valuespace.sort(widget);
@@ -581,10 +592,12 @@ public class MetadataReader {
 
 
 
-	private ValuespaceData getValuespaceExternal(String value) throws Exception {
+	private ValuespaceData getValuespaceExternal(ValuespaceInfo value) throws Exception {
 		ValuespaceReader reader = ValuespaceReader.getSupportedReader(value);
 		if(reader != null) {
 			return reader.getValuespace(locale);
+		} else {
+			logger.warn("No viable metadata reader found for url " + value);
 		}
 		return null;
 	}

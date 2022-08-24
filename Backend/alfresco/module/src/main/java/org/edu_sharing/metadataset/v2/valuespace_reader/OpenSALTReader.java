@@ -8,6 +8,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataKey;
 import org.edu_sharing.metadataset.v2.ValuespaceData;
+import org.edu_sharing.metadataset.v2.ValuespaceInfo;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,8 +28,8 @@ public class OpenSALTReader extends ValuespaceReader{
     private String uuid;
     private static Logger logger = Logger.getLogger(OpenSALTReader.class);
 
-    public OpenSALTReader(String valuespaceUrl) {
-        super(valuespaceUrl);
+    public OpenSALTReader(ValuespaceInfo info) {
+        super(info);
         // e.g. http://localhost:3000/uri/8a2a94f0-36bd-11e9-bdc4-0242ac1a0003
         Matcher matched = matches("(https?:\\/\\/.*\\/)uri\\/(.*)");
         if(matched.matches()){

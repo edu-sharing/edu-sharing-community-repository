@@ -8,6 +8,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataKey;
 import org.edu_sharing.metadataset.v2.ValuespaceData;
+import org.edu_sharing.metadataset.v2.ValuespaceInfo;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,15 +23,17 @@ import java.util.regex.Matcher;
 public class SKOSReader extends ValuespaceReader{
     private static final String ASSOCIATION_IS_CHILD_OF = "isChildOf";
     private String url;
-    private static Logger logger = Logger.getLogger(SKOSReader.class);
+    private static final Logger logger = Logger.getLogger(SKOSReader.class);
 
-    public SKOSReader(String valuespaceUrl) {
-        super(valuespaceUrl);
+    public SKOSReader(ValuespaceInfo info) {
+        super(info);
         // e.g. http://localhost:8000/api/v1/curricula/metadatasets
         Matcher matched = matches("(https?:\\/\\/.*\\/)w3id\\.org\\/.*\\.json");
-        if(matched.matches()){
-            url = valuespaceUrl;
-            logger.info("matched SKOS at "+matched.group(1));
+        if(matched.matches() || ValuespaceInfo.ValuespaceType.SKOS.equals(info.getType())) {
+            url = info.getValue();
+            if(matched.groupCount() >= 2) {
+                logger.info("matched SKOS at " + matched.group(1));
+            }
         }
     }
 
