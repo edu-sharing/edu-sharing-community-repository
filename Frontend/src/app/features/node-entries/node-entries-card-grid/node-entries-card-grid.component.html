@@ -157,12 +157,7 @@
     </div>
   </ng-container>
 </ng-container>
-<ng-container
-  *ngIf="
-    !entriesService.dataSource.isLoading &&
-    entriesService.dataSource.hasMore()
-  "
->
+<ng-container *ngIf="!entriesService.dataSource.isLoading && entriesService.dataSource.hasMore()">
   <div class="load-more">
     <button mat-button color="primary" (click)="loadData(true)">
       <i esIcon="refresh"></i>
