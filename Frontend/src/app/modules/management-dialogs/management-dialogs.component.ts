@@ -231,8 +231,6 @@ export class WorkspaceManagementDialogsComponent {
     currentLtiTool: Node;
     ltiToolRefresh: Boolean;
     reopenSimpleEdit = false;
-    @Input() nodeDeleteOnCancel: boolean;
-    @Output() nodeDeleteOnCancelChange = new EventEmitter();
     private nodeLicenseOnUpload = false;
     /**
      * QR Code object data to print
@@ -514,16 +512,13 @@ export class WorkspaceManagementDialogsComponent {
             nodes.map((n) => this.nodeService.deleteNode(n.ref.id, false)),
         ).subscribe(() => {
             this.toast.closeModalDialog();
-            this.closeEditor(true);
         });
     }
     closeEditor(refresh: boolean, nodes: Node[] = null) {
-        if (this.nodeDeleteOnCancel && nodes == null) {
-            this.nodeDeleteOnCancel = false;
+        if (this._nodeFromUpload && !this.reopenSimpleEdit && nodes == null) {
             this.deleteNodes(this._nodeMetadata);
-            return;
+            refresh = true;
         }
-        this.setNodeDeleteOnCancel(false);
         const previousNodes = this._nodeMetadata;
         this._nodeMetadata = null;
         this.nodeMetadataChange.emit(null);
@@ -547,6 +542,7 @@ export class WorkspaceManagementDialogsComponent {
             }
         }
     }
+
     public editLti(event: Node) {
         //this.closeLtiTools();
         this._nodeMetadata = [event];
@@ -695,8 +691,6 @@ export class WorkspaceManagementDialogsComponent {
             console.error('Invalid configuration for upload.postDialog: ' + dialog);
         }
         this._nodeFromUpload = true;
-        this.nodeDeleteOnCancel = true;
-        this.nodeDeleteOnCancelChange.emit(true);
     }
 
     closeTemplate() {
@@ -801,16 +795,17 @@ export class WorkspaceManagementDialogsComponent {
     }
 
     closeSimpleEdit(event: SimpleEditCloseEvent) {
-        if (event.reason === 'done' && this._nodeFromUpload) {
-            this.onUploadFilesProcessed.emit(event.nodes);
-        } else if (event.reason === 'abort' && this.nodeDeleteOnCancel) {
-            this.deleteNodes(this._nodeSimpleEdit);
-            this.onUploadFilesProcessed.emit(null);
+        if (this._nodeFromUpload) {
+            if (event.reason === 'done') {
+                this.onUploadFilesProcessed.emit(event.nodes);
+            } else if (event.reason === 'abort') {
+                this.deleteNodes(this._nodeSimpleEdit);
+                this.onUploadFilesProcessed.emit(null);
+            }
         }
         if (event.nodes) {
             this.onRefresh.emit(event.nodes);
         }
-        this.setNodeDeleteOnCancel(false);
         this._nodeSimpleEdit = null;
         this.nodeSimpleEditChange.emit(null);
     }
@@ -850,11 +845,6 @@ export class WorkspaceManagementDialogsComponent {
     closeLinkMap(node: Node = null) {
         this.linkMap = null;
         this.linkMapChange.emit(null);
-    }
-
-    private setNodeDeleteOnCancel(nodeDeleteOnCancel: boolean) {
-        this.nodeDeleteOnCancel = nodeDeleteOnCancel;
-        this.nodeDeleteOnCancelChange.emit(nodeDeleteOnCancel);
     }
 
     declineProposals(nodes: ProposalNode[]) {
