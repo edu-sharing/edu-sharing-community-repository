@@ -187,7 +187,7 @@ export class SimpleEditDialogComponent {
             buttons: [
                 new DialogButton('DISCARD', { color: 'standard' }, () => {
                     this.toast.closeModalDialog();
-                    this.onClose.emit({reason: 'abort', nodes: this._nodes});
+                    this.onClose.emit({ reason: 'abort', nodes: this._nodes });
                     callback();
                 }),
                 new DialogButton('SAVE', { color: 'primary' }, () => {
@@ -211,7 +211,7 @@ export class SimpleEditDialogComponent {
             this.toast.error(error);
         }
         this.toast.closeModalDialog();
-        this.onClose.emit({reason: 'abort'});
+        this.onClose.emit({ reason: 'abort' });
     }
 
     hasPermission(permission: string) {
