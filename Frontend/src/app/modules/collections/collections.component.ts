@@ -13,7 +13,7 @@ import {
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { forkJoin as observableForkJoin, Subject } from 'rxjs';
-import { first, takeUntil } from 'rxjs/operators';
+import { filter, first, takeUntil } from 'rxjs/operators';
 import {
     DropSource,
     DropTarget,
@@ -429,12 +429,16 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
             title: 'COLLECTIONS.TITLE',
             currentScope: 'collections',
             searchEnabled: false,
+            // TODO: document where this fails.
+            //
             // onCreate: (nodes) => this.addNodesToCollection(nodes),
         });
-        // @TODO: check if this is the ideal trigger event
         this.mainNavService
             .getDialogs()
-            .onUploadFilesProcessed.pipe(takeUntil(this.destroyed))
+            .onUploadFilesProcessed.pipe(
+                takeUntil(this.destroyed),
+                filter((nodes) => !!nodes),
+            )
             .subscribe((nodes) => this.addNodesToCollection(nodes));
         this.mainNavUpdateTrigger.pipe(takeUntil(this.destroyed)).subscribe(() => {
             this.mainNavService.patchMainNavConfig({

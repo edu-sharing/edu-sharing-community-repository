@@ -46,6 +46,7 @@ import { BulkBehavior } from '../../features/mds/types/types';
 import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { MainNavService } from 'src/app/main/navigation/main-nav.service';
 import { first } from 'rxjs/operators';
+import { SimpleEditCloseEvent } from './simple-edit-dialog/simple-edit-dialog.component';
 
 export enum DialogType {
     SimpleEdit = 'SimpleEdit',
@@ -194,6 +195,15 @@ export class WorkspaceManagementDialogsComponent {
     @Output() onClose = new EventEmitter();
     @Output() onCreate = new EventEmitter();
     @Output() onRefresh = new EventEmitter<Node[] | void>();
+    /**
+     * Emits once when the user created new nodes (either by upload or links) after the user closed
+     * the final editing dialog.
+     *
+     * - Does not emit when jumping between dialogs (the final dialog is also the first dialog that
+     *   appears after the user creates new nodes).
+     * - Emits the new nodes when the user confirms the final dialog.
+     * - Emits `null` when the user cancels the final dialog.
+     */
     @Output() onUploadFilesProcessed = new EventEmitter<Node[]>();
     @Output() onCloseMetadata = new EventEmitter();
     @Output() onUploadFileSelected = new EventEmitter<FileList>();
@@ -479,16 +489,15 @@ export class WorkspaceManagementDialogsComponent {
     closeLicense() {
         if (this.nodeLicenseOnUpload) {
             this.showMetadataAfterUpload(this.nodeLicense);
-        } else {
-            if (this._nodeFromUpload) this.onUploadFilesProcessed.emit(this.nodeLicense);
-            this._nodeFromUpload = false;
-        }
-        if (this.editorPending) {
+        } else if (this.editorPending) {
             this.editorPending = false;
             this._nodeMetadata = this.nodeLicense;
         } else if (this.reopenSimpleEdit) {
             this.reopenSimpleEdit = false;
             this._nodeSimpleEdit = this.nodeLicense;
+        } else if (this._nodeFromUpload) {
+            this.onUploadFilesProcessed.emit(this.nodeLicense);
+            this._nodeFromUpload = false;
         }
         this.nodeLicense = null;
         this.nodeLicenseOnUpload = false;
@@ -523,12 +532,10 @@ export class WorkspaceManagementDialogsComponent {
         if (this.reopenSimpleEdit) {
             this.reopenSimpleEdit = false;
             this._nodeSimpleEdit = previousNodes;
+        } else if (this._nodeFromUpload) {
+            this.onUploadFilesProcessed.emit(nodes);
         }
         if (refresh) {
-            console.log('_nodeFromUpload', this._nodeFromUpload);
-            if (this._nodeFromUpload) {
-                this.onUploadFilesProcessed.emit(nodes);
-            }
             this.onRefresh.emit(nodes);
             if (
                 nodes?.length === 1 &&
@@ -793,15 +800,15 @@ export class WorkspaceManagementDialogsComponent {
         }
     }
 
-    closeSimpleEdit(saved: boolean, nodes: Node[] = null) {
-        if (saved && this._nodeFromUpload) {
-            this.onUploadFilesProcessed.emit(nodes);
-        } else if (!saved && this.nodeDeleteOnCancel) {
+    closeSimpleEdit(event: SimpleEditCloseEvent) {
+        if (event.reason === 'done' && this._nodeFromUpload) {
+            this.onUploadFilesProcessed.emit(event.nodes);
+        } else if (event.reason === 'abort' && this.nodeDeleteOnCancel) {
             this.deleteNodes(this._nodeSimpleEdit);
             this.onUploadFilesProcessed.emit(null);
         }
-        if (nodes) {
-            this.onRefresh.emit(nodes);
+        if (event.nodes) {
+            this.onRefresh.emit(event.nodes);
         }
         this.setNodeDeleteOnCancel(false);
         this._nodeSimpleEdit = null;
