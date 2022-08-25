@@ -188,6 +188,14 @@
     ></es-drag-preview>
   </mat-row>
 </mat-table>
+<ng-container *ngIf="!entriesService.dataSource.isLoading && entriesService.dataSource.hasMore()">
+  <div class="load-more">
+    <button mat-button color="primary" (click)="loadData()">
+      <i esIcon="refresh"></i>
+      <span>{{ 'LOAD_MORE' | translate }}</span>
+    </button>
+  </div>
+</ng-container>
 <ng-container *ngIf="entriesService.dataSource.isLoading">
   <ng-container *ngTemplateOutlet="loading"> </ng-container>
 </ng-container>
