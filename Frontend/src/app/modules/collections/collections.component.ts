@@ -816,7 +816,6 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
                         collection.collections,
                         collection.pagination,
                     );
-                    this.dataSourceCollections.setCanLoadMore(false);
                     if (this.isRootLevelCollection()) {
                         this.finishCollectionLoading(callback);
                         return;
@@ -1465,7 +1464,6 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
                         proposals.nodes,
                         proposals.pagination,
                     );
-                    this.dataSourceCollectionProposals.setCanLoadMore(false);
                     this.dataSourceCollectionProposals.isLoading = false;
                     setTimeout(() => {
                         this.listProposals?.initOptionsGenerator({
