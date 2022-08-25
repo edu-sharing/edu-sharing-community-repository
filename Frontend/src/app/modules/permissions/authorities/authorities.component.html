@@ -366,6 +366,7 @@
       [displayType]="DisplayType.Table"
       [elementInteractionType]="InteractionType.Emitter"
       (clickItem)="selectOnClick(memberAdd, $event)"
+      (fetchData)="refreshMemberList()"
     ></es-node-entries-wrapper>
   </div>
 </es-card>
