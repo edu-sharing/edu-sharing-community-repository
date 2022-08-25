@@ -172,7 +172,6 @@
 <ng-container
   *ngIf="
     !entriesService.dataSource.isLoading &&
-    entriesService.dataSource.getCanLoadMore() &&
     entriesService.dataSource.hasMore() &&
     entriesGlobalService.getPaginationStrategy(entriesService.scope) ===
       PaginationStrategy.InfiniteScroll

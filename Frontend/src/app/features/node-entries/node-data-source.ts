@@ -9,7 +9,6 @@ export class NodeDataSource<T extends Node | GenericAuthority> extends DataSourc
     private pagination$ = new BehaviorSubject<Pagination>(null);
     public isLoading: boolean;
     private displayCountSubject = new BehaviorSubject<number | null>(null);
-    private canLoadMore = true;
     private areAllDisplayed$ = rxjs.combineLatest([this.dataStream, this.displayCountSubject]).pipe(
         map(([data, displayCount]) => this.getAreAllDisplayed(displayCount, data)),
         distinctUntilChanged(),
@@ -68,7 +67,6 @@ export class NodeDataSource<T extends Node | GenericAuthority> extends DataSourc
 
     reset() {
         this.setData([]);
-        this.setCanLoadMore(true);
     }
 
     hasMore() {
@@ -120,16 +118,5 @@ export class NodeDataSource<T extends Node | GenericAuthority> extends DataSourc
 
     isFullyLoaded() {
         return this.getTotal() <= this.getData()?.length;
-    }
-
-    /**
-     * set info if this datasource is able to fetch more data from the list
-     * @param _canLoadMore
-     */
-    setCanLoadMore(canLoadMore: boolean) {
-        this.canLoadMore = canLoadMore;
-    }
-    getCanLoadMore() {
-        return this.canLoadMore;
     }
 }

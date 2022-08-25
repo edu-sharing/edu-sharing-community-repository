@@ -222,6 +222,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     }
 
     loadData() {
+        // TODO: focus next item when triggered via button.
         if (this.entriesService.dataSource.hasMore()) {
             this.entriesService.fetchData.emit({
                 offset: this.entriesService.dataSource.getData().length,

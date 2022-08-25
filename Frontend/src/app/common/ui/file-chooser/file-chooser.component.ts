@@ -357,7 +357,7 @@ export class FileChooserComponent implements OnInit {
     }
 
     loadMore() {
-        if (!this.list.getCanLoadMore()) {
+        if (!this.list.hasMore()) {
             return;
         }
         this.viewDirectory(this.currentDirectory, false);
@@ -383,7 +383,6 @@ export class FileChooserComponent implements OnInit {
     private addToList(list: NodeList) {
         this.isLoading = false;
         if (!list.nodes.length) {
-            this.list.setCanLoadMore(false);
             return;
         }
         this.list.setPagination(list.pagination);

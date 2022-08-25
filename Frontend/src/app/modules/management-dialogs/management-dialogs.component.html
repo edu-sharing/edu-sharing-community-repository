@@ -52,9 +52,7 @@
   (onOpenMetadata)="reopenSimpleEdit = true; _nodeMetadata = $event"
   (onOpenInvite)="reopenSimpleEdit = true; nodeShare = $event"
   (onOpenLicense)="reopenSimpleEdit = true; nodeLicense = $event"
-  (onCancel)="closeSimpleEdit(false)"
-  (onClose)="closeSimpleEdit(true, $event)"
-  (onDone)="closeSimpleEdit(true, $event)"
+  (onClose)="closeSimpleEdit($event)"
 ></es-simple-edit-dialog>
 <es-view-collection-feedback
   *ngIf="collectionViewFeedback"
