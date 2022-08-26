@@ -455,13 +455,6 @@ export class Toast implements OnDestroy {
         if (message === 'COMMON_API_ERROR') {
             dialogMessage = '';
             dialogTitle = 'COMMON_API_ERROR_TITLE';
-            translationParameters = {
-                date: DateHelper.formatDate(this.translate, new Date().getTime(), {
-                    useRelativeLabels: false,
-                    showAlwaysTime: true,
-                    showSeconds: true,
-                }),
-            };
             try {
                 if (json.error.stacktraceArray) {
                     errorInfo = json.stacktraceArray.join('\n');
@@ -554,6 +547,15 @@ export class Toast implements OnDestroy {
                 if (!translationParameters) {
                     translationParameters = {};
                 }
+                translationParameters.date = DateHelper.formatDate(
+                    this.translate,
+                    new Date().getTime(),
+                    {
+                        useRelativeLabels: false,
+                        showAlwaysTime: true,
+                        showSeconds: true,
+                    },
+                );
                 translationParameters.error = error;
             }
         }
@@ -565,8 +567,16 @@ export class Toast implements OnDestroy {
             dialogTitle = null;
         }
         if (errorObject?.traceId) {
-            dialogTitle = this.translate.instant(dialogTitle) + ' (' + errorObject.traceId + ')';
-            message = this.translate.instant(message) + '\n(' + errorObject.traceId + ')';
+            dialogTitle =
+                this.translate.instant(dialogTitle, translationParameters) +
+                ' (' +
+                errorObject.traceId +
+                ')';
+            message =
+                this.translate.instant(message, translationParameters) +
+                '\n(' +
+                errorObject.traceId +
+                ')';
         }
         return {
             message,
