@@ -1,6 +1,8 @@
 package org.edu_sharing.restservices.ltiplatform.v13.model;
 
-public class LoginInitiationSessionObject {
+import java.io.Serializable;
+
+public class LoginInitiationSessionObject implements Serializable {
 
     public static enum MessageType{resourcelink,deeplink}
 
