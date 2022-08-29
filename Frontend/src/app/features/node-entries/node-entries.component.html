@@ -15,3 +15,16 @@
     <ng-container *ngTemplateOutlet="templatesService.empty"></ng-container>
   </ng-container>
 </ng-container>
+<!-- @TODO: hiding it via ngIf would be better, but we need to access the reference in ts file -->
+<mat-paginator
+  #paginator
+  [pageSizeOptions]="entriesGlobalService.getPaginatorSizeOptions(entriesService.scope)"
+  [class.display-none]="
+    !entriesService.dataSource ||
+    entriesGlobalService.getPaginationStrategy(entriesService.scope) !==
+      PaginationStrategy.Paginator ||
+    entriesService.dataSource.isLoading ||
+    entriesService.dataSource.isEmpty()
+  "
+  (page)="openPage($event)"
+></mat-paginator>

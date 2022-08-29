@@ -2,6 +2,7 @@
 
 @import '../../../core-ui-module/styles/variables';
 $defaultColumnWidth: 120px;
+$minColumnWidth: 30%;
 $rowHeight: 58px;
 
 :host {
@@ -17,7 +18,7 @@ $rowHeight: 58px;
                 @include setGlobalKeyboardFocus('border');
             }
         }
-        es-list-text {
+        es-list-base {
             white-space: nowrap;
             text-overflow: ellipsis;
             overflow: hidden;
@@ -35,15 +36,21 @@ mat-cell {
     &:not(.mat-column-primary) {
         flex: 0 $defaultColumnWidth;
     }
+    &.mat-column-primary {
+        min-width: $minColumnWidth;
+    }
     &.mat-column-select {
         flex: 0 54px;
+        min-width: 54px;
     }
     &.mat-column-icon {
         flex: 0 65px;
+        min-width: 65px;
         justify-content: center;
     }
     &.mat-column-actions {
         flex: 0 50px;
+        min-width: 50px;
         display: flex;
         justify-content: flex-end;
         padding-right: 5px;
@@ -52,22 +59,22 @@ mat-cell {
 
 .mat-row {
     cursor: pointer;
-    &.mat-row-virtual {
-        background: linear-gradient(
-            to right,
-            $nodeVirtualColor 0,
-            $nodeVirtualColor 5px,
-            rgba(255, 255, 255, 0.0001) 5px
-        );
+    &.mat-row-selected {
+        background: $listItemSelectedBackgroundEffect;
     }
-    &.mat-row-virtual-seperator {
+    // Overrides `.mat-row-selected` background by order
+    &.mat-row-virtual {
+        background: linear-gradient(to right, $nodeVirtualColor 5px, transparent 5px) no-repeat;
+        border-right: 2px dashed lighten($nodeVirtualColor, 10%);
+    }
+    &.mat-row-virtual-first {
+        border-top: 2px dashed lighten($nodeVirtualColor, 10%);
+    }
+    &.mat-row-virtual-last {
         border-bottom: 2px dashed lighten($nodeVirtualColor, 10%);
     }
     &:hover {
         background-color: $listItemSelectedBackground;
-    }
-    &.mat-row-selected {
-        background: $listItemSelectedBackgroundEffect;
     }
     &.selected-when-dragging {
         opacity: 0.5; // Same as .cdk-drag-placeholder
@@ -104,4 +111,9 @@ mat-cell {
         display: flex;
         justify-content: center;
     }
+}
+
+.load-more {
+    display: flex;
+    justify-content: center;
 }

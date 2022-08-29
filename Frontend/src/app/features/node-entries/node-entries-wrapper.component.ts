@@ -15,6 +15,7 @@ import {
     SimpleChange,
     TemplateRef,
     Type,
+    ViewChild,
     ViewContainerRef,
 } from '@angular/core';
 import { Subject } from 'rxjs';
@@ -31,8 +32,8 @@ import { OptionItem } from '../../core-ui-module/option-item';
 import { OptionsHelperService } from '../../core-ui-module/options-helper.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { MainNavService } from '../../main/navigation/main-nav.service';
-import { NodeEntriesTemplatesService } from '../node-entries/node-entries-templates.service';
-import { NodeEntriesComponent, NodeEntriesDataType } from '../node-entries/node-entries.component';
+import { NodeEntriesTemplatesService } from './node-entries-templates.service';
+import { NodeEntriesComponent, NodeEntriesDataType } from './node-entries.component';
 import {
     FetchEvent,
     GridConfig,
@@ -49,15 +50,30 @@ import { NodeDataSource } from './node-data-source';
 
 @Component({
     selector: 'es-node-entries-wrapper',
-    template: ` <es-node-entries *ngIf="!customNodeListComponent"> </es-node-entries>`,
+    template: ` <es-node-entries #nodeEntriesComponent *ngIf="!customNodeListComponent">
+    </es-node-entries>`,
     providers: [NodeEntriesService, OptionsHelperService, NodeEntriesTemplatesService],
 })
 export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     implements AfterViewInit, OnInit, OnChanges, OnDestroy, ListEventInterface<T>
 {
+    /**
+     * title (above) the table/grid
+     */
     @ContentChild('title') titleRef: TemplateRef<any>;
+    /**
+     * data shown when data source is empty
+     */
     @ContentChild('empty') emptyRef: TemplateRef<any>;
+    /**
+     * custom area for actions only for NodeEntriesDisplayType.SmallGrid (per card at the bottom)
+     */
     @ContentChild('actionArea') actionAreaRef: TemplateRef<any>;
+    /**
+     * custom area for an overlay "above" each card (i.e. to show disabled infos), only for NodeEntriesDisplayType.SmallGrid & odeEntriesDisplayType.Grid
+     */
+    @ContentChild('overlay') overlayRef: TemplateRef<any>;
+    @ViewChild('nodeEntriesComponent') nodeEntriesComponentRef: NodeEntriesComponent<T>;
     @Input() dataSource: NodeDataSource<T>;
     @Input() columns: ListItem[];
     @Input() configureColumns: boolean;
@@ -87,7 +103,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @Output() displayTypeChanged = this.optionsHelper.displayTypeChanged;
 
     customNodeListComponent: Type<NodeEntriesComponent<T>>;
-    private componentRef: ComponentRef<any>;
+    private componentRef: ComponentRef<NodeEntriesComponent<T>>;
     private options: ListOptions;
     private destroyed = new Subject<void>();
 
@@ -97,7 +113,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         private viewContainerRef: ViewContainerRef,
         private ngZone: NgZone,
         private entriesService: NodeEntriesService<T>,
-        private optionsHelper: OptionsHelperService,
+        public optionsHelper: OptionsHelperService,
         private nodeHelperService: NodeHelperService,
         private mainNav: MainNavService,
         private templatesService: NodeEntriesTemplatesService,
@@ -110,8 +126,13 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         );
         */
         this.entriesService.selection.changed.subscribe(() => {
-            this.optionsHelper.getData().selectedObjects = this.entriesService.selection.selected;
-            this.optionsHelper.getData().activeObjects = this.entriesService.selection.selected;
+            if (this.optionsHelper.getData()) {
+                this.optionsHelper.getData().selectedObjects =
+                    this.entriesService.selection.selected;
+                this.optionsHelper.getData().activeObjects = this.entriesService.selection.selected;
+            } else {
+                console.warn('optionsHelper is not initalized correctly; data is empty');
+            }
             this.optionsHelper.refreshComponents();
         });
     }
@@ -256,6 +277,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
 
     async initOptionsGenerator(config: ListOptionsConfig) {
         await this.optionsHelper.initComponents(config.actionbar, this);
+        this.entriesService.scope = config.scope;
         this.optionsHelper.setData({
             scope: config.scope,
             activeObjects: this.entriesService.selection.selected,
@@ -276,5 +298,15 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.templatesService.title = this.titleRef;
         this.templatesService.empty = this.emptyRef;
         this.templatesService.actionArea = this.actionAreaRef;
+        this.templatesService.overlay = this.overlayRef;
+    }
+
+    /**
+     * reset the pagination to the first page
+     * hint: this will do nothing in case the paginationStrategy !== Pagination
+     */
+    resetPagination() {
+        console.log(this.nodeEntriesComponentRef);
+        this.nodeEntriesComponentRef?.paginator?.firstPage();
     }
 }

@@ -135,6 +135,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         private cardService: CardService,
         private dialogs: ManagementDialogsService,
         private ltiPlatformService: LtiPlatformService,
+        private paste: PasteService,
     ) {
         this.route.queryParams.subscribe((params) => {
             this.params = params;

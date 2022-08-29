@@ -6,10 +6,9 @@ import { GenericAuthority, Pagination, Node } from 'src/app/core-module/core.mod
 
 export class NodeDataSource<T extends Node | GenericAuthority> extends DataSource<T> {
     private dataStream = new BehaviorSubject<T[]>([]);
-    private pagination: Pagination;
+    private pagination$ = new BehaviorSubject<Pagination>(null);
     public isLoading: boolean;
     private displayCountSubject = new BehaviorSubject<number | null>(null);
-    private canLoadMore = true;
     private areAllDisplayed$ = rxjs.combineLatest([this.dataStream, this.displayCountSubject]).pipe(
         map(([data, displayCount]) => this.getAreAllDisplayed(displayCount, data)),
         distinctUntilChanged(),
@@ -23,6 +22,10 @@ export class NodeDataSource<T extends Node | GenericAuthority> extends DataSourc
 
     connect(): Observable<T[]> {
         return this.dataStream;
+    }
+
+    connectPagination(): Observable<Pagination> {
+        return this.pagination$;
     }
 
     disconnect() {}
@@ -48,29 +51,29 @@ export class NodeDataSource<T extends Node | GenericAuthority> extends DataSourc
     removeData(removeData: T[]): void {
         const data = this.getData().filter((value) => !removeData.includes(value));
         this.dataStream.next(data);
-        if (this.pagination) {
+        if (this.pagination$.value) {
+            const pagination = this.pagination$.value;
             this.setPagination({
-                count: this.pagination.count - removeData.length,
-                from: this.pagination.from,
-                total: this.pagination.total - removeData.length,
+                count: pagination.count - removeData.length,
+                from: pagination.from,
+                total: pagination.total - removeData.length,
             });
         }
     }
 
     setPagination(pagination: Pagination) {
-        this.pagination = pagination;
+        this.pagination$.next(pagination);
     }
 
     reset() {
         this.setData([]);
-        this.setCanLoadMore(true);
     }
 
     hasMore() {
-        if (!this.pagination) {
+        if (!this.pagination$.value) {
             return undefined;
         }
-        return this.pagination.total > this.getData()?.length;
+        return this.pagination$.value.total > this.getData()?.length;
     }
 
     getData() {
@@ -82,7 +85,7 @@ export class NodeDataSource<T extends Node | GenericAuthority> extends DataSourc
     }
 
     getTotal() {
-        return this.pagination?.total ?? this.getData()?.length ?? 0;
+        return this.pagination$.value?.total ?? this.getData()?.length ?? 0;
     }
 
     /**
@@ -115,16 +118,5 @@ export class NodeDataSource<T extends Node | GenericAuthority> extends DataSourc
 
     isFullyLoaded() {
         return this.getTotal() <= this.getData()?.length;
-    }
-
-    /**
-     * set info if this datasource is able to fetch more data from the list
-     * @param _canLoadMore
-     */
-    setCanLoadMore(canLoadMore: boolean) {
-        this.canLoadMore = canLoadMore;
-    }
-    getCanLoadMore() {
-        return this.canLoadMore;
     }
 }

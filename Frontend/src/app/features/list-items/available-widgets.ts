@@ -9,6 +9,7 @@ import { ListWidgetClass } from './list-widget';
 export enum ListWidgetType {
     CollectionInfo = 'CollectionInfo',
     Text = 'Text',
+    Custom = 'Custom',
     NodeLicense = 'NodeLicense',
     NodeReplicationSource = 'NodeReplicationSource',
     NodeWorkflow = 'NodeWorkflow',
@@ -22,6 +23,7 @@ export const AVAILABLE_LIST_WIDGETS: {
     NodeReplicationSource: ListNodeReplicationSourceComponent,
     NodeWorkflow: ListNodeWorkflowComponent,
     NodeCounts: ListCountsComponent,
+    Custom: null,
 
     // use the widgets with wildcards as last ones
     Text: ListTextComponent,

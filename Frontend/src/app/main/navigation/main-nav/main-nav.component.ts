@@ -842,11 +842,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             .observeCurrentUserInfo()
             .pipe(takeUntil(this.destroyed$))
             .subscribe(async ({ user, loginInfo }) => {
-                if (loginInfo.isGuest) {
-                    this.currentUser = null;
-                } else {
-                    this.currentUser = user?.person;
-                }
+                this.currentUser = user?.person;
             });
     }
 

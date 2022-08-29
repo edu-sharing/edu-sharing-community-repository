@@ -35,7 +35,7 @@
       </div>
     </div>
 
-    <div class="empty" *ngIf="!relations?.length && !forkedChilds?.length">
+    <div class="empty" *ngIf="!relations?.length && !forkedChilds?.length && !forkedOrigin">
       {{ 'NODE_RELATIONS.NO_RELATIONS' | translate }}
     </div>
     <div class="relations-group" *ngFor="let key of getRelationKeys()">
@@ -63,6 +63,32 @@
         </es-node-url>
       </div>
     </div>
+    <ng-container *ngIf="forkedOrigin">
+      <h5 class="relations-heading">
+        {{ 'NODE_RELATIONS.RELATION_TYPE.FORKED_ORIGIN' | translate }}
+      </h5>
+      <div class="relation-nodes version">
+        <es-node-url
+          class="relation-node"
+          [node]="forkedOrigin"
+          [queryParams]="{ closeOnBack: true }"
+          target="_BLANK"
+        >
+          <es-node-row [node]="forkedOrigin" [columns]="columns">
+            <ng-template #customMetadata>
+              <div class="info-group">
+                <label>{{ 'NODE_RELATIONS.VARIANT_CREATED' | translate }}</label>
+                <span>{{ forkedOrigin.createdAt | formatDate: { relative: true } }}</span>
+              </div>
+              <div class="info-group">
+                <label>{{ 'NODE_RELATIONS.VARIANT_CREATOR' | translate }}</label>
+                <span>{{ forkedOrigin.createdBy | authorityName }}</span>
+              </div>
+            </ng-template>
+          </es-node-row>
+        </es-node-url>
+      </div>
+    </ng-container>
     <ng-container *ngIf="forkedChilds?.length">
       <h5 class="relations-heading">
         {{ 'NODE_RELATIONS.RELATION_TYPE.FORKED_CHILDS' | translate }}

@@ -1,38 +1,65 @@
-import { Component, Input, ViewChild } from '@angular/core';
-import { ListItem, RestArchiveService } from '../../../core-module/core.module';
-import { RestConstants } from '../../../core-module/core.module';
-import { CustomOptions, ElementType, OptionItem } from '../../../core-ui-module/option-item';
+import { AfterViewInit, Component, Input, ViewChild } from '@angular/core';
+import {
+    ArchiveRestore,
+    GenericAuthority,
+    ListItem,
+    ListItemSort,
+    Node,
+    RestArchiveService,
+    RestConstants,
+    TemporaryStorageService,
+} from '../../../core-module/core.module';
+import { CustomOptions, ElementType, OptionItem, Scope } from '../../../core-ui-module/option-item';
 import { RecycleRestoreComponent } from './restore/restore.component';
 import { TranslateService } from '@ngx-translate/core';
 import { Toast } from '../../../core-ui-module/toast';
-import { ArchiveRestore, Node } from '../../../core-module/core.module';
-import { TemporaryStorageService } from '../../../core-module/core.module';
 import { ActionbarComponent } from '../../../shared/components/actionbar/actionbar.component';
+import {
+    FetchEvent,
+    InteractionType,
+    ListSortConfig,
+    NodeClickEvent,
+    NodeEntriesDisplayType,
+} from '../../../features/node-entries/entries-model';
+import { NodeEntriesWrapperComponent } from '../../../features/node-entries/node-entries-wrapper.component';
+import { MainNavService } from '../../../main/navigation/main-nav.service';
+import { NodeDataSource } from '../../../features/node-entries/node-data-source';
 
 @Component({
     selector: 'es-recycle',
     templateUrl: 'recycle.component.html',
+    styleUrls: ['recycle.component.scss'],
 })
-export class RecycleMainComponent {
-    @ViewChild('list') list: NodeList;
+export class RecycleMainComponent implements AfterViewInit {
+    readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    readonly InteractionType = InteractionType;
+    @ViewChild('list') list: NodeEntriesWrapperComponent<Node>;
+    dataSource = new NodeDataSource();
     public toDelete: Node[] = null;
     public restoreResult: ArchiveRestore;
 
-    @Input() isInsideWorkspace = false;
-    @Input() searchWorkspace: string;
     @Input() actionbar: ActionbarComponent;
-    public reload: Boolean;
-    public sortBy = RestConstants.CM_ARCHIVED_DATE;
-    public sortAscending = false;
-    selected: Node[] = [];
 
-    public columns: ListItem[] = [];
+    public columns: ListItem[] = [
+        new ListItem('NODE', RestConstants.CM_NAME),
+        new ListItem('NODE', RestConstants.CM_ARCHIVED_DATE),
+    ];
     public options: CustomOptions = {
         useDefaultOptions: false,
         addOptions: [],
     };
+    sort: ListSortConfig = {
+        columns: [
+            new ListItemSort('NODE', RestConstants.CM_NAME),
+            new ListItemSort('NODE', RestConstants.CM_ARCHIVED_DATE),
+        ],
+        allowed: true,
+        active: RestConstants.CM_ARCHIVED_DATE,
+        direction: 'desc',
+    };
+    searchQuery: string;
     loadData(currentQuery: string, offset: number, sortBy: string, sortAscending: boolean) {
-        return this.archive.search(currentQuery, '', {
+        return this.archive.search(currentQuery || '*', '', {
             propertyFilter: [RestConstants.ALL],
             offset: offset,
             sortBy: [sortBy],
@@ -42,11 +69,10 @@ export class RecycleMainComponent {
     constructor(
         private archive: RestArchiveService,
         private toast: Toast,
+        public mainNavService: MainNavService,
         private translate: TranslateService,
         private service: TemporaryStorageService,
     ) {
-        this.columns.push(new ListItem('NODE', RestConstants.CM_NAME));
-        this.columns.push(new ListItem('NODE', RestConstants.CM_ARCHIVED_DATE));
         this.options.addOptions.push(
             new OptionItem('RECYCLE.OPTION.RESTORE_SINGLE', 'undo', (node: Node) =>
                 this.restoreSingle(node),
@@ -60,9 +86,21 @@ export class RecycleMainComponent {
         this.options.addOptions.forEach((o) => {
             o.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         });
+        this.mainNavService.patchMainNavConfig({
+            onSearch: (query) => {
+                this.searchQuery = query;
+                this.refresh();
+            },
+        });
     }
-    public onSelection(data: Node[]) {
-        this.selected = data;
+
+    ngAfterViewInit(): void {
+        this.refresh();
+        this.list.initOptionsGenerator({
+            scope: Scope.WorkspaceList,
+            actionbar: this.actionbar,
+            customOptions: this.options,
+        });
     }
     private restoreFinished(list: Node[], restoreResult: any) {
         this.toast.closeModalDialog();
@@ -74,11 +112,10 @@ export class RecycleMainComponent {
         if (list.length == 1) {
             this.toast.toast('RECYCLE.TOAST.RESTORE_FINISHED_SINGLE'); //,{link : 'TODO'},{enableHTML:true});
         } else this.toast.toast('RECYCLE.TOAST.RESTORE_FINISHED');
-        this.reload = new Boolean(true);
-        this.selected = [];
+        this.refresh();
     }
     private delete(): void {
-        this.deleteNodes(this.selected);
+        this.deleteNodes(this.list.getSelection().selected);
     }
     private deleteSingle(node: Node): void {
         if (node == null) {
@@ -91,7 +128,7 @@ export class RecycleMainComponent {
     public deleteNodesWithoutConfirmation(list = this.toDelete) {
         this.toast.showProgressDialog();
         this.archive.delete(list).subscribe(
-            (result) => this.deleteFinished(),
+            () => this.deleteFinished(),
             (error) => this.handleErrors(error),
         );
     }
@@ -99,8 +136,8 @@ export class RecycleMainComponent {
     private deleteFinished() {
         this.toast.closeModalDialog();
         this.toast.toast('RECYCLE.TOAST.DELETE_FINISHED');
-        this.selected = [];
-        this.reload = new Boolean(true);
+        this.list.getSelection().clear();
+        this.refresh();
     }
     private deleteNodes(list: Node[]) {
         if (this.service.get('recycleSkipDeleteConfirmation', false)) {
@@ -108,10 +145,7 @@ export class RecycleMainComponent {
             return;
         }
 
-        this.toDelete = [];
-        for (var i = 0; i < list.length; i++) {
-            this.toDelete.push(list[i]);
-        }
+        this.toDelete = [...list];
     }
     restoreNodesEvent(event: any) {
         this.restoreNodes(event.nodes, event.parent);
@@ -144,6 +178,33 @@ export class RecycleMainComponent {
         this.restoreNodes([node]);
     }
     private restore(): void {
-        this.restoreNodes(this.selected);
+        this.restoreNodes(this.list.getSelection().selected);
+    }
+
+    async refresh(event?: FetchEvent) {
+        this.dataSource.isLoading = true;
+        // @TODO: handle pagination after merge!
+        if (event == null) {
+            this.dataSource.reset();
+        }
+        const result = await this.loadData(
+            this.searchQuery,
+            event ? event?.offset || this.dataSource.getData().length : 0,
+            this.sort.active,
+            this.sort.direction === 'asc',
+        ).toPromise();
+
+        this.dataSource.setData(result.nodes, result.pagination);
+        this.dataSource.isLoading = false;
+    }
+
+    click(event: NodeClickEvent<Node | GenericAuthority>) {
+        this.list.getSelection().toggle(event.element as Node);
+    }
+
+    updateSort(sort: ListSortConfig) {
+        console.log(sort);
+        this.sort = sort;
+        this.refresh();
     }
 }

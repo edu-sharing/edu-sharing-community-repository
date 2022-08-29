@@ -1,5 +1,5 @@
 import { Directive, ElementRef, EventEmitter, Input, NgZone, Output } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { DragData, DropAction, NodesDragDropService } from '../../services/nodes-drag-drop.service';
 
 interface DropTargetState {
@@ -55,6 +55,13 @@ export class NodesDropTargetDirective<T = unknown> {
             this.elementRef.nativeElement.addEventListener('mouseleave', () =>
                 this.nodesDragDrop.onMouseLeave(this),
             );
+            // Firefox does not fire a mouseleave event when the element is removed from the DOM
+            // while being hovered. When an element is dragged, it will be replaced with a
+            // placeholder. If the element was also a drop target, we would think that we are still
+            // hovering the element.
+            observeRemovedFromParent(this.elementRef.nativeElement).subscribe(() =>
+                this.nodesDragDrop.onMouseLeave(this),
+            );
         });
     }
 
@@ -70,4 +77,23 @@ export class NodesDropTargetDirective<T = unknown> {
             }
         });
     }
+}
+
+function observeRemovedFromParent(element: HTMLElement): Observable<void> {
+    return new Observable((subscriber) => {
+        const observer = new MutationObserver((event) => {
+            for (const mutation of event) {
+                if ([...mutation.removedNodes].includes(element)) {
+                    subscriber.next();
+                }
+            }
+        });
+        // Wait for `element` to be attached to the DOM.
+        setTimeout(() => {
+            observer.observe(element.parentNode, { childList: true, subtree: false });
+        });
+        return () => {
+            observer.disconnect();
+        };
+    });
 }

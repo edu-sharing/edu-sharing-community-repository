@@ -213,10 +213,9 @@ export class Toast implements OnDestroy {
         customAction: CustomAction = null,
         toastMessage: ToastMessage = null,
     ): void {
-        if (errorObject?.processed) {
-            console.warn('Called toast.error() with an already consumed error object');
-            return;
-        }
+        // If this is called by the default error handler given to ngx-edu-sharing-api und you want
+        // to prevent the toast message, provide an error handler when subscribing and call
+        // `error.preventDefault()`.
         const parsingResult = this.parseErrorObject({
             errorObject,
             message,

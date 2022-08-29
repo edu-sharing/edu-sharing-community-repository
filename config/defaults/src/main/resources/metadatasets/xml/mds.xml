@@ -1208,27 +1208,100 @@
 		</basequery>
 		<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
 
+		<query join="AND" id="collections">
+			<basequery propertyNull="ngsearchword">
+			{"bool":{
+			"must":[
+			{"term":{"aspects":"ccm:collection"}},{"term":{"nodeRef.storeRef.protocol":"workspace"}}
+			{"bool":{
+			"should":[
+			{"term":{"properties.ccm:collectionlevel0.keyword":"true"}},
+			{"term":{"properties.ccm:collection_pinned_status":"true"}},
+			]
+			}}]
+			}}
+			</basequery>
+			<basequery>{"bool":{
+				"must":[
+				{"term":{"type":"ccm:map"}},{"term":{"aspects":"ccm:collection"}}
+				]
+				}}
+			</basequery>
+			<property name="ngsearchword">
+				<statement>
+					{"bool":{"should":[
+					{
+					"simple_query_string": {
+					"query": "${valueRaw}*",
+					"flags": "OR|AND|PREFIX|PHRASE|WHITESPACE",
+					"fields": [
+					"properties.cm:name^2",
+					"properties.cm:title^2",
+					"properties.cclom:title^5",
+					"properties.cclom:general_description^2",
+					"properties.cclom:general_keyword^4",
+					"i18n.de_DE.ccm:taxonid^2"
+					],
+					"default_operator": "and"
+					}
+					},
+					{"wildcard":{"nodeRef.id": {"value":"*${value}*", "case_insensitive": true }}}
+					]
+					}}</statement>
+			</property>
+		</query>
 		<query join="AND" id="ngsearch">
 			<!--TODO basequery-->
 			<!--basequery>ISNULL:@ccm\:tool_category</basequery-->
-			<basequery>
-				{"bool":
-				"must_not":[{"term":{"aspects":"ccm:metadataPresettingTemplate"}},
+			<basequery>{"bool":{
+				"must":[
+				{"term":{"type":"ccm:io"}},
+				{"term":{"nodeRef.storeRef.protocol":"workspace"}}
+				],
+				"must_not":[
+				{"term":{"aspects":"ccm:metadataPresettingTemplate"}},
 				{"term":{"aspects":"ccm:io_childobject"}},
 				{"wildcard":{"properties.cm:name.keyword":"._*"}},
 				{"term":{"aspects":"ccm:collection_io_reference"}},
-				{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}]
-				}
-				}</basequery>
+				{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}
+				]
+				}}</basequery>
 			<property name="ngsearchword">
-				<statement>{"bool":{"should":[
-					{"wildcard":{"properties.cm:name":{"value":"*${value}*", "case_insensitive": true }}},
-					{"wildcard":{"properties.cclom:title.keyword":{"value":"*${value}*", "case_insensitive": true }}},
-					{"wildcard":{"properties.cclom:general_description":{"value":"*${value}*", "case_insensitive": true }}},
-					{"wildcard":{"properties.cclom:general_keyword":{"value":"*${value}*", "case_insensitive": true }}},
-					{"wildcard":{"content.fulltext":{"value":"*${value}*", "case_insensitive": true }}},
-					{"wildcard":{"nodeRef.id":{"value":"*${value}*", "case_insensitive": true }}}
-					]}}</statement>
+				<basequery>
+					{"bool": {
+					"must_not":[
+					{"term":{"aspects":"ccm:metadataPresettingTemplate"}},
+					{"term":{"aspects":"ccm:io_childobject"}},
+					{"wildcard":{"properties.cm:name.keyword":"._*"}},
+					{"term":{"aspects":"ccm:collection_io_reference"}},
+					{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}
+					]
+					}
+					}</basequery>
+				<statement>
+					{"bool":{"should":[
+					{
+					"simple_query_string": {
+					"query": "${valueRaw}*",
+					"flags": "OR|AND|PREFIX|PHRASE|WHITESPACE",
+					"fields": [
+					"properties.cm:name^2",
+					"properties.cm:title^2",
+					"properties.cclom:title^5",
+					"properties.cclom:general_description^2",
+					"properties.cclom:general_keyword^4",
+					"properties.ccm:lifecyclecontributer_author^1",
+					"properties.ccm:lifecyclecontributer_publisher^1",
+					"properties.ccm:publisher^1",
+					"i18n.de_DE.ccm:taxonid^2",
+					"content.fulltext^1"
+					],
+					"default_operator": "and"
+					}
+					},
+					{"wildcard":{"nodeRef.id": {"value":"*${value}*", "case_insensitive": true }}}
+					]
+					}}</statement>
 				<exactMatching>false</exactMatching>
 				<multiple>true</multiple>
 				<multiplejoin>AND</multiplejoin>
@@ -1302,7 +1375,7 @@
 				<statement>{"bool": {
 					"must_not": [
 					{"match": {"nodeRef.id": "${valueRaw}"}},
-					{"match": {"properties.ccm:published_original.keyword": "${valueRaw}"}}
+					{"wildcard": {"properties.ccm:published_original.keyword": "*${valueRaw}"}}
 					]}}</statement>
 			</property>
 			<property name="ccm:taxonid">

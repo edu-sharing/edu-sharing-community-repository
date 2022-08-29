@@ -59,7 +59,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
     private temporaryValue: string[] = undefined;
 
     constructor(
-        mdsEditorInstance: MdsEditorInstanceService,
+        public mdsEditorInstance: MdsEditorInstanceService,
         translate: TranslateService,
         private ui: UIService,
         private viewInstance: ViewInstanceService,

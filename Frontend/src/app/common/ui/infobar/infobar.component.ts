@@ -1,15 +1,4 @@
-import {
-    Component,
-    Input,
-    Output,
-    EventEmitter,
-    OnInit,
-    HostListener,
-    ViewChild,
-    ElementRef,
-    QueryList,
-} from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { trigger } from '@angular/animations';
 import { DialogButton } from '../../../core-module/core.module';

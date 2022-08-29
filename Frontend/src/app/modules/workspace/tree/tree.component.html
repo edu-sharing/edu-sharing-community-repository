@@ -6,13 +6,10 @@
 <div class="tree" *ngIf="root == MY_FILES">
   <es-workspace-sub-tree
     [node]="'-userhome-'"
-    [openPath]="_path"
+    [currentPath]="currentPath"
     [reload]="reload"
-    [selectedPath]="_selectedPath"
-    [selectedNode]="selectedNode"
     (onUpdateOptions)="updateOptions($event)"
     (onDrop)="drop($event)"
-    (onToggleTree)="toggleTree($event)"
     (onClick)="openNode($event)"
   ></es-workspace-sub-tree>
 </div>
@@ -28,13 +25,10 @@
 <div class="tree" *ngIf="root == SHARED_FILES">
   <es-workspace-sub-tree
     [node]="'-shared_files-'"
-    [openPath]="_path"
+    [currentPath]="currentPath"
     [reload]="reload"
-    [selectedPath]="_selectedPath"
-    [selectedNode]="selectedNode"
     (onUpdateOptions)="updateOptions($event)"
     (onDrop)="drop($event)"
-    (onToggleTree)="toggleTree($event)"
     (onClick)="openNode($event)"
   ></es-workspace-sub-tree>
 </div>
@@ -50,13 +44,10 @@
 <div class="tree" *ngIf="root == MY_SHARED_FILES">
   <es-workspace-sub-tree
     [node]="'-my_shared_files-'"
-    [openPath]="_path"
+    [currentPath]="currentPath"
     [reload]="reload"
-    [selectedPath]="_selectedPath"
-    [selectedNode]="selectedNode"
     (onUpdateOptions)="updateOptions($event)"
     (onDrop)="drop($event)"
-    (onToggleTree)="toggleTree($event)"
     (onClick)="openNode($event)"
   ></es-workspace-sub-tree>
 </div>
@@ -74,13 +65,10 @@
 <div class="tree" *ngIf="root == TO_ME_SHARED_FILES">
   <es-workspace-sub-tree
     [node]="workspace.getRootFolderInternalId()"
-    [openPath]="_path"
+    [currentPath]="currentPath"
     [reload]="reload"
-    [selectedPath]="_selectedPath"
-    [selectedNode]="selectedNode"
     (onUpdateOptions)="updateOptions($event)"
     (onDrop)="drop($event)"
-    (onToggleTree)="toggleTree($event)"
     (onClick)="openNode($event)"
   ></es-workspace-sub-tree>
 </div>
@@ -94,10 +82,8 @@
 <div class="tree" *ngIf="root == WORKFLOW_RECEIVE">
   <es-workspace-sub-tree
     [node]="'-workflow_receive-'"
-    [openPath]="_path"
+    [currentPath]="currentPath"
     [reload]="reload"
-    [selectedPath]="_selectedPath"
-    [selectedNode]="selectedNode"
     (onUpdateOptions)="updateOptions($event)"
     (onDrop)="drop($event)"
     (onClick)="openNode($event)"

@@ -111,7 +111,7 @@ export class MdsEditorWidgetContainerComponent
     constructor(
         private elementRef: ElementRef,
         private uiService: UIService,
-        private mdsEditorInstance: MdsEditorInstanceService,
+        public mdsEditorInstance: MdsEditorInstanceService,
         private cdr: ChangeDetectorRef,
         private formFieldRegistration: FormFieldRegistrationService,
         private viewInstance: ViewInstanceService,

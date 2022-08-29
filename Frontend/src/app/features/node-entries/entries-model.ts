@@ -35,7 +35,7 @@ export enum InteractionType {
 export type ListOptions = { [key in Target]?: OptionItem[] };
 export type ListOptionsConfig = {
     scope: Scope;
-    actionbar: ActionbarComponent;
+    actionbar?: ActionbarComponent;
     parent?: Node;
     customOptions?: CustomOptions;
 };
@@ -65,6 +65,7 @@ export enum ClickSource {
     Icon,
     Metadata,
     Comments,
+    Overlay,
 }
 
 export type NodeClickEvent<T extends NodeEntriesDataType> = {
@@ -75,6 +76,11 @@ export type NodeClickEvent<T extends NodeEntriesDataType> = {
 export type FetchEvent = {
     offset: number;
     amount?: number;
+    /**
+     * is a reset of the current data required?
+     * this should be true if this was a pagination request
+     */
+    reset?: boolean;
 };
 export type GridConfig = {
     maxRows?: number;
@@ -96,7 +102,7 @@ export interface ListEventInterface<T extends NodeEntriesDataType> {
     /**
      * activate option (dropdown) generation
      */
-    initOptionsGenerator(actionbar: ListOptionsConfig): void | Promise<void>;
+    initOptionsGenerator(config: ListOptionsConfig): void | Promise<void>;
 
     getSelection(): SelectionModel<T>;
 }

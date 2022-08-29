@@ -88,6 +88,12 @@
   "RADIO_BUTTON_SELECTED": "Optionsfeld ausgewählt",
   "RADIO_BUTTON_NOT_SELECTED": "Optionsfeld nicht ausgewählt",
   "DISABLED": "deaktiviert",
+  "PAGINATOR": {
+    "itemsPerPageLabel": "Einträge pro Seite:",
+    "nextPageLabel": "Nächste Seite",
+    "previousPageLabel": "Vorherige Seite",
+    "getRangeLabel": "Seite {{page}} von {{pageCount}}"
+  },
   "COLLECTION_CHOOSER": {
     "ADD_TO_RECENT_COLLECTION": "In zuletzt verwendete Sammlungen",
     "SEARCH_COLLECTIONS": "Sammlung suchen...",
@@ -211,7 +217,7 @@
     "JSON": "Gesamtes Objekt",
     "PERMISSIONS": "Berechtigungen",
     "PERMISSIONS_INHERITED": "Geerbte Berechtigungen",
-    "PERMISSIONS_INHERIT_DISABLED": "Vereerbung dektiviert",
+    "PERMISSIONS_INHERIT_DISABLED": "Vereerbung deaktiviert",
     "PERMISSIONS_INHERIT_EMPTY": "Keine Berechtigungen vom Parent geerbt",
     "PERMISSIONS_LOCAL": "Explizite Berechtigungen",
     "PERMISSIONS_LOCAL_EMPTY": "Keine Berechtigungen am Objekt festgelegt",
@@ -413,6 +419,7 @@
   },
   "COMMENTS_SINGLE": "Kommentar",
   "COMMENTS_MULTIPLE": "Kommentare",
+  "PUBLISHED_COPY_TOOLTIP": "Veröffentlichte Kopie",
   "NODE_COMMENTS": {
     "TITLE": "Kommentare",
     "NEW_COMMENT_PLACEHOLDER": "Neuer Kommentar...",
@@ -850,11 +857,17 @@
     "RELATION_TYPE": {
       "VERSIONS": "Versionen",
       "FORKED_CHILDS": "Hat Varianten",
+      "FORKED_ORIGIN": "Ist Variante von",
       "isPartOf": "ist Teil von",
       "isBasedOn": "basiert auf",
       "references": "bezieht sich auf",
       "hasPart": "besitzt Teil",
       "isBasisFor": "ist Basis von"
+    },
+    "RELATION_TYPE_FULLY": {
+      "isPartOf": "ist Teil von (isPartOf)",
+      "isBasedOn": "basiert auf (isBasedOn)",
+      "references": "bezieht sich auf (references)"
     }
   },
   "VCARD": {

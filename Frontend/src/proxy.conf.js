@@ -12,7 +12,12 @@ if (!process.env.BACKEND_URL) {
 
 const PROXY_CONFIG = [
     {
-        context: ['/edu-sharing/rest', '/edu-sharing/eduservlet'],
+        context: [
+            '/edu-sharing/rest',
+            '/edu-sharing/eduservlet',
+            '/edu-sharing/preview',
+            '/edu-sharing/themes',
+        ],
         target: process.env.BACKEND_URL,
         secure: false,
         changeOrigin: true,

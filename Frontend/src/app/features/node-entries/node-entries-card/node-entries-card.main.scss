@@ -56,14 +56,21 @@ $optionBarHeight: 50px;
         outline: 2px dashed $nodeVirtualColor;
     }
     .card-top-bar {
-        background-color: rgba(255, 255, 255, 0.5);
         height: $topBarHeight;
-
         display: flex;
         gap: 15px;
 
         align-items: center;
         padding: 0 $entriesCardPaddingHorizontal;
+        position: relative;
+        .card-top-bar-collection-color {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.5);
+            left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+        }
         .card-top-bar-type,
         .card-top-bar-flag {
             display: flex;
@@ -74,6 +81,8 @@ $optionBarHeight: 50px;
             border-radius: 50%;
             background-color: #fff;
             padding: 5px;
+            position: relative;
+            z-index: 1;
             @include materialShadow();
             i {
                 // TODO: do we want to style based on collection type?
@@ -88,6 +97,7 @@ $optionBarHeight: 50px;
         .card-top-bar-type {
         }
         .card-top-bar-comments,
+        .card-top-bar-published-copy,
         .card-top-bar-childobjects {
             > div {
                 background-color: rgba(255, 255, 255, 0.75);
@@ -95,6 +105,7 @@ $optionBarHeight: 50px;
                 display: inline-flex;
                 align-items: center;
                 min-width: 35px;
+                min-height: 22px;
                 justify-content: center;
                 cursor: default;
                 user-select: none;
@@ -103,6 +114,12 @@ $optionBarHeight: 50px;
                     > i {
                         font-size: 13px;
                         margin-left: 4px;
+                    }
+                }
+                &.node-published-copy {
+                    min-width: auto;
+                    > i {
+                        font-size: 13px;
                     }
                 }
                 &.node-comments {
@@ -209,9 +226,6 @@ $optionBarHeight: 50px;
         background-color: $primaryVeryLight;
         // transform: scale(1.0075);
     }
-    &.grid-card-collection:hover .card-meta {
-        background-color: rgba(255, 255, 255, 0.9);
-    }
     .card-options {
         border-top: 1px solid #ddd;
         // margin-top: 2px; white artefact on hover
@@ -263,5 +277,22 @@ $optionBarHeight: 50px;
             // @TDOO: better focus visibility is required
             background-color: #fff;
         }
+    }
+}
+/**
+    custom overlay provided via template
+ */
+.card-overlay {
+    position: absolute;
+    z-index: 1;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    // Pass pointer events through to the underlying card when the overlay template is empty...
+    pointer-events: none;
+    // ...but re-enable pointer-event handling for the overlay's content (if any).
+    & ::ng-deep > * {
+        pointer-events: auto;
     }
 }

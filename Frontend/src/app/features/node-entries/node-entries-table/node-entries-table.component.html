@@ -12,8 +12,15 @@
 <mat-table
   [dataSource]="entriesService.dataSource"
   matSort
+  [matSortActive]="entriesService.sort?.active"
+  [matSortDirection]="entriesService.sort?.direction"
   esInfiniteScroll
-  (scrolled)="loadData()"
+  (scrolled)="
+    entriesGlobalService.getPaginationStrategy(entriesService.scope) ===
+    PaginationStrategy.InfiniteScroll
+      ? loadData()
+      : null
+  "
 >
   <!-- Checkbox Column -->
   <ng-container matColumnDef="select">
@@ -117,17 +124,19 @@
         *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
       >
         <es-node-url cdkMonitorSubtreeFocus [node]="node" [mode]="first ? 'link' : 'wrapper'">
-          <es-list-text
+          <es-list-base
+            [forceText]="true"
             [node]="node"
             [item]="column"
             esCheckTextOverflow
             #text="esCheckTextOverflow"
             [matTooltip]="text.hasTextOverflow() ? cell.innerText : null"
-          ></es-list-text>
+          ></es-list-base>
         </es-node-url>
       </ng-container>
-      <es-list-text
+      <es-list-base
         *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink"
+        [forceText]="true"
         [node]="node"
         [item]="column"
         (click)="
@@ -148,7 +157,7 @@
         esCheckTextOverflow
         #text="esCheckTextOverflow"
         [matTooltip]="text.hasTextOverflow() ? cell.innerText : null"
-      ></es-list-text>
+      ></es-list-base>
     </mat-cell>
   </ng-container>
   <mat-header-row mat-header-row *matHeaderRowDef="getVisibleColumns()"></mat-header-row>
@@ -168,8 +177,11 @@
     [class.mat-row-selected]="entriesService.selection.isSelected(node)"
     [class.selected-when-dragging]="isDragging && entriesService.selection.isSelected(node)"
     [class.mat-row-virtual]="node.virtual"
-    [class.mat-row-virtual-seperator]="
-      node.virtual && !last && !$any(entriesService.dataSource.getData()[i + 1]).virtual
+    [class.mat-row-virtual-first]="
+      node.virtual && !$any(entriesService.dataSource.getData()[i - 1])?.virtual
+    "
+    [class.mat-row-virtual-last]="
+      node.virtual && !$any(entriesService.dataSource.getData()[i + 1])?.virtual
     "
     *matRowDef="let node; let i = index; let last = last; columns: getVisibleColumns()"
     (contextmenu)="onRowContextMenu({ event: $event, node: node })"
@@ -183,6 +195,21 @@
     ></es-drag-preview>
   </mat-row>
 </mat-table>
+<ng-container
+  *ngIf="
+    !entriesService.dataSource.isLoading &&
+    entriesService.dataSource.hasMore() &&
+    entriesGlobalService.getPaginationStrategy(entriesService.scope) ===
+      PaginationStrategy.InfiniteScroll
+  "
+>
+  <div class="load-more">
+    <button mat-button color="primary" (click)="loadData()">
+      <i esIcon="refresh"></i>
+      <span>{{ 'LOAD_MORE' | translate }}</span>
+    </button>
+  </div>
+</ng-container>
 <ng-container *ngIf="entriesService.dataSource.isLoading">
   <ng-container *ngTemplateOutlet="loading"> </ng-container>
 </ng-container>

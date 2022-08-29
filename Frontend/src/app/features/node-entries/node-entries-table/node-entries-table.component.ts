@@ -18,9 +18,11 @@ import { NodeEntriesService } from '../../../core-ui-module/node-entries.service
 import { Target } from '../../../core-ui-module/option-item';
 import { DragData } from '../../../services/nodes-drag-drop.service';
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
-import { CanDrop } from '../../../shared/directives/nodes-drop-target.directive';
 import { ClickSource, InteractionType } from '../entries-model';
+
 import { NodeEntriesDataType } from '../node-entries.component';
+import { NodeEntriesGlobalService, PaginationStrategy } from '../node-entries-global.service';
+import { CanDrop } from '../../../shared/directives/nodes-drop-target.directive';
 
 @Component({
     selector: 'es-node-entries-table',
@@ -33,6 +35,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     readonly InteractionType = InteractionType;
     readonly ClickSource = ClickSource;
     readonly Target = Target;
+    readonly PaginationStrategy = PaginationStrategy;
 
     @ViewChild(MatSort) sort: MatSort;
     @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -54,6 +57,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
 
     constructor(
         public entriesService: NodeEntriesService<T>,
+        public entriesGlobalService: NodeEntriesGlobalService,
         private applicationRef: ApplicationRef,
         private toast: Toast,
         public ui: UIService,
@@ -218,9 +222,11 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     }
 
     loadData() {
+        // TODO: focus next item when triggered via button.
         if (this.entriesService.dataSource.hasMore()) {
             this.entriesService.fetchData.emit({
                 offset: this.entriesService.dataSource.getData().length,
+                reset: false,
             });
         }
     }

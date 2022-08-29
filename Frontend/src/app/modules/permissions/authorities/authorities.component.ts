@@ -832,8 +832,6 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                     await this.dataSource.appendData(
                         orgs.organizations.filter((o) => o.administrationAccess),
                     );
-                    // org endpoint does not support proper pagination, so check if result was empty
-                    this.dataSource.setCanLoadMore(orgs.organizations.length > 0);
                     this.dataSource.isLoading = false;
                     this.updateOptions();
                 });

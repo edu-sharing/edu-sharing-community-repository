@@ -1,0 +1,76 @@
+@import '../../../core-ui-module/styles/variables';
+
+.collections-cards-div {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 30px;
+    .heading-group {
+        display: flex;
+        align-items: center;
+        > h2 {
+            flex-grow: 1;
+            margin: 5px 10px 0 0;
+        }
+        mat-slide-toggle {
+            margin-right: 20px;
+        }
+    }
+}
+.collection-nocontent-container {
+    text-align: left;
+    float: left;
+    width: 100%;
+}
+
+.collection-nocontent-big {
+    font-size: $fontSizeLarge;
+    color: $textLight;
+    margin: 40px 20px;
+    text-align: center;
+    width: 100%;
+}
+
+.collection-nocontent-small {
+    padding: 16px;
+    color: $textMediumLight;
+}
+
+.actionbarMaterials {
+    display: flex;
+    justify-content: flex-end;
+    padding: 20px 30px;
+    margin: -20px -20px 0;
+}
+.node-deleted {
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(3px);
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+    div {
+        opacity: 1;
+        padding-bottom: 7px;
+    }
+    > div i {
+        font-size: 26pt;
+        color: $textPrimary;
+    }
+    .headline {
+        color: $textPrimary;
+        font-size: 120%;
+    }
+    .subline {
+        color: $textLight;
+        font-size: 90%;
+    }
+    a {
+        text-transform: uppercase;
+        font-weight: bold;
+        i {
+            position: relative;
+            top: 7px;
+        }
+    }
+}

@@ -31,6 +31,7 @@ import { ListTableComponent } from '../../../core-ui-module/components/list-tabl
 import {
     DropSource,
     DropTarget,
+    FetchEvent,
     InteractionType,
     ListSortConfig,
     NodeClickEvent,
@@ -211,22 +212,26 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     searchGlobal() {
         this.onSearchGlobal.emit(this._searchQuery);
     }
-    public load(reset: boolean) {
+    public load(event: FetchEvent = null) {
         if (this._node == null && !this._searchQuery) return;
         if (this.dataSource.isLoading) {
-            setTimeout(() => this.load(reset), 10);
+            setTimeout(() => this.load(event), 10);
             return;
         }
-        if (reset) {
-            this.dataSource = new NodeDataSource<Node>();
+        if (event?.reset) {
+            this.dataSource.reset();
             this.nodeEntries.getSelection().clear();
             this.onReset.emit();
+            if (event.offset === 0) {
+                console.log('reset pagination', event);
+                this.nodeEntries.resetPagination();
+            }
         } else if (this.dataSource.isFullyLoaded()) {
             return;
         }
         this.dataSource.isLoading = true;
         // ignore virtual (new) added/uploaded elements
-        const offset = this.getRealNodeCount();
+        const offset = event.offset || this.getRealNodeCount();
         const request: any = {
             offset,
             propertyFilter: [
@@ -246,6 +251,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             ],
             sortBy: [this.sort.active],
             sortAscending: this.sort.direction === 'asc',
+            count: event?.amount,
         };
         if (this._searchQuery) {
             const query = '*' + this._searchQuery + '*';
@@ -349,7 +355,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             sortBy: config.active,
             sortAscending: config.direction === 'asc',
         });
-        this.load(true);
+        this.load({ reset: true, offset: 0 });
     }
     public onSelection(event: Node[]) {
         this.onSelectionChanged.emit(event);
@@ -386,7 +392,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             if (Helper.objectEquals(this._node, current)) return;
             this._node = current;
             this.initOptions();
-            this.load(true);
+            this.load({ reset: true, offset: 0 });
         });
     }
 
@@ -395,7 +401,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             if (query && query.query) {
                 this._searchQuery = query.query;
                 this._node = query.node;
-                this.load(true);
+                this.load({ reset: true, offset: 0 });
             } else {
                 this._searchQuery = null;
             }

@@ -37,6 +37,13 @@ export class MdsService {
         return this.availableSetsDict[repository];
     }
 
+    /**
+     * get the given metadata
+     * NOTE: "DEFAULT" will refer to the primary metadataset of the repository but will NOT
+     * obey any restrictions given via the (client-side) configuration
+     * @param repository
+     * @param metadataSet
+     */
     getMetadataSet({
         repository = HOME_REPOSITORY,
         metadataSet = DEFAULT,

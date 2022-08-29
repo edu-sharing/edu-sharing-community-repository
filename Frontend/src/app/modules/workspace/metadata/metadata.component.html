@@ -38,7 +38,7 @@
     <div [hidden]="tab !== PROPERTIES" class="content content-properties">
       <p class="description">{{ 'WORKSPACE.METADATA.USAGE_COUNT_TITLE' | translate }}</p>
 
-      <canvas id="myChart" width="270" height="200"></canvas>
+      <canvas id="myChart" width="320" height="200"></canvas>
       <ul class="statistic-value">
         <li *ngFor="let point of stats.points; let i = index" class="point">
           <i class="material-icons">{{ stats.pointsIcons[i] }}</i> {{ point }}
@@ -48,45 +48,42 @@
         {{ 'WORKSPACE.METADATA.USAGE_COUNT' | translate }}
         <span class="usage-counter">{{ statsTotalPoints }}</span>
       </p>
-      <p class="description collections" *ngIf="usagesCollection && usagesCollection.length">
-        {{ 'WORKSPACE.METADATA.COLLECTIONS' | translate: { count: usagesCollection.length } }}
+      <p class="description collections" *ngIf="!usagesCollection.isEmpty()">
+        {{
+          'WORKSPACE.METADATA.COLLECTIONS' | translate: { count: usagesCollection.getData().length }
+        }}
       </p>
-      <es-listTable
-        *ngIf="usagesCollection && usagesCollection.length"
-        [nodes]="usagesCollection"
+      <es-node-entries-wrapper
+        *ngIf="!usagesCollection.isEmpty()"
+        [dataSource]="usagesCollection"
         [columns]="columnsCollections"
-        [viewType]="0"
-        [hasHeading]="false"
-        [hasIcon]="true"
-        [isClickable]="true"
-        (clickRow)="displayCollection($event.node)"
-      ></es-listTable>
+        [displayType]="NodeEntriesDisplayType.SmallGrid"
+        [elementInteractionType]="InteractionType.DefaultActionLink"
+      ></es-node-entries-wrapper>
       <div class="description forkedParend" *ngIf="forkedParent">
         {{ 'WORKSPACE.METADATA.FORKED_PARENT' | translate }}
       </div>
-      <es-listTable
+      <es-node-entries-wrapper
         *ngIf="forkedParent"
-        [nodes]="[forkedParent]"
+        [dataSource]="staticDataSource(forkedParent)"
         [columns]="columns"
-        [viewType]="0"
-        [hasHeading]="false"
-        [hasIcon]="true"
-        [isClickable]="true"
-        (clickRow)="displayNode($event.node)"
-      ></es-listTable>
-      <div class="description forkedParend" *ngIf="forkedChilds && forkedChilds.length">
-        {{ 'WORKSPACE.METADATA.FORKED_CHILDS' | translate: { count: forkedChilds.length } }}
+        [checkbox]="false"
+        [displayType]="NodeEntriesDisplayType.Table"
+        [elementInteractionType]="InteractionType.DefaultActionLink"
+      ></es-node-entries-wrapper>
+      <div class="description forkedParend" *ngIf="!forkedChildren.isEmpty()">
+        {{
+          'WORKSPACE.METADATA.FORKED_CHILDS' | translate: { count: forkedChildren.getData().length }
+        }}
       </div>
-      <es-listTable
-        *ngIf="forkedChilds && forkedChilds.length"
-        [nodes]="forkedChilds"
+      <es-node-entries-wrapper
+        *ngIf="!forkedChildren.isEmpty()"
+        [dataSource]="forkedChildren"
         [columns]="columns"
-        [viewType]="0"
-        [hasHeading]="false"
-        [hasIcon]="true"
-        [isClickable]="true"
-        (clickRow)="displayNode($event.node)"
-      ></es-listTable>
+        [checkbox]="false"
+        [displayType]="NodeEntriesDisplayType.Table"
+        [elementInteractionType]="InteractionType.DefaultActionLink"
+      ></es-node-entries-wrapper>
 
       <!--<div class="value">{{usageCount}}</div>-->
       <!--<div class="description"><a class="clickable" (click)="openPermalink()">{{'WORKSPACE.METADATA.PERMALINK' | translate}}</a></div>-->

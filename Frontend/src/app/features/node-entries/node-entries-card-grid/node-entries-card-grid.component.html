@@ -16,9 +16,15 @@
       mat-button
       color="primary"
     >
-      {{ 'NODE.' + entriesService.sort.active | translate }}
+      <span *ngIf="entriesService.sort.active">{{
+        'NODE.' + entriesService.sort.active | translate
+      }}</span>
+      <span *ngIf="!entriesService.sort.active">{{ 'SORT_BY' | translate }}</span>
       <i
-        *ngIf="entriesService.sort.active !== 'ccm:collection_ordered_position'"
+        *ngIf="
+          entriesService.sort.active &&
+          entriesService.sort.active !== 'ccm:collection_ordered_position'
+        "
         [esIcon]="'arrow_' + (entriesService.sort.direction === 'asc' ? 'upward' : 'downward')"
       ></i>
     </button>
@@ -44,6 +50,7 @@
     *ngIf="entriesService.sort?.customSortingInProgress"
     role="list"
     class="card-grid card-grid-reorder"
+    cdkDropListGroup
   >
     <ng-container *ngIf="visibleNodes$ | async as nodes">
       <div
@@ -90,7 +97,12 @@
       #grid
       (esBorderBoxObserver)="onGridSizeChanges()"
       esInfiniteScroll
-      (scrolled)="loadData()"
+      (scrolled)="
+        entriesGlobalService.getPaginationStrategy(entriesService.scope) ===
+        PaginationStrategy.InfiniteScroll
+          ? loadData()
+          : null
+      "
     >
       <ng-container *ngTemplateOutlet="globalOptions"></ng-container>
       <ng-container *ngIf="visibleNodes$ | async as nodes">
@@ -102,8 +114,6 @@
           [canDropNodes]="canDropNodes"
           (nodeDropped)="onNodesDropped($event)"
           #dropTarget="esNodesDropTarget"
-          [class.card-grid-drop-allowed]="dropTarget.active?.canDrop.accept"
-          [class.card-grid-drop-blocked]="dropTarget.active?.canDrop.denyExplicit"
         >
           <es-node-entries-card
             *ngIf="displayType === NodeEntriesDisplayType.Grid"
@@ -144,12 +154,12 @@
           >
           </es-node-entries-card-small>
           <div
-            *ngIf="dropTarget.active?.canDrop.denyExplicit"
+            *ngIf="dropTarget.active?.canDrop?.denyExplicit"
             class="card-grid-drop-blocked-container"
           >
             <i esIcon="cancel"></i>
           </div>
-          <div *ngIf="dropTarget.active?.canDrop.accept" class="card-grid-drop-allowed-container">
+          <div *ngIf="dropTarget.active?.canDrop?.accept" class="card-grid-drop-allowed-container">
             <i
               [esIcon]="dropTarget.active.action === 'copy' ? 'add_circle_outline' : 'archive'"
             ></i>
@@ -162,8 +172,9 @@
 <ng-container
   *ngIf="
     !entriesService.dataSource.isLoading &&
-    entriesService.dataSource.getCanLoadMore() &&
-    entriesService.dataSource.hasMore()
+    entriesService.dataSource.hasMore() &&
+    entriesGlobalService.getPaginationStrategy(entriesService.scope) ===
+      PaginationStrategy.InfiniteScroll
   "
 >
   <div class="load-more">

@@ -1215,7 +1215,7 @@ export class ListTableComponent
     }
     updateNodes(objects: Node[] | any) {
         this.replaceNodes(objects, this._nodes);
-        this.replaceNodes(objects, this.selectedNodes);
+        this.replaceNodes(objects, this.selectedNodes ?? []);
         this.nodesChange.emit(this._nodes);
     }
     addVirtualNodes(objects: Node[]) {
