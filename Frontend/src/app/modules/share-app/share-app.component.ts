@@ -30,6 +30,8 @@ import { CordovaService, OnBackBehaviour } from '../../common/services/cordova.s
 import { DateHelper } from '../../core-ui-module/DateHelper';
 import { RestConnectorsService } from '../../core-module/core.module';
 import { FrameEventsService } from '../../core-module/core.module';
+import { InteractionType, NodeEntriesDisplayType } from '../../features/node-entries/entries-model';
+import { NodeDataSource } from '../../features/node-entries/node-data-source';
 @Component({
     selector: 'es-share-app',
     templateUrl: 'share-app.component.html',
@@ -37,6 +39,8 @@ import { FrameEventsService } from '../../core-module/core.module';
     animations: [],
 })
 export class ShareAppComponent {
+    readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    readonly InteractionType = InteractionType;
     globalProgress = true;
     uri: string;
     private type = 'LINK';
@@ -46,14 +50,13 @@ export class ShareAppComponent {
     private inboxPath: Node[];
     inbox: Node;
     columns: ListItem[] = [];
-    collections: Node[];
+    collections = new NodeDataSource<Node>();
     private cordovaType: string;
     private mimetype: string;
     private editorType: string;
     private file: File;
     private fileName: string;
     private text: string;
-    loading = true;
     constructor(
         private toast: Toast,
         private route: ActivatedRoute,
@@ -196,6 +199,8 @@ export class ShareAppComponent {
                 this.fileName = params['file'];
                 this.text = params['text']; // ios only: custom description
                 this.description = null;
+                this.collections.reset();
+                this.collections.isLoading = true;
                 this.collectionApi
                     .search('', {
                         sortBy: [RestConstants.CM_MODIFIED_DATE],
@@ -205,12 +210,12 @@ export class ShareAppComponent {
                     })
                     .subscribe(
                         (data) => {
-                            this.collections = data.collections;
-                            this.loading = false;
+                            this.collections.setData(data.collections, data.pagination);
+                            this.collections.isLoading = false;
                         },
                         (error) => {
                             this.toast.error(error);
-                            this.loading = false;
+                            this.collections.isLoading = false;
                         },
                     );
                 this.node

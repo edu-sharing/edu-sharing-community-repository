@@ -431,7 +431,9 @@ export class UIHelper {
                             () => {
                                 bridge.closeModalDialog();
                                 if (callback) {
-                                    callback(results.map((n) => n.node as CollectionReference));
+                                    // Invoke `callback` only with the nodes successfully added
+                                    // before.
+                                    callback(success.map((n) => n.node as CollectionReference));
                                 }
                             },
                             () => {
@@ -444,7 +446,13 @@ export class UIHelper {
                                     collection,
                                     duplicated.map((d) => d.node),
                                     false,
-                                    callback,
+                                    (nodes) =>
+                                        // Invoke `callback` with both, the nodes successfully added
+                                        // before and the duplicate nodes added now.
+                                        callback?.([
+                                            ...success.map((n) => n.node as CollectionReference),
+                                            ...nodes,
+                                        ]),
                                     true,
                                 );
                             },
