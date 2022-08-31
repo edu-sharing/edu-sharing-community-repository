@@ -130,7 +130,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
                 this.setDownloadUrl(url);
             },
         };
-        this.frame.addListener(this);
+        this.frame.addListener(this, this.destroyed$);
         this.renderHelper.setViewContainerRef(viewContainerRef);
 
         this.translations.waitForInit().subscribe(() => {

@@ -180,7 +180,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.initDone$.complete();
             });
         });
-        this.event.addListener(this);
+        this.event.addListener(this, this.destroyed$);
     }
 
     private registerMainNavConfig() {

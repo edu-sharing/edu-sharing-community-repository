@@ -183,7 +183,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         private loadingScreen: LoadingScreenService,
         private mainNavService: MainNavService,
     ) {
-        this.event.addListener(this);
+        this.event.addListener(this, this.destroyed$);
         this.translations.waitForInit().subscribe(() => {
             void this.initialize();
         });

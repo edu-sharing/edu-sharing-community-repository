@@ -7,6 +7,7 @@ import {
     Sanitizer,
     ElementRef,
     EventEmitter,
+    OnDestroy,
 } from '@angular/core';
 
 import { Router, Params, ActivatedRoute } from '@angular/router';
@@ -60,7 +61,7 @@ import { MdsMetadatasets } from '../../../core-module/core.module';
 import { ConfigurationHelper } from '../../../core-module/core.module';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { DefaultGroups, OptionItem } from '../../../core-ui-module/option-item';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { PlatformLocation } from '@angular/common';
 import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
@@ -81,7 +82,7 @@ type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITO
     templateUrl: 'collection-new.component.html',
     styleUrls: ['collection-new.component.scss'],
 })
-export class CollectionNewComponent implements EventListener, OnInit {
+export class CollectionNewComponent implements EventListener, OnInit, OnDestroy {
     @ViewChild('mds') mds: MdsEditorWrapperComponent;
     @ViewChild('organizations') organizationsRef: NodeEntriesWrapperComponent<Group>;
     @ViewChild('share') shareRef: WorkspaceShareComponent;
@@ -147,6 +148,7 @@ export class CollectionNewComponent implements EventListener, OnInit {
     private originalPermissions: LocalPermissions;
     private permissionsInfo: any;
     private loadingTask = this.loadingScreen.addLoadingTask();
+    private destroyed = new Subject<void>();
 
     @ViewChild('file') imageFileRef: ElementRef;
     @ViewChild('authorFreetextInput') authorFreetextInput: ElementRef<HTMLInputElement>;
@@ -241,7 +243,7 @@ export class CollectionNewComponent implements EventListener, OnInit {
         private loadingScreen: LoadingScreenService,
         private mainNav: MainNavService,
     ) {
-        this.eventService.addListener(this);
+        this.eventService.addListener(this, this.destroyed);
         this.translations.waitForInit().subscribe(() => {
             this.connector.isLoggedIn().subscribe((data) => {
                 this.mdsService.getSets().subscribe((mdsSets) => {
@@ -366,6 +368,11 @@ export class CollectionNewComponent implements EventListener, OnInit {
             currentScope: 'collections',
             searchEnabled: false,
         });
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
     }
 
     getShareStatus() {
