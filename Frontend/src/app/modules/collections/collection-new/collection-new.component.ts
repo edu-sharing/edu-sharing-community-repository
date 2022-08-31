@@ -24,6 +24,7 @@ import {
     UIService,
     FrameEventsService,
     EventListener,
+    Node,
 } from '../../../core-module/core.module';
 import { RestNodeService } from '../../../core-module/core.module';
 import { RestConstants } from '../../../core-module/core.module';
@@ -47,7 +48,7 @@ import { UIConstants } from '../../../core-module/ui/ui-constants';
 import { MdsComponent } from '../../../features/mds/legacy/mds/mds.component';
 import { TranslateService } from '@ngx-translate/core';
 import { ColorHelper, PreferredColor } from '../../../core-module/ui/color-helper';
-import { DomSanitizer } from '@angular/platform-browser';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { TemporaryStorageService } from '../../../core-module/core.module';
 import { RegisterResetPasswordComponent } from '../../register/register-reset-password/register-reset-password.component';
 import { MainNavComponent } from '../../../main/navigation/main-nav/main-nav.component';
@@ -124,7 +125,7 @@ export class CollectionNewComponent implements EventListener, OnInit {
     public editorialColumns: ListItem[] = [
         new ListItem('GROUP', RestConstants.AUTHORITY_DISPLAYNAME),
     ];
-    imageData: any = null;
+    imageData: string | SafeUrl = null;
     private imageFile: File = null;
     readonly STEP_NEW = 'NEW';
     readonly STEP_GENERAL = 'GENERAL';
@@ -197,13 +198,13 @@ export class CollectionNewComponent implements EventListener, OnInit {
         });
     }
 
-    onEvent(event: string, data: any): void {
+    onEvent(event: string, data: Node): void {
         if (event === FrameEventsService.EVENT_APPLY_NODE) {
-            const imageData = data.preview?.data;
+            const imageData = data.preview?.data?.[0];
             if (imageData) {
                 this.imageData = imageData;
                 this.updateImageOptions();
-                fetch(this.imageData)
+                fetch(imageData)
                     .then((res) => res.blob())
                     .then((blob) => {
                         this.imageFile = blob as File;
