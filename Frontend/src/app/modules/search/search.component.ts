@@ -453,6 +453,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     async applyParameters(
         origin: 'mainnav' | 'mds' | 'did-you-mean-suggestion' | 'sort',
         props: Values = null,
+        { replaceUrl = false } = {},
     ) {
         this.searchService.reinit = true;
         this.searchService.extendedSearchUsed = true;
@@ -465,7 +466,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         ) {
             this.searchService.sidenavOpened = false;
         }
-        await this.routeSearchParameters(props);
+        await this.routeSearchParameters(props, { replaceUrl });
         this.getSearch(this.searchService.searchTerm, true);
     }
 
@@ -553,12 +554,16 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         return true;
     }
 
-    routeSearchParameters(parameters: { [property: string]: string[] }) {
+    routeSearchParameters(
+        parameters: { [property: string]: string[] },
+        { replaceUrl = false } = {},
+    ) {
         this.routeSearch(
             this.searchService.searchTerm,
             this.currentRepository,
             this.mdsId,
             parameters,
+            { replaceUrl },
         );
     }
 
@@ -585,6 +590,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         repository = this.currentRepository,
         mds = this.mdsId,
         parameters?: { [property: string]: string[] },
+        { replaceUrl = false } = {},
     ) {
         if (!parameters) {
             parameters = await this.getMdsValues();
@@ -607,6 +613,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             queryParams.materialsSortAscending = this.searchService.sort.direction === 'asc';
             const result = await this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
                 queryParams,
+                replaceUrl,
             });
             if (result !== true) {
                 // this.invalidateMds();
@@ -758,6 +765,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 displayType: type ?? null,
             },
             queryParamsHandling: 'merge',
+            replaceUrl: true,
         });
     }
 
@@ -1629,6 +1637,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private registerSearchOnMdsUpdate(): void {
+        // Don't create a new browser-history entry for the initial mds values update, so the back
+        // navigation will skip the resulting redirect.
+        let initDone = false;
         rxjs.merge(this.searchField.filterValuesChange, this.mdsDesktopRef.mdsEditorInstance.values)
             .pipe(
                 takeUntil(this.destroyed$),
@@ -1644,7 +1655,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 distinctUntilChanged(),
                 map((json) => JSON.parse(json)),
             )
-            .subscribe((values) => this.applyParameters('mds', values));
+            .subscribe((values) => {
+                this.applyParameters('mds', values, { replaceUrl: !initDone });
+                initDone = true;
+            });
         this.mdsDesktopRef.mdsEditorInstance.mdsInitDone
             .pipe(
                 takeUntil(this.destroyed$),
