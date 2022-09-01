@@ -276,7 +276,12 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private initAfterView(): void {
-        this.tutorialElement = this.mainNavService.getMainNav().searchField.input;
+        // For some reason, the main nav component does not get populated in time when navigating
+        // back from the rendering component. However, since the user cannot go anywhere without
+        // closing the tutorial, we won't be needing it in this case anyway.
+        if (this.mainNavService.getMainNav().searchField) {
+            this.tutorialElement = this.mainNavService.getMainNav().searchField.input;
+        }
         this.handleScroll();
         this.searchService.clear();
         this.initalized = true;
