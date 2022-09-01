@@ -176,6 +176,7 @@
     [class.mat-row-virtual-last]="
       node.virtual && !$any(entriesService.dataSource.getData()[i + 1])?.virtual
     "
+    [class.dynamic-single-click]="entriesService.singleClickHint === 'dynamic'"
     *matRowDef="let node; let i = index; let last = last; columns: getVisibleColumns()"
     (contextmenu)="onRowContextMenu({ event: $event, node: node })"
     (keydown.ContextMenu)="onRowContextMenu({ event: $event, node: node })"

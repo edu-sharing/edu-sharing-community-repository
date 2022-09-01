@@ -90,6 +90,20 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
      * true for one instance per page.
      */
     @Input() globalKeyboardShortcuts: boolean;
+    /**
+     * UI hints for whether a single click will cause a dynamic action.
+     *
+     * This does not configure the actual behavior but only UI hints to the user. Hints include
+     * hover effects and a changed cursor.
+     *
+     * - When choosing 'static', the `clickItem` event should trigger some stationary action like
+     *   selecting the element or displaying information in a complementary page area. The
+     *   `dblClickItem` event can be used for a more disruptive action.
+     * - When choosing 'dynamic', the `clickItem` event should trigger a major action like
+     *   navigating to a new page or closing a dialog.
+     */
+    // TODO: Consider controlling the ui hints and the actual behavior with a single option.
+    @Input() singleClickHint: 'dynamic' | 'static' = 'dynamic';
     @Output() fetchData = new EventEmitter<FetchEvent>();
     @Output() clickItem = new EventEmitter<NodeClickEvent<T>>();
     @Output() dblClickItem = new EventEmitter<NodeClickEvent<T>>();
@@ -157,6 +171,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.dblClickItem = this.dblClickItem;
         this.entriesService.fetchData = this.fetchData;
         this.entriesService.globalKeyboardShortcuts = this.globalKeyboardShortcuts;
+        this.entriesService.singleClickHint = this.singleClickHint;
 
         if (this.componentRef) {
             this.componentRef.instance.changeDetectorRef?.detectChanges();

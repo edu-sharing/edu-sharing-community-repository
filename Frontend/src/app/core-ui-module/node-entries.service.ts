@@ -52,6 +52,7 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
         this.gridConfig$.next(value);
     }
     globalKeyboardShortcuts: boolean;
+    singleClickHint: 'dynamic' | 'static';
 
     constructor(private uiService: UIService) {}
 
