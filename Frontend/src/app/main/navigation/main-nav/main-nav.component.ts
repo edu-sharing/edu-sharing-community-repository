@@ -868,7 +868,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                                     this.router,
                                     this.configService,
                                     this.isSafe() ? RestConstants.SAFE_SCOPE : null,
-                                    null,
                                 );
                                 this.toast.closeModalDialog();
                             }),
