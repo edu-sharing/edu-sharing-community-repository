@@ -98,6 +98,13 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
         }
         return result;
     }
+
+    // FIXME: should we really do this?
+    // > Warning: The beforeunload event should only be used to alert the user of unsaved changes.
+    // > Once those changes are saved, the event should be removed. It should never be added
+    // > unconditionally to the page, as doing so can hurt performance in some cases. See the legacy
+    // > APIs section for details.
+    // --- https://developer.chrome.com/blog/page-lifecycle-api/
     @HostListener('window:beforeunload', ['$event'])
     interceptRoute(event: BeforeUnloadEvent) {
         console.log(event);
