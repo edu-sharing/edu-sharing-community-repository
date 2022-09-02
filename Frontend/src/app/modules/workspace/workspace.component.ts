@@ -158,7 +158,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     displayType: NodeEntriesDisplayType = null;
     reorderDialog: boolean;
     private readonly destroyed$ = new Subject<void>();
-    private loadingTask = this.loadingScreen.addLoadingTask();
+    private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed$ });
 
     constructor(
         private toast: Toast,

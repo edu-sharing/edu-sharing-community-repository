@@ -147,8 +147,8 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
     private parentCollection: EduData.Node;
     private originalPermissions: LocalPermissions;
     private permissionsInfo: any;
-    private loadingTask = this.loadingScreen.addLoadingTask();
     private destroyed = new Subject<void>();
+    private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
 
     @ViewChild('file') imageFileRef: ElementRef;
     @ViewChild('authorFreetextInput') authorFreetextInput: ElementRef<HTMLInputElement>;

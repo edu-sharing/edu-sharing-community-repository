@@ -433,7 +433,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         this.addDownloadButton(download);
     }
     private loadRenderData() {
-        const loadingTask = this.loadingScreen.addLoadingTask();
+        const loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed$ });
         this.isLoading = true;
         this.optionsHelper.clearComponents(this.actionbar);
         if (this.isBuildingPage) {

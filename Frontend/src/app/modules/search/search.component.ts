@@ -217,7 +217,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly didYouMeanSuggestion$ = this.searchApi
         .observeDidYouMeanSuggestion()
         .pipe(shareReplay(1));
-    private loadingTask = this.loadingScreen.addLoadingTask();
+    private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed$ });
 
     constructor(
         private router: Router,

@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router, RoutesRecognized } from '@angular/router';
 import { TranslationsService } from '../../translations/translations.service';
 import * as EduData from '../../core-module/core.module';
@@ -31,7 +31,7 @@ import {
 } from '../../core-ui-module/option-item';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { UIConstants } from '../../core-module/ui/ui-constants';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
 import { trigger } from '@angular/animations';
 import { CordovaService } from '../../common/services/cordova.service';
@@ -52,7 +52,7 @@ import { MainNavService } from '../../main/navigation/main-nav.service';
     animations: [trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
     providers: [OptionsHelperService],
 })
-export class StreamComponent implements OnInit, AfterViewInit {
+export class StreamComponent implements OnInit, AfterViewInit, OnDestroy {
     connectorList: ConnectorList;
     createConnectorName: string;
     createConnectorType: Connector;
@@ -99,6 +99,8 @@ export class StreamComponent implements OnInit, AfterViewInit {
     mode = 'new';
     options: OptionItem[];
     private currentStreamObject: StreamEntry;
+    private destroyed = new Subject<void>();
+
     doSearch({ query }: { query: string; cleared: boolean }) {
         this.searchQuery = query;
         // TODO: Search for the given query doch nicht erledigt
@@ -125,7 +127,7 @@ export class StreamComponent implements OnInit, AfterViewInit {
         private mainNavService: MainNavService,
         private translations: TranslationsService,
     ) {
-        const loadingTask = this.loadingScreen.addLoadingTask();
+        const loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
         this.translations.waitForInit().subscribe(() => {
             this.connector.isLoggedIn().subscribe((data) => {
                 this.dateToDisplay = moment()
@@ -177,6 +179,11 @@ export class StreamComponent implements OnInit, AfterViewInit {
 
     async ngAfterViewInit() {
         await this.optionsHelper.initComponents();
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
     }
 
     setStreamMode() {

@@ -50,6 +50,7 @@ import { TranslationsService } from '../translations/translations.service';
 import { LoadingScreenService } from '../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../main/navigation/main-nav.service';
 import { ManagementDialogsService } from '../modules/management-dialogs/management-dialogs.service';
+import * as rxjs from 'rxjs';
 
 @Component({
     selector: 'es-router',
@@ -125,7 +126,16 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
     }
 
     ngOnInit(): void {
-        this.translations.initialize().pipe(this.loadingScreen.showUntilFinished()).subscribe();
+        this.translations
+            .initialize()
+            .pipe(
+                this.loadingScreen.showUntilFinished({
+                    // The router component lives as long as the application, so we don't need to
+                    // set `until` to anything meaningful.
+                    until: rxjs.EMPTY,
+                }),
+            )
+            .subscribe();
         this.setUserScale();
         this.registerContrastMode();
     }

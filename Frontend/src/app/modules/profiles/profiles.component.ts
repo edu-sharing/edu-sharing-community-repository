@@ -1,6 +1,6 @@
-import { forkJoin as observableForkJoin, Observable } from 'rxjs';
+import { forkJoin as observableForkJoin, Observable, Subject } from 'rxjs';
 
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { TranslationsService } from '../../translations/translations.service';
 import { ProfileSettings, UserStats } from '../../core-module/core.module';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -29,8 +29,9 @@ import { MainNavService } from '../../main/navigation/main-nav.service';
     styleUrls: ['profiles.component.scss'],
     animations: [trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
 })
-export class ProfilesComponent implements OnInit {
-    private loadingTask = this.loadingScreen.addLoadingTask();
+export class ProfilesComponent implements OnInit, OnDestroy {
+    private destroyed = new Subject<void>();
+    private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
     constructor(
         private toast: Toast,
         private route: ActivatedRoute,
@@ -85,6 +86,11 @@ export class ProfilesComponent implements OnInit {
             currentScope: 'profiles',
             searchEnabled: false,
         });
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
     }
 
     public loadUser(authority: string) {

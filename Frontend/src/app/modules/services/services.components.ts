@@ -1,11 +1,11 @@
-import { Component, ViewChild, HostListener, ElementRef, OnInit } from '@angular/core';
+import { Component, ViewChild, HostListener, ElementRef, OnInit, OnDestroy } from '@angular/core';
 import { Router, Params } from '@angular/router';
 import { TranslationsService } from '../../translations/translations.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ConfigurationService } from '../../core-module/core.module';
 import { RestNetworkService } from '../../core-module/core.module';
 import { Toast } from '../../core-ui-module/toast';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { AccessScope, Application, LoginResult, Service } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
 import { RestHelper } from '../../core-module/core.module';
@@ -21,7 +21,7 @@ import { LoadingScreenService } from '../../main/loading-screen/loading-screen.s
     templateUrl: 'services.component.html',
     styleUrls: ['services.component.scss'],
 })
-export class ServicesComponent implements OnInit {
+export class ServicesComponent implements OnInit, OnDestroy {
     serviceUrl: string;
     registeredServices: Service[] = [];
     stats: any = {};
@@ -31,6 +31,8 @@ export class ServicesComponent implements OnInit {
     statsUrlLicenses: SafeResourceUrl;
     statsUrlMaterials: SafeResourceUrl;
     tab: String = 'LICENSES';
+    private destroyed = new Subject<void>();
+
     constructor(
         private router: Router,
         private toast: Toast,
@@ -42,7 +44,7 @@ export class ServicesComponent implements OnInit {
         private mainNav: MainNavService,
         private network: RestNetworkService,
     ) {
-        const loadingTask = this.loadingScreen.addLoadingTask();
+        const loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
         this.translations.waitForInit().subscribe(() => {
             this.configService.getAll().subscribe((data: any) => {
                 this.refreshServiceList();
@@ -57,6 +59,11 @@ export class ServicesComponent implements OnInit {
             currentScope: 'services',
             searchEnabled: false,
         });
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
     }
 
     public registerService() {
