@@ -51,7 +51,17 @@ export class CreateLtitoolComponent implements OnInit {
         };
     }
 
-    ngOnInit(): void {}
+    ngOnInit(): void {
+        console.log(
+            'this._tool.appId24:' +
+                this._tool.appId +
+                ' parentId:' +
+                this._parent.ref.id +
+                ' nodes:' +
+                this.nodes.length,
+        );
+        this.open();
+    }
 
     @Input() set tool(tool: Tool) {
         this._tool = tool;
@@ -73,6 +83,7 @@ export class CreateLtitoolComponent implements OnInit {
     }
 
     public open() {
+        console.log('iminopen');
         /*if (this._tool.customContentOption) {
             if (this._name == undefined) {
                 return;
@@ -96,14 +107,18 @@ export class CreateLtitoolComponent implements OnInit {
                     (error: any) => {},
                 );
         } else {*/
-        window.open(
+
+        let w = window.open(
             '/edu-sharing/rest/ltiplatform/v13/generateLoginInitiationForm?appId=' +
                 this._tool.appId +
                 '&parentId=' +
                 this._parent.ref.id,
             '_blank',
         );
-        //}
+
+        if (!w) {
+            window.alert('popups are disabled');
+        }
     }
 
     public angularFunctionCalled(nodeIds: string[], titles: string[]) {
