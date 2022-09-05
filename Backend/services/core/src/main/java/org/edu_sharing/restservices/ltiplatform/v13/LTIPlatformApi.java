@@ -31,6 +31,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.forms.DuplicateFinder;
 import org.edu_sharing.repository.server.tools.security.AllSessions;
 import org.edu_sharing.repository.server.tools.security.Signing;
 import org.edu_sharing.restservices.*;
@@ -731,16 +732,6 @@ public class LTIPlatformApi {
                 throw new Exception("missing lti content items");
             }
 
-            String nodeId = null;
-            /*String nodeId = sessionObject.getContentUrlNodeId();
-            if(appInfoTool.hasLtiToolCustomContentOption()){
-
-                if(nodeId == null){
-                    throw new Exception("id from initial created node required");
-                }
-                if(contentItems.size() > 1) throw new Exception("only one node can be handled for lti tool: " + appInfoTool.getAppId());
-            }*/
-
 
             List<String> nodeIds = new ArrayList<>();
             List<String> titles = new ArrayList<>();
@@ -758,8 +749,10 @@ public class LTIPlatformApi {
 
                 String title = (String)contentItem.get("title");
                 title = title != null ? title : url;
-                properties.put(CCConstants.CM_NAME,new String[]{EduSharingNodeHelper.cleanupCmName(title)} );
-                properties.put(CCConstants.LOM_PROP_GENERAL_TITLE,new String[]{title});
+                String name = EduSharingNodeHelper.cleanupCmName(title);
+                name = new DuplicateFinder().getUniqueValue(sessionObject.getContextId(),CCConstants.CM_NAME,name);
+                properties.put(CCConstants.CM_NAME,new String[]{name} );
+               // properties.put(CCConstants.LOM_PROP_GENERAL_TITLE,new String[]{title});
 
                 if(contentItem.containsKey("icon")){
                     Map<String,Object> icon = (Map<String,Object>)contentItem.get("icon");
@@ -770,15 +763,10 @@ public class LTIPlatformApi {
                 }
 
                 org.edu_sharing.service.nodeservice.NodeService eduNodeService = NodeServiceFactory.getLocalService();
-                String tmpNodeId = null;
-                if(nodeId == null){
-                    tmpNodeId = eduNodeService.createNode(sessionObject.getContextId(), CCConstants.CCM_TYPE_IO,properties);
-                }else{
-                    eduNodeService.updateNode(nodeId,properties);
-                    tmpNodeId = nodeId;
-                }
+                String nodeId = eduNodeService.createNode(sessionObject.getContextId(), CCConstants.CCM_TYPE_IO,properties);
 
-                NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,tmpNodeId);
+
+                NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
                 QName aspectLti = QName.createQName(CCConstants.CCM_ASPECT_LTITOOL_NODE);
 
                 if(!nodeService.hasAspect(nodeRef,aspectLti)){
@@ -789,10 +777,10 @@ public class LTIPlatformApi {
                 }
 
                 String wwwurl = ApplicationInfoList.getHomeRepository().getClientBaseUrl()
-                        +"/rest/ltiplatform/v13/generateLoginInitiationFormResourceLink?nodeId="+tmpNodeId;
+                        +"/rest/ltiplatform/v13/generateLoginInitiationFormResourceLink?nodeId="+nodeId;
                 nodeService.setProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_WWWURL),wwwurl);
-                nodeIds.add(tmpNodeId);
-                titles.add(title);
+                nodeIds.add(nodeId);
+                titles.add(name);
             }
 
 
