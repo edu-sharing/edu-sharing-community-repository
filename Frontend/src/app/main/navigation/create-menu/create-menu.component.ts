@@ -568,6 +568,16 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                     (data: NodeWrapper) => {
                         this.onCreate.emit([data.node]);
                         this.createToolType = null;
+                        if (event.tool.customContentOption == true) {
+                            let w = window.open(
+                                '/edu-sharing/rest/ltiplatform/v13/generateLoginInitiationFormResourceLink?nodeId=' +
+                                    data.node.ref.id,
+                                '_blank',
+                            );
+                            if (!w) {
+                                window.alert('popups are disabled');
+                            }
+                        }
                     },
                     (error: any) => {
                         if (

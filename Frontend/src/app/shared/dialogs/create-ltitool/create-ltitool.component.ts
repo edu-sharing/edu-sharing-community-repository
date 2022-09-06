@@ -79,7 +79,7 @@ export class CreateLtitoolComponent implements OnInit {
         if (!this.nodes) {
             return;
         }
-        this.onCreate.emit({ nodes: this.nodes });
+        this.onCreate.emit({ nodes: this.nodes, tool: this._tool });
     }
 
     public open() {
