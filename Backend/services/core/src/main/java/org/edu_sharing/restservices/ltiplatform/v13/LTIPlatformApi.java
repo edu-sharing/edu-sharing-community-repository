@@ -276,7 +276,7 @@ public class LTIPlatformApi {
                 .claim("nonce", nonce)
                 .setIssuer(RegistrationService.getLtiPlatformOpenIdConfiguration().getIssuer())
                 .setIssuedAt(now)
-                .setExpiration(new Date((now.getTime() + 1000)))
+                .setExpiration(new Date((now.getTime() + 10000)))
                 .setAudience(clientId)
                 .setSubject(username)
                 .claim(LTIConstants.LTI_DEPLOYMENT_ID, appInfo.getLtiDeploymentId())
