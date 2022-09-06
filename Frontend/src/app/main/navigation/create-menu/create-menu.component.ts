@@ -134,9 +134,8 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         private event: FrameEventsService,
         private cardService: CardService,
         private dialogs: ManagementDialogsService,
-        private ltiPlatformService: LtiPlatformService,
-    ) //private paste: PasteService,
-    {
+        private ltiPlatformService: LtiPlatformService, //private paste: PasteService,
+    ) {
         this.route.queryParams.subscribe((params) => {
             this.params = params;
             this.updateOptions();
