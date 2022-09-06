@@ -8,6 +8,7 @@
     [icon]="'create'"
     [buttons]="buttons"
     [isCancelable]="true"
+    (onCancel)="cancel()"
   >
     <div class="card-content-padding">
       <form (ngSubmit)="create()">
