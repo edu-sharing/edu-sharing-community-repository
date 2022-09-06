@@ -312,8 +312,6 @@ public class RegistrationService {
 
     public ApplicationInfo ltiDynamicToolRegistration(JSONObject registrationPayload, Jwt registrationToken) throws Exception{
 
-        checkHomeAppKid();
-
         List<String> responseTypes = (List<String>)registrationPayload.get("response_types");
         String initiateLoginUri = (String)registrationPayload.get("initiate_login_uri");
         List<String> redirectUris = (List<String>)registrationPayload.get("redirect_uris");
@@ -397,6 +395,8 @@ public class RegistrationService {
                                         String targetLinkUri, String redirectUris, String logoUri,
                                         String customParameters, String description, String clientName, String targetLinkUriDeepLink, String toolUrl) throws Exception {
         HashMap<String,String> properties = new HashMap<>();
+
+        checkHomeAppKid();
 
         /**
          * fallback to required redrect Urls
