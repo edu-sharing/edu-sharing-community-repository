@@ -114,16 +114,16 @@ export class SearchNodeStoreComponent implements OnInit, AfterViewInit, OnDestro
 
     onSelection(data: Node[]) {
         this.selected = data;
-        this.updateActionOptions();
+        void this.updateActionOptions();
     }
 
     changeSort(config: ListSortConfig) {
         this.sortPolicySubject.next({ ...config, direction: config.direction || 'asc' });
     }
 
-    private updateActionOptions() {
+    private async updateActionOptions() {
         this.options.addOptions = [];
-        const download = this.actionBarHelper.createOptionIfPossible(
+        const download = await this.actionBarHelper.createOptionIfPossible(
             'DOWNLOAD',
             this.selected,
             (node: Node) => this.nodeHelper.downloadNodes(node ? [node] : this.selected),
@@ -169,7 +169,7 @@ export class SearchNodeStoreComponent implements OnInit, AfterViewInit, OnDestro
                         this.dialogRef.patchConfig(config),
                     );
                     this.dialogRef.patchState({ isLoading: false });
-                    this.updateActionOptions();
+                    void this.updateActionOptions();
                 },
                 error: () => {
                     this.dialogRef.patchState({ isLoading: false });

@@ -14,7 +14,6 @@ import { MessageType } from '../../core-module/ui/message-type';
 
 @Injectable()
 export class ActionbarHelperService {
-    private repositories: Repository[];
     public static getNodes(nodes: Node[], node: Node): Node[] {
         return NodeHelperService.getActionbarNodes(nodes, node);
     }
@@ -23,11 +22,8 @@ export class ActionbarHelperService {
         private networkService: RestNetworkService,
         private connectors: RestConnectorsService,
         private nodeHelper: NodeHelperService,
-    ) {
-        this.networkService
-            .getRepositories()
-            .subscribe((repositories) => (this.repositories = repositories.repositories));
-    }
+    ) {}
+
     /**
      * Add a given option for a specified type and checks the rights if possible
      * returns the option if it could be created, null otherwise
@@ -36,11 +32,12 @@ export class ActionbarHelperService {
      * @param {Function} callback
      * @returns {any}
      */
-    public createOptionIfPossible(
+    async createOptionIfPossible(
         type: string,
         nodes: Node[],
         callback: (node: Node | any) => void,
     ) {
+        const repositories = (await this.networkService.getRepositories().toPromise()).repositories;
         let option: OptionItem = null;
         if (type == 'DOWNLOAD') {
             if (this.nodeHelper.allFiles(nodes)) {
@@ -72,7 +69,7 @@ export class ActionbarHelperService {
             option.showCallback = (node: Node) => {
                 let n = ActionbarHelperService.getNodes(nodes, node);
                 if (n == null) return false;
-                return n.length && RestNetworkService.allFromHomeRepo(n, this.repositories);
+                return n.length && RestNetworkService.allFromHomeRepo(n, repositories);
             };
         }
         if (type == 'NODE_TEMPLATE') {
@@ -172,7 +169,7 @@ export class ActionbarHelperService {
                         this.connectors
                             .getRestConnector()
                             .hasToolPermissionInstant(RestConstants.TOOLPERMISSION_INVITE_STREAM) &&
-                        RestNetworkService.allFromHomeRepo(n, this.repositories)
+                        RestNetworkService.allFromHomeRepo(n, repositories)
                     );
                 };
                 option.showCallback = (node: Node) => {
@@ -180,7 +177,7 @@ export class ActionbarHelperService {
                     if (n == null) return false;
                     return (
                         this.nodeHelper.allFiles(nodes) &&
-                        RestNetworkService.allFromHomeRepo(n, this.repositories) &&
+                        RestNetworkService.allFromHomeRepo(n, repositories) &&
                         n.length == 1
                     );
                 };
