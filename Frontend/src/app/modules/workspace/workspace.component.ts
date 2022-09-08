@@ -502,7 +502,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             lastLocation = null;
         }
         if (!params.id && !params.query && lastLocation) {
-            this.openDirectory(lastLocation);
+            this.openDirectory(lastLocation, { replaceUrl: true });
         } else {
             this.openDirectoryFromRoute(params);
         }
@@ -656,8 +656,8 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         this.mainNavService.getDialogs().closeSidebar();
     }
 
-    private openDirectory(id: string) {
-        this.routeTo(this.root, id);
+    private openDirectory(id: string, { replaceUrl = false } = {}) {
+        this.routeTo(this.root, id, null, { replaceUrl });
     }
 
     searchGlobal(query: string) {
@@ -810,7 +810,12 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         });
     }
 
-    private async routeTo(root: string, node: string = null, search: string = null) {
+    private async routeTo(
+        root: string,
+        node: string = null,
+        search: string = null,
+        { replaceUrl = false } = {},
+    ) {
         const params = await UIHelper.getCommonParameters(this.route).toPromise();
         params.root = root;
         params.id = node;
@@ -821,7 +826,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             params.displayType = this.displayType;
         }
         void this.router
-            .navigate(['./'], { queryParams: params, relativeTo: this.route })
+            .navigate(['./'], { queryParams: params, relativeTo: this.route, replaceUrl })
             .then((result: boolean) => {
                 if (!result) {
                     this.refresh(false);
