@@ -232,7 +232,9 @@ export class OptionsHelperService implements OnDestroy {
         this.actionbar = actionbar;
         this.list = list;
         this.dropdown = dropdown;
-        await this.networkService.getRepositories().toPromise();
+        if ((await this.iamService.getCurrentUserAsync()).person.authorityName) {
+            await this.networkService.getRepositories().toPromise();
+        }
     }
 
     /**
