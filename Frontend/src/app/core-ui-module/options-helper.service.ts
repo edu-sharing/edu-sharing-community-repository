@@ -95,7 +95,7 @@ export class OptionsHelperService implements OnDestroy {
         if(!event.composedPath().some(
             (t) => {
                 const name = (t as HTMLElement)?.nodeName;
-                return ['LISTTABLE', 'ACTIONBAR'].indexOf(name) !== -1
+                return ['LISTTABLE', 'ACTIONBAR', 'BODY'].indexOf(name) !== -1
             })) {
             return;
         }
