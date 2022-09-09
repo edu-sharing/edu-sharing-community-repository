@@ -323,6 +323,8 @@
                 [gridConfig]="{
                   maxRows: collectionsMore ? -1 : 1
                 }"
+                (fetchData)="loadCollections('load-more')"
+                [disableInfiniteScroll]="true"
               >
                 <ng-template #title>
                   <div class="heading">

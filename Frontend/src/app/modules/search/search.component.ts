@@ -30,6 +30,7 @@ import {
     NodeList,
     NodeWrapper,
     Repository,
+    RequestObject,
     RestCollectionService,
     RestConnectorService,
     RestConstants,
@@ -667,46 +668,66 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         if (init) {
             this.searchService.dataSourceCollections.reset();
             if (this.isHomeRepository() || this.currentRepository == RestConstants.ALL) {
-                this.isSearchingCollections = true;
-                this.search
-                    .searchWithBody(
-                        {
-                            criteria: this.getCriterias(this.currentValues, searchString, false),
-                            facets: [],
-                        },
-                        {
-                            sortBy: [
-                                RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
-                                RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
-                                RestConstants.CM_MODIFIED_DATE,
-                            ],
-                            propertyFilter: [RestConstants.ALL],
-                            sortAscending: [false, true, false],
-                        },
-                        // this is now handled via mds queries
-                        RestConstants.CONTENT_TYPE_ALL,
-                        this.currentRepository == RestConstants.ALL
-                            ? RestConstants.HOME_REPOSITORY
-                            : this.currentRepository,
-                        this.mdsId,
-                        [],
-                        RestConstants.QUERY_NAME_COLLECTIONS,
-                    )
-                    .subscribe(
-                        (data: NodeList) => {
-                            this.isSearchingCollections = false;
-                            this.searchService.dataSourceCollections.setData(
-                                data.nodes,
-                                data.pagination,
-                            );
-                        },
-                        (error: any) => {
-                            this.isSearchingCollections = false;
-                            this.toast.error(error);
-                        },
-                    );
+                this.loadCollections('init');
             }
         }
+    }
+
+    loadCollections(mode: 'init' | 'load-more') {
+        const LOAD_MORE_COUNT = 20;
+        this.isSearchingCollections = true;
+        const requestOptions: RequestObject = {
+            sortBy: [
+                RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
+                RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
+                RestConstants.CM_MODIFIED_DATE,
+            ],
+            propertyFilter: [RestConstants.ALL],
+            sortAscending: [false, true, false],
+        };
+
+        if (mode === 'load-more') {
+            requestOptions.count = LOAD_MORE_COUNT;
+            requestOptions.offset = this.searchService.dataSourceCollections.getData().length;
+        }
+
+        this.search
+            .searchWithBody(
+                {
+                    criteria: this.getCriterias(
+                        this.currentValues,
+                        this.searchService.searchTerm,
+                        false,
+                    ),
+                    facets: [],
+                },
+                requestOptions,
+                // this is now handled via mds queries
+                RestConstants.CONTENT_TYPE_ALL,
+                this.currentRepository == RestConstants.ALL
+                    ? RestConstants.HOME_REPOSITORY
+                    : this.currentRepository,
+                this.mdsId,
+                [],
+                RestConstants.QUERY_NAME_COLLECTIONS,
+            )
+            .subscribe(
+                (data: NodeList) => {
+                    this.isSearchingCollections = false;
+                    if (mode === 'init') {
+                        this.searchService.dataSourceCollections.setData(
+                            data.nodes,
+                            data.pagination,
+                        );
+                    } else if (mode === 'load-more') {
+                        this.searchService.dataSourceCollections.appendData(data.nodes);
+                    }
+                },
+                (error: any) => {
+                    this.isSearchingCollections = false;
+                    this.toast.error(error);
+                },
+            );
     }
 
     updateGroupedRepositories() {

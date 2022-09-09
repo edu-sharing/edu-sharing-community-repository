@@ -15,7 +15,7 @@
   [matSortActive]="entriesService.sort?.active"
   [matSortDirection]="entriesService.sort?.direction"
   esInfiniteScroll
-  (scrolled)="loadData()"
+  (scrolled)="!entriesService.disableInfiniteScroll && loadData()"
 >
   <!-- Checkbox Column -->
   <ng-container matColumnDef="select">

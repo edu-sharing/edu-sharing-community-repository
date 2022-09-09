@@ -104,6 +104,10 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
      */
     // TODO: Consider controlling the ui hints and the actual behavior with a single option.
     @Input() singleClickHint: 'dynamic' | 'static' = 'dynamic';
+    /**
+     * Do not load more data on scroll.
+     */
+    @Input() disableInfiniteScroll = false;
     @Output() fetchData = new EventEmitter<FetchEvent>();
     @Output() clickItem = new EventEmitter<NodeClickEvent<T>>();
     @Output() dblClickItem = new EventEmitter<NodeClickEvent<T>>();
@@ -172,6 +176,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.fetchData = this.fetchData;
         this.entriesService.globalKeyboardShortcuts = this.globalKeyboardShortcuts;
         this.entriesService.singleClickHint = this.singleClickHint;
+        this.entriesService.disableInfiniteScroll = this.disableInfiniteScroll;
 
         if (this.componentRef) {
             this.componentRef.instance.changeDetectorRef?.detectChanges();

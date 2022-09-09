@@ -90,7 +90,7 @@
       #grid
       (esBorderBoxObserver)="onGridSizeChanges()"
       esInfiniteScroll
-      (scrolled)="loadData()"
+      (scrolled)="!entriesService.disableInfiniteScroll && !visibleItemsLimited && loadData()"
     >
       <ng-container *ngTemplateOutlet="globalOptions"></ng-container>
       <ng-container *ngIf="visibleNodes$ | async as nodes">
@@ -157,7 +157,13 @@
     </div>
   </ng-container>
 </ng-container>
-<ng-container *ngIf="!entriesService.dataSource.isLoading && entriesService.dataSource.hasMore()">
+<ng-container
+  *ngIf="
+    !entriesService.dataSource.isLoading &&
+    entriesService.dataSource.hasMore() &&
+    !visibleItemsLimited
+  "
+>
   <div class="load-more">
     <button mat-button color="primary" (click)="loadData(true)">
       <i esIcon="refresh"></i>

@@ -53,6 +53,7 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     }
     globalKeyboardShortcuts: boolean;
     singleClickHint: 'dynamic' | 'static';
+    disableInfiniteScroll: boolean;
 
     constructor(private uiService: UIService) {}
 
