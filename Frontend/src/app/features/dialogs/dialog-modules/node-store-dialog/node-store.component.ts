@@ -4,7 +4,6 @@ import { TranslateService } from '@ngx-translate/core';
 import { Node, NodeListService, SortPolicy } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { switchMap, takeUntil } from 'rxjs/operators';
-import { ActionbarHelperService } from '../../../../common/services/actionbar-helper';
 import {
     ListItem,
     ListItemSort,
@@ -12,7 +11,6 @@ import {
     UIConstants,
     UIService,
 } from '../../../../core-module/core.module';
-import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
 import { CustomOptions, DefaultGroups, OptionItem } from '../../../../core-ui-module/option-item';
 import { Toast } from '../../../../core-ui-module/toast';
 import { ActionbarComponent } from '../../../../shared/components/actionbar/actionbar.component';
@@ -49,7 +47,9 @@ export class SearchNodeStoreComponent implements OnInit, AfterViewInit, OnDestro
         columns: [new ListItemSort('NODE', RestConstants.LOM_PROP_TITLE)],
     });
     private options: CustomOptions = {
-        useDefaultOptions: false,
+        useDefaultOptions: true,
+        supportedOptions: ['OPTIONS.DOWNLOAD'],
+        addOptions: this.getAdditionalOptions(),
     };
     private selected: Node[] = [];
     private readonly destroyed = new Subject<void>();
@@ -58,8 +58,6 @@ export class SearchNodeStoreComponent implements OnInit, AfterViewInit, OnDestro
         private dialogRef: CardDialogRef,
         private toast: Toast,
         private router: Router,
-        private actionBarHelper: ActionbarHelperService,
-        private nodeHelper: NodeHelperService,
         private nodeList: NodeListService,
         private translate: TranslateService,
         private ui: UIService,
@@ -114,27 +112,18 @@ export class SearchNodeStoreComponent implements OnInit, AfterViewInit, OnDestro
 
     onSelection(data: Node[]) {
         this.selected = data;
-        void this.updateActionOptions();
     }
 
     changeSort(config: ListSortConfig) {
         this.sortPolicySubject.next({ ...config, direction: config.direction || 'asc' });
     }
 
-    private async updateActionOptions() {
-        this.options.addOptions = [];
-        const download = await this.actionBarHelper.createOptionIfPossible(
-            'DOWNLOAD',
-            this.selected,
-            (node: Node) => this.nodeHelper.downloadNodes(node ? [node] : this.selected),
-        );
-        download.group = DefaultGroups.FileOperations;
-        this.options.addOptions.push(download);
+    private getAdditionalOptions() {
         const remove = new OptionItem('SEARCH.NODE_STORE.REMOVE_ITEM', 'delete', () => {
             this.deleteSelection();
         });
         remove.group = DefaultGroups.FileOperations;
-        this.options.addOptions.push(remove);
+        return [remove];
     }
 
     private deleteSelection() {
@@ -169,7 +158,6 @@ export class SearchNodeStoreComponent implements OnInit, AfterViewInit, OnDestro
                         this.dialogRef.patchConfig(config),
                     );
                     this.dialogRef.patchState({ isLoading: false });
-                    void this.updateActionOptions();
                 },
                 error: () => {
                     this.dialogRef.patchState({ isLoading: false });
