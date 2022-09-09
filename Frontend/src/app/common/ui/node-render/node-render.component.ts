@@ -31,7 +31,6 @@ import { trigger } from '@angular/animations';
 import { Location, PlatformLocation } from '@angular/common';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
 import { SearchService } from '../../../modules/search/search.service';
-import { ActionbarHelperService } from '../../services/actionbar-helper';
 import { HttpClient } from '@angular/common/http';
 import {
     ConfigurationHelper,
@@ -110,7 +109,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         private cardServcie: CardService,
         private viewContainerRef: ViewContainerRef,
         private frame: FrameEventsService,
-        private actionbarService: ActionbarHelperService,
         private toast: Toast,
         private cd: ChangeDetectorRef,
         private config: ConfigurationService,

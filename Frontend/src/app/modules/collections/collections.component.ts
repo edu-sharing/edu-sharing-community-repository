@@ -23,7 +23,6 @@ import {
     NodeEntriesDisplayType,
 } from 'src/app/features/node-entries/entries-model';
 import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
-import { ActionbarHelperService } from '../../common/services/actionbar-helper';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import * as EduData from '../../core-module/core.module';
 import {
@@ -313,7 +312,6 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
         private organizationService: RestOrganizationService,
         private iamService: RestIamService,
         private mdsService: RestMdsService,
-        private actionbar: ActionbarHelperService,
         private connector: RestConnectorService,
         private route: ActivatedRoute,
         private uiService: UIService,

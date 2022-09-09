@@ -11,7 +11,6 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { ActionbarHelperService } from '../../common/services/actionbar-helper';
 import { MainNavComponent } from '../../main/navigation/main-nav/main-nav.component';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import {
@@ -230,7 +229,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         private iam: RestIamService,
         private search: RestSearchService,
         private collectionApi: RestCollectionService,
-        private actionbar: ActionbarHelperService,
         private nodeApi: RestNodeService,
         private toast: Toast,
         private translate: TranslateService,
@@ -1015,11 +1013,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         );
     }
 
-    private addToStream(node: Node) {
-        let nodes = ActionbarHelperService.getNodes(this.getSelection(), node);
-        this.addNodesStream = nodes;
-    }
-
     private printListener() {
         // not working properly
         /*
@@ -1495,7 +1488,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                             .getDialogs()
                             .addToCollectionList(
                                 this.addToCollection,
-                                ActionbarHelperService.getNodes(this.getSelection(), node),
+                                NodeHelperService.getActionbarNodes(this.getSelection(), node),
                                 true,
                                 () => {
                                     this.switchToCollections(this.addToCollection.ref.id);
