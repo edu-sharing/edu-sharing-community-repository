@@ -43,6 +43,15 @@ public class NodeServiceDDBImpl extends NodeServiceAdapterCached{
 		try{
 			// fetch binary info
 			String all = SearchServiceDDBImpl.httpGet(SearchServiceDDBImpl.DDB_API+"/items/"+nodeId+"/aip?oauth_consumer_key=" + URLEncoder.encode(this.APIKey, "UTF-8"), null);
+			for(int i = 1; i < 10; i++) {
+				// ULTRA DIRTY HACK to prevent json from failing with duplicate keys!
+				all = all.replaceFirst("\"Concept\":", "\"Concept"+i+"\":")
+						.replaceFirst("\"Agent\":", "\"Agent"+i+"\":")
+						.replaceFirst("\"rights\":", "\"rights"+i+"\":")
+						.replaceFirst("\"subject\":", "\"subject"+i+"\":")
+						.replaceFirst("\"Event\":", "\"subject"+i+"\":")
+						.replaceFirst("\"language\":", "\"language"+i+"\":");
+			}
 			JSONObject allJson = new JSONObject(all);
 			try {
 				JSONArray binaries = (JSONArray)allJson.getJSONObject("binaries").getJSONArray("binary");
@@ -137,7 +146,6 @@ public class NodeServiceDDBImpl extends NodeServiceAdapterCached{
 			catch(Throwable t) {
 				previewUrl=new MimeTypesV2(appInfo).getPreview(CCConstants.CCM_TYPE_IO, properties, null);
 			}*/
-
 			if(imageUrl != null) {
 				properties.put(CCConstants.CCM_PROP_IO_THUMBNAILURL, imageUrl);
 			}
