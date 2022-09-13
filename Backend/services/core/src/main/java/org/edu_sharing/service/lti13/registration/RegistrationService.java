@@ -300,13 +300,15 @@ public class RegistrationService {
         properties.put(ApplicationInfo.KEY_PUBLIC_KEY, pubKeyString);
         AdminServiceFactory.getInstance().addApplication(properties);
 
-        token.setRegisteredAppId(appId);
-        DynamicRegistrationTokens dynamicRegistrationTokens = get();
-        dynamicRegistrationTokens.update(token);
-        try {
-            write(dynamicRegistrationTokens);
-        } catch (Throwable e) {
-            logger.error(e.getMessage(),e);
+        if(token != null){
+            token.setRegisteredAppId(appId);
+            DynamicRegistrationTokens dynamicRegistrationTokens = get();
+            dynamicRegistrationTokens.update(token);
+            try {
+                write(dynamicRegistrationTokens);
+            } catch (Throwable e) {
+                logger.error(e.getMessage(),e);
+            }
         }
     }
 
