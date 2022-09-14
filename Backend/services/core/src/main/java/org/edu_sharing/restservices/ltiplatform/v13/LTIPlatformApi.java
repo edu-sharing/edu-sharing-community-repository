@@ -1067,9 +1067,15 @@ public class LTIPlatformApi {
                 throw new Exception("admin required");
             }
 
+            String kid = ApplicationInfoList.getHomeRepository().getLtiKid();
+            if(kid == null){
+                throw new Exception("missing kid for homeApp");
+            }
+
+
             Key issPrivateKey = new Signing().getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM);
             JwtBuilder builder = Jwts.builder()
-                    .setHeaderParam("kid", ApplicationInfoList.getHomeRepository().getAppId())  // The key id used to sign this
+                    .setHeaderParam("kid", ApplicationInfoList.getHomeRepository().getLtiKid())  // The key id used to sign this
                     .setHeaderParam("typ", "JWT") // The type
                     .setIssuer("ltiStarter")  //This is our own identifier, to know that we are the issuer.
                     .setExpiration(DateUtils.addSeconds(new Date(), 360000000));

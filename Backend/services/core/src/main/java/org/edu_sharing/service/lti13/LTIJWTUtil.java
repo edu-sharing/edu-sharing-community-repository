@@ -200,6 +200,10 @@ public class LTIJWTUtil {
                     /*return new Signing().getPemPublicKey(
                             appInfo.getPublicKey(),
                             CCConstants.SECURITY_KEY_ALGORITHM);*/
+                    String keysetUrl = appInfo.getLtiKeysetUrl();
+                    if(keysetUrl == null){
+                        throw new RuntimeException("keyset url is null");
+                    }
                     JWKSet publicKeys = JWKSet.load(new URL(appInfo.getLtiKeysetUrl()));
                     String keyId = header.getKeyId();
                     if(keyId == null) throw new RuntimeException("missing keyid");
