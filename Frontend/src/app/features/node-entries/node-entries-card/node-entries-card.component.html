@@ -141,6 +141,7 @@
   </es-node-url>
   <div
     *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink"
+    matRipple
     (click)="
       entriesService.onClicked({
         event: $event,
