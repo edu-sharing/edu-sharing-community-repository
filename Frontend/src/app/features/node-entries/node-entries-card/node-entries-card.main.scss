@@ -223,6 +223,14 @@ $optionBarHeight: 50px;
     &.dynamic-single-click.grid-card-collection:hover .card-meta {
         background-color: rgba(255, 255, 255, 0.9);
     }
+    &.grid-card-collection {
+        .card-meta {
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        .card-options {
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+    }
     .card-options {
         border-top: 1px solid #ddd;
         // margin-top: 2px; white artefact on hover
