@@ -201,7 +201,10 @@ public class LTIJWTUtil {
                             appInfo.getPublicKey(),
                             CCConstants.SECURITY_KEY_ALGORITHM);*/
                     JWKSet publicKeys = JWKSet.load(new URL(appInfo.getLtiKeysetUrl()));
-                    JWK jwk = publicKeys.getKeyByKeyId(header.getKeyId());
+                    String keyId = header.getKeyId();
+                    if(keyId == null) throw new RuntimeException("missing keyid");
+                    JWK jwk = publicKeys.getKeyByKeyId(keyId);
+                    if(jwk == null) throw new RuntimeException("no public key found for key: "+keyId);
                     return ((AsymmetricJWK) jwk).toPublicKey();
                 } catch (MalformedURLException e) {
                     throw new RuntimeException(e);
