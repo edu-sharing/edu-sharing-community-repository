@@ -222,6 +222,11 @@ public class LTIPlatformApi {
                 custom.put(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID,appInfo.getAppId());
                 custom.put(LTIPlatformConstants.CUSTOM_CLAIM_NODEID,loginInitiationSessionObject.getContentUrlNodeId());
                 custom.put(LTIPlatformConstants.CUSTOM_CLAIM_USER,username);
+                if(loginInitiationSessionObject.getContentUrlNodeId() != null) {
+                    custom.put(LTIPlatformConstants.CUSTOM_CLAIM_FILENAME, (String)nodeService.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+                            loginInitiationSessionObject.getContentUrlNodeId()),
+                            ContentModel.PROP_NAME));
+                }
                 custom.put(LTIPlatformConstants.CUSTOM_CLAIM_GET_CONTENTAPIURL,homeApp.getClientBaseUrl()+"/rest/ltiplatform/v13/content");
                 if(accessStatus != null && accessStatus.equals(AccessStatus.ALLOWED)){
                     custom.put(LTIPlatformConstants.CUSTOM_CLAIM_POST_CONTENTAPIURL,homeApp.getClientBaseUrl()+"/rest/ltiplatform/v13/content");
@@ -763,7 +768,14 @@ public class LTIPlatformApi {
                 }
 
                 org.edu_sharing.service.nodeservice.NodeService eduNodeService = NodeServiceFactory.getLocalService();
-                String nodeId = eduNodeService.createNode(sessionObject.getContextId(), CCConstants.CCM_TYPE_IO,properties);
+
+                String nodeId = null;
+                if(sessionObject.getContentUrlNodeId() != null) {
+                    nodeId = sessionObject.getContentUrlNodeId();
+                    eduNodeService.updateNode(nodeId,properties);
+                }else{
+                    nodeId = eduNodeService.createNode(sessionObject.getContextId(), CCConstants.CCM_TYPE_IO, properties);
+                }
 
 
                 NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);

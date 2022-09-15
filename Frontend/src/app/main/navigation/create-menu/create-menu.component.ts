@@ -559,7 +559,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     }
 
     createLtiTool(event: any) {
-        console.log('createLtiTool called' + event);
+        console.log('createLtiTool called' + event + ' nodes:' + event.nodes);
         let nodes: Node[] = event.nodes;
         if (nodes) {
             nodes.forEach((n) => {

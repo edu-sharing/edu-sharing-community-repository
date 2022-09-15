@@ -47,7 +47,7 @@ export class CreateLtitoolComponent implements OnInit {
             component: this,
             zone: this.ngZone,
             loadAngularFunction: (nodeIds: string[], titles: string[]) =>
-                this.angularFunctionCalled(nodeIds, titles),
+                this.deeplinkResponse(nodeIds, titles),
         };
     }
 
@@ -60,7 +60,9 @@ export class CreateLtitoolComponent implements OnInit {
                 ' nodes:' +
                 this.nodes.length,
         );
-        this.open();
+        if (!this._tool.customContentOption) {
+            this.openLti();
+        }
     }
 
     @Input() set tool(tool: Tool) {
@@ -76,52 +78,58 @@ export class CreateLtitoolComponent implements OnInit {
     }
 
     public create() {
-        if (!this.nodes) {
+        console.log(
+            'create() this._name:' +
+                this._name +
+                ' this._tool.customContentOption:' +
+                this._tool.customContentOption,
+        );
+        if (this._tool.customContentOption) {
+            this.openLti();
             return;
+        } else {
+            if (!this.nodes) {
+                return;
+            }
+            this.onCreate.emit({ nodes: this.nodes, tool: this._tool });
         }
-        this.onCreate.emit({ nodes: this.nodes, tool: this._tool });
     }
 
-    public open() {
-        console.log('iminopen');
-        /*if (this._tool.customContentOption) {
+    public openLti() {
+        // @TODO cordova handling, popup problem
+        console.log('open() this._tool.customContentOption:' + this._tool.customContentOption);
+        let url =
+            '/edu-sharing/rest/ltiplatform/v13/generateLoginInitiationForm?appId=' +
+            this._tool.appId +
+            '&parentId=' +
+            this._parent.ref.id;
+        if (this._tool.customContentOption) {
+            console.log('open() this._name:' + this._name);
             if (this._name == undefined) {
                 return;
             }
             const properties = RestHelper.createNameProperty(this._name);
-            console.log('tool has create option 123test');
             this.nodeService
                 .createNode(this._parent.ref.id, RestConstants.CCM_TYPE_IO, [], properties)
                 .subscribe(
                     (data: NodeWrapper) => {
-                        window.open(
-                            '/edu-sharing/rest/ltiplatform/v13/generateLoginInitiationForm?appId=' +
-                                this._tool.appId +
-                                '&parentId=' +
-                                this._parent.ref.id +
-                                '&nodeId=' +
-                                data.node.ref.id,
-                            '_blank',
-                        );
+                        url = url + '&nodeId=' + data.node.ref.id;
+                        window.open(url, '_blank');
                     },
-                    (error: any) => {},
+                    (error: any) => {
+                        this.nodeHelper.handleNodeError(this._name, error);
+                    },
                 );
-        } else {*/
+        } else {
+            let w = window.open(url, '_blank');
 
-        let w = window.open(
-            '/edu-sharing/rest/ltiplatform/v13/generateLoginInitiationForm?appId=' +
-                this._tool.appId +
-                '&parentId=' +
-                this._parent.ref.id,
-            '_blank',
-        );
-
-        if (!w) {
-            window.alert('popups are disabled');
+            if (!w) {
+                window.alert('popups are disabled');
+            }
         }
     }
 
-    public angularFunctionCalled(nodeIds: string[], titles: string[]) {
+    public deeplinkResponse(nodeIds: string[], titles: string[]) {
         console.log('js function called ' + nodeIds + ' titles:' + titles + ' test');
         this._name = titles[0];
 
@@ -134,5 +142,12 @@ export class CreateLtitoolComponent implements OnInit {
             idx++;
         });
         console.log(this.nodes);
+
+        /**
+         * auto close when customContentOption
+         */
+        if (this._tool.customContentOption) {
+            this.onCreate.emit({ nodes: this.nodes, tool: this._tool });
+        }
     }
 }
