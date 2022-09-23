@@ -5,7 +5,7 @@ import { GeneralPage } from './general.page';
 export class SearchPage {
     static readonly url = './components/search';
     /** The time after which we expect the search index to reflect any changes. */
-    static readonly INDEX_UPDATE_TIMEOUT = 10 * 1000;
+    static readonly INDEX_UPDATE_TIMEOUT = 10_000;
 
     private readonly generalPage = new GeneralPage(this.page);
 
