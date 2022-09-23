@@ -21,11 +21,12 @@ const ciConfig: Partial<PlaywrightTestConfig> = {
     workers: 1,
     /* Fail the build on CI if you accidentally left test.only in the source code. */
     forbidOnly: true,
-    /* Retry on CI only */
-    // retries: 2,
+    retries: 2,
     use: {
         actionTimeout: 10 * 1000,
         trace: 'retain-on-failure',
+        screenshot: 'only-on-failure',
+        video: 'retain-on-failure',
     },
 };
 
@@ -43,16 +44,16 @@ const ciConfig: Partial<PlaywrightTestConfig> = {
  * in any test to launch the Playwright debugger interface.
  */
 const devConfig: Partial<PlaywrightTestConfig> = {
-    // expect: {
-    //     timeout: 5 * 1000,
-    // },
     // Opt out of parallel tests since timeouts are likely to be exceeded
     workers: 1,
     use: {
         actionTimeout: 5 * 1000,
-        trace: 'on',
         headless: false,
     },
+};
+
+const parallelConfig: Partial<PlaywrightTestConfig> = {
+    retries: 2,
 };
 
 /**
@@ -77,8 +78,7 @@ const config: PlaywrightTestConfig = {
     /* This causes `beforeAll` and `afterAll` hooks to be executed for each test. */
     fullyParallel: true,
     forbidOnly: false,
-    /* Run tests in parallel. */
-    // workers: undefined,
+    workers: readInt(process.env.E2E_TEST_MAX_WORKERS),
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
     reporter: [['list'], ['html']],
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -96,6 +96,8 @@ const config: PlaywrightTestConfig = {
 
         /* Collect trace. See https://playwright.dev/docs/trace-viewer */
         trace: 'on',
+        screenshot: 'on',
+        video: 'on',
     },
 
     /* Configure projects for major browsers */
@@ -171,10 +173,23 @@ function readBool(s: string): boolean {
     return ['1', 'true', 'yes'].includes(s?.toLowerCase());
 }
 
-if (readBool(process.env.CI)) {
+function readInt(s: string): number | undefined {
+    const result = parseInt(s, 10);
+    if (isNaN(result)) {
+        return undefined;
+    } else {
+        return result;
+    }
+}
+
+const mode = process.env.E2E_TEST_MODE ?? 'parallel';
+
+if (mode === 'ci' || readBool(process.env.CI)) {
     _.merge(config, ciConfig);
-} else if (readBool(process.env.E2E_TEST_DEV)) {
+} else if (mode === 'dev') {
     _.merge(config, devConfig);
+} else {
+    _.merge(config, parallelConfig);
 }
 
 export default config;
