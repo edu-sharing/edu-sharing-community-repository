@@ -295,7 +295,10 @@
                       <ng-container *ngIf="searchService.resultCount.materials && currentRepository!='-all-'">({{searchService.resultCount.materials}})</ng-container>
                     </h2>
                     <!-- TODO: make popup menu usable with keyboard -->
-                    <div class="sort-by">
+                    <div
+                      *ngIf="!searchService.isFrontpage"
+                      class="sort-by"
+                    >
                       <label for="sorting">{{'SORT_BY' | translate}}</label>
                       <div>
                         <button
