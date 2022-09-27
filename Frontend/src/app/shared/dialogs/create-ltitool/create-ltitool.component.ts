@@ -7,7 +7,7 @@ import {
     OnInit,
     Output,
 } from '@angular/core';
-import { Tool } from 'ngx-edu-sharing-api';
+import { LtiPlatformService, Tool } from 'ngx-edu-sharing-api';
 import { DialogButton } from '../../../core-module/ui/dialog-button';
 import {
     Node,
@@ -38,6 +38,7 @@ export class CreateLtitoolComponent implements OnInit {
         private ngZone: NgZone,
         private nodeService: RestNodeService,
         private nodeHelper: NodeHelperService,
+        private ltiPlatformService: LtiPlatformService,
     ) {
         this.buttons = [
             new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel()),
@@ -61,7 +62,7 @@ export class CreateLtitoolComponent implements OnInit {
                 this.nodes.length,
         );
         if (!this._tool.customContentOption) {
-            this.openLti();
+            this.openDeepLinkFlow();
         }
     }
 
@@ -85,7 +86,7 @@ export class CreateLtitoolComponent implements OnInit {
                 this._tool.customContentOption,
         );
         if (this._tool.customContentOption) {
-            this.openLti();
+            this.createLtiContentOptionNode();
             return;
         } else {
             if (!this.nodes) {
@@ -95,37 +96,48 @@ export class CreateLtitoolComponent implements OnInit {
         }
     }
 
-    public openLti() {
+    public createLtiContentOptionNode() {
         // @TODO cordova handling, popup problem
-        console.log('open() this._tool.customContentOption:' + this._tool.customContentOption);
+        console.log('open() this._name:' + this._name);
+        if (this._name == undefined) {
+            return;
+        }
+        const properties = RestHelper.createNameProperty(this._name);
+        this.nodeService
+            .createNode(this._parent.ref.id, RestConstants.CCM_TYPE_IO, [], properties)
+            .subscribe(
+                (data: NodeWrapper) => {
+                    this.ltiPlatformService
+                        .convertToLtiResourceLink(data.node.ref.id, this._tool.appId)
+                        .subscribe(
+                            (result: any) => {
+                                this.nodes[0] = data.node;
+                                /**
+                                 * auto close when customContentOption and open resourcelink
+                                 */
+                                this.onCreate.emit({ nodes: this.nodes, tool: this._tool });
+                            },
+                            (error: any) => {
+                                this.nodeHelper.handleNodeError(this._name, error);
+                            },
+                        );
+                },
+                (error: any) => {
+                    this.nodeHelper.handleNodeError(this._name, error);
+                },
+            );
+    }
+
+    public openDeepLinkFlow() {
         let url =
             '/edu-sharing/rest/ltiplatform/v13/generateLoginInitiationForm?appId=' +
             this._tool.appId +
             '&parentId=' +
             this._parent.ref.id;
-        if (this._tool.customContentOption) {
-            console.log('open() this._name:' + this._name);
-            if (this._name == undefined) {
-                return;
-            }
-            const properties = RestHelper.createNameProperty(this._name);
-            this.nodeService
-                .createNode(this._parent.ref.id, RestConstants.CCM_TYPE_IO, [], properties)
-                .subscribe(
-                    (data: NodeWrapper) => {
-                        url = url + '&nodeId=' + data.node.ref.id;
-                        window.open(url, '_blank');
-                    },
-                    (error: any) => {
-                        this.nodeHelper.handleNodeError(this._name, error);
-                    },
-                );
-        } else {
-            let w = window.open(url, '_blank');
+        let w = window.open(url, '_blank');
 
-            if (!w) {
-                window.alert('popups are disabled');
-            }
+        if (!w) {
+            window.alert('popups are disabled');
         }
     }
 
@@ -142,12 +154,5 @@ export class CreateLtitoolComponent implements OnInit {
             idx++;
         });
         console.log(this.nodes);
-
-        /**
-         * auto close when customContentOption
-         */
-        if (this._tool.customContentOption) {
-            this.onCreate.emit({ nodes: this.nodes, tool: this._tool });
-        }
     }
 }

@@ -31,4 +31,8 @@ export class LtiPlatformService {
             }),
         );
     }
+
+    convertToLtiResourceLink(nodeId: string, appId: string): Observable<null> {
+        return this.ltiPlatformService.convertToResourcelink({ nodeId, appId });
+    }
 }

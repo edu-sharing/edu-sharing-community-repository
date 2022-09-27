@@ -563,31 +563,35 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         let nodes: Node[] = event.nodes;
         if (nodes) {
             nodes.forEach((n) => {
-                const prop = RestHelper.createNameProperty(n.name);
-                this.nodeService.editNodeMetadata(n.ref.id, prop).subscribe(
-                    (data: NodeWrapper) => {
-                        this.onCreate.emit([data.node]);
-                        this.createToolType = null;
-                        if (event.tool.customContentOption == true) {
-                            let w = window.open(
-                                '/edu-sharing/rest/ltiplatform/v13/generateLoginInitiationFormResourceLink?nodeId=' +
-                                    data.node.ref.id,
-                                '_blank',
-                            );
-                            if (!w) {
-                                window.alert('popups are disabled');
+                if (event.tool.customContentOption == true) {
+                    let w = window.open(
+                        '/edu-sharing/rest/ltiplatform/v13/generateLoginInitiationFormResourceLink?nodeId=' +
+                            n.ref.id,
+                        '_blank',
+                    );
+                    if (!w) {
+                        window.alert('popups are disabled');
+                    }
+
+                    this.onCreate.emit([n]);
+                    this.createToolType = null;
+                } else {
+                    const prop = RestHelper.createNameProperty(n.name);
+                    this.nodeService.editNodeMetadata(n.ref.id, prop).subscribe(
+                        (data: NodeWrapper) => {
+                            this.onCreate.emit([data.node]);
+                            this.createToolType = null;
+                        },
+                        (error: any) => {
+                            if (
+                                this.nodeHelper.handleNodeError(n.name, error) ===
+                                RestConstants.DUPLICATE_NODE_RESPONSE
+                            ) {
+                                this.createConnectorName = event.name;
                             }
-                        }
-                    },
-                    (error: any) => {
-                        if (
-                            this.nodeHelper.handleNodeError(n.name, error) ===
-                            RestConstants.DUPLICATE_NODE_RESPONSE
-                        ) {
-                            this.createConnectorName = event.name;
-                        }
-                    },
-                );
+                        },
+                    );
+                }
             });
         }
     }

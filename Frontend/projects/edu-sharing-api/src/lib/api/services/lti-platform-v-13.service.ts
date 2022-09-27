@@ -240,6 +240,68 @@ export class LtiPlatformV13Service extends BaseService {
     }
 
     /**
+     * Path part for operation getContent
+     */
+    static readonly GetContentPath = '/ltiplatform/v13/content';
+
+    /**
+     * Custom edu-sharing endpoint to get content of node.
+     *
+     * Get content of node.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getContent()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getContent$Response(params: {
+        /**
+         * jwt containing the claims appId, nodeId, user previously send with ResourceLinkRequest or DeeplinkRequest. Must be signed by tool
+         */
+        jwt: string;
+    }): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(this.rootUrl, LtiPlatformV13Service.GetContentPath, 'get');
+        if (params) {
+            rb.query('jwt', params.jwt, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'blob',
+                    accept: '*/*',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<string>;
+                }),
+            );
+    }
+
+    /**
+     * Custom edu-sharing endpoint to get content of node.
+     *
+     * Get content of node.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getContent$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getContent(params: {
+        /**
+         * jwt containing the claims appId, nodeId, user previously send with ResourceLinkRequest or DeeplinkRequest. Must be signed by tool
+         */
+        jwt: string;
+    }): Observable<string> {
+        return this.getContent$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
+        );
+    }
+
+    /**
      * Path part for operation changeContent
      */
     static readonly ChangeContentPath = '/ltiplatform/v13/content';
@@ -270,7 +332,10 @@ export class LtiPlatformV13Service extends BaseService {
          */
         mimetype: string;
         body?: {
-            file?: {};
+            /**
+             * file upload
+             */
+            file?: Blob;
         };
     }): Observable<StrictHttpResponse<NodeEntry>> {
         const rb = new RequestBuilder(
@@ -288,8 +353,8 @@ export class LtiPlatformV13Service extends BaseService {
         return this.http
             .request(
                 rb.build({
-                    responseType: 'text',
-                    accept: 'text/html',
+                    responseType: 'json',
+                    accept: 'application/json',
                 }),
             )
             .pipe(
@@ -326,11 +391,91 @@ export class LtiPlatformV13Service extends BaseService {
          */
         mimetype: string;
         body?: {
-            file?: {};
+            /**
+             * file upload
+             */
+            file?: Blob;
         };
     }): Observable<NodeEntry> {
         return this.changeContent$Response(params).pipe(
             map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
+        );
+    }
+
+    /**
+     * Path part for operation convertToResourcelink
+     */
+    static readonly ConvertToResourcelinkPath = '/ltiplatform/v13/convert2resourcelink';
+
+    /**
+     * manual convertion of an io to an resource link without deeplinking.
+     *
+     * io conversion to resourcelink
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `convertToResourcelink()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    convertToResourcelink$Response(params: {
+        /**
+         * nodeId
+         */
+        nodeId: string;
+
+        /**
+         * appId of a lti tool
+         */
+        appId: string;
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(
+            this.rootUrl,
+            LtiPlatformV13Service.ConvertToResourcelinkPath,
+            'post',
+        );
+        if (params) {
+            rb.query('nodeId', params.nodeId, {});
+            rb.query('appId', params.appId, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<any>;
+                }),
+            );
+    }
+
+    /**
+     * manual convertion of an io to an resource link without deeplinking.
+     *
+     * io conversion to resourcelink
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `convertToResourcelink$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    convertToResourcelink(params: {
+        /**
+         * nodeId
+         */
+        nodeId: string;
+
+        /**
+         * appId of a lti tool
+         */
+        appId: string;
+    }): Observable<any> {
+        return this.convertToResourcelink$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }
 
@@ -816,6 +961,72 @@ export class LtiPlatformV13Service extends BaseService {
         };
     }): Observable<string> {
         return this.startDynamicRegistration$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
+        );
+    }
+
+    /**
+     * Path part for operation testToken
+     */
+    static readonly TestTokenPath = '/ltiplatform/v13/testToken';
+
+    /**
+     * test creates a token signed with homeapp.
+     *
+     * test token.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `testToken()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    testToken$Response(params: {
+        /**
+         * properties
+         */
+        body: {
+            [key: string]: string;
+        };
+    }): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(this.rootUrl, LtiPlatformV13Service.TestTokenPath, 'put');
+        if (params) {
+            rb.body(params.body, 'application/json');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<string>;
+                }),
+            );
+    }
+
+    /**
+     * test creates a token signed with homeapp.
+     *
+     * test token.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `testToken$Response()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    testToken(params: {
+        /**
+         * properties
+         */
+        body: {
+            [key: string]: string;
+        };
+    }): Observable<string> {
+        return this.testToken$Response(params).pipe(
             map((r: StrictHttpResponse<string>) => r.body as string),
         );
     }

@@ -19,7 +19,6 @@ import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
-import org.apache.catalina.Session;
 import org.apache.catalina.session.StandardSession;
 import org.apache.catalina.session.StandardSessionFacade;
 import org.apache.commons.lang.StringUtils;
@@ -45,6 +44,7 @@ import org.edu_sharing.service.lti13.registration.RegistrationService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.version.VersionService;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.extensions.surf.util.I18NUtil;
@@ -769,28 +769,15 @@ public class LTIPlatformApi {
 
                 org.edu_sharing.service.nodeservice.NodeService eduNodeService = NodeServiceFactory.getLocalService();
 
-                String nodeId = null;
-                if(sessionObject.getContentUrlNodeId() != null) {
-                    nodeId = sessionObject.getContentUrlNodeId();
-                    eduNodeService.updateNode(nodeId,properties);
+
+                String nodeId = sessionObject.getContentUrlNodeId();
+                if(nodeId != null) {
+                    eduNodeService.updateNode(sessionObject.getContentUrlNodeId(), properties);
                 }else{
                     nodeId = eduNodeService.createNode(sessionObject.getContextId(), CCConstants.CCM_TYPE_IO, properties);
                 }
 
-
-                NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
-                QName aspectLti = QName.createQName(CCConstants.CCM_ASPECT_LTITOOL_NODE);
-
-                if(!nodeService.hasAspect(nodeRef,aspectLti)){
-                    Map<QName, Serializable> ltiAspectProps = new HashMap<>();
-                    ltiAspectProps.put(QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_RESOURCELINK),url);
-                    ltiAspectProps.put(QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_TOOLURL),appInfoTool.getLtitoolUrl());
-                    nodeService.addAspect(nodeRef,aspectLti,ltiAspectProps);
-                }
-
-                String wwwurl = ApplicationInfoList.getHomeRepository().getClientBaseUrl()
-                        +"/rest/ltiplatform/v13/generateLoginInitiationFormResourceLink?nodeId="+nodeId;
-                nodeService.setProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_WWWURL),wwwurl);
+                updateToResourceLink(nodeId, appInfoTool, url);
                 nodeIds.add(nodeId);
                 titles.add(name);
             }
@@ -820,6 +807,91 @@ public class LTIPlatformApi {
             return ApiTool.processError(req,e,"LTI_ERROR");
         }
     }
+
+    @NotNull
+    private String updateToResourceLink(String nodeId, ApplicationInfo appInfoTool, String resourceLink) throws Throwable {
+
+        NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
+        QName aspectLti = QName.createQName(CCConstants.CCM_ASPECT_LTITOOL_NODE);
+
+        if(!nodeService.hasAspect(nodeRef,aspectLti)){
+            Map<QName, Serializable> ltiAspectProps = new HashMap<>();
+            ltiAspectProps.put(QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_RESOURCELINK), resourceLink);
+            ltiAspectProps.put(QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_TOOLURL), appInfoTool.getLtitoolUrl());
+            nodeService.addAspect(nodeRef,aspectLti,ltiAspectProps);
+        }
+
+        String wwwurl = ApplicationInfoList.getHomeRepository().getClientBaseUrl()
+                +"/rest/ltiplatform/v13/generateLoginInitiationFormResourceLink?nodeId="+nodeId;
+        nodeService.setProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_WWWURL),wwwurl);
+        return nodeId;
+    }
+
+
+    @POST
+    @Path("/convert2resourcelink")
+
+    @Operation(summary = "manual convertion of an io to an resource link without deeplinking", description = "io conversion to resourcelink")
+    @Consumes({"application/json"})
+    @Produces({"application/json"})
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+                    @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response convertToResourcelink(
+            @Parameter(description = "nodeId", required=true ) @QueryParam("nodeId") String nodeId,
+            @Parameter(description = "appId of a lti tool", required=true ) @QueryParam("appId") String appId,
+            @Context HttpServletRequest req) {
+        RepositoryDao repoDao = null;
+        try {
+            repoDao = RepositoryDao.getHomeRepository();
+            NodeDao nodeDao = NodeDao.getNode(repoDao, nodeId);
+            if(!nodeDao.getType().equals("ccm:io")){
+                throw new Exception("wrong type:" + nodeDao.getType());
+            }
+
+            ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
+            if(appInfo == null || !appInfo.isLtiTool()){
+                throw new Exception("application "+ appId + " is no tool");
+            }
+
+            updateToResourceLink(nodeId,appInfo,appInfo.getLtitoolUrl());
+            return Response.ok().build();
+
+        } catch (DAOValidationException t) {
+
+            logger.warn(t.getMessage(), t);
+            return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
+
+        } catch (DAOSecurityException t) {
+
+            logger.warn(t.getMessage(), t);
+            return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
+
+        } catch (DAOMissingException t) {
+
+            logger.warn(t.getMessage(), t);
+            return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
+
+        }catch(DAOVirusDetectedException t){
+            logger.warn(t.getMessage(),t);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+        } catch (Throwable t) {
+
+            logger.error(t.getMessage(), t);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+        }
+
+    }
+
+
 
 
     @POST
