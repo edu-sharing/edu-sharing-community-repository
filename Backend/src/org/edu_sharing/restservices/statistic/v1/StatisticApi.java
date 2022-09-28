@@ -185,8 +185,11 @@ public class StatisticApi {
 			ToolPermissionHelper.throwIfToolpermissionMissing(toolpermission);
 		}else {
 			// do NOT allow mediacenter persons to view user statistics
-			ToolPermissionHelper.throwIfToolpermissionMissing(toolpermission);
-			// MediacenterDao.get(RepositoryDao.getHomeRepository(), mediacenter).checkAdminAccess();
+			if(toolpermission.equals(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_USER)) {
+				ToolPermissionHelper.throwIfToolpermissionMissing(toolpermission);
+			} else {
+				MediacenterDao.get(RepositoryDao.getHomeRepository(), mediacenter).checkAdminAccess();
+			}
 		}
 	}
 
