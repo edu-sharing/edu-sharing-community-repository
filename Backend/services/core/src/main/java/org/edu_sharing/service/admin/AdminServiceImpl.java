@@ -12,10 +12,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
@@ -27,6 +24,7 @@ import org.alfresco.service.cmr.module.ModuleInstallState;
 import org.alfresco.service.cmr.module.ModuleService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.input.ReversedLinesFileReader;
@@ -69,6 +67,7 @@ import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.foldertemplates.FolderTemplatesImpl;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.nodeservice.RecurseMode;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
@@ -86,35 +85,30 @@ public class AdminServiceImpl implements AdminService  {
 	ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
 	private static Logger logger = Logger.getLogger(AdminServiceImpl.class);
-	
+
+
 	@Override
-	public ArrayList<String>  getAllValuesFor(String property, HashMap authInfo) throws Throwable {
-		ArrayList<String> result = new ArrayList<String>();
+	public Collection<String>  getAllValuesFor(String property) throws Throwable {
+		Set<String> result = new HashSet<String>();
 
-		MCAlfrescoBaseClient mcAlfrescoBaseClient = (MCAlfrescoBaseClient) RepoFactory.getInstance(null, authInfo);
-		if (mcAlfrescoBaseClient instanceof MCAlfrescoAPIClient) {
-			String companyHomeId = mcAlfrescoBaseClient.getCompanyHomeNodeId();
-			
-			HashMap<String, Object> importFolderProps = mcAlfrescoBaseClient.getChild(companyHomeId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME,
-					OAIPMHLOMImporter.FOLDER_NAME_IMPORTED_OBJECTS);
-			if (importFolderProps != null) {
-				String rootFolderId = (String) importFolderProps.get(CCConstants.SYS_PROP_NODE_UID);
-				HashMap<String, HashMap<String, Object>> childs = ((MCAlfrescoAPIClient) mcAlfrescoBaseClient).getChildrenRecursive(rootFolderId,
-						CCConstants.CCM_TYPE_IO);
-				for (Map.Entry<String, HashMap<String, Object>> childEntry : childs.entrySet()) {
-					for (Map.Entry<String, Object> propsEntry : childEntry.getValue().entrySet()) {
-						if (propsEntry.getKey().equals(property) && !result.contains((propsEntry.getValue()))) {
-							String toAdd = (String) propsEntry.getValue();
-							
-							if (toAdd != null) {
-								result.add(toAdd.trim());
-							}
+		List<NodeRef> children = NodeServiceFactory.getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+				NodeServiceFactory.getLocalService().getCompanyHome(),
+				Collections.singletonList(CCConstants.CCM_TYPE_IO),
+				RecurseMode.Folders
+		);
 
-						}
-					}
-				}
+		/*HashMap<String, Object> importFolderProps = mcAlfrescoBaseClient.getChild(companyHomeId, CCConstants.CCM_TYPE_MAP, CCConstants.CM_NAME,
+				OAIPMHLOMImporter.FOLDER_NAME_IMPORTED_OBJECTS);*/
+		for (NodeRef childEntry : children) {
+			Serializable value = NodeServiceHelper.getPropertyNative(childEntry, property);
+			if(value == null) {
+				continue;
 			}
-
+			if(value instanceof Collection) {
+				result.addAll((Collection<? extends String>) value);
+			} else {
+				result.add(value.toString());
+			}
 		}
 
 		return result;
@@ -265,6 +259,33 @@ public class AdminServiceImpl implements AdminService  {
 			throw new Exception("Job could not be canceled. Scheduler returned false");
 		}
 	}
+
+	public void writePropertyToMDSXml(Result result, String property) throws Throwable {
+		Collection<String> values = getAllValuesFor(property);
+
+		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+		Document document = documentBuilder.newDocument();
+		Element rootElement = document.createElement("valuespaces");
+		document.appendChild(rootElement);
+
+		Element valueSpace = document.createElement("valuespace");
+		valueSpace.setAttribute("property", CCConstants.getValidLocalName(property));
+		rootElement.appendChild(valueSpace);
+
+		for (String val : values) {
+			Element key = document.createElement("key");
+			key.appendChild(document.createTextNode(val));
+			valueSpace.appendChild(key);
+		}
+
+		Source source = new DOMSource(document);
+
+		// Write the DOM document to the file
+		Transformer xformer = TransformerFactory.newInstance().newTransformer();
+		xformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		xformer.transform(source, result);
+	}
 	public void writePublisherToMDSXml(Result result,String vcardProps, String valueSpaceProp, String ignoreValues, HashMap authInfo) throws Throwable {
 		
 		List<String> ignoreValuesList = null;
@@ -277,7 +298,7 @@ public class AdminServiceImpl implements AdminService  {
 		ArrayList<String> allValues = new ArrayList<String>();
 		String[] splittedVCardProp = vcardProps.split(",");
 		for (String oneVCardProp : splittedVCardProp) {
-			allValues.addAll(getAllValuesFor(oneVCardProp, authInfo));
+			allValues.addAll(getAllValuesFor(oneVCardProp));
 		}
 		
 		if (allValues != null && allValues.size() > 0) {
@@ -403,7 +424,7 @@ public class AdminServiceImpl implements AdminService  {
 		ApplicationInfoList.refresh();
 		RepoFactory.refresh();
 	}
-	
+
 	@Override
 	public HashMap<String,String> addApplication(String appMetadataUrl) throws Exception{
 		
@@ -518,9 +539,12 @@ public class AdminServiceImpl implements AdminService  {
 	
 	@Override
 	public String getPropertyToMDSXml(List<String> properties) throws Throwable{
-		for(int i=0;i<properties.size();i++)
-			properties.set(i, NameSpaceTool.transformToLongQName(properties.get(i)));
-		return getPublisherToMDSXml(properties,null, null, getAuthInfo());
+		properties.replaceAll(NameSpaceTool::transformToLongQName);
+		StringWriter writer=new StringWriter();
+		Result result = new StreamResult(writer);
+		writePropertyToMDSXml(result, properties.get(0));
+		return writer.toString();
+		// return getPublisherToMDSXml(properties,null, null, getAuthInfo());
 	}
 	
 	@Override

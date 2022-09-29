@@ -154,6 +154,10 @@ public class PersonDao {
 
 			this.userInfo = authorityService.getUserInfo(userName);
 
+			if(this.userInfo == null){
+				throw new DAOMissingException(new Exception("user "+ userName + " not found"));
+			}
+
 			// may causes performance penalties!
 			this.parentOrganizations = AuthenticationUtil.runAsSystem(() ->
 					authorityService.getEduGroups(userName, NodeServiceInterceptor.getEduSharingScope())
@@ -501,7 +505,6 @@ public class PersonDao {
 	}
 
 	public String getUserName() {
-
 		return (String)this.userInfo.get(CCConstants.CM_PROP_PERSON_USERNAME);
 	}
 

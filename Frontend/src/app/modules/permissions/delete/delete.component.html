@@ -128,6 +128,7 @@
         <authority-search-input
                 [mode]="AuthoritySearchMode.Organizations"
                 hint="{{'PERMISSIONS.DELETE.RECEIVER_GROUP_HINT' | translate}}"
+                [globalSearchAllowed]="true"
                 [showRecent]="false"
                 (onChooseAuthority)="receiverGroup=$event"
                 placeholder="{{'PERMISSIONS.DELETE.RECEIVER_GROUP' | translate}}"
