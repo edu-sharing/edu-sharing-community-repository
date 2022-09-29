@@ -148,7 +148,11 @@ public class NodeServiceInterceptor implements MethodInterceptor {
         NodeService nodeService = serviceRegistry.getNodeService();
         int i = 0;
         while(nodeId!=null) {
-            if (hasSignature(nodeId) || hasUsage(nodeId) || accessibleViaStream(nodeId) || hasCollectionPermissions(nodeId)) {
+            if (
+                    (hasSignature(nodeId) || hasUsage(nodeId)) ||
+                    // direct permissions only valid for current node, NOT for parent!
+                    (accessibleViaStream(nodeId) || hasCollectionPermissions(nodeId) && i == 0)
+            ) {
                 logger.debug("Node "+nodeId+" -> will run as system");
                 return AuthenticationUtil.runAsSystem(() -> {
                     try {
