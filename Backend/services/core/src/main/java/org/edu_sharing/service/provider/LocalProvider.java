@@ -1,5 +1,7 @@
 package org.edu_sharing.service.provider;
 
+import org.edu_sharing.service.comment.CommentService;
+import org.edu_sharing.service.comment.CommentServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceImpl;
@@ -27,5 +29,10 @@ public class LocalProvider extends Provider{
     @Override
     public SearchService getSearchService(){
         return SearchServiceFactory.getLocalService();
+    }
+
+    @Override
+    public CommentService getCommentService() {
+        return CommentServiceFactory.getLocalService();
     }
 }
