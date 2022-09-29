@@ -67,7 +67,7 @@ public interface AdminService {
 	void writePublisherToMDSXml(String vcardProps, String valueSpaceProp, String ignoreValues, String filePath,
 			HashMap authInfo) throws Throwable;
 
-	ArrayList<String> getAllValuesFor(String property, HashMap authInfo) throws Throwable;
+	Collection<String> getAllValuesFor(String property) throws Throwable;
 
 	void removeApplication(ApplicationInfo info) throws Exception;
 

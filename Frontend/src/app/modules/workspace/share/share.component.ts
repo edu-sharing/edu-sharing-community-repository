@@ -282,6 +282,8 @@ export class WorkspaceShareComponent {
                     this.inherited =
                         permissions[0].permissions.localPermissions.inherited;
                     setTimeout(()=>this.setInitialState());
+                } else {
+                    this.setPermissions([]);
                 }
                 this.toast.closeModalDialog();
             });

@@ -16,7 +16,9 @@ import {
 } from './option-item';
 import {UIHelper} from './ui-helper';
 import {UIService} from '../core-module/rest/services/ui.service';
-import {WorkspaceManagementDialogsComponent} from '../modules/management-dialogs/management-dialogs.component';
+import {
+    WorkspaceManagementDialogsComponent
+} from '../modules/management-dialogs/management-dialogs.component';
 import {
     Connector,
     Filetype,
@@ -95,7 +97,7 @@ export class OptionsHelperService implements OnDestroy {
         if(!event.composedPath().some(
             (t) => {
                 const name = (t as HTMLElement)?.nodeName;
-                return ['LISTTABLE', 'ACTIONBAR'].indexOf(name) !== -1
+                return ['LISTTABLE', 'ACTIONBAR', 'BODY'].indexOf(name) !== -1
             })) {
             return;
         }
@@ -577,7 +579,7 @@ export class OptionsHelperService implements OnDestroy {
         );
         addNodeToCollection.elementType = OptionsHelperService.ElementTypesAddToCollection;
         addNodeToCollection.showAsAction = true;
-        addNodeToCollection.constrains = [Constrain.Files, Constrain.User];
+        addNodeToCollection.constrains = [Constrain.Files, Constrain.User, Constrain.NoScope];
         addNodeToCollection.customShowCallback = (nodes) => {
             addNodeToCollection.name = this.data.scope === Scope.CollectionsReferences ?
                 'OPTIONS.COLLECTION_OTHER' : 'OPTIONS.COLLECTION';
@@ -594,7 +596,7 @@ export class OptionsHelperService implements OnDestroy {
             this.bookmarkNodes(this.getObjects(object))
         );
         bookmarkNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
-        bookmarkNode.constrains = [Constrain.Files, Constrain.HomeRepository];
+        bookmarkNode.constrains = [Constrain.Files, Constrain.HomeRepository, Constrain.NoScope];
         bookmarkNode.group = DefaultGroups.Reuse;
         bookmarkNode.priority = 20;
         bookmarkNode.customShowCallback = (nodes) => {
@@ -1264,6 +1266,12 @@ export class OptionsHelperService implements OnDestroy {
             if (this.connectors.getRestConnector().getCurrentLogin() &&
                 this.connectors.getRestConnector().getCurrentLogin().statusCode !== RestConstants.STATUS_CODE_OK) {
                 return Constrain.User;
+            }
+        }
+        if (constrains.indexOf(Constrain.NoScope) !== -1) {
+            if (this.connectors.getRestConnector().getCurrentLogin() &&
+                !!this.connectors.getRestConnector().getCurrentLogin().currentScope) {
+                return Constrain.NoScope;
             }
         }
         if (constrains.indexOf(Constrain.NoSelection) !== -1) {
