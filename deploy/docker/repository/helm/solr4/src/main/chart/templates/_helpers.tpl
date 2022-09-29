@@ -27,3 +27,9 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app: {{ include "edusharing_repository_search_solr4.name" . }}
 app.kubernetes.io/name: {{ include "edusharing_repository_search_solr4.name" . }}
 {{- end -}}
+
+{{- define "edusharing_repository_search_solr4.image" -}}
+{{- $registry := default .Values.global.image.registry .Values.image.registry -}}
+{{- $repository := default .Values.global.image.repository .Values.image.repository -}}
+{{ $registry }}{{ if $registry }}/{{ end }}{{ $repository }}{{ if $repository }}/{{ end }}
+{{- end -}}

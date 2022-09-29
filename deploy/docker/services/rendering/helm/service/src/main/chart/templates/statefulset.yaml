@@ -13,6 +13,7 @@ spec:
       labels: {{ include "edusharing_services_rendering.labels.app" . | nindent 8 }}
       annotations:
         checksum/configmap-env: {{ include (print .Template.BasePath "/configmap-env.yaml") . | sha256sum | trunc 63 }}
+        checksum/configmap-file: {{ include (print .Template.BasePath "/configmap-file.yaml") . | sha256sum | trunc 63 }}
         checksum/secret-env: {{ include (print .Template.BasePath "/secret-env.yaml") . | sha256sum | trunc 63 }}
         {{- if not .Values.global.metrics.servicemonitor.enabled }}
         prometheus.io/path: "/metrics"
@@ -27,7 +28,7 @@ spec:
       initContainers:
       {{- if (default .Values.global.cluster.storage.share.permission .Values.persistence.share.permission) }}
       - name: {{ include "edusharing_services_rendering.name" . }}-init-permission
-        image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/{{ .Values.image.prefix }}-deploy-docker-build-minideb:{{ .Values.image.tag }}
+        image: {{ include "edusharing_services_rendering.image" . }}{{ .Values.image.prefix }}-deploy-docker-build-minideb:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         command:
         - "/bin/bash"
@@ -40,6 +41,11 @@ spec:
             mountPath: /var/cache/esrender/config
           - name: share-data
             mountPath: /var/cache/esrender/data
+          {{- with .Values.config.override.logging.application }}
+          - name: file
+            mountPath: /var/www/html/esrender/conf/de.metaventis.esrender.log4php.xml
+            subPath: logging-application
+          {{- end }}
         {{- with .Values.init.permission.resources }}
         resources: {{ toYaml . | nindent 10 }}
         {{- end }}
@@ -49,7 +55,7 @@ spec:
       {{- end }}
       containers:
       - name: {{ include "edusharing_services_rendering.name" . }}
-        image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/{{ .Values.image.prefix }}-deploy-docker-services-rendering-build-service:{{ .Values.image.tag }}
+        image: {{ include "edusharing_services_rendering.image" . }}{{ .Values.image.prefix }}-deploy-docker-services-rendering-build-service:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         {{- $patroni := merge .Values.config.database.patroni .Values.global.patroni }}
         {{- if $patroni.enabled }}
@@ -114,7 +120,7 @@ spec:
         {{- end }}
       {{- if .Values.sidecar.metrics.enabled }}
       - name: {{ include "edusharing_services_rendering.name" . }}-metrics
-        image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/{{ .Values.image.prefix }}-deploy-docker-build-apache_exporter:{{ .Values.image.tag }}
+        image: {{ include "edusharing_services_rendering.image" . }}{{ .Values.image.prefix }}-deploy-docker-build-apache_exporter:{{ .Values.image.tag }}
         args:
         - --scrape_uri=http://127.0.0.1:8082/server-status/?auto
         - --telemetry.address=:9117
@@ -164,6 +170,9 @@ spec:
         {{- end }}
       {{- end }}
       volumes:
+      - name: file
+        configMap:
+          name: {{ include "edusharing_services_rendering.name" . }}-file
       - name: share-config
         persistentVolumeClaim:
           claimName: {{ include "edusharing_services_rendering.pvc.share.config" . }}

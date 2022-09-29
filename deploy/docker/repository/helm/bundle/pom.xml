@@ -17,6 +17,14 @@
 
   <properties>
 
+    <helm.edusharing_repository_antivirus.enabled>
+      false
+    </helm.edusharing_repository_antivirus.enabled>
+    <helm.edusharing_repository_antivirus.line1/>
+    <helm.edusharing_repository_antivirus.line2/>
+    <helm.edusharing_repository_antivirus.line3/>
+    <helm.edusharing_repository_antivirus.line4/>
+
     <helm.edusharing_repository_search_elastic_index.enabled>
       false
     </helm.edusharing_repository_search_elastic_index.enabled>
@@ -79,6 +87,23 @@
               <type>tar.gz</type>
               <classifier>bin</classifier>
               <outputDirectory>${project.build.directory}/chart/charts/${helm.prefix}-rediscluster
+              </outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>edusharing_repository_antivirus</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-enterprise-repository-plugin-antivirus-deploy-docker-helm
+              </includeArtifactIds>
+              <type>tar.gz</type>
+              <classifier>bin</classifier>
+              <outputDirectory>
+                ${project.build.directory}/chart/charts/edu_sharing-enterprise-repository-plugin-antivirus
               </outputDirectory>
             </configuration>
           </execution>
@@ -274,6 +299,84 @@
   </dependencies>
 
   <profiles>
+
+    <profile>
+
+      <id>repository.antivirus</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.REPOSITORY_ANTIVIRUS_ENABLED</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <build>
+
+        <plugins>
+
+          <plugin>
+            <groupId>org.codehaus.gmavenplus</groupId>
+            <artifactId>gmavenplus-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>antivirus-rest-client</id>
+                <goals>
+                  <goal>execute</goal>
+                </goals>
+                <phase>generate-sources</phase>
+                <configuration>
+                  <scripts>
+                    <!--suppress UnresolvedMavenProperty -->
+                    <script><![CDATA[
+                      def version = project.properties['org.edu_sharing:edu_sharing-enterprise-repository-plugin-antivirus-deploy-docker-helm:tar.gz:bin.version']
+                      ${git.semver}
+                      project.properties.setProperty('org.edu_sharing:edu_sharing-enterprise-repository-plugin-antivirus-deploy-docker-helm:tar.gz:bin.range', semver)
+                    ]]></script>
+                  </scripts>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+        </plugins>
+
+      </build>
+
+      <properties>
+
+        <helm.edusharing_repository_antivirus.enabled>
+          true
+        </helm.edusharing_repository_antivirus.enabled>
+        <helm.edusharing_repository_antivirus.line1>
+          - name: edu_sharing-enterprise-repository-plugin-antivirus
+        </helm.edusharing_repository_antivirus.line1>
+        <helm.edusharing_repository_antivirus.line2>
+          <!--suppress UnresolvedMavenProperty -->
+          version: ${org.edu_sharing:edu_sharing-enterprise-repository-plugin-antivirus-deploy-docker-helm:tar.gz:bin.range}
+        </helm.edusharing_repository_antivirus.line2>
+        <helm.edusharing_repository_antivirus.line3>
+          alias: edusharing_repository_antivirus
+        </helm.edusharing_repository_antivirus.line3>
+        <helm.edusharing_repository_antivirus.line4>
+          condition: edusharing_repository_antivirus.enabled
+        </helm.edusharing_repository_antivirus.line4>
+
+      </properties>
+
+      <dependencies>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-enterprise-repository-plugin-antivirus-deploy-docker-helm</artifactId>
+          <type>tar.gz</type>
+          <classifier>bin</classifier>
+        </dependency>
+
+      </dependencies>
+
+    </profile>
 
     <profile>
 

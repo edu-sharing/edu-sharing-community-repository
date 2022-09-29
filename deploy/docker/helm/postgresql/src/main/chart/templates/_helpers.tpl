@@ -27,3 +27,9 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app: {{ include "edusharing_postgresql.name" . }}
 app.kubernetes.io/name: {{ include "edusharing_postgresql.name" . }}
 {{- end -}}
+
+{{- define "edusharing_postgresql.image" -}}
+{{- $registry := default .Values.global.image.registry .Values.image.registry -}}
+{{- $repository := default .Values.global.image.repository .Values.image.repository -}}
+{{ $registry }}{{ if $registry }}/{{ end }}{{ $repository }}{{ if $repository }}/{{ end }}
+{{- end -}}

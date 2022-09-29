@@ -49,6 +49,21 @@
 
     </profile>
 
+    <profile>
+
+      <id>customer.deploy</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <file>
+          <exists>customer/pom.xml</exists>
+        </file>
+      </activation>
+      <modules>
+        <module>customer</module>
+      </modules>
+    </profile>
+
   </profiles>
 
   <build>

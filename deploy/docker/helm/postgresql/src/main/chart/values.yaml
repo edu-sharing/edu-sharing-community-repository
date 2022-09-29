@@ -21,6 +21,8 @@ global:
   image:
     pullPolicy: Always
     pullSecrets: []
+    registry: ${docker.registry}
+    repository: ${docker.repository}
 
   metrics:
     scrape:
@@ -46,8 +48,6 @@ global:
 nameOverride: *nameOverride
 
 image:
-  registry: ${docker.registry}
-  repository: ${docker.repository}
   prefix: ${docker.prefix}
   tag: ${docker.tag}
 

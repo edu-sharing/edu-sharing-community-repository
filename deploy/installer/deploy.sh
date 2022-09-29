@@ -230,6 +230,11 @@ init() {
 		echo "REPOSITORY_TRANSFORM_SERVER_HOST=repository-transform"
 	} >> repository/.env
 
+	# plugin antivirus (please check deploy/installer/server/scripts/../install.sh inside plugin)
+	{
+		echo "REPOSITORY_ANTIVIRUS_SERVER_BIND=0.0.0.0"
+	} >> repository/plugin-antivirus/.env
+
 	# plugin elastic (please check deploy/installer/tracker/scripts/../install.sh inside plugin)
 	{
 		echo "REPOSITORY_SERVICE_ADMIN_PASS=${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"

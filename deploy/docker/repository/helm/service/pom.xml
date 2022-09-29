@@ -17,6 +17,7 @@
 
   <properties>
 
+    <helm.config.antivirus.enabled>false</helm.config.antivirus.enabled>
     <helm.config.cluster.enabled>false</helm.config.cluster.enabled>
     <helm.config.transform.enabled>false</helm.config.transform.enabled>
 
@@ -100,6 +101,26 @@
   </build>
 
   <profiles>
+
+    <profile>
+
+      <id>repository.antivirus</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.REPOSITORY_ANTIVIRUS_ENABLED</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <properties>
+
+        <helm.config.antivirus.enabled>true</helm.config.antivirus.enabled>
+
+      </properties>
+
+    </profile>
 
     <profile>
 

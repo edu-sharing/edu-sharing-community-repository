@@ -59,6 +59,7 @@
               <includeArtifactIds>
                 edu_sharing-community-repository-plugin-elastic-backend-alfresco-module,
                 edu_sharing-community-repository-plugin-mongo-backend-alfresco-module,
+                edu_sharing-enterprise-repository-plugin-antivirus-backend-alfresco-module,
                 edu_sharing-enterprise-repository-plugin-cluster-backend-alfresco-module,
                 edu_sharing-enterprise-repository-plugin-remote-backend-alfresco-module,
                 edu_sharing-enterprise-repository-plugin-transform-backend-alfresco-module
@@ -76,6 +77,7 @@
               <includeArtifactIds>
                 edu_sharing-community-repository-plugin-elastic-backend-services-module,
                 edu_sharing-community-repository-plugin-mongo-backend-services-module,
+                edu_sharing-enterprise-repository-plugin-antivirus-backend-services-module,
                 edu_sharing-enterprise-repository-plugin-cluster-backend-services-module,
                 edu_sharing-enterprise-repository-plugin-remote-backend-services-module,
                 edu_sharing-enterprise-repository-plugin-transform-backend-services-module
@@ -93,6 +95,7 @@
               <includeArtifactIds>
                 edu_sharing-community-repository-plugin-elastic-config-defaults,
                 edu_sharing-community-repository-plugin-mongo-config-defaults,
+                edu_sharing-enterprise-repository-plugin-antivirus-config-defaults,
                 edu_sharing-enterprise-repository-plugin-cluster-config-defaults,
                 edu_sharing-enterprise-repository-plugin-remote-config-defaults,
                 edu_sharing-enterprise-repository-plugin-transform-config-defaults
@@ -253,6 +256,41 @@
   </dependencies>
 
   <profiles>
+
+    <profile>
+
+      <id>repository.antivirus</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.REPOSITORY_ANTIVIRUS_ENABLED</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <dependencies>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-enterprise-repository-plugin-antivirus-backend-alfresco-module</artifactId>
+          <type>amp</type>
+        </dependency>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-enterprise-repository-plugin-antivirus-backend-services-module</artifactId>
+          <type>amp</type>
+        </dependency>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-enterprise-repository-plugin-antivirus-config-defaults</artifactId>
+        </dependency>
+
+      </dependencies>
+
+    </profile>
 
     <profile>
 

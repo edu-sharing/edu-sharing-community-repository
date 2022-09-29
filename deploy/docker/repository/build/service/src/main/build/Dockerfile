@@ -103,6 +103,8 @@ RUN set -eux \
     && rm -rf /tmp/install/alfresco-platform \
     && mkdir -p tomcat/webapps/alfresco \
     && unzip tomcat/webapps/alfresco.war -d tomcat/webapps/alfresco \
+      -x "WEB-INF/classes/logging.properties" \
+      -x "WEB-INF/classes/log4j.properties" \
       -x "WEB-INF/lib/commons-lang3-*" \
       -x "WEB-INF/lib/hazelcast-*" \
       -x "WEB-INF/lib/jackson-*" \

@@ -1,9 +1,5 @@
 {{- if not .Values.global.cluster.istio.enabled }}
-{{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
 apiVersion: networking.k8s.io/v1
-{{- else }}
-apiVersion: networking.k8s.io/v1beta1
-{{- end }}
 kind: Ingress
 metadata:
   name: {{ include "edusharing_services_rendering.name" . }}
@@ -22,18 +18,12 @@ spec:
       paths:
       {{- range $.Values.ingress.paths }}
       - path: {{ . }}
-        {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
         pathType: Prefix
         backend:
           service:
             name: {{ include "edusharing_services_rendering.name" $ }}
             port:
               number: {{ $.Values.service.port.api.external }}
-        {{- else }}
-        backend:
-          serviceName: {{ include "edusharing_services_rendering.name" $ }}
-          servicePort: {{ $.Values.service.port.api.external }}
-        {{- end }}
       {{- end }}
   {{- end }}
 {{- end }}

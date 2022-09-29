@@ -43,6 +43,7 @@
             <configuration>
               <includeArtifactIds>
                 edu_sharing-community-repository-plugin-elastic-deploy-installer-compose-debian-bullseye,
+                edu_sharing-enterprise-repository-plugin-antivirus-deploy-installer-compose-debian-bullseye,
                 edu_sharing-enterprise-repository-plugin-cluster-deploy-installer-compose-debian-bullseye,
                 edu_sharing-enterprise-repository-plugin-transform-deploy-installer-compose-debian-bullseye
               </includeArtifactIds>
@@ -87,6 +88,28 @@
   </build>
 
   <profiles>
+
+    <profile>
+
+      <id>repository.antivirus</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.REPOSITORY_ANTIVIRUS_ENABLED</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <dependencies>
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-enterprise-repository-plugin-antivirus-deploy-installer-compose-debian-bullseye
+          </artifactId>
+        </dependency>
+      </dependencies>
+
+    </profile>
 
     <profile>
 

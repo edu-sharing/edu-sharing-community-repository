@@ -18,6 +18,7 @@
     "bom": {
       "bom": "${bom.bom.version}",
       "repository": "${bom.repository.version}",
+      "repository-antivirus": "${bom.repository-antivirus.version}",
       "repository-cluster": "${bom.repository-cluster.version}",
       "repository-elastic": "${bom.repository-elastic.version}",
       "repository-mongo": "${bom.repository-mongo.version}",

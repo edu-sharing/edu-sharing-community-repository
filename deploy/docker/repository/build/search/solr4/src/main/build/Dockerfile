@@ -88,7 +88,7 @@ RUN set -eux \
         's|@@ALFRESCO_SOLR4_DATA_DIR@@|'"$ALF_HOME"'/alf_data/solr4/index|' \
         solr4/workspace-SpacesStore/conf/solrcore.properties
 
-COPY --chown=worker:worker assets/solr4 solr4/log4j-solr.properties
+COPY --chown=worker:worker assets/solr4 solr4/
 
 ########################################################################################################################
 
