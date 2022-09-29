@@ -33,6 +33,8 @@ global:
   image:
     pullPolicy: Always
     pullSecrets: []
+    registry: ${docker.registry}
+    repository: ${docker.repository}
 
   metrics:
     scrape:
@@ -54,8 +56,6 @@ global:
 nameOverride: edusharing-repository-service
 
 image:
-  registry: ${docker.registry}
-  repository: ${docker.repository}
   prefix: ${docker.prefix}
   tag: ${docker.tag}
 
@@ -87,17 +87,15 @@ ingress:
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/app-root: /edu-sharing
     nginx.ingress.kubernetes.io/proxy-body-size: "5g"
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "15"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "180"
-#    nginx.ingress.kubernetes.io/configuration-snippet: |
-#      location /alfresco/service/api/solr/ {return 403;}
-#      location /alfresco/s/api/solr/ {return 403;}
-#      location /alfresco/wcservice/api/solr/ {return 403;}
-#      location /alfresco/wcs/api/solr/ {return 403;}
-#      location /share/proxy/alfresco/api/solr/ {return 403 ;}
-#      location /share/-default-/proxy/alfresco/api/ {return 403;}
+    nginx.ingress.kubernetes.io/server-snippet: |
+      location ~ ^/.*/(wc)?s(ervice)?/api/solr/.*$ {return 403;}
+      location ~ ^/.*/proxy/.*/api/solr/.*$ {return 403;}
+      location ~ ^/.*/-default-/proxy/.*/api/.*$ {return 403;}
 
   hosts:
   - repository.127.0.0.1.nip.io
@@ -118,6 +116,12 @@ config:
 
   admin:
     password: admin
+
+  antivirus:
+    enabled: ${helm.config.antivirus.enabled}
+    host: edusharing-repository-antivirus
+    port: 1344
+    service: virus_scan
 
   cache:
     cluster: true
@@ -140,10 +144,6 @@ config:
     internal:
       threads: 200
       timeout: -1
-
-  custom:
-    enabled: false
-    services: ""
 
   database:
     driver: org.postgresql.Driver
@@ -170,8 +170,8 @@ config:
   jvm:
     debug: false
     ram:
-      minPercentage: "90.0"
-      maxPercentage: "90.0"
+      minPercentage: "75.0"
+      maxPercentage: "75.0"
 
   metrics: true
 
@@ -209,6 +209,15 @@ config:
         username: ""
         password: ""
         authtype: ""
+
+  override:
+    config:
+      application:
+        client: ""
+        server: ""
+    logging:
+      application: ""
+      server: ""
 
   saml:
     enabled: false
@@ -294,7 +303,7 @@ startupProbe:
 
   failureThreshold: 30
   initialDelaySeconds: 0
-  periodSeconds: 20
+  periodSeconds: 30
   successThreshold: 1
   timeoutSeconds: 10
 

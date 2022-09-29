@@ -31,14 +31,14 @@ popd >/dev/null || exit
 	cp -f ".env" "${COMPOSE_DIR}"
 }
 
-export COMPOSE_NAME="${COMPOSE_PROJECT_NAME:-$(echo "${COMPOSE_PROJECT}-docker-$(git rev-parse --abbrev-ref HEAD)" | sed 's|[\/\.]|-|g' | tr '[:upper:]' '[:lower:]')}"
+export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-$(echo "${COMPOSE_PROJECT}-docker-$(git rev-parse --abbrev-ref HEAD)" | sed 's|[\/\.]|-|g' | tr '[:upper:]' '[:lower:]')}"
 
 case "$(uname)" in
 MINGW*)
-	COMPOSE_EXEC="winpty docker-compose -p $COMPOSE_NAME"
+	COMPOSE_EXEC="winpty docker-compose"
 	;;
 *)
-	COMPOSE_EXEC="docker-compose -p $COMPOSE_NAME"
+	COMPOSE_EXEC="docker-compose"
 	;;
 esac
 
@@ -118,8 +118,8 @@ info() {
 	echo ""
 	echo "  JVM:"
 	echo ""
-	echo "    XMS:            ${REPOSITORY_SEARCH_ELASTIC_INDEX_JAVA_XMS:-512m}"
-	echo "    XMX:            ${REPOSITORY_SEARCH_ELASTIC_INDEX_JAVA_XMX:-512m}"
+	echo "    XMS:            ${REPOSITORY_SEARCH_ELASTIC_INDEX_JAVA_XMS:-1g}"
+	echo "    XMX:            ${REPOSITORY_SEARCH_ELASTIC_INDEX_JAVA_XMX:-1g}"
 	echo ""
 	echo "  Services:"
 	echo ""
@@ -132,8 +132,8 @@ info() {
 	echo ""
 	echo "  JVM:"
 	echo ""
-	echo "    XMS:            ${REPOSITORY_SEARCH_ELASTIC_TRACKER_JAVA_XMS:-512m}"
-	echo "    XMX:            ${REPOSITORY_SEARCH_ELASTIC_TRACKER_JAVA_XMX:-512m}"
+	echo "    XMS:            ${REPOSITORY_SEARCH_ELASTIC_TRACKER_JAVA_XMS:-1g}"
+	echo "    XMX:            ${REPOSITORY_SEARCH_ELASTIC_TRACKER_JAVA_XMX:-1g}"
 	echo ""
 	echo "  Services:"
 	echo ""
@@ -145,12 +145,12 @@ info() {
 	echo ""
 	echo "  JVM:"
 	echo ""
-	echo "    XMS:            ${REPOSITORY_SEARCH_SOLR4_JAVA_XMS:-2g}"
-	echo "    XMX:            ${REPOSITORY_SEARCH_SOLR4_JAVA_XMX:-4g}"
+	echo "    XMS:            ${REPOSITORY_SEARCH_SOLR4_JAVA_XMS:-1g}"
+	echo "    XMX:            ${REPOSITORY_SEARCH_SOLR4_JAVA_XMX:-1g}"
 	echo ""
 	echo "  Services:"
 	echo ""
-	echo "    HTTP:           http://127.0.0.1:${REPOSITORY_SEARCH_SOLR4_PORT_HTTP:-8200}/solr4/"
+	echo "    HTTP:           http://127.0.0.1:${REPOSITORY_SEARCH_SOLR4_PORT_HTTP:-8200}/solr/"
 	echo "    JPDA:           127.0.0.1:${REPOSITORY_SEARCH_SOLR4_PORT_JPDA:-8201}"
 	echo ""
 	echo "#########################################################################"
@@ -246,68 +246,53 @@ note() {
 
 compose() {
 
-	COMPOSE_BASE_FILE="$1"
-	COMPOSE_DIRECTORY="$(dirname "$COMPOSE_BASE_FILE")"
-	COMPOSE_FILE_NAME="$(basename "$COMPOSE_BASE_FILE" | cut -f 1 -d '.')" # without extension
-
+	COMPOSE_DIRECTORY="$1"
 	COMPOSE_LIST=
 
 	shift && {
 
-		while true; do
-			flag="$1"
-			shift || break
+      COMPOSE_FILE_GROUP="$1"
 
-			COMPOSE_FILE=""
-			case "$flag" in
-			-common) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-common.yml" ;;
-			-debug) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-debug.yml" ;;
-			-dev) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-dev.yml" ;;
-			-remote) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-remote.yml" ;;
-			*)
-				{
-					echo "error: unknown flag: $flag"
-					echo ""
-					echo "valid flags are:"
-					echo "  -common"
-					echo "  -debug"
-					echo "  -dev"
-					echo "  -remote"
-				} >&2
-				exit 1
-				;;
-			esac
+    shift && {
 
-			if [[ -f "$COMPOSE_FILE" ]]; then
-				COMPOSE_LIST="$COMPOSE_LIST -f $COMPOSE_FILE"
-			fi
+      while true; do
+        flag="$1"
+        shift || break
 
-		done
+        COMPOSE_FILE_TYPE=""
+        case "$flag" in
+        -common) COMPOSE_FILE_TYPE="common" ;;
+        -debug) COMPOSE_FILE_TYPE="debug" ;;
+        -dev) COMPOSE_FILE_TYPE="dev" ;;
+        -remote) COMPOSE_FILE_TYPE="remote" ;;
+        *)
+          {
+            echo "error: unknown flag: $flag"
+            echo ""
+            echo "valid flags are:"
+            echo "  -common"
+            echo "  -debug"
+            echo "  -dev"
+            echo "  -remote"
+          } >&2
+          exit 1
+          ;;
+        esac
+
+        while IFS='' read -r COMPOSE_FILE; do
+          COMPOSE_LIST="$COMPOSE_LIST -f ${COMPOSE_FILE}"
+        done < <(find "${COMPOSE_DIRECTORY}" -type f -name "${COMPOSE_FILE_GROUP}_*-${COMPOSE_FILE_TYPE}.yml" | sort -g)
+
+      done
+    }
 
 	}
 
 	echo $COMPOSE_LIST
 }
 
-compose_plugins() {
-	PLUGIN_DIR="$1"
-	shift
-
-	COMPOSE_LIST=
-	for plugin in $PLUGIN_DIR/plugin*/; do
-		[ ! -d $plugin ] && continue
-		COMPOSE_PLUGIN="$(compose "./$plugin$(basename $plugin).yml" "$@")"
-		COMPOSE_LIST="$COMPOSE_LIST $COMPOSE_PLUGIN"
-	done
-
-	echo $COMPOSE_LIST
-}
-
 logs() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -317,15 +302,12 @@ logs() {
 }
 
 ps() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
 	$COMPOSE_EXEC \
-		-f $COMPOSE_LIST \
+		$COMPOSE_LIST \
 		ps || exit
 }
 
@@ -356,10 +338,7 @@ getComposeFilesFromRemote() {
 rstart() {
   getComposeFilesFromRemote
 
-	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -remote)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote) $(compose_plugins repository -common -remote)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -remote)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common -remote)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common -remote)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -375,10 +354,7 @@ rstart() {
 rdebug() {
   getComposeFilesFromRemote
 
-	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -remote -debug)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote -debug) $(compose_plugins repository -common -remote -debug)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -remote -debug)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common -remote -debug)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common -remote -debug)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -399,10 +375,7 @@ rdev() {
 	export GIT_ROOT
 	popd >/dev/null || exit
 
-	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -remote -debug -dev)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote -debug -dev) $(compose_plugins repository -common -remote -debug -dev)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -remote -debug -dev)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common -remote -debug -dev)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common -remote -debug -dev)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -416,10 +389,7 @@ rdev() {
 }
 
 lstart() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -429,10 +399,7 @@ lstart() {
 }
 
 ldebug() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -debug)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -debug) $(compose_plugins repository -common -debug)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -debug)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common -debug)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common -debug)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -447,10 +414,7 @@ ldev() {
 	export GIT_ROOT
 	popd >/dev/null || exit
 
-	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -debug -dev)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -debug -dev) $(compose_plugins repository -common -debug -dev)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -debug -dev)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common -debug -dev)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common -debug -dev)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -460,10 +424,7 @@ ldev() {
 }
 
 stop() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -debug)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -debug) $(compose_plugins repository -common -debug)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -debug)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common -debug)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common -debug)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -476,10 +437,7 @@ remove() {
 	read -p "Are you sure you want to continue? [y/N] " answer
 	case ${answer:0:1} in
 	y | Y)
-		COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -debug)"
-		COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -debug) $(compose_plugins repository -common -debug)"
-		COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -debug)"
-		COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common -debug)"
+		COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common -debug)"
 
 		echo "Use compose set: $COMPOSE_LIST"
 
@@ -498,10 +456,7 @@ reload() {
 		CLI_OPT2="edu-sharing"
 	}
 
-	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -521,20 +476,17 @@ reload() {
 }
 
 ci() {
-	COMPOSE_LIST1="$(compose_plugins repository -remote)"
+	COMPOSE_LIST="$(compose . 2 -remote)"
 
-  [[ -n $COMPOSE_LIST1 ]] && {
+  [[ -n $COMPOSE_LIST ]] && {
 		echo "Use compose set: $COMPOSE_LIST1"
 
 		$COMPOSE_EXEC \
-			$COMPOSE_LIST1 \
+			$COMPOSE_LIST \
 			pull || exit
 	}
 
-	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common -remote)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose project.yml -common)"
+	COMPOSE_LIST="$(compose . 0 -common) $(compose . 1 -common) $(compose . 2 -common -remote)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 

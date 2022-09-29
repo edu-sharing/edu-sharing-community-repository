@@ -35,3 +35,9 @@ share-config-{{ include "edusharing_services_rendering.name" . }}
 {{- define "edusharing_services_rendering.pvc.share.data" -}}
 share-data-{{ include "edusharing_services_rendering.name" . }}
 {{- end -}}
+
+{{- define "edusharing_services_rendering.image" -}}
+{{- $registry := default .Values.global.image.registry .Values.image.registry -}}
+{{- $repository := default .Values.global.image.repository .Values.image.repository -}}
+{{ $registry }}{{ if $registry }}/{{ end }}{{ $repository }}{{ if $repository }}/{{ end }}
+{{- end -}}

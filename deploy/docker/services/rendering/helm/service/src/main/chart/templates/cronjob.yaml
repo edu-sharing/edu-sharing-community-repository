@@ -27,7 +27,7 @@ spec:
           restartPolicy: OnFailure
           containers:
           - name: {{ include "edusharing_services_rendering.name" . }}-job-cachecleaner
-            image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/{{ .Values.image.prefix }}-deploy-docker-services-rendering-build-service:{{ .Values.image.tag }}
+            image: {{ include "edusharing_services_rendering.image" . }}{{ .Values.image.prefix }}-deploy-docker-services-rendering-build-service:{{ .Values.image.tag }}
             imagePullPolicy: {{ .Values.global.image.pullPolicy }}
             args: ["php", "func/classes.new/Helper/cacheCleaner.php"]
             {{- $patroni := merge .Values.config.database.patroni .Values.global.patroni }}

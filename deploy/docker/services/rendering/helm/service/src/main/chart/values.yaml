@@ -27,6 +27,8 @@ global:
   image:
     pullPolicy: Always
     pullSecrets: []
+    registry: ${docker.registry}
+    repository: ${docker.repository}
 
   metrics:
     scrape:
@@ -48,8 +50,6 @@ global:
 nameOverride: edusharing-services-rendering-service
 
 image:
-  registry: ${docker.registry}
-  repository: ${docker.repository}
   prefix: ${docker.prefix}
   tag: ${docker.tag}
 
@@ -84,9 +84,6 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "15"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "180"
-#    nginx.ingress.kubernetes.io/configuration-snippet: |
-#      location /esrender/application/ {return 403;}
-#      location /esrender/conf/ {return 403;}
 
   hosts:
   - rendering.services.127.0.0.1.nip.io
@@ -136,6 +133,10 @@ config:
         proxyport: ""
         proxyuser: ""
         proxypass: ""
+
+  override:
+    logging:
+      application: ""
 
   plugins: []
 #   - class: "ESRender_Plugin_...."

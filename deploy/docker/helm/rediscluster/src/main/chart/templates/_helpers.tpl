@@ -31,3 +31,9 @@ app.kubernetes.io/name: {{ include "edusharing_rediscluster.name" . }}
 {{- define "edusharing_rediscluster.replicas" -}}
 {{ mul .Values.config.cluster.master (add1 .Values.config.cluster.replicas) }}
 {{- end -}}
+
+{{- define "edusharing_rediscluster.image" -}}
+{{- $registry := default .Values.global.image.registry .Values.image.registry -}}
+{{- $repository := default .Values.global.image.repository .Values.image.repository -}}
+{{ $registry }}{{ if $registry }}/{{ end }}{{ $repository }}{{ if $repository }}/{{ end }}
+{{- end -}}

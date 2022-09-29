@@ -4,6 +4,7 @@ services:
 
   repository-database:
     image: "${docker.repository}/${docker.prefix}-deploy-docker-build-postgresql:${docker.tag}"
+    container_name: "repository-database_${COMPOSE_PROJECT_NAME}"
     environment:
       POSTGRESQL_DATABASE: "${REPOSITORY_DATABASE_NAME:-repository}"
       POSTGRESQL_PASSWORD: "${REPOSITORY_DATABASE_PASS:-repository}"
@@ -16,6 +17,7 @@ services:
 
   repository-mailcatcher:
     image: "${docker.repository}/${docker.prefix}-deploy-docker-build-mailcatcher:${docker.tag}"
+    container_name: "repository-mailcatcher_${COMPOSE_PROJECT_NAME}"
     expose:
       - "1025"
     ports:
@@ -23,6 +25,7 @@ services:
 
   repository-search-solr4:
     image: "${docker.repository}/${docker.prefix}-deploy-docker-repository-build-search-solr4:${docker.tag}"
+    container_name: "repository-search-solr4_${COMPOSE_PROJECT_NAME}"
     environment:
       CATALINA_OPTS: >-
         -Xms${REPOSITORY_SEARCH_SOLR4_JAVA_XMS:-512m}
@@ -47,6 +50,7 @@ services:
 
   repository-service:
     image: "${docker.repository}/${docker.prefix}-deploy-docker-repository-build-service:${docker.tag}"
+    container_name: "repository-service_${COMPOSE_PROJECT_NAME}"
     environment:
       CACHE_CLUSTER: "false"
       CACHE_DATABASE: "0"
@@ -78,6 +82,7 @@ services:
       REPOSITORY_SERVICE_HTTP_SERVER_CSP_FONT: "${REPOSITORY_SERVICE_HTTP_SERVER_CSP_FONT:-}"
       REPOSITORY_SERVICE_HTTP_SERVER_CSP_IMG: "${REPOSITORY_SERVICE_HTTP_SERVER_CSP_IMG:-}"
       REPOSITORY_SERVICE_HTTP_SERVER_CSP_SCRIPT: "${REPOSITORY_SERVICE_HTTP_SERVER_CSP_SCRIPT:-}"
+      REPOSITORY_SERVICE_HTTP_SERVER_SESSION_TIMEOUT: "${REPOSITORY_SERVICE_HTTP_SERVER_SESSION_TIMEOUT:-60}"
       REPOSITORY_SERVICE_MAIL_FROM: "${REPOSITORY_SERVICE_MAIL_FROM:-no-reply@edu-sharing.net}"
       REPOSITORY_SERVICE_MAIL_ADDREPLYTO: "${REPOSITORY_SERVICE_MAIL_ADDREPLYTO:-true}"
       REPOSITORY_SERVICE_MAIL_REGISTER_RECEIVER: "${REPOSITORY_SERVICE_MAIL_REGISTER_RECEIVER:-}"
@@ -108,6 +113,7 @@ services:
 
   repository-transform:
     image: "${docker.repository}/${docker.prefix}-deploy-docker-repository-build-transform:${docker.tag}"
+    container_name: "repository-transform_${COMPOSE_PROJECT_NAME}"
     expose:
       - "8100"
 

@@ -14,9 +14,7 @@ spec:
       labels: {{ include "edusharing_repository_service.labels.app" . | nindent 8 }}
       annotations:
         checksum/configmap-env: {{ include (print .Template.BasePath "/configmap-env.yaml") . | sha256sum | trunc 63 }}
-        {{- if .Values.config.custom.enabled }}
         checksum/configmap-file: {{ include (print .Template.BasePath "/configmap-file.yaml") . | sha256sum | trunc 63 }}
-        {{- end }}
         {{- if .Values.config.saml.enabled }}
         {{- if .Values.config.saml.config }}
         checksum/configmap-saml-file: {{ include (print .Template.BasePath "/configmap-saml-file.yaml") . | sha256sum | trunc 63 }}
@@ -39,7 +37,7 @@ spec:
       initContainers:
       {{- if (default .Values.global.cluster.storage.share.permission .Values.persistence.share.permission) }}
       - name: {{ include "edusharing_repository_service.name" . }}-init-permission
-        image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/{{ .Values.image.prefix }}-deploy-docker-build-minideb:{{ .Values.image.tag }}
+        image: {{ include "edusharing_repository_service.image" . }}{{ .Values.image.prefix }}-deploy-docker-build-minideb:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         command:
         - "/bin/bash"
@@ -64,7 +62,7 @@ spec:
       {{- end }}
       containers:
       - name: {{ include "edusharing_repository_service.name" . }}-server
-        image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/{{ .Values.image.prefix }}-deploy-docker-repository-build-service:{{ .Values.image.tag }}
+        image: {{ include "edusharing_repository_service.image" . }}{{ .Values.image.prefix }}-deploy-docker-repository-build-service:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         {{- if .Values.config.jvm.debug }}
         args: [ "catalina.sh", "jpda", "run" ]
@@ -101,18 +99,33 @@ spec:
           mountPath: /usr/local/tomcat/shared/classes/config/cluster
         - name: share-data
           mountPath: /opt/alfresco/alf_data
-        {{- if .Values.config.custom.enabled }}
+        {{- with .Values.config.override.config.application.client }}
+        - name: file
+          mountPath: /usr/local/tomcat/shared/classes/config/defaults/client.config.xml
+          subPath: config-application-client
+        {{- end }}
+        {{- with .Values.config.override.config.application.server }}
         - name: file
           mountPath: /usr/local/tomcat/shared/classes/config/cluster/edu-sharing.override.conf
-          subPath: services
+          subPath: config-application-server
+        {{- end }}
+        {{- with .Values.config.override.logging.application }}
+        - name: file
+          mountPath: /usr/local/tomcat/webapps/alfresco/WEB-INF/classes/log4j2.xml
+          subPath: logging-application
+        {{- end }}
+        {{- with .Values.config.override.logging.server }}
+        - name: file
+          mountPath: /usr/local/tomcat/conf/logging.properties
+          subPath: logging-server
         {{- end }}
         {{- if .Values.config.saml.enabled }}
-        {{- if .Values.config.saml.config }}
+        {{- with .Values.config.saml.config }}
         - name: saml-file
           mountPath: /usr/local/tomcat/webapps/edu-sharing/WEB-INF/securityContext.xml
           subPath: security
         {{- end }}
-        {{- if .Values.config.saml.files }}
+        {{- with .Values.config.saml.files }}
         - name: saml-files
           mountPath: /usr/local/tomcat/webapps/edu-sharing/WEB-INF/classes/saml
         {{- end }}
@@ -120,7 +133,7 @@ spec:
         {{- with .Values.startupProbe }}
         startupProbe:
           httpGet:
-            path: /edu-sharing/rest/_about/status/SERVICE?timeoutSeconds={{ add1 .timeoutSeconds }}
+            path: /edu-sharing/rest/_about/status/SERVICE?timeoutSeconds={{ .timeoutSeconds }}
             httpHeaders:
               - name: Accept
                 value: application/json
@@ -143,7 +156,7 @@ spec:
         {{- with .Values.readinessProbe }}
         readinessProbe:
           httpGet:
-            path: /edu-sharing/rest/_about/status/SERVICE?timeoutSeconds={{ add1 .timeoutSeconds }}
+            path: /edu-sharing/rest/_about/status/SERVICE?timeoutSeconds={{ .timeoutSeconds }}
             httpHeaders:
             - name: Accept
               value: application/json
@@ -162,7 +175,7 @@ spec:
         {{- end }}
       {{ if not .Values.config.transform.server.enabled }}
       - name: {{ include "edusharing_repository_service.name" . }}-transform
-        image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/{{ .Values.image.prefix }}-deploy-docker-repository-build-transform:{{ .Values.image.tag }}
+        image: {{ include "edusharing_repository_service.image" . }}{{ .Values.image.prefix }}-deploy-docker-repository-build-transform:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         envFrom:
         - configMapRef:
@@ -260,21 +273,19 @@ spec:
       - name: share-data
         persistentVolumeClaim:
           claimName: {{ include "edusharing_repository_service.pvc.share.data" . }}
-      {{- if .Values.config.custom.enabled }}
       - name: file
         configMap:
           name: {{ include "edusharing_repository_service.name" . }}-file
-      {{- end }}
       {{- if .Values.config.saml.enabled }}
-      {{- if .Values.config.saml.config }}
+      {{- with .Values.config.saml.config }}
       - name: saml-file
         configMap:
-          name: {{ include "edusharing_repository_service.name" . }}-saml-file
+          name: {{ include "edusharing_repository_service.name" $ }}-saml-file
       {{- end }}
-      {{- if .Values.config.saml.files }}
+      {{- with .Values.config.saml.files }}
       - name: saml-files
         configMap:
-          name: {{ include "edusharing_repository_service.name" . }}-saml-files
+          name: {{ include "edusharing_repository_service.name" $ }}-saml-files
       {{- end }}
       {{- end }}
   volumeClaimTemplates:

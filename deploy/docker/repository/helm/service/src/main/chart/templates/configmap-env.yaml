@@ -31,6 +31,11 @@ data:
     -javaagent:/opt/alfresco/tomcat/agent/jmx_prometheus_javaagent.jar=9090:/opt/alfresco/tomcat/agent/jmx-exporter-config.yaml
     {{- end }}
   JPDA_ADDRESS: "0.0.0.0:5005"
+  {{- if .Values.config.antivirus.enabled }}
+  REPOSITORY_ANTIVIRUS_SERVER_HOST: {{ .Values.config.antivirus.host | quote }}
+  REPOSITORY_ANTIVIRUS_SERVER_PORT: {{ .Values.config.antivirus.port | quote }}
+  REPOSITORY_ANTIVIRUS_SERVER_SERVICE: {{ .Values.config.antivirus.service | quote }}
+  {{- end }}
   REPOSITORY_DATABASE_DRIV: {{ .Values.config.database.driver | quote }}
   REPOSITORY_DATABASE_HOST: {{ .Values.config.database.host | quote }}
   REPOSITORY_DATABASE_NAME: {{ .Values.config.database.database | quote }}

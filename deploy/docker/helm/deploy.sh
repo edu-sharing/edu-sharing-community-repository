@@ -2,12 +2,10 @@
 set -e
 set -o pipefail
 
-COMMAND=${1:?"Please specify a helm command"}
-RELEASE=${2:-""}
-CHART=${3:-""}
-VERSION=${4:-""}
-USERNAME=${5:-""}
-PASSWORD=${6:-""}
+RELEASE=${1:-"Please specify a release name"}
+VERSION=${2:-""}
+USERNAME=${3:-""}
+PASSWORD=${4:-""}
 
 CONTEXT="$(kubectl config current-context)"
 NAMESPACE="$(kubectl config view --minify --output 'jsonpath={..namespace}')"
@@ -51,12 +49,12 @@ OPTIONS+=("${root}/helm/context/${CONTEXT}/${NAMESPACE}/${RELEASE}.yaml")
 SOURCE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
 pushd "${SOURCE_PATH}" >/dev/null || exit
 
-file="bundle/target/helm/repo/${CHART}-${VERSION}.tgz"
+file="bundle/target/helm/repo/edu_sharing-projects-${RELEASE}-${VERSION}.tgz"
 
 if [[ -f $file ]]; then
 
 	set -x
-	helm "${COMMAND}" "${RELEASE}" "${file}" "${OPTIONS[@]}"
+	helm upgrade --install "${RELEASE}" "${file}" "${OPTIONS[@]}"
 	set +x
 
 else
@@ -72,8 +70,8 @@ else
 	}
 
 	set -x
-	helm "${COMMAND}" "${RELEASE}" \
-		"${CHART}" --version "${VERSION}" \
+	helm upgrade --install "${RELEASE}" \
+		"edu_sharing-projects-${RELEASE}" --version "${VERSION}" \
 		--repo "https://artifacts.edu-sharing.com/repository/helm/" \
 		"${CREDENTIALS[@]}" \
 		"${OPTIONS[@]}"

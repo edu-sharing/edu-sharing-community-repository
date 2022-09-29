@@ -70,9 +70,6 @@ RUN set -eux \
 	&& a2ensite internal \
     && a2ensite metrics
 
-COPY assets/rendering/de.metaventis.esrender.log4php.properties conf/
-COPY assets/rendering/de.metaventis.esrender.log4php.cachecleaner.properties conf/
-
 ########################################################################################################################
 
 COPY assets/entrypoint.sh /usr/local/bin/

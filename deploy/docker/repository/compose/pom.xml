@@ -40,6 +40,7 @@
               <includeArtifactIds>
                 edu_sharing-community-repository-plugin-elastic-deploy-docker-compose,
                 edu_sharing-community-repository-plugin-mongo-deploy-docker-compose,
+                edu_sharing-enterprise-repository-plugin-antivirus-deploy-docker-compose,
                 edu_sharing-enterprise-repository-plugin-cluster-deploy-docker-compose,
                 edu_sharing-enterprise-repository-plugin-remote-deploy-docker-compose,
                 edu_sharing-enterprise-repository-plugin-transform-deploy-docker-compose
@@ -85,6 +86,29 @@
   </build>
 
   <profiles>
+
+    <profile>
+
+      <id>repository.antivirus</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.REPOSITORY_ANTIVIRUS_ENABLED</name>
+          <value>true</value>
+        </property>
+      </activation>
+
+      <dependencies>
+
+        <dependency>
+          <groupId>${project.groupId}</groupId>
+          <artifactId>edu_sharing-enterprise-repository-plugin-antivirus-deploy-docker-compose</artifactId>
+        </dependency>
+
+      </dependencies>
+
+    </profile>
 
     <profile>
 

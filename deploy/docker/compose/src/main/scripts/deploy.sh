@@ -3,14 +3,14 @@ set -e
 set -o pipefail
 
 GIT_BRANCH="$(echo '${project.version}' | sed 's|[\/\.]|-|g' | tr '[:upper:]' '[:lower:]')"
-export COMPOSE_NAME="${COMPOSE_PROJECT_NAME:-edusharing-docker-$GIT_BRANCH}"
+export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-edusharing-docker-$GIT_BRANCH}"
 
 case "$(uname)" in
 MINGW*)
-	COMPOSE_EXEC="winpty docker-compose -p $COMPOSE_NAME"
+	COMPOSE_EXEC="winpty docker-compose"
 	;;
 *)
-	COMPOSE_EXEC="docker-compose -p $COMPOSE_NAME"
+	COMPOSE_EXEC="docker-compose"
 	;;
 esac
 
@@ -81,63 +81,53 @@ info() {
 
 compose() {
 
-	COMPOSE_BASE_FILE="$1"
-	COMPOSE_DIRECTORY="$(dirname "$COMPOSE_BASE_FILE")"
-	COMPOSE_FILE_NAME="$(basename "$COMPOSE_BASE_FILE" | cut -f 1 -d '.')" # without extension
-
+	COMPOSE_DIRECTORY="$1"
 	COMPOSE_LIST=
 
 	shift && {
 
-		while true; do
-			flag="$1"
-			shift || break
+    COMPOSE_FILE_GROUP="$1"
 
-			COMPOSE_FILE=""
-			case "$flag" in
-			-common) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-common.yml" ;;
-			-remote) COMPOSE_FILE="$COMPOSE_DIRECTORY/$COMPOSE_FILE_NAME-remote.yml" ;;
-			*)
-				{
-					echo "error: unknown flag: $flag"
-					echo ""
-					echo "valid flags are:"
-					echo "  -common"
-					echo "  -remote"
-				} >&2
-				exit 1
-				;;
-			esac
+    shift && {
 
-			if [[ -f "$COMPOSE_FILE" ]]; then
-				COMPOSE_LIST="$COMPOSE_LIST -f $COMPOSE_FILE"
-			fi
+      while true; do
+        flag="$1"
+        shift || break
 
-		done
+        COMPOSE_FILE_TYPE=""
+        case "$flag" in
+        -common) COMPOSE_FILE_TYPE="common" ;;
+        -debug) COMPOSE_FILE_TYPE="debug" ;;
+        -dev) COMPOSE_FILE_TYPE="dev" ;;
+        -remote) COMPOSE_FILE_TYPE="remote" ;;
+        *)
+          {
+            echo "error: unknown flag: $flag"
+            echo ""
+            echo "valid flags are:"
+            echo "  -common"
+            echo "  -debug"
+            echo "  -dev"
+            echo "  -remote"
+          } >&2
+          exit 1
+          ;;
+        esac
+
+        while IFS='' read -r COMPOSE_FILE; do
+          COMPOSE_LIST="$COMPOSE_LIST -f ${COMPOSE_FILE}"
+        done < <(find "${COMPOSE_DIRECTORY}" -type f -name "${COMPOSE_FILE_GROUP}_*-${COMPOSE_FILE_TYPE}.yml" | sort -g)
+
+      done
+    }
 
 	}
 
 	echo $COMPOSE_LIST
 }
 
-compose_plugins() {
-	PLUGIN_DIR="$1"
-	shift
-
-	COMPOSE_LIST=
-	for plugin in $PLUGIN_DIR/plugin*/; do
-		[ ! -d $plugin ] && continue
-		COMPOSE_PLUGIN="$(compose "./$plugin$(basename $plugin).yml" "$@")"
-		COMPOSE_LIST="$COMPOSE_LIST $COMPOSE_PLUGIN"
-	done
-
-	echo $COMPOSE_LIST
-}
-
 logs() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -147,21 +137,17 @@ logs() {
 }
 
 ps() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
 	$COMPOSE_EXEC \
-		-f $COMPOSE_LIST \
+		$COMPOSE_LIST \
 		ps || exit
 }
 
 rstart() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common -remote)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common -remote) $(compose_plugins repository -common -remote)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common -remote)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common -remote)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -175,9 +161,7 @@ rstart() {
 }
 
 stop() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-	COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -190,9 +174,7 @@ remove() {
 	read -p "Are you sure you want to continue? [y/N] " answer
 	case ${answer:0:1} in
 	y | Y)
-		COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
-		COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-		COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
+		COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common)"
 
 		echo "Use compose set: $COMPOSE_LIST"
 
@@ -210,9 +192,7 @@ purge() {
 	read -p "Are you sure you want to continue? [y/N] " answer
 	case ${answer:0:1} in
 	y | Y)
-		COMPOSE_LIST="$COMPOSE_LIST $(compose edusharing.yml -common)"
-		COMPOSE_LIST="$COMPOSE_LIST $(compose repository/repository.yml -common) $(compose_plugins repository -common)"
-		COMPOSE_LIST="$COMPOSE_LIST $(compose services/rendering/rendering.yml -common)"
+		COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common)"
 
 		echo "Use compose set: $COMPOSE_LIST"
 

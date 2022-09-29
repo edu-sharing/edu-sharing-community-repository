@@ -13,13 +13,21 @@ global:
 
 nameOverride: edusharing-repository
 
-image:
-  registry: ${docker.registry}
-  repository: ${docker.repository}
-  tag: ${docker.tag}
-
 ########################################################################################################################
 # DEPENDENCY
+########################################################################################################################
+
+edusharing_repository_antivirus:
+
+  enabled: ${helm.edusharing_repository_antivirus.enabled}
+
+  nameOverride: &antivirusNameOverride edusharing-repository-antivirus
+
+  service:
+
+    port:
+      api: &antivirusServicePortApi 1344
+
 ########################################################################################################################
 
 edusharing_repository_postgresql:
@@ -45,7 +53,7 @@ edusharing_repository_rediscluster:
 
   enabled: true
 
-  nameOverride: &redisclusterNameOverride edusharing-rediscluster
+  nameOverride: &redisclusterNameOverride edusharing-repository-rediscluster
 
   service:
 
@@ -110,6 +118,11 @@ edusharing_repository_service:
         internal: *serviceServicePortApiInternal
 
   config:
+
+    antivirus:
+      enabled: ${helm.edusharing_repository_antivirus.enabled}
+      host: *antivirusNameOverride
+      port: *antivirusServicePortApi
 
     cache:
       host: *redisclusterNameOverride

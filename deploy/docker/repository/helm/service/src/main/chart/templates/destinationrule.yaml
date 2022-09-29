@@ -7,5 +7,12 @@ metadata:
   labels: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
 spec:
   host: {{ include "edusharing_repository_service.name" . }}
+  trafficPolicy:
+    loadBalancer:
+      consistentHash:
+        httpCookie:
+          name: ISTIOCOOKIE
+          path: /
+          ttl: 0s
 {{- end }}
 {{- end }}

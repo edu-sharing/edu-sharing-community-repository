@@ -1,9 +1,5 @@
 {{- if not .Values.global.cluster.istio.enabled }}
-{{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
 apiVersion: networking.k8s.io/v1
-{{- else }}
-apiVersion: networking.k8s.io/v1beta1
-{{- end }}
 kind: Ingress
 metadata:
   name: {{ include "edusharing_repository_service.name" . }}
@@ -22,18 +18,38 @@ spec:
       paths:
       {{- range $.Values.ingress.paths }}
       - path: {{ . }}
-        {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
         pathType: Prefix
         backend:
           service:
             name: {{ include "edusharing_repository_service.name" $ }}
             port:
               number: {{ $.Values.service.port.api.external }}
-        {{- else }}
-        backend:
-          serviceName: {{ include "edusharing_repository_service.name" $ }}
-          servicePort: {{ $.Values.service.port.api.external }}
-        {{- end }}
       {{- end }}
+  {{- end }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "edusharing_repository_service.name" . }}-root
+  labels: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
+  {{- with merge .Values.ingress.annotations .Values.global.cluster.cert.annotations }}
+  annotations: {{ toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.ingress.tls }}
+  tls: {{ toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+    - host: {{ . }}
+      http:
+        paths:
+        - path: /
+          pathType: Exact
+          backend:
+            service:
+              name: {{ include "edusharing_repository_service.name" $ }}
+              port:
+                number: {{ $.Values.service.port.api.external }}
   {{- end }}
 {{- end }}

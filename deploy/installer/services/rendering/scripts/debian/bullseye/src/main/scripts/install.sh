@@ -451,8 +451,7 @@ info >> "$execution_folder/install_log-$(date "+%Y.%m.%d-%H.%M.%S").txt"
 info
 
 echo "- Please check logging configuration:"
-echo "    ${RS_ROOT}/conf/de.metaventis.esrender.cachecleaner.properties"
-echo "    ${RS_ROOT}/conf/de.metaventis.esrender.log4php.properties"
+echo "    ${RS_ROOT}/conf/de.metaventis.esrender.log4php.xml"
 
 echo "- done."
 exit
