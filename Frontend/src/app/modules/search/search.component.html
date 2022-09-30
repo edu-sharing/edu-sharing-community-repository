@@ -372,7 +372,7 @@
               [dataSource]="searchService.dataSourceSearchResult[0]"
               [columns]="searchService.columns"
               [sort]="{
-                allowed: true,
+                allowed: !searchService.isFrontpage,
                 active: searchService.sort?.active,
                 direction: searchService.sort?.direction,
                 columns: searchService.sort?.columns

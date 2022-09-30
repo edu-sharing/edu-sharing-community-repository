@@ -746,7 +746,7 @@ export class AdminComponent implements OnInit, OnDestroy {
         this.admin.getPropertyValuespace(this.propertyName).subscribe(
             (data: any) => {
                 this.globalProgress = false;
-                this.dialogTitle = 'ADMIN.IMPORT.PROPERTY_VALUESPACE';
+                this.dialogTitle = 'ADMIN.TOOLKIT.PROPERTY_VALUESPACE';
                 this.dialogMessage = data.xml;
                 this.dialogButtons = DialogButton.getOk(() => {
                     this.dialogTitle = null;

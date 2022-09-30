@@ -18,7 +18,7 @@ public class CommentServiceFactory {
 		}
 	}
 
-	private static CommentService getLocalService(){
+	public static CommentService getLocalService(){
 		return new CommentServiceImpl();
 	}
 }
