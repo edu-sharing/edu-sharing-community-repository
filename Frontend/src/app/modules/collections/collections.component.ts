@@ -8,7 +8,19 @@ import {
     ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { TranslationsService } from '../../translations/translations.service';
+import { TranslateService } from '@ngx-translate/core';
+import { forkJoin as observableForkJoin, Subject } from 'rxjs';
+import { filter, first, takeUntil } from 'rxjs/operators';
+import {
+    DropSource,
+    DropTarget,
+    InteractionType,
+    ListEventInterface,
+    ListSortConfig,
+    NodeEntriesDisplayType,
+} from 'src/app/features/node-entries/entries-model';
+import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
+import { BridgeService } from '../../core-bridge-module/bridge.service';
 import * as EduData from '../../core-module/core.module';
 import {
     ConfigurationService,
@@ -149,6 +161,8 @@ export class CollectionsMainComponent implements OnDestroy {
     reurl: any;
     private _collectionShare: Node;
     private params: Params;
+    private destroyed = new Subject<void>();
+    private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
 
     // inject services
     constructor(
@@ -165,7 +179,6 @@ export class CollectionsMainComponent implements OnDestroy {
         private organizationService: RestOrganizationService,
         private iamService: RestIamService,
         private mdsService: RestMdsService,
-        private actionbar: ActionbarHelperService,
         private connector: RestConnectorService,
         private route: ActivatedRoute,
         private uiService: UIService,

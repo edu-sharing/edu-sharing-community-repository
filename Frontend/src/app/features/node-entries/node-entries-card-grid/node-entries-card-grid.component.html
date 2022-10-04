@@ -100,7 +100,7 @@
       (scrolled)="
         entriesGlobalService.getPaginationStrategy(entriesService.scope) ===
         PaginationStrategy.InfiniteScroll
-          ? loadData()
+          ? !entriesService.disableInfiniteScroll && !visibleItemsLimited && loadData()
           : null
       "
     >
@@ -173,6 +173,7 @@
   *ngIf="
     !entriesService.dataSource.isLoading &&
     entriesService.dataSource.hasMore() &&
+    !visibleItemsLimited &&
     entriesGlobalService.getPaginationStrategy(entriesService.scope) ===
       PaginationStrategy.InfiniteScroll
   "

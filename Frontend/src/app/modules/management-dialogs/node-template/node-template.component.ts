@@ -44,6 +44,8 @@ export class NodeTemplateComponent {
                 }
                 this.loading = false;
                 this.updateButtons();
+                // @TODO/ this is only required for the legacy mds and might be removed as soon as the legacy mds is obsolet
+                setTimeout(() => this.mdsRef.loadMds(true));
             });
         });
     }

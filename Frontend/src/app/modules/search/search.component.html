@@ -323,6 +323,8 @@
                 [gridConfig]="{
                   maxRows: collectionsMore ? -1 : 1
                 }"
+                (fetchData)="loadCollections('load-more')"
+                [disableInfiniteScroll]="true"
               >
                 <ng-template #title>
                   <div class="heading">
@@ -370,7 +372,7 @@
               [dataSource]="searchService.dataSourceSearchResult[0]"
               [columns]="searchService.columns"
               [sort]="{
-                allowed: true,
+                allowed: !searchService.isFrontpage,
                 active: searchService.sort?.active,
                 direction: searchService.sort?.direction,
                 columns: searchService.sort?.columns

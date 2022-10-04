@@ -113,7 +113,7 @@ export class RocketchatComponent implements EventListener {
             return;
         }
         const login = this.connector.getCurrentLogin();
-        if (login.remoteAuthentications && login.remoteAuthentications.ROCKETCHAT) {
+        if (login?.remoteAuthentications?.ROCKETCHAT) {
             this.rocketChat._data = login.remoteAuthentications.ROCKETCHAT;
             this.src = this.getFrameUrl();
         }

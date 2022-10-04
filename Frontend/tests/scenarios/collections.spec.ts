@@ -44,8 +44,8 @@ test.describe('Root collections page', () => {
         await generalPage.expectLoadingToFinish();
         // FIXME: Page interaction outside test step
         const elements = await generalPage.getCardElement('').count();
-        // FIXME: Playwright confuses test steps when inside `Promise.all`
-        await Promise.all([generalPage.scrollToLastCard(), generalPage.expectLoadingSpinner()]);
+        await generalPage.scrollToLastCard();
+        await generalPage.expectLoadingSpinner();
         await generalPage.expectLoadingToFinish();
         expect(await generalPage.getCardElement('').count()).toBeGreaterThan(elements);
     });

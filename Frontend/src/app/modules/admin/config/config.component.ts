@@ -86,8 +86,9 @@ export class AdminConfigComponent {
     setEditSupported(status: boolean) {
         this.editSupported = status;
         this.showRO = !this.editSupported;
-        this.codeOptionsHocoonRW.readOnly = !this.editSupported;
-        this.clientCodeOptions.readOnly = !this.editSupported;
+        // fix: monaco editor requires full object change to trigger/sync state
+        this.codeOptionsHocoonRW = { ...this.codeOptionsHocoonRW, readOnly: !this.editSupported };
+        this.clientCodeOptions = { ...this.clientCodeOptions, readOnly: !this.editSupported };
     }
     displayError(error: any) {
         console.warn(error);
