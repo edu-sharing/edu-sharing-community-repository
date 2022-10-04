@@ -457,6 +457,7 @@
       "NO_WRITE_PERMISSION": "You have insufficient permissions to store items at the current location",
       "ONGOING_UPLOAD": "An upload task is currently running. Please wait until the task has finished",
       "NOT_FOUND": "The folder {{id}} was not found. May it has been deleted.",
+      "ELEMENT_NOT_IN_FOLDER": "Could not find the element in this folder",
       "LICENSE_UPDATED": "License has been updated",
       "CONTRIBUTOR_UPDATED": "Information of contributors have been updated",
       "WORKFLOW_UPDATED": "Workflow information have been updated",

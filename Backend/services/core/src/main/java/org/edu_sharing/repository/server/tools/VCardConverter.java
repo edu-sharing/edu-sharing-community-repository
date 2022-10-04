@@ -110,6 +110,7 @@ public class VCardConverter {
 						VCardVersion.V3_0.equals(vcard.getVersion().getVersion()) ||
 								VCardVersion.V4_0.equals(vcard.getVersion().getVersion())
 				)) {
+					vcardMap = new HashMap<>(vcardMap.entrySet().stream().filter(e -> ( e.getKey() != null && e.getValue() != null)).collect(Collectors.toMap(e -> e.getKey(), e-> e.getValue())));
 					vcardMap = new HashMap<>(vcardMap.entrySet()
 							.stream()
 							.collect(Collectors.toMap(

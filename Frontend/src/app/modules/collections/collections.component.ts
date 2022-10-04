@@ -13,16 +13,16 @@ import {
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { forkJoin as observableForkJoin, Subject } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { filter, first, takeUntil } from 'rxjs/operators';
 import {
     DropSource,
     DropTarget,
+    InteractionType,
     ListEventInterface,
     ListSortConfig,
     NodeEntriesDisplayType,
 } from 'src/app/features/node-entries/entries-model';
 import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
-import { ActionbarHelperService } from '../../common/services/actionbar-helper';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import * as EduData from '../../core-module/core.module';
 import {
@@ -107,12 +107,14 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
     };
     readonly SCOPES = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    readonly InteractionType = InteractionType;
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
 
     @ViewChild('actionbarCollection') actionbarCollection: ActionbarComponent;
     @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
     @ViewChild('listCollections') listCollections: ListTableComponent;
     @ViewChild('listReferences') listReferences: ListEventInterface<CollectionReference>;
+    @ViewChild('listProposals') listProposals: ListEventInterface<ProposalNode>;
     @ContentChild('collectionContentTemplate') collectionContentTemplateRef: TemplateRef<any>;
 
     dataSourceCollections = new NodeDataSource<Node>();
@@ -163,11 +165,11 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
     addMaterialBinaryOptionItem = new OptionItem('OPTIONS.ADD_OBJECT', 'cloud_upload', () => {
         this.mainNavService.getMainNav().topBar.createMenu.openUploadSelect();
     });
-    collectionProposals: AbstractList<ProposalNode>;
+    dataSourceCollectionProposals = new NodeDataSource<ProposalNode>();
     proposalColumns = [
         new ListItem('NODE', RestConstants.CM_PROP_TITLE),
-        new ListItem('NODE_PROPOSAL', RestConstants.CM_CREATOR, { showLabel: true }),
-        new ListItem('NODE_PROPOSAL', RestConstants.CM_PROP_C_CREATED, { showLabel: true }),
+        new ListItem('NODE_PROPOSAL', RestConstants.CM_CREATOR, { showLabel: false }),
+        new ListItem('NODE_PROPOSAL', RestConstants.CM_PROP_C_CREATED, { showLabel: false }),
     ];
     tutorialElement: ElementRef;
     permissions: Permission[];
@@ -292,7 +294,8 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
     private _collectionShare: Node;
     private feedbacks: CollectionFeedback[];
     private params: Params;
-    private loadingTask = this.loadingScreen.addLoadingTask();
+    private destroyed = new Subject<void>();
+    private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
 
     // inject services
     constructor(
@@ -309,7 +312,6 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
         private organizationService: RestOrganizationService,
         private iamService: RestIamService,
         private mdsService: RestMdsService,
-        private actionbar: ActionbarHelperService,
         private connector: RestConnectorService,
         private route: ActivatedRoute,
         private uiService: UIService,
@@ -412,6 +414,8 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy() {
+        this.destroyed.next();
+        this.destroyed.complete();
         this.temporaryStorageService.set(
             TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE,
             this.dataSourceReferences,
@@ -423,13 +427,18 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
             title: 'COLLECTIONS.TITLE',
             currentScope: 'collections',
             searchEnabled: false,
+            // TODO: document where this fails.
+            //
             // onCreate: (nodes) => this.addNodesToCollection(nodes),
         });
-        // @TODO: check if this is the ideal trigger event
         this.mainNavService
             .getDialogs()
-            .onUploadFilesProcessed.subscribe((nodes) => this.addNodesToCollection(nodes));
-        this.mainNavUpdateTrigger.subscribe(() => {
+            .onUploadFilesProcessed.pipe(
+                takeUntil(this.destroyed),
+                filter((nodes) => !!nodes),
+            )
+            .subscribe((nodes) => this.addNodesToCollection(nodes));
+        this.mainNavUpdateTrigger.pipe(takeUntil(this.destroyed)).subscribe(() => {
             this.mainNavService.patchMainNavConfig({
                 create: {
                     allowed: this.createAllowed(),
@@ -595,8 +604,12 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
                         this.refreshContent();
                         return;
                     }
-                    if (source.element.length === nodes.length) {
-                        const observables = source.element.map((n: any) =>
+                    if (nodes.length > 0) {
+                        const movedNodes = source.element.filter(
+                            (sourceElement: CollectionReference) =>
+                                nodes.some((node) => node.originalId === sourceElement.originalId),
+                        );
+                        const observables = movedNodes.map((n) =>
                             this.collectionService.removeFromCollection(
                                 n.ref.id,
                                 this.collectionContent.node.ref.id,
@@ -774,7 +787,6 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
             return;
         }
         this.isLoading = true;
-        this.collectionProposals = null;
         if (!this.loadingTask.isDone) {
             this.loadingTask.done();
         }
@@ -806,21 +818,12 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
                         collection.collections,
                         collection.pagination,
                     );
-                    this.dataSourceCollections.setCanLoadMore(false);
                     if (this.isRootLevelCollection()) {
                         this.finishCollectionLoading(callback);
                         return;
                     }
                     if (this.isAllowedToEditCollection()) {
-                        this.collectionService
-                            .getCollectionProposals(this.collectionContent.node.ref.id)
-                            .subscribe((proposals) => {
-                                proposals.nodes = proposals.nodes.map((p) => {
-                                    p.proposalCollection = this.collectionContent.node;
-                                    return p;
-                                });
-                                this.collectionProposals = proposals;
-                            });
+                        this.refreshProposals();
                     }
                     const requestRefs = this.getReferencesRequest();
                     requestRefs.count = null;
@@ -973,7 +976,7 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
         }
         this.createSubCollectionOptionItem.name =
             'OPTIONS.' + (this.isRootLevelCollection() ? 'NEW_COLLECTION' : 'NEW_SUB_COLLECTION');
-        if (id == '-root-') {
+        if (id == RestConstants.ROOT) {
             // display root collections with tabs
             this.sortCollections.active = RestConstants.CM_MODIFIED_DATE;
             this.sortCollections.direction = 'desc';
@@ -1035,7 +1038,7 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
                     }
                 },
                 (error) => {
-                    if (id != '-root-') {
+                    if (id != RestConstants.ROOT) {
                         this.navigate();
                     }
                     if (error.status == 404) {
@@ -1446,6 +1449,38 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
         } else {
             return this.isAllowedToEditCollection();
         }
+    }
+
+    private refreshProposals() {
+        this.dataSourceCollectionProposals.reset();
+        this.dataSourceCollectionProposals.isLoading = true;
+        if (this.isAllowedToEditCollection()) {
+            this.collectionService
+                .getCollectionProposals(this.collectionContent.node.ref.id)
+                .subscribe((proposals) => {
+                    proposals.nodes = proposals.nodes.map((p) => {
+                        p.proposalCollection = this.collectionContent.node;
+                        return p;
+                    });
+                    this.dataSourceCollectionProposals.setData(
+                        proposals.nodes,
+                        proposals.pagination,
+                    );
+                    this.dataSourceCollectionProposals.isLoading = false;
+                    setTimeout(() => {
+                        this.listProposals?.initOptionsGenerator({
+                            scope: Scope.CollectionsProposals,
+                        });
+                    });
+                });
+        }
+    }
+    isDeleted(node: CollectionReference) {
+        return (
+            node.aspects.includes(RestConstants.CCM_ASPECT_IO_REFERENCE) &&
+            !node.aspects.includes(RestConstants.CCM_ASPECT_REMOTEREPOSITORY) &&
+            !node.originalId
+        );
     }
 }
 

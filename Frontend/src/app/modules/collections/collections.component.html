@@ -119,8 +119,11 @@
 
           <div *ngIf="hasNonIconPreview()" class="card-image-icon-container">
             <img
+              *ngIf="collectionContent?.node?.preview?.url"
               class="collection-header-image"
-              [src]="collectionContent?.node?.preview?.url + '&crop=true&width=400&height=350'"
+              [src]="
+                collectionContent?.node | appNodeImage: { crop: true, width: 400, height: 350 }
+              "
               role="presentation"
             />
           </div>
@@ -334,7 +337,7 @@
           </section>
 
           <section
-            *ngIf="!isLoading && collectionProposals?.nodes?.length"
+            *ngIf="!isLoading && !dataSourceCollectionProposals.isEmpty()"
             class="collections-cards-div"
           >
             <div class="content-header heading-group">
@@ -343,21 +346,16 @@
               </h2>
             </div>
 
-            <es-custom-node-list-wrapper
-              [parent]="collectionContent.node"
-              [hasHeading]="false"
-              [viewType]="1"
-              [dragDrop]="false"
-              [hasIcon]="true"
+            <es-node-entries-wrapper
+              [elementInteractionType]="InteractionType.DefaultActionLink"
+              #listProposals
+              [dataSource]="dataSourceCollectionProposals"
+              [displayType]="NodeEntriesDisplayType.Grid"
               [columns]="proposalColumns"
-              [scope]="SCOPES.CollectionsReferences"
-              [isClickable]="true"
-              (clickRow)="onContentClick($event.node)"
-              [createLink]="true"
-              [nodes]="$any(collectionProposals.nodes)"
-              (nodesChange)="collectionProposals.nodes = $any($event)"
+              [globalOptions]=""
+              (clickItem)="onContentClick($event)"
               class="no-padding"
-            ></es-custom-node-list-wrapper>
+            ></es-node-entries-wrapper>
           </section>
           <section
             class="collections-cards-div"
@@ -373,6 +371,7 @@
               #listReferences
               [dataSource]="dataSourceReferences"
               [columns]="referencesColumns"
+              (clickItem)="onContentClick($event.element)"
               [displayType]="NodeEntriesDisplayType.Grid"
               [dragDrop]="{
                 dragAllowed: isAllowedToEditCollection(),
@@ -405,6 +404,25 @@
                   <h2 class="mat-heading-3">
                     {{ 'collections_content' | translate }}
                   </h2>
+                </div>
+              </ng-template>
+              <ng-template #overlay let-element="element">
+                <div class="node-deleted" *ngIf="isDeleted(element)">
+                  <div>
+                    <i esIcon="delete"></i>
+                    <div class="headline">{{ 'ORIGINAL_DELETED' | translate }}</div>
+                    <div class="subline">{{ 'ORIGINAL_DELETED_INFO' | translate }}</div>
+                    <button
+                      mat-button
+                      color="primary"
+                      (click)="
+                        deleteReference(element); $event.stopPropagation(); $event.preventDefault()
+                      "
+                      *ngIf="canDelete(element)"
+                    >
+                      {{ 'ORIGINAL_DELETE' | translate }}
+                    </button>
+                  </div>
                 </div>
               </ng-template>
             </es-node-entries-wrapper>

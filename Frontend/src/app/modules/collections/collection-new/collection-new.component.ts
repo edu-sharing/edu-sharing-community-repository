@@ -7,6 +7,7 @@ import {
     Sanitizer,
     ElementRef,
     EventEmitter,
+    OnDestroy,
 } from '@angular/core';
 
 import { Router, Params, ActivatedRoute } from '@angular/router';
@@ -24,6 +25,7 @@ import {
     UIService,
     FrameEventsService,
     EventListener,
+    Node,
 } from '../../../core-module/core.module';
 import { RestNodeService } from '../../../core-module/core.module';
 import { RestConstants } from '../../../core-module/core.module';
@@ -47,7 +49,7 @@ import { UIConstants } from '../../../core-module/ui/ui-constants';
 import { MdsComponent } from '../../../features/mds/legacy/mds/mds.component';
 import { TranslateService } from '@ngx-translate/core';
 import { ColorHelper, PreferredColor } from '../../../core-module/ui/color-helper';
-import { DomSanitizer } from '@angular/platform-browser';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { TemporaryStorageService } from '../../../core-module/core.module';
 import { RegisterResetPasswordComponent } from '../../register/register-reset-password/register-reset-password.component';
 import { MainNavComponent } from '../../../main/navigation/main-nav/main-nav.component';
@@ -59,12 +61,18 @@ import { MdsMetadatasets } from '../../../core-module/core.module';
 import { ConfigurationHelper } from '../../../core-module/core.module';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { DefaultGroups, OptionItem } from '../../../core-ui-module/option-item';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { PlatformLocation } from '@angular/common';
 import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { Values } from '../../../features/mds/types/types';
+import { NodeDataSource } from '../../../features/node-entries/node-data-source';
+import {
+    InteractionType,
+    NodeEntriesDisplayType,
+} from '../../../features/node-entries/entries-model';
+import { NodeEntriesWrapperComponent } from '../../../features/node-entries/node-entries-wrapper.component';
 
 type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITORIAL_GROUPS';
 
@@ -74,9 +82,12 @@ type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITO
     templateUrl: 'collection-new.component.html',
     styleUrls: ['collection-new.component.scss'],
 })
-export class CollectionNewComponent implements EventListener, OnInit {
+export class CollectionNewComponent implements EventListener, OnInit, OnDestroy {
     @ViewChild('mds') mds: MdsEditorWrapperComponent;
+    @ViewChild('organizations') organizationsRef: NodeEntriesWrapperComponent<Group>;
     @ViewChild('share') shareRef: WorkspaceShareComponent;
+    readonly InteractionType = InteractionType;
+    readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     public hasCustomScope: boolean;
     public COLORS: string[];
     public DEFAULT_COLORS: string[] = [
@@ -110,13 +121,12 @@ export class CollectionNewComponent implements EventListener, OnInit {
     public mediacenter: any;
     public parentId: any;
     public editId: any;
-    public editorialGroups: Group[] = [];
-    public editorialGroupsSelected: Group[] = [];
+    public editorialGroups = new NodeDataSource<Group>();
     public editorialPublic = true;
     public editorialColumns: ListItem[] = [
         new ListItem('GROUP', RestConstants.AUTHORITY_DISPLAYNAME),
     ];
-    imageData: any = null;
+    imageData: string | SafeUrl = null;
     private imageFile: File = null;
     readonly STEP_NEW = 'NEW';
     readonly STEP_GENERAL = 'GENERAL';
@@ -137,7 +147,8 @@ export class CollectionNewComponent implements EventListener, OnInit {
     private parentCollection: EduData.Node;
     private originalPermissions: LocalPermissions;
     private permissionsInfo: any;
-    private loadingTask = this.loadingScreen.addLoadingTask();
+    private destroyed = new Subject<void>();
+    private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
 
     @ViewChild('file') imageFileRef: ElementRef;
     @ViewChild('authorFreetextInput') authorFreetextInput: ElementRef<HTMLInputElement>;
@@ -147,6 +158,7 @@ export class CollectionNewComponent implements EventListener, OnInit {
     mdsSet: string;
     imageOptions: OptionItem[];
     imageWindow: Window;
+    editorialGroupsSelected: Group[] = [];
 
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
@@ -162,9 +174,6 @@ export class CollectionNewComponent implements EventListener, OnInit {
             const id = collection.ref.id;
             this.nodeService.getNodePermissions(id).subscribe((perm: EduData.NodePermissions) => {
                 this.mdsSet = collection.metadataset;
-                this.editorialGroupsSelected = this.getEditoralGroups(
-                    perm.permissions.localPermissions.permissions,
-                );
                 this.editorialPublic = perm.permissions.localPermissions?.permissions?.some(
                     (p: Permission) =>
                         p.authority?.authorityName === RestConstants.AUTHORITY_EVERYONE,
@@ -191,13 +200,13 @@ export class CollectionNewComponent implements EventListener, OnInit {
         });
     }
 
-    onEvent(event: string, data: any): void {
+    onEvent(event: string, data: Node): void {
         if (event === FrameEventsService.EVENT_APPLY_NODE) {
-            const imageData = data.preview?.data;
+            const imageData = data.preview?.data?.[0];
             if (imageData) {
                 this.imageData = imageData;
                 this.updateImageOptions();
-                fetch(this.imageData)
+                fetch(imageData)
                     .then((res) => res.blob())
                     .then((blob) => {
                         this.imageFile = blob as File;
@@ -234,7 +243,7 @@ export class CollectionNewComponent implements EventListener, OnInit {
         private loadingScreen: LoadingScreenService,
         private mainNav: MainNavService,
     ) {
-        this.eventService.addListener(this);
+        this.eventService.addListener(this, this.destroyed);
         this.translations.waitForInit().subscribe(() => {
             this.connector.isLoggedIn().subscribe((data) => {
                 this.mdsService.getSets().subscribe((mdsSets) => {
@@ -341,9 +350,11 @@ export class CollectionNewComponent implements EventListener, OnInit {
                         this.iamService
                             .searchGroups('*', true, RestConstants.GROUP_TYPE_EDITORIAL, '', {
                                 count: RestConstants.COUNT_UNLIMITED,
+                                sortBy: [RestConstants.CM_PROP_AUTHORITY_DISPLAYNAME],
+                                sortAscending: [true],
                             })
                             .subscribe((data: IamGroups) => {
-                                this.editorialGroups = data.groups;
+                                this.editorialGroups.setData(data.groups, data.pagination);
                             });
                     }
                 });
@@ -357,6 +368,11 @@ export class CollectionNewComponent implements EventListener, OnInit {
             currentScope: 'collections',
             searchEnabled: false,
         });
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
     }
 
     getShareStatus() {
@@ -631,6 +647,18 @@ export class CollectionNewComponent implements EventListener, OnInit {
             setTimeout(() => {
                 this.mds?.loadMds(true);
             });
+            if (this.newCollectionStep == this.STEP_EDITORIAL_GROUPS) {
+                setTimeout(() => {
+                    this.organizationsRef
+                        .getSelection()
+                        .select(...this.getEditoralGroups(this.originalPermissions.permissions));
+                    this.organizationsRef
+                        .getSelection()
+                        .changed.subscribe(
+                            (change) => (this.editorialGroupsSelected = change.source.selected),
+                        );
+                });
+            }
         }
         this.updateButtons();
     }
@@ -795,7 +823,7 @@ export class CollectionNewComponent implements EventListener, OnInit {
     private getEditoralGroups(permissions: Permission[]) {
         let list: Group[] = [];
         for (let perm of permissions) {
-            for (let group of this.editorialGroups) {
+            for (let group of this.editorialGroups.getData()) {
                 if (group.authorityName == perm.authority.authorityName) {
                     list.push(group);
                 }

@@ -175,10 +175,14 @@
           >
             <img
               class="blurred-image"
-              [src]="currentCollection.preview.url + '&crop=true&width=300&height=300'"
+              [src]="
+                currentCollection | appNodeImage: { maxWidth: 300, maxHeight: 300, crop: true }
+              "
             />
             <img
-              [src]="currentCollection.preview.url + '&crop=true&maxWidth=300&maxHeight=300'"
+              [src]="
+                currentCollection | appNodeImage: { maxWidth: 300, maxHeight: 300, crop: true }
+              "
               class="card-image-preview"
             />
           </div>
@@ -347,24 +351,28 @@
     >
       <div class="editorial-group">
         <div class="editorial-list">
-          <div class="noGroups" *ngIf="editorialGroups.length === 0">
-            {{ 'COLLECTIONS.NO_EDITORIAL_GROUPS' | translate }}
-          </div>
           <div class="noPermission" *ngIf="!shareToAll">
             <h4>{{ 'TOOLPERMISSION_ERROR_HEADER' | translate }}</h4>
             <h5>{{ 'TOOLPERMISSION.TOOLPERMISSION_INVITE_ALLAUTHORITIES' | translate }}</h5>
           </div>
-          <es-listTable
-            *ngIf="editorialGroups.length !== 0 && shareToAll"
-            [nodes]="$any(editorialGroups)"
+          <es-node-entries-wrapper
+            #organizations
+            [dataSource]="editorialGroups"
+            [displayType]="NodeEntriesDisplayType.Table"
             [columns]="editorialColumns"
-            [selectedNodes]="$any(editorialGroupsSelected)"
-            [hasCheckbox]="true"
-            [hasIcon]="true"
-            [hasHeading]="false"
-            (selectionChanged)="editorialGroupsSelected = $event"
-            [icon]="'star'"
-          ></es-listTable>
+            [sort]="{
+              active: null,
+              direction: 'asc',
+              columns: [],
+              allowed: false
+            }"
+            [elementInteractionType]="InteractionType.Emitter"
+            (clickItem)="organizations.getSelection().toggle($event.element)"
+          >
+            <ng-template #empty>
+              <div class="noGroups">{{ 'COLLECTIONS.NO_EDITORIAL_GROUPS' | translate }}</div>
+            </ng-template>
+          </es-node-entries-wrapper>
         </div>
         <div class="editorial-public">
           <mat-slide-toggle [(ngModel)]="editorialPublic">

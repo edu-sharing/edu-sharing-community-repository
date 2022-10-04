@@ -107,7 +107,7 @@ export class MdsViewerComponent {
             this._groupId,
             this._setId,
             RestConstants.HOME_REPOSITORY,
-            'nodes',
+            'viewer',
             this._data,
         );
         if (!editor) {

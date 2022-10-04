@@ -35,6 +35,7 @@ import { FormBuilder } from '@angular/forms';
 import { SessionStorageService } from '../core-module/rest/services/session-storage.service';
 import { map } from 'rxjs/operators';
 import { RestNodeService } from '../core-module/rest/services/rest-node.service';
+import { getRepoUrl } from '../util/repo-url';
 
 export type WorkflowDefinitionStatus = {
     current: WorkflowDefinition;
@@ -233,7 +234,7 @@ export class NodeHelperService {
      */
     public downloadNode(node: any, version = RestConstants.NODE_VERSION_CURRENT, metadata = false) {
         this.downloadUrl(
-            node.downloadUrl +
+            getRepoUrl(node.downloadUrl, node) +
                 (version && version != RestConstants.NODE_VERSION_CURRENT
                     ? '&version=' + version
                     : '') +
@@ -250,9 +251,9 @@ export class NodeHelperService {
         return new Observable<Node>((observer: Observer<Node>) => {
             const options: any = this.rest.getRequestOptions();
             options.responseType = 'blob';
-
+            const url = getRepoUrl(node.preview.url, node);
             this.rest
-                .get(node.preview.url + '&allowRedirect=false&quality=' + quality, options, false)
+                .get(url + '&allowRedirect=false&quality=' + quality, options, false)
                 .subscribe(
                     async (data: Blob) => {
                         const reader = new FileReader();

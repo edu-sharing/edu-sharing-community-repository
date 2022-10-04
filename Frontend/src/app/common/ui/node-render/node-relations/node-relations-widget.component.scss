@@ -3,6 +3,11 @@
 .node-relations-widget {
     padding: 15px 20px;
     border-radius: 5px;
+    .relations-heading {
+        font-size: 100%;
+        font-style: italic;
+        color: $textRenderingLabels;
+    }
     .relation-nodes {
         display: grid;
         grid-template-rows: repeat(auto-fill, 1fr);

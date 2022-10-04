@@ -14,6 +14,9 @@ $optionBarHeight: 50px;
     @include contrastMode {
         border: 1px solid rgba(black, 0.42);
     }
+    &.selected {
+        background-color: $primaryVeryLight;
+    }
     .dropdown-dummy {
         position: fixed;
     }
@@ -88,6 +91,7 @@ $optionBarHeight: 50px;
         .card-top-bar-type {
         }
         .card-top-bar-comments,
+        .card-top-bar-published-copy,
         .card-top-bar-childobjects {
             > div {
                 background-color: rgba(255, 255, 255, 0.75);
@@ -95,6 +99,7 @@ $optionBarHeight: 50px;
                 display: inline-flex;
                 align-items: center;
                 min-width: 35px;
+                min-height: 22px;
                 justify-content: center;
                 cursor: default;
                 user-select: none;
@@ -103,6 +108,12 @@ $optionBarHeight: 50px;
                     > i {
                         font-size: 13px;
                         margin-left: 4px;
+                    }
+                }
+                &.node-published-copy {
+                    min-width: auto;
+                    > i {
+                        font-size: 13px;
                     }
                 }
                 &.node-comments {
@@ -204,13 +215,21 @@ $optionBarHeight: 50px;
             }
         }
     }
-    &:hover {
+    &.dynamic-single-click:hover {
         @include materialShadowMediumLarge(false, 0.2);
         background-color: $primaryVeryLight;
         // transform: scale(1.0075);
     }
-    &.grid-card-collection:hover .card-meta {
+    &.dynamic-single-click.grid-card-collection:hover .card-meta {
         background-color: rgba(255, 255, 255, 0.9);
+    }
+    &.grid-card-collection {
+        .card-meta {
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        .card-options {
+            background-color: rgba(255, 255, 255, 0.9);
+        }
     }
     .card-options {
         border-top: 1px solid #ddd;
@@ -263,5 +282,22 @@ $optionBarHeight: 50px;
             // @TDOO: better focus visibility is required
             background-color: #fff;
         }
+    }
+}
+/**
+    custom overlay provided via template
+ */
+.card-overlay {
+    position: absolute;
+    z-index: 1;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    // Pass pointer events through to the underlying card when the overlay template is empty...
+    pointer-events: none;
+    // ...but re-enable pointer-event handling for the overlay's content (if any).
+    & ::ng-deep > * {
+        pointer-events: auto;
     }
 }

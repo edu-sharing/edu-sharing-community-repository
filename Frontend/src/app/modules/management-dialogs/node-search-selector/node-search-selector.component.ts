@@ -20,7 +20,7 @@ import { RestMdsService } from '../../../core-module/rest/services/rest-mds.serv
 import { TranslateService } from '@ngx-translate/core';
 import { ListItem } from '../../../core-module/ui/list-item';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
-import { animate, state, style, transition, trigger } from '@angular/animations';
+import { trigger } from '@angular/animations';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 
@@ -117,7 +117,10 @@ export class NodeSearchSelectorComponent implements AfterViewInit {
         this.mdsService.getSet().subscribe((set) => {
             this.columns = MdsHelper.getColumns(this.translate, set, this.columnsIds);
         });
-        this.searchResult$ = combineLatest([this.input.valueChanges]).pipe(
+        this.searchResult$ = combineLatest([
+            this.input.valueChanges,
+            this.mdsEditor.mdsEditorInstance.values,
+        ]).pipe(
             debounceTime(200),
             switchMap(() => this.searchNodes()),
         );

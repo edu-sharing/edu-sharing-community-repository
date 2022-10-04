@@ -90,7 +90,7 @@
       #grid
       (esBorderBoxObserver)="onGridSizeChanges()"
       esInfiniteScroll
-      (scrolled)="loadData()"
+      (scrolled)="!entriesService.disableInfiniteScroll && !visibleItemsLimited && loadData()"
     >
       <ng-container *ngTemplateOutlet="globalOptions"></ng-container>
       <ng-container *ngIf="visibleNodes$ | async as nodes">
@@ -102,8 +102,6 @@
           [canDropNodes]="canDropNodes"
           (nodeDropped)="onNodesDropped($event)"
           #dropTarget="esNodesDropTarget"
-          [class.card-grid-drop-allowed]="dropTarget.active?.canDrop.accept"
-          [class.card-grid-drop-blocked]="dropTarget.active?.canDrop.denyExplicit"
         >
           <es-node-entries-card
             *ngIf="displayType === NodeEntriesDisplayType.Grid"
@@ -162,8 +160,8 @@
 <ng-container
   *ngIf="
     !entriesService.dataSource.isLoading &&
-    entriesService.dataSource.getCanLoadMore() &&
-    entriesService.dataSource.hasMore()
+    entriesService.dataSource.hasMore() &&
+    !visibleItemsLimited
   "
 >
   <div class="load-more">

@@ -31,8 +31,8 @@ import { OptionItem } from '../../core-ui-module/option-item';
 import { OptionsHelperService } from '../../core-ui-module/options-helper.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { MainNavService } from '../../main/navigation/main-nav.service';
-import { NodeEntriesTemplatesService } from '../node-entries/node-entries-templates.service';
-import { NodeEntriesComponent, NodeEntriesDataType } from '../node-entries/node-entries.component';
+import { NodeEntriesTemplatesService } from './node-entries-templates.service';
+import { NodeEntriesComponent, NodeEntriesDataType } from './node-entries.component';
 import {
     FetchEvent,
     GridConfig,
@@ -55,9 +55,22 @@ import { NodeDataSource } from './node-data-source';
 export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     implements AfterViewInit, OnInit, OnChanges, OnDestroy, ListEventInterface<T>
 {
+    /**
+     * title (above) the table/grid
+     */
     @ContentChild('title') titleRef: TemplateRef<any>;
+    /**
+     * data shown when data source is empty
+     */
     @ContentChild('empty') emptyRef: TemplateRef<any>;
+    /**
+     * custom area for actions only for NodeEntriesDisplayType.SmallGrid (per card at the bottom)
+     */
     @ContentChild('actionArea') actionAreaRef: TemplateRef<any>;
+    /**
+     * custom area for an overlay "above" each card (i.e. to show disabled infos), only for NodeEntriesDisplayType.SmallGrid & odeEntriesDisplayType.Grid
+     */
+    @ContentChild('overlay') overlayRef: TemplateRef<any>;
     @Input() dataSource: NodeDataSource<T>;
     @Input() columns: ListItem[];
     @Input() configureColumns: boolean;
@@ -77,6 +90,24 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
      * true for one instance per page.
      */
     @Input() globalKeyboardShortcuts: boolean;
+    /**
+     * UI hints for whether a single click will cause a dynamic action.
+     *
+     * This does not configure the actual behavior but only UI hints to the user. Hints include
+     * hover effects and a changed cursor.
+     *
+     * - When choosing 'static', the `clickItem` event should trigger some stationary action like
+     *   selecting the element or displaying information in a complementary page area. The
+     *   `dblClickItem` event can be used for a more disruptive action.
+     * - When choosing 'dynamic', the `clickItem` event should trigger a major action like
+     *   navigating to a new page or closing a dialog.
+     */
+    // TODO: Consider controlling the ui hints and the actual behavior with a single option.
+    @Input() singleClickHint: 'dynamic' | 'static' = 'dynamic';
+    /**
+     * Do not load more data on scroll.
+     */
+    @Input() disableInfiniteScroll = false;
     @Output() fetchData = new EventEmitter<FetchEvent>();
     @Output() clickItem = new EventEmitter<NodeClickEvent<T>>();
     @Output() dblClickItem = new EventEmitter<NodeClickEvent<T>>();
@@ -144,6 +175,8 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.dblClickItem = this.dblClickItem;
         this.entriesService.fetchData = this.fetchData;
         this.entriesService.globalKeyboardShortcuts = this.globalKeyboardShortcuts;
+        this.entriesService.singleClickHint = this.singleClickHint;
+        this.entriesService.disableInfiniteScroll = this.disableInfiniteScroll;
 
         if (this.componentRef) {
             this.componentRef.instance.changeDetectorRef?.detectChanges();
@@ -218,16 +251,6 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
                 this.nodeHelperService.copyDataToNode(d as Node, hits[0] as Node);
             }
         });
-        nodes?.forEach((node) => {
-            if (
-                !this.dataSource
-                    .getData()
-                    .filter((n) => (n as Node).ref.id === (node as Node).ref.id).length
-            ) {
-                (node as Node).virtual = true;
-                this.dataSource.appendData([node], 'before');
-            }
-        });
     }
 
     showReorderColumnsDialog(): void {}
@@ -286,5 +309,6 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.templatesService.title = this.titleRef;
         this.templatesService.empty = this.emptyRef;
         this.templatesService.actionArea = this.actionAreaRef;
+        this.templatesService.overlay = this.overlayRef;
     }
 }

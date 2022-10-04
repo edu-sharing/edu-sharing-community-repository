@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class RegisterInformation {
+public class RegisterInformation implements Serializable{
     private String firstName,lastName,email,password;
     private String organization;
     // general flag for indicating if user may receive mail notifications

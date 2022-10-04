@@ -4,7 +4,7 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { delay, filter, first, switchMap } from 'rxjs/operators';
 import {
     DropSource,
     DropTarget,
@@ -158,7 +158,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     displayType: NodeEntriesDisplayType = null;
     reorderDialog: boolean;
     private readonly destroyed$ = new Subject<void>();
-    private loadingTask = this.loadingScreen.addLoadingTask();
+    private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed$ });
 
     constructor(
         private toast: Toast,
@@ -183,7 +183,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         private loadingScreen: LoadingScreenService,
         private mainNavService: MainNavService,
     ) {
-        this.event.addListener(this);
+        this.event.addListener(this, this.destroyed$);
         this.translations.waitForInit().subscribe(() => {
             void this.initialize();
         });
@@ -213,23 +213,6 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         if (this.isSafe) {
             void this.connector.logout().toPromise();
         }
-    }
-
-    @HostListener('document:keyup', ['$event'])
-    handleKeyboardEventUp(event: KeyboardEvent) {
-        if (event.keyCode === 91 || event.keyCode === 93) {
-        }
-    }
-
-    @HostListener('document:keydown', ['$event'])
-    handleKeyboardEvent(event: KeyboardEvent) {
-        if (event.keyCode === 91 || event.keyCode === 93) {
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
-        const clip = this.storage.get('workspace_clipboard') as ClipboardObject;
-        const fromInputField = KeyEvents.eventFromInputField(event);
     }
 
     private handleScroll(event: Event) {
@@ -419,116 +402,140 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
 
     private async initialize() {
         this.user = await this.iam.getCurrentUserAsync();
-        this.route.params.subscribe(async (routeParams: Params) => {
-            this.isSafe = routeParams.mode === 'safe';
-            const login = await this.connector.isLoggedIn().toPromise();
-            if (login.statusCode !== RestConstants.STATUS_CODE_OK) {
-                RestHelper.goToLogin(this.router, this.config);
-                return;
-            }
-            await this.prepareActionbar();
-            this.loadFolders(this.user);
+        this.route.params.subscribe((routeParams: Params) => this.handleParamsUpdate(routeParams));
+        this.route.queryParams.subscribe((params: Params) => this.handleQueryParamsUpdate(params));
+    }
 
-            let valid = true;
-            if (!login.isValidLogin || login.isGuest) {
-                valid = false;
-            }
-            this.isBlocked = !this.connector.hasToolPermissionInstant(
-                RestConstants.TOOLPERMISSION_WORKSPACE,
+    private async handleParamsUpdate(routeParams: Params) {
+        this.isSafe = routeParams.mode === 'safe';
+        const login = await this.connector.isLoggedIn().toPromise();
+        if (login.statusCode !== RestConstants.STATUS_CODE_OK) {
+            RestHelper.goToLogin(this.router, this.config);
+            return;
+        }
+        await this.prepareActionbar();
+        this.loadFolders(this.user);
+
+        let valid = true;
+        if (!login.isValidLogin || login.isGuest) {
+            valid = false;
+        }
+        this.isBlocked = !this.connector.hasToolPermissionInstant(
+            RestConstants.TOOLPERMISSION_WORKSPACE,
+        );
+        if (this.isSafe && login.currentScope !== RestConstants.SAFE_SCOPE) {
+            valid = false;
+        }
+        if (!this.isSafe && login.currentScope != null) {
+            this.connector.logout().subscribe(
+                () => {
+                    this.goToLogin();
+                },
+                (error: any) => {
+                    this.toast.error(error);
+                    this.goToLogin();
+                },
             );
-            if (this.isSafe && login.currentScope !== RestConstants.SAFE_SCOPE) {
-                valid = false;
+            return;
+        }
+        if (!valid) {
+            this.goToLogin();
+            return;
+        }
+        this.connector.scope = this.isSafe ? RestConstants.SAFE_SCOPE : null;
+        this.isLoggedIn = true;
+        this.globalProgress = false;
+    }
+
+    private handleQueryParamsUpdate(params: Params) {
+        let needsUpdate = false;
+        if (this.oldParams) {
+            for (const key of Object.keys(this.oldParams).concat(Object.keys(params))) {
+                if (params[key] === this.oldParams[key]) {
+                    continue;
+                }
+                if (key === UIConstants.QUERY_PARAM_LIST_VIEW_TYPE) {
+                    continue;
+                }
+                needsUpdate = true;
             }
-            if (!this.isSafe && login.currentScope != null) {
-                this.connector.logout().subscribe(
-                    () => {
-                        this.goToLogin();
-                    },
-                    (error: any) => {
-                        this.toast.error(error);
-                        this.goToLogin();
-                    },
-                );
+        } else {
+            needsUpdate = true;
+        }
+        if (params.displayType != null) {
+            this.setDisplayType(
+                parseInt(params[UIConstants.QUERY_PARAM_LIST_VIEW_TYPE], 10),
+                false,
+            );
+        } else {
+            this.setDisplayType(
+                this.config.instant(
+                    'workspaceViewType',
+                    NodeEntriesDisplayType.Table,
+                ) as NodeEntriesDisplayType,
+                false,
+            );
+        }
+        if (params.root && WorkspaceMainComponent.VALID_ROOTS.indexOf(params.root) !== -1) {
+            this.root = params.root;
+        } else {
+            this.root = 'MY_FILES';
+        }
+        if (params.reurl) {
+            this.reurl = params.reurl;
+        }
+        this.mainnav = params.mainnav === 'false' ? false : true;
+
+        this.initMainNav();
+
+        if (params.file && params.file !== this.oldParams?.file) {
+            void this.showNodeInCurrentFolder(params.file);
+        }
+
+        if (!needsUpdate) {
+            return;
+        }
+        this.createAllowed = this.root === 'MY_FILES';
+        let lastLocation = this.storage.pop(this.getLastLocationStorageId(), null);
+        if (this.isSafe) {
+            // clear lastLocation, this is another folder than the safe
+            lastLocation = null;
+        }
+        if (!params.id && !params.query && lastLocation) {
+            this.openDirectory(lastLocation, { replaceUrl: true });
+        } else {
+            this.openDirectoryFromRoute(params);
+        }
+        if (params.showAlpha) {
+            this.showAlpha();
+        }
+        this.oldParams = params;
+    }
+
+    private async showNodeInCurrentFolder(id: string) {
+        // TODO: Consider moving this to `NodeDataSource`. We would need to make sure that the
+        // dataSource is not replaced by explorer, however.
+        const visibleNodes = await this.explorer.dataSourceSubject
+            .pipe(
+                filter(notNull),
+                switchMap((dataSource) => dataSource.connect()),
+                first((data) => data?.length > 1),
+            )
+            .toPromise();
+        let node = visibleNodes.find((node) => node.ref.id === id);
+        if (!node) {
+            ({ node } = await this.node.getNodeMetadata(id, [RestConstants.ALL]).toPromise());
+            if (node.parent?.id === this.currentFolder?.ref.id) {
+                this.explorer.dataSource.appendData([node], 'before');
+                // FIXME: The appended node will show up a second time when loading more data.
+            } else {
+                this.toast.error(null, 'WORKSPACE.TOAST.ELEMENT_NOT_IN_FOLDER');
                 return;
             }
-            if (!valid) {
-                this.goToLogin();
-                return;
-            }
-            this.connector.scope = this.isSafe ? RestConstants.SAFE_SCOPE : null;
-            this.isLoggedIn = true;
-            this.globalProgress = false;
-            this.route.queryParams.subscribe((params: Params) => {
-                let needsUpdate = false;
-                if (this.oldParams) {
-                    for (const key of Object.keys(this.oldParams).concat(Object.keys(params))) {
-                        if (params[key] === this.oldParams[key]) {
-                            continue;
-                        }
-                        if (key === UIConstants.QUERY_PARAM_LIST_VIEW_TYPE) {
-                            continue;
-                        }
-                        needsUpdate = true;
-                    }
-                } else {
-                    needsUpdate = true;
-                }
-                this.oldParams = params;
-                if (params.displayType != null) {
-                    this.setDisplayType(
-                        parseInt(params[UIConstants.QUERY_PARAM_LIST_VIEW_TYPE], 10),
-                        false,
-                    );
-                } else {
-                    this.setDisplayType(
-                        this.config.instant(
-                            'workspaceViewType',
-                            NodeEntriesDisplayType.Table,
-                        ) as NodeEntriesDisplayType,
-                        false,
-                    );
-                }
-                if (params.root && WorkspaceMainComponent.VALID_ROOTS.indexOf(params.root) !== -1) {
-                    this.root = params.root;
-                } else {
-                    this.root = 'MY_FILES';
-                }
-                if (params.reurl) {
-                    this.reurl = params.reurl;
-                }
-                this.mainnav = params.mainnav === 'false' ? false : true;
-
-                this.initMainNav();
-
-                if (params.file) {
-                    this.node
-                        .getNodeMetadata(params.file, [RestConstants.ALL])
-                        .subscribe((paramNode) => {
-                            this.setSelection([paramNode.node]);
-                            this.parameterNode = paramNode.node;
-                            this.mainNavService.getDialogs().nodeSidebar = paramNode.node;
-                        });
-                }
-
-                if (!needsUpdate) {
-                    return;
-                }
-                this.createAllowed = this.root === 'MY_FILES';
-                let lastLocation = this.storage.pop(this.getLastLocationStorageId(), null);
-                if (this.isSafe) {
-                    // clear lastLocation, this is another folder than the safe
-                    lastLocation = null;
-                }
-                if (!params.id && !params.query && lastLocation) {
-                    this.openDirectory(lastLocation);
-                } else {
-                    this.openDirectoryFromRoute(params);
-                }
-                if (params.showAlpha) {
-                    this.showAlpha();
-                }
-            });
-        });
+        }
+        this.setSelection([node]);
+        this.parameterNode = node;
+        this.mainNavService.getDialogs().nodeSidebar = node;
     }
 
     resetWorkspace() {
@@ -649,8 +656,8 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         this.mainNavService.getDialogs().closeSidebar();
     }
 
-    private openDirectory(id: string) {
-        this.routeTo(this.root, id);
+    private openDirectory(id: string, { replaceUrl = false } = {}) {
+        this.routeTo(this.root, id, null, { replaceUrl });
     }
 
     searchGlobal(query: string) {
@@ -803,7 +810,12 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         });
     }
 
-    private async routeTo(root: string, node: string = null, search: string = null) {
+    private async routeTo(
+        root: string,
+        node: string = null,
+        search: string = null,
+        { replaceUrl = false } = {},
+    ) {
         const params = await UIHelper.getCommonParameters(this.route).toPromise();
         params.root = root;
         params.id = node;
@@ -814,7 +826,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             params.displayType = this.displayType;
         }
         void this.router
-            .navigate(['./'], { queryParams: params, relativeTo: this.route })
+            .navigate(['./'], { queryParams: params, relativeTo: this.route, replaceUrl })
             .then((result: boolean) => {
                 if (!result) {
                     this.refresh(false);
@@ -1020,4 +1032,8 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     onDeleteNodes(nodes: Node[]): void {
         this.mainNavService.getDialogs().nodeDelete = nodes;
     }
+}
+
+function notNull<T>(value?: T): boolean {
+    return value !== undefined && value !== null;
 }

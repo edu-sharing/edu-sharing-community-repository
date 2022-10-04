@@ -12,8 +12,10 @@
 <mat-table
   [dataSource]="entriesService.dataSource"
   matSort
+  [matSortActive]="entriesService.sort?.active"
+  [matSortDirection]="entriesService.sort?.direction"
   esInfiniteScroll
-  (scrolled)="loadData()"
+  (scrolled)="!entriesService.disableInfiniteScroll && loadData()"
 >
   <!-- Checkbox Column -->
   <ng-container matColumnDef="select">
@@ -168,9 +170,13 @@
     [class.mat-row-selected]="entriesService.selection.isSelected(node)"
     [class.selected-when-dragging]="isDragging && entriesService.selection.isSelected(node)"
     [class.mat-row-virtual]="node.virtual"
-    [class.mat-row-virtual-seperator]="
-      node.virtual && !last && !$any(entriesService.dataSource.getData()[i + 1]).virtual
+    [class.mat-row-virtual-first]="
+      node.virtual && !$any(entriesService.dataSource.getData()[i - 1])?.virtual
     "
+    [class.mat-row-virtual-last]="
+      node.virtual && !$any(entriesService.dataSource.getData()[i + 1])?.virtual
+    "
+    [class.dynamic-single-click]="entriesService.singleClickHint === 'dynamic'"
     *matRowDef="let node; let i = index; let last = last; columns: getVisibleColumns()"
     (contextmenu)="onRowContextMenu({ event: $event, node: node })"
     (keydown.ContextMenu)="onRowContextMenu({ event: $event, node: node })"
@@ -183,6 +189,14 @@
     ></es-drag-preview>
   </mat-row>
 </mat-table>
+<ng-container *ngIf="!entriesService.dataSource.isLoading && entriesService.dataSource.hasMore()">
+  <div class="load-more">
+    <button mat-button color="primary" (click)="loadData()">
+      <i esIcon="refresh"></i>
+      <span>{{ 'LOAD_MORE' | translate }}</span>
+    </button>
+  </div>
+</ng-container>
 <ng-container *ngIf="entriesService.dataSource.isLoading">
   <ng-container *ngTemplateOutlet="loading"> </ng-container>
 </ng-container>

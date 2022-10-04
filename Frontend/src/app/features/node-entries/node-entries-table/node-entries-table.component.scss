@@ -51,23 +51,25 @@ mat-cell {
 }
 
 .mat-row {
-    cursor: pointer;
-    &.mat-row-virtual {
-        background: linear-gradient(
-            to right,
-            $nodeVirtualColor 0,
-            $nodeVirtualColor 5px,
-            rgba(255, 255, 255, 0.0001) 5px
-        );
-    }
-    &.mat-row-virtual-seperator {
-        border-bottom: 2px dashed lighten($nodeVirtualColor, 10%);
-    }
-    &:hover {
-        background-color: $listItemSelectedBackground;
+    &.dynamic-single-click {
+        cursor: pointer;
+        &:hover {
+            background-color: $listItemSelectedBackground;
+        }
     }
     &.mat-row-selected {
         background: $listItemSelectedBackgroundEffect;
+    }
+    // Overrides `.mat-row-selected` background by order
+    &.mat-row-virtual {
+        background: linear-gradient(to right, $nodeVirtualColor 5px, transparent 5px) no-repeat;
+        border-right: 2px dashed lighten($nodeVirtualColor, 10%);
+    }
+    &.mat-row-virtual-first {
+        border-top: 2px dashed lighten($nodeVirtualColor, 10%);
+    }
+    &.mat-row-virtual-last {
+        border-bottom: 2px dashed lighten($nodeVirtualColor, 10%);
     }
     &.selected-when-dragging {
         opacity: 0.5; // Same as .cdk-drag-placeholder
@@ -104,4 +106,9 @@ mat-cell {
         display: flex;
         justify-content: center;
     }
+}
+
+.load-more {
+    display: flex;
+    justify-content: center;
 }

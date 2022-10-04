@@ -7124,7 +7124,8 @@
                 "cluster",
                 "defaults",
                 "defaults/metadatasets",
-                "defaults/mailtemplates"
+                "defaults/mailtemplates",
+                "defaults/database"
               ],
               "type": "string"
             }
@@ -7221,7 +7222,8 @@
                 "cluster",
                 "defaults",
                 "defaults/metadatasets",
-                "defaults/mailtemplates"
+                "defaults/mailtemplates",
+                "defaults/database"
               ],
               "type": "string"
             }

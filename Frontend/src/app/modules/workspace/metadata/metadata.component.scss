@@ -1,5 +1,10 @@
 @import '../../../core-ui-module/styles/variables';
 
+:host ::ng-deep {
+    mat-header-row {
+        display: none;
+    }
+}
 .main {
     height: 100%;
     display: flex;
@@ -93,16 +98,15 @@ p.description {
     line-height: 40px;
     margin-right: 18px;
 }
-// Statiskik Canvas
 canvas {
     align-self: flex-start;
 }
-es-listTable {
-    float: left;
-    width: 100%;
-}
 .statistic-value {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     margin-left: 20px;
+    padding-right: 5px;
 
     .point {
         display: flex;
@@ -110,7 +114,6 @@ es-listTable {
         align-items: center;
         float: left;
         text-align: center;
-        width: 64px;
         color: #383838;
         font-weight: bold;
         font-size: 26px;

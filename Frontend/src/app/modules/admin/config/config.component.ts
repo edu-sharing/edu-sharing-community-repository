@@ -1,16 +1,10 @@
 import { RestAdminService } from '../../../core-module/rest/services/rest-admin.service';
 import { Component } from '@angular/core';
-import {
-    ConfigFilePrefix,
-    DialogButton,
-    RestLocatorService,
-} from '../../../core-module/core.module';
+import { DialogButton } from '../../../core-module/core.module';
 import { Toast } from '../../../core-ui-module/toast';
 import { ModalMessageType } from '../../../common/ui/modal-dialog-toast/modal-dialog-toast.component';
-import { forkJoin, Observable } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { ConfigService } from 'ngx-edu-sharing-api';
-// Charts.js
-declare var Chart: any;
 
 @Component({
     selector: 'es-admin-config',
@@ -44,6 +38,7 @@ export class AdminConfigComponent {
         reference: null,
         clusterDeployment: null,
         nodeDeployment: null,
+        extension: null,
         clusterOverride: null,
         nodeOverride: null,
         parsed: null,
@@ -64,6 +59,9 @@ export class AdminConfigComponent {
             .getConfigFile(AdminConfigComponent.CONFIG_FILE_REFERENCE, 'DEFAULTS')
             .subscribe((base) => (this.configs.reference = base));
         this.adminService
+            .getConfigFile(AdminConfigComponent.EXTENSION_CONFIG_FILE, 'DEFAULTS')
+            .subscribe((deployment) => (this.configs.extension = deployment));
+        this.adminService
             .getConfigFile(AdminConfigComponent.CONFIG_DEPLOYMENT_FILE, 'CLUSTER')
             .subscribe((deployment) => (this.configs.clusterDeployment = deployment));
         this.adminService
@@ -80,7 +78,7 @@ export class AdminConfigComponent {
                 this.configs.parsed = JSON.stringify(merged, null, 2);
                 this.setEditSupported(merged?.security?.configuration?.inlineEditing);
             },
-            (error) => {
+            () => {
                 this.setEditSupported(false);
             },
         );
@@ -88,8 +86,9 @@ export class AdminConfigComponent {
     setEditSupported(status: boolean) {
         this.editSupported = status;
         this.showRO = !this.editSupported;
-        this.codeOptionsHocoonRW.readOnly = !this.editSupported;
-        this.clientCodeOptions.readOnly = !this.editSupported;
+        // fix: monaco editor requires full object change to trigger/sync state
+        this.codeOptionsHocoonRW = { ...this.codeOptionsHocoonRW, readOnly: !this.editSupported };
+        this.clientCodeOptions = { ...this.clientCodeOptions, readOnly: !this.editSupported };
     }
     displayError(error: any) {
         console.warn(error);
@@ -114,6 +113,11 @@ export class AdminConfigComponent {
                 AdminConfigComponent.CLIENT_CONFIG_FILE,
                 'DEFAULTS',
                 this.configs.clientConfig,
+            ),
+            this.adminService.updateConfigFile(
+                AdminConfigComponent.EXTENSION_CONFIG_FILE,
+                'DEFAULTS',
+                this.configs.extension,
             ),
             this.adminService.updateConfigFile(
                 AdminConfigComponent.OVERRIDE_CONFIG_FILE,

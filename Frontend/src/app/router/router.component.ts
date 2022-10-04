@@ -50,6 +50,7 @@ import { TranslationsService } from '../translations/translations.service';
 import { LoadingScreenService } from '../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../main/navigation/main-nav.service';
 import { ManagementDialogsService } from '../modules/management-dialogs/management-dialogs.service';
+import * as rxjs from 'rxjs';
 
 @Component({
     selector: 'es-router',
@@ -97,6 +98,13 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
         }
         return result;
     }
+
+    // FIXME: should we really do this?
+    // > Warning: The beforeunload event should only be used to alert the user of unsaved changes.
+    // > Once those changes are saved, the event should be removed. It should never be added
+    // > unconditionally to the page, as doing so can hurt performance in some cases. See the legacy
+    // > APIs section for details.
+    // --- https://developer.chrome.com/blog/page-lifecycle-api/
     @HostListener('window:beforeunload', ['$event'])
     interceptRoute(event: BeforeUnloadEvent) {
         console.log(event);
@@ -125,7 +133,16 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
     }
 
     ngOnInit(): void {
-        this.translations.initialize().pipe(this.loadingScreen.showUntilFinished()).subscribe();
+        this.translations
+            .initialize()
+            .pipe(
+                this.loadingScreen.showUntilFinished({
+                    // The router component lives as long as the application, so we don't need to
+                    // set `until` to anything meaningful.
+                    until: rxjs.EMPTY,
+                }),
+            )
+            .subscribe();
         this.setUserScale();
         this.registerContrastMode();
     }

@@ -101,7 +101,7 @@ public class MetadataReader {
 	    try {
             String id = appId.getAppId() + "_" + mdsName + "_" + locale;
             if (mdsCache.getKeys().contains(id) && !"true".equalsIgnoreCase(ApplicationInfoList.getHomeRepository().getDevmode()))
-                return SerializationUtils.clone(mdsCache.get(id));
+				return mdsCache.get(id);
             reader = new MetadataReader(mdsNameDefault + ".xml", locale);
             mds = reader.getMetadatasetForFile(mdsNameDefault);
             mds.setRepositoryId(appId.getAppId());

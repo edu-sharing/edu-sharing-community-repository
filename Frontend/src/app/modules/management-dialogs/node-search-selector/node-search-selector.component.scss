@@ -10,6 +10,8 @@ mat-form-field {
 .more {
     display: flex;
     align-items: center;
+    position: relative;
+    z-index: 1;
     // background-color: $cardLightBackground;
     width: 100%;
     margin-top: -15px;
@@ -17,6 +19,10 @@ mat-form-field {
     > span {
         flex-grow: 1;
     }
+    @include materialShadowBottom();
+}
+.mds-wrapper {
+    background-color: $cardLightBackground;
 }
 .missing-permissions {
     position: absolute;
@@ -33,8 +39,13 @@ mat-form-field {
     color: $textMain;
     font-weight: bold;
 }
-::ng-deep {
-    .clear-button {
-        margin-bottom: 0;
+:host ::ng-deep {
+    .mds-wrapper {
+        es-mds-editor-core {
+            padding: 10px 20px 0 20px;
+        }
+        .clear-button {
+            display: none;
+        }
     }
 }

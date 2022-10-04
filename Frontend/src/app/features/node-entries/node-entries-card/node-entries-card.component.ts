@@ -19,6 +19,7 @@ import { ConfigurationService } from '../../../core-module/rest/services/configu
 import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { ClickSource, InteractionType } from '../entries-model';
+import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
 
 @Component({
     selector: 'es-node-entries-card',
@@ -42,6 +43,7 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
         public applicationRef: ApplicationRef,
         public connector: RestConnectorService,
         public configService: ConfigurationService,
+        public templatesService: NodeEntriesTemplatesService,
         private toast: Toast,
     ) {}
 

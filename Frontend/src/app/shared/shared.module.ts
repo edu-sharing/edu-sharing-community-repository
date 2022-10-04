@@ -63,6 +63,7 @@ import { BitwisePipe } from './pipes/bitwise.pipe';
 import { FormatSizePipe } from './pipes/file-size.pipe';
 import { FormatDatePipe } from './pipes/format-date.pipe';
 import { NodeImageSizePipe } from './pipes/node-image-size.pipe';
+import { NodeImagePipe } from './pipes/node-image.pipe';
 import { NodePersonNamePipe } from './pipes/node-person-name.pipe';
 import { NodeTitlePipe } from './pipes/node-title.pipe';
 import { OptionTooltipPipe } from './pipes/option-tooltip.pipe';
@@ -115,6 +116,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         WorkspaceCreateConnector,
         NodesDragDirective,
         NodesDropTargetDirective,
+        NodeImagePipe,
     ],
     imports: [
         A11yModule,
@@ -208,6 +210,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         NodesDragDirective,
         NodesDropTargetDirective,
         MatBadgeModule,
+        NodeImagePipe,
     ],
 })
 export class SharedModule {}

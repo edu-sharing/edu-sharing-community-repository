@@ -37,7 +37,7 @@
   (loadMore)="load(false)"></es-listTable>
   -->
 <es-node-entries-wrapper
-  [dataSource]="_dataSource"
+  [dataSource]="dataSource"
   [columns]="columns"
   [configureColumns]="true"
   (columnsChange)="saveColumns($event)"
@@ -52,6 +52,7 @@
     dropped: drop
   }"
   [globalKeyboardShortcuts]="true"
+  [singleClickHint]="'static'"
   (sortChange)="setSorting($event)"
   (clickItem)="clickItem($event)"
   (dblClickItem)="onOpenNode.emit($event.element)"

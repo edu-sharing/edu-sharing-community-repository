@@ -24,6 +24,11 @@ import { forkJoin, Observable } from 'rxjs';
 import { CardType } from '../../../shared/components/card/card.component';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 
+export interface SimpleEditCloseEvent {
+    reason: 'abort' | 'done' | 'temporary';
+    nodes?: Node[];
+}
+
 @Component({
     selector: 'es-simple-edit-dialog',
     templateUrl: 'simple-edit-dialog.component.html',
@@ -56,9 +61,7 @@ export class SimpleEditDialogComponent {
         this.toast.showProgressDialog();
         this.updateButtons();
     }
-    @Output() onCancel = new EventEmitter<void>();
-    @Output() onClose = new EventEmitter<Node[]>();
-    @Output() onDone = new EventEmitter<Node[]>();
+    @Output() onClose = new EventEmitter<SimpleEditCloseEvent>();
     @Output() onOpenMetadata = new EventEmitter<Node[]>();
     @Output() onOpenInvite = new EventEmitter<Node[]>();
     @Output() onOpenLicense = new EventEmitter<Node[]>();
@@ -87,7 +90,7 @@ export class SimpleEditDialogComponent {
         });
     }
     public cancel() {
-        this.onCancel.emit();
+        this.onClose.emit({ reason: 'abort' });
     }
     updateButtons(): any {
         this.buttons = [
@@ -118,7 +121,10 @@ export class SimpleEditDialogComponent {
                                             (nodes.length === 1 ? '' : '_MULTIPLE'),
                                         { name: nodes[0].node.name, count: nodes.length },
                                     );
-                                    this.onDone.emit(nodes.map((n) => n.node));
+                                    this.onClose.emit({
+                                        reason: 'done',
+                                        nodes: nodes.map((n) => n.node),
+                                    });
                                     if (callback) {
                                         callback();
                                     }
@@ -159,7 +165,7 @@ export class SimpleEditDialogComponent {
             this.showDirtyDialog(() => this.openDialog(callback, true));
             return;
         }
-        this.onClose.emit(this._nodes);
+        this.onClose.emit({ reason: 'temporary', nodes: this._nodes });
         callback();
     }
     openMetadata(force = false) {
@@ -181,7 +187,7 @@ export class SimpleEditDialogComponent {
             buttons: [
                 new DialogButton('DISCARD', { color: 'standard' }, () => {
                     this.toast.closeModalDialog();
-                    this.onClose.emit(this._nodes);
+                    this.onClose.emit({ reason: 'abort', nodes: this._nodes });
                     callback();
                 }),
                 new DialogButton('SAVE', { color: 'primary' }, () => {
@@ -205,7 +211,7 @@ export class SimpleEditDialogComponent {
             this.toast.error(error);
         }
         this.toast.closeModalDialog();
-        this.onCancel.emit();
+        this.onClose.emit({ reason: 'abort' });
     }
 
     hasPermission(permission: string) {

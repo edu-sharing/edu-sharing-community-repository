@@ -55,13 +55,6 @@
     -webkit-box-orient: vertical;
     /* autoprefixer: off */
 }
-@mixin fadeRight($color, $position) {
-    background: linear-gradient(
-        to right,
-        rgba(red($color), green($color), blue($color), 0.001) 0,
-        $color $position
-    );
-}
 @mixin unselectableText() {
     cursor: default;
     user-select: none;
@@ -165,5 +158,24 @@
         }
     } @else {
         @error "Invalid scope #{$scope}.";
+    }
+}
+
+@mixin removeButtonDefaultStyles {
+    background: unset;
+    border: unset;
+    padding: unset;
+}
+
+@mixin afterPseudoElement {
+    position: relative;
+    &:after {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        @content;
     }
 }

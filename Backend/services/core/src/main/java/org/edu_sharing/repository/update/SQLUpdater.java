@@ -1,5 +1,6 @@
 package org.edu_sharing.repository.update;
 
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -14,6 +15,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.springframework.context.ApplicationContext;
 
 public class SQLUpdater extends UpdateAbstract {
@@ -85,7 +87,8 @@ public class SQLUpdater extends UpdateAbstract {
 		connection.setAutoCommit(false);
 		ScriptRunner scriptRunner = new ScriptRunner(connection);
 		
-		InputStream is = this.getClass().getClassLoader().getResourceAsStream(script);
+		InputStream is = PropertiesHelper.Config.getInputStreamForFile(PropertiesHelper.Config.PATH_CONFIG + PropertiesHelper.Config.PathPrefix.DEFAULTS_DATABASE + "/" + script);
+
 		scriptRunner.setSendFullScript(true);
 		//scriptRunner.setEscapeProcessing(true);
 		scriptRunner.setStopOnError(true);

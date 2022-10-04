@@ -1,4 +1,4 @@
-import { Component, NgZone, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, NgZone, OnDestroy, ViewChild, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
     EventListener,
@@ -11,6 +11,7 @@ import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import { Subject } from 'rxjs';
 
 @Component({
     selector: 'es-mds-embed',
@@ -34,7 +35,7 @@ import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-
     `,
     styleUrls: ['embed.component.scss'],
 })
-export class EmbedComponent implements EventListener {
+export class EmbedComponent implements EventListener, OnDestroy {
     @ViewChild('mdsRef') mdsRef: MdsEditorWrapperComponent;
     @ViewChild('licenseRef') licenseRef: WorkspaceLicenseComponent;
     component: string;
@@ -42,6 +43,7 @@ export class EmbedComponent implements EventListener {
     groupId = 'io';
     setId = RestConstants.DEFAULT;
     refresh: Boolean;
+    private destroyed = new Subject<void>();
     constructor(
         private translations: TranslationsService,
         private mainNavService: MainNavService,
@@ -56,7 +58,7 @@ export class EmbedComponent implements EventListener {
         this.mainNavService.patchMainNavConfig({
             currentScope: 'embed',
         });
-        this.event.addListener(this);
+        this.event.addListener(this, this.destroyed);
         this.toast.showProgressDialog();
         this.translations.waitForInit().subscribe(() => {
             this.route.params.subscribe((params) => {
@@ -85,6 +87,12 @@ export class EmbedComponent implements EventListener {
             });
         });
     }
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
+    }
+
     async onEvent(event: string, data: any) {
         if (event === FrameEventsService.EVENT_PARENT_FETCH_DATA) {
             if (this.component === 'mds') {

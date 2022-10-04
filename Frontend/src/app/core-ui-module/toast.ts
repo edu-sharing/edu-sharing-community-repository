@@ -213,10 +213,9 @@ export class Toast implements OnDestroy {
         customAction: CustomAction = null,
         toastMessage: ToastMessage = null,
     ): void {
-        if (errorObject?.processed) {
-            console.warn('Called toast.error() with an already consumed error object');
-            return;
-        }
+        // If this is called by the default error handler given to ngx-edu-sharing-api und you want
+        // to prevent the toast message, provide an error handler when subscribing and call
+        // `error.preventDefault()`.
         const parsingResult = this.parseErrorObject({
             errorObject,
             message,
@@ -456,13 +455,6 @@ export class Toast implements OnDestroy {
         if (message === 'COMMON_API_ERROR') {
             dialogMessage = '';
             dialogTitle = 'COMMON_API_ERROR_TITLE';
-            translationParameters = {
-                date: DateHelper.formatDate(this.translate, new Date().getTime(), {
-                    useRelativeLabels: false,
-                    showAlwaysTime: true,
-                    showSeconds: true,
-                }),
-            };
             try {
                 if (json.error.stacktraceArray) {
                     errorInfo = json.stacktraceArray.join('\n');
@@ -555,6 +547,15 @@ export class Toast implements OnDestroy {
                 if (!translationParameters) {
                     translationParameters = {};
                 }
+                translationParameters.date = DateHelper.formatDate(
+                    this.translate,
+                    new Date().getTime(),
+                    {
+                        useRelativeLabels: false,
+                        showAlwaysTime: true,
+                        showSeconds: true,
+                    },
+                );
                 translationParameters.error = error;
             }
         }
@@ -566,8 +567,16 @@ export class Toast implements OnDestroy {
             dialogTitle = null;
         }
         if (errorObject?.traceId) {
-            dialogTitle = this.translate.instant(dialogTitle) + ' (' + errorObject.traceId + ')';
-            message = this.translate.instant(message) + '\n(' + errorObject.traceId + ')';
+            dialogTitle =
+                this.translate.instant(dialogTitle, translationParameters) +
+                ' (' +
+                errorObject.traceId +
+                ')';
+            message =
+                this.translate.instant(message, translationParameters) +
+                '\n(' +
+                errorObject.traceId +
+                ')';
         }
         return {
             message,

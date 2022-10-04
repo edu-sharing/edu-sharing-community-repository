@@ -26,7 +26,26 @@
       "NO_DESCRIPTION": "There are no details available for this plugin",
       "ENABLED": "Active",
       "DISABLED": "Inactive",
-      "PLUGIN_DETAILS": {},
+      "PLUGIN_DETAILS": {
+        "edu_sharing-community-repository-backend-alfresco-module": {
+          "TITLE": "edu-sharing Core"
+        },
+        "Alfresco Share Services AMP": {
+          "TITLE": "Alfresco Share Service"
+        },
+        "edu_sharing-community-repository-plugin-elastic-backend-alfresco-module": {
+          "TITLE": "edu-sharing Elasticsearch Plugin"
+        },
+        "alfresco-trashcan-cleaner project": {
+          "TITLE": "Trashcan Cleaner"
+        },
+        "edu_sharing-projects-community-repository-backend-alfresco-module": {
+          "TITLE": "edu-sharing Customizing"
+        },
+        "edu_sharing-enterprise-repository-plugin-transform-backend-alfresco-module": {
+          "TITLE": "edu-sharing Transformer Plugin"
+        }
+      },
       "MORE": "More information about how to obtain, confiure and deploy extensions can be found on the edu-sharing website",
       "MORE_LINK": "Go to edu-sharing website"
     },
@@ -49,6 +68,8 @@
       "CLUSTER_OVERRIDE_CONFIG_HINT": "Override-Configuration for all cluster nodes",
       "NODE_OVERRIDE_CONFIG_TITLE": "Node-Override",
       "NODE_OVERRIDE_CONFIG_HINT": "Override-Configuration for this cluster node (check ip address!)",
+      "EXTENSION_CONFIG_TITLE": "Extension config (customer/project specific values)",
+      "EXTENSION_CONFIG_HINT": "This file is managed via the git repository of the customer project and applies to all nodes.",
 
       "SIZE": "Editor-size",
       "SIZE_MEDIUM": "normal",
@@ -145,7 +166,6 @@
         "mail.smtp.username": "User name for authentication on the mail server",
         "mail.smtp.passwd": "Password for authentication on the mail server",
         "mail.smtp.from": "Displayed e-mail address of the sender. Recommended \"noreply@yourdomain.com\"",
-        "mail.admin": "Deprecated",
         "mail.addReplyTo": "If true (default), the Reply-To address of the user who triggered the event is appended"
       }
     },

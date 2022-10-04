@@ -22,24 +22,33 @@
     },
     "PLUGINS": {
       "TITLE": "Erweiterungen",
-      "INFO": "In dieser Liste werden Erweiterungen, die aktuell für Alfresco & edu-sharing auf diesem System verfügbar sind, angezeigt. Es handelt sich hierbei um zusätzliche Funktionskomponenten für das Repository.",
+      "INFO": "In dieser Liste werden Erweiterungen, die aktuell für auf diesem System verfügbar bzw. aktiv sind, angezeigt. Es handelt sich hierbei um zusätzliche Funktionskomponenten für das Repository.",
       "NO_DESCRIPTION": "Für dieses Plugin sind keine Details verfügbar",
       "ENABLED": "Aktiviert",
       "DISABLED": "Deaktiviert",
       "PLUGIN_DETAILS": {
         "edu_sharing-community-repository-backend-alfresco-module": {
-          "DESCRIPTION": "Das Core-Modul von edu-sharing. Es erweitert Alfresco um edu-sharing API's und Oberflächen"
+          "TITLE": "edu-sharing Core",
+          "DESCRIPTION": "Das Core-Modul von edu-sharing. Es erweitert das Basis-System um edu-sharing API's und Oberflächen sowie weitere Funktionalitäten"
         },
         "Alfresco Share Services AMP": {
+          "TITLE": "Alfresco Share Service",
           "DESCRIPTION": "Dieses Alfresco-Modul stellt die Alfresco Share-Oberflächen bereit"
         },
         "edu_sharing-community-repository-plugin-elastic-backend-alfresco-module": {
+          "TITLE": "edu-sharing Elasticsearch Plugin",
           "DESCRIPTION": "Das Elasticsearch-Modul transformiert die Objekte inkl. Statistiken und Metadaten in eine spezielle Elasticsearch-Indexstruktur und erlaubt effiziente und sehr detaillierte Suchqueries"
         },
         "alfresco-trashcan-cleaner project": {
+          "TITLE": "Trashcan Cleaner",
           "DESCRIPTION": "Der Trashcan-Cleaner löscht regelmäßig alte Inhalte im Papierkorb aller Nutzer"
         },
+        "edu_sharing-projects-community-repository-backend-alfresco-module": {
+          "TITLE": "edu-sharing Customizing",
+          "DESCRIPTION": "Dieses Modul beinhaltet ggf. projektspezifische Anpassungen"
+        },
         "edu_sharing-enterprise-repository-plugin-transform-backend-alfresco-module": {
+          "TITLE": "edu-sharing Transformer Plugin",
           "DESCRIPTION": "Dieses Plugin trennt die Transformationsfunktionen (Screenshot & Volltext-Generierung von Dokumenten via LibreOffice) vom Repository-Server und erlaubt eine bessere, stabilere Verteilung der Workload"
         }
       },
@@ -75,8 +84,8 @@
       "PARSE_ERROR": "Fehler beim Übernehmen der Config! Prüfen Sie den Syntax die Konfiguration, und wiederholen Sie den Vorgang.<br><b>Das Repository befindet sich aktuell in einem ungültigen Zustand!</b><br>Für weitere Details prüfen Sie bitte die Logdateien<br><br>{{error}}",
       "DEPLOYMENT_CONFIG_TITLE": "Deployment Konfigurationsdatei",
       "DEPLOYMENT_CONFIG_HINT": "Diese Datei wurde durch das Deployment festgelegt und ändert ggf. Daten abweichend der Vorlage. Diese Datei kann nur durch das Deployment verändert werden.",
-      "EXTENSION_CONFIG_TITLE": "Extension-Konfigurationsdatei (Überschreiben)",
-      "EXTENSION_CONFIG_HINT": "Sie können hier Werte der Konfiguration überschreiben. Beachten Sie, dass diese Konfiguration beim Rollout überschrieben wird. Die hier erfolgten Änderungen müssen an das edu-sharing Entwicklerteam gegeben werden",
+      "EXTENSION_CONFIG_TITLE": "Extension-Konfigurationsdatei (Kunden/Projektspezifische Werte)",
+      "EXTENSION_CONFIG_HINT": "Diese Datei ist über das Git-Repository des Kundenprojekts eingefügt und gilt für alle Knoten.",
       "SERVER_CONFIG_TITLE": "Server-Konfigurationsdatei (Überschreiben)",
       "SERVER_CONFIG_HINT": "Sie können hier Werte der Konfiguration überschreiben. Diese Änderungen gelten für den aktuellen Server und werden bei Updates nicht überschrieben. Sie haben die höchste Priorität. ACHTUNG! Im Cluster-Betrieb gelten diese Parameter nur für den aktuellen Cluster-Server!"
     },
@@ -167,7 +176,6 @@
         "mail.smtp.username": "Nutzername für die Authentifizierung am Mailserver",
         "mail.smtp.passwd": "Passwort für die AUthentifizierung am Mailserver",
         "mail.smtp.from": "Angezeigte E-Mailadresse des Absenders. Empfohlen \"noreply@yourdomain.com\"",
-        "mail.admin": "Deprecated",
         "mail.addReplyTo": "Wenn true (Standard), wird als Reply-To Adresse der jeweilige Nutzer, der das Event ausgelöst hat, angehangen"
       }
     },

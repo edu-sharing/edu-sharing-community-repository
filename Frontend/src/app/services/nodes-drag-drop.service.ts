@@ -1,13 +1,13 @@
 import { Injectable, NgZone } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { Node } from '../core-module/core.module';
 import * as rxjs from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { distinctUntilChanged, map, pairwise } from 'rxjs/operators';
+import { Node, UIService } from '../core-module/core.module';
+import { Toast } from '../core-ui-module/toast';
 import {
     CanDrop,
     NodesDropTargetDirective,
 } from '../shared/directives/nodes-drop-target.directive';
-import { distinctUntilChanged, map, pairwise, scan } from 'rxjs/operators';
-import { Toast } from '../core-ui-module/toast';
 
 export type DropAction = 'move' | 'copy' | 'link';
 
@@ -29,8 +29,7 @@ export class NodesDragDropService {
     private canDropSubject = new BehaviorSubject<CanDrop | null>(null);
     /** A target being hovered with the cursor. Does not mean anything is dragged yet. */
     private hoveredTargetSubject = new BehaviorSubject<NodesDropTargetDirective>(null);
-    /** Current drop action based on pressed modifier keys. Updated outside ngZone. */
-    private dropActionSubjectOutsideZone = new BehaviorSubject<DropAction>('move');
+    /** Current drop action based on pressed modifier keys. */
     private dropActionSubject = new BehaviorSubject<DropAction>('move');
     /** The current cursor style. */
     private curserSubject = new BehaviorSubject<string>(null);
@@ -43,8 +42,7 @@ export class NodesDragDropService {
         return this.canDropSubject.value;
     }
 
-    constructor(private ngZone: NgZone, private toast: Toast) {
-        this.registerModifierState();
+    constructor(private ngZone: NgZone, private toast: Toast, private uiService: UIService) {
         this.registerDropTarget();
         this.registerCanDrop();
         this.registerDropActionSubject();
@@ -79,13 +77,6 @@ export class NodesDragDropService {
         } else if (this.canDrop?.denyReason) {
             this.toast.error(null, this.canDrop.denyReason);
         }
-    }
-
-    private registerModifierState() {
-        this.ngZone.runOutsideAngular(() => {
-            document.addEventListener('keydown', this.onKeyDown);
-            document.addEventListener('keyup', this.onKeyUp);
-        });
     }
 
     private registerDropTarget() {
@@ -152,24 +143,21 @@ export class NodesDragDropService {
             });
     }
 
-    private onKeyDown = (e: KeyboardEvent) => {
-        if (e.key === 'Control' || e.keyCode == 91 || e.keyCode == 93) {
-            this.dropActionSubjectOutsideZone.next('copy');
-        }
-    };
-
-    private onKeyUp = (e: KeyboardEvent) => {
-        if (e.key === 'Control' || e.keyCode == 91 || e.keyCode == 93) {
-            this.dropActionSubjectOutsideZone.next('move');
-        }
-    };
-
     private registerDropActionSubject() {
-        this.dropActionSubjectOutsideZone
-            .pipe(distinctUntilChanged())
+        this.uiService
+            .observeCtrlOrCmdKeyPressedOutsideZone()
+            .pipe(map((ctrlOrCmdPressed) => this.getDropAction(ctrlOrCmdPressed)))
             .subscribe((dropAction) =>
                 this.ngZone.run(() => this.dropActionSubject.next(dropAction)),
             );
+    }
+
+    private getDropAction(ctrlOrCmdPressed: boolean): DropAction {
+        if (ctrlOrCmdPressed) {
+            return 'copy';
+        } else {
+            return 'move';
+        }
     }
 
     private getCursor(draggedNodes: Node[], canDrop: CanDrop, dropAction: DropAction): string {

@@ -166,9 +166,11 @@ export enum Scope {
     Render = 'Render',
     Search = 'Search',
     CollectionsReferences = 'CollectionsReferences',
-    CollectionsCollection = 'CollectionsCollection',
+    CollectionsProposals = 'CollectionsReferences',
+    CollectionsCollection = 'CollectionsProposals',
     WorkspaceList = 'WorkspaceList',
     WorkspaceTree = 'WorkspaceTree',
+    Sharing = 'Sharing',
     Oer = 'Oer',
     UserManagement = 'UserManagement',
     Stream = 'Stream',
@@ -220,6 +222,7 @@ export enum Constrain {
     AddObjects, // Only visible when it is possible to add objects into the current list
     HomeRepository, // Only visible when the nodes are from the local (home) repository
     User, // Only visible when a user is present and logged in
+    NoScope, // Only visible when no current scope (i.e "safe" scope) is set
     ReurlMode, // Only visible when a reurl is present (called to pick object from lms)
     LTIMode, // Only visible when a lti session is present (called to pick object from lti platform)
 }

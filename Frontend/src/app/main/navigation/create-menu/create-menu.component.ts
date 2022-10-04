@@ -12,8 +12,9 @@ import {
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { ConnectorService } from 'ngx-edu-sharing-api';
+import * as rxjs from 'rxjs';
 import { Observable, Subject } from 'rxjs';
-import { delay, takeUntil } from 'rxjs/operators';
+import { delay, take, takeUntil } from 'rxjs/operators';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
@@ -53,6 +54,7 @@ import {
     DialogRef,
     ManagementDialogsService,
 } from '../../../modules/management-dialogs/management-dialogs.service';
+import { PasteService } from '../../../services/paste.service';
 import { CardComponent } from '../../../shared/components/card/card.component';
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
 
@@ -131,6 +133,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         private event: FrameEventsService,
         private cardService: CardService,
         private dialogs: ManagementDialogsService,
+        private paste: PasteService,
     ) {
         this.route.queryParams.subscribe((params) => {
             this.params = params;
@@ -155,6 +158,14 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         this.optionsService.virtualNodesAdded
             .pipe(takeUntil(this.destroyed))
             .subscribe((nodes) => this.onCreate.emit(nodes));
+        this.paste
+            .observeUrlPasteOnPage()
+            .pipe(takeUntil(this.destroyed))
+            .subscribe((url) => this.onUrlPasteOnPage(url));
+        this.paste
+            .observeNonTextPageOnPage()
+            .pipe(takeUntil(this.destroyed))
+            .subscribe(() => this.toast.error(null, 'CLIPBOARD_DATA_UNSUPPORTED'));
     }
 
     ngOnDestroy(): void {
@@ -162,41 +173,29 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         this.destroyed.complete();
     }
 
-    @HostListener('document:paste', ['$event'])
-    onDataPaste(event: ClipboardEvent) {
-        if (event.type === 'paste') {
-            if (!this.allowed || !this.allowBinary) {
-                return;
-            }
-            if (CardComponent.getNumberOfOpenCards() > 0) {
-                return;
-            }
-            if ((event.target as HTMLElement)?.tagName === 'INPUT') {
-                return;
-            }
-            if (event.clipboardData.items.length > 0) {
-                const item = event.clipboardData.items[0];
-                if (item.type === 'text/plain') {
-                    item.getAsString((data) => {
-                        if (data.toLowerCase().startsWith('http')) {
-                            // @TODO: Later we should find a way to prevent the event from propagating
-                            // this currently fails because getAsString is called async!
-                            this.managementService
-                                .getDialogsComponent()
-                                .createUrlLink(new LinkData(data));
-                            event.preventDefault();
-                            event.stopPropagation();
-                        } else {
-                            // this.toast.error(null, 'CLIPBOARD_DATA_UNSUPPORTED');
-                            // it is normal text, ignore it
-                            return;
-                        }
-                    });
-                } else {
-                    this.toast.error(null, 'CLIPBOARD_DATA_UNSUPPORTED');
-                }
-            }
+    private onUrlPasteOnPage(url: string) {
+        if (!this.allowed || !this.allowBinary) {
+            return;
         }
+        if (CardComponent.getNumberOfOpenCards() > 0) {
+            return;
+        }
+        // @TODO: Later we should find a way to prevent the event from propagating
+        // this currently fails because getAsString is called async!
+        this.managementService.getDialogsComponent().createUrlLink({
+            ...new LinkData(url),
+            parent: this.getParent(),
+        });
+        // `onUploadFilesProcessed` will be fired when the quick edit dialog triggered by
+        // `createUrlLink` is confirmed or canceled.
+        this.dialogs
+            .getDialogsComponent()
+            .onUploadFilesProcessed.pipe(take(1))
+            .subscribe((nodes) => {
+                if (nodes) {
+                    this.onCreate.emit(nodes);
+                }
+            });
     }
 
     updateOptions() {
@@ -314,6 +313,29 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         this.uploadSelectDialogRef.afterClosed().subscribe((files) => {
             if (files) {
                 this.uploadFiles(files);
+            } else {
+                // When `files` is not set, that can either mean that the dialog was canceled or
+                // that a link was entered, which causes an edit dialog to be opened by the
+                // management dialogs component. When that edit dialog is confirmed or canceled, the
+                // `onUploadFilesProcessed` event is fired. When either of this happens, the link
+                // creation is completed.
+                //
+                // FIXME: This kind of logic should be cleanly separated. Either
+                // - the management-dialogs service should process file uploads and edit dialogs and
+                //   should, for both links and uploads, notify us only after the edit dialog was
+                //   closed by the user, or
+                // - we handle the edit dialog here as a response to the user either uploading files
+                //   or entering a link.
+                rxjs.merge(
+                    this.dialogs.getDialogsComponent().onUploadFilesProcessed,
+                    this.dialogs.getDialogsComponent().onUploadSelectCanceled,
+                )
+                    .pipe(take(1))
+                    .subscribe((nodes) => {
+                        if (nodes) {
+                            this.onCreate.emit(nodes);
+                        }
+                    });
             }
             this.uploadSelectDialogRef = null;
         });

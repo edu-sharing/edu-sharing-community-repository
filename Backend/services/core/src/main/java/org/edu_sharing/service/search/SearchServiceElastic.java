@@ -15,7 +15,10 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.metadataset.v2.*;
+import org.edu_sharing.metadataset.v2.MetadataQuery;
+import org.edu_sharing.metadataset.v2.MetadataQueryParameter;
+import org.edu_sharing.metadataset.v2.MetadataReader;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repackaged.elasticsearch.org.apache.http.HttpHost;
@@ -38,14 +41,17 @@ import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SearchVCard;
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.xcontent.*;
-import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.SearchModule;
@@ -63,9 +69,12 @@ import org.elasticsearch.search.suggest.SuggestBuilder;
 import org.elasticsearch.search.suggest.SuggestBuilders;
 import org.elasticsearch.search.suggest.phrase.DirectCandidateGeneratorBuilder;
 import org.elasticsearch.search.suggest.phrase.PhraseSuggestion;
+import org.elasticsearch.xcontent.*;
 import org.springframework.context.ApplicationContext;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -341,127 +350,134 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
 
 
-            logger.info("query: "+searchSourceBuilder.toString());
-            SearchResponse searchResponse = LogTime.log("Searching elastic", () -> client.search(searchRequest, RequestOptions.DEFAULT));
+            // logger.info("query: "+searchSourceBuilder.toString());
+            try {
+                SearchResponse searchResponse = LogTime.log("Searching elastic", () -> client.search(searchRequest, RequestOptions.DEFAULT));
 
+                SearchHits hits = searchResponse.getHits();
+                logger.info("result count: "+hits.getTotalHits());
 
-            SearchHits hits = searchResponse.getHits();
-            logger.info("result count: "+hits.getTotalHits());
+                long millisPerm = System.currentTimeMillis();
+                for (SearchHit hit : hits) {
+                    data.add(transformSearchHit(authorities, user, hit, searchToken.isResolveCollections()));
+                }
+                logger.info("permission stuff took:"+(System.currentTimeMillis() - millisPerm));
 
-            long millisPerm = System.currentTimeMillis();
-            for (SearchHit hit : hits) {
-                data.add(transformSearchHit(authorities, user, hit, searchToken.isResolveCollections()));
-            }
-            logger.info("permission stuff took:"+(System.currentTimeMillis() - millisPerm));
+                List<NodeSearch.Facet> facetsResult = new ArrayList<>();
+                List<NodeSearch.Facet> facetsResultSelected = new ArrayList<>();
 
-            List<NodeSearch.Facet> facetsResult = new ArrayList<>();
-            List<NodeSearch.Facet> facetsResultSelected = new ArrayList<>();
+                Long total = null;
 
-            Long total = null;
+                List<Aggregation> aggregations = new ArrayList<>();
+                if(searchResponseAggregations != null){
+                    aggregations.addAll(searchResponseAggregations.getAggregations().asList());
+                }
+                if(searchResponse.getAggregations() != null) aggregations.addAll(searchResponse.getAggregations().asList());
 
-            List<Aggregation> aggregations = new ArrayList<>();
-            if(searchResponseAggregations != null){
-                aggregations.addAll(searchResponseAggregations.getAggregations().asList());
-            }
-            if(searchResponse.getAggregations() != null) aggregations.addAll(searchResponse.getAggregations().asList());
+                for(Aggregation a : aggregations){
+                    if(a instanceof  ParsedStringTerms) {
+                        ParsedStringTerms pst = (ParsedStringTerms) a;
+                        facetsResult.add(getFacet(pst));
+                    }else if (a instanceof ParsedCardinality){
+                        ParsedCardinality pc = (ParsedCardinality)a;
+                        if (a.getName().equals("original_count")) {
+                            total = pc.getValue();
+                        }else{
+                            logger.error("unknown cardinality aggregation");
+                        }
 
-           for(Aggregation a : aggregations){
-               if(a instanceof  ParsedStringTerms) {
-                   ParsedStringTerms pst = (ParsedStringTerms) a;
-                   facetsResult.add(getFacet(pst));
-               }else if (a instanceof ParsedCardinality){
-                   ParsedCardinality pc = (ParsedCardinality)a;
-                   if (a.getName().equals("original_count")) {
-                       total = pc.getValue();
-                   }else{
-                       logger.error("unknown cardinality aggregation");
-                   }
-
-               }else if(a instanceof ParsedFilter){
-                   ParsedFilter pf = (ParsedFilter)a;
-                   for(Aggregation aggregation : pf.getAggregations().asList()){
-                      if(aggregation instanceof ParsedStringTerms){
-                          ParsedStringTerms pst = (ParsedStringTerms) aggregation;
-                          if(a.getName().endsWith("_selected")){
-                              facetsResultSelected.add(getFacet(pst));
-                          }else{
-                              facetsResult.add(getFacet(pst));
-                          }
-                      }
-                   }
-               }else{
-                   logger.error("non supported aggreagtion "+a.getName());
-               }
-           }
-            /**
-             * add selected when missing
-             */
-            if(searchToken != null && searchToken.getFacets() != null && searchToken.getFacets().size() > 0) {
-                for (String facet : searchToken.getFacets()) {
-                    if (!criterias.containsKey(facet)) {
-                        continue;
-                    }
-                    for (String value : criterias.get(facet)) {
-                        Optional<NodeSearch.Facet> facetResult = facetsResult.stream()
-                                .filter(f -> f.getProperty().equals(facet)).findFirst();
-                        Optional<NodeSearch.Facet> selected = facetsResultSelected
-                                .stream()
-                                .filter(f ->
-                                        f.getProperty().equals(facet))
-                                .findFirst();
-                        if (selected.isPresent()) {
-                            if (facetResult.isPresent()) {
-                                if (!facetResult.get().getValues().stream().anyMatch(v -> v.getValue().equals(value))) {
-                                    if (selected.get().getValues().stream().anyMatch(v -> value.equals(v.getValue()))) {
-                                        facetResult.get().getValues().add(selected.get().getValues().stream()
-                                                .filter(v -> value.equals(v.getValue()))
-                                                .findFirst()
-                                                .get()
-                                        );
-                                    }
+                    }else if(a instanceof ParsedFilter){
+                        ParsedFilter pf = (ParsedFilter)a;
+                        for(Aggregation aggregation : pf.getAggregations().asList()){
+                            if(aggregation instanceof ParsedStringTerms){
+                                ParsedStringTerms pst = (ParsedStringTerms) aggregation;
+                                if(a.getName().endsWith("_selected")){
+                                    facetsResultSelected.add(getFacet(pst));
+                                }else{
+                                    facetsResult.add(getFacet(pst));
                                 }
-                            } else {
-                                if (selected.get().getValues().stream().anyMatch(v -> value.equals(v.getValue()))) {
-                                    facetsResult.add(selected.get());
+                            }
+                        }
+                    }else{
+                        logger.error("non supported aggreagtion "+a.getName());
+                    }
+                }
+                /**
+                 * add selected when missing
+                 */
+                if(searchToken != null && searchToken.getFacets() != null && searchToken.getFacets().size() > 0) {
+                    for (String facet : searchToken.getFacets()) {
+                        if (!criterias.containsKey(facet)) {
+                            continue;
+                        }
+                        for (String value : criterias.get(facet)) {
+                            Optional<NodeSearch.Facet> facetResult = facetsResult.stream()
+                                    .filter(f -> f.getProperty().equals(facet)).findFirst();
+                            Optional<NodeSearch.Facet> selected = facetsResultSelected
+                                    .stream()
+                                    .filter(f ->
+                                            f.getProperty().equals(facet))
+                                    .findFirst();
+                            if (selected.isPresent()) {
+                                if (facetResult.isPresent()) {
+                                    if (!facetResult.get().getValues().stream().anyMatch(v -> v.getValue().equals(value))) {
+                                        if (selected.get().getValues().stream().anyMatch(v -> value.equals(v.getValue()))) {
+                                            facetResult.get().getValues().add(selected.get().getValues().stream()
+                                                    .filter(v -> value.equals(v.getValue()))
+                                                    .findFirst()
+                                                    .get()
+                                            );
+                                        }
+                                    }
+                                } else {
+                                    if (selected.get().getValues().stream().anyMatch(v -> value.equals(v.getValue()))) {
+                                        facetsResult.add(selected.get());
+                                    }
                                 }
                             }
                         }
                     }
                 }
+
+                if(searchResponse.getSuggest() != null) {
+                    PhraseSuggestion phraseSuggestion = searchResponse.getSuggest().getSuggestion("ngsearchword");
+                    if (phraseSuggestion.getEntries() != null && phraseSuggestion.getEntries().size() > 0) {
+                        List<PhraseSuggestion.Entry> entries = phraseSuggestion.getEntries();
+
+                        List<NodeSearch.Suggest> suggests = new ArrayList<>();
+                        for (PhraseSuggestion.Entry entry : entries) {
+                            if(entry.getOptions() == null || entry.getOptions().size() == 0) continue;
+                            logger.info("phrase:" +entry.getCutoffScore());
+                            for(PhraseSuggestion.Entry.Option option: entry.getOptions()){
+                                NodeSearch.Suggest suggest = new NodeSearch.Suggest();
+                                suggest.setText(option.getText().string());
+                                suggest.setHighlighted((option.getHighlighted().hasString())
+                                        ? option.getHighlighted().string() : null);
+                                suggest.setScore(option.getScore());
+                                suggests.add(suggest);
+                                logger.info("SUGGEST:" + option.getText() +" " + option.getScore() +" "+ option.getHighlighted());
+                            }
+
+                        }
+                        sr.setSuggests(suggests);
+
+                    }
+                }
+
+                if(total == null){
+                    total = hits.getTotalHits().value;
+                }
+                sr.setFacets(facetsResult);
+                sr.setStartIDX(searchToken.getFrom());
+                sr.setNodeCount((int)total.longValue());
+                //client.close();
+            } catch(ElasticsearchException e) {
+                logger.error("Error running query. The query is logged below for debugging reasons");
+                logger.error(e.getMessage(), e);
+                logger.error(queryBuilder.toString());
+                throw e;
             }
 
-           if(searchResponse.getSuggest() != null) {
-               PhraseSuggestion phraseSuggestion = searchResponse.getSuggest().getSuggestion("ngsearchword");
-               if (phraseSuggestion.getEntries() != null && phraseSuggestion.getEntries().size() > 0) {
-                   List<PhraseSuggestion.Entry> entries = phraseSuggestion.getEntries();
-
-                   List<NodeSearch.Suggest> suggests = new ArrayList<>();
-                   for (PhraseSuggestion.Entry entry : entries) {
-                       if(entry.getOptions() == null || entry.getOptions().size() == 0) continue;
-                       logger.info("phrase:" +entry.getCutoffScore());
-                       for(PhraseSuggestion.Entry.Option option: entry.getOptions()){
-                           NodeSearch.Suggest suggest = new NodeSearch.Suggest();
-                           suggest.setText(option.getText().string());
-                           suggest.setHighlighted((option.getHighlighted().hasString())
-                                   ? option.getHighlighted().string() : null);
-                           suggest.setScore(option.getScore());
-                           suggests.add(suggest);
-                           logger.info("SUGGEST:" + option.getText() +" " + option.getScore() +" "+ option.getHighlighted());
-                       }
-
-                   }
-                   sr.setSuggests(suggests);
-
-               }
-           }
-
-            if(total == null){
-               total = hits.getTotalHits().value;
-           }
-            sr.setFacets(facetsResult);
-            sr.setStartIDX(searchToken.getFrom());
-            sr.setNodeCount((int)total.longValue());
-            //client.close();
         } catch (IOException e) {
             logger.error(e.getMessage(),e);
         }
@@ -589,6 +605,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         Map nodeRef = (Map) sourceAsMap.get("nodeRef");
         String nodeId = (String) nodeRef.get("id");
+
+        Map parentRef = (Map) sourceAsMap.get("parentRef");
+        String parentId = (parentRef != null) ? (String)parentRef.get("id") :null;
+
+
         Map storeRef = (Map) nodeRef.get("storeRef");
         String protocol = (String) storeRef.get("protocol");
         String identifier = (String) storeRef.get("identifier");
@@ -702,6 +723,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         if(sourceAsMap.get("content") != null) {
             props.put(CCConstants.DOWNLOADURL, URLTool.getDownloadServletUrl(alfNodeRef.getId(), null, true));
+        }
+
+        if(parentId != null){
+            props.put(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID,parentId);
         }
 
         T eduNodeRef = clazz.newInstance();

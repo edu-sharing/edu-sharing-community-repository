@@ -2,13 +2,16 @@
 
 ## Usage
 
+Configure using variables in `.env` (see `.env.example`).
+
+When testing against `localhost:4200`, make sure to start the dev server using `npm start` before
+running tests.
+
 Run all tests:
 
 ```sh
 npm run e2e
 ```
-
-Configure using variables in `.env` (see `.env.example`).
 
 ### Run Individual Tests
 
@@ -25,6 +28,8 @@ Then you can use IDE integration like for VSCode or run tests manually:
 npx playwright test playwright/out/scenarios/login.spec.js --project chromium --headed
 # Run test matching the given pattern in Chromium and enabled Playwright inspector
 npx playwright test --project chromium --debug -g 'should remove an element from the collection'
+# Run test matching the given pattern 5 times in each browser
+npx playwright test -g 'should remove an element from the collection' --repeat-each=5
 ```
 
 ## Writing Tests

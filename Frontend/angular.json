@@ -58,7 +58,8 @@
             "optimization": false,
             "namedChunks": true,
             "allowedCommonJsDependencies": [
-              "@cordobo/qrcode"
+              "@cordobo/qrcode",
+              "uuid"
             ]
           },
           "configurations": {

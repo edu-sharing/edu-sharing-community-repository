@@ -11,7 +11,6 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { ActionbarHelperService } from '../../common/services/actionbar-helper';
 import { MainNavComponent } from '../../main/navigation/main-nav/main-nav.component';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import {
@@ -30,6 +29,7 @@ import {
     NodeList,
     NodeWrapper,
     Repository,
+    RequestObject,
     RestCollectionService,
     RestConnectorService,
     RestConstants,
@@ -111,7 +111,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     @ViewChild('mdsMobile') mdsMobileRef: MdsEditorWrapperComponent;
     @ViewChild('mdsDesktop') mdsDesktopRef: MdsEditorWrapperComponent;
-    @ViewChild('list') list: ListTableComponent;
     @ViewChild('extendedSearch') extendedSearch: ElementRef;
     @ViewChild('toolbar') toolbar: any;
     @ViewChild('extendedSearchTabGroup') extendedSearchTabGroup: MatTabGroup;
@@ -218,7 +217,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly didYouMeanSuggestion$ = this.searchApi
         .observeDidYouMeanSuggestion()
         .pipe(shareReplay(1));
-    private loadingTask = this.loadingScreen.addLoadingTask();
+    private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed$ });
 
     constructor(
         private router: Router,
@@ -230,7 +229,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         private iam: RestIamService,
         private search: RestSearchService,
         private collectionApi: RestCollectionService,
-        private actionbar: ActionbarHelperService,
         private nodeApi: RestNodeService,
         private toast: Toast,
         private translate: TranslateService,
@@ -261,6 +259,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     ngAfterViewInit() {
         // Avoid changed-after-checked error
+        this.mainNavService.getMainNav().refreshBanner();
         setTimeout(() => {
             this.initAfterView();
         });
@@ -276,7 +275,12 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private initAfterView(): void {
-        this.tutorialElement = this.mainNavService.getMainNav().searchField.input;
+        // For some reason, the main nav component does not get populated in time when navigating
+        // back from the rendering component. However, since the user cannot go anywhere without
+        // closing the tutorial, we won't be needing it in this case anyway.
+        if (this.mainNavService.getMainNav().searchField) {
+            this.tutorialElement = this.mainNavService.getMainNav().searchField.input;
+        }
         this.handleScroll();
         this.searchService.clear();
         this.initalized = true;
@@ -412,7 +416,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             // showUser: this.mainnav,
             searchQueryChange: (searchQuery) => (this.searchService.searchTerm = searchQuery),
             onSearch: () => this.applyParameters('mainnav'),
-            onCreate: (nodes) => this.list.addVirtualNodes(nodes),
+            onCreate: (nodes) => this.nodeEntriesResults.addVirtualNodes(nodes),
         });
     }
 
@@ -453,6 +457,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     async applyParameters(
         origin: 'mainnav' | 'mds' | 'did-you-mean-suggestion' | 'sort',
         props: Values = null,
+        { replaceUrl = false } = {},
     ) {
         this.searchService.reinit = true;
         this.searchService.extendedSearchUsed = true;
@@ -465,7 +470,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         ) {
             this.searchService.sidenavOpened = false;
         }
-        await this.routeSearchParameters(props);
+        await this.routeSearchParameters(props, { replaceUrl });
         this.getSearch(this.searchService.searchTerm, true);
     }
 
@@ -553,12 +558,16 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         return true;
     }
 
-    routeSearchParameters(parameters: { [property: string]: string[] }) {
+    routeSearchParameters(
+        parameters: { [property: string]: string[] },
+        { replaceUrl = false } = {},
+    ) {
         this.routeSearch(
             this.searchService.searchTerm,
             this.currentRepository,
             this.mdsId,
             parameters,
+            { replaceUrl },
         );
     }
 
@@ -585,6 +594,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         repository = this.currentRepository,
         mds = this.mdsId,
         parameters?: { [property: string]: string[] },
+        { replaceUrl = false } = {},
     ) {
         if (!parameters) {
             parameters = await this.getMdsValues();
@@ -607,6 +617,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             queryParams.materialsSortAscending = this.searchService.sort.direction === 'asc';
             const result = await this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
                 queryParams,
+                replaceUrl,
             });
             if (result !== true) {
                 // this.invalidateMds();
@@ -655,47 +666,66 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         if (init) {
             this.searchService.dataSourceCollections.reset();
             if (this.isHomeRepository() || this.currentRepository == RestConstants.ALL) {
-                this.isSearchingCollections = true;
-                this.search
-                    .searchWithBody(
-                        {
-                            criteria: this.getCriterias(this.currentValues, searchString, false),
-                            facets: [],
-                        },
-                        {
-                            sortBy: [
-                                RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
-                                RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
-                                RestConstants.CM_MODIFIED_DATE,
-                            ],
-                            propertyFilter: [RestConstants.ALL],
-                            sortAscending: [false, true, false],
-                        },
-                        // this is now handled via mds queries
-                        RestConstants.CONTENT_TYPE_ALL,
-                        this.currentRepository == RestConstants.ALL
-                            ? RestConstants.HOME_REPOSITORY
-                            : this.currentRepository,
-                        this.mdsId,
-                        [],
-                        RestConstants.QUERY_NAME_COLLECTIONS,
-                    )
-                    .subscribe(
-                        (data: NodeList) => {
-                            this.isSearchingCollections = false;
-                            this.searchService.dataSourceCollections.setData(
-                                data.nodes,
-                                data.pagination,
-                            );
-                            this.searchService.dataSourceCollections.setCanLoadMore(false);
-                        },
-                        (error: any) => {
-                            this.isSearchingCollections = false;
-                            this.toast.error(error);
-                        },
-                    );
+                this.loadCollections('init');
             }
         }
+    }
+
+    loadCollections(mode: 'init' | 'load-more') {
+        const LOAD_MORE_COUNT = 20;
+        this.isSearchingCollections = true;
+        const requestOptions: RequestObject = {
+            sortBy: [
+                RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
+                RestConstants.CCM_PROP_COLLECTION_PINNED_ORDER,
+                RestConstants.CM_MODIFIED_DATE,
+            ],
+            propertyFilter: [RestConstants.ALL],
+            sortAscending: [false, true, false],
+        };
+
+        if (mode === 'load-more') {
+            requestOptions.count = LOAD_MORE_COUNT;
+            requestOptions.offset = this.searchService.dataSourceCollections.getData().length;
+        }
+
+        this.search
+            .searchWithBody(
+                {
+                    criteria: this.getCriterias(
+                        this.currentValues,
+                        this.searchService.searchTerm,
+                        false,
+                    ),
+                    facets: [],
+                },
+                requestOptions,
+                // this is now handled via mds queries
+                RestConstants.CONTENT_TYPE_ALL,
+                this.currentRepository == RestConstants.ALL
+                    ? RestConstants.HOME_REPOSITORY
+                    : this.currentRepository,
+                this.mdsId,
+                [],
+                RestConstants.QUERY_NAME_COLLECTIONS,
+            )
+            .subscribe(
+                (data: NodeList) => {
+                    this.isSearchingCollections = false;
+                    if (mode === 'init') {
+                        this.searchService.dataSourceCollections.setData(
+                            data.nodes,
+                            data.pagination,
+                        );
+                    } else if (mode === 'load-more') {
+                        this.searchService.dataSourceCollections.appendData(data.nodes);
+                    }
+                },
+                (error: any) => {
+                    this.isSearchingCollections = false;
+                    this.toast.error(error);
+                },
+            );
     }
 
     updateGroupedRepositories() {
@@ -759,6 +789,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 displayType: type ?? null,
             },
             queryParamsHandling: 'merge',
+            replaceUrl: true,
         });
     }
 
@@ -982,11 +1013,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         );
     }
 
-    private addToStream(node: Node) {
-        let nodes = ActionbarHelperService.getNodes(this.getSelection(), node);
-        this.addNodesStream = nodes;
-    }
-
     private printListener() {
         // not working properly
         /*
@@ -1198,6 +1224,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     customOptions: this.customOptions,
                     scope: Scope.Search,
                 });
+                this.searchService.isFrontpage = useFrontpage && tryFrontpage;
                 this.processSearchResult(data, init);
                 this.searchService.showchosenfilters = true;
                 this.searchRepository(
@@ -1461,7 +1488,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                             .getDialogs()
                             .addToCollectionList(
                                 this.addToCollection,
-                                ActionbarHelperService.getNodes(this.getSelection(), node),
+                                NodeHelperService.getActionbarNodes(this.getSelection(), node),
                                 true,
                                 () => {
                                     this.switchToCollections(this.addToCollection.ref.id);
@@ -1629,6 +1656,9 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private registerSearchOnMdsUpdate(): void {
+        // Don't create a new browser-history entry for the initial mds values update, so the back
+        // navigation will skip the resulting redirect.
+        let initDone = false;
         rxjs.merge(this.searchField.filterValuesChange, this.mdsDesktopRef.mdsEditorInstance.values)
             .pipe(
                 takeUntil(this.destroyed$),
@@ -1644,7 +1674,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 distinctUntilChanged(),
                 map((json) => JSON.parse(json)),
             )
-            .subscribe((values) => this.applyParameters('mds', values));
+            .subscribe((values) => {
+                this.applyParameters('mds', values, { replaceUrl: !initDone });
+                initDone = true;
+            });
         this.mdsDesktopRef.mdsEditorInstance.mdsInitDone
             .pipe(
                 takeUntil(this.destroyed$),

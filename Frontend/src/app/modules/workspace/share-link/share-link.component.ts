@@ -128,7 +128,7 @@ export class WorkspaceShareLinkComponent {
                 this._node.ref.id,
                 this.currentShare.shareId,
                 date,
-                this.passwordEnabled ? this.passwordString : '',
+                this.getPasswordParameter(),
             )
             .subscribe((data: NodeShare) => {
                 this.currentShare = data;
@@ -136,6 +136,19 @@ export class WorkspaceShareLinkComponent {
                     this.currentShare.url = this.translate.instant('WORKSPACE.SHARE_LINK.DISABLED');
                 // console.log(data);
             });
+    }
+
+    private getPasswordParameter(): string | null {
+        if (this.passwordEnabled && this.passwordString) {
+            // Set or update the password
+            return this.passwordString;
+        } else if (this.passwordEnabled && this.passwordAlreadySet) {
+            // Keep the password that was already set
+            return null;
+        } else {
+            // Remove the password
+            return '';
+        }
     }
 
     setExpiry(value: boolean) {

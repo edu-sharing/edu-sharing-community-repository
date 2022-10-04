@@ -24,7 +24,7 @@ mat-tab-group {
     // Use `margin-top` instead of `top` to not create a negative position offset at the bottom of
     // the container, which could be overlapped by a custom footer.
     margin-top: $mainnavHeight;
-    min-height: calc(100vh - #{$mainnavHeight});
+    min-height: calc(100vh - $mainnavHeight);
 
     .collections-right {
         > es-spinner {
@@ -33,6 +33,7 @@ mat-tab-group {
     }
     &.collectionsContainerTabs {
         margin-top: $mainnavHeight + 48px;
+        min-height: calc(100vh - ($mainnavHeight + 48px));
     }
     &.collectionsContainerNoSidebar {
         padding: 0 10%;
@@ -340,6 +341,39 @@ section {
             > span {
                 @include limitLineCount(2, 1.25);
             }
+        }
+    }
+}
+.node-deleted {
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(3px);
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+    div {
+        opacity: 1;
+        padding-bottom: 7px;
+    }
+    > div i {
+        font-size: 26pt;
+        color: $textPrimary;
+    }
+    .headline {
+        color: $textPrimary;
+        font-size: 120%;
+    }
+    .subline {
+        color: $textLight;
+        font-size: 90%;
+    }
+    a {
+        text-transform: uppercase;
+        font-weight: bold;
+        i {
+            position: relative;
+            top: 7px;
         }
     }
 }

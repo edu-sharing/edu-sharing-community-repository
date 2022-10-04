@@ -3,6 +3,10 @@
     display: flex;
     flex-direction: column;
     overscroll-behavior: contain;
+    es-node-entries-wrapper {
+        padding: 0 20px;
+        display: block;
+    }
 }
 .breadcrumbs {
     display: flex;
@@ -19,6 +23,24 @@
     align-items: center;
     z-index: 101;
     pointer-events: none;
+}
+.show-more {
+    display: flex;
+    margin: auto;
+}
+.no-permissions-overlay {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    cursor: default;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(3px);
+    > i {
+        margin-bottom: 15px;
+    }
 }
 .noElements {
     display: flex;
@@ -43,7 +65,7 @@
     }
 }
 .search {
-    padding: 20px 30px 0 20px;
+    padding: 20px 20px 0 20px;
     .mat-form-field {
         width: 100%;
         .mat-form-field-appearance-outline .mat-form-field-wrapper {
