@@ -13,6 +13,11 @@ spec:
     - destination:
         host: {{ include "edusharing_repository_service.name" . }}
       weight: 100
+  tcp:
+  - route:
+    - destination:
+        host: {{ include "edusharing_repository_service.name" . }}
+      weight: 100
 ---
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService

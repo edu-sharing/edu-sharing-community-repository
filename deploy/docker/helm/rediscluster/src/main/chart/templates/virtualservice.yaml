@@ -8,6 +8,11 @@ metadata:
 spec:
   hosts:
   - {{ include "edusharing_rediscluster.name" . }}
+  http:
+  - route:
+    - destination:
+        host: {{ include "edusharing_rediscluster.name" . }}
+      weight: 100
   tcp:
   - route:
     - destination:
