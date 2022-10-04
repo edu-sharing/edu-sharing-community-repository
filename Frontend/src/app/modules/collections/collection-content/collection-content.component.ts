@@ -164,7 +164,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     dataSourceCollectionProposals = new NodeDataSource<ProposalNode>();
     collectionsColumns: ListItem[] = [];
     referencesColumns: ListItem[] = [];
-    private loadingTask = this.loadingScreen.addLoadingTask();
+    private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed$ });
 
     proposalColumns = [
         new ListItem('NODE', RestConstants.CM_PROP_TITLE),
