@@ -196,7 +196,10 @@ public class MetadataTemplateRenderer {
 						String rawValue = value;
 						HashMap<String, Object> vcardData = null;
 						if ("vcard".equals(widget.getType())) {
-							ArrayList<HashMap<String, Object>> map = VCardConverter.vcardToHashMap(value);
+							ArrayList<HashMap<String, Object>> map = VCardConverter.vcardToHashMap(
+									// html in vcards gets escaped beforehand for security reason, unescape special chars to not break the format
+									org.apache.commons.lang.StringEscapeUtils.unescapeHtml(value)
+ 							);
 							if (map.size() > 0) {
 								vcardData = map.get(0);
 							}

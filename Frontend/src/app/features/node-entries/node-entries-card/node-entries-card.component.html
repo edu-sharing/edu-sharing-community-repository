@@ -2,6 +2,8 @@
   class="grid-card"
   [class.grid-card-collection]="nodeHelper.isNodeCollection(node)"
   [class.grid-card-virtual]="node.virtual"
+  [class.dynamic-single-click]="entriesService.singleClickHint === 'dynamic'"
+  [class.selected]="entriesService.selection.isSelected(node)"
   (contextmenu)="openContextmenu($event)"
   (keydown.ContextMenu)="openContextmenu($event)"
 >
@@ -142,7 +144,7 @@
   </es-node-url>
   <div
     *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink"
-    class="clickable"
+    matRipple
     (click)="
       entriesService.onClicked({
         event: $event,

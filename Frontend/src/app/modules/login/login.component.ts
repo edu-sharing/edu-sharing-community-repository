@@ -1,7 +1,7 @@
 import { trigger } from '@angular/animations';
 import { PlatformLocation } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { first, map, startWith } from 'rxjs/operators';
@@ -25,6 +25,7 @@ import { UIHelper } from '../../core-ui-module/ui-helper';
 import { LoginInfo, AuthenticationService } from 'ngx-edu-sharing-api';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
+import { Subject } from 'rxjs';
 
 @Component({
     selector: 'es-workspace-login',
@@ -32,7 +33,7 @@ import { MainNavService } from '../../main/navigation/main-nav.service';
     styleUrls: ['login.component.scss'],
     animations: [trigger('dialog', UIAnimation.switchDialog(UIAnimation.ANIMATION_TIME_FAST))],
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnDestroy {
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     @ViewChild('loginForm') loginForm: ElementRef;
     @ViewChild('passwordInput') passwordInput: InputPasswordComponent;
@@ -55,6 +56,7 @@ export class LoginComponent implements OnInit {
     private next = '';
     private providers: any;
     private scope = '';
+    private destroyed = new Subject<void>();
 
     constructor(
         private connector: RestConnectorService,
@@ -70,7 +72,7 @@ export class LoginComponent implements OnInit {
         private loadingScreen: LoadingScreenService,
         private mainNav: MainNavService,
     ) {
-        const loadingTask = this.loadingScreen.addLoadingTask();
+        const loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
         this.isLoading = true;
         this.updateButtons();
         this.translations.waitForInit().subscribe(() => {
@@ -181,6 +183,11 @@ export class LoginComponent implements OnInit {
                 });
             });
         });
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
     }
 
     canRegister(): boolean {

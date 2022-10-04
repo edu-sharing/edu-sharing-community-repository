@@ -766,7 +766,7 @@ $badgeWidth: 250px;
     left: 5px;
 }
 .rowInner {
-    max-height: 1.5em;
+    max-height: 1.6em;
     overflow: hidden;
     flex-grow: 1;
 }
@@ -799,7 +799,7 @@ a.rowInner {
         font-size: 110%;
 
         .rowInner {
-            @include limitLineCount(2, 1.25);
+            @include limitLineCount(2, 1.4);
             justify-content: center;
             /*display: flex;
           justify-content: center;
@@ -996,7 +996,7 @@ a.rowInner {
 }
 .cardList .row_2 .rowInner,
 .cardList .row_3 .rowInner {
-    max-height: 1.5em;
+    max-height: 1.6em;
 }
 .cardList .row_2,
 .cardList .row_3,

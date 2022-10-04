@@ -52,6 +52,7 @@
     dropped: drop
   }"
   [globalKeyboardShortcuts]="true"
+  [singleClickHint]="'static'"
   (sortChange)="setSorting($event)"
   (clickItem)="clickItem($event)"
   (dblClickItem)="onOpenNode.emit($event.element)"

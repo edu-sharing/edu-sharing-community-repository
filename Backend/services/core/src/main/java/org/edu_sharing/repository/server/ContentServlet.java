@@ -11,7 +11,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -87,7 +89,14 @@ public class ContentServlet extends HttpServlet{
 		
 		try{
 			ApplicationInfo  homeAppInfo = ApplicationInfoList.getHomeRepository();
-			serviceRegistry.getAuthenticationService().authenticate(homeAppInfo.getUsername(), homeAppInfo.getPassword().toCharArray());
+			try {
+				serviceRegistry.getAuthenticationService().authenticate(homeAppInfo.getUsername(), homeAppInfo.getPassword().toCharArray());
+			} catch (AuthenticationException e) {
+				String message = "Wrong config values for username / password in homeApplication.properties.xml. Please update the config values in the repository";
+				logger.error(message, e);
+				resp.sendError(HttpServletResponse.SC_PRECONDITION_FAILED, message);
+				return;
+			}
 			// if remote repository, fetch the content via the implemented node service
 			if(repId!=null && !homeAppInfo.getAppId().equals(repId)){
 				String mimetype=NodeServiceFactory.getNodeService(repId).getContentMimetype(null,null,nodeId);
@@ -165,7 +174,11 @@ public class ContentServlet extends HttpServlet{
 		}catch(Throwable t) {
 			throw new ServletException(t);
 		}finally{
-			serviceRegistry.getAuthenticationService().invalidateTicket(serviceRegistry.getAuthenticationService().getCurrentTicket());
+			try {
+				serviceRegistry.getAuthenticationService().invalidateTicket(serviceRegistry.getAuthenticationService().getCurrentTicket());
+			} catch(AuthenticationCredentialsNotFoundException ignored) {
+
+			}
 		}
 		
 		

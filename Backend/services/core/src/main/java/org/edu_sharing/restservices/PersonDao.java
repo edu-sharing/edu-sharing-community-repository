@@ -53,6 +53,8 @@ public class PersonDao {
 	Logger logger = Logger.getLogger(PersonDao.class);
 	public static final String ME = "-me-";
 
+	private final ArrayList<EduGroup> parentOrganizations;
+
 	public static PersonDao getPerson(RepositoryDao repoDao, String userName) throws DAOException {
 
 		try {
@@ -150,6 +152,16 @@ public class PersonDao {
 			this.repoDao = repoDao;
 
 			this.userInfo = authorityService.getUserInfo(userName);
+
+			if(this.userInfo == null){
+				throw new DAOMissingException(new Exception("user "+ userName + " not found"));
+			}
+
+			// may causes performance penalties!
+			this.parentOrganizations = AuthenticationUtil.runAsSystem(() ->
+					authorityService.getEduGroups(userName, NodeServiceInterceptor.getEduSharingScope())
+			);
+
 
 			try{
 
@@ -503,7 +515,6 @@ public class PersonDao {
 	}
 
 	public String getUserName() {
-
 		return (String)this.userInfo.get(CCConstants.CM_PROP_PERSON_USERNAME);
 	}
 

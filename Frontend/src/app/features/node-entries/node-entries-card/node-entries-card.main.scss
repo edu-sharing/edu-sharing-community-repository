@@ -14,6 +14,9 @@ $optionBarHeight: 50px;
     @include contrastMode {
         border: 1px solid rgba(black, 0.42);
     }
+    &.selected {
+        background-color: $primaryVeryLight;
+    }
     .dropdown-dummy {
         position: fixed;
     }
@@ -221,10 +224,21 @@ $optionBarHeight: 50px;
             }
         }
     }
-    &:hover {
+    &.dynamic-single-click:hover {
         @include materialShadowMediumLarge(false, 0.2);
         background-color: $primaryVeryLight;
         // transform: scale(1.0075);
+    }
+    &.dynamic-single-click.grid-card-collection:hover .card-meta {
+        background-color: rgba(255, 255, 255, 0.9);
+    }
+    &.grid-card-collection {
+        .card-meta {
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        .card-options {
+            background-color: rgba(255, 255, 255, 0.9);
+        }
     }
     .card-options {
         border-top: 1px solid #ddd;

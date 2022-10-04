@@ -180,7 +180,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.initDone$.complete();
             });
         });
-        this.event.addListener(this);
+        this.event.addListener(this, this.destroyed$);
     }
 
     private registerMainNavConfig() {
@@ -868,7 +868,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                                     this.router,
                                     this.configService,
                                     this.isSafe() ? RestConstants.SAFE_SCOPE : null,
-                                    null,
                                 );
                                 this.toast.closeModalDialog();
                             }),

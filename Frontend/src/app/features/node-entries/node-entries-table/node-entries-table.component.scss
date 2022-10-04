@@ -58,7 +58,12 @@ mat-cell {
 }
 
 .mat-row {
-    cursor: pointer;
+    &.dynamic-single-click {
+        cursor: pointer;
+        &:hover {
+            background-color: $listItemSelectedBackground;
+        }
+    }
     &.mat-row-selected {
         background: $listItemSelectedBackgroundEffect;
     }
@@ -72,9 +77,6 @@ mat-cell {
     }
     &.mat-row-virtual-last {
         border-bottom: 2px dashed lighten($nodeVirtualColor, 10%);
-    }
-    &:hover {
-        background-color: $listItemSelectedBackground;
     }
     &.selected-when-dragging {
         opacity: 0.5; // Same as .cdk-drag-placeholder
@@ -111,4 +113,9 @@ mat-cell {
         display: flex;
         justify-content: center;
     }
+}
+
+.load-more {
+    display: flex;
+    justify-content: center;
 }

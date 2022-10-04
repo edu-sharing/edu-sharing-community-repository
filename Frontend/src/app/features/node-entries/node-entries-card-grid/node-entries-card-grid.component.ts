@@ -5,6 +5,7 @@ import {
     Input,
     NgZone,
     OnChanges,
+    OnInit,
     QueryList,
     SimpleChanges,
     ViewChild,
@@ -28,7 +29,7 @@ import { NodeEntriesGlobalService, PaginationStrategy } from '../node-entries-gl
     templateUrl: 'node-entries-card-grid.component.html',
     styleUrls: ['node-entries-card-grid.component.scss'],
 })
-export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
+export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnChanges {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly PaginationStrategy = PaginationStrategy;
     readonly Target = Target;
@@ -39,6 +40,12 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
 
     isDragging = false; // Drag-and-drop, not rearrange
     dropLists: CdkDropList[];
+    /**
+     * Whether the number of shown items is limited by `gridConfig.maxRows`.
+     *
+     * A value of `true` does not mean, that there would be more items available.
+     */
+    visibleItemsLimited = false;
 
     private readonly nodes$ = this.entriesService.dataSource$.pipe(
         switchMap((dataSource) => dataSource?.connect()),
@@ -68,6 +75,10 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
         public ui: UIService,
         private ngZone: NgZone,
     ) {}
+
+    ngOnInit(): void {
+        this.registerVisibleItemsLimited();
+    }
 
     ngOnChanges(changes: SimpleChanges): void {}
 
@@ -134,6 +145,12 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
         } else {
             return null;
         }
+    }
+
+    private registerVisibleItemsLimited() {
+        this.maxRows$.subscribe((maxRows) => {
+            this.visibleItemsLimited = maxRows > 0;
+        });
     }
 
     private refreshDropLists() {

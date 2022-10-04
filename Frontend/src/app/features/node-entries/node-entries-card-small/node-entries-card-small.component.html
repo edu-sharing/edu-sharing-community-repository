@@ -1,6 +1,7 @@
 <div
   class="grid-card"
   [class.grid-card-collection]="nodeHelper.isNodeCollection(node)"
+  [class.dynamic-single-click]="entriesService.singleClickHint === 'dynamic'"
   [style.background-color]="nodeHelper.isNodeCollection(node) ? node.collection.color : null"
   (contextmenu)="openContextmenu($event)"
   (keydown.ContextMenu)="openContextmenu($event)"
