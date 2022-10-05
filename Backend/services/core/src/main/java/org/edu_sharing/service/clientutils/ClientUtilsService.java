@@ -106,9 +106,9 @@ public class ClientUtilsService {
 				String content = metaTag.getAttribute("content");
 				if (name != null && content != null) {
 					if (name.equals("description"))
-						info.setDescription(content);
+						info.setDescription(StringEscapeUtils.unescapeHtml(content));
 					if (name.equals("keywords"))
-						info.setKeywords(content.split(","));
+						info.setKeywords(StringEscapeUtils.unescapeHtml(content).split(","));
 				}
 
 			}
