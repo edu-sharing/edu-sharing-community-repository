@@ -38,7 +38,7 @@ export class NodeStoreService {
                         });
                     }
                     for (const { nodeId, error } of errors) {
-                        if (RestHelper.errorMessageContains(error, 'Node is already in list')) {
+                        if (error.status === RestConstants.DUPLICATE_NODE_RESPONSE) {
                             this.toast.error(null, 'SEARCH.ADDED_TO_NODE_STORE_EXISTS', {
                                 name: RestHelper.getTitle(
                                     nodes.find((node) => node.ref.id === nodeId),
