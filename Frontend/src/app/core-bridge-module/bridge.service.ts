@@ -25,6 +25,9 @@ export class BridgeService {
     showModalDialog(options: ModalDialogOptions) {
         this.injector.get(Toast).showConfigurableDialog(options);
     }
+    showError(errorObject: any) {
+        this.injector.get(Toast).error(errorObject);
+    }
     showProgressDialog(title= 'PROGRESS_DIALOG_DEFAULT_TITLE', message= 'PROGRESS_DIALOG_DEFAULT_MESSAGE', type = ProgressType.Indeterminate) {
         this.injector.get(Toast).showProgressDialog(title, message, type);
     }

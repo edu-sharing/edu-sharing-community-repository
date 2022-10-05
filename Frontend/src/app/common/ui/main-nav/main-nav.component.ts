@@ -527,8 +527,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
 
     isSafe() {
         return (
-            this.connector.getCurrentLogin() &&
-            this.connector.getCurrentLogin().currentScope ===
+            this.connector.getCurrentLogin()?.currentScope ===
                 RestConstants.SAFE_SCOPE
         );
     }

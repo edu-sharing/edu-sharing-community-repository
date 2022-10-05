@@ -317,7 +317,11 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         this.refresh();
     }
     private async initialize() {
-        this.user = await (this.iam.getCurrentUserAsync());
+        try {
+            this.user = await (this.iam.getCurrentUserAsync());
+        } catch(e) {
+            this.toast.error(e);
+        }
         this.route.params.subscribe(async (routeParams: Params) => {
             this.isSafe = routeParams.mode === 'safe';
             const login = await this.connector.isLoggedIn().toPromise();

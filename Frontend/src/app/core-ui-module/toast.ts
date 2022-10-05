@@ -1,15 +1,15 @@
 import {Injectable, Injector, OnDestroy} from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {Router} from '@angular/router';
+import {TranslateService} from '@ngx-translate/core';
 import {BehaviorSubject, Observable} from 'rxjs';
-import { ModalDialogOptions } from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
-import { ProgressType } from '../common/ui/modal-dialog/modal-dialog.component';
-import { RestConstants } from '../core-module/rest/rest-constants';
-import { TemporaryStorageService } from '../core-module/rest/services/temporary-storage.service';
-import { DialogButton } from '../core-module/ui/dialog-button';
-import { UIConstants } from '../core-module/ui/ui-constants';
-import { DateHelper } from './DateHelper';
+import {ModalDialogOptions} from '../common/ui/modal-dialog-toast/modal-dialog-toast.component';
+import {ProgressType} from '../common/ui/modal-dialog/modal-dialog.component';
+import {RestConstants} from '../core-module/rest/rest-constants';
+import {TemporaryStorageService} from '../core-module/rest/services/temporary-storage.service';
+import {DialogButton} from '../core-module/ui/dialog-button';
+import {UIConstants} from '../core-module/ui/ui-constants';
+import {DateHelper} from './DateHelper';
 import {Subscription} from 'rxjs/Subscription';
 import {SessionStorageService} from '../core-module/rest/services/session-storage.service';
 import {ToastMessageComponent} from './components/toast-message/toast-message.component';
@@ -417,7 +417,15 @@ export class Toast implements OnDestroy {
             json = errorObject.error;
         }
         try {
-            error = json.error + ': ' + json.message;
+            if(json.error || json.message) {
+                error = json.error + ': ' + json.message;
+            } else if (json) {
+                error = JSON.stringify(json, null, 2);
+            }
+            // add url of endpoint (if available) to the message
+            if(errorObject.url) {
+                error += '\n\n' + errorObject.url;
+            }
         } catch (e) {
             console.error(errorObject);
             error = errorObject?.toString();
