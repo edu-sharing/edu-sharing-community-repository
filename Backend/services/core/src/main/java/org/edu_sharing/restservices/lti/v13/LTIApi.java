@@ -89,56 +89,93 @@ public class LTIApi {
         /**
          * @TODO check if multiple deployments got an own key pair
          */
-
-        RepoTools repoTools = new RepoTools();
+        
         try {
-
-            ApplicationInfo platform = repoTools.getApplicationInfo(iss, clientId, ltiDeploymentId);
-            Tool tool = Config.getTool(platform,req,true);
-            // get data from request
-            final LoginRequest loginRequest = LoginRequestFactory.from(req);
-            if (this.logger.isInfoEnabled()) {
-                this.logger.info("OIDC launch received with " + loginRequest.toString());
-            }
-
-            String targetLinkUri = loginRequest.getTarget_link_uri();
-            if(targetLinkUri == null){
-                throw new Exception("Bad request targetLinkUri is null. check tool config on platform side.");
-            }
-
-            final URI uri = new URI(targetLinkUri);
-			/* commented in local because localhost resolves to 0:0:0:0*/
-            String host = uri.getHost();
-			String remoteHost = new URI(req.getRequestURL().toString()).getHost();
-
-            logger.info("host:" + host + " remoteHost:"+remoteHost);
-            if (!host.equals(remoteHost)) {
-				throw new Exception("Bad request target uri host:" + host +" remoteHost:"+remoteHost);
-			}
-
-
-            // do the redirection
-            String authRequest = tool.getOidcAuthUrl(loginRequest);
-
-            /**
-             * fix: when it's an LtiResourceLinkRequest moodle sends rendering url (/edu-sharing/components/render)
-             * as targetUrl. edu.uoc.elc.lti.tool.Tool take this url for redirect_url which is wrong.
-             * moodle validates redirect url against config redirecturl which would fail with nodeId
-             *
-             * we can not detect if it will be an ResourceLink or Deeplink call here.
-             * This fix is only for ResourceLink calls. Deeplinks use the same redirect url so this is ok here.
-             */
-            authRequest = UrlTool.removeParam(authRequest,"redirect_uri");
-            authRequest = UrlTool.setParam(authRequest,"redirect_uri",ApplicationInfoList.getHomeRepository().getClientBaseUrl()+"/rest/lti/v13/" + LTIConstants.LTI_TOOL_REDIRECTURL_PATH);
-
-
-            //response.sendRedirect(authRequest);
-            return Response.status(302).location(new URI(authRequest)).build();
+            return loginInitiationsCore(iss, clientId, ltiDeploymentId, req);
 
         } catch (Throwable e) {
             logger.error(e.getMessage(),e);
             return ApiTool.processError(req,e,"LTI_ERROR");
         }
+    }
+
+    @GET
+    @Path("/oidc/login_initiations")
+    @Operation(summary = "lti authentication process preparation.", description = "preflight phase. prepares lti authentication process. checks it issuer is valid")
+    @Consumes({"application/x-www-form-urlencoded"})
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode="200", description= RestConstants.HTTP_200, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class)))
+            })
+    public Response loginInitiationsGet(@Parameter(description = "Issuer of the request, will be validated",required=true) @QueryParam(LTIConstants.LTI_PARAM_ISS) String iss,
+                                     @Parameter(description = "target url of platform at the end of the flow",required=true) @QueryParam(LTIConstants.LTI_PARAM_TARGET_LINK_URI) String targetLinkUrl,
+                                     @Parameter(description = "Id of the issuer",required=false) @QueryParam(LTIConstants.LTI_PARAM_CLIENT_ID) String clientId,
+                                     @Parameter(description = "context information of the platform",required=false) @QueryParam(LTIConstants.LTI_PARAM_LOGIN_HINT) String loginHint,
+                                     @Parameter(description = "additional context information of the platform",required=false) @QueryParam(LTIConstants.LTI_PARAM_MESSAGE_HINT) String ltiMessageHint,
+                                     @Parameter(description = "A can have multiple deployments in a platform",required=false) @QueryParam(LTIConstants.LTI_PARAM_DEPLOYMENT_ID) String ltiDeploymentId,
+                                     @Context HttpServletRequest req
+    ){
+        /**
+         * @TODO check if multiple deployments got an own key pair
+         */
+
+        try {
+            return loginInitiationsCore(iss, clientId, ltiDeploymentId, req);
+
+        } catch (Throwable e) {
+            logger.error(e.getMessage(),e);
+            return ApiTool.processError(req,e,"LTI_ERROR");
+        }
+    }
+
+    private Response loginInitiationsCore(String iss, String clientId, String ltiDeploymentId, HttpServletRequest req) throws Exception {
+        RepoTools repoTools = new RepoTools();
+        ApplicationInfo platform = repoTools.getApplicationInfo(iss, clientId, ltiDeploymentId);
+        Tool tool = Config.getTool(platform, req,true);
+        // get data from request
+        final LoginRequest loginRequest = LoginRequestFactory.from(req);
+        if (this.logger.isInfoEnabled()) {
+            this.logger.info("OIDC launch received with " + loginRequest.toString());
+        }
+
+        String targetLinkUri = loginRequest.getTarget_link_uri();
+        if(targetLinkUri == null){
+            throw new Exception("Bad request targetLinkUri is null. check tool config on platform side.");
+        }
+
+        final URI uri = new URI(targetLinkUri);
+        /* commented in local because localhost resolves to 0:0:0:0*/
+        String host = uri.getHost();
+        String remoteHost = new URI(req.getRequestURL().toString()).getHost();
+
+        logger.info("host:" + host + " remoteHost:"+remoteHost);
+        if (!host.equals(remoteHost)) {
+            throw new Exception("Bad request target uri host:" + host +" remoteHost:"+remoteHost);
+        }
+
+
+        // do the redirection
+        String authRequest = tool.getOidcAuthUrl(loginRequest);
+
+        /**
+         * fix: when it's an LtiResourceLinkRequest moodle sends rendering url (/edu-sharing/components/render)
+         * as targetUrl. edu.uoc.elc.lti.tool.Tool take this url for redirect_url which is wrong.
+         * moodle validates redirect url against config redirecturl which would fail with nodeId
+         *
+         * we can not detect if it will be an ResourceLink or Deeplink call here.
+         * This fix is only for ResourceLink calls. Deeplinks use the same redirect url so this is ok here.
+         */
+        authRequest = UrlTool.removeParam(authRequest,"redirect_uri");
+        authRequest = UrlTool.setParam(authRequest,"redirect_uri",ApplicationInfoList.getHomeRepository().getClientBaseUrl()+"/rest/lti/v13/" + LTIConstants.LTI_TOOL_REDIRECTURL_PATH);
+
+
+        //response.sendRedirect(authRequest);
+        return Response.status(302).location(new URI(authRequest)).build();
     }
 
     /**
