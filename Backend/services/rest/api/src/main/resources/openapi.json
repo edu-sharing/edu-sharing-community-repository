@@ -17071,7 +17071,7 @@
             "description": "Fatal error occured."
           }
         },
-        "summary": "Deelete a node of a node list of a user",
+        "summary": "Delete a node of a node list of a user",
         "tags": [
           "IAM v1"
         ]
