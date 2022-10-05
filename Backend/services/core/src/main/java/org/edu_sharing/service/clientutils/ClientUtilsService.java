@@ -75,7 +75,7 @@ public class ClientUtilsService {
 			for (int i = 0; i < list.size(); i++) {
 				TitleTag titleTag = (TitleTag) list.elementAt(i);
 				String rawTagName = titleTag.getRawTagName().toLowerCase();
-				if (rawTagName != null) {
+				if (titleTag.getParent() != null && "head".equals(titleTag.getParent().getText())) {
 
 					String title = titleTag.getTitle();
 					if (title != null)
