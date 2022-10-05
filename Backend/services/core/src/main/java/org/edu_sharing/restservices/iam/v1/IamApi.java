@@ -255,7 +255,7 @@ public class IamApi  {
     }
     @DELETE       
     @Path("/people/{repository}/{person}/nodeList/{list}/{node}")    
-    @Operation(summary = "Deelete a node of a node list of a user", description = "For guest users, the list will be temporary stored in the current session")
+    @Operation(summary = "Delete a node of a node list of a user", description = "For guest users, the list will be temporary stored in the current session")
     
     @ApiResponses(
     	value = { 
