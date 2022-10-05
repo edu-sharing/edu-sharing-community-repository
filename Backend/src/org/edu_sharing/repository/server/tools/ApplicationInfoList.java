@@ -151,6 +151,7 @@ public class ApplicationInfoList {
 			return;
 		}
 
+		List<ApplicationInfo> tmpAppInfos = new ArrayList<>();
 		for(String appFile: appFileArray){
 
 			appFile = appFile.trim();
@@ -161,17 +162,21 @@ public class ApplicationInfoList {
 
 			try{
 				ApplicationInfo repInfo = new ApplicationInfo(appFile);
-				logger.debug("put:"+appFile+" "+repInfo);
-				synchronized(appInfos) {
-					appInfos.put(repInfo.getAppId(), repInfo);
-				}
+				tmpAppInfos.add(repInfo);
 			}catch(Exception e){
 				e.printStackTrace();
 			}
 
 		}
 
-
+		synchronized(appInfos) {
+			for (ApplicationInfo appInfo : tmpAppInfos) {
+				if(logger.isDebugEnabled()) {
+					logger.debug("put:" + appInfo.getAppFile() + " " + appInfo + " size:" + appInfos.getKeys().size());
+				}
+				appInfos.put(appInfo.getAppId(), appInfo);
+			}
+		}
 	}
 	
 	/**
