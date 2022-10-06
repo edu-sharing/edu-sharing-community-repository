@@ -73,7 +73,7 @@ public class ErrorResponse {
 			logger.info(t.getMessage(), t);
 			return Response.status(CCConstants.HTTP_INSUFFICIENT_STORAGE).entity(new ErrorResponse(t)).build();
 		}
-        if(t instanceof DAODuplicateNodeNameException){
+        if(t instanceof DAODuplicateNodeNameException || t instanceof DAODuplicateNodeException){
         	return Response.status(Response.Status.CONFLICT).entity(new ErrorResponse(t)).build();
         }
 

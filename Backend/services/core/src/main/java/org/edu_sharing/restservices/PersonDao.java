@@ -20,6 +20,7 @@ import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.repository.server.tools.EduSharingLockHelper;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.ImageTool;
 import org.edu_sharing.repository.server.tools.Mail;
@@ -617,11 +618,13 @@ public class PersonDao {
 	}
 
 	public void addNodeList(String list,String nodeId) throws Exception {
+		EduSharingLockHelper.runSingleton(PersonDao.class, this.getAuthorityName() + "_nodeList", () -> {
+			try {
 		// Simply check if node is valid
-		NodeDao node=NodeDao.getNode(repoDao, nodeId);
+				NodeDao node = NodeDao.getNode(this.repoDao, nodeId);
 		if(node.isDirectory())
 			throw new IllegalArgumentException("The node "+nodeId+" is a directory. Only files are allowed for this list");
-		String data=getCurrentNodeListJson();
+				String data = getCurrentNodeListJson();
 		JSONObject json=new JSONObject();
 		if(data!=null)
 			json=new JSONObject(data);
@@ -632,8 +635,9 @@ public class PersonDao {
 		List<JSONObject> nodes=new ArrayList<>();
 		if(array!=null){
 			for(int i=0;i<array.length();i++){
-				if(array.getJSONObject(i).getString("id").equals(nodeId))
-					throw new IllegalAccessException("Node is already in list: "+nodeId);
+				if(array.getJSONObject(i).getString("id").equals(nodeId)) {
+					throw new DAODuplicateNodeException(new Exception("Node is already in list"), nodeId);
+				}
 				nodes.add(array.getJSONObject(i));
 			}
 		}
@@ -642,19 +646,11 @@ public class PersonDao {
 		object.put("dateAdded",System.currentTimeMillis());
 		nodes.add(object);
 		json.put(list,new JSONArray(nodes));
-		updateNodeList(json);
+				updateNodeList(json);
+			} catch(Exception e) {
+				throw new RuntimeException(e);
 	}
-	private String getCurrentNodeListJson(){
-		org.edu_sharing.service.authority.AuthorityService service=AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
-		HttpSession session = Context.getCurrentInstance().getRequest().getSession();
-		String data;
-		if(service.isGuest()){
-			data=(String) session.getAttribute(CCConstants.CCM_PROP_PERSON_NODE_LISTS);
-		}
-		else{
-			data=(String) this.userInfo.get(CCConstants.CCM_PROP_PERSON_NODE_LISTS);
-		}
-		return data;
+		});
 	}
 	public List<NodeRef> getNodeList(String list) throws Exception {
 		String data=getCurrentNodeListJson();
@@ -669,8 +665,8 @@ public class PersonDao {
 			String nodeId=array.getJSONObject(i).getString("id");
 			try{
 				// causes invalid nodes to fire throwable -> delete them
-				NodeDao.getNode(repoDao, nodeId);
-				result.add(new NodeRef(repoDao.getId(), nodeId));
+				NodeDao.getNode(this.repoDao, nodeId);
+				result.add(new NodeRef(this.repoDao.getId(), nodeId));
 			}
 			catch(Throwable t){
 				removeNodeList(list,nodeId);
@@ -678,9 +674,23 @@ public class PersonDao {
 		}
 		return result;
 	}
+	private String getCurrentNodeListJson() throws Exception {
+		org.edu_sharing.service.authority.AuthorityService service=AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
+		HttpSession session = Context.getCurrentInstance().getRequest().getSession();
+		String data;
+		if(service.isGuest()){
+			data=(String) session.getAttribute(CCConstants.CCM_PROP_PERSON_NODE_LISTS);
+		}
+		else{
+			data=(String) AuthorityServiceFactory.getLocalService().getAuthorityProperty(this.getUserName(), CCConstants.CCM_PROP_PERSON_NODE_LISTS);
+		}
+		return data;
+	}
 
 	public void removeNodeList(String list, String nodeId) throws Exception {
-		String data=getCurrentNodeListJson();
+		EduSharingLockHelper.runSingleton(PersonDao.class, this.getAuthorityName() + "_nodeList", () -> {
+			try {
+				String data = getCurrentNodeListJson();
 		if(data==null)
 			throw new IllegalArgumentException("Node list not found: "+list);
 		JSONObject json=new JSONObject(data);
@@ -699,7 +709,11 @@ public class PersonDao {
 		if(!found)
 			throw new IllegalArgumentException("Node not found in list: "+nodeId);
 		json.put(list, new JSONArray(result));
-		updateNodeList(json);
+				updateNodeList(json);
+			}catch(Exception e) {
+				throw new RuntimeException(e);
+			}
+		});
 }
 
 	private void updateNodeList(JSONObject json) throws Exception {
@@ -709,10 +723,7 @@ public class PersonDao {
 			session.setAttribute(CCConstants.CCM_PROP_PERSON_NODE_LISTS,json.toString());
 		}
 		else{
-			HashMap<String, String> newUserInfo = new HashMap<String, String>();
-			newUserInfo.put(CCConstants.PROP_USERNAME, getUserName());
-			newUserInfo.put(CCConstants.CCM_PROP_PERSON_NODE_LISTS, json.toString());
-			((MCAlfrescoAPIClient)this.baseClient).updateUser(newUserInfo);
+			AuthorityServiceFactory.getLocalService().setAuthorityProperty(this.getUserName(), CCConstants.CCM_PROP_PERSON_NODE_LISTS, json.toString());
 		}
 	}
 
