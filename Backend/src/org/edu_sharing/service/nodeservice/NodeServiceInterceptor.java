@@ -215,7 +215,8 @@ public class NodeServiceInterceptor implements MethodInterceptor {
             return false;
         }
         if(!CallSourceHelper.getCallSource().equals(CallSourceHelper.CallSource.Render)
-                && !CallSourceHelper.getCallSource().equals(CallSourceHelper.CallSource.Preview)){
+                && !CallSourceHelper.getCallSource().equals(CallSourceHelper.CallSource.Preview)
+                && !CallSourceHelper.getCallSource().equals(CallSourceHelper.CallSource.Sitemap)){
             logger.info("took:"+(System.currentTimeMillis() - test) +"ms");
             return false;
         }
