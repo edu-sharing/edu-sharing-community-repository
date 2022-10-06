@@ -265,7 +265,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                             this._currentScope !== 'login' && this.showUser;
                         this.refreshNodeStore();
                         this.checkConfig();
-                        const user = await this.iam.getUser().toPromise();
+                        const user = await this.iam.getCurrentUserAsync();
                         this.canEditProfile = user.editProfile;
                         this.configService.getAll().subscribe(() => {});
                     });
