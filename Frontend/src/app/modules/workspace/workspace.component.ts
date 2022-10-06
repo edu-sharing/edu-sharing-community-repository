@@ -321,6 +321,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             this.user = await (this.iam.getCurrentUserAsync());
         } catch(e) {
             this.toast.error(e);
+            return;
         }
         this.route.params.subscribe(async (routeParams: Params) => {
             this.isSafe = routeParams.mode === 'safe';
