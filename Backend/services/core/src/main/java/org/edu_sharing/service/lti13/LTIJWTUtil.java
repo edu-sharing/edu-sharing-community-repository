@@ -106,7 +106,14 @@ public class LTIJWTUtil {
                      * @TODO: why this fallback is used
                      * clientId vs audience (" audience of a token is the intended recipient of the token.")
                      */
-                    if(tmpClientId == null) tmpClientId = claims.getAudience();
+                    if(tmpClientId == null){
+                        tmpClientId = claims.getAudience();
+                        //aud is a list, there is a bug in DefaultClaims implementation which returns the list as a string with surrounding []
+                        if(tmpClientId.startsWith("[") && tmpClientId.endsWith("]")){
+                            tmpClientId = tmpClientId.replace("[","").replace("]","");
+                            tmpClientId = tmpClientId.split(",")[0];
+                        }
+                    }
                     if(tmpDeploymentId == null) tmpDeploymentId = claims.get(LTIConstants.LTI_DEPLOYMENT_ID, String.class);
                     // We are dealing with RS256 encryption, so we have some Oauth utils to manage the keys and
                     // convert them to keys from the string stored in DB. There are for sure other ways to manage this.
