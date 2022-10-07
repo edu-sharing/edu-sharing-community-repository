@@ -116,7 +116,9 @@ public class ApplicationInfoList {
 	public static Map<String, ApplicationInfo> getApplicationInfos(){
 		if(appInfos.getKeys().size() == 0){
 			logger.debug("appInfos size is 0");
-			initAppInfos();
+			synchronized(appInfos) {
+				initAppInfos();
+			}
 		}else{
 			logger.debug("appInfos size not 0");
 		}
@@ -169,13 +171,11 @@ public class ApplicationInfoList {
 
 		}
 
-		synchronized(appInfos) {
-			for (ApplicationInfo appInfo : tmpAppInfos) {
-				if(logger.isDebugEnabled()) {
-					logger.debug("put:" + appInfo.getAppFile() + " " + appInfo + " size:" + appInfos.getKeys().size());
-				}
-				appInfos.put(appInfo.getAppId(), appInfo);
+		for (ApplicationInfo appInfo : tmpAppInfos) {
+			if(logger.isDebugEnabled()) {
+				logger.debug("put:" + appInfo.getAppFile() + " " + appInfo + " size:" + appInfos.getKeys().size());
 			}
+			appInfos.put(appInfo.getAppId(), appInfo);
 		}
 	}
 	
