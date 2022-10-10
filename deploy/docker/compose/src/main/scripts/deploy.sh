@@ -7,10 +7,10 @@ export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-edusharing-docker-$GIT_BRAN
 
 case "$(uname)" in
 MINGW*)
-	COMPOSE_EXEC="winpty docker-compose"
+	COMPOSE_EXEC="winpty docker compose"
 	;;
 *)
-	COMPOSE_EXEC="docker-compose"
+	COMPOSE_EXEC="docker compose"
 	;;
 esac
 
@@ -30,7 +30,7 @@ pushd "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)" >/dev/null || e
 
 COMPOSE_DIR="."
 
-[[ -f ".env" ]] && {
+[[ -f ".env" ]] && [[ ! "${COMPOSE_DIR}/.env" -ef "./.env" ]] && {
 	cp -f ".env" "${COMPOSE_DIR}"
 }
 
@@ -49,7 +49,7 @@ info() {
 	echo ""
 	echo "  edu-sharing repository:"
 	echo ""
-	echo "    http://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}:${REPOSITORY_SERVICE_PORT_HTTP:-8100}/edu-sharing/"
+	echo "    http://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}:${REPOSITORY_SERVICE_PORT:-8100}/edu-sharing/"
 	echo ""
 	echo "    username: admin"
 	echo "    password: ${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
@@ -210,6 +210,9 @@ case "${CLI_OPT1}" in
 start)
 	rstart && info
 	;;
+restart)
+  stop && rstart
+  ;;
 info)
 	info
 	;;
@@ -235,6 +238,7 @@ purge)
 	echo "Option:"
 	echo ""
 	echo "  - start             startup containers"
+  echo "  - restart           stops and starts containers"
 	echo ""
 	echo "  - info              show information"
 	echo "  - logs              show logs"
