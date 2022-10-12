@@ -2,7 +2,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "target": "es2018",
-    "module": "commonjs",
+    "module": "ES2022",
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "../playwright/out",
