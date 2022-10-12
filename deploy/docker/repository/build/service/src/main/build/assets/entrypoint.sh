@@ -467,8 +467,8 @@ xmlstarlet ed -L \
 }
 
 [[ -n "${my_http_client_proxy_nonproxyhosts}" ]] && {
-	export CATALINA_OPTS="-Dhttp.nonProxyHosts=${my_http_client_proxy_nonproxyhosts} $CATALINA_OPTS"
-	export CATALINA_OPTS="-Dhttps.nonProxyHosts=${my_http_client_proxy_nonproxyhosts} $CATALINA_OPTS"
+	export CATALINA_OPTS="-Dhttp.nonProxyHosts=\"${my_http_client_proxy_nonproxyhosts/,/|}\" $CATALINA_OPTS"
+	export CATALINA_OPTS="-Dhttps.nonProxyHosts=\"${my_http_client_proxy_nonproxyhosts/,/|}\" $CATALINA_OPTS"
 	hocon -f ${eduSConf} \
 		set "repository.httpclient.proxy.nonproxyhosts" '"'"${my_http_client_proxy_nonproxyhosts}"'"'
 }

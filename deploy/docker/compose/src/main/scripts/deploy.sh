@@ -18,7 +18,6 @@ export COMPOSE_EXEC
 
 export CLI_CMD="$0"
 export CLI_OPT1="$1"
-export CLI_OPT2="$2"
 
 ROOT_PATH="$(
 	cd "$(dirname ".")"
@@ -31,7 +30,7 @@ pushd "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)" >/dev/null || e
 COMPOSE_DIR="."
 
 [[ -f ".env" ]] && [[ ! "${COMPOSE_DIR}/.env" -ef "./.env" ]] && {
-	cp -f ".env" "${COMPOSE_DIR}"
+  cp -f ".env" "${COMPOSE_DIR}"
 }
 
 pushd "${COMPOSE_DIR}" >/dev/null || exit
@@ -49,7 +48,7 @@ info() {
 	echo ""
 	echo "  edu-sharing repository:"
 	echo ""
-	echo "    http://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}:${REPOSITORY_SERVICE_PORT:-8100}/edu-sharing/"
+	echo "    ${REPOSITORY_SERVICE_PROT:-http}://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}:${REPOSITORY_SERVICE_PORT:-8100}${REPOSITORY_SERVICE_PATH:-/edu-sharing}/"
 	echo ""
 	echo "    username: admin"
 	echo "    password: ${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
@@ -58,7 +57,7 @@ info() {
 	echo ""
 	echo "    rendering:"
 	echo ""
-	echo "      http://${SERVICES_RENDERING_SERVICE_HOST:-rendering.services.127.0.0.1.nip.io}:${SERVICES_RENDERING_SERVICE_PORT_HTTP:-9100}/esrender/admin/"
+	echo "      ${SERVICES_RENDERING_SERVICE_PROT:-http}://${SERVICES_RENDERING_SERVICE_HOST:-rendering.services.127.0.0.1.nip.io}:${SERVICES_RENDERING_SERVICE_PORT:-9100}${SERVICES_RENDERING_SERVICE_PATH:-/esrender}/admin/"
 	echo ""
 	echo "      username: ${SERVICES_RENDERING_DATABASE_USER:-rendering}"
 	echo "      password: ${SERVICES_RENDERING_DATABASE_PASS:-rendering}"
@@ -133,7 +132,17 @@ logs() {
 
 	$COMPOSE_EXEC \
 		$COMPOSE_LIST \
-		logs -f || exit
+		logs -f $@ || exit
+}
+
+terminal() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
+	$COMPOSE_EXEC \
+		$COMPOSE_LIST \
+		exec -u root -it  $1 /bin/bash || exit
 }
 
 ps() {
@@ -157,7 +166,7 @@ rstart() {
 
 	$COMPOSE_EXEC \
 		$COMPOSE_LIST \
-		up -d || exit
+		up -d $@ || exit
 }
 
 stop() {
@@ -167,7 +176,7 @@ stop() {
 
 	$COMPOSE_EXEC \
 		$COMPOSE_LIST \
-		stop || exit
+		stop $@ || exit
 }
 
 remove() {
@@ -206,24 +215,23 @@ purge() {
 	esac
 }
 
+shift
+
 case "${CLI_OPT1}" in
 start)
-	rstart && info
+	rstart $@ && info
 	;;
-restart)
-  stop && rstart
-  ;;
 info)
 	info
 	;;
 logs)
-	logs
+	logs $@
 	;;
 ps)
 	ps
 	;;
 stop)
-	stop
+	stop $@
 	;;
 remove)
 	remove
@@ -231,22 +239,30 @@ remove)
 purge)
 	purge
 	;;
+restart)
+	stop $@ && rstart $@ && info
+	;;
+terminal)
+  terminal $@
+  ;;
 *)
 	echo ""
 	echo "Usage: ${CLI_CMD} [option]"
 	echo ""
 	echo "Option:"
 	echo ""
-	echo "  - start             startup containers"
-  echo "  - restart           stops and starts containers"
+	echo "  - start [Service...]   startup containers"
+	echo "  - restart [Service...] stops and starts containers"
 	echo ""
-	echo "  - info              show information"
-	echo "  - logs              show logs"
-	echo "  - ps                show containers"
+	echo "  - info                 show information"
+	echo "  - logs [Service...]    show logs"
+	echo "  - ps                   show containers"
 	echo ""
-	echo "  - stop              stop all containers"
-	echo "  - remove            remove all containers"
-	echo "  - purge             remove all containers and volumes"
+	echo "  - stop [Service...]    stop all containers"
+	echo "  - remove               remove all containers"
+	echo "  - purge                remove all containers and volumes"
+	echo ""
+	echo "  - terminal [service]   open container bash as root"
 	echo ""
 	;;
 esac
