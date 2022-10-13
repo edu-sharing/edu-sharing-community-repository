@@ -289,6 +289,7 @@ public class LTIApi {
          * Launch validation: validates authentication response, and specific message(deeplink,....) validation
          * https://www.imsglobal.org/spec/security/v1p0/#authentication-response-validation
          */
+        logger.info("idToken:"+idToken+" state:"+state);
         tool.validate(idToken, state);
         if (!tool.isValid()) {
             logger.error(tool.getReason());
@@ -557,8 +558,14 @@ public class LTIApi {
             });
             if(throwable != null) throw throwable;
 
+           String serverPort = "";
+           if(!("443".equals(new Integer(req.getServerPort()).toString()) || "80".equals(new Integer(req.getServerPort()).toString()))){
+               serverPort = ":" + new Integer(req.getServerPort()).toString();
+           }
+
            return Response.seeOther(new URI(req.getScheme() +"://"
                            + req.getServerName()
+                           + serverPort
                            + "/edu-sharing/components/lti"))
                    .build();
         }catch(Throwable e){
