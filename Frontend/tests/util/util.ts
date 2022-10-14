@@ -9,8 +9,8 @@ export interface InlineFile {
     buffer: Buffer;
 }
 
-export function getStorageStatePath(loginCredentials: LoginCredentials): string {
-    return 'playwright/storage/' + loginCredentials.username + '.json';
+export function getStorageStatePath(loginCredentials: LoginCredentials, customSuffix = ''): string {
+    return 'playwright/storage/' + loginCredentials.username + customSuffix + '.json';
 }
 
 export function generateTestThingName(thing: string): string {

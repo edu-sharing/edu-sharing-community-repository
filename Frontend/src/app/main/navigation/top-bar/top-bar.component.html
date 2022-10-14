@@ -138,6 +138,7 @@
       *ngIf="currentUser && showUser"
       [matMenuTriggerFor]="userDropdown.menu"
       title="{{ 'USERMENU' | translate }}"
+      data-test="main-nav-user-menu-button"
     >
       <es-user-avatar [user]="currentUser" [size]="'xsmall'"></es-user-avatar>
       <span *ngIf="!connector.getCurrentLogin()?.isGuest">{{ currentUser | authorityName }}</span>
