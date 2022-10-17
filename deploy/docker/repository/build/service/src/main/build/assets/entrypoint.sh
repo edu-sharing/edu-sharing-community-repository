@@ -212,6 +212,7 @@ xmlstarlet ed -L \
 	-i '$external2' -t attr -n "URIEncoding" -v "UTF-8" \
 	-i '$external2' -t attr -n "connectionTimeout" -v "${my_wait_external}" \
 	-i '$external2' -t attr -n "maxThreads" -v "${my_pool_external}" \
+	-i '$external2' -t attr -n "secretRequired" -v "false" \
 	${catSConf}
 
 [[ -n "${cache_host}" && -n "${cache_port}" ]] && {
