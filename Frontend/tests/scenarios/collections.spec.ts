@@ -36,7 +36,7 @@ test.describe('Root collections page', () => {
     });
 
     test('should show collections scope', async () => {
-        await collectionsPage.expectScopeButton();
+        await generalPage.expectScopeButton(/Collections/);
     });
 
     // FIXME: This needs more than 25 root collections as setup

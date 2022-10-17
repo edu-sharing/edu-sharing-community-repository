@@ -24,8 +24,7 @@ export class SafePage {
     }
 
     @testStep()
-    async expectScopeButton() {
-        const mainNavScopeButton = this.page.locator('[data-test="main-nav-scope-button"]');
-        await expect(mainNavScopeButton).toHaveText(/Safe/);
+    async expectLogoutTimer(remainingTime: string) {
+        await expect(this.page.locator('[data-test="logout-timer"]')).toContainText(remainingTime);
     }
 }

@@ -33,6 +33,12 @@ export class GeneralPage {
     }
 
     @testStep()
+    async expectScopeButton(buttonText: string | RegExp) {
+        const mainNavScopeButton = this.page.locator('[data-test="main-nav-scope-button"]');
+        await expect(mainNavScopeButton).toHaveText(buttonText);
+    }
+
+    @testStep()
     async expectToastMessage(message: string | RegExp) {
         await expect(this.page.locator('[data-test="toast-message"]')).toHaveText(message);
     }

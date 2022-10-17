@@ -52,7 +52,7 @@
     </ng-container>
   </div>
   <ng-container *ngIf="isSafe && !mainMenuSidebar?.show">
-    <div class="timeout" *ngIf="autoLogoutTimeout$ | async as timeout">
+    <div class="timeout" *ngIf="autoLogoutTimeout$ | async as timeout" data-test="logout-timer">
       <i esIcon="av_timer"></i>
       {{ timeout }}
     </div>

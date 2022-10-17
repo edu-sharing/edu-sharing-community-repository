@@ -16,8 +16,7 @@ export class WorkspacePage {
 
     @testStep()
     async expectScopeButton() {
-        const mainNavScopeButton = this.page.locator('[data-test="main-nav-scope-button"]');
-        await expect(mainNavScopeButton).toHaveText(/Workspace/);
+        await this.generalPage.expectScopeButton(/Workspace/);
     }
 
     @testStep()
