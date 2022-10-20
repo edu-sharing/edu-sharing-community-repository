@@ -78,7 +78,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
 
     @ViewChild(SearchFieldComponent) searchField: SearchFieldComponent;
     @ViewChild(TopBarComponent) topBar: TopBarComponent;
-    @ViewChild('userRef') userRef: ElementRef;
     @ViewChild('tabNav') tabNav: ElementRef;
 
     private shouldAlwaysHide = this.storage.get(TemporaryStorageService.OPTION_HIDE_MAINNAV, false);
@@ -441,8 +440,8 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                     user.editProfile &&
                     this.configService.instant('editProfile', false)
                 ) {
-                    this.uiService.waitForComponent(this, 'userRef').subscribe(() => {
-                        this.tutorialElement = this.userRef;
+                    this.uiService.waitForComponent(this, 'topBar').subscribe(() => {
+                        this.tutorialElement = this.topBar.userRef;
                     });
                 }
             });
