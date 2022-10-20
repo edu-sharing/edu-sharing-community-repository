@@ -120,6 +120,15 @@ public class BulkServiceImpl implements BulkService {
 		for (BulkServiceInterceptorInterface interceptor : interceptors) {
 			propertiesNative = interceptor.preprocessProperties(propertiesNative);
 		}
+		// filter for valid/declared properties to store
+		propertiesNative = propertiesNative.entrySet().stream().filter(property -> {
+			QName prop = QName.createQName(property.getKey());
+			return serviceRegistry.getDictionaryService().getProperty(prop) != null;
+		}).collect(
+				HashMap::new,
+				(map, e) -> map.put(e.getKey(), e.getValue()),
+				Map::putAll
+		);
 		if(existing == null) {
 			NodeRef groupFolder = getOrCreate(primaryFolder, group, propertiesNative);
 			if(groupBy != null && groupBy.size()>0){

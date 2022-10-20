@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Path("/bulk/v1")
 @Api(tags = { "BULK v1" })
-@ApiService(value = "BULK", major = 1, minor = 0)
+@ApiService(value = "BULK", major = 1, minor = 1)
 public class BulkApi {
 	private static Logger logger = Logger.getLogger(BulkApi.class);
 
