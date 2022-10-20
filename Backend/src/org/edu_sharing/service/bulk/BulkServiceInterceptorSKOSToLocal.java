@@ -28,12 +28,8 @@ public class BulkServiceInterceptorSKOSToLocal implements BulkServiceInterceptor
             mds.getWidgets().stream().filter(
                     w -> w.getTemplate() == null && w.getCondition() == null && w.getValues() != null && !w.getValues().isEmpty()
             ).forEach(w -> {
-                Object values = properties.get(CCConstants.getValidGlobalName(w.getId()));
-                if(values != null) {
-                    if(values instanceof String) {
-                        values = Collections.singletonList(values);
-                    }
-                    List<?> valuesList = ((List<?>) values);
+                List<?> valuesList = getPropertyValue(properties, CCConstants.getValidGlobalName(w.getId()));
+                if(valuesList != null) {
                     if(valuesList.stream().allMatch(v -> v.toString().toLowerCase().startsWith("http"))) {
                         List<String> result = mapValues(w, valuesList);
                         logger.info("transformed SKOS properties of " + w.getId() + "("  + result.size() +" mapped from total of " + valuesList.size() + ")");
@@ -52,6 +48,16 @@ public class BulkServiceInterceptorSKOSToLocal implements BulkServiceInterceptor
         return properties;
     }
 
+    protected List<?> getPropertyValue(HashMap<String, Object> properties, String key){
+        Object values = properties.get(key);
+        if(values != null) {
+            if (values instanceof String) {
+                values = Collections.singletonList(values);
+            }
+            return ((List<?>) values);
+        }
+        return null;
+    }
     protected List<String> mapValues(MetadataWidget widget, List<?> valuesList) {
         Map<String, MetadataKey> map = widget.getValuesAsMap();
         return valuesList.stream().map(v -> (String) v).map(v -> {
