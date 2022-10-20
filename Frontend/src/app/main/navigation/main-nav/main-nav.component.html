@@ -27,42 +27,6 @@
       [showSkip]="false"
     ></es-tutorial>
 
-    <div class="dialog darken" *ngIf="licenseAgreement" [@fade]="licenseAgreement"></div>
-    <div
-      class="card card-agreement center-card card-scroll card-high card-wide card-action"
-      *ngIf="licenseAgreement"
-      [@cardAnimation]="licenseAgreement"
-    >
-      <div class="card-content">
-        <div class="card-title">{{ 'LICENSE_AGREEMENT.TITLE' | translate }}</div>
-        <div class="agreementGroup card-scroll">
-          <div class="agreement" [innerHTML]="licenseAgreementHTML"></div>
-        </div>
-        <div *ngIf="licenseAgreementHTML">
-          <mat-checkbox [(ngModel)]="acceptLicenseAgreement">{{
-            'LICENSE_AGREEMENT.CHECKBOX' | translate
-          }}</mat-checkbox>
-        </div>
-      </div>
-      <div class="card-action">
-        <a
-          tabindex="0"
-          class="waves-effect waves-light btn"
-          [class.disabled]="!acceptLicenseAgreement"
-          (keyup.enter)="saveLicenseAgreement()"
-          (click)="saveLicenseAgreement()"
-          >{{ 'LICENSE_AGREEMENT.ACCEPT' | translate }}</a
-        >
-        <a
-          tabindex="0"
-          class="waves-effect waves-light btn-flat"
-          (keyup.enter)="logout()"
-          (click)="logout()"
-          >{{ 'LICENSE_AGREEMENT.DECLINE' | translate }}</a
-        >
-      </div>
-    </div>
-
     <es-top-bar
       class="topBar {{ 'topBar-' + mainNavConfig.currentScope }} scrollWithBanner"
       [class.noUser]="!showUser"

@@ -31,15 +31,10 @@ import {
     ConfigurationService,
     DialogButton,
     FrameEventsService,
-    Node,
-    NodeTextContent,
-    NodeWrapper,
     RestConnectorService,
     RestConstants,
     RestHelper,
     RestIamService,
-    RestNodeService,
-    SessionStorageService,
     TemporaryStorageService,
     UIService,
 } from '../../../core-module/core.module';
@@ -51,7 +46,7 @@ import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { CardDialogRef } from '../../../features/dialogs/card-dialog/card-dialog-ref';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { NodeStoreService } from '../../../modules/search/node-store.service';
-import { TranslationsService } from '../../../translations/translations.service';
+import { LicenseAgreementService } from '../../../services/license-agreement.service';
 import { MainMenuEntriesService } from '../main-menu-entries.service';
 import { MainNavConfig, MainNavService } from '../main-nav.service';
 import { SearchFieldComponent } from '../search-field/search-field.component';
@@ -87,9 +82,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     config: any = {};
     nodeStoreIsOpen = false;
     nodeStoreDialogRef: CardDialogRef<void, void> | null = null;
-    acceptLicenseAgreement: boolean;
-    licenseAgreement: boolean;
-    licenseAgreementHTML: string;
     canEditProfile: boolean;
     userMenuOptions: OptionItem[];
     tutorialElement: ElementRef;
@@ -108,7 +100,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly initDone$ = new ReplaySubject<void>();
     private readonly destroyed$ = new Subject<void>();
     private editUrl: string;
-    private licenseAgreementNode: Node;
     private scrollInitialPositions: any[] = [];
     private lastScroll = -1;
     private elementsTopY = 0;
@@ -122,13 +113,11 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         public connector: RestConnectorService,
         private bridge: BridgeService,
         private event: FrameEventsService,
-        private nodeService: RestNodeService,
         private configService: ConfigurationService,
         private aboutService: AboutService,
         private uiService: UIService,
         private mainNavService: MainNavService,
         private storage: TemporaryStorageService,
-        private session: SessionStorageService,
         private http: HttpClient,
         private router: Router,
         private route: ActivatedRoute,
@@ -137,11 +126,11 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         private authentication: AuthenticationService,
         private user: UserService,
         private ngZone: NgZone,
-        private translations: TranslationsService,
         // private changeDetectorRef: ChangeDetectorRef,
         private nodeStore: NodeStoreService,
         private rocketChat: RocketChatService,
         private dialogs: DialogsService,
+        private licenseAgreement: LicenseAgreementService,
     ) {}
 
     ngOnInit(): void {
@@ -420,16 +409,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         UIHelper.openUrl(url, this.bridge, OPEN_URL_MODE.BlankSystemBrowser);
     }
 
-    saveLicenseAgreement() {
-        this.licenseAgreement = false;
-        if (this.licenseAgreementNode) {
-            this.session.set('licenseAgreement', this.licenseAgreementNode.content.version);
-        } else {
-            this.session.set('licenseAgreement', '0.0');
-        }
-        this.startTutorial();
-    }
-
     startTutorial() {
         this.user
             .observeCurrentUserInfo()
@@ -568,56 +547,9 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.globalProgress = false;
     }
 
-    private async showLicenseAgreement() {
-        const config = await this.configService.get('licenseAgreement', false).toPromise();
-        if (
-            !config ||
-            this.connector.getCurrentLogin()?.isGuest ||
-            !this.connector.getCurrentLogin().isValidLogin
-        ) {
+    private showLicenseAgreement() {
+        this.licenseAgreement.waitForAgreementCleared().subscribe(() => {
             this.startTutorial();
-            return;
-        }
-        this.session.get('licenseAgreement', false).subscribe((version: string) => {
-            this.licenseAgreementHTML = null;
-            let nodeId: string = null;
-            for (const node of config.nodeId) {
-                if (node.language == null) nodeId = node.value;
-                if (node.language === this.translations.getLanguage()) {
-                    nodeId = node.value;
-                    break;
-                }
-            }
-            this.nodeService.getNodeMetadata(nodeId).subscribe(
-                (data: NodeWrapper) => {
-                    this.licenseAgreementNode = data.node;
-                    if (version === data.node.content.version) {
-                        this.startTutorial();
-                        return;
-                    }
-                    this.licenseAgreement = true;
-                    this.nodeService.getNodeTextContent(nodeId).subscribe(
-                        (data: NodeTextContent) => {
-                            this.licenseAgreementHTML = data.html
-                                ? data.html
-                                : data.raw
-                                ? data.raw
-                                : data.text;
-                        },
-                        (error: any) => {
-                            this.licenseAgreementHTML = `Error loading content for license agreement node '${nodeId}'`;
-                        },
-                    );
-                },
-                (error: any) => {
-                    if (version === '0.0') {
-                        this.startTutorial();
-                        return;
-                    }
-                    this.licenseAgreement = true;
-                    this.licenseAgreementHTML = `Error loading metadata for license agreement node '${nodeId}'`;
-                },
-            );
         });
     }
 
