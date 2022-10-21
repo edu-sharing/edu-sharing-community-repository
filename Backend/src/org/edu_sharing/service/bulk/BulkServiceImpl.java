@@ -68,6 +68,11 @@ public class BulkServiceImpl implements BulkService {
 		return node;
 	}
 
+	@Override
+	public NodeRef getPrimaryFolder() {
+		return primaryFolder;
+	}
+
 	public BulkServiceImpl(){
 		primaryFolder = getOrCreate(repositoryHelper.getCompanyHome(), PRIMARY_FOLDER_NAME, null);
 
