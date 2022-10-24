@@ -483,7 +483,7 @@ public class MetadataTemplateRenderer {
 				path = Lists.reverse(path);
 				int j = 0;
 				if (renderingMode.equals(RenderingMode.HTML)) {
-					widgetHtml.append("<div class='mdsValue'>");
+					widgetHtml.append("<div class='mdsValue' data-value-key='").append(value).append("'>");
 				} else if (renderingMode.equals(RenderingMode.TEXT)) {
 					if(i > 0) {
 						widgetHtml.append(TEXT_MULTIVALUE_SEPERATOR);

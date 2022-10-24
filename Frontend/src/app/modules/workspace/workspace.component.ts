@@ -317,7 +317,12 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
         this.refresh();
     }
     private async initialize() {
-        this.user = await (this.iam.getCurrentUserAsync());
+        try {
+            this.user = await (this.iam.getCurrentUserAsync());
+        } catch(e) {
+            this.toast.error(e);
+            return;
+        }
         this.route.params.subscribe(async (routeParams: Params) => {
             this.isSafe = routeParams.mode === 'safe';
             const login = await this.connector.isLoggedIn().toPromise();
@@ -358,9 +363,7 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
             } catch (e) {
                 console.warn('no connectors found: ' + e.toString());
             }
-            const data = await this.node.getHomeDirectory().toPromise();
             this.globalProgress = false;
-            this.homeDirectory = data.id;
             this.route.queryParams.subscribe((params: Params) => {
 
                 if (params.connector) {

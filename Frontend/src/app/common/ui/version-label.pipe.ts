@@ -28,6 +28,7 @@ export class VersionLabelPipe implements PipeTransform {
           || comment === RestConstants.COMMENT_BULK_CREATE
           || comment === RestConstants.COMMENT_BULK_UPDATE
           || comment === RestConstants.COMMENT_BULK_UPDATE_RESYNC
+          || comment === RestConstants.COMMENT_MIGRATION
           || comment === RestConstants.COMMENT_BLOCKED_IMPORT
           || comment.startsWith(RestConstants.COMMENT_EDITOR_UPLOAD)) {
         const parameters = comment.split(',');

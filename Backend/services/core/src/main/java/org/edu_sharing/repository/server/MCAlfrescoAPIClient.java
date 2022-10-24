@@ -2123,7 +2123,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 	}
 	
-	public Map<String, Serializable> transformQNameKeyToString(Map<QName, Serializable> props) {
+	public static Map<String, Serializable> transformQNameKeyToString(Map<QName, Serializable> props) {
 		Map<String, Serializable> result = new HashMap<String, Serializable>();
 		for (Map.Entry<QName, Serializable> entry : props.entrySet()) {
 			result.put(entry.getKey().toString(), entry.getValue());

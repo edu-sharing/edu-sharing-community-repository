@@ -2860,7 +2860,7 @@ export class MdsComponent {
                 },
             );
         } else if (preview) {
-            this.node.uploadNodePreview(this.currentNodes[0].ref.id, preview).subscribe(
+            this.node.uploadNodePreview(this.currentNodes[0].ref.id, preview, false).subscribe(
                 () => {
                     this.onAddChildobject(callback);
                 },

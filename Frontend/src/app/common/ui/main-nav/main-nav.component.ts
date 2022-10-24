@@ -265,7 +265,9 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                             this._currentScope !== 'login' && this.showUser;
                         this.refreshNodeStore();
                         this.checkConfig();
-                        const user = await this.iam.getUser().toPromise();
+                        console.log('user');
+                        const user = await this.iam.getCurrentUserAsync();
+                        console.log('user', user, this._showUser);
                         this.canEditProfile = user.editProfile;
                         this.configService.getAll().subscribe(() => {});
                     });
@@ -527,8 +529,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
 
     isSafe() {
         return (
-            this.connector.getCurrentLogin() &&
-            this.connector.getCurrentLogin().currentScope ===
+            this.connector.getCurrentLogin()?.currentScope ===
                 RestConstants.SAFE_SCOPE
         );
     }
