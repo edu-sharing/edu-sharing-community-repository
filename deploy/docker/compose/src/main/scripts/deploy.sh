@@ -2,15 +2,15 @@
 set -e
 set -o pipefail
 
-GIT_BRANCH="$(echo '${project.version}' | sed 's|[\/\.]|-|g' | tr '[:upper:]' '[:lower:]')"
-export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-edusharing-docker-$GIT_BRANCH}"
+#$ADDITIONAL_COMPOSE_FILES are defined in .env
+export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-$(basename $(pwd))}"
 
 case "$(uname)" in
 MINGW*)
-	COMPOSE_EXEC="winpty docker-compose"
+	COMPOSE_EXEC="winpty docker compose"
 	;;
 *)
-	COMPOSE_EXEC="docker-compose"
+	COMPOSE_EXEC="docker compose"
 	;;
 esac
 
@@ -18,7 +18,7 @@ export COMPOSE_EXEC
 
 export CLI_CMD="$0"
 export CLI_OPT1="$1"
-export CLI_OPT2="$2"
+shift || true
 
 ROOT_PATH="$(
 	cd "$(dirname ".")"
@@ -30,8 +30,8 @@ pushd "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)" >/dev/null || e
 
 COMPOSE_DIR="."
 
-[[ -f ".env" ]] && {
-	cp -f ".env" "${COMPOSE_DIR}"
+[[ -f ".env" ]] && [[ ! "${COMPOSE_DIR}/.env" -ef "./.env" ]] && {
+  cp -f ".env" "${COMPOSE_DIR}"
 }
 
 pushd "${COMPOSE_DIR}" >/dev/null || exit
@@ -49,7 +49,7 @@ info() {
 	echo ""
 	echo "  edu-sharing repository:"
 	echo ""
-	echo "    http://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}:${REPOSITORY_SERVICE_PORT_HTTP:-8100}/edu-sharing/"
+	echo "    ${REPOSITORY_SERVICE_PROT:-http}://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}:${REPOSITORY_SERVICE_PORT:-8100}${REPOSITORY_SERVICE_PATH:-/edu-sharing}/"
 	echo ""
 	echo "    username: admin"
 	echo "    password: ${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
@@ -58,7 +58,7 @@ info() {
 	echo ""
 	echo "    rendering:"
 	echo ""
-	echo "      http://${SERVICES_RENDERING_SERVICE_HOST:-rendering.services.127.0.0.1.nip.io}:${SERVICES_RENDERING_SERVICE_PORT_HTTP:-9100}/esrender/admin/"
+	echo "      ${SERVICES_RENDERING_SERVICE_PROT:-http}://${SERVICES_RENDERING_SERVICE_HOST:-rendering.services.127.0.0.1.nip.io}:${SERVICES_RENDERING_SERVICE_PORT:-9100}${SERVICES_RENDERING_SERVICE_PATH:-/esrender}/admin/"
 	echo ""
 	echo "      username: ${SERVICES_RENDERING_DATABASE_USER:-rendering}"
 	echo "      password: ${SERVICES_RENDERING_DATABASE_PASS:-rendering}"
@@ -100,6 +100,10 @@ compose() {
         -debug) COMPOSE_FILE_TYPE="debug" ;;
         -dev) COMPOSE_FILE_TYPE="dev" ;;
         -remote) COMPOSE_FILE_TYPE="remote" ;;
+        -productive)
+          COMPOSE_FILE_TYPE="remote"
+          if [[ ! $PRODUCTIVE_ENABLED -eq "true" ]] ; then continue ; fi
+          ;;
         *)
           {
             echo "error: unknown flag: $flag"
@@ -109,6 +113,7 @@ compose() {
             echo "  -debug"
             echo "  -dev"
             echo "  -remote"
+            echo "  -productive"
           } >&2
           exit 1
           ;;
@@ -117,27 +122,40 @@ compose() {
         while IFS='' read -r COMPOSE_FILE; do
           COMPOSE_LIST="$COMPOSE_LIST -f ${COMPOSE_FILE}"
         done < <(find "${COMPOSE_DIRECTORY}" -type f -name "${COMPOSE_FILE_GROUP}_*-${COMPOSE_FILE_TYPE}.yml" | sort -g)
+      done
 
+
+      for COMPOSE_FILE in $ADDITIONAL_COMPOSE_FILES; do
+        COMPOSE_LIST="$COMPOSE_LIST -f ${COMPOSE_FILE}"
       done
     }
-
 	}
 
 	echo $COMPOSE_LIST
 }
 
 logs() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common -productive)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
 	$COMPOSE_EXEC \
 		$COMPOSE_LIST \
-		logs -f || exit
+		logs -f $@ || exit
+}
+
+terminal() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common -productive)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
+	$COMPOSE_EXEC \
+		$COMPOSE_LIST \
+		exec -u root -it  $1 /bin/bash || exit
 }
 
 ps() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common -productive)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -147,7 +165,7 @@ ps() {
 }
 
 rstart() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common -remote)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common -remote -productive)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -157,24 +175,24 @@ rstart() {
 
 	$COMPOSE_EXEC \
 		$COMPOSE_LIST \
-		up -d || exit
+		up -d $@ || exit
 }
 
 stop() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common -productive)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
 	$COMPOSE_EXEC \
 		$COMPOSE_LIST \
-		stop || exit
+		stop $@ || exit
 }
 
 remove() {
 	read -p "Are you sure you want to continue? [y/N] " answer
 	case ${answer:0:1} in
 	y | Y)
-		COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common)"
+		COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common -productive)"
 
 		echo "Use compose set: $COMPOSE_LIST"
 
@@ -192,7 +210,7 @@ purge() {
 	read -p "Are you sure you want to continue? [y/N] " answer
 	case ${answer:0:1} in
 	y | Y)
-		COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common)"
+		COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common -productive)"
 
 		echo "Use compose set: $COMPOSE_LIST"
 
@@ -208,19 +226,19 @@ purge() {
 
 case "${CLI_OPT1}" in
 start)
-	rstart && info
+	rstart $@ && info
 	;;
 info)
 	info
 	;;
 logs)
-	logs
+	logs $@
 	;;
 ps)
 	ps
 	;;
 stop)
-	stop
+	stop $@
 	;;
 remove)
 	remove
@@ -228,21 +246,30 @@ remove)
 purge)
 	purge
 	;;
+restart)
+	stop $@ && rstart $@ && info
+	;;
+terminal)
+  terminal $@
+  ;;
 *)
 	echo ""
 	echo "Usage: ${CLI_CMD} [option]"
 	echo ""
-	echo "Option:"
+	echo "options:"
 	echo ""
-	echo "  - start             startup containers"
+	echo "  - start [Service...]   startup containers"
+	echo "  - restart [Service...] stops and starts containers"
 	echo ""
-	echo "  - info              show information"
-	echo "  - logs              show logs"
-	echo "  - ps                show containers"
+	echo "  - info                 show information"
+	echo "  - logs [Service...]    show logs"
+	echo "  - ps                   show containers"
 	echo ""
-	echo "  - stop              stop all containers"
-	echo "  - remove            remove all containers"
-	echo "  - purge             remove all containers and volumes"
+	echo "  - stop [Service...]    stop all containers"
+	echo "  - remove               remove all containers"
+	echo "  - purge                remove all containers and volumes"
+	echo ""
+	echo "  - terminal [service]   open container bash as root"
 	echo ""
 	;;
 esac

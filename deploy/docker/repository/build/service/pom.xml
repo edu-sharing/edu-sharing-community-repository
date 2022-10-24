@@ -102,22 +102,35 @@
           </execution>
 
           <execution>
-            <id>alfresco</id>
+            <id>alfresco-1</id>
             <goals>
               <goal>copy-dependencies</goal>
             </goals>
             <phase>package</phase>
             <configuration>
               <includeArtifactIds>
-                edu_sharing-community-repository-backend-alfresco-module,
-                edu_sharing-projects-community-repository-backend-alfresco-module
+                edu_sharing-community-repository-backend-alfresco-module
               </includeArtifactIds>
-              <outputDirectory>${project.build.directory}/build/amps/alfresco/0</outputDirectory>
+              <outputDirectory>${project.build.directory}/build/amps/alfresco/1</outputDirectory>
             </configuration>
           </execution>
 
           <execution>
-            <id>plugin-alfresco</id>
+            <id>alfresco-2</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-projects-community-repository-backend-alfresco-module
+              </includeArtifactIds>
+              <outputDirectory>${project.build.directory}/build/amps/alfresco/2</outputDirectory>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>alfresco-3</id>
             <goals>
               <goal>copy-dependencies</goal>
             </goals>
@@ -131,12 +144,12 @@
                 edu_sharing-enterprise-repository-plugin-remote-backend-alfresco-module,
                 edu_sharing-enterprise-repository-plugin-transform-backend-alfresco-module
               </includeArtifactIds>
-              <outputDirectory>${project.build.directory}/build/amps/alfresco/1</outputDirectory>
+              <outputDirectory>${project.build.directory}/build/amps/alfresco/3</outputDirectory>
             </configuration>
           </execution>
 
           <execution>
-            <id>plugin-edusharing</id>
+            <id>edusharing-1</id>
             <goals>
               <goal>copy-dependencies</goal>
             </goals>

@@ -27,7 +27,7 @@ pushd ".." >/dev/null || exit
 }
 popd >/dev/null || exit
 
-[[ -f ".env" ]] && {
+[[ -f ".env" ]] && [[ ! "${COMPOSE_DIR}/.env" -ef "./.env" ]] && {
 	cp -f ".env" "${COMPOSE_DIR}"
 }
 
@@ -35,10 +35,10 @@ export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-$(echo "${COMPOSE_PROJECT}-
 
 case "$(uname)" in
 MINGW*)
-	COMPOSE_EXEC="winpty docker-compose"
+	COMPOSE_EXEC="winpty docker compose"
 	;;
 *)
-	COMPOSE_EXEC="docker-compose"
+	COMPOSE_EXEC="docker compose"
 	;;
 esac
 
@@ -174,6 +174,7 @@ info() {
 	echo ""
 	echo "  Services:"
 	echo ""
+	echo "    AJP:            ajp://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}:${REPOSITORY_SERVICE_PORT_AJP:-8102}/edu-sharing/"
 	echo "    HTTP:           http://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}:${REPOSITORY_SERVICE_PORT_HTTP:-8100}/edu-sharing/"
 	echo "    JPDA:           127.0.0.1:${REPOSITORY_SERVICE_PORT_JPDA:-8101}"
 	echo ""
@@ -214,7 +215,7 @@ note() {
 	echo ""
 	echo "  edu-sharing repository:"
 	echo ""
-	echo "    http://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}:${REPOSITORY_SERVICE_PORT_HTTP:-8100}/edu-sharing/"
+	echo "    http://${REPOSITORY_SERVICE_HOST:-repository.127.0.0.1.nip.io}:${REPOSITORY_SERVICE_PORT:-8100}/edu-sharing/"
 	echo ""
 	echo "    username: admin"
 	echo "    password: ${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
@@ -348,7 +349,7 @@ rstart() {
 
 	$COMPOSE_EXEC \
 		$COMPOSE_LIST \
-		up -d || exit
+		up -d $@ || exit
 }
 
 rdebug() {
@@ -364,7 +365,7 @@ rdebug() {
 
 	$COMPOSE_EXEC \
 		$COMPOSE_LIST \
-		up -d || exit
+		up -d $@ || exit
 }
 
 rdev() {
@@ -385,7 +386,7 @@ rdev() {
 
 	$COMPOSE_EXEC \
 		$COMPOSE_LIST \
-		up -d || exit
+		up -d $@ || exit
 }
 
 lstart() {
@@ -395,7 +396,7 @@ lstart() {
 
 	$COMPOSE_EXEC \
 		$COMPOSE_LIST \
-		up -d || exit
+		up -d $@ || exit
 }
 
 ldebug() {
@@ -405,7 +406,7 @@ ldebug() {
 
 	$COMPOSE_EXEC \
 		$COMPOSE_LIST \
-		up -d || exit
+		up -d $@ || exit
 }
 
 ldev() {
@@ -420,7 +421,7 @@ ldev() {
 
 	$COMPOSE_EXEC \
 		$COMPOSE_LIST \
-		up -d || exit
+		up -d $@ || exit
 }
 
 stop() {
@@ -430,7 +431,7 @@ stop() {
 
 	$COMPOSE_EXEC \
 		$COMPOSE_LIST \
-		stop || exit
+		stop $@ || exit
 }
 
 remove() {
@@ -495,24 +496,35 @@ ci() {
 		up -d || exit
 }
 
+terminal() {
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common)"
+
+	echo "Use compose set: $COMPOSE_LIST"
+
+	$COMPOSE_EXEC \
+		$COMPOSE_LIST \
+		exec -u root -it  $1 /bin/bash || exit
+}
+
+shift
 case "${CLI_OPT1}" in
 rstart)
-	rstart && note
+	rstart $@ && note
 	;;
 rdebug)
-	rdebug && info
+	rdebug $@ && info
 	;;
 rdev)
-	rdev && info
+	rdev $@ && info
 	;;
 lstart)
-	lstart && note
+	lstart $@ && note
 	;;
 ldebug)
-	ldebug && info
+	ldebug $@ && info
 	;;
 ldev)
-	ldev && info
+	ldev $@ && info
 	;;
 reload)
 	reload
@@ -521,13 +533,13 @@ info)
 	info
 	;;
 logs)
-	logs
+	logs $@
 	;;
 ps)
 	ps
 	;;
 stop)
-	stop
+	stop $@
 	;;
 remove)
 	remove
@@ -535,30 +547,36 @@ remove)
 ci)
 	ci
 	;;
+terminal)
+  terminal $@
+  ;;
+
 *)
 	echo ""
 	echo "Usage: ${CLI_CMD} [option]"
 	echo ""
 	echo "Option:"
 	echo ""
-	echo "  - rstart            startup containers from remote images"
-	echo "  - rdebug            startup containers from remote images with dev ports"
-	echo "  - rdev              startup containers from remote images with dev ports and artifacts"
+	echo "  - rstart [service...] startup containers from remote images"
+	echo "  - rdebug [service...] startup containers from remote images with dev ports"
+	echo "  - rdev [service...]   startup containers from remote images with dev ports and artifacts"
 	echo ""
-	echo "  - lstart            startup containers from local images"
-	echo "  - ldebug            startup containers from local images with dev ports"
-	echo "  - ldev              startup containers from local images with dev ports and artifacts"
+	echo "  - lstart [service...] startup containers from local images"
+	echo "  - ldebug [service...] startup containers from local images with dev ports"
+	echo "  - ldev [service...]   startup containers from local images with dev ports and artifacts"
 	echo ""
-	echo "  - ci                startup containers inside ci-pipeline"
+	echo "  - ci                  startup containers inside ci-pipeline"
 	echo ""
-	echo "  - reload [service]  reload services [edu-sharing]"
+	echo "  - reload [service]    reload services [edu-sharing]"
 	echo ""
-	echo "  - info              show information"
-	echo "  - logs              show logs"
-	echo "  - ps                show containers"
+	echo "  - info                show information"
+	echo "  - logs [service...]   show logs"
+	echo "  - ps                  show containers"
 	echo ""
-	echo "  - stop              stop all containers"
-	echo "  - remove            remove all containers and volumes"
+	echo "  - stop [service...]   stop all containers"
+	echo "  - remove              remove all containers and volumes"
+	echo ""
+	echo "  - terminal [service]  open container bash as root"
 	echo ""
 	;;
 esac

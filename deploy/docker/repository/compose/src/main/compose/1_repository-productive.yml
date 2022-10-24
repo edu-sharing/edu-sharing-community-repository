@@ -1,0 +1,18 @@
+version: '3.7'
+
+services:
+
+  repository-database:
+    restart: unless-stopped
+
+  repository-mailcatcher:
+    restart: unless-stopped
+
+  repository-search-solr4:
+    restart: unless-stopped
+
+  repository-service:
+    restart: unless-stopped
+
+  repository-transform:
+    restart: unless-stopped

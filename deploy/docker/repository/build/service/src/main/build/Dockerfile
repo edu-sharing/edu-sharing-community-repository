@@ -166,7 +166,7 @@ COPY --chown=worker:worker assets/plugins bin/plugins/
 
 STOPSIGNAL SIGWINCH
 
-EXPOSE 8080 8081
+EXPOSE 8009 8080 8081
 
 ENTRYPOINT ["entrypoint.sh"]
 CMD ["catalina.sh", "run"]

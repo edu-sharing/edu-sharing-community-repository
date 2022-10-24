@@ -1,0 +1,9 @@
+version: '3.7'
+
+services:
+
+  services-rendering-database:
+    restart: unless-stopped
+
+  services-rendering-service:
+    restart: unless-stopped
