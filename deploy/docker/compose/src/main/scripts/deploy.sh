@@ -2,8 +2,8 @@
 set -e
 set -o pipefail
 
-GIT_BRANCH="$(echo '${project.version}' | sed 's|[\/\.]|-|g' | tr '[:upper:]' '[:lower:]')"
-export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-edusharing-docker-$GIT_BRANCH}"
+#$ADDITIONAL_COMPOSE_FILES are defined in .env
+export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-$(basename $(pwd))}"
 
 case "$(uname)" in
 MINGW*)
@@ -18,6 +18,7 @@ export COMPOSE_EXEC
 
 export CLI_CMD="$0"
 export CLI_OPT1="$1"
+shift || true
 
 ROOT_PATH="$(
 	cd "$(dirname ".")"
@@ -99,6 +100,10 @@ compose() {
         -debug) COMPOSE_FILE_TYPE="debug" ;;
         -dev) COMPOSE_FILE_TYPE="dev" ;;
         -remote) COMPOSE_FILE_TYPE="remote" ;;
+        -productive)
+          COMPOSE_FILE_TYPE="remote"
+          if [[ ! $PRODUCTIVE_ENABLED -eq "true" ]] ; then continue ; fi
+          ;;
         *)
           {
             echo "error: unknown flag: $flag"
@@ -108,6 +113,7 @@ compose() {
             echo "  -debug"
             echo "  -dev"
             echo "  -remote"
+            echo "  -productive"
           } >&2
           exit 1
           ;;
@@ -116,17 +122,20 @@ compose() {
         while IFS='' read -r COMPOSE_FILE; do
           COMPOSE_LIST="$COMPOSE_LIST -f ${COMPOSE_FILE}"
         done < <(find "${COMPOSE_DIRECTORY}" -type f -name "${COMPOSE_FILE_GROUP}_*-${COMPOSE_FILE_TYPE}.yml" | sort -g)
+      done
 
+
+      for COMPOSE_FILE in $ADDITIONAL_COMPOSE_FILES; do
+        COMPOSE_LIST="$COMPOSE_LIST -f ${COMPOSE_FILE}"
       done
     }
-
 	}
 
 	echo $COMPOSE_LIST
 }
 
 logs() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common -productive)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -136,7 +145,7 @@ logs() {
 }
 
 terminal() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common -productive)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -146,7 +155,7 @@ terminal() {
 }
 
 ps() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common -productive)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -156,7 +165,7 @@ ps() {
 }
 
 rstart() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common -remote)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common -remote -productive)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -170,7 +179,7 @@ rstart() {
 }
 
 stop() {
-	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common)"
+	COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common -productive)"
 
 	echo "Use compose set: $COMPOSE_LIST"
 
@@ -183,7 +192,7 @@ remove() {
 	read -p "Are you sure you want to continue? [y/N] " answer
 	case ${answer:0:1} in
 	y | Y)
-		COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common)"
+		COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common -productive)"
 
 		echo "Use compose set: $COMPOSE_LIST"
 
@@ -201,7 +210,7 @@ purge() {
 	read -p "Are you sure you want to continue? [y/N] " answer
 	case ${answer:0:1} in
 	y | Y)
-		COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common)"
+		COMPOSE_LIST="$COMPOSE_LIST $(compose . "*" -common -productive)"
 
 		echo "Use compose set: $COMPOSE_LIST"
 
@@ -214,8 +223,6 @@ purge() {
 		;;
 	esac
 }
-
-shift
 
 case "${CLI_OPT1}" in
 start)
@@ -249,7 +256,7 @@ terminal)
 	echo ""
 	echo "Usage: ${CLI_CMD} [option]"
 	echo ""
-	echo "Option:"
+	echo "options:"
 	echo ""
 	echo "  - start [Service...]   startup containers"
 	echo "  - restart [Service...] stops and starts containers"

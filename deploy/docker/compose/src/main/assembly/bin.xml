@@ -24,6 +24,7 @@
         <include>README.md</include>
         <include>**/*-common.yml</include>
         <include>**/*-remote.yml</include>
+        <include>**/*-productive.yml</include>
       </includes>
     </fileSet>
 
