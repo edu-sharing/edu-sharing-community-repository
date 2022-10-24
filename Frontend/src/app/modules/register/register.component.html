@@ -2,7 +2,7 @@
 <card *ngIf="!isLoading"
       role="main" [appSkipTarget]="SkipTarget.MainContent"
       avatar="assets/images/app-icon.svg"
-      [buttons]="updateButtons()"
+      [buttons]="buttons"
       title="{{(state=='request' || state=='done-reset' ? 'REGISTER.REQUEST.TITLE' : state=='reset-password' ? 'REGISTER.RESET.TITLE' : 'REGISTER.TITLE') | translate}}"
       subtitle="{{'REGISTER.ORGANIZATION_TITLE' | translate}}"
       width="normal"
@@ -12,15 +12,13 @@
 >
     <div class="register-content card-content-padding">
         <h1 appTitle class="cdk-visually-hidden">{{ 'REGISTER.TITLE' | translate }}</h1>
-        <app-register-form [class.display-none]="!(state=='register')" (onRegisterDone)="onRegisterDone()" #registerForm></app-register-form>
-        <app-register-done *ngIf="state=='done' || state=='done-reset'" (onModify)="modifyData()" [inputState]="state" #registerDone></app-register-done>
-        <app-register-request *ngIf="state=='request'" (onDone)="onPasswordRequested()" #request></app-register-request>
-        <app-register-reset-password *ngIf="state=='reset-password'" #resetPassword></app-register-reset-password>
+        <app-register-form [class.display-none]="!(state=='register')" (onStateChanged)="updateButtons()" (onRegisterDone)="onRegisterDone()" #registerForm></app-register-form>
+        <app-register-done *ngIf="state=='done' || state=='done-reset'" (onStateChanged)="updateButtons()" (onModify)="modifyData()" [inputState]="state" #registerDone></app-register-done>
+        <app-register-request *ngIf="state=='request'" (onStateChanged)="updateButtons()" (onDone)="onPasswordRequested()" #request></app-register-request>
+        <app-register-reset-password *ngIf="state=='reset-password'" (onStateChanged)="updateButtons()" #resetPassword></app-register-reset-password>
         <div *ngIf="state != 'register' && state != 'done' && state != 'done-reset' && state != 'request' && canRegister()" class="register">
             {{'LOGIN.REGISTER_TEXT' | translate}}
             <button mat-button color="primary" (click)="linkRegister()">{{'LOGIN.REGISTER_LINK' | translate}} <i icon="arrow_forward"></i></button>
         </div>
-    </div>
-    <div class="card-action">
     </div>
 </card>
