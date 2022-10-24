@@ -126,6 +126,7 @@ public class BulkServiceImpl implements BulkService {
 			propertiesNative = interceptor.preprocessProperties(propertiesNative);
 		}
 		// filter for valid/declared properties to store
+		HashMap<String, Object> rawProperties = new HashMap<>(propertiesNative);
 		propertiesNative = propertiesNative.entrySet().stream().filter(property -> {
 			QName prop = QName.createQName(property.getKey());
 			return serviceRegistry.getDictionaryService().getProperty(prop) != null;
@@ -138,7 +139,7 @@ public class BulkServiceImpl implements BulkService {
 			NodeRef groupFolder = getOrCreate(primaryFolder, group, propertiesNative);
 			if(groupBy != null && groupBy.size()>0){
 				if(groupBy.size() == 1){
-					groupFolder = getOrCreate(groupFolder, propertiesNative.get(CCConstants.getValidGlobalName(groupBy.get(0))).toString(), propertiesNative);
+					groupFolder = getOrCreate(groupFolder, rawProperties.get(CCConstants.getValidGlobalName(groupBy.get(0))).toString(), propertiesNative);
 				} else {
 					throw new IllegalArgumentException("groupBy currently only supports exactly one value");
 				}
