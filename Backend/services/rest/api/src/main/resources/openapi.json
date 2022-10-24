@@ -22096,6 +22096,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "description": "create a node version",
+            "in": "query",
+            "name": "createVersion",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
           }
         ],
         "requestBody": {
