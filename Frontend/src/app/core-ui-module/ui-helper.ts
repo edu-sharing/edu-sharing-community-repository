@@ -185,7 +185,7 @@ export class UIHelper {
         // console.log("strength: "+this.getPasswordStrength(password));
         if (password && password.length >= min_length) {
             if (this.getPasswordStrength(password) > 70) {
-                if (this.getPasswordStrength(password) > 120) {
+                if (this.getPasswordStrength(password) > 160) {
                     return 'strong';
                 } else {
                     return 'medium';
