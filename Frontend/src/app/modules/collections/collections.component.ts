@@ -880,6 +880,10 @@ export class CollectionsMainComponent {
     }
 
     displayCollectionById(id: string, callback: () => void = null): void {
+        this.parentCollectionId = new EduData.Reference(
+            RestConstants.HOME_REPOSITORY,
+            RestConstants.ROOT,
+        );
         if (id == null) {
             id = RestConstants.ROOT;
         }
@@ -968,6 +972,12 @@ export class CollectionsMainComponent {
             .getNodeParents(this.collectionContent.node.ref.id, false)
             .subscribe((data: EduData.NodeList) => {
                 this.path = data.nodes.reverse();
+                if(this.path.length > 1) {
+                    this.parentCollectionId = new EduData.Reference(
+                        this.path[this.path.length - 2].ref.repo,
+                        this.path[this.path.length - 2].ref.id,
+                    );
+                }
             });
     }
 
@@ -1173,6 +1183,15 @@ export class CollectionsMainComponent {
             this.mainNavRef,
             this.actionbarCollection,
         );
+        this.optionsService.setListener({
+            onDelete: ({objects}) => {
+                if(objects.length === 1 && objects[0].ref.id === this.collectionContent.node.ref.id) {
+                    // use set timeout to allow router navigate to work
+                    const id = this.parentCollectionId.id;
+                    setTimeout(() => this.navigate(id));
+                }
+            }
+        })
         this.optionsService.refreshComponents();
     }
 
