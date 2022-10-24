@@ -8,6 +8,10 @@ import java.util.List;
 
 public interface BulkService {
 
+    NodeRef getPrimaryFolder();
+
+    void refresh();
+
     NodeRef sync(String group, List<String> match, List<String> groupBy, String type, List<String> aspects, HashMap<String, String[]> properties, boolean forceUpdate) throws Throwable;
 
     NodeRef find(HashMap<String, String[]> properties) throws Exception;

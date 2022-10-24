@@ -421,7 +421,6 @@ public class AdminServiceImpl implements AdminService  {
 				PropertiesHelper.Config.getPropertyFilePath(info.getAppFile())
 		));
 		appFile.renameTo(new File(appFile.getAbsolutePath()+System.currentTimeMillis()+".bak"));
-		ApplicationInfoList.refresh();
 		RepoFactory.refresh();
 	}
 
@@ -527,7 +526,6 @@ public class AdminServiceImpl implements AdminService  {
 			homeAppProps.storeToXML(new FileOutputStream(new File(homeAppPath)), " added contenturl and preview url");
 		}
 		
-		ApplicationInfoList.refresh();
 		RepoFactory.refresh();
 		
 		HashMap<String,String> result = new HashMap<String,String>();
@@ -943,7 +941,6 @@ public class AdminServiceImpl implements AdminService  {
 		for(String key : properties.keySet()){
 			PropertiesHelper.setProperty(key,properties.get(key), appFile.getAbsolutePath(), PropertiesHelper.XML);
 		}
-		ApplicationInfoList.refresh();
 		RepoFactory.refresh();
 	}
 	

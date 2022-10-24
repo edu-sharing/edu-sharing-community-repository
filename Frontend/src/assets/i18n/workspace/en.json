@@ -246,6 +246,7 @@
                 "BULK_CREATE": "Node imported via bulk",
                 "BULK_UPDATE": "Node updated via bulk",
                 "BULK_UPDATE_RESYNC": "Applied local changes onto bulk-changes",
+                "BULK_MIGRATION": "Migration step for converting oai imports to etl/bulk imports",
                 "IMPORT_BLOCKED": "Changed status of import-blocking"
             }
         },

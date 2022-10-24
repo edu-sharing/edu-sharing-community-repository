@@ -131,7 +131,9 @@ export class WorkspaceTreeComponent {
     }
 
     openNode(event: Node) {
-        this._path.splice(1, this._path.length - 1);
+        console.log(event, this._path);
+        // when active, this will reset other open trees, so disable it to keep manually opened trees open
+        // this._path.splice(1, this._path.length - 1);
         this.onOpenNode.emit(event);
     }
 }

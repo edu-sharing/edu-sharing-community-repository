@@ -77,7 +77,7 @@ $mobileHeightLandscape: 400px;
 $mobileWidthPortrait: 400px;
 // this factor should be multiplied by a natural number, e.g. *3 means stage 3 (relatively early)
 $mobileStage:   100px;
-$dialogZIndex: 120;
+$dialogZIndex: 130;
 $dialogNonModalZIndex: 90; // before the top bar on mobile, but behind the mobile tabs and the top bar on desktop
 $topBarZIndex: 98;
 $topBarMobileZIndex: 80;
