@@ -861,12 +861,18 @@ public class NodeDao {
 		}
 	}
 	
-	public NodeDao changePreview(InputStream is,String mimetype) throws DAOException {
+	public NodeDao changePreview(InputStream is,String mimetype, boolean version) throws DAOException {
 
 		try {
 			is=ImageTool.autoRotateImage(is,ImageTool.MAX_THUMB_SIZE);
-			nodeService.setProperty(storeProtocol,storeId,nodeId,
-					CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_PREVIEW_CHANGED);
+
+			HashMap<String,String[]> props = new HashMap<>();
+			if(version){
+				props.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, new String[]{CCConstants.VERSION_COMMENT_PREVIEW_CHANGED});
+				//mergeVersionComment(props, versionComment);
+			}
+			props.put(CCConstants.CCM_PROP_IO_CREATE_VERSION,new String[]{new Boolean(version).toString()});
+			nodeService.updateNode(nodeId, props);
 			nodeService.writeContent(storeRef, nodeId, is, mimetype, null,
 					isDirectory() ? CCConstants.CCM_PROP_MAP_ICON : CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
 			PreviewCache.purgeCache(nodeId);
