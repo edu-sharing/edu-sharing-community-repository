@@ -595,6 +595,47 @@ export class OptionsHelperService implements OnDestroy {
             options.push(openFolder);
          */
 
+        const openOriginalNode = new OptionItem(
+            'OPTIONS.OPEN_ORIGINAL_NODE',
+            'description',
+            async (object) => {
+                const nodeId = RestHelper.removeSpacesStoreRef(
+                    this.getObjects(object)[0].properties[
+                        RestConstants.CCM_PROP_PUBLISHED_ORIGINAL
+                    ][0],
+                );
+                UIHelper.goToNode(this.router, new Node(nodeId));
+            },
+        );
+        openOriginalNode.constrains = [
+            Constrain.Files,
+            Constrain.NoBulk,
+            Constrain.HomeRepository,
+            Constrain.User,
+        ];
+        openOriginalNode.toolpermissions = [RestConstants.TOOLPERMISSION_WORKSPACE];
+        openOriginalNode.scopes = [Scope.CollectionsReferences, Scope.Search, Scope.Render];
+        openOriginalNode.customEnabledCallback = (nodes) => {
+            if (nodes && nodes.length === 1) {
+                openOriginalNode.customEnabledCallback = null;
+                let nodeId = RestHelper.removeSpacesStoreRef(
+                    nodes[0].properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL][0],
+                );
+                this.nodeService.getNodeMetadata(nodeId).subscribe(
+                    () => {
+                        openOriginalNode.isEnabled = true;
+                    },
+                    () => {
+                        openOriginalNode.isEnabled = false;
+                    },
+                );
+            }
+            return false;
+        };
+        openOriginalNode.elementType = [ElementType.NodePublishedCopy];
+        openOriginalNode.group = DefaultGroups.View;
+        openOriginalNode.priority = 13;
+
         const openParentNode = new OptionItem('OPTIONS.SHOW_IN_FOLDER', 'folder', async (object) =>
             this.goToWorkspace((await this.getObjectsAsync(object, true))[0]),
         );
@@ -1382,6 +1423,7 @@ export class OptionsHelperService implements OnDestroy {
         options.push(debugNode);
         options.push(acceptProposal);
         options.push(declineProposal);
+        options.push(openOriginalNode);
         options.push(openParentNode);
         options.push(openNode);
         options.push(editConnectorNode);
