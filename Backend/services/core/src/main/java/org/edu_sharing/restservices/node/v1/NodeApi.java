@@ -540,6 +540,46 @@ public class NodeApi  {
     	}
     }
 
+	@PUT
+	@Path("/nodes/{repository}/{node}/metadata/copy/{from}")
+
+	@Operation(summary = "Copy metadata from another node.", description = "Copies all common metadata from one note to another. Current user needs write access to the target node and read access to the source node.")
+
+	@ApiResponses(
+			value = {
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+			})
+
+	public Response copyMetadata(
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+			@Parameter(description = "The node where to copy the metadata from",required=true ) @PathParam("from") String from,
+			@Context HttpServletRequest req) {
+
+		try {
+
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+			NodeDao fromDao = NodeDao.getNode(repoDao, from);
+			NodeDao newNode = nodeDao.copyProperties(fromDao);
+
+			NodeEntry response = new NodeEntry();
+			response.setNode(newNode.asNode());
+
+			return Response.status(Response.Status.OK).entity(response).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+
 	@GET
 	@Path("/nodes/{repository}/{node}/metadata/template")
 

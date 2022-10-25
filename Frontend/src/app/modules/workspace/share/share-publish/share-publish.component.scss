@@ -42,6 +42,12 @@ es-info-message {
             margin: 5px 10px;
             width: 100%;
             justify-content: space-between;
+            > mat-radio-button {
+                padding: 0 10px;
+            }
+            @media screen and (max-width: ($mobileWidth)) {
+                flex-direction: column;
+            }
         }
         es-info-message {
             display: block;
@@ -88,8 +94,12 @@ es-info-message {
                 font-size: $fontSizeSmall;
             }
             &.version-virtual {
-                background: transparent;
+                background: lighten($workspaceInheritColor, 40%);
                 border: 2px dashed $workspaceInheritColor;
+            }
+            &.version-update {
+                background: lighten($warningMedium, 40%);
+                border: 2px dashed $warningMedium;
             }
             .version-actions {
                 align-self: center;

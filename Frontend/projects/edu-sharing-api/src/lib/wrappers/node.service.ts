@@ -60,6 +60,13 @@ export class NodeService {
             node: id,
         });
     }
+    copyMetadata(node: string, from: string, { repository = HOME_REPOSITORY }) {
+        return this.nodeV1.copyMetadata({
+            node,
+            from,
+            repository,
+        });
+    }
 
     /**
      * Fetches the metadata as indexed for search.
