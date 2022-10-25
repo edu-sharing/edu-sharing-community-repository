@@ -844,21 +844,26 @@ public class NodeDao {
 	public NodeDao changePropertiesWithVersioning(
 			HashMap<String,String[]> properties, String comment) throws DAOException {
 
-		try { 
-			mergeVersionComment(properties, comment);
-	
-			// 1. update
-			this.nodeService.updateNode(nodeId,transformProperties(properties));
-	
-			// 2. versioning
-			this.nodeService.createVersion(nodeId);
-	
-			return new NodeDao(repoDao, nodeId, Filter.createShowAllFilter());
-			
-		} catch (Throwable t) {
-			
-			throw DAOException.mapping(t);
-		}
+		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(()-> {
+
+			try {
+				mergeVersionComment(properties, comment);
+
+				// 1. update
+				this.nodeService.updateNode(nodeId, transformProperties(properties));
+
+				// 2. versioning
+				this.nodeService.createVersion(nodeId);
+
+				return new NodeDao(repoDao, nodeId, Filter.createShowAllFilter());
+
+			} catch (Throwable t) {
+
+				throw DAOException.mapping(t);
+			}
+		});
 	}
 	
 	public NodeDao changePreview(InputStream is,String mimetype, boolean version) throws DAOException {
