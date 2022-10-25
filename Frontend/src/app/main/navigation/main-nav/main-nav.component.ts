@@ -152,6 +152,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.registerAutoLogoutDialog();
         this.registerAutoLogoutTimeout();
         this.registerHandleScroll();
+        this.showLicenseAgreement();
     }
 
     ngAfterViewInit() {
@@ -535,7 +536,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             this.config = data;
             this.editUrl = data.editProfileUrl;
             this.showEditProfile = data.editProfile;
-            this.showLicenseAgreement();
             this.updateUserOptions();
         });
     }
@@ -569,9 +569,10 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.globalProgress = false;
     }
 
-    private showLicenseAgreement() {
+    private async showLicenseAgreement() {
+        const config = await this.configService.get('licenseAgreement', false).toPromise();
         if (
-            !this.config.licenseAgreement ||
+            !config ||
             this.connector.getCurrentLogin()?.isGuest ||
             !this.connector.getCurrentLogin().isValidLogin
         ) {
@@ -581,7 +582,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         this.session.get('licenseAgreement', false).subscribe((version: string) => {
             this.licenseAgreementHTML = null;
             let nodeId: string = null;
-            for (const node of this.config.licenseAgreement.nodeId) {
+            for (const node of config.nodeId) {
                 if (node.language == null) nodeId = node.value;
                 if (node.language === this.translations.getLanguage()) {
                     nodeId = node.value;
