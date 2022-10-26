@@ -125,6 +125,7 @@
             esCheckTextOverflow
             #text="esCheckTextOverflow"
             [matTooltip]="text.hasTextOverflow() ? cell.innerText : null"
+            matTooltipTouchGestures="off"
           ></es-list-text>
         </es-node-url>
       </ng-container>
@@ -150,6 +151,7 @@
         esCheckTextOverflow
         #text="esCheckTextOverflow"
         [matTooltip]="text.hasTextOverflow() ? cell.innerText : null"
+        matTooltipTouchGestures="off"
       ></es-list-text>
     </mat-cell>
   </ng-container>
@@ -231,6 +233,7 @@ available. -->
           ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
           : ''
       "
+      matTooltipTouchGestures="off"
     />
     <i
       *ngIf="!node.iconURL"
