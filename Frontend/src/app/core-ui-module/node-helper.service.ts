@@ -279,7 +279,7 @@ export class NodeHelperService {
      * @returns {string}
      */
     public getLicenseIcon(node: Node) {
-        return node.license ? node.license.icon : null;
+        return node.license ? getRepoUrl(node.license.icon, node) : null;
     }
 
     /**

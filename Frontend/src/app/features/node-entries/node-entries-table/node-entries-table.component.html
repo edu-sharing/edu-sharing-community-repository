@@ -220,7 +220,7 @@ available. -->
   <div class="icon-bg">
     <img
       *ngIf="node.iconURL"
-      [src]="node.iconURL"
+      [src]="node | esNodeIcon"
       [alt]="
         node.mediatype
           ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)

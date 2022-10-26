@@ -1,7 +1,7 @@
 <div class="node-row" *ngIf="node">
   <div class="icon-bg">
     <img
-      [src]="node.iconURL"
+      [src]="node | esNodeIcon"
       [alt]="
         node.mediatype
           ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)

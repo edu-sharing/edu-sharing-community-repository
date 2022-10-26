@@ -50,7 +50,7 @@
       </ng-container>
       <ng-container *ngIf="!nodeHelper.isNodeCollection(node)">
         <img
-          [src]="node.iconURL"
+          [src]="node | esNodeIcon"
           [alt]="
             node.mediatype
               ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
