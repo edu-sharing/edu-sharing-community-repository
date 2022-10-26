@@ -130,7 +130,12 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         });
          */
     }
-    getVisibleColumns() {
+
+    getVisibleDataColumns() {
+        return this.entriesService.columns.filter((c) => c.visible);
+    }
+
+    getVisibleColumnNames() {
         const columns = [];
         if (this.entriesService.checkbox) {
             columns.push('select');
