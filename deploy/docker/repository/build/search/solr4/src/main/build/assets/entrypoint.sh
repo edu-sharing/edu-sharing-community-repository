@@ -47,6 +47,7 @@ xmlstarlet ed -L \
   -i '$internal' -t attr -n "proxyPort"          -v "${my_port}" \
   -i '$internal' -t attr -n "protocol"           -v "HTTP/1.1" \
   -i '$internal' -t attr -n "connectionTimeout"  -v "20000" \
+  -i '$internal' -t attr -n "maxHttpHeaderSize"  -v "5242880" \
   ${catSConf}
 
 ### Alfresco solr4 #####################################################################################################
