@@ -29,6 +29,8 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     set dataSource(value: NodeDataSource<T>) {
         this.dataSource$.next(value);
     }
+    // TODO: Use a subject of an immutable type for columns, so users don't have to monitor
+    // `columnsChange` separately.
     columns: ListItem[];
     configureColumns: boolean;
     columnsChange: EventEmitter<ListItem[]>;

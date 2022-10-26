@@ -96,7 +96,7 @@
   </ng-container>
   <!-- Data Columns -->
   <ng-container
-    *ngFor="let column of getVisibleDataColumns(); let first = first"
+    *ngFor="let column of visibleDataColumns$ | async; let first = first"
     [matColumnDef]="column.name"
   >
     <ng-container *ngIf="entriesService.sort?.allowed && isSortable(column)">
@@ -155,7 +155,7 @@
       ></es-list-text>
     </mat-cell>
   </ng-container>
-  <mat-header-row mat-header-row *matHeaderRowDef="getVisibleColumnNames()"></mat-header-row>
+  <mat-header-row mat-header-row *matHeaderRowDef="visibleColumnNames$ | async"></mat-header-row>
   <mat-row
     mat-row
     matRipple
@@ -179,7 +179,7 @@
       node.virtual && !$any(entriesService.dataSource.getData()[i + 1])?.virtual
     "
     [class.dynamic-single-click]="entriesService.singleClickHint === 'dynamic'"
-    *matRowDef="let node; let i = index; let last = last; columns: getVisibleColumnNames()"
+    *matRowDef="let node; let i = index; let last = last; columns: visibleColumnNames$ | async"
     (contextmenu)="onRowContextMenu({ event: $event, node: node })"
     (keydown.ContextMenu)="onRowContextMenu({ event: $event, node: node })"
   >
@@ -187,7 +187,7 @@
       *cdkDragPreview
       [node]="node"
       [selected]="entriesService.selection.selected"
-      [item]="getVisibleDataColumns()[0]"
+      [item]="(visibleDataColumns$ | async)[0]"
     ></es-drag-preview>
   </mat-row>
 </mat-table>
@@ -206,10 +206,10 @@
 <mat-paginator #paginator [pageSizeOptions]="pageSizeOptions"></mat-paginator>
 -->
 
-<!-- Wait for 'ready' state to avoid changed-after-checked error when `columnChooserTrigger` becomes
+<!-- Wait for ready state to avoid changed-after-checked error when `columnChooserTrigger` becomes
 available. -->
 <es-column-chooser
-  *ngIf="ready"
+  *ngIf="columnChooserTriggerReady"
   [columns]="entriesService.columns"
   [(columnChooserVisible)]="columnChooserVisible"
   [origin]="columnChooserTrigger"
