@@ -169,15 +169,15 @@ export class ProfilesComponent {
     }
   }
   public saveEdits() {
-    if(!this.userEdit.profile.firstName.trim()) {
+    if(!this.userEdit.profile.firstName?.trim()) {
       this.toast.error(null,'PROFILES.ERROR.FIRST_NAME');
       return;
     }
-    if(!this.userEdit.profile.lastName.trim()) {
+    if(!this.userEdit.profile.lastName?.trim()) {
       this.toast.error(null,'PROFILES.ERROR.LAST_NAME');
       return;
     }
-    if(!this.userEdit.profile.email.trim()) {
+    if(!this.userEdit.profile.email?.trim()) {
       this.toast.error(null,'PROFILES.ERROR.EMAIL');
       return;
     }
