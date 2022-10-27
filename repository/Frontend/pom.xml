@@ -59,6 +59,16 @@
               <arguments>${npm.args.build}</arguments>
             </configuration>
           </execution>
+          <execution>
+            <id>licenses</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <phase>process-classes</phase>
+            <configuration>
+              <arguments>run print-licenses</arguments>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
 
