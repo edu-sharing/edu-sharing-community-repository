@@ -163,6 +163,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	//used to identify applications by resourcelinks
 	public static final String KEY_LTITOOL_URL = "ltitool_url";
 
+	public static final String KEY_LTI_SCOPEUSERNAME = "lti_scope_username";
+
 
 	/**
 	 * property file vals
@@ -404,6 +406,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	private String ltitoolUrl;
 
+	private final boolean ltiScopeUsername;
+
 
 	/**
 	 * der Anfangsteil des alfresco Intergity Pattern:
@@ -577,6 +581,9 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		ltitoolDescription = properties.getProperty(KEY_LTITOOL_DESCRIPTION);
 		ltitoolCustomContentOption = properties.getProperty(KEY_LTITOOL_CUSTOMCONTENT_OPTION);
 		ltitoolUrl = properties.getProperty(KEY_LTITOOL_URL);
+		ltiScopeUsername = (properties.getProperty(KEY_LTI_SCOPEUSERNAME) == null)
+				? true
+				: new Boolean(properties.getProperty(KEY_LTI_SCOPEUSERNAME));
 	}
 	
 	public String getXml() {
@@ -1129,4 +1136,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		return ltitoolUrl;
 	}
 
+	public boolean isLtiScopeUsername() {
+		return ltiScopeUsername;
+	}
 }

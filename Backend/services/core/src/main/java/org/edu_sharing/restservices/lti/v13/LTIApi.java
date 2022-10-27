@@ -356,7 +356,9 @@ public class LTIApi {
                     }
                 }
             }
-            user = user+"@"+jws.getBody().getIssuer();
+            if(ltijwtUtil.getApplicationInfo().isLtiScopeUsername()){
+                user = user+"@"+jws.getBody().getIssuer();
+            }
 
             String name = jws.getBody().get(LTIConstants.LTI_NAME, String.class);
             String familyName = jws.getBody().get(LTIConstants.LTI_FAMILY_NAME, String.class);
