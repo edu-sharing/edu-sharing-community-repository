@@ -18,7 +18,7 @@
 <es-card-actions
   *ngIf="(buttons && buttons.length > 0) || savingState"
   [buttons]="buttons"
-  [additionalContent]="savingInfo"
+  [additionalContent]="config.customBottomBarContent ?? savingInfo"
 ></es-card-actions>
 <ng-template #savingInfo>
   <p *ngIf="savingState === 'saving'" class="saving-info" aria-live="polite">

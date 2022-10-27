@@ -1,14 +1,9 @@
-import { Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
+import { AfterViewInit, Component, Inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MatTabChangeEvent } from '@angular/material/tabs';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { map, skip, switchMap, takeUntil, tap } from 'rxjs/operators';
-import {
-    InteractionType,
-    ListSortConfig,
-    NodeEntriesDisplayType,
-} from '../../../features/node-entries/entries-model';
+import { distinctUntilChanged, map, skip, switchMap, takeUntil, tap } from 'rxjs/operators';
 import {
     DialogButton,
     ListItem,
@@ -18,87 +13,32 @@ import {
     RestConnectorService,
     RestConstants,
     RestNodeService,
-    SessionStorageService,
-} from '../../../core-module/core.module';
-import { Toast } from '../../../core-ui-module/toast';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { WorkspaceExplorerComponent } from '../../../modules/workspace/explorer/explorer.component';
-import { NodeDataSource } from '../../../features/node-entries/node-data-source';
+} from '../../../../core-module/core.module';
+import { Toast } from '../../../../core-ui-module/toast';
+import { UIHelper } from '../../../../core-ui-module/ui-helper';
+import { WorkspaceExplorerComponent } from '../../../../modules/workspace/explorer/explorer.component';
+import {
+    InteractionType,
+    ListSortConfig,
+    NodeEntriesDisplayType,
+} from '../../../node-entries/entries-model';
+import { NodeDataSource } from '../../../node-entries/node-data-source';
+import { CardDialogConfig, CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
+import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
+import { FileChooserDialogData, FileChooserDialogResult } from './file-chooser-dialog-data';
+
+const SINGLE_COLUMN_WIDTH = 600;
+const MULTI_COLUMN_WIDTH = 900;
 
 @Component({
-    selector: 'es-file-chooser',
-    templateUrl: 'file-chooser.component.html',
-    styleUrls: ['file-chooser.component.scss'],
+    selector: 'es-file-chooser-dialog',
+    templateUrl: './file-chooser-dialog.component.html',
+    styleUrls: ['./file-chooser-dialog.component.scss'],
 })
-/**
- * An edu-sharing file-picker modal dialog
- */
-export class FileChooserComponent implements OnInit {
+export class FileChooserDialogComponent implements OnInit, AfterViewInit {
+    @ViewChild('bottomBarContent') bottomBarContent: TemplateRef<HTMLElement>;
+
     readonly InteractionType = InteractionType;
-    /**
-     * The caption of the dialog, will be translated automatically.
-     */
-    @Input() title: string;
-    /**
-     * The subtitle of the dialog. Will be auto-filled if left empty.
-     */
-    @Input() subtitle: string;
-    /**
-     * True if the dialog can be canceled by the user.
-     */
-    @Input() isCancelable: boolean;
-    /**
-     * Set true if the user nees write permissions to the target file.
-     */
-    @Input() writeRequired = false;
-    /**
-     * Set true if the user should pick a collection, not a regular node.
-     */
-    @Input() set collections(collections: boolean) {
-        this._collections = collections;
-        this.displayType = NodeEntriesDisplayType.SmallGrid;
-        this.tabs = null;
-        this.setHomeDirectory(RestConstants.ROOT, { canSelectHome: false });
-        this.hasHeading = false;
-        this._pickDirectory = false;
-        this.searchMode = true;
-        this.searchQuery = '';
-        this.columns = UIHelper.getDefaultCollectionColumns();
-        this.sort = {
-            active: RestConstants.CM_MODIFIED_DATE,
-            direction: 'desc',
-            columns: [],
-        };
-    }
-    get collections() {
-        return this._collections;
-    }
-    /**
-     * Set to true if the user should pick a directory.
-     */
-    @Input() set pickDirectory(pickDirectory: boolean) {
-        if (pickDirectory) {
-            this.cardIcon = 'folder';
-            this.filter.push(RestConstants.FILTER_FOLDERS);
-        }
-        this._pickDirectory = pickDirectory;
-    }
-    /**
-     * Filter for individual file types, please see @RestNodeService.getChildren().
-     */
-    @Input() filter: string[] = [];
-    @Input() priority = 0;
-
-    /**
-     * Fired when an element is choosen, a Node Array will be send as a result
-     * If mode is set to directory or collection, the array will always contain 1 element
-     */
-    @Output() onChoose = new EventEmitter();
-    /**
-     * Fired when the picker was canceled by the user
-     */
-    @Output() onCancel = new EventEmitter();
-
     /**
      * Path to show as breadcrumbs, beginning with the first item after the current home directory.
      */
@@ -107,16 +47,19 @@ export class FileChooserComponent implements OnInit {
     columns: ListItem[] = [];
     sort: ListSortConfig;
     selectedFiles: Node[] = [];
-    _collections = false;
     displayType = NodeEntriesDisplayType.Table;
     searchMode: boolean;
     searchQuery: string;
-    buttons: DialogButton[];
-    defaultSubtitle: string;
+    private defaultSubtitleSubject = new BehaviorSubject<string>(null);
+    private get defaultSubtitle(): string {
+        return this.defaultSubtitleSubject.value;
+    }
+    private set defaultSubtitle(value: string) {
+        this.defaultSubtitleSubject.next(value);
+    }
     list = new NodeDataSource<Node>();
     cardIcon: string;
     hasHeading = true;
-    _pickDirectory: boolean;
     tabs = [
         {
             label: 'WORKSPACE.MY_FILES',
@@ -140,14 +83,14 @@ export class FileChooserComponent implements OnInit {
     private currentDirectory: string;
     canSelectHome: boolean;
     private loadDirectoryTrigger = new Subject<{ directory: string; reset: boolean }>();
-    dialogWidth = 'normal';
 
     constructor(
+        @Inject(CARD_DIALOG_DATA) public data: FileChooserDialogData,
+        private dialogRef: CardDialogRef<FileChooserDialogData, FileChooserDialogResult>,
         private connector: RestConnectorService,
         private collectionApi: RestCollectionService,
         private nodeApi: RestNodeService,
         private toast: Toast,
-        private config: SessionStorageService,
         private translate: TranslateService,
     ) {
         // http://plnkr.co/edit/btpW3l0jr5beJVjohy1Q?p=preview
@@ -155,19 +98,33 @@ export class FileChooserComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        this.processDialogData();
         this.registerObservables();
         this.initialize();
+        this.setDialogConfig();
+        this.defaultSubtitleSubject
+            .pipe(
+                map((defaultSubtitle) => this.data.subtitle ?? defaultSubtitle),
+                distinctUntilChanged(),
+            )
+            .subscribe((subtitle) => this.dialogRef.patchConfig({ subtitle }));
     }
 
-    @HostListener('document:keydown', ['$event'])
-    handleKeyboardEvent(event: KeyboardEvent) {
-        if (event.code === 'Escape' && this.isCancelable) {
-            event.preventDefault();
-            event.stopPropagation();
-            this.cancel();
-            return;
+    ngAfterViewInit(): void {
+        this.dialogRef.patchConfig({ customBottomBarContent: this.bottomBarContent });
+    }
+
+    private setDialogConfig(): void {
+        const config: Partial<CardDialogConfig<FileChooserDialogData>> = {
+            title: this.data.title,
+            width: SINGLE_COLUMN_WIDTH,
+        };
+        this.dialogRef.patchConfig(config);
+        if (this.cardIcon) {
+            config.avatar = { kind: 'icon', icon: this.cardIcon };
         }
     }
+
     folderIsWritable() {
         return (
             this.path$?.value?.[this.path$?.value?.length - 1]?.access?.indexOf(
@@ -199,8 +156,25 @@ export class FileChooserComponent implements OnInit {
         this.selectedFiles = node;
     }
 
-    private initialize() {
-        if (!this._collections) {
+    private processDialogData() {
+        if (this.data.pickDirectory) {
+            this.cardIcon = 'folder';
+            this.data.filter.push(RestConstants.FILTER_FOLDERS);
+        }
+        if (this.data.collections) {
+            this.displayType = NodeEntriesDisplayType.SmallGrid;
+            this.tabs = null;
+            this.setHomeDirectory(RestConstants.ROOT, { canSelectHome: false });
+            this.hasHeading = false;
+            this.searchMode = true;
+            this.searchQuery = '';
+            this.columns = UIHelper.getDefaultCollectionColumns();
+            this.sort = {
+                active: RestConstants.CM_MODIFIED_DATE,
+                direction: 'desc',
+                columns: [],
+            };
+        } else {
             this.columns = WorkspaceExplorerComponent.getColumns(this.connector);
             this.columns = this.columns.map((c, i) => {
                 c.visible = i === 0;
@@ -215,6 +189,9 @@ export class FileChooserComponent implements OnInit {
                 ),
             };
         }
+    }
+
+    private initialize() {
         if (this.homeDirectory) {
             this.viewDirectory(this.homeDirectory);
         } else {
@@ -246,7 +223,7 @@ export class FileChooserComponent implements OnInit {
     }
 
     selectItem(event: Node) {
-        if (event.isDirectory || this._collections) {
+        if (event.isDirectory || this.data.collections) {
             if (this.searchMode) {
                 this.selectedFiles = [event];
                 this.updateButtons();
@@ -312,10 +289,10 @@ export class FileChooserComponent implements OnInit {
         this.currentDirectory = directory;
         if (reset) {
             this.list.reset();
-            // this.hasMoreToLoad = true; // !this._collections; // Collections have no paging
+            // this.hasMoreToLoad = true; // !this.data.collections; // Collections have no paging
         }
         this.isLoading = true;
-        if (this._collections) {
+        if (this.data.collections) {
             return this.collectionApi
                 .search(this.searchQuery, {
                     offset: this.list.getData().length,
@@ -341,7 +318,7 @@ export class FileChooserComponent implements OnInit {
                 );
         } else {
             return this.nodeApi
-                .getChildren(directory, this.filter, {
+                .getChildren(directory, this.data.filter, {
                     offset: this.list.getData().length,
                     sortBy: [this.sort.active],
                     sortAscending: this.sort.direction === 'asc',
@@ -377,7 +354,7 @@ export class FileChooserComponent implements OnInit {
     }
 
     cancel() {
-        this.onCancel.emit();
+        this.dialogRef.close(null);
     }
 
     private addToList(list: NodeList) {
@@ -399,34 +376,34 @@ export class FileChooserComponent implements OnInit {
                     .pipe(map((nodeWrapper) => nodeWrapper.node));
             }
         })().subscribe((node) => {
-            if (this._collections) {
+            if (this.data.collections) {
                 if (node.access.indexOf(RestConstants.ACCESS_WRITE) === -1) {
                     this.toast.error(null, 'NO_WRITE_PERMISSIONS');
                     return;
                 }
             }
-            this.onChoose.emit([node]);
+            this.dialogRef.close([node]);
         });
     }
 
     private chooseFile() {
-        if (this._collections) {
+        if (this.data.collections) {
             if (this.selectedFiles[0].access.indexOf(RestConstants.ACCESS_WRITE) == -1) {
                 this.toast.error(null, 'NO_WRITE_PERMISSIONS');
                 return;
             }
         }
-        this.onChoose.emit(this.selectedFiles);
+        this.dialogRef.close(this.selectedFiles);
     }
 
     updateButtons() {
-        this.buttons = [
+        const buttons = [
             new DialogButton(this.translate.instant('CANCEL'), { color: 'standard' }, () =>
                 this.cancel(),
             ),
         ];
         let confirmButton;
-        if (this._pickDirectory) {
+        if (this.data.pickDirectory) {
             if (this.path$.value.length) {
                 this.defaultSubtitle = this.path$.value[this.path$.value.length - 1].name;
             } else {
@@ -439,7 +416,7 @@ export class FileChooserComponent implements OnInit {
             );
             confirmButton.disabled =
                 (!this.path$.value.length && !this.canSelectHome) || !this.folderIsWritable();
-        } else if (this.collections && !this.selectedFiles.length) {
+        } else if (this.data.collections && !this.selectedFiles.length) {
             this.defaultSubtitle = null;
             confirmButton = new DialogButton(
                 'SELECT_ROOT_DISABLED',
@@ -450,22 +427,30 @@ export class FileChooserComponent implements OnInit {
         } else if (this.selectedFiles.length) {
             this.defaultSubtitle = this.selectedFiles[0].name;
             confirmButton = new DialogButton(
-                this.translate.instant(this._collections ? 'SELECT_COLLECTION' : 'SELECT_FILE', {
-                    name: this.defaultSubtitle,
-                }),
+                this.translate.instant(
+                    this.data.collections ? 'SELECT_COLLECTION' : 'SELECT_FILE',
+                    {
+                        name: this.defaultSubtitle,
+                    },
+                ),
                 { color: 'primary' },
                 () => this.chooseFile(),
             );
             confirmButton.disabled =
-                this.writeRequired &&
+                this.data.writeRequired &&
                 this.hasWritePermissions(this.selectedFiles[0]).status == false;
         }
         if (confirmButton) {
-            this.buttons.push(confirmButton);
+            buttons.push(confirmButton);
         }
+        this.dialogRef.patchConfig({ buttons });
     }
 
     checkColumnState(event: ListItem[]) {
-        this.dialogWidth = event.filter((i) => i.visible).length > 1 ? 'xxlarge' : 'normal';
+        if (event.filter((i) => i.visible).length > 1) {
+            this.dialogRef.patchConfig({ width: MULTI_COLUMN_WIDTH });
+        } else {
+            this.dialogRef.patchConfig({ width: SINGLE_COLUMN_WIDTH });
+        }
     }
 }

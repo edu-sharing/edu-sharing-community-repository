@@ -1,4 +1,3 @@
-import { FileChooserComponent } from './common/ui/file-chooser/file-chooser.component';
 import { RouterComponent } from './router/router.component';
 import { NodeRenderComponent } from './common/ui/node-render/node-render.component';
 import { ApplyToLmsComponent } from './common/ui/apply-to-lms/apply-to-lms.component';
@@ -43,7 +42,6 @@ export const DECLARATIONS = [
     NodeAuthorNamePipe,
     VersionLabelPipe,
     TimePipe,
-    FileChooserComponent,
     SmallCollectionComponent,
     ScrollToTopButtonComponent,
     CustomGlobalExtensionsComponent,

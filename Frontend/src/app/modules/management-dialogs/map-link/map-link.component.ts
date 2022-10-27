@@ -8,6 +8,7 @@ import { RestConstants } from '../../../core-module/core.module';
 import { Toast } from '../../../core-ui-module/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { Router } from '@angular/router';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
 
 @Component({
     selector: 'es-map-link',
@@ -20,7 +21,6 @@ import { Router } from '@angular/router';
 })
 export class MapLinkComponent {
     _node: Node;
-    chooseDirectory = false;
     breadcrumbs: Node[];
     buttons: DialogButton[];
     @Input() set node(node: Node) {
@@ -36,6 +36,7 @@ export class MapLinkComponent {
         private toast: Toast,
         private router: Router,
         private nodeApi: RestNodeService,
+        private dialogs: DialogsService,
     ) {
         this.updateBreadcrumbs(RestConstants.INBOX);
         this.updateButtons();
@@ -44,12 +45,24 @@ export class MapLinkComponent {
         this.onCancel.emit();
     }
 
+    async chooseDirectory() {
+        const dialogRef = await this.dialogs.openFileChooserDialog({
+            title: 'MAP_LINK.FILE_PICKER_TITLE',
+            pickDirectory: true,
+            writeRequired: true,
+        });
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                this.setDirectory(result);
+            }
+        });
+    }
+
     setDirectory(event: Node[]) {
         this.updateBreadcrumbs(event[0].ref.id);
     }
 
     private updateBreadcrumbs(id: string) {
-        this.chooseDirectory = false;
         this.nodeApi.getNodeParents(id, false).subscribe((parents) => {
             this.breadcrumbs = parents.nodes.reverse();
         });

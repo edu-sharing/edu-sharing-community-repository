@@ -1,10 +1,9 @@
-@import '../../../core-ui-module/styles/variables';
+@import '../../../../core-ui-module/styles/variables';
 
-// es-card ::ng-deep .card-dialog .mat-card {
-//     .mat-card-header .avatar > i {
-//         color: $primary;
-//     }
-// }
+:host ::ng-deep es-node-entries-card-grid {
+    display: block;
+    margin: 10px 20px;
+}
 
 .fileChooserOut {
     padding: 20px;
@@ -17,6 +16,7 @@
     display: flex;
     width: 100%;
     text-align: center;
+    justify-content: center;
     padding-bottom: 10px;
 }
 

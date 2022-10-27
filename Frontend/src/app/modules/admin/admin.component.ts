@@ -168,8 +168,6 @@ export class AdminComponent implements OnInit, OnDestroy {
     public globalProgress = true;
     public appUrl: string;
     public propertyName: string;
-    public chooseDirectory = false;
-    public chooseCollection = false;
     public cacheName: string;
     public cacheInfo: string;
     public oai: any = {};
@@ -544,13 +542,33 @@ export class AdminComponent implements OnInit, OnDestroy {
             skipLocationChange: skipLocationChange,
         });
     }
+    async chooseDirectory() {
+        const dialogRef = await this.dialogs.openFileChooserDialog({
+            title: 'ADMIN.IMPORT.CHOOSE_DIRECTORY',
+            pickDirectory: true,
+        });
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                this.pickDirectory(result);
+            }
+        });
+    }
     public pickDirectory(event: Node[]) {
         this.parentNode = event[0];
-        this.chooseDirectory = false;
+    }
+    async chooseCollection() {
+        const dialogRef = await this.dialogs.openFileChooserDialog({
+            title: 'ADMIN.IMPORT.CHOOSE_COLLECTION',
+            collections: true,
+        });
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                this.pickCollection(result);
+            }
+        });
     }
     public pickCollection(event: Node[]) {
         this.parentCollection = event[0];
-        this.chooseCollection = false;
     }
     public registerAppXml(event: any) {
         const file = event.target.files[0];

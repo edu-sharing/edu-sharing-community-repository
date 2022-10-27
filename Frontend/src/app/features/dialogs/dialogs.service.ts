@@ -4,6 +4,10 @@ import { Closable, configForNode } from './card-dialog/card-dialog-config';
 import { CardDialogRef } from './card-dialog/card-dialog-ref';
 import { CardDialogService } from './card-dialog/card-dialog.service';
 import {
+    FileChooserDialogData,
+    FileChooserDialogResult,
+} from './dialog-modules/file-chooser-dialog/file-chooser-dialog-data';
+import {
     LicenseAgreementDialogData,
     LicenseAgreementDialogResult,
 } from './dialog-modules/license-agreement-dialog/license-agreement-dialog-data';
@@ -108,6 +112,20 @@ export class DialogsService {
             subtitle: 'ACCESSIBILITY.SUBTITLE',
             avatar: { kind: 'icon', icon: 'accessibility' },
             width: 700,
+        });
+    }
+
+    async openFileChooserDialog(
+        data: Partial<FileChooserDialogData>,
+    ): Promise<CardDialogRef<FileChooserDialogData, FileChooserDialogResult>> {
+        const { FileChooserDialogComponent } = await import(
+            './dialog-modules/file-chooser-dialog/file-chooser-dialog.module'
+        );
+        return this.cardDialog.open(FileChooserDialogComponent, {
+            contentPadding: 0,
+            // width: 500,
+            height: 800,
+            data: { ...new FileChooserDialogData(), ...(data ?? {}) },
         });
     }
 }

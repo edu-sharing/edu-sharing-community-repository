@@ -1,4 +1,4 @@
-import { InjectionToken } from '@angular/core';
+import { InjectionToken, TemplateRef } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { Observable, of } from 'rxjs';
@@ -14,6 +14,7 @@ export class CardDialogConfig<D = unknown> {
     subtitle?: string;
     avatar?: CardAvatar;
     buttons?: DialogButton[];
+    customBottomBarContent?: TemplateRef<unknown>;
     contentPadding?: number = 25;
     width?: number;
     minWidth?: number | string;

@@ -73,22 +73,6 @@
   [isCancelable]="true"
   (onCancel)="dialogTitle = null"
 ></es-modal-dialog>
-<es-file-chooser
-  *ngIf="chooseDirectory"
-  [isCancelable]="true"
-  [title]="'ADMIN.IMPORT.CHOOSE_DIRECTORY'"
-  [pickDirectory]="true"
-  (onCancel)="chooseDirectory = false"
-  (onChoose)="pickDirectory($event)"
-></es-file-chooser>
-<es-file-chooser
-  *ngIf="chooseCollection"
-  [isCancelable]="true"
-  [title]="'ADMIN.IMPORT.CHOOSE_COLLECTION'"
-  [collections]="true"
-  (onCancel)="chooseCollection = false"
-  (onChoose)="pickCollection($event)"
-></es-file-chooser>
 <div class="main">
   <div class="main-nav">
     <div>
@@ -457,7 +441,7 @@
           }}</mat-radio-button>
         </mat-radio-group>
         <div class="inputGroup" *ngIf="parentCollectionType === 'choose'">
-          <button mat-raised-button (click)="chooseCollection = true">
+          <button mat-raised-button (click)="chooseCollection()">
             {{ 'ADMIN.IMPORT.CHOOSE_COLLECTION' | translate }}
           </button>
           <div class="directory">
@@ -489,7 +473,7 @@
           <div class="file">{{ excelFile ? excelFile.name : '' }}</div>
         </div>
         <div class="inputGroup">
-          <button mat-raised-button (click)="chooseDirectory = true">
+          <button mat-raised-button (click)="chooseDirectory()">
             {{ 'ADMIN.IMPORT.CHOOSE_DIRECTORY' | translate }}
           </button>
           <div class="directory">
@@ -901,7 +885,7 @@
       </div>
       <div class="group caches">
         <div class="inputGroup">
-          <button mat-raised-button (click)="chooseDirectory = true">
+          <button mat-raised-button (click)="chooseDirectory()">
             {{ 'ADMIN.TOOLKIT.CACHE_ROOT_FOLDER' | translate }}
           </button>
           <div class="directory">
