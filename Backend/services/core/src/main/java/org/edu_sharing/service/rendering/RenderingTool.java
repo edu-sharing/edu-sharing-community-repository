@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -58,12 +59,18 @@ public class RenderingTool {
 				renderingService = UrlTool.setParam(renderingService, param.getKey(),param.getValue());
 			}
 		}
+		String appId = repInfo.getAppId();
+		if(nodeId == null) {
+			appId = "";
+			nodeId = UUID.randomUUID().toString();
+			renderingService = UrlTool.setParam(renderingService, "sig_token", nodeId);
+		}
 		renderingService = UrlTool.setParam(renderingService, "ts",""+timestamp);
 		try{
 			renderingService = UrlTool.setParam(renderingService, "language",new AuthenticationToolAPI().getCurrentLanguage());
 		}catch(Throwable t){}
 
-		renderingService = UrlTool.setParam(renderingService, "sig", getSignatureSigned(repInfo.getAppId(),nodeId,timestamp));
+		renderingService = UrlTool.setParam(renderingService, "sig", getSignatureSigned(appId,nodeId,timestamp));
 		return renderingService;
 
 	}

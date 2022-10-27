@@ -11,6 +11,7 @@
     <card
       *ngIf="licenseDialog"
       title="{{ 'LICENSE_INFORMATION' | translate }}"
+      icon="copyright"
       width="xxlarge"
       height="xxlarge"
       [isCancelable]="true"
@@ -18,7 +19,15 @@
     >
       <div class="card-content-padding card-licenses">
         <spinner *ngIf="!licenseDetails"></spinner>
-        <div [innerHTML]="licenseDetails"></div>
+        <ng-container *ngIf="licenseDetails">
+          <ng-container *ngFor="let license of licenseDetails; let first=first">
+            <!-- <div class="license-spacer" role="separator" *ngIf="!first"></div> -->
+            <h5 class="mat-heading-5">{{license.component}} / {{license.plugin}}</h5>
+            <div
+              [innerHTML]="license.details"
+              class="license-group"></div>
+          </ng-container>
+        </ng-container>
       </div>
     </card>
 
@@ -44,7 +53,7 @@
         <div *ngIf="licenseAgreementHTML">
           <mat-checkbox [(ngModel)]="acceptLicenseAgreement">{{
             'LICENSE_AGREEMENT.CHECKBOX' | translate
-          }}</mat-checkbox>
+            }}</mat-checkbox>
         </div>
       </div>
       <div class="card-action">
@@ -54,14 +63,14 @@
           [class.disabled]="!acceptLicenseAgreement"
           (keyup.enter)="saveLicenseAgreement()"
           (click)="saveLicenseAgreement()"
-          >{{ 'LICENSE_AGREEMENT.ACCEPT' | translate }}</a
+        >{{ 'LICENSE_AGREEMENT.ACCEPT' | translate }}</a
         >
         <a
           tabindex="0"
           class="waves-effect waves-light btn-flat"
           (keyup.enter)="logout()"
           (click)="logout()"
-          >{{ 'LICENSE_AGREEMENT.DECLINE' | translate }}</a
+        >{{ 'LICENSE_AGREEMENT.DECLINE' | translate }}</a
         >
       </div>
     </div>
@@ -122,8 +131,8 @@
             </button>
           </ng-container>
         </div>
-      <div class="timeout" *ngIf="isSafe() && timeout && !mainMenuSidebar?.show">
-        <i icon="av_timer"></i>
+        <div class="timeout" *ngIf="isSafe() && timeout && !mainMenuSidebar?.show">
+          <i icon="av_timer"></i>
           {{ timeout }}
         </div>
         <div class="add-material">
@@ -153,10 +162,10 @@
         <div class="topBarSearch" [class.noScope]="!showScope">
           <div class="scopeNameMobile" *ngIf="!searchEnabled">{{ title | translate }}</div>
           <form
-                autocomplete="off"
-                *ngIf="searchEnabled"
-                role="search"
-                #searchForm>
+            autocomplete="off"
+            *ngIf="searchEnabled"
+            role="search"
+            #searchForm>
             <div class="searchInputGroup">
               <input
                 #search
@@ -184,7 +193,7 @@
               *ngIf="config.imprintUrl"
               (click)="openImprint()"
               (keyup.enter)="openImprint()"
-              >{{ 'IMPRINT' | translate }}</a
+            >{{ 'IMPRINT' | translate }}</a
             >
             <a
               cdkMonitorElementFocus
@@ -193,7 +202,7 @@
               *ngIf="config.privacyInformationUrl"
               (click)="openPrivacy()"
               (keyup.enter)="openPrivacy()"
-              >{{ 'PRIVACY_INFORMATION' | translate }}</a
+            >{{ 'PRIVACY_INFORMATION' | translate }}</a
             >
           </div>
           <button mat-icon-button *ngIf="iam.getCurrentUser() && showChat()" class="rocketchat" (click)="openChat()">

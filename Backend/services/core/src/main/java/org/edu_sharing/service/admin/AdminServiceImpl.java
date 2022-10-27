@@ -72,6 +72,8 @@ import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.edu_sharing.service.version.RepositoryVersionInfo;
+import org.edu_sharing.service.version.VersionService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.StreamUtils;
 import org.w3c.dom.Document;
@@ -1038,5 +1040,14 @@ public class AdminServiceImpl implements AdminService  {
 		return moduleService.getAllModules().stream().map(m ->
 			new PluginStatus(m.getTitle(), m.getModuleVersionNumber().toString(), m.getInstallState().equals(ModuleInstallState.INSTALLED))
 		).collect(Collectors.toList());
+	}
+
+	@Override
+	public RepositoryVersionInfo getVersion() {
+		try {
+			return VersionService.getRepositoryVersionInfo();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

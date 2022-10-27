@@ -54,7 +54,7 @@ import { MainMenuEntriesService } from '../../services/main-menu-entries.service
 import { GlobalContainerComponent } from '../global-container/global-container.component';
 import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar.component';
 import {MainMenuDropdownComponent} from '../main-menu-dropdown/main-menu-dropdown.component';
-import {BehaviorSubject} from 'rxjs';
+import {BehaviorSubject, forkJoin} from 'rxjs';
 import {MainNavService} from '../../services/main-nav.service';
 
 /**
@@ -201,7 +201,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     _showUser = false;
     licenseDialog: boolean;
     showScrollToTop = false;
-    licenseDetails: string;
+    licenseDetails: {component: string, plugin: string, details: string}[];
     mainMenuStyle: 'sidebar' | 'dropdown' = 'sidebar';
 
     private editUrl: string;
@@ -349,13 +349,13 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                             element.getAttribute(
                                 MainNavComponent.ID_ATTRIBUTE_NAME,
                             )
-                        ]
+                            ]
                     )
                         continue;
                     // getComputedStyle does report wrong values in search sidenav
                     this.scrollInitialPositions[
                         element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)
-                    ] = window
+                        ] = window
                         .getComputedStyle(element)
                         .getPropertyValue('top');
                 }
@@ -407,7 +407,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                 element.style.position = 'fixed';
                 element.style.top = this.scrollInitialPositions[
                     element.getAttribute(MainNavComponent.ID_ATTRIBUTE_NAME)
-                ];
+                    ];
             } else {
                 element.style.position = 'absolute';
                 element.style.top =
@@ -416,7 +416,7 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                             element.getAttribute(
                                 MainNavComponent.ID_ATTRIBUTE_NAME,
                             )
-                        ],
+                            ],
                         10,
                     ) +
                     y +
@@ -530,19 +530,32 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
     isSafe() {
         return (
             this.connector.getCurrentLogin()?.currentScope ===
-                RestConstants.SAFE_SCOPE
+            RestConstants.SAFE_SCOPE
         );
     }
 
     showLicenses() {
         this.licenseDialog = true;
-        this.http
-            .get('assets/licenses/en.html', { responseType: 'text' })
-            .subscribe(
-                text => {
-                    this.licenseDetails = text as any;
+        this.connector.getLicenses().subscribe(
+                (licenses) => {
+                    const mapping = (component:string, plugin:string, details: string) => {
+                        return {
+                            component,
+                            plugin: plugin.replace('.txt', ''),
+                            details: details
+                        };
+                    };
+                    this.licenseDetails = Object.keys(licenses.repository).map(k => mapping('Repository', k, licenses.repository[k]));
+                    const services = Object.keys(licenses.services).forEach(k =>
+                        this.licenseDetails = this.licenseDetails.concat(
+                            Object.keys(licenses.services[k]).map(p => mapping(k, p, licenses.services[k][p]))
+                        )
+                    );
+
                 },
                 error => {
+                    this.licenseDialog = false;
+                    this.toast.error(error);
                     console.error(error);
                 },
             );
@@ -701,8 +714,8 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
                                 this.licenseAgreementHTML = data.html
                                     ? data.html
                                     : data.raw
-                                    ? data.raw
-                                    : data.text;
+                                        ? data.raw
+                                        : data.text;
                             },
                             (error: any) => {
                                 this.licenseAgreementHTML = `Error loading content for license agreement node '${nodeId}'`;
@@ -763,12 +776,12 @@ export class MainNavComponent implements AfterViewInit, OnDestroy {
             this._currentScope === 'stream' ||
             this._currentScope === 'collections'
         ) {*/
-            const boomarkOption = new OptionItem(
-                'SEARCH.NODE_STORE.TITLE',
-                'bookmark_border',
-                () => this.setNodeStore(true),
-            );
-            this.userMenuOptions.push(boomarkOption);
+        const boomarkOption = new OptionItem(
+            'SEARCH.NODE_STORE.TITLE',
+            'bookmark_border',
+            () => this.setNodeStore(true),
+        );
+        this.userMenuOptions.push(boomarkOption);
         // }
         const accessibilityOptions = new OptionItem(
             'OPTIONS.ACCESSIBILITY',

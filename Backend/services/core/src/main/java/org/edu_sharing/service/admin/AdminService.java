@@ -22,6 +22,7 @@ import org.edu_sharing.repository.server.jobs.quartz.JobInfo;
 import org.edu_sharing.service.admin.model.RepositoryConfig;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
 import org.edu_sharing.service.admin.model.ToolPermission;
+import org.edu_sharing.service.version.RepositoryVersionInfo;
 
 public interface AdminService {
 
@@ -124,4 +125,6 @@ public interface AdminService {
     Object getLightbendConfig();
 
 	Collection<PluginStatus> getPlugins();
+
+    RepositoryVersionInfo getVersion();
 }

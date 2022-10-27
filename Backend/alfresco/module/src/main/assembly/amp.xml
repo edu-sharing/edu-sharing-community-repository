@@ -25,6 +25,11 @@
       <filtered>true</filtered>
     </fileSet>
     <fileSet>
+      <directory>src/main/amp/licenses</directory>
+      <outputDirectory>licenses</outputDirectory>
+      <filtered>false</filtered>
+    </fileSet>
+    <fileSet>
       <directory>${project.build.directory}/fixes</directory>
       <outputDirectory>config</outputDirectory>
       <filtered>false</filtered>
