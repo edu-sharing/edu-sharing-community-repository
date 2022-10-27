@@ -178,8 +178,7 @@
             "RESULT": "Update-Output"
         },
         "INFO": {
-            "REPOSITORY": "Repository-Version (Server-Side)",
-            "NG": "Angular/Interface-Version (Client-Side)",
+            "REPOSITORY": "Repository-Version",
             "SYSTEM_CHECKS": "General system tests",
             "CHECK": {
                 "RENDERING": {

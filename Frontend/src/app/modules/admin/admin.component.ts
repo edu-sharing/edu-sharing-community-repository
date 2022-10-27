@@ -796,7 +796,7 @@ export class AdminComponent {
     getMajorVersion(version:string) {
       const v=version.split('.');
       if(v.length<3)
-        return v;
+        return version;
       v.splice(2,v.length-2);
       return v.join('.');
     }
@@ -1188,8 +1188,8 @@ export class AdminComponent {
                         this.oai.binaryHandlerClassName = '';
                 });
             });
-            this.admin.getRepositoryVersion().subscribe((data: string) => {
-                this.repositoryVersion = data;
+            this.admin.getRepositoryVersion().subscribe((data) => {
+                this.repositoryVersion = JSON.stringify(data, null, 2);
             }, (error: any) => {
                 console.info(error);
                 this.repositoryVersion = 'Error accessing version information. Are you in dev mode?';
