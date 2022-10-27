@@ -98,4 +98,16 @@ export class DialogsService {
             data,
         });
     }
+
+    async openAccessibilityDialog(): Promise<CardDialogRef<void, void>> {
+        const { AccessibilityDialogComponent } = await import(
+            './dialog-modules/accessibility-dialog/accessibility-dialog.module'
+        );
+        return this.cardDialog.open(AccessibilityDialogComponent, {
+            title: 'ACCESSIBILITY.TITLE',
+            subtitle: 'ACCESSIBILITY.SUBTITLE',
+            avatar: { kind: 'icon', icon: 'accessibility' },
+            width: 700,
+        });
+    }
 }

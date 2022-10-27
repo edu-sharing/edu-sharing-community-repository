@@ -136,7 +136,7 @@ export class CardDialogRef<D = unknown, R = unknown> {
         this.overlayRef
             .keydownEvents()
             .pipe(
-                filter(() => !this.state.isLoading),
+                filter(() => !this.state.isLoading && this.state.savingState !== 'saving'),
                 filter((event) => event.keyCode === ESCAPE && !hasModifierKey(event)),
             )
             .subscribe((event) => {
@@ -148,7 +148,7 @@ export class CardDialogRef<D = unknown, R = unknown> {
 
         this.overlayRef
             .backdropClick()
-            .pipe(filter(() => !this.state.isLoading))
+            .pipe(filter(() => !this.state.isLoading && this.state.savingState !== 'saving'))
             .subscribe(() => {
                 const acknowledged = this.tryCancel('backdrop');
                 if (!acknowledged) {

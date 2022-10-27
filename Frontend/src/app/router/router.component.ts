@@ -39,10 +39,9 @@ import { WorkspaceMainComponent } from '../modules/workspace/workspace.component
 import { ActivatedRoute, NavigationEnd, Router, Routes, UrlTree } from '@angular/router';
 import { CookieInfoComponent } from '../common/ui/cookie-info/cookie-info.component';
 import { BridgeService } from '../core-bridge-module/bridge.service';
-import { AccessibilityComponent } from '../common/ui/accessibility/accessibility.component';
 import { extensionRoutes } from '../extension/extension-routes';
 import { BehaviorSubject } from 'rxjs';
-import { AccessibilityService } from '../common/ui/accessibility/accessibility.service';
+import { AccessibilityService } from '../services/accessibility.service';
 import { LtiComponent } from '../modules/lti/lti.component';
 import { printCurrentTaskInfo } from './track-change-detection';
 import { environment } from '../../environments/environment';
@@ -75,7 +74,6 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
     }
 
     @ViewChild('management') management: WorkspaceManagementDialogsComponent;
-    @ViewChild('accessibility') accessibility: AccessibilityComponent;
     @ViewChild('cookie') cookie: CookieInfoComponent;
 
     private numberOfChecks = 0;
@@ -160,7 +158,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
     ngAfterViewInit(): void {
         this.dialogs.registerDialogsComponent(this.management);
         this.mainNavService.registerCookieInfo(this.cookie);
-        this.mainNavService.registerAccessibility(this.accessibility);
+        this.mainNavService.registerAccessibility();
     }
 
     private monitorChecks(): void {

@@ -26,6 +26,7 @@ import { DialogButton } from '../../../../core-module/core.module';
 import { UIAnimation } from '../../../../core-module/ui/ui-animation';
 import { CardDialogConfig, Closable } from '../card-dialog-config';
 import { CardDialogRef } from '../card-dialog-ref';
+import { SavingState } from '../card-dialog-state';
 
 let idCounter = 0;
 
@@ -115,6 +116,7 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
     config: CardDialogConfig<unknown> = {};
     buttons: DialogButton[];
     isLoading = false;
+    savingState: SavingState = null;
 
     /** Emits when an animation state changes. */
     readonly animationStateChanged = new EventEmitter<DialogAnimationEvent>();
@@ -158,11 +160,18 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
                 this.updateButtons();
                 this.isLoading = isLoading;
             });
+        this.dialogRef
+            .observeState('savingState')
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((savingState) => {
+                this.updateButtons();
+                this.savingState = savingState;
+            });
         this.setState('enter');
     }
 
     private updateButtons(): void {
-        if (this.dialogRef.state.isLoading) {
+        if (this.dialogRef.state.isLoading || this.dialogRef.state.savingState === 'saving') {
             this.buttons = this.config.buttons?.map((button) => ({
                 ...button,
                 disabled: true,

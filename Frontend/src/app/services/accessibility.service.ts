@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { SessionStorageService } from 'src/app/core-module/core.module';
-import { ToastDuration } from 'src/app/core-ui-module/toast';
+import { SessionStorageService } from '../core-module/core.module';
+import { ToastDuration } from '../core-ui-module/toast';
 
 export class AccessibilitySettings {
     toastMode: 'important' | 'all' = 'all';

@@ -12,7 +12,7 @@ import { UIConstants } from '../core-module/ui/ui-constants';
 import { DateHelper } from './DateHelper';
 import { ToastMessageComponent } from './components/toast-message/toast-message.component';
 import { RestConnectorService } from '../core-module/core.module';
-import { AccessibilityService } from '../common/ui/accessibility/accessibility.service';
+import { AccessibilityService } from '../services/accessibility.service';
 import { takeUntil } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 

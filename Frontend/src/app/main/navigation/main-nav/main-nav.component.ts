@@ -601,7 +601,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             'OPTIONS.ACCESSIBILITY',
             'accessibility',
             () => {
-                this.mainNavService.getAccessibility().show();
+                void this.dialogs.openAccessibilityDialog();
             },
         );
         this.userMenuOptions.push(accessibilityOptions);

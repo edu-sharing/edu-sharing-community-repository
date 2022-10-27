@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import { AccessibilityService } from 'src/app/common/ui/accessibility/accessibility.service';
-import { ListItem } from 'src/app/core-module/core.module';
-import { NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
+import { AccessibilityService } from '../../../services/accessibility.service';
+import { ListItem } from '../../../core-module/core.module';
+import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 
 import { ListWidget } from '../list-widget';
 

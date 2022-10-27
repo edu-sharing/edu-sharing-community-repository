@@ -1,6 +1,6 @@
-@import '../../../core-ui-module/styles/variables';
+@import '../../../../core-ui-module/styles/variables';
 
-.card-content-padding {
+:host {
     > label {
         display: flex;
         font-size: $fontSizeLarge;

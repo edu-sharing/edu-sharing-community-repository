@@ -26,7 +26,7 @@ import { VersionLabelPipe } from './common/ui/version-label.pipe';
 import { ToolpermissionCheckDirective } from './common/directives/toolpermission-check.directive';
 import { NodeAuthorNamePipe } from './common/ui/node-author-name.pipe';
 import { ColorTransformPipe } from './common/ui/color-transform.pipe';
-import { AccessibilityComponent } from './common/ui/accessibility/accessibility.component';
+
 import { MatConfirmGroupComponent } from './common/ui/mat-confirm-group/mat-confirm-group.component';
 import { ScrollToTopButtonComponent } from './common/ui/scroll-to-top-button/scroll-to-top-button.component';
 import { CustomGlobalExtensionsComponent } from './extension/custom-global-component/custom-global-extensions.component';
@@ -61,7 +61,7 @@ export const DECLARATIONS = [
     FooterComponent,
     CookieInfoComponent,
     MatConfirmGroupComponent,
-    AccessibilityComponent,
+
     EmbedComponent,
     ToolpermissionCheckDirective,
 ];

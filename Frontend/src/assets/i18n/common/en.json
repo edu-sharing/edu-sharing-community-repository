@@ -439,7 +439,6 @@
     "TOAST_DURATION_INFINITE_INFO": "Status messages are not automatically hidden and must be closed manually.",
     "TOAST_DURATION_TITLE": "Display time",
     "TOAST_DURATION_MESSAGE": "Status messages disappear automatically after a specified time or can be closed manually by clicking.",
-    "SAVED": "Settings have been saved.",
     "DISMISS_TOAST": "Hide"
   },
   "AUTHORITY_TYPE_GROUP": "Group",
@@ -563,6 +562,9 @@
     "TOTAL_COUNT_TOOLTIP": "{{selected}} items selected from a total of {{total}}"
   },
   "DIALOG": {
+    "SAVING": "Saving...",
+    "SAVED": "Changes saved",
+    "SAVING_ERROR": "Error saving changes",
     "COLLECTION_SHARE_PUBLIC": "Add material to collection?",
     "COLLECTION_SHARE_PUBLIC_INFO": "By adding this material into collection \"{{collection}}\" everyone who has access to this collection may access it.",
     "COLLECTION_PROPSE": "Propose material(s)?",

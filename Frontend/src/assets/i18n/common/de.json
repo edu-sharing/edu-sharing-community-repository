@@ -511,7 +511,6 @@
     "TOAST_DURATION_INFINITE_INFO": "Statusmeldungen werden nicht automatisch ausgeblendet und müssen manuell geschlossen werden",
     "TOAST_DURATION_TITLE": "Anzeigedauer",
     "TOAST_DURATION_MESSAGE": "Statusmeldungen können automatisch nach einer festgelegten Zeit verschwinden oder durch klicken manuell geschlossen werden.",
-    "SAVED": "Einstellungen wurden gespeichert.",
     "DISMISS_TOAST": "Ausblenden"
   },
   "AUTHORITY_TYPE_GROUP": "Gruppe",
@@ -604,6 +603,9 @@
     "TOTAL_COUNT_TOOLTIP": "{{selected}} Elemente ausgewählt von insgesamt {{total}}"
   },
   "DIALOG": {
+    "SAVING": "Speichern...",
+    "SAVED": "Änderungen gespeichert",
+    "SAVING_ERROR": "Fehler beim Speichern der Änderungen",
     "COLLECTION_SHARE_PUBLIC": "Material zur Sammlung hinzufügen?",
     "COLLECTION_SHARE_PUBLIC_INFO": "Durch Hinzufügen des Materials in die Sammlung \"{{collection}}\" wird es für alle Personen sichtbar, die Zugriff auf diese Sammlung haben.",
     "COLLECTION_PROPSE": "Vorschlag einreichen?",
