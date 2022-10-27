@@ -844,6 +844,7 @@ public class NodeDao {
 	public NodeDao changePropertiesWithVersioning(
 			HashMap<String,String[]> properties, String comment) throws DAOException {
 
+		// Throws ConcurrencyFailureException if the previous call changes the preview (DESP-851)
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(()-> {
@@ -860,7 +861,6 @@ public class NodeDao {
 				return new NodeDao(repoDao, nodeId, Filter.createShowAllFilter());
 
 			} catch (Throwable t) {
-
 				throw DAOException.mapping(t);
 			}
 		});
