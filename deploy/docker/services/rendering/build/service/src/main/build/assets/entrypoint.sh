@@ -170,7 +170,8 @@ if [[ ! -f "${RS_CACHE}/config/version.json" ]]; then
 	find -L . -type f -newer "${before}" -exec cp {} "${RS_CACHE}/config/{}" \;
 	find "${RS_CACHE}/config" -type d -empty -delete
 
-	cp "$RS_ROOT"/version.json "${RS_CACHE}"/config/version.json
+	cp "${RS_ROOT}/version.json" "${RS_CACHE}/config/version.json"
+  cp "${RS_CACHE}/config/version.json" "${RS_CACHE}/config/version.json.$(date +%d-%m-%Y_%H-%M-%S )"
 
 	echo "config saved."
 
@@ -183,9 +184,9 @@ else
 	find . -type d -exec mkdir -p "${RS_ROOT}/{}" \;
 	find . -type f -exec cp -f {} "${RS_ROOT}/{}" \;
 
-	cmp -s "$RS_ROOT"/version.json version.json || {
-		mv version.json version.json."$(date +%d-%m-%Y_%H-%M-%S )"
-		cp "$RS_ROOT"/version.json version.json
+	cmp -s "${RS_ROOT}/version.json" "${RS_CACHE}/config/version.json" || {
+    cp "${RS_ROOT}/version.json" "${RS_CACHE}/config/version.json"
+    cp "${RS_CACHE}/config/version.json" "${RS_CACHE}/config/version.json.$(date +%d-%m-%Y_%H-%M-%S )"
 	}
 
 	popd
