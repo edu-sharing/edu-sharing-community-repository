@@ -8,11 +8,11 @@ import {
 } from './license-agreement-dialog-data';
 
 @Component({
-    selector: 'es-license-agreement',
-    templateUrl: './license-agreement.component.html',
-    styleUrls: ['./license-agreement.component.scss'],
+    selector: 'es-license-agreement-dialog',
+    templateUrl: './license-agreement-dialog.component.html',
+    styleUrls: ['./license-agreement-dialog.component.scss'],
 })
-export class LicenseAgreementComponent implements OnInit {
+export class LicenseAgreementDialogComponent implements OnInit {
     licenseAgreementHTML: string;
     acceptLicenseAgreement = false;
     readonly contentPadding = new CardDialogConfig().contentPadding;

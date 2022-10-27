@@ -6,10 +6,10 @@ import { CardDialogService } from './card-dialog/card-dialog.service';
 import {
     LicenseAgreementDialogData,
     LicenseAgreementDialogResult,
-} from './dialog-modules/license-agreement/license-agreement-dialog-data';
+} from './dialog-modules/license-agreement-dialog/license-agreement-dialog-data';
 import { NodeEmbedDialogData } from './dialog-modules/node-embed-dialog/node-embed-dialog.component';
-import { NodeInfoDialogData } from './dialog-modules/node-info-dialog/node-info/node-info.component';
-import { NodeReportDialogData } from './dialog-modules/node-report-dialog/node-report/node-report.component';
+import { NodeInfoDialogData } from './dialog-modules/node-info-dialog/node-info-dialog.component';
+import { NodeReportDialogData } from './dialog-modules/node-report-dialog/node-report-dialog.component';
 import { QrDialogData } from './dialog-modules/qr-dialog/qr-dialog.component';
 
 @Injectable({
@@ -51,10 +51,10 @@ export class DialogsService {
     async openNodeReportDialog(
         data: NodeReportDialogData,
     ): Promise<CardDialogRef<NodeReportDialogData, void>> {
-        const { NodeReportComponent } = await import(
+        const { NodeReportDialogComponent } = await import(
             './dialog-modules/node-report-dialog/node-report-dialog.module'
         );
-        return this.cardDialog.open(NodeReportComponent, {
+        return this.cardDialog.open(NodeReportDialogComponent, {
             title: 'NODE_REPORT.TITLE',
             ...configForNode(data.node),
             data,
@@ -88,10 +88,10 @@ export class DialogsService {
     async openLicenseAgreementDialog(
         data: LicenseAgreementDialogData,
     ): Promise<CardDialogRef<LicenseAgreementDialogData, LicenseAgreementDialogResult>> {
-        const { LicenseAgreementComponent } = await import(
-            './dialog-modules/license-agreement/license-agreement.module'
+        const { LicenseAgreementDialogComponent } = await import(
+            './dialog-modules/license-agreement-dialog/license-agreement-dialog.module'
         );
-        return this.cardDialog.open(LicenseAgreementComponent, {
+        return this.cardDialog.open(LicenseAgreementDialogComponent, {
             title: 'LICENSE_AGREEMENT.TITLE',
             closable: Closable.Disabled,
             width: 900,

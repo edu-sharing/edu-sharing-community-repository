@@ -25,11 +25,11 @@ import { configForNodes } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 
 @Component({
-    selector: 'es-search-node-store',
-    templateUrl: 'node-store.component.html',
-    styleUrls: ['node-store.component.scss'],
+    selector: 'es-search-node-store-dialog',
+    templateUrl: 'node-store-dialog.component.html',
+    styleUrls: ['node-store-dialog.component.scss'],
 })
-export class SearchNodeStoreComponent implements OnInit, AfterViewInit, OnDestroy {
+export class SearchNodeStoreDialogComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
 

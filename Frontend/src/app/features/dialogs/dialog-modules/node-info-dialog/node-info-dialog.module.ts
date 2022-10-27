@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { SharedModule } from '../../../../shared/shared.module';
-import { NodeInfoComponent } from './node-info/node-info.component';
+import { NodeInfoDialogComponent } from './node-info-dialog.component';
 
-export { NodeInfoComponent };
+export { NodeInfoDialogComponent as NodeInfoComponent };
 
 @NgModule({
-    declarations: [NodeInfoComponent],
+    declarations: [NodeInfoDialogComponent],
     imports: [SharedModule],
 })
 export class NodeInfoDialogModule {}

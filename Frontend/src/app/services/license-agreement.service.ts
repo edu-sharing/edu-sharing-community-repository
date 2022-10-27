@@ -22,7 +22,7 @@ import { RestNodeService, SessionStorageService } from '../core-module/core.modu
 import {
     LicenseAgreementDialogData,
     LicenseAgreementDialogResult,
-} from '../features/dialogs/dialog-modules/license-agreement/license-agreement-dialog-data';
+} from '../features/dialogs/dialog-modules/license-agreement-dialog/license-agreement-dialog-data';
 import { DialogsService } from '../features/dialogs/dialogs.service';
 import { MainNavService } from '../main/navigation/main-nav.service';
 import { TranslationsService } from '../translations/translations.service';

@@ -18,27 +18,27 @@ import {
     RestConnectorService,
     RestIamService,
     RestNodeService,
-} from '../../../../../core-module/core.module';
-import { UIAnimation } from '../../../../../core-module/ui/ui-animation';
-import { Toast } from '../../../../../core-ui-module/toast';
-import { CARD_DIALOG_DATA, Closable } from '../../../card-dialog/card-dialog-config';
-import { CardDialogRef } from '../../../card-dialog/card-dialog-ref';
+} from '../../../../core-module/core.module';
+import { UIAnimation } from '../../../../core-module/ui/ui-animation';
+import { Toast } from '../../../../core-ui-module/toast';
+import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
+import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 
 export interface NodeReportDialogData {
     node: Node;
 }
 
 @Component({
-    selector: 'es-node-report',
-    templateUrl: 'node-report.component.html',
-    styleUrls: ['node-report.component.scss'],
+    selector: 'es-node-report-dialog',
+    templateUrl: 'node-report-dialog.component.html',
+    styleUrls: ['node-report-dialog.component.scss'],
     animations: [
         trigger('fade', UIAnimation.fade()),
         trigger('cardAnimation', UIAnimation.cardAnimation()),
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NodeReportComponent implements OnInit {
+export class NodeReportDialogComponent implements OnInit {
     readonly reasons = ['UNAVAILABLE', 'INAPPROPRIATE_CONTENT', 'INVALID_METADATA', 'OTHER'];
 
     @ViewChild('formElement') formRef: ElementRef<HTMLFormElement>;

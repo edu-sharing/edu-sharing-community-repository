@@ -9,31 +9,31 @@ import {
     Permissions,
     RestConstants,
     RestNodeService,
-} from '../../../../../core-module/core.module';
+} from '../../../../core-module/core.module';
 import { forkJoin } from 'rxjs';
-import { UIConstants } from '../../../../../core-module/ui/ui-constants';
-import { Toast } from '../../../../../core-ui-module/toast';
+import { UIConstants } from '../../../../core-module/ui/ui-constants';
+import { Toast } from '../../../../core-ui-module/toast';
 import {
     CARD_DIALOG_DATA,
     configForNode,
     configForNodes,
-} from '../../../card-dialog/card-dialog-config';
-import { CardDialogRef } from '../../../card-dialog/card-dialog-ref';
-import { UIHelper } from '../../../../../core-ui-module/ui-helper';
+} from '../../card-dialog/card-dialog-config';
+import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
+import { UIHelper } from '../../../../core-ui-module/ui-helper';
 
 export interface NodeInfoDialogData {
     nodes: Node[];
 }
 
 @Component({
-    selector: 'es-node-info',
-    templateUrl: 'node-info.component.html',
-    styleUrls: ['node-info.component.scss'],
+    selector: 'es-node-info-dialog',
+    templateUrl: 'node-info-dialog.component.html',
+    styleUrls: ['node-info-dialog.component.scss'],
 })
 /**
  * A node info dialog (useful primary for admin stuff)
  */
-export class NodeInfoComponent implements OnInit {
+export class NodeInfoDialogComponent implements OnInit {
     _nodes: Node[];
     _path: Node[];
     _children: Node[];
