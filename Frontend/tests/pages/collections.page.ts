@@ -21,12 +21,6 @@ export class CollectionsPage {
     }
 
     @testStep()
-    async expectScopeButton() {
-        const mainNavScopeButton = this.page.locator('[data-test="main-nav-scope-button"]');
-        await expect(mainNavScopeButton).toHaveText(/Collections/);
-    }
-
-    @testStep()
     async expectToBeOnRootCollectionPage() {
         await expect(this.page).toHaveURL(/\/collections/);
         await expect(this.page).not.toHaveURL(/id=\w/);

@@ -24,6 +24,7 @@ export {
     UserQuota,
     UserStatus,
     WebsiteInformation,
+    LicenseAgreement,
 } from './api/models';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MdsView } from './api/models';

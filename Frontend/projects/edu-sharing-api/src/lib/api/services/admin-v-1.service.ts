@@ -1554,7 +1554,8 @@ export class AdminV1Service extends BaseService {
             | 'cluster'
             | 'defaults'
             | 'defaults/metadatasets'
-            | 'defaults/mailtemplates';
+            | 'defaults/mailtemplates'
+            | 'defaults/database';
     }): Observable<StrictHttpResponse<string>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetConfigFilePath, 'get');
         if (params) {
@@ -1602,7 +1603,8 @@ export class AdminV1Service extends BaseService {
             | 'cluster'
             | 'defaults'
             | 'defaults/metadatasets'
-            | 'defaults/mailtemplates';
+            | 'defaults/mailtemplates'
+            | 'defaults/database';
     }): Observable<string> {
         return this.getConfigFile$Response(params).pipe(
             map((r: StrictHttpResponse<string>) => r.body as string),
@@ -1639,7 +1641,8 @@ export class AdminV1Service extends BaseService {
             | 'cluster'
             | 'defaults'
             | 'defaults/metadatasets'
-            | 'defaults/mailtemplates';
+            | 'defaults/mailtemplates'
+            | 'defaults/database';
         body?: string;
     }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.UpdateConfigFilePath, 'put');
@@ -1689,11 +1692,63 @@ export class AdminV1Service extends BaseService {
             | 'cluster'
             | 'defaults'
             | 'defaults/metadatasets'
-            | 'defaults/mailtemplates';
+            | 'defaults/mailtemplates'
+            | 'defaults/database';
         body?: string;
     }): Observable<any> {
         return this.updateConfigFile$Response(params).pipe(
             map((r: StrictHttpResponse<any>) => r.body as any),
+        );
+    }
+
+    /**
+     * Path part for operation getEnabledPlugins
+     */
+    static readonly GetEnabledPluginsPath = '/admin/v1/plugins';
+
+    /**
+     * get enabled system plugins.
+     *
+     *
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getEnabledPlugins()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getEnabledPlugins$Response(params?: {}): Observable<StrictHttpResponse<string>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetEnabledPluginsPath, 'get');
+        if (params) {
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<string>;
+                }),
+            );
+    }
+
+    /**
+     * get enabled system plugins.
+     *
+     *
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getEnabledPlugins$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getEnabledPlugins(params?: {}): Observable<string> {
+        return this.getEnabledPlugins$Response(params).pipe(
+            map((r: StrictHttpResponse<string>) => r.body as string),
         );
     }
 

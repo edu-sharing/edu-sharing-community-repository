@@ -22,12 +22,6 @@ export class SearchPage {
     }
 
     @testStep()
-    async expectScopeButton() {
-        const mainNavScopeButton = this.page.locator('[data-test="main-nav-scope-button"]');
-        await expect(mainNavScopeButton).toHaveText(/Search/);
-    }
-
-    @testStep()
     async expectToHaveElement(pattern: string | RegExp) {
         await expect(this.getElement(pattern)).toBeVisible();
     }

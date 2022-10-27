@@ -137,6 +137,12 @@ public class NodeDao {
 		return nodeDao;
 	}
 
+	public NodeDao copyProperties(NodeDao fromDao) throws DAOException {
+		HashMap<String, String[]> props = fromDao.getAllProperties();
+		props.remove(CCConstants.getValidLocalName(CCConstants.CM_NAME));
+		return changeProperties(props);
+	}
+
 	enum ExistingMode {
 		// Fallback if the original node does not exist
 		IfNotExists,

@@ -119,12 +119,18 @@
                 <ng-container slot="label">
                   {{ 'WORKSPACE.SHARE.PUBLISH.NO_REPUBLISH' | translate }}
                 </ng-container>
+                <ng-container slot="description">
+                  {{ 'WORKSPACE.SHARE.PUBLISH.NO_REPUBLISH_DESCRIPTION' | translate }}
+                </ng-container>
               </es-multi-line-label>
             </mat-radio-button>
-            <mat-radio-button [disabled]="currentVersionPublished()" [value]="true">
+            <mat-radio-button [disabled]="currentVersionPublished()" [value]="'new'">
               <es-multi-line-label>
                 <ng-container slot="label">
                   {{ 'WORKSPACE.SHARE.PUBLISH.REPUBLISH' | translate }}
+                </ng-container>
+                <ng-container slot="description">
+                  {{ 'WORKSPACE.SHARE.PUBLISH.REPUBLISH_DESCRIPTION' | translate }}
                 </ng-container>
               </es-multi-line-label>
               <!--
@@ -133,6 +139,16 @@
                 <span class="version-number">({{ node['properties']['cclom:version'][0] }})</span>
               </h5>
               -->
+            </mat-radio-button>
+            <mat-radio-button [disabled]="currentVersionPublished() || !isCopy" [value]="'update'">
+              <es-multi-line-label>
+                <ng-container slot="label">
+                  {{ 'WORKSPACE.SHARE.PUBLISH.UPDATE_METADATA' | translate }}
+                </ng-container>
+                <ng-container slot="description">
+                  {{ 'WORKSPACE.SHARE.PUBLISH.UPDATE_METADATA_DESCRIPTION' | translate }}
+                </ng-container>
+              </es-multi-line-label>
             </mat-radio-button>
           </mat-radio-group>
           <es-info-message mode="info" *ngIf="!publishCopyPermission">
@@ -145,7 +161,9 @@
 </div>
 <div
   class="doi"
-  *ngIf="doiPermission && publishCopyPermission && !inherited && shareModeCopy && republish"
+  *ngIf="
+    doiPermission && publishCopyPermission && !inherited && shareModeCopy && republish === 'new'
+  "
 >
   <mat-checkbox
     [disabled]="doiDisabled"
@@ -199,7 +217,12 @@
     <div class="no-versions" *ngIf="!allPublishedVersions">
       <es-spinner-small></es-spinner-small>
     </div>
-    <div *ngFor="let v of allPublishedVersions" class="version" [class.version-virtual]="v.virtual">
+    <div
+      *ngFor="let v of allPublishedVersions"
+      class="version"
+      [class.version-virtual]="v.status === 'new'"
+      [class.version-update]="v.status === 'update'"
+    >
       <div class="version-group">
         <div>
           <div class="version-comment">
@@ -229,7 +252,7 @@
         <button
           mat-button
           color="primary"
-          [disabled]="v.virtual"
+          [disabled]="!!v.status"
           matTooltip="{{ 'WORKSPACE.SHARE.PUBLISH.OPEN_VERSION' | translate }}"
           (click)="openVersion(v)"
         >

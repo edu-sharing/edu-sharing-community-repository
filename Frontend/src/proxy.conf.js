@@ -17,6 +17,7 @@ const PROXY_CONFIG = [
             '/edu-sharing/eduservlet',
             '/edu-sharing/preview',
             '/edu-sharing/themes',
+            '/edu-sharing/ccimages',
         ],
         target: process.env.BACKEND_URL,
         secure: false,

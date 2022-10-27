@@ -63,6 +63,7 @@ import { BitwisePipe } from './pipes/bitwise.pipe';
 import { FormatSizePipe } from './pipes/file-size.pipe';
 import { FormatDatePipe } from './pipes/format-date.pipe';
 import { NodeImageSizePipe } from './pipes/node-image-size.pipe';
+import { NodeIconPipe } from './pipes/node-icon.pipe';
 import { NodeImagePipe } from './pipes/node-image.pipe';
 import { NodePersonNamePipe } from './pipes/node-person-name.pipe';
 import { NodeTitlePipe } from './pipes/node-title.pipe';
@@ -117,6 +118,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
         WorkspaceCreateConnector,
         NodesDragDirective,
         NodesDropTargetDirective,
+        NodeIconPipe,
         NodeImagePipe,
     ],
     imports: [
@@ -212,6 +214,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
         NodesDragDirective,
         NodesDropTargetDirective,
         MatBadgeModule,
+        NodeIconPipe,
         NodeImagePipe,
     ],
 })
