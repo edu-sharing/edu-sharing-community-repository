@@ -2,7 +2,33 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "edusharing_repository_service.name" . }}
+  name: {{ include "edusharing_repository_service.name" . }}-exact
+  labels: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
+  {{- with merge .Values.ingress.annotations .Values.global.cluster.cert.annotations }}
+  annotations: {{ toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.ingress.tls }}
+  tls: {{ toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+  - host: {{ . }}
+    http:
+      paths:
+      - path: /
+        pathType: Exact
+        backend:
+          service:
+            name: {{ include "edusharing_repository_service.name" $ }}
+            port:
+              number: {{ $.Values.service.port.api.external }}
+  {{- end }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "edusharing_repository_service.name" . }}-prefix
   labels: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
   {{- with merge .Values.ingress.annotations .Values.global.cluster.cert.annotations }}
   annotations: {{ toYaml . | nindent 4 }}
@@ -25,31 +51,5 @@ spec:
             port:
               number: {{ $.Values.service.port.api.external }}
       {{- end }}
-  {{- end }}
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: {{ include "edusharing_repository_service.name" . }}-root
-  labels: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
-  {{- with merge .Values.ingress.annotations .Values.global.cluster.cert.annotations }}
-  annotations: {{ toYaml . | nindent 4 }}
-  {{- end }}
-spec:
-  {{- with .Values.ingress.tls }}
-  tls: {{ toYaml . | nindent 4 }}
-  {{- end }}
-  rules:
-  {{- range .Values.ingress.hosts }}
-    - host: {{ . }}
-      http:
-        paths:
-        - path: /
-          pathType: Exact
-          backend:
-            service:
-              name: {{ include "edusharing_repository_service.name" $ }}
-              port:
-                number: {{ $.Values.service.port.api.external }}
   {{- end }}
 {{- end }}
