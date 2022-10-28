@@ -32,6 +32,7 @@ import org.edu_sharing.restservices.lti.v13.model.RegistrationUrl;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.NodeLTIDeepLink;
+import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.lti13.*;
 import org.edu_sharing.service.lti13.model.LTISessionObject;
@@ -358,6 +359,11 @@ public class LTIApi {
             }
             if(ltijwtUtil.getApplicationInfo().isLtiScopeUsername()){
                 user = user+"@"+jws.getBody().getIssuer();
+            }else{
+                /**
+                 * prevent an lti platform can becomes an alfresco admin
+                 */
+                user = SSOAuthorityMapper.mapAdminAuthority(user,ltijwtUtil.getApplicationInfo().getAppId());
             }
 
             String name = jws.getBody().get(LTIConstants.LTI_NAME, String.class);
