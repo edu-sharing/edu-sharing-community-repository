@@ -855,12 +855,13 @@ for config in "${configs[@]}"; do
 				unzip -qq -o $jar -d tomcat/shared/classes/config/$config -x 'META-INF/*'
 			fi
 		done
-		cp -f tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/$config
+    cp tomcat/webapps/edu-sharing/WEB-INF/classes/version.json tomcat/shared/classes/config/$config/version.json
+    cp tomcat/shared/classes/config/$config/version.json tomcat/shared/classes/config/$config/version.json.$(date +%d-%m-%Y_%H-%M-%S )
 	else
-		cmp -s tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/$config/version.json || {
+		cmp -s tomcat/webapps/edu-sharing/WEB-INF/classes/version.json tomcat/shared/classes/config/$config/version.json || {
 			echo "- update tomcat/shared/classes/config/$config/version.json"
-			mv tomcat/shared/classes/config/$config/version.json tomcat/shared/classes/config/$config/version.json.$(date +%d-%m-%Y_%H-%M-%S )
-			cp tomcat/webapps/edu-sharing/version.json tomcat/shared/classes/config/$config/version.json
+			cp tomcat/webapps/edu-sharing/WEB-INF/classes/version.json tomcat/shared/classes/config/$config/version.json
+			cp tomcat/shared/classes/config/$config/version.json tomcat/shared/classes/config/$config/version.json.$(date +%d-%m-%Y_%H-%M-%S )
 
 			if [[ $config == 'cluster' ]] ; then
 				echo "- WARNING: You may need to clean $ALF_HOME/alf_data/solr4 due to content model changes!"

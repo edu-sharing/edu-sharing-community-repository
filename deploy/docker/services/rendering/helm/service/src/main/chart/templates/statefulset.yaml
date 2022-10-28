@@ -84,7 +84,7 @@ spec:
         {{- with .Values.startupProbe }}
         startupProbe:
           httpGet:
-            path: /esrender/application/esmain/version.php
+            path: /esrender/application/esmain/metadata.php
             port: api-internal
           failureThreshold: {{ .failureThreshold }}
           initialDelaySeconds: {{ .initialDelaySeconds }}
@@ -104,7 +104,7 @@ spec:
         {{- with .Values.readinessProbe }}
         readinessProbe:
           httpGet:
-            path: /esrender/application/esmain/version.php
+            path: /esrender/application/esmain/metadata.php
             port: api-internal
           failureThreshold: {{ .failureThreshold }}
           initialDelaySeconds: {{ .initialDelaySeconds }}

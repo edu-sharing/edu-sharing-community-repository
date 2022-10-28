@@ -170,7 +170,8 @@ if [[ ! -f "${RS_CACHE}/config/version.json" ]]; then
 	find -L . -type f -newer "${before}" -exec cp {} "${RS_CACHE}/config/{}" \;
 	find "${RS_CACHE}/config" -type d -empty -delete
 
-	cp "$RS_ROOT"/version.json "${RS_CACHE}"/config/version.json
+	cp "${RS_ROOT}/version.json" "${RS_CACHE}/config/version.json"
+  cp "${RS_CACHE}/config/version.json" "${RS_CACHE}/config/version.json.$(date +%d-%m-%Y_%H-%M-%S )"
 
 	echo "config saved."
 
@@ -183,9 +184,9 @@ else
 	find . -type d -exec mkdir -p "${RS_ROOT}/{}" \;
 	find . -type f -exec cp -f {} "${RS_ROOT}/{}" \;
 
-	cmp -s "$RS_ROOT"/version.json version.json || {
-		mv version.json version.json."$(date +%d-%m-%Y_%H-%M-%S )"
-		cp "$RS_ROOT"/version.json version.json
+	cmp -s "${RS_ROOT}/version.json" "${RS_CACHE}/config/version.json" || {
+    cp "${RS_ROOT}/version.json" "${RS_CACHE}/config/version.json"
+    cp "${RS_CACHE}/config/version.json" "${RS_CACHE}/config/version.json.$(date +%d-%m-%Y_%H-%M-%S )"
 	}
 
 	popd
@@ -195,7 +196,19 @@ fi
 
 ########################################################################################################################
 
+before="$(mktemp)"
+
 yes | php admin/cli/update.php
+
+echo "config saving."
+
+find -L . -type d -exec mkdir -p "${RS_CACHE}/config/{}" \;
+find -L . -type f -newer "${before}" -exec cp {} "${RS_CACHE}/config/{}" \;
+find "${RS_CACHE}/config" -type d -empty -delete
+
+echo "config saved."
+
+########################################################################################################################
 
 dbConf="${RS_ROOT}/conf/db.conf.php"
 sed -i -r "s|\$dsn.*|\$dsn = \"${rendering_database_driv}:host=${rendering_database_host};port=${rendering_database_port};dbname=${rendering_database_name}\";|" "${dbConf}"
