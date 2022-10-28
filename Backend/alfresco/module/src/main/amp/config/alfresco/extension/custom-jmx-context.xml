@@ -25,10 +25,6 @@
 
   <!-- beans -->
 
-  <bean id="jmxAuthorityService" class="org.edu_sharing.alfresco.monitoring.AuthorityServiceMBeanImpl">
-    <property name="authorityService" ref="AuthorityService"/>
-  </bean>
-
   <bean id="jmxDataSource" class="org.edu_sharing.alfresco.monitoring.DataSourceMBeanImpl">
     <property name="dataSource" ref="defaultDataSource"/>
   </bean>
