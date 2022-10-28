@@ -140,9 +140,12 @@ public class VersionService {
 	public static RepositoryVersionInfo getRepositoryVersionInfo() throws IOException {
 		return
 				new Gson().fromJson(
-						FileUtils.readFileToString(
-								new File(Context.getCurrentInstance().getRequest().getSession().getServletContext().getRealPath(VERSION_FILE))
-						),
+						String.join(
+                                "",
+                                IOUtils.readLines(
+                                        VersionService.class.getClassLoader().getResourceAsStream("version.json")
+                                )
+                        ),
 						RepositoryVersionInfo.class
 				);
 	}
