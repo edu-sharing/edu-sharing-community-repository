@@ -196,7 +196,19 @@ fi
 
 ########################################################################################################################
 
+before="$(mktemp)"
+
 yes | php admin/cli/update.php
+
+echo "config saving."
+
+find -L . -type d -exec mkdir -p "${RS_CACHE}/config/{}" \;
+find -L . -type f -newer "${before}" -exec cp {} "${RS_CACHE}/config/{}" \;
+find "${RS_CACHE}/config" -type d -empty -delete
+
+echo "config saved."
+
+########################################################################################################################
 
 dbConf="${RS_ROOT}/conf/db.conf.php"
 sed -i -r "s|\$dsn.*|\$dsn = \"${rendering_database_driv}:host=${rendering_database_host};port=${rendering_database_port};dbname=${rendering_database_name}\";|" "${dbConf}"
