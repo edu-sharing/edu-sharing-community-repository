@@ -50,6 +50,8 @@ import {
 import { OptionsHelperService } from '../../../core-ui-module/options-helper.service';
 import { Toast } from '../../../core-ui-module/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
+import { AddFolderDialogResult } from '../../../features/dialogs/dialog-modules/add-folder-dialog/add-folder-dialog-data';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import {
     DialogRef,
     ManagementDialogsService,
@@ -97,7 +99,6 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     @Output() onCreate = new EventEmitter<Node[]>();
 
     _parent: Node = null;
-    addFolderName: string = null;
 
     uploadSelectDialogRef: DialogRef<FileList>;
     uploadDialogRef: DialogRef<Node[]>;
@@ -132,8 +133,9 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         private nodeHelper: NodeHelperService,
         private event: FrameEventsService,
         private cardService: CardService,
-        private dialogs: ManagementDialogsService,
+        private managementDialogs: ManagementDialogsService,
         private paste: PasteService,
+        private dialogs: DialogsService,
     ) {
         this.route.queryParams.subscribe((params) => {
             this.params = params;
@@ -188,7 +190,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         });
         // `onUploadFilesProcessed` will be fired when the quick edit dialog triggered by
         // `createUrlLink` is confirmed or canceled.
-        this.dialogs
+        this.managementDialogs
             .getDialogsComponent()
             .onUploadFilesProcessed.pipe(take(1))
             .subscribe((nodes) => {
@@ -282,10 +284,8 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             }
         }
         if (this.folder) {
-            const addFolder = new OptionItem(
-                'WORKSPACE.ADD_FOLDER',
-                'create_new_folder',
-                () => (this.addFolderName = ''),
+            const addFolder = new OptionItem('WORKSPACE.ADD_FOLDER', 'create_new_folder', () =>
+                this.openAddFolderDialog(),
             );
             addFolder.elementType = [ElementType.Unknown];
             addFolder.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS];
@@ -305,8 +305,20 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         });
     }
 
+    private async openAddFolderDialog(name?: string) {
+        const dialogRef = await this.dialogs.openAddFolderDialog({
+            name,
+            parent: this.getParent(),
+        });
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                this.addFolder(result);
+            }
+        });
+    }
+
     openUploadSelect(): void {
-        this.uploadSelectDialogRef = this.dialogs.openUploadSelect({
+        this.uploadSelectDialogRef = this.managementDialogs.openUploadSelect({
             parent: this.getParent(),
             showPicker: this.showPicker,
         });
@@ -327,8 +339,8 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                 // - we handle the edit dialog here as a response to the user either uploading files
                 //   or entering a link.
                 rxjs.merge(
-                    this.dialogs.getDialogsComponent().onUploadFilesProcessed,
-                    this.dialogs.getDialogsComponent().onUploadSelectCanceled,
+                    this.managementDialogs.getDialogsComponent().onUploadFilesProcessed,
+                    this.managementDialogs.getDialogsComponent().onUploadSelectCanceled,
                 )
                     .pipe(take(1))
                     .subscribe((nodes) => {
@@ -351,12 +363,11 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             : this.fallbackFolder;
     }
 
-    addFolder(folder: any) {
-        this.addFolderName = null;
+    addFolder(folder: AddFolderDialogResult) {
         this.toast.showProgressDialog();
         const properties = RestHelper.createNameProperty(folder.name);
-        if (folder.metadataset) {
-            properties[RestConstants.CM_PROP_METADATASET_EDU_METADATASET] = [folder.metadataset];
+        if (folder.metadataSet) {
+            properties[RestConstants.CM_PROP_METADATASET_EDU_METADATASET] = [folder.metadataSet];
             properties[RestConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET] = ['true'];
         }
         this.nodeService
@@ -373,7 +384,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                         this.nodeHelper.handleNodeError(folder.name, error) ===
                         RestConstants.DUPLICATE_NODE_RESPONSE
                     ) {
-                        this.addFolderName = folder.name;
+                        void this.openAddFolderDialog(folder.name);
                     }
                 },
             );
@@ -409,7 +420,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     }
 
     private openUpload(files: FileList): void {
-        this.uploadDialogRef = this.dialogs.openUpload({
+        this.uploadDialogRef = this.managementDialogs.openUpload({
             parent: this.getParent(),
             files,
         });

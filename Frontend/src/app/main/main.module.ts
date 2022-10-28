@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { extensionDeclarationsMap } from '../extension/extension-declarations-map';
 import { SharedModule } from '../shared/shared.module';
 import { LoadingScreenComponent } from './loading-screen/loading-screen.component';
-import { WorkspaceAddFolder } from './navigation/add-folder/add-folder.component';
 import { BannerComponent } from './navigation/banner/banner.component';
 import { CreateMenuComponent } from './navigation/create-menu/create-menu.component';
 import { SearchHeaderComponent } from './navigation/header/header.component';
@@ -31,7 +30,6 @@ import { UserProfileComponent } from './navigation/user-profile/user-profile.com
         CreateMenuComponent,
         UserProfileComponent,
         SearchFieldComponent,
-        WorkspaceAddFolder,
         extensionDeclarationsMap['MainModule'] || [],
     ],
     imports: [SharedModule],

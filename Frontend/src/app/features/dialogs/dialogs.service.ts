@@ -1,8 +1,13 @@
 import { Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
+import { RestConnectorService } from '../../core-module/core.module';
 import { Closable, configForNode } from './card-dialog/card-dialog-config';
 import { CardDialogRef } from './card-dialog/card-dialog-ref';
 import { CardDialogService } from './card-dialog/card-dialog.service';
+import {
+    AddFolderDialogData,
+    AddFolderDialogResult,
+} from './dialog-modules/add-folder-dialog/add-folder-dialog-data';
 import {
     FileChooserDialogData,
     FileChooserDialogResult,
@@ -24,7 +29,12 @@ export class DialogsService {
         return this.cardDialog.openDialogs;
     }
 
-    constructor(private cardDialog: CardDialogService, private translate: TranslateService) {}
+    constructor(
+        private cardDialog: CardDialogService,
+        private translate: TranslateService,
+        // TODO: Move the methods we use of `RestConnectorService` to a utils function if possible.
+        private restConnector: RestConnectorService,
+    ) {}
 
     async openQrDialog(data: QrDialogData): Promise<CardDialogRef<QrDialogData, void>> {
         const { QrDialogComponent } = await import('./dialog-modules/qr-dialog/qr-dialog.module');
@@ -123,9 +133,24 @@ export class DialogsService {
         );
         return this.cardDialog.open(FileChooserDialogComponent, {
             contentPadding: 0,
-            // width: 500,
             height: 800,
             data: { ...new FileChooserDialogData(), ...(data ?? {}) },
+        });
+    }
+
+    async openAddFolderDialog(
+        data: AddFolderDialogData,
+    ): Promise<CardDialogRef<AddFolderDialogData, AddFolderDialogResult>> {
+        const { AddFolderDialogComponent } = await import(
+            './dialog-modules/add-folder-dialog/add-folder-dialog.module'
+        );
+        return this.cardDialog.open(AddFolderDialogComponent, {
+            title: 'WORKSPACE.ADD_FOLDER_TITLE',
+            ...configForNode(data.parent),
+            avatar: { kind: 'image', url: this.restConnector.getThemeMimeIconSvg('folder.svg') },
+            width: 600,
+            autoFocus: '[autofocus=""]',
+            data,
         });
     }
 }
