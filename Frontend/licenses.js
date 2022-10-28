@@ -1,6 +1,5 @@
 var checker = require('license-checker');
 var fs = require('fs');
-var htmlencode = require('htmlencode');
 
 checker.init({
     start: './',
@@ -11,24 +10,23 @@ checker.init({
         //Handle error
     } else {
         console.log(packages);
-        var result="";
         var keys=Object.keys(packages);
+        var result='Lists of ' + keys.length + ' third-party dependencies.\n';
         console.log(keys);
         for(var i=0;i<keys.length;i++){
-            var package=packages[keys[i]];
-            result+="<h3>"+keys[i]+"</h3>";
-            result+="<h4>License: "+package.licenses+"</h4>";
-            console.log(package.licenseFile);
-            if(package.licenseFile) {
-                var text = fs.readFileSync(package.licenseFile);
-                if(text) {
-                    result += "<pre>" + htmlencode.htmlEncode(''+text) + "</pre>";
-                }
+            const pack = packages[keys[i]];
+            let name = keys[i].split('@');
+            delete name[name.length - 1];
+            name = name.join('@');
+            name = name.substring(0, name.length - 1);
+            result += '     (' + pack.licenses + ') ' + name + ' (' + keys[i];
+            if(pack.url) {
+                result += ' - ' + pack.url;
             }
+            result += ')\n';
         }
-        fs.writeFileSync("licenses.html",result);
+        fs.mkdirSync('dist/WEB-INF/licenses', {recursive: true});
+        fs.writeFileSync('dist/WEB-INF/licenses/THIRD-PARTY-edu_sharing-community-repository-frontend.txt',result);
         console.log(result);
-        //The sorted package data
-        //as an Object
     }
 });

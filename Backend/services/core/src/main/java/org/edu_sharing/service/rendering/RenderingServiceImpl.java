@@ -2,11 +2,13 @@ package org.edu_sharing.service.rendering;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -73,6 +75,12 @@ public class RenderingServiceImpl implements RenderingService{
 		}catch(Throwable e){
 			throw new RuntimeException(e);
 		}
+	}
+
+	public RenderingVersionInfo getVersion() throws GeneralSecurityException {
+		String url = new RenderingTool().getRenderServiceUrl(ApplicationInfoList.getHomeRepository(), null);
+		url = url.replace("index.php", "version.php");
+		return new Gson().fromJson(new HttpQueryTool().query(url), RenderingVersionInfo.class);
 	}
 	
 	@Override

@@ -18,6 +18,15 @@
 
   <name>edu_sharing-community-repository-backend</name>
 
+  <licenses>
+    <license>
+      <name>GNU Lesser General Public License v3.0 or later</name>
+      <url>
+        http://www.gnu.org/licenses/lgpl-3.0-standalone.html
+      </url>
+    </license>
+  </licenses>
+
   <build>
 
     <plugins>

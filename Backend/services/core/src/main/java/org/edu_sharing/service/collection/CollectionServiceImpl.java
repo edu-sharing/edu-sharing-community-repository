@@ -461,7 +461,14 @@ public class CollectionServiceImpl implements CollectionService{
 	@Override
 	public void updateAndSetScope(Collection collection) throws Exception {
 		update(collection);
-		setScope(collection);		
+		if(permissionService.hasPermission(
+				StoreRef.PROTOCOL_WORKSPACE,
+				StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+				collection.getNodeId(),
+				CCConstants.PERMISSION_CHANGEPERMISSIONS
+				)) {
+			setScope(collection);
+		}
 	}
 	
 	public HashMap<String,Object> asProps(Collection collection){

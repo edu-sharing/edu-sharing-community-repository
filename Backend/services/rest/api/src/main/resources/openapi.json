@@ -1752,6 +1752,26 @@
         },
         "type": "object"
       },
+      "Licenses": {
+        "properties": {
+          "repository": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "services": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
       "Location": {
         "properties": {
           "geo": {
@@ -3416,6 +3436,17 @@
         },
         "type": "object"
       },
+      "RepositoryVersionInfo": {
+        "properties": {
+          "maven": {
+            "$ref": "#/components/schemas/VersionMaven"
+          },
+          "version": {
+            "$ref": "#/components/schemas/Version"
+          }
+        },
+        "type": "object"
+      },
       "RestoreResult": {
         "properties": {
           "archiveNodeId": {
@@ -4970,6 +5001,57 @@
         },
         "type": "object"
       },
+      "Version": {
+        "properties": {
+          "build": {
+            "type": "string"
+          },
+          "full": {
+            "type": "string"
+          },
+          "major": {
+            "type": "string"
+          },
+          "minor": {
+            "type": "string"
+          },
+          "patch": {
+            "type": "string"
+          },
+          "qualifier": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VersionMaven": {
+        "properties": {
+          "bom": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "project": {
+            "$ref": "#/components/schemas/VersionProject"
+          }
+        },
+        "type": "object"
+      },
+      "VersionProject": {
+        "properties": {
+          "artifactId": {
+            "type": "string"
+          },
+          "groupId": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "WebsiteInformation": {
         "properties": {
           "description": {
@@ -5063,6 +5145,38 @@
           }
         },
         "summary": "Discover the API.",
+        "tags": [
+          "ABOUT"
+        ]
+      }
+    },
+    "/_about/licenses": {
+      "get": {
+        "description": "Get information about used 3rd-party licenses.",
+        "operationId": "licenses",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Licenses"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "License information.",
         "tags": [
           "ABOUT"
         ]
@@ -9635,6 +9749,78 @@
           }
         },
         "summary": "Upload a file",
+        "tags": [
+          "ADMIN v1"
+        ]
+      }
+    },
+    "/admin/v1/version": {
+      "get": {
+        "description": "detailed information about the running system version",
+        "operationId": "getVersion",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RepositoryVersionInfo"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "get detailed version information",
         "tags": [
           "ADMIN v1"
         ]

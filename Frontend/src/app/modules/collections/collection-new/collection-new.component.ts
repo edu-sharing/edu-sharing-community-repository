@@ -184,6 +184,11 @@ export class CollectionNewComponent {
                 this.nodeService.getNodeMetadata(id,[RestConstants.ALL]).subscribe((node:EduData.NodeWrapper)=>{
                   this.nodeService.getNodePermissions(id).subscribe((perm:EduData.NodePermissions)=>{
                     this.mdsSet = node.node.metadataset;
+                    this.canInvite =
+                        this.canInvite &&
+                        RestHelper.hasAccessPermission(
+                            data.collection, RestConstants.ACCESS_CHANGE_PERMISSIONS
+                        );
                     this.editorialGroupsSelected=this.getEditoralGroups(perm.permissions.localPermissions.permissions);
                     this.editorialPublic=perm.permissions.localPermissions?.permissions?.some(
                         (p: Permission) => p.authority?.authorityName === RestConstants.AUTHORITY_EVERYONE

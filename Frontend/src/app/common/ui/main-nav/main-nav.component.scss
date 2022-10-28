@@ -21,8 +21,18 @@
     }
 }
 :host ::ng-deep .card-licenses{
-    pre{
-        white-space: pre-wrap;
+    display: flex;
+    flex-direction: column;
+    .license-group {
+        white-space: pre;
+        font-family: monospace;
+        overflow-x: auto;
+    }
+    .license-spacer {
+        width: 100%;
+        height: 1px;
+        margin: 15px 10px;
+        background-color: $cardSeperatorLineColor;
     }
 }
 .preload {
@@ -65,10 +75,10 @@ user-profile {
     font-size: 7pt;
     a {
         color: rgba(
-            red($workspaceTopBarFontColor),
-            green($workspaceTopBarFontColor),
-            blue($workspaceTopBarFontColor),
-            0.7
+                red($workspaceTopBarFontColor),
+                green($workspaceTopBarFontColor),
+                blue($workspaceTopBarFontColor),
+                0.7
         ) !important;
     }
     a:hover {
