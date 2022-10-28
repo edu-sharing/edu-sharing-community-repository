@@ -92,10 +92,6 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "15"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "180"
-    nginx.ingress.kubernetes.io/server-snippet: |
-      location ~ ^/.*/(wc)?s(ervice)?/api/solr/.*$ {return 403;}
-      location ~ ^/.*/proxy/.*/api/solr/.*$ {return 403;}
-      location ~ ^/.*/-default-/proxy/.*/api/.*$ {return 403;}
 
   hosts:
   - repository.127.0.0.1.nip.io
@@ -107,8 +103,6 @@ ingress:
 
   paths:
   - /edu-sharing
-  - /alfresco
-  - /share
 
 ########################################################################################################################
 
