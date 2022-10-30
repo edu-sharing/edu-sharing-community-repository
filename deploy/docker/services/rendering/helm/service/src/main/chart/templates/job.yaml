@@ -1,8 +1,11 @@
-{{- if .Release.IsInstall }}
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ include "edusharing_services_rendering.name" . }}-init
+  annotations:
+    "helm.sh/hook": "post-install,post-upgrade"
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
   labels: {{ include "edusharing_services_rendering.labels.app" . | nindent 4 }}
     app.kubernetes.io/component: init
 spec:
@@ -49,4 +52,3 @@ spec:
       affinity:
         nodeAffinity: {{ toYaml . | nindent 10 }}
       {{- end }}
-{{- end }}

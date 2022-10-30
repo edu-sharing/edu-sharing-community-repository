@@ -73,6 +73,7 @@ else
 	helm upgrade --install "${RELEASE}" \
 		"edu_sharing-projects-${RELEASE}" --version "${VERSION}" \
 		--repo "https://artifacts.edu-sharing.com/repository/helm/" \
+		--timeout 30m \
 		"${CREDENTIALS[@]}" \
 		"${OPTIONS[@]}"
 	set +x
