@@ -23,6 +23,7 @@ export class CardDialogConfig<D = unknown> {
     minHeight?: number | string;
     maxHeight?: number | string = '95%';
     closable?: Closable = Closable.Casual;
+    autoFocus?: AutoFocusTarget | string | boolean = 'first-tabbable';
     data?: D;
 }
 
@@ -49,6 +50,8 @@ export enum Closable {
      */
     Disabled,
 }
+
+export type AutoFocusTarget = 'dialog' | 'first-tabbable' | 'first-heading';
 
 export function configForNode(node: Node): Partial<CardDialogConfig> {
     return {
