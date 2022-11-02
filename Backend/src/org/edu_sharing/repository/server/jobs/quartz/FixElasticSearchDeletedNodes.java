@@ -12,12 +12,13 @@ import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescript
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.elasticsearch.action.delete.DeleteRequest;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.*;
 import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.Scroll;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -39,7 +40,7 @@ public class FixElasticSearchDeletedNodes extends AbstractJob{
 
     SearchServiceElastic searchServiceElastic = new SearchServiceElastic(ApplicationInfoList.getHomeRepository().getAppId());
 
-    private static int pageSize = 100;
+    private static int pageSize = 1000;
 
     Logger logger = Logger.getLogger(FixElasticSearchDeletedNodes.class);
 
@@ -66,21 +67,29 @@ public class FixElasticSearchDeletedNodes extends AbstractJob{
 
     private void run() throws IOException{
         QueryBuilder queryBuilder = (query == null) ? QueryBuilders.matchAllQuery() : QueryBuilders.wrapperQuery(query);
-        SearchRequest searchRequest = new SearchRequest(INDEX_WORKSPACE);
 
+        final Scroll scroll = new Scroll(TimeValue.timeValueHours(4L));
+        SearchResponse response = null;
         int page = 0;
-        SearchHits searchHits = null;
         do{
-            if(searchHits != null){
-                page += pageSize;
+            if(response == null) {
+                response = search(INDEX_WORKSPACE, queryBuilder, scroll);
+            }else {
+                response = scroll(scroll,response.getScrollId());
             }
-            searchHits = search(INDEX_WORKSPACE, queryBuilder, page, pageSize);
+            SearchHits searchHits = response.getHits();
+            logger.info("page:" + page + " with result size:" + searchHits.getHits().length + " of:" + searchHits.getTotalHits().value);
             for(SearchHit searchHit : searchHits.getHits()){
-                logger.info("page:" + page +" of:" + searchHits.getTotalHits().value);
                 handleSearchHit(searchHit);
             }
+            page++;
+        }while(response != null
+                && response.getHits() != null
+                && response.getHits().getHits().length > 0);
 
-        }while(searchHits.getTotalHits().value > page);
+        boolean clearSuccess = clearScroll(response.getScrollId());
+        if(clearSuccess) logger.info("cleared scroll successfully");
+        else logger.error("clear of scroll "+ response.getScrollId() +" failed");
     }
 
     private void handleSearchHit(SearchHit searchHit) throws IOException {
@@ -111,24 +120,28 @@ public class FixElasticSearchDeletedNodes extends AbstractJob{
         }
     }
 
-    /**
-     * @TODO put this method in searchServiceElastic
-     *
-     * @param index
-     * @param queryBuilder
-     * @param from
-     * @param size
-     * @return
-     * @throws IOException
-     */
-    private SearchHits search(String index, QueryBuilder queryBuilder, int from, int size) throws IOException {
+
+    private SearchResponse search(String index, QueryBuilder queryBuilder, Scroll scroll) throws IOException {
         SearchRequest searchRequest = new SearchRequest(index);
+        searchRequest.scroll(scroll);
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.size(pageSize);
         searchSourceBuilder.query(queryBuilder);
-        searchSourceBuilder.from(from);
-        searchSourceBuilder.size(size);
         searchRequest.source(searchSourceBuilder);
-        SearchResponse searchResponse = searchServiceElastic.getClient().search(searchRequest, RequestOptions.DEFAULT);
-        return searchResponse.getHits();
+        return searchServiceElastic.getClient().search(searchRequest, RequestOptions.DEFAULT);
     }
+
+    private SearchResponse scroll(Scroll scroll, String scrollId) throws IOException {
+        SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
+        scrollRequest.scroll(scroll);
+        return searchServiceElastic.getClient().scroll(scrollRequest, RequestOptions.DEFAULT);
+    }
+
+    private boolean clearScroll(String scrollId) throws IOException {
+        ClearScrollRequest clearScrollRequest = new ClearScrollRequest();
+        clearScrollRequest.addScrollId(scrollId);
+        ClearScrollResponse clearScrollResponse = searchServiceElastic.getClient().clearScroll(clearScrollRequest, RequestOptions.DEFAULT);
+        return clearScrollResponse.isSucceeded();
+    }
+
 }
