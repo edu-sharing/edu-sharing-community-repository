@@ -646,6 +646,13 @@
          <ref bean="transformer.worker.ESCollectionRefTransformerWorker" />
       </property>
    </bean>
+    <bean id="transformer.worker.SerloIndexTransformerWorker" class="org.edu_sharing.alfresco.transformer.SerloIndexTransformerWorker">
+    </bean>
+    <bean id="transformer.SerloIndexTransformer" class="org.alfresco.repo.content.transform.ProxyContentTransformer" parent="baseContentTransformer">
+        <property name="worker">
+            <ref bean="transformer.worker.SerloIndexTransformerWorker" />
+        </property>
+    </bean>
    
     <bean id="eduNodeServiceInterceptor" class="org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor" init-method="init">
       <property name="nodeService">
