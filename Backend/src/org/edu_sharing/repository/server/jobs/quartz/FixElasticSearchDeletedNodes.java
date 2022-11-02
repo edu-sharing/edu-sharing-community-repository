@@ -127,6 +127,7 @@ public class FixElasticSearchDeletedNodes extends AbstractJob{
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.size(pageSize);
         searchSourceBuilder.query(queryBuilder);
+        searchSourceBuilder.fetchSource(null,new String[]{"preview"});
         searchRequest.source(searchSourceBuilder);
         return searchServiceElastic.getClient().search(searchRequest, RequestOptions.DEFAULT);
     }
