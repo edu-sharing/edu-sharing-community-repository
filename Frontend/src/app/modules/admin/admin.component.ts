@@ -60,6 +60,7 @@ import { NodeDataSource } from '../../features/node-entries/node-data-source';
 import { WorkspaceExplorerComponent } from '../workspace/explorer/explorer.component';
 import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';
 import { NodeEntriesWrapperComponent } from '../../features/node-entries/node-entries-wrapper.component';
+import { XmlAppPropertiesDialogData } from '../../features/dialogs/dialog-modules/xml-app-properties-dialog/xml-app-properties-dialog-data';
 
 type LuceneData = {
     mode: 'NODEREF' | 'SOLR' | 'ELASTIC';
@@ -127,14 +128,6 @@ export class AdminComponent implements OnInit, OnDestroy {
                     this.showWarning = false;
                 }),
             ];
-            this.xmlCardButtons = [
-                new DialogButton('CANCEL', { color: 'standard' }, () => {
-                    this.xmlAppProperties = null;
-                }),
-                new DialogButton('APPLY', { color: 'primary' }, () => {
-                    this.saveApp();
-                }),
-            ];
             this.getTemplates();
             this.connector.isLoggedIn().subscribe((data: LoginResult) => {
                 this.loginResult = data;
@@ -145,7 +138,6 @@ export class AdminComponent implements OnInit, OnDestroy {
             });
         });
     }
-    private static MULTILINE_PROPERTIES = ['custom_html_headers', 'public_key'];
     static RS_CONFIG_HELP =
         'https://docs.edu-sharing.com/confluence/edp/de/installation-en/installation-of-the-edu-sharing-rendering-service';
     mailTemplates = [
@@ -221,10 +213,6 @@ export class AdminComponent implements OnInit, OnDestroy {
     public dialogButtons: DialogButton[] = [];
     public dialogParameters: any;
     public warningButtons: DialogButton[] = [];
-    public xmlCardButtons: DialogButton[] = [];
-    public xmlAppProperties: any;
-    public xmlAppAdditionalPropertyName: string;
-    public xmlAppAdditionalPropertyValue: string;
     parentNode: Node;
     parentCollection: Node;
     parentCollectionType = 'root';
@@ -244,8 +232,6 @@ export class AdminComponent implements OnInit, OnDestroy {
     uploadJobsFile: File;
     uploadOaiFile: File;
     public xmlAppKeys: string[];
-    public currentApp: string;
-    currentAppXml: string;
     public editableXmls = [{ name: 'HOMEAPP', file: RestConstants.HOME_APPLICATION_XML }];
     searchResponse = new NodeDataSource<Node>();
     searchColumns: ListItem[] = [];
@@ -374,10 +360,6 @@ export class AdminComponent implements OnInit, OnDestroy {
     public removeLuceneAuthority(authority: Authority) {
         this.lucene.authorities.splice(this.lucene.authorities.indexOf(authority), 1);
     }
-    public isMultilineProperty(key: string) {
-        if (AdminComponent.MULTILINE_PROPERTIES.indexOf(key) != -1) return true;
-        return this.xmlAppProperties[key].indexOf('\n') != -1;
-    }
     public downloadApp(app: Application) {
         Helper.downloadContent(app.file, app.xml);
     }
@@ -462,42 +444,17 @@ export class AdminComponent implements OnInit, OnDestroy {
             },
         );
     }
-    public closeAppEditor() {
-        this.xmlAppProperties = null;
-        this.xmlAppAdditionalPropertyName = null;
-        this.xmlAppAdditionalPropertyValue = null;
-    }
-    public saveApp() {
-        this.globalProgress = true;
-        if (this.xmlAppAdditionalPropertyName && this.xmlAppAdditionalPropertyName.trim()) {
-            this.xmlAppProperties[this.xmlAppAdditionalPropertyName.trim()] =
-                this.xmlAppAdditionalPropertyValue;
-        }
-        this.admin.updateApplicationXML(this.currentAppXml, this.xmlAppProperties).subscribe(
-            () => {
-                this.toast.toast('ADMIN.APPLICATIONS.APP_SAVED', { xml: this.currentAppXml });
-                this.globalProgress = false;
-                this.closeAppEditor();
-                this.refreshAppList();
-            },
-            (error: any) => {
-                this.globalProgress = false;
-                this.toast.error(error);
-            },
-        );
-    }
     public configApp(app: Application) {
         window.open(app.configUrl);
     }
     public editApp(app: any) {
-        this.currentApp = app.name || 'HOMEAPP';
-        this.currentAppXml = app.file;
+        const appName = app.name || 'HOMEAPP';
+        const appXml = app.file;
         this.globalProgress = true;
         this.admin.getApplicationXML(app.file).subscribe(
-            (data: any[]) => {
+            async (properties: any[]) => {
+                await this.showXmlAppPropertiesDialog({ appName, appXml, properties });
                 this.globalProgress = false;
-                this.xmlAppKeys = Object.keys(data);
-                this.xmlAppProperties = data;
             },
             (error: any) => {
                 this.globalProgress = false;
@@ -505,6 +462,16 @@ export class AdminComponent implements OnInit, OnDestroy {
             },
         );
     }
+
+    private async showXmlAppPropertiesDialog(data: XmlAppPropertiesDialogData) {
+        const dialogRef = await this.dialogs.openXmlAppPropertiesDialog(data);
+        dialogRef.afterClosed().subscribe((wasUpdated) => {
+            if (wasUpdated) {
+                this.refreshAppList();
+            }
+        });
+    }
+
     public removeApp(app: Application) {
         this.dialogTitle = 'ADMIN.APPLICATIONS.REMOVE_TITLE';
         this.dialogMessage = 'ADMIN.APPLICATIONS.REMOVE_MESSAGE';
@@ -662,11 +629,7 @@ export class AdminComponent implements OnInit, OnDestroy {
                 },
             );
     }
-    public removeAppProperty(pos: number) {
-        const key = this.xmlAppKeys[pos];
-        this.xmlAppKeys.splice(pos, 1);
-        delete this.xmlAppProperties[key];
-    }
+
     public oaiImport() {
         if (!this.oaiPreconditions()) return;
         this.globalProgress = true;

@@ -20,6 +20,10 @@ import { NodeEmbedDialogData } from './dialog-modules/node-embed-dialog/node-emb
 import { NodeInfoDialogData } from './dialog-modules/node-info-dialog/node-info-dialog.component';
 import { NodeReportDialogData } from './dialog-modules/node-report-dialog/node-report-dialog.component';
 import { QrDialogData } from './dialog-modules/qr-dialog/qr-dialog.component';
+import {
+    XmlAppPropertiesDialogData,
+    XmlAppPropertiesDialogResult,
+} from './dialog-modules/xml-app-properties-dialog/xml-app-properties-dialog-data';
 
 @Injectable({
     providedIn: 'root',
@@ -150,6 +154,22 @@ export class DialogsService {
             avatar: { kind: 'image', url: this.restConnector.getThemeMimeIconSvg('folder.svg') },
             width: 600,
             autoFocus: '[autofocus=""]',
+            data,
+        });
+    }
+
+    async openXmlAppPropertiesDialog(
+        data: XmlAppPropertiesDialogData,
+    ): Promise<CardDialogRef<XmlAppPropertiesDialogData, XmlAppPropertiesDialogResult>> {
+        const title = await this.translate
+            .get('ADMIN.APPLICATIONS.EDIT_APP', { xml: data.appXml })
+            .toPromise();
+        const { XmlAppPropertiesDialogComponent } = await import(
+            './dialog-modules/xml-app-properties-dialog/xml-app-properties-dialog.module'
+        );
+        return this.cardDialog.open(XmlAppPropertiesDialogComponent, {
+            title,
+            width: 600,
             data,
         });
     }
