@@ -261,7 +261,7 @@ public class AdminApi {
 				entry.setRepositoryType(appInfo.getRepositoryType());
 				entry.setSubtype(appInfo.getSubtype());
 				entry.setXml(appInfo.getXml());
-				entry.setFile(new File(appInfo.getAppFile()).getName());
+				entry.setFile(appInfo.getAppFileName());
 				if (ApplicationInfo.TYPE_RENDERSERVICE.equals(entry.getType()) && entry.getContentUrl() != null) {
 					entry.setConfigUrl(appInfo.getContentUrl().replace("/application/esmain/index.php", "/admin"));
 				}
