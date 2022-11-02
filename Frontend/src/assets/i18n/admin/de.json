@@ -59,7 +59,7 @@
             "EDIT_DISABLED": "Die Konfiguration wurde auf Read-Only eingestellt. Es können keine Modifikationen über dieses Tool vorgenommen werden. Der Parameter {{key}} muss auf true gesetzt werden, damit die Config hier bearbeitet werden kann. Dies ist nur für Testsysteme empfohlen.",
             "SHOW_RO": "Read-Only Konfigurationsdateien anzeigen",
             "INHERIT_INFO": "Die angezeigten Konfigurationswerte werden von unten nach oben eingelesen. Konfigurationswerte der darunterliegenden Konfiguration haben eine höhere Priorität und können Werte überschreiben.",
-            "VOLATILE_WARNING": "Die Änderungen an dieser Konfigurationsdatei sind temporär und werden beim nächsten Update/Rollout überschrieben! Persistente Änderungen müssen an das edu-sharing Entwicklerteam weitergegeben werden",
+            "VOLATILE_WARNING": "Die Änderungen an dieser Konfigurationsdatei sind temporär und werden beim nächsten Neustart überschrieben! Es erfolgt keine Verteilung im Cluster! Nur für temporäre Änderungen oder Tests verwenden!",
             "CLIENT_CONFIG_TITLE": "Client-Konfiguration (Konfiguration von anzeigerelevanten Funktionen)",
             "CLIENT_CONFIG_HINT": "Sie können hier Werte eintragen, um Labels zu überschreiben, Kontexte zu konfigurieren, Authentifizierungsmethoden einzurichten und mehr. Nach dem Speichern müssen Sie möglicherweise die gesamte Seite im Browser neu laden",
             "BASE_CONFIG_TITLE": "Globale Konfigurationsdatei (Standard-Werte)",

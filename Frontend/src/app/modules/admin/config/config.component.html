@@ -49,13 +49,15 @@
       <mat-hint><div>{{'ADMIN.GLOBAL_CONFIG.NODE_DEPLOYMENT_CONFIG_HINT' | translate}}</div></mat-hint>
     </div>
   </ng-container>
-  <ng-container *ngIf="editSupported || configs.translate">
+  <!--
+  <ng-container *ngIf="editSupported || configs.nodeOverride">
     <h3 class="mat-heading-3 mat-heading-underline">{{ 'ADMIN.GLOBAL_CONFIG.NODE_OVERRIDE_CONFIG_TITLE' | translate}}</h3>
     <div class="monaco-editor">
       <ngx-monaco-editor [options]="codeOptionsHocoonRW" [(ngModel)]="configs.nodeOverride" [ngModelOptions]="{standalone: true}"></ngx-monaco-editor>
       <mat-hint><div>{{'ADMIN.GLOBAL_CONFIG.NODE_OVERRIDE_CONFIG_HINT' | translate}}</div></mat-hint>
     </div>
   </ng-container>
+  -->
   <ng-container *ngIf="showRO">
     <h3 class="mat-heading-3 mat-heading-underline">{{'ADMIN.GLOBAL_CONFIG.PARSED_TITLE' | translate}}</h3>
     <div class="monaco-editor">
