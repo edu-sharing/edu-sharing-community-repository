@@ -23,6 +23,7 @@ const PROXY_CONFIG = [
         secure: false,
         changeOrigin: true,
         onProxyRes: function (proxyRes, req, res) {
+            proxyRes.headers['X-Edu-Sharing-Proxy-Target'] = process.env.BACKEND_URL;
             const cookies = proxyRes.headers['set-cookie'];
             if (cookies) {
                 proxyRes.headers['set-cookie'] = cookies.map((cookie) =>
@@ -42,6 +43,7 @@ const PROXY_CONFIG = [
         secure: false,
         changeOrigin: true,
         onProxyRes: function (proxyRes, req, res) {
+            proxyRes.headers['X-Edu-Sharing-Proxy-Target'] = process.env.BACKEND_URL;
             const cookies = proxyRes.headers['set-cookie'];
             if (cookies) {
                 proxyRes.headers['set-cookie'] = cookies.map((cookie) =>
