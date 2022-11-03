@@ -38,6 +38,7 @@ import org.edu_sharing.webservices.usage2.Usage2Exception;
 import org.edu_sharing.webservices.util.AuthenticationUtils;
 
 import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
+import org.elasticsearch.client.RequestOptions;
 
 
 public class ContextManagementFilter implements javax.servlet.Filter {
@@ -61,6 +62,10 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 		default void addToRequest(HttpRequestBase request) {
 
 		}
+
+		default void addToRequestBuilder(RequestOptions.Builder b) {
+
+		};
 	}
 	// stores the currently accessing tool type, e.g. CONNECTOR
 	public static ThreadLocal<String> accessToolType = new ThreadLocal<>();
@@ -123,13 +128,17 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 				@Override
 				public void addToRequest(HttpRequestBase request) {
 					for (String header : Collections.list(http.getHeaderNames())) {
-						if (
-								header.toUpperCase().startsWith("X-B3-") ||
-										header.toUpperCase().startsWith("X-OT-") ||
-										header.equalsIgnoreCase("X-Request-Id") ||
-										header.equalsIgnoreCase("X-Client-Trace-Id")
-						) {
+						if (isX3Header(header)) {
 							request.setHeader(header, http.getHeader(header));
+						}
+					}
+				}
+
+				@Override
+				public void addToRequestBuilder(RequestOptions.Builder b) {
+					for (String header : Collections.list(http.getHeaderNames())) {
+						if (ContextManagementFilter.isX3Header(header)) {
+							b.addHeader(header, http.getHeader(header));
 						}
 					}
 				}
@@ -220,6 +229,13 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 
 		}
 
+	}
+
+	public static boolean isX3Header(String header) {
+		return header.toUpperCase().startsWith("X-B3-") ||
+				header.toUpperCase().startsWith("X-OT-") ||
+				header.equalsIgnoreCase("X-Request-Id") ||
+				header.equalsIgnoreCase("X-Client-Trace-Id");
 	}
 
 	/**
