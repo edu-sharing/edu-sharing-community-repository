@@ -183,6 +183,7 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	public static final String PROPERTY_VALIDATOR_REGEX_CM_NAME = "property_validator_regex_cm_name";
 
 	private final Properties properties;
+	private final String appFileName;
 
 	private String host = null;
 	
@@ -337,8 +338,9 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	public ApplicationInfo(String _appFile) throws Exception{
 		if(_appFile == null) throw new Exception("Application Filename was null!");
+		appFileName = _appFile;
 		appFile = PropertiesHelper.Config.getPropertyFilePath(_appFile);
-		
+
 		ClassLoader classLoader = Thread.currentThread()
 				.getContextClassLoader();
 		URL url = classLoader.getResource(appFile);
@@ -614,8 +616,18 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		return appCaption;
 	}
 
+	/**
+	 * @return the full app file path
+	 */
 	public String getAppFile() {
 		return appFile;
+	}
+
+	/**
+	 * @return only the file name
+	 */
+	public String getAppFileName() {
+		return appFileName;
 	}
 
 	public String getAppId() {

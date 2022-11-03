@@ -46,6 +46,9 @@ export class AdminConfigComponent {
       this.adminService.getConfigFile(AdminConfigComponent.CONFIG_FILE_REFERENCE, 'DEFAULTS').subscribe((base) =>
           this.configs.reference = base
       );
+      this.adminService
+          .getConfigFile(AdminConfigComponent.EXTENSION_CONFIG_FILE, 'DEFAULTS')
+          .subscribe((deployment) => (this.configs.extension = deployment));
       this.adminService.getConfigFile(AdminConfigComponent.CONFIG_DEPLOYMENT_FILE, 'CLUSTER').subscribe((deployment) =>
           this.configs.clusterDeployment = deployment
       );

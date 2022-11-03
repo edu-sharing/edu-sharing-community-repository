@@ -68,6 +68,8 @@
             "CLUSTER_OVERRIDE_CONFIG_HINT": "Override-Configuration for all cluster nodes",
             "NODE_OVERRIDE_CONFIG_TITLE": "Node-Override",
             "NODE_OVERRIDE_CONFIG_HINT": "Override-Configuration for this cluster node (check ip address!)",
+          "EXTENSION_CONFIG_TITLE": "Extension config (customer/project specific values)",
+          "EXTENSION_CONFIG_HINT": "This file is managed via the git repository of the customer project and applies to all nodes.",
 
             "SIZE": "Editor-size",
             "SIZE_MEDIUM": "normal",
