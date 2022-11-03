@@ -8,6 +8,7 @@ import javax.servlet.ServletContext;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
+import org.alfresco.repo.search.impl.lucene.LuceneQueryParser;
 import org.alfresco.repo.search.impl.lucene.SolrJSONResultSet;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -1104,10 +1105,13 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 						//subQuery.append((furtherToken ? " AND( " : "(")).append("@cm\\:authorityName:").append("\"")
 						//		.append(token).append("\"").append(" OR @cm\\:authorityDisplayName:").append("\"")
 
-						subQuery.append((furtherToken ? " AND( " : "(")).append("@cm\\:authorityDisplayName:")
-								.append("\"").append(token).append("\"").
+						subQuery.append((furtherToken ? " AND( " : "("))
+								.append("@cm\\:authorityDisplayName:")
+								.append("\"").append(LuceneQueryParser.escape(token)).append("\"").
 								// boost groups so that they'll appear before users
-								append("^10");
+								append("^10 OR ")
+								.append("@ccm\\:groupEmail:")
+								.append("\"").append(LuceneQueryParser.escape(token)).append("\"");
 						subQuery.append(")");
 	
 					}
