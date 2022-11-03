@@ -1387,7 +1387,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 
 	@Override
-	public Collection<NodeRef> getFrontpageNodes() throws Throwable {
+	public Collection<org.edu_sharing.service.model.NodeRef> getFrontpageNodes() throws Throwable {
 		return new NodeFrontpage().getNodesForCurrentUserAndConfig();
 	}
 }
