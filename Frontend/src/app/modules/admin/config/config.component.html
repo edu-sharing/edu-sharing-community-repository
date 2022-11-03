@@ -32,9 +32,9 @@
     <h3 class="mat-heading-3 mat-heading-underline">
       {{ 'ADMIN.GLOBAL_CONFIG.EXTENSION_CONFIG_TITLE' | translate }}
     </h3>
-    <es-info-message mode="warning" *ngIf="editSupported">{{
+    <info-message mode="warning" *ngIf="editSupported">{{
       'ADMIN.GLOBAL_CONFIG.VOLATILE_WARNING' | translate
-    }}</es-info-message>
+    }}</info-message>
     <div class="monaco-editor">
       <ngx-monaco-editor
         [options]="codeOptionsHocoonRW"
