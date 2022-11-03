@@ -599,7 +599,8 @@ public class IamApi  {
     @PUT
     @Path("/people/{repository}/{person}/avatar")
     @Operation(summary = "Set avatar of the user.", description = "Set avatar of the user. (To set foreign avatars, admin rights are required.)")
-    @ApiResponses(
+	@Consumes({ "multipart/form-data" })
+	@ApiResponses(
     	value = {
 	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
 	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
