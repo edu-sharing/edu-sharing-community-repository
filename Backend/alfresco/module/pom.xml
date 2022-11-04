@@ -144,6 +144,28 @@
         </executions>
       </plugin>
 
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <includeArtifactIds>
+                edu_sharing-community-repository-repackaged-elasticsearch,
+                edu_sharing-community-repository-repackaged-isoparser
+              </includeArtifactIds>
+              <type>tar.gz</type>
+              <classifier>bin</classifier>
+              <outputDirectory>src/main/amp/licenses</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
 
   </build>
