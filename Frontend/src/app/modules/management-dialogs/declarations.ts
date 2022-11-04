@@ -5,7 +5,6 @@ import { WorkspaceLtiToolConfigsComponent } from './lti-tool-configs/lti-tool-co
 import { WorkspaceCreateLtiComponent } from './create-lti/create-lti.component';
 import { WorkspaceFileUploadComponent } from './file-upload/file-upload.component';
 import { WorkspaceFileUploadSelectComponent } from './file-upload-select/file-upload-select.component';
-import { WorkspaceContributorComponent } from './contributor/contributor.component';
 import { AddStreamComponent } from './add-stream/add-stream.component';
 import { NodeTemplateComponent } from './node-template/node-template.component';
 import { NodeVariantComponent } from './node-variant/node-variant.component';
@@ -30,7 +29,6 @@ export const DECLARATIONS_MANAGEMENT_DIALOGS = [
     WorkspaceCreateLtiComponent,
     WorkspaceFileUploadComponent,
     WorkspaceFileUploadSelectComponent,
-    WorkspaceContributorComponent,
     NodeRelationManagerComponent,
     CommentsListComponent,
     NodeSearchSelectorComponent,

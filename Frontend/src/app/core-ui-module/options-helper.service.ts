@@ -251,12 +251,11 @@ export class OptionsHelperService implements OnDestroy {
         }
         if (this.mainNavService.getMainNav()) {
             this.subscriptions.push(
-                this.mainNavService.getDialogs().onRefresh.subscribe((nodes: void | Node[]) => {
-                    this.nodesChanged.emit(nodes);
-                    if (this.list) {
-                        this.list.updateNodes(nodes);
-                    }
-                }),
+                this.mainNavService
+                    .getDialogs()
+                    .onRefresh.subscribe((nodes: void | Node[]) =>
+                        this.onNodesChanged(nodes ? nodes : undefined),
+                    ),
             );
             this.subscriptions.push(
                 this.mainNavService
@@ -280,6 +279,13 @@ export class OptionsHelperService implements OnDestroy {
         }
         if (this.actionbar) {
             this.actionbar.options = this.globalOptions;
+        }
+    }
+
+    private onNodesChanged(nodes?: Node[]): void {
+        this.nodesChanged.emit(nodes);
+        if (this.list) {
+            this.list.updateNodes(nodes);
         }
     }
 
@@ -876,11 +882,16 @@ export class OptionsHelperService implements OnDestroy {
         licenseNode.group = DefaultGroups.Edit;
         licenseNode.priority = 30;
 
-        const contributorNode = new OptionItem(
-            'OPTIONS.CONTRIBUTOR',
-            'group',
-            (object) => (management.nodeContributor = this.getObjects(object)[0]),
-        );
+        const contributorNode = new OptionItem('OPTIONS.CONTRIBUTOR', 'group', async (object) => {
+            const dialogRef = await this.dialogs.openContributorsDialog({
+                node: this.getObjects(object)[0],
+            });
+            dialogRef.afterClosed().subscribe((updatedNode) => {
+                if (updatedNode) {
+                    this.onNodesChanged([updatedNode]);
+                }
+            });
+        });
         contributorNode.constrains = [
             Constrain.Files,
             Constrain.NoCollectionReference,

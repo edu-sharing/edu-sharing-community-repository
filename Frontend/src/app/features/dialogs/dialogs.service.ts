@@ -13,6 +13,10 @@ import {
     ContributorEditDialogResult,
 } from './dialog-modules/contributor-edit-dialog/contributor-edit-dialog-data';
 import {
+    ContributorsDialogData,
+    ContributorsDialogResult,
+} from './dialog-modules/contributors-dialog/contributors-dialog-data';
+import {
     FileChooserDialogData,
     FileChooserDialogResult,
 } from './dialog-modules/file-chooser-dialog/file-chooser-dialog-data';
@@ -207,6 +211,20 @@ export class DialogsService {
             width: 600,
             height: 900,
             closable: Closable.Standard,
+            data,
+        });
+    }
+
+    async openContributorsDialog(
+        data: ContributorsDialogData,
+    ): Promise<CardDialogRef<ContributorsDialogData, ContributorsDialogResult>> {
+        const { ContributorsDialogComponent } = await import(
+            './dialog-modules/contributors-dialog/contributors-dialog.module'
+        );
+        return this.cardDialog.open(ContributorsDialogComponent, {
+            title: 'WORKSPACE.CONTRIBUTOR.TITLE',
+            width: 500,
+            height: 700,
             data,
         });
     }
