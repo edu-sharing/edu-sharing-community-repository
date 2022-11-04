@@ -228,7 +228,7 @@ public class LTIPlatformApi {
                             ContentModel.PROP_NAME));
                 }
                 custom.put(LTIPlatformConstants.CUSTOM_CLAIM_GET_CONTENTAPIURL,homeApp.getClientBaseUrl()+"/rest/ltiplatform/v13/content");
-                if(accessStatus != null && accessStatus.equals(AccessStatus.ALLOWED)){
+                if(accessStatus != null && accessStatus.equals(AccessStatus.ALLOWED) && loginInitiationSessionObject.isResourceLinkEditMode()){
                     custom.put(LTIPlatformConstants.CUSTOM_CLAIM_POST_CONTENTAPIURL,homeApp.getClientBaseUrl()+"/rest/ltiplatform/v13/content");
                     jwtBuilder = jwtBuilder.claim(LTIConstants.LTI_CLAIM_CUSTOM,custom);
                 }else{
@@ -581,7 +581,7 @@ public class LTIPlatformApi {
 
             for(ApplicationInfo appInfo : ApplicationInfoList.getApplicationInfos().values()){
                 if(appInfo.isLtiTool() && appInfo.getAppId().equals(appId)){
-                    String form = prepareLoginInitiation(parentId,null, nodeId, appInfo, LoginInitiationSessionObject.MessageType.deeplink, req);
+                    String form = prepareLoginInitiation(parentId,null, null, nodeId, appInfo, LoginInitiationSessionObject.MessageType.deeplink, req);
                     return Response.status(Response.Status.OK).entity(form).build();
                 }
             }
@@ -605,9 +605,14 @@ public class LTIPlatformApi {
                     @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = String.class)))
             })
-    public Response generateLoginInitiationFormResourceLink(@Parameter(description = "the nodeid of a node that contains a lti resourcelink. is required for lti resourcelink",required=false) @QueryParam("nodeId") String nodeId,
+    public Response generateLoginInitiationFormResourceLink(@Parameter(description = "the nodeid of a node that contains a lti resourcelink. is required for lti resourcelink",required=true) @QueryParam("nodeId") String nodeId,
+                                                @Parameter(description = "for tools with content option, this param sends changeContentUrl (true) else contentUrl will be excluded",required = false,schema = @Schema(defaultValue = "true")) @QueryParam("editMode") Boolean editMode,
                                                 @Context HttpServletRequest req){
         try{
+            //@TODO find out why defaultvalue of swagger definition does not work
+            if(editMode == null){
+                editMode = true;
+            }
             NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
 
             if(!nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_LTITOOL_NODE))){
@@ -628,6 +633,7 @@ public class LTIPlatformApi {
                 if(appInfo.isLtiTool() && toolUrl.equals(appInfo.getLtitoolUrl())){
                     String form = prepareLoginInitiation(nodeService.getPrimaryParent(nodeRef).getParentRef().getId(),
                             nodeId,
+                            editMode,
                             nodeId,
                             appInfo,
                             LoginInitiationSessionObject.MessageType.resourcelink,
@@ -653,6 +659,7 @@ public class LTIPlatformApi {
      */
     private String prepareLoginInitiation(String contextId,
                                           String resourceLinkNodeId,
+                                          Boolean resourceLinkEditMode,
                                           String contentUrlNodeId,
                                           ApplicationInfo appInfo,
                                           LoginInitiationSessionObject.MessageType messageType,
@@ -676,6 +683,7 @@ public class LTIPlatformApi {
         loginInitiationSessionObject.setClientId(appInfo.getLtiClientId());
         loginInitiationSessionObject.setContextId(contextId);
         loginInitiationSessionObject.setResourceLinkNodeId(resourceLinkNodeId);
+        if(resourceLinkEditMode != null) loginInitiationSessionObject.setResourceLinkEditMode(resourceLinkEditMode);
         loginInitiationSessionObject.setMessageType(messageType);
         loginInitiationSessionObject.setContentUrlNodeId(contentUrlNodeId);
         req.getSession().setAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT, loginInitiationSessionObject);

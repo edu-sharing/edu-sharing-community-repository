@@ -1343,6 +1343,12 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			String permaLink = URLTool.getNgComponentsUrl()+"render/" + nodeRef.getId();
 			permaLink = (version != null) ? permaLink + "/" + version : permaLink;
 			properties.put(CCConstants.VIRT_PROP_PERMALINK, permaLink);
+
+			if(aspects.contains(QName.createQName(CCConstants.CCM_ASPECT_LTITOOL_NODE))){
+				properties.put(CCConstants.VIRT_PROP_LTITOOL_START_RESOURCE_LINK,
+						ApplicationInfoList.getHomeRepository().getClientBaseUrl()
+								+"/rest/ltiplatform/v13/generateLoginInitiationFormResourceLink?nodeId="+nodeRef.getId());
+			}
 		}
 
 		if (nodeType.equals(CCConstants.CCM_TYPE_MAP)) {

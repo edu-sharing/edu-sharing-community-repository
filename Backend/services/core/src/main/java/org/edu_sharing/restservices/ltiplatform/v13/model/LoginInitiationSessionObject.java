@@ -7,6 +7,7 @@ public class LoginInitiationSessionObject implements Serializable {
     public static enum MessageType{resourcelink,deeplink}
 
     String contextId,clientId,appId,resourceLinkNodeId,contentUrlNodeId;
+    boolean resourceLinkEditMode = true;
 
     MessageType messageType;
 
@@ -57,5 +58,13 @@ public class LoginInitiationSessionObject implements Serializable {
 
     public String getContentUrlNodeId() {
         return contentUrlNodeId;
+    }
+
+    public void setResourceLinkEditMode(boolean resourceLinkEditMode) {
+        this.resourceLinkEditMode = resourceLinkEditMode;
+    }
+
+    public boolean isResourceLinkEditMode() {
+        return resourceLinkEditMode;
     }
 }

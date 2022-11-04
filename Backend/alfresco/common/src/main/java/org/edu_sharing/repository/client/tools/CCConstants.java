@@ -987,6 +987,8 @@ public class CCConstants {
 
 	public final static String VIRT_PROP_ORIGINAL_DELETED = "{virtualproperty}originaldeleted";
 
+	public final static String VIRT_PROP_LTITOOL_START_RESOURCE_LINK = "{virtualproperty}ltitool_start_resourcelink";
+
 	public final static String TOOL_HOMEFOLDER = "EDU_TOOL";
 
     public static final String TEMPLATE_NODE_NAME = ".METADATA_TEMPLATE";
