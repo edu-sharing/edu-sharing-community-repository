@@ -420,7 +420,7 @@ public class AdminServiceImpl implements AdminService  {
 		String result=org.apache.commons.lang3.StringUtils.join(apps,",");
 		changeAppPropertiesApplications(result, new Date()+" removed app: "+info.getAppFile());
 		File appFile = new File(PropertiesHelper.Config.getAbsolutePathForConfigFile(
-				PropertiesHelper.Config.getPropertyFilePath(info.getAppFile())
+				PropertiesHelper.Config.getPropertyFilePath(info.getAppFileName())
 		));
 		appFile.renameTo(new File(appFile.getAbsolutePath()+System.currentTimeMillis()+".bak"));
 		RepoFactory.refresh();
