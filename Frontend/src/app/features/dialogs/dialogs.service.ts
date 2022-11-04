@@ -9,6 +9,10 @@ import {
     AddFolderDialogResult,
 } from './dialog-modules/add-folder-dialog/add-folder-dialog-data';
 import {
+    ContributorEditDialogData,
+    ContributorEditDialogResult,
+} from './dialog-modules/contributor-edit-dialog/contributor-edit-dialog-data';
+import {
     FileChooserDialogData,
     FileChooserDialogResult,
 } from './dialog-modules/file-chooser-dialog/file-chooser-dialog-data';
@@ -170,6 +174,25 @@ export class DialogsService {
         return this.cardDialog.open(XmlAppPropertiesDialogComponent, {
             title,
             width: 600,
+            data,
+        });
+    }
+
+    async openContributorEditDialog(
+        data: ContributorEditDialogData,
+    ): Promise<CardDialogRef<ContributorEditDialogData, ContributorEditDialogResult>> {
+        const title = await this.translate
+            .get('WORKSPACE.CONTRIBUTOR.' + (data.vCard ? 'EDIT' : 'ADD') + '_TITLE')
+            .toPromise();
+        const { ContributorEditDialogComponent } = await import(
+            './dialog-modules/contributor-edit-dialog/contributor-edit-dialog.module'
+        );
+        return this.cardDialog.open(ContributorEditDialogComponent, {
+            title,
+            contentPadding: 0,
+            width: 600,
+            height: 900,
+            closable: Closable.Standard,
             data,
         });
     }
