@@ -1170,7 +1170,11 @@ public class SolrQueryHTTPClient implements BeanFactoryAware, InitializingBean
                 IOException, HttpException, URIException, JSONException
     {
         PostMethod post = new PostMethod(url);
-        Context.getCurrentInstance();
+
+        for(Map.Entry<String, String> header: Context.getCurrentInstance().getB3().getX3Headers().entrySet()) {
+            post.addRequestHeader(header.getKey(), header.getValue());
+        }
+
         if (body.toString().length() > DEFAULT_SAVEPOST_BUFFER)
         {
             post.getParams().setBooleanParameter(HttpMethodParams.USE_EXPECT_CONTINUE, true);
