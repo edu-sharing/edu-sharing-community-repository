@@ -11,7 +11,6 @@ import { AutocompleteComponent } from './common/ui/autocomplete/autocomplete.com
 import { CookieInfoComponent } from './common/ui/cookie-info/cookie-info.component';
 import { PoweredByComponent } from './common/ui/powered-by/powered-by.component';
 import { FooterComponent } from './common/ui/footer/footer.component';
-import { CalendarComponent } from './common/ui/calendar/calendar.component';
 import { UserQuotaComponent } from './common/ui/user-quota/user-quota.component';
 import { EmbedComponent } from './common/ui/embed/embed.component';
 import { TimePipe } from './common/ui/time.pipe';
@@ -36,7 +35,6 @@ export const DECLARATIONS = [
     InputsTestComponent,
     UserAvatarTestComponent,
     ModalTestComponent,
-    CalendarComponent,
     AutocompleteComponent,
     ColorTransformPipe,
     NodeAuthorNamePipe,
