@@ -29,6 +29,7 @@
       <outputDirectory>licenses</outputDirectory>
       <filtered>false</filtered>
     </fileSet>
+    <!-- deploy into WEB-INF/classes for earlier classloading -->
     <fileSet>
       <directory>${project.build.directory}/fixes</directory>
       <outputDirectory>config</outputDirectory>
