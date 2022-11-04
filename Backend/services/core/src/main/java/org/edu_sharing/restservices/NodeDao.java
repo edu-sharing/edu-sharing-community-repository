@@ -18,12 +18,10 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
-import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.service.authority.AuthorityService;
-import org.edu_sharing.service.authority.AuthorityServiceImpl;
 import org.edu_sharing.service.permission.HandleMode;
 import org.edu_sharing.alfresco.tools.EduSharingNodeHelper;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -60,7 +58,6 @@ import org.edu_sharing.service.notification.NotificationServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.rating.RatingDetails;
-import org.edu_sharing.service.rating.RatingsCache;
 import org.edu_sharing.service.rating.RatingServiceFactory;
 import org.edu_sharing.service.remote.RemoteObjectService;
 import org.edu_sharing.service.search.SearchService;
@@ -74,7 +71,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.security.core.Authentication;
 
 import static org.codehaus.groovy.runtime.DefaultGroovyMethods.collect;
 
@@ -1478,7 +1474,8 @@ public class NodeDao {
 				return true;
 			else {
 				Map<String, Serializable> profileSettings = AuthorityServiceFactory.getLocalService().getProfileSettingsProperties(userName, CCConstants.CCM_PROP_PERSON_SHOW_EMAIL);
-				boolean isEmailPublic = false;
+				// default value is true for backward compatibility reasons
+				boolean isEmailPublic = true;
 				if (profileSettings.containsKey(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL)) {
 					isEmailPublic = (boolean) profileSettings.get(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL);
 				}
@@ -2208,10 +2205,23 @@ public class NodeDao {
 			throw DAOException.mapping(t);
 		}
 	}
-	public static List<NodeRef> getFrontpageNodes(RepositoryDao repoDao) throws DAOException {
+	public static SearchResult<NodeDao> getFrontpageNodes(RepositoryDao repoDao) throws DAOException {
 		try {
-			return NodeServiceFactory.getNodeService(repoDao.getId()).
-					getFrontpageNodes().stream().map((ref)->new NodeRef(repoDao,ref.getId())).collect(Collectors.toList());
+			SearchResult<NodeDao> sr = new SearchResult<>();
+			sr.setNodes(NodeServiceFactory.getNodeService(repoDao.getId()).
+					getFrontpageNodes().stream().map((ref)-> {
+						try {
+							return NodeDao.getNode(repoDao,ref);
+						} catch (DAOException e) {
+							throw new RuntimeException(e);
+						}
+					}).collect(Collectors.toList()));
+			Pagination p = new Pagination();
+			p.setFrom(0);
+			p.setCount(sr.getNodes().size());
+			p.setTotal(sr.getNodes().size());
+			sr.setPagination(p);
+			return sr;
 		}catch(Throwable t){
 			throw DAOException.mapping(t);
 		}

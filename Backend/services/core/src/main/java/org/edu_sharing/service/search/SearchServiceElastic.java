@@ -12,6 +12,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
@@ -23,6 +24,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
+import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.repository.server.tools.URLTool;
@@ -57,6 +59,7 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.xcontent.*;
 import org.springframework.context.ApplicationContext;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
@@ -100,7 +103,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             searchSourceBuilder.parseXContent(parser);
         }
         searchRequest.source(searchSourceBuilder);
-        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+        SearchResponse searchResponse = client.search(searchRequest, getRequestOptions());
 
         SearchResultNodeRefElastic sr = new SearchResultNodeRefElastic();
         List<NodeRef> data = new ArrayList<>();
@@ -115,6 +118,15 @@ public class SearchServiceElastic extends SearchServiceImpl {
             data.add(transformSearchHit(authorities, user, hit, false));
         }
         return sr;
+    }
+
+    private RequestOptions getRequestOptions() {
+        RequestOptions.Builder b = RequestOptions.DEFAULT.toBuilder();
+        // add trace headers to elastic request
+        for(Map.Entry<String, String> header: Context.getCurrentInstance().getB3().getX3Headers().entrySet()) {
+            b.addHeader(header.getKey(), header.getValue());
+        }
+        return b.build();
     }
 
     public BoolQueryBuilder getPermissionsQuery(String field){
@@ -247,7 +259,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
 
             logger.info("query: "+searchSourceBuilder.toString());
-            SearchResponse searchResponse = LogTime.log("Searching elastic", () -> client.search(searchRequest, RequestOptions.DEFAULT));
+            SearchResponse searchResponse = LogTime.log("Searching elastic", () -> client.search(searchRequest, getRequestOptions()));
 
 
             SearchHits hits = searchResponse.getHits();
@@ -324,7 +336,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         SearchRequest request = new SearchRequest("workspace");
         request.source(searchSourceBuilder);
         try {
-            SearchResponse searchResult = client.search(request, RequestOptions.DEFAULT);
+            SearchResponse searchResult = client.search(request, getRequestOptions());
             boolean isChildObject = searchResult.getHits().getTotalHits().value > 0;
             if(!isChildObject) return false;
 
@@ -347,7 +359,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
             searchSourceBuilder.size(0);
             SearchRequest request = new SearchRequest("workspace");
             request.source(searchSourceBuilder);
-            SearchResponse searchResult = client.search(request, RequestOptions.DEFAULT);
+            SearchResponse searchResult = client.search(request, getRequestOptions());
             return searchResult.getHits().getTotalHits().value > 0;
 
         } catch (IOException e) {
@@ -357,7 +369,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return false;
     }
 
-    private NodeRef transformSearchHit(Set<String> authorities, String user, SearchHit hit, boolean resolveCollections) {
+    public NodeRef transformSearchHit(Set<String> authorities, String user, SearchHit hit, boolean resolveCollections) {
         return this.transform(authorities,user,hit.getSourceAsMap(), resolveCollections);
     }
     private NodeRef transform(Set<String> authorities, String user, Map<String, Object> sourceAsMap, boolean resolveCollections){
@@ -621,7 +633,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         searchSourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
         searchSourceBuilder.aggregation(AggregationBuilders.terms("vcard").field("contributor.vcard.keyword").size(10000));
         searchRequest.source(searchSourceBuilder);
-        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+        SearchResponse searchResponse = client.search(searchRequest, getRequestOptions());
         ParsedStringTerms aggregation = searchResponse.getAggregations().get("vcard");
         /*
         for (Terms.Bucket bucket : aggregation.getBuckets()) {
@@ -704,7 +716,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return client;
     }
     public void checkClient() throws IOException {
-        if(client == null || !client.ping(RequestOptions.DEFAULT)){
+        if(client == null || !client.ping(getRequestOptions())){
              if(client != null){
                  try {
                      client.close();
