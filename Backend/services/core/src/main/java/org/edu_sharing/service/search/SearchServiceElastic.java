@@ -367,7 +367,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
         return false;
     }
 
-    private NodeRef transformSearchHit(Set<String> authorities, String user, SearchHit hit, boolean resolveCollections) {
+    public NodeRef transformSearchHit(Set<String> authorities, String user, SearchHit hit, boolean resolveCollections) {
         return this.transform(authorities,user,hit.getSourceAsMap(), resolveCollections);
     }
     private NodeRef transform(Set<String> authorities, String user, Map<String, Object> sourceAsMap, boolean resolveCollections){

@@ -812,7 +812,7 @@ public class NodeApi  {
 				response = searchResultToResponse(NodeDao.getFilesSharedToMe(repoDao, SharedToMeType.Private, filter, propFilter,sortDefinition,skipCount,maxItems));
 			}
 	    	else if("-frontpage-".equals(node)){
-				children = NodeDao.getFrontpageNodes(repoDao);
+				response = searchResultToResponse(NodeDao.getFrontpageNodes(repoDao));
 			}
 	    	else{
 		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, propFilter);
