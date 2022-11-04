@@ -1474,7 +1474,8 @@ public class NodeDao {
 				return true;
 			else {
 				Map<String, Serializable> profileSettings = AuthorityServiceFactory.getLocalService().getProfileSettingsProperties(userName, CCConstants.CCM_PROP_PERSON_SHOW_EMAIL);
-				boolean isEmailPublic = false;
+				// default value is true for backward compatibility reasons
+				boolean isEmailPublic = true;
 				if (profileSettings.containsKey(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL)) {
 					isEmailPublic = (boolean) profileSettings.get(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL);
 				}
