@@ -1171,8 +1171,10 @@ public class SolrQueryHTTPClient implements BeanFactoryAware, InitializingBean
     {
         PostMethod post = new PostMethod(url);
 
-        for(Map.Entry<String, String> header: Context.getCurrentInstance().getB3().getX3Headers().entrySet()) {
-            post.addRequestHeader(header.getKey(), header.getValue());
+        if (Context.getCurrentInstance() != null) {
+            for (Map.Entry<String, String> header : Context.getCurrentInstance().getB3().getX3Headers().entrySet()) {
+                post.addRequestHeader(header.getKey(), header.getValue());
+            }
         }
 
         if (body.toString().length() > DEFAULT_SAVEPOST_BUFFER)
