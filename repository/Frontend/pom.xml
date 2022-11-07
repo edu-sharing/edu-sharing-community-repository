@@ -102,6 +102,13 @@
                   <directory>src/generated/ng/dist</directory>
                 </fileset>
                 <fileset>
+                  <directory>src/generated/ng/node_modules/@angular/compiler-cli/ngcc</directory>
+                  <includes>
+                    <include>**/ngcc_lock_file</include>
+                    <include>**/__ngcc_lock_file__</include>
+                  </includes>
+                </fileset>
+                <fileset>
                   <directory>src/generated/ng/src</directory>
                 </fileset>
               </filesets>

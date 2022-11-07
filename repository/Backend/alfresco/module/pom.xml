@@ -90,7 +90,7 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-repository-backend-alfresco-fixes</artifactId>
+      <artifactId>edu_sharing-community-repository-backend-alfresco-common</artifactId>
       <scope>provided</scope>
     </dependency>
 

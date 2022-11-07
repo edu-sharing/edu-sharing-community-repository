@@ -4,3 +4,6 @@ services:
 
   cache:
     image: "${docker.registry}/${docker.repository}/${docker.prefix}-deploy-docker-build-redis:${docker.tag}"
+
+  profiler:
+    image: "${docker.registry}/${docker.repository}/${docker.prefix}-deploy-docker-build-profiler:${docker.tag}"
