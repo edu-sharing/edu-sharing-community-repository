@@ -32,3 +32,8 @@ export const YES_OR_NO: GenericDialogButton<'YES' | 'NO'>[] = [
     { label: 'NO', config: { color: 'standard' } },
     { label: 'YES', config: { color: 'primary' } },
 ];
+
+export const DISCARD_OR_BACK: GenericDialogButton<'DISCARD' | 'BACK'>[] = [
+    { label: 'BACK', config: { color: 'standard' } },
+    { label: 'DISCARD', config: { color: 'primary' } },
+];
