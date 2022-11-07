@@ -230,11 +230,10 @@ public class LTIPlatformApi {
                 custom.put(LTIPlatformConstants.CUSTOM_CLAIM_GET_CONTENTAPIURL,homeApp.getClientBaseUrl()+"/rest/ltiplatform/v13/content");
                 if(accessStatus != null && accessStatus.equals(AccessStatus.ALLOWED) && loginInitiationSessionObject.isResourceLinkEditMode()){
                     custom.put(LTIPlatformConstants.CUSTOM_CLAIM_POST_CONTENTAPIURL,homeApp.getClientBaseUrl()+"/rest/ltiplatform/v13/content");
-                    jwtBuilder = jwtBuilder.claim(LTIConstants.LTI_CLAIM_CUSTOM,custom);
                 }else{
                     logger.info("user "+username +" has no writeContent Permissions");
                 }
-
+                jwtBuilder = jwtBuilder.claim(LTIConstants.LTI_CLAIM_CUSTOM,custom);
             }
 
 
