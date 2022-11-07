@@ -6,6 +6,10 @@ services:
     ports:
       - "${COMMON_BIND_HOST:-127.0.0.1}:${REPOSITORY_DATABASE_PORT:-8000}:5432"
 
+  repository-mailcatcher:
+    ports:
+      - "${COMMON_BIND_HOST:-127.0.0.1}:${REPOSITORY_MAILCATCHER_PORT_HTTP:-8025}:1080"
+
   repository-search-solr4:
     command: ["catalina.sh", "jpda", "run"]
     environment:

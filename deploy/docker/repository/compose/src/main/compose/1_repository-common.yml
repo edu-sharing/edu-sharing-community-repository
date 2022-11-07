@@ -20,8 +20,7 @@ services:
     container_name: "repository-mailcatcher_${COMPOSE_PROJECT_NAME}"
     expose:
       - "1025"
-    ports:
-      - "${COMMON_BIND_HOST:-127.0.0.1}:${REPOSITORY_MAILCATCHER_PORT_HTTP:-8025}:1080"
+      - "1080"
 
   repository-search-solr4:
     image: "${docker.repository}/${docker.prefix}-deploy-docker-repository-build-search-solr4:${docker.tag}"
