@@ -828,10 +828,6 @@ public class LTIPlatformApi {
             ltiAspectProps.put(QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_TOOLURL), appInfoTool.getLtitoolUrl());
             nodeService.addAspect(nodeRef,aspectLti,ltiAspectProps);
         }
-
-        String wwwurl = ApplicationInfoList.getHomeRepository().getClientBaseUrl()
-                +"/rest/ltiplatform/v13/generateLoginInitiationFormResourceLink?nodeId="+nodeId;
-        nodeService.setProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_WWWURL),wwwurl);
         return nodeId;
     }
 
