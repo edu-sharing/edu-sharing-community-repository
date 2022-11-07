@@ -4,6 +4,7 @@ import { ComponentPortal, ComponentType } from '@angular/cdk/portal';
 import { Injectable, Injector } from '@angular/core';
 import { Observable } from 'rxjs';
 import { filter, map, pairwise, skipWhile, takeUntil, tap } from 'rxjs/operators';
+import { DialogsService } from '../dialogs.service';
 import { CardDialogConfig, CARD_DIALOG_DATA } from './card-dialog-config';
 import { CardDialogContainerComponent } from './card-dialog-container/card-dialog-container.component';
 import { CardDialogRef } from './card-dialog-ref';
@@ -32,7 +33,13 @@ export class CardDialogService {
         const overlayRef = this.createOverlay(config);
         const state = new CardDialogState();
         const containerRef = overlayRef.attach(new ComponentPortal(CardDialogContainerComponent));
-        const dialogRef = new CardDialogRef<D, R>(overlayRef, containerRef.instance, config, state);
+        const dialogRef = new CardDialogRef<D, R>(
+            overlayRef,
+            containerRef.instance,
+            config,
+            state,
+            this.injector.get(DialogsService),
+        );
         containerRef.instance.dialogRef = dialogRef;
         this.registerSizeAndPositionSwitch(overlayRef, dialogRef);
         const contentInjector = Injector.create({

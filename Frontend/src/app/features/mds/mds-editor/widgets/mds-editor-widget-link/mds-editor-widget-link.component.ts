@@ -10,6 +10,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
 import { NodeHelperService } from '../../../../../core-ui-module/node-helper.service';
 import { MainNavService } from '../../../../../main/navigation/main-nav.service';
+import { DialogsService } from '../../../../dialogs/dialogs.service';
 
 @Component({
     selector: 'es-mds-editor-widget-link',
@@ -38,6 +39,7 @@ export class MdsEditorWidgetLinkComponent
         private mainnav: MainNavService,
         public translate: TranslateService,
         public mdsEditorValues: MdsEditorInstanceService,
+        private dialogs: DialogsService,
     ) {
         super(mdsEditorValues, translate);
     }
@@ -65,7 +67,7 @@ export class MdsEditorWidgetLinkComponent
         } else if (this.widgetName === 'contributor') {
             await MdsEditorWidgetAuthorComponent.openContributorDialog(
                 this.mdsEditorValues,
-                this.mainnav,
+                this.dialogs,
             );
         } else {
             throw new Error('not implemented');

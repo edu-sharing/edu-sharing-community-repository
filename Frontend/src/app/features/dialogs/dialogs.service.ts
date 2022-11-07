@@ -13,9 +13,17 @@ import {
     ContributorEditDialogResult,
 } from './dialog-modules/contributor-edit-dialog/contributor-edit-dialog-data';
 import {
+    ContributorsDialogData,
+    ContributorsDialogResult,
+} from './dialog-modules/contributors-dialog/contributors-dialog-data';
+import {
     FileChooserDialogData,
     FileChooserDialogResult,
 } from './dialog-modules/file-chooser-dialog/file-chooser-dialog-data';
+import {
+    GenericDialogConfig,
+    GenericDialogData,
+} from './dialog-modules/generic-dialog/generic-dialog-data';
 import {
     LicenseAgreementDialogData,
     LicenseAgreementDialogResult,
@@ -43,6 +51,16 @@ export class DialogsService {
         // TODO: Move the methods we use of `RestConnectorService` to a utils function if possible.
         private restConnector: RestConnectorService,
     ) {}
+
+    async openGenericDialog<R extends string>(
+        config: GenericDialogConfig<R>,
+    ): Promise<CardDialogRef<GenericDialogData<R>, R>> {
+        const { title, ...data } = config;
+        const { GenericDialogComponent } = await import(
+            './dialog-modules/generic-dialog/generic-dialog.module'
+        );
+        return this.cardDialog.open(GenericDialogComponent, { title, data });
+    }
 
     async openQrDialog(data: QrDialogData): Promise<CardDialogRef<QrDialogData, void>> {
         const { QrDialogComponent } = await import('./dialog-modules/qr-dialog/qr-dialog.module');
@@ -193,6 +211,20 @@ export class DialogsService {
             width: 600,
             height: 900,
             closable: Closable.Standard,
+            data,
+        });
+    }
+
+    async openContributorsDialog(
+        data: ContributorsDialogData,
+    ): Promise<CardDialogRef<ContributorsDialogData, ContributorsDialogResult>> {
+        const { ContributorsDialogComponent } = await import(
+            './dialog-modules/contributors-dialog/contributors-dialog.module'
+        );
+        return this.cardDialog.open(ContributorsDialogComponent, {
+            title: 'WORKSPACE.CONTRIBUTOR.TITLE',
+            width: 500,
+            height: 700,
             data,
         });
     }

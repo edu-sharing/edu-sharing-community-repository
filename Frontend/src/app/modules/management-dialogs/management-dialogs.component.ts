@@ -47,6 +47,7 @@ import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-edi
 import { MainNavService } from 'src/app/main/navigation/main-nav.service';
 import { first } from 'rxjs/operators';
 import { SimpleEditCloseEvent } from './simple-edit-dialog/simple-edit-dialog.component';
+import { DialogsService } from '../../features/dialogs/dialogs.service';
 
 export enum DialogType {
     SimpleEdit = 'SimpleEdit',
@@ -174,8 +175,6 @@ export class WorkspaceManagementDialogsComponent {
     @Output() nodeMetadataChange = new EventEmitter<Node[]>();
     @Input() nodeTemplate: Node;
     @Output() nodeTemplateChange = new EventEmitter();
-    @Input() nodeContributor: Node;
-    @Output() nodeContributorChange = new EventEmitter<Node>();
     @Input() set nodeSimpleEdit(nodeSimpleEdit: Node[]) {
         this._nodeSimpleEdit = nodeSimpleEdit;
         this._nodeFromUpload = false;
@@ -316,6 +315,7 @@ export class WorkspaceManagementDialogsComponent {
         private nodeHelper: NodeHelperService,
         private bridge: BridgeService,
         private router: Router,
+        private dialogs: DialogsService,
     ) {}
     closeLtiToolConfig() {
         this.ltiToolConfig = null;
@@ -469,16 +469,17 @@ export class WorkspaceManagementDialogsComponent {
         this.closeUploadSelect();
         this.onUploadSelectCanceled.emit(false);
     }
-    public closeContributor(node: Node) {
-        if (this.editorPending) {
-            this.editorPending = false;
-            this._nodeMetadata = [this.nodeContributor];
-        }
-        this.nodeContributor = null;
-        this.nodeContributorChange.emit(node);
-        if (node) {
-            this.onRefresh.emit([node]);
-        }
+    async openContributorsDialog(node: Node) {
+        const dialogRef = await this.dialogs.openContributorsDialog({ node });
+        dialogRef.afterClosed().subscribe((updatedNode) => {
+            if (this.editorPending) {
+                this.editorPending = false;
+                this._nodeMetadata = [node];
+            }
+            if (updatedNode) {
+                this.onRefresh.emit([updatedNode]);
+            }
+        });
     }
     closeLtiTools() {
         this.showLtiTools = false;

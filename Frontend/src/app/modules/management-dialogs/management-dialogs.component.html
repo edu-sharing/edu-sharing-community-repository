@@ -3,7 +3,7 @@
   [nodes]="nodeLicense"
   (onLoading)="globalProgress = $event"
   (onCancel)="closeLicense()"
-  (openContributor)="nodeContributor = $event[0]"
+  (openContributor)="openContributorsDialog($event[0])"
   (onDone)="updateLicense($any($event))"
 ></es-workspace-license>
 <es-add-stream
@@ -184,7 +184,7 @@
   (onDone)="closeEditor(true, $any($event))"
   (openLicense)="nodeLicense = _nodeMetadata; editorPending = true"
   (openTemplate)="nodeTemplate = _nodeMetadata[0]"
-  (openContributor)="nodeContributor = _nodeMetadata[0]; editorPending = true"
+  (openContributor)="openContributorsDialog(_nodeMetadata[0]); editorPending = true"
 ></es-mds-editor-wrapper>
 <es-node-template
   *ngIf="nodeTemplate"
@@ -207,9 +207,3 @@
   (onFileSelected)="uploadFile($event)"
   (onLinkSelected)="createUrlLink($event)"
 ></es-workspace-file-upload-select>
-<es-workspace-contributor
-  *ngIf="nodeContributor"
-  [node]="nodeContributor"
-  (onLoading)="globalProgress = $event"
-  (onClose)="closeContributor($event)"
-></es-workspace-contributor>

@@ -67,8 +67,8 @@ export class MdsEditorCardComponent implements OnInit, OnDestroy {
     confirmDiscard(): void {
         if (this.mdsEditorInstance.getHasUserChanges()) {
             this.toast.showModalDialog(
-                'MDS.CONFIRM_DISCARD_TITLE',
-                'MDS.CONFIRM_DISCARD_MESSAGE',
+                'DIALOG.CONFIRM_DISCARD_TITLE',
+                'DIALOG.CONFIRM_DISCARD_MESSAGE',
                 [
                     new DialogButton('CANCEL', { color: 'standard' }, () => {
                         this.toast.closeModalDialog();

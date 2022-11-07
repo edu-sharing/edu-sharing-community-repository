@@ -326,7 +326,6 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
      * hint: this will do nothing in case the paginationStrategy !== Pagination
      */
     resetPagination() {
-        console.log(this.nodeEntriesComponentRef);
         this.nodeEntriesComponentRef?.paginator?.firstPage();
     }
 }

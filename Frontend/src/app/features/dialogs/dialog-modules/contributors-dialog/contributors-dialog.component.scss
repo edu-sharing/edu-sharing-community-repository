@@ -1,9 +1,5 @@
-@import '../../../core-ui-module/styles/variables';
-@import '../../../shared/components/card/variables';
-
-.contributor-content {
-    padding: 0 $cardPadding;
-}
+@import '../../../../core-ui-module/styles/variables';
+@import '../../../../shared/components/card/variables';
 
 .lifecycleHeading,
 .metadataHeading {
