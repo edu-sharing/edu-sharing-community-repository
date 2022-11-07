@@ -138,7 +138,7 @@ public class RenderingApi {
 			}
 			String detailsSnippet = new RenderingDao(repoDao).getDetails(node,nodeVersion, displayMode,parameters);
 
-			NodeDao nodeDao = NodeDao.getNode(repoDao, node, Filter.createShowAllFilter());
+			NodeDao nodeDao = NodeDao.getNodeWithVersion(repoDao, node, nodeVersion);
 			Node nodeJson = nodeDao.asNode();
 			String mimeType = nodeJson.getMimetype();
 
