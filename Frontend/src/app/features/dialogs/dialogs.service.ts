@@ -17,6 +17,10 @@ import {
     FileChooserDialogResult,
 } from './dialog-modules/file-chooser-dialog/file-chooser-dialog-data';
 import {
+    GenericDialogConfig,
+    GenericDialogData,
+} from './dialog-modules/generic-dialog/generic-dialog-data';
+import {
     LicenseAgreementDialogData,
     LicenseAgreementDialogResult,
 } from './dialog-modules/license-agreement-dialog/license-agreement-dialog-data';
@@ -43,6 +47,16 @@ export class DialogsService {
         // TODO: Move the methods we use of `RestConnectorService` to a utils function if possible.
         private restConnector: RestConnectorService,
     ) {}
+
+    async openGenericDialog<R extends string>(
+        config: GenericDialogConfig<R>,
+    ): Promise<CardDialogRef<GenericDialogData<R>, R>> {
+        const { title, ...data } = config;
+        const { GenericDialogComponent } = await import(
+            './dialog-modules/generic-dialog/generic-dialog.module'
+        );
+        return this.cardDialog.open(GenericDialogComponent, { title, data });
+    }
 
     async openQrDialog(data: QrDialogData): Promise<CardDialogRef<QrDialogData, void>> {
         const { QrDialogComponent } = await import('./dialog-modules/qr-dialog/qr-dialog.module');
