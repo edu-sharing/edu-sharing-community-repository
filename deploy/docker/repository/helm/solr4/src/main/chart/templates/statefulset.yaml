@@ -62,6 +62,10 @@ spec:
         - name: metrics
           containerPort: 9090
         {{- end }}
+        {{- if .Values.config.jvm.debug }}
+        - name: jpda
+          containerPort: 5005
+        {{- end }}
         volumeMounts:
         - name: data
           mountPath: /opt/alfresco/alf_data
