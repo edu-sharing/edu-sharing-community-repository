@@ -232,7 +232,7 @@ public class RenderingServiceImpl implements RenderingService{
 
 		// context/config
 		data.setConfigValues(ConfigServiceFactory.getCurrentConfig().values);
-		data.setNodeUrls(new NodeUrls(node));
+		data.setNodeUrls(new NodeUrls(node, nodeVersion));
 
 		logger.info("Preparing rendering data took "+(System.currentTimeMillis()-time)+" ms");
 		return data;

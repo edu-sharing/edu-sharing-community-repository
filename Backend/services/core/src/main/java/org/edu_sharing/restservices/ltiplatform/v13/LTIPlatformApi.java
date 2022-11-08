@@ -18,6 +18,8 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
+import org.alfresco.service.cmr.version.Version;
+import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.QName;
 import org.apache.catalina.session.StandardSession;
 import org.apache.catalina.session.StandardSessionFacade;
@@ -222,13 +224,18 @@ public class LTIPlatformApi {
                 custom.put(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID,appInfo.getAppId());
                 custom.put(LTIPlatformConstants.CUSTOM_CLAIM_NODEID,loginInitiationSessionObject.getContentUrlNodeId());
                 custom.put(LTIPlatformConstants.CUSTOM_CLAIM_USER,username);
+                if(loginInitiationSessionObject.getVersion() != null){
+                    custom.put(LTIPlatformConstants.CUSTOM_CLAIM_VERSION,loginInitiationSessionObject.getVersion());
+                }
                 if(loginInitiationSessionObject.getContentUrlNodeId() != null) {
                     custom.put(LTIPlatformConstants.CUSTOM_CLAIM_FILENAME, (String)nodeService.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
                             loginInitiationSessionObject.getContentUrlNodeId()),
                             ContentModel.PROP_NAME));
                 }
                 custom.put(LTIPlatformConstants.CUSTOM_CLAIM_GET_CONTENTAPIURL,homeApp.getClientBaseUrl()+"/rest/ltiplatform/v13/content");
-                if(accessStatus != null && accessStatus.equals(AccessStatus.ALLOWED) && loginInitiationSessionObject.isResourceLinkEditMode()){
+                if(accessStatus != null && accessStatus.equals(AccessStatus.ALLOWED)
+                        && loginInitiationSessionObject.isResourceLinkEditMode()
+                        && (loginInitiationSessionObject.getVersion() == null || "".equals(loginInitiationSessionObject.getVersion()))){
                     custom.put(LTIPlatformConstants.CUSTOM_CLAIM_POST_CONTENTAPIURL,homeApp.getClientBaseUrl()+"/rest/ltiplatform/v13/content");
                 }else{
                     logger.info("user "+username +" has no writeContent Permissions");
@@ -580,7 +587,7 @@ public class LTIPlatformApi {
 
             for(ApplicationInfo appInfo : ApplicationInfoList.getApplicationInfos().values()){
                 if(appInfo.isLtiTool() && appInfo.getAppId().equals(appId)){
-                    String form = prepareLoginInitiation(parentId,null, null, nodeId, appInfo, LoginInitiationSessionObject.MessageType.deeplink, req);
+                    String form = prepareLoginInitiation(parentId,null, null, nodeId, null, appInfo, LoginInitiationSessionObject.MessageType.deeplink, req);
                     return Response.status(Response.Status.OK).entity(form).build();
                 }
             }
@@ -606,6 +613,7 @@ public class LTIPlatformApi {
             })
     public Response generateLoginInitiationFormResourceLink(@Parameter(description = "the nodeid of a node that contains a lti resourcelink. is required for lti resourcelink",required=true) @QueryParam("nodeId") String nodeId,
                                                 @Parameter(description = "for tools with content option, this param sends changeContentUrl (true) else contentUrl will be excluded",required = false,schema = @Schema(defaultValue = "true")) @QueryParam("editMode") Boolean editMode,
+                                                @Parameter(description = "the version. for tools with contentoption.", required = false) @QueryParam("version") String version,
                                                 @Context HttpServletRequest req){
         try{
             //@TODO find out why defaultvalue of swagger definition does not work
@@ -634,6 +642,7 @@ public class LTIPlatformApi {
                             nodeId,
                             editMode,
                             nodeId,
+                            version,
                             appInfo,
                             LoginInitiationSessionObject.MessageType.resourcelink,
                             req);
@@ -660,6 +669,7 @@ public class LTIPlatformApi {
                                           String resourceLinkNodeId,
                                           Boolean resourceLinkEditMode,
                                           String contentUrlNodeId,
+                                          String version,
                                           ApplicationInfo appInfo,
                                           LoginInitiationSessionObject.MessageType messageType,
                                           HttpServletRequest req) {
@@ -683,6 +693,7 @@ public class LTIPlatformApi {
         loginInitiationSessionObject.setContextId(contextId);
         loginInitiationSessionObject.setResourceLinkNodeId(resourceLinkNodeId);
         if(resourceLinkEditMode != null) loginInitiationSessionObject.setResourceLinkEditMode(resourceLinkEditMode);
+        loginInitiationSessionObject.setVersion(version);
         loginInitiationSessionObject.setMessageType(messageType);
         loginInitiationSessionObject.setContentUrlNodeId(contentUrlNodeId);
         req.getSession().setAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT, loginInitiationSessionObject);
@@ -1068,14 +1079,26 @@ public class LTIPlatformApi {
             Jws<Claims> jwtObj = this.validateForCustomContent(jwt);
             String nodeId = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_NODEID, String.class);
 
-            NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
-
 
             String appId = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID, String.class);
+
+            String version = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_VERSION, String.class);
 
             ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
 
             AuthenticationUtil.runAsSystem(() -> {
+
+                NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId);
+                if(version != null && !version.trim().equals("")){
+                    VersionHistory versionHistory = serviceRegistry.getVersionService().getVersionHistory(nodeRef);
+                    if(versionHistory != null){
+                        Version version1 = versionHistory.getVersion(version);
+                        if(version1 != null)
+                            nodeRef = version1.getFrozenStateNodeRef();
+                        else
+                            logger.error("unknown version");
+                    }
+                }
 
                 String toolUrl = (String)serviceRegistry.getNodeService().getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_TOOLURL));
                 if(toolUrl == null || !toolUrl.equals(appInfo.getLtitoolUrl())){

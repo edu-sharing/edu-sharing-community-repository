@@ -4,9 +4,13 @@ import java.io.Serializable;
 
 public class LoginInitiationSessionObject implements Serializable {
 
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
     public static enum MessageType{resourcelink,deeplink}
 
-    String contextId,clientId,appId,resourceLinkNodeId,contentUrlNodeId;
+    String contextId,clientId,appId,resourceLinkNodeId,contentUrlNodeId,version;
     boolean resourceLinkEditMode = true;
 
     MessageType messageType;
@@ -66,5 +70,9 @@ public class LoginInitiationSessionObject implements Serializable {
 
     public boolean isResourceLinkEditMode() {
         return resourceLinkEditMode;
+    }
+
+    public String getVersion() {
+        return version;
     }
 }

@@ -8,10 +8,13 @@ import org.edu_sharing.repository.server.tools.URLTool;
 public class NodeUrls {
 
 
-    public NodeUrls(Node node) {
+    public NodeUrls(Node node, String requestedVersion) {
         repositoryBaseUrl = URLTool.getBaseUrl(true);
         if(node.getAspects().contains(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_LTITOOL_NODE))){
             generateLtiResourceLink = repositoryBaseUrl + "/rest/ltiplatform/v13/generateLoginInitiationFormResourceLink?nodeId=" + node.getRef().getId();
+            if(requestedVersion != null && !requestedVersion.equals("-1")){
+                generateLtiResourceLink +="&version="+requestedVersion;
+            }
         }
     }
 
