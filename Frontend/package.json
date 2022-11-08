@@ -1,7 +1,7 @@
 {
   "name": "angular-edusharing",
   "version": "1.0.0",
-  "license": "GNU GPL v2",
+  "license": "GPL-3.0-or-later",
   "angular-cli": {},
   "scripts": {
     "prestart": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build edu-sharing-api --configuration development",
@@ -11,8 +11,8 @@
     "publish:edu-sharing-api": "npm run build:edu-sharing-api && cd dist/edu-sharing-api && npm publish",
     "prebuild": "npm run build:edu-sharing-api",
     "build": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build --configuration production --delete-output-path false --base-href /edu-sharing/",
-    "prebuild-dev": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build edu-sharing-api --configuration development",
-    "build-dev": "node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build --delete-output-path false --base-href /edu-sharing/",
+    "prebuild-dev": "node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng build edu-sharing-api --configuration development",
+    "build-dev": "node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng build --delete-output-path false --base-href /edu-sharing/",
     "check:lint": "ng lint --max-warnings=835",
     "fix:lint": "ng lint --fix",
     "check:format": "prettier --check src projects/*/src",
@@ -31,7 +31,7 @@
     "postinstall": "ngcc --async=false",
     "prepare": "cd .. && husky install Frontend/.husky && cd Frontend/src/app/core-module && git config core.hooksPath ../../../.husky || true"
   },
-  "private": true,
+  "private": false,
   "dependencies": {
     "@angular-slider/ngx-slider": "^2.0.3",
     "@angular/animations": "~13.3.5",

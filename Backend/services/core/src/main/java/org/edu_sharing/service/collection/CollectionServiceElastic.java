@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 public class CollectionServiceElastic extends CollectionServiceImpl {
 
     private final SearchServiceElastic searchServiceElastic;
-    private final RestHighLevelClient esClient;
 
     public static CollectionServiceElastic build(String appId) {
         CollectionServiceConfig config = (CollectionServiceConfig) ApplicationContextFactory.getApplicationContext().getBean("collectionServiceConfig");
@@ -41,11 +40,6 @@ public class CollectionServiceElastic extends CollectionServiceImpl {
     public CollectionServiceElastic(String appId, String pattern, String path) {
         super(appId,  pattern, path);
         this.searchServiceElastic = new SearchServiceElastic(appId);
-        try {
-            esClient = searchServiceElastic.getClient();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
@@ -71,7 +65,7 @@ public class CollectionServiceElastic extends CollectionServiceImpl {
             searchSourceBuilder.aggregation(aggregation);
             searchSourceBuilder.size(0);
             searchRequest.source(searchSourceBuilder);
-            SearchResponse result = esClient.search(searchRequest, RequestOptions.DEFAULT);
+            SearchResponse result = searchServiceElastic.searchNative(searchRequest);
             ParsedStringTerms types = result.getAggregations().get("type");
             for(Terms.Bucket bucket : types.getBuckets()){
                 if(bucket.getKeyAsString().equals("ccm:io")){

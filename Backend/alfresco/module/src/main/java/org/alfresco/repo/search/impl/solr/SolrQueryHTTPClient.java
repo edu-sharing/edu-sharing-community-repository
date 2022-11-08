@@ -26,7 +26,8 @@
 package org.alfresco.repo.search.impl.solr;
 
 import org.alfresco.error.AlfrescoRuntimeException;
-
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.alfresco.opencmis.dictionary.CMISStrictDictionaryService;
 import org.alfresco.repo.admin.RepositoryState;
 import org.alfresco.repo.dictionary.NamespaceDAO;
@@ -1169,6 +1170,13 @@ public class SolrQueryHTTPClient implements BeanFactoryAware, InitializingBean
                 IOException, HttpException, URIException, JSONException
     {
         PostMethod post = new PostMethod(url);
+
+        if (Context.getCurrentInstance() != null) {
+            for (Map.Entry<String, String> header : Context.getCurrentInstance().getB3().getX3Headers().entrySet()) {
+                post.addRequestHeader(header.getKey(), header.getValue());
+            }
+        }
+
         if (body.toString().length() > DEFAULT_SAVEPOST_BUFFER)
         {
             post.getParams().setBooleanParameter(HttpMethodParams.USE_EXPECT_CONTINUE, true);

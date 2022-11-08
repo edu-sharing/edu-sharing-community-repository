@@ -18,7 +18,13 @@
     <form (ngSubmit)="keyInput.trim() ? activate(keyInput) : null">
       <mat-form-field>
         <mat-label>{{ 'REGISTER.DONE.KEY_PL' | translate }}</mat-label>
-        <input matInput id="key" name="key" [(ngModel)]="keyInput" />
+        <input
+          matInput
+          id="key"
+          name="key"
+          [(ngModel)]="keyInput"
+          (ngModelChange)="onStateChanged.emit()"
+        />
         <mat-hint>{{ 'REGISTER.DONE.ACTIVATE_HINT' | translate }}</mat-hint>
       </mat-form-field>
     </form>

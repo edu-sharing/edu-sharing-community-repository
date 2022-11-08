@@ -19,7 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
-import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.tools.I18nAngular;
@@ -1031,6 +1030,11 @@ public class NodeDao {
 	public NodeDao changePropertiesWithVersioning(
 			HashMap<String,String[]> properties, String comment) throws DAOException {
 
+		// Throws ConcurrencyFailureException if the previous call changes the preview (DESP-851)
+		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+		serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(()-> {
+
 		try {
 			mergeVersionComment(properties, comment);
 
@@ -1040,20 +1044,31 @@ public class NodeDao {
 			// 2. versioning
 			this.nodeService.createVersion(nodeId);
 
+			} catch (Throwable t) {
+				throw DAOException.mapping(t);
+			}
+			return null;
+		});
+		// don't do this in transaction since it could cause rollbacks!
+		try {
 			return new NodeDao(repoDao, nodeId, Filter.createShowAllFilter());
-
 		} catch (Throwable t) {
-
 			throw DAOException.mapping(t);
 		}
 	}
 
-	public NodeDao changePreview(InputStream is,String mimetype) throws DAOException {
+	public NodeDao changePreview(InputStream is,String mimetype, boolean version) throws DAOException {
 
 		try {
 			is=ImageTool.autoRotateImage(is,ImageTool.MAX_THUMB_SIZE);
-			nodeService.setProperty(storeProtocol,storeId,nodeId,
-					CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_PREVIEW_CHANGED);
+
+			HashMap<String,String[]> props = new HashMap<>();
+			if(version){
+				props.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, new String[]{CCConstants.VERSION_COMMENT_PREVIEW_CHANGED});
+				//mergeVersionComment(props, versionComment);
+			}
+			props.put(CCConstants.CCM_PROP_IO_CREATE_VERSION,new String[]{new Boolean(version).toString()});
+			nodeService.updateNode(nodeId, props);
 			nodeService.writeContent(storeRef, nodeId, is, mimetype, null,
 					isDirectory() ? CCConstants.CCM_PROP_MAP_ICON : CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
 			PreviewCache.purgeCache(nodeId);
@@ -1672,7 +1687,8 @@ public class NodeDao {
 				return true;
 			else {
 				Map<String, Serializable> profileSettings = AuthorityServiceFactory.getLocalService().getProfileSettingsProperties(userName, CCConstants.CCM_PROP_PERSON_SHOW_EMAIL);
-				boolean isEmailPublic = false;
+				// default value is true for backward compatibility reasons
+				boolean isEmailPublic = true;
 				if (profileSettings.containsKey(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL)) {
 					isEmailPublic = (boolean) profileSettings.get(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL);
 				}
@@ -1753,7 +1769,14 @@ public class NodeDao {
 				logger.warn("Error while fetching original node version from " + nodeId + ":" + t.getMessage());
 			}
 		}
-		return (String) nodeProps.get(CCConstants.LOM_PROP_LIFECYCLE_VERSION);
+		String version = (String) nodeProps.get(CCConstants.LOM_PROP_LIFECYCLE_VERSION);
+		if(version == null) {
+			version = (String) nodeProps.get(CCConstants.CM_PROP_VERSIONABLELABEL);
+		}
+		if(version == null) {
+			version = this.version;
+		}
+		return version;
 	}
 
 	private String getContentUrl() {
@@ -2438,10 +2461,23 @@ public class NodeDao {
 			throw DAOException.mapping(t);
 		}
 	}
-	public static List<NodeRef> getFrontpageNodes(RepositoryDao repoDao) throws DAOException {
+	public static SearchResult<NodeDao> getFrontpageNodes(RepositoryDao repoDao) throws DAOException {
 		try {
-			return NodeServiceFactory.getNodeService(repoDao.getId()).
-					getFrontpageNodes().stream().map((ref)->new NodeRef(repoDao,ref.getId())).collect(Collectors.toList());
+			SearchResult<NodeDao> sr = new SearchResult<>();
+			sr.setNodes(NodeServiceFactory.getNodeService(repoDao.getId()).
+					getFrontpageNodes().stream().map((ref)-> {
+						try {
+							return NodeDao.getNode(repoDao,ref);
+						} catch (DAOException e) {
+							throw new RuntimeException(e);
+						}
+					}).collect(Collectors.toList()));
+			Pagination p = new Pagination();
+			p.setFrom(0);
+			p.setCount(sr.getNodes().size());
+			p.setTotal(sr.getNodes().size());
+			sr.setPagination(p);
+			return sr;
 		}catch(Throwable t){
 			throw DAOException.mapping(t);
 		}

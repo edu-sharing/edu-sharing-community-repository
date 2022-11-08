@@ -19,7 +19,8 @@ import { RestLocatorService } from '../../../core-module/core.module';
     styleUrls: ['register-done.component.scss'],
 })
 export class RegisterDoneComponent {
-    @Output() onModify = new EventEmitter();
+    @Output() onModify = new EventEmitter<void>();
+    @Output() onStateChanged = new EventEmitter<void>();
     @Input() inputState: string;
     loading = false;
     email = '';
@@ -134,7 +135,7 @@ export class RegisterDoneComponent {
                     }
                 },
                 (error) => {
-                    if (UIHelper.errorContains(error, 'InvalidKeyException')) {
+                    if (error?.error?.error.includes('DAOInvalidKeyException')) {
                         this.toast.error(null, 'REGISTER.TOAST_INVALID_KEY');
                     } else {
                         this.toast.error(error);

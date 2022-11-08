@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { Router, Route, Params, ActivatedRoute, UrlSerializer } from '@angular/router';
 import { RestConnectorService } from '../../../core-module/core.module';
@@ -12,25 +12,36 @@ import { CordovaService } from '../../../common/services/cordova.service';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
 import { RestRegisterService } from '../../../core-module/core.module';
 import { FormControl, Validators } from '@angular/forms';
+import { ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
     selector: 'es-register-request',
     templateUrl: 'register-request.component.html',
     styleUrls: ['register-request.component.scss'],
 })
-export class RegisterRequestComponent {
+export class RegisterRequestComponent implements OnDestroy {
     @Output() onDone = new EventEmitter();
+    @Output() onStateChanged = new EventEmitter<void>();
+    private destroyed$: ReplaySubject<void> = new ReplaySubject(1);
     emailFormControl = new FormControl('', [
         Validators.required,
-        //Validators.email, // also local accounts are allowed for restore
+        // Validators.email, // also local accounts are allowed for restore
     ]);
     constructor(
         private connector: RestConnectorService,
         private toast: Toast,
         private router: Router,
         private register: RestRegisterService,
-    ) {}
-
+    ) {
+        this.emailFormControl.statusChanges
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe(() => this.onStateChanged.emit());
+    }
+    ngOnDestroy() {
+        this.destroyed$.next();
+        this.destroyed$.complete();
+    }
     submit() {
         if (!this.emailFormControl.valid) return;
         this.toast.showProgressDialog();
@@ -42,7 +53,8 @@ export class RegisterRequestComponent {
             },
             (error) => {
                 this.toast.closeModalDialog();
-                if (UIHelper.errorContains(error, 'Invalid mail address')) {
+                console.log(error);
+                if (error?.error?.error?.includes('DAOInvalidKeyException')) {
                     this.toast.error(null, 'REGISTER.TOAST_INVALID_MAIL');
                 } else {
                     this.toast.error(error);

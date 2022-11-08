@@ -51,6 +51,8 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.AuthenticatorRemoteAppResult;
 import org.edu_sharing.repository.server.tools.AuthenticatorRemoteRepository;
 import org.edu_sharing.repository.server.tools.PropertiesHelper;
+import org.edu_sharing.service.bulk.BulkServiceFactory;
+import org.edu_sharing.service.bulk.BulkServiceInterceptorInterface;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.provider.ProviderHelper;
@@ -235,6 +237,7 @@ public class RepoFactory {
 		ApplicationInfoList.refresh();
 		LightbendConfigHelper.refresh();
 		appClassCache.clear();
+		BulkServiceFactory.getInstance().refresh();
 		MetadataReader.refresh();
 		ConfigServiceFactory.refresh();
 		VersionService.invalidateCache();

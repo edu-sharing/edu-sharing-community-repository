@@ -122,9 +122,8 @@ export class UIHelper {
         let fuc = 1.0; // uppercase factor
         let fnm = 1.3; // number factor
         let fsc = 1.5; // special char factor
-        let spc_chars = '^`?()[]{/}+-=Â¦|~!@#$%&*_';
 
-        let regex_sc = new RegExp('[' + spc_chars + ']', 'g');
+        let regex_sc = new RegExp(/[!@#\$%\^\&*\)\(+=._-]/g);
 
         let lcase_count: any = password.match(/[a-z]/g);
         lcase_count = lcase_count ? lcase_count.length : 0;
@@ -134,14 +133,12 @@ export class UIHelper {
         num_count = num_count ? num_count.length : 0;
         let schar_count: any = password.match(regex_sc);
         schar_count = schar_count ? schar_count.length : 0;
-        let avg: any = password.length / 2;
-
         strength =
-            ((lcase_count * flc + 1) *
-                (ucase_count * fuc + 1) *
-                (num_count * fnm + 1) *
-                (schar_count * fsc + 1)) /
-            (avg + 1);
+            (lcase_count * flc + 1) *
+            (ucase_count * fuc + 1) *
+            (num_count * fnm + 1) *
+            (schar_count * fsc + 1);
+        // / (avg + 1);
 
         // console.log('Strengt: '+strength);
         return strength;
@@ -177,8 +174,8 @@ export class UIHelper {
         let min_length = 5;
         // console.log("strength: "+this.getPasswordStrength(password));
         if (password && password.length >= min_length) {
-            if (this.getPasswordStrength(password) > 10) {
-                if (this.getPasswordStrength(password) > 15) {
+            if (this.getPasswordStrength(password) > 70) {
+                if (this.getPasswordStrength(password) > 160) {
                     return 'strong';
                 } else {
                     return 'medium';

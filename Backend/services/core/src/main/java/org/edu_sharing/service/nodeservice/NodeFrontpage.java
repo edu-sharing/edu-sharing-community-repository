@@ -1,6 +1,7 @@
 package org.edu_sharing.service.nodeservice;
 
-import org.alfresco.service.cmr.repository.NodeRef;
+
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -11,6 +12,8 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.admin.RepositoryConfigFactory;
 import org.edu_sharing.service.admin.model.RepositoryConfig;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
+import org.edu_sharing.service.model.NodeRef;
+import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.SearchService;
@@ -65,7 +68,18 @@ public class NodeFrontpage {
             SortDefinition sortDefinition=new SortDefinition();
             sortDefinition.addSortDefinitionEntry(
                     new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CCM_PROP_COLLECTION_ORDERED_POSITION),true),0);
-            return CollectionServiceFactory.getLocalService().getChildren(config.collection, null,sortDefinition, Collections.singletonList("files"));
+
+            Collection<org.alfresco.service.cmr.repository.NodeRef> alfNodeRef = CollectionServiceFactory.getLocalService().getChildren(config.collection, null,sortDefinition, Collections.singletonList("files"));
+            Collection<NodeRef> result = new ArrayList<>();
+            alfNodeRef.stream().forEach((n)->{
+                NodeRef nodeRef = new NodeRefImpl();
+                nodeRef.setNodeId(n.getId());
+                nodeRef.setStoreId(n.getStoreRef().getIdentifier());
+                nodeRef.setStoreProtocol(n.getStoreRef().getProtocol());
+                result.add(nodeRef);
+            });
+
+            return result;
         }
         //initElastic rasuschmeißen (frontpage_cache nicht mehr benötigt)
 
@@ -109,19 +123,15 @@ public class NodeFrontpage {
 
 
         // fetch more because we might need buffer for invalid permissions
-        searchSourceBuilder.size(config.totalCount*2);
+        searchSourceBuilder.size(config.totalCount);
         searchSourceBuilder.from(0);
         SearchRequest searchRequest = new SearchRequest().source(searchSourceBuilder);
         searchRequest.indices("workspace");
-        SearchResponse searchResult = searchServiceElastic.getClient().search(searchRequest,RequestOptions.DEFAULT);
+        SearchResponse searchResult = searchServiceElastic.searchNative(searchRequest);
         List<NodeRef> result=new ArrayList<>();
         for(SearchHit hit : searchResult.getHits().getHits()){
             logger.info("score:"+hit.getScore() +" id:"+hit.getId() + " "+ ((Map)hit.getSourceAsMap().get("properties")).get("cm:name"));
-            Map nodeRef = (Map) hit.getSourceAsMap().get("nodeRef");
-            String nodeId = (String) nodeRef.get("id");
-            if(permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeId,CCConstants.PERMISSION_READ)){
-                result.add(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,nodeId));
-            }
+            result.add(searchServiceElastic.transformSearchHit(new HashSet<>(), AuthenticationUtil.getFullyAuthenticatedUser(),hit,false));
         }
         result = result.subList(0, result.size() > config.totalCount ? config.totalCount : result.size());
         if(config.displayCount<config.totalCount) {

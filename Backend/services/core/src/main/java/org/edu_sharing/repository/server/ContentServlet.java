@@ -125,7 +125,7 @@ public class ContentServlet extends HttpServlet{
 
 				// we only fetch a specific version if it's not a ref
 				// and it's not a remote node
-				if (!isCollectionRef && version != null && !version.trim().equals("") && !homeAppInfo.getAppId().equals(repId)) {
+				if (!isCollectionRef && version != null && !version.trim().equals("") && homeAppInfo.getAppId().equals(repId)) {
 					VersionHistory versionHistory = serviceRegistry.getVersionService().getVersionHistory(nodeRef);
 					Version versionObj = null;
 					if(versionHistory != null) {

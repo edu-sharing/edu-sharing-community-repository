@@ -2170,6 +2170,8 @@ public class CCConstants {
 
 	public static final String VERSION_COMMENT_BULK_CREATE = "BULK_CREATE";
 	public static final String VERSION_COMMENT_BULK_UPDATE = "BULK_UPDATE";
+
+	public static final String VERSION_COMMENT_BULK_MIGRATION = "BULK_MIGRATION";
 	public static final String VERSION_COMMENT_BULK_UPDATE_RESYNC = "BULK_UPDATE_RESYNC";
 	public static final String VERSION_COMMENT_REMOTE_OBJECT_INIT = "REMOTE_OBJECT_INIT";
 

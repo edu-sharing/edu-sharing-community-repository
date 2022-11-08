@@ -15,6 +15,7 @@ import org.edu_sharing.service.collection.DuplicateNodeException;
 import org.edu_sharing.service.permission.PermissionException;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.alfresco.RestrictedAccessException;
+import java.security.InvalidKeyException;
 
 public class DAOException extends Exception {
 
@@ -57,6 +58,9 @@ public class DAOException extends Exception {
 		}
 		if (t instanceof ContentQuotaException){
 			return new DAOQuotaException(t,nodeId);
+		}
+		if(t instanceof InvalidKeyException) {
+			return new DAOInvalidKeyException(t);
 		}
 		if(t instanceof AlfrescoRuntimeException
 				&& t.getCause() != null

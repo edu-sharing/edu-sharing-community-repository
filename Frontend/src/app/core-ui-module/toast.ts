@@ -445,7 +445,15 @@ export class Toast implements OnDestroy {
             json = errorObject.error;
         }
         try {
-            error = json.error + ': ' + json.message;
+            if (json.error || json.message) {
+                error = json.error + ': ' + json.message;
+            } else if (json) {
+                error = JSON.stringify(json, null, 2);
+            }
+            // add url of endpoint (if available) to the message
+            if (errorObject.url) {
+                error += '\n\n' + errorObject.url;
+            }
         } catch (e) {
             if (errorObject) {
                 console.error(errorObject);

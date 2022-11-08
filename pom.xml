@@ -239,12 +239,6 @@
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>edu_sharing-community-repository-backend-alfresco-fixes</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-backend-alfresco-module</artifactId>
         <version>${project.version}</version>
       </dependency>

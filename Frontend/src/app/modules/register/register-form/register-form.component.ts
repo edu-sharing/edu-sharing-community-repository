@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
 import { Toast } from '../../../core-ui-module/toast';
 import { Router, UrlSerializer } from '@angular/router';
 import { RegisterInformation } from '../../../core-module/core.module';
@@ -8,41 +8,41 @@ import { ConfigurationService } from '../../../core-module/core.module';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { PlatformLocation } from '@angular/common';
 import { RestRegisterService } from '../../../core-module/core.module';
-import { FormControl, ValidationErrors, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
     selector: 'es-register-form',
     templateUrl: 'register-form.component.html',
     styleUrls: ['register-form.component.scss'],
 })
-export class RegisterFormComponent {
+export class RegisterFormComponent implements OnDestroy {
     @Output() onRegisterDone = new EventEmitter();
-    public info: RegisterInformation = {
-        firstName: '',
-        lastName: '',
-        email: '',
-        organization: '',
-        password: '',
-        allowNotifications: false,
-    };
-    emailFormControl = new FormControl('', [Validators.required, Validators.email]);
+    @Output() onStateChanged = new EventEmitter<void>();
+    password: string;
+    registerForm: FormGroup;
+    private destroyed$: ReplaySubject<void> = new ReplaySubject(1);
+    info: RegisterInformation;
     public news = true;
     public agree = false;
     public privacyUrl: string;
     requiredFields: string[] = [];
 
     public register() {
-        this.info.email = this.emailFormControl.value;
         this.toast.showProgressDialog();
+        this.info = this.registerForm.getRawValue();
+        delete (this.info as any).agree;
+        this.info.password = this.password;
         this.registerService.register(this.info).subscribe(
             () => {
                 this.toast.closeModalDialog();
                 this.onRegisterDone.emit();
-                //this.toast.toast("REGISTER.TOAST");
+                // this.toast.toast("REGISTER.TOAST");
             },
             (error) => {
                 if (UIHelper.errorContains(error, 'DuplicateAuthorityException')) {
-                    this.emailFormControl.setErrors({ incorrect: true });
+                    this.registerForm.setErrors({ incorrect: true });
                     this.toast.error(null, 'REGISTER.TOAST_DUPLICATE');
                 } else {
                     this.toast.error(error);
@@ -58,13 +58,9 @@ export class RegisterFormComponent {
 
     public canRegister() {
         return (
-            (!this.isRequired('firstName') || this.info.firstName.trim()) &&
-            (!this.isRequired('lastName') || this.info.lastName.trim()) &&
-            (!this.isRequired('organization') || this.info.organization.trim()) &&
-            this.emailFormControl.valid &&
-            this.info.password &&
-            UIHelper.getPasswordStrengthString(this.info.password) != 'weak' &&
-            this.agree
+            this.registerForm.valid &&
+            this.password &&
+            UIHelper.getPasswordStrengthString(this.password) !== 'weak'
         );
     }
 
@@ -72,7 +68,7 @@ export class RegisterFormComponent {
         private connector: RestConnectorService,
         private toast: Toast,
         private platformLocation: PlatformLocation,
-        private urlSerializer: UrlSerializer,
+        private formBuilder: FormBuilder,
         private router: Router,
         private registerService: RestRegisterService,
         private translations: TranslationsService,
@@ -83,10 +79,31 @@ export class RegisterFormComponent {
             this.requiredFields = this.configService.instant('register.requiredFields', [
                 'firstName',
             ]);
+
+            this.registerForm = this.formBuilder.group({
+                firstName: new FormControl(
+                    '',
+                    this.requiredFields.includes('firstName') ? [Validators.required] : null,
+                ),
+                lastName: new FormControl(
+                    '',
+                    this.requiredFields.includes('lastName') ? [Validators.required] : null,
+                ),
+                organization: new FormControl(
+                    '',
+                    this.requiredFields.includes('organization') ? [Validators.required] : null,
+                ),
+                email: new FormControl('', [Validators.required, Validators.email]),
+                agree: new FormControl(false, [Validators.requiredTrue]),
+                allowNotifications: new FormControl(false),
+            });
+            this.registerForm.statusChanges
+                .pipe(takeUntil(this.destroyed$))
+                .subscribe(() => this.onStateChanged.emit());
         });
     }
-
-    isRequired(field: string) {
-        return this.requiredFields.indexOf(field) != -1;
+    ngOnDestroy() {
+        this.destroyed$.next();
+        this.destroyed$.complete();
     }
 }

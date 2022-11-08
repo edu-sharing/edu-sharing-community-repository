@@ -27,7 +27,7 @@ import { BridgeService } from '../../core-bridge-module/bridge.service';
 import * as EduData from '../../core-module/core.module';
 import {
     AbstractList,
-    CollectionFeedback,
+    Collection,
     CollectionReference,
     ConfigurationHelper,
     ConfigurationService,
@@ -205,13 +205,16 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
     // of type `Node` here.
     private adminMediacenters: Mediacenter[];
     private mainNavUpdateTrigger = new Subject<void>();
+
     set collectionShare(collectionShare: Node[]) {
         this._collectionShare = collectionShare as any as Node;
         this.refreshAll();
     }
+
     get collectionShare() {
         return this._collectionShare as any as Node[];
     }
+
     set tabSelectedIndex(pos: number) {
         if (this.isGuest) {
             pos += 2; // skip first 2 tabs
@@ -224,6 +227,7 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
         }
         this.selectTab(CollectionsMainComponent.INDEX_MAPPING[pos]);
     }
+
     get tabSelectedIndex() {
         let pos = CollectionsMainComponent.INDEX_MAPPING.indexOf(this.tabSelected);
         if (this.isGuest) {
@@ -237,6 +241,7 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
         }
         return pos;
     }
+
     toggleCollectionsOrder() {
         if (this.sortCollections.customSortingInProgress) {
             this.infoTitle = 'COLLECTIONS.ORDER_COLLECTIONS';
@@ -253,6 +258,7 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
             this.refreshContent();
         }
     }
+
     toggleReferencesOrder() {
         if (this.sortReferences.customSortingInProgress) {
             this.infoTitle = 'COLLECTIONS.ORDER_ELEMENTS';
@@ -509,6 +515,7 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
         }
         return false;
     }
+
     feedbackAllowed(): boolean {
         return (
             !this.isGuest &&
@@ -518,6 +525,7 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
             )
         );
     }
+
     isAllowedToDeleteCollection(): boolean {
         if (this.isRootLevelCollection()) {
             return false;
@@ -564,6 +572,7 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
     getScopeInfo() {
         return this.nodeHelper.getCollectionScopeInfo(this.collectionContent.node);
     }
+
     dropOnRef = (target: Node, source: DropSource<Node>) => {
         return;
     };
@@ -632,6 +641,7 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
             );
         }
     };
+
     addNodesToCollection(nodes: Node[]) {
         this.toast.showProgressDialog();
         UIHelper.addToCollection(
@@ -971,6 +981,10 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
     }
 
     displayCollectionById(id: string, callback: () => void = null): void {
+        this.parentCollectionId = new EduData.Reference(
+            RestConstants.HOME_REPOSITORY,
+            RestConstants.ROOT,
+        );
         if (id == null) {
             id = RestConstants.ROOT;
         }
@@ -1086,6 +1100,12 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
             .getNodeParents(this.collectionContent.node.ref.id, false)
             .subscribe((data: EduData.NodeList) => {
                 this.path = data.nodes.reverse();
+                if (this.path.length > 1) {
+                    this.parentCollectionId = new EduData.Reference(
+                        this.path[this.path.length - 2].ref.repo,
+                        this.path[this.path.length - 2].ref.id,
+                    );
+                }
             });
     }
 
@@ -1303,6 +1323,18 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
             activeObjects: [this.collectionContent.node],
         });
         this.optionsService.initComponents(this.actionbarCollection, this.listReferences);
+        this.optionsService.nodesDeleted
+            .pipe(takeUntil(this.destroyed))
+            .subscribe(({ objects }) => {
+                if (
+                    objects.length === 1 &&
+                    objects[0].ref.id === this.collectionContent.node.ref.id
+                ) {
+                    // use set timeout to allow router navigate to work
+                    const id = this.parentCollectionId.id;
+                    setTimeout(() => this.navigate(id));
+                }
+            });
         this.optionsService.refreshComponents();
     }
 
@@ -1380,6 +1412,7 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
             this.toggleCollectionsOrder();
         }
     }
+
     async setReferenceSort(sort: ListSortConfig) {
         const diff = Helper.getKeysWithDifferentValues(this.sortReferences, sort);
         this.sortReferences = sort;
@@ -1475,6 +1508,7 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
                 });
         }
     }
+
     isDeleted(node: CollectionReference) {
         return (
             node.aspects.includes(RestConstants.CCM_ASPECT_IO_REFERENCE) &&

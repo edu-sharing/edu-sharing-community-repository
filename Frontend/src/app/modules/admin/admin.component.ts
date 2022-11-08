@@ -1013,7 +1013,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
     getMajorVersion(version: string) {
         const v = version.split('.');
-        if (v.length < 3) return v;
+        if (v.length < 3) return version;
         v.splice(2, v.length - 2);
         return v.join('.');
     }

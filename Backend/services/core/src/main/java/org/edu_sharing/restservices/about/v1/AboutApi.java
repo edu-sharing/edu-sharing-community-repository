@@ -7,16 +7,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.ApiApplication;
 import org.edu_sharing.restservices.ApiService;
 import org.edu_sharing.restservices.RestConstants;
-import org.edu_sharing.restservices.about.v1.model.About;
-import org.edu_sharing.restservices.about.v1.model.Service;
-import org.edu_sharing.restservices.about.v1.model.ServiceInstance;
-import org.edu_sharing.restservices.about.v1.model.ServiceVersion;
+import org.edu_sharing.restservices.about.v1.model.*;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.monitoring.Monitoring;
@@ -26,6 +24,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -112,13 +112,6 @@ public class AboutApi  {
     	
     }
     
-    @OPTIONS        
-    @Hidden
-    public Response options() {
-    	
-    	return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
-    }
-    
     @GET
 	@Path("/status/{mode}")
 	@Operation(summary = "status of repo services", description = "returns http status 200 when ok")
@@ -157,15 +150,28 @@ public class AboutApi  {
     	
     	
     }
-    
-    @OPTIONS
-	@Path("/status/repo/{mode}")
-	@Hidden
-	public Response options2() {
-		return Response.status(Response.Status.OK).header("Allow", "OPTIONS, GET").build();
+
+	@GET
+	@Path("/licenses")
+	@Operation(summary = "License information.", description = "Get information about used 3rd-party licenses.")
+	@ApiResponses(
+			value = {
+					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Licenses.class))),
+					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+			})
+
+	public Response licenses(@Context HttpServletRequest req) {
+		try {
+			Licenses licenses = VersionService.getLicenses();
+
+			return Response.status(Response.Status.OK).entity(licenses).build();
+
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+
 	}
-    
-   
-    
+
+
 }
 
