@@ -3,7 +3,7 @@ package org.edu_sharing.repository.server.jobs.quartz;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
-
+import java.util.concurrent.TimeUnit;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.NamespaceService;
 import org.apache.log4j.Logger;
@@ -15,32 +15,35 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
 
+@JobDescription(description = "Cleanup trashcan ")
 public class TrashcanCleanerJob extends AbstractJob {
 
-	protected static final long DEFAULT_TIME_TO_KEEP = -1;
+	protected static final int DEFAULT_DAYS_TO_KEEP = -1;
 	protected static final int DEFAULT_DELETE_BATCH_COUNT = 1000;
-	
-	private static final String KEY_TIME_TO_KEEP = "timeToKeep";
-	private static final String KEY_DELETE_BATCH_COUNT = "batchSize";
-	
+
+	@JobFieldDescription(description = "Days which should NOT be deleted, e.g. 30  -> keep the last 30 days (-1 -> Cleaning trashcan will be skipped )", sampleValue = "-1")
+	public int DAYS_TO_KEEP;
+	@JobFieldDescription(description = "How much nodes per run, e.g. 1000 ", sampleValue = "1000")
+	public int BATCH_COUNT;
+
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		
 		JobDataMap jobDataMap = context.getJobDetail().getJobDataMap();
 		
 		try {
-		
-			long time =   jobDataMap.containsKey(KEY_TIME_TO_KEEP)
-						? jobDataMap.getLong(KEY_TIME_TO_KEEP)
-						: DEFAULT_TIME_TO_KEEP;
-			
-			int batch =   jobDataMap.containsKey(KEY_DELETE_BATCH_COUNT)
-						? jobDataMap.getInt(KEY_DELETE_BATCH_COUNT)
-						: DEFAULT_DELETE_BATCH_COUNT;
+			final int time =   jobDataMap.containsKey("DAYS_TO_KEEP")
+					? jobDataMap.getInt("DAYS_TO_KEEP")
+					: DEFAULT_DAYS_TO_KEEP;
 
-			new TrashcanCleaner(time , batch).execute(); 	
-						
+			int batch =   jobDataMap.containsKey("BATCH_COUNT")
+					? jobDataMap.getInt("BATCH_COUNT")
+					: DEFAULT_DELETE_BATCH_COUNT;
+
+			new TrashcanCleaner(TimeUnit.MILLISECONDS.convert(time, TimeUnit.DAYS),batch).execute();
 		} catch (Throwable t) {
 			throw new JobExecutionException(t);
 		}
@@ -66,15 +69,13 @@ public class TrashcanCleanerJob extends AbstractJob {
 		private final String PROP_ARCHIVED_DATE = "{" + NamespaceService.SYSTEM_MODEL_1_0_URI + "}archivedDate";
 		
 		TrashcanCleaner (long timeToKeep, int batchSize) {
-			
 			this.timeToKeep = timeToKeep;
-			this.batchSize = batchSize;			
-		}		
-		
+			this.batchSize = batchSize;
+		}
+
 		void execute() throws Throwable {
 
- 			if (timeToKeep <= 0) {
-
+			if (timeToKeep < 0) {
 				logger.info("Cleaning trashcan will be skipped (timeToKeep undefined).");
 				return;
 			}
