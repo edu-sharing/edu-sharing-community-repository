@@ -1,57 +1,171 @@
-import { forkJoin as observableForkJoin, Observable } from 'rxjs';
+import {
+    Component,
+    ElementRef,
+    EventEmitter,
+    Input,
+    OnInit,
+    Output,
+    ViewChild,
+} from '@angular/core';
+import { LicenseDialogData, LicenseDialogResult } from './license-dialog-data';
+
+import { TranslateService } from '@ngx-translate/core';
+import { Values } from 'dist/edu-sharing-api/lib/api/models';
+import { forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Component, Input, EventEmitter, Output, ViewChild, ElementRef } from '@angular/core';
 import {
+    ConfigurationService,
     DialogButton,
-    RestConnectorService,
-    RestIamService,
-} from '../../../core-module/core.module';
-import { Toast } from '../../../core-ui-module/toast';
-import { RestNodeService } from '../../../core-module/core.module';
-import { RestConstants } from '../../../core-module/core.module';
-import {
-    NodeWrapper,
+    LocalPermissionsResult,
     Node,
     NodePermissions,
-    LocalPermissionsResult,
-    Permission,
-} from '../../../core-module/core.module';
-import { TranslateService } from '@ngx-translate/core';
-import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
-import { ConfigurationService } from '../../../core-module/core.module';
-import { RestHelper } from '../../../core-module/core.module';
-import { VCard } from '../../../core-module/ui/VCard';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import { UIService } from '../../../core-module/core.module';
-import { Helper } from '../../../core-module/rest/helper';
-import { Values } from 'dist/edu-sharing-api/lib/api/models';
-import { UserPresentableError } from '../../../features/mds/mds-editor/mds-editor-common.service';
-import { MdsEditorInstanceService } from '../../../features/mds/mds-editor/mds-editor-instance.service';
-import { ViewInstanceService } from '../../../features/mds/mds-editor/mds-editor-view/view-instance.service';
-import { MdsEditorWidgetAuthorComponent } from '../../../features/mds/mds-editor/widgets/mds-editor-widget-author/mds-editor-widget-author.component';
+    RestConnectorService,
+    RestConstants,
+    RestHelper,
+    RestIamService,
+    RestNodeService,
+} from '../../../../core-module/core.module';
+import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
+import { Toast } from '../../../../core-ui-module/toast';
+import { UIHelper } from '../../../../core-ui-module/ui-helper';
+import { UserPresentableError } from '../../../../features/mds/mds-editor/mds-editor-common.service';
+import { MdsEditorInstanceService } from '../../../../features/mds/mds-editor/mds-editor-instance.service';
+import { ViewInstanceService } from '../../../../features/mds/mds-editor/mds-editor-view/view-instance.service';
+import { MdsEditorWidgetAuthorComponent } from '../../../../features/mds/mds-editor/widgets/mds-editor-widget-author/mds-editor-widget-author.component';
+
+const ALL_LICENSE_TYPES = [
+    'NONE',
+    'CC_0',
+    'CC_BY',
+    'SCHULFUNK',
+    'UNTERRICHTS_UND_LEHRMEDIEN',
+    'COPYRIGHT',
+    'CUSTOM',
+];
+
+const ALL_COUNTRIES = [
+    'AE',
+    'AL',
+    'AR',
+    'AT',
+    'AU',
+    'BA',
+    'BG',
+    'BH',
+    'BO',
+    'BR',
+    'BY',
+    'CA',
+    'CH',
+    'CL',
+    'CN',
+    'CO',
+    'CR',
+    'CY',
+    'CZ',
+    'DE',
+    'DK',
+    'DO',
+    'DZ',
+    'EC',
+    'EE',
+    'EG',
+    'ES',
+    'FI',
+    'FR',
+    'GB',
+    'GR',
+    'GT',
+    'HK',
+    'HN',
+    'HR',
+    'HU',
+    'ID',
+    'IE',
+    'IL',
+    'IN',
+    'IQ',
+    'IS',
+    'IT',
+    'JO',
+    'JP',
+    'KR',
+    'KW',
+    'LB',
+    'LT',
+    'LU',
+    'LV',
+    'LY',
+    'MA',
+    'ME',
+    'MK',
+    'MT',
+    'MX',
+    'MY',
+    'NI',
+    'NL',
+    'NO',
+    'NZ',
+    'OM',
+    'PA',
+    'PE',
+    'PH',
+    'PL',
+    'PR',
+    'PT',
+    'PY',
+    'QA',
+    'RO',
+    'RS',
+    'RU',
+    'SA',
+    'SD',
+    'SE',
+    'SG',
+    'SI',
+    'SK',
+    'SY',
+    'TH',
+    'TN',
+    'TR',
+    'TW',
+    'UA',
+    'US',
+    'UY',
+    'VE',
+    'VN',
+    'YE',
+    'ZA',
+];
 
 @Component({
-    selector: 'es-workspace-license',
-    templateUrl: 'license.component.html',
-    styleUrls: ['license.component.scss'],
+    selector: 'es-license-dialog-content',
+    templateUrl: './license-dialog-content.component.html',
+    styleUrls: ['./license-dialog-content.component.scss'],
     providers: [MdsEditorInstanceService, ViewInstanceService],
-    animations: [
-        trigger('fade', UIAnimation.fade()),
-        trigger('cardAnimation', UIAnimation.cardAnimation()),
-        trigger('dialog', UIAnimation.switchDialog()),
-    ],
 })
-export class WorkspaceLicenseComponent {
+export class LicenseDialogContentComponent implements OnInit {
+    @ViewChild('selectLicense') selectLicense: ElementRef;
+    @ViewChild('author') author: MdsEditorWidgetAuthorComponent;
+
+    @Input() data: LicenseDialogData;
+
+    /**
+     * Emits the updated node or properties (depending on the provided `data`) when saved and null
+     * when canceled.
+     */
+    @Output() done = new EventEmitter<LicenseDialogResult>();
+    @Output() isLoading = new EventEmitter<boolean>();
+    @Output() canSave = new EventEmitter<boolean>();
+
     set primaryType(primaryType: string) {
         this._primaryType = primaryType;
-        this.updateButtons();
+        this.updateCanSave();
     }
     get primaryType() {
         return this._primaryType;
     }
-    public set type(type: string) {
+    set type(type: string) {
         if (type == 'CC_0' || type == 'PDM') {
             this.cc0Type = type;
             type = 'CC_0';
@@ -70,13 +184,13 @@ export class WorkspaceLicenseComponent {
         }
         this.primaryType = type;
     }
-    public get type() {
+    get type() {
         return this.getLicenseProperty();
     }
-    public get getccCountries() {
+    get getccCountries() {
         return this._ccCountries;
     }
-    public set oerMode(oerMode: boolean) {
+    set oerMode(oerMode: boolean) {
         this._oerMode = oerMode;
         this.showCcAuthor = false;
         if (oerMode) {
@@ -87,26 +201,68 @@ export class WorkspaceLicenseComponent {
             }
         }
     }
-    public get oerMode() {
+    get oerMode() {
         return this._oerMode;
     }
-    @Input() set properties(properties: any) {
-        this.loadConfig();
-        this._properties = properties;
-        this.readLicense();
-        this.mdsEditorInstanceService.initWithNodes(
-            [
-                {
-                    properties,
-                } as any,
-            ],
-            { refetch: false },
-        );
-        this.loading = false;
-        this.updateButtons();
+
+    _properties: any;
+    ccShare = '';
+    ccCommercial = '';
+    ccTitleOfWork = '';
+    ccSourceUrl = '';
+    ccVersion = '4.0';
+    ccCountry = '';
+    ccProfileUrl = '';
+    copyrightType = 'COPYRIGHT_FREE';
+    rightsDescription = '';
+    _ccCountries: Array<{ key: string; name: string }> = [];
+    licenseMainTypes: string[];
+    private _primaryType = '';
+    private buttons: DialogButton[];
+    private cc0Type = 'CC_0';
+    private eduType = 'P_NR';
+    private showCcAuthor = false; // FIXME: not used.
+    private contact = true;
+    private contactIndeterminate = false;
+    private release = false;
+    private releaseIndeterminate = false;
+    private eduDownload = true;
+    private _oerMode = true;
+    private permissions: LocalPermissionsResult;
+    private allowedLicenses: string[];
+    private releaseMulti: string;
+    private allowRelease = true; // FIXME: not used.
+
+    constructor(
+        private connector: RestConnectorService,
+        private translate: TranslateService,
+        private config: ConfigurationService,
+        private nodeHelper: NodeHelperService,
+        private mdsEditorInstanceService: MdsEditorInstanceService,
+        private iamApi: RestIamService,
+        private toast: Toast,
+        private nodeApi: RestNodeService,
+    ) {}
+
+    ngOnInit(): void {
+        this.translateLicenseCountries(ALL_COUNTRIES);
+        void this.iamApi.getCurrentUserAsync();
+        switch (this.data.kind) {
+            case 'nodes':
+                this.initNodes(this.data.nodes);
+                break;
+            case 'properties':
+                this.initProperties(this.data.properties);
+                break;
+        }
     }
-    @Input() set nodes(nodesIn: Node[]) {
-        this.loading = true;
+
+    private updateCanSave() {
+        this.canSave.emit(this.type !== 'MULTI');
+    }
+
+    private initNodes(nodesIn: Node[]) {
+        this.isLoading.emit(true);
         this.loadNodes(nodesIn).subscribe(
             async (nodes) => {
                 try {
@@ -117,14 +273,14 @@ export class WorkspaceLicenseComponent {
                     } else {
                         this.toast.error(e);
                     }
-                    this.cancel();
+                    this.done.emit(null);
                     return;
                 }
                 this.loadConfig();
                 this.checkAllowRelease();
                 this.readLicense();
-                this.loading = false;
-                this.updateButtons();
+                this.isLoading.emit(false);
+                this.updateCanSave();
                 this.releaseMulti = null;
                 let i = 0;
                 for (const node of nodes) {
@@ -139,177 +295,32 @@ export class WorkspaceLicenseComponent {
             },
             (error) => {
                 this.toast.error(error);
-                this.cancel();
+                this.done.emit(null);
             },
         );
     }
-    constructor(
-        private connector: RestConnectorService,
-        private translate: TranslateService,
-        private config: ConfigurationService,
-        private nodeHelper: NodeHelperService,
-        private mdsEditorInstanceService: MdsEditorInstanceService,
-        private ui: UIService,
-        private iamApi: RestIamService,
-        private toast: Toast,
-        private nodeApi: RestNodeService,
-    ) {
-        this.translateLicenceCountries(this.constantCountries);
-        this.updateButtons();
-        this.iamApi.getCurrentUserAsync().then(() => {});
+
+    private initProperties(properties: any) {
+        this.loadConfig();
+        this._properties = properties;
+        this.readLicense();
+        this.mdsEditorInstanceService.initWithNodes(
+            [
+                {
+                    properties,
+                } as any,
+            ],
+            { refetch: false },
+        );
+        this.isLoading.emit(false);
+        this.updateCanSave();
     }
-    @ViewChild('selectLicense') selectLicense: ElementRef;
-    @ViewChild('author') author: MdsEditorWidgetAuthorComponent;
 
-    /**
-     * priority, useful if the dialog seems not to be in the foreground
-     * Values greater 0 will raise the z-index
-     * Default is 1 for mds
-     */
-    @Input() priority = 1;
-    @Input() embedded = false;
-    _primaryType = '';
-    _properties: any;
-    buttons: DialogButton[];
-    public ccShare = '';
-    ccCommercial = '';
-    ccTitleOfWork = '';
-    ccSourceUrl = '';
-    ccVersion = '4.0';
-    ccCountry = '';
-    cc0Type = 'CC_0';
-    ccProfileUrl = '';
-    copyrightType = 'COPYRIGHT_FREE';
-    eduType = 'P_NR';
-    rightsDescription = '';
-    private showCcAuthor = false;
-    private contact = true;
-    private contactIndeterminate = false;
-    private release = false;
-    private releaseIndeterminate = false;
-    private eduDownload = true;
-    _ccCountries: Array<{ key: string; name: string }> = [];
-
-    private _oerMode = true;
-    private constantCountries = [
-        'AE',
-        'AL',
-        'AR',
-        'AT',
-        'AU',
-        'BA',
-        'BG',
-        'BH',
-        'BO',
-        'BR',
-        'BY',
-        'CA',
-        'CH',
-        'CL',
-        'CN',
-        'CO',
-        'CR',
-        'CY',
-        'CZ',
-        'DE',
-        'DK',
-        'DO',
-        'DZ',
-        'EC',
-        'EE',
-        'EG',
-        'ES',
-        'FI',
-        'FR',
-        'GB',
-        'GR',
-        'GT',
-        'HK',
-        'HN',
-        'HR',
-        'HU',
-        'ID',
-        'IE',
-        'IL',
-        'IN',
-        'IQ',
-        'IS',
-        'IT',
-        'JO',
-        'JP',
-        'KR',
-        'KW',
-        'LB',
-        'LT',
-        'LU',
-        'LV',
-        'LY',
-        'MA',
-        'ME',
-        'MK',
-        'MT',
-        'MX',
-        'MY',
-        'NI',
-        'NL',
-        'NO',
-        'NZ',
-        'OM',
-        'PA',
-        'PE',
-        'PH',
-        'PL',
-        'PR',
-        'PT',
-        'PY',
-        'QA',
-        'RO',
-        'RS',
-        'RU',
-        'SA',
-        'SD',
-        'SE',
-        'SG',
-        'SI',
-        'SK',
-        'SY',
-        'TH',
-        'TN',
-        'TR',
-        'TW',
-        'UA',
-        'US',
-        'UY',
-        'VE',
-        'VN',
-        'YE',
-        'ZA',
-    ];
-    public ALL_LICENSE_TYPES = [
-        'NONE',
-        'CC_0',
-        'CC_BY',
-        'SCHULFUNK',
-        'UNTERRICHTS_UND_LEHRMEDIEN',
-        'COPYRIGHT',
-        'CUSTOM',
-    ];
-    public licenseMainTypes: string[];
-    private permissions: LocalPermissionsResult;
-    public loading = true;
-    private allowedLicenses: string[];
-    private releaseMulti: string;
-    private allowRelease = true;
-    userAuthor = false;
-    @Output() onCancel = new EventEmitter();
-    @Output() onLoading = new EventEmitter();
-    @Output() onDone = new EventEmitter<Node[] | Values>();
-    @Output() openContributor = new EventEmitter();
-
-    public isAllowedLicense(license: string) {
+    isAllowedLicense(license: string) {
         return this.allowedLicenses == null || this.allowedLicenses.indexOf(license) != -1;
     }
-    public isOerLicense() {
+
+    isOerLicense() {
         return (
             this.getLicenseProperty() == 'CC_0' ||
             this.getLicenseProperty() == 'PDM' ||
@@ -317,8 +328,9 @@ export class WorkspaceLicenseComponent {
             this.getLicenseProperty() == 'CC_BY_SA'
         );
     }
-    public loadNodes(nodes: Node[]) {
-        return observableForkJoin(
+
+    private loadNodes(nodes: Node[]) {
+        return forkJoin(
             nodes.map((n) =>
                 this.nodeApi
                     .getNodeMetadata(n.ref.id, [RestConstants.ALL])
@@ -326,10 +338,11 @@ export class WorkspaceLicenseComponent {
             ),
         );
     }
+
     private loadConfig() {
         this.config.get('allowedLicenses').subscribe((data: string[]) => {
             if (!data) {
-                this.licenseMainTypes = this.ALL_LICENSE_TYPES;
+                this.licenseMainTypes = ALL_LICENSE_TYPES;
                 this.allowedLicenses = null;
             } else {
                 this.licenseMainTypes = [];
@@ -344,7 +357,7 @@ export class WorkspaceLicenseComponent {
                     } else if (entry.startsWith('COPYRIGHT')) {
                         this.licenseMainTypes.push('COPYRIGHT');
                         if (data.indexOf(this.copyrightType) == -1) this.copyrightType = entry;
-                    } else if (this.ALL_LICENSE_TYPES.indexOf(entry) != -1) {
+                    } else if (ALL_LICENSE_TYPES.indexOf(entry) != -1) {
                         this.licenseMainTypes.push(entry);
                     }
                 }
@@ -360,17 +373,14 @@ export class WorkspaceLicenseComponent {
             }
         });
     }
-    public cancel() {
-        this.onCancel.emit();
-    }
 
-    public async saveLicense(callback: Function = null) {
+    async saveLicense() {
         if (this.type === 'CUSTOM' && !this.rightsDescription.trim()) {
             this.toast.error(null, 'LICENSE.DESCRIPTION_REQUIRED');
             return;
         }
         if (this._properties) {
-            this.onDone.emit(await this.getProperties(this._properties));
+            this.done.emit(await this.getProperties(this._properties));
             return;
         }
         if (!this.getLicenseProperty() && this.release) {
@@ -380,12 +390,10 @@ export class WorkspaceLicenseComponent {
         let prop: Values = {};
 
         prop = await this.getProperties(prop);
-        let i = 0;
-        this.onLoading.emit(true);
+        this.isLoading.emit(true);
         const updatedNodes: Node[] = [];
         for (const node of this.getNodes()) {
             node.properties = prop;
-            i++;
             this.nodeApi
                 .editNodeMetadataNewVersion(node.ref.id, RestConstants.COMMENT_LICENSE_UPDATE, prop)
                 .subscribe(
@@ -394,23 +402,22 @@ export class WorkspaceLicenseComponent {
                         this.savePermissions(node);
                         if (updatedNodes.length === this.getNodes().length) {
                             this.toast.toast('WORKSPACE.TOAST.LICENSE_UPDATED');
-                            this.onLoading.emit(false);
-                            this.onDone.emit(updatedNodes);
-                            if (callback) {
-                                callback();
-                            }
+                            this.isLoading.emit(false);
+                            this.done.emit(updatedNodes);
                         }
                     },
                     (error: any) => {
-                        this.onLoading.emit(false);
+                        this.isLoading.emit(false);
                         this.toast.error(error);
                     },
                 );
         }
     }
-    getNodes() {
+
+    private getNodes() {
         return this.mdsEditorInstanceService.nodes$.value;
     }
+
     private getValueForAll(
         prop: string,
         fallbackNotIdentical: any = '',
@@ -432,6 +439,7 @@ export class WorkspaceLicenseComponent {
             return fallbackIsEmpty;
         }
     }
+
     private readLicense() {
         let license = this.getValueForAll(RestConstants.CCM_PROP_LICENSE, 'MULTI', 'NONE');
         if (!license) license = 'NONE';
@@ -506,18 +514,23 @@ export class WorkspaceLicenseComponent {
 
         return name;
     }
+
     getLicenseName() {
         return this.nodeHelper.getLicenseNameByString(this.getLicenseProperty());
     }
+
     getLicenseUrl() {
         return this.nodeHelper.getLicenseUrlByString(this.getLicenseProperty(), this.ccVersion);
     }
+
     getLicenseUrlVersion(type: string) {
         return this.nodeHelper.getLicenseUrlByString(type, this.ccVersion);
     }
+
     getLicenseIcon() {
         return this.nodeHelper.getLicenseIconByString(this.getLicenseProperty());
     }
+
     private savePermissions(node: Node) {
         if (this.releaseIndeterminate) {
             return;
@@ -537,12 +550,12 @@ export class WorkspaceLicenseComponent {
                     perm.permissions.push(RestConstants.ACCESS_CONSUMER);
                 }
                 /*if(perm.permissions.indexOf(RestConstants.ACCESS_CC_PUBLISH)!=-1 && !this.release){
-                  perm.permissions.splice(perm.permissions.indexOf(RestConstants.ACCESS_CC_PUBLISH),1);
-                }
-                if(perm.permissions.indexOf(RestConstants.ACCESS_CONSUMER)!=-1 && !this.release){
-                  perm.permissions.splice(perm.permissions.indexOf(RestConstants.ACCESS_CONSUMER),1);
-                }
-                */
+              perm.permissions.splice(perm.permissions.indexOf(RestConstants.ACCESS_CC_PUBLISH),1);
+            }
+            if(perm.permissions.indexOf(RestConstants.ACCESS_CONSUMER)!=-1 && !this.release){
+              perm.permissions.splice(perm.permissions.indexOf(RestConstants.ACCESS_CONSUMER),1);
+            }
+            */
                 break;
             }
             index++;
@@ -566,6 +579,7 @@ export class WorkspaceLicenseComponent {
             (error: any) => this.toast.error(error),
         );
     }
+
     private readPermissions(last: boolean) {
         this.release = false;
         if (this)
@@ -614,15 +628,6 @@ export class WorkspaceLicenseComponent {
                 }
             });
     }
-    setCCBy() {
-        this.type = 'CC_BY';
-        this.ccShare = '';
-        this.ccCommercial = '';
-    }
-    setCC0() {
-        this.type = 'CC_0';
-        this.cc0Type = 'CC_0';
-    }
 
     async getProperties(prop = this._properties) {
         prop[RestConstants.CCM_PROP_LICENSE] = [this.getLicenseProperty()];
@@ -661,45 +666,6 @@ export class WorkspaceLicenseComponent {
         return prop;
     }
 
-    openContributorDialog() {
-        const nodes = this.getNodes();
-        this.saveLicense(() => {
-            this.openContributor.emit(nodes);
-        });
-    }
-
-    changeRelease(release: boolean) {
-        if (release) {
-            if (this.config.instant('publishingNotice', false)) {
-                const cancel = () => {
-                    this.release = false;
-                    this.toast.closeModalDialog();
-                };
-                this.toast.showModalDialog(
-                    'WORKSPACE.SHARE.PUBLISHING_WARNING_TITLE',
-                    'WORKSPACE.SHARE.PUBLISHING_WARNING_MESSAGE',
-                    DialogButton.getYesNo(cancel, () => {
-                        this.release = true;
-                        this.toast.closeModalDialog();
-                    }),
-                    true,
-                    cancel,
-                );
-
-                return;
-            }
-        }
-    }
-
-    private updateButtons() {
-        const save = new DialogButton('SAVE', { color: 'primary' }, () => this.saveLicense());
-        save.disabled = this.loading || this.type == 'MULTI';
-        this.buttons = [
-            new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel()),
-            save,
-        ];
-    }
-
     isCCAttributableLicense() {
         return this.getLicenseProperty() && this.getLicenseProperty().startsWith('CC_BY');
     }
@@ -708,7 +674,7 @@ export class WorkspaceLicenseComponent {
      * Get all the key from countries and return the array with key and name (Translated)
      * @param {string[]} countries array with all Countries Key
      */
-    translateLicenceCountries(countries: string[]) {
+    private translateLicenseCountries(countries: string[]) {
         this._ccCountries = [];
         countries.forEach((country) => {
             this._ccCountries.push({

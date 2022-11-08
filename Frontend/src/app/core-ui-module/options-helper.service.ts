@@ -863,11 +863,15 @@ export class OptionsHelperService implements OnDestroy {
         streamNode.customShowCallback = (objects) =>
             this.configService.instant('stream.enabled', false);
 
-        const licenseNode = new OptionItem(
-            'OPTIONS.LICENSE',
-            'copyright',
-            (object) => (management.nodeLicense = this.getObjects(object)),
-        );
+        const licenseNode = new OptionItem('OPTIONS.LICENSE', 'copyright', async (object) => {
+            const nodes = this.getObjects(object);
+            const dialogRef = await this.dialogs.openLicenseDialog({ kind: 'nodes', nodes });
+            dialogRef.afterClosed().subscribe((result: Node[] | null) => {
+                if (result) {
+                    this.onNodesChanged(result);
+                }
+            });
+        });
         licenseNode.elementType = [ElementType.Node, ElementType.NodeChild];
         licenseNode.constrains = [
             Constrain.Files,

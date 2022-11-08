@@ -35,6 +35,7 @@ import {
 } from '../../../../features/mds/mds-editor/mds-editor-instance.service';
 import { MainNavService } from '../../../../main/navigation/main-nav.service';
 import { NodeService } from 'ngx-edu-sharing-api';
+import { DialogsService } from '../../../../features/dialogs/dialogs.service';
 
 class PublishedNode extends Node {
     status?: 'new' | 'update' | null; // flag if this node is manually added later and didn't came from the repo
@@ -87,6 +88,7 @@ export class SharePublishComponent implements OnChanges, OnInit, OnDestroy {
         private router: Router,
         private bridge: BridgeService,
         private mainNavService: MainNavService,
+        private dialogs: DialogsService,
     ) {
         this.doiPermission = this.connector.hasToolPermissionInstant(
             RestConstants.TOOLPERMISSION_HANDLESERVICE,
@@ -143,15 +145,24 @@ export class SharePublishComponent implements OnChanges, OnInit, OnDestroy {
         return this.translate.instant('LICENSE.NAMES.' + this.getLicense());
     }
 
-    openLicense() {
-        this.mainNavService.getDialogs().nodeLicense = [this.node];
-        this.mainNavService.getDialogs().nodeLicenseChange.subscribe(async () => {
-            this.node = (
-                await this.legacyNodeService
-                    .getNodeMetadata(this.node.ref.id, [RestConstants.ALL])
-                    .toPromise()
-            ).node;
-            this.refresh();
+    async openLicense() {
+        const dialogRef = await this.dialogs.openLicenseDialog({
+            kind: 'nodes',
+            nodes: [this.node],
+        });
+        dialogRef.afterClosed().subscribe((updatedNodes) => {
+            if (updatedNodes) {
+                // We used to fetch the node again, but we should be fine just taking the updated
+                // node from the dialog, right?
+                //
+                // this.node = (
+                //     await this.legacyNodeService
+                //         .getNodeMetadata(this.node.ref.id, [RestConstants.ALL])
+                //         .toPromise()
+                // ).node;
+                this.node = updatedNodes[0];
+                this.refresh();
+            }
         });
     }
     openMetadata() {

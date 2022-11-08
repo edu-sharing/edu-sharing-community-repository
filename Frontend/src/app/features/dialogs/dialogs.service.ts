@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { RestConnectorService } from '../../core-module/core.module';
-import { Closable, configForNode } from './card-dialog/card-dialog-config';
+import { Closable, configForNode, configForNodes } from './card-dialog/card-dialog-config';
 import { CardDialogRef } from './card-dialog/card-dialog-ref';
 import { CardDialogService } from './card-dialog/card-dialog.service';
 import {
@@ -28,6 +28,10 @@ import {
     LicenseAgreementDialogData,
     LicenseAgreementDialogResult,
 } from './dialog-modules/license-agreement-dialog/license-agreement-dialog-data';
+import {
+    LicenseDialogData,
+    LicenseDialogResult,
+} from './dialog-modules/license-dialog/license-dialog-data';
 import { NodeEmbedDialogData } from './dialog-modules/node-embed-dialog/node-embed-dialog.component';
 import { NodeInfoDialogData } from './dialog-modules/node-info-dialog/node-info-dialog.component';
 import { NodeReportDialogData } from './dialog-modules/node-report-dialog/node-report-dialog.component';
@@ -225,6 +229,24 @@ export class DialogsService {
             title: 'WORKSPACE.CONTRIBUTOR.TITLE',
             width: 500,
             height: 700,
+            data,
+        });
+    }
+
+    async openLicenseDialog(
+        data: LicenseDialogData,
+    ): Promise<CardDialogRef<LicenseDialogData, LicenseDialogResult>> {
+        const { LicenseDialogComponent } = await import(
+            './dialog-modules/license-dialog/license-dialog.module'
+        );
+        return this.cardDialog.open(LicenseDialogComponent, {
+            title: 'WORKSPACE.LICENSE.TITLE',
+            ...(data.kind === 'nodes'
+                ? await configForNodes(data.nodes, this.translate).toPromise()
+                : {}),
+            width: 700,
+            height: 1100,
+            closable: Closable.Standard,
             data,
         });
     }

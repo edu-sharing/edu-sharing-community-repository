@@ -37,6 +37,7 @@ import { CardComponent } from './components/card/card.component';
 import { DropdownComponent } from './components/dropdown/dropdown.component';
 import { GlobalProgressComponent } from './components/global-progress/global-progress.component';
 import { InfoMessageComponent } from './components/info-message/info-message.component';
+import { LicenseSourceComponent } from './components/license-source/license-source.component';
 import { LinkComponent } from './components/link/link.component';
 import { ModalDialogComponent } from './components/modal-dialog/modal-dialog.component';
 import { MultiLineLabelComponent } from './components/multi-line-label/multi-line-label.component';
@@ -99,6 +100,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         IconDirective,
         InfiniteScrollDirective,
         InfoMessageComponent,
+        LicenseSourceComponent,
         LinkComponent,
         ModalDialogComponent,
         MultiLineLabelComponent,
@@ -172,6 +174,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         IconDirective,
         InfiniteScrollDirective,
         InfoMessageComponent,
+        LicenseSourceComponent,
         LinkComponent,
         MatAutocompleteModule,
         MatButtonModule,

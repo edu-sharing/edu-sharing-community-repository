@@ -1,5 +1,4 @@
 import { WorkspaceManagementDialogsComponent } from '../management-dialogs/management-dialogs.component';
-import { WorkspaceLicenseComponent } from './license/license.component';
 import { WorkspaceLtiToolsComponent } from './lti-tools/lti-tools.component';
 import { WorkspaceLtiToolConfigsComponent } from './lti-tool-configs/lti-tool-configs.component';
 import { WorkspaceCreateLtiComponent } from './create-lti/create-lti.component';
@@ -14,15 +13,12 @@ import { SimpleEditDialogComponent } from './simple-edit-dialog/simple-edit-dial
 import { SimpleEditMetadataComponent } from './simple-edit-dialog/simple-edit-metadata/simple-edit-metadata.component';
 import { SimpleEditInviteComponent } from './simple-edit-dialog/simple-edit-invite/simple-edit-invite.component';
 import { SimpleEditLicenseComponent } from './simple-edit-dialog/simple-edit-license/simple-edit-license.component';
-import { LicenseSourceComponent } from './license/license-source/license-source.component';
 import { MapLinkComponent } from './map-link/map-link.component';
 import { SignupGroupComponent } from './signup-group/signup-group.component';
 import { NodeSearchSelectorComponent } from './node-search-selector/node-search-selector.component';
 import { NodeRelationManagerComponent } from './node-relation-manager/node-relation-manager.component';
 
 export const DECLARATIONS_MANAGEMENT_DIALOGS = [
-    WorkspaceLicenseComponent,
-    LicenseSourceComponent,
     WorkspaceLtiToolsComponent,
     WorkspaceLtiToolConfigsComponent,
     WorkspaceManagementDialogsComponent,

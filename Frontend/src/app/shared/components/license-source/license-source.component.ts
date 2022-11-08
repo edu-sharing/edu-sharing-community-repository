@@ -1,6 +1,6 @@
 import { Component, Input, EventEmitter, Output, ViewChild, ElementRef } from '@angular/core';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../../../core-module/ui/ui-animation';
+import { UIAnimation } from '../../../core-module/ui/ui-animation';
 
 @Component({
     selector: 'es-license-source',

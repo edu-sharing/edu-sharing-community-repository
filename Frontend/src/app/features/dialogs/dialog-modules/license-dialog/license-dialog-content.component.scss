@@ -1,61 +1,76 @@
-@import '../../../core-ui-module/styles/variables';
+@import '../../../../core-ui-module/styles/variables';
 
-.license-content {
-    padding: $cardPadding;
+:host {
     display: flex;
     flex-direction: column;
+    height: 100%;
 }
-.card-content .cc label {
+
+:host ::ng-deep {
+    .mat-tab-labels {
+        background-color: #fff;
+    }
+    .mat-checkbox-layout {
+        white-space: normal !important;
+        align-items: baseline !important;
+    }
+}
+
+es-mds-editor-widget-author {
+    flex-grow: 1;
+}
+
+.cc label {
     width: 100%;
 }
+
+.cc h5 {
+    padding-bottom: 5px;
+}
+
+.cc {
+    mat-radio-group {
+        display: flex;
+        flex-direction: column;
+        mat-radio-button {
+            margin: 3px 0;
+        }
+    }
+}
+
+.cc .ccAbout {
+    text-transform: uppercase;
+    text-align: center;
+    font-weight: bold;
+}
+
 .licenseType {
     width: 100%;
     margin: 10px 0;
 }
+
 .custom {
     > mat-form-field {
         width: 100%;
     }
 }
-:host ::ng-deep {
-    .license-content {
-        .mat-tab-labels {
-            background-color: #fff;
-        }
-        .mat-checkbox-layout {
-            white-space: normal !important;
-            align-items: baseline !important;
-        }
-    }
-    .mat-card-content {
-        h4 {
-            font-weight: bold;
-            font-size: 100%;
-            margin: 1.6rem 0 1rem 0;
-        }
 
-        h5 {
-            font-weight: normal;
-            font-size: 90%;
-            color: $textLight;
-            margin: 0;
-            line-height: 1.5;
-        }
-    }
-}
-::ng-deep {
-    .mat-card-content {
-        // prevent horizontal scrollbar
-        overflow-x: hidden;
-    }
-}
-.ccAuthor {
+h4 {
     font-weight: bold;
-    margin: 10px 0;
+    font-size: 100%;
+    margin: 1.6rem 0 1rem 0;
+    color: $textLight;
+    font-weight: bold;
 }
-.cc h5 {
-    padding-bottom: 5px;
+
+h5 {
+    font-weight: normal;
+    font-size: 90%;
+    color: $textLight;
+    margin: 0;
+    line-height: 1.5;
 }
+
 .currentLicense {
     text-align: center;
     background-color: $backgroundColor;
@@ -66,6 +81,7 @@
     }
     width: calc(100% + 40px);
 }
+
 .licenseName {
     display: table;
     margin: auto;
@@ -75,6 +91,7 @@
         display: table-cell;
     }
 }
+
 .oerStatus {
     padding-left: 10px;
     font-weight: bold;
@@ -93,22 +110,26 @@
         border-radius: 8px;
     }
 }
+
 .oerLicenses {
     width: 100%;
     .ccAuthor {
         margin: 5px 20px;
     }
 }
+
 mat-radio-button {
     margin-bottom: 10px;
     padding-left: 20px;
     padding-right: 20px;
 }
+
 .more-information-link {
     margin-left: 48px;
     margin-top: -10px;
     margin-bottom: 20px;
 }
+
 fieldset {
     border: none;
     margin: 0;
@@ -119,43 +140,28 @@ fieldset {
         color: $textLight;
     }
 }
-h4 {
-    color: $textLight;
-    font-weight: bold;
-}
+
 .oerSelect {
     float: right;
 }
-.licenseTypeLabel {
-    width: 100%;
-}
+
 .currentLicenseIcon {
     height: 40px;
     width: auto;
 }
+
 .currentLicenseDescription {
     color: $textLight;
 }
-.customLicenseDescription {
-    white-space: pre-line;
-}
+
 .currentLicenseDescription div {
     margin: 0 10px;
 }
-.cc {
-    mat-radio-group {
-        display: flex;
-        flex-direction: column;
-        mat-radio-button {
-            margin: 3px 0;
-        }
-    }
+
+.customLicenseDescription {
+    white-space: pre-line;
 }
-.cc .ccAbout {
-    text-transform: uppercase;
-    text-align: center;
-    font-weight: bold;
-}
+
 .license-additional-data {
     display: flex;
     justify-content: center;
@@ -164,29 +170,8 @@ h4 {
         margin: 0 10px;
     }
 }
+
 .licenseUrl {
     margin: 10px !important;
     text-transform: uppercase;
-}
-.licenseCheckbox {
-    padding-top: 20px;
-}
-.licenseCheckbox label {
-    width: 100%;
-}
-.release,
-.strong {
-    font-weight: bold;
-    display: block;
-    margin-bottom: 5px;
-}
-
-.doi {
-    margin: 10px 0 10px 50px;
-    display: flex;
-    flex-direction: column;
-    span {
-        margin-left: 35px;
-        margin-right: 10px;
-    }
 }

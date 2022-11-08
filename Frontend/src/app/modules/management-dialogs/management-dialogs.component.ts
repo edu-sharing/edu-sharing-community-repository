@@ -40,7 +40,6 @@ import { ClipboardObject, TemporaryStorageService } from '../../core-module/core
 import { RestUsageService } from '../../core-module/core.module';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { LinkData, NodeHelperService } from '../../core-ui-module/node-helper.service';
-import { WorkspaceLicenseComponent } from './license/license.component';
 import { ErrorProcessingService } from '../../core-ui-module/error.processing';
 import { BulkBehavior } from '../../features/mds/types/types';
 import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
@@ -73,7 +72,6 @@ export interface ManagementEvent {
 export class WorkspaceManagementDialogsComponent {
     readonly BulkBehaviour = BulkBehavior;
     @ViewChild(MdsEditorWrapperComponent) mdsEditorWrapperRef: MdsEditorWrapperComponent;
-    @ViewChild(WorkspaceLicenseComponent) licenseComponent: WorkspaceLicenseComponent;
     @ContentChild('collectionChooserBeforeRecent')
     collectionChooserBeforeRecentRef: TemplateRef<any>;
     @Input() showLtiTools = false;
@@ -86,8 +84,6 @@ export class WorkspaceManagementDialogsComponent {
     @Output() filesToUploadChange = new EventEmitter();
     @Input() parent: Node;
     @Output() showLtiToolsChange = new EventEmitter();
-    @Input() nodeLicense: Node[];
-    @Output() nodeLicenseChange = new EventEmitter();
     @Input() addPinnedCollection: Node;
     @Output() addPinnedCollectionChange = new EventEmitter();
     @Output() onEvent = new EventEmitter<ManagementEvent>();
@@ -206,7 +202,6 @@ export class WorkspaceManagementDialogsComponent {
     @Output() onUploadFilesProcessed = new EventEmitter<Node[]>();
     @Output() onCloseMetadata = new EventEmitter();
     @Output() onUploadFileSelected = new EventEmitter<FileList>();
-    @Output() onUpdateLicense = new EventEmitter();
     @Output() onCloseAddToCollection = new EventEmitter();
     @Output() onStoredAddToCollection = new EventEmitter<{
         collection: Node;
@@ -275,12 +270,6 @@ export class WorkspaceManagementDialogsComponent {
             }
             if (this.nodeTemplate != null) {
                 this.closeTemplate();
-                event.preventDefault();
-                event.stopPropagation();
-                return;
-            }
-            if (this.nodeLicense != null) {
-                this.closeLicense();
                 event.preventDefault();
                 event.stopPropagation();
                 return;
@@ -426,7 +415,7 @@ export class WorkspaceManagementDialogsComponent {
     }
     public uploadDone(event: Node[]) {
         if (this.config.instant('licenseDialogOnUpload', false)) {
-            this.nodeLicense = event;
+            void this.openLicenseDialog(event);
             this.nodeLicenseOnUpload = true;
         } else {
             this.showMetadataAfterUpload(event);
@@ -485,27 +474,26 @@ export class WorkspaceManagementDialogsComponent {
         this.showLtiTools = false;
         this.showLtiToolsChange.emit(false);
     }
-    closeLicense() {
-        if (this.nodeLicenseOnUpload) {
-            this.showMetadataAfterUpload(this.nodeLicense);
-        } else if (this.editorPending) {
-            this.editorPending = false;
-            this._nodeMetadata = this.nodeLicense;
-        } else if (this.reopenSimpleEdit) {
-            this.reopenSimpleEdit = false;
-            this._nodeSimpleEdit = this.nodeLicense;
-        } else if (this._nodeFromUpload) {
-            this.onUploadFilesProcessed.emit(this.nodeLicense);
-            this._nodeFromUpload = false;
-        }
-        this.nodeLicense = null;
-        this.nodeLicenseOnUpload = false;
-        this.nodeLicenseChange.emit(null);
-    }
-    updateLicense(nodes: Node[]) {
-        this.closeLicense();
-        this.onUpdateLicense.emit();
-        this.onRefresh.emit(nodes);
+    async openLicenseDialog(nodes: Node[]): Promise<void> {
+        const dialogRef = await this.dialogs.openLicenseDialog({ kind: 'nodes', nodes });
+        dialogRef.afterClosed().subscribe((updatedNodes) => {
+            if (this.nodeLicenseOnUpload) {
+                this.showMetadataAfterUpload(nodes);
+            } else if (this.editorPending) {
+                this.editorPending = false;
+                this._nodeMetadata = nodes;
+            } else if (this.reopenSimpleEdit) {
+                this.reopenSimpleEdit = false;
+                this._nodeSimpleEdit = nodes;
+            } else if (this._nodeFromUpload) {
+                this.onUploadFilesProcessed.emit(nodes);
+                this._nodeFromUpload = false;
+            }
+            this.nodeLicenseOnUpload = false;
+            if (updatedNodes) {
+                this.onRefresh.emit(updatedNodes);
+            }
+        });
     }
     deleteNodes(nodes: Node[]) {
         this.toast.showProgressDialog();
