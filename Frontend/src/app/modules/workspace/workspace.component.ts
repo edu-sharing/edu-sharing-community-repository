@@ -330,9 +330,6 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 RestHelper.goToLogin(this.router, this.config);
                 return;
             }
-            await this.prepareActionbar();
-            this.loadFolders(this.user);
-
             let valid = true;
             this.isGuest = login.isGuest;
             if (!login.isValidLogin || login.isGuest) {
@@ -356,6 +353,9 @@ export class WorkspaceMainComponent implements EventListener, OnDestroy {
                 this.goToLogin();
                 return;
             }
+            await this.prepareActionbar();
+            this.loadFolders(this.user);
+
             this.connector.scope = this.isSafe ? RestConstants.SAFE_SCOPE : null;
             this.isLoggedIn = true;
             try {
