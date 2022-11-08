@@ -11,7 +11,6 @@ import {
 } from '@angular/core';
 import { MdsTestComponent } from '../common/test/mds-test/mds-test.component';
 import { ApplyToLmsComponent } from '../common/ui/apply-to-lms/apply-to-lms.component';
-import { EmbedComponent } from '../common/ui/embed/embed.component';
 import { NodeRenderComponent } from '../common/ui/node-render/node-render.component';
 import { UIConstants } from '../core-module/ui/ui-constants';
 import { AdminComponent } from '../modules/admin/admin.component';
@@ -293,7 +292,10 @@ export const ROUTES: Routes = [
     { path: UIConstants.ROUTER_PREFIX + 'services', component: ServicesComponent },
 
     // embed
-    { path: UIConstants.ROUTER_PREFIX + 'embed/:component', component: EmbedComponent },
+    {
+        path: UIConstants.ROUTER_PREFIX + 'embed/:component',
+        loadChildren: () => import('../common/ui/embed/embed.module').then((m) => m.EmbedModule),
+    },
 
     { path: UIConstants.ROUTER_PREFIX + 'lti', component: LtiComponent },
 
