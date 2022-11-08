@@ -127,7 +127,7 @@ public class NodeFrontpage {
         searchSourceBuilder.from(0);
         SearchRequest searchRequest = new SearchRequest().source(searchSourceBuilder);
         searchRequest.indices("workspace");
-        SearchResponse searchResult = searchServiceElastic.getClient().search(searchRequest,RequestOptions.DEFAULT);
+        SearchResponse searchResult = searchServiceElastic.searchNative(searchRequest);
         List<NodeRef> result=new ArrayList<>();
         for(SearchHit hit : searchResult.getHits().getHits()){
             logger.info("score:"+hit.getScore() +" id:"+hit.getId() + " "+ ((Map)hit.getSourceAsMap().get("properties")).get("cm:name"));

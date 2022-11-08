@@ -24,7 +24,6 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
-import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.repository.server.tools.URLTool;
@@ -34,8 +33,9 @@ import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SearchVCard;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.delete.DeleteResponse;
+import org.elasticsearch.action.search.*;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -59,7 +59,6 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.xcontent.*;
 import org.springframework.context.ApplicationContext;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
@@ -711,9 +710,21 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 map((k) -> new SearchVCard(k.toString())).
                 collect(Collectors.toCollection(HashSet::new));
     }
-    public RestHighLevelClient getClient() throws IOException {
+    protected RestHighLevelClient getClient() throws IOException {
         checkClient();
         return client;
+    }
+    public DeleteResponse deleteNative(DeleteRequest deleteRequest) throws IOException {
+        return getClient().delete(deleteRequest, getRequestOptions());
+    }
+    public SearchResponse searchNative(SearchRequest searchRequest) throws IOException {
+        return getClient().search(searchRequest, getRequestOptions());
+    }
+    public SearchResponse scrollNative(SearchScrollRequest searchScrollRequest) throws IOException {
+        return getClient().scroll(searchScrollRequest, getRequestOptions());
+    }
+    public ClearScrollResponse clearScrollNative(ClearScrollRequest clearScrollRequest) throws IOException {
+        return getClient().clearScroll(clearScrollRequest, getRequestOptions());
     }
     public void checkClient() throws IOException {
         if(client == null || !client.ping(getRequestOptions())){
