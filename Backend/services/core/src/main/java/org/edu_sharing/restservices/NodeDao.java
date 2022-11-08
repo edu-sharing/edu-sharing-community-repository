@@ -843,7 +843,7 @@ public class NodeDao {
 		// Throws ConcurrencyFailureException if the previous call changes the preview (DESP-851)
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(()-> {
+		serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(()-> {
 
 			try {
 				mergeVersionComment(properties, comment);
@@ -854,12 +854,17 @@ public class NodeDao {
 				// 2. versioning
 				this.nodeService.createVersion(nodeId);
 
-				return new NodeDao(repoDao, nodeId, Filter.createShowAllFilter());
-
 			} catch (Throwable t) {
 				throw DAOException.mapping(t);
 			}
+			return null;
 		});
+		// don't do this in transaction since it could cause rollbacks!
+		try {
+			return new NodeDao(repoDao, nodeId, Filter.createShowAllFilter());
+		} catch (Throwable t) {
+			throw DAOException.mapping(t);
+		}
 	}
 	
 	public NodeDao changePreview(InputStream is,String mimetype, boolean version) throws DAOException {
