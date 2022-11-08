@@ -1,5 +1,6 @@
 package org.edu_sharing.restservices;
 
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.restservices.tracking.v1.model.Tracking;
 import org.edu_sharing.restservices.tracking.v1.model.TrackingNode;
@@ -23,7 +24,7 @@ public class TrackingDAO {
                     Node node=null;
                     if(track.getNode()!=null) {
                         try {
-                            node = NodeDao.getNode(RepositoryDao.getHomeRepository(), track.getNode(), Filter.createShowAllFilter()).asNode();
+                            node = NodeDao.getAsNodeSimple(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, track.getNode()));
                         }catch(DAOMissingException e){
                             // node is propably deleted, only set the ref
                             node = new Node();
