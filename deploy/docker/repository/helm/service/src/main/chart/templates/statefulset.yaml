@@ -64,7 +64,7 @@ spec:
       - name: {{ include "edusharing_repository_service.name" . }}-server
         image: {{ include "edusharing_repository_service.image" . }}{{ .Values.image.prefix }}-deploy-docker-repository-build-service:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
-        {{- if .Values.config.jvm.debug }}
+        {{- if default .Values.global.debug .Values.debug }}
         args: [ "catalina.sh", "jpda", "run" ]
         {{- end }}
         {{- $patroni := merge .Values.config.database.patroni .Values.global.patroni }}
@@ -92,7 +92,7 @@ spec:
         - name: metrics
           containerPort: 9090
         {{- end }}
-        {{- if .Values.config.jvm.debug }}
+        {{- if default .Values.global.debug .Values.debug }}
         - name: jpda
           containerPort: 5005
         {{- end }}

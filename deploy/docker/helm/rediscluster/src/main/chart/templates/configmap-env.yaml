@@ -6,6 +6,7 @@ metadata:
 data:
   ALLOW_EMPTY_PASSWORD: "yes"
   REDIS_ALLOW_REMOTE_CONNECTIONS: "yes"
+  REDIS_AOF_ENABLED: "{{ if .Values.config.aof.enabled }}yes{{ else }}no{{ end }}"
   REDIS_CLUSTER_DYNAMIC_IPS: "yes"
   REDIS_CLUSTER_REPLICAS: {{ .Values.config.cluster.replicas | quote }}
   REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP: {{ .Values.config.cluster.wait | quote }}

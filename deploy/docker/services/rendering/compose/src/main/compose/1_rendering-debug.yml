@@ -5,7 +5,3 @@ services:
   services-rendering-database:
     ports:
       - "${COMMON_BIND_HOST:-127.0.0.1}:${SERVICES_RENDERING_DATABASE_PORT:-9000}:5432"
-
-  services-rendering-service:
-    volumes:
-      - "profiler:/opt/profiler"

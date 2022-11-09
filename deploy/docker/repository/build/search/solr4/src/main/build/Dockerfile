@@ -5,8 +5,11 @@ FROM ${docker.from.tomcat}
 RUN set -eux \
     && apt-get update -y \
     && apt-get install -y --no-install-recommends \
+        curl \
         jq \
+        nano \
         wait-for-it \
+        wget \
         xmlstarlet \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
@@ -89,6 +92,14 @@ RUN set -eux \
         solr4/workspace-SpacesStore/conf/solrcore.properties
 
 COPY --chown=worker:worker assets/solr4 solr4/
+
+########################################################################################################################
+
+RUN set -eux \
+    && mkdir profiler \
+    && wget -qO- https://github.com/Granulate/async-profiler/releases/download/v2.0g1/async-profiler-2.0-linux-x64.tar.gz | tar xvz -C profiler
+
+COPY --chown=worker:worker assets/profiler profiler/
 
 ########################################################################################################################
 
