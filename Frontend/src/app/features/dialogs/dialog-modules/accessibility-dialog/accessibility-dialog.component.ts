@@ -35,12 +35,12 @@ export class AccessibilityDialogComponent implements OnInit, OnDestroy {
             });
         this.saveTrigger
             .pipe(
-                tap(() => this.dialogRef.patchState({ savingState: 'saving' })),
+                tap(() => this.dialogRef.patchState({ autoSavingState: 'saving' })),
                 switchMap(() => rxjs.from(this.accessibility.set(this.settings))),
             )
             .subscribe({
-                next: () => this.dialogRef.patchState({ savingState: 'saved' }),
-                error: () => this.dialogRef.patchState({ savingState: 'error' }),
+                next: () => this.dialogRef.patchState({ autoSavingState: 'saved' }),
+                error: () => this.dialogRef.patchState({ autoSavingState: 'error' }),
             });
     }
 

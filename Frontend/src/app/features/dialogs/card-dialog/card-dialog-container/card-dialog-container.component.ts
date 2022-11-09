@@ -28,7 +28,7 @@ import { DialogButton } from '../../../../core-module/core.module';
 import { UIAnimation } from '../../../../core-module/ui/ui-animation';
 import { CardDialogConfig, Closable } from '../card-dialog-config';
 import { CardDialogRef } from '../card-dialog-ref';
-import { SavingState } from '../card-dialog-state';
+import { AutoSavingState } from '../card-dialog-state';
 
 let idCounter = 0;
 
@@ -118,7 +118,7 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
     config: CardDialogConfig<unknown> = {};
     buttons: DialogButton[];
     isLoading = false;
-    savingState: SavingState = null;
+    autoSavingState: AutoSavingState = null;
 
     /** Emits when an animation state changes. */
     readonly animationStateChanged = new EventEmitter<DialogAnimationEvent>();
@@ -166,11 +166,11 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
                 this.isLoading = isLoading;
             });
         this.dialogRef
-            .observeState('savingState')
+            .observeState('autoSavingState')
             .pipe(takeUntil(this.destroyed$))
-            .subscribe((savingState) => {
+            .subscribe((autoSavingState) => {
                 this.updateButtons();
-                this.savingState = savingState;
+                this.autoSavingState = autoSavingState;
             });
     }
 
@@ -179,7 +179,7 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
     }
 
     private updateButtons(): void {
-        if (this.dialogRef.state.isLoading || this.dialogRef.state.savingState === 'saving') {
+        if (this.dialogRef.state.isLoading || this.dialogRef.state.autoSavingState === 'saving') {
             this.buttons = this.config.buttons?.map((button) => ({
                 ...button,
                 disabled: true,
