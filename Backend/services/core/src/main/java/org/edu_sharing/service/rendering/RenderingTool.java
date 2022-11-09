@@ -156,7 +156,6 @@ public class RenderingTool {
 	}
 
 	public static void buildRenderingCache(String nodeId) {
-		ContextManagementFilter.B3 b3 = ContextManagementFilter.b3.get();
 		prepareExecutor.execute(()->{
 			AuthenticationUtil.runAsSystem(()-> {
 				try {
@@ -169,7 +168,6 @@ public class RenderingTool {
 					}
 					// @TODO: May we need to build up caches just for particular file types?
 					RenderingServiceImpl service = (RenderingServiceImpl) RenderingServiceFactory.getLocalService();
-					service.setB3(b3);
 					return service.getDetails(nodeId, null, DISPLAY_PRERENDER, null);
 				} catch (Exception e) {
 					logger.warn("Error building rendering cache for node " + nodeId + ": " + e.getMessage(), e);

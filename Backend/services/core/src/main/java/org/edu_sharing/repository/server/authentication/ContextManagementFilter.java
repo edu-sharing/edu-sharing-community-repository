@@ -41,7 +41,7 @@ import org.springframework.context.ApplicationContext;
 
 public class ContextManagementFilter implements javax.servlet.Filter {
 	// stores the currently accessing tool type, e.g. CONNECTOR
-	public static ThreadLocal<String> accessToolType = new ThreadLocal<>();
+	public static ThreadLocal<ApplicationInfo> accessTool = new ThreadLocal<>();
 
 	Logger logger = Logger.getLogger(ContextManagementFilter.class);
 
@@ -152,7 +152,7 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 	 * Checks if app headers and signature are present and sets the header accordingly
 	 */
 	private void handleAppSignature(HttpServletRequest httpReq, HttpServletResponse httpRes) throws IOException {
-		accessToolType.set(null);
+		accessTool.set(null);
 
 		String appId = httpReq.getHeader("X-Edu-App-Id");
 		if(appId != null) {
@@ -163,7 +163,7 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 				httpRes.sendError(result.getStatuscode(), result.getMessage());
 			} else {
 				ApplicationInfo appInfo = result.getAppInfo();
-				accessToolType.set(appInfo);
+				accessTool.set(appInfo);
 
 				String courseId = httpReq.getHeader("X-Edu-Usage-Course-Id");
 				String nodeId = httpReq.getHeader("X-Edu-Usage-Node-Id");

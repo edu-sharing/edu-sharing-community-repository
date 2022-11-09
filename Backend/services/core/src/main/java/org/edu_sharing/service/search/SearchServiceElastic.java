@@ -1027,7 +1027,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 map((k) -> new SearchVCard(k.toString())).
                 collect(Collectors.toCollection(HashSet::new));
     }
-    protected RestHighLevelClient getClient() throws IOException {
+    public RestHighLevelClient getClient() throws IOException {
         checkClient();
         return client;
     }
