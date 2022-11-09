@@ -39,3 +39,4 @@ data:
   SERVICES_RENDERING_SERVICE_PROXY_PORT: {{ .Values.config.http.client.proxy.proxyport | quote }}
   SERVICES_RENDERING_SERVICE_PROXY_USER: {{ .Values.config.http.client.proxy.proxyuser | quote }}
   SERVICES_RENDERING_SERVICE_PROXY_PASS: {{ .Values.config.http.client.proxy.proxypass | quote }}
+  SERVICES_RENDERING_SERVICE_VIEWER_ENABLED: {{ .Values.config.viewer.enabled | quote }}

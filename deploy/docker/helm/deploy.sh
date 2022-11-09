@@ -21,6 +21,9 @@ touch "${root}/helm/context/${CONTEXT}/${NAMESPACE}/${RELEASE}.yaml"
 
 OPTIONS=()
 
+OPTIONS+=("--timeout")
+OPTIONS+=("30m")
+
 OPTIONS+=("--values")
 OPTIONS+=("${root}/helm/config/${RELEASE}.yaml")
 OPTIONS+=("--values")
@@ -54,7 +57,9 @@ file="bundle/target/helm/repo/edu_sharing-projects-${RELEASE}-${VERSION}.tgz"
 if [[ -f $file ]]; then
 
 	set -x
-	helm upgrade --install "${RELEASE}" "${file}" "${OPTIONS[@]}"
+	helm upgrade --install "${RELEASE}" \
+	  "${file}" \
+    "${OPTIONS[@]}"
 	set +x
 
 else
@@ -73,7 +78,6 @@ else
 	helm upgrade --install "${RELEASE}" \
 		"edu_sharing-projects-${RELEASE}" --version "${VERSION}" \
 		--repo "https://artifacts.edu-sharing.com/repository/helm/" \
-		--timeout 30m \
 		"${CREDENTIALS[@]}" \
 		"${OPTIONS[@]}"
 	set +x

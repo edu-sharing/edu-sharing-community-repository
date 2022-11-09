@@ -17,9 +17,11 @@ RUN set -eux \
         libxml2-dev \
         libzip-dev \
         mariadb-client \
+        nano \
         postgresql-client \
         redis-tools \
         wait-for-it \
+        wget \
         xmlstarlet \
         zip \
     && docker-php-ext-install -j$(nproc) soap \

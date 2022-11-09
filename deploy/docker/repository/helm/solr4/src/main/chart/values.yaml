@@ -18,6 +18,8 @@ global:
         permission: false
         spec: {}
 
+  debug: false
+
   image:
     pullPolicy: Always
     pullSecrets: []
@@ -64,7 +66,6 @@ service:
 config:
 
   jvm:
-    debug: false
     ram:
       minPercentage: "75.0"
       maxPercentage: "75.0"
@@ -79,6 +80,10 @@ config:
   repository:
     host: edusharing-repository-service
     port: 8080
+
+########################################################################################################################
+
+debug: false
 
 ########################################################################################################################
 

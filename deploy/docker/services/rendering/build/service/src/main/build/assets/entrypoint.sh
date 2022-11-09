@@ -33,6 +33,8 @@ my_gdpr_enabled="${SERVICES_RENDERING_SERVICE_GDPR_ENABLED:-false}"
 my_gdpr_modules="${SERVICES_RENDERING_SERVICE_GDPR_MODULES:-}"
 my_gdpr_urls="${SERVICES_RENDERING_SERVICE_GDPR_URLS:-}"
 
+my_viewer_enabled="${SERVICES_RENDERING_SERVICE_VIEWER_ENABLED:-true}"
+
 my_plugins="${SERVICES_RENDERING_SERVICE_PLUGINS:-}"
 
 cache_cluster="${CACHE_CLUSTER:-false}"
@@ -222,6 +224,9 @@ sed -i -r "s|\$CC_RENDER_PATH.*|\$CC_RENDER_PATH = '${RS_CACHE}';|" "${systemCon
 
 sed -i -r 's|\$DATAPROTECTIONREGULATION_CONFIG.*|\$DATAPROTECTIONREGULATION_CONFIG = ["enabled" => '"${my_gdpr_enabled}"', "modules" => ['"${my_gdpr_modules/,/\",\"}"'], "urls" => ['"${my_gdpr_urls}"']];|' "${systemConf}"
 grep -q '\$DATAPROTECTIONREGULATION_CONFIG' "${systemConf}" || echo "\$DATAPROTECTIONREGULATION_CONFIG = [\"enabled\" => ${my_gdpr_enabled}, \"modules\" => [\"${my_gdpr_modules/,/\",\"}\"], \"urls\" => [${my_gdpr_urls}]];" >> "${systemConf}"
+
+sed -i -r "s|DEFINE\(\"ENABLE_VIEWER_JS\".*|DEFINE\(\"ENABLE_VIEWER_JS\", ${my_viewer_enabled}\);|" "${systemConf}"
+grep -q 'ENABLE_VIEWER_JS' "${systemConf}" || echo "DEFINE(\"ENABLE_VIEWER_JS\", ${my_viewer_enabled});" >> "${systemConf}"
 
 proxyConf="${RS_ROOT}/conf/proxy.conf.php"
 rm -f "${proxyConf}"

@@ -49,7 +49,7 @@ spec:
       - name: {{ include "edusharing_repository_search_solr4.name" . }}
         image: {{ include "edusharing_repository_search_solr4.image" . }}{{ .Values.image.prefix }}-deploy-docker-repository-build-search-solr4:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
-        {{- if .Values.config.jvm.debug }}
+        {{- if default .Values.global.debug .Values.debug }}
         args: [ "catalina.sh", "jpda", "run" ]
         {{- end }}
         envFrom:
@@ -62,7 +62,7 @@ spec:
         - name: metrics
           containerPort: 9090
         {{- end }}
-        {{- if .Values.config.jvm.debug }}
+        {{- if default .Values.global.debug .Values.debug }}
         - name: jpda
           containerPort: 5005
         {{- end }}

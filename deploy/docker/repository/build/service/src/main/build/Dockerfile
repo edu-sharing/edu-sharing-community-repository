@@ -5,16 +5,19 @@ FROM ${docker.from.tomcat}
 RUN set -eux \
     && apt-get update -y \
     && apt-get install -y --no-install-recommends \
+        curl \
         exiftool \
 	    ffmpeg \
 	    ghostscript \
 	    gsfonts \
 	    imagemagick \
 	    jq \
+	    nano \
         postgresql-client \
 	    redis-tools \
         ruby-hocon \
         wait-for-it \
+        wget \
         xmlstarlet \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
@@ -161,6 +164,14 @@ COPY --chown=worker:worker config tomcat/shared/lib/
 ########################################################################################################################
 
 COPY --chown=worker:worker assets/plugins bin/plugins/
+
+########################################################################################################################
+
+RUN set -eux \
+    && mkdir profiler \
+    && wget -qO- https://github.com/Granulate/async-profiler/releases/download/v2.0g1/async-profiler-2.0-linux-x64.tar.gz | tar xvz -C profiler
+
+COPY --chown=worker:worker assets/profiler profiler/
 
 ########################################################################################################################
 

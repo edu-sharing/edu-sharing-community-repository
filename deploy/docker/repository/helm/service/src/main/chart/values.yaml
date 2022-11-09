@@ -30,6 +30,8 @@ global:
         permission: false
         spec: {}
 
+  debug: false
+
   image:
     pullPolicy: Always
     pullSecrets: []
@@ -162,7 +164,6 @@ config:
     appid: local
 
   jvm:
-    debug: false
     ram:
       minPercentage: "75.0"
       maxPercentage: "75.0"
@@ -235,6 +236,10 @@ config:
       enabled: ${helm.config.transform.enabled}
       host: edusharing-repository-transform
       port: 8080
+
+########################################################################################################################
+
+debug: false
 
 ########################################################################################################################
 
