@@ -25,6 +25,7 @@ import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.service.authentication.ScopeUserHomeService;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
+import org.edu_sharing.service.feedback.FeedbackServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.RecurseMode;
@@ -97,7 +98,7 @@ public class PersonLifecycleService {
 			CCConstants.CCM_TYPE_IO,
 			CCConstants.CCM_TYPE_MAP,
 			CCConstants.CCM_TYPE_COLLECTION_PROPOSAL,
-			CCConstants.CCM_TYPE_COLLECTION_FEEDBACK,
+			CCConstants.CCM_TYPE_MATERIAL_FEEDBACK,
 			CCConstants.CCM_TYPE_COMMENT,
 			CCConstants.CCM_TYPE_RATING
 	);
@@ -211,15 +212,9 @@ public class PersonLifecycleService {
 			else{
 				result.comments=assignUserToType(personNodeRef, deletedUsername, CCConstants.CCM_TYPE_COMMENT,null).size();
 			}
-			if(options.ratings.delete) {
-				processRatings(result, userName, options.ratings.delete);
-			}
-			if(options.collectionFeedback.delete){
-				result.collectionFeedback=deleteAllOfType(personNodeRef, CCConstants.CCM_TYPE_COLLECTION_FEEDBACK,null).size();
-			}
-			else{
-				result.collectionFeedback=assignUserToType(personNodeRef, deletedUsername, CCConstants.CCM_TYPE_COLLECTION_FEEDBACK,null).size();
-			}
+			processRatings(result, userName, options.ratings.delete);
+			processFeedback(result, userName, options.collectionFeedback.delete);
+
 			handleStatistics(personNodeRef, deletedUsername,options);
 
 			logger.info("deleting person");
@@ -241,6 +236,13 @@ public class PersonLifecycleService {
 			RatingServiceFactory.getLocalService().deleteUserData(userName);
 		} else {
 			RatingServiceFactory.getLocalService().changeUserData(userName, result.deletedName);
+		}
+	}
+	public void processFeedback(PersonDeleteResult result, String userName, boolean delete) {
+		if(delete) {
+			FeedbackServiceFactory.getLocalService().deleteUserData(userName);
+		} else {
+			FeedbackServiceFactory.getLocalService().changeUserData(userName, result.deletedName);
 		}
 	}
 

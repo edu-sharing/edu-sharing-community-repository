@@ -54,6 +54,8 @@ import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.service.bulk.BulkServiceFactory;
 import org.edu_sharing.service.bulk.BulkServiceInterceptorInterface;
 import org.edu_sharing.service.config.ConfigServiceFactory;
+import org.edu_sharing.service.feedback.FeedbackServiceFactory;
+import org.edu_sharing.service.feedback.FeedbackServiceImpl;
 import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.provider.ProviderHelper;
 import org.edu_sharing.service.version.VersionService;
@@ -239,6 +241,7 @@ public class RepoFactory {
 		appClassCache.clear();
 		BulkServiceFactory.getInstance().refresh();
 		MetadataReader.refresh();
+		FeedbackServiceFactory.getLocalService().refresh();
 		ConfigServiceFactory.refresh();
 		VersionService.invalidateCache();
 		try {

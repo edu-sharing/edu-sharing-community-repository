@@ -10,6 +10,28 @@ stages:
   - test
   - deploy
 
+unittest frontend:
+  stage: test
+  variables:
+    NODE_VERSION: 16
+    CHROME_BIN: /usr/bin/chromium-browser
+  image: node:$NODE_VERSION-alpine3.16
+  cache:
+    key:
+      files:
+        - Frontend/package-lock.json
+      prefix: node-modules-$NODE_VERSION
+    paths:
+      - Frontend/node_modules
+  before_script:
+    - apk add chromium
+    - cd Frontend
+    # Install dependencies on cache miss, e.g., when first running on a ci runner.
+    - ([[ -d node_modules ]] || npm ci)
+  script:
+    - npm run prebuild
+    - npm run test-ci
+
 deploy:
   stage: deploy
   needs: []

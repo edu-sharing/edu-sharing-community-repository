@@ -207,7 +207,7 @@ public class CCConstants {
 
 	public final static String CCM_TYPE_COMMENT = "{http://www.campuscontent.de/model/1.0}comment";
 
-	public final static String CCM_TYPE_COLLECTION_FEEDBACK = "{http://www.campuscontent.de/model/1.0}collection_feedback";
+	public final static String CCM_TYPE_MATERIAL_FEEDBACK = "{http://www.campuscontent.de/model/1.0}material_feedback";
 
 	public final static String CCM_TYPE_RATING = "{http://www.campuscontent.de/model/1.0}rating";
 
@@ -394,9 +394,9 @@ public class CCConstants {
 	public final static String CCM_PROP_COMMENT_REPLY = "{http://www.campuscontent.de/model/1.0}comment_reply";
 	public final static String CCM_PROP_COMMENT_CONTENT = "{http://www.campuscontent.de/model/1.0}comment_content";
 
-	public final static String CCM_PROP_COLLECTION_FEEDBACK_AUTHORITY = "{http://www.campuscontent.de/model/1.0}collection_feedback_authority";
+	public final static String CCM_PROP_MATERIAL_FEEDBACK_AUTHORITY = "{http://www.campuscontent.de/model/1.0}material_feedback_authority";
 
-	public final static String CCM_PROP_COLLECTION_FEEDBACK_DATA = "{http://www.campuscontent.de/model/1.0}collection_feedback_data";
+	public final static String CCM_PROP_MATERIAL_FEEDBACK_DATA = "{http://www.campuscontent.de/model/1.0}material_feedback_data";
 
 	public final static String CCM_PROP_RATING_VALUE = "{http://www.campuscontent.de/model/1.0}rating_value";
 	public final static String CCM_PROP_RATING_TEXT = "{http://www.campuscontent.de/model/1.0}rating_text";
@@ -597,7 +597,7 @@ public class CCConstants {
 
 	public final static String CCM_ASSOC_RATING = "{http://www.campuscontent.de/model/1.0}childrating";
 
-	public final static String CCM_ASSOC_COLLECTION_FEEDBACK = "{http://www.campuscontent.de/model/1.0}childcollectionfeedback";
+	public final static String CCM_ASSOC_MATERIAL_FEEDBACK = "{http://www.campuscontent.de/model/1.0}childmaterialfeedback";
 	/**
 	 * update alfresco3stable auf alfresco34e
 	 *
@@ -893,7 +893,7 @@ public class CCConstants {
 
 	public final static String CCM_VALUE_TOOLPERMISSION_HANDLESERVICE = "TOOLPERMISSION_HANDLESERVICE";
 
-	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK = "TOOLPERMISSION_COLLECTION_FEEDBACK";
+	public final static String CCM_VALUE_TOOLPERMISSION_MATERIAL_FEEDBACK = "TOOLPERMISSION_MATERIAL_FEEDBACK";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_USAGE_STATISTIC = "TOOLPERMISSION_USAGE_STATISTIC";
 
@@ -1901,6 +1901,7 @@ public class CCConstants {
 			permission.add(PERMISSION_READ_PREVIEW);
 			permission.add(PERMISSION_READ_ALL);
 			permission.add(PERMISSION_COMMENT);
+			permission.add(PERMISSION_FEEDBACK);
 			permission.add(PERMISSION_RATE);
 			permission.add(PERMISSION_RATE_READ);
 			permission.add(PERMISSION_RELATION);

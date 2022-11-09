@@ -70,6 +70,7 @@ export class ToolpermissionManagerComponent {
                 RestConstants.TOOLPERMISSION_COMMENT_WRITE,
                 RestConstants.TOOLPERMISSION_RATE_READ,
                 RestConstants.TOOLPERMISSION_RATE_WRITE,
+                RestConstants.TOOLPERMISSION_MATERIAL_FEEDBACK,
             ],
         },
         {
@@ -97,7 +98,6 @@ export class ToolpermissionManagerComponent {
                 RestConstants.TOOLPERMISSION_COLLECTION_EDITORIAL,
                 RestConstants.TOOLPERMISSION_COLLECTION_CURRICULUM,
                 RestConstants.TOOLPERMISSION_COLLECTION_PINNING,
-                RestConstants.TOOLPERMISSION_COLLECTION_FEEDBACK,
                 RestConstants.TOOLPERMISSION_VIDEO_AUDIO_CUT,
                 RestConstants.TOOLPERMISSION_COLLECTION_CHANGE_OWNER,
             ],

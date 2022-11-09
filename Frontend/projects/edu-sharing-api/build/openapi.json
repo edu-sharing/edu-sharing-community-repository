@@ -5250,191 +5250,6 @@
         }
       }
     },
-    "/collection/v1/collections/{repository}/{collection}/feedback" : {
-      "get" : {
-        "tags" : [ "COLLECTION v1" ],
-        "summary" : "Get feedback of collection.",
-        "description" : "Requires permission \"???\" on the specific permission",
-        "operationId" : "getFeedbackOfCollection",
-        "parameters" : [ {
-          "name" : "repository",
-          "in" : "path",
-          "description" : "ID of repository (or \"-home-\" for home repository)",
-          "required" : true,
-          "schema" : {
-            "type" : "string",
-            "default" : "-home-"
-          }
-        }, {
-          "name" : "collection",
-          "in" : "path",
-          "description" : "ID of collection",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "string"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Preconditions are not present.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401" : {
-            "description" : "Authorization failed.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403" : {
-            "description" : "Session user has insufficient rights to perform this operation.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Ressources are not found.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500" : {
-            "description" : "Fatal error occured.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post" : {
-        "tags" : [ "COLLECTION v1" ],
-        "summary" : "Post feedback to collection.",
-        "description" : "Requires permission \"Feedback\" on the specific collection",
-        "operationId" : "addFeedbackToCollection",
-        "parameters" : [ {
-          "name" : "repository",
-          "in" : "path",
-          "description" : "ID of repository (or \"-home-\" for home repository)",
-          "required" : true,
-          "schema" : {
-            "type" : "string",
-            "default" : "-home-"
-          }
-        }, {
-          "name" : "collection",
-          "in" : "path",
-          "description" : "ID of collection",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "object",
-                "additionalProperties" : {
-                  "type" : "array",
-                  "items" : {
-                    "type" : "string"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses" : {
-          "200" : {
-            "description" : "OK.",
-            "content" : {
-              "application/json" : { }
-            }
-          },
-          "400" : {
-            "description" : "Preconditions are not present.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401" : {
-            "description" : "Authorization failed.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403" : {
-            "description" : "Session user has insufficient rights to perform this operation.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Ressources are not found.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500" : {
-            "description" : "Fatal error occured.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/collection/v1/collections/{repository}/{collection}/references/{node}" : {
       "put" : {
         "tags" : [ "COLLECTION v1" ],
@@ -7882,6 +7697,202 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/ConnectorList"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Preconditions are not present.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Authorization failed.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Session user has insufficient rights to perform this operation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Ressources are not found.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Fatal error occured.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/feedback/v1/feedback/{repository}/{node}/add" : {
+      "put" : {
+        "tags" : [ "FEEDBACK v1" ],
+        "summary" : "Give feedback on a node",
+        "description" : "Adds feedback to the given node. Depending on the internal config, the current user will be obscured to prevent back-tracing to the original id",
+        "operationId" : "addFeedback",
+        "parameters" : [ {
+          "name" : "repository",
+          "in" : "path",
+          "description" : "ID of repository (or \"-home-\" for home repository)",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "default" : "-home-"
+          }
+        }, {
+          "name" : "node",
+          "in" : "path",
+          "description" : "ID of node",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "description" : "feedback data, key/value pairs",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "additionalProperties" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/FeedbackResult"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Preconditions are not present.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Authorization failed.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Session user has insufficient rights to perform this operation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Ressources are not found.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Fatal error occured.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/feedback/v1/feedback/{repository}/{node}/list" : {
+      "get" : {
+        "tags" : [ "FEEDBACK v1" ],
+        "summary" : "Get given feedback on a node",
+        "description" : "Get all given feedback for a node. Requires Coordinator permissions on node",
+        "operationId" : "getFeedbacks",
+        "parameters" : [ {
+          "name" : "repository",
+          "in" : "path",
+          "description" : "ID of repository (or \"-home-\" for home repository)",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "default" : "-home-"
+          }
+        }, {
+          "name" : "node",
+          "in" : "path",
+          "description" : "ID of node",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/FeedbackData"
+                  }
                 }
               }
             }
@@ -26684,24 +26695,6 @@
           }
         }
       },
-      "CollectionFeedback" : {
-        "type" : "object",
-        "properties" : {
-          "createdAt" : {
-            "type" : "string",
-            "format" : "date-time"
-          },
-          "creator" : {
-            "type" : "string"
-          },
-          "feedback" : {
-            "type" : "object",
-            "additionalProperties" : {
-              "type" : "object"
-            }
-          }
-        }
-      },
       "CollectionEntries" : {
         "required" : [ "collections" ],
         "type" : "object",
@@ -27668,6 +27661,42 @@
             "items" : {
               "$ref" : "#/components/schemas/Connector"
             }
+          }
+        }
+      },
+      "FeedbackResult" : {
+        "type" : "object",
+        "properties" : {
+          "nodeId" : {
+            "type" : "string"
+          },
+          "wasUpdated" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "FeedbackData" : {
+        "type" : "object",
+        "properties" : {
+          "authority" : {
+            "type" : "string"
+          },
+          "data" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string"
+              }
+            }
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "modifiedAt" : {
+            "type" : "string",
+            "format" : "date-time"
           }
         }
       },

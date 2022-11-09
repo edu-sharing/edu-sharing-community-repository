@@ -12,6 +12,7 @@ export {
     MdsWidget,
     MdsWidgetCondition,
     MetadataSetInfo,
+    FeedbackData,
     Node,
     NodeEntries,
     NodeRef,
