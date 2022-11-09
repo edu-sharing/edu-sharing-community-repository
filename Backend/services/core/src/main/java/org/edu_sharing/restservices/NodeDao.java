@@ -103,6 +103,20 @@ public class NodeDao {
 
 	private static ThreadLocal<Boolean> isGlobalAdmin = new ThreadLocal<>();
 
+	private NodeDao(org.alfresco.service.cmr.repository.NodeRef nodeRef) throws Throwable {
+		this.nodeId = nodeRef.getId();
+		storeId = nodeRef.getStoreRef().getIdentifier();
+		storeProtocol = nodeRef.getStoreRef().getProtocol();
+		filter = Filter.createShowAllFilter();
+		repoDao = RepositoryDao.getHomeRepository();
+		access = new ArrayList<>();
+		type = NodeServiceHelper.getType(nodeRef);
+		aspects = Arrays.asList(NodeServiceHelper.getAspects(nodeRef));
+		nodeProps = NodeServiceHelper.getProperties(nodeRef);
+		previewData = null;
+		ownerUsername = null;
+	}
+
 	public static NodeDao getNodeWithVersion(RepositoryDao repoDao, String nodeId,String versionLabel) throws DAOException {
 		if(versionLabel!=null && versionLabel.equals("-1"))
 			versionLabel = null;
@@ -843,7 +857,7 @@ public class NodeDao {
 		// Throws ConcurrencyFailureException if the previous call changes the preview (DESP-851)
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(()-> {
+		serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(()-> {
 
 			try {
 				mergeVersionComment(properties, comment);
@@ -854,12 +868,17 @@ public class NodeDao {
 				// 2. versioning
 				this.nodeService.createVersion(nodeId);
 
-				return new NodeDao(repoDao, nodeId, Filter.createShowAllFilter());
-
 			} catch (Throwable t) {
 				throw DAOException.mapping(t);
 			}
+			return null;
 		});
+		// don't do this in transaction since it could cause rollbacks!
+		try {
+			return new NodeDao(repoDao, nodeId, Filter.createShowAllFilter());
+		} catch (Throwable t) {
+			throw DAOException.mapping(t);
+		}
 	}
 	
 	public NodeDao changePreview(InputStream is,String mimetype, boolean version) throws DAOException {
@@ -987,7 +1006,7 @@ public class NodeDao {
 		public Node asNode(boolean fetchReference) throws DAOException {
 		if(this.version!=null){
 			VersionedNode node=new VersionedNode();
-			fillNodeObject(node);
+			fillNodeObject(node, true, true);
 			VersionedNode.Version version=new VersionedNode.Version();
 			version.setComment((String)nodeProps.get(CCConstants.CCM_PROP_IO_VERSION_COMMENT));
 			node.setVersion(version);
@@ -998,7 +1017,7 @@ public class NodeDao {
 			data = new CollectionReference();
 			fillNodeReference((CollectionReference) data);
 		}
-		fillNodeObject(data);
+		fillNodeObject(data, true, true);
 		return data;
 	}
 
@@ -1051,7 +1070,7 @@ public class NodeDao {
 		return originalId;
 	}
 
-	private void fillNodeObject(Node data) throws DAOException {
+	private void fillNodeObject(Node data, boolean fillOwner, boolean fillContent) throws DAOException {
 		data.setRef(getRef());
 		data.setParent(getParentRef());
 		data.setRemote(getRemote());
@@ -1065,12 +1084,16 @@ public class NodeDao {
 
 		data.setCreatedAt(getCreatedAt());
 		data.setCreatedBy(getCreatedBy());
-		data.setOwner(getOwner());
+		if(fillOwner) {
+			data.setOwner(getOwner());
+		}
 
 		data.setModifiedAt(getModifiedAt());
 		data.setModifiedBy(getModifiedBy());
 
-		data.setContent(getContent(data));
+		if(fillContent) {
+			data.setContent(getContent(data));
+		}
 
 		data.setDownloadUrl(getDownloadUrl());
 		data.setMetadataset(getMetadataSet());
@@ -2300,5 +2323,27 @@ public class NodeDao {
 
 	public static void setIsGlobalAdmin(Boolean isGlobalAdmin){
 		NodeDao.isGlobalAdmin.set(isGlobalAdmin);
+	}
+
+	/**
+	 * simply transfer an alfresco node to an rest-api compatible node object
+	 * This is a pretty simple call which is only supposed to be used for performance critical calls and will skip things like
+	 * 	- Current Access permission list
+	 * 	- Previews
+	 * 	- Content info
+	 * 	and ONLY include:
+	 * 	- aspects
+	 * 	- properties
+	 * 	Only use it if you don't need any advanced data or mappings
+	 */
+	public static Node getAsNodeSimple(org.alfresco.service.cmr.repository.NodeRef nodeRef) throws DAOException {
+		try {
+			NodeDao dao = new NodeDao(nodeRef);
+			Node node = new Node();
+			dao.fillNodeObject(node, false, false);
+			return node;
+		} catch (Throwable t) {
+			throw DAOException.mapping(t);
+		}
 	}
 }

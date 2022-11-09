@@ -114,7 +114,7 @@ public class FixElasticSearchDeletedNodes extends AbstractJob{
                 DeleteRequest request = new DeleteRequest(
                         INDEX_WORKSPACE,
                         Long.toString(dbid));
-                searchServiceElastic.getClient().delete(request,RequestOptions.DEFAULT);
+                searchServiceElastic.deleteNative(request);
             }
         }
     }
@@ -128,19 +128,19 @@ public class FixElasticSearchDeletedNodes extends AbstractJob{
         searchSourceBuilder.query(queryBuilder);
         searchSourceBuilder.fetchSource(null,new String[]{"preview"});
         searchRequest.source(searchSourceBuilder);
-        return searchServiceElastic.getClient().search(searchRequest, RequestOptions.DEFAULT);
+        return searchServiceElastic.searchNative(searchRequest);
     }
 
     private SearchResponse scroll(Scroll scroll, String scrollId) throws IOException {
         SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
         scrollRequest.scroll(scroll);
-        return searchServiceElastic.getClient().scroll(scrollRequest, RequestOptions.DEFAULT);
+        return searchServiceElastic.scrollNative(scrollRequest);
     }
 
     private boolean clearScroll(String scrollId) throws IOException {
         ClearScrollRequest clearScrollRequest = new ClearScrollRequest();
         clearScrollRequest.addScrollId(scrollId);
-        ClearScrollResponse clearScrollResponse = searchServiceElastic.getClient().clearScroll(clearScrollRequest, RequestOptions.DEFAULT);
+        ClearScrollResponse clearScrollResponse = searchServiceElastic.clearScrollNative(clearScrollRequest);
         return clearScrollResponse.isSucceeded();
     }
 
