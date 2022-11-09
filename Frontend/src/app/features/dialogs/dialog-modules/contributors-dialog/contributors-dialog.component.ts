@@ -8,7 +8,12 @@ import {
 } from '../../../../core-module/core.module';
 import { VCard } from '../../../../core-module/ui/VCard';
 import { Toast } from '../../../../core-ui-module/toast';
-import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
+import {
+    CardDialogConfig,
+    CARD_DIALOG_DATA,
+    Closable,
+    configForNode,
+} from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { DialogsService } from '../../dialogs.service';
 import {
@@ -64,6 +69,9 @@ export class ContributorsDialogComponent implements OnInit {
         } else {
             this.node = this.data.node;
         }
+        this.dialogRef.patchConfig(
+            configForNode(this.node) as Partial<CardDialogConfig<ContributorsDialogData>>,
+        );
         for (let role of this.rolesLifecycle) {
             this.contributorLifecycle[role] = [];
             let list = this.node.properties[RestConstants.CONTRIBUTOR_LIFECYCLE_PREFIX + role];
