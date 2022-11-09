@@ -1601,7 +1601,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		return repoClient.getPermissions(nodeId);
 	}
 	private boolean isAdminOrSystem(){
-		return Arrays.asList(AuthenticationUtil.SYSTEM_USER_NAME,ApplicationInfoList.getHomeRepository().getUsername()).contains(AuthenticationUtil.getFullyAuthenticatedUser());
+		return Arrays.asList(AuthenticationUtil.SYSTEM_USER_NAME,ApplicationInfoList.getHomeRepository().getUsername()).contains(AuthenticationUtil.getFullyAuthenticatedUser()) || AuthenticationUtil.isRunAsUserTheSystemUser();
 	}
 
 	@Override
