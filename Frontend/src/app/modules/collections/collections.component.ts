@@ -27,7 +27,6 @@ import { BridgeService } from '../../core-bridge-module/bridge.service';
 import * as EduData from '../../core-module/core.module';
 import {
     AbstractList,
-    Collection,
     CollectionReference,
     ConfigurationHelper,
     ConfigurationService,
@@ -298,7 +297,6 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
     private showCollection = false;
     reurl: any;
     private _collectionShare: Node;
-    private feedbacks: CollectionFeedback[];
     private params: Params;
     private destroyed = new Subject<void>();
     private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
@@ -1028,15 +1026,7 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
 
                     this.refreshContent(callback);
                     if (this.feedbackAllowed() && this.params.feedback === 'true') {
-                        this.mainNavService.getDialogs().collectionWriteFeedback = collection;
-                        this.mainNavService
-                            .getDialogs()
-                            .collectionWriteFeedbackChange.pipe(first())
-                            .subscribe(() => {
-                                if (this.params.feedbackClose === 'true') {
-                                    window.close();
-                                }
-                            });
+                        this.mainNavService.getDialogs().materialWriteFeedback = collection;
                     }
                     if (
                         this.collectionContent.node.access.indexOf(

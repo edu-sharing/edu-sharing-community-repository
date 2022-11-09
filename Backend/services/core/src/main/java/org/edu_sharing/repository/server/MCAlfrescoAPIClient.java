@@ -951,7 +951,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			}
 		}
 
-		boolean hasMds = nodeType.equals(CCConstants.CCM_TYPE_IO) || nodeType.equals(CCConstants.CCM_TYPE_COMMENT) || nodeType.equals(CCConstants.CCM_TYPE_COLLECTION_FEEDBACK) || nodeType.equals(CCConstants.CCM_TYPE_MAP) || nodeType.equals(CCConstants.CM_TYPE_FOLDER);
+		boolean hasMds = nodeType.equals(CCConstants.CCM_TYPE_IO) || nodeType.equals(CCConstants.CCM_TYPE_COMMENT) || nodeType.equals(CCConstants.CCM_TYPE_MATERIAL_FEEDBACK) || nodeType.equals(CCConstants.CCM_TYPE_MAP) || nodeType.equals(CCConstants.CM_TYPE_FOLDER);
 		String mdsId=CCConstants.metadatasetdefault_id;
 		MetadataSet mds = null;
 		/**

@@ -7,6 +7,7 @@ export { CollectionV1Service } from './services/collection-v-1.service';
 export { CommentV1Service } from './services/comment-v-1.service';
 export { ConfigV1Service } from './services/config-v-1.service';
 export { ConnectorV1Service } from './services/connector-v-1.service';
+export { FeedbackV1Service } from './services/feedback-v-1.service';
 export { IamV1Service } from './services/iam-v-1.service';
 export { KnowledgeV1Service } from './services/knowledge-v-1.service';
 export { AuthenticationV1Service } from './services/authentication-v-1.service';

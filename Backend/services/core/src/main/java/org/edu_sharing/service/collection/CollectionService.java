@@ -92,10 +92,6 @@ public interface CollectionService {
 
 	List<NodeRef> getReferenceObjectsSync(String nodeId);
 
-	String addFeedback(String id, HashMap<String, String[]> feedbackData) throws Throwable;
-
-	List<String> getFeedbacks(String id) throws Throwable;
-
 	default CollectionProposalInfo getCollectionsContainingProposals(CCConstants.PROPOSAL_STATUS status, Integer skipCount, Integer maxItems, SortDefinition sortDefinition) throws Throwable {
 		throw new NotImplementedException("collections proposal feature is not supported without elasticsearch");
 	}

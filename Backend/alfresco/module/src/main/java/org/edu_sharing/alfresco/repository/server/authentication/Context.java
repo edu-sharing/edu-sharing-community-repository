@@ -135,6 +135,14 @@ public class Context {
 		}
     	return sessionAtt;
     }
+
+    public String getSessionId(){
+        if(this.getRequest() != null
+                && this.getRequest().getSession() != null){
+            return this.request.getSession().getId();
+        }
+        return null;
+    }
     
     public String getLocale(){
     	return getSessionAttribute(CCConstants.AUTH_LOCALE);

@@ -470,36 +470,4 @@ public class CollectionDao {
 	public Node asNode() throws DAOException {
 		return nodeDao.asNode();
 	}
-
-	public void addFeedback(HashMap<String, String[]> feedbackData) throws DAOException {
-		try {
-			collectionClient.addFeedback(nodeDao.getRef().getId(), feedbackData);
-		}catch(Throwable t){
-			throw new DAOException(t,collectionId);
-		}
-	}
-	public List<CollectionFeedback> getFeedbacks() throws DAOException {
-		try {
-			return collectionClient.getFeedbacks(nodeDao.getRef().getId()).stream().map((id)->{
-				try {
-					NodeDao node=NodeDao.getNode(repoDao,id);
-					String data = NodeServiceHelper.getProperty(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, id), CCConstants.CCM_PROP_COLLECTION_FEEDBACK_DATA);
-					String authority = NodeServiceHelper.getProperty(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, id), CCConstants.CCM_PROP_COLLECTION_FEEDBACK_AUTHORITY);
-					CollectionFeedback feedback = new CollectionFeedback();
-					feedback.setCreatedAt(node.getCreatedAt());
-					if(authority!=null) {
-						feedback.setCreator(String.valueOf(Math.abs(authority.hashCode()) % 1000));
-					}
-					feedback.setFeedback(new Gson().fromJson(data,Map.class));
-					return feedback;
-				} catch (DAOException e) {
-					throw new RuntimeException(e);
-				}
-
-			}).collect(Collectors.toList());
-		}catch(Throwable t){
-			throw new DAOException(t,collectionId);
-		}
-	}
-
 }

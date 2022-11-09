@@ -24,6 +24,7 @@ public class ToolPermissionService extends ToolPermissionBaseService {
 	// list of old TP (key) and target(s) to migrate it to
 	static Map<String, Collection<String>> MIGRATE_TP_LIST = new HashMap<>();
 	static {
+		MIGRATE_TP_LIST.put("TOOLPERMISSION_COLLECTION_FEEDBACK", Collections.singletonList(CCConstants.CCM_VALUE_TOOLPERMISSION_MATERIAL_FEEDBACK));
 		MIGRATE_TP_LIST.put("TOOLPERMISSION_RATE",Arrays.asList(CCConstants.CCM_VALUE_TOOLPERMISSION_RATE_READ, CCConstants.CCM_VALUE_TOOLPERMISSION_RATE_WRITE));
 	}
 

@@ -472,11 +472,9 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
                             this.moveInnerStyleToHead(nodeRenderContent);
                             this.postprocessHtml();
                             this.handleProposal();
-                            this.addCollections();
-                            this.addNodeRelations();
+                            this.renderHelper.doAll(this._node);
                             this.addVideoControls();
                             this.linkSearchableWidgets();
-                            this.addComments();
                             this.loadNode();
                             this.loadSimilarNodes();
                             this.isLoading = false;
@@ -555,16 +553,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
             target,
             data,
         );
-    }
-
-    addCollections() {
-        this.renderHelper.injectModuleInCollections(this._node);
-    }
-    addNodeRelations() {
-        this.renderHelper.injectNodeRelationsWidget(this._node);
-    }
-    addComments() {
-        this.renderHelper.injectModuleComments(this._node);
     }
     private postprocessHtml() {
         if (!this.config.instant('rendering.showPreview', true)) {

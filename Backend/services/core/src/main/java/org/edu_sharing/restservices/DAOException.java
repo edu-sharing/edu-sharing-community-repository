@@ -17,12 +17,14 @@ import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.alfresco.RestrictedAccessException;
 import java.security.InvalidKeyException;
 
+import java.lang.reflect.UndeclaredThrowableException;
+
 public class DAOException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 	private String nodeId;
 
-	protected DAOException(Throwable t, String nodeId) {
+	public DAOException(Throwable t, String nodeId) {
 		super(t);
 		this.nodeId=nodeId;
 	}
@@ -43,6 +45,10 @@ public class DAOException extends Exception {
 	public static DAOException mapping(Throwable t,String nodeId) {
 		// de-capsulate previously capsulated runtime throwables
 		if(t instanceof RuntimeException && (t.getCause() instanceof RestrictedAccessException || (t.getMessage() != null && t.getMessage().contains("Error during run as.")))) {
+			t = t.getCause();
+		}
+		// these exceptions come from annotated permissions checks
+		if(t instanceof UndeclaredThrowableException) {
 			t = t.getCause();
 		}
 		if (t instanceof DAOException) {
