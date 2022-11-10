@@ -131,6 +131,7 @@ public class NodeDao {
 		nodeProps = NodeServiceHelper.getProperties(nodeRef);
 		previewData = null;
 		ownerUsername = null;
+		isCollectionHomePath=false; // TODO do we need to resolve this here?
 	}
 
 	public static NodeDao getNodeWithVersion(RepositoryDao repoDao, String nodeId,String versionLabel) throws DAOException {

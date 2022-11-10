@@ -111,7 +111,7 @@ public class CollectionDao {
 				NodeDao dao = NodeDao.getNode(repoDao, data.getNodeRef());
 				NodeCollectionProposalCount node = new NodeCollectionProposalCount();
 				dao.fetchCounts = fetchCounts;
-				dao.fillNodeObject(node);
+				dao.fillNodeObject(node, false, false); // TODO do wee need to fill owner and content here?
 				node.setProposalCount(data.getProposalCount());
 				result.add(node);
 			}
@@ -302,7 +302,7 @@ public class CollectionDao {
 				}
 				try {
 					NodeDao original = NodeDao.getNode(repoDao, ref.getTargetRef().getId());
-					original.fillNodeObject(proposal);
+					original.fillNodeObject(proposal, false, false); // TODO do wee need to fill owner and content here?
 					proposal.setAccessible(true);
 				} catch(DAOSecurityException e){
 					proposal = NodeDao.createEmptyDummy(NodeProposal.class,
