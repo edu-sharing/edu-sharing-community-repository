@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "target": "es2018",
+    "module": "ES2022",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "outDir": "../../playwright/out/scripts",
+    "lib": ["es2018"],
+    "types": ["node"],
+    "experimentalDecorators": true,
+    "strict": true,
+  },
+  "include": ["*.ts", "*.mts"]
+}

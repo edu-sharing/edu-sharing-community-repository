@@ -1,5 +1,9 @@
 package org.edu_sharing.metadataset.v2;
 
+
+import org.apache.commons.lang3.SerializationUtils;
+
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 
@@ -81,6 +85,9 @@ public class MetadataQuery extends MetadataQueryBase implements Serializable {
 		}
 	}
 
+	public MetadataQuery copy() {
+		return SerializationUtils.clone(this);
+	}
 	public boolean isApplyBasequery() {
 		if(applyBasequery==null)
 			return true;

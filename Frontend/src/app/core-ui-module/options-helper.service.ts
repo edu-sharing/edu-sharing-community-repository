@@ -595,6 +595,47 @@ export class OptionsHelperService implements OnDestroy {
             options.push(openFolder);
          */
 
+        const openOriginalNode = new OptionItem(
+            'OPTIONS.OPEN_ORIGINAL_NODE',
+            'description',
+            async (object) => {
+                const nodeId = RestHelper.removeSpacesStoreRef(
+                    this.getObjects(object)[0].properties[
+                        RestConstants.CCM_PROP_PUBLISHED_ORIGINAL
+                    ][0],
+                );
+                UIHelper.goToNode(this.router, new Node(nodeId));
+            },
+        );
+        openOriginalNode.constrains = [
+            Constrain.Files,
+            Constrain.NoBulk,
+            Constrain.HomeRepository,
+            Constrain.User,
+        ];
+        openOriginalNode.toolpermissions = [RestConstants.TOOLPERMISSION_WORKSPACE];
+        openOriginalNode.scopes = [Scope.CollectionsReferences, Scope.Search, Scope.Render];
+        openOriginalNode.customEnabledCallback = (nodes) => {
+            if (nodes && nodes.length === 1) {
+                openOriginalNode.customEnabledCallback = null;
+                let nodeId = RestHelper.removeSpacesStoreRef(
+                    nodes[0].properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL][0],
+                );
+                this.nodeService.getNodeMetadata(nodeId).subscribe(
+                    () => {
+                        openOriginalNode.isEnabled = true;
+                    },
+                    () => {
+                        openOriginalNode.isEnabled = false;
+                    },
+                );
+            }
+            return false;
+        };
+        openOriginalNode.elementType = [ElementType.NodePublishedCopy];
+        openOriginalNode.group = DefaultGroups.View;
+        openOriginalNode.priority = 13;
+
         const openParentNode = new OptionItem('OPTIONS.SHOW_IN_FOLDER', 'folder', async (object) =>
             this.goToWorkspace((await this.getObjectsAsync(object, true))[0]),
         );
@@ -1230,60 +1271,50 @@ export class OptionsHelperService implements OnDestroy {
         pinCollection.group = DefaultGroups.Edit;
         pinCollection.priority = 20;
 
-        const feedbackCollection = new OptionItem(
-            'OPTIONS.COLLECTION_FEEDBACK',
+        const feedbackMaterial = new OptionItem(
+            'OPTIONS.MATERIAL_FEEDBACK',
             'chat_bubble',
-            (object) => (management.collectionWriteFeedback = this.getObjects(object)[0]),
+            (object) => (management.materialWriteFeedback = this.getObjects(object)[0]),
         );
-        feedbackCollection.constrains = [
+        feedbackMaterial.constrains = [
             Constrain.HomeRepository,
-            Constrain.Collections,
+            Constrain.Files,
             Constrain.NoBulk,
             Constrain.User,
         ];
-        feedbackCollection.permissions = [RestConstants.PERMISSION_FEEDBACK];
-        feedbackCollection.permissionsMode = HideMode.Hide;
-        feedbackCollection.toolpermissions = [RestConstants.TOOLPERMISSION_COLLECTION_FEEDBACK];
-        feedbackCollection.group = DefaultGroups.View;
-        feedbackCollection.priority = 10;
+        feedbackMaterial.permissions = [RestConstants.PERMISSION_FEEDBACK];
+        feedbackMaterial.permissionsRightMode = NodesRightMode.Original;
+        feedbackMaterial.scopes = [Scope.Render];
+        feedbackMaterial.permissionsMode = HideMode.Hide;
+        feedbackMaterial.toolpermissions = [RestConstants.TOOLPERMISSION_MATERIAL_FEEDBACK];
+        feedbackMaterial.group = DefaultGroups.View;
+        feedbackMaterial.priority = 15;
         // feedback is only shown for non-managers
-        feedbackCollection.customShowCallback = (objects) =>
-            objects &&
-            objects[0].access &&
-            objects[0].access.indexOf(RestConstants.ACCESS_WRITE) === -1;
-        /*
-         if (
-         this.feedbackAllowed() &&
-         !this.isAllowedToDeleteCollection() &&
-         this.connector.hasToolPermissionInstant(
-         RestConstants.TOOLPERMISSION_COLLECTION_FEEDBACK,
-         )
-         ) {
-            this.optionsCollection.push(
-                new OptionItem(
-                    'COLLECTIONS.ACTIONBAR.FEEDBACK',
-                    'chat_bubble',
-                    () => this.collectionFeedback(true),
-                ),
+        feedbackMaterial.customShowCallback = (objects) =>
+            !this.nodeHelper.getNodesRight(
+                objects,
+                RestConstants.ACCESS_WRITE,
+                NodesRightMode.Original,
             );
-        }
-         */
-        const feedbackCollectionView = new OptionItem(
-            'OPTIONS.COLLECTION_FEEDBACK_VIEW',
+
+        const feedbackMaterialView = new OptionItem(
+            'OPTIONS.MATERIAL_FEEDBACK_VIEW',
             'speaker_notes',
-            (object) => (management.collectionViewFeedback = this.getObjects(object)[0]),
+            (object) => (management.materialViewFeedback = this.getObjects(object)[0]),
         );
-        feedbackCollectionView.constrains = [
+        feedbackMaterialView.constrains = [
             Constrain.HomeRepository,
-            Constrain.Collections,
+            Constrain.Files,
             Constrain.NoBulk,
             Constrain.User,
         ];
-        feedbackCollectionView.permissions = [RestConstants.ACCESS_DELETE];
-        feedbackCollectionView.permissionsMode = HideMode.Hide;
-        feedbackCollectionView.toolpermissions = [RestConstants.TOOLPERMISSION_COLLECTION_FEEDBACK];
-        feedbackCollectionView.group = DefaultGroups.View;
-        feedbackCollectionView.priority = 20;
+        feedbackMaterialView.scopes = [Scope.Render];
+        feedbackMaterialView.permissions = [RestConstants.ACCESS_DELETE];
+        feedbackMaterialView.permissionsRightMode = NodesRightMode.Original;
+        feedbackMaterialView.permissionsMode = HideMode.Hide;
+        feedbackMaterialView.toolpermissions = [RestConstants.TOOLPERMISSION_MATERIAL_FEEDBACK];
+        feedbackMaterialView.group = DefaultGroups.View;
+        feedbackMaterialView.priority = 20;
 
         const setDisplayType = (viewType: number, emit = true) => {
             switch (viewType) {
@@ -1382,14 +1413,15 @@ export class OptionsHelperService implements OnDestroy {
         options.push(debugNode);
         options.push(acceptProposal);
         options.push(declineProposal);
+        options.push(openOriginalNode);
         options.push(openParentNode);
         options.push(openNode);
         options.push(editConnectorNode);
         options.push(bookmarkNode);
         options.push(editCollection);
         options.push(pinCollection);
-        options.push(feedbackCollection);
-        options.push(feedbackCollectionView);
+        options.push(feedbackMaterial);
+        options.push(feedbackMaterialView);
         options.push(simpleEditNode);
         options.push(editNode);
         // add to collection

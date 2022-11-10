@@ -13,6 +13,7 @@ import org.apache.commons.logging.impl.Log4JLogger;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.restservices.*;
@@ -115,9 +116,9 @@ public class ErrorResponse {
 			t.printStackTrace( printWriter );
 			printWriter.flush();
 			if(level.toInt()<=Level.DEBUG_INT)
-				setStacktrace(ContextManagementFilter.b3.get().toString() + "\n" + writer.toString());
+				setStacktrace(Context.getCurrentInstance().getB3().toString() + "\n" + writer.toString());
 			else
-				setMessage(ContextManagementFilter.b3.get().toString());
+				setMessage(Context.getCurrentInstance().getB3().toString());
 		}
 	}
 	

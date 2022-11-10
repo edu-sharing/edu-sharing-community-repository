@@ -75,6 +75,8 @@ import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.edu_sharing.service.version.RepositoryVersionInfo;
+import org.edu_sharing.service.version.VersionService;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerFactory;
 import org.springframework.context.ApplicationContext;
@@ -444,10 +446,9 @@ public class AdminServiceImpl implements AdminService  {
 		String result=org.apache.commons.lang3.StringUtils.join(apps,",");
 		changeAppPropertiesApplications(result, new Date()+" removed app: "+info.getAppFile());
 		File appFile = new File(PropertiesHelper.Config.getAbsolutePathForConfigFile(
-				PropertiesHelper.Config.getPropertyFilePath(info.getAppFile())
+				PropertiesHelper.Config.getPropertyFilePath(info.getAppFileName())
 		));
 		appFile.renameTo(new File(appFile.getAbsolutePath()+System.currentTimeMillis()+".bak"));
-		ApplicationInfoList.refresh();
 		RepoFactory.refresh();
 	}
 
@@ -576,7 +577,6 @@ public class AdminServiceImpl implements AdminService  {
 			homeAppProps.storeToXML(new FileOutputStream(new File(homeAppPath)), " added contenturl and preview url");
 		}
 
-		ApplicationInfoList.refresh();
 		RepoFactory.refresh();
 
 		HashMap<String,String> result = new HashMap<String,String>();
@@ -1014,7 +1014,6 @@ public class AdminServiceImpl implements AdminService  {
 		for(String key : properties.keySet()){
 			PropertiesHelper.setProperty(key,properties.get(key), appFile.getAbsolutePath(), PropertiesHelper.XML);
 		}
-		ApplicationInfoList.refresh();
 		RepoFactory.refresh();
 	}
 	
@@ -1121,5 +1120,14 @@ public class AdminServiceImpl implements AdminService  {
 		return moduleService.getAllModules().stream().map(m ->
 			new PluginStatus(m.getTitle(), m.getModuleVersionNumber().toString(), m.getInstallState().equals(ModuleInstallState.INSTALLED))
 		).collect(Collectors.toList());
+	}
+
+	@Override
+	public RepositoryVersionInfo getVersion() {
+		try {
+			return VersionService.getRepositoryVersionInfo();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

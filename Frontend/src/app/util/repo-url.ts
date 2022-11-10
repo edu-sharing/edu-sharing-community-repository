@@ -5,7 +5,7 @@ import { Node, RestNetworkService } from '../core-module/core.module';
  * Replaces absolute backend URLs with proxied URLs when in dev environment.
  *
  * This is needed for content that requires authentication, so the browser provides the required
- * session cookie with the request.
+ * session cookie with the request, or when accessing the dev server from another device.
  */
 export function getRepoUrl(url: string, node: Node): string {
     if (

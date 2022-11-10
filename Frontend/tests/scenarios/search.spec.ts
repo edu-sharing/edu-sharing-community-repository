@@ -31,7 +31,7 @@ test('should go to search page', async () => {
 
 test('should show search scope', async () => {
     await searchPage.goto();
-    await searchPage.expectScopeButton();
+    await generalPage.expectScopeButton(/Search/);
 });
 
 // FIXME: Fails due to console error.

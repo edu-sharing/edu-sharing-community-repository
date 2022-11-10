@@ -102,6 +102,8 @@ export { Variables } from './models/variables';
 export { Connector } from './models/connector';
 export { ConnectorFileType } from './models/connector-file-type';
 export { ConnectorList } from './models/connector-list';
+export { FeedbackResult } from './models/feedback-result';
+export { FeedbackData } from './models/feedback-data';
 export { UserCredential } from './models/user-credential';
 export { UserProfileEdit } from './models/user-profile-edit';
 export { User } from './models/user';

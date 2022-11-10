@@ -62,6 +62,8 @@
   "INFORMATION": "information",
   "TODAY": "today",
   "YESTERDAY": "yesterday",
+  "YEARS_AGO": "{{ years }} year(s) ago",
+  "MONTHS_AGO": "{{ months }} month(s) ago",
   "DAYS_AGO": "{{ days }} days ago",
   "HOURS_AGO": "{{ hours }} hours ago",
   "MINUTES_AGO": "{{ minutes }} minutes ago",
@@ -140,7 +142,7 @@
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE": "Searching and inviting users outside the organization in shared folders in the safe",
     "TOOLPERMISSION_COLLECTION_PINNING": "Pinning collections and managing pinned collections",
     "TOOLPERMISSION_COLLECTION_CURRICULUM": "Creating curriculum collections (currently not used)",
-    "TOOLPERMISSION_COLLECTION_FEEDBACK": "Give feedback on other collections",
+    "TOOLPERMISSION_MATERIAL_FEEDBACK": "Give feedback on materials",
     "TOOLPERMISSION_CONFIDENTAL": "Access to the secure area (safe)",
     "TOOLPERMISSION_UNCHECKEDCONTENT": "Show sources like YouTube in your search",
     "TOOLPERMISSION_WORKSPACE": "Access to the workspace",
@@ -569,6 +571,7 @@
     "APPLY": "Apply",
     "SHOW": "Preview & Info",
     "SHOW_IN_FOLDER": "Open storage location",
+    "OPEN_ORIGINAL_NODE": "Open original",
     "DEBUG": "Debug",
     "INVITE": "Invite",
     "EDIT": "Edit info",
@@ -576,8 +579,8 @@
     "EDIT_SIMPLE": "Quick-Edit",
     "COLLECTION_EDIT": "Edit",
     "COLLECTION_PIN": "Pin collection",
-    "COLLECTION_FEEDBACK": "Feedback...",
-    "COLLECTION_FEEDBACK_VIEW": "View feedback",
+    "MATERIAL_FEEDBACK": "Feedback...",
+    "MATERIAL_FEEDBACK_VIEW": "View feedback",
     "OPEN": "Open",
     "DOWNLOAD": "Download",
     "DOWNLOAD_ALL": "download zip",
@@ -671,7 +674,14 @@
     "NO_ARBITRARY_VALUES_NOTICE": "For this field, you cannot use arbitrary values. Please select values from the list.",
     "DELETE_KEY_NOTICE": "Remove with Delete key"
   },
-
+  "FEEDBACK": {
+    "TITLE": "Give feedback for material",
+    "VIEW_TITLE": "Given feedback for material",
+    "VIEW_EMPTY": "No feedback was given for this collection yet",
+    "CREATOR": "Author {{creator}}",
+    "SAVE": "Send",
+    "TOAST": "Feedback sent. Thank you!"
+  },
   "SIMPLE_EDIT": {
     "TITLE": "Quick Edit",
     "SAVED": "Element {{name}} was changed",

@@ -1,0 +1,14 @@
+:host {
+    display: flex;
+    flex-direction: column;
+}
+
+.card-scroll {
+    overflow-x: hidden;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
+.mat-checkbox ::ng-deep .mat-checkbox-layout {
+    white-space: normal !important;
+}

@@ -135,6 +135,10 @@ public class NodeServiceHelper {
 		NodeServiceFactory.getLocalService().removeProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),key);
 	}
 
+	public static void removeNode(NodeRef nodeRef,boolean recycle){
+		NodeServiceFactory.getLocalService().removeNode(nodeRef.getId(), null, recycle);
+	}
+
 	/**
 	 * returns true if the value is not empty
 	 * This will not only return false for null values, but also for empty strings and lists with only empty string

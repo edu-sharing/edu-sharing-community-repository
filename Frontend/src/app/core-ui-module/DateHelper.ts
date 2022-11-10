@@ -1,11 +1,22 @@
 import { TranslateService } from '@ngx-translate/core';
 import { isNumeric } from '../common/ui/isNumeric';
 
+export enum RelativeMode {
+    off,
+    short,
+    medium,
+    large,
+    all,
+}
 export class FormatOptions {
     showDate? = true;
     showAlwaysTime? = false;
     showSeconds? = false;
+    // @Deprecated
+    // this will be mapped to relativeLabels = MEDIUM
+    // use relativeLabels instead
     useRelativeLabels? = true;
+    relativeLabels?: RelativeMode;
 }
 
 export class DateHelper {
@@ -49,10 +60,6 @@ export class DateHelper {
 
     /**
      * Format a date for the current language
-     * @param translation
-     * @param date
-     * @param showAlwaysTime
-     * @returns {any}
      */
     public static formatDate(
         translation: TranslateService,
@@ -60,6 +67,9 @@ export class DateHelper {
         options: FormatOptions = new FormatOptions(),
     ): string {
         try {
+            if (options.useRelativeLabels && !options.relativeLabels) {
+                options.relativeLabels = RelativeMode.medium;
+            }
             if (date == null) {
                 return null;
             }
@@ -74,13 +84,15 @@ export class DateHelper {
             let isYesterday = dateObject.toDateString() == dateYesterday.toDateString();
             let prefix = '';
             let timeDiff = (dateToday.getTime() - dateObject.getTime()) / 1000;
-            let diffDays = Math.ceil(timeDiff / (3600 * 24));
+            let diffDays = Math.floor(timeDiff / (3600 * 24));
+            let diffMonths = new Date(timeDiff * 1000).getMonth();
+            let diffYears = new Date(timeDiff * 1000).getFullYear() - 1970;
             let addDate = true;
             let timeFormat = 'HH:mm';
             if (options.showSeconds) {
                 timeFormat += ':ss';
             }
-            if (timeDiff < 3600 * 6 && options.useRelativeLabels) {
+            if (timeDiff < 3600 * 6 && options.relativeLabels >= RelativeMode.short) {
                 if (timeDiff < 90) {
                     prefix = translation.instant('JUST_NOW', { seconds: timeDiff });
                 } else if (timeDiff < 60 * 100) {
@@ -94,19 +106,35 @@ export class DateHelper {
                 }
                 addDate = false;
                 timeFormat = '';
-            } else if (isToday && options.useRelativeLabels) {
+            } else if (isToday && options.relativeLabels >= RelativeMode.short) {
                 prefix = translation.instant('TODAY');
                 addDate = false;
-            } else if (isYesterday && options.useRelativeLabels) {
+            } else if (isYesterday && options.relativeLabels >= RelativeMode.medium) {
                 prefix = translation.instant('YESTERDAY');
                 addDate = false;
-            } else if (diffDays < 6 && options.useRelativeLabels) {
+            } else if (
+                (diffDays < 6 && options.relativeLabels >= RelativeMode.medium) ||
+                (diffDays < 45 && options.relativeLabels >= RelativeMode.large)
+            ) {
                 prefix = translation.instant('DAYS_AGO', { days: diffDays });
+                addDate = false;
+                if (!options.showAlwaysTime) timeFormat = '';
+            } else if (
+                diffYears === 0 &&
+                diffMonths < 12 &&
+                options.relativeLabels >= RelativeMode.large
+            ) {
+                prefix = translation.instant('MONTHS_AGO', { months: diffMonths });
+                addDate = false;
+                if (!options.showAlwaysTime) timeFormat = '';
+            } else if (options.relativeLabels === RelativeMode.all) {
+                prefix = translation.instant('YEARS_AGO', { years: diffYears });
                 addDate = false;
                 if (!options.showAlwaysTime) timeFormat = '';
             } else {
                 if (!options.showAlwaysTime) timeFormat = '';
             }
+
             // ng2's dateformatter is super slow, but it doesn't matter, we just iterate it once :)
             //return dateFormat+time;
             let str = prefix;

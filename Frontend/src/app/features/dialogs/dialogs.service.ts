@@ -1,8 +1,12 @@
 import { Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { configForNode } from './card-dialog/card-dialog-config';
+import { Closable, configForNode } from './card-dialog/card-dialog-config';
 import { CardDialogRef } from './card-dialog/card-dialog-ref';
 import { CardDialogService } from './card-dialog/card-dialog.service';
+import {
+    LicenseAgreementDialogData,
+    LicenseAgreementDialogResult,
+} from './dialog-modules/license-agreement/license-agreement-dialog-data';
 import { NodeEmbedDialogData } from './dialog-modules/node-embed-dialog/node-embed-dialog.component';
 import { NodeInfoDialogData } from './dialog-modules/node-info-dialog/node-info/node-info.component';
 import { NodeReportDialogData } from './dialog-modules/node-report-dialog/node-report/node-report.component';
@@ -78,6 +82,20 @@ export class DialogsService {
             width: 400,
             minHeight: 'min(95%, 600px)',
             contentPadding: 0,
+        });
+    }
+
+    async openLicenseAgreementDialog(
+        data: LicenseAgreementDialogData,
+    ): Promise<CardDialogRef<LicenseAgreementDialogData, LicenseAgreementDialogResult>> {
+        const { LicenseAgreementComponent } = await import(
+            './dialog-modules/license-agreement/license-agreement.module'
+        );
+        return this.cardDialog.open(LicenseAgreementComponent, {
+            title: 'LICENSE_AGREEMENT.TITLE',
+            closable: Closable.Disabled,
+            width: 900,
+            data,
         });
     }
 }

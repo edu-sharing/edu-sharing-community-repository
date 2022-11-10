@@ -34,6 +34,11 @@ import {
     MdsEditorInstanceService,
 } from '../../../../features/mds/mds-editor/mds-editor-instance.service';
 import { MainNavService } from '../../../../main/navigation/main-nav.service';
+import { NodeService } from 'ngx-edu-sharing-api';
+
+class PublishedNode extends Node {
+    status?: 'new' | 'update' | null; // flag if this node is manually added later and didn't came from the repo
+}
 
 @Component({
     selector: 'es-share-publish',
@@ -63,9 +68,9 @@ export class SharePublishComponent implements OnChanges, OnInit, OnDestroy {
     doiDisabled: boolean;
     isCopy: boolean;
     handleMode: 'distinct' | 'update' = 'distinct';
-    republish = false;
+    republish: 'update' | 'new' | false = false;
     private publishedVersions: Node[] = [];
-    allPublishedVersions: Node[];
+    allPublishedVersions: PublishedNode[];
     mdsCompletion: CompletionStatusEntry;
     private initHasStarted = false;
     private destroyed = new Subject<void>();
@@ -74,7 +79,8 @@ export class SharePublishComponent implements OnChanges, OnInit, OnDestroy {
         private connector: RestConnectorService,
         private translate: TranslateService,
         private nodeHelper: NodeHelperService,
-        private nodeService: RestNodeService,
+        private legacyNodeService: RestNodeService,
+        private nodeService: NodeService,
         private config: ConfigurationService,
         private mdsService: MdsEditorInstanceService,
         private toast: Toast,
@@ -115,7 +121,7 @@ export class SharePublishComponent implements OnChanges, OnInit, OnDestroy {
             // refresh already for providing initial state
             this.refresh();
             this.node = (
-                await this.nodeService
+                await this.legacyNodeService
                     .getNodeMetadata(this.node.ref.id, [RestConstants.ALL])
                     .toPromise()
             ).node;
@@ -141,7 +147,7 @@ export class SharePublishComponent implements OnChanges, OnInit, OnDestroy {
         this.mainNavService.getDialogs().nodeLicense = [this.node];
         this.mainNavService.getDialogs().nodeLicenseChange.subscribe(async () => {
             this.node = (
-                await this.nodeService
+                await this.legacyNodeService
                     .getNodeMetadata(this.node.ref.id, [RestConstants.ALL])
                     .toPromise()
             ).node;
@@ -162,7 +168,7 @@ export class SharePublishComponent implements OnChanges, OnInit, OnDestroy {
         });
         this.mainNavService.getDialogs().nodeMetadataChange.subscribe(async () => {
             this.node = (
-                await this.nodeService
+                await this.legacyNodeService
                     .getNodeMetadata(this.node.ref.id, [RestConstants.ALL])
                     .toPromise()
             ).node;
@@ -177,7 +183,7 @@ export class SharePublishComponent implements OnChanges, OnInit, OnDestroy {
         if (prop === ShareMode.Copy) {
             this.shareModeCopy = true;
             this.isCopy = true;
-            this.nodeService.getPublishedCopies(this.node.ref.id).subscribe(
+            this.legacyNodeService.getPublishedCopies(this.node.ref.id).subscribe(
                 (nodes) => {
                     this.publishedVersions = nodes.nodes.reverse();
                     this.updatePublishedVersions();
@@ -188,7 +194,7 @@ export class SharePublishComponent implements OnChanges, OnInit, OnDestroy {
             );
         }
         if (prop !== ShareMode.Copy) {
-            this.republish = true;
+            this.republish = 'new';
         }
         // if GROUP_EVERYONE is not yet invited -> reset to off
         this.shareModeDirect = this.permissions.some(
@@ -249,15 +255,32 @@ export class SharePublishComponent implements OnChanges, OnInit, OnDestroy {
             if (
                 this.shareModeCopy &&
                 // republish and not yet published, or wasn't published before at all
-                ((this.republish && !this.currentVersionPublished()) || !this.isCopy)
+                ((this.republish === 'new' && !this.currentVersionPublished()) || !this.isCopy)
             ) {
-                this.nodeService
+                this.legacyNodeService
                     .publishCopy(
                         this.node.ref.id,
                         this.doiPermission && !this.doiDisabled && this.doiActive
                             ? this.handleMode
                             : null,
                     )
+                    .subscribe(
+                        ({ node }) => {
+                            observer.next(node);
+                            observer.complete();
+                        },
+                        (error) => {
+                            observer.error(error);
+                            observer.complete();
+                        },
+                    );
+            } else if (
+                this.shareModeCopy &&
+                // update most recent version
+                this.republish === 'update'
+            ) {
+                this.nodeService
+                    .copyMetadata(this.publishedVersions[0].ref.id, this.node.ref.id, {})
                     .subscribe(
                         ({ node }) => {
                             observer.next(node);
@@ -295,7 +318,7 @@ export class SharePublishComponent implements OnChanges, OnInit, OnDestroy {
     }
 
     updatePublishedVersions() {
-        if ((!this.isCopy && this.shareModeCopy) || this.republish) {
+        if ((!this.isCopy && this.shareModeCopy) || this.republish === 'new') {
             if (this.node?.properties) {
                 const virtual = Helper.deepCopy(this.node);
                 virtual.properties[RestConstants.CCM_PROP_PUBLISHED_DATE + '_LONG'] = [
@@ -304,10 +327,13 @@ export class SharePublishComponent implements OnChanges, OnInit, OnDestroy {
                 if (this.doiActive && !this.doiDisabled && this.doiPermission) {
                     virtual.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID] = [true];
                 }
-                virtual.virtual = true;
+                virtual.status = 'new';
                 this.allPublishedVersions = [virtual].concat(this.publishedVersions);
                 this.handleMode = this.hasExactOneHandle() ? 'update' : 'distinct';
             }
+        } else if (this.republish === 'update') {
+            this.allPublishedVersions = Helper.deepCopy(this.publishedVersions);
+            this.allPublishedVersions[0].status = 'update';
         } else {
             this.allPublishedVersions = this.publishedVersions;
         }
@@ -326,7 +352,7 @@ export class SharePublishComponent implements OnChanges, OnInit, OnDestroy {
     }
 
     setRepublish() {
-        this.doiActive = this.republish && this.doiPermission;
+        this.doiActive = this.republish !== false && this.doiPermission;
         this.updatePublishedVersions();
     }
 
@@ -336,7 +362,8 @@ export class SharePublishComponent implements OnChanges, OnInit, OnDestroy {
                 this.allPublishedVersions
                     .filter(
                         (v) =>
-                            !v.virtual && v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID],
+                            !v.status === null &&
+                            v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID],
                     )
                     .map((v) => v.properties[RestConstants.CCM_PROP_PUBLISHED_HANDLE_ID][0]),
             ).size === 1

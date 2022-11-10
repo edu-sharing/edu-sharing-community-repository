@@ -174,6 +174,12 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
             const id = collection.ref.id;
             this.nodeService.getNodePermissions(id).subscribe((perm: EduData.NodePermissions) => {
                 this.mdsSet = collection.metadataset;
+                this.canInvite =
+                    this.canInvite &&
+                    RestHelper.hasAccessPermission(
+                        collection,
+                        RestConstants.ACCESS_CHANGE_PERMISSIONS,
+                    );
                 this.editorialPublic = perm.permissions.localPermissions?.permissions?.some(
                     (p: Permission) =>
                         p.authority?.authorityName === RestConstants.AUTHORITY_EVERYONE,

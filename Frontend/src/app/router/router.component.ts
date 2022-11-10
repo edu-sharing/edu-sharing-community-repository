@@ -51,6 +51,7 @@ import { LoadingScreenService } from '../main/loading-screen/loading-screen.serv
 import { MainNavService } from '../main/navigation/main-nav.service';
 import { ManagementDialogsService } from '../modules/management-dialogs/management-dialogs.service';
 import * as rxjs from 'rxjs';
+import { LicenseAgreementService } from '../services/license-agreement.service';
 
 @Component({
     selector: 'es-router',
@@ -119,6 +120,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
         private accessibilityService: AccessibilityService,
         private translations: TranslationsService,
         private loadingScreen: LoadingScreenService,
+        private licenseAgreement: LicenseAgreementService,
     ) {
         this.injector.get(Router).events.subscribe((event) => {
             if (event instanceof NavigationEnd) {
@@ -145,6 +147,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
             .subscribe();
         this.setUserScale();
         this.registerContrastMode();
+        this.licenseAgreement.setup();
     }
 
     ngDoCheck(): void {

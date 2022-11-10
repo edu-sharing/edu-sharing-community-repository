@@ -3,6 +3,7 @@ package org.edu_sharing.service.nodeservice;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +14,6 @@ import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang3.NotImplementedException;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
@@ -365,7 +365,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public List<NodeRef> getFrontpageNodes() throws Throwable {
+	public Collection<org.edu_sharing.service.model.NodeRef> getFrontpageNodes() throws Throwable {
 		return null;
 	}
 

@@ -96,7 +96,7 @@
   </ng-container>
   <!-- Data Columns -->
   <ng-container
-    *ngFor="let column of entriesService.columns; let first = first"
+    *ngFor="let column of visibleDataColumns$ | async; let first = first"
     [matColumnDef]="column.name"
   >
     <ng-container *ngIf="entriesService.sort?.allowed && isSortable(column)">
@@ -125,6 +125,7 @@
             esCheckTextOverflow
             #text="esCheckTextOverflow"
             [matTooltip]="text.hasTextOverflow() ? cell.innerText : null"
+            matTooltipTouchGestures="off"
           ></es-list-text>
         </es-node-url>
       </ng-container>
@@ -150,10 +151,11 @@
         esCheckTextOverflow
         #text="esCheckTextOverflow"
         [matTooltip]="text.hasTextOverflow() ? cell.innerText : null"
+        matTooltipTouchGestures="off"
       ></es-list-text>
     </mat-cell>
   </ng-container>
-  <mat-header-row mat-header-row *matHeaderRowDef="getVisibleColumns()"></mat-header-row>
+  <mat-header-row mat-header-row *matHeaderRowDef="visibleColumnNames$ | async"></mat-header-row>
   <mat-row
     mat-row
     matRipple
@@ -177,7 +179,7 @@
       node.virtual && !$any(entriesService.dataSource.getData()[i + 1])?.virtual
     "
     [class.dynamic-single-click]="entriesService.singleClickHint === 'dynamic'"
-    *matRowDef="let node; let i = index; let last = last; columns: getVisibleColumns()"
+    *matRowDef="let node; let i = index; let last = last; columns: visibleColumnNames$ | async"
     (contextmenu)="onRowContextMenu({ event: $event, node: node })"
     (keydown.ContextMenu)="onRowContextMenu({ event: $event, node: node })"
   >
@@ -185,7 +187,7 @@
       *cdkDragPreview
       [node]="node"
       [selected]="entriesService.selection.selected"
-      [item]="entriesService.columns[0]"
+      [item]="(visibleDataColumns$ | async)[0]"
     ></es-drag-preview>
   </mat-row>
 </mat-table>
@@ -204,10 +206,10 @@
 <mat-paginator #paginator [pageSizeOptions]="pageSizeOptions"></mat-paginator>
 -->
 
-<!-- Wait for 'ready' state to avoid changed-after-checked error when `columnChooserTrigger` becomes
+<!-- Wait for ready state to avoid changed-after-checked error when `columnChooserTrigger` becomes
 available. -->
 <es-column-chooser
-  *ngIf="ready"
+  *ngIf="columnChooserTriggerReady"
   [columns]="entriesService.columns"
   [(columnChooserVisible)]="columnChooserVisible"
   [origin]="columnChooserTrigger"
@@ -220,7 +222,7 @@ available. -->
   <div class="icon-bg">
     <img
       *ngIf="node.iconURL"
-      [src]="node.iconURL"
+      [src]="node | esNodeIcon"
       [alt]="
         node.mediatype
           ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
@@ -231,6 +233,7 @@ available. -->
           ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
           : ''
       "
+      matTooltipTouchGestures="off"
     />
     <i
       *ngIf="!node.iconURL"

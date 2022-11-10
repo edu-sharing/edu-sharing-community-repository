@@ -63,6 +63,7 @@ import { BitwisePipe } from './pipes/bitwise.pipe';
 import { FormatSizePipe } from './pipes/file-size.pipe';
 import { FormatDatePipe } from './pipes/format-date.pipe';
 import { NodeImageSizePipe } from './pipes/node-image-size.pipe';
+import { NodeIconPipe } from './pipes/node-icon.pipe';
 import { NodeImagePipe } from './pipes/node-image.pipe';
 import { NodePersonNamePipe } from './pipes/node-person-name.pipe';
 import { NodeTitlePipe } from './pipes/node-title.pipe';
@@ -116,6 +117,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         WorkspaceCreateConnector,
         NodesDragDirective,
         NodesDropTargetDirective,
+        NodeIconPipe,
         NodeImagePipe,
     ],
     imports: [
@@ -210,6 +212,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         NodesDragDirective,
         NodesDropTargetDirective,
         MatBadgeModule,
+        NodeIconPipe,
         NodeImagePipe,
     ],
 })

@@ -401,7 +401,13 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     }
 
     private async initialize() {
-        this.user = await this.iam.getCurrentUserAsync();
+        try {
+            this.user = await this.iam.getCurrentUserAsync();
+        } catch (e) {
+            this.toast.error(e);
+            return;
+        }
+
         this.route.params.subscribe((routeParams: Params) => this.handleParamsUpdate(routeParams));
         this.route.queryParams.subscribe((params: Params) => this.handleQueryParamsUpdate(params));
     }
@@ -413,9 +419,6 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             RestHelper.goToLogin(this.router, this.config);
             return;
         }
-        await this.prepareActionbar();
-        this.loadFolders(this.user);
-
         let valid = true;
         if (!login.isValidLogin || login.isGuest) {
             valid = false;
@@ -442,6 +445,9 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             this.goToLogin();
             return;
         }
+        await this.prepareActionbar();
+        this.loadFolders(this.user);
+
         this.connector.scope = this.isSafe ? RestConstants.SAFE_SCOPE : null;
         this.isLoggedIn = true;
         this.globalProgress = false;

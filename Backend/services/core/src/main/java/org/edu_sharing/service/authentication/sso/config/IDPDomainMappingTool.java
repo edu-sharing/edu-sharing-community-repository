@@ -25,7 +25,7 @@ public class IDPDomainMappingTool {
 
 	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 
-	String file = "/idp.xml";
+	String file = "/config/cluster/idp.xml";
 
 	Document docMdSets = null;
 	

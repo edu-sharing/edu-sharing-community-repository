@@ -1,21 +1,24 @@
 import {
+    ChangeDetectorRef,
     Component,
     ComponentFactoryResolver,
     ElementRef,
     Injector,
     Input,
+    NgZone,
     QueryList,
     ViewChildren,
     ViewContainerRef,
 } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import { RestConstants, RestMdsService } from '../../../core-module/core.module';
+import { RestConstants } from '../../../core-module/core.module';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { MdsEditorInstanceService } from '../mds-editor/mds-editor-instance.service';
 import { ViewInstanceService } from '../mds-editor/mds-editor-view/view-instance.service';
 import { replaceElementWithDiv } from '../mds-editor/util/replace-element-with-div';
 import { Values } from '../types/types';
 import { MdsWidgetComponent } from './widget/mds-widget.component';
+import { MdsService, MdsDefinition } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-mds-viewer',
@@ -29,7 +32,7 @@ export class MdsViewerComponent {
     _groupId: string;
     _setId: string;
     _data: Values;
-    mds: any;
+    mds: MdsDefinition;
     templates: any[];
 
     @Input() set groupId(groupId: string) {
@@ -37,28 +40,41 @@ export class MdsViewerComponent {
         this.inflate();
     }
 
-    @Input() set setId(setId: string) {
-        this._setId = setId;
-        this.mdsService.getSet(setId).subscribe((mds) => {
-            this.mds = mds;
-            this.inflate();
-        });
+    @Input() set setId(metadataSet: string) {
+        this._setId = metadataSet;
+        this.mdsService
+            .getMetadataSet({
+                repository: RestConstants.HOME_REPOSITORY,
+                metadataSet,
+            })
+            .subscribe(async (mds) => {
+                this.mds = mds;
+                await this.inflate();
+            });
     }
 
     @Input() set data(data: Values) {
         this._data = data;
         if (this._data[RestConstants.CM_PROP_METADATASET_EDU_METADATASET] != null) {
             this.mdsService
-                .getSet(this._data[RestConstants.CM_PROP_METADATASET_EDU_METADATASET][0])
+                .getMetadataSet({
+                    repository: RestConstants.HOME_REPOSITORY,
+                    metadataSet: this._data[RestConstants.CM_PROP_METADATASET_EDU_METADATASET][0],
+                })
                 .subscribe(async (mds) => {
                     this.mds = mds;
                     await this.inflate();
                 });
         } else {
-            this.mdsService.getSet().subscribe(async (mds) => {
-                this.mds = mds;
-                await this.inflate();
-            });
+            this.mdsService
+                .getMetadataSet({
+                    repository: RestConstants.HOME_REPOSITORY,
+                    metadataSet: RestConstants.DEFAULT,
+                })
+                .subscribe(async (mds) => {
+                    this.mds = mds;
+                    await this.inflate();
+                });
         }
     }
 
@@ -82,7 +98,7 @@ export class MdsViewerComponent {
     }
 
     constructor(
-        private mdsService: RestMdsService,
+        private mdsService: MdsService,
         private mdsEditorInstanceService: MdsEditorInstanceService,
         private factoryResolver: ComponentFactoryResolver,
         private injector: Injector,
