@@ -447,7 +447,7 @@ public class AdminApi {
 	@Path("/applications/xml")
 
 	@Operation(summary = "register/add an application via xml file", description = "register the xml file provided.")
-
+	@Consumes({ "multipart/form-data" })
 	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = HashMap.class))),
 			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
