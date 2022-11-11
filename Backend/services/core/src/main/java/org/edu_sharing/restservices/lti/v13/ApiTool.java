@@ -1,6 +1,10 @@
 package org.edu_sharing.restservices.lti.v13;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.springframework.extensions.surf.util.URLEncoder;
 
 import javax.servlet.http.HttpServletRequest;
@@ -60,5 +64,30 @@ public class ApiTool {
         }
         sb.append("</body></html>");
         return sb.toString();
+    }
+
+    public static String encrpt(String toEncrypt){
+        ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
+        String encrpted = null;
+        try {
+            Encryption encryptionTool = new Encryption("RSA");
+            byte[] userEncryptedBytes = encryptionTool.encrypt(toEncrypt.getBytes(), encryptionTool.getPemPublicKey(homeRepository.getPublicKey()));
+            encrpted = java.util.Base64.getEncoder().encodeToString(userEncryptedBytes);
+        }catch (Exception e){
+
+        }
+        return encrpted;
+    }
+
+    public static String decrpt(String toDecrypt){
+        Encryption encryptionTool = new Encryption("RSA");
+
+        try {
+            return encryptionTool.decrypt(
+                    Base64.decodeBase64(toDecrypt.getBytes()),
+                    encryptionTool.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey()));
+        }catch (Exception e){
+            return null;
+        }
     }
 }

@@ -10,7 +10,7 @@ public class LoginInitiationSessionObject implements Serializable {
 
     public static enum MessageType{resourcelink,deeplink}
 
-    String contextId,clientId,appId,resourceLinkNodeId,contentUrlNodeId,version;
+    String contextId,clientId,appId,resourceLinkNodeId,contentUrlNodeId,version,token;
     boolean resourceLinkEditMode = true;
 
     MessageType messageType;
@@ -74,5 +74,17 @@ public class LoginInitiationSessionObject implements Serializable {
 
     public String getVersion() {
         return version;
+    }
+
+    /**
+     *
+     * @return encrypted token
+     */
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

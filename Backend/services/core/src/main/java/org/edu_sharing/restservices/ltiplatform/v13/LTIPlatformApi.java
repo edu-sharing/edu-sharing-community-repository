@@ -1,5 +1,6 @@
 package org.edu_sharing.restservices.ltiplatform.v13;
 
+import com.google.gson.Gson;
 import io.jsonwebtoken.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -50,6 +51,7 @@ import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.extensions.surf.util.I18NUtil;
+import org.springframework.extensions.surf.util.URLEncoder;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -226,6 +228,9 @@ public class LTIPlatformApi {
                 custom.put(LTIPlatformConstants.CUSTOM_CLAIM_USER,username);
                 if(loginInitiationSessionObject.getVersion() != null){
                     custom.put(LTIPlatformConstants.CUSTOM_CLAIM_VERSION,loginInitiationSessionObject.getVersion());
+                }
+                if(loginInitiationSessionObject.getToken() != null){
+                    custom.put(LTIPlatformConstants.CUSTOM_CLAIM_TOKEN, loginInitiationSessionObject.getToken());
                 }
                 if(loginInitiationSessionObject.getContentUrlNodeId() != null) {
                     custom.put(LTIPlatformConstants.CUSTOM_CLAIM_FILENAME, (String)nodeService.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
@@ -699,14 +704,18 @@ public class LTIPlatformApi {
         req.getSession().setAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT, loginInitiationSessionObject);
         //remember session in userLTISessions map to reuse in later backend call
         if(contentUrlNodeId != null){
-            AllSessions.userLTISessions.put(getUserLTISessionKey(appInfo.getAppId(),AuthenticationUtil.getFullyAuthenticatedUser(),contentUrlNodeId), req.getSession());
+            Map<String,String> map = new HashMap<>();
+            map.put("appId",appInfo.getAppId());
+            map.put("user",AuthenticationUtil.getFullyAuthenticatedUser());
+            map.put("nodeId",contentUrlNodeId);
+            map.put("ts",System.currentTimeMillis()+"");
+            String json = new Gson().toJson(map);
+            String encryptedToken = ApiTool.encrpt(json);
+            loginInitiationSessionObject.setToken(encryptedToken);
+            AllSessions.userLTISessions.put(encryptedToken, req.getSession());
         }
 
         return form;
-    }
-
-    private String getUserLTISessionKey(String appId,String user,String contentUrlNodeId){
-        return appId+user+contentUrlNodeId;
     }
 
 
@@ -1020,10 +1029,15 @@ public class LTIPlatformApi {
             throw new ValidationException("missing "+LTIPlatformConstants.CUSTOM_CLAIM_NODEID);
         }
 
+        String token = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_TOKEN, String.class);
+        if(token == null){
+            throw new ValidationException("missing "+LTIPlatformConstants.CUSTOM_CLAIM_TOKEN);
+        }
+
         /**
          * this is a backend call so we con not use this: req.getSession().getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
          */
-        HttpSession session = AllSessions.userLTISessions.get(this.getUserLTISessionKey(appId,user,nodeId));
+        HttpSession session = AllSessions.userLTISessions.get(token);
         if(session == null){
             throw new ValidationException("no session found");
         }
@@ -1040,6 +1054,17 @@ public class LTIPlatformApi {
 
         if(!nodeId.equals(sessionObject.getContentUrlNodeId())){
             throw new ValidationException("wrong nodeId");
+        }
+
+        HashMap<String,String> tokenData = new Gson().fromJson(ApiTool.decrpt(token), HashMap.class);
+        if(!appId.equals(tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID))){
+            throw new ValidationException("mismatch appId");
+        }
+        if(!user.equals(tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_USER))){
+            throw new ValidationException("mismatch user");
+        }
+        if(!nodeId.equals(tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_NODEID))){
+            throw new ValidationException("mismatch nodeId");
         }
 
 

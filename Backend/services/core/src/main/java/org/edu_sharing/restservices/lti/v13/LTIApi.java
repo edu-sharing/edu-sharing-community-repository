@@ -24,12 +24,17 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.Signing;
 import org.edu_sharing.restservices.NodeDao;
+import org.edu_sharing.restservices.RenderingDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.lti.v13.model.JWKResult;
 import org.edu_sharing.restservices.lti.v13.model.JWKSResult;
 import org.edu_sharing.restservices.lti.v13.model.RegistrationUrl;
+import org.edu_sharing.restservices.ltiplatform.v13.LTIPlatformConstants;
+import org.edu_sharing.restservices.ltiplatform.v13.model.ValidationException;
+import org.edu_sharing.restservices.rendering.v1.model.RenderingDetailsEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
+import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.NodeLTIDeepLink;
 import org.edu_sharing.service.authentication.SSOAuthorityMapper;
@@ -702,6 +707,62 @@ public class LTIApi {
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
         }
+    }
+
+    @GET
+    @Path("/details")
+
+
+    @Operation(summary = "get a html snippet containing a rendered version of a node. this method can be called from a platform as a xhr request instead of doing the resource link flow", description = "get rendered html snippet for a node.")
+
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = RenderingDetailsEntry.class))),
+                    @ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response getDetailsSnippet(
+            @Parameter(description = "jwt containing the claims appId (platform), nodeId, user. Must be signed by platform", required=true ) @QueryParam("jwt")  String jwt,
+            @Parameter(description = "Rendering displayMode", required=false) @QueryParam("displayMode") String displayMode,
+            @Context HttpServletRequest req){
+
+          /*try{
+          Jws<Claims> jwtObj = this.validateForCustomContent(jwt);
+            String nodeId = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_NODEID, String.class);
+            String appId = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID, String.class);
+            String version = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_VERSION, String.class);
+            String repository = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_REPOSITORY, String.class);
+            if(repository == null) ApplicationInfoList.getHomeRepository().getAppId();
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            if (repoDao == null) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+            String detailsSnippet = new RenderingDao(repoDao).getDetails(nodeId,version,displayMode,null);
+
+            Node nodeJson = NodeDao.getNode(repoDao, nodeId, Filter.createShowAllFilter()).asNode();
+            String mimeType = nodeJson.getMimetype();
+
+
+            RenderingDetailsEntry response = new RenderingDetailsEntry();
+            response.setDetailsSnippet(detailsSnippet);
+            response.setMimeType(mimeType);
+            response.setNode(nodeJson);
+
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        }catch(ValidationException e){
+            logger.warn(e.getMessage(),e);
+            return Response.status(Response.Status.FORBIDDEN).entity(e.getMessage()).build();
+        }catch (Throwable t) {
+
+            logger.error(t.getMessage(), t);
+            return ErrorResponse.createResponse(t);
+        }*/
+        return null;
     }
 
 
