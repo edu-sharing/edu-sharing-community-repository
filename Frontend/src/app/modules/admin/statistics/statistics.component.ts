@@ -419,9 +419,6 @@ export class AdminStatisticsComponent implements OnInit{
             });
         });
     }
-    openNode(entry: any){
-        this.onOpenNode.emit(entry.node);
-    }
     getValidMode(mode: 'NODES' | 'USERS'){
         if (!this._mediacenter) {
             if(!this.nodesPermission) {

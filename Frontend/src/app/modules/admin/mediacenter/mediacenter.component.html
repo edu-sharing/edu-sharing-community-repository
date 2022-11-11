@@ -98,8 +98,6 @@
                         [hasIcon]="true"
                         [customOptions]="groupActions"
                         icon="group"
-                        [isClickable]="true"
-                        (clickRow)="onOpenNode.emit($event.node)"
                         [columns]="groupColumns"
                 ></listTable>
                 </div>
@@ -130,9 +128,12 @@
                                [hasHeading]="true"
                                [hasCheckbox]="true"
                                icon="node"
+                               [isClickable]="true"
+                               [createLink]="false"
                                [columns]="nodeColumns"
                                [sortBy]="mediacenterNodesSort.sortBy"
                                [sortAscending]="mediacenterNodesSort.sortAscending"
+                               (clickRow)="onOpenNode.emit($event.node)"
                                (sortListener)="setMediacenterNodesSort($event)"
                                (loadMore)="loadMediacenterNodes()"
                                [isLoading]="isLoadingMediacenterNodes"
@@ -145,6 +146,7 @@
                 <!-- workaround for https://github.com/angular/components/issues/7274 -->
                 <app-admin-statistics *ngIf="currentTab==3 && currentMediacenter"
                     [mediacenter]="currentMediacenter"
+                    (onOpenNode)="onOpenNode.emit($event)"
                 ></app-admin-statistics>
             </mat-tab>
         </mat-tab-group>
