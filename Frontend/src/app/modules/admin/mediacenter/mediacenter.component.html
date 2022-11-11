@@ -98,6 +98,7 @@
                         [hasIcon]="true"
                         [customOptions]="groupActions"
                         icon="group"
+                        (clickRow)="onOpenNode.emit($event.node)"
                         [columns]="groupColumns"
                 ></listTable>
                 </div>

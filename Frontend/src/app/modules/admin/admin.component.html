@@ -175,6 +175,7 @@
     </div>
     <div *ngIf="modeIsActive('MEDIACENTER')" class="content mediacenter">
       <app-admin-mediacenter
+        (onOpenNode)="openNodeRender($event)"
       ></app-admin-mediacenter>
     </div>
     <div *ngIf="modeIsActive('FRONTPAGE')" class="content frontpage">
