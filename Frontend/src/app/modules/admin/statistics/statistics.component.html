@@ -177,7 +177,7 @@
 
         <ng-container *ngFor="let key of singleDataRows" [matColumnDef]="key">
           <mat-header-cell *matHeaderCellDef> {{'ADMIN.STATISTICS.HEADERS.'+key | translate}} </mat-header-cell>
-          <mat-cell *matCellDef="let element" (click)="openNode(element.entry ? element.entry : null)">
+          <mat-cell *matCellDef="let element" (click)="onOpenNode.emit(element.entry ? element.entry : null)">
             <span *ngIf="key=='action'">{{'ADMIN.STATISTICS.ACTIONS.'+element[key] | translate}}</span>
             <span *ngIf="key=='date'">{{element[key] | formatDate:{time:true,relative:false} }}</span>
             <span *ngIf="key=='authority'">{{element.authority.hash | slice:0:8 }}</span>
