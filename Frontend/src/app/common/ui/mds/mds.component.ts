@@ -1776,7 +1776,7 @@ export class MdsComponent {
         }
     let html=this.autoSuggestField(widget,'',false,
                 this.getWindowComponent()+`.openTree('`+widget.id+`')`,'arrow_forward',widget.type=='singlevalueTree')
-        +`     <div class="dialog darken mds-tree-dialog" style="display:none;z-index:`+(122 + this.priority)+`;" id="`+domId+`_tree">
+        +`     <div class="dialog darken mds-tree-dialog" style="display:none;z-index:`+(132 + this.priority)+`;" id="`+domId+`_tree">
                 <div class="card center-card card-wide card-high card-action">
                   <div class="card-content">
                   <div class="card-cancel" onclick="document.getElementById('` +
