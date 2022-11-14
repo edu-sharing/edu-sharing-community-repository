@@ -1,12 +1,15 @@
 package org.edu_sharing.restservices.lti.v13;
 
 import com.google.gson.Gson;
-import com.nimbusds.jose.jwk.*;
+import com.nimbusds.jose.jwk.KeyUse;
+import com.nimbusds.jose.jwk.RSAKey;
 import edu.uoc.elc.lti.tool.Tool;
 import edu.uoc.elc.lti.tool.oidc.LoginRequest;
 import edu.uoc.elc.spring.lti.security.openid.HttpSessionOIDCLaunchSession;
 import edu.uoc.elc.spring.lti.security.openid.LoginRequestFactory;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -24,22 +27,22 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.Signing;
 import org.edu_sharing.restservices.NodeDao;
-import org.edu_sharing.restservices.RenderingDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.lti.v13.model.JWKResult;
 import org.edu_sharing.restservices.lti.v13.model.JWKSResult;
 import org.edu_sharing.restservices.lti.v13.model.RegistrationUrl;
-import org.edu_sharing.restservices.ltiplatform.v13.LTIPlatformConstants;
 import org.edu_sharing.restservices.ltiplatform.v13.model.ValidationException;
+import org.edu_sharing.restservices.rendering.v1.RenderingApi;
 import org.edu_sharing.restservices.rendering.v1.model.RenderingDetailsEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
-import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.NodeLTIDeepLink;
 import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.edu_sharing.service.lti13.*;
+import org.edu_sharing.service.lti13.LTIConstants;
+import org.edu_sharing.service.lti13.LTIJWTUtil;
+import org.edu_sharing.service.lti13.RepoTools;
 import org.edu_sharing.service.lti13.model.LTISessionObject;
 import org.edu_sharing.service.lti13.registration.DynamicRegistrationToken;
 import org.edu_sharing.service.lti13.registration.DynamicRegistrationTokens;
@@ -58,7 +61,10 @@ import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 @Path("/lti/v13")
 @Consumes({ "text/html" })
@@ -710,7 +716,7 @@ public class LTIApi {
     }
 
     @GET
-    @Path("/details")
+    @Path("/details/{repository}/{node}")
 
 
     @Operation(summary = "get a html snippet containing a rendered version of a node. this method can be called from a platform as a xhr request instead of doing the resource link flow", description = "get rendered html snippet for a node.")
@@ -726,34 +732,19 @@ public class LTIApi {
             })
 
     public Response getDetailsSnippet(
-            @Parameter(description = "jwt containing the claims appId (platform), nodeId, user. Must be signed by platform", required=true ) @QueryParam("jwt")  String jwt,
+            @Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+            @Parameter(description = "ID of node",required=true ) @PathParam("node") String node,
+            @Parameter(description = "version of node",required=false) @QueryParam("version") String nodeVersion,
             @Parameter(description = "Rendering displayMode", required=false) @QueryParam("displayMode") String displayMode,
+            @Parameter(description = "jwt containing the claims aud (clientId of platform), deploymentId and a token. must be signed by platform", required=true ) @QueryParam("jwt")  String jwt,
             @Context HttpServletRequest req){
 
-          /*try{
-          Jws<Claims> jwtObj = this.validateForCustomContent(jwt);
-            String nodeId = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_NODEID, String.class);
-            String appId = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID, String.class);
-            String version = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_VERSION, String.class);
-            String repository = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_REPOSITORY, String.class);
-            if(repository == null) ApplicationInfoList.getHomeRepository().getAppId();
-            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-            if (repoDao == null) {
-                return Response.status(Response.Status.NOT_FOUND).build();
-            }
-            String detailsSnippet = new RenderingDao(repoDao).getDetails(nodeId,version,displayMode,null);
+        try{
+            String user = new LTIJWTUtil().validateForInitialToolSession(jwt);
 
-            Node nodeJson = NodeDao.getNode(repoDao, nodeId, Filter.createShowAllFilter()).asNode();
-            String mimeType = nodeJson.getMimetype();
-
-
-            RenderingDetailsEntry response = new RenderingDetailsEntry();
-            response.setDetailsSnippet(detailsSnippet);
-            response.setMimeType(mimeType);
-            response.setNode(nodeJson);
-
-            return Response.status(Response.Status.OK).entity(response).build();
-
+            return AuthenticationUtil.runAs(() -> {
+                return new RenderingApi().getDetailsSnippet(repository,node,nodeVersion,displayMode,req);
+            },user);
         }catch(ValidationException e){
             logger.warn(e.getMessage(),e);
             return Response.status(Response.Status.FORBIDDEN).entity(e.getMessage()).build();
@@ -761,8 +752,7 @@ public class LTIApi {
 
             logger.error(t.getMessage(), t);
             return ErrorResponse.createResponse(t);
-        }*/
-        return null;
+        }
     }
 
 

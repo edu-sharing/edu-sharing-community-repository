@@ -944,7 +944,7 @@ public class LTIPlatformApi {
 
         try {
 
-            Jws<Claims>  jwtObj = this.validateForCustomContent(jwt);
+            Jws<Claims>  jwtObj = new LTIJWTUtil().validateForCustomContent(jwt,true);
             String user = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_USER, String.class);
             String nodeId = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_NODEID, String.class);
 
@@ -991,95 +991,6 @@ public class LTIPlatformApi {
 
     }
 
-    private Jws<Claims> validateForCustomContent(String jwt) throws Exception{
-        /**
-         * decode without validating signature to get appId
-         */
-        String[] chunks = jwt.split("\\.");
-        Base64.Decoder decoder = Base64.getUrlDecoder();
-
-        String header = new String(decoder.decode(chunks[0]));
-        String payload = new String(decoder.decode(chunks[1]));
-        JSONObject jsonObject = (JSONObject)new JSONParser().parse(payload);
-        String appId = (String)jsonObject.get("appId");
-        logger.info("appId tool:" + appId);
-        if(appId == null) throw new Exception("missing "+LTIPlatformConstants.CUSTOM_CLAIM_APP_ID);
-        ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
-        if(appInfo == null || !appInfo.isLtiTool()){
-            throw new ValidationException("application is no lti tool");
-        }
-
-        /**
-         * validate that this message was signed by the tool
-         */
-        Jws<Claims> jwtObj = LTIJWTUtil.validateJWT(jwt,appInfo);
-        //maybe obsolet:
-        String validatedAppId = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID,String.class);
-        if(!appId.equals(validatedAppId)){
-            throw new ValidationException("mismatch appId");
-        }
-
-        String user = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_USER, String.class);
-        if(user == null){
-            throw new ValidationException("missing "+LTIPlatformConstants.CUSTOM_CLAIM_USER);
-        }
-
-        String nodeId = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_NODEID, String.class);
-        if(nodeId == null){
-            throw new ValidationException("missing "+LTIPlatformConstants.CUSTOM_CLAIM_NODEID);
-        }
-
-        String token = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_TOKEN, String.class);
-        if(token == null){
-            throw new ValidationException("missing "+LTIPlatformConstants.CUSTOM_CLAIM_TOKEN);
-        }
-
-        /**
-         * this is a backend call so we con not use this: req.getSession().getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
-         */
-        HttpSession session = AllSessions.userLTISessions.get(token);
-        if(session == null){
-            throw new ValidationException("no session found");
-        }
-
-        LoginInitiationSessionObject sessionObject = (LoginInitiationSessionObject)session.getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
-        if(!appId.equals(sessionObject.getAppId())){
-            throw new ValidationException("wrong appId");
-        }
-
-
-        if(!user.equals(session.getAttribute(CCConstants.AUTH_USERNAME))){
-            throw new ValidationException("wrong user");
-        }
-
-        if(!nodeId.equals(sessionObject.getContentUrlNodeId())){
-            throw new ValidationException("wrong nodeId");
-        }
-
-        HashMap<String,String> tokenData = new Gson().fromJson(ApiTool.decrpt(token), HashMap.class);
-        if(!appId.equals(tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID))){
-            throw new ValidationException("mismatch appId");
-        }
-        if(!user.equals(tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_USER))){
-            throw new ValidationException("mismatch user");
-        }
-        if(!nodeId.equals(tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_NODEID))){
-            throw new ValidationException("mismatch nodeId");
-        }
-
-
-        /**
-         * extend session runtime
-         */
-        Field facadeSessionField = StandardSessionFacade.class.getDeclaredField("session");
-        facadeSessionField.setAccessible(true);
-        StandardSession stdSession = (StandardSession) facadeSessionField.get(session);
-        stdSession.endAccess();
-        logger.info("last AccessTime:" + new Date(session.getLastAccessedTime()));
-
-        return jwtObj;
-    }
-
 
     @GET
     @Path("/content")
@@ -1101,7 +1012,7 @@ public class LTIPlatformApi {
             @Context HttpServletRequest req,
             @Context HttpServletResponse resp){
         try {
-            Jws<Claims> jwtObj = this.validateForCustomContent(jwt);
+            Jws<Claims> jwtObj = new LTIJWTUtil().validateForCustomContent(jwt,true);
             String nodeId = jwtObj.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_NODEID, String.class);
 
 
