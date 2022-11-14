@@ -40,12 +40,13 @@ import { ClipboardObject, TemporaryStorageService } from '../../core-module/core
 import { RestUsageService } from '../../core-module/core.module';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { LinkData, NodeHelperService } from '../../core-ui-module/node-helper.service';
-import { WorkspaceLicenseComponent } from './license/license.component';
 import { ErrorProcessingService } from '../../core-ui-module/error.processing';
 import { BulkBehavior } from '../../features/mds/types/types';
 import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { MainNavService } from 'src/app/main/navigation/main-nav.service';
 import { first } from 'rxjs/operators';
+import { SimpleEditCloseEvent } from './simple-edit-dialog/simple-edit-dialog.component';
+import { DialogsService } from '../../features/dialogs/dialogs.service';
 
 export enum DialogType {
     SimpleEdit = 'SimpleEdit',
@@ -71,7 +72,6 @@ export interface ManagementEvent {
 export class WorkspaceManagementDialogsComponent {
     readonly BulkBehaviour = BulkBehavior;
     @ViewChild(MdsEditorWrapperComponent) mdsEditorWrapperRef: MdsEditorWrapperComponent;
-    @ViewChild(WorkspaceLicenseComponent) licenseComponent: WorkspaceLicenseComponent;
     @ContentChild('collectionChooserBeforeRecent')
     collectionChooserBeforeRecentRef: TemplateRef<any>;
     @Input() showLtiTools = false;
@@ -84,8 +84,6 @@ export class WorkspaceManagementDialogsComponent {
     @Output() filesToUploadChange = new EventEmitter();
     @Input() parent: Node;
     @Output() showLtiToolsChange = new EventEmitter();
-    @Input() nodeLicense: Node[];
-    @Output() nodeLicenseChange = new EventEmitter();
     @Input() addPinnedCollection: Node;
     @Output() addPinnedCollectionChange = new EventEmitter();
     @Output() onEvent = new EventEmitter<ManagementEvent>();
@@ -173,8 +171,6 @@ export class WorkspaceManagementDialogsComponent {
     @Output() nodeMetadataChange = new EventEmitter<Node[]>();
     @Input() nodeTemplate: Node;
     @Output() nodeTemplateChange = new EventEmitter();
-    @Input() nodeContributor: Node;
-    @Output() nodeContributorChange = new EventEmitter<Node>();
     @Input() set nodeSimpleEdit(nodeSimpleEdit: Node[]) {
         this._nodeSimpleEdit = nodeSimpleEdit;
         this._nodeFromUpload = false;
@@ -194,10 +190,18 @@ export class WorkspaceManagementDialogsComponent {
     @Output() onClose = new EventEmitter();
     @Output() onCreate = new EventEmitter();
     @Output() onRefresh = new EventEmitter<Node[] | void>();
+    /**
+     * Emits once when the user created new nodes (either by upload or links) after the user closed
+     * the final editing dialog.
+     *
+     * - Does not emit when jumping between dialogs (the final dialog is also the first dialog that
+     *   appears after the user creates new nodes).
+     * - Emits the new nodes when the user confirms the final dialog.
+     * - Emits `null` when the user cancels the final dialog.
+     */
     @Output() onUploadFilesProcessed = new EventEmitter<Node[]>();
     @Output() onCloseMetadata = new EventEmitter();
     @Output() onUploadFileSelected = new EventEmitter<FileList>();
-    @Output() onUpdateLicense = new EventEmitter();
     @Output() onCloseAddToCollection = new EventEmitter();
     @Output() onStoredAddToCollection = new EventEmitter<{
         collection: Node;
@@ -221,8 +225,6 @@ export class WorkspaceManagementDialogsComponent {
     currentLtiTool: Node;
     ltiToolRefresh: Boolean;
     reopenSimpleEdit = false;
-    @Input() nodeDeleteOnCancel: boolean;
-    @Output() nodeDeleteOnCancelChange = new EventEmitter();
     private nodeLicenseOnUpload = false;
     /**
      * QR Code object data to print
@@ -272,12 +274,6 @@ export class WorkspaceManagementDialogsComponent {
                 event.stopPropagation();
                 return;
             }
-            if (this.nodeLicense != null) {
-                this.closeLicense();
-                event.preventDefault();
-                event.stopPropagation();
-                return;
-            }
             if (this.showLtiTools) {
                 this.closeLtiTools();
                 event.preventDefault();
@@ -308,6 +304,7 @@ export class WorkspaceManagementDialogsComponent {
         private nodeHelper: NodeHelperService,
         private bridge: BridgeService,
         private router: Router,
+        private dialogs: DialogsService,
     ) {}
     closeLtiToolConfig() {
         this.ltiToolConfig = null;
@@ -418,7 +415,7 @@ export class WorkspaceManagementDialogsComponent {
     }
     public uploadDone(event: Node[]) {
         if (this.config.instant('licenseDialogOnUpload', false)) {
-            this.nodeLicense = event;
+            void this.openLicenseDialog(event);
             this.nodeLicenseOnUpload = true;
         } else {
             this.showMetadataAfterUpload(event);
@@ -461,43 +458,42 @@ export class WorkspaceManagementDialogsComponent {
         this.closeUploadSelect();
         this.onUploadSelectCanceled.emit(false);
     }
-    public closeContributor(node: Node) {
-        if (this.editorPending) {
-            this.editorPending = false;
-            this._nodeMetadata = [this.nodeContributor];
-        }
-        this.nodeContributor = null;
-        this.nodeContributorChange.emit(node);
-        if (node) {
-            this.onRefresh.emit([node]);
-        }
+    async openContributorsDialog(node: Node) {
+        const dialogRef = await this.dialogs.openContributorsDialog({ node });
+        dialogRef.afterClosed().subscribe((updatedNode) => {
+            if (this.editorPending) {
+                this.editorPending = false;
+                this._nodeMetadata = [node];
+            }
+            if (updatedNode) {
+                this.onRefresh.emit([updatedNode]);
+            }
+        });
     }
     closeLtiTools() {
         this.showLtiTools = false;
         this.showLtiToolsChange.emit(false);
     }
-    closeLicense() {
-        if (this.nodeLicenseOnUpload) {
-            this.showMetadataAfterUpload(this.nodeLicense);
-        } else {
-            if (this._nodeFromUpload) this.onUploadFilesProcessed.emit(this.nodeLicense);
-            this._nodeFromUpload = false;
-        }
-        if (this.editorPending) {
-            this.editorPending = false;
-            this._nodeMetadata = this.nodeLicense;
-        } else if (this.reopenSimpleEdit) {
-            this.reopenSimpleEdit = false;
-            this._nodeSimpleEdit = this.nodeLicense;
-        }
-        this.nodeLicense = null;
-        this.nodeLicenseOnUpload = false;
-        this.nodeLicenseChange.emit(null);
-    }
-    updateLicense(nodes: Node[]) {
-        this.closeLicense();
-        this.onUpdateLicense.emit();
-        this.onRefresh.emit(nodes);
+    async openLicenseDialog(nodes: Node[]): Promise<void> {
+        const dialogRef = await this.dialogs.openLicenseDialog({ kind: 'nodes', nodes });
+        dialogRef.afterClosed().subscribe((updatedNodes) => {
+            if (this.nodeLicenseOnUpload) {
+                this.showMetadataAfterUpload(nodes);
+            } else if (this.editorPending) {
+                this.editorPending = false;
+                this._nodeMetadata = nodes;
+            } else if (this.reopenSimpleEdit) {
+                this.reopenSimpleEdit = false;
+                this._nodeSimpleEdit = nodes;
+            } else if (this._nodeFromUpload) {
+                this.onUploadFilesProcessed.emit(nodes);
+                this._nodeFromUpload = false;
+            }
+            this.nodeLicenseOnUpload = false;
+            if (updatedNodes) {
+                this.onRefresh.emit(updatedNodes);
+            }
+        });
     }
     deleteNodes(nodes: Node[]) {
         this.toast.showProgressDialog();
@@ -505,16 +501,13 @@ export class WorkspaceManagementDialogsComponent {
             nodes.map((n) => this.nodeService.deleteNode(n.ref.id, false)),
         ).subscribe(() => {
             this.toast.closeModalDialog();
-            this.closeEditor(true);
         });
     }
     closeEditor(refresh: boolean, nodes: Node[] = null) {
-        if (this.nodeDeleteOnCancel && nodes == null) {
-            this.nodeDeleteOnCancel = false;
+        if (this._nodeFromUpload && !this.reopenSimpleEdit && nodes == null) {
             this.deleteNodes(this._nodeMetadata);
-            return;
+            refresh = true;
         }
-        this.setNodeDeleteOnCancel(false);
         const previousNodes = this._nodeMetadata;
         this._nodeMetadata = null;
         this.nodeMetadataChange.emit(null);
@@ -523,12 +516,10 @@ export class WorkspaceManagementDialogsComponent {
         if (this.reopenSimpleEdit) {
             this.reopenSimpleEdit = false;
             this._nodeSimpleEdit = previousNodes;
+        } else if (this._nodeFromUpload) {
+            this.onUploadFilesProcessed.emit(nodes);
         }
         if (refresh) {
-            console.log('_nodeFromUpload', this._nodeFromUpload);
-            if (this._nodeFromUpload) {
-                this.onUploadFilesProcessed.emit(nodes);
-            }
             this.onRefresh.emit(nodes);
             if (
                 nodes?.length === 1 &&
@@ -540,6 +531,7 @@ export class WorkspaceManagementDialogsComponent {
             }
         }
     }
+
     public editLti(event: Node) {
         //this.closeLtiTools();
         this._nodeMetadata = [event];
@@ -688,8 +680,6 @@ export class WorkspaceManagementDialogsComponent {
             console.error('Invalid configuration for upload.postDialog: ' + dialog);
         }
         this._nodeFromUpload = true;
-        this.nodeDeleteOnCancel = true;
-        this.nodeDeleteOnCancelChange.emit(true);
     }
 
     closeTemplate() {
@@ -793,17 +783,18 @@ export class WorkspaceManagementDialogsComponent {
         }
     }
 
-    closeSimpleEdit(saved: boolean, nodes: Node[] = null) {
-        if (saved && this._nodeFromUpload) {
-            this.onUploadFilesProcessed.emit(nodes);
-        } else if (!saved && this.nodeDeleteOnCancel) {
-            this.deleteNodes(this._nodeSimpleEdit);
-            this.onUploadFilesProcessed.emit(null);
+    closeSimpleEdit(event: SimpleEditCloseEvent) {
+        if (this._nodeFromUpload) {
+            if (event.reason === 'done') {
+                this.onUploadFilesProcessed.emit(event.nodes);
+            } else if (event.reason === 'abort') {
+                this.deleteNodes(this._nodeSimpleEdit);
+                this.onUploadFilesProcessed.emit(null);
+            }
         }
-        if (nodes) {
-            this.onRefresh.emit(nodes);
+        if (event.nodes) {
+            this.onRefresh.emit(event.nodes);
         }
-        this.setNodeDeleteOnCancel(false);
         this._nodeSimpleEdit = null;
         this.nodeSimpleEditChange.emit(null);
     }
@@ -843,11 +834,6 @@ export class WorkspaceManagementDialogsComponent {
     closeLinkMap(node: Node = null) {
         this.linkMap = null;
         this.linkMapChange.emit(null);
-    }
-
-    private setNodeDeleteOnCancel(nodeDeleteOnCancel: boolean) {
-        this.nodeDeleteOnCancel = nodeDeleteOnCancel;
-        this.nodeDeleteOnCancelChange.emit(nodeDeleteOnCancel);
     }
 
     declineProposals(nodes: ProposalNode[]) {

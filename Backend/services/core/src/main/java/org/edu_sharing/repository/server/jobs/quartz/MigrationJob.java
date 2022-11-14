@@ -9,11 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.Client;
@@ -50,6 +46,8 @@ public class MigrationJob extends AbstractJob {
 
     public final static String PARAM_IDM_URL = "PARAM_IDM_URL";
     public final static String PARAM_TESTMODE = "PARAM_TESTMODE";
+
+    public final static String PARAM_AUTHORITIES = "AUTHORITIES";
 
     ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
     ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
@@ -110,12 +108,15 @@ public class MigrationJob extends AbstractJob {
 
                     boolean testMode = (ptestmode == null) ? true : new Boolean(ptestmode);
 
+                    String paramAuthorities = context.getJobDetail().getJobDataMap().getString(PARAM_AUTHORITIES);
+
                     client = ClientBuilder.newClient();
 
                     // http://localhost:8085/migration/mapping?groupId=wedwedwedw&url=http%3A%2F%2Feee.de%2Feee
 
-                    Set<String> authorities = authorityService
-                            .getAllAuthoritiesInZone(AuthorityService.ZONE_APP_DEFAULT, AuthorityType.GROUP);
+                    Set<String> authorities = (paramAuthorities == null || paramAuthorities.trim().equals(""))
+                            ? authorityService.getAllAuthoritiesInZone(AuthorityService.ZONE_APP_DEFAULT, AuthorityType.GROUP)
+                            : new HashSet<>(Arrays.asList(paramAuthorities.split(",")));
                     logger.info(";authorities:" + authorities.size());
                     for (String authority : authorities) {
                         logger.info(";authority;"+authority);

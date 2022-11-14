@@ -1,18 +1,17 @@
-import { Component, NgZone, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject } from 'rxjs';
-import { first } from 'rxjs/operators';
 import { Node } from '../../../../../core-module/rest/data-object';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { RestConnectorService } from '../../../../../core-module/rest/services/rest-connector.service';
 import { NodeHelperService } from '../../../../../core-ui-module/node-helper.service';
-import { UIHelper } from '../../../../../core-ui-module/ui-helper';
 import { MainNavService } from '../../../../../main/navigation/main-nav.service';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import { Constraints, MdsWidgetValue, Values } from '../../../types/types';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import { DialogsService } from '../../../../dialogs/dialogs.service';
 
 @Component({
     selector: 'es-mds-editor-widget-license',
@@ -41,10 +40,10 @@ export class MdsEditorWidgetLicenseComponent
         private connector: RestConnectorService,
         private mainnav: MainNavService,
         private sanitizer: DomSanitizer,
-        private ngZone: NgZone,
         public translate: TranslateService,
         private nodeHelper: NodeHelperService,
         public mdsEditorValues: MdsEditorInstanceService,
+        private dialogs: DialogsService,
     ) {
         super(mdsEditorValues, translate);
         this.isSafe = this.connector.getCurrentLogin()?.currentScope === RestConstants.SAFE_SCOPE;
@@ -84,27 +83,17 @@ export class MdsEditorWidgetLicenseComponent
         return values;
     }
 
-    openLicense(): void {
-        this.mainnav.getDialogs().nodeLicense = this.mdsEditorValues.nodes$.value;
-        // increase priority to have license in foreground
-        UIHelper.waitForComponent(
-            this.ngZone,
-            this.mainnav.getDialogs(),
-            'licenseComponent',
-        ).subscribe(() => (this.mainnav.getDialogs().licenseComponent.priority = 2));
-        // @TODO: With the rebuild to individual dialogs, we should handle this with scoped services!
-        const oldState = this.mainnav.getDialogs().reopenSimpleEdit;
-        if (this.mainnav.getDialogs().reopenSimpleEdit) {
-            this.mainnav.getDialogs().reopenSimpleEdit = false;
-        }
-        this.mainnav
-            .getDialogs()
-            .onRefresh.pipe(first())
-            .subscribe((nodes: Node[]) => {
-                this.nodes = nodes;
+    async openLicense(): Promise<void> {
+        const dialogRef = await this.dialogs.openLicenseDialog({
+            kind: 'nodes',
+            nodes: this.mdsEditorValues.nodes$.value,
+        });
+        dialogRef.afterClosed().subscribe((updatedNodes) => {
+            if (updatedNodes) {
+                this.nodes = updatedNodes;
                 this.mdsEditorValues.updateNodes(this.nodes);
-                this.mainnav.getDialogs().reopenSimpleEdit = oldState;
-            });
+            }
+        });
     }
 
     updateValue(license: License, status: boolean) {

@@ -1,0 +1,14 @@
+<div
+  class="card-scroll"
+  [style.margin-top.px]="-contentPadding"
+  [style.margin-left.px]="-contentPadding"
+  [style.margin-right.px]="-contentPadding"
+  [style.padding.px]="contentPadding"
+>
+  <div class="agreement" [innerHTML]="licenseAgreementHTML"></div>
+</div>
+<div>
+  <mat-checkbox [(ngModel)]="acceptLicenseAgreement" (change)="updateButtons()">{{
+    'LICENSE_AGREEMENT.CHECKBOX' | translate
+  }}</mat-checkbox>
+</div>

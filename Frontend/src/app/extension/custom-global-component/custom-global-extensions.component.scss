@@ -1,0 +1,11 @@
+@import '../../core-ui-module/styles/variables';
+
+.icon-green {
+    color: $colorStatusPositive;
+}
+.icon-yellow {
+    color: $warningMedium;
+}
+.icon-red {
+    color: $colorStatusNegative;
+}

@@ -2,8 +2,13 @@ import { Component } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { AccessibilityService } from 'src/app/common/ui/accessibility/accessibility.service';
-import { ListItem, RestConstants, Node } from 'src/app/core-module/core.module';
+import { AccessibilityService } from '../../../services/accessibility.service';
+import {
+    ListItem,
+    RestConstants,
+    Node,
+    RestNetworkService,
+} from '../../../core-module/core.module';
 import { ListWidget } from '../list-widget';
 import { NodeSourcePipe } from '../node-source.pipe';
 
@@ -20,6 +25,11 @@ export class ListNodeReplicationSourceComponent extends ListWidget {
     );
 
     readonly text$ = this.replicationSource$.pipe(
+        // Wait for repositories to be available to `restNetwork` since `nodeSource.transform` fails
+        // if it isn't.
+        switchMap((replicationSource) =>
+            this.restNetwork.getRepositories().pipe(map(() => replicationSource)),
+        ),
         switchMap((replicationSource) =>
             this.translate.get(
                 'REPOSITORIES.' + this.nodeSource.transform(replicationSource, { mode: 'escaped' }),
@@ -46,6 +56,7 @@ export class ListNodeReplicationSourceComponent extends ListWidget {
         private accessibility: AccessibilityService,
         private nodeSource: NodeSourcePipe,
         private translate: TranslateService,
+        private restNetwork: RestNetworkService,
     ) {
         super();
     }

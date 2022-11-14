@@ -1,5 +1,5 @@
 import { Directive, ElementRef, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
-import { ReplaySubject } from 'rxjs';
+import { ReplaySubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 interface BorderBox {
@@ -18,6 +18,15 @@ interface BorderBox {
     exportAs: 'borderBoxObserver',
 })
 export class BorderBoxObserverDirective implements OnInit, OnDestroy {
+    static observeElement(elementRef: ElementRef<HTMLElement>): Observable<BorderBox> {
+        return new Observable((subscriber) => {
+            const borderBoxObserver = new BorderBoxObserverDirective(elementRef);
+            borderBoxObserver.ngOnInit();
+            borderBoxObserver.borderBoxSubject.subscribe(subscriber);
+            return () => borderBoxObserver.ngOnDestroy();
+        });
+    }
+
     @Output('esBorderBoxObserver') borderBoxEmitter = new EventEmitter<BorderBox>();
 
     private observer: ResizeObserver;

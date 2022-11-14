@@ -30,6 +30,7 @@ import {
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { LinkData } from '../../../core-ui-module/node-helper.service';
 import { Toast } from '../../../core-ui-module/toast';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
 
 @Component({
     selector: 'es-workspace-file-upload-select',
@@ -78,7 +79,6 @@ export class WorkspaceFileUploadSelectComponent implements OnInit, OnChanges {
     @Output() onLinkSelected = new EventEmitter<LinkData>();
 
     disabled = true;
-    chooseParent = false;
     showSaveParent = false;
     saveParent = false;
     breadcrumbs: {
@@ -111,6 +111,7 @@ export class WorkspaceFileUploadSelectComponent implements OnInit, OnChanges {
         public configService: ConfigurationService,
         private toast: Toast,
         private clientUtils: ClientutilsV1Service,
+        private dialogs: DialogsService,
     ) {
         this.setState('');
         this.iamService.getCurrentUserAsync().then((user) => {
@@ -260,11 +261,23 @@ export class WorkspaceFileUploadSelectComponent implements OnInit, OnChanges {
         // }
     }
 
+    async chooseParent() {
+        const dialogRef = await this.dialogs.openFileChooserDialog({
+            pickDirectory: true,
+            title: 'WORKSPACE.CHOOSE_LOCATION_TITLE',
+            subtitle: 'WORKSPACE.CHOOSE_LOCATION_DESCRIPTION',
+        });
+        dialogRef.afterClosed().subscribe((nodes) => {
+            if (nodes) {
+                this.parentChoosed(nodes);
+            }
+        });
+    }
+
     parentChoosed(event: Node[]) {
         this.showSaveParent = true;
         this.parent = event[0];
         this.parentChange.emit(this.parent);
-        this.chooseParent = false;
     }
 
     updateButtons() {

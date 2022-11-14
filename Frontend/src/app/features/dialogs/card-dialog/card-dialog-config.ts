@@ -1,4 +1,4 @@
-import { InjectionToken } from '@angular/core';
+import { InjectionToken, TemplateRef } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { Observable, of } from 'rxjs';
@@ -14,6 +14,7 @@ export class CardDialogConfig<D = unknown> {
     subtitle?: string;
     avatar?: CardAvatar;
     buttons?: DialogButton[];
+    customBottomBarContent?: TemplateRef<unknown>;
     contentPadding?: number = 25;
     width?: number;
     minWidth?: number | string;
@@ -22,6 +23,7 @@ export class CardDialogConfig<D = unknown> {
     minHeight?: number | string;
     maxHeight?: number | string = '95%';
     closable?: Closable = Closable.Casual;
+    autoFocus?: AutoFocusTarget | string | boolean = 'first-tabbable';
     data?: D;
 }
 
@@ -48,6 +50,8 @@ export enum Closable {
      */
     Disabled,
 }
+
+export type AutoFocusTarget = 'dialog' | 'first-tabbable' | 'first-heading';
 
 export function configForNode(node: Node): Partial<CardDialogConfig> {
     return {

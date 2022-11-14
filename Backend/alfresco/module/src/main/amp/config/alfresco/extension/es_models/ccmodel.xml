@@ -1797,6 +1797,19 @@
 	         			<tokenised>false</tokenised>
 	         		</index>	
 				</property>
+
+				<!-- information about the period of a group, i.e. the school year of a class group -->
+				<property name="ccm:groupPeriod">
+					<title>information about the period of a group</title>
+					<type>d:text</type>
+					<mandatory>false</mandatory>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
+				</property>
 				
 				<property name="ccm:groupSource">
 					<title>flagging groups the are created by sso authentication, i.e the lms appid</title>

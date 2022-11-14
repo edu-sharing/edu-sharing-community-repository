@@ -1,3 +1,5 @@
+@import '../../../../core-ui-module/styles/variables';
+
 ::ng-deep .card-dialog-pane {
     flex-direction: column;
 }
@@ -44,4 +46,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.saving-info {
+    color: $textMain;
+}
+
+.saving-error {
+    color: $warning;
 }

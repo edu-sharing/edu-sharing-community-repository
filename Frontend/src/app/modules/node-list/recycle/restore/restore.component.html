@@ -26,10 +26,3 @@
     </div>
   </div>
 </es-card>
-<es-file-chooser
-  *ngIf="showFileChooser"
-  [isCancelable]="true"
-  [pickDirectory]="true"
-  (onChoose)="folderSelected($event)"
-  (onCancel)="closeFolder()"
-></es-file-chooser>

@@ -8,6 +8,7 @@ export {
 } from './lib/edu-sharing-api-configuration';
 export * from './lib/edu-sharing-api.module';
 export * from './lib/models';
+export * from './lib/wrappers/api-helpers.service';
 export * from './lib/wrappers/about.service';
 export * from './lib/wrappers/authentication.service';
 export * from './lib/wrappers/config.service';

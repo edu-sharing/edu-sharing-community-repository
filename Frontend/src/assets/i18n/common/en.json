@@ -439,7 +439,6 @@
     "TOAST_DURATION_INFINITE_INFO": "Status messages are not automatically hidden and must be closed manually.",
     "TOAST_DURATION_TITLE": "Display time",
     "TOAST_DURATION_MESSAGE": "Status messages disappear automatically after a specified time or can be closed manually by clicking.",
-    "SAVED": "Settings have been saved.",
     "DISMISS_TOAST": "Hide"
   },
   "AUTHORITY_TYPE_GROUP": "Group",
@@ -563,6 +562,11 @@
     "TOTAL_COUNT_TOOLTIP": "{{selected}} items selected from a total of {{total}}"
   },
   "DIALOG": {
+    "SAVING": "Saving...",
+    "SAVED": "Changes saved",
+    "SAVING_ERROR": "Error saving changes",
+    "CONFIRM_DISCARD_TITLE": "Discard changes?",
+    "CONFIRM_DISCARD_MESSAGE": "Close the dialog without saving any changes?",
     "COLLECTION_SHARE_PUBLIC": "Add material to collection?",
     "COLLECTION_SHARE_PUBLIC_INFO": "By adding this material into collection \"{{collection}}\" everyone who has access to this collection may access it.",
     "COLLECTION_PROPSE": "Propose material(s)?",
@@ -575,6 +579,7 @@
     "APPLY": "Apply",
     "SHOW": "Preview & Info",
     "SHOW_IN_FOLDER": "Open storage location",
+    "OPEN_ORIGINAL_NODE": "Open original",
     "DEBUG": "Debug",
     "INVITE": "Invite",
     "EDIT": "Edit info",
@@ -661,8 +666,6 @@
     "ADD_CHILD_OBJECT_DESCRIPTION": "Create a series by attaching more materials to this object",
     "ADD_CHILD_OBJECT_QUOTA_REACHED": "Error while uploading \"{{ name }}\": Upload quota reached",
     "ADD_CHILD_OBJECT_VIRUS_DETECTED": "Error while uploading \"{{ name }}\": Virus detected. File was deleted",
-    "CONFIRM_DISCARD_TITLE": "Discard changes?",
-    "CONFIRM_DISCARD_MESSAGE": "Close the dialog without saving any changes?",
     "REQUIRED_MESSAGE": "Field is required",
     "REQUIRED_FOR_PUBLISH_MESSAGE": "Field is required for publishing",
     "INDETERMINATE_NOTICE": "Click on the chip in order to add the value \"{{ value }}\" to all elements, or remove it in order to delete it from all elements.",

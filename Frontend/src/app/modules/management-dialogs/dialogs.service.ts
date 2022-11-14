@@ -4,9 +4,7 @@ import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { LinkData } from '../../core-ui-module/node-helper.service';
-import { Values } from '../../features/mds/types/types';
 import { WorkspaceFileUploadSelectComponent } from './file-upload-select/file-upload-select.component';
-import { WorkspaceLicenseComponent } from './license/license.component';
 
 export interface DialogRef<R> {
     close: () => void;
@@ -33,23 +31,6 @@ export type UploadSelectResult =
 })
 export class DialogsService {
     constructor(private overlay: Overlay) {}
-
-    openLicenseDialog({ properties }: { properties?: Values }): DialogRef<Values> {
-        const overlayRef = this.overlay.create();
-        const portal = new ComponentPortal(WorkspaceLicenseComponent);
-        const componentRef = overlayRef.attach(portal);
-        const dialogClosed = new Subject<Values | null>();
-        properties && (componentRef.instance.properties = properties);
-        componentRef.instance.onDone.subscribe((properties) =>
-            dialogClosed.next(properties as Values),
-        );
-        componentRef.instance.onCancel.subscribe(() => dialogClosed.next(null));
-        dialogClosed.subscribe(() => overlayRef.dispose());
-        return {
-            close: () => dialogClosed.next(null),
-            afterClosed: () => dialogClosed.pipe(take(1)),
-        };
-    }
 
     openUploadSelectDialog({
         showLti = true,

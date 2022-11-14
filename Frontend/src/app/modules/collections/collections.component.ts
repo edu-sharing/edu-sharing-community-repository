@@ -8,7 +8,10 @@ import {
     ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { TranslationsService } from '../../translations/translations.service';
+import { TranslateService } from '@ngx-translate/core';
+import { Subject } from 'rxjs';
+import { NodeEntriesDisplayType } from 'src/app/features/node-entries/entries-model';
+import { BridgeService } from '../../core-bridge-module/bridge.service';
 import * as EduData from '../../core-module/core.module';
 import {
     ConfigurationService,
@@ -37,19 +40,17 @@ import { UIHelper } from '../../core-ui-module/ui-helper';
 import { UIConstants } from '../../core-module/ui/ui-constants';
 import { ListTableComponent } from '../../core-ui-module/components/list-table/list-table.component';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
-import { TranslateService } from '@ngx-translate/core';
 import { Location } from '@angular/common';
 import { Helper } from '../../core-module/rest/helper';
 import { ColorHelper, PreferredColor } from '../../core-module/ui/color-helper';
-import { ActionbarHelperService } from '../../common/services/actionbar-helper';
-import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { HttpClient } from '@angular/common/http';
 import { OptionsHelperService } from '../../core-ui-module/options-helper.service';
 import { SortEvent } from '../../shared/components/sort-dropdown/sort-dropdown.component';
 import { MainNavService } from '../../main/navigation/main-nav.service';
-import { NodeEntriesDisplayType } from 'src/app/features/node-entries/entries-model';
 import { CollectionInfoBarComponent } from './collection-info-bar/collection-info-bar.component';
 import { CollectionContentComponent } from './collection-content/collection-content.component';
+import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
+import { TranslationsService } from '../../translations/translations.service';
 
 // component class
 @Component({
@@ -149,6 +150,8 @@ export class CollectionsMainComponent implements OnDestroy {
     reurl: any;
     private _collectionShare: Node;
     private params: Params;
+    private destroyed = new Subject<void>();
+    private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
 
     // inject services
     constructor(
@@ -165,7 +168,6 @@ export class CollectionsMainComponent implements OnDestroy {
         private organizationService: RestOrganizationService,
         private iamService: RestIamService,
         private mdsService: RestMdsService,
-        private actionbar: ActionbarHelperService,
         private connector: RestConnectorService,
         private route: ActivatedRoute,
         private uiService: UIService,
@@ -177,6 +179,7 @@ export class CollectionsMainComponent implements OnDestroy {
         private config: ConfigurationService,
         private translationService: TranslateService,
         private translations: TranslationsService,
+        private loadingScreen: LoadingScreenService,
     ) {
         this.translations.waitForInit().subscribe(() => {
             this.connector.isLoggedIn().subscribe(

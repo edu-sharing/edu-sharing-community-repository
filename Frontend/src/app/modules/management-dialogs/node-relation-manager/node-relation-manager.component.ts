@@ -228,8 +228,8 @@ export class NodeRelationManagerComponent implements OnInit, OnChanges {
     private cancel() {
         if (this.hasChanges()) {
             this.toast.showModalDialog(
-                'MDS.CONFIRM_DISCARD_TITLE',
-                'MDS.CONFIRM_DISCARD_MESSAGE',
+                'DIALOG.CONFIRM_DISCARD_TITLE',
+                'DIALOG.CONFIRM_DISCARD_MESSAGE',
                 [
                     new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => {
                         this.toast.closeModalDialog();

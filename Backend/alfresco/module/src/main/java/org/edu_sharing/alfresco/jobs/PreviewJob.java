@@ -221,6 +221,11 @@ public class PreviewJob implements Job {
 									}
 								};
 
+								//cleanup will be done after one hour in ActionObserver.removeInactiveActions
+								if(!serviceRegistry.getNodeService().exists(entry.getKey())){
+									return;
+								}
+
 								String creator = (String) serviceRegistry.getNodeService()
 										.getProperty(entry.getKey(), ContentModel.PROP_CREATOR);
 

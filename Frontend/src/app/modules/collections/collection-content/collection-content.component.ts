@@ -14,7 +14,7 @@ import {
 import { AuthenticationService, MdsService, Node, UserService } from 'ngx-edu-sharing-api';
 import { RestHelper } from '../../../core-module/rest/rest-helper';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
-import { takeUntil } from 'rxjs/operators';
+import { filter, takeUntil } from 'rxjs/operators';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
 import { NodeDataSource } from '../../../features/node-entries/node-data-source';
 import {
@@ -164,7 +164,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     dataSourceCollectionProposals = new NodeDataSource<ProposalNode>();
     collectionsColumns: ListItem[] = [];
     referencesColumns: ListItem[] = [];
-    private loadingTask = this.loadingScreen.addLoadingTask();
+    private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed$ });
 
     proposalColumns = [
         new ListItem('NODE', RestConstants.CM_PROP_TITLE),
@@ -459,8 +459,12 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                         this.refreshContent();
                         return;
                     }
-                    if (source.element.length === nodes.length) {
-                        const observables = source.element.map((n: any) =>
+                    if (nodes.length > 0) {
+                        const movedNodes = source.element.filter(
+                            (sourceElement: CollectionReference) =>
+                                nodes.some((node) => node.originalId === sourceElement.originalId),
+                        );
+                        const observables = movedNodes.map((n) =>
                             this.collectionService.removeFromCollection(
                                 n.ref.id,
                                 this.collection.ref.id,
@@ -577,12 +581,16 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             title: 'COLLECTIONS.TITLE',
             currentScope: 'collections',
             searchEnabled: false,
+            // TODO: document where this fails.
+            //
             // onCreate: (nodes) => this.addNodesToCollection(nodes),
         });
-        // @TODO: check if this is the ideal trigger event
         this.mainNavService
             .getDialogs()
-            .onUploadFilesProcessed.pipe(takeUntil(this.destroyed$))
+            .onUploadFilesProcessed.pipe(
+                takeUntil(this.destroyed$),
+                filter((nodes) => !!nodes),
+            )
             .subscribe((nodes) => this.addNodesToCollection(nodes));
         this.mainNavUpdateTrigger.pipe(takeUntil(this.destroyed$)).subscribe(async () => {
             this.mainNavService.patchMainNavConfig({
@@ -630,7 +638,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                         collection.pagination,
                     );
                     this.dataSourceCollections.isLoading = false;
-                    this.dataSourceCollections.setCanLoadMore(false);
                     if (this.isRootLevel) {
                         this.finishCollectionLoading();
                         return;
@@ -934,7 +941,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                         proposals.nodes,
                         proposals.pagination,
                     );
-                    this.dataSourceCollectionProposals.setCanLoadMore(false);
                     this.dataSourceCollectionProposals.isLoading = false;
                     setTimeout(() => {
                         this.listProposals?.initOptionsGenerator({

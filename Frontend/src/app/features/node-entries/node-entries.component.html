@@ -24,8 +24,7 @@
     entriesGlobalService.getPaginationStrategy(entriesService.scope) !==
       PaginationStrategy.Paginator ||
     entriesService.dataSource.isLoading ||
-    entriesService.dataSource.isEmpty() ||
-    !entriesService.dataSource.getCanLoadMore()
+    entriesService.dataSource.isEmpty()
   "
   (page)="openPage($event)"
 ></mat-paginator>

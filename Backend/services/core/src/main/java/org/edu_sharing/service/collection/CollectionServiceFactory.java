@@ -22,12 +22,17 @@ public class CollectionServiceFactory {
 	public static CollectionService getCollectionService(String appId){
 		ApplicationInfo appInfo = (appId == null) ? ApplicationInfoList.getHomeRepository() : ApplicationInfoList.getRepositoryInfoById(appId);
 		if(!ProviderHelper.hasProvider(appInfo)){
-			return getLocalService();
-
+			return getLocalService(appInfo.getAppId());
 		}else{
 			return ProviderHelper.getProviderByApp(appInfo).getCollectionService();
 		}
 	}
+
+	public static CollectionService getLocalService(String appId) {
+		CollectionServiceConfig config = (CollectionServiceConfig)ApplicationContextFactory.getApplicationContext().getBean("collectionServiceConfig");
+		return CollectionServiceImpl.build(appId);
+	}
+
 	public static CollectionService getLocalService() {
 		CollectionServiceConfig config = (CollectionServiceConfig)ApplicationContextFactory.getApplicationContext().getBean("collectionServiceConfig");
 		return CollectionServiceImpl.build(ApplicationInfoList.getHomeRepository().getAppId());

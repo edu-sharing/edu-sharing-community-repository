@@ -232,7 +232,9 @@ export class OptionsHelperService implements OnDestroy {
         this.actionbar = actionbar;
         this.list = list;
         this.dropdown = dropdown;
-        await this.networkService.getRepositories().toPromise();
+        if ((await this.iamService.getCurrentUserAsync()).person.authorityName) {
+            await this.networkService.getRepositories().toPromise();
+        }
     }
 
     /**
@@ -249,12 +251,11 @@ export class OptionsHelperService implements OnDestroy {
         }
         if (this.mainNavService.getMainNav()) {
             this.subscriptions.push(
-                this.mainNavService.getDialogs().onRefresh.subscribe((nodes: void | Node[]) => {
-                    this.nodesChanged.emit(nodes);
-                    if (this.list) {
-                        this.list.updateNodes(nodes);
-                    }
-                }),
+                this.mainNavService
+                    .getDialogs()
+                    .onRefresh.subscribe((nodes: void | Node[]) =>
+                        this.onNodesChanged(nodes ? nodes : undefined),
+                    ),
             );
             this.subscriptions.push(
                 this.mainNavService
@@ -278,6 +279,13 @@ export class OptionsHelperService implements OnDestroy {
         }
         if (this.actionbar) {
             this.actionbar.options = this.globalOptions;
+        }
+    }
+
+    private onNodesChanged(nodes?: Node[]): void {
+        this.nodesChanged.emit(nodes);
+        if (this.list) {
+            this.list.updateNodes(nodes);
         }
     }
 
@@ -593,6 +601,47 @@ export class OptionsHelperService implements OnDestroy {
             options.push(openFolder);
          */
 
+        const openOriginalNode = new OptionItem(
+            'OPTIONS.OPEN_ORIGINAL_NODE',
+            'description',
+            async (object) => {
+                const nodeId = RestHelper.removeSpacesStoreRef(
+                    this.getObjects(object)[0].properties[
+                        RestConstants.CCM_PROP_PUBLISHED_ORIGINAL
+                    ][0],
+                );
+                UIHelper.goToNode(this.router, new Node(nodeId));
+            },
+        );
+        openOriginalNode.constrains = [
+            Constrain.Files,
+            Constrain.NoBulk,
+            Constrain.HomeRepository,
+            Constrain.User,
+        ];
+        openOriginalNode.toolpermissions = [RestConstants.TOOLPERMISSION_WORKSPACE];
+        openOriginalNode.scopes = [Scope.CollectionsReferences, Scope.Search, Scope.Render];
+        openOriginalNode.customEnabledCallback = (nodes) => {
+            if (nodes && nodes.length === 1) {
+                openOriginalNode.customEnabledCallback = null;
+                let nodeId = RestHelper.removeSpacesStoreRef(
+                    nodes[0].properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL][0],
+                );
+                this.nodeService.getNodeMetadata(nodeId).subscribe(
+                    () => {
+                        openOriginalNode.isEnabled = true;
+                    },
+                    () => {
+                        openOriginalNode.isEnabled = false;
+                    },
+                );
+            }
+            return false;
+        };
+        openOriginalNode.elementType = [ElementType.NodePublishedCopy];
+        openOriginalNode.group = DefaultGroups.View;
+        openOriginalNode.priority = 13;
+
         const openParentNode = new OptionItem('OPTIONS.SHOW_IN_FOLDER', 'folder', async (object) =>
             this.goToWorkspace((await this.getObjectsAsync(object, true))[0]),
         );
@@ -681,7 +730,7 @@ export class OptionsHelperService implements OnDestroy {
         );
         addNodeToCollection.elementType = OptionsHelperService.ElementTypesAddToCollection;
         addNodeToCollection.showAsAction = true;
-        addNodeToCollection.constrains = [Constrain.Files, Constrain.User];
+        addNodeToCollection.constrains = [Constrain.Files, Constrain.User, Constrain.NoScope];
         addNodeToCollection.customShowCallback = (nodes) => {
             addNodeToCollection.name =
                 this.data.scope === Scope.CollectionsReferences
@@ -724,7 +773,7 @@ export class OptionsHelperService implements OnDestroy {
             this.bookmarkNodes(this.getObjects(object)),
         );
         bookmarkNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
-        bookmarkNode.constrains = [Constrain.Files, Constrain.HomeRepository];
+        bookmarkNode.constrains = [Constrain.Files, Constrain.HomeRepository, Constrain.NoScope];
         bookmarkNode.group = DefaultGroups.Reuse;
         bookmarkNode.priority = 20;
         bookmarkNode.customShowCallback = (nodes) => {
@@ -814,11 +863,15 @@ export class OptionsHelperService implements OnDestroy {
         streamNode.customShowCallback = (objects) =>
             this.configService.instant('stream.enabled', false);
 
-        const licenseNode = new OptionItem(
-            'OPTIONS.LICENSE',
-            'copyright',
-            (object) => (management.nodeLicense = this.getObjects(object)),
-        );
+        const licenseNode = new OptionItem('OPTIONS.LICENSE', 'copyright', async (object) => {
+            const nodes = this.getObjects(object);
+            const dialogRef = await this.dialogs.openLicenseDialog({ kind: 'nodes', nodes });
+            dialogRef.afterClosed().subscribe((result: Node[] | null) => {
+                if (result) {
+                    this.onNodesChanged(result);
+                }
+            });
+        });
         licenseNode.elementType = [ElementType.Node, ElementType.NodeChild];
         licenseNode.constrains = [
             Constrain.Files,
@@ -833,11 +886,16 @@ export class OptionsHelperService implements OnDestroy {
         licenseNode.group = DefaultGroups.Edit;
         licenseNode.priority = 30;
 
-        const contributorNode = new OptionItem(
-            'OPTIONS.CONTRIBUTOR',
-            'group',
-            (object) => (management.nodeContributor = this.getObjects(object)[0]),
-        );
+        const contributorNode = new OptionItem('OPTIONS.CONTRIBUTOR', 'group', async (object) => {
+            const dialogRef = await this.dialogs.openContributorsDialog({
+                node: this.getObjects(object)[0],
+            });
+            dialogRef.afterClosed().subscribe((updatedNode) => {
+                if (updatedNode) {
+                    this.onNodesChanged([updatedNode]);
+                }
+            });
+        });
         contributorNode.constrains = [
             Constrain.Files,
             Constrain.NoCollectionReference,
@@ -1380,6 +1438,7 @@ export class OptionsHelperService implements OnDestroy {
         options.push(debugNode);
         options.push(acceptProposal);
         options.push(declineProposal);
+        options.push(openOriginalNode);
         options.push(openParentNode);
         options.push(openNode);
         options.push(editConnectorNode);
@@ -1689,6 +1748,14 @@ export class OptionsHelperService implements OnDestroy {
         if (constrains.indexOf(Constrain.LTIMode) !== -1) {
             if (!this.connectors.getRestConnector().getCurrentLogin().ltiSession) {
                 return Constrain.LTIMode;
+            }
+        }
+        if (constrains.indexOf(Constrain.NoScope) !== -1) {
+            if (
+                this.connectors.getRestConnector().getCurrentLogin() &&
+                !!this.connectors.getRestConnector().getCurrentLogin().currentScope
+            ) {
+                return Constrain.NoScope;
             }
         }
         if (constrains.indexOf(Constrain.NoSelection) !== -1) {

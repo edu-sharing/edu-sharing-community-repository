@@ -5,66 +5,6 @@
   [buttons]="warningButtons"
   [isCancelable]="false"
 ></es-modal-dialog>
-<es-card
-  width="normal"
-  height="xxlarge"
-  [buttons]="xmlCardButtons"
-  [isCancelable]="true"
-  (onCancel)="xmlAppProperties = null"
-  title="{{ 'ADMIN.APPLICATIONS.EDIT_APP' | translate: { xml: currentAppXml } }}"
-  *ngIf="xmlAppProperties"
->
-  <div class="card-content-padding card-xml">
-    <div class="warning">{{ 'ADMIN.APPLICATIONS.APP_XML_WARNING' | translate }}</div>
-    <div *ngFor="let value of xmlAppKeys; let i = index" class="appEditor">
-      <mat-form-field class="mat-input-group">
-        <mat-label>{{ value }}</mat-label>
-        <textarea
-          matInput
-          cdkTextareaAutosize
-          cdkAutosizeMinRows="2"
-          cdkAutosizeMaxRows="5"
-          *ngIf="isMultilineProperty(value)"
-          class="materialize-textarea"
-          [(ngModel)]="xmlAppProperties[value]"
-        ></textarea>
-        <input
-          matInput
-          *ngIf="!isMultilineProperty(value)"
-          type="text"
-          [(ngModel)]="xmlAppProperties[value]"
-        />
-        <!-- Api does currently not support deleting -->
-        <i class="material-icons clickable" (click)="removeAppProperty(i)" *ngIf="false">delete</i>
-        <mat-hint *ngIf="currentApp">{{
-          'ADMIN.APPLICATIONS.' + currentApp + '.' + value | translate: { fallback: '' }
-        }}</mat-hint>
-      </mat-form-field>
-    </div>
-    <div class="add-property">
-      <h4 class="property mat-heading-4 mat-heading-underline">
-        {{ 'ADMIN.APPLICATIONS.ADD_PROPERTY' | translate }}
-      </h4>
-      <mat-form-field>
-        <mat-label>{{ 'ADMIN.APPLICATIONS.PROPERTY_NAME_PLACEHOLDER' | translate }}</mat-label>
-        <input
-          matInput
-          type="text"
-          id="additionalProperty"
-          [(ngModel)]="xmlAppAdditionalPropertyName"
-        />
-        <mat-hint *ngIf="currentApp">{{
-          'ADMIN.APPLICATIONS.' + currentApp + '.' + xmlAppAdditionalPropertyName
-            | translate: { fallback: '' }
-        }}</mat-hint>
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>{{ 'ADMIN.APPLICATIONS.PROPERTY_VALUE_PLACEHOLDER' | translate }}</mat-label>
-        <input matInput type="text" [(ngModel)]="xmlAppAdditionalPropertyValue" />
-      </mat-form-field>
-    </div>
-  </div>
-</es-card>
 <es-modal-dialog
   [title]="dialogTitle"
   [message]="dialogMessage"
@@ -73,22 +13,6 @@
   [isCancelable]="true"
   (onCancel)="dialogTitle = null"
 ></es-modal-dialog>
-<es-file-chooser
-  *ngIf="chooseDirectory"
-  [isCancelable]="true"
-  [title]="'ADMIN.IMPORT.CHOOSE_DIRECTORY'"
-  [pickDirectory]="true"
-  (onCancel)="chooseDirectory = false"
-  (onChoose)="pickDirectory($event)"
-></es-file-chooser>
-<es-file-chooser
-  *ngIf="chooseCollection"
-  [isCancelable]="true"
-  [title]="'ADMIN.IMPORT.CHOOSE_COLLECTION'"
-  [collections]="true"
-  (onCancel)="chooseCollection = false"
-  (onChoose)="pickCollection($event)"
-></es-file-chooser>
 <div class="main">
   <div class="main-nav">
     <div>
@@ -457,7 +381,7 @@
           }}</mat-radio-button>
         </mat-radio-group>
         <div class="inputGroup" *ngIf="parentCollectionType === 'choose'">
-          <button mat-raised-button (click)="chooseCollection = true">
+          <button mat-raised-button (click)="chooseCollection()">
             {{ 'ADMIN.IMPORT.CHOOSE_COLLECTION' | translate }}
           </button>
           <div class="directory">
@@ -489,7 +413,7 @@
           <div class="file">{{ excelFile ? excelFile.name : '' }}</div>
         </div>
         <div class="inputGroup">
-          <button mat-raised-button (click)="chooseDirectory = true">
+          <button mat-raised-button (click)="chooseDirectory()">
             {{ 'ADMIN.IMPORT.CHOOSE_DIRECTORY' | translate }}
           </button>
           <div class="directory">
@@ -901,7 +825,7 @@
       </div>
       <div class="group caches">
         <div class="inputGroup">
-          <button mat-raised-button (click)="chooseDirectory = true">
+          <button mat-raised-button (click)="chooseDirectory()">
             {{ 'ADMIN.TOOLKIT.CACHE_ROOT_FOLDER' | translate }}
           </button>
           <div class="directory">

@@ -1,11 +1,3 @@
-<es-workspace-license
-  *ngIf="nodeLicense"
-  [nodes]="nodeLicense"
-  (onLoading)="globalProgress = $event"
-  (onCancel)="closeLicense()"
-  (openContributor)="nodeContributor = $event[0]"
-  (onDone)="updateLicense($any($event))"
-></es-workspace-license>
 <es-add-stream
   *ngIf="addNodesStream"
   [nodes]="addNodesStream"
@@ -51,10 +43,8 @@
   [fromUpload]="_nodeFromUpload"
   (onOpenMetadata)="reopenSimpleEdit = true; _nodeMetadata = $event"
   (onOpenInvite)="reopenSimpleEdit = true; nodeShare = $event"
-  (onOpenLicense)="reopenSimpleEdit = true; nodeLicense = $event"
-  (onCancel)="closeSimpleEdit(false)"
-  (onClose)="closeSimpleEdit(true, $event)"
-  (onDone)="closeSimpleEdit(true, $event)"
+  (onOpenLicense)="reopenSimpleEdit = true; openLicenseDialog($event)"
+  (onClose)="closeSimpleEdit($event)"
 ></es-simple-edit-dialog>
 <es-view-collection-feedback
   *ngIf="collectionViewFeedback"
@@ -184,9 +174,9 @@
   [bulkBehaviour]="_nodeFromUpload ? BulkBehaviour.Replace : BulkBehaviour.Default"
   (onCancel)="closeEditor(false)"
   (onDone)="closeEditor(true, $any($event))"
-  (openLicense)="nodeLicense = _nodeMetadata; editorPending = true"
+  (openLicense)="openLicenseDialog(_nodeMetadata); editorPending = true"
   (openTemplate)="nodeTemplate = _nodeMetadata[0]"
-  (openContributor)="nodeContributor = _nodeMetadata[0]; editorPending = true"
+  (openContributor)="openContributorsDialog(_nodeMetadata[0]); editorPending = true"
 ></es-mds-editor-wrapper>
 <es-node-template
   *ngIf="nodeTemplate"
@@ -209,9 +199,3 @@
   (onFileSelected)="uploadFile($event)"
   (onLinkSelected)="createUrlLink($event)"
 ></es-workspace-file-upload-select>
-<es-workspace-contributor
-  *ngIf="nodeContributor"
-  [node]="nodeContributor"
-  (onLoading)="globalProgress = $event"
-  (onClose)="closeContributor($event)"
-></es-workspace-contributor>

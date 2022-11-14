@@ -11,10 +11,12 @@ import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatOptionModule, MatRippleModule } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
@@ -30,10 +32,12 @@ import { ActionbarComponent } from './components/actionbar/actionbar.component';
 import { AuthorityRowComponent } from './components/authority-search-input/authority-row/authority-row.component';
 import { AuthoritySearchInputComponent } from './components/authority-search-input/authority-search-input.component';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
+import { CalendarComponent } from './components/calendar/calendar.component';
 import { CardComponent } from './components/card/card.component';
 import { DropdownComponent } from './components/dropdown/dropdown.component';
 import { GlobalProgressComponent } from './components/global-progress/global-progress.component';
 import { InfoMessageComponent } from './components/info-message/info-message.component';
+import { LicenseSourceComponent } from './components/license-source/license-source.component';
 import { LinkComponent } from './components/link/link.component';
 import { ModalDialogComponent } from './components/modal-dialog/modal-dialog.component';
 import { MultiLineLabelComponent } from './components/multi-line-label/multi-line-label.component';
@@ -62,6 +66,7 @@ import { AuthorityNamePipe } from './pipes/authority-name.pipe';
 import { BitwisePipe } from './pipes/bitwise.pipe';
 import { FormatSizePipe } from './pipes/file-size.pipe';
 import { FormatDatePipe } from './pipes/format-date.pipe';
+import { NodeIconPipe } from './pipes/node-icon.pipe';
 import { NodeImageSizePipe } from './pipes/node-image-size.pipe';
 import { NodeImagePipe } from './pipes/node-image.pipe';
 import { NodePersonNamePipe } from './pipes/node-person-name.pipe';
@@ -70,7 +75,6 @@ import { OptionTooltipPipe } from './pipes/option-tooltip.pipe';
 import { ReplaceCharsPipe } from './pipes/replace-chars.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { VCardNamePipe } from './pipes/vcard-name.pipe';
-import { MatPaginatorModule } from '@angular/material/paginator';
 
 @NgModule({
     declarations: [
@@ -83,6 +87,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
         BitwisePipe,
         BorderBoxObserverDirective,
         BreadcrumbsComponent,
+        CalendarComponent,
         CardComponent,
         CheckTextOverflowDirective,
         DropdownComponent,
@@ -95,6 +100,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
         IconDirective,
         InfiniteScrollDirective,
         InfoMessageComponent,
+        LicenseSourceComponent,
         LinkComponent,
         ModalDialogComponent,
         MultiLineLabelComponent,
@@ -117,6 +123,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
         WorkspaceCreateConnector,
         NodesDragDirective,
         NodesDropTargetDirective,
+        NodeIconPipe,
         NodeImagePipe,
     ],
     imports: [
@@ -127,6 +134,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
         MatAutocompleteModule,
         MatButtonModule,
         MatCardModule,
+        MatDatepickerModule,
         MatInputModule,
         MatInputModule,
         MatMenuModule,
@@ -150,6 +158,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
         BitwisePipe,
         BorderBoxObserverDirective,
         BreadcrumbsComponent,
+        CalendarComponent,
         CardComponent,
         CheckTextOverflowDirective,
         CommonModule,
@@ -165,6 +174,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
         IconDirective,
         InfiniteScrollDirective,
         InfoMessageComponent,
+        LicenseSourceComponent,
         LinkComponent,
         MatAutocompleteModule,
         MatButtonModule,
@@ -212,6 +222,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
         NodesDragDirective,
         NodesDropTargetDirective,
         MatBadgeModule,
+        NodeIconPipe,
         NodeImagePipe,
     ],
 })

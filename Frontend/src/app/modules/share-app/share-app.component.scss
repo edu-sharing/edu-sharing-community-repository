@@ -3,11 +3,15 @@
 .content {
     padding: 20px 30px;
     width: 100%;
-    max-width: $cardWidth * 3 + 125px;
+    max-width: $cardWidth * 4 + 125px;
     margin: auto;
+    margin-top: $mainnavHeight;
+    display: flex;
+    flex-direction: column;
     .breadcrumbs {
         color: $primary;
         display: flex;
+        flex-grow: 1;
         align-items: center;
         margin-left: 5px;
         > * {

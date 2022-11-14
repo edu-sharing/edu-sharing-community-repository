@@ -3,7 +3,8 @@ import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal, ComponentType } from '@angular/cdk/portal';
 import { Injectable, Injector } from '@angular/core';
 import { Observable } from 'rxjs';
-import { map, skipWhile, takeUntil, tap } from 'rxjs/operators';
+import { filter, map, pairwise, skipWhile, takeUntil, tap } from 'rxjs/operators';
+import { DialogsService } from '../dialogs.service';
 import { CardDialogConfig, CARD_DIALOG_DATA } from './card-dialog-config';
 import { CardDialogContainerComponent } from './card-dialog-container/card-dialog-container.component';
 import { CardDialogRef } from './card-dialog-ref';
@@ -32,7 +33,13 @@ export class CardDialogService {
         const overlayRef = this.createOverlay(config);
         const state = new CardDialogState();
         const containerRef = overlayRef.attach(new ComponentPortal(CardDialogContainerComponent));
-        const dialogRef = new CardDialogRef<D, R>(overlayRef, containerRef.instance, config, state);
+        const dialogRef = new CardDialogRef<D, R>(
+            overlayRef,
+            containerRef.instance,
+            config,
+            state,
+            this.injector.get(DialogsService),
+        );
         containerRef.instance.dialogRef = dialogRef;
         this.registerSizeAndPositionSwitch(overlayRef, dialogRef);
         const contentInjector = Injector.create({
@@ -78,6 +85,8 @@ export class CardDialogService {
     }
 
     private registerSizeAndPositionSwitch(overlayRef: OverlayRef, dialogRef: CardDialogRef): void {
+        // Update dialog size and position based on pre-defined view modes when the viewport size
+        // changes.
         this.createViewModeObservable()
             .pipe(
                 takeUntil(overlayRef.detachments()),
@@ -91,10 +100,31 @@ export class CardDialogService {
                         this.resetSizeAndPosition(dialogRef.config, overlayRef);
                         break;
                     case 'mobile':
+                        // The 'mobile' view mode doesn't respect configured sizes as of now.
                         this.setMobileSizeAndPosition(overlayRef);
                         break;
                 }
             });
+
+        // Reflect size-related changes of config as long as we are in 'default' view mode.
+        const sizeProperties: (keyof CardDialogConfig)[] = [
+            'height',
+            'minHeight',
+            'maxHeight',
+            'width',
+            'minWidth',
+            'maxWidth',
+        ];
+        dialogRef
+            .observeConfig()
+            .pipe(
+                pairwise(),
+                filter(([previous, current]) =>
+                    sizeProperties.some((prop) => previous[prop] !== current[prop]),
+                ),
+                filter(() => dialogRef.state.viewMode === 'default'),
+            )
+            .subscribe(([_, current]) => this.resetSizeAndPosition(current, overlayRef));
     }
 
     private registerOpenDialog<T, D, R>(dialogRef: CardDialogRef<D, R>) {

@@ -1342,7 +1342,12 @@
 		<query join="AND" id="mediacenter_filter">
 			<basequery>{"term":{"type":"ccm:io"}}</basequery>
 			<property name="ngsearchword">
-				<statement>{"bool":{"should":[{"wildcard":{"properties.cm:name":{"value":"*${value}*"}}},{"wildcard":{"properties.ccm.replicationsourceid":{"value":"*${value}*"}}}]}}</statement>
+				<statement>{"bool":{"should":[
+					{"wildcard":{"properties.cm:name.keyword":{"value":"*${value}*"}}},
+					{"wildcard":{"properties.cclom:title.keyword":{"value":"*${value}*"}}},
+					{"wildcard":{"properties.ccm:replicationsourceid.keyword":{"value":"*${value}*"}}}
+					]}}
+				</statement>
 			</property>
 		</query>
 		<query join="AND" id="search_relation_query">

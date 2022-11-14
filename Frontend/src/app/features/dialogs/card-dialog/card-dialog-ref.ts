@@ -2,6 +2,8 @@ import { ESCAPE, hasModifierKey } from '@angular/cdk/keycodes';
 import { OverlayRef, OverlaySizeConfig } from '@angular/cdk/overlay';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, map, take } from 'rxjs/operators';
+import { DISCARD_OR_BACK } from '../dialog-modules/generic-dialog/generic-dialog-data';
+import { DialogsService } from '../dialogs.service';
 import { CardDialogConfig, Closable } from './card-dialog-config';
 import { CardDialogContainerComponent } from './card-dialog-container/card-dialog-container.component';
 import { CardDialogState } from './card-dialog-state';
@@ -29,6 +31,7 @@ export class CardDialogRef<D = unknown, R = unknown> {
         private containerInstance: CardDialogContainerComponent,
         config: CardDialogConfig<D>,
         state: CardDialogState,
+        private dialogs: DialogsService,
     ) {
         this.configSubject = new BehaviorSubject(config);
         this.stateSubject = new BehaviorSubject(state);
@@ -121,8 +124,28 @@ export class CardDialogRef<D = unknown, R = unknown> {
                         return true;
                 }
             case Closable.Confirm:
-                // TODO implement
-                return true;
+                switch (trigger) {
+                    case 'backdrop':
+                        return false;
+                    case 'x-button':
+                    case 'esc-key':
+                        void this.dialogs
+                            .openGenericDialog({
+                                title: 'DIALOG.CONFIRM_DISCARD_TITLE',
+                                messageText: 'DIALOG.CONFIRM_DISCARD_MESSAGE',
+                                buttons: DISCARD_OR_BACK,
+                            })
+                            .then((dialogRef) =>
+                                dialogRef.afterClosed().subscribe((response) => {
+                                    if (response === 'DISCARD') {
+                                        this.close();
+                                    } else {
+                                        this.containerInstance.trapFocus();
+                                    }
+                                }),
+                            );
+                        return true;
+                }
             case Closable.Disabled:
                 return false;
         }
@@ -136,7 +159,7 @@ export class CardDialogRef<D = unknown, R = unknown> {
         this.overlayRef
             .keydownEvents()
             .pipe(
-                filter(() => !this.state.isLoading),
+                filter(() => !this.state.isLoading && this.state.autoSavingState !== 'saving'),
                 filter((event) => event.keyCode === ESCAPE && !hasModifierKey(event)),
             )
             .subscribe((event) => {
@@ -148,7 +171,7 @@ export class CardDialogRef<D = unknown, R = unknown> {
 
         this.overlayRef
             .backdropClick()
-            .pipe(filter(() => !this.state.isLoading))
+            .pipe(filter(() => !this.state.isLoading && this.state.autoSavingState !== 'saving'))
             .subscribe(() => {
                 const acknowledged = this.tryCancel('backdrop');
                 if (!acknowledged) {

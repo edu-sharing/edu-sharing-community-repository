@@ -16,26 +16,21 @@
       <div>{{ inbox.name }}</div>
     </div>
   </div>
+  <div class="save">
+    <button mat-flat-button color="primary" (click)="saveFile()">
+      <i esIcon="folder"></i><span>{{ 'SAVE' | translate }}</span>
+    </button>
+  </div>
   <div class="collections">
     <div class="addToCollection">
       {{ 'SHARE_APP.ADD_TO_COLLECTION' | translate }}
     </div>
-    <es-spinner *ngIf="loading"></es-spinner>
-    <es-listTable
-      [nodes]="collections"
+    <es-node-entries-wrapper
+      [dataSource]="collections"
       [columns]="columns"
-      [hasIcon]="true"
-      [validatePermissions]="hasWritePermissions"
-      [hasCheckbox]="false"
-      [hasHeading]="false"
-      [isClickable]="true"
-      [viewType]="2"
-      (clickRow)="saveToCollection($event.node)"
-    ></es-listTable>
-    <div class="save">
-      <button mat-flat-button color="primary" (click)="saveFile()">
-        <i esIcon="folder"></i><span>{{ 'SAVE' | translate }}</span>
-      </button>
-    </div>
+      [displayType]="NodeEntriesDisplayType.SmallGrid"
+      [elementInteractionType]="InteractionType.Emitter"
+      (clickItem)="saveToCollection($event.element)"
+    ></es-node-entries-wrapper>
   </div>
 </div>

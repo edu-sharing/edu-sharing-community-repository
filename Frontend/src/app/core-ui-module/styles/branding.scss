@@ -1,10 +1,39 @@
-$primary: #48708e;
-$primaryMediumLight: #87acb5;
-$primaryLight: #dde7ee;
+@use '@angular/material' as mat;
+
+$primary: #003b7c;
+$primaryMediumLight: #99b1cb;
+$primaryLight: #d9e2eb;
 $primaryComplementary: $primary;
-$primaryDark: #283851;
+$primaryDark: #032850;
 $textOnPrimary: #fff;
 $textOnPrimaryLight: rgba(255, 255, 255, 0.75);
-$textPrimary: #000;
-$workspaceTopBarBackground: #383838;
+$textPrimary: #333333;
+$textMain: $textPrimary;
+$workspaceTopBarBackground: $primary;
 $workspaceTopBarFontColor: #fff;
+$primaryFontFamily: 'Source-Sans-Pro-Regular';
+
+$customIcons: true;
+
+$mainnavHeight: 150px;
+$warning: #e73445;
+// $colorStatusWarning: #e98c1b;
+$colorStatusPositive: #3fcb8e;
+
+$oehYellow: #e4f700;
+$oehGreen: #b4da1c;
+$tabColorLight: $oehYellow;
+
+$custom-typography: mat.define-typography-config(
+    $font-family: $primaryFontFamily,
+    $display-1: mat.define-typography-level(32px, 40px, 500, 'Montserrat'),
+    $headline: mat.define-typography-level(24px, 32px, 700, 'Montserrat'),
+    $title: mat.define-typography-level(20px, 30px, 700, 'Montserrat'),
+    $subheading-2: mat.define-typography-level(18px, 27px, 700, 'Montserrat'),
+    $subheading-1: mat.define-typography-level(16px, 24px, 700, 'Montserrat'),
+    $body-2: mat.define-typography-level(16px, 24px, 700, 'Montserrat'),
+    $body-1: mat.define-typography-level(16px, 21px, 400),
+    $caption: mat.define-typography-level(11px, 15px, 500, 'Montserrat'),
+    $button: mat.define-typography-level(14px, 20px, 700, 'Montserrat'),
+    $input: mat.define-typography-level(inherit, 1.125, 400),
+);

@@ -605,6 +605,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         Map nodeRef = (Map) sourceAsMap.get("nodeRef");
         String nodeId = (String) nodeRef.get("id");
+
+        Map parentRef = (Map) sourceAsMap.get("parentRef");
+        String parentId = (parentRef != null) ? (String)parentRef.get("id") :null;
+
+
         Map storeRef = (Map) nodeRef.get("storeRef");
         String protocol = (String) storeRef.get("protocol");
         String identifier = (String) storeRef.get("identifier");
@@ -718,6 +723,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         if(sourceAsMap.get("content") != null) {
             props.put(CCConstants.DOWNLOADURL, URLTool.getDownloadServletUrl(alfNodeRef.getId(), null, true));
+        }
+
+        if(parentId != null){
+            props.put(CCConstants.VIRT_PROP_PRIMARYPARENT_NODEID,parentId);
         }
 
         T eduNodeRef = clazz.newInstance();
