@@ -272,7 +272,7 @@ class FeedbackServiceImplTest {
             nodeServiceHelperMockedStatic.verify(times(list.size()),
                     () -> NodeServiceHelper.setProperty(any(), eq(CCConstants.CCM_PROP_MATERIAL_FEEDBACK_AUTHORITY), eq(
                             DigestUtils.sha1Hex(newUserId)
-                    ))
+                    ), eq(false))
             );
 
             nodeServiceHelperMockedStatic.reset();
@@ -284,14 +284,14 @@ class FeedbackServiceImplTest {
             nodeServiceHelperMockedStatic.verify(times(list.size()),
                     () -> NodeServiceHelper.setProperty(any(), eq(CCConstants.CCM_PROP_MATERIAL_FEEDBACK_AUTHORITY), eq(
                             DigestUtils.sha1Hex(newUserId)
-                    ))
+                    ), eq(false))
             );
 
             nodeServiceHelperMockedStatic.reset();
             underTest.userMode = UserMode.session;
             underTest.changeUserData(userId, newUserId);
             nodeServiceHelperMockedStatic.verify(times(0),
-                    () -> NodeServiceHelper.setProperty(any(), eq(CCConstants.CCM_PROP_MATERIAL_FEEDBACK_AUTHORITY), anyString())
+                    () -> NodeServiceHelper.setProperty(any(), eq(CCConstants.CCM_PROP_MATERIAL_FEEDBACK_AUTHORITY), anyString(), eq(false))
             );
 
         }

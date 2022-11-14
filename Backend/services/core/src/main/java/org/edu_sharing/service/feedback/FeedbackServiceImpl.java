@@ -168,7 +168,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         if(Arrays.asList(UserMode.full, UserMode.obfuscate).contains(userMode)) {
             List<NodeRef> nodes = getUsersFeedback(userName);
             nodes.forEach(n ->
-                    NodeServiceHelper.setProperty(n, CCConstants.CCM_PROP_MATERIAL_FEEDBACK_AUTHORITY, DigestUtils.sha1Hex((deletedName)))
+                    NodeServiceHelper.setProperty(n, CCConstants.CCM_PROP_MATERIAL_FEEDBACK_AUTHORITY, DigestUtils.sha1Hex((deletedName)), false)
             );
         }
     }
