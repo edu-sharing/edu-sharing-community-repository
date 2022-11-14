@@ -36,7 +36,9 @@ spec:
         - "/bin/bash"
         - "-ec"
         - |
-          chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /bitnami/postgresql
+          if [[ ! "$(ls -A /bitnami/postgresql)" ]]; then
+            chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /bitnami/postgresql
+          fi
         volumeMounts:
         - name: data
           mountPath: /bitnami/postgresql

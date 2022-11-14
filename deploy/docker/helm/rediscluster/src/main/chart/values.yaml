@@ -94,9 +94,7 @@ podSecurityContext:
 
   runAsUser: 1001
   fsGroup: 1001
-#  sysctls:
-#  - name: net.core.somaxconn
-#    value: "10000"
+  fsGroupChangePolicy: OnRootMismatch
 
 securityContext:
 

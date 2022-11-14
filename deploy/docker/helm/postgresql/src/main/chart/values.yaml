@@ -95,6 +95,7 @@ podSecurityContext:
 
   runAsUser: 1001
   fsGroup: 1001
+  fsGroupChangePolicy: OnRootMismatch
 
 securityContext:
 
