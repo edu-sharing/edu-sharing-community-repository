@@ -46,10 +46,6 @@ public class RatingServiceImpl extends RatingServiceAdapter {
         super(ApplicationInfoList.getHomeRepository().getAppId());
     }
 
-    public RatingServiceImpl(String appId) {
-        super(appId);
-    }
-
     public void init(){
         this.nodeService=NodeServiceFactory.getLocalService();
         this.authorityService=AuthorityServiceFactory.getLocalService();
