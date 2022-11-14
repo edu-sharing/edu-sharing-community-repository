@@ -46,6 +46,7 @@ import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-edi
 import { MainNavService } from 'src/app/main/navigation/main-nav.service';
 import { first } from 'rxjs/operators';
 import { SimpleEditCloseEvent } from './simple-edit-dialog/simple-edit-dialog.component';
+import { FeedbackV1Service } from 'ngx-edu-sharing-api';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 
 export enum DialogType {
@@ -176,10 +177,10 @@ export class WorkspaceManagementDialogsComponent {
         this._nodeFromUpload = false;
     }
     @Input() nodeSimpleEditChange = new EventEmitter<Node[]>();
-    @Input() collectionWriteFeedback: Node;
-    @Output() collectionWriteFeedbackChange = new EventEmitter<Node>();
-    @Input() collectionViewFeedback: Node;
-    @Output() collectionViewFeedbackChange = new EventEmitter<Node>();
+    @Input() materialWriteFeedback: Node;
+    @Output() materialWriteFeedbackChange = new EventEmitter<Node>();
+    @Input() materialViewFeedback: Node;
+    @Output() materialViewFeedbackChange = new EventEmitter<Node>();
     @Input() nodeSidebar: Node;
     @Output() nodeSidebarChange = new EventEmitter<Node>();
     @Input() showUploadSelect = false;
@@ -294,6 +295,7 @@ export class WorkspaceManagementDialogsComponent {
         private toolService: RestToolService,
         private temporaryStorage: TemporaryStorageService,
         private collectionService: RestCollectionService,
+        private feedbackService: FeedbackV1Service,
         private translate: TranslateService,
         private config: ConfigurationService,
         private connector: RestConnectorService,
@@ -693,27 +695,33 @@ export class WorkspaceManagementDialogsComponent {
     }
 
     closeCollectionWriteFeedback() {
-        this.collectionWriteFeedback = null;
-        this.collectionWriteFeedbackChange.emit(null);
+        this.materialWriteFeedback = null;
+        this.materialWriteFeedbackChange.emit(null);
     }
 
-    addCollectionFeedback(feedback: any) {
+    addMaterialFeedback(feedback: { [key in string]: string[] }) {
         if (!feedback) {
             return;
         }
         delete feedback[RestConstants.CM_NAME];
         this.toast.showProgressDialog();
-        this.collectionService.addFeedback(this.collectionWriteFeedback.ref.id, feedback).subscribe(
-            () => {
-                this.toast.closeModalDialog();
-                this.closeCollectionWriteFeedback();
-                this.toast.toast('COLLECTIONS.FEEDBACK_TOAST');
-            },
-            (error) => {
-                this.toast.closeModalDialog();
-                this.toast.error(error);
-            },
-        );
+        this.feedbackService
+            .addFeedback({
+                repository: RestConstants.HOME_REPOSITORY,
+                node: this.materialWriteFeedback.ref.id,
+                body: feedback,
+            })
+            .subscribe(
+                () => {
+                    this.toast.closeModalDialog();
+                    this.closeCollectionWriteFeedback();
+                    this.toast.toast('FEEDBACK.TOAST');
+                },
+                (error) => {
+                    this.toast.closeModalDialog();
+                    this.toast.error(error);
+                },
+            );
     }
     restoreVersion(restore: { version: Version; node: Node }) {
         this.toast.showConfigurableDialog({
@@ -757,9 +765,9 @@ export class WorkspaceManagementDialogsComponent {
             );
     }
 
-    closeCollectionViewFeedback() {
-        this.collectionViewFeedback = null;
-        this.collectionViewFeedbackChange.emit(null);
+    closeMaterialViewFeedback() {
+        this.materialViewFeedback = null;
+        this.materialViewFeedbackChange.emit(null);
     }
 
     closeSidebar() {

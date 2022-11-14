@@ -851,7 +851,7 @@ public class NodeApi  {
 				response = searchResultToResponse(NodeDao.getFilesSharedToMe(repoDao, SharedToMeType.Private, filter, propFilter,sortDefinition,skipCount,maxItems));
 			}
 	    	else if("-frontpage-".equals(node)){
-				children = NodeDao.getFrontpageNodes(repoDao);
+				response = searchResultToResponse(NodeDao.getFrontpageNodes(repoDao));
 			}
 	    	else{
 		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, propFilter);
@@ -1164,7 +1164,7 @@ public class NodeApi  {
 	    @Parameter(description = "rename if the same node name exists", required = false, schema = @Schema(defaultValue="false")) @QueryParam("renameIfExists") Boolean renameIfExists,
 	    @Parameter(description = "comment, leave empty = no inital version", required=false ) @QueryParam("versionComment")  String versionComment,
 	    @Parameter(description = "properties, example: {\"{http://www.alfresco.org/model/content/1.0}name\": [\"test\"]}" , required=true ) HashMap<String, String[]> properties,	    
-	    @Parameter(description = "Association type, can be empty" , required=false ) @QueryParam("assocType") String assocType,	    
+	    @Parameter(description = "Association type, can be empty" , required=false ) @QueryParam("assocType") String assocType,
 		@Context HttpServletRequest req) {
 
     	try {
@@ -1177,7 +1177,7 @@ public class NodeApi  {
 	    	NodeDao child = nodeDao.createChild(type, aspects, properties,
 	    			renameIfExists==null ? false : renameIfExists.booleanValue(),
 					assocType!=null && !assocType.trim().isEmpty() ? assocType : null);
-	    	
+
 			if(versionComment!=null && !versionComment.isEmpty()){
 				child.createVersion(versionComment);
 			}
@@ -1442,6 +1442,7 @@ public class NodeApi  {
 	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
 	    @FormDataParam("image") InputStream inputStream,
 	    @Parameter(description = "MIME-Type", required=true ) @QueryParam("mimetype")  String mimetype,
+		@Parameter(description = "create a node version", required = false, schema = @Schema(defaultValue="true")) @QueryParam("createVersion") Boolean createVersion,
 		@Context HttpServletRequest req) {
     	
     	try {
@@ -1449,7 +1450,7 @@ public class NodeApi  {
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 	    	
-	    	NodeDao newNode = nodeDao.changePreview(inputStream,mimetype);
+	    	NodeDao newNode = nodeDao.changePreview(inputStream,mimetype, createVersion==null || createVersion);
 	    	
 	    	NodeEntry response = new NodeEntry();
 	    	response.setNode(newNode.asNode());

@@ -31,6 +31,10 @@
 <es-mds-editor-card
   *ngIf="editorType === 'angular' && !embedded"
   [title]="(customTitle ? customTitle : 'MDS.TITLE') | translate"
+  [labels]="{
+    POSITIVE: labelPositive,
+    NEGATIVE: labelNegative
+  }"
   [priority]="priority"
   (cancel)="onCancel.emit()"
   (save)="onSave()"

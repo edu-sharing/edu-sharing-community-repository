@@ -114,7 +114,7 @@
       <permissionGroup name="ReadPreview" expose="true" allowFullControl="false" />
       <!-- edu-sharing comment permission --> 
       <permissionGroup name="Comment" expose="true" allowFullControl="false" />
-       <!-- edu-sharing feedback permission (for ccm:collection) -->
+       <!-- edu-sharing feedback permission (for ccm:io) -->
       <permissionGroup name="Feedback" expose="true" allowFullControl="false" />
        <!-- edu-sharing RateRead permission -->
        <permissionGroup name="RateRead" expose="true" allowFullControl="false" />

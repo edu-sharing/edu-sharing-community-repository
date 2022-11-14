@@ -46,6 +46,7 @@ import { PROVIDERS } from './providers';
 import { RouterComponent } from './router/router.component';
 import { SharedModule } from './shared/shared.module';
 import { TranslationsModule } from './translations/translations.module';
+import { CoreUiModule } from './core-ui-module/core-ui.module';
 
 // http://blog.angular-university.io/angular2-ngmodule/
 // -> Making modules more readable using the spread operator
@@ -96,6 +97,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         ResizableModule,
         MdsModule,
         DialogsModule,
+        CoreUiModule,
     ],
     providers: [
         {

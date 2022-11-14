@@ -25,18 +25,11 @@
   [nodes]="nodeRelations"
   (close)="closeRelations($event)"
 ></es-node-relation-manager>
-<es-mds
-  *ngIf="collectionWriteFeedback"
-  customTitle="COLLECTIONS.FEEDBACK_TITLE"
-  [embedded]="false"
-  [displayJumpmarks]="false"
-  [invalidate]="true"
-  [currentValues]="{}"
-  groupId="collection_feedback"
-  labelPositive="COLLECTIONS.FEEDBACK_SAVE"
-  (onCancel)="closeCollectionWriteFeedback()"
-  (onDone)="addCollectionFeedback($event)"
-></es-mds>
+<es-add-material-feedback
+  *ngIf="materialWriteFeedback"
+  [node]="materialWriteFeedback"
+  (onClose)="closeCollectionWriteFeedback()"
+></es-add-material-feedback>
 <es-simple-edit-dialog
   *ngIf="_nodeSimpleEdit"
   [nodes]="_nodeSimpleEdit"
@@ -46,11 +39,11 @@
   (onOpenLicense)="reopenSimpleEdit = true; openLicenseDialog($event)"
   (onClose)="closeSimpleEdit($event)"
 ></es-simple-edit-dialog>
-<es-view-collection-feedback
-  *ngIf="collectionViewFeedback"
-  [collection]="collectionViewFeedback"
-  (onClose)="closeCollectionViewFeedback()"
-></es-view-collection-feedback>
+<es-view-material-feedback
+  *ngIf="materialViewFeedback"
+  [node]="materialViewFeedback"
+  (onClose)="closeMaterialViewFeedback()"
+></es-view-material-feedback>
 <es-collections-manage-pinning
   *ngIf="addPinnedCollection"
   [addCollection]="addPinnedCollection"

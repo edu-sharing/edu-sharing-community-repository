@@ -33,6 +33,7 @@ import { RestRegisterService } from '../../../core-module/core.module';
     styleUrls: ['register-reset-password.component.scss'],
 })
 export class RegisterResetPasswordComponent {
+    @Output() onStateChanged = new EventEmitter<void>();
     public new_password = '';
     @Input() params: Params;
     public buttonCheck() {
@@ -56,7 +57,7 @@ export class RegisterResetPasswordComponent {
             (error) => {
                 console.log('error', error);
                 this.toast.closeModalDialog();
-                if (UIHelper.errorContains(error, 'InvalidKeyException')) {
+                if (error?.error?.error?.includes('DAOInvalidKeyException')) {
                     this.toast.error(null, 'REGISTER.TOAST_INVALID_RESET_KEY');
                     this.router.navigate([UIConstants.ROUTER_PREFIX, 'register', 'request']);
                 } else {

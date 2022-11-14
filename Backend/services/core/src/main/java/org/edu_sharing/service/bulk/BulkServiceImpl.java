@@ -1,6 +1,7 @@
 package org.edu_sharing.service.bulk;
 
 
+import com.typesafe.config.Config;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
@@ -10,6 +11,7 @@ import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
@@ -20,6 +22,7 @@ import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,7 +48,7 @@ public class BulkServiceImpl implements BulkService {
 	private static Logger logger = Logger.getLogger(BulkServiceImpl.class);
 	private final List<String> propsToClean;
 	private NodeRef primaryFolder;
-
+	private List<BulkServiceInterceptorInterface> interceptors;
 
 
 	/**
@@ -76,6 +79,11 @@ public class BulkServiceImpl implements BulkService {
 		return node;
 	}
 
+	@Override
+	public NodeRef getPrimaryFolder() {
+		return primaryFolder;
+	}
+
 	public BulkServiceImpl(){
 		primaryFolder = getOrCreate(repositoryHelper.getCompanyHome(), PRIMARY_FOLDER_NAME, null);
 
@@ -93,7 +101,22 @@ public class BulkServiceImpl implements BulkService {
 							.map(QName::toString).collect(Collectors.toList())
 			);
 		}*/
+		refresh();
 	}
+
+	@Override
+	public void refresh() {
+		Config config = LightbendConfigLoader.get().getConfig("repository.bulk");
+		interceptors = config.getStringList("interceptors").stream().map(i -> {
+			try {
+				return (BulkServiceInterceptorInterface)Class.forName(i).getConstructor().newInstance();
+			} catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+					 NoSuchMethodException | ClassNotFoundException e) {
+				throw new RuntimeException(e);
+	}
+		}).collect(Collectors.toList());
+	}
+
 	@Override
 	public NodeRef sync(String group, List<String> match, List<String> groupBy, String type, List<String> aspects, HashMap<String, String[]> properties, boolean resetVersion) throws Throwable {
 		if(match == null || match.size() == 0){
@@ -110,11 +133,24 @@ public class BulkServiceImpl implements BulkService {
 		HashMap<String, Object> propertiesNative = NodeServiceHelper.getPropertiesSinglevalue(properties);
 		propertiesNative.put(CCConstants.CM_NAME, NodeServiceHelper.cleanupCmName((String)(propertiesNative.get(CCConstants.CM_NAME))) + "_" + System.currentTimeMillis());
 		propertiesNative.remove(CCConstants.CCM_PROP_IO_VERSION_COMMENT);
+		for (BulkServiceInterceptorInterface interceptor : interceptors) {
+			propertiesNative = interceptor.preprocessProperties(propertiesNative);
+		}
+		// filter for valid/declared properties to store
+		HashMap<String, Object> rawProperties = new HashMap<>(propertiesNative);
+		propertiesNative = propertiesNative.entrySet().stream().filter(property -> {
+			QName prop = QName.createQName(property.getKey());
+			return serviceRegistry.getDictionaryService().getProperty(prop) != null;
+		}).collect(
+				HashMap::new,
+				(map, e) -> map.put(e.getKey(), e.getValue()),
+				Map::putAll
+		);
 		if(existing == null) {
 			NodeRef groupFolder = getOrCreate(primaryFolder, group, propertiesNative);
 			if(groupBy != null && groupBy.size()>0){
 				if(groupBy.size() == 1){
-					groupFolder = getOrCreate(groupFolder, propertiesNative.get(CCConstants.getValidGlobalName(groupBy.get(0))).toString(), propertiesNative);
+					groupFolder = getOrCreate(groupFolder, rawProperties.get(CCConstants.getValidGlobalName(groupBy.get(0))).toString(), propertiesNative);
 				} else {
 					throw new IllegalArgumentException("groupBy currently only supports exactly one value");
 				}
@@ -156,6 +192,9 @@ public class BulkServiceImpl implements BulkService {
 		if(aspects != null) {
 			NodeRef finalExisting = existing;
 			aspects.forEach((a) -> NodeServiceFactory.getLocalService().addAspect(finalExisting.getId(), CCConstants.getValidGlobalName(a)));
+		}
+		for (BulkServiceInterceptorInterface interceptor : interceptors) {
+			interceptor.onNodeCreated(existing, propertiesNative);
 		}
 		return existing;
 

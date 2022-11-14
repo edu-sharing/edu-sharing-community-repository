@@ -22,7 +22,7 @@ import {
     UserService,
 } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
-import { Observable, ReplaySubject, Subject } from 'rxjs';
+import { Observable, ReplaySubject, Subject, forkJoin } from 'rxjs';
 import { map, take, takeUntil, tap, delay, filter } from 'rxjs/operators';
 import { NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
 import { RocketChatService } from '../../../common/ui/global-container/rocketchat/rocket-chat.service';
@@ -90,7 +90,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     showProfile: boolean;
     showUser = false;
     licenseDialog: boolean;
-    licenseDetails: string;
+    licenseDetails: { component: string; plugin: string; details: string }[];
     mainMenuStyle: 'sidebar' | 'dropdown' = 'sidebar';
     currentUser: User;
     canOpen: boolean;
@@ -440,11 +440,30 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
 
     showLicenses() {
         this.licenseDialog = true;
-        this.http.get('assets/licenses/en.html', { responseType: 'text' }).subscribe(
-            (text) => {
-                this.licenseDetails = text as any;
+        this.connector.getLicenses().subscribe(
+            (licenses) => {
+                const mapping = (component: string, plugin: string, details: string) => {
+                    return {
+                        component,
+                        plugin: plugin.replace('.txt', ''),
+                        details: details,
+                    };
+                };
+                this.licenseDetails = Object.keys(licenses.repository).map((k) =>
+                    mapping('Repository', k, licenses.repository[k]),
+                );
+                const services = Object.keys(licenses.services).forEach(
+                    (k) =>
+                        (this.licenseDetails = this.licenseDetails.concat(
+                            Object.keys(licenses.services[k]).map((p) =>
+                                mapping(k, p, licenses.services[k][p]),
+                            ),
+                        )),
+                );
             },
             (error) => {
+                this.licenseDialog = false;
+                this.toast.error(error);
                 console.error(error);
             },
         );

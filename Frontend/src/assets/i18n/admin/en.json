@@ -53,7 +53,7 @@
       "EDIT_DISABLED": "The configuration was set to read-only. No modifications can be made via this tool. The parameter {{key}} must be set to true in order to change parameters via this tool.",
       "SHOW_RO": "Display read-only configuration files",
       "INHERIT_INFO": "The displayed configurations are read from top to bottom. Configuration values can be overriden by files underneath the one they're declared",
-      "VOLATILE_WARNING": "Changes for this configuration file are volatile and will be removed on next update/rollout. If you want to persist them please share them with the edu-sharing dev team",
+      "VOLATILE_WARNING": "Changes for this configuration file are volatile and will be removed on next restart. No propagation in cluster. Please only use it for testing purposes.",
       "CLIENT_CONFIG_TITLE": "Client configuration (configuration of display relevant functions)",
       "CLIENT_CONFIG_HINT": "You can enter values here to overwrite labels, configure contexts, set up authentication methods and more. After saving, you may need to reload the entire page in your browser",
       "BASE_CONFIG_TITLE": "Global configuration file (default values)",
@@ -180,8 +180,7 @@
       "RESULT": "Update-Output"
     },
     "INFO": {
-      "REPOSITORY": "Repository-Version (Server-Side)",
-      "NG": "Angular/Interface-Version (Client-Side)",
+      "REPOSITORY": "Repository-Version",
       "SYSTEM_CHECKS": "General system tests",
       "CHECK": {
         "RENDERING": {

@@ -438,8 +438,8 @@
 			<required>true</required>
 		</widget>
 		<widget>
-			<id>collection_feedback</id>
-			<type>collection_feedback</type>
+			<id>material_feedback</id>
+			<type>material_feedback</type>
 			<link>_BLANK</link>
 			<icon>chat_bubble</icon>
 			<hideIfEmpty>true</hideIfEmpty>
@@ -752,7 +752,7 @@
 				]]></html>
 		</template>
 		<template>
-			<id>collection_feedback</id>
+			<id>material_feedback</id>
 			<html><![CDATA[
 					<style>
 					.feedback_comment_container textarea{
@@ -932,15 +932,17 @@
 			</views>
 		</group>
 		<group>
-			<id>collection_feedback_view</id>
+			<id>material_feedback_view</id>
+			<rendering>angular</rendering>
 			<views>
-				<view>collection_feedback</view>
+				<view>material_feedback</view>
 			</views>
 		</group>
 		<group>
-			<id>collection_feedback</id>
+			<id>material_feedback</id>
+			<rendering>angular</rendering>
 			<views>
-				<view>collection_feedback</view>
+				<view>material_feedback</view>
 			</views>
 		</group>
 		<group>

@@ -24,7 +24,7 @@ import java.util.List;
 
 @Path("/bulk/v1")
 @Tag(name= "BULK v1" )
-@ApiService(value = "BULK", major = 1, minor = 0)
+@ApiService(value = "BULK", major = 1, minor = 1)
 @Consumes({ "application/json" })
 @Produces({"application/json"})
 public class BulkApi {

@@ -8,7 +8,7 @@ import { AddStreamComponent } from './add-stream/add-stream.component';
 import { NodeTemplateComponent } from './node-template/node-template.component';
 import { NodeVariantComponent } from './node-variant/node-variant.component';
 import { CommentsListComponent } from './node-comments/comments-list/comments-list.component';
-import { ViewCollectionFeedbackComponent } from './view-collection-feedback/view-collection-feedback.component';
+import { ViewMaterialFeedbackComponent } from './view-material-feedback/view-material-feedback.component';
 import { SimpleEditDialogComponent } from './simple-edit-dialog/simple-edit-dialog.component';
 import { SimpleEditMetadataComponent } from './simple-edit-dialog/simple-edit-metadata/simple-edit-metadata.component';
 import { SimpleEditInviteComponent } from './simple-edit-dialog/simple-edit-invite/simple-edit-invite.component';
@@ -17,6 +17,7 @@ import { MapLinkComponent } from './map-link/map-link.component';
 import { SignupGroupComponent } from './signup-group/signup-group.component';
 import { NodeSearchSelectorComponent } from './node-search-selector/node-search-selector.component';
 import { NodeRelationManagerComponent } from './node-relation-manager/node-relation-manager.component';
+import { AddMaterialFeedbackComponent } from './add-material-feedback/add-material-feedback.component';
 
 export const DECLARATIONS_MANAGEMENT_DIALOGS = [
     WorkspaceLtiToolsComponent,
@@ -32,7 +33,8 @@ export const DECLARATIONS_MANAGEMENT_DIALOGS = [
     NodeVariantComponent,
     MapLinkComponent,
     NodeTemplateComponent,
-    ViewCollectionFeedbackComponent,
+    ViewMaterialFeedbackComponent,
+    AddMaterialFeedbackComponent,
     SimpleEditDialogComponent,
     SimpleEditMetadataComponent,
     SimpleEditLicenseComponent,

@@ -443,7 +443,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     async showCreateConnector(connector: Connector) {
         this.createConnectorName = '';
         this.createConnectorType = connector;
-        const user = await this.iamService.getUser().toPromise();
+        const user = await this.iamService.getCurrentUserAsync();
         if (
             user.person.quota.enabled &&
             user.person.quota.sizeCurrent >= user.person.quota.sizeQuota

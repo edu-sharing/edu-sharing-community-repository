@@ -28,6 +28,10 @@ export class MdsEditorCardComponent implements OnInit, OnDestroy {
     }
     public static JUMPMARK_POSTFIX = '_header';
     @Input() title: string;
+    @Input() set labels(labels: { [key in 'NEGATIVE' | 'POSITIVE']: string }) {
+        this.buttons[0].label = labels.NEGATIVE;
+        this.buttons[1].label = labels.POSITIVE;
+    }
     @Input() priority = 0;
     @Output() cancel = new EventEmitter();
     @Output() save = new EventEmitter();
