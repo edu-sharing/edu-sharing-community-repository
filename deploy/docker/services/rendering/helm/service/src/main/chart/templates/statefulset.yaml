@@ -34,8 +34,12 @@ spec:
         - "/bin/bash"
         - "-ec"
         - |
-          chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /var/cache/esrender/config
-          chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /var/cache/esrender/data
+          if [[ ! "$(ls -A /var/cache/esrender/config)" ]]; then
+            chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /var/cache/esrender/config
+          fi
+          if [[ ! "$(ls -A /var/cache/esrender/data)" ]]; then
+            chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /var/cache/esrender/data
+          fi
         volumeMounts:
           - name: share-config
             mountPath: /var/cache/esrender/config

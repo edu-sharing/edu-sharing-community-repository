@@ -35,7 +35,9 @@ spec:
         - "/bin/bash"
         - "-ec"
         - |
-          chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /bitnami/redis
+          if [[ ! "$(ls -A /bitnami/redis)" ]]; then
+            chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} /bitnami/redis
+          fi
         volumeMounts:
         - name: data
           mountPath: /bitnami/redis
