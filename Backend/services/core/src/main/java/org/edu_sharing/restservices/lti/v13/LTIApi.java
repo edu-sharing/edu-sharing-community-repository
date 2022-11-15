@@ -717,7 +717,8 @@ public class LTIApi {
 
     @GET
     @Path("/details/{repository}/{node}")
-
+    @Consumes({ "application/json" })
+    @Produces({ "application/json"})
 
     @Operation(summary = "get a html snippet containing a rendered version of a node. this method can be called from a platform as a xhr request instead of doing the resource link flow", description = "get rendered html snippet for a node.")
 
