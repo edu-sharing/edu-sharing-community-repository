@@ -16,11 +16,14 @@ export * from './lib/wrappers/mds-label.service';
 export * from './lib/wrappers/mds.service';
 export * from './lib/wrappers/node.service';
 export * from './lib/wrappers/nodeList.service';
+export * from './lib/wrappers/saved-searches.service';
 export * from './lib/wrappers/search.service';
 export * from './lib/wrappers/user.service';
 export * from './lib/wrappers/relation.service';
 export * from './lib/wrappers/connector.service';
 export * from './lib/wrappers/lti-platform.service';
+export * from './lib/wrappers/network.service';
+export * from './lib/constants';
 
 // Unwrapped API services.
 //

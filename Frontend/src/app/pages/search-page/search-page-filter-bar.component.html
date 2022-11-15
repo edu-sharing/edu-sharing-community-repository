@@ -1,0 +1,55 @@
+<mat-form-field appearance="fill" *ngIf="(availableMetadataSets | async)?.length > 1">
+  <mat-label>{{ 'SEARCH.METADATASET' | translate }}</mat-label>
+  <mat-select [formControl]="activeMdsForm">
+    <mat-option *ngFor="let mds of availableMetadataSets | async" [value]="mds.id">
+      {{ mds.name }}
+    </mat-option>
+  </mat-select>
+</mat-form-field>
+
+<!-- 
+    [class.display-none]="currentRepository === '-all-'"
+    [(extended)]="mdsExtended"
+ -->
+
+<es-mds-editor-wrapper
+  *ngIf="mdsParamsReady"
+  groupId="ngsearch"
+  [repository]="activeRepository.getValue()"
+  [setId]="activeMetadataSet.getValue()"
+  [embedded]="true"
+  mode="search"
+  [currentValues]="searchFilterValues"
+>
+</es-mds-editor-wrapper>
+
+<button
+  *ngIf="savedSearchesButtonIsVisible"
+  mat-fab
+  class="saved-searches-button"
+  color="primary"
+  [matMenuTriggerFor]="savedSearchesMenu"
+  [matTooltip]="'SEARCH.SAVED_SEARCHES_LABEL' | translate"
+>
+  <mat-icon>bookmark</mat-icon>
+</button>
+<mat-menu #savedSearchesMenu="matMenu">
+  <button mat-menu-item (click)="openSaveSearchDialog()">
+    <mat-icon>save</mat-icon>
+    <span>{{ 'SEARCH.SAVED_CURRENT_SEARCH' | translate }}</span>
+  </button>
+  <ng-container *ngIf="savedSearches | async as savedSearches">
+    <button mat-menu-item *ngIf="savedSearches.length > 0" (click)="goToSavedSearches()">
+      <mat-icon>folder</mat-icon>
+      <span>{{ 'SEARCH.MANAGE_SAVED_SEARCH' | translate }}</span>
+    </button>
+    <button
+      mat-menu-item
+      *ngFor="let savedSearch of savedSearches"
+      (click)="applySavedSearch(savedSearch)"
+    >
+      <mat-icon>search</mat-icon>
+      <span>{{ savedSearch.title }}</span>
+    </button>
+  </ng-container>
+</mat-menu>

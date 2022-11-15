@@ -84,6 +84,7 @@ import { filter } from 'rxjs/operators';
 export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit {
     readonly DisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
+    readonly Scope = Scope;
     sortConfig: ListSortConfig = {
         allowed: true,
         active: null,
@@ -459,7 +460,6 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                     await this.signupList.initOptionsGenerator({
                         actionbar: this.actionbarSignup,
                         customOptions: this.signupActions,
-                        scope: Scope.UserManagement,
                     });
                     this.toast.closeModalDialog();
                 },
@@ -663,7 +663,6 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         await this.nodeEntries?.initOptionsGenerator({
             actionbar: this.actionbar,
             customOptions: this.options,
-            scope: Scope.UserManagement,
         });
     }
     cancelEdit() {
@@ -1438,7 +1437,6 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         await this.nodeMemberAdd?.initOptionsGenerator({
             actionbar: this.actionbarMember,
             customOptions: this.memberOptions,
-            scope: Scope.UserManagement,
         });
         this.nodeMemberAdd.getSelection().changed.subscribe(() => this.updateButtons());
     }

@@ -42,14 +42,8 @@
       <es-search-field
         data-selector-search-field
         *ngIf="mainNavConfig.searchEnabled"
-        [(searchString)]="searchQuery"
-        (searchStringChange)="
-          mainNavConfig.searchQueryChange && mainNavConfig.searchQueryChange($event)
-        "
         [placeholder]="mainNavConfig.searchPlaceholder"
         [enableFiltersAndSuggestions]="mainNavConfig.currentScope === 'search'"
-        (searchSubmit)="doSearch(searchQuery)"
-        (clear)="clearSearch()"
       ></es-search-field
     ></es-top-bar>
 

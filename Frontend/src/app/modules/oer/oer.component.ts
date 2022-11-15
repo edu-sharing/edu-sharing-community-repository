@@ -18,7 +18,8 @@ import { GlobalContainerComponent } from '../../common/ui/global-container/globa
 import { Helper } from '../../core-module/rest/helper';
 import { NodeUrlComponent } from '../../shared/components/node-url/node-url.component';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { SearchFieldService } from '../../main/navigation/search-field/search-field.service';
 
 @Component({
     selector: 'es-oer',
@@ -46,6 +47,8 @@ export class OerComponent implements OnInit, OnDestroy {
     public hasMore: boolean[] = [];
     private offsets: number[] = [];
     public nodes: Node[][] = [];
+    private destroyed = new Subject<void>();
+
     constructor(
         private router: Router,
         private route: ActivatedRoute,
@@ -58,6 +61,7 @@ export class OerComponent implements OnInit, OnDestroy {
         private translations: TranslationsService,
         private mainNav: MainNavService,
         private translate: TranslateService,
+        private searchField: SearchFieldService,
     ) {
         this.translations.waitForInit().subscribe(() => {
             for (let i = 0; i < this.TYPE_COUNT; i++) {
@@ -116,6 +120,8 @@ export class OerComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy() {
+        this.destroyed.next();
+        this.destroyed.complete();
         this.storage.set(
             TemporaryStorageService.NODE_RENDER_PARAMETER_LIST,
             this.nodes[this.MATERIALS],
@@ -130,12 +136,12 @@ export class OerComponent implements OnInit, OnDestroy {
             searchEnabled: true,
             searchPlaceholder: 'OER.SEARCH',
             canOpen: true,
-            onSearch: (query) => this.routeSearch(query),
         });
+        this.searchField
+            .onSearchTriggered(this.destroyed)
+            .subscribe(({ searchString }) => this.routeSearch(searchString));
         this.currentQuerySubject.subscribe((currentQuery) =>
-            this.mainNav.patchMainNavConfig({
-                searchQuery: currentQuery,
-            }),
+            this.searchField.setSearchString(currentQuery),
         );
     }
 

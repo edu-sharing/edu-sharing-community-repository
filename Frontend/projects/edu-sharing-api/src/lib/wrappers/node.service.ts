@@ -25,7 +25,7 @@ export class NodeTools {
 export class NodeService {
     constructor(private nodeV1: NodeV1Service, private searchV1: SearchV1Service) {}
 
-    getNode(repository: string, id: string): Observable<Node> {
+    getNode(id: string, { repository = HOME_REPOSITORY } = {}): Observable<Node> {
         return this.nodeV1
             .getMetadata({
                 repository,
@@ -37,20 +37,19 @@ export class NodeService {
 
     getChildren(
         parent: string,
-        skipCount?: number,
-        maxItems?: number,
-        filter?: string[],
-        { repository = HOME_REPOSITORY } = {},
+        {
+            repository = HOME_REPOSITORY,
+            ...params
+        }: Partial<Omit<Parameters<NodeV1Service['getChildren']>[0], 'node'>> = {},
     ) {
         return this.nodeV1.getChildren({
             repository,
             node: parent,
-            filter,
-            skipCount,
-            maxItems,
             propertyFilter: ['-all-'],
+            ...params,
         });
     }
+
     /**
      * return the forked childs (variants) of this node
      * @returns

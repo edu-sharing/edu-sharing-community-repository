@@ -4,15 +4,17 @@ export {
     About,
     Connector,
     ConnectorList,
+    FeedbackData,
+    LicenseAgreement,
     Mds as MdsDefinition,
     MdsGroup,
+    MdsQueryCriteria,
     MdsSort,
     MdsValue,
     MdsView,
     MdsWidget,
     MdsWidgetCondition,
     MetadataSetInfo,
-    FeedbackData,
     Node,
     NodeEntries,
     NodeRef,
@@ -27,7 +29,6 @@ export {
     UserQuota,
     UserStatus,
     WebsiteInformation,
-    LicenseAgreement,
 } from './api/models';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MdsView } from './api/models';

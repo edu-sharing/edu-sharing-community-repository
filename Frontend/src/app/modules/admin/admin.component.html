@@ -1052,6 +1052,7 @@
         <es-node-entries-wrapper
           #searchResults
           [dataSource]="searchResponse"
+          [scope]="SCOPES.Admin"
           [columns]="searchColumns"
           [configureColumns]="true"
           [displayType]="NodeEntriesDisplayType.Table"

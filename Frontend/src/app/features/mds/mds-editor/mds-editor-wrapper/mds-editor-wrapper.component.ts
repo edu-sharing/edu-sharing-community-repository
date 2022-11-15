@@ -282,13 +282,14 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
             }
             if (!this.editorType) {
                 console.warn(
-                    'mds ' +
-                        this.setId +
-                        ' at ' +
-                        this.repository +
-                        ' did not specify any rendering type',
+                    `mds ${this.setId} at ${this.repository} did not specify any rendering type`,
                 );
                 this.editorType = 'legacy';
+            }
+            if (this.editorType === 'legacy') {
+                console.warn(
+                    `mds ${this.setId} at ${this.repository} is configured for legacy rendering`,
+                );
             }
             if (this.editorType === 'legacy' && !this.legacySuggestionsRegistered) {
                 this.registerLegacySuggestions();

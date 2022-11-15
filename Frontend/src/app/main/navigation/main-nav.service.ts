@@ -49,7 +49,6 @@ export class MainNavConfig {
      * "add material" options
      */
     create?: MainNavCreateConfig = new MainNavCreateConfig();
-    searchQuery?: string;
     currentScope: string;
 
     /**
@@ -57,11 +56,6 @@ export class MainNavConfig {
      */
     onCreate?: (node: Node[]) => void;
     onCreateNotAllowed?: () => void;
-    /**
-     * Called when a search event happened, emits the search string and additional event info.
-     */
-    onSearch?: (query: string, cleared: boolean) => void;
-    searchQueryChange?: (searchQuery: string) => void;
 }
 
 @Injectable({

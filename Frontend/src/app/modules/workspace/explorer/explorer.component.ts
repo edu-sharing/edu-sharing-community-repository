@@ -476,7 +476,6 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         await this.nodeEntries?.initOptionsGenerator({
             actionbar: this.actionbar,
             customOptions: this.customOptions,
-            scope: Scope.WorkspaceList,
             parent: this.node$.value,
         });
     }

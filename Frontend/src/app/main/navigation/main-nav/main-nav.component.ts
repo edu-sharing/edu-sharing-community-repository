@@ -2,8 +2,6 @@ import { trigger } from '@angular/animations';
 import { HttpClient } from '@angular/common/http';
 import {
     AfterViewInit,
-    ChangeDetectionStrategy,
-    ChangeDetectorRef,
     Component,
     ElementRef,
     HostListener,
@@ -22,14 +20,13 @@ import {
     UserService,
 } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
-import { Observable, ReplaySubject, Subject, forkJoin } from 'rxjs';
-import { map, take, takeUntil, tap, delay, filter, switchMap } from 'rxjs/operators';
+import { Observable, ReplaySubject, Subject } from 'rxjs';
+import { delay, filter, map, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
 import { RocketChatService } from '../../../common/ui/global-container/rocketchat/rocket-chat.service';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
-    DialogButton,
     FrameEventsService,
     RestConnectorService,
     RestConstants,
@@ -49,7 +46,6 @@ import { NodeStoreService } from '../../../modules/search/node-store.service';
 import { LicenseAgreementService } from '../../../services/license-agreement.service';
 import { MainMenuEntriesService } from '../main-menu-entries.service';
 import { MainNavConfig, MainNavService } from '../main-nav.service';
-import { SearchFieldComponent } from '../search-field/search-field.component';
 import { TopBarComponent } from '../top-bar/top-bar.component';
 
 /**
@@ -71,7 +67,6 @@ import { TopBarComponent } from '../top-bar/top-bar.component';
 export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     private static readonly ID_ATTRIBUTE_NAME = 'data-banner-id';
 
-    @ViewChild(SearchFieldComponent) searchField: SearchFieldComponent;
     @ViewChild(TopBarComponent) topBar: TopBarComponent;
     @ViewChild('tabNav') tabNav: ElementRef;
 
@@ -93,7 +88,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     currentUser: User;
     canOpen: boolean;
     mainNavConfig: MainNavConfig;
-    searchQuery: string;
 
     private readonly initDone$ = new ReplaySubject<void>();
     private readonly destroyed$ = new Subject<void>();
@@ -110,7 +104,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         public iam: RestIamService,
         public connector: RestConnectorService,
         private bridge: BridgeService,
-        private event: FrameEventsService,
         private configService: ConfigurationService,
         private aboutService: AboutService,
         private uiService: UIService,
@@ -166,7 +159,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.initDone$.complete();
             });
         });
-        this.event.addListener(this, this.destroyed$);
     }
 
     private registerMainNavConfig() {
@@ -194,7 +186,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     ): void {
         this.visible = this.getIsVisible(mainNavConfig, queryParams);
         this.canOpen = mainNavConfig.canOpen;
-        this.searchQuery = mainNavConfig.searchQuery;
         if (!userInfo.loginInfo.isValidLogin) {
             this.canOpen = userInfo.loginInfo.isGuest;
             this.checkConfig();
@@ -375,12 +366,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         UIHelper.changeQueryParameter(this.router, this.route, 'nodeStore', value || null);
     }
 
-    onEvent(event: string, data: any) {
-        if (event === FrameEventsService.EVENT_PARENT_SEARCH) {
-            this.doSearch(data, false);
-        }
-    }
-
     openProfileDialog() {
         this.showProfile = true;
     }
@@ -461,10 +446,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         );
     }
 
-    clearSearch() {
-        this.mainNavConfig.onSearch('', true);
-    }
-
     logout() {
         this.globalProgress = true;
         this.uiService.handleLogout().subscribe(() => this.finishLogout());
@@ -477,13 +458,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             '',
             reurl ? window.location.href : '',
         );
-    }
-
-    doSearch(value = this.searchQuery, broadcast = true) {
-        if (broadcast) {
-            this.event.broadcastEvent(FrameEventsService.EVENT_GLOBAL_SEARCH, value);
-        }
-        this.mainNavConfig.onSearch?.(value, false);
     }
 
     openImprint() {

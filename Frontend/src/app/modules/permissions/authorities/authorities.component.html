@@ -118,6 +118,7 @@
     </div>
     <es-node-entries-wrapper
       #signupList
+      [scope]="Scope.UserManagement"
       [displayType]="DisplayType.Table"
       [elementInteractionType]="InteractionType.Emitter"
       [columns]="addMemberColumns"
@@ -359,6 +360,7 @@
     </div>
     <es-node-entries-wrapper
       #memberAdd
+      [scope]="Scope.UserManagement"
       [columns]="editGroups ? editGroupColumns : addMemberColumns"
       [dataSource]="memberList"
       [displayType]="DisplayType.Table"
@@ -402,6 +404,7 @@
 <es-node-entries-wrapper
   class="list"
   #mainList
+  [scope]="Scope.UserManagement"
   infinite-scroll
   (scrolled)="loadAuthorities()"
   [scrollWindow]="false"

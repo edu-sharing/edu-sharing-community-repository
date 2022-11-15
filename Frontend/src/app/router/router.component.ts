@@ -268,7 +268,11 @@ const childRoutes: Routes = [
         component: ApplyToLmsComponent,
     },
     // search
-    { path: UIConstants.ROUTER_PREFIX + 'search', component: SearchComponent },
+    {
+        path: UIConstants.ROUTER_PREFIX + 'search',
+        loadChildren: () =>
+            import('../pages/search-page/search-page.module').then((m) => m.SearchPageModule),
+    },
     // workspace
     { path: UIConstants.ROUTER_PREFIX + 'workspace', component: WorkspaceMainComponent },
     { path: UIConstants.ROUTER_PREFIX + 'workspace/:mode', component: WorkspaceMainComponent },

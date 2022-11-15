@@ -1,9 +1,9 @@
 import { MatTableDataSourcePageEvent, MatTableDataSourcePaginator } from '@angular/material/table';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import { Subject } from 'rxjs';
 
 export class InfiniteScrollPaginator implements MatTableDataSourcePaginator {
-    page = new BehaviorSubject<MatTableDataSourcePageEvent>(this._getPage());
+    readonly page = new Subject<MatTableDataSourcePageEvent>();
     private _pageIndex = 0;
     get pageIndex() {
         return this._pageIndex;

@@ -79,6 +79,7 @@
         [elementInteractionType]="interactionType"
         #listProposals
         [dataSource]="dataSourceCollectionProposals"
+        [scope]="Scope.CollectionsProposals"
         [displayType]="NodeEntriesDisplayType.Grid"
         [columns]="proposalColumns"
         [globalOptions]=""
@@ -101,6 +102,7 @@
           #listReferences
           [elementInteractionType]="InteractionType.Emitter"
           [dataSource]="dataSourceReferences"
+          [scope]="Scope.CollectionsReferences"
           [globalKeyboardShortcuts]="true"
           [columns]="referencesColumns"
           [displayType]="NodeEntriesDisplayType.Grid"

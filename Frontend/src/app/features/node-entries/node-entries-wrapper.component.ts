@@ -28,7 +28,7 @@ import {
 } from '../../core-module/core.module';
 import { NodeEntriesService } from '../../core-ui-module/node-entries.service';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
-import { OptionItem } from '../../core-ui-module/option-item';
+import { OptionItem, Scope } from '../../core-ui-module/option-item';
 import { OptionsHelperService } from '../../core-ui-module/options-helper.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { MainNavService } from '../../main/navigation/main-nav.service';
@@ -76,6 +76,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @ContentChild('overlay') overlayRef: TemplateRef<any>;
     @ViewChild('nodeEntriesComponent') nodeEntriesComponentRef: NodeEntriesComponent<T>;
     @Input() dataSource: NodeDataSource<T> | NodeDataSourceRemote<T>;
+    @Input() scope: Scope;
     @Input() columns: ListItem[];
     @Input() configureColumns: boolean;
     @Input() checkbox = true;
@@ -116,6 +117,18 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
      * Do not load more data on scroll.
      */
     @Input() disableInfiniteScroll = false;
+    /**
+     * Whether to show a loading spinner when no data has been fetched yet.
+     *
+     * Independently of this setting, we will always show a loading spinner when additional content
+     * is fetched via pagination or infinite scrolling.
+     *
+     * In case the data source's remote is replaced, we will treat the fetching operation as initial
+     * and respect this setting. Additionally we will keep showing any previous data in this case
+     * only if this setting is `false` (so to not misleadingly show a loading spinner after the
+     * content to be replaced).
+     */
+    @Input() showInitialLoadingSpinner = true;
     @Output() fetchData = new EventEmitter<FetchEvent>();
     @Output() clickItem = new EventEmitter<NodeClickEvent<T>>();
     @Output() dblClickItem = new EventEmitter<NodeClickEvent<T>>();
@@ -172,6 +185,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         }
         this.entriesService.list = this;
         this.entriesService.dataSource = this.dataSource;
+        this.entriesService.scope = this.scope;
         this.entriesService.columns = this.columns;
         this.entriesService.configureColumns = this.configureColumns;
         this.entriesService.checkbox = this.checkbox;
@@ -306,9 +320,8 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
 
     async initOptionsGenerator(config: ListOptionsConfig) {
         await this.optionsHelper.initComponents(config.actionbar, this);
-        this.entriesService.scope = config.scope;
         this.optionsHelper.setData({
-            scope: config.scope,
+            scope: this.entriesService.scope,
             activeObjects: this.entriesService.selection.selected,
             selectedObjects: this.entriesService.selection.selected,
             allObjects: this.dataSource.getData(),

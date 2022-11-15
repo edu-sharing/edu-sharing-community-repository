@@ -1,5 +1,6 @@
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { NgModule } from '@angular/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { EditorModule } from '@tinymce/tinymce-angular';
 import { SharedModule } from '../../shared/shared.module';
 import { MdsComponent } from './legacy/mds/mds.component';
@@ -42,7 +43,6 @@ import { MdsEditorWidgetVersionComponent } from './mds-editor/widgets/mds-editor
 import { MdsEditorWidgetTinyMCE } from './mds-editor/widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-tinymce.component';
 import { MdsViewerComponent } from './mds-viewer/mds-viewer.component';
 import { MdsWidgetComponent } from './mds-viewer/widget/mds-widget.component';
-import { MatFormFieldModule } from '@angular/material/form-field';
 
 @NgModule({
     declarations: [
@@ -94,6 +94,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
         MdsEditorWrapperComponent,
         MdsViewerComponent,
         MdsEditorCoreComponent,
+        SearchFieldFacetsComponent,
+        PropertySlugPipe,
     ],
 })
 export class MdsModule {}

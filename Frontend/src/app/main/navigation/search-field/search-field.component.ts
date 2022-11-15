@@ -1,22 +1,14 @@
 import { CdkConnectedOverlay, ConnectedPosition } from '@angular/cdk/overlay';
-import {
-    Component,
-    ElementRef,
-    EventEmitter,
-    Input,
-    OnDestroy,
-    OnInit,
-    Output,
-    ViewChild,
-} from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatChip } from '@angular/material/chips';
 import { FacetsDict, LabeledValue, LabeledValuesDict } from 'ngx-edu-sharing-api';
+import * as rxjs from 'rxjs';
 import { Subject } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { filter, map, takeUntil } from 'rxjs/operators';
 import { SearchFieldFacetsComponent } from '../../../features/mds/mds-editor/search-field-facets/search-field-facets.component';
 import { Values } from '../../../features/mds/types/types';
-import { SearchFieldService } from './search-field.service';
+import { SearchFieldInternalService } from './search-field-internal.service';
 
 @Component({
     selector: 'es-search-field',
@@ -25,16 +17,7 @@ import { SearchFieldService } from './search-field.service';
 })
 export class SearchFieldComponent implements OnInit, OnDestroy {
     filtersCount: number;
-    @Input()
-    set searchString(s: string) {
-        this.searchString_ = s;
-        this.inputControl.setValue(s);
-    }
-    get searchString() {
-        return this.searchString_;
-    }
-    private searchString_: string;
-    @Output() searchStringChange = new EventEmitter<string>();
+
     @Input() placeholder: string;
     /**
      * If enabled, shows filters as chips inside the search field and suggests additional filters in
@@ -45,12 +28,8 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
      */
     @Input()
     set enableFiltersAndSuggestions(value: boolean) {
-        // This feature is currently not ready for use. Some components are not available in the
-        // required Angular module and backends don't reliably provide the required data.
-        // this.searchField.setEnableFiltersAndSuggestions(value);
+        this.internal.setEnableFiltersAndSuggestions(value);
     }
-    @Output() searchSubmit = new EventEmitter<string>();
-    @Output() clear = new EventEmitter<void>();
 
     @ViewChild('input') input: ElementRef;
     @ViewChild(CdkConnectedOverlay) private overlay: CdkConnectedOverlay;
@@ -58,10 +37,10 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
     @ViewChild(MatChip) private firstActiveChip: MatChip;
 
     readonly inputControl = new FormControl('');
-    readonly filters$ = this.searchField.filters$;
-    readonly rawFilters$ = this.searchField.rawFilters$;
-    readonly categories$ = this.searchField.categoriesSubject;
-    readonly suggestions$ = this.searchField.suggestions$;
+    readonly filters$ = this.internal.filters$;
+    readonly rawFilters$ = this.internal.rawFilters$;
+    readonly categories$ = this.internal.categoriesSubject;
+    readonly suggestions$ = this.internal.suggestions$;
     showOverlay = false;
     hasSuggestions = true;
     readonly overlayPositions: ConnectedPosition[] = [
@@ -74,26 +53,34 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
             overlayY: 'top',
         },
     ];
-    readonly mdsInfo$ = this.searchField.mdsInfo$;
+    readonly mdsInfo$ = this.internal.mdsInfo$;
     inputHasFocus = false;
 
     private readonly destroyed$ = new Subject<void>();
 
-    constructor(private searchField: SearchFieldService) {}
+    constructor(private internal: SearchFieldInternalService) {}
 
     ngOnInit(): void {
-        this.inputControl.valueChanges.subscribe((inputString) => {
-            if (inputString !== this.searchString) {
-                // The value was updated through user interaction and not by the component input
-                // `searchString`.
-                this.searchField.updateSuggestions(inputString);
-                this.searchStringChange.emit(inputString);
-            }
-        });
-        this.filters$
+        this.internal.searchFieldComponent = this;
+        this.internal.searchString
             .pipe(
                 takeUntil(this.destroyed$),
-                map((filters) => this.getFiltersCount(filters)),
+                filter((searchString) => this.inputControl.value !== searchString),
+            )
+            .subscribe((searchString) => this.inputControl.setValue(searchString));
+        this.inputControl.valueChanges.subscribe((inputString) => {
+            if (inputString !== this.internal.searchString.value) {
+                // The value was updated through user interaction and not by the component input
+                // `searchString`.
+                this.internal.searchString.next(inputString);
+                this.internal.updateSuggestions(inputString);
+                this.internal.searchStringChanged.next(inputString);
+            }
+        });
+        rxjs.combineLatest([this.filters$, this.categories$])
+            .pipe(
+                takeUntil(this.destroyed$),
+                map(([filters, categories]) => this.getFiltersCount(filters, categories)),
             )
             .subscribe((filtersCount) => (this.filtersCount = filtersCount));
         this.suggestions$
@@ -115,37 +102,31 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this.destroyed$.next();
         this.destroyed$.complete();
+        if (this.internal.searchFieldComponent === this) {
+            this.internal.searchFieldComponent = null;
+        }
     }
 
     onSubmit(): void {
         this.showOverlay = false;
-        this.searchSubmit.emit(this.inputControl.value);
+        this.internal.triggerSearch({ searchString: this.inputControl.value, cleared: false });
     }
 
     onClear(): void {
         this.inputControl.setValue('');
-        this.clear.emit();
+        this.internal.triggerSearch({ searchString: null, cleared: true });
     }
 
     onValuesChange(values: Values): void {
         // A `valuesChange` event from the mds editor means, a suggestion card has been added as
         // filter.
         this.inputControl.setValue('');
-        this.searchField.setFilterValues(values, { emitValuesChange: true });
+        this.internal.setFilterValues(values, { emitValuesChange: true });
     }
 
     onRemoveFilter(property: string, filter: LabeledValue): void {
-        this.searchField.removeFilter(property, filter);
+        this.internal.removeFilter(property, filter);
     }
-
-    // Can probably be replaced by using `@Output() overlayOutsideClick` of the overlay.
-
-    // onOutsideClick(event: MouseEvent): void {
-    //     const clickTarget = event.target as HTMLElement;
-    //     if (!(this.overlay.origin.elementRef.nativeElement as HTMLElement).contains(clickTarget)) {
-    //         this.showOverlay = false;
-    //     }
-    // }
 
     focusOverlayIfOpen(event: Event): void {
         if (this.firstActiveChip) {
@@ -189,7 +170,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
     }
 
     onCategories(properties: string[]): void {
-        this.searchField.categoriesSubject.next(properties);
+        this.internal.categoriesSubject.next(properties);
     }
 
     private getHasSuggestions(suggestions: FacetsDict): boolean {
@@ -199,12 +180,12 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
         );
     }
 
-    getFiltersCount(filters: LabeledValuesDict | null): number {
+    getFiltersCount(filters: LabeledValuesDict | null, categories: string[]): number {
         if (!filters) {
             return 0;
         }
         const mapped = Object.keys(filters)
-            .filter((f) => this.categories$.value?.includes(f))
+            .filter((f) => categories?.includes(f))
             .map((k) => filters[k].length);
         if (!mapped.length) {
             return 0;

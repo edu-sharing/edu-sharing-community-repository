@@ -22,6 +22,7 @@ import { RestHelper } from '../../core-module/core.module';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { Subject } from 'rxjs';
+import { SearchFieldService } from '../../main/navigation/search-field/search-field.service';
 
 @Component({
     selector: 'es-permissions-main',
@@ -48,6 +49,7 @@ export class PermissionsMainComponent implements OnInit, OnDestroy {
         private loadingScreen: LoadingScreenService,
         private mainNav: MainNavService,
         private connector: RestConnectorService,
+        private searchField: SearchFieldService,
     ) {
         const loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
         this.translations.waitForInit().subscribe(() => {
@@ -89,21 +91,23 @@ export class PermissionsMainComponent implements OnInit, OnDestroy {
         this.mainNav.setMainNavConfig({
             title: 'PERMISSIONS.TITLE',
             currentScope: 'permissions',
-            onSearch: (query) => this.doSearch(query),
         });
         this.updateMainNav();
+        this.searchField
+            .onSearchTriggered(this.destroyed)
+            .subscribe(({ searchString }) => this.doSearch(searchString));
     }
 
     private updateMainNav(): void {
         this.mainNav.patchMainNavConfig({
             searchEnabled: this.tab !== 3,
-            searchQuery: this.searchQuery,
             searchPlaceholder: 'PERMISSIONS.SEARCH_' + this.TABS[this.tab],
         });
+        this.searchField.setSearchString(this.searchQuery);
     }
 
-    public doSearch(event: string) {
-        this.searchQuery = event;
+    private doSearch(searchString: string) {
+        this.searchQuery = searchString;
     }
 
     setTab(tab: number) {

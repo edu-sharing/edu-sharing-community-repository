@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, Input, OnDestroy, ViewChild } from '@angular/core';
 import {
     ArchiveRestore,
     GenericAuthority,
@@ -22,17 +22,19 @@ import {
     NodeEntriesDisplayType,
 } from '../../../features/node-entries/entries-model';
 import { NodeEntriesWrapperComponent } from '../../../features/node-entries/node-entries-wrapper.component';
-import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { NodeDataSource } from '../../../features/node-entries/node-data-source';
+import { SearchFieldService } from '../../../main/navigation/search-field/search-field.service';
+import { Subject } from 'rxjs';
 
 @Component({
     selector: 'es-recycle',
     templateUrl: 'recycle.component.html',
     styleUrls: ['recycle.component.scss'],
 })
-export class RecycleMainComponent implements AfterViewInit {
+export class RecycleMainComponent implements AfterViewInit, OnDestroy {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
+    readonly Scope = Scope;
     @ViewChild('list') list: NodeEntriesWrapperComponent<Node>;
     dataSource = new NodeDataSource();
     public toDelete: Node[] = null;
@@ -66,12 +68,14 @@ export class RecycleMainComponent implements AfterViewInit {
             sortAscending: sortAscending,
         });
     }
+    private destroyed = new Subject<void>();
+
     constructor(
         private archive: RestArchiveService,
         private toast: Toast,
-        public mainNavService: MainNavService,
         private translate: TranslateService,
         private service: TemporaryStorageService,
+        private searchField: SearchFieldService,
     ) {
         this.options.addOptions.push(
             new OptionItem('RECYCLE.OPTION.RESTORE_SINGLE', 'undo', (node: Node) =>
@@ -86,22 +90,25 @@ export class RecycleMainComponent implements AfterViewInit {
         this.options.addOptions.forEach((o) => {
             o.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         });
-        this.mainNavService.patchMainNavConfig({
-            onSearch: (query) => {
-                this.searchQuery = query;
-                this.refresh();
-            },
+        this.searchField.onSearchTriggered(this.destroyed).subscribe(({ searchString }) => {
+            this.searchQuery = searchString;
+            this.refresh();
         });
     }
 
     ngAfterViewInit(): void {
         this.refresh();
         this.list.initOptionsGenerator({
-            scope: Scope.WorkspaceList,
             actionbar: this.actionbar,
             customOptions: this.options,
         });
     }
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
+    }
+
     private restoreFinished(list: Node[], restoreResult: any) {
         this.toast.closeModalDialog();
 

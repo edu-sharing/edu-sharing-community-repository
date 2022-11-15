@@ -60,6 +60,10 @@ import { WorkspaceExplorerComponent } from './explorer/explorer.component';
 import { canDragDrop, canDropOnNode } from './workspace-utils';
 import { WorkspaceTreeComponent } from './tree/tree.component';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
+import {
+    SearchEvent,
+    SearchFieldService,
+} from '../../main/navigation/search-field/search-field.service';
 
 @Component({
     selector: 'es-workspace-main',
@@ -187,6 +191,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         private ngZone: NgZone,
         private loadingScreen: LoadingScreenService,
         private mainNavService: MainNavService,
+        private searchField: SearchFieldService,
     ) {
         this.event.addListener(this, this.destroyed$);
         this.translations.waitForInit().subscribe(() => {
@@ -254,9 +259,10 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             onCreateNotAllowed: () => this.createNotAllowed(),
             searchPlaceholder: this.isSafe ? 'WORKSPACE.SAFE_SEARCH' : 'WORKSPACE.SEARCH',
             canOpen: this.mainnav,
-            searchQuery: this.searchQuery?.query,
-            onSearch: (query, cleared) => this.doSearch({ query, cleared }),
         });
+        this.searchField
+            .onSearchTriggered(this.destroyed$)
+            .subscribe((event) => this.doSearch(event));
     }
 
     private registerUpdateMainNav(): void {
@@ -275,9 +281,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             }),
         );
         this.searchQuerySubject.subscribe((searchQuery) =>
-            this.mainNavService.patchMainNavConfig({
-                searchQuery: searchQuery?.query,
-            }),
+            this.searchField.setSearchString(searchQuery?.query),
         );
     }
 
@@ -551,14 +555,14 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         }
     }
 
-    doSearch(query: any) {
+    doSearch(event: SearchEvent) {
         const id = this.currentFolder
             ? this.currentFolder.ref.id
             : this.searchQuery && this.searchQuery.node
             ? this.searchQuery.node.ref.id
             : null;
-        void this.routeTo(this.root, id, query.query);
-        if (!query.cleared) {
+        void this.routeTo(this.root, id, event.searchString);
+        if (!event.cleared) {
             this.ui.hideKeyboardIfMobile();
         }
     }

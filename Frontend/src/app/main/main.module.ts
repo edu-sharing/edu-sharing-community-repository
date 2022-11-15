@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { extensionDeclarationsMap } from '../extension/extension-declarations-map';
+import { MdsModule } from '../features/mds/mds.module';
 import { SharedModule } from '../shared/shared.module';
 import { LoadingScreenComponent } from './loading-screen/loading-screen.component';
 import { BannerComponent } from './navigation/banner/banner.component';
@@ -32,7 +33,7 @@ import { UserProfileComponent } from './navigation/user-profile/user-profile.com
         SearchFieldComponent,
         extensionDeclarationsMap['MainModule'] || [],
     ],
-    imports: [SharedModule],
+    imports: [SharedModule, MdsModule],
     exports: [MainNavComponent, SearchFieldComponent, CreateMenuComponent],
 })
 export class MainModule {}

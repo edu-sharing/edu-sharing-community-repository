@@ -279,12 +279,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private initAfterView(): void {
-        // For some reason, the main nav component does not get populated in time when navigating
-        // back from the rendering component. However, since the user cannot go anywhere without
-        // closing the tutorial, we won't be needing it in this case anyway.
-        if (this.mainNavService.getMainNav().searchField) {
-            this.tutorialElement = this.mainNavService.getMainNav().searchField.input;
-        }
+        this.tutorialElement = this.searchField.getInputElement();
         this.handleScroll();
         this.searchService.clear();
         this.initalized = true;
@@ -403,9 +398,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         );
         this.searchService.searchTermSubject
             .pipe(takeUntil(this.destroyed$))
-            .subscribe((searchTerm) =>
-                this.mainNavService.patchMainNavConfig({ searchQuery: searchTerm }),
-            );
+            .subscribe((searchTerm) => this.searchField.setSearchString(searchTerm));
     }
 
     private initMainNav(): void {
@@ -418,10 +411,14 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             // Why do we need this, when the top bar is hidden anyway?
             // showScope: this.mainnav,
             // showUser: this.mainnav,
-            searchQueryChange: (searchQuery) => (this.searchService.searchTerm = searchQuery),
-            onSearch: () => this.applyParameters('mainnav'),
             onCreate: (nodes) => this.nodeEntriesResults.addVirtualNodes(nodes),
         });
+        this.searchField
+            .onSearchStringChanged(this.destroyed$)
+            .subscribe((searchString) => (this.searchService.searchTerm = searchString));
+        this.searchField
+            .onSearchTriggered(this.destroyed$)
+            .subscribe(() => this.applyParameters('mainnav'));
     }
 
     registerScrollHandler(): void {
@@ -1243,7 +1240,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 await this.nodeEntriesResults.initOptionsGenerator({
                     actionbar: this.actionbarComponent,
                     customOptions: this.customOptions,
-                    scope: Scope.Search,
                 });
                 this.searchService.isFrontpage = useFrontpage && tryFrontpage;
                 this.processSearchResult(data, init);
@@ -1651,7 +1647,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         // Don't create a new browser-history entry for the initial mds values update, so the back
         // navigation will skip the resulting redirect.
         let initDone = false;
-        rxjs.merge(this.searchField.filterValuesChange, this.mdsDesktopRef.mdsEditorInstance.values)
+        rxjs.merge(
+            this.searchField.onFilterValuesChanged(this.destroyed$),
+            this.mdsDesktopRef.mdsEditorInstance.values,
+        )
             .pipe(
                 takeUntil(this.destroyed$),
                 map((valuesDict) =>

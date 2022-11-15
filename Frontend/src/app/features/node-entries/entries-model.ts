@@ -34,7 +34,6 @@ export enum InteractionType {
 
 export type ListOptions = { [key in Target]?: OptionItem[] };
 export type ListOptionsConfig = {
-    scope: Scope;
     actionbar?: ActionbarComponent;
     parent?: Node;
     customOptions?: CustomOptions;

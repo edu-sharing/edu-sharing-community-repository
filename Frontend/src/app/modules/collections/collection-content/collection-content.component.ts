@@ -89,6 +89,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
+    readonly Scope = Scope;
 
     @Input() collection: Node;
     /**
@@ -787,7 +788,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         setTimeout(() => {
             this.setOptionsCollection();
             this.listReferences?.initOptionsGenerator({
-                scope: Scope.CollectionsReferences,
                 actionbar: this.actionbarReferences,
                 parent: this.collection,
             });
@@ -952,9 +952,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                     );
                     this.dataSourceCollectionProposals.isLoading = false;
                     setTimeout(() => {
-                        this.listProposals?.initOptionsGenerator({
-                            scope: Scope.CollectionsProposals,
-                        });
+                        this.listProposals?.initOptionsGenerator({});
                     });
                 });
         }

@@ -318,7 +318,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         }
         await this.nodeEntriesSearchResult.initOptionsGenerator({
             actionbar: this.actionbarComponent,
-            scope: Scope.Admin,
         });
         const request = {
             offset: this.lucene.offset ? this.lucene.offset : 0,

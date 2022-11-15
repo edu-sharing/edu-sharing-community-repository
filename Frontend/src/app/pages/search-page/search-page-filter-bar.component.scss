@@ -1,0 +1,13 @@
+:host {
+    position: relative;
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    padding: 0 20px;
+}
+
+.saved-searches-button {
+    position: sticky;
+    align-self: flex-end;
+    bottom: 20px;
+}
