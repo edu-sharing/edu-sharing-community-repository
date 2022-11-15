@@ -240,22 +240,30 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		String metadataSetId = (metadataSetIdArr != null && metadataSetIdArr.length > 0) ? metadataSetIdArr[0] : null;
 
 		if(metadataSetId == null) {
-			Boolean forceMds = false;
-			try {
-				forceMds = (Boolean)nodeService.getProperty(new NodeRef(MCAlfrescoAPIClient.storeRef,parentId), QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET));
-				if(forceMds == null) forceMds = false;
-			}catch(Throwable t) {}
-			if(forceMds) {
-				metadataSetId = (String)nodeService.getProperty(new NodeRef(MCAlfrescoAPIClient.storeRef,parentId), QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
-			}
-			else {
-				if(HttpContext.getCurrentMetadataSet() != null && HttpContext.getCurrentMetadataSet().trim().length() > 0) {
-					metadataSetId = HttpContext.getCurrentMetadataSet();
-				}else {
-					metadataSetId = CCConstants.metadatasetdefault_id;
+			// allow to run as admin since user might don't have access to the parent ref
+			metadataSetId = AuthenticationUtil.runAsSystem(() -> {
+				Boolean forceMds = false;
+				NodeRef parentRef = new NodeRef(MCAlfrescoAPIClient.storeRef, parentId);
+				if (nodeService.exists(parentRef)) {
+					try {
+						forceMds = (Boolean) nodeService.getProperty(parentRef, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET));
+						if (forceMds == null) forceMds = false;
+					} catch (Throwable t) {
+					}
 				}
-				props.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, new String[] {metadataSetId});
-			}
+				if (forceMds) {
+					return (String) nodeService.getProperty(parentRef, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
+				} else {
+					String mdsId;
+					if(HttpContext.getCurrentMetadataSet() != null && HttpContext.getCurrentMetadataSet().trim().length() > 0) {
+						mdsId = HttpContext.getCurrentMetadataSet();
+					}else {
+						mdsId = CCConstants.metadatasetdefault_id;
+					}
+					props.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, new String[] {mdsId});
+					return mdsId;
+				}
+			});
 		}
 
 		MetadataSet mds = MetadataHelper.getMetadataset(getApplication(), metadataSetId);
