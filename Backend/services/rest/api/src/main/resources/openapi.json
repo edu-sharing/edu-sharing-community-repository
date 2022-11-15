@@ -5436,7 +5436,7 @@
         "operationId": "addApplication",
         "requestBody": {
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "properties": {
                   "xml": {
