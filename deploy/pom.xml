@@ -48,6 +48,5 @@
     </profile>
   </profiles>
 <modules>  <module>docker</module>
-    <module>installer</module>
   </modules>
 </project>
