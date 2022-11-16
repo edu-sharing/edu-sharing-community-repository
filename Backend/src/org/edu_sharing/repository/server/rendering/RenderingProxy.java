@@ -355,14 +355,14 @@ public class RenderingProxy extends HttpServlet {
 			RenderingServiceData renderData = service.getData(repoInfo, nodeId, null, usernameDecrypted, options);
 			resp.getOutputStream().write(service.getDetails(finalContentUrl, renderData).getBytes(StandardCharsets.UTF_8));
 			// track inline / lms
-			if (options.displayMode.equals(RenderingTool.DISPLAY_INLINE)) {
+			if (Arrays.asList(RenderingTool.DISPLAY_INLINE, RenderingTool.DISPLAY_EMBED).contains(options.displayMode)) {
 				NodeTrackingDetails details = getTrackingDetails(req, usage);
 				AuthenticationUtil.runAs(() ->
-				TrackingServiceFactory.getTrackingService().trackActivityOnNode(
-						new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
-						details,
-						TrackingService.EventType.VIEW_MATERIAL_EMBEDDED)
-				,usernameDecrypted);
+								TrackingServiceFactory.getTrackingService().trackActivityOnNode(
+										new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId),
+										details,
+										TrackingService.EventType.VIEW_MATERIAL_EMBEDDED)
+						,usernameDecrypted);
 			}
 		} catch (HttpException e) {
 			throw new RenderingException(e);

@@ -12,9 +12,10 @@ import {Toast} from '../../../core-ui-module/toast';
 import {SearchService} from '../../../modules/search/search.service';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
 import {UIConstants} from '../../../core-module/ui/ui-constants';
-import {Translation} from '../../../core-ui-module/translation';
-import {TranslateService} from '@ngx-translate/core';
+import { TranslationsService } from '../../../translations/translations.service';
 import {RestLocatorService} from '../../../core-module/core.module';
+import {RouterHelper} from '../../../core-ui-module/router.helper';
+import {PlatformLocation} from '@angular/common';
 
 export class NodeLMS extends Node {
     objectUrl?: string;
@@ -35,11 +36,11 @@ export class ApplyToLmsComponent {
     private nodeApi : RestNodeService,
     private toast : Toast,
     private events : FrameEventsService,
-    private translate : TranslateService,
-    private config : ConfigurationService,
+    private translations : TranslationsService,
     private temporaryStorage : TemporaryStorageService,
     private nodeHelper: NodeHelperService,
-    private storage : SessionStorageService,
+    private router : Router,
+    private platformLocation : PlatformLocation,
     private route : ActivatedRoute,
     private searchService:SearchService) {
     this.route.queryParams.subscribe((params:Params)=> {
@@ -47,6 +48,7 @@ export class ApplyToLmsComponent {
         this.reurl=params.reurl;
       }
       this.route.params.subscribe((params: Params) => {
+        this.toast.showProgressDialog();
         if(temporaryStorage.get(TemporaryStorageService.APPLY_TO_LMS_PARAMETER_NODE)) {
           this.node = temporaryStorage.get(TemporaryStorageService.APPLY_TO_LMS_PARAMETER_NODE);
           this.forward();
@@ -57,7 +59,7 @@ export class ApplyToLmsComponent {
               this.node = data.node;
               this.forward();
             },(error:any)=> {
-              Translation.initialize(this.translate,this.config,this.storage,this.route).subscribe(()=> {
+              this.translations.waitForInit().subscribe(()=> {
                 this.toast.error(error);
               });
             }
@@ -69,10 +71,6 @@ export class ApplyToLmsComponent {
   }
   node: Node;
   reurl: string;
-
-  public static navigateToSearchUsingReurl(router:Router,url=window.location.href) {
-    router.navigate(['./'+UIConstants.ROUTER_PREFIX+'search'],{queryParams:{reurl:url}});
-  }
 
   private static roundNumber(number: number) {
       number=Math.round(number);
@@ -135,6 +133,7 @@ export class ApplyToLmsComponent {
         // let contentParams = node.contentUrl.indexOf("?") == -1 ? '?' : '&';
         // contentParams += "LMS_URL=" + encodeURIComponent(reurl);
         // console.log(node.contentUrl + contentParams);
-        window.location.replace(reurl + params);// + params;
+        this.temporaryStorage.set(TemporaryStorageService.APPLY_TO_LMS_PARAMETER_NODE, node);
+        RouterHelper.navigateToAbsoluteUrl(this.platformLocation, this.router, reurl + params, true);
     }
 }

@@ -8,6 +8,7 @@ import org.alfresco.service.namespace.QName;
 import org.apache.ibatis.binding.BindingException;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.EduGroup;
@@ -127,7 +128,9 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
     @Override
     public boolean trackActivityOnUser(String authorityName, EventType type) {
         super.trackActivityOnUser(authorityName,type);
-        if(authorityName==null || authorityName.equals(ApplicationInfoList.getHomeRepository().getGuest_username()) || authorityName.equals(AuthenticationUtil.getSystemUserName())){
+        if(authorityName==null
+                || GuestCagePolicy.getGuestUsers().contains(authorityName)
+                || authorityName.equals(AuthenticationUtil.getSystemUserName())){
             return false;
         }
         return AuthenticationUtil.runAs(()-> execDatabaseQuery(TRACKING_INSERT_USER, statement -> {
@@ -157,19 +160,18 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         }),authorityName);
 
     }
-
     @Override
-    public boolean trackActivityOnNode(NodeRef nodeRef,NodeTrackingDetails details, EventType type) {
-        super.trackActivityOnNode(nodeRef,details,type);
-        
-            String version;
-            String nodeVersion = details==null ? null : details.getNodeVersion();
-            if(nodeVersion==null || nodeVersion.isEmpty() || nodeVersion.equals("-1")){
-                version=NodeServiceHelper.getProperty(nodeRef,CCConstants.CM_PROP_VERSIONABLELABEL);
-            }
-            else{
-                version=nodeVersion;
-            }
+    public boolean trackActivityOnNode(NodeRef nodeRef,NodeTrackingDetails details, EventType type, String authorityName) {
+        super.trackActivityOnNode(nodeRef,details,type, authorityName);
+
+        String version;
+        String nodeVersion = details==null ? null : details.getNodeVersion();
+        if(nodeVersion==null || nodeVersion.isEmpty() || nodeVersion.equals("-1")){
+            version=NodeServiceHelper.getProperty(nodeRef,CCConstants.CM_PROP_VERSIONABLELABEL);
+        }
+        else{
+            version=nodeVersion;
+        }
             String originalNodeRef = null;
             try {
                 if (NodeServiceHelper.hasAspect(nodeRef, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
@@ -182,29 +184,28 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
                 statement.setString(2, nodeRef.getId());
                 statement.setString(3, finalOriginalNodeRef);
                 statement.setString(4, version);
-                statement.setString(5, super.getTrackedUsername(null));
-                try {
+                statement.setString(5, super.getTrackedUsername(authorityName));
+            try {
                     statement.setArray(6,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllOrganizations(true).getData().stream().map(EduGroup::getGroupname).toArray()));
-                } catch (Exception e) {
-                    logger.info("Failed to track organizations of user",e);
-                }
-                try {
+            } catch (Exception e) {
+                logger.info("Failed to track organizations of user",e);
+            }
+            try {
                     statement.setArray(7,statement.getConnection().createArrayOf("VARCHAR",SearchServiceFactory.getLocalService().getAllMediacenters().toArray()));
-                } catch (Exception e) {
-                    logger.info("Failed to track mediacenter of user",e);
-                }
+            } catch (Exception e) {
+                logger.info("Failed to track mediacenter of user",e);
+            }
                 statement.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
                 statement.setString(9, type.name());
-                JSONObject json = buildJson(nodeRef, details, type);
-                PGobject obj = new PGobject();
-                obj.setType("json");
-                if (json != null)
-                    obj.setValue(json.toString());
+            JSONObject json = buildJson(nodeRef, details, type);
+            PGobject obj = new PGobject();
+            obj.setType("json");
+            if (json != null)
+                obj.setValue(json.toString());
                 statement.setObject(10, obj);
 
-                return true;
-            });
-        
+            return true;
+        });
     }
 
     /**

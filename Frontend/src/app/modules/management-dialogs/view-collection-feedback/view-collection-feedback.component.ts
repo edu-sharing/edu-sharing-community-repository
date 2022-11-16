@@ -10,7 +10,7 @@ import {ConfigurationService} from "../../../core-module/core.module";
 import {UIHelper} from "../../../core-ui-module/ui-helper";
 import {RestIamService} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
-import {MdsComponent} from "../../../common/ui/mds/mds.component";
+import {MdsComponent} from "../../../features/mds/legacy/mds/mds.component";
 import {RestConstants} from "../../../core-module/core.module";
 import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {trigger} from "@angular/animations";
@@ -55,7 +55,7 @@ export class ViewCollectionFeedbackComponent  {
     this.feedbackViewButtons = DialogButton.getSingleButton(
         'CLOSE',
         () => this.onClose.emit(),
-        DialogButton.TYPE_CANCEL,
+        'standard',
     );
   }
 }

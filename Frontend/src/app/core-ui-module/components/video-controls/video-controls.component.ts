@@ -21,7 +21,7 @@ import {Toast} from '../../toast';
 import {UIHelper} from '../../ui-helper';
 import {DurationPipe} from './duration.pipe';
 import {NodeHelperService} from '../../node-helper.service';
-import {MainNavService} from "../../../common/services/main-nav.service";
+import { MainNavService } from '../../../main/navigation/main-nav.service';
 interface VideoControlsValues {
     startTime: number;
     endTime: number;

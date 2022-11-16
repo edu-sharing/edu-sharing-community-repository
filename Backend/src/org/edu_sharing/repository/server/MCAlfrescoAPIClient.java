@@ -105,11 +105,10 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.HasPermissionsWork;
 import org.edu_sharing.alfresco.fixes.VirtualEduGroupFolderTool;
+import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
-import org.edu_sharing.metadataset.v2.MetadataKey;
 import org.edu_sharing.metadataset.v2.MetadataSet;
-import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.exception.CCException;
 import org.edu_sharing.repository.client.rpc.ACE;
@@ -148,7 +147,7 @@ import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
-import org.edu_sharing.service.nodeservice.PropertiesInterceptor;
+import org.edu_sharing.service.nodeservice.PropertiesGetInterceptor;
 import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 import org.edu_sharing.service.share.ShareService;
@@ -858,7 +857,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	}
 	public boolean downloadAllowed(String nodeId,Serializable commonLicenseKey,String editorType){
 		// when there is a signed request from the connector, the download (binary content delivery) is allowed
-		if(ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get())) {
+		if(ContextManagementFilter.accessTool.get() != null && ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getType())) {
 			return true;
 		}
 		boolean downloadAllowed;
@@ -953,16 +952,18 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			}
 		}
 
+		boolean hasMds = nodeType.equals(CCConstants.CCM_TYPE_IO) || nodeType.equals(CCConstants.CCM_TYPE_COMMENT) || nodeType.equals(CCConstants.CCM_TYPE_COLLECTION_FEEDBACK) || nodeType.equals(CCConstants.CCM_TYPE_MAP) || nodeType.equals(CCConstants.CM_TYPE_FOLDER);
+		String mdsId=CCConstants.metadatasetdefault_id;
+		MetadataSet mds = null;
 		/**
 		 * run over all properties and format the date props with with current
 		 * user locale
 		 */
-		if (nodeType.equals(CCConstants.CCM_TYPE_IO) || nodeType.equals(CCConstants.CCM_TYPE_COMMENT) || nodeType.equals(CCConstants.CCM_TYPE_COLLECTION_FEEDBACK) || nodeType.equals(CCConstants.CCM_TYPE_MAP) || nodeType.equals(CCConstants.CM_TYPE_FOLDER)) {
-			String mdsId=CCConstants.metadatasetdefault_id;
+		if (hasMds) {
 			if(propsCopy.containsKey(CCConstants.CM_PROP_METADATASET_EDU_METADATASET)){
 				mdsId=(String)propsCopy.get(CCConstants.CM_PROP_METADATASET_EDU_METADATASET);
 			}
-			MetadataSet mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(),mdsId);
+			mds = MetadataHelper.getMetadataset(ApplicationInfoList.getHomeRepository(),mdsId);
 			HashMap<String, Object> addAndOverwriteDateMap = new HashMap<String, Object>();
 			for (Map.Entry<String, Object> entry : propsCopy.entrySet()) {
 
@@ -984,20 +985,6 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 					addAndOverwriteDateMap.put(entry.getKey() + CCConstants.LONG_DATE_SUFFIX, entry.getValue());
 					// put formated
 					addAndOverwriteDateMap.put(entry.getKey(), ValueTool.toMultivalue(formattedValues));
-				}
-				try{
-					MetadataWidget widget = mds.findWidget(CCConstants.getValidLocalName(entry.getKey()));
-					Map<String, MetadataKey> map = widget.getValuesAsMap();
-					if(!map.isEmpty()){
-						String[] keys=ValueTool.getMultivalue((String) entry.getValue());
-						String[] values=new String[keys.length];
-						for(int i=0;i<keys.length;i++)
-							values[i]=map.containsKey(keys[i]) ? map.get(keys[i]).getCaption() : keys[i];
-						addAndOverwriteDateMap.put(entry.getKey() + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(values,CCConstants.MULTIVALUE_SEPARATOR));
-					}
-
-				}catch(Throwable t){
-
 				}
 			}
 
@@ -1142,13 +1129,27 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			}
 		}
 		HashMap<String, Object> propsOutput = propsCopy;
-		for (PropertiesInterceptor i : PropertiesInterceptorFactory.getPropertiesInterceptors()) {
+		// @TODO: remove all of this from/to multivalue
+		ValueTool.getMultivalue(propsOutput);
+		for (PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
 			propsOutput = new HashMap<>(i.beforeDeliverProperties(PropertiesInterceptorFactory.getPropertiesContext(
 					nodeRef,
 					propsOutput,
-					Arrays.asList(aspects))
+					Arrays.asList(aspects),
+					null)
 			));
 		}
+
+		/**
+		 * attach the display name suffix
+		 */
+		if(hasMds) {
+			MetadataHelper.addVirtualDisplaynameProperties(mds, propsOutput);
+		}
+
+		// @TODO: remove all of this from/to multivalue
+		ValueTool.toMultivalue(propsOutput);
+
 		return propsOutput;
 	}
 
@@ -1374,9 +1375,9 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			Date mdate = (Date) propMap.get(QName.createQName(CCConstants.CM_PROP_C_MODIFIED));
 			if (mdate != null) {
 				properties.put(CCConstants.CC_CACHE_MILLISECONDS_KEY, new Long(mdate.getTime()).toString());
-				for(PropertiesInterceptor i : PropertiesInterceptorFactory.getPropertiesInterceptors()) {
+				for(PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
 					properties = new HashMap<>(i.beforeCacheProperties(PropertiesInterceptorFactory.getPropertiesContext(nodeRef, properties,
-									aspects.stream().map(QName::toString).collect(Collectors.toList()))));
+									aspects.stream().map(QName::toString).collect(Collectors.toList()), null)));
 				}
 				repCache.put(nodeRef.getId(), properties);
 			}
@@ -3006,8 +3007,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	
 	public HashMap<String, Boolean> hasAllPermissions(String storeProtocol, String storeId, String nodeId, String[] permissions) {
 		ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
-		String guestName = appInfo.getGuest_username();
-		boolean guest=guestName!=null && guestName.equals(AuthenticationUtil.getFullyAuthenticatedUser());
+		boolean guest= GuestCagePolicy.getGuestUsers().contains(AuthenticationUtil.getFullyAuthenticatedUser());
 		PermissionService permissionService = serviceRegistry.getPermissionService();
 		HashMap<String, Boolean> result = new HashMap<String, Boolean>();
 		NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol,storeId), nodeId);
@@ -3526,29 +3526,31 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				(String) nodeService.getProperty(
 						new NodeRef(storeRef, nodeId),
 						QName.createQName(CCConstants.CM_NAME));
-		for(int i=0;;i++) {
-			String name=originalName;
-			if(i>0) {
-				name = NodeServiceHelper.renameNode(name, i);
-				nodeService.setProperty(new NodeRef(storeRef, nodeId),
-						QName.createQName(CCConstants.CM_NAME),name);
-			}
-			try {
-				nodeService.moveNode(
-						new NodeRef(storeRef, nodeId),
-						new NodeRef(storeRef, newParentId),
-						QName.createQName(childAssocType),
-						QName.createQName(CCConstants.NAMESPACE_CCM, name));
 
-				// remove from cache so that the new primary parent will be refreshed
-				Cache repCache = new RepositoryCache();
-				repCache.remove(nodeId);
-				break;
-			}catch(DuplicateChildNodeNameException e){
-				// let the loop run
-			}
+		nodeService.setProperty(new NodeRef(storeRef, nodeId), QName.createQName(CCConstants.CM_NAME), UUID.randomUUID().toString());
+		nodeService.moveNode(
+				new NodeRef(storeRef, nodeId),
+				new NodeRef(storeRef, newParentId),
+				QName.createQName(childAssocType),
+				QName.createQName(CCConstants.NAMESPACE_CCM, nodeId));
+
+		String name = originalName;
+		int i = 1;
+		int maxRetries = 10;
+		while (nodeService.getChildByName(new NodeRef(storeRef, newParentId), ContentModel.ASSOC_CONTAINS, name) != null && i <= maxRetries) {
+			name = NodeServiceHelper.renameNode(originalName, i++);
 		}
+
+		boolean canApplyName = i <= maxRetries;
+		if (canApplyName) {
+			nodeService.setProperty(new NodeRef(storeRef, nodeId), QName.createQName(CCConstants.CM_NAME), name);
+		}
+
+		// remove from cache so that the new primary parent will be refreshed
+		Cache repCache = new RepositoryCache();
+		repCache.remove(nodeId);
 	}
+
 
 	/**
 	 * @param nodeId : the id of the node to copy

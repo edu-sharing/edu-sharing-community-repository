@@ -61,6 +61,7 @@ public class NotificationServiceImpl implements NotificationService {
 		replace.put("name", (String)properties.get(CCConstants.CM_NAME));
 		replace.put("id", nodeId);
 		replace.put("link", URLTool.getNgRenderNodeUrl(nodeId,null,true));
+		MailTemplate.applyNodePropertiesToMap("node.", properties, replace);
 		Mail mail=new Mail();
 		String receiver=mail.getConfig().getString("report.receiver");
 		if(receiver==null)

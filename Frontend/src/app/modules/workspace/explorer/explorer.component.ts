@@ -17,27 +17,27 @@ import {
     RestNodeService,
     RestSearchService,
     SessionStorageService,
-    Store,
-    TemporaryStorageService
+    TemporaryStorageService, UIService
 } from '../../../core-module/core.module';
 import {TranslateService} from '@ngx-translate/core';
 import {CustomOptions, Scope} from '../../../core-ui-module/option-item';
 import {Toast} from '../../../core-ui-module/toast';
 import {Helper} from '../../../core-module/rest/helper';
-import {ActionbarComponent} from '../../../common/ui/actionbar/actionbar.component';
-import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
+import {ActionbarComponent} from '../../../shared/components/actionbar/actionbar.component';
 import {ListTableComponent} from '../../../core-ui-module/components/list-table/list-table.component';
-import {DragNodeTarget, DropData} from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
-import {compareNumbers} from '@angular/compiler-cli/src/diagnostics/typescript_version';
 import {
-    NodeEntriesWrapperComponent
-} from '../../../core-ui-module/components/node-entries-wrapper/node-entries-wrapper.component';
-import {NodeDataSource} from '../../../core-ui-module/components/node-entries-wrapper/node-data-source';
-import {
-    DropSource, DropTarget, InteractionType, ListSortConfig,
-    NodeClickEvent, NodeEntriesDisplayType,
+    DropSource,
+    DropTarget,
+    FetchEvent,
+    InteractionType,
+    ListSortConfig,
+    NodeClickEvent,
+    NodeEntriesDisplayType,
     NodeRoot
-} from '../../../core-ui-module/components/node-entries-wrapper/entries-model';
+} from 'src/app/features/node-entries/entries-model';
+import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-entries-wrapper.component';
+import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
+import { NodeEntriesDataType } from 'src/app/features/node-entries/node-entries.component';
 
 @Component({
     selector: 'es-workspace-explorer',
@@ -47,184 +47,13 @@ import {
 export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterViewInit {
     public readonly SCOPES = Scope;
     readonly InteractionType = InteractionType;
-    @ViewChild('list') list: ListTableComponent;
-    @ViewChild(NodeEntriesWrapperComponent) nodeEntries: NodeEntriesWrapperComponent<Node>;
-    public _dataSource: NodeDataSource<Node>;
-    @Input() customOptions: CustomOptions;
-    @Input() set dataSource(dataSource: NodeDataSource<Node>) {
-        this._dataSource = dataSource;
-    }
-    @Output() nodesChange = new EventEmitter<Node[]>();
-    sort: ListSortConfig = {
-        allowed: true,
-        active: RestConstants.CM_NAME,
-        direction: 'asc',
-        columns: RestConstants.POSSIBLE_SORT_BY_FIELDS
-    };
 
-    public columns : ListItem[]=[];
-    @Input() displayType = NodeEntriesDisplayType.Table;
-    @Output() displayTypeChange = new EventEmitter<NodeEntriesDisplayType>();
-    @Input() reorderDialog = false;
-    @Output() reorderDialogChange = new EventEmitter<boolean>();
-    @Input() preventKeyevents:boolean;
-    @Input() mainNav:MainNavComponent;
-    @Input() actionbar:ActionbarComponent;
-
-    totalCount: number;
-
-    public _searchQuery : string = null;
-    _node : Node;
-    private lastRequestSearch : boolean;
-
-    _root: NodeRoot;
-    @Input() set root (root: NodeRoot) {
-        this._root = root;
-        if(['MY_FILES', 'SHARED_FILES'].includes(root)) {
-            this.sort.columns = RestConstants.POSSIBLE_SORT_BY_FIELDS;
-        } else {
-            this.sort.columns = RestConstants.POSSIBLE_SORT_BY_FIELDS_SOLR;
-        }
-        this.storage.get(SessionStorageService.KEY_WORKSPACE_SORT + root, null).subscribe((data) => {
-            if (data?.sortBy != null) {
-                this.sort.active = data.sortBy;
-                this.sort.direction = data.sortAscending ? 'asc' : 'desc';
-            } else {
-                this.sort.active = RestConstants.CM_NAME;
-                this.sort.direction = 'asc';
-            }
-        });
-    }
-    @Input() set current(current : Node) {
-        this.setNode(current);
-
-    }
-    @Input() set searchQuery(query : any) {
-        this.setSearchQuery(query);
-    }
-    @Output() onOpenNode=new EventEmitter<Node>();
-    @Output() onViewNode=new EventEmitter();
-    @Output() onSelectionChanged=new EventEmitter();
-    @Output() onSelectNode=new EventEmitter<Node>();
-    @Output() onSearchGlobal=new EventEmitter();
-    @Output() onDrop=new EventEmitter<{target: DropTarget, source: DropSource<Node>}>();
-    @Output() onReset=new EventEmitter();
-    private path : Node[];
-    searchGlobal() {
-        this.onSearchGlobal.emit(this._searchQuery);
-    }
-    public load(reset : boolean) {
-        if(this._node==null && !this._searchQuery)
-            return;
-        if(this._dataSource.isLoading) {
-            setTimeout(()=>this.load(reset),10);
-            return;
-        }
-        if(reset) {
-            this._dataSource = new NodeDataSource<Node>();
-            this.nodeEntries.getSelection().clear();
-            this.onReset.emit();
-        }
-        else if(this._dataSource.isFullyLoaded()) {
-            return;
-        }
-        this._dataSource.isLoading = true;
-        // ignore virtual (new) added/uploaded elements
-        const offset = this.getRealNodeCount();
-        const request: any= {offset,propertyFilter:[
-                RestConstants.ALL
-                /*RestConstants.CM_MODIFIED_DATE,
-              RestConstants.CM_CREATOR,
-              RestConstants.CM_PROP_C_CREATED,
-              RestConstants.CCM_PROP_LICENSE,
-              RestConstants.LOM_PROP_LIFECYCLE_VERSION,
-              RestConstants.CCM_PROP_WF_STATUS,
-              RestConstants.CCM_PROP_CCRESSOURCETYPE,
-              RestConstants.CCM_PROP_CCRESSOURCESUBTYPE,
-              RestConstants.CCM_PROP_CCRESSOURCEVERSION,
-              RestConstants.CCM_PROP_WIDTH,
-              RestConstants.CCM_PROP_HEIGHT,
-              RestConstants.VIRTUAL_PROP_USAGECOUNT,*/
-            ],sortBy:[this.sort.active],sortAscending:this.sort.direction === 'asc'};
-        if(this._searchQuery) {
-            const query='*'+this._searchQuery+'*';
-            this.lastRequestSearch=true;
-            /*this.search.searchByProperties([RestConstants.NODE_ID,RestConstants.CM_PROP_TITLE,RestConstants.CM_NAME,RestConstants.LOM_PROP_DESCRIPTION,RestConstants.LOM_PROP_GENERAL_KEYWORD],
-              [query,query,query,query,query],[],RestConstants.COMBINE_MODE_OR,RestConstants.CONTENT_TYPE_FILES_AND_FOLDERS, request).subscribe((data : NodeList) => this.addNodes(data,true));*/
-            const criterias:any=[];
-            criterias.push({property: RestConstants.PRIMARY_SEARCH_CRITERIA, values: [query]});
-            if(this._node) {
-                criterias.push({property: 'parent', values: [this._node ? this._node.ref.id : '']});
-            }
-            this.search.search(criterias,[],request,this.connector.getCurrentLogin() && this.connector.getCurrentLogin().isAdmin ? RestConstants.CONTENT_TYPE_ALL : RestConstants.CONTENT_TYPE_FILES_AND_FOLDERS,RestConstants.HOME_REPOSITORY,
-                RestConstants.DEFAULT,[],'workspace').subscribe((data:NodeList)=> {
-                this.addNodes(data,true);
-            },(error:any)=> {
-                this.totalCount=0;
-                this.handleError(error);
-            });
-            // this.nodeApi.searchNodes(query,[],request).subscribe((data : NodeList) => this.addNodes(data,true));
-        }
-        else {
-            this.lastRequestSearch=false;
-            this.nodeApi.getChildren(this._node.ref.id,[],request).subscribe((data : NodeList) => this.addNodes(data,false),
-                (error:any) => {
-                    this.totalCount=0;
-                    this.handleError(error);
-                });
-        }
-    }
-
-    ngOnDestroy(): void {
-        this.temporaryStorage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE, this._dataSource);
-    }
-
-    async ngOnChanges(changes: SimpleChanges) {
-        if (changes.displayType) {
-            await this.initOptions();
-        }
-    }
-
-    private handleError(error: any) {
-        if (error.status == 404)
-            this.toast.error(null, 'WORKSPACE.TOAST.NOT_FOUND', {id: this._node.ref.id})
-        else
-            this.toast.error(error);
-
-        this._dataSource.isLoading = false;
-    }
-    private addNodes(data: NodeList,wasSearch: boolean) {
-        if (this.lastRequestSearch !== wasSearch) {
-            return;
-        }
-        this._dataSource.isLoading = false;
-        if (data && data.nodes) {
-            this._dataSource.appendData(data.nodes);
-            this._dataSource.setPagination(data.pagination);
-        }
-    }
-    constructor(
-        private connector : RestConnectorService,
-        private translate : TranslateService,
-        private storage : SessionStorageService,
-        private temporaryStorage : TemporaryStorageService,
-        private config : ConfigurationService,
-        private search : RestSearchService,
-        private toast : Toast,
-        private nodeApi : RestNodeService) {
-        // super(temporaryStorage,['_node','_nodes','sortBy','sortAscending','columns','totalCount','hasMoreToLoad']);
-        this.initColumns();
-    }
-
-    async ngAfterViewInit() {
-        await this.initOptions();
-    }
-    public getColumns(customColumns:any[],configColumns:string[]) {
+    public static getColumns(connector: RestConnectorService, customColumns:ListItem[] = [],configColumns:string[] = []) {
         let defaultColumns:ListItem[]=[];
         defaultColumns.push(new ListItem('NODE', RestConstants.CM_NAME));
         defaultColumns.push(new ListItem('NODE', RestConstants.CM_CREATOR));
         defaultColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
-        if(this.connector.getCurrentLogin() ? this.connector.getCurrentLogin().isAdmin : false) {
+        if(connector.getCurrentLogin() ? connector.getCurrentLogin().isAdmin : false) {
             defaultColumns.push(new ListItem('NODE', RestConstants.NODE_ID));
 
             const repsource = new ListItem('NODE', RestConstants.CCM_PROP_REPLICATIONSOURCEID);
@@ -290,17 +119,199 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             for(const column of defaultColumns) {
                 let add=true;
                 for(const column2 of customColumns) {
-                    if(column.name==column2.name) {
-                        add=false;
+                    if(column.name === column2.name) {
+                        add = false;
                         break;
                     }
                 }
-                if(add)
+                if(add) {
                     customColumns.push(column);
+                }
             }
             return customColumns;
         }
         return defaultColumns;
+    }
+
+    @ViewChild('list') list: ListTableComponent;
+    @ViewChild(NodeEntriesWrapperComponent) nodeEntries: NodeEntriesWrapperComponent<Node>;
+    public _dataSource: NodeDataSource<Node>;
+    @Input() customOptions: CustomOptions;
+    @Input() set dataSource(dataSource: NodeDataSource<Node>) {
+        this._dataSource = dataSource;
+    }
+    @Output() nodesChange = new EventEmitter<Node[]>();
+    sort: ListSortConfig = {
+        allowed: true,
+        active: RestConstants.CM_NAME,
+        direction: 'asc',
+        columns: RestConstants.POSSIBLE_SORT_BY_FIELDS
+    };
+
+    public columns : ListItem[]=[];
+    @Input() displayType = NodeEntriesDisplayType.Table;
+    @Output() displayTypeChange = new EventEmitter<NodeEntriesDisplayType>();
+    @Input() reorderDialog = false;
+    @Output() reorderDialogChange = new EventEmitter<boolean>();
+    @Input() preventKeyevents:boolean;
+    @Input() actionbar:ActionbarComponent;
+
+    totalCount: number;
+
+    public _searchQuery : string = null;
+    _node : Node;
+    private lastRequestSearch : boolean;
+
+    _root: NodeRoot;
+    @Input() set root (root: NodeRoot) {
+        this._root = root;
+        if(['MY_FILES', 'SHARED_FILES'].includes(root)) {
+            this.sort.columns = RestConstants.POSSIBLE_SORT_BY_FIELDS;
+        } else {
+            this.sort.columns = RestConstants.POSSIBLE_SORT_BY_FIELDS_SOLR;
+        }
+        this.storage.get(SessionStorageService.KEY_WORKSPACE_SORT + root, null).subscribe((data) => {
+            if (data?.sortBy != null) {
+                this.sort.active = data.sortBy;
+                this.sort.direction = data.sortAscending ? 'asc' : 'desc';
+            } else {
+                this.sort.active = RestConstants.CM_NAME;
+                this.sort.direction = 'asc';
+            }
+        });
+    }
+    @Input() set current(current : Node) {
+        this.setNode(current);
+
+    }
+    @Input() set searchQuery(query : any) {
+        this.setSearchQuery(query);
+    }
+    @Output() onOpenNode=new EventEmitter<NodeEntriesDataType>();
+    @Output() onViewNode=new EventEmitter();
+    @Output() onSelectionChanged=new EventEmitter();
+    @Output() onSelectNode=new EventEmitter<NodeEntriesDataType>();
+    @Output() onSearchGlobal=new EventEmitter();
+    @Output() onDrop=new EventEmitter<{target: DropTarget, source: DropSource<Node>}>();
+    @Output() onReset=new EventEmitter();
+    private path : Node[];
+    searchGlobal() {
+        this.onSearchGlobal.emit(this._searchQuery);
+    }
+    public load(event: FetchEvent = null) {
+        if(this._node==null && !this._searchQuery)
+            return;
+        if(this._dataSource.isLoading) {
+            setTimeout(()=>this.load(event),10);
+            return;
+        }
+        if(event?.reset) {
+            this._dataSource.reset();
+            this.nodeEntries.getSelection().clear();
+            this.onReset.emit();
+            if(event.offset === 0) {
+                console.log('reset pagination', event);
+                this.nodeEntries.resetPagination();
+            }
+        }
+        else if(this._dataSource.isFullyLoaded()) {
+            return;
+        }
+        this._dataSource.isLoading = true;
+        // ignore virtual (new) added/uploaded elements
+        const offset = event.offset || this.getRealNodeCount();
+        const request: any= {offset,propertyFilter:[
+                RestConstants.ALL
+                /*RestConstants.CM_MODIFIED_DATE,
+              RestConstants.CM_CREATOR,
+              RestConstants.CM_PROP_C_CREATED,
+              RestConstants.CCM_PROP_LICENSE,
+              RestConstants.LOM_PROP_LIFECYCLE_VERSION,
+              RestConstants.CCM_PROP_WF_STATUS,
+              RestConstants.CCM_PROP_CCRESSOURCETYPE,
+              RestConstants.CCM_PROP_CCRESSOURCESUBTYPE,
+              RestConstants.CCM_PROP_CCRESSOURCEVERSION,
+              RestConstants.CCM_PROP_WIDTH,
+              RestConstants.CCM_PROP_HEIGHT,
+              RestConstants.VIRTUAL_PROP_USAGECOUNT,*/
+            ],
+            sortBy:[this.sort.active],
+            sortAscending:this.sort.direction === 'asc',
+            count: event?.amount,
+        };
+        if(this._searchQuery) {
+            const query='*'+this._searchQuery+'*';
+            this.lastRequestSearch=true;
+            /*this.search.searchByProperties([RestConstants.NODE_ID,RestConstants.CM_PROP_TITLE,RestConstants.CM_NAME,RestConstants.LOM_PROP_DESCRIPTION,RestConstants.LOM_PROP_GENERAL_KEYWORD],
+              [query,query,query,query,query],[],RestConstants.COMBINE_MODE_OR,RestConstants.CONTENT_TYPE_FILES_AND_FOLDERS, request).subscribe((data : NodeList) => this.addNodes(data,true));*/
+            const criterias:any=[];
+            criterias.push({property: RestConstants.PRIMARY_SEARCH_CRITERIA, values: [query]});
+            if(this._node) {
+                criterias.push({property: 'parent', values: [this._node ? this._node.ref.id : '']});
+            }
+            this.search.search(criterias,[],request,this.connector.getCurrentLogin() && this.connector.getCurrentLogin().isAdmin ? RestConstants.CONTENT_TYPE_ALL : RestConstants.CONTENT_TYPE_FILES_AND_FOLDERS,RestConstants.HOME_REPOSITORY,
+                RestConstants.DEFAULT,[],'workspace').subscribe((data:NodeList)=> {
+                this.addNodes(data,true);
+            },(error:any)=> {
+                this.totalCount=0;
+                this.handleError(error);
+            });
+            // this.nodeApi.searchNodes(query,[],request).subscribe((data : NodeList) => this.addNodes(data,true));
+        }
+        else {
+            this.lastRequestSearch=false;
+            this.nodeApi.getChildren(this._node.ref.id,[],request).subscribe((data : NodeList) => this.addNodes(data,false),
+                (error:any) => {
+                    this.totalCount=0;
+                    this.handleError(error);
+                });
+        }
+    }
+
+    ngOnDestroy(): void {
+        this.temporaryStorage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE, this._dataSource);
+    }
+
+    async ngOnChanges(changes: SimpleChanges) {
+        if (changes.displayType) {
+            await this.initOptions();
+        }
+    }
+
+    private handleError(error: any) {
+        if (error.status == 404)
+            this.toast.error(null, 'WORKSPACE.TOAST.NOT_FOUND', {id: this._node.ref.id})
+        else
+            this.toast.error(error);
+
+        this._dataSource.isLoading = false;
+    }
+    private addNodes(data: NodeList,wasSearch: boolean) {
+        if (this.lastRequestSearch !== wasSearch) {
+            return;
+        }
+        this._dataSource.isLoading = false;
+        if (data && data.nodes) {
+            this._dataSource.appendData(data.nodes);
+            this._dataSource.setPagination(data.pagination);
+        }
+    }
+    constructor(
+        private connector : RestConnectorService,
+        private translate : TranslateService,
+        private storage : SessionStorageService,
+        private temporaryStorage : TemporaryStorageService,
+        private config : ConfigurationService,
+        private search : RestSearchService,
+        private toast : Toast,
+        public ui : UIService,
+        private nodeApi : RestNodeService) {
+        // super(temporaryStorage,['_node','_nodes','sortBy','sortAscending','columns','totalCount','hasMoreToLoad']);
+        this.initColumns();
+    }
+
+    async ngAfterViewInit() {
+        await this.initOptions();
     }
     public setSorting(config: ListSortConfig) {
         this.sort = config;
@@ -308,7 +319,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             sortBy: config.active,
             sortAscending: config.direction === 'asc'
         });
-        this.load(true);
+        this.load({reset: true, offset: 0});
     }
     public onSelection(event : Node[]) {
         this.onSelectionChanged.emit(event);
@@ -346,7 +357,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
                 return;
             this._node=current;
             this.initOptions();
-            this.load(true);
+            this.load({reset: true, offset: 0});
         });
     }
 
@@ -355,7 +366,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             if (query && query.query) {
                 this._searchQuery = query.query;
                 this._node=query.node;
-                this.load(true);
+                this.load({reset: true, offset: 0});
             }
             else {
                 this._searchQuery=null;
@@ -381,16 +392,16 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     initColumns() {
         this.config.get('workspaceColumns').subscribe((data:string[])=> {
             this.storage.get('workspaceColumns').subscribe((columns:any[])=> {
-                this.columns = this.getColumns(columns, data);
+                this.columns = WorkspaceExplorerComponent.getColumns(this.connector, columns, data);
             });
         });
     }
 
-    select(event: NodeClickEvent<Node>) {
+    select(event: NodeClickEvent<NodeEntriesDataType>) {
         if(!(this.nodeEntries.getSelection().selected.length === 1 && this.nodeEntries.getSelection().selected[0] === event.element)) {
             this.nodeEntries.getSelection().clear();
         }
-        this.nodeEntries.getSelection().toggle(event.element);
+        this.nodeEntries.getSelection().toggle(event.element as Node);
     }
 
     private async initOptions() {
@@ -404,5 +415,13 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
 
     saveColumns(columns: ListItem[]) {
         this.storage.set('workspaceColumns',columns);
+    }
+
+    clickItem(event: NodeClickEvent<NodeEntriesDataType>) {
+          if(this.ui.isMobile()) {
+              this.onOpenNode.emit(event.element);
+          } else {
+              this.select(event);
+          }
     }
 }

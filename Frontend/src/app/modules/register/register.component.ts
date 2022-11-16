@@ -2,11 +2,10 @@ import { PlatformLocation } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import {ActivatedRoute, Params, Router, UrlSerializer} from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
-import {ConfigurationService, DialogButton, RestConnectorService, RestHelper, SessionStorageService, UIService} from '../../core-module/core.module';
+import { TranslationsService } from '../../translations/translations.service';
+import {ConfigurationService, DialogButton, RestConnectorService, RestHelper, UIService} from '../../core-module/core.module';
 import { UIConstants } from '../../core-module/ui/ui-constants';
 import { Toast } from '../../core-ui-module/toast';
-import { Translation } from '../../core-ui-module/translation';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { RegisterDoneComponent } from './register-done/register-done.component';
 import { RegisterFormComponent } from './register-form/register-form.component';
@@ -49,12 +48,11 @@ export class RegisterComponent {
         private platformLocation: PlatformLocation,
         private urlSerializer: UrlSerializer,
         private router: Router,
-        private translate: TranslateService,
+        private translations: TranslationsService,
         private uiService: UIService,
         private configService: ConfigurationService,
         private changes: ChangeDetectorRef,
         private title: Title,
-        private storage: SessionStorageService,
         private route: ActivatedRoute,
     ) {
         this.updateButtons();
@@ -74,7 +72,7 @@ export class RegisterComponent {
             }
         });
 
-        Translation.initialize(this.translate, this.configService, this.storage, this.route).subscribe(() => {
+        this.translations.waitForInit().subscribe(() => {
             this.isLoading = false;
             this.changes.detectChanges();
             if(['request', 'reset-password', 'done-reset'].indexOf(this.params.status) !== -1) {
@@ -140,7 +138,7 @@ export class RegisterComponent {
 
     updateButtons() {
         const primaryButton = this.getPrimaryButton();
-        const cancelButton = new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.cancel());
+        const cancelButton = new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel());
         this.buttons = [cancelButton];
         if (primaryButton) {
             this.buttons.push(primaryButton);
@@ -151,23 +149,23 @@ export class RegisterComponent {
     private getPrimaryButton(): DialogButton {
         let btn: DialogButton;
         if (this.state === 'register') {
-            btn = new DialogButton('REGISTER.BUTTON', DialogButton.TYPE_PRIMARY, () => this.registerForm.register());
+            btn = new DialogButton('REGISTER.BUTTON', { color: 'primary' }, () => this.registerForm.register());
             btn.disabled = !this.registerForm || !this.registerForm.canRegister();
         }
         if (this.state === 'request') {
-            btn = new DialogButton('REGISTER.REQUEST.BUTTON', DialogButton.TYPE_PRIMARY, () => {
+            btn = new DialogButton('REGISTER.REQUEST.BUTTON', { color: 'primary' }, () => {
                 this.requestDone(this.request.emailFormControl.value);
             });
             btn.disabled = !this.request || !this.request.emailFormControl.valid;
         }
         if (this.state === 'reset-password') {
-            btn = new DialogButton('REGISTER.RESET.BUTTON', DialogButton.TYPE_PRIMARY, () => this.newPassword());
+            btn = new DialogButton('REGISTER.RESET.BUTTON', { color: 'primary' }, () => this.newPassword());
             btn.disabled = !this.resetPassword || !this.resetPassword.buttonCheck();
         }
         if ((this.state === 'done' || this.state === 'done-reset') && this.registerDone) {
             btn = new DialogButton(
                 this.state === 'done' ? 'REGISTER.DONE.ACTIVATE' : 'NEXT',
-                DialogButton.TYPE_PRIMARY,
+                { color: 'primary' },
                 () => this.registerDone.activate(this.registerDone.keyInput),
             );
             btn.disabled = !this.registerDone || !this.registerDone.keyInput.trim();

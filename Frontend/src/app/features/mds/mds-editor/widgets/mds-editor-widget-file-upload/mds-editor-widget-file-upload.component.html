@@ -1,0 +1,35 @@
+<input #fileSelect type="file" style="display:none" id="fileSelect" [multiple]="false" (change)="filesSelected($event)" />
+<es-mds-editor-widget-container
+        [label]="false"
+        [injectedView]="this"
+>
+  <div class="dropArea" [class.dropActive]="isFileOver" fileDrop
+       (onFileDrop)="setFilesByFileList($event)"
+       (click)="link ? null : fileSelect.click()"
+       (fileOver)="isFileOver=$event">
+    <div *ngIf="selectedFiles.value?.length > 0">
+      <div class="filename"><mat-icon>description</mat-icon> {{selectedFiles.value[0].name}}</div>
+      <es-mat-link (click)="clearFile()">{{ 'WORKSPACE.ADD_OBJECT_RESET' | translate}}</es-mat-link>
+    </div>
+    <div *ngIf="!selectedFiles.value && !link">
+      <div><i esIcon="cloud_upload"></i></div>
+      <div *ngIf="supportsDrop">{{ 'WORKSPACE.ADD_OBJECT_MESSAGE' | translate}}
+        <es-mat-link (click)="fileSelect.click()">{{ 'WORKSPACE.ADD_OBJECT_BROWSE' | translate}}</es-mat-link>
+      </div>
+    </div>
+    <div *ngIf="link">
+      <div><i esIcon="cloud_off"></i></div>
+      <div>{{ 'WORKSPACE.ADD_OBJECT_LINK_SELECTED' | translate}}
+      </div>
+    </div>
+  </div>
+  <div class="seperator-line uppercase">{{ 'WORKSPACE.SELECT_ORG' | translate}}</div>
+  <div class="link">
+    <div class="link-info">
+      <mat-form-field floatLabel="always">
+        <mat-label>{{ 'WORKSPACE.SELECT_LINK' | translate}}</mat-label>
+        <input matInput [(ngModel)]="link" (keyup.enter)="setLink()" [disabled]="!!selectedFiles.value" placeholder="http://">
+      </mat-form-field>
+    </div>
+  </div>
+</es-mds-editor-widget-container>

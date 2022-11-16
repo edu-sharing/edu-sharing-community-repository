@@ -4,7 +4,6 @@ import {RestConstants} from "../../../core-module/core.module";
 import {NodeWrapper, Node, NodeShare} from "../../../core-module/core.module";
 import {VCard} from "../../../core-module/ui/VCard";
 import {Toast} from "../../../core-ui-module/toast";
-import {Translation} from "../../../core-ui-module/translation";
 import {TranslateService} from "@ngx-translate/core";
 import {Helper} from "../../../core-module/rest/helper";
 import {DateHelper} from "../../../core-ui-module/DateHelper";
@@ -128,7 +127,7 @@ export class WorkspaceShareLinkComponent  {
     private translate:TranslateService,
     private toast:Toast,
   ){
-    this.buttons=[new DialogButton('CLOSE',DialogButton.TYPE_PRIMARY,()=>this.cancel())];
+    this.buttons=[new DialogButton('CLOSE',{ color: 'primary' },()=>this.cancel())];
   }
 
     private createShare() {

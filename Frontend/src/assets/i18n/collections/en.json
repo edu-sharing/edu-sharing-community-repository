@@ -12,10 +12,12 @@
         "ORDER_COLLECTIONS_INFO": "Viewers of the collection see the contained subcollections in a certain order.",
         "SORT_SLIDER": "Umsortieren",
         "CUSTOM_ORDER":"change element order",
-        "PERMISSIONS": "Invited:",
+        "PERMISSIONS": "Invited",
         "DETAILS": "Collection details",
         "EDITORIAL_PUBLIC": "Publicly visible",
         "EDITORIAL_PUBLIC_INFO": "The editorial collection is for all users and guests visible",
+        "CREATOR": "Creator",
+        "SHARING_STATE": "Sharing state",
         "STEP": {
             "GENERAL": "Title, Image, Description and Color",
             "METADATA": "Additional information",
@@ -24,6 +26,11 @@
             "EDITORIAL_GROUPS": "Editors groups in charge",
             "DONE": "Done"
         },
+      "EMPTY": {
+        "SHARED": "You have not been invited to any collections yet.",
+        "PUBLIC": "There are no public collections available yet.",
+        "SUBCOLLECTIONS": "There are no sub-collections available yet."
+      },
         "TAB": {
             "TYPE_EDITORIAL_LONG": "editorially managed collections",
             "TYPE_MEDIA_CENTER_LONG": "collections provided by your media center",
@@ -83,7 +90,12 @@
             "INVALID_NAME": "The given name is invalid. Please don't use special characters"
         },
         "NEW": {
-            "AUTHOR_FREETEXT": "Name of author"
+            "AUTHOR_FREETEXT": "Name of author",
+          "IMAGE": {
+            "UPLOAD" : "Upload image",
+            "SEARCH" : "Select image from search",
+            "DELETE" : "Delete image"
+          }
         },
         "FEEDBACK_TITLE": "Give feedback for collection",
         "FEEDBACK_VIEW_TITLE": "Given feedback for collection",
@@ -98,16 +110,12 @@
     },
 
     "collections_description": "Description:",
-    "collections_noOrgaCollections": "You have not been invited to any collections yet.",
-    "collections_noCollections": "There are no public collections available yet.",
 
     "collections_content": "Content",
     "collections_noContentAvailable": "No content available yet.",
     "collections_howToAddContent": "Just click on the \"ADD MATERIAL\" button and use the search engine to find contents for your collection.",
 
     "collectionNew_preview": "preview of the collection",
-    "collectionNew_uploadCollectionImage": "Upload a new collection image",
-    "collectionNew_deleteCollectionImage": "Delete the collection image",
     "collectionNew_setColor": "color of the collection:",
     "collectionNew_colorIndex": "color {{ index }}",
     "collectionNew_createCollection": "create",

@@ -1,13 +1,10 @@
 import { Injectable } from '@angular/core';
-import { SearchConfig, SearchService as SearchApiService } from 'ngx-edu-sharing-api';
+import { SearchConfig } from 'ngx-edu-sharing-api';
 import { BehaviorSubject } from 'rxjs';
-import { SearchFieldService } from 'src/app/common/ui/search-field/search-field.service';
+import { ListSortConfig, NodeEntriesDisplayType } from 'src/app/features/node-entries/entries-model';
+import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
+import { SearchFieldService } from 'src/app/main/navigation/search-field/search-field.service';
 import { ListItem, Node } from '../../core-module/core.module';
-import { NodeDataSource } from '../../core-ui-module/components/node-entries-wrapper/node-data-source';
-import {
-    ListSortConfig,
-    NodeEntriesDisplayType
-} from '../../core-ui-module/components/node-entries-wrapper/entries-model';
 
 /**
  * Session state for search.component.
@@ -17,7 +14,13 @@ import {
  */
 @Injectable()
 export class SearchService {
-    searchTerm: string = '';
+    searchTermSubject = new BehaviorSubject<string>('');
+    get searchTerm(): string {
+        return this.searchTermSubject.value;
+    }
+    set searchTerm(value: string) {
+        this.searchTermSubject.next(value);
+    }
     dataSourceSearchResult: { [key: number]: NodeDataSource<Node> } = [];
     searchResultRepositories: Node[][] = [];
     dataSourceCollections = new NodeDataSource<Node>();
@@ -47,7 +50,7 @@ export class SearchService {
 
     private readonly searchConfigSubject = new BehaviorSubject<Partial<SearchConfig>>({});
 
-    constructor(private searchApi: SearchApiService, private searchField: SearchFieldService) {
+    constructor(private searchField: SearchFieldService) {
         this.searchConfigSubject.pipe().subscribe((config) => {
             const { repository, metadataSet } = config;
             if (repository && metadataSet) {

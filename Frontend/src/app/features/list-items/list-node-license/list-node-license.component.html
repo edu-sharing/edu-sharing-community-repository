@@ -1,0 +1,8 @@
+<ng-container *ngIf="licenseIcon$ | async as licenseIcon">
+  <span *ngIf="indicatorIcons$ | async; else textRepresentation" [matTooltip]="tooltip$ | async"
+    ><img [alt]="tooltip$ | async" [src]="licenseIcon"
+  /></span>
+  <ng-template #textRepresentation>
+    <span>{{ tooltip$ | async }}</span>
+  </ng-template>
+</ng-container>

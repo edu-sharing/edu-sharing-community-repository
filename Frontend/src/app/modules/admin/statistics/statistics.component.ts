@@ -8,7 +8,7 @@ import {RestHelper} from '../../../core-module/rest/rest-helper';
 import {ConfigurationService} from '../../../core-module/rest/services/configuration.service';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {RestStatisticsService} from '../../../core-module/rest/services/rest-statistics.service';
-import {AuthorityNamePipe} from '../../../core-ui-module/pipes/authority-name.pipe';
+import {AuthorityNamePipe} from '../../../shared/pipes/authority-name.pipe';
 import {Toast} from '../../../core-ui-module/toast';
 import {Helper} from '../../../core-module/rest/helper';
 import {CsvHelper} from '../../../core-module/csv.helper';
@@ -18,7 +18,7 @@ import {UIService} from '../../../core-module/rest/services/ui.service';
 import {MdsHelper} from '../../../core-module/rest/mds-helper';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {trigger} from '@angular/animations';
-import {ListCountsComponent} from "../../../core-ui-module/components/list-table/widgets/list-counts/list-counts.component";
+import { ListCountsComponent } from 'src/app/features/list-items/list-counts/list-counts.component';
 
 // Charts.js
 declare var Chart: any;

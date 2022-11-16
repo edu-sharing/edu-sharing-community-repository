@@ -198,9 +198,10 @@ public class UsageDao {
 		}
 	}
 
-	public Set<Usages.CollectionUsage> getUsagesByNodeCollection(String nodeId) throws DAOException {
+	public Collection<Usages.CollectionUsage> getUsagesByNodeCollection(String nodeId) throws DAOException {
 		try {
-			Set<Usages.CollectionUsage> collections = new HashSet<>();
+			//Collection<Usages.CollectionUsage> collections = new HashSet<>();
+			Collection<Usages.CollectionUsage> collections = new ArrayList<>();
 			for (org.edu_sharing.service.usage.Usage usage : new Usage2Service().getUsageByParentNodeId(null, null,
 					nodeId)) {
 				if (usage.getCourseId() == null)
@@ -214,11 +215,21 @@ public class UsageDao {
 				} catch (Throwable t) {
 				}
 			}
-			CollectionServiceFactory.getLocalService().getCollectionProposals(nodeId).forEach((ref) -> {
+			CollectionServiceFactory.getLocalService().getCollectionProposals(nodeId, CCConstants.PROPOSAL_STATUS.PENDING).forEach((ref) -> {
 				Usages.CollectionUsage usage = new Usages.CollectionUsage();
 				try {
 					usage.setCollection(CollectionDao.getCollection(repoDao, ref.getId()).asNode());
-					usage.setCollectionUsageType(Usages.CollectionUsageType.PROPOSAL);
+					usage.setCollectionUsageType(Usages.CollectionUsageType.PROPOSAL_PENDING);
+					collections.add(usage);
+				} catch (DAOException e) {
+					logger.warn("Could not fetch collection: " + e.getMessage(), e);
+				}
+			});
+			CollectionServiceFactory.getLocalService().getCollectionProposals(nodeId, CCConstants.PROPOSAL_STATUS.DECLINED).forEach((ref) -> {
+				Usages.CollectionUsage usage = new Usages.CollectionUsage();
+				try {
+					usage.setCollection(CollectionDao.getCollection(repoDao, ref.getId()).asNode());
+					usage.setCollectionUsageType(Usages.CollectionUsageType.PROPOSAL_DECLINED);
 					collections.add(usage);
 				} catch (DAOException e) {
 					logger.warn("Could not fetch collection: " + e.getMessage(), e);

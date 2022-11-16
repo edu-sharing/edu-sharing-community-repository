@@ -1,0 +1,45 @@
+@import '../../../../../core-ui-module/styles/variables';
+
+.dropArea {
+  border-radius: 5px;
+  text-align: center;
+  border: 2px dashed $cardSeparatorLineColor;
+  padding: 60px 30px;
+  margin-bottom: 10px;
+  color: $textLight;
+  .filename{
+    padding-bottom: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    mat-icon{
+      padding-right: 5px;
+    }
+  }
+  a {
+    font-weight: bold;
+  }
+
+  i {
+    font-size: 60px;
+  }
+
+  &.dropActive {
+    border-color: $primaryMediumLight;
+    background: $primaryLight;
+
+    i {
+      color: $primary;
+    }
+
+    .object-message {
+      margin-bottom: 10px;
+    }
+  }
+}
+.seperator-line{
+  margin:20px 5px;
+}
+mat-form-field{
+  width:100%;
+}

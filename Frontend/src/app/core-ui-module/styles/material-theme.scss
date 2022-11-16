@@ -1,10 +1,11 @@
-@use '~@angular/material' as mat;
+@use '@angular/material' as mat;
 @import "variables";
 
 // Include the common styles for Angular Material. We include this here so that you only
 // have to load a single css file for Angular Material in your app.
 // Be sure that you only ever include this mixin once!
 @include mat.core();
+// @include mat.strong-focus-indicators();
 
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
@@ -62,15 +63,18 @@ $candy-app-warn:    mat.define-palette(mat.$red-palette);
 // Create the theme object (a Sass map containing all of the palettes).
 $candy-app-theme: mat.define-light-theme($candy-app-primary, $candy-app-accent, $candy-app-warn);
 
-// Uncomment the styles below to override the themes foreground colors.
+// Override the themes foreground colors.
 // WCAG minimums are
 //  - rgba(black, 0.54) for text on white
 //  - rgba(black, 0.42) for non-text on white
-//
+
+// For reference: default definition from
+// https://github.com/angular/components/blob/master/src/material/core/theming/_palette.scss:
+
 // $dark-dividers: rgba(black, 0.12);
 // $dark-disabled-text: rgba(black, 0.38);
 // $dark-secondary-text: rgba(black, 0.54);
-// $mat-light-theme-foreground: (
+// $light-theme-foreground-palette: (
 //   base:              black,
 //   divider:           $dark-dividers,
 //   dividers:          $dark-dividers,
@@ -87,13 +91,34 @@ $candy-app-theme: mat.define-light-theme($candy-app-primary, $candy-app-accent, 
 //   slider-off:        rgba(black, 0.26),
 //   slider-off-active: rgba(black, 0.38),
 // );
-// $my-app-theme-custom: map-merge($candy-app-theme, (foreground: $mat-light-theme-foreground));
-// @include angular-material-theme($my-app-theme-custom);
 
+$dark-dividers: rgba(black, 0.12);
+$dark-disabled-text: rgba(black, 0.54);  // increased contrast
+$dark-secondary-text: rgba(black, 0.54);
+$light-theme-foreground-palette: (
+  base:              black,
+  divider:           $dark-dividers,
+  dividers:          $dark-dividers,
+  disabled:          $dark-disabled-text,
+  disabled-button:   rgba(black, 0.26),
+  disabled-text:     $dark-disabled-text,
+  elevation:         black,
+  hint-text:         $dark-disabled-text,
+  secondary-text:    $dark-secondary-text,
+  icon:              rgba(black, 0.54),
+  icons:             rgba(black, 0.54),
+  text:              rgba(black, 0.87),
+  slider-min:        rgba(black, 0.87),
+  slider-off:        rgba(black, 0.26),
+  slider-off-active: rgba(black, 0.38),
+);
+
+$my-app-theme-custom: map-merge($candy-app-theme, (foreground: $light-theme-foreground-palette));
 // Include theme styles for core and each component used in your app.
 // Alternatively, you can import and @include the theme mixins for each component
 // that you are using.
-@include mat.all-component-themes($candy-app-theme);
+@include mat.all-component-themes($my-app-theme-custom);
+// @include mat.strong-focus-indicators-theme($my-app-theme-custom);
 
 /** custom project specifics */
 [matripplecolor=primary] {
@@ -137,9 +162,12 @@ mat-button-toggle-group{
         &.cdk-keyboard-focused{
             @include setGlobalKeyboardFocus('border');
         }
-        text-transform: uppercase;
         &.mat-tab-label-active{
             opacity: 0.9;
+        }
+        &.mat-tab-disabled {
+            // Disabled styles are already reflected via label color, don't further reduce contrast.
+            opacity: 1;
         }
         .tab-icon{
             margin-right: 5px;
@@ -230,6 +258,11 @@ mat-button-toggle-group{
         padding-bottom: 0;
     }
 }
+.mat-form-field.mat-form-field-max-width{
+    .mat-form-field-wrapper {
+        width: 100%;
+    }
+}
 // form border on hover
 .mat-form-field-appearance-outline .mat-form-field-outline-thick{
     color:$primaryMediumLight;
@@ -281,7 +314,7 @@ mat-slide-toggle.mat-primary-bright{
 input.mat-input-element, mat-label, .mat-select-value{
     line-height: normal;
 }
-input.mat-input-element::placeholder {
+.mat-input-element::placeholder {
     color: $placeholderColor;
 }
 // will better align the border label for the outlined input
@@ -339,6 +372,9 @@ input.mat-input-element::placeholder {
       }
     }
 }
+.mat-checkbox.cdk-keyboard-focused .mat-focus-indicator {
+    @include setGlobalKeyboardFocus();
+}
 .mat-flat-button,.mat-raised-button{
     min-height: 36px;
 }
@@ -352,7 +388,7 @@ input.mat-input-element::placeholder {
     }
 }
 button{
-    &.mat-button, &.mat-flat-button, &.mat-raised-button, &.mat-icon-button {
+    &.mat-button, &.mat-flat-button, &.mat-raised-button, &.mat-icon-button, &.mat-fab {
         &.cdk-keyboard-focused {
             @include setGlobalKeyboardFocus();
         }
@@ -363,7 +399,6 @@ button{
     display: flex !important;
     align-items: center;
     justify-content: center;
-    text-transform: uppercase;
     > i {
         width: 35px;
     }
@@ -393,6 +428,19 @@ button{
     }
     &:hover:not(.mat-option-disabled), .mat-option:focus:not(.mat-option-disabled){
         background-color: $buttonHoverBackground;
+    }
+    &.mat-focus-indicator.mat-active::before {
+        content: '';
+    }
+    &.mat-focus-indicator::before {
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        position: absolute;
+        box-sizing: border-box;
+        pointer-events: none;
+        @include setGlobalKeyboardFocus($mode: 'border');
     }
 }
 
@@ -480,7 +528,7 @@ mat-select.mat-select-icon {
 }
 
 .mat-select-panel, .mat-autocomplete-panel {
-    .mat-option{
+    .mat-option:not(.mat-option-disabled) {
         color: $primary;
     }
     .mat-option.mat-selected:not(.mat-option-multiple){
@@ -548,5 +596,20 @@ mat-form-field {
                 opacity: 0.5;
             }
         }
+    }
+}
+
+@include contrastMode(global) {
+    // We cannot archive sufficient contrast through a Material theme since opacities for color
+    // values are hardcoded in the Material component's theme files --- independently of opacities
+    // given by the theme.
+    .mat-form-field-appearance-outline .mat-form-field-outline:not(.mat-form-field-outline-thick) {
+        color: rgba(black, 0.42);
+    }
+    .cdk-overlay-pane .suggestion-card,
+    .cdk-overlay-pane .mat-autocomplete-panel,
+    .cdk-overlay-pane .mat-menu-panel,
+    .cdk-overlay-pane .mat-tooltip {
+        outline: 1px solid rgba(black, 0.42);
     }
 }

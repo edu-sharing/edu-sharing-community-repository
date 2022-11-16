@@ -1,9 +1,10 @@
-import { Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
-import { MatTabChangeEvent } from '@angular/material/tabs';
-import { TranslateService } from '@ngx-translate/core';
+import {Component, EventEmitter, HostListener, Input, OnInit, Output} from '@angular/core';
+import {MatTabChangeEvent} from '@angular/material/tabs';
+import {TranslateService} from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject, Subject, Observable } from 'rxjs';
-import { map, skip, switchMap, takeUntil, tap, first } from 'rxjs/operators';
+import {BehaviorSubject, Observable, Subject} from 'rxjs';
+import {map, skip, switchMap, takeUntil, tap} from 'rxjs/operators';
+import { InteractionType, ListSortConfig, NodeEntriesDisplayType } from '../../../features/node-entries/entries-model';
 import {
     DialogButton,
     ListItem,
@@ -12,10 +13,12 @@ import {
     RestCollectionService,
     RestConnectorService,
     RestConstants,
-    RestNodeService,
+    RestNodeService, SessionStorageService,
 } from '../../../core-module/core.module';
-import { Toast } from '../../../core-ui-module/toast';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
+import {Toast} from '../../../core-ui-module/toast';
+import {UIHelper} from '../../../core-ui-module/ui-helper';
+import {WorkspaceExplorerComponent} from '../../../modules/workspace/explorer/explorer.component';
+import { NodeDataSource } from '../../../features/node-entries/node-data-source';
 
 @Component({
     selector: 'es-file-chooser',
@@ -26,6 +29,7 @@ import { UIHelper } from '../../../core-ui-module/ui-helper';
  * An edu-sharing file-picker modal dialog
  */
 export class FileChooserComponent implements OnInit {
+    readonly InteractionType = InteractionType;
     /**
      * The caption of the dialog, will be translated automatically.
      */
@@ -39,10 +43,6 @@ export class FileChooserComponent implements OnInit {
      */
     @Input() isCancelable: boolean;
     /**
-     * An array of element id's which should be hidden in the list.
-     */
-    @Input() filterElements: string[] = [];
-    /**
      * Set true if the user nees write permissions to the target file.
      */
     @Input() writeRequired = false;
@@ -51,17 +51,19 @@ export class FileChooserComponent implements OnInit {
      */
     @Input() set collections(collections: boolean) {
         this._collections = collections;
-        this.viewType = 2;
+        this.displayType = NodeEntriesDisplayType.SmallGrid;
         this.tabs = null;
         this.setHomeDirectory(RestConstants.ROOT, { canSelectHome: false });
         this.hasHeading = false;
         this._pickDirectory = false;
-        this.icon = 'layers';
         this.searchMode = true;
         this.searchQuery = '';
         this.columns = UIHelper.getDefaultCollectionColumns();
-        this.sortBy = RestConstants.CM_MODIFIED_DATE;
-        this.sortAscending = false;
+        this.sort = {
+            active: RestConstants.CM_MODIFIED_DATE,
+            direction: 'desc',
+            columns: [],
+        };
     }
     get collections() {
         return this._collections;
@@ -98,17 +100,15 @@ export class FileChooserComponent implements OnInit {
     readonly path$ = new BehaviorSubject<Node[]>([]);
     isLoading: boolean;
     columns: ListItem[] = [];
-    sortBy: string;
-    sortAscending = true;
+    sort: ListSortConfig;
     selectedFiles: Node[] = [];
     _collections = false;
-    viewType = 0;
+    displayType = NodeEntriesDisplayType.Table;
     searchMode: boolean;
     searchQuery: string;
     buttons: DialogButton[];
     defaultSubtitle: string;
-    list: Node[] = [];
-    icon: string = null;
+    list = new NodeDataSource<Node>();
     cardIcon: string;
     hasHeading = true;
     _pickDirectory: boolean;
@@ -131,23 +131,22 @@ export class FileChooserComponent implements OnInit {
         label: string;
         icon: string;
     } = null;
-    private hasMoreToLoad: boolean;
-    private offset = 0;
     private homeDirectory: string;
     private currentDirectory: string;
     canSelectHome: boolean;
     private loadDirectoryTrigger = new Subject<{ directory: string; reset: boolean }>();
+    dialogWidth = 'normal';
 
     constructor(
         private connector: RestConnectorService,
         private collectionApi: RestCollectionService,
         private nodeApi: RestNodeService,
         private toast: Toast,
+        private config: SessionStorageService,
         private translate: TranslateService,
     ) {
         // http://plnkr.co/edit/btpW3l0jr5beJVjohy1Q?p=preview
         this.columns.push(new ListItem('NODE', RestConstants.CM_NAME));
-        this.sortBy = this.columns[0].name;
     }
 
     ngOnInit(): void {
@@ -192,6 +191,21 @@ export class FileChooserComponent implements OnInit {
     }
 
     private initialize() {
+        if(!this._collections) {
+            this.columns = WorkspaceExplorerComponent.getColumns(this.connector);
+            this.columns = this.columns.map((c, i) => {
+                c.visible = i === 0;
+                return c;
+            });
+            this.sort = {
+                active: this.columns[0].name,
+                direction: 'asc',
+                allowed: true,
+                columns: RestConstants.POSSIBLE_SORT_BY_FIELDS.filter(
+                    (s) => this.columns.some(c => c.name === s.name)
+                )
+            };
+        }
         if (this.homeDirectory) {
             this.viewDirectory(this.homeDirectory);
         } else {
@@ -226,6 +240,7 @@ export class FileChooserComponent implements OnInit {
         if (event.isDirectory || this._collections) {
             if (this.searchMode) {
                 this.selectedFiles = [event];
+                this.updateButtons();
                 return;
             }
             this.selectedFiles = [];
@@ -284,47 +299,45 @@ export class FileChooserComponent implements OnInit {
     private loadDirectory(directory: string, reset = true): Observable<void> {
         this.currentDirectory = directory;
         if (reset) {
-            this.list = [];
-            this.offset = 0;
+            this.list.reset();
             // this.hasMoreToLoad = true; // !this._collections; // Collections have no paging
         }
         this.isLoading = true;
         if (this._collections) {
             return this.collectionApi
                 .search(this.searchQuery, {
-                    offset: this.offset,
-                    sortBy: [this.sortBy],
-                    sortAscending: this.sortAscending,
+                    offset: this.list.getData().length,
+                    sortBy: [this.sort.active],
+                    sortAscending: this.sort.direction === 'asc',
                     propertyFilter: [RestConstants.ALL],
                 })
                 .pipe(
                     tap((data) => {
-                        const result: any = [];
+                        const list: Node[] = [];
                         for (const c of data.collections) {
                             const obj: any = c;
                             // dummy for list-table so it recognizes a collection
                             obj.collection = c;
-                            result.push(obj);
+                            list.push(obj);
                         }
-                        this.showList(result);
+                        this.showList({
+                            pagination: data.pagination,
+                            nodes: list
+                        });
                     }),
                     map(() => {}),
                 );
         } else {
             return this.nodeApi
                 .getChildren(directory, this.filter, {
-                    offset: this.offset,
-                    sortBy: [this.sortBy],
-                    sortAscending: this.sortAscending,
+                    offset: this.list.getData().length,
+                    sortBy: [this.sort.active],
+                    sortAscending: this.sort.direction === 'asc',
                     propertyFilter: [RestConstants.ALL],
                 })
                 .pipe(
                     tap((list: NodeList) => {
-                        this.hasMoreToLoad =
-                            list.pagination.count + list.pagination.from < list.pagination.total;
-                        if (this.currentDirectory === this.homeDirectory && list.nodes.length > 0) {
-                        }
-                        this.showList(list.nodes);
+                        this.showList(list);
                     }),
                     map(() => {}),
                 );
@@ -332,22 +345,20 @@ export class FileChooserComponent implements OnInit {
     }
 
     loadMore() {
-        if (!this.hasMoreToLoad) {
+        if (!this.list.getCanLoadMore()) {
             return;
         }
-        this.offset += this.connector.numberPerRequest;
         this.viewDirectory(this.currentDirectory, false);
         this.isLoading = true;
     }
 
-    setSorting(data: any) {
-        this.sortBy = data.sortBy;
-        this.sortAscending = data.sortAscending;
-        this.list = null;
+    setSorting(data: ListSortConfig) {
+        this.sort = data;
+        this.list.reset();
         this.viewDirectory(this.currentDirectory);
     }
 
-    private showList(list: any) {
+    private showList(list: NodeList) {
         this.addToList(list);
         this.updateButtons();
         this.isLoading = false;
@@ -357,19 +368,14 @@ export class FileChooserComponent implements OnInit {
         this.onCancel.emit();
     }
 
-    private addToList(list: Node[]) {
+    private addToList(list: NodeList) {
         this.isLoading = false;
-        if (!list.length) {
-            this.hasMoreToLoad = false;
+        if (!list.nodes.length) {
+            this.list.setCanLoadMore(false);
+            return;
         }
-        for (const node of list) {
-            if (this.filterElements && this.filterElements.length) {
-                if (this.filterElements.indexOf(node.ref.id) != -1) {
-                    continue;
-                }
-            }
-            this.list.push(node);
-        }
+        this.list.setPagination(list.pagination);
+        this.list.appendData(list.nodes);
     }
 
     private chooseDirectory() {
@@ -404,7 +410,7 @@ export class FileChooserComponent implements OnInit {
 
     updateButtons() {
         this.buttons = [
-            new DialogButton(this.translate.instant('CANCEL'), DialogButton.TYPE_CANCEL, () =>
+            new DialogButton(this.translate.instant('CANCEL'), { color: 'standard' }, () =>
                 this.cancel(),
             ),
         ];
@@ -417,7 +423,7 @@ export class FileChooserComponent implements OnInit {
             }
             confirmButton = new DialogButton(
                 this.translate.instant('APPLY'),
-                DialogButton.TYPE_PRIMARY,
+                { color: 'primary' },
                 () => this.chooseDirectory(),
             );
             confirmButton.disabled = (!this.path$.value.length && !this.canSelectHome) || !this.folderIsWritable();
@@ -425,7 +431,7 @@ export class FileChooserComponent implements OnInit {
             this.defaultSubtitle = null;
             confirmButton = new DialogButton(
                 'SELECT_ROOT_DISABLED',
-                DialogButton.TYPE_PRIMARY,
+                { color: 'primary' },
                 () => {},
             );
             confirmButton.disabled = true;
@@ -435,7 +441,7 @@ export class FileChooserComponent implements OnInit {
                 this.translate.instant(this._collections ? 'SELECT_COLLECTION' : 'SELECT_FILE', {
                     name: this.defaultSubtitle,
                 }),
-                DialogButton.TYPE_PRIMARY,
+                { color: 'primary' },
                 () => this.chooseFile(),
             );
             confirmButton.disabled =
@@ -445,5 +451,9 @@ export class FileChooserComponent implements OnInit {
         if (confirmButton) {
             this.buttons.push(confirmButton);
         }
+    }
+
+    checkColumnState(event: ListItem[]) {
+        this.dialogWidth = event.filter(i => i.visible).length > 1 ? 'xxlarge' : 'normal';
     }
 }

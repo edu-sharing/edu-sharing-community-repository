@@ -27,7 +27,8 @@
         "SELECT_COLLECTION": "Select collection",
         "SELECT_ORG": "or",
         "SELECT_LINK": "Enter URL",
-
+        "LINK_INVALID_INFO": "We could not find a website for this link.",
+        "LINK_DUPLICATES_INFO": "We found other items that are similar to this link. Please check if this item already exists.",
         "RELOGIN": "Re-Login",
         "AUTOLOGOUT": "You have been logged out",
         "AUTOLOGOUT_INFO": "Your session was automatically closed for your safety, because you have been inactive for at least {{ minutes }} minutes. Please login again.",
@@ -39,6 +40,7 @@
         "LTI_CONSUMER_KEY": "Consumer Key",
         "LTI_SHARED_SECRET": "Shared Secret",
         "SHARED_FILES": "Shared content",
+        "RESTRICTED_FOLDER": "Foreign folder",
         "MY_SHARED_FILES": "Shared by me",
         "TO_ME_SHARED_FILES": "Shared with me",
         "WORKFLOW_RECEIVE": "Assigned to me",
@@ -419,6 +421,14 @@
             "NO_WRITE_PERMISSIONS": "You don't have write permissions for the selected directory. Please select a different one.",
             "HOME_FOLDER_NO_PERMISSIONS": "You can't store elements in this directory. Please choose a sub-directory."
         },
+        "GO_TO_HOME": "Open \"My files\"",
+        "CREATE_REASON": {
+          "TITLE": "Create not possible",
+          "SEARCH": "You're currently in a search view and can not insert elements here.",
+          "PERMISSIONS": "You don't have sufficient permissions to create elements in the current folder.",
+          "VIRTUAL": "You're inside a folder where inserting elements is not possible.",
+          "GENERAL": "Navigate to a different folder and create your elements there."
+        },
         "TOAST": {
             "FOLDER_ADDED": "Folder added",
             "NODE_EXISTS_IN_COLLECTION": "The collection already contains the element {{name}}",
@@ -433,7 +443,7 @@
             "CUT_COPY": "{{count}} Element(s) copied to clipboard",
             "PASTE": "{{count}} Element(s) have been {{mode}} from \"{{from}}\" to \"{{to}}\"",
             "PASTE_DRAG": "{{count}} Element(s) have been {{mode}} to {{to}}",
-            "DUPLICATE_NAME": "The name {{name}} already exists.<br>Please use an other, unique name",
+            "DUPLICATE_NAME": "The name {{name}} already exists.\nPlease use an other, unique name",
             "CYCLIC_NODE": "A folder can not be pasted into its own",
             "NOT_POSSIBLE_IN_SEARCH": "This operation is not possible during search",
             "NOT_POSSIBLE_GENERAL": "Uploading is not possible in the current area",

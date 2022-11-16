@@ -10,6 +10,7 @@ import java.util.Map;
 public class MetadataQueryParameter implements Serializable {
 	// the used syntax, inherited by the group of queries
 	private final String syntax;
+	private final MetadataSet mds;
 	private String name;
 	private Map<String,String> statements;
 	private boolean multiple;
@@ -22,8 +23,9 @@ public class MetadataQueryParameter implements Serializable {
 	//only DSL
 	private boolean asFilter = true;
 
-	MetadataQueryParameter(String syntax){
+	MetadataQueryParameter(String syntax, MetadataSet mds){
 		this.syntax = syntax;
+		this.mds = mds;
 	}
 
 	public String getSyntax() {
@@ -148,4 +150,8 @@ public class MetadataQueryParameter implements Serializable {
 	public void setAsFilter(boolean asFilter) { this.asFilter = asFilter; }
 
 	public boolean isAsFilter() { return asFilter; }
+
+	public MetadataSet getMds() {
+		return mds;
+	}
 }

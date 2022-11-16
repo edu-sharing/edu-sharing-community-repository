@@ -43,7 +43,7 @@ export class AdminV1Service extends BaseService {
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
      * To access only the response body, use `addApplication()` instead.
      *
-     * This method sends `application/json` and handles request body of type `application/json`.
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
      */
     addApplication$Response(params?: {
         body?: {
@@ -55,7 +55,7 @@ export class AdminV1Service extends BaseService {
     }): Observable<StrictHttpResponse<string>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.AddApplicationPath, 'put');
         if (params) {
-            rb.body(params.body, 'application/json');
+            rb.body(params.body, 'multipart/form-data');
         }
 
         return this.http
@@ -81,7 +81,7 @@ export class AdminV1Service extends BaseService {
      * This method provides access to only to the response body.
      * To access the full response (for headers, for example), `addApplication$Response()` instead.
      *
-     * This method sends `application/json` and handles request body of type `application/json`.
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
      */
     addApplication(params?: {
         body?: {
@@ -666,6 +666,11 @@ export class AdminV1Service extends BaseService {
          * store, workspace or archive
          */
         store?: 'Workspace' | 'Archive';
+
+        /**
+         * authority scope to search for
+         */
+        authorityScope?: Array<string>;
     }): Observable<StrictHttpResponse<string>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.ExportByLucenePath, 'get');
         if (params) {
@@ -674,6 +679,7 @@ export class AdminV1Service extends BaseService {
             rb.query('sortAscending', params.sortAscending, {});
             rb.query('properties', params.properties, {});
             rb.query('store', params.store, {});
+            rb.query('authorityScope', params.authorityScope, {});
         }
 
         return this.http
@@ -726,6 +732,11 @@ export class AdminV1Service extends BaseService {
          * store, workspace or archive
          */
         store?: 'Workspace' | 'Archive';
+
+        /**
+         * authority scope to search for
+         */
+        authorityScope?: Array<string>;
     }): Observable<string> {
         return this.exportByLucene$Response(params).pipe(
             map((r: StrictHttpResponse<string>) => r.body as string),
@@ -1533,10 +1544,22 @@ export class AdminV1Service extends BaseService {
          * filename to fetch
          */
         filename: string;
+
+        /**
+         * path prefix this file belongs to
+         */
+        pathPrefix:
+            | 'node'
+            | 'cluster/applications'
+            | 'cluster'
+            | 'defaults'
+            | 'defaults/metadatasets'
+            | 'defaults/mailtemplates';
     }): Observable<StrictHttpResponse<string>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetConfigFilePath, 'get');
         if (params) {
             rb.query('filename', params.filename, {});
+            rb.query('pathPrefix', params.pathPrefix, {});
         }
 
         return this.http
@@ -1569,6 +1592,17 @@ export class AdminV1Service extends BaseService {
          * filename to fetch
          */
         filename: string;
+
+        /**
+         * path prefix this file belongs to
+         */
+        pathPrefix:
+            | 'node'
+            | 'cluster/applications'
+            | 'cluster'
+            | 'defaults'
+            | 'defaults/metadatasets'
+            | 'defaults/mailtemplates';
     }): Observable<string> {
         return this.getConfigFile$Response(params).pipe(
             map((r: StrictHttpResponse<string>) => r.body as string),
@@ -1595,11 +1629,23 @@ export class AdminV1Service extends BaseService {
          * filename to fetch
          */
         filename: string;
+
+        /**
+         * path prefix this file belongs to
+         */
+        pathPrefix:
+            | 'node'
+            | 'cluster/applications'
+            | 'cluster'
+            | 'defaults'
+            | 'defaults/metadatasets'
+            | 'defaults/mailtemplates';
         body?: string;
     }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.UpdateConfigFilePath, 'put');
         if (params) {
             rb.query('filename', params.filename, {});
+            rb.query('pathPrefix', params.pathPrefix, {});
             rb.body(params.body, 'application/json');
         }
 
@@ -1633,6 +1679,17 @@ export class AdminV1Service extends BaseService {
          * filename to fetch
          */
         filename: string;
+
+        /**
+         * path prefix this file belongs to
+         */
+        pathPrefix:
+            | 'node'
+            | 'cluster/applications'
+            | 'cluster'
+            | 'defaults'
+            | 'defaults/metadatasets'
+            | 'defaults/mailtemplates';
         body?: string;
     }): Observable<any> {
         return this.updateConfigFile$Response(params).pipe(
@@ -1739,6 +1796,53 @@ export class AdminV1Service extends BaseService {
     getJobs(params?: {}): Observable<string> {
         return this.getJobs$Response(params).pipe(
             map((r: StrictHttpResponse<string>) => r.body as string),
+        );
+    }
+
+    /**
+     * Path part for operation getLightbendConfig
+     */
+    static readonly GetLightbendConfigPath = '/admin/v1/config/merged';
+
+    /**
+     * Get the fully merged & parsed (lightbend) backend config
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getLightbendConfig()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getLightbendConfig$Response(params?: {}): Observable<StrictHttpResponse<{}>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetLightbendConfigPath, 'get');
+        if (params) {
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<{}>;
+                }),
+            );
+    }
+
+    /**
+     * Get the fully merged & parsed (lightbend) backend config
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getLightbendConfig$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getLightbendConfig(params?: {}): Observable<{}> {
+        return this.getLightbendConfig$Response(params).pipe(
+            map((r: StrictHttpResponse<{}>) => r.body as {}),
         );
     }
 
@@ -3122,7 +3226,7 @@ export class AdminV1Service extends BaseService {
          * params
          */
         body: {
-            [key: string]: string;
+            [key: string]: {};
         };
     }): Observable<StrictHttpResponse<any>> {
         const rb = new RequestBuilder(this.rootUrl, AdminV1Service.StartJobPath, 'post');
@@ -3166,10 +3270,149 @@ export class AdminV1Service extends BaseService {
          * params
          */
         body: {
-            [key: string]: string;
+            [key: string]: {};
         };
     }): Observable<any> {
         return this.startJob$Response(params).pipe(
+            map((r: StrictHttpResponse<any>) => r.body as any),
+        );
+    }
+
+    /**
+     * Path part for operation startJobSync
+     */
+    static readonly StartJobSyncPath = '/admin/v1/job/{jobClass}/sync';
+
+    /**
+     * Start a Job.
+     *
+     * Start a Job. Wait for the result synchronously
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `startJobSync()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    startJobSync$Response(params: {
+        /**
+         * jobClass
+         */
+        jobClass: string;
+
+        /**
+         * params
+         */
+        body: {
+            [key: string]: {};
+        };
+    }): Observable<StrictHttpResponse<{}>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.StartJobSyncPath, 'post');
+        if (params) {
+            rb.path('jobClass', params.jobClass, {});
+            rb.body(params.body, 'application/json');
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<{}>;
+                }),
+            );
+    }
+
+    /**
+     * Start a Job.
+     *
+     * Start a Job. Wait for the result synchronously
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `startJobSync$Response()` instead.
+     *
+     * This method sends `application/json` and handles request body of type `application/json`.
+     */
+    startJobSync(params: {
+        /**
+         * jobClass
+         */
+        jobClass: string;
+
+        /**
+         * params
+         */
+        body: {
+            [key: string]: {};
+        };
+    }): Observable<{}> {
+        return this.startJobSync$Response(params).pipe(
+            map((r: StrictHttpResponse<{}>) => r.body as {}),
+        );
+    }
+
+    /**
+     * Path part for operation switchAuthority
+     */
+    static readonly SwitchAuthorityPath = '/admin/v1/authenticate/{authorityName}';
+
+    /**
+     * switch the session to a known authority name.
+     *
+     *
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `switchAuthority()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    switchAuthority$Response(params: {
+        /**
+         * the authority to use (must be a person)
+         */
+        authorityName: string;
+    }): Observable<StrictHttpResponse<any>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.SwitchAuthorityPath, 'post');
+        if (params) {
+            rb.path('authorityName', params.authorityName, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<any>;
+                }),
+            );
+    }
+
+    /**
+     * switch the session to a known authority name.
+     *
+     *
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `switchAuthority$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    switchAuthority(params: {
+        /**
+         * the authority to use (must be a person)
+         */
+        authorityName: string;
+    }): Observable<any> {
+        return this.switchAuthority$Response(params).pipe(
             map((r: StrictHttpResponse<any>) => r.body as any),
         );
     }

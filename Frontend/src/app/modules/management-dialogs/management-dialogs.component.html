@@ -66,21 +66,17 @@
                  (onLoading)="globalProgress=$event"
                  (onClose)="closeShare()"
 ></es-workspace-share>
-<es-node-info *ngIf="nodeDebug"
-           [node]="$any(nodeDebug)"
-           (onClose)="closeDebug()"
-></es-node-info>
-<es-card
+<!-- <es-card
         *ngIf="qr"
         [node]="qr.node"
         [isCancelable]="true"
         title="{{ 'OPTIONS.QR_CODE' | translate }}"
         (onCancel)="qr=null"
-        class="qr"
+        class="qr-link-card"
         width="xlarge"
         height="xxxlarge">
     <qrcode [qrdata]="qr.data" elementType="img" [margin]="2" [width]="512" errorCorrectionLevel="M"></qrcode>
-</es-card>
+</es-card> -->
 <es-card
     *ngIf="_nodeDelete"
     title="{{ nodeDeleteTitle | translate }}"
@@ -116,13 +112,6 @@
                       (onLoading)="globalProgress=$event"
                       (onClose)="closeShareLink()"
 ></es-workspace-share-link>
-<es-node-report
-  *ngIf="nodeReport"
-  [node]="nodeReport"
-  (onLoading)="globalProgress=$event"
-  (onCancel)="closeReport()"
-  (onDone)="closeReport()"
-></es-node-report>
 <es-node-variant
         *ngIf="nodeVariant"
         [node]="nodeVariant"
@@ -197,7 +186,7 @@
                               [(parent)]="parent"
                               [showPicker]="uploadShowPicker"
                               [multiple]="uploadMultiple"
-                              (onCancel)="closeUploadSelect()"
+                              (onCancel)="cancelUploadSelect()"
                               (onFileSelected)="uploadFile($event)"
                               (onLinkSelected)="createUrlLink($event)"
 ></es-workspace-file-upload-select>

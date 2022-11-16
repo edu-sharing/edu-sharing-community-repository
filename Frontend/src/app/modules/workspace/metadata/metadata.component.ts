@@ -7,8 +7,8 @@ import {Router} from '@angular/router';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {UIConstants} from '../../../core-module/ui/ui-constants';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
-import {NodeDatePipe} from '../../../core-ui-module/pipes/date.pipe';
-import {NodeImageSizePipe} from '../../../core-ui-module/pipes/node-image-size.pipe';
+import { FormatDatePipe } from '../../../shared/pipes/format-date.pipe';
+import {NodeImageSizePipe} from '../../../shared/pipes/node-image-size.pipe';
 
 // Charts.js
 declare var Chart: any;
@@ -46,6 +46,7 @@ export class WorkspaceMetadataComponent{
   @Input() isAdmin: boolean;
   forkedParent: Node;
   forkedChilds: Node[];
+  loading = true;
   @Input() set node(node: Node) {
     this.load(node);
   }
@@ -58,7 +59,11 @@ export class WorkspaceMetadataComponent{
         this.versions = null;
         this.versionsLoading = true;
         this.resetStats();
+        this.loading = true;
+        // use temporary the given data to show headers
+        this.data = this.format(node);
         this.nodeObject = (await this.nodeApi.getNodeMetadata(node.ref.id, [RestConstants.ALL]).toPromise()).node;
+        this.loading = false;
         if (this.nodeObject.isDirectory) {
             this.tab = this.INFO;
         }
@@ -68,6 +73,24 @@ export class WorkspaceMetadataComponent{
             if (currentNode !== this.nodeObject)
                 return;
             this.versions = data.versions.reverse();
+            for (const version of this.versions) {
+                if (version.comment) {
+                    if (version.comment === RestConstants.COMMENT_MAIN_FILE_UPLOAD
+                        || version.comment === RestConstants.COMMENT_METADATA_UPDATE
+                        || version.comment === RestConstants.COMMENT_CONTRIBUTOR_UPDATE
+                        || version.comment === RestConstants.COMMENT_CONTENT_UPDATE
+                        || version.comment === RestConstants.COMMENT_LICENSE_UPDATE
+                        || version.comment === RestConstants.COMMENT_NODE_PUBLISHED
+                        || version.comment === RestConstants.COMMENT_PREVIEW_CHANGED
+                        || version.comment.startsWith(RestConstants.COMMENT_EDITOR_UPLOAD)) {
+                        const parameters = version.comment.split(',');
+                        let editor = '';
+                        if (parameters.length > 1)
+                            editor = this.translate.instant('CONNECTOR.' + parameters[1] + '.NAME');
+                        version.comment = this.translate.instant('WORKSPACE.METADATA.COMMENT.' + parameters[0], {editor});
+                    }
+                }
+            }
             let i = 0;
             for (const version of this.versions) {
                 if (this.isCurrentVersion(version)) {
@@ -155,7 +178,7 @@ export class WorkspaceMetadataComponent{
       data.keywords = null;
     //data["creator"]=node.properties[RestConstants.CM_CREATOR];
     data.creator = ConfigurationHelper.getPersonWithConfigDisplayName(node.createdBy, this.config);
-    data.createDate = new NodeDatePipe(this.translate).transform(node.createdAt);
+    data.createDate = new FormatDatePipe(this.translate).transform(node.createdAt);
     data.duration = RestHelper.getDurationFormatted(node);
     data.author = this.toVCards(node.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]).join(', ');
     data.author_freetext = node.properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT] ? node.properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT][0] : null;
@@ -163,7 +186,7 @@ export class WorkspaceMetadataComponent{
     data.mimetype = node.mimetype;
     data.size = node.size;
     if (node.properties[RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL]) {
-        data.exifDate = new NodeDatePipe(this.translate).transform(node.properties[RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL][0]);
+        data.exifDate = new FormatDatePipe(this.translate).transform(node.properties[RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL][0]);
     }
 
     data.dimensions = new NodeImageSizePipe().transform(node);
@@ -276,48 +299,50 @@ export class WorkspaceMetadataComponent{
         this.statsTotalPoints = this.stats.points.reduce((a: any, b: any) => parseInt(a) + parseInt(b));
         const statsMax = this.stats.points.reduce((a: any, b: any) => Math.max(parseInt(a), parseInt(b)));
         this.canvas = document.getElementById('myChart');
-        this.ctx = this.canvas.getContext('2d');
-        // FontFamily
-        Chart.defaults.global.defaultFontFamily = 'open_sansregular';
-        const myChart = new Chart(this.ctx, {
-            type: 'bar',
-            data: {
-                labels: this.stats.labels,
-                datasets: [{
-                    data: this.stats.points,
-                    backgroundColor: this.stats.colors,
-                    borderWidth: 0.2
-                }]
-            },
-            options: {
-                responsive: false,
-                legend: {
-                    display: false
-                },
-                mode: 'index',
-                layout: {
-                    padding: {
-                        left: 0,
-                        right: 0,
-                        top: 20,
-                        bottom: 0
-                    }
-                },
-                scales: {
-                    xAxes: [{
-                        ticks: {
-                            display: false
-                        }
-                    }],
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero: true,
-                            max: Math.max(Math.round(statsMax * 1.25), 6)
-                        }
+        if(this.canvas) {
+            this.ctx = this.canvas.getContext('2d');
+            // FontFamily
+            Chart.defaults.global.defaultFontFamily = 'open_sansregular';
+            const myChart = new Chart(this.ctx, {
+                type: 'bar',
+                data: {
+                    labels: this.stats.labels,
+                    datasets: [{
+                        data: this.stats.points,
+                        backgroundColor: this.stats.colors,
+                        borderWidth: 0.2
                     }]
+                },
+                options: {
+                    responsive: false,
+                    legend: {
+                        display: false
+                    },
+                    mode: 'index',
+                    layout: {
+                        padding: {
+                            left: 0,
+                            right: 0,
+                            top: 20,
+                            bottom: 0
+                        }
+                    },
+                    scales: {
+                        xAxes: [{
+                            ticks: {
+                                display: false
+                            }
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                max: Math.max(Math.round(statsMax * 1.25), 6)
+                            }
+                        }]
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     canEdit() {

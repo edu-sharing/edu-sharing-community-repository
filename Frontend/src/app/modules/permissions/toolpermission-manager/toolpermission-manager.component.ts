@@ -12,7 +12,7 @@ import {TranslateService} from "@ngx-translate/core";
 import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {Helper} from "../../../core-module/rest/helper";
 import {trigger} from "@angular/animations";
-import {AuthorityNamePipe} from '../../../core-ui-module/pipes/authority-name.pipe';
+import {AuthorityNamePipe} from '../../../shared/pipes/authority-name.pipe';
 
 @Component({
   selector: 'es-toolpermission-manager',
@@ -49,13 +49,14 @@ export class ToolpermissionManagerComponent {
         RestConstants.TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS,
     ]},
     {name:"DATA_MANAGEMENT",icon:"folder",permissions:[
-        RestConstants.TOOLPERMISSION_WORKSPACE,
-        RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES,
-        RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS,
-        RestConstants.TOOLPERMISSION_CREATE_MAP_LINK,
-        RestConstants.TOOLPERMISSION_UNCHECKEDCONTENT,
+            RestConstants.TOOLPERMISSION_WORKSPACE,
+            RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES,
+            RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS,
+            RestConstants.TOOLPERMISSION_CREATE_MAP_LINK,
+            RestConstants.TOOLPERMISSION_UNCHECKEDCONTENT,
             RestConstants.TOOLPERMISSION_COMMENT_WRITE,
-            RestConstants.TOOLPERMISSION_RATE
+            RestConstants.TOOLPERMISSION_RATE_READ,
+            RestConstants.TOOLPERMISSION_RATE_WRITE
     ]},
     {name:"ACCOUNT_MANAGEMENT",icon:"group",permissions:[
               RestConstants.TOOLPERMISSION_SIGNUP_GROUP,
@@ -144,7 +145,7 @@ export class ToolpermissionManagerComponent {
               private node : RestNodeService,
               private translate : TranslateService,
               private iam: RestIamService) {
-    this.buttons=DialogButton.getSingleButton('CLOSE',()=>this.close(),DialogButton.TYPE_CANCEL);
+    this.buttons=DialogButton.getSingleButton('CLOSE',()=>this.close(), 'standard');
   }
   close(){
     this.onClose.emit();

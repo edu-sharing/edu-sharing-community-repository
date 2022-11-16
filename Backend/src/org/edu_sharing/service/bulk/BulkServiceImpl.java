@@ -14,6 +14,7 @@ import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.cache.PersonCache;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
@@ -24,7 +25,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class BulkServiceImpl implements BulkService {
-	private static final String PRIMARY_FOLDER_NAME = "SYNC_OBJ";
+	public static final String PRIMARY_FOLDER_NAME = "SYNC_OBJ";
+
+	/**
+	 * these internal properties will be ignored from the mds and never touched by the bulk service sync method
+	 */
+	private static final List<String> IGNORE_PROPERTIES = Stream.of(
+			ContentModel.PROP_NODE_UUID,
+			ContentModel.PROP_VERSION_LABEL,
+			ContentModel.PROP_INITIAL_VERSION,
+			ContentModel.PROP_VERSION_TYPE
+	).map(QName::toString).collect(Collectors.toList());
 	static NodeService nodeServiceAlfresco = (NodeService) AlfAppContextGate.getApplicationContext().getBean("alfrescoDefaultDbNodeService");
 	static ServiceRegistry serviceRegistry = (ServiceRegistry) AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
 	static VersionService versionServiceAlfresco = serviceRegistry.getVersionService();
@@ -154,8 +165,10 @@ public class BulkServiceImpl implements BulkService {
 		/*HashMap<String, Serializable> cleanProps = new HashMap<>();
 		propsToClean.forEach((k) -> cleanProps.put(k, null));
 		return cleanProps;*/
-		return Stream.concat(MetadataHelper.getWidgetsByNode(nodeRef).stream().map((w) -> CCConstants.getValidGlobalName(w.getId())).
-				filter(Objects::nonNull),
+		return Stream.concat(MetadataHelper.getWidgetsByNode(nodeRef, false).stream().map((w) -> CCConstants.getValidGlobalName(w.getId())).
+				filter(Objects::nonNull).
+				filter(id -> !IGNORE_PROPERTIES.contains(id)).
+				filter(id -> !id.startsWith("{virtualproperty}")),
 				propsToClean.stream())
 				.collect(Collectors.toList());
 	}

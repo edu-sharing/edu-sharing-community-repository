@@ -1,24 +1,10 @@
 <div id="eduSearchWrapper" (window:resize)="onResize()">
   <es-tutorial [element]="tutorialElement" [heading]="'SEARCH.TUTORIAL_HEADING'" [description]="'SEARCH.TUTORIAL_DESCRIPTION'" [showSkip]="false"
   ></es-tutorial>
-  <es-main-nav #mainNav
-    [hidden]="!mainnav"
-    [title]="'SEARCH.TITLE'"
-    [currentScope]="'search'"
-    [searchEnabled]="true"
-    [showScope]="mainnav"
-    [showUser]="mainnav"
-    [searchPlaceholder]="'SEARCH.SEARCH_STUFF'"
-    [canOpen]="true"
-    [create]="{allowed: isHomeRepository(), allowBinary: true}"
-    [(searchQuery)]="searchService.searchTerm"
-    (onSearch)="applyParameters('mainnav')"
-    (onCreate)="list.addVirtualNodes($event)"
-  ></es-main-nav>
 
   <div class="rowRepositories scrollWithBanner"
        [class.no-mainnav]="!mainnav"
-       *ngIf="repositories && repositories.length>2"
+       *ngIf="repositories && repositories.length>2 || false"
   >
       <div class="mobile-move-top row tab-group row-dark">
           <div class="col s12" role="region">
@@ -296,14 +282,14 @@
                         </es-node-entries-wrapper>
                     </div>
                 </div>
-                <div *ngIf="!(currentRepository=='-all-' && groupResults && !searchService.dataSourceSearchResult[0]?.isLoading)" class="searchUngrouped">
+                <div [class.display-none]="(currentRepository=='-all-' && groupResults && !searchService.dataSourceSearchResult[0]?.isLoading)" class="searchUngrouped">
                     <div class="noResultsMatched" *ngIf="!searchService.dataSourceSearchResult[0]?.isEmpty() && searchService.ignored && searchService.ignored.length">
                         <i class="material-icons">search</i>
                         {{'SEARCH.QUERY_NO_RESULT' | translate}}
                     </div>
                   <es-node-entries-wrapper
                     #nodeEntriesResults
-                    *ngIf="searchService.dataSourceSearchResult[0]"
+                    [class.display-none]="!searchService.dataSourceSearchResult[0]"
                     [dataSource]="searchService.dataSourceSearchResult[0]"
                     [columns]="searchService.columns"
                     [sort]="{
@@ -314,7 +300,7 @@
                     }"
                     (sortChange)="updateSort($event)"
                     [displayType]="searchService.displayType"
-                    (fetchData)="getMoreResults()"
+                    (fetchData)="getMoreResults($event)"
                   >
                     <ng-template #title>
                       <div class="heading" *ngIf="!searchService.dataSourceSearchResult[0]?.isEmpty()">
@@ -403,8 +389,8 @@
                 -->
             </div>
         </div>
-        <es-footer [scope]="'search'" class="alignWithBanner"></es-footer>
-    </div>
+      </div>
+    <es-footer [scope]="'search'" class="alignWithBanner"></es-footer>
 </div>
 </div>
 <div tabindex="0" *ngIf="showMoreRepositories" class="scrollWithBanner dialog moreRepositories" (click)="showMoreRepositories=false" (keyup.enter)="showMoreRepositories=false">

@@ -5,6 +5,11 @@ import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.authentication.RemoteAuthDescription;
@@ -41,10 +46,10 @@ public class Rocketchat {
 
     private JSONObject callApi(String endpoint, String methodType, String postData, boolean asAdmin) throws Exception {
         String url = info.getString(ApplicationInfo.KEY_API_URL, null) + "/" + endpoint;
-        HttpMethodBase method = new GetMethod(url);
+        HttpUriRequest method = new HttpGet(url);
         if (methodType.equals("POST")) {
-            method = new PostMethod(url);
-            ((PostMethod) method).setRequestEntity(new StringRequestEntity(postData, "application/json", "UTF-8"));
+            method = new HttpPost(url);
+            ((HttpPost) method).setEntity(new StringEntity(postData, ContentType.APPLICATION_JSON));
         }
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");

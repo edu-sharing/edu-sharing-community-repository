@@ -88,6 +88,9 @@ $imagePath: '../../../../assets/images/collections/';
 :host ::ng-deep{
   .createCollection{
     .collection-item{
+      &.cdk-keyboard-focused {
+        outline-offset: -4px;
+      }
       >.mat-button-wrapper{
         width: 100%;
         justify-content: flex-start;
@@ -421,7 +424,9 @@ $imagePath: '../../../../assets/images/collections/';
 .card-image-preview {
     width: 100%;
     height: 240px;
-    object-fit: cover;
+    object-fit: contain;
+    position: relative;
+    z-index: 1
 }
 
 .image-upload-field {
@@ -442,8 +447,8 @@ $imagePath: '../../../../assets/images/collections/';
 
 .button-icon{
   position: absolute;
-  bottom: 10px;
-  right: 5px;
+  bottom: 15px;
+  right: 10px;
   z-index: 2;
   .mat-fab{
     margin: 0 5px;
@@ -514,9 +519,6 @@ input[type="radio"] {
       }
     }
   }
-}
-.blurred-image{
-  display: none;
 }
 @media screen and (max-height: $mobileHeight + $mobileStage*2){
   .card, .card-high, .card-low {

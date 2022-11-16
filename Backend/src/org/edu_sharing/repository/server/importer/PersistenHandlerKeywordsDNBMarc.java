@@ -17,6 +17,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.search.Suggestion;
 import org.edu_sharing.service.util.CSVTool;
+import org.json.simple.JSONValue;
 
 import java.sql.*;
 import java.text.Normalizer;
@@ -77,6 +78,7 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
         }
         String synonyms = null;
         if(synonymCollection.size() > 0) {
+            synonymCollection = synonymCollection.stream().map(s -> s.replace("\"","\\\"")).collect(Collectors.toSet());
             synonyms = synonymCollection.stream().collect(Collectors.joining("\",\"", "\"", "\""));
             synonyms = "{"+synonyms+"}";
         }

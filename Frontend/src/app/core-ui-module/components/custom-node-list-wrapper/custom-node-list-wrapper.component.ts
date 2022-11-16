@@ -12,8 +12,8 @@ import {
     SimpleChange, SkipSelf, TemplateRef,
     ViewContainerRef,
 } from '@angular/core';
-import { ActionbarComponent } from '../../../common/ui/actionbar/actionbar.component';
-import { MainNavComponent } from '../../../common/ui/main-nav/main-nav.component';
+import { ActionbarComponent } from '../../../shared/components/actionbar/actionbar.component';
+import { MainNavComponent } from '../../../main/navigation/main-nav/main-nav.component';
 import {
     ListItem,
     Node,
@@ -74,7 +74,6 @@ export class CustomNodeListWrapperComponent implements OnChanges {
     @Input() canDelete: (node: Node | any) => boolean;
 
 
-    @Input() mainNav: MainNavComponent;
     @Input() actionbar: ActionbarComponent;
     @Input() optionItems: OptionItem[];
     @Input() customOptions: CustomOptions;

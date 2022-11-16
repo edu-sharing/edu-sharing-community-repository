@@ -1,0 +1,17 @@
+<es-mds-editor-widget-container
+  #container
+  [widget]="widget"
+  [label]="false"
+  [valueType]="valueType"
+  [control]="formControl"
+  [wrapInFormField]="false"
+>
+  <mat-checkbox
+    *ngIf="formControl"
+    [(indeterminate)]="isIndeterminate"
+    [formControl]="formControl"
+    [aria-describedby]="container.descriptionId"
+    (indeterminateChange)="onIndeterminateChange($event)"
+    >{{ widget.definition.caption }}</mat-checkbox
+  >
+</es-mds-editor-widget-container>

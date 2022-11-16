@@ -76,7 +76,7 @@ public class MdsWidget {
 		}
 
 	}
-	private String id,caption,bottomCaption,icon,type,link,template;
+	private String id,caption,bottomCaption,icon,type,link,template,configuration;
 	private boolean hasValues;
 	private List<MdsValue> values;
 	private List<MdsSubwidget> mdsSubwidgets;
@@ -115,6 +115,7 @@ public class MdsWidget {
 		this.maxlength=widget.getMaxlength();
 		this.interactionType=widget.getInteractionType();
 		this.unit=widget.getUnit();
+		this.configuration=widget.getConfiguration();
 		this.min=widget.getMin();
 		this.max=widget.getMax();
 		this.defaultMin=widget.getDefaultMin();
@@ -349,6 +350,15 @@ public class MdsWidget {
 
 	public void setMaxlength(int maxlength) {
 		this.maxlength = maxlength;
+	}
+
+	@JsonProperty
+	public String getConfiguration() {
+		return configuration;
+	}
+
+	public void setConfiguration(String configuration) {
+		this.configuration = configuration;
 	}
 
 	@JsonProperty

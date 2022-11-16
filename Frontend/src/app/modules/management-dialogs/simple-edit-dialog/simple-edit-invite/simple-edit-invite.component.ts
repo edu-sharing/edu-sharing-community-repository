@@ -1,5 +1,5 @@
 import {ApplicationRef, Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {Authority, AuthorityProfile, DialogButton, Group, LocalPermissions, Permission, Permissions, RestConnectorService, RestOrganizationService} from '../../../../core-module/core.module';
+import {Authority, AuthorityProfile, DialogButton, Group, LocalPermissions, Organization, Permission, Permissions, RestConnectorService, RestOrganizationService} from '../../../../core-module/core.module';
 import {Toast} from '../../../../core-ui-module/toast';
 import {RestNodeService} from '../../../../core-module/core.module';
 import {Connector, Node} from '../../../../core-module/core.module';
@@ -17,13 +17,12 @@ import {FrameEventsService} from '../../../../core-module/core.module';
 
 import {OPEN_URL_MODE} from '../../../../core-module/ui/ui-constants';
 import {BridgeService} from '../../../../core-bridge-module/bridge.service';
-import {BulkBehavior, MdsComponent} from '../../../../common/ui/mds/mds.component';
 import {forkJoin, Observable, Observer} from 'rxjs';
 import {MatButtonToggleGroup} from '@angular/material/button-toggle';
 import {Helper} from '../../../../core-module/rest/helper';
 import {ShareMode, SharePublishComponent} from '../../../workspace/share/share-publish/share-publish.component';
 
-type Org = {organization: Group, groups?: any};
+type Org = {organization: Organization, groups?: any};
 
 class SimpleEditGroupConfig {
   toolpermission?: string;

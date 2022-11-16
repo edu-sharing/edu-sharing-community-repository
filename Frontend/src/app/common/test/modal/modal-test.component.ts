@@ -18,8 +18,8 @@ export class ModalTestComponent {
     };
     sizes = ['auto', 'small', 'normal', 'large', 'xlarge', 'xxlarge'];
     buttons = [
-        new DialogButton('Negative',DialogButton.TYPE_CANCEL,() => this.card = false),
-        new DialogButton('Positive',DialogButton.TYPE_PRIMARY,() => this.card = false),
+        new DialogButton('Negative',{ color: 'standard' },() => this.card = false),
+        new DialogButton('Positive',{ color: 'primary' },() => this.card = false),
     ];
     public textSize = 3;
 

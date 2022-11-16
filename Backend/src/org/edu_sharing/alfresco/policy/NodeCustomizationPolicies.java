@@ -2,6 +2,8 @@ package org.edu_sharing.alfresco.policy;
 
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -44,6 +46,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
+import org.json.JSONObject;
 import org.quartz.Scheduler;
 import org.springframework.security.crypto.codec.Base64;
 
@@ -79,6 +82,8 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 	/* Some safe properties they're not necessary in the mds, but the client is allowed to define */
 	public static final String[] SAFE_PROPS = new String[]{
 			CCConstants.CM_NAME,
+			CCConstants.CM_PROP_TITLE,
+			CCConstants.CM_PROP_DESCRIPTION,
 			CCConstants.LOM_PROP_GENERAL_TITLE,
 			CCConstants.LOM_PROP_TECHNICAL_FORMAT,
 			CCConstants.CCM_PROP_IO_WWWURL,
@@ -449,7 +454,8 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		try{
 			policyBehaviourFilter.disableBehaviour(eduNodeRef);
 			QName type = nodeService.getType(eduNodeRef);
-			if(CCConstants.EDUCONTEXT_TYPES.contains(type.toString())){
+			// do not add the context for references / they will copy it from their original
+			if(CCConstants.EDUCONTEXT_TYPES.contains(type.toString()) && !nodeService.hasAspect(eduNodeRef, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))){
 				String context = getEduSharingContext();
 				nodeService.setProperty(
 						eduNodeRef,
@@ -696,7 +702,10 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		if(previewImageBase64 != null) {
 			writeBase64Image(nodeRef, previewImageBase64);
 		} else {
-			byte[] previewImage = getPreviewFromURLSplash(url);
+			byte[] previewImage = getPreviewFromURLPlaywright(url);
+			if(previewImage == null) {
+				previewImage = getPreviewFromURLSplash(url);
+			}
 			if(previewImage != null){
 				writeImage(nodeRef, previewImage);
 			}
@@ -821,6 +830,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 				GetMethod method = new GetMethod(url.toString());
 				int timeout = (int) ((splash.getDouble("wait") + splash.getDouble("timeout")) * 1000);
 				client.getHttpConnectionManager().getParams().setConnectionTimeout(timeout);
+				client.getHttpConnectionManager().getParams().setSoTimeout(timeout);
 				int statusCode = client.executeMethod(method);
 				if (statusCode == HttpStatus.SC_OK) {
 					return method.getResponseBody();
@@ -829,6 +839,34 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 				}
 			}catch(Exception e) {
 				logger.warn("Calling Splash service failed: " + e.getMessage(), e);
+			}
+		}
+		return null;
+	}
+	private static byte[] getPreviewFromURLPlaywright(String httpURL) {
+		Config playwright = LightbendConfigLoader.get().getConfig("repository.communication.playwright");
+		if(playwright != null && playwright.hasPath("url")) {
+			try {
+				final StringBuilder url = new StringBuilder(playwright.getString("url") + "/v1/website?url=" + java.net.URLEncoder.encode(httpURL, "ISO-8859-1"));
+				playwright.entrySet().stream().filter((e) -> !"url".equals(e.getKey())).forEach((e) -> {
+					try {
+						url.append("&").append(e.getKey()).append("=").append(java.net.URLEncoder.encode(e.getValue().unwrapped().toString(), "ISO-8859-1"));
+					}catch(UnsupportedEncodingException ignored) {}
+				});
+				HttpClient client = new HttpClient();
+				GetMethod method = new GetMethod(url.toString());
+				int timeout = (int) (playwright.getDouble("timeout") * 1000);
+				client.getHttpConnectionManager().getParams().setConnectionTimeout(timeout);
+				client.getHttpConnectionManager().getParams().setSoTimeout(timeout);
+				int statusCode = client.executeMethod(method);
+				if (statusCode == HttpStatus.SC_OK) {
+					JSONObject result = new JSONObject(method.getResponseBodyAsString());
+					return Base64.decode(result.getString("preview").getBytes(StandardCharsets.UTF_8));
+				} else {
+					logger.warn("Playwright returned non-okay error code " + statusCode + ", " + url.toString());
+				}
+			}catch(Exception e) {
+				logger.warn("Calling Playwright service failed: " + e.getMessage(), e);
 			}
 		}
 		return null;

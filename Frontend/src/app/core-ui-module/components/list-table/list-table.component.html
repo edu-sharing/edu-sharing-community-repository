@@ -259,7 +259,7 @@
                    [attr.property]="getLRMIProperty(node,item)">{{getLRMIAttribute(node,item)}}</div>
               <div class="row-group">
                 <div class="rowInner">
-                  <es-list-base [node]="node" [item]="item" [showFieldTooltip]="viewType !== 0"></es-list-base>
+                  <es-list-base [node]="node" [item]="item" [provideLabel]="viewType !== 0"></es-list-base>
                 </div>
                 <div *ngIf="j==0 && viewType==0 && getReference(node).properties && getReference(node).properties['virtual:childobjectcount']>0" class="childobjectCount">
                   <span>{{getReference(node).properties['virtual:childobjectcount']*1+1}}</span><i esIcon="filter_none"></i>
@@ -289,7 +289,7 @@
               </button>
             </div>
           </ng-container>
-          <ng-container *ngIf="!orderElementsActive">
+          <ng-container *ngIf="!orderElementsActive && viewType !== 2">
             <div class="more column" *ngIf="_options && _options.length>1" >
               <button mat-icon-button
                       color="primary"

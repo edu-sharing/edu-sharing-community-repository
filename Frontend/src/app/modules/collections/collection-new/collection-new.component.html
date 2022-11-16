@@ -1,9 +1,3 @@
-<es-main-nav *ngIf="mainnav"
-          #mainNav
-          [title]="'COLLECTIONS.TITLE'"
-          [currentScope]="'collections'"
-          [searchEnabled]="false"
-></es-main-nav>
 <div
   role="main"
   esSkipTarget="MAIN_CONTENT"
@@ -90,7 +84,8 @@
   </es-card>
   <es-card *ngIf="newCollectionStep==STEP_GENERAL"
         [buttons]="buttons"
-        [isCancelable]="false"
+        [isCancelable]="true"
+        (onCancel)="newCollectionCancel()"
         title="{{ 'collectionNew_preview' | translate }}"
         [subtitle]="currentCollection.title"
         modal="auto"
@@ -103,21 +98,11 @@
                   class="image-upload-field-input">
               </div>
               <div class="button-icon">
-                  <button mat-fab [color]="$any('white')" (click)="file.click()"
-                    [matTooltip]="'collectionNew_uploadCollectionImage' | translate"
-                    [attr.aria-label]="'collectionNew_uploadCollectionImage' | translate"
-                  >
-                    <i esIcon="file_upload"></i>
-                  </button>
-                  <button
-                    mat-fab
-                    [color]="$any('white')"
-                    *ngIf="imageData || (currentCollection.preview && !currentCollection.preview.isIcon)" (click)="deleteImage()"
-                    [matTooltip]="'collectionNew_deleteCollectionImage' | translate"
-                    [attr.aria-label]="'collectionNew_deleteCollectionImage' | translate"
-                  >
-                    <i esIcon="delete"></i>
-                  </button>
+                <es-actionbar [options]="imageOptions"
+                              appearance="round"
+                              [numberOfAlwaysVisibleOptions]="0"
+                              [numberOfAlwaysVisibleOptionsMobile]="0"
+                ></es-actionbar>
               </div>
 
               <!-- Making the image area clickable poses a violation of accessibility rules. Merge
@@ -238,7 +223,8 @@
   <es-card *ngIf="newCollectionStep==STEP_METADATA"
         title="{{ 'COLLECTIONS.STEP.METADATA' | translate }}"
         [subtitle]="currentCollection.title"
-        [isCancelable]="false"
+        [isCancelable]="true"
+        (onCancel)="newCollectionCancel()"
         modal="auto"
         width="large"
         height="xlarge"
@@ -257,30 +243,37 @@
   <es-card *ngIf="newCollectionStep==STEP_EDITORIAL_GROUPS"
         title="{{ 'COLLECTIONS.STEP.EDITORIAL_GROUPS' | translate }}"
         [subtitle]="currentCollection.title"
-        [isCancelable]="false"
-        modal="auto"
+        [isCancelable]="true"
+        (onCancel)="newCollectionCancel()"
+         modal="auto"
         width="large"
         height="xxlarge"
         [buttons]="buttons"
         class="collection-metadata">
     <div class="editorial-group">
       <div class="editorial-list">
-        <div class="noGroups" *ngIf="editorialGroups.length==0">{{'COLLECTIONS.NO_EDITORIAL_GROUPS' | translate}}</div>
         <div class="noPermission" *ngIf="!shareToAll">
           <h4>{{'TOOLPERMISSION_ERROR_HEADER' | translate}}</h4>
           <h5>{{'TOOLPERMISSION.TOOLPERMISSION_INVITE_ALLAUTHORITIES' | translate}}</h5>
         </div>
-        <es-listTable
-          *ngIf="editorialGroups.length!=0 && shareToAll"
-          [nodes]="$any(editorialGroups)"
+        <es-node-entries-wrapper
+          #organizations
+          [dataSource]="editorialGroups"
+          [displayType]="NodeEntriesDisplayType.Table"
           [columns]="editorialColumns"
-          [selectedNodes]="$any(editorialGroupsSelected)"
-          [hasCheckbox]="true"
-          [hasIcon]="true"
-          [hasHeading]="false"
-          (selectionChanged)="editorialGroupsSelected=$event"
-          [icon]="'star'"
-        ></es-listTable>
+          [sort]="{
+            active: null,
+            direction: 'asc',
+            columns: [],
+            allowed: false
+          }"
+          [elementInteractionType]="InteractionType.Emitter"
+          (clickItem)="organizations.getSelection().toggle($event.element)"
+        >
+          <ng-template #empty>
+            <div class="noGroups">{{'COLLECTIONS.NO_EDITORIAL_GROUPS' | translate}}</div>
+          </ng-template>
+        </es-node-entries-wrapper>
       </div>
       <div class="editorial-public">
         <mat-slide-toggle [(ngModel)]="editorialPublic">
@@ -299,7 +292,8 @@
   <es-card *ngIf="newCollectionStep==STEP_PERMISSIONS"
         title="{{ 'COLLECTIONS.EDIT_PERMISSIONS' | translate }}"
         modal="auto"
-        [isCancelable]="false"
+        [isCancelable]="true"
+        (onCancel)="newCollectionCancel()"
         [buttons]="buttons"
         width="normal"
         height="large"

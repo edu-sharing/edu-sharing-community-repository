@@ -1,17 +1,13 @@
 import {Component, NgZone, ViewChild, ViewEncapsulation} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {EventListener, FrameEventsService} from '../../../core-module/rest/services/frame-events.service';
-import {MdsComponent} from '../mds/mds.component';
-import {TranslateService} from '@ngx-translate/core';
-import {ConfigurationService} from '../../../core-module/rest/services/configuration.service';
-import {SessionStorageService} from '../../../core-module/rest/services/session-storage.service';
-import {Translation} from '../../../core-ui-module/translation';
+import { TranslationsService } from '../../../translations/translations.service';
 import {WorkspaceLicenseComponent} from '../../../modules/management-dialogs/license/license.component';
 import {Toast} from "../../../core-ui-module/toast";
 import {RestConstants} from "../../../core-module/rest/rest-constants";
-import {MdsEditorWrapperComponent} from '../mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
-import {MainNavService} from '../../services/main-nav.service';
+import { MainNavService } from '../../../main/navigation/main-nav.service';
+import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 
 @Component({
     selector: 'es-mds-embed',
@@ -30,9 +26,7 @@ export class EmbedComponent implements EventListener {
     groupId = 'io';
     setId = RestConstants.DEFAULT;
     refresh:Boolean;
-    constructor(private translate:TranslateService,
-                private config:ConfigurationService,
-                private storage:SessionStorageService,
+    constructor(private translations: TranslationsService,
                 private mainNavService:MainNavService,
                 private toast:Toast,
                 private ngZone:NgZone,
@@ -41,9 +35,12 @@ export class EmbedComponent implements EventListener {
         (window as any).ngEmbed = this;
         // disable the cookie info when in embedded context
         this.mainNavService.getCookieInfo().show = false;
+        this.mainNavService.patchMainNavConfig({
+            currentScope: 'embed'
+        });
         this.event.addListener(this);
         this.toast.showProgressDialog();
-        Translation.initialize(this.translate,this.config,this.storage,this.route).subscribe(()=> {
+        this.translations.waitForInit().subscribe(()=> {
             this.route.params.subscribe((params)=> {
                this.component=params.component;
                 this.route.queryParams.subscribe((params) => {

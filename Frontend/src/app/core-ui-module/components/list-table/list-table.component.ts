@@ -21,7 +21,6 @@ import {
     SimpleChanges,
     OnChanges,
     Renderer2,
-    Sanitizer,
     ViewChildren,
     QueryList,
     AfterViewInit,
@@ -33,8 +32,7 @@ import {
     OptionsHelperService,
     OPTIONS_HELPER_CONFIG,
 } from '../../options-helper.service';
-import { ActionbarComponent } from '../../../common/ui/actionbar/actionbar.component';
-import { MainNavComponent } from '../../../common/ui/main-nav/main-nav.component';
+import { ActionbarComponent } from '../../../shared/components/actionbar/actionbar.component';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import {
     ConfigurationService,
@@ -64,15 +62,11 @@ import {CustomOptions, OptionItem, Scope, Target} from '../../option-item';
 import { Toast } from '../../toast';
 import {NodeHelperService} from '../../node-helper.service';
 import {DomSanitizer} from '@angular/platform-browser';
-import {CollectionChooserComponent} from '../collection-chooser/collection-chooser.component';
-import {NodeTitlePipe} from '../../pipes/node-title.pipe';
-import {NodeUrlComponent} from '../node-url/node-url.component';
+import {NodeTitlePipe} from '../../../shared/pipes/node-title.pipe';
+import {NodeUrlComponent} from '../../../shared/components/node-url/node-url.component';
 import {SelectionModel} from '@angular/cdk/collections';
-import {
-    ListEventInterface,
-    ListOptions,
-    ListOptionsConfig, NodeEntriesDisplayType
-} from '../node-entries-wrapper/entries-model';
+import { MainNavService } from '../../../main/navigation/main-nav.service';
+import { ListEventInterface, ListOptions, ListOptionsConfig, NodeEntriesDisplayType } from 'src/app/features/node-entries/entries-model';
 
 
 @Component({
@@ -291,11 +285,6 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
      */
     @Input() viewType = ListTableComponent.VIEW_TYPE_LIST;
 
-    /**
-     * Link to the MainNavComponent
-     * Required to refresh particular events when triggered, e.g. a node was bookmarked
-     */
-    @Input() mainNav: MainNavComponent;
     /**
      * link to the actionbar component that is in use
      */
@@ -529,6 +518,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
         private bridge: BridgeService,
         private frame: FrameEventsService,
         private renderer: Renderer2,
+        private mainnavService: MainNavService,
     ) {
         this.nodeHelper.setViewContainerRef(this.viewContainerRef);
         this.reorderButtons = DialogButton.getSaveCancel(
@@ -536,7 +526,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
             () => this.closeReorder(true),
         );
         this.reorderButtons.splice(0, 0,
-            new DialogButton('RESET', + DialogButton.TYPE_CANCEL + DialogButton.TYPE_SECONDARY, () => {
+            new DialogButton('RESET', { color: 'standard', position: 'opposite' }, () => {
             this.sessionStorage.delete('workspaceColumns');
             this.onInvalidateColumns.emit();
         }));
@@ -560,7 +550,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
     }
 
     ngAfterViewInit(): void {
-        this.optionsHelper.initComponents(this.mainNav, this.actionbar, this);
+        this.optionsHelper.initComponents(this.actionbar, this);
     }
 
     setViewType(viewType: number) {
@@ -853,8 +843,8 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
             } else {
                 this.setSelectionToSingleNode(node);
             }
-            if (this.mainNav && this.mainNav.management.nodeSidebar) {
-                this.mainNav.management.nodeSidebar = node;
+            if (this.mainnavService.getDialogs().nodeSidebar) {
+                this.mainnavService.getDialogs().nodeSidebar = node;
             }
         }
         event.event.stopPropagation();
@@ -1379,7 +1369,7 @@ export class ListTableComponent implements OnChanges, AfterViewInit, EventListen
      * Switch to new @NodeEntriesComponent
      */
     async initOptionsGenerator(config: ListOptionsConfig) {
-        await this.optionsHelper.initComponents(this.mainNav, this.actionbar, this);
+        await this.optionsHelper.initComponents(this.actionbar, this);
         this.optionsHelper.refreshComponents();
     }
 

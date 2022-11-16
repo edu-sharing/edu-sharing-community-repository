@@ -10,6 +10,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
@@ -27,6 +28,7 @@ import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -134,7 +136,7 @@ public class MetadataTemplateRenderer {
 	private String renderTemplate(MetadataTemplate template) throws IllegalArgumentException {
 		String html="";
 		if(renderingMode.equals(RenderingMode.HTML)) {
-			html += "<div class='mdsGroup'>" + "<h2 class='mdsCaption " + template.getId() + "'>" + template.getCaption() + "</h2>" + "<div class='mdsContent'>";
+			html += "<div class='mdsGroup mdsGroup-" + template.getId() + "'>" + "<h2 class='mdsCaption " + template.getId() + "'>" + template.getCaption() + "</h2>" + "<div class='mdsContent'>";
 		}
 		String content=template.getHtml();
 		for(MetadataWidget srcWidget : mds.getWidgets()){
@@ -165,7 +167,12 @@ public class MetadataTemplateRenderer {
 					if (widget.getCaption() != null) {
 						widgetHtml.append("<h3 class='mdsWidgetCaption'>").append(widget.getCaption()).append("</h3>");
 					}
-					widgetHtml.append("<div class='mdsWidgetContent mds_").append(widget.getId().replace(":", "_"));
+					String innerContainerTag = widget.isMultivalue() ? "ul" : "div";
+					widgetHtml
+						.append("<")
+						.append(innerContainerTag)
+						.append(" class='mdsWidgetContent mds_")
+						.append(widget.getId().replace(":", "_"));
 					if (widget.isMultivalue()) {
 						widgetHtml.append(" mdsWidgetMultivalue");
 					}
@@ -184,6 +191,7 @@ public class MetadataTemplateRenderer {
 					empty = renderCollectionFeedback(widget, widgetHtml);
 					wasEmpty = empty;
 				} else {
+					int i = 0;
 					for (String value : values) {
 						String rawValue = value;
 						HashMap<String, Object> vcardData = null;
@@ -272,7 +280,7 @@ public class MetadataTemplateRenderer {
 						}
 						if (value == null || value.trim().isEmpty())
 							continue;
-						value = renderWidgetValue(widget, value);
+						value = renderWidgetValue(widget, value, i);
 						boolean isLink = false;
 						// do not use global link for vcard, they handle links seperately
 						if (!widget.getType().equals("vcard") && widget.getLink() != null && !widget.getLink().isEmpty() && renderingMode.equals(RenderingMode.HTML)) {
@@ -282,7 +290,9 @@ public class MetadataTemplateRenderer {
 							value = VCardConverter.getNameForVCard("", vcardData);
 						}
 						if (renderingMode.equals(RenderingMode.HTML)) {
-							widgetHtml.append("<div class='mdsValue' data-value-key='" + rawValue + "'>");
+							widgetHtml
+								.append(widget.isMultivalue() ? "<li " : "<div ")
+								.append("class='mdsValue' data-value-key='" + rawValue + "'>");
 							if (widget.getIcon() != null) {
 								widgetHtml.append(insertIcon(widget.getIcon()));
 							}
@@ -344,15 +354,17 @@ public class MetadataTemplateRenderer {
 							widgetHtml.append("</div>");
 						}
 						if (renderingMode.equals(RenderingMode.HTML)) {
-							widgetHtml.append("</div>");
+							widgetHtml.append(widget.isMultivalue() ? "</li>" : "</div>");
 							if (isLink) {
 								widgetHtml.append("</a>");
 							}
 						}
+						i++;
 					}
 				}
 				if (renderingMode.equals(RenderingMode.HTML)) {
-					widgetHtml.append("</div></div>");
+					String innerContainerTag = widget.isMultivalue() ? "ul" : "div";
+					widgetHtml.append("</").append(innerContainerTag).append("></div>");
 				}
 				if ((empty || wasEmpty) && widget.isHideIfEmpty()) {
 					widgetHtml = new StringBuffer();
@@ -401,7 +413,7 @@ public class MetadataTemplateRenderer {
 			}
 			if( isInsideCollection &&
 				ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK) &&
-				!Objects.equals(ApplicationInfoList.getHomeRepository().getGuest_username(),userName) &&
+				!GuestCagePolicy.getGuestUsers().contains(userName) &&
 				PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),parent,CCConstants.PERMISSION_FEEDBACK) &&
 				!PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),parent,CCConstants.PERMISSION_DELETE)
 			){
@@ -443,7 +455,7 @@ public class MetadataTemplateRenderer {
 				widgetHtml.append("<div class='mdsValue'>");
 				for (MetadataWidget.Subwidget subwidget : widget.getSubwidgets()) {
 					try {
-						widgetHtml.append(renderWidgetValue(mds.findWidget(subwidget.getId()), properties.get(subwidget.getId())[i])).append(" ");
+						widgetHtml.append(renderWidgetValue(mds.findWidget(subwidget.getId()), properties.get(subwidget.getId())[i], i)).append(" ");
 					} catch (IndexOutOfBoundsException | NullPointerException e) {
 						logger.warn("Sub widget " + subwidget.getId() + " can not be rendered (main widget " + widget.getId() + "): The array values of the sub widgets do not match up", e);
 					}
@@ -477,7 +489,7 @@ public class MetadataTemplateRenderer {
 				path = Lists.reverse(path);
 				int j = 0;
 				if (renderingMode.equals(RenderingMode.HTML)) {
-					widgetHtml.append("<div class='mdsValue'>");
+					widgetHtml.append("<li class='mdsValue'>");
 				} else if (renderingMode.equals(RenderingMode.TEXT)) {
 					if(i > 0) {
 						widgetHtml.append(TEXT_MULTIVALUE_SEPERATOR);
@@ -497,18 +509,18 @@ public class MetadataTemplateRenderer {
 					j++;
 				}
 				if (renderingMode.equals(RenderingMode.HTML)) {
-					widgetHtml.append("</div>");
+					widgetHtml.append("</li>");
 				}
 				i++;
 			}
 		}
 		return empty;
 	}
-	private String renderWidgetValue(MetadataWidget widget,String value){
+	private String renderWidgetValue(MetadataWidget widget,String value, int index){
 		if(widget.getType()!=null){
 			if(widget.getType().equals("date")){
 				try{
-					Date dateValue = new DateTool().getDate(value);
+					Date dateValue = new DateTool().getDate(properties.get(widget.getId() + CCConstants.LONG_DATE_SUFFIX)[index]);
 					if(widget.getFormat()!=null && !widget.getFormat().isEmpty()){
 						value=new SimpleDateFormat(widget.getFormat()).format(dateValue);
 					}
@@ -534,7 +546,7 @@ public class MetadataTemplateRenderer {
 
 				}
 			}
-			if(widget.getType().equals("filesize")){
+			if("number".equals(widget.getType()) && "bytes".equals(widget.getFormat())) {
 				try{
 					value=formatFileSize(Long.parseLong(value));
 				}catch(Throwable t){
@@ -599,7 +611,7 @@ public class MetadataTemplateRenderer {
 
 	private static String cleanupText(MetadataWidget.TextEscapingPolicy textEscapingPolicy, String untrustedHTML) {
 		if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.htmlBasic)) {
-			PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.LINKS);
+			PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.BLOCKS).and(Sanitizers.LINKS);
 			return policy.sanitize(untrustedHTML);
 		} else if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.all)){
 			return StringEscapeUtils.escapeHtml4(untrustedHTML);
@@ -734,11 +746,20 @@ public class MetadataTemplateRenderer {
 	    		field.setAccessible(true);
 	    		if(field.getType().getSimpleName().equalsIgnoreCase("boolean")) {
 	    			field.set(widget, Boolean.parseBoolean(value));
+				} else if(field.getType().isEnum()) {
+					try {
+						field.set(widget, field.getType().getDeclaredMethod("valueOf", String.class).invoke(null, value));
+					} catch(InvocationTargetException e) {
+						if(e.getTargetException() instanceof IllegalArgumentException) {
+							logger.info("enum constant for widget " + widget.getId() +" " + name + "=" + value + " could not be resolved and will be ignored");
+						}
+					}
 				} else {
 					field.set(widget, value);
 				}
 	    	}catch(Throwable t){
-	    		throw new IllegalArgumentException("Invalid attribute found for widget "+widget.getId()+", attribute "+name+" is unknown",t);
+	    		logger.warn("Invalid attribute found for widget "+widget.getId()+", attribute "+name+" is unknown: " + t.getMessage());
+	    		//throw new IllegalArgumentException("Invalid attribute found for widget "+widget.getId()+", attribute "+name+" is unknown",t);
 	    	}
 	      }
 	    return widget;

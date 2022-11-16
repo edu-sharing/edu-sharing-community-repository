@@ -1,16 +1,11 @@
 import {Component, Input, EventEmitter, ViewEncapsulation, Output} from '@angular/core';
 import { Observable } from 'rxjs';
 import { BrowserModule } from '@angular/platform-browser';
-import {Translation} from "../../core-ui-module/translation";
 import {Toast} from "../../core-ui-module/toast";
 import {ArchiveRestore, RestoreResult, ArchiveSearch, Node, ListItem, Pagination} from '../../core-module/core.module';
 import {RestConnectorService} from "../../core-module/core.module";
 import {CustomOptions, OptionItem} from "../../core-ui-module/option-item";
-import {ConfigurationService} from "../../core-module/core.module";
-import {SessionStorageService} from "../../core-module/core.module";
-import {ActivatedRoute} from "@angular/router";
-import {TranslateService} from "@ngx-translate/core";
-import {ActionbarComponent} from "../../common/ui/actionbar/actionbar.component";
+import {ActionbarComponent} from "../../shared/components/actionbar/actionbar.component";
 
 @Component({
   selector: 'es-node-list',
@@ -51,7 +46,7 @@ export class NodeListComponent {
 }
   @Output() onSelectionChanged = new EventEmitter();
   public hasSearched = false;
-  public selected:Node[] = [];
+  @Input() selected:Node[] = [];
     @Input() fullscreenLoading=false;
 
     // the current node which has an overlay menu open
@@ -60,13 +55,8 @@ export class NodeListComponent {
     public query : string;
     private currentQuery : string;
 	  constructor(private connector : RestConnectorService,
-                private translate : TranslateService,
-                private config : ConfigurationService,
-                private storage : SessionStorageService,
-                private route : ActivatedRoute,
                 private toast: Toast) {
         // http://plnkr.co/edit/btpW3l0jr5beJVjohy1Q?p=preview
-        Translation.initialize(translate,this.config,this.storage,this.route).subscribe(()=>{});
 
         /*
         let restoreResult=new ArchiveRestore();

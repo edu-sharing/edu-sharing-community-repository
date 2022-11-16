@@ -33,18 +33,10 @@ public class BeforeDeleteIOPolicy implements BeforeDeleteNodePolicy {
 
 	Logger logger = Logger.getLogger(BeforeDeleteIOPolicy.class);
 
-	HandleService handleService = null;
-
 	VersionService versionService = null;
 
 	public void init(){
 		policyComponent.bindClassBehaviour(BeforeDeleteNodePolicy.QNAME, QName.createQName(CCConstants.CCM_TYPE_IO), new JavaBehaviour(this, "beforeDeleteNode"));
-
-		try {
-			handleService = new HandleService();
-		} catch (HandleServiceNotConfiguredException e) {
-			logger.info(e.getMessage());
-		}
 	}
 
 	@Override

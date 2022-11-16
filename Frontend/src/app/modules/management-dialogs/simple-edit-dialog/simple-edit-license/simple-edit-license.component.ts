@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {Authority, DialogButton, Group, LocalPermissions, Permission, Permissions, RestConnectorService, RestOrganizationService} from '../../../../core-module/core.module';
 import {Toast} from '../../../../core-ui-module/toast';
 import {RestNodeService} from '../../../../core-module/core.module';
@@ -16,7 +16,6 @@ import {RestConnectorsService} from '../../../../core-module/core.module';
 import {FrameEventsService} from '../../../../core-module/core.module';
 import {OPEN_URL_MODE} from '../../../../core-module/ui/ui-constants';
 import {BridgeService} from '../../../../core-bridge-module/bridge.service';
-import {BulkBehavior, MdsComponent} from '../../../../common/ui/mds/mds.component';
 import {forkJoin, Observable, Observer} from 'rxjs';
 import {MatButtonToggleGroup} from '@angular/material/button-toggle';
 import {WorkspaceShareComponent} from '../../../workspace/share/share.component';
@@ -34,7 +33,7 @@ import {NodeHelperService} from '../../../../core-ui-module/node-helper.service'
     trigger('cardAnimation', UIAnimation.cardAnimation())
   ]
 })
-export class SimpleEditLicenseComponent {
+export class SimpleEditLicenseComponent implements OnInit{
   @ViewChild('modeGroup') modeGroup: MatButtonToggleGroup;
   @ViewChild('licenseGroup') licenseGroup: MatButtonToggleGroup;
   @Input() fromUpload : boolean;
@@ -66,18 +65,12 @@ export class SimpleEditLicenseComponent {
     private organizationApi : RestOrganizationService,
     private toast : Toast,
   ) {
-    // just for init
-    this.iamApi.getUser().subscribe(() => {
-      if(!this.getESUID()){
-        console.warn('Current user has no esuid, detecting owner of license is impossible');
-      }
-    });
     this.configService.get('simpleEdit.licenses',['NONE', 'COPYRIGHT_FREE', 'CC_BY', 'CC_0'])
         .subscribe((licenses) => this.allowedLicenses = licenses);
     this.connector.hasToolPermission(RestConstants.TOOLPERMISSION_LICENSE).subscribe((tp) => this.tpLicense = tp);
   }
-  getESUID() {
-    return this.iamApi.getCurrentUserVCard().uid;
+  async getESUID() {
+      return (await this.iamApi.getCurrentUserVCard()).uid;
   }
   isDirty() {
     // state is untouched -> so not dirty
@@ -92,18 +85,18 @@ export class SimpleEditLicenseComponent {
            this.initalAuthorFreetext !== this.authorFreetext ||
            this.initialMode !== this.modeGroup.value;
   }
-  save() : Observable<any> {
-    if (!this.isDirty()) {
-      return new Observable<void>((observer) => {
-        observer.next();
-        observer.complete();
-        return;
-      });
-    }
-    const properties = this.getProperties();
-    return forkJoin(this._nodes.map((n, i) => {
-      return this.nodeApi.editNodeMetadataNewVersion(n.ref.id, RestConstants.COMMENT_LICENSE_UPDATE, properties);
-    }));
+  save(): Observable<any> {
+      if (!this.isDirty()) {
+          return new Observable<void>((observer) => {
+              observer.next();
+              observer.complete();
+              return;
+          });
+      }
+      return forkJoin(this._nodes.map(async (n, i) => {
+          const properties = await this.getProperties();
+          return this.nodeApi.editNodeMetadataNewVersion(n.ref.id, RestConstants.COMMENT_LICENSE_UPDATE, properties);
+      }));
   }
 
   prepare(updateInvalid = false) {
@@ -130,67 +123,74 @@ export class SimpleEditLicenseComponent {
           }
           this.initialLicense = license;
           this.initalAuthorFreetext = this.authorFreetext;
-          setTimeout(()=> {
-            if(updateInvalid) {
-              this.invalid = !this.fromUpload && !isValid;
-              this.wasInvalid = this.invalid;
-            }
-            if(this.tpLicense) {
-              if (this.fromUpload) {
-                this.modeGroup.value = 'own';
-              } else {
-                if (this.getESUID() && this.getESUID() === vcard.uid) {
-                  this.modeGroup.value = 'own';
-                } else {
-                  this.modeGroup.value = 'foreign';
-                }
+          setTimeout(async () => {
+              if (updateInvalid) {
+                  this.invalid = !this.fromUpload && !isValid;
+                  this.wasInvalid = this.invalid;
               }
-              this.initialMode = this.modeGroup.value;
-              if (isValid) {
-                this.licenseGroup.value = license;
-              } else {
-                this.licenseGroup.value = 'NONE';
+              if (this.tpLicense) {
+                  if (this.fromUpload) {
+                      this.modeGroup.value = 'own';
+                  } else {
+                      const esuid = (await this.getESUID());
+                      if (esuid && esuid === vcard.uid) {
+                          this.modeGroup.value = 'own';
+                      } else {
+                          this.modeGroup.value = 'foreign';
+                      }
+                  }
+                  this.initialMode = this.modeGroup.value;
+                  if (isValid) {
+                      this.licenseGroup.value = license;
+                  } else {
+                      this.licenseGroup.value = 'NONE';
+                  }
               }
-            }
-            this.onInitFinished.emit();
+              this.onInitFinished.emit();
           });
         }, error => this.onError.emit(error));
 
   }
 
-  private getProperties() {
-    const properties:any = {};
-    if (this.modeGroup.value === 'own') {
-      const vcard = this.iamApi.getCurrentUserVCard();
-      properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = [vcard.toVCardString()];
-      properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT] = null;
-    } else {
-      properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = null;
-      properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT] = [this.authorFreetext];
-    }
-    if(this.isCCAttributableLicense()){
-      if (this.ccTitleOfWork) {
-        properties[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK] = [this.ccTitleOfWork];
+  private async getProperties() {
+      const properties: any = {};
+      if (this.modeGroup.value === 'own') {
+          const vcard = await this.iamApi.getCurrentUserVCard();
+          properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = [vcard.toVCardString()];
+          properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT] = null;
       } else {
-        properties[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK] = null;
+          properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = null;
+          properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT] = [this.authorFreetext];
       }
-      if (this.ccSourceUrl) {
-        properties[RestConstants.CCM_PROP_LICENSE_SOURCE_URL] = [this.ccSourceUrl];
-      } else {
-        properties[RestConstants.CCM_PROP_LICENSE_SOURCE_URL] = null;
+      if (this.isCCAttributableLicense()) {
+          if (this.ccTitleOfWork) {
+              properties[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK] = [this.ccTitleOfWork];
+          } else {
+              properties[RestConstants.CCM_PROP_LICENSE_TITLE_OF_WORK] = null;
+          }
+          if (this.ccSourceUrl) {
+              properties[RestConstants.CCM_PROP_LICENSE_SOURCE_URL] = [this.ccSourceUrl];
+          } else {
+              properties[RestConstants.CCM_PROP_LICENSE_SOURCE_URL] = null;
+          }
+          if (this.ccProfileUrl) {
+              properties[RestConstants.CCM_PROP_LICENSE_PROFILE_URL] = [this.ccProfileUrl];
+          } else {
+              properties[RestConstants.CCM_PROP_LICENSE_PROFILE_URL] = null;
+          }
       }
-      if (this.ccProfileUrl) {
-        properties[RestConstants.CCM_PROP_LICENSE_PROFILE_URL] = [this.ccProfileUrl];
-      } else {
-        properties[RestConstants.CCM_PROP_LICENSE_PROFILE_URL] = null;
-      }
-    }
-    properties[RestConstants.CCM_PROP_LICENSE] = [this.licenseGroup.value];
-    properties[RestConstants.CCM_PROP_LICENSE_CC_VERSION]  = this.licenseGroup.value === 'CC_BY' ? ['4.0'] : null;
-    return properties;
+      properties[RestConstants.CCM_PROP_LICENSE] = [this.licenseGroup.value];
+      properties[RestConstants.CCM_PROP_LICENSE_CC_VERSION] = this.licenseGroup.value === 'CC_BY' ? ['4.0'] : null;
+      return properties;
   }
 
     isCCAttributableLicense() {
         return this.licenseGroup && this.licenseGroup.value && this.licenseGroup.value.startsWith('CC_BY');
+    }
+
+    async ngOnInit() {
+        if (!await this.getESUID()) {
+            console.warn('Current user has no esuid, detecting owner of license is impossible');
+        }
     }
 }

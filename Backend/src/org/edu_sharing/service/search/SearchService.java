@@ -95,4 +95,6 @@ public interface SearchService {
 	SearchResultNodeRef searchFingerPrint(String nodeId);
 
 	public Set<SearchVCard> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind kind) throws IOException;
+
+	public SearchResultNodeRef getMetadata(List<String> nodeIds) throws IOException;
 }

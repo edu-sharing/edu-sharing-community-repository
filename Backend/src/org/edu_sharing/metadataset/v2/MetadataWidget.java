@@ -1,13 +1,13 @@
 package org.edu_sharing.metadataset.v2;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MetadataWidget extends MetadataTranslatable{
+
+	private Map<String, MetadataKey> valuesAsMapCache;
+	private String configuration;
 
     public enum Required{
 		mandatory,
@@ -292,6 +292,13 @@ public class MetadataWidget extends MetadataTranslatable{
 	public TextEscapingPolicy getTextEscapingPolicy() {
 		return textEscapingPolicy;
 	}
+	public void setConfiguration(String configuration) {
+		this.configuration = configuration;
+	}
+
+	public String getConfiguration() {
+		return configuration;
+	}
 
 	public void setInteractionType(InteractionType interactionType) {
 		this.interactionType = interactionType;
@@ -324,8 +331,12 @@ public class MetadataWidget extends MetadataTranslatable{
 	}
 	public Map<String, MetadataKey> getValuesAsMap() {
 		Map<String,MetadataKey> map=new HashMap<>();
-		if(values==null)
+		if(values==null) {
 			return map;
+		}
+		if(valuesAsMapCache != null) {
+			return valuesAsMapCache;
+		}
 		for(MetadataKey value : values){
 			map.put(value.getKey(), value);
 			if(value.getAlternativeKeys() != null) {
@@ -334,15 +345,13 @@ public class MetadataWidget extends MetadataTranslatable{
 				);
 			}
 		}
+		valuesAsMapCache = map;
 		return map;
 	}
-	public Map<MetadataKey.MetadataKeyRelated, MetadataKey> getValuespaceMappingByRelation(MetadataKey.MetadataKeyRelated.Relation relation) {
-		Map<MetadataKey.MetadataKeyRelated, MetadataKey> map=new HashMap<>();
+	public Map<String, Collection<MetadataKey.MetadataKeyRelated>> getValuespaceMappingByRelation(MetadataKey.MetadataKeyRelated.Relation relation) {
+		Map<String, Collection<MetadataKey.MetadataKeyRelated>> map=new HashMap<>();
 		for(MetadataKey value : values){
-			List<MetadataKey.MetadataKeyRelated> related = value.getRelated().stream().filter((r) -> r.getRelation().equals(relation)).collect(Collectors.toList());
-			related.forEach((r) -> {
-				map.put(r, value);
-			});
+			map.put(value.getKey(), value.getRelated().stream().filter(r -> r.getRelation().equals(relation)).collect(Collectors.toList()));
 		}
 		return map;
 	}

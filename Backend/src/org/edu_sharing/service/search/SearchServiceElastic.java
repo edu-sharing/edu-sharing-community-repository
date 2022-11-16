@@ -17,7 +17,7 @@ import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
-import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
+import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -25,13 +25,14 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.restservices.shared.Contributor;
 import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.model.CollectionRef;
 import org.edu_sharing.service.model.CollectionRefImpl;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.model.NodeRefImpl;
-import org.edu_sharing.service.nodeservice.PropertiesInterceptor;
+import org.edu_sharing.service.nodeservice.PropertiesGetInterceptor;
 import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.search.model.SearchToken;
@@ -55,16 +56,12 @@ import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.metrics.ParsedCardinality;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.ScoreSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
-import org.elasticsearch.search.suggest.Suggest;
 import org.elasticsearch.search.suggest.SuggestBuilder;
 import org.elasticsearch.search.suggest.SuggestBuilders;
 import org.elasticsearch.search.suggest.phrase.DirectCandidateGeneratorBuilder;
 import org.elasticsearch.search.suggest.phrase.PhraseSuggestion;
-import org.elasticsearch.search.suggest.phrase.PhraseSuggestionBuilder;
-import org.elasticsearch.search.suggest.phrase.SmoothingModel;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
@@ -150,11 +147,23 @@ public class SearchServiceElastic extends SearchServiceImpl {
         audienceQueryBuilder.should(QueryBuilders.matchQuery("owner", user));
 
         //enhance to collection permissions
+        MatchQueryBuilder collectionTypeProposal = QueryBuilders.matchQuery("collections.relation.type", "ccm:collection_proposal");
         BoolQueryBuilder collectionPermissions = getPermissionsQuery("collections.permissions.read");
         collectionPermissions.should(QueryBuilders.matchQuery("collections.owner", user));
+        collectionPermissions.mustNot(collectionTypeProposal);
+
+        BoolQueryBuilder proposalPermissions = getPermissionsQuery("collections.permissions.Coordinator",getUserAuthorities().stream().filter(a -> !a.equals(CCConstants.AUTHORITY_GROUP_EVERYONE)).collect(Collectors.toSet()));
+        proposalPermissions.should(QueryBuilders.matchQuery("collections.owner", user));
+        proposalPermissions.must(collectionTypeProposal);
+
+        BoolQueryBuilder subPermissions = QueryBuilders.boolQuery().minimumShouldMatch(1)
+                .should(collectionPermissions)
+                .should(proposalPermissions);
+
+
         BoolQueryBuilder audienceQueryBuilderCollections = QueryBuilders.boolQuery()
                 .mustNot(QueryBuilders.termQuery("properties.ccm:restricted_access",true))
-                .must(collectionPermissions);
+                .must(subPermissions);
         audienceQueryBuilder.should(audienceQueryBuilderCollections);
 
         return audienceQueryBuilder;
@@ -162,7 +171,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
     public SearchResultNodeRef searchFacets(MetadataSet mds, String query, Map<String,String[]> criterias, SearchToken searchToken) throws Throwable {
         List<NodeSearch.Facet> facetsResult = new ArrayList<>();
-        BoolQueryBuilder globalConditions = getGlobalConditions(searchToken);
+        BoolQueryBuilder globalConditions = getGlobalConditions(searchToken.getAuthorityScope(),searchToken.getPermissions());
 
         MetadataQuery queryData = mds.findQuery(query, MetadataReader.QUERY_SYNTAX_DSL);
         Set<MetadataQueryParameter> excludeOwnFacets = MetadataElasticSearchHelper.getExcludeOwnFacets(queryData, new HashMap<>(), searchToken.getFacets());
@@ -223,10 +232,6 @@ public class SearchServiceElastic extends SearchServiceImpl {
             return super.search(mds,query,criterias,searchToken);
         }
 
-        String[] searchword = criterias.get("ngsearchword");
-        String ngsearchword = (searchword != null) ? searchword[0] : null;
-
-
         Set<String> authorities = getUserAuthorities();
         String user = serviceRegistry.getAuthenticationService().getCurrentUserName();
 
@@ -240,22 +245,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
 
-            QueryBuilder metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL),queryData,criterias,true);
-            QueryBuilder metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL),queryData,criterias,false);
-            BoolQueryBuilder queryBuilderGlobalConditions = getGlobalConditions(searchToken);
+            QueryBuilder metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL),queryData,criterias,true);
+            QueryBuilder metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL),queryData,criterias,false);
+            BoolQueryBuilder queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(),searchToken.getPermissions());
 
             BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
             BoolQueryBuilder filterBuilder = QueryBuilders.boolQuery().must(metadataQueryBuilderFilter).must(queryBuilderGlobalConditions);
-            if(searchToken.getSearchCriterias().getContentkind() != null && searchToken.getSearchCriterias().getContentkind().length > 0){
-                BoolQueryBuilder criteriasBool = new BoolQueryBuilder();
-                Arrays.stream(searchToken.getSearchCriterias().getContentkind()).forEach((content) ->
-                        criteriasBool.should(
-                                new MatchQueryBuilder("type", CCConstants.getValidLocalName(content)))
-                );
-                queryBuilder = queryBuilder.filter(
-                        criteriasBool
-                );
-            }
+
             queryBuilder = queryBuilder.filter(filterBuilder);
             queryBuilder = queryBuilder.must(metadataQueryBuilderAsQuery);
 
@@ -416,7 +412,11 @@ public class SearchServiceElastic extends SearchServiceImpl {
                             if (facetResult.isPresent()) {
                                 if (!facetResult.get().getValues().stream().anyMatch(v -> v.getValue().equals(value))) {
                                     if (selected.get().getValues().stream().anyMatch(v -> value.equals(v.getValue()))) {
-                                        facetResult.get().getValues().addAll(selected.get().getValues());
+                                        facetResult.get().getValues().add(selected.get().getValues().stream()
+                                                .filter(v -> value.equals(v.getValue()))
+                                                .findFirst()
+                                                .get()
+                                        );
                                     }
                                 }
                             } else {
@@ -491,16 +491,17 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
     /**
      * permissions, scope ...
-     * @param searchToken
+     * @param authorityScope
+     * @param permissions
      * @return
      */
-    private BoolQueryBuilder getGlobalConditions(SearchToken searchToken) {
-        BoolQueryBuilder queryBuilderGlobalConditions = (searchToken.getAuthorityScope() != null && searchToken.getAuthorityScope().size() > 0)
-                ? getPermissionsQuery("permissions.read",new HashSet<>(searchToken.getAuthorityScope()))
+    private BoolQueryBuilder getGlobalConditions(List<String> authorityScope, List<String> permissions) {
+        BoolQueryBuilder queryBuilderGlobalConditions = (authorityScope != null && authorityScope.size() > 0)
+                ? getPermissionsQuery("permissions.read",new HashSet<>(authorityScope))
                 : getReadPermissionsQuery();
         queryBuilderGlobalConditions = queryBuilderGlobalConditions.must(QueryBuilders.matchQuery("nodeRef.storeRef.protocol", "workspace"));
-        if(searchToken.getPermissions() != null){
-            for(String permission : searchToken.getPermissions()){
+        if(permissions != null){
+            for(String permission : permissions){
                 queryBuilderGlobalConditions = QueryBuilders.boolQuery().must(queryBuilderGlobalConditions).must(getPermissionsQuery("permissions." + permission));
             }
         }
@@ -576,6 +577,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }
     }
     private <T extends NodeRefImpl> T transform(Class<T> clazz, Set<String> authorities, String user, Map<String, Object> sourceAsMap, boolean resolveCollections) throws IllegalAccessException, InstantiationException {
+        HashMap<String,MetadataSet> mdsCache = new HashMap<>();
+
         Map<String, Serializable> properties = (Map) sourceAsMap.get("properties");
 
         Map nodeRef = (Map) sourceAsMap.get("nodeRef");
@@ -632,6 +635,24 @@ public class SearchServiceElastic extends SearchServiceImpl {
                         props.put(CCConstants.getValidGlobalName(entry.getKey()) + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(displayNames, CCConstants.MULTIVALUE_SEPARATOR));
                     }
                 }
+            } else {
+                try {
+                    String mdsId= (String) properties.getOrDefault(
+                            CCConstants.getValidLocalName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET),
+                            CCConstants.metadatasetdefault_id);
+                    MetadataSet mds = mdsCache.get(mdsId);
+                    if(mds == null){
+                        mds = MetadataHelper.getMetadataset(
+                                ApplicationInfoList.getHomeRepository(),
+                                mdsId
+                        );
+                        mdsCache.put(mdsId,mds);
+                    }
+
+                    MetadataHelper.addVirtualDisplaynameProperties(mds, props);
+                } catch (Throwable t) {
+                    logger.info("Could not resolve displaynames: " + t.getMessage());
+                }
             }
         }
         props.put(CCConstants.NODETYPE, sourceAsMap.get("type"));
@@ -686,10 +707,18 @@ public class SearchServiceElastic extends SearchServiceImpl {
         eduNodeRef.setAspects(((List<String>)sourceAsMap.get("aspects")).
                 stream().map(CCConstants::getValidGlobalName).filter(Objects::nonNull).collect(Collectors.toList()));
 
-        PropertiesInterceptor.PropertiesContext propertiesContext = PropertiesInterceptorFactory.getPropertiesContext(alfNodeRef,props,eduNodeRef.getAspects());
-        for (PropertiesInterceptor i : PropertiesInterceptorFactory.getPropertiesInterceptors()) {
+        // @TODO: remove all of this from/to multivalue
+        ValueTool.getMultivalue(props);
+        PropertiesGetInterceptor.PropertiesContext propertiesContext = PropertiesInterceptorFactory.getPropertiesContext(
+                alfNodeRef,props,eduNodeRef.getAspects(),
+                sourceAsMap
+        )
+                ;
+        for (PropertiesGetInterceptor i : PropertiesInterceptorFactory.getPropertiesGetInterceptors()) {
             props = new HashMap<>(i.beforeDeliverProperties(propertiesContext));
         }
+        // @TODO: remove all of this from/to multivalue
+        ValueTool.toMultivalue(props);
         eduNodeRef.setProperties(props);
 
         eduNodeRef.setOwner((String)sourceAsMap.get("owner"));
@@ -702,19 +731,40 @@ public class SearchServiceElastic extends SearchServiceImpl {
             );
         }
 
+        List<Contributor> contributorsResult = new ArrayList<>();
+        List contributors = (List)sourceAsMap.get("contributor");
+        if(contributors != null) {
+            for (Object contributor : contributors) {
+                Map c = (Map) contributor;
+                Contributor contributorResult = new Contributor();
+                contributorResult.setProperty((String) c.get("property"));
+                contributorResult.setEmail((String) c.get("email"));
+                contributorResult.setFirstname((String) c.get("firstname"));
+                contributorResult.setLastname((String) c.get("lastname"));
+                contributorResult.setOrg((String) c.get("org"));
+                contributorResult.setVcard((String) c.get("vcard"));
+                contributorsResult.add(contributorResult);
+            }
+        }
+        eduNodeRef.setContributors(contributorsResult);
+
 
         HashMap<String, Boolean> permissions = new HashMap<>();
         permissions.put(CCConstants.PERMISSION_READ, true);
-
+        String guestUser = ApplicationInfoList.getHomeRepository().getGuest_username();
         long millis = System.currentTimeMillis();
-
+        eduNodeRef.setPublic(false);
         Map<String,List<String>> permissionsElastic = (Map) sourceAsMap.get("permissions");
         String owner = (String)sourceAsMap.get("owner");
         for(Map.Entry<String,List<String>> entry : permissionsElastic.entrySet()){
             if("read".equals(entry.getKey())){
                 continue;
             }
-
+            if(!eduNodeRef.getPublic() && guestUser != null && entry.getValue().contains(CCConstants.AUTHORITY_GROUP_EVERYONE)) {
+                PermissionReference pr = permissionModel.getPermissionReference(null,entry.getKey());
+                Set<PermissionReference> granteePermissions = permissionModel.getGranteePermissions(pr);
+                eduNodeRef.setPublic(granteePermissions.stream().anyMatch(p -> p.getName().equals(CCConstants.PERMISSION_READ_ALL)));
+            }
             if(authorities.stream().anyMatch(s -> entry.getValue().contains(s))
                     || entry.getValue().contains(user) ){
                 //get fine grained permissions
@@ -950,6 +1000,44 @@ public class SearchServiceElastic extends SearchServiceImpl {
              }
              client = new RestHighLevelClient(RestClient.builder(getConfiguredHosts()));
         }
+    }
+
+
+    public SearchResultNodeRef getMetadata(List<String> nodeIds) throws IOException{
+
+        SearchResultNodeRef sr = new SearchResultNodeRef();
+        List<NodeRef> data = new ArrayList<>();
+        sr.setData(data);
+
+        SearchRequest searchRequest = new SearchRequest("workspace");
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        BoolQueryBuilder queryBuilder = getGlobalConditions(null,null);
+        BoolQueryBuilder qbNodeIds = QueryBuilders.boolQuery().minimumShouldMatch(1);
+        queryBuilder.must(qbNodeIds);
+
+        for(String nodeId : nodeIds) {
+            qbNodeIds.should(QueryBuilders.termQuery("nodeRef.id",nodeId));
+        }
+
+        searchSourceBuilder.query(queryBuilder);
+
+        searchSourceBuilder.from(0);
+        searchSourceBuilder.size(nodeIds.size());
+        searchSourceBuilder.trackTotalHits(true);
+        searchRequest.source(searchSourceBuilder);
+
+        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+
+        logger.info("query: "+searchSourceBuilder.toString());
+        SearchHits hits = searchResponse.getHits();
+        logger.info("result count: "+hits.getTotalHits());
+
+        for (SearchHit hit : hits) {
+            data.add(transformSearchHit(getUserAuthorities(), AuthenticationUtil.getFullyAuthenticatedUser(), hit,true));
+        }
+        sr.setStartIDX(0);
+        sr.setNodeCount( (int)hits.getTotalHits().value);
+        return sr;
     }
 
 

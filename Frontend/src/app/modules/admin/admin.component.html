@@ -1,9 +1,4 @@
-<es-main-nav
-  #mainNav
-  [title]="'ADMIN.TITLE'"
-  [currentScope]="'admin'"
-  [searchEnabled]="false"
-></es-main-nav>
+<div class="main-nav-placeholder"></div>
 <es-modal-dialog
   [title]="showWarning ? 'ADMIN.WARNING_TITLE' : null"
   [message]="'ADMIN.WARNING_INFO'"
@@ -40,10 +35,6 @@
     </div>
   </div>
 </es-card>
-<es-node-info *ngIf="nodeInfo"
-           [node]="nodeInfo"
-           (onClose)="nodeInfo=null"
-></es-node-info>
 <es-modal-dialog
   [title]="dialogTitle"
   [message]="dialogMessage"
@@ -219,9 +210,14 @@
             <input matInput type="text" name="ownAppUrl" [ngModel]="getOwnAppUrl()" readonly>
             <mat-hint>{{'ADMIN.APPLICATIONS.OWN_URL_HINT' | translate}}</mat-hint>
           </mat-form-field>
-          <div><button mat-raised-button (click)="copyOwnApp()">{{'ADMIN.APPLICATIONS.COPY' | translate}}</button></div>
+          <button mat-raised-button (click)="copyOwnApp()">{{'ADMIN.APPLICATIONS.COPY' | translate}}</button></div>
+          <div>
         </div>
       </form>
+      <h4 class="mat-heading-4 mat-heading-underline">
+        <span>{{'ADMIN.LTI.HEADER' | translate }}</span>
+      </h4>
+      <es-lti-admin (onRefreshAppList)="refreshAppList()"></es-lti-admin>
       <h4 class="mat-heading-4 mat-heading-underline">
         <span>{{'ADMIN.APPLICATIONS.LIST' | translate }}</span>
       </h4>
@@ -453,13 +449,18 @@
             <h5 class="mat-heading-5">{{'ADMIN.JOBS.PARAMETERS' | translate}}</h5>
             <div class="param-table">
               <div class="param-row" *ngFor="let param of job.object.params">
-                <div class="param-name">{{param.name}} <span *ngIf="param.file">(file)</span></div>
+                <div class="param-name">
+                  {{param.name}}
+                  <span *ngIf="param.array">[]</span>
+                  <span *ngIf="param.file">(file)</span></div>
                 <div>{{param.description}}</div>
                 <div class="param-value">
                   <ng-container *ngIf="param.values">
                     <div class="param-table">
                       <div class="param-row" *ngFor="let value of param.values">
-                        <div>{{value.name}}</div>
+                        <div>
+                          {{value.name}}
+                        </div>
                         <div>{{value.description}}</div>
                       </div>
                     </div>
@@ -576,6 +577,7 @@
         <div class="heading"><i class="material-icons">person</i><span>{{'ADMIN.TOOLKIT.AUTHENTICATE_AS_USER' | translate}}</span></div>
         <es-authority-search-input
           [mode]="AuthoritySearchMode.Users"
+          [globalSearchAllowed]="true"
           label="{{'ADMIN.TOOLKIT.AUTHENTICATE_AS_USER' | translate}}"
           [showRecent]="false"
           (onChooseAuthority)="authenticateAuthority = $event"></es-authority-search-input>
@@ -714,7 +716,7 @@
             <div><button mat-flat-button color="primary" (click)="exportLucene()">{{'ADMIN.BROWSER.LUCENE_EXPORT_START' | translate}}</button></div>
           </div>
         </ng-container>
-        <ng-container *ngIf="lucene.mode === 'SOLR' && lucene.outputMode=='view'">
+        <ng-container *ngIf="lucene.mode === 'SOLR'">
           <div class="inputGroupGrow">
             <div class="info">{{'ADMIN.BROWSER.LUCENE_AUTHORITIES' | translate }}</div>
             <es-authority-search-input [globalSearchAllowed]="true" [placeholder]="'ADMIN.BROWSER.ADD_AUTHORITY'" [allowAny]="true" (onChooseAuthority)="addLuceneAuthority($event)"></es-authority-search-input>
@@ -745,33 +747,31 @@
           </div>
         </div>
       </div>
-      <div *ngIf="lucene.mode === 'ELASTIC' && searchResponse" class="elastic-response">
-          <label for="elasticResponse">{{'ADMIN.BROWSER.ELASTIC_RESPONSE' | translate }}</label>
+      <div *ngIf="lucene.mode === 'ELASTIC' && elasticResponse" class="elastic-response">
+          <label for="elasticResponseLabel">{{'ADMIN.BROWSER.ELASTIC_RESPONSE' | translate }}</label>
           <ngx-monaco-editor [options]="elasticResponseCodeOptions"
-                             [ngModel]="$any(searchResponse)?.elasticResponse"
+                             [ngModel]="elasticResponse.elasticResponse"
                              [ngModelOptions]="{standalone: true}"
-                             id="elasticResponse"
+                             id="elasticResponseLabel"
           ></ngx-monaco-editor>
       </div>
       <div *ngIf="lucene.mode=='NODEREF' || lucene.outputMode=='view'" class="search-list">
         <es-actionbar #actionbarComponent></es-actionbar>
-        <es-listTable *ngIf="searchResponse?.nodes?.length"
-                   [viewType]="0"
-                   [columns]="searchColumns"
-                   [scope]="SCOPES.Admin"
-                   [mainNav]="mainNav"
-                   [actionbar]="actionbarComponent"
-                   [hasHeading]="true"
-                   [nodes]="searchResponse.nodes"
-                   [hasCheckbox]="true"
-                   [hasIcon]="true"
-                   [totalCount]="searchResponse.pagination.total"
-                   [isClickable]="true"
-                   (clickRow)="debugNode($event.node)"
-        ></es-listTable>
-        <div class="no-results" *ngIf="!searchResponse?.nodes?.length">
-          {{'WORKSPACE.NO_MATCHING_ITEMS' | translate}}
-        </div>
+        <es-node-entries-wrapper
+          #searchResults
+          [dataSource]="searchResponse"
+          [columns]="searchColumns"
+          [configureColumns]="true"
+          [displayType]="NodeEntriesDisplayType.Table"
+          [elementInteractionType]="InteractionType.Emitter"
+          (clickItem)="debugNode($event.element)"
+        >
+          <ng-template #empty>
+            <div class="no-results">
+              {{'WORKSPACE.NO_MATCHING_ITEMS' | translate}}
+            </div>
+          </ng-template>
+        </es-node-entries-wrapper>
       </div>
       <es-lucene-template-memory
         [(query)]="lucene.query"

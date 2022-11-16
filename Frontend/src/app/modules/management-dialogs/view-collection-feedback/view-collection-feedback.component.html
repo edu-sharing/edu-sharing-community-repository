@@ -11,6 +11,7 @@
             <h2 class="empty" *ngIf="!feedbacks || !feedbacks.length">
                 {{ 'COLLECTIONS.FEEDBACK_VIEW_EMPTY' | translate }}
             </h2>
+            <!-- TODO: introduce a sensible heading structure. -->
             <div *ngIf="feedbacks && feedbacks.length">
                 <div *ngFor="let feedback of feedbacks" class="feedback-container">
                     <div class="main-data">

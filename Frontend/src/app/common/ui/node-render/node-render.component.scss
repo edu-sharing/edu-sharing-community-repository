@@ -34,11 +34,13 @@ a, a:hover, a:visited, a:active {
   color:#fff;
 }
 :host ::ng-deep{
-  .topBar-render{
-    display: none!important;
-  }
   a.edusharing_rendering_content{
     background-color: $primary;
+    // `&.cdk-keyboard-focused` would be better, but we cannot trivially apply the
+    // `cdkMonitorElementFocus` directive here.
+    &:focus {
+      @include setGlobalKeyboardFocus();
+    }
   }
   .edusharing_rendering_metadata_body comments .group{
     padding: 0 10px;
@@ -61,6 +63,10 @@ a, a:hover, a:visited, a:active {
       color: $primary;
       font-weight: 400;
     }
+  }
+  // Again, `&.cdk-keyboard-focused` would be better.
+  .edusharing_rendering_metadata_body .mds_license a:focus {
+    @include setGlobalKeyboardFocus();
   }
 }
 .topBar{
@@ -110,8 +116,7 @@ a, a:hover, a:visited, a:active {
 
 #nodeRenderContentWrapper {
   background: #ebebeb;
-  position: absolute;
-  top:$mainnavHeight;
+  margin-top: $mainnavHeight;
   width:100%;
 }
 

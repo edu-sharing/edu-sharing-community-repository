@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
@@ -120,12 +121,9 @@ public class SerloImporter implements Importer{
 		//client.getParams().setParameter("http.useragent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:35.0) Gecko/20100101 Firefox/35.0");
 		
 		String url = serloUrl + set;
-		
-		GetMethod method = new GetMethod(url);
-		method.getParams().setContentCharset("utf-8");
-		method.setFollowRedirects(true);
 
-		String result = new HttpQueryTool().query(url, null, method);
+		HttpGet method = new HttpGet(url);
+		String result = new HttpQueryTool().query(url, null, method,true);
 		
 		try{
 			JSONArray ja = (JSONArray)new JSONParser().parse(result);

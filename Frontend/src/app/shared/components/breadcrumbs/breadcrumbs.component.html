@@ -1,0 +1,220 @@
+<ng-container *ngIf="clickable">
+  <!-- Full (not short) breadcrumbs -->
+  <div class="breadcrumb breadcrumb-full" [attr.role]="nodes.length > 0 ? 'list' : null">
+    <ng-container *ngTemplateOutlet="homeBreadcrumbElement"></ng-container>
+    <ng-container *ngIf="nodes.length === 0">
+      <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
+      <span class="home-notice">{{ 'BREADCRUMBS.YOU_ARE_HOME' | translate }}</span>
+    </ng-container>
+    <ng-container *ngFor="let node of nodes; let index = index; let last = last">
+      <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
+      <ng-container
+        *ngTemplateOutlet="
+          nodeBreadcrumbElement;
+          context: { node: node, index: index, currentPos: last }
+        "
+      ></ng-container>
+    </ng-container>
+  </div>
+
+  <!-- Short breadcrumbs
+
+  Show only the last breadcrumbs and either a back- or a home button.
+  -->
+  <div class="breadcrumb breadcrumb-short" [attr.role]="nodes.length > 0 ? 'list' : null">
+    <!-- root / home breadcrumb -->
+    <ng-container *ngIf="nodes.length <= 1">
+      <ng-container *ngTemplateOutlet="homeBreadcrumbElement"></ng-container>
+      <i
+        *ngIf="nodes.length === 1"
+        aria-hidden="true"
+        esIcon="keyboard_arrow_right"
+        class="breadcrumb-arrow"
+      ></i>
+    </ng-container>
+    <!-- back / level-up breadcrumb -->
+    <ng-container *ngIf="nodes.length > 1">
+      <ng-container
+        *ngTemplateOutlet="
+          nodeBreadcrumbElement;
+          context: { node: nodes[nodes.length - 2], index: nodes.length - 2, inner: backInner }
+        "
+      ></ng-container>
+    </ng-container>
+    <!-- breadcrumb for current node -->
+    <ng-container *ngIf="nodes.length > 0">
+      <div *ngIf="invisibleDescription" class="cdk-visually-hidden">
+        {{ 'BREADCRUMB_LOCATION_PREFIX' | translate }}
+      </div>
+      <ng-container
+        *ngTemplateOutlet="
+          nodeBreadcrumbElement;
+          context: { node: nodes[nodes.length - 1], index: nodes.length - 1, currentPos: true }
+        "
+      ></ng-container>
+    </ng-container>
+  </div>
+</ng-container>
+
+<!-- Read-only breadcrumbs.
+
+Short version works only with `short="always"`.
+-->
+<div
+  *ngIf="!clickable"
+  class="breadcrumb breadcrumb-readonly"
+  [attr.role]="nodes.length > 0 ? 'list' : null"
+>
+  <span class="breadcrumb-element" [class.breadcrumb-element-active]="nodes.length === 0">
+    <ng-container *ngIf="homeIcon"><i class="home-icon" [esIcon]="homeIcon"></i></ng-container>
+    <ng-container *ngIf="home">{{ home | translate }}</ng-container>
+    <ng-container *ngIf="!home && !homeIcon"><i class="home-icon" esIcon="home"></i></ng-container>
+  </span>
+  <ng-container *ngIf="nodes.length === 0">
+    <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
+    <span class="home-notice">{{ 'BREADCRUMBS.IN_HOME' | translate }}</span>
+  </ng-container>
+  <ng-container *ngIf="short === 'always' && nodes.length > 1">
+    <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
+    <span class="folder">...</span>
+  </ng-container>
+  <ng-container
+    *ngFor="
+      let node of short === 'always' && nodes.length > 1 ? [nodes[nodes.length - 1]] : nodes;
+      let last = last
+    "
+  >
+    <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
+    <span class="breadcrumb-element" [class.breadcrumb-element-active]="last">{{
+      node ? node.name : ''
+    }}</span>
+  </ng-container>
+</div>
+
+<ng-template #homeInner>
+  <div class="breadcrumb-inner">
+    <ng-container *ngIf="homeIcon">
+      <i [esIcon]="homeIcon" class="home-icon"></i>
+    </ng-container>
+    <ng-container *ngIf="home">
+      {{ home | translate }}
+    </ng-container>
+    <ng-container *ngIf="!home && !homeIcon">
+      <i esIcon="home" class="home-icon"></i>
+    </ng-container>
+    <i *ngIf="nodes.length < 1" esIcon="keyboard_arrow_down" class="dropdown-icon mobile-only"></i>
+  </div>
+</ng-template>
+
+<ng-template #backInner>
+  <i esIcon="keyboard_arrow_left" class="breadcrumb-arrow"></i>
+</ng-template>
+
+<ng-template #homeBreadcrumbElement>
+  <div
+    *ngIf="homeRouterLink"
+    role="listitem"
+    cdkDropList
+    cdkDropListOrientation="vertical"
+    [cdkDropListData]="'HOME'"
+    (cdkDropListEntered)="dragEnter($event)"
+    (cdkDropListExited)="dragExit($event)"
+    (cdkDropListDropped)="drop($event)"
+    class="breadcrumb-element"
+  >
+    <a
+      #trigger
+      cdkDrag
+      esDragCursor
+      [cdkDragDisabled]="true"
+      (cdkDragEntered)="dragEnter($event)"
+      (cdkDragExited)="dragExit($event)"
+      (cdkDragDropped)="drop($event)"
+      [class.selected]="getDragState().element === 'HOME'"
+      [routerLink]="homeRouterLink.routerLink"
+      [queryParams]="homeRouterLink.queryParams"
+      [queryParamsHandling]="homeRouterLink.queryParamsHandling"
+      cdkMonitorElementFocus
+      class="breadcrumb-element-home"
+    >
+      <ng-container *ngTemplateOutlet="homeInner"></ng-container>
+      <div mat-ripple [matRippleTrigger]="trigger" matRippleColor="primary"></div>
+    </a>
+  </div>
+  <div
+    *ngIf="!homeRouterLink"
+    role="listitem"
+    cdkDropList
+    cdkDropListOrientation="vertical"
+    [cdkDropListData]="'MY_FILES'"
+    (cdkDropListEntered)="dragEnter($event)"
+    (cdkDropListExited)="dragExit($event)"
+    (cdkDropListDropped)="drop($event)"
+    class="breadcrumb-element"
+    [class.selected]="getDragState().element === 'HOME'"
+  >
+    <button
+      #trigger
+      cdkDrag
+      esDragCursor
+      [cdkDragDisabled]="true"
+      [cdkDragData]="'MY_FILES'"
+      (cdkDragEntered)="dragEnter($event)"
+      (cdkDragExited)="dragExit($event)"
+      (cdkDragDropped)="drop($event)"
+      cdkMonitorElementFocus
+      class="breadcrumb-element-home"
+      (click)="openBreadcrumb(0)"
+    >
+      <ng-container *ngTemplateOutlet="homeInner"></ng-container>
+      <div mat-ripple [matRippleTrigger]="trigger" matRippleColor="primary"></div>
+    </button>
+  </div>
+</ng-template>
+
+<ng-template
+  #nodeBreadcrumbElement
+  let-node="node"
+  let-index="index"
+  let-inner="inner"
+  let-currentPos="currentPos"
+>
+  <es-node-url
+    role="listitem"
+    #trigger="esElementRef"
+    esElementRef
+    cdkMonitorSubtreeFocus
+    [aria-label]="false"
+    [node]="node"
+    [mode]="createLink ? 'link' : 'button'"
+    (buttonClick)="openBreadcrumb(index + 1)"
+    [disabled]="currentPos"
+  >
+    <span
+      cdkDropList
+      cdkDropListOrientation="vertical"
+      [cdkDropListData]="node"
+      (cdkDropListEntered)="dragEnter($event)"
+      (cdkDropListExited)="dragExit($event)"
+      (cdkDropListDropped)="drop($event)"
+      class="breadcrumb-element"
+    >
+      <span
+        cdkDrag
+        esDragCursor
+        [cdkDragDisabled]="true"
+        class="breadcrumb-inner"
+        [class.breadcrumb-inner-active]="currentPos"
+        [class.selected]="node && getDragState().element === node"
+      >
+        <span *ngIf="currentPos && invisibleDescription" class="cdk-visually-hidden">
+          {{ 'BREADCRUMB_LOCATION_PREFIX' | translate }}
+        </span>
+        <ng-container *ngIf="!inner; else inner">
+          {{ node ? node.name : '' }}
+        </ng-container>
+      </span>
+    </span>
+    <!-- <div mat-ripple [matRippleTrigger]="$any(trigger)" matRippleColor="primary"></div> -->
+  </es-node-url>
+</ng-template>

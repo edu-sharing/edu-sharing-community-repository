@@ -183,7 +183,6 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	@Override
 	public String createNodeBasic(StoreRef store, String parentID, String nodeTypeString, String childAssociation, HashMap<String, ?> _props) {
 		childAssociation = (childAssociation == null) ? CCConstants.CM_ASSOC_FOLDER_CONTAINS : childAssociation;
-		Map<QName, Serializable> properties = transformPropMap(_props);
 
 		NodeRef parentNodeRef = new NodeRef(store, parentID);
 		QName nodeType = QName.createQName(nodeTypeString);
@@ -198,6 +197,24 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			assocName = QName.createValidLocalName(assocName);
 		}
 		assocName = "{" + CCConstants.NAMESPACE_CCM + "}" + assocName;
+		Map<String, Object> propsConverted = new HashMap<>();
+		propsConverted.putAll(_props);
+		for (PropertiesSetInterceptor i : PropertiesInterceptorFactory.getPropertiesSetInterceptors()) {
+			try {
+				propsConverted = i.beforeSetProperties(
+						PropertiesInterceptorFactory.getPropertiesContext(
+								null,
+								propsConverted,
+								Collections.emptyList(),
+								null
+						)
+				);
+			} catch (Throwable e) {
+				logger.warn("Error while calling interceptor " + i.getClass().getName() + ": " + e.toString());
+			}
+		}
+		Map<QName, Serializable> properties = transformPropMap(propsConverted);
+
 
 		ChildAssociationRef childRef = nodeService.createNode(parentNodeRef, QName.createQName(childAssociation), QName.createQName(assocName), nodeType,
 				properties);
@@ -243,7 +260,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		MetadataSet mds = MetadataHelper.getMetadataset(getApplication(), metadataSetId);
 		HashMap<String,Object> toSafe = new HashMap<String,Object>();
 		for (MetadataWidget widget : (templateName==null ?
-				mds.getWidgetsByNode(nodeType,Arrays.asList(ArrayUtils.nullToEmpty(aspects))) :
+				mds.getWidgetsByNode(nodeType,Arrays.asList(ArrayUtils.nullToEmpty(aspects)), false) :
 				mds.getWidgetsByTemplate(templateName))) {
 			String id=widget.getId();
 			if(!MetadataHelper.checkConditionTrue(widget.getCondition())) {
@@ -278,7 +295,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					}).collect(Collectors.toList());
 
 				}catch(Throwable t){
-					logger.warn("Could not parse date for widget id " + widget.getId(), t);
+					logger.info("Could not parse date for widget id " + widget.getId() + ": " + t.getMessage());
 					values = new ArrayList<>();
 				}
 			}
@@ -583,19 +600,19 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		this.updateNodeNative(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId, _props);
 	}
 
-	public void updateNodeNative(StoreRef store, String nodeId, HashMap<String, ?> _props) {
+	public void updateNodeNative(StoreRef store, String nodeId, Map<String, ?> _props) {
 
 		try {
 			NodeRef nodeRef = new NodeRef(store, nodeId);
 			Map<QName, Serializable> props = transformPropMap(_props);
-			Map<QName, Serializable> propsNotNull = new HashMap<>();
+			Map<String, Object> propsNotNull = new HashMap<>();
 
 			for(Map.Entry<QName, Serializable> prop : props.entrySet()){
 				// instead of storing props as null (which can cause solr erros), remove them completely from the node!
 				if(prop.getValue()==null)
 					nodeService.removeProperty(nodeRef,prop.getKey());
 				else
-					propsNotNull.put(prop.getKey(),prop.getValue());
+					propsNotNull.put(prop.getKey().toString(),prop.getValue());
 			}
 
 			// don't do this cause it's slow:
@@ -606,15 +623,30 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			 */
 
 			// prevent overwriting of properties that don't come with param _props
-			Set<QName> changedProps = propsNotNull.keySet();
+			Set<String> changedProps = propsNotNull.keySet();
 			Map<QName, Serializable> currentProps = nodeService.getProperties(nodeRef);
 			for (Map.Entry<QName, Serializable> entry : currentProps.entrySet()) {
-				if (!changedProps.contains(entry.getKey())) {
-					propsNotNull.put(entry.getKey(), entry.getValue());
+				if (!changedProps.contains(entry.getKey().toString())) {
+					propsNotNull.put(entry.getKey().toString(), entry.getValue());
 				}
 			}
 
-			nodeService.setProperties(nodeRef, propsNotNull);
+			for (PropertiesSetInterceptor i : PropertiesInterceptorFactory.getPropertiesSetInterceptors()) {
+				try {
+					propsNotNull = i.beforeSetProperties(PropertiesInterceptorFactory.getPropertiesContext(
+									nodeRef,
+									propsNotNull,
+									Arrays.asList(getAspects(store.getProtocol(), store.getIdentifier(), nodeId)), null));
+				} catch (Throwable e) {
+					logger.warn("Error while calling interceptor " + i.getClass().getName() + ": " + e.toString());
+				}
+			}
+			Map<QName, Serializable> propsStore = propsNotNull.entrySet().stream().collect(
+					HashMap::new,
+					(m,entry)-> m.put(QName.createQName(entry.getKey()), (Serializable) entry.getValue()),
+					HashMap::putAll
+			);
+			nodeService.setProperties(nodeRef, propsStore);
 
 		} catch (org.hibernate.StaleObjectStateException e) {
 			// this occurs sometimes in workspace
@@ -630,7 +662,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 	}
 	
-	Map<QName, Serializable> transformPropMap(HashMap map) {
+	Map<QName, Serializable> transformPropMap(Map map) {
 		Map<QName, Serializable> result = new HashMap<QName, Serializable>();
 		for (Object key : map.keySet()) {
 
@@ -1053,10 +1085,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					policyBehaviourFilter.disableBehaviour(newNode);
 					// replace owner, creator & modifier
 					setPublishedCopyProperties(oldNodeRef, newNode, owner);
-					setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), oldNodeRef.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_MODE, "copy");
-					setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_DATE, new Date());
+					setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), oldNodeRef.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_MODE, "copy", false);
+					setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_DATE, new Date(), false);
 					setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL,
-							oldNodeRef);
+							oldNodeRef, false);
 					NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.LOM_PROP_LIFECYCLE_VERSION);
 					NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.CCM_PROP_IO_VERSION_COMMENT);
 					//deleteVersionHistory(newNode.getId());
@@ -1288,7 +1320,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 	@Override
 	public void removeProperty(String storeProtocol, String storeId, String nodeId, String property) {
-		nodeService.removeProperty(new NodeRef(new StoreRef(storeProtocol,storeId),nodeId),QName.createQName(property));
+		// when interceptors are active, use set instead to trigger interceptors
+		if(PropertiesInterceptorFactory.getPropertiesSetInterceptors().size() > 0) {
+			setProperty(storeProtocol, storeId, nodeId, property, null, true);
+		} else {
+			nodeService.removeProperty(new NodeRef(new StoreRef(storeProtocol, storeId), nodeId), QName.createQName(property));
+		}
 	}
 	@Override
 	public String[] getAspects(String storeProtocol, String storeId, String nodeId){
@@ -1355,20 +1392,59 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 	}
 
-	public void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value) {
+	public void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value, boolean skipDefinitionChecks) {
+		NodeRef nodeRef = new NodeRef(new StoreRef(protocol, storeId), nodeId);
 		property = NameSpaceTool.transformToLongQName(property);
 		QName prop = QName.createQName(property);
-		PropertyDefinition propertyDefinition = dictionaryService.getProperty(prop);
-		if(propertyDefinition == null){
-			logger.error("property" + property + " is not defined in content model");
-			return;
-		}
+		if(!skipDefinitionChecks) {
+			PropertyDefinition propertyDefinition = dictionaryService.getProperty(prop);
+			if (propertyDefinition == null) {
+				logger.error("property" + property + " is not defined in content model");
+				return;
+			}
 
-		if(!propertyDefinition.isMultiValued() && value instanceof Collection){
-			value = (Serializable)((Collection)value).stream().iterator().next();
+			if (!propertyDefinition.isMultiValued() && value instanceof Collection) {
+				if (((Collection) value).stream().iterator().hasNext()) {
+					value = (Serializable) ((Collection) value).stream().iterator().next();
+				} else {
+					value = null;
+				}
+			}
 		}
-
-		nodeService.setProperty(new NodeRef(new StoreRef(protocol,storeId), nodeId), prop,value);
+		Map<String, Object> properties = null;
+		if(PropertiesInterceptorFactory.getPropertiesSetInterceptors().size() > 0) {
+			try {
+				properties = nodeService.getProperties(nodeRef).entrySet().stream().collect(
+						HashMap::new,
+						(m,entry)-> m.put(entry.getKey().toString(), entry.getValue()),
+						HashMap::putAll
+				);
+				properties.put(property, value);
+				for (PropertiesSetInterceptor i : PropertiesInterceptorFactory.getPropertiesSetInterceptors()) {
+					try {
+						properties = i.beforeSetProperties(PropertiesInterceptorFactory.getPropertiesContext(
+										nodeRef,
+										properties,
+										Arrays.asList(getAspects(protocol, storeId, nodeId)), null)
+						);
+					} catch (Throwable e) {
+						logger.warn("Error while calling interceptors " + i.getClass().getName() + ": " + e);
+					}
+				}
+				} catch (Throwable e) {
+					logger.warn("Error while handling set interceptors: " + e);
+				}
+		}
+		if(properties != null) {
+			updateNodeNative(nodeRef.getStoreRef(), nodeRef.getId(), properties);
+			nodeService.setProperties(nodeRef, properties.entrySet().stream().collect(
+					HashMap::new,
+					(m,entry)-> m.put(QName.createQName(entry.getKey()), (Serializable) entry.getValue()),
+					HashMap::putAll
+			));
+		} else {
+			nodeService.setProperty(nodeRef, prop, value);
+		}
 	}
 
 	@Override

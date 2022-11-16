@@ -33,6 +33,7 @@
     [sortBy]="sortBy"
     [sortAscending]="sortAscending"
     (sortListener)="setSorting($event)"
+    [selectedNodes]="selected"
     (selectionChanged)="onSelection($event)"
     (loadMore)="loadMore()"></es-listTable>
 </div>

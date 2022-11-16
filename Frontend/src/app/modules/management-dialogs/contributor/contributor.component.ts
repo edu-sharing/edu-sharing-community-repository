@@ -4,7 +4,6 @@ import {RestConstants} from "../../../core-module/core.module";
 import {NodeWrapper,Node} from "../../../core-module/core.module";
 import {VCard} from "../../../core-module/ui/VCard";
 import {Toast} from "../../../core-ui-module/toast";
-import {Translation} from "../../../core-ui-module/translation";
 import {TranslateService} from "@ngx-translate/core";
 import {DateHelper} from "../../../core-ui-module/DateHelper";
 import {trigger} from "@angular/animations";
@@ -67,8 +66,6 @@ export class WorkspaceContributorComponent  {
   public date : Date;
   buttons: DialogButton[];
   editButtons: DialogButton[];
-  private static TYPE_PERSON = 0;
-  private static TYPE_ORG = 1;
   private fullName = new BehaviorSubject('');
   private orgName = new BehaviorSubject('');
   suggestionPersons$: Observable<VCardResult[]>;
@@ -101,8 +98,8 @@ export class WorkspaceContributorComponent  {
   }
   public resetVCard(){
       this.date = null;
-      this.editType=WorkspaceContributorComponent.TYPE_PERSON;
       this.edit=new VCard();
+      this.editType=this.edit.getType();
       this.editDisabled = false;
   }
   public addVCard(mode = this.editMode) {
@@ -118,42 +115,42 @@ export class WorkspaceContributorComponent  {
       this.date=new Date();
       //setTimeout(()=>this.datepicker.toggle());
   }
-  public editVCard(mode:string,vcard : VCard,scope:string){
-    this.editMode=mode;
-    this.editOriginal=vcard;
-    this.edit=vcard.copy();
-    this.editDisabled = !!(vcard.orcid || vcard.gnduri || vcard.ror || vcard.wikidata);
-    this.editScopeOld=scope;
-    this.editScopeNew=scope;
-    this.editType=vcard.givenname||vcard.surname ? WorkspaceContributorComponent.TYPE_PERSON : WorkspaceContributorComponent.TYPE_ORG;
-    if(vcard.uid === this.iamService.getCurrentUserVCard().uid) {
-      this.userAuthor = true;
-      this.editDisabled = true;
-    }
-    this.date=null;
-    let contributeDate=vcard.contributeDate;
-    if(contributeDate) {
-      //this.date.formatted=contributeDate;
-      //this.dateOptions.initialDate=new Date(contributeDate);
-      this.date=new Date(contributeDate);
-      /*
-      let split=contributeDate.split("-");
-      if(split.length==3){
-        this.dateOptions.initialDate=new Date(parseInt(split[0]),parseInt(split[1]),parseInt(split[2]),0,0,0,0);
+  public async editVCard(mode: string, vcard: VCard, scope: string) {
+      this.editMode = mode;
+      this.editOriginal = vcard;
+      this.edit = vcard.copy();
+      this.editDisabled = !!(vcard.orcid || vcard.gnduri || vcard.ror || vcard.wikidata);
+      this.editScopeOld = scope;
+      this.editScopeNew = scope;
+      this.editType = vcard.getType();
+      if (vcard.uid === (await this.iamService.getCurrentUserVCard()).uid) {
+          this.userAuthor = true;
+          this.editDisabled = true;
       }
-      */
-    }
+      this.date = null;
+      let contributeDate = vcard.contributeDate;
+      if (contributeDate) {
+          //this.date.formatted=contributeDate;
+          //this.dateOptions.initialDate=new Date(contributeDate);
+          this.date = new Date(contributeDate);
+          /*
+          let split=contributeDate.split("-");
+          if(split.length==3){
+            this.dateOptions.initialDate=new Date(parseInt(split[0]),parseInt(split[1]),parseInt(split[2]),0,0,0,0);
+          }
+          */
+      }
   }
   public saveEdits(){
-    if(this.editType==WorkspaceContributorComponent.TYPE_PERSON && (!this.edit.givenname || !this.edit.surname)){
+    if(this.editType==VCard.TYPE_PERSON && (!this.edit.givenname || !this.edit.surname)){
       this.toast.error(null,'WORKSPACE.CONTRIBUTOR.ERROR_PERSON_NAME');
       return;
     }
-    if(this.editType==WorkspaceContributorComponent.TYPE_ORG && (!this.edit.org)){
+    if(this.editType==VCard.TYPE_ORG && (!this.edit.org)){
       this.toast.error(null,'WORKSPACE.CONTRIBUTOR.ERROR_ORG_NAME');
       return;
     }
-    if(this.editType==WorkspaceContributorComponent.TYPE_ORG){
+    if(this.editType==VCard.TYPE_ORG){
       this.edit.givenname='';
       this.edit.surname='';
       this.edit.title='';
@@ -228,12 +225,12 @@ export class WorkspaceContributorComponent  {
         switchMap((v) => this.searchService.searchContributors(v.trim(), 'ORGANIZATION')),
     );
     this.buttons=[
-        new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
-        new DialogButton('APPLY',DialogButton.TYPE_PRIMARY,()=>this.saveContributor())
+        new DialogButton('CANCEL',{ color: 'standard' },()=>this.cancel()),
+        new DialogButton('APPLY',{ color: 'primary' },()=>this.saveContributor())
     ];
     this.editButtons=[
-        new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
-        new DialogButton('APPLY',DialogButton.TYPE_PRIMARY,()=>this.saveEdits())
+        new DialogButton('CANCEL',{ color: 'standard' },()=>this.cancel()),
+        new DialogButton('APPLY',{ color: 'primary' },()=>this.saveEdits())
     ];
   }
 
@@ -249,19 +246,18 @@ export class WorkspaceContributorComponent  {
   }
 
   useVCardSuggestion(event: MatAutocompleteSelectedEvent) {
-    console.log(event);
     this.edit = event.option.value.copy();
     this.editDisabled = true;
   }
 
-  setVCardAuthor(set: boolean) {
-    if(set) {
-      this.edit = this.iamService.getCurrentUserVCard();
-      this.userAuthor = true;
-      this.editDisabled = true;
-    } else {
-      this.resetVCard();
-    }
+  async setVCardAuthor(set: boolean) {
+      if (set) {
+          this.edit = await this.iamService.getCurrentUserVCard();
+          this.userAuthor = true;
+          this.editDisabled = true;
+      } else {
+          this.resetVCard();
+      }
 
   }
 }

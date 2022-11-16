@@ -217,24 +217,32 @@ public class MetadataSet implements Serializable {
 			throw new IllegalArgumentException("Query id "+queryId+" not found using syntax " + syntax, e);
 		}
 	}
-	public List<MetadataWidget> getWidgetsByNode(String nodeType,Collection<String> aspects) {
-		String group=null;
+	public Collection<MetadataWidget> getWidgetsByNode(String nodeType,Collection<String> aspects, boolean onlyPrimaryWidgets) {
+		List<String> group=null;
 		if(CCConstants.CCM_TYPE_IO.equals(nodeType)) {
-			group="io";
+			group= Collections.singletonList("io");
 		}
 		else if(CCConstants.CCM_TYPE_MAP.equals(nodeType)) {
 			if(aspects.contains(CCConstants.CCM_ASPECT_COLLECTION)){
-				group="collection_editorial";
+				group=Arrays.asList("collection_editorial", "io");
 			}
 			else {
-				group = "map";
+				group = Collections.singletonList("map");
 			}
 		}
 		if(group==null) {
 			logger.info("Node type "+nodeType+" currently not supported by backend, will use metadata from all available widgets");
 			return getWidgets();
 		}
-		return getWidgetsByTemplate(group);
+		if(onlyPrimaryWidgets) {
+			return getWidgetsByTemplate(group.get(0));
+		} else {
+			HashSet<MetadataWidget> result = new HashSet<MetadataWidget>();
+			for(String g: group) {
+				result.addAll(getWidgetsByTemplate(g));
+			}
+			return result;
+		}
 	}
 
 	public List<MetadataWidget> getWidgetsByTemplate(String template) {

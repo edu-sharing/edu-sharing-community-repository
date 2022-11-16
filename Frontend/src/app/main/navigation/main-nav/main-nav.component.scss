@@ -1,0 +1,89 @@
+@import '../../../core-ui-module/styles/variables';
+@import '../../../core-ui-module/styles/toast';
+
+::ng-deep {
+    .mobile-move-top, .mobile-move-bottom {
+        &:focus-within {
+            // Don't hide any dynamic elements when focused.
+            top: 0 !important;
+        }
+    }
+}
+
+.topBar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-width: 100%;
+    z-index: $topBarZIndex;
+}
+:host ::ng-deep .card-licenses{
+    pre{
+        white-space: pre-wrap;
+    }
+}
+.dialog {
+    z-index: $dialogZIndex + 5;
+}
+.card-agreement {
+    z-index: $dialogZIndex + 6;
+    .card-content {
+        display: flex;
+        flex-direction: column;
+    }
+    .card-scroll {
+        height: calc(100% - 68px);
+    }
+}
+es-user-profile {
+    display: inherit !important;
+}
+
+.topBar {
+    @include placeholder {
+        color: mix(
+                $workspaceTopBarInputBackground,
+                $workspaceTopBarInputText,
+                20%
+        ); //rgba(255,255,255,0.165);/* => #595959;*/
+    }
+}
+
+es-search-field {
+    max-width: 550px;
+}
+
+.tab-nav {
+    display: none;
+}
+
+@media screen and (max-width: ($mobileTabSwitchWidth)) {
+    #scrollToTop {
+        display: none !important;
+    }
+
+    .topBar {
+        z-index: $topBarMobileZIndex;
+    }
+
+    .tab-nav {
+        position: fixed;
+        z-index: $mobileTabsZIndex;
+        width: 100%;
+        bottom: 0;
+        display: flex;
+        // disable events to "click-through" if menu is hidden
+        pointer-events: none;
+        > es-main-menu-bottom {
+            // but re-enable them on the real menu again
+            pointer-events: auto;
+        }
+    }
+}
+
+@media print {
+    .topBar {
+        position: absolute;
+    }
+}

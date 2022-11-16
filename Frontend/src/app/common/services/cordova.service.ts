@@ -14,11 +14,17 @@ import {RestConstants} from '../../core-module/rest/rest-constants';
 
 declare var cordova : any;
 
+export enum OnBackBehaviour {
+    default,
+    closeApp,
+}
+
 /**
  * All services that touch the mobile app or cordova plugins are available here.
  */
 @Injectable()
 export class CordovaService {
+    private onBackBehaviour = OnBackBehaviour.default;
 
   get oauth() {
     return this._oauth;
@@ -467,9 +473,15 @@ export class CordovaService {
     this.setPermanentStorage(RestConstants.CORDOVA_STORAGE_OAUTHTOKENS,null);
     if(parameters)
         parameters='&'+parameters;
-    if(navigator.userAgent.indexOf('ionic / edu-sharing-app')!=-1) {
+    console.log(navigator.userAgent, navigator.userAgent.includes('ionic / edu-sharing-app'));
+    console.log((window as any).device);
+    if(navigator.userAgent.includes('ionic / edu-sharing-app')) {
         // go to ionic local server
-        window.location.replace('http://localhost:54361/?reset=true' + parameters);
+        if(this.isAndroid() && navigator.userAgent.includes('3.0.1')) {
+            window.location.replace('http://localhost/?reset=true' + parameters);
+        } else {
+            window.location.replace('http://localhost:54361/?reset=true' + parameters);
+        }
     }
     else {
         window.location.replace('http://app-registry.edu-sharing.com/ng/?reset=true' + parameters);
@@ -1227,6 +1239,9 @@ export class CordovaService {
 
       });
     }
+    setOnBackBehaviour(behaviour: OnBackBehaviour) {
+        this.onBackBehaviour = behaviour;
+    }
 
     private onBackKeyDown() {
         const eventDown = new KeyboardEvent('keydown', {key: 'Escape',view: window,bubbles: true,cancelable: true});
@@ -1237,7 +1252,11 @@ export class CordovaService {
 
         } else// if(window.history.length>2) {
             // (navigator as any).app.backHistory();
-            this.location.back();
+            if(this.onBackBehaviour === OnBackBehaviour.closeApp) {
+                (navigator as any).app.exitApp();
+            } else {
+                this.location.back();
+            }
         /*}
         else{
             (navigator as any).app.exitApp();

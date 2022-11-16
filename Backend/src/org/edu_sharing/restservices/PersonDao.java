@@ -129,7 +129,7 @@ public class PersonDao {
 	private final RepositoryDao repoDao;
 	
 	private final Map<String, Serializable> userInfo;
-	private final String homeFolderId;
+	private String homeFolderId;
 	private final List<String> sharedFolderIds = new ArrayList<String>();
 
 	private NodeService nodeService;
@@ -150,7 +150,6 @@ public class PersonDao {
 			this.repoDao = repoDao;
 
 			this.userInfo = authorityService.getUserInfo(userName);
-			this.homeFolderId = baseClient.getHomeFolderID(userName);
 
 			try{
 
@@ -556,7 +555,13 @@ public class PersonDao {
 		return (String[])this.userInfo.get(CCConstants.CM_PROP_PERSON_SKILLS);
 	}
 	public String getHomeFolder() {
-		
+		if(this.homeFolderId == null) {
+			try {
+				this.homeFolderId = baseClient.getHomeFolderID(getUserName());
+			}catch(Throwable t) {
+				throw new RuntimeException(t);
+			}
+		}
 		return this.homeFolderId;
 	}
 
@@ -704,8 +709,8 @@ public class PersonDao {
 			);
 		}
 		String oldStatus= (String) userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS);
-		NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),getNodeId(),CCConstants.CM_PROP_PERSON_ESPERSONSTATUS,status.name());
-		NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),getNodeId(),CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE,new Date());
+		NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),getNodeId(),CCConstants.CM_PROP_PERSON_ESPERSONSTATUS,status.name(), false);
+		NodeServiceFactory.getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),getNodeId(),CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE,new Date(), false);
 		if(notifyMail){
 			Mail mail=new Mail();
 			Map<String, String> replace=new HashMap<>();

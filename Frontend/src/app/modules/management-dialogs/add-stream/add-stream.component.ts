@@ -10,7 +10,7 @@ import {ConfigurationService} from "../../../core-module/core.module";
 import {UIHelper} from "../../../core-ui-module/ui-helper";
 import {RestIamService} from "../../../core-module/core.module";
 import {TranslateService} from "@ngx-translate/core";
-import {MdsComponent} from "../../../common/ui/mds/mds.component";
+import {MdsComponent} from "../../../features/mds/legacy/mds/mds.component";
 import {RestConstants} from "../../../core-module/core.module";
 import {UIAnimation} from "../../../core-module/ui/ui-animation";
 import {trigger} from "@angular/animations";
@@ -52,10 +52,10 @@ export class AddStreamComponent  {
     private toast : Toast,
     private nodeApi : RestNodeService) {
     this.buttons=[
-        new DialogButton("CANCEL",DialogButton.TYPE_CANCEL,()=>this.cancel()),
-        new DialogButton("SAVE",DialogButton.TYPE_PRIMARY,()=>this.save()),
+        new DialogButton("CANCEL",{ color: 'standard' },()=>this.cancel()),
+        new DialogButton("SAVE",{ color: 'primary' },()=>this.save()),
     ]
-    this.connector.isLoggedIn().subscribe((data:LoginResult)=>{
+    this.connector.isLoggedIn(false).subscribe((data:LoginResult)=>{
 
     });
   }

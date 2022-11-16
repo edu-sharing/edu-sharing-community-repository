@@ -1,0 +1,38 @@
+<es-dropdown
+    #dropdown
+    class="addDesktopMenu"
+    menuClass="create-menu-{{ scope }}"
+    [options]="options"
+    position="right"
+    ></es-dropdown>
+<es-workspace-add-folder *ngIf="addFolderName!=null"
+                      [folder]="addFolderName"
+                      [parent]="getParent()"
+                      (onCancel)="addFolderName=null"
+                      (onFolderAdded)="addFolder($event)"
+></es-workspace-add-folder>
+<!-- TODO: include via overlays -->
+<!-- <es-workspace-management #management
+        [parent]="getParent()"
+        [(showUploadSelect)]="showUploadSelect"
+        [uploadShowPicker]="showPicker"
+        [(filesToUpload)]="filesToUpload"
+        (onUploadFileSelected)="uploadFiles($event)"
+        (onUploadFilesProcessed)="afterUpload($event)"
+></es-workspace-management> -->
+<es-workspace-create-connector *ngIf="createConnectorName!=null"
+                            [name]="createConnectorName"
+                            [connector]="createConnectorType"
+                            (onCancel)="createConnectorName=null"
+                            (onCreate)="createConnector($event)"
+></es-workspace-create-connector>
+
+<div *ngIf="!(cardHasOpenModals$ | async)" fileDrop [window]="true" (fileOver)="fileIsOver=$event" (onFileDrop)="onFileDrop($event)"></div>
+<div class="dialog darken drop-zone" *ngIf="fileIsOver">
+    <div>
+        <i class="material-icons" *ngIf="isAllowed()">cloud_upload</i>
+        <i class="material-icons" *ngIf="!isAllowed()">cloud_off</i>
+        <p *ngIf="isAllowed()">{{'WORKSPACE.DROP_FILES' |translate}}</p>
+        <p *ngIf="!isAllowed()">{{'WORKSPACE.DROP_FILES_DISABLED' |translate}}</p>
+    </div>
+</div>

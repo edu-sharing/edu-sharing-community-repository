@@ -1,55 +1,37 @@
-/**
- *
- *  
- * 
- * 
- *	
- *
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- *
- */
 package org.edu_sharing.repository.server.tools;
 
+import com.typesafe.config.Config;
+import jdk.nashorn.internal.codegen.CompilerConstants;
+import org.alfresco.repo.cache.SimpleCache;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.http.*;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.*;
+import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
+import org.apache.http.util.EntityUtils;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.tools.HttpQueryToolConfig;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.SSLSocket;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-
-import com.typesafe.config.Config;
-import org.alfresco.repo.cache.SimpleCache;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethodBase;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthPolicy;
-import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
-import org.edu_sharing.alfresco.tools.ProxyConfig;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 
 public class HttpQueryTool {
 
@@ -60,35 +42,37 @@ public class HttpQueryTool {
 	Log logger = LogFactory.getLog(HttpQueryTool.class);
 
 
-	
+
 	String basicAuthUn = null;
-	
+
 	String basicAuthPw = null;
-	
-	
+
 	public HttpQueryTool() {
 		init();
 	}
-	
+
 	public HttpQueryTool(String basicAuthUn, String basicAuthPw) {
 		this();
 		this.basicAuthUn = basicAuthUn;
 		this.basicAuthPw = basicAuthPw;
 	}
-	
+
 	private void init(){
 		if(configCache != null && configCache.get(CACHE_KEY) == null){
 			try{
-				Config config = LightbendConfigLoader.get().getConfig("repository.proxy");
-				ProxyConfig proxyConfig = new ProxyConfig();
-				proxyConfig.setProxyhost(config.getString("proxyhost"));
-				proxyConfig.setProxyport(config.getInt("proxyport"));
-				if(config.hasPath("host")){ proxyConfig.setHost(config.getString("host"));};
-				if(config.hasPath("proxyuser"))proxyConfig.setProxyUsername(config.getString("proxyuser") );
-				if(config.hasPath("proxypass"))proxyConfig.setProxyPass(config.getString("proxypass"));
-				if(config.hasPath("nonproxyhosts")) proxyConfig.setNonProxyHosts(config.getString("nonproxyhosts"));
+				Config root = LightbendConfigLoader.get();
+				Config httpClientConfiguration = root.getConfig("repository.httpclient");
+				Config proxyConfiguration = httpClientConfiguration.getConfig("proxy");
+				HttpQueryToolConfig httpQueryToolConfig = new HttpQueryToolConfig();
+				if(proxyConfiguration.hasPath("proxyhost")) httpQueryToolConfig.getProxyConfig().setProxyhost(proxyConfiguration.getString("proxyhost"));
+				if(proxyConfiguration.hasPath("proxyport")) httpQueryToolConfig.getProxyConfig().setProxyport(proxyConfiguration.getInt("proxyport"));
+				if(proxyConfiguration.hasPath("host")) httpQueryToolConfig.getProxyConfig().setHost(proxyConfiguration.getString("host"));
+				if(proxyConfiguration.hasPath("proxyuser")) httpQueryToolConfig.getProxyConfig().setProxyUsername(proxyConfiguration.getString("proxyuser") );
+				if(proxyConfiguration.hasPath("proxypass")) httpQueryToolConfig.getProxyConfig().setProxyPass(proxyConfiguration.getString("proxypass"));
+				if(proxyConfiguration.hasPath("nonproxyhosts")) httpQueryToolConfig.getProxyConfig().setNonProxyHosts(proxyConfiguration.getString("nonproxyhosts"));
+				if(httpClientConfiguration.hasPath("disableSNI4Hosts")) httpQueryToolConfig.setDisableSNI4Hosts(httpClientConfiguration.getStringList("disableSNI4Hosts"));
 
-				configCache.put(CACHE_KEY,proxyConfig);
+				configCache.put(CACHE_KEY, httpQueryToolConfig);
 
 			}catch(Exception e){
 				logger.info("No proxy to use found or invalid proxy config: "+e.getMessage());
@@ -97,135 +81,224 @@ public class HttpQueryTool {
 		}
 	}
 
-	
 	public String query(String url) {
-		return this.query(url,null,null);
+		return this.query(url,null,null,true);
 	}
+
+	public String query(HttpUriRequest method){
+		return this.query(method.getURI().toString(),null,method,true);
+	}
+
+	public String query(String url, Map<String,String> header, HttpUriRequest _method) {
+		return query(url,header,_method,true);
+	}
+
+	public String query(String url, Map<String,String> header, HttpUriRequest method, boolean followRedirects) {
+
+		return execute(url, header, method, followRedirects, null);
+	}
+
+	private String execute(String url, Map<String,String> header, HttpUriRequest method, boolean followRedirects, Callback callback){
+		logger.debug("url:" + url);
+
+		if(url == null && method != null){
+			url = method.getURI().toString();
+		}
+
+		if(method == null){
+			method = new HttpGet(url);
+		}
+
+		CloseableHttpClient client= null;
+		try {
+			URL urlObj = new URL(url);
+			String urlHost = urlObj.getHost();
+			//@todo check for config
+            HttpQueryToolConfig proxyConf = (configCache != null) ? (HttpQueryToolConfig)configCache.get(CACHE_KEY) : null;
+            if (proxyConf != null && proxyConf.getDisableSNI4Hosts().contains(urlHost)) {
+                client = prepare(url,header,method,followRedirects, false);
+            }else{
+                client = prepare(url,header,method,followRedirects, true);
+            }
+			
+		} catch (NoSuchAlgorithmException e) {
+			logger.error(e.getMessage(),e);
+			return null;
+		}catch(MalformedURLException e){
+			logger.error(e.getMessage(),e);
+			return null;
+		}
+
+		HttpEntity result;
+		try {
+			CloseableHttpResponse response = client.execute(method);
+
+			try{
+				int returnCode = response.getStatusLine().getStatusCode();
+				logger.debug("HttpStatus:"+returnCode);
+				if (returnCode == HttpStatus.SC_NOT_IMPLEMENTED) {
+					logger.error("The method is not implemented by this URI");
+					// still consume the response body
+				}
+				result = response.getEntity();
+
+				try{
+					if(returnCode >= 400){
+						String rsStrg = null;
+						if (result != null) {
+							rsStrg = EntityUtils.toString(result,"UTF-8");
+						}
+						throw new HttpException(returnCode,rsStrg);
+					}
+
+					if(callback == null){
+						return EntityUtils.toString(result,"UTF-8");
+					}else{
+						callback.handle(result.getContent());
+						return null;
+					}
+				}finally {
+					response.close();
+				}
+			}finally {
+				response.close();
+			}
+		}catch (IOException e){
+			logger.debug(e.getMessage(),e);
+			throw new HttpException(0,e.getMessage());
+		}finally {
+			try {
+				client.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public void queryStream(String url, Callback callback) {
+		execute(url, null, null, true, callback);
+	}
+
 
 	/**
-	 * backward compatbility
+	 * basic auth, proxy server handling, Content-Type "charset=UTF-8"
+	 * @param url
+	 * @param method
+	 * @return
 	 */
-	public String query(String url, Map<String,String> header, HttpMethodBase _method) {
-		logger.debug("url:" + url);
-		HttpClient client = new HttpClient();
+	private CloseableHttpClient prepare(String url,
+										Map<String,String> header,
+										HttpUriRequest method,
+										boolean followRedirects,
+										boolean sni) throws NoSuchAlgorithmException {
 
-		client.getParams().setParameter("http.useragent", "Test Client");
+		Header[] headersContentType = method.getHeaders("Content-Type");
+		if(headersContentType == null || headersContentType.length == 0){
+			method.setHeader("Content-Type", "charset=UTF-8");
+		}
 
-		HttpMethodBase method;
-		if(_method == null) {
-			method = new GetMethod(url);
-			method.setFollowRedirects(true);
-		}
-		else{
-			method = _method;
-		}
-		
-		if(basicAuthUn != null && basicAuthPw != null) {
-			method.addRequestHeader("Authorization", "Basic " +java.util.Base64.getEncoder().encodeToString((basicAuthUn +":" +basicAuthPw) .getBytes()));
-		}
-		
+
 		if(header != null){
 			for(Map.Entry<String, String> entry : header.entrySet()){
-				method.addRequestHeader(entry.getKey(), entry.getValue());
+				method.setHeader(entry.getKey(), entry.getValue());
 			}
 		}
-		return query(method);
-	}
-	public InputStream getStream(HttpMethodBase method) {
-		HttpClient client = prepareClient(method);
-		try {
 
-			int returnCode = client.executeMethod(method);
-			if(returnCode==200){
-				return method.getResponseBodyAsStream();
-			}
-			if(returnCode >= 400){
-				throw new HttpException(returnCode,method.getResponseBodyAsString());
-			}
-		} catch (IOException e) {
-			throw new HttpException(0,e.getMessage());
-		}
-		return null;
-	}
-	public String query(HttpMethodBase method) {
-		HttpClient client = prepareClient(method);
+		HttpClientBuilder clientBuilder =
+				(sni) ? HttpClientBuilder.create()
+						: HttpClients.custom()
+						.setSSLSocketFactory(new SSLConnectionSocketFactory(SSLContext.getDefault(), SSLConnectionSocketFactory.getDefaultHostnameVerifier()) {
+							@Override
+							protected void prepareSocket(SSLSocket socket) throws IOException {
+								SSLParameters sslParameters = socket.getSSLParameters();
+								sslParameters.setServerNames(new ArrayList<>());
+								socket.setSSLParameters(sslParameters);
+							}
+						});
 
-		String result = null;
-		try {
-
-			int returnCode = client.executeMethod(method);
-			logger.debug("HttpStatus:"+returnCode);
-			if (returnCode == HttpStatus.SC_NOT_IMPLEMENTED) {
-				System.err.println("The method is not implemented by this URI");
-				// still consume the response body
-				result = method.getResponseBodyAsString();
-			} else {
-				result = method.getResponseBodyAsString();
-			}
-			
-			if(returnCode >= 400){
-				throw new HttpException(returnCode,result);
-			}
-
-		}catch(IOException e){
-			throw new HttpException(0,e.getMessage());
-		} finally {
-			method.releaseConnection();
+		if(followRedirects){
+			//LaxRedirectStrategy = commons.httpclient method.setFollowRedirects(true);
+			clientBuilder.setRedirectStrategy(new LaxRedirectStrategy());
 		}
 
-		return result;
-	}
+		clientBuilder.setUserAgent("Test Client");
 
-	private HttpClient prepareClient(HttpMethodBase method) {
-		HttpClient client = new HttpClient();
-
-		client.getParams().setParameter("http.useragent", "Test Client");
-
-
+		//basic auth
+		CredentialsProvider credentialsProvider = null;
 		if(basicAuthUn != null && basicAuthPw != null) {
-			method.addRequestHeader("Authorization", "Basic " + Base64.encodeBase64String((basicAuthUn +":" +basicAuthPw) .getBytes()));
+			credentialsProvider = new BasicCredentialsProvider();
+			credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(basicAuthUn, basicAuthPw));
+			clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
 		}
 
+		//proxy
 		try {
 
 			//get host of url to check if its an nonproxy host
-			URL urlObj = new URL(method.getURI().getURI());
+			URL urlObj = new URL(url);
 			String urlHost = urlObj.getHost();
 			logger.debug("current Host:" + urlHost);
 
-			ProxyConfig proxyConf = (configCache != null) ? (ProxyConfig)configCache.get(CACHE_KEY) : null;
-			if (proxyConf != null) {
-				logger.debug("nonProxyHosts:" + proxyConf.getNonProxyHosts());
+			HttpQueryToolConfig conf = (configCache != null) ? (HttpQueryToolConfig)configCache.get(CACHE_KEY) : null;
+			if (conf != null) {
+				logger.debug("nonProxyHosts:" + conf.getProxyConfig().getNonProxyHosts());
 
-				if (proxyConf.getHost() != null && proxyConf.getProxyhost() != null && proxyConf.getProxyport() != null
-						&& !(proxyConf.getNonProxyHosts() != null && proxyConf.getNonProxyHosts().contains(urlHost))) {
-					logger.debug("using  proxy proxyhost:" + proxyConf.getProxyhost() + " proxyport:" + proxyConf.getProxyport() + " host" + proxyConf.getHost());
-					client.getHostConfiguration().setHost(proxyConf.getHost());
-					client.getHostConfiguration().setProxy(proxyConf.getProxyhost(), proxyConf.getProxyport());
+				if (conf.getProxyConfig().getProxyhost() != null && conf.getProxyConfig().getProxyport() != null
+						&& !(conf.getProxyConfig().getNonProxyHosts() != null && conf.getProxyConfig().getNonProxyHosts().contains(urlHost))) {
+					logger.debug("using  proxy proxyhost:" + conf.getProxyConfig().getProxyhost() + " proxyport:" + conf.getProxyConfig().getProxyport() + " host" + conf.getProxyConfig().getHost());
 
-					if (proxyConf.getProxyUsername() != null && proxyConf.getProxyPass() != null) {
+					HttpHost proxy = new HttpHost(conf.getProxyConfig().getProxyhost(), conf.getProxyConfig().getProxyport());
 
-						List authPrefs = new ArrayList(2);
-						authPrefs.add(AuthPolicy.DIGEST);
-						authPrefs.add(AuthPolicy.BASIC);
 
-						client.getParams().setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, authPrefs);
-						client.getState().setProxyCredentials(new AuthScope(proxyConf.getProxyhost(), proxyConf.getProxyport()), new UsernamePasswordCredentials(proxyConf.getProxyUsername(), proxyConf.getProxyPass()));
+					if(conf.getProxyConfig().getHost() != null && !conf.getProxyConfig().getHost().trim().equals("")){
+						logger.warn("proxyConf.host is not longer supported");
 					}
+
+					DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxy);
+					clientBuilder.setRoutePlanner(routePlanner);
+					//clientBuilder.setProxy(proxy)
+					if (conf.getProxyConfig().getProxyUsername() != null && conf.getProxyConfig().getProxyPass() != null) {
+
+						if(credentialsProvider == null){
+							credentialsProvider = new BasicCredentialsProvider();
+						}
+						credentialsProvider.setCredentials(new AuthScope(conf.getProxyConfig().getProxyhost(),conf.getProxyConfig().getProxyport()),
+								new UsernamePasswordCredentials(conf.getProxyConfig().getProxyUsername(), conf.getProxyConfig().getProxyPass()));
+						clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+						clientBuilder.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
+					}
+
 				}
 			}
 
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(),e);
 		}
 
-		method.getParams().setContentCharset("utf-8");
-		return client;
+		return clientBuilder.build();
 	}
 
 	public static void invalidateProxySettings(){
 		configCache.remove(CACHE_KEY);
 	}
 
+	public static abstract class Callback<T extends Object>{
+		T result;
+
+		/**
+		 * do not store InputStream here cause it would be closed after handle method is called
+		 * you can store exceptions or other informations about inputstream handling here
+		 * @param result
+		 */
+		public void setResult(T result){
+			this.result = result;
+		}
+
+		public T getResult() {
+			return result;
+		}
+
+		public abstract void handle(InputStream httpResult);
+	}
 }

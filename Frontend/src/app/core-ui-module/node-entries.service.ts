@@ -1,28 +1,23 @@
 import { SelectionModel } from '@angular/cdk/collections';
 import { EventEmitter, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { filter } from 'rxjs/operators';
-import { Node } from '../core-module/rest/data-object';
 import { UIService } from '../core-module/rest/services/ui.service';
 import { ListItem } from '../core-module/ui/list-item';
-import {
-    FetchEvent,
-    GridConfig,
-    InteractionType,
-    ListDragGropConfig,
-    ListEventInterface,
-    ListOptions,
-    ListSortConfig,
-    NodeClickEvent,
-    NodeEntriesDisplayType,
-} from './components/node-entries-wrapper/entries-model';
-import { NodeDataSource } from './components/node-entries-wrapper/node-data-source';
-import { OptionItem } from './option-item';
+import { ListEventInterface, NodeEntriesDisplayType, InteractionType, ListOptions, ListSortConfig, ListDragGropConfig, NodeClickEvent, FetchEvent, GridConfig } from '../features/node-entries/entries-model';
+import { NodeDataSource } from '../features/node-entries/node-data-source';
+import { NodeEntriesDataType } from '../features/node-entries/node-entries.component';
+
+import {OptionItem, Scope} from './option-item';
 
 @Injectable()
-export class NodeEntriesService<T extends Node> {
+export class NodeEntriesService<T extends NodeEntriesDataType> {
     list: ListEventInterface<T>;
     readonly dataSource$ = new BehaviorSubject<NodeDataSource<T> | null>(null);
+    /**
+     * scope the current list is in, e.g. workspace
+     * This is used for additional config injection based on the scope
+     */
+    scope: Scope;
     get dataSource(): NodeDataSource<T> {
         return this.dataSource$.value;
     }
@@ -36,6 +31,7 @@ export class NodeEntriesService<T extends Node> {
     selection = new SelectionModel<T>(true, []);
     elementInteractionType: InteractionType;
     options: ListOptions;
+    checkbox: boolean;
     globalOptions: OptionItem[];
     sort: ListSortConfig;
     sortChange: EventEmitter<ListSortConfig>;

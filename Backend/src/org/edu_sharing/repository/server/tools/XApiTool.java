@@ -8,6 +8,12 @@ import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
@@ -19,6 +25,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONArray;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.URLEncoder;
 import java.util.*;
@@ -68,7 +77,7 @@ public class XApiTool {
         String uuid = UUID.randomUUID().toString();
         String url = learningLocker.getBaseUrl();
         url += "/api/statements/aggregate?pipeline="+ URLEncoder.encode(query.toString());
-        GetMethod method=new GetMethod(url);
+        HttpGet method = new HttpGet(url);
         return storeHTTP(method);
     }
     private static String sendToStore(JSONObject data) throws Exception {
@@ -78,12 +87,12 @@ public class XApiTool {
         String uuid = UUID.randomUUID().toString();
         String url = learningLocker.getBaseUrl();
         url += "/data/xAPI/statements?statementId="+ URLEncoder.encode(uuid);
-        PostMethod method=new PostMethod(url);
-        method.setRequestEntity(new ByteArrayRequestEntity(data.toString().getBytes()));
+        HttpPost method=new HttpPost(url);
+        method.setEntity(new ByteArrayEntity(data.toString().getBytes()));
         return storeHTTP(method);
     }
 
-    private static String storeHTTP(HttpMethodBase data) throws Exception {
+    private static String storeHTTP(HttpUriRequest data) throws Exception {
         ApplicationInfo learningLocker = ApplicationInfoList.getLearningLocker();
         Map<String, String> header=new HashMap<>();
         header.put("X-Experience-API-Version","1.0.3");
@@ -163,7 +172,7 @@ public class XApiTool {
         if(!xApiData.getJSONObject("object").getJSONObject("definition").has("extensions"))
             xApiData.getJSONObject("object").getJSONObject("definition").put("extensions",new JSONObject());
         JSONObject propsData = new JSONObject();
-        List<MetadataWidget> widgets = MetadataHelper.getWidgetsByNode(nodeRef);
+        Collection<MetadataWidget> widgets = MetadataHelper.getWidgetsByNode(nodeRef, true);
         // widgets objects to unique id set
         Set<String> storedProperties = widgets.stream().map((w) -> CCConstants.getValidGlobalName(w.getId())).collect(Collectors.toSet());
         // fixed properties that always should be added

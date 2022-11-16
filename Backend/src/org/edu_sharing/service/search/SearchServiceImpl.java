@@ -1067,4 +1067,9 @@ public class SearchServiceImpl implements SearchService {
 	public Set<SearchVCard> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind contributorKind) throws IOException {
 		throw new NotImplementedException("searchContributors not supported via Solr");
 	}
+
+	@Override
+	public SearchResultNodeRef getMetadata(List<String> nodeIds) throws IOException {
+		throw new NotImplementedException("getMetadata not supported via Solr");
+	}
 }

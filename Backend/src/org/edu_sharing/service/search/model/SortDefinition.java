@@ -8,18 +8,23 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.util.Pair;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.service.collection.Collection;
+import org.elasticsearch.script.Script;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.sort.ScoreSortBuilder;
-import org.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.search.sort.*;
 import org.springframework.context.ApplicationContext;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
 public class SortDefinition implements Serializable {
 
+	private static final List<String> ALLOWED_SORT_MAIN_PROPERTIES = Collections.singletonList(
+			"fullpath"
+	);
 	transient ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 	transient ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 	
@@ -126,8 +131,14 @@ public class SortDefinition implements Serializable {
 			SortOrder sortOrder = sortDefintionEntry.ascending ? SortOrder.ASC : SortOrder.DESC;
 			if(sortDefintionEntry.getProperty().equalsIgnoreCase("score")) {
 				searchSourceBuilder.sort(new ScoreSortBuilder().order(sortOrder));
-			} else {
-
+			} else if(sortDefintionEntry.getProperty().equalsIgnoreCase("tree")) {
+				searchSourceBuilder.sort(SortBuilders.scriptSort(
+						new Script("doc['fullpath'].value + '/' + doc['nodeRef.id'].value"),//(doc['properties.cm:name.keyword'].size() == 0 ? doc['properties.cm:name.keyword'].value : doc['properties.cm:name.keyword'].value)
+						ScriptSortBuilder.ScriptSortType.STRING
+				));
+			}else if(ALLOWED_SORT_MAIN_PROPERTIES.contains(sortDefintionEntry.getProperty())) {
+				searchSourceBuilder.sort(sortDefintionEntry.getProperty(), sortOrder);
+			}else {
 				boolean addKeywordSuffix = false;
 				String property = CCConstants.getValidGlobalName(sortDefintionEntry.getProperty());
 				if(property != null){

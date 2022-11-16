@@ -1,4 +1,4 @@
-import {Translation} from '../../core-ui-module/translation';
+import { TranslationsService } from '../../translations/translations.service';
 import {UIHelper} from '../../core-ui-module/ui-helper';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Toast} from '../../core-ui-module/toast';
@@ -12,7 +12,16 @@ import {
 import {TranslateService} from '@ngx-translate/core';
 import {SessionStorageService} from '../../core-module/core.module';
 import {RestConnectorService} from '../../core-module/core.module';
-import {Component, ViewChild, ElementRef, ViewContainerRef, ComponentFactoryResolver} from '@angular/core';
+import {
+    Component,
+    ViewChild,
+    ElementRef,
+    ViewContainerRef,
+    ComponentFactoryResolver,
+    OnDestroy,
+    OnInit,
+    AfterViewInit
+} from '@angular/core';
 import {
     LoginResult,
     ServerUpdate,
@@ -34,9 +43,8 @@ import {RestSearchService} from '../../core-module/core.module';
 import {RestHelper} from '../../core-module/core.module';
 import {Observable, Observer} from 'rxjs';
 import {RestNetworkService} from '../../core-module/core.module';
-import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {MainNavComponent} from '../../main/navigation/main-nav/main-nav.component';
 import {CustomHelper} from '../../common/custom-helper';
-import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {DateHelper} from '../../core-ui-module/DateHelper';
 import {CsvHelper} from '../../core-module/csv.helper';
 import {trigger} from '@angular/animations';
@@ -45,9 +53,18 @@ import IEditorOptions = monaco.editor.IEditorOptions;
 import {NgxEditorModel} from 'ngx-monaco-editor';
 import {Scope} from '../../core-ui-module/option-item';
 import {AboutService} from 'ngx-edu-sharing-api';
-import { SkipTarget } from '../../common/ui/skip-nav/skip-nav.service';
-import {AuthoritySearchMode} from '../../common/ui/authority-search-input/authority-search-input.component';
+import { SkipTarget } from '../../main/navigation/skip-nav/skip-nav.service';
+import {AuthoritySearchMode} from '../../shared/components/authority-search-input/authority-search-input.component';
 import {PlatformLocation} from '@angular/common';
+import { MainNavService } from '../../main/navigation/main-nav.service';
+import { DialogsService } from '../../features/dialogs/dialogs.service';
+import {InteractionType, NodeEntriesDisplayType} from 'src/app/features/node-entries/entries-model';
+import {NodeDataSource} from "../../features/node-entries/node-data-source";
+import {WorkspaceExplorerComponent} from "../workspace/explorer/explorer.component";
+import {
+    NodeEntriesWrapperComponent
+} from "../../features/node-entries/node-entries-wrapper.component";
+import {ActionbarComponent} from "../../shared/components/actionbar/actionbar.component";
 
 
 type LuceneData = {
@@ -71,9 +88,14 @@ type LuceneData = {
     trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))
   ]
 })
-export class AdminComponent {
+export class AdminComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly AuthoritySearchMode = AuthoritySearchMode;
   readonly SCOPES = Scope;
+  readonly InteractionType = InteractionType;
+  readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+  @ViewChild('searchResults') nodeEntriesSearchResult: NodeEntriesWrapperComponent<Node>;
+  @ViewChild('actionbarComponent') actionbarComponent: ActionbarComponent;
+  elasticResponse: NodeListElastic;
 
   constructor(private toast: Toast,
               private route: ActivatedRoute,
@@ -81,6 +103,7 @@ export class AdminComponent {
               private platformLocation: PlatformLocation,
               private config: ConfigurationService,
               private translate: TranslateService,
+              private translations: TranslationsService,
               private iamService: RestIamService,
               private storage : SessionStorageService,
               private networkService : RestNetworkService,
@@ -92,20 +115,18 @@ export class AdminComponent {
               private about: AboutService,
               private node: RestNodeService,
               private searchApi: RestSearchService,
+              private mainNav: MainNavService,
+              private dialogs: DialogsService,
               private organization: RestOrganizationService) {
       this.addCustomComponents(CustomHelper.getCustomComponents('AdminComponent',this.componentFactoryResolver));
-      this.searchColumns.push(new ListItem('NODE', RestConstants.CM_NAME));
-      this.searchColumns.push(new ListItem('NODE', RestConstants.NODE_ID));
-      this.searchColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
-      Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
-          GlobalContainerComponent.finishPreloading();
+      this.translations.waitForInit().subscribe(() => {
           this.warningButtons=[
-              new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=> {window.history.back()}),
-              new DialogButton('ADMIN.UNDERSTAND',DialogButton.TYPE_PRIMARY,()=> {this.showWarning=false})
+              new DialogButton('CANCEL',{ color: 'standard' },()=> {window.history.back()}),
+              new DialogButton('ADMIN.UNDERSTAND',{ color: 'primary' },()=> {this.showWarning=false})
           ];
           this.xmlCardButtons=[
-              new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=> {this.xmlAppProperties=null}),
-              new DialogButton('APPLY',DialogButton.TYPE_PRIMARY,()=> {this.saveApp()})
+              new DialogButton('CANCEL',{ color: 'standard' },()=> {this.xmlAppProperties=null}),
+              new DialogButton('APPLY',{ color: 'primary' },()=> {this.saveApp()})
           ];
           this.getTemplates();
           this.connector.isLoggedIn().subscribe((data: LoginResult) => {
@@ -123,6 +144,7 @@ export class AdminComponent {
   static RS_CONFIG_HELP='https://docs.edu-sharing.com/confluence/edp/de/installation-en/installation-of-the-edu-sharing-rendering-service';
   mailTemplates=[
       'invited',
+      'invited_workflow',
       'invited_safe',
       'invited_collection',
       'nodeIssue',
@@ -181,7 +203,6 @@ export class AdminComponent {
   parentCollectionType = 'root';
   public catalina : string;
   oaiClasses: string[];
-  @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('catalinaRef') catalinaRef : ElementRef;
   @ViewChild('xmlSelect') xmlSelect : ElementRef;
   @ViewChild('excelSelect') excelSelect : ElementRef;
@@ -201,9 +222,8 @@ export class AdminComponent {
   public editableXmls=[
     {name:'HOMEAPP',file:RestConstants.HOME_APPLICATION_XML},
   ]
-  searchResponse: NodeList | NodeListElastic;
-  searchColumns: ListItem[]=[];
-  nodeInfo: Node;
+  searchResponse = new NodeDataSource<Node>();
+  searchColumns: ListItem[] = [];
   public selectedTemplate = '';
   public templates:string[];
   public eduGroupSuggestions:SuggestItem[];
@@ -216,6 +236,20 @@ export class AdminComponent {
   private mediacenters: any[];
   ownAppMode='repository';
   authenticateAuthority: Authority;
+  private readonly onDestroyTasks: Array<() => void> = [];
+
+  ngOnInit(): void {
+    this.mainNav.setMainNavConfig({
+      title: 'ADMIN.TITLE',
+      currentScope: 'admin',
+      searchEnabled: false,
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.onDestroyTasks.forEach((task) => task());
+  }
+
   public startJob() {
     this.storage.set('admin_job',this.job);
     this.globalProgress=true;
@@ -235,7 +269,7 @@ export class AdminComponent {
     }
   }
   public debugNode(node:Node) {
-    this.nodeInfo=node;
+    this.dialogs.openNodeInfoDialog({ nodes: [node] });
   }
   public getModeButton(mode=this.mode) : any {
       return this.buttons[Helper.indexOfObjectArray(this.buttons,'id',mode)];
@@ -245,50 +279,54 @@ export class AdminComponent {
         this.globalProgress=true;
         this.node.getNodeMetadata(this.lucene.noderef,[RestConstants.ALL]).subscribe((node)=> {
             this.globalProgress=false;
-            this.searchResponse={
-                nodes: [node.node],
-                pagination: {
+            this.searchResponse.setData([node.node], {
                     from: 0,
                     count: 1,
                     total: 1
                 }
-            };
+            );
         },(error)=> {
             this.globalProgress=false;
             this.toast.error(error);
         });
     }
-  public searchNodes() {
-    this.storage.set('admin_lucene',this.lucene);
-    const authorities=[];
-    if(this.lucene.authorities) {
-      for(const auth of this.lucene.authorities) {
-        authorities.push(auth.authorityName);
+  public async searchNodes() {
+      this.storage.set('admin_lucene', this.lucene);
+      const authorities = [];
+      if (this.lucene.authorities) {
+          for (const auth of this.lucene.authorities) {
+              authorities.push(auth.authorityName);
+          }
       }
-    }
-    const request= {
-      offset:this.lucene.offset ? this.lucene.offset : 0,
-      count:this.lucene.count,
-      propertyFilter:[RestConstants.ALL]
-    };
-    this.globalProgress=true;
-    if(this.lucene.mode === 'SOLR') {
-        this.admin.searchLucene(this.lucene.query, this.lucene.store, authorities, request).subscribe((data) => {
-            this.globalProgress = false;
-            this.searchResponse = data;
-        }, (error: any) => {
-            this.globalProgress = false;
-            this.toast.error(error);
-        });
-    } else if (this.lucene.mode === 'ELASTIC') {
-        this.admin.searchElastic(this.lucene.query).subscribe((data) => {
-            this.globalProgress = false;
-            this.searchResponse = data;
-        }, (error: any) => {
-            this.globalProgress = false;
-            this.toast.error(error);
-        });
-    }
+      await this.nodeEntriesSearchResult.initOptionsGenerator({
+          actionbar: this.actionbarComponent,
+          scope: Scope.Admin
+      });
+      const request = {
+          offset: this.lucene.offset ? this.lucene.offset : 0,
+          count: this.lucene.count,
+          propertyFilter: [RestConstants.ALL]
+      };
+      this.globalProgress = true;
+      if (this.lucene.mode === 'SOLR') {
+          this.admin.searchLucene(this.lucene.query, this.lucene.store, authorities, request).subscribe((data) => {
+              this.globalProgress = false;
+              this.searchResponse.setData(data.nodes, data.pagination);
+          }, (error: any) => {
+              this.globalProgress = false;
+              this.toast.error(error);
+          });
+      } else if (this.lucene.mode === 'ELASTIC') {
+          this.admin.searchElastic(this.lucene.query).subscribe((data) => {
+              this.globalProgress = false;
+              console.log(data);
+              this.searchResponse.setData(data.nodes, data.pagination);
+              this.elasticResponse = data;
+          }, (error: any) => {
+              this.globalProgress = false;
+              this.toast.error(error);
+          });
+      }
   }
   public addLuceneAuthority(authority:Authority) {
     if(!this.lucene.authorities)
@@ -419,8 +457,8 @@ export class AdminComponent {
 
     this.dialogParameters= {info};
     this.dialogButtons=[
-      new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=> {this.dialogTitle=null}),
-      new DialogButton('ADMIN.APPLICATIONS.REMOVE',DialogButton.TYPE_DANGER,()=> {
+      new DialogButton('CANCEL',{ color: 'standard' },()=> {this.dialogTitle=null}),
+      new DialogButton('ADMIN.APPLICATIONS.REMOVE',{ color: 'danger' },()=> {
         this.dialogTitle=null;
         this.globalProgress=true;
         this.admin.removeApplication(app.id).subscribe(()=> {
@@ -611,7 +649,7 @@ export class AdminComponent {
     });
   }
 
-  private refreshAppList() {
+  public refreshAppList() {
     this.admin.getApplications().subscribe((data:Application[])=> {
       this.applications = data;
       this.applicationsOpen = {};
@@ -790,7 +828,7 @@ export class AdminComponent {
     }
     reloadJobStatus() {
         this.admin.getJobs().subscribe((jobs)=> {
-            this.jobs=jobs;
+            this.jobs = jobs.filter((j: any) => !!j);
             this.updateJobLogs();
         })
     }
@@ -1021,7 +1059,10 @@ export class AdminComponent {
     this.storage.set('admin_lucene',this.lucene);
     this.globalProgress=true;
     const props=this.lucene.properties.split('\n');
-    this.admin.exportLucene(this.lucene.query, this.lucene.store, props).subscribe((data)=> {
+    this.admin.exportLucene(
+        this.lucene.query, this.lucene.store, props,
+        this.lucene.authorities?.map(a => a.authorityName)
+    ).subscribe((data)=> {
       const filename='Export-'+DateHelper.formatDate(this.translate,new Date().getTime(),{useRelativeLabels:false});
       this.globalProgress=false;
 
@@ -1129,6 +1170,13 @@ export class AdminComponent {
     private init() {
         this.initButtons();
         this.globalProgress=false;
+
+        this.searchColumns = WorkspaceExplorerComponent.getColumns(this.connector);
+        this.searchColumns.filter(s =>
+            [RestConstants.CM_NAME, RestConstants.NODE_ID, RestConstants.CM_CREATOR]
+                .includes(s.name)
+        ).forEach(s => s.visible = true);
+
         this.route.queryParams.subscribe((data:any)=> {
             if(data.mode) {
                 this.mode = data.mode;
@@ -1162,10 +1210,11 @@ export class AdminComponent {
               this.availableJobs = jobs;
               this.prepareJobClasses();
             });
-            setInterval(() => {
+            const interval = setInterval(() => {
                 if (this.mode == 'JOBS')
                     this.reloadJobStatus();
             }, 10000);
+            this.onDestroyTasks.push(() => clearInterval(interval));
             this.admin.getOAIClasses().subscribe((classes: string[]) => {
                 this.oaiClasses = classes;
                 this.storage.get('admin_oai').subscribe((data: any) => {
@@ -1185,14 +1234,13 @@ export class AdminComponent {
             this.admin.getRepositoryVersion().subscribe((data: string) => {
                 this.repositoryVersion = data;
             }, (error: any) => {
-                console.info(error);
                 this.repositoryVersion = 'Error accessing version information. Are you in dev mode?';
             });
         }
     }
 
   getOwnAppUrl() {
-    return this.connector.getAbsoluteEdusharingUrl()+'metadata?format='+this.ownAppMode;
+    return this.connector.getAbsoluteEdusharingUrl()+'metadata?format='+this.ownAppMode + '&external=true';
   }
 
   copyOwnApp() {
@@ -1244,9 +1292,12 @@ export class AdminComponent {
       if (param.file) {
         continue;
       }
-      data[param.name] = param.sampleValue ?? '';
+      data[param.name] = param.type === 'boolean' ? param.sampleValue === 'true' : param.sampleValue ?? '';
       if(param.values) {
         data[param.name] = param.values.map((v) => v.name).join('|');
+      }
+      if(param.array) {
+          data[param.name] = [data[param.name]];
       }
       modified = true;
     }
@@ -1281,6 +1332,9 @@ export class AdminComponent {
         } catch (e) {
 
         }
+    }
+
+    ngAfterViewInit(): void {
     }
 }
 

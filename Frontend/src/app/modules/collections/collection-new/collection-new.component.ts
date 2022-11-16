@@ -6,17 +6,26 @@ import {
     ViewChild,
     Sanitizer,
     ElementRef,
-    EventEmitter
+    EventEmitter, ApplicationRef
 } from '@angular/core';
 
 
 import {Router, Params, ActivatedRoute} from "@angular/router";
 
-import {Translation} from '../../../core-ui-module/translation';
+import { TranslationsService } from '../../../translations/translations.service';
 
 import * as EduData from "../../../core-module/core.module";
 
-import {RestCollectionService, ListItem, DialogButton, RestMediacenterService, RestMdsService, UIService} from "../../../core-module/core.module";
+import {
+    RestCollectionService,
+    ListItem,
+    DialogButton,
+    RestMediacenterService,
+    RestMdsService,
+    UIService,
+    FrameEventsService,
+    EventListener,
+} from '../../../core-module/core.module';
 import {RestNodeService} from "../../../core-module/core.module";
 import {RestConstants} from "../../../core-module/core.module";
 import {RestHelper} from "../../../core-module/core.module";
@@ -28,25 +37,36 @@ import {LocalPermissions} from "../../../core-module/core.module";
 import {Collection} from "../../../core-module/core.module";
 import {RestConnectorService} from "../../../core-module/core.module";
 import {ConfigurationService} from "../../../core-module/core.module";
-import {SessionStorageService} from "../../../core-module/core.module";
 import {UIConstants} from "../../../core-module/ui/ui-constants";
-import {MdsComponent} from "../../../common/ui/mds/mds.component";
+import {MdsComponent} from "../../../features/mds/legacy/mds/mds.component";
 import {TranslateService} from "@ngx-translate/core";
 import {ColorHelper, PreferredColor} from '../../../core-module/ui/color-helper';
 import {DomSanitizer} from "@angular/platform-browser";
 import {TemporaryStorageService} from "../../../core-module/core.module";
 import {RegisterResetPasswordComponent} from "../../register/register-reset-password/register-reset-password.component";
-import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
+import {MainNavComponent} from '../../../main/navigation/main-nav/main-nav.component';
 import {UIHelper} from "../../../core-ui-module/ui-helper";
-import {GlobalContainerComponent} from "../../../common/ui/global-container/global-container.component";
-import {AuthorityNamePipe} from "../../../core-ui-module/pipes/authority-name.pipe";
+import {AuthorityNamePipe} from "../../../shared/pipes/authority-name.pipe";
 import {BridgeService} from '../../../core-bridge-module/bridge.service';
 import {WorkspaceShareComponent} from "../../workspace/share/share.component";
 import {MdsMetadatasets} from '../../../core-module/core.module';
 import {ConfigurationHelper} from '../../../core-module/core.module';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
-import {MdsEditorWrapperComponent} from '../../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
-import {Values} from '../../../common/ui/mds-editor/types';
+import {DefaultGroups, OptionItem} from '../../../core-ui-module/option-item';
+import {Observable} from 'rxjs';
+import {PlatformLocation} from '@angular/common';
+import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
+import { MainNavService } from '../../../main/navigation/main-nav.service';
+import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import { Values } from '../../../features/mds/types/types';
+import {NodeDataSource} from "../../../features/node-entries/node-data-source";
+import {
+    InteractionType,
+    NodeEntriesDisplayType
+} from "../../../features/node-entries/entries-model";
+import {
+    NodeEntriesWrapperComponent
+} from "../../../features/node-entries/node-entries-wrapper.component";
 
 type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITORIAL_GROUPS';
 
@@ -56,10 +76,12 @@ type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITO
   templateUrl: 'collection-new.component.html',
   styleUrls: ['collection-new.component.scss']
 })
-export class CollectionNewComponent {
-  @ViewChild('mainNav') mainNavRef: MainNavComponent;
+export class CollectionNewComponent implements EventListener, OnInit {
   @ViewChild('mds') mds : MdsEditorWrapperComponent;
+  @ViewChild('organizations') organizationsRef : NodeEntriesWrapperComponent<Group>;
   @ViewChild('share') shareRef : WorkspaceShareComponent;
+  readonly InteractionType = InteractionType;
+  readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
   public hasCustomScope: boolean;
   public COLORS:string[];
   public DEFAULT_COLORS:string[]=['#975B5D','#692426','#E6B247','#A89B39','#699761','#32662A','#60998F','#29685C','#759CB7','#537997','#976097','#692869'];
@@ -80,8 +102,7 @@ export class CollectionNewComponent {
   public mediacenter:any;
   public parentId: any;
   public editId: any;
-  public editorialGroups:Group[]=[];
-  public editorialGroupsSelected:Group[]=[];
+  public editorialGroups = new NodeDataSource<Group>();
   public editorialPublic = true;
   public editorialColumns:ListItem[]=[new ListItem("GROUP",RestConstants.AUTHORITY_DISPLAYNAME)];
   imageData:any = null;
@@ -105,6 +126,7 @@ export class CollectionNewComponent {
   private parentCollection: EduData.Node;
   private originalPermissions: LocalPermissions;
   private permissionsInfo: any;
+  private loadingTask = this.loadingScreen.addLoadingTask();
 
   @ViewChild('file') imageFileRef : ElementRef;
   @ViewChild('authorFreetextInput') authorFreetextInput : ElementRef<HTMLInputElement>;
@@ -112,6 +134,9 @@ export class CollectionNewComponent {
   authorFreetext=false;
   authorFreetextAllowed=false;
   mdsSet: string;
+  imageOptions: OptionItem[];
+  imageWindow: Window;
+  editorialGroupsSelected: Group[] = [];
 
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
@@ -121,6 +146,52 @@ export class CollectionNewComponent {
       this.goBack();
       return;
     }
+  }
+    setCollection(collection: EduData.Node) {
+      return new Observable<void>((observer) =>
+        {
+            const id = collection.ref.id;
+            this.nodeService.getNodePermissions(id).subscribe((perm: EduData.NodePermissions) => {
+                this.mdsSet = collection.metadataset;
+                this.editorialPublic = perm.permissions.localPermissions?.permissions?.some(
+                    (p: Permission) => p.authority?.authorityName === RestConstants.AUTHORITY_EVERYONE
+                );
+                this.editId = id;
+                this.currentCollection = collection;
+                // cleanup irrelevant data
+                this.currentCollection.rating = null;
+                this.authorFreetext = this.currentCollection.collection.authorFreetext != null;
+                this.originalPermissions = perm.permissions.localPermissions;
+                this.properties = collection.properties;
+                this.newCollectionType = this.getTypeForCollection(this.currentCollection);
+                this.hasCustomScope = false;
+                this.newCollectionStep = this.STEP_GENERAL;
+                if (this.currentCollection.collection.scope === RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC) {
+                    this.currentCollection.collection.scope = RestConstants.COLLECTIONSCOPE_CUSTOM;
+                }
+                observer.next();
+                observer.complete();
+            });
+        });
+    }
+
+    onEvent(event: string, data: any): void {
+      if(event === FrameEventsService.EVENT_APPLY_NODE) {
+          console.log(data);
+          const imageData = data.preview?.data;
+          if(imageData) {
+            this.imageData = imageData;
+            this.updateImageOptions();
+            fetch(this.imageData).then(res => res.blob()).then(blob => {
+                this.imageFile = blob as File;
+            });
+          } else {
+              this.toast.error(
+                  null, 'COLLECTIONS.TOAST.ERROR_IMAGE_APPLY'
+              );
+          }
+        this.imageWindow?.close();
+      }
   }
 
   constructor(
@@ -133,16 +204,23 @@ export class CollectionNewComponent {
       private mediacenterService : RestMediacenterService,
       private route:ActivatedRoute,
       private mdsService:RestMdsService,
+      private eventService:FrameEventsService,
       private router: Router,
+      private platformLocation: PlatformLocation,
       private toast : Toast,
       private bridge : BridgeService,
       private temporaryStorage : TemporaryStorageService,
-      private storage : SessionStorageService,
       private zone: NgZone,
       private sanitizer: DomSanitizer,
       private config : ConfigurationService,
-      private translationService:TranslateService) {
-    Translation.initialize(this.translationService,this.config,this.storage,this.route).subscribe(()=>{
+      private ref : ApplicationRef,
+      private translations: TranslationsService,
+      private translationService:TranslateService,
+      private loadingScreen: LoadingScreenService,
+      private mainNav: MainNavService,
+    ) {
+      this.eventService.addListener(this);
+    this.translations.waitForInit().subscribe(()=>{
       this.connector.isLoggedIn().subscribe((data) => {
         this.mdsService.getSets().subscribe((mdsSets) => {
           const sets = ConfigurationHelper.filterValidMds(RestConstants.HOME_REPOSITORY, mdsSets.metadatasets, this.config);
@@ -150,8 +228,15 @@ export class CollectionNewComponent {
 
           this.COLORS=this.config.instant('collections.colors',this.DEFAULT_COLORS);
           if(data.statusCode!=RestConstants.STATUS_CODE_OK){
+            this.toast.error(
+              { message: 'loginData.statusCode was not ok', data },
+              'TOOLPERMISSION_ERROR',
+            );
             UIHelper.getCommonParameters(this.route).subscribe((params)=> {
-              this.router.navigate([UIConstants.ROUTER_PREFIX + "collections",{queryParams:params}]);
+              this.router.navigate(
+                [UIConstants.ROUTER_PREFIX + "collections"],
+                { queryParams: params },
+              );
             });
             return;
           }
@@ -166,61 +251,68 @@ export class CollectionNewComponent {
           });
           this.authorFreetextAllowed=this.connector.hasToolPermissionInstant(RestConstants.TOOLPERMISSION_COLLECTION_CHANGE_OWNER);
 
-          this.iamService.getUser().subscribe((user : IamUser) => this.user=user.person);
-          this.route.queryParams.subscribe(params => {
-            this.mainnav=params['mainnav']!='false';
-          });
-          this.iamService.searchGroups("*",true,RestConstants.GROUP_TYPE_EDITORIAL, '', {count:RestConstants.COUNT_UNLIMITED}).subscribe((data:IamGroups)=>{
-            this.editorialGroups=data.groups;
-          });
-          this.route.params.subscribe(params => {
-            // get mode from route and validate input data
-            let mode = params['mode'];
-            let id = params['id'];
-            if (mode=="edit") {
-              this.collectionService.getCollection(id).subscribe((data)=>{
-                this.nodeService.getNodeMetadata(id,[RestConstants.ALL]).subscribe((node:EduData.NodeWrapper)=>{
-                  this.nodeService.getNodePermissions(id).subscribe((perm:EduData.NodePermissions)=>{
-                    this.mdsSet = node.node.metadataset;
-                    this.editorialGroupsSelected=this.getEditoralGroups(perm.permissions.localPermissions.permissions);
-                    this.editorialPublic=perm.permissions.localPermissions?.permissions?.some(
-                        (p: Permission) => p.authority?.authorityName === RestConstants.AUTHORITY_EVERYONE
-                    );;
-                    this.editId=id;
-                    this.currentCollection = data.collection;
-                    // cleanup irrelevant data
-                    this.currentCollection.rating = null;
-                    this.authorFreetext=this.currentCollection.collection.authorFreetext!=null;
-                    this.originalPermissions=perm.permissions.localPermissions;
-                    this.properties=node.node.properties;
-                    this.newCollectionType=this.getTypeForCollection(this.currentCollection);
-                    this.hasCustomScope=false;
-                    this.newCollectionStep = this.STEP_GENERAL;
-                    if(this.currentCollection.collection.scope === RestConstants.COLLECTIONSCOPE_CUSTOM_PUBLIC) {
-                      this.currentCollection.collection.scope = RestConstants.COLLECTIONSCOPE_CUSTOM;
-                    }
-                    this.updateAvailableSteps();
-                    this.isLoading=false;
-                    GlobalContainerComponent.finishPreloading();
-                  });
-                });
+          this.iamService.getCurrentUserAsync().then((user : IamUser) => this.user=user.person);
+          this.route.queryParams.subscribe(queryParams => {
+            this.mainnav = queryParams.mainnav !== 'false';
+              this.route.params.subscribe(params => {
+                  // get mode from route and validate input data
+                  let mode = params['mode'];
+                  let id = params['id'];
+                  if(queryParams.collection) {
+                      this.setParent(id,null);
+                      this.setCollection(JSON.parse(queryParams.collection)).subscribe(() => {
+                          this.updateAvailableSteps();
+                          this.isLoading=false;
+                          if (!this.loadingTask.isDone) {
+                            this.loadingTask.done();
+                          }
+                      });
+                  } else if (mode=="edit") {
+                      this.collectionService.getCollection(id).subscribe((data)=>{
+                          this.nodeService.getNodeMetadata(id,[RestConstants.ALL]).subscribe((node:EduData.NodeWrapper)=>{
+                              this.setCollection(node.node).subscribe(() => {
+                                  this.updateAvailableSteps();
+                                  this.updateImageOptions();
+                                  this.isLoading=false;
+                                  if (!this.loadingTask.isDone) {
+                                    this.loadingTask.done();
+                                  }
+                              });
+                          });
+                      });
+                  } else {
+                      if(id==RestConstants.ROOT){
+                          this.setParent(id,null);
+                          return;
+                      }
+                      this.collectionService.getCollection(id).subscribe((data:EduData.CollectionWrapper)=>{
+                          this.setParent(id,data.collection);
+                      },(error:any)=>{
+                          this.setParent(id,null);
+                      });
+                  }
               });
-            } else {
-              if(id==RestConstants.ROOT){
-                this.setParent(id,null);
-                return;
-              }
-              this.collectionService.getCollection(id).subscribe((data:EduData.CollectionWrapper)=>{
-                this.setParent(id,data.collection);
-              },(error:any)=>{
-                this.setParent(id,null);
-              });
-            }
+
+          });
+          this.iamService.searchGroups("*",true,RestConstants.GROUP_TYPE_EDITORIAL, '', {
+              count:RestConstants.COUNT_UNLIMITED,
+              sortBy: [RestConstants.CM_PROP_AUTHORITY_DISPLAYNAME],
+              sortAscending: [true]
+          }).subscribe((data:IamGroups)=>{
+            this.editorialGroups.setData(data.groups, data.pagination);
           });
 
         });
       });
     });
+  }
+
+  ngOnInit(): void {
+    this.mainNav.setMainNavConfig({
+      title: 'COLLECTIONS.TITLE',
+      currentScope: 'collections',
+      searchEnabled: false,
+    })
   }
 
     getShareStatus(){
@@ -277,7 +369,7 @@ export class CollectionNewComponent {
       }
       else{
         this.editPermissionsDummy=new EduData.Node();
-        this.editPermissionsDummy.ref=new NodeRef();
+        this.editPermissionsDummy.ref= {} as NodeRef;
         this.editPermissionsDummy.aspects=[RestConstants.CCM_ASPECT_COLLECTION];
         this.editPermissionsDummy.isDirectory=true;
       }
@@ -344,6 +436,7 @@ export class CollectionNewComponent {
         // remember file for upload
         this.imageFile = file;
         this.imageData=this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(file));
+        this.updateImageOptions();
     }
     handleError(error:any){
       if(error.status==RestConstants.DUPLICATE_NODE_RESPONSE){
@@ -477,6 +570,14 @@ export class CollectionNewComponent {
             setTimeout(() => {
                 this.mds?.loadMds(true);
             });
+            if (this.newCollectionStep == this.STEP_EDITORIAL_GROUPS) {
+                setTimeout(() => {
+                    this.organizationsRef.getSelection().select(...this.getEditoralGroups(this.originalPermissions.permissions));
+                    this.organizationsRef.getSelection().changed.subscribe(
+                        change => this.editorialGroupsSelected = change.source.selected
+                    )
+                });
+            }
         }
         this.updateButtons();
     }
@@ -605,7 +706,7 @@ export class CollectionNewComponent {
   private getEditoralGroups(permissions: Permission[]) {
     let list:Group[]=[];
     for(let perm of permissions){
-      for(let group of this.editorialGroups){
+      for(let group of this.editorialGroups.getData()){
         if(group.authorityName==perm.authority.authorityName){
           list.push(group);
         }
@@ -637,8 +738,11 @@ export class CollectionNewComponent {
           this.setCollectionType(RestConstants.COLLECTIONTYPE_EDITORIAL);
       }
     this.updateAvailableSteps();
+    this.updateImageOptions();
     this.isLoading=false;
-    GlobalContainerComponent.finishPreloading();
+    if (!this.loadingTask.isDone) {
+      this.loadingTask.done();
+    }
   }
 
   private save4(collection: EduData.Node) {
@@ -660,6 +764,7 @@ export class CollectionNewComponent {
       this.imageFile = null;
       this.imageFileRef.nativeElement.value = null;
       this.currentCollection.preview = null;
+      this.updateImageOptions();
     }
 
     private updateButtons() {
@@ -671,8 +776,8 @@ export class CollectionNewComponent {
 
          */
         this.buttons=[
-            new DialogButton('BACK',DialogButton.TYPE_CANCEL,()=>this.goBack()),
-            new DialogButton(this.isLastStep() ? 'SAVE' : 'NEXT',DialogButton.TYPE_PRIMARY,()=>this.goToNextStep())
+            new DialogButton('BACK',{ color: 'standard' },()=>this.goBack()),
+            new DialogButton(this.isLastStep() ? 'SAVE' : 'NEXT',{ color: 'primary' },()=>this.goToNextStep())
         ]
     }
 
@@ -692,4 +797,35 @@ export class CollectionNewComponent {
     this.authorFreetext=false;
     this.currentCollection.collection.authorFreetext=null;
   }
+
+    updateImageOptions() {
+        this.imageOptions = [
+            new OptionItem('COLLECTIONS.NEW.IMAGE.UPLOAD', 'file_upload',
+                () => this.imageFileRef.nativeElement.click()
+            ),
+            new OptionItem('COLLECTIONS.NEW.IMAGE.SEARCH', 'search',
+                () => {
+                    this.imageWindow = UIHelper.openSearchWithReurl(this.platformLocation, this.router, 'WINDOW', {queryParams:
+                            {reurlCreate: false, reurlTypes: ['image']}
+                    }) as Window;
+                    /*this.router.navigate([], {
+                        relativeTo: this.route,
+                        queryParams: {
+                            collection: JSON.stringify(this.currentCollection)
+                        }
+                    }).then(() => {
+                    });*/
+                }
+            )
+        ];
+        this.imageOptions[0].group = DefaultGroups.Edit;
+        this.imageOptions[1].group = DefaultGroups.Edit;
+        if(this.imageData || (this.currentCollection.preview && !this.currentCollection.preview.isIcon)) {
+            this.imageOptions.push(new OptionItem('COLLECTIONS.NEW.IMAGE.DELETE', 'delete',
+                () => this.deleteImage())
+            );
+            this.imageOptions[2].group = DefaultGroups.Delete;
+        }
+    }
+
 }

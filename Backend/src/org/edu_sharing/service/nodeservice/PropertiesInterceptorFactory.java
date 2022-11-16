@@ -14,48 +14,80 @@ public class PropertiesInterceptorFactory {
     static Logger logger = Logger.getLogger(PropertiesInterceptorFactory.class);
 
 
-    static List<PropertiesInterceptor> propertiesInterceptor = null;
+    static List<PropertiesGetInterceptor> propertiesGetInterceptors = null;
+    static List<PropertiesSetInterceptor> propertiesSetInterceptors = null;
 
-    public static List<? extends PropertiesInterceptor> getPropertiesInterceptors(){
-        if(propertiesInterceptor == null){
+    public static List<?> getInterceptors(String key) {
+        synchronized (PropertiesInterceptorFactory.class) {
+            try {
+                List<String> className = new ArrayList<>(LightbendConfigLoader.get().getStringList(key));
+                ArrayList<Class<?>> clazz = className.stream().map((String className1) -> {
+                    try {
+                        return Class.forName(className1);
+                    } catch (ClassNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                }).collect(Collectors.toCollection((Supplier<ArrayList>) ArrayList::new));
+                return clazz.stream().map((c) -> {
+                    try {
+                        return c.newInstance();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }).collect(Collectors.toList());
+            } catch (Throwable t) {
+                throw new RuntimeException(t);
+            }
+        }
+    }
+    public static List<? extends PropertiesSetInterceptor> getPropertiesSetInterceptors(){
+        if(propertiesSetInterceptors == null){
             synchronized (PropertiesInterceptorFactory.class){
                 try{
-                    List<String> className = new ArrayList<>(LightbendConfigLoader.get().getStringList("repository.interceptors.properties"));
-                    if(className.size() == 0) {
-                        logger.info("No interceptors for properties defined, will use default handling");
+                    List<PropertiesSetInterceptor> clazz =
+                            (List<PropertiesSetInterceptor>) getInterceptors("repository.interceptors.properties.set");
+                    if(clazz.size() == 0) {
+                        logger.info("No interceptors for set properties defined, will use default handling");
                     }
-                    ArrayList<Class<? extends PropertiesInterceptor>> clazz = className.stream().map((String className1) -> {
-                        try {
-                            return Class.forName(className1);
-                        } catch (ClassNotFoundException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }).collect(Collectors.toCollection((Supplier<ArrayList>) ArrayList::new));
-                    clazz.add(0, PropertiesInterceptorPermissions.class);
-                    propertiesInterceptor = clazz.stream().map((c) -> {
-                        try {
-                            return c.newInstance();
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    }).collect(Collectors.toList());
+                    propertiesSetInterceptors = clazz;
                 }catch(Throwable t) {
                     throw new RuntimeException(t);
                 }
             }
         }
-        return propertiesInterceptor;
+        return propertiesSetInterceptors;
+    }
+    public static List<? extends PropertiesGetInterceptor> getPropertiesGetInterceptors(){
+        if(propertiesGetInterceptors == null){
+            synchronized (PropertiesInterceptorFactory.class){
+                try{
+                    List<PropertiesGetInterceptor> clazz =
+                            (List<PropertiesGetInterceptor>) getInterceptors("repository.interceptors.properties.get");
+                    if(clazz.size() == 0) {
+                        logger.info("No interceptors for get properties defined, will use default handling");
+                    }
+                    clazz.add(0, new PropertiesGetInterceptorPermissions());
+
+                    propertiesGetInterceptors = clazz;
+                }catch(Throwable t) {
+                    throw new RuntimeException(t);
+                }
+            }
+        }
+        return propertiesGetInterceptors;
     }
 
     public static void refresh(){
-        propertiesInterceptor = null;
+        propertiesGetInterceptors = null;
+        propertiesSetInterceptors = null;
     }
 
-    public static PropertiesInterceptor.PropertiesContext getPropertiesContext(NodeRef nodeRef, Map<String,Object> properties, List<String> aspects){
-        PropertiesInterceptor.PropertiesContext propertiesContext = new PropertiesInterceptor.PropertiesContext();
+    public static PropertiesGetInterceptor.PropertiesContext getPropertiesContext(NodeRef nodeRef, Map<String,Object> properties, List<String> aspects, Map<String, Object> elasticsearchSource){
+        PropertiesGetInterceptor.PropertiesContext propertiesContext = new PropertiesGetInterceptor.PropertiesContext();
         propertiesContext.setProperties(properties);
         propertiesContext.setAspects(aspects);
         propertiesContext.setNodeRef(nodeRef);
+        propertiesContext.setElasticsearchSource(elasticsearchSource);
         propertiesContext.setSource(CallSourceHelper.getCallSource());
         return propertiesContext;
     }

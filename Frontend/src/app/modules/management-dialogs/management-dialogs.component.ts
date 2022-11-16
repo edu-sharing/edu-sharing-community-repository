@@ -28,7 +28,6 @@ import {NodeWrapper, Node, Collection} from "../../core-module/core.module";
 import {RestHelper} from "../../core-module/core.module";
 import {RestToolService} from "../../core-module/core.module";
 import {ConfigurationService} from "../../core-module/core.module";
-import {BulkBehavior, MdsComponent} from "../../common/ui/mds/mds.component";
 import {RestCollectionService} from "../../core-module/core.module";
 import {trigger} from "@angular/animations";
 import {UIAnimation} from "../../core-module/ui/ui-animation";
@@ -39,9 +38,12 @@ import {ClipboardObject, TemporaryStorageService} from '../../core-module/core.m
 import {RestUsageService} from "../../core-module/core.module";
 import {BridgeService} from '../../core-bridge-module/bridge.service';
 import {LinkData, NodeHelperService} from '../../core-ui-module/node-helper.service';
-import { MdsEditorWrapperComponent } from '../../common/ui/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import {WorkspaceLicenseComponent} from './license/license.component';
 import {ErrorProcessingService} from '../../core-ui-module/error.processing';
+import { BulkBehavior } from '../../features/mds/types/types';
+import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import { MainNavService } from 'src/app/main/navigation/main-nav.service';
+import { first } from 'rxjs/operators';
 
 
 export enum DialogType {
@@ -105,7 +107,7 @@ export class WorkspaceManagementDialogsComponent  {
         this.nodeDeleteMessage='WORKSPACE.DELETE_MESSAGE'+(nodeDelete.length === 1 ? '_SINGLE' : '');
         this.nodeDeleteMessageParams = {name:RestHelper.getName(nodeDelete[0])};
         this.nodeDeleteButtons=DialogButton.getCancel(()=> {this._nodeDelete = null});
-        this.nodeDeleteButtons.push(new DialogButton('YES_DELETE',DialogButton.TYPE_DANGER,()=>{this.deleteConfirmed(nodeDelete)}));
+        this.nodeDeleteButtons.push(new DialogButton('YES_DELETE', { color: 'danger' },()=>{this.deleteConfirmed(nodeDelete)}));
       if(nodeDelete.length === 1) {
           if (nodeDelete[0].collection) {
               this.nodeDeleteTitle = 'WORKSPACE.DELETE_TITLE_COLLECTION';
@@ -134,16 +136,12 @@ export class WorkspaceManagementDialogsComponent  {
     @Output() onDelete = new EventEmitter<{objects: Node[]|any,error: boolean, count: number}>();
   @Input() nodeShare : Node[];
   @Output() nodeShareChange = new EventEmitter<Node[]>();
-    @Input() nodeDebug : Node[];
-    @Output() nodeDebugChange = new EventEmitter<Node[]>();
     @Input() nodeShareLink : Node;
     @Output() nodeShareLinkChange = new EventEmitter();
     @Input() nodeWorkflow : Node[];
     @Output() nodeWorkflowChange = new EventEmitter();
     @Input() signupGroup : boolean;
     @Output() signupGroupChange = new EventEmitter<boolean>();
-  @Input() nodeReport : Node;
-  @Output() nodeReportChange = new EventEmitter();
   @Input() addNodesStream : Node[];
   @Output() addNodesStreamChange = new EventEmitter();
     @Input() nodeVariant : Node;
@@ -170,12 +168,13 @@ export class WorkspaceManagementDialogsComponent  {
     @Output() nodeSidebarChange = new EventEmitter<Node>();
     @Input() showUploadSelect=false;
   @Output() showUploadSelectChange = new EventEmitter();
+  @Output() onUploadSelectCanceled = new EventEmitter();
   @Output() onClose=new EventEmitter();
   @Output() onCreate=new EventEmitter();
   @Output() onRefresh=new EventEmitter<Node[]|void>();
   @Output() onUploadFilesProcessed=new EventEmitter<Node[]>();
   @Output() onCloseMetadata=new EventEmitter();
-  @Output() onUploadFileSelected=new EventEmitter();
+  @Output() onUploadFileSelected=new EventEmitter<FileList>();
   @Output() onUpdateLicense=new EventEmitter();
   @Output() onCloseAddToCollection=new EventEmitter();
   @Output() onStoredAddToCollection=new EventEmitter<{collection: Node, references: CollectionReference[]}>();
@@ -204,7 +203,7 @@ export class WorkspaceManagementDialogsComponent  {
      * @node: Reference to the node (for header title)
      * @data: The string to display inside the qr code (e.g. an url)
      */
-  @Input() qr: {node: Node, data: string};
+//   @Input() qr: {node: Node, data: string};
 
     /**
      * @Deprecated, the components should use toast service directly
@@ -259,12 +258,6 @@ export class WorkspaceManagementDialogsComponent  {
         event.stopPropagation();
         return;
       }
-      if(this.nodeReport!=null){
-        this.closeReport();
-        event.preventDefault();
-        event.stopPropagation();
-        return;
-      }
       if(this.ltiObject){
         this.ltiObject=null;
         event.preventDefault();
@@ -283,6 +276,7 @@ export class WorkspaceManagementDialogsComponent  {
     private config:ConfigurationService,
     private connector:RestConnectorService,
     private searchService:RestSearchService,
+    private mainNavService:MainNavService,
     private toast:Toast,
     private errorProcessing:ErrorProcessingService,
     private nodeHelper: NodeHelperService,
@@ -393,14 +387,15 @@ export class WorkspaceManagementDialogsComponent  {
   public refresh(){
     this.onRefresh.emit();
   }
- public uploadFile(event:any){
+ public uploadFile(event: FileList){
    this.onUploadFileSelected.emit(event);
  }
-  createUrlLink(link : LinkData) {
+  async createUrlLink(link : LinkData) {
     const urlData = this.nodeHelper.createUrlLink(link);
     this.closeUploadSelect();
     this.toast.showProgressDialog();
-    this.nodeService.createNode(this.parent.ref.id,RestConstants.CCM_TYPE_IO,urlData.aspects,urlData.properties,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(
+    const config = await this.mainNavService.observeMainNavConfig().pipe(first()).toPromise();
+    this.nodeService.createNode(link.parent?.ref.id,RestConstants.CCM_TYPE_IO,urlData.aspects,urlData.properties,true,RestConstants.COMMENT_MAIN_FILE_UPLOAD).subscribe(
       (data) => {
         this.showMetadataAfterUpload([data.node]);
         this.toast.closeModalDialog();
@@ -413,6 +408,10 @@ export class WorkspaceManagementDialogsComponent  {
    this.showUploadSelect=false
    this.showUploadSelectChange.emit(false);
  }
+  public cancelUploadSelect(){
+    this.closeUploadSelect();
+    this.onUploadSelectCanceled.emit(false);
+  }
  public closeContributor(node: Node){
      if(this.editorPending){
          this.editorPending=false;
@@ -470,6 +469,7 @@ export class WorkspaceManagementDialogsComponent  {
     this.createMetadata=null;
     this.onCloseMetadata.emit(nodes);
     if(refresh) {
+        console.log('_nodeFromUpload', this._nodeFromUpload);
         if(this._nodeFromUpload) {
             this.onUploadFilesProcessed.emit(nodes);
         }
@@ -514,10 +514,6 @@ export class WorkspaceManagementDialogsComponent  {
   public closeStream() {
     this.addNodesStream=null;
     this.addNodesStreamChange.emit(null);
-  }
-  public closeReport() {
-    this.nodeReport=null;
-    this.nodeReportChange.emit(null);
   }
     public closeVariant() {
         this.nodeVariant=null;
@@ -596,11 +592,6 @@ export class WorkspaceManagementDialogsComponent  {
     closeTemplate() {
         this.nodeTemplate = null;
         this.nodeTemplateChange.emit(null);
-    }
-
-    closeDebug() {
-      this.nodeDebug = null;
-      this.nodeDebugChange.emit(null);
     }
 
     closePinnedCollection() {
@@ -686,6 +677,7 @@ export class WorkspaceManagementDialogsComponent  {
             this.onUploadFilesProcessed.emit(nodes);
         } else if(!saved && this.nodeDeleteOnCancel) {
             this.deleteNodes(this._nodeSimpleEdit);
+            this.onUploadFilesProcessed.emit(null);
         }
         if (nodes) {
             this.onRefresh.emit(nodes);

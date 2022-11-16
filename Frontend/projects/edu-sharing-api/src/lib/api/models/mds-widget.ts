@@ -9,6 +9,7 @@ export interface MdsWidget {
     bottomCaption?: string;
     caption?: string;
     condition?: MdsWidgetCondition;
+    configuration?: string;
     defaultMax?: number;
     defaultMin?: number;
     defaultvalue?: string;

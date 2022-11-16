@@ -1,0 +1,48 @@
+<ng-container [ngSwitch]="item.name">
+  <ng-container *ngSwitchCase="'info'">
+    <ng-container *ngIf="indicatorIcons$ | async; else textRepresentation">
+      <i
+        esIcon="layers"
+        [altText]="'COLLECTION.INFO_REFERENCES_MULTI' | translate"
+        [matTooltip]="'COLLECTION.INFO_REFERENCES_MULTI' | translate"
+      ></i>
+      {{ $any(node).collection?.childCollectionsCount }}
+      <i
+        esIcon="insert_drive_file"
+        [altText]="'collections_content' | translate"
+        [matTooltip]="'collections_content' | translate"
+      ></i>
+      {{ $any(node).collection?.childReferencesCount }}
+    </ng-container>
+    <ng-template #textRepresentation>
+      <div class="rows">
+        <p>
+          {{ 'COLLECTION.INFO_REFERENCES_MULTI' | translate }}:
+          {{ $any(node).collection?.childCollectionsCount }}
+        </p>
+        <p>
+          {{ 'collections_content' | translate }}:
+          {{ $any(node).collection?.childReferencesCount }}
+        </p>
+      </div>
+    </ng-template>
+  </ng-container>
+  <ng-container *ngSwitchCase="'scope'">
+    <i
+      *ngIf="indicatorIcons$ | async; else textRepresentation"
+      class="collectionScope"
+      [esIcon]="nodeHelper.getCollectionScopeInfo($any(node)).icon"
+      [matTooltip]="
+        'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate
+      "
+      [altText]="
+        'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate
+      "
+    ></i>
+    <ng-template #textRepresentation>
+      {{
+        'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate
+      }}
+    </ng-template>
+  </ng-container>
+</ng-container>

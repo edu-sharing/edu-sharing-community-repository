@@ -8,9 +8,20 @@ import {Toast} from '../../../core-ui-module/toast';
 import {DialogButton} from '../../../core-module/core.module';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {trigger} from '@angular/animations';
-import {ProgressType} from '../modal-dialog/modal-dialog.component';
-import {CardType} from '../../../core-ui-module/components/card/card.component';
+import {ProgressType} from '../../../shared/components/modal-dialog/modal-dialog.component';
+import {CardType} from '../../../shared/components/card/card.component';
 import {MessageType} from '../../../core-module/ui/message-type';
+
+export enum DialogType {
+    /**
+     * centered modal dialog
+     */
+    ModalCard,
+    /**
+     * info message bar at the bottom
+     */
+    Infobar
+}
 
 @Component({
   selector: 'es-modal-dialog-toast',
@@ -22,6 +33,7 @@ import {MessageType} from '../../../core-module/ui/message-type';
   ]
 })
 export class ModalDialogToastComponent {
+    readonly DialogType = DialogType;
   buttons: DialogButton[];
   private onCancel: () => void;
   node: Node | Node[];
@@ -33,7 +45,8 @@ export class ModalDialogToastComponent {
       this.input = data.input;
       this.toast.dialogInputValue = '';
       this.progressType = data.progressType;
-      this.dialogType = data.dialogType;
+      this.cardType = data.cardType;
+      this.dialogType = data.dialogType || DialogType.ModalCard;
       this.node = data.node;
       this.messageParameters = data.messageParameters;
       this.messageType = data.messageType || ModalMessageType.Text;
@@ -76,7 +89,8 @@ export class ModalDialogToastComponent {
    * type of the progress to display. Null if this is not an progress dialog
    */
   progressType: ProgressType;
-  dialogType: CardType;
+  cardType: CardType;
+  dialogType: DialogType;
   /* value stored in the input, if enabled */
   inputValue: string;
 
@@ -95,7 +109,8 @@ export class ModalDialogOptions {
   buttons?: DialogButton[];
   input?: string;
   progressType?: ProgressType;
-  dialogType?: CardType;
+  cardType?: CardType;
+  dialogType?: DialogType;
   messageParameters?: any;
   priority?: number;
   messageType? = ModalMessageType.Text;

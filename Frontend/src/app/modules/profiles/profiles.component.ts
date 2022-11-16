@@ -1,10 +1,9 @@
 
 import {forkJoin as observableForkJoin, Observable} from 'rxjs';
 
-import {Component, ElementRef, ViewChild} from '@angular/core';
-import {Translation} from '../../core-ui-module/translation';
-import {ProfileSettings, SessionStorageService, UserStats} from '../../core-module/core.module';
-import {TranslateService} from '@ngx-translate/core';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import { TranslationsService } from '../../translations/translations.service';
+import {ProfileSettings, UserStats} from '../../core-module/core.module';
 import {DomSanitizer} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Toast} from '../../core-ui-module/toast';
@@ -12,16 +11,18 @@ import {RestConnectorService} from '../../core-module/core.module';
 import {ConfigurationService} from '../../core-module/core.module';
 import {RestIamService} from '../../core-module/core.module';
 import {IamUser, User} from '../../core-module/core.module';
-import {AuthorityNamePipe} from '../../core-ui-module/pipes/authority-name.pipe';
+import {AuthorityNamePipe} from '../../shared/pipes/authority-name.pipe';
 import {trigger} from '@angular/animations';
 import {UIAnimation} from '../../core-module/ui/ui-animation';
-import {UserProfileComponent} from '../../common/ui/user-profile/user-profile.component';
+import {UserProfileComponent} from '../../main/navigation/user-profile/user-profile.component';
 import {RestConstants} from '../../core-module/core.module';
 import {RestHelper} from '../../core-module/core.module';
-import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import {MainNavComponent} from '../../main/navigation/main-nav/main-nav.component';
 import {Helper} from '../../core-module/rest/helper';
-import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {DefaultGroups, OptionGroup, OptionItem} from '../../core-ui-module/option-item';
+import {VCard} from '../../core-module/ui/VCard';
+import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
+import { MainNavService } from '../../main/navigation/main-nav.service';
 
 @Component({
   selector: 'es-profiles',
@@ -31,17 +32,19 @@ import {DefaultGroups, OptionGroup, OptionItem} from '../../core-ui-module/optio
     trigger('overlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))
   ]
 })
-export class ProfilesComponent {
+export class ProfilesComponent implements OnInit {
+  private loadingTask = this.loadingScreen.addLoadingTask();
   constructor(private toast: Toast,
               private route: ActivatedRoute,
+              private mainNav: MainNavService,
               private connector: RestConnectorService,
-              private translate: TranslateService,
+              private translations: TranslationsService,
               private router: Router,
               private config: ConfigurationService,
               private sanitizer: DomSanitizer,
-              private storage : SessionStorageService,
+              private loadingScreen: LoadingScreenService,
               private iamService: RestIamService) {
-    Translation.initialize(translate, this.config, this.storage, this.route).subscribe(() => {
+    this.translations.waitForInit().subscribe(() => {
       route.params.subscribe((params)=> {
         this.editProfileUrl=this.config.instant('editProfileUrl');
         this.editProfile=this.config.instant('editProfile',true);
@@ -72,13 +75,21 @@ export class ProfilesComponent {
   private editProfileUrl: string;
   avatarImage: any;
   profileSettings: ProfileSettings;
-  @ViewChild('mainNav') mainNavRef: MainNavComponent;
   @ViewChild('avatar') avatarElement : ElementRef;
   // can the particular user profile (based on the source) be edited?
   userEditProfile: boolean;
   actions: OptionItem[];
   private editAction: OptionItem;
   showPersistentIds = false;
+
+  ngOnInit(): void {
+    this.mainNav.setMainNavConfig({
+      title: 'PROFILES.TITLE_NAV',
+      currentScope: 'profiles',
+      searchEnabled: false
+    })
+  }
+
   public loadUser(authority:string) {
     this.toast.showProgressDialog();
     this.connector.isLoggedIn().subscribe((login)=> {
@@ -91,9 +102,14 @@ export class ProfilesComponent {
         this.userEditProfile = profile.editProfile;
         this.toast.closeModalDialog();
         this.userEdit=Helper.deepCopy(this.user);
+        if(!(this.user.profile.vcard instanceof VCard)) {
+            this.user.profile.vcard = new VCard((this.user.profile.vcard as unknown as string));
+        }
         this.userEdit.profile.vcard = this.user.profile.vcard?.copy();
-        GlobalContainerComponent.finishPreloading();
-        this.iamService.getUser().subscribe((me)=> {
+        if (!this.loadingTask.isDone) {
+            this.loadingTask.done();
+        }
+        this.iamService.getCurrentUserAsync().then((me)=> {
           this.isMe = profile.person.authorityName === me.person.authorityName;
           if(this.isMe && login.isGuest) {
             RestHelper.goToLogin(this.router,this.config);
@@ -102,7 +118,9 @@ export class ProfilesComponent {
         });
       }, (error: any) => {
         this.toast.closeModalDialog();
-        GlobalContainerComponent.finishPreloading();
+        if (!this.loadingTask.isDone) {
+            this.loadingTask.done();
+        }
         this.toast.error(null, 'PROFILES.LOAD_ERROR');
       });
     });

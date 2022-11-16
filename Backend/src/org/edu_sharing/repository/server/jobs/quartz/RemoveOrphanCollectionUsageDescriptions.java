@@ -78,6 +78,10 @@ public class RemoveOrphanCollectionUsageDescriptions extends AbstractJob{
 		String localApp = ApplicationInfoList.getHomeRepository().getAppId();
 		NodeRunner runner = new NodeRunner();
 		runner.setTask((ref)->{
+			if(!NodeServiceHelper.exists(ref)) {
+				logger.info("Node " + ref + " is already deleted, skipping");
+				return;
+			}
 			String appId = (String) NodeServiceHelper.getPropertyNative(ref, CCConstants.CCM_PROP_USAGE_APPID);
 			if(localApp.equals(appId)){
 				String refNodeId = NodeServiceHelper.getProperty(ref, CCConstants.CCM_PROP_USAGE_RESSOURCEID);

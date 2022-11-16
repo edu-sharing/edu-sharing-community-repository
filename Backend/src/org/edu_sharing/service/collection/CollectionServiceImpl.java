@@ -801,7 +801,8 @@ public class CollectionServiceImpl implements CollectionService{
 				ref.getStoreRef().getIdentifier(),
 				ref.getId(),
 				CCConstants.CCM_PROP_MAP_COLLECTIONSCOPE,
-				result.toString());
+				result.toString(),
+				false);
 	}
 
 	public void setScope(Collection collection) throws Exception {
@@ -972,6 +973,19 @@ public class CollectionServiceImpl implements CollectionService{
 	}
 
 	@Override
+	public List<NodeRef> getReferenceObjectsSync(String nodeId){
+		Map<String,Object> map = new HashMap<>();
+		map.put(CCConstants.CCM_PROP_IO_ORIGINAL,nodeId);
+
+		List<String> aspects = new ArrayList<>();
+		aspects.add(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
+		logger.debug("cmis helper start");
+		List<org.alfresco.service.cmr.repository.NodeRef> nodes = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO,map,aspects,null,100000);
+		logger.debug("cmis helper finished");
+		return nodes;
+	}
+
+	@Override
 	public String addFeedback(String id, HashMap<String, String[]> feedbackData) throws Throwable {
 		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK);
 		new PermissionServiceHelper(PermissionServiceFactory.getLocalService()).validatePermissionOrThrow(id,CCConstants.PERMISSION_FEEDBACK);
@@ -1005,10 +1019,10 @@ public class CollectionServiceImpl implements CollectionService{
 	}
 
 	@Override
-	public List<NodeRef> getCollectionProposals(String nodeId) {
+	public List<NodeRef> getCollectionProposals(String nodeId, CCConstants.PROPOSAL_STATUS status) {
 		Map<String, Object> filters = new HashMap<>();
 		filters.put(CCConstants.CCM_PROP_COLLECTION_PROPOSAL_TARGET, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId).toString());
-		filters.put(CCConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS, CCConstants.PROPOSAL_STATUS.PENDING.toString());
+		filters.put(CCConstants.CCM_PROP_COLLECTION_PROPOSAL_STATUS, status.toString());
 		List<NodeRef> collections = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_COLLECTION_PROPOSAL, filters);
 		return collections.stream().map(
 				(ref) -> serviceRegistry.getNodeService().getPrimaryParent(ref).getParentRef()

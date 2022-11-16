@@ -27,14 +27,14 @@ public class NodeCollectorLucene {
     private final String lucene;
     private Logger logger = Logger.getLogger(NodeCollectorLucene.class);
 
-    int PAGE_SIZE = 100;
+    int PAGE_SIZE = 500;
 
     public NodeCollectorLucene(String lucene, StoreRef storeRef){
         this.lucene = lucene;
         this.storeRef = storeRef;
     }
 
-    List<NodeRef> getNodes(){
+    public List<NodeRef> getNodes(){
         logger.info("query:" + lucene);
         Set<NodeRef> set = new HashSet<>();
         execute(0,lucene,set);

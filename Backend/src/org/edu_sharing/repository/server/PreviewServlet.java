@@ -5,6 +5,8 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -33,9 +35,11 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.server.tools.ActionObserver;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -150,7 +154,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 						// if its local stored, load the url directly
 						String thumbnail = (String)props.get(CCConstants.CCM_PROP_IO_THUMBNAILURL);
 						if(thumbnail != null && !thumbnail.trim().equals("")){
-							resp.sendRedirect(thumbnail);
+							handleExternalThumbnail(nodeId,req, resp, thumbnail);
 							return;
 						}
 						if(nodeType.equals(CCConstants.CCM_TYPE_REMOTEOBJECT) || aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY)) {
@@ -160,7 +164,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 						if(props != null){
 							thumbnail = (String)props.get(CCConstants.CCM_PROP_IO_THUMBNAILURL);
 							if(thumbnail != null && !thumbnail.trim().equals("")){
-								resp.sendRedirect(thumbnail);
+								handleExternalThumbnail(nodeId,req, resp, thumbnail);
 								return;
 							}
 						}
@@ -402,8 +406,7 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		if (getPrevResult.getType().equals(PreviewDetail.TYPE_EXTERNAL)) {
 			String extThumbUrl = getPrevResult.getUrl();
 			if (extThumbUrl != null && !extThumbUrl.trim().equals("")) {
-				resp.sendRedirect(extThumbUrl);
-				return true;
+				return handleExternalThumbnail(nodeId,req, resp, extThumbUrl);
 			}
 		}
 
@@ -437,6 +440,37 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 		}
 		return false;
 	}
+
+	private boolean handleExternalThumbnail(String nodeId, HttpServletRequest req, HttpServletResponse resp, String url) throws IOException {
+		if ("false".equalsIgnoreCase(req.getParameter("allowRedirect")) &&
+				LightbendConfigLoader.get().getStringList("repository.communication.preview.remoteAllowList").stream().anyMatch((reg) -> {
+					Pattern pattern = Pattern.compile(reg);
+					Matcher matched = pattern.matcher(url);
+					return matched.matches();
+				})) {
+			logger.debug("Follow redirect allowed for " + url);
+			try{
+				new HttpQueryTool().queryStream(url, new HttpQueryTool.Callback<Void>() {
+					@Override
+					public void handle(InputStream httpResult) {
+						resp.setHeader("Content-Type", "image/jpeg");
+						try {
+							DataInputStream extImgTransformed = postProcessImage(nodeId, new DataInputStream(httpResult), req);
+							StreamUtils.copy(extImgTransformed, resp.getOutputStream());
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+					}
+				});
+				return true;
+			} catch(Throwable t) {
+				logger.info("Fetching preview via http failed for: " + url, t);
+			}
+		}
+		resp.sendRedirect(url);
+		return true;
+	}
+
 	private DataInputStream postProcessImage(String nodeId,DataInputStream in,HttpServletRequest req){
 		float quality=DEFAULT_QUALITY;
 
@@ -576,9 +610,12 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 			imgOutStream.close();
 			in.close();
 			return new DataInputStream(new ByteArrayInputStream(os.toByteArray()));
-
-		}
-		catch(Throwable t){
+		} catch(OutOfMemoryError e) {
+			throw e;
+		}catch(Throwable t){
+			if(t.getCause() instanceof OutOfMemoryError) {
+				throw (OutOfMemoryError)t.getCause();
+			}
 			return null;
 		}
 		finally {
@@ -593,7 +630,6 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 
 			@Override
 			public Boolean doWork() throws Exception {
-				ServletOutputStream op = resp.getOutputStream();
 				ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef,
 						QName.createQName(contentProp));
 
@@ -612,18 +648,18 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 				//
 				// Stream to the requester.
 				//
-				byte[] bbuf = new byte[1024];
+
 				// DataInputStream in = new
 				// DataInputStream(url.openStream());
 				InputStream is=reader.getContentInputStream();
 				DataInputStream in = new DataInputStream(is);
-				if(mimetype.startsWith("image")){
-					DataInputStream tmp = postProcessImage(nodeRef.getId(),in,req);
-					if(tmp != null){
-						in = tmp;
-						mimetype = "image/jpeg";
-					}
-					else {
+				if(mimetype.startsWith("image")) {
+					try {
+						DataInputStream tmp = postProcessImage(nodeRef.getId(), in, req);
+						if (tmp != null) {
+							in = tmp;
+							mimetype = "image/jpeg";
+						} else {
 						// image was broken but stream is consumed, open a new one
 						reader = serviceRegistry.getContentService().getReader(nodeRef,
 								QName.createQName(contentProp));
@@ -631,28 +667,38 @@ public class PreviewServlet extends HttpServlet implements SingleThreadModel {
 						in = new DataInputStream(is);
 					}
 
+					} catch (OutOfMemoryError e) {
+						logger.debug("Image too large for memory, falling back to icon " + nodeRef);
+						throw e;
+					}
 				}
-				// fix to proper mimetype (usually comes at "image/svg xml" which is not valid)
-				if(mimetype.startsWith("image/svg")){
-					mimetype = "image/svg+xml";
-				}
-				resp.setContentType(mimetype);
-
-				resp.setContentLength((int) in.available());
-
-
-				while ((in != null) && ((length = in.read(bbuf)) != -1)) {
-					op.write(bbuf, 0, length);
-				}
-
-				in.close();
-
-				op.flush();
-				op.close();
+				deliverImage(mimetype, in, resp);
 				return true;
 			}
 		});
 
+	}
+
+	private void deliverImage(String mimetype, DataInputStream in, HttpServletResponse resp) throws IOException {
+		ServletOutputStream op = resp.getOutputStream();
+		int length;
+		// fix to proper mimetype (usually comes at "image/svg xml" which is not valid)
+		if(mimetype.startsWith("image/svg")){
+			mimetype = "image/svg+xml";
+		}
+		resp.setContentType(mimetype);
+
+		resp.setContentLength((int) in.available());
+
+		byte[] bbuf = new byte[1024];
+		while ((in != null) && ((length = in.read(bbuf)) != -1)) {
+			op.write(bbuf, 0, length);
+		}
+
+		in.close();
+
+		op.flush();
+		op.close();
 	}
 
 

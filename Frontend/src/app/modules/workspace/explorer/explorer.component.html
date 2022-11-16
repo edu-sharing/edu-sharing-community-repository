@@ -44,7 +44,7 @@
   [displayType]="displayType"
   (displayTypeChange)="displayTypeChange.emit($event)"
   [elementInteractionType]="InteractionType.Emitter"
-  (fetchData)="load(false)"
+  (fetchData)="load($event)"
   [sort]="sort"
   [dragDrop]="{
     dragAllowed: true,
@@ -52,7 +52,7 @@
     dropped: drop
   }"
   (sortChange)="setSorting($event)"
-  (clickItem)="select($event)"
+  (clickItem)="clickItem($event)"
   (dblClickItem)="onOpenNode.emit($event.element)"
 >
   <ng-template #empty>

@@ -390,6 +390,11 @@ export class MdsV1Service extends BaseService {
          * parent id of the new entry (might be null)
          */
         parent?: string;
+
+        /**
+         * One or more nodes this suggestion relates to (optional, only for extended mail data)
+         */
+        nodeId?: Array<string>;
     }): Observable<StrictHttpResponse<MdsValue>> {
         const rb = new RequestBuilder(this.rootUrl, MdsV1Service.SuggestValuePath, 'post');
         if (params) {
@@ -398,6 +403,7 @@ export class MdsV1Service extends BaseService {
             rb.path('widget', params.widget, {});
             rb.query('caption', params.caption, {});
             rb.query('parent', params.parent, {});
+            rb.query('nodeId', params.nodeId, {});
         }
 
         return this.http
@@ -450,6 +456,11 @@ export class MdsV1Service extends BaseService {
          * parent id of the new entry (might be null)
          */
         parent?: string;
+
+        /**
+         * One or more nodes this suggestion relates to (optional, only for extended mail data)
+         */
+        nodeId?: Array<string>;
     }): Observable<MdsValue> {
         return this.suggestValue$Response(params).pipe(
             map((r: StrictHttpResponse<MdsValue>) => r.body as MdsValue),

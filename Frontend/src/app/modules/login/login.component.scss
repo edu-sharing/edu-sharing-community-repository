@@ -1,5 +1,5 @@
 @import "../../core-ui-module/styles/variables";
-@import "../../core-ui-module/components/card/variables";
+@import "../../shared/components/card/variables";
 
 .login-content{
   padding:$cardPadding;
@@ -38,7 +38,6 @@ es-powered-by{
     justify-content: flex-end;
     height: 1.25em;
     a{
-      text-transform: uppercase;
       font-size: $fontSizeXSmall;
       &.cdk-keyboard-focused {
         @include setGlobalKeyboardFocus();

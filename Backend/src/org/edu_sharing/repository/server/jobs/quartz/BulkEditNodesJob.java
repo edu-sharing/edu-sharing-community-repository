@@ -36,9 +36,8 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
-import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.nodeservice.RecurseMode;
-import org.edu_sharing.service.provider.Provider;
 import org.edu_sharing.service.util.CSVTool;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -48,6 +47,7 @@ import java.io.BufferedReader;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -79,8 +79,9 @@ public class BulkEditNodesJob extends AbstractJob{
 	private String property;
 	@JobFieldDescription(description = "Value to replace target property with")
 	private Serializable value;
-	@JobFieldDescription(description = "property to copy value from, if mode == Copy", sampleValue = "cclom:title")
+	@JobFieldDescription(description = "property to copy value from, if mode == Replace. Hint: use \"parent::\" prefix to copy data from the primary parent. Also supports special attributes like _DISPLAYNAME (if available for the source property)", sampleValue = "cclom:title")
 	private String copy;
+	private boolean copyParent;
 	@JobFieldDescription(description = "token to replace, if mode == ReplaceToken")
 	private String searchToken;
 	@JobFieldDescription(description = "Token to replace with, if mode == ReplaceToken")
@@ -106,6 +107,8 @@ public class BulkEditNodesJob extends AbstractJob{
 		Append,
 		@JobFieldDescription(description = "Remove the property. Use with searchtoken: one value must be equal, than the property is removed.")
 		Remove,
+		@JobFieldDescription(description = "Remove the property. Use with searchtoken: if a found value is equal, than it is removed, but other values will stay stored (useful for multivalue fields).")
+		RemoveSingle,
 		@JobFieldDescription(description = "Remove Duplicates in multivalue properties.")
 		RemoveDuplicates,
 		@JobFieldDescription(description = "Use a class that implements custom handling. defined by customClass param")
@@ -134,6 +137,12 @@ public class BulkEditNodesJob extends AbstractJob{
 
 		copy = prepareParam(context, "copy", false);
 		if (copy != null) {
+			if(copy.startsWith("parent::")) {
+				copyParent = true;
+				copy = copy.substring("parent::".length());
+			} else {
+				copyParent = false;
+			}
 			copy = CCConstants.getValidGlobalName(copy);
 		}
 		value = prepareParam(context, "value", false);
@@ -150,7 +159,7 @@ public class BulkEditNodesJob extends AbstractJob{
 			replaceToken = prepareParam(context, "replaceToken", true);
 		}
 
-		if (mode.equals(Mode.Remove)) {
+		if (mode.equals(Mode.Remove) || mode.equals(Mode.RemoveSingle)) {
 			searchToken = prepareParam(context, "searchToken", true);
 		}
 
@@ -196,7 +205,18 @@ public class BulkEditNodesJob extends AbstractJob{
 				org.alfresco.service.cmr.repository.NodeRef nodeRef = new org.alfresco.service.cmr.repository.NodeRef(ref.getStoreRef(), ref.getId());
 				logger.info("Bulk edit metadata for node " + ref.getId());
 				if (copy != null) {
-					value = nodeService.getProperty(nodeRef, QName.createQName(copy));
+					try {
+						if (copyParent) {
+							value = NodeServiceHelper.getPropertyNativeWithMapping(
+									nodeService.getPrimaryParent(nodeRef).getParentRef(),
+									copy
+							);
+						} else {
+							value = NodeServiceHelper.getPropertyNativeWithMapping(nodeRef, copy);
+						}
+					} catch (Throwable t) {
+						logger.warn("Could not read copy property from source node: "+ t.getMessage());
+					}
 				}
 				if (mode.equals(Mode.Replace)) {
 					nodeService.setProperty(nodeRef, QName.createQName(property), value);
@@ -211,7 +231,7 @@ public class BulkEditNodesJob extends AbstractJob{
 								}
 							} else if (current instanceof List) {
 								for (Object o : (List) current) {
-									if (searchToken.equals(0)) {
+									if (searchToken.equals(o)) {
 										remove = true;
 									}
 								}
@@ -223,19 +243,40 @@ public class BulkEditNodesJob extends AbstractJob{
 					} else {
 						nodeService.removeProperty(nodeRef, QName.createQName(property));
 					}
+				} else if (mode.equals(Mode.RemoveSingle)) {
+					Serializable current = nodeService.getProperty(nodeRef, QName.createQName(property));
+					if (current != null) {
+						if (current instanceof String) {
+							if (searchToken.equals(current)) {
+								nodeService.removeProperty(nodeRef, QName.createQName(property));
+							}
+						} else if (current instanceof List) {
+							ArrayList<String> newList = new ArrayList<>((List<String>) current);
+							newList.removeIf((entry) -> entry.equals(searchToken));
+							if(((List<?>) current).size() != newList.size()) {
+								if(newList.size() == 0) {
+									NodeServiceHelper.removeProperty(nodeRef, property);
+								} else {
+									NodeServiceHelper.setProperty(nodeRef, property, newList, true);
+								}
+							}
+						} else {
+							logger.error("Could not process property of node " + nodeRef + ": Unsupported type " + current.getClass().getName());
+						}
+					}
 				} else if (mode.equals(Mode.ReplaceToken) || mode.equals(Mode.ReplaceMapping)) {
 					Serializable current = nodeService.getProperty(nodeRef, QName.createQName(property));
 					if (current != null) {
 						if (current instanceof String) {
-							nodeService.setProperty(nodeRef, QName.createQName(property), processPropertyValue((String) current));
+							NodeServiceHelper.setProperty(nodeRef, property, processPropertyValue((String) current), true);
 						} else if (current instanceof List) {
-							nodeService.setProperty(nodeRef, QName.createQName(property), (Serializable) ((List) current).stream().map((v) -> {
+							NodeServiceHelper.setProperty(nodeRef, property, (Serializable) ((List) current).stream().map((v) -> {
 								if (v instanceof String) {
 									return processPropertyValue((String) v);
 								} else {
 									return v;
 								}
-							}).collect(Collectors.toList()));
+							}).collect(Collectors.toList()), true);
 						} else {
 							logger.info("Can not replace property " + property + "for node " + nodeRef + ": current data is not of type String/List");
 						}
@@ -244,7 +285,7 @@ public class BulkEditNodesJob extends AbstractJob{
 					Serializable current = nodeService.getProperty(nodeRef, QName.createQName(property));
 					if (current != null && current instanceof List) {
 						if (((List) current).stream().distinct().count() != ((List) current).size()) {
-							nodeService.setProperty(nodeRef, QName.createQName(property), (Serializable) ((List) current).stream().distinct().collect(Collectors.toList()));
+							NodeServiceHelper.setProperty(nodeRef, property, (Serializable) ((List) current).stream().distinct().collect(Collectors.toList()), true);
 						}
 					}
 				} else {

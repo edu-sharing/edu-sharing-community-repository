@@ -11,7 +11,7 @@
             "MEDIACENTER": "Medienzentren",
             "GLOBAL_CONFIG": "Globale Systemkonfiguration",
             "CONFIG": "Erweiterte Systemkonfiguration",
-            "APPLICATIONS": "Remote-Systeme (Rendering, LMS, Suchen)",
+            "APPLICATIONS": "Remote-Systeme (Rendering, LMS, LTI, Suchen)",
             "UPDATE": "Server Updates",
             "IMPORT": "Importieren",
             "JOBS": "Aufgaben",
@@ -157,7 +157,7 @@
                 "APPID": {
                     "TITLE": "Bezeichnung des Home-Repositories",
                     "STATUS_OK": "Dem System wurde ein eigener Identifier zugewiesen ({{id}}).",
-                    "STATUS_WARN": "Dem System wurde keine ID zugewiesen, es verwendet den Standardwert ({{id}}).\nDamit dieses Repository fehlerfrei mit anderen Systemen kommunizieren kann, ist ein eindeutiger Identifier wichtig. Es wird empfohlen, einen möglichst eindeutigen Identifier zu benutzen (z.B. die Hauptdomain des Systems)",
+                    "STATUS_WARN": "Dem System wurde keine ID zugewiesen, es verwendet den Standardwert ({{id}}).\nDamit dieses Repository fehlerfrei mit anderen Systemen kommunizieren kann, ist ein eindeutiger Identifier wichtig. Es wird empfohlen, einen möglichst eindeutigen Identifier zu benutzen (z.B. die Hauptdomain des Systems).\n\nWichtig: Starten Sie nach Änderungen an der App-ID den Server neu!",
                     "SOLUTION": "Wechseln Sie zu \"Grundkonfiguration\" und bearbeiten Sie das Feld \"appid\" in der homeApplication.properties.xml",
                     "SOLUTION_LINK": "homeApplication.properties.xml bearbeiten"
                 },
@@ -562,6 +562,31 @@
             "CONDITION_TYPE": {
                 "TOOLPERMISSION": "Toolpermission"
             }
+        },
+      "LTI": {
+        "HEADER": "LTI Plattform Registrierung",
+        "DYNAMIC": "LTI Dynamische Registrierung",
+        "ADVANCED": "LTI Manuelle Registrierung",
+        "URL": "Url",
+        "TOKEN" : "Token",
+        "TS" : "Ablaufdatum",
+        "GENERATE" : "Token hinzufügen",
+        "SAVE" : "Speichern",
+        "REMOVE_TITLE": "Token löschen?",
+        "REMOVE_MESSAGE": "Möchten Sie das Token mit der URL \"{{url}}\" wirklich löschen?\n\nBestehende Verlinkungen werden dadurch möglicherweise unbrauchbar.",
+        "DYNAMIC_INFO": "Mit Hilfe der dynamischen LTI-Registrierung können andere, LTI-Kompatible Systeme, einfach mit edu-sharing verbunden werden. Durch Klick auf \"Token hinzufügen\" können Sie einen Token generieren.\n\nFügen Sie diesen anschließend in ihr LTI-Kompatibles System (z.B. Moodle) ein. Anschließend wird das externe System automatisch an edu-sharing angebunden.",
+        "MANUAL_INFO": "Sollte ihr LTI-Kompatibles System die dynamische Registrierung nicht unterstützen oder diese nicht funktionieren, können Sie die manuelle Registrierung unten nutzen.\n\nNach Klick auf \"Speichern\" wird mit den gegebenen Daten eine Anbindung vorbereitet.",
+        "EXPIRED": "Abgelaufen",
+        "DATA" : {
+          "platformId" : "Platform Id",
+          "client_id" : "Client Id",
+          "deployment_id" : "Deployment Id",
+          "authentication_request_url" : "Authentication Request Url",
+          "keyset_url" : "Keyset url",
+          "key_id" : "Key id",
+          "auth_token_url" : "Auth Token Url",
+          "CREATED" : "Plattform wurde angebunden"
         }
+      }
     }
 }

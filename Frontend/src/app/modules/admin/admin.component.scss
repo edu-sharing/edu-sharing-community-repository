@@ -3,8 +3,7 @@
 
 $sidenavWidth:250px;
 $sidenavWidthMobile:66px;
-es-main-nav{
-    display: flex;
+.main-nav-placeholder {
     height: $mainnavHeight;
 }
 .main{
@@ -79,7 +78,7 @@ es-main-nav{
     font-weight: bold;
     font-size: 110%;
     width:100%;
-    border-bottom: 1px solid $cardSeperatorLineColor;
+    border-bottom: 1px solid $cardSeparatorLineColor;
     margin: 20px 0;
     padding:0 10px;
     i{
@@ -185,7 +184,7 @@ es-main-nav{
         >div {
             display: flex;
             align-items: center;
-            border-bottom: 1px solid $cardSeperatorLineColor;
+            border-bottom: 1px solid $cardSeparatorLineColor;
             div {
                 width: 0;
                 flex-grow: 2;
@@ -324,7 +323,7 @@ es-main-nav{
         padding:5px 10px;
         vertical-align: middle;
         word-break: break-all;
-        border-bottom: 1px solid $cardSeperatorLineColor;
+        border-bottom: 1px solid $cardSeparatorLineColor;
         .material-icons{
             color:$textLight;
         }
@@ -566,7 +565,7 @@ es-main-nav{
     }
     .job{
         &:not(:last-child){
-            border-bottom: 1px solid $cardSeperatorLineColor;
+            border-bottom: 1px solid $cardSeparatorLineColor;
         }
         display:flex;
         width:100%;

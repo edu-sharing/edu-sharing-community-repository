@@ -3,7 +3,6 @@ import {Toast} from '../../../core-ui-module/toast';
 import {Router, Route, Params, ActivatedRoute, UrlSerializer} from '@angular/router';
 import {OAuthResult, LoginResult, AccessScope} from '../../../core-module/core.module';
 import {TranslateService} from '@ngx-translate/core';
-import {Translation} from '../../../core-ui-module/translation';
 import {RestConnectorService} from '../../../core-module/core.module';
 import {RestConstants} from '../../../core-module/core.module';
 import {ConfigurationService} from '../../../core-module/core.module';

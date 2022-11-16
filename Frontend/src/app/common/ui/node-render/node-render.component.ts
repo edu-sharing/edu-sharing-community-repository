@@ -9,6 +9,7 @@ import {
     Input,
     NgZone,
     OnDestroy,
+    OnInit,
     Output,
     ViewChild,
     ViewContainerRef
@@ -16,8 +17,8 @@ import {
 import {Toast} from '../../../core-ui-module/toast';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
-import {Translation} from '../../../core-ui-module/translation';
-import {DefaultGroups, ElementType, OptionGroup, OptionItem, Scope, Target} from '../../../core-ui-module/option-item';
+import { TranslationsService } from '../../../translations/translations.service';
+import {DefaultGroups, ElementType, OptionItem, Scope, Target} from '../../../core-ui-module/option-item';
 import {UIAnimation} from '../../../core-module/ui/ui-animation';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 import {trigger} from '@angular/animations';
@@ -25,7 +26,6 @@ import {Location, PlatformLocation} from '@angular/common';
 import {UIConstants} from '../../../core-module/ui/ui-constants';
 import {SearchService} from '../../../modules/search/search.service';
 import {ActionbarHelperService} from '../../services/actionbar-helper';
-import {MainNavComponent} from '../main-nav/main-nav.component';
 import {HttpClient} from '@angular/common/http';
 import {
     ConfigurationHelper,
@@ -50,28 +50,25 @@ import {
     RestSearchService,
     RestToolService,
     RestUsageService,
-    SessionStorageService,
-    TemporaryStorageService
+    TemporaryStorageService, UIService
 } from '../../../core-module/core.module';
 import {MdsHelper} from '../../../core-module/rest/mds-helper';
-import {ListTableComponent} from '../../../core-ui-module/components/list-table/list-table.component';
-import {SpinnerComponent} from '../../../core-ui-module/components/spinner/spinner.component';
-import {CommentsListComponent} from '../../../modules/management-dialogs/node-comments/comments-list/comments-list.component';
-import {GlobalContainerComponent} from '../global-container/global-container.component';
 import {VideoControlsComponent} from '../../../core-ui-module/components/video-controls/video-controls.component';
-import {ActionbarComponent} from '../actionbar/actionbar.component';
+import {ActionbarComponent} from '../../../shared/components/actionbar/actionbar.component';
 import {
     OPTIONS_HELPER_CONFIG,
     OptionsHelperService
 } from '../../../core-ui-module/options-helper.service';
 import {RestTrackingService} from '../../../core-module/rest/services/rest-tracking.service';
 import {NodeHelperService} from '../../../core-ui-module/node-helper.service';
-import {CardComponent} from '../../../core-ui-module/components/card/card.component';
+import {CardComponent} from '../../../shared/components/card/card.component';
 import {CardService} from '../../../core-ui-module/card.service';
 import {RouterComponent} from '../../../router/router.component';
 import {RenderHelperService} from '../../../core-ui-module/render-helper.service';
-import {NodeDataSource} from '../../../core-ui-module/components/node-entries-wrapper/node-data-source';
 import { Subject } from 'rxjs';
+import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
+import { MainNavService } from '../../../main/navigation/main-nav.service';
+import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 
 
 @Component({
@@ -87,7 +84,7 @@ import { Subject } from 'rxjs';
 })
 
 
-export class NodeRenderComponent implements EventListener, OnDestroy {
+export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
     @Input() set node(node: Node|string) {
       const id=(node as Node).ref ? (node as Node).ref.id : (node as string);
       jQuery('#nodeRenderContent').html('');
@@ -96,6 +93,8 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     }
     constructor(
       private translate : TranslateService,
+      private translations : TranslationsService,
+      private uiService : UIService,
       private tracking : RestTrackingService,
       private nodeHelper: NodeHelperService,
       private renderHelper: RenderHelperService,
@@ -118,20 +117,21 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
       private toast : Toast,
       private cd: ChangeDetectorRef,
       private config : ConfigurationService,
-      private storage : SessionStorageService,
       private route : ActivatedRoute,
       private networkService : RestNetworkService,
       private _ngZone: NgZone,
       private router : Router,
       private platformLocation : PlatformLocation,
       private optionsHelper : OptionsHelperService,
+      private loadingScreen: LoadingScreenService,
+      private mainNavService: MainNavService,
       private temporaryStorageService: TemporaryStorageService) {
       (window as any).nodeRenderComponentRef = {component: this, zone: _ngZone};
       (window as any).ngRender = {setDownloadUrl:(url:string)=> {this.setDownloadUrl(url)}};
       this.frame.addListener(this);
       this.renderHelper.setViewContainerRef(viewContainerRef);
 
-        Translation.initialize(translate,config,storage,route).subscribe(()=> {
+        this.translations.waitForInit().subscribe(()=> {
         this.banner = ConfigurationHelper.getBanner(this.config);
         this.connector.setRoute(this.route);
         this.networkService.prepareCache();
@@ -152,7 +152,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                 } else {
                     this.list = this.temporaryStorageService.get(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST);
                 }
-              this.connector.isLoggedIn().subscribe((data:LoginResult)=> {
+              this.connector.isLoggedIn(false).subscribe((data:LoginResult)=> {
                 this.isSafe=data.currentScope==RestConstants.SAFE_SCOPE;
                 if(params.version) {
                     this.version = params.version;
@@ -170,6 +170,13 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
 
       });
       this.frame.broadcastEvent(FrameEventsService.EVENT_VIEW_OPENED,'node-render');
+    }
+
+    ngOnInit(): void {
+      this.mainNavService.setMainNavConfig({
+        show: false,
+        currentScope: 'render',
+      })
     }
 
 
@@ -202,7 +209,6 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
   public nodeDelete: Node[];
   public nodeVariant: Node;
   public addToCollection: Node[];
-  public nodeReport: Node;
   private editor: string;
   private fromLogin = false;
   public banner: any;
@@ -221,7 +227,6 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
   private readonly destroyed$ = new Subject<void>();
 
   @ViewChild('sequencediv') sequencediv : ElementRef;
-  @ViewChild('mainNav') mainNavRef : MainNavComponent;
   @ViewChild('actionbar') actionbar: ActionbarComponent;
   isChildobject = false;
     _node : Node;
@@ -284,7 +289,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
             // use a timeout to let the browser try to go back in history first
             setTimeout(()=> {
                 if(!this.isDestroyed) {
-                    this.mainNavRef.toggleMenuSidebar();
+                    this.mainNavService.getMainNav().topBar.toggleMenuSidebar();
                 }
             },250);
           }
@@ -296,10 +301,15 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
 
 
     showDetails() {
-      const rect=document.getElementById('edusharing_rendering_metadata').getBoundingClientRect();
-      if(window.scrollY<rect.top) {
-          UIHelper.scrollSmooth(rect.top, 1.5);
-      }
+      const element = document.getElementById('edusharing_rendering_metadata');
+      element.setAttribute('tabindex', '-1');
+      element.addEventListener(
+          'blur',
+          (event) => (event.target as HTMLElement).removeAttribute('tabindex'),
+          { once: true },
+      );
+      element.focus({ preventScroll: true });
+      element.scrollIntoView({ behavior: 'smooth' });
     }
     public getPosition() {
       if(!this._node || !this.list)
@@ -345,7 +355,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     if(this.isLoading) {
         return;
     }
-    this.optionsHelper.clearComponents(this.mainNavRef, this.actionbar);
+    this.optionsHelper.clearComponents(this.actionbar);
     this.isLoading=true;
     this.node=this._nodeId;
   }
@@ -394,8 +404,9 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     this.addDownloadButton(download);
   }
   private loadRenderData() {
+    const loadingTask = this.loadingScreen.addLoadingTask();
       this.isLoading=true;
-      this.optionsHelper.clearComponents(this.mainNavRef, this.actionbar);
+      this.optionsHelper.clearComponents(this.actionbar);
     if(this.isBuildingPage) {
         setTimeout(()=>this.loadRenderData(),50);
         return;
@@ -442,7 +453,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                 });
             }
             this.isLoading = false;
-            GlobalContainerComponent.finishPreloading();
+            loadingTask.done();
         },(error)=> {
             console.log(error.error.error);
             if(error?.error?.error === 'org.edu_sharing.restservices.DAOMissingException') {
@@ -456,7 +467,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                 this.toast.error(error);
             }
             this.isLoading = false;
-            GlobalContainerComponent.finishPreloading();
+            loadingTask.done();
         })
   }
     onDelete(event:any) {
@@ -550,7 +561,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
                 addOptions: this.currentOptions
             },
         });
-        this.optionsHelper.initComponents(this.mainNavRef, this.actionbar);
+        this.optionsHelper.initComponents(this.actionbar);
         this.optionsHelper.setListener({
             onRefresh: (node) => {
                 this.refresh();
@@ -576,6 +587,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
               const downloadAll = new OptionItem('OPTIONS.DOWNLOAD_ALL','archive',()=> {
                   this.downloadSequence();
               });
+              downloadAll.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.NodePublishedCopy];
               downloadAll.group = DefaultGroups.View;
               downloadAll.priority = 35;
               options.splice(1,0,downloadAll);
@@ -626,7 +638,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     scroll(direction: string) {
         const element = this.sequencediv.nativeElement;
         const width=window.innerWidth/2;
-        UIHelper.scrollSmoothElement(element.scrollLeft + (direction=='left' ? -width : width),element,2,'x').then((limit)=> {
+        this.uiService.scrollSmoothElement(element.scrollLeft + (direction=='left' ? -width : width),element,2,'x').then((limit)=> {
             this.setScrollparameters();
         });
     }
@@ -661,7 +673,7 @@ export class NodeRenderComponent implements EventListener, OnDestroy {
     }
 
     public switchNode(event : any) {
-        UIHelper.scrollSmooth();
+        this.uiService.scrollSmooth();
         this.node = event.node;
     }
 

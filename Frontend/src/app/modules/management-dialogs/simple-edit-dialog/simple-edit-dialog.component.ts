@@ -10,7 +10,7 @@ import {SimpleEditMetadataComponent} from './simple-edit-metadata/simple-edit-me
 import {SimpleEditInviteComponent} from './simple-edit-invite/simple-edit-invite.component';
 import {SimpleEditLicenseComponent} from './simple-edit-license/simple-edit-license.component';
 import {forkJoin, Observable} from 'rxjs';
-import {CardType} from '../../../core-ui-module/components/card/card.component';
+import {CardType} from '../../../shared/components/card/card.component';
 import {UIHelper} from '../../../core-ui-module/ui-helper';
 
 @Component({
@@ -75,8 +75,8 @@ export class SimpleEditDialogComponent  {
   }
     updateButtons(): any {
         this.buttons=[
-            new DialogButton('CANCEL',DialogButton.TYPE_CANCEL,()=>this.cancel()),
-            new DialogButton('SAVE',DialogButton.TYPE_PRIMARY,()=>this.save())
+            new DialogButton('CANCEL',{ color: 'standard' },()=>this.cancel()),
+            new DialogButton('SAVE',{ color: 'primary' },()=>this.save())
         ]
     }
 
@@ -139,14 +139,14 @@ export class SimpleEditDialogComponent  {
       title: 'SIMPLE_EDIT.DIRTY.TITLE',
       message: 'SIMPLE_EDIT.DIRTY.MESSAGE',
       isCancelable: true,
-      dialogType: CardType.Question,
+      cardType: CardType.Question,
       buttons: [
-          new DialogButton('DISCARD',DialogButton.TYPE_CANCEL, () => {
+          new DialogButton('DISCARD',{ color: 'standard' }, () => {
             this.toast.closeModalDialog();
             this.onClose.emit(this._nodes);
             callback();
           }),
-          new DialogButton('SAVE',DialogButton.TYPE_PRIMARY, () => {
+          new DialogButton('SAVE',{ color: 'primary' }, () => {
             this.toast.closeModalDialog();
             this.save(callback);
           }),

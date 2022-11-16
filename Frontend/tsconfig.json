@@ -8,6 +8,18 @@
         "dist/edu-sharing-api/edu-sharing-api",
         "dist/edu-sharing-api"
       ],
+      // Prevent imports from `projects` directory.
+      //
+      // Don't directly import modules from `projects`, but instead build project modules
+      // separately, so they can be included by their paths from `dist` (see above).
+      //
+      // ```
+      // import { Node } from 'projects/edu-sharing-api/src/lib/api/models'; // Don't do this!
+      // import { Node } from 'ngx-edu-sharing-api'; // Yes!
+      // ```
+      "projects/*": [
+        "",
+      ],
       "@angular/*": [
         "./node_modules/@angular/*"
       ],
@@ -20,7 +32,7 @@
     },
     "declaration": false,
     "experimentalDecorators": true,
-    "lib": ["es2018", "dom"],
+    "lib": ["es2018", "dom", "dom.iterable"],
     "module": "es2020",
     "moduleResolution": "node",
     "outDir": "./dist/out-tsc",
@@ -29,7 +41,10 @@
     "typeRoots": [
       "./node_modules/@types"
     ],
-    "downlevelIteration": true
+    "downlevelIteration": true,
+    // Needed for imports of @angular/compiler-cli in version 13.3.5. Can be removed, when
+    // @angular/compiler-cli compiles without this.
+    "allowSyntheticDefaultImports": true,
   },
   "angularCompilerOptions": {
     "strictInjectionParameters": true,

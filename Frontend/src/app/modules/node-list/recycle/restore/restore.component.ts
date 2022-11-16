@@ -15,7 +15,7 @@ export class RecycleRestoreComponent {
   public showFileChooser: Boolean;
   buttons: DialogButton[];
   constructor() {
-    this.buttons = DialogButton.getSingleButton('CLOSE', () => this.confirm(), DialogButton.TYPE_CANCEL);
+    this.buttons = DialogButton.getSingleButton('CLOSE', () => this.confirm(), 'standard');
   }
   public confirm(): void {
     this.onClose.emit();

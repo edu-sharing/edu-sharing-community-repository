@@ -1,9 +1,7 @@
-<!-- dummy for banner and bindings -->
-<es-main-nav #mainNav [currentScope]="'render'"></es-main-nav>
 <div class="topBar fixed scrollWithBanner" *ngIf="showTopBar">
   <div class="displayBar">
     <button mat-button class="clickable" title="{{'BACK' | translate}}" (click)="close()"><i esIcon="keyboard_arrow_left"></i> <span class="render-back">{{'BACK' | translate}}</span></button>
-    <button mat-button *ngIf="_node" class="clickable showDetails" (click)="showDetails()" title="{{'GOTO' | translate}} {{'INFO' | translate}}"><i esIcon="info_outline"></i> <span class="uppercase hidemobile">{{'INFO' | translate}}</span></button>
+    <button mat-button *ngIf="_node" class="clickable showDetails" (click)="showDetails()" title="{{'GOTO' | translate}} {{'INFO' | translate}}"><i esIcon="info_outline"></i> <span class="hidemobile">{{'INFO' | translate}}</span></button>
     <div class="actionbar-container">
     <es-actionbar class="actionbarFrame" #actionbar
                [backgroundType]="'dark'"
@@ -68,7 +66,6 @@
 <es-workspace-management
   [(nodeMetadata)]="nodeMetadata"
   [(addToCollection)]="addToCollection"
-  [(nodeReport)]="nodeReport"
   [(nodeShare)]="nodeShare"
   [(nodeShareLink)]="nodeShareLink"
   [(nodeVariant)]="nodeVariant"

@@ -7,7 +7,7 @@ import {TranslateService} from "@ngx-translate/core";
 import {Toast} from "../../../core-ui-module/toast";
 import {ArchiveRestore,Node} from "../../../core-module/core.module";
 import {TemporaryStorageService} from "../../../core-module/core.module";
-import {ActionbarComponent} from "../../../common/ui/actionbar/actionbar.component";
+import {ActionbarComponent} from "../../../shared/components/actionbar/actionbar.component";
 
 @Component({
   selector: 'es-recycle',
@@ -24,14 +24,13 @@ export class RecycleMainComponent {
   public reload : Boolean;
   public sortBy = RestConstants.CM_ARCHIVED_DATE;
   public sortAscending = false;
-  private selected:Node[] = [];
+  selected:Node[] = [];
 
   public columns : ListItem[]=[];
   public options : CustomOptions = {
     useDefaultOptions: false,
     addOptions: []
   };
-  public fullscreenLoading:boolean;
   loadData(currentQuery :string,offset : number,sortBy : string,sortAscending : boolean){
     return this.archive.search(currentQuery,"",{propertyFilter:[RestConstants.ALL],offset:offset,sortBy:[sortBy],sortAscending:sortAscending})
   }
@@ -46,7 +45,7 @@ export class RecycleMainComponent {
     this.selected=data;
   }
   private restoreFinished(list: Node[], restoreResult: any){
-    this.fullscreenLoading=false;
+    this.toast.closeModalDialog();
 
     RecycleRestoreComponent.prepareResults(this.translate,restoreResult);
     if(restoreResult.hasDuplicateNames || restoreResult.hasParentFolderMissing)
@@ -58,7 +57,7 @@ export class RecycleMainComponent {
     else
       this.toast.toast("RECYCLE.TOAST.RESTORE_FINISHED");
     this.reload=new Boolean(true);
-
+    this.selected = [];
   }
   private delete() : void{
     this.deleteNodes(this.selected);
@@ -72,7 +71,7 @@ export class RecycleMainComponent {
   }
 
   public deleteNodesWithoutConfirmation(list = this.toDelete){
-    this.fullscreenLoading=true;
+      this.toast.showProgressDialog();
     this.archive.delete(list).subscribe(
       (result) => this.deleteFinished(),
       error => this.handleErrors(error),
@@ -80,8 +79,9 @@ export class RecycleMainComponent {
   }
 
   private deleteFinished() {
-    this.fullscreenLoading=false;
+    this.toast.closeModalDialog();
     this.toast.toast('RECYCLE.TOAST.DELETE_FINISHED');
+    this.selected = [];
     this.reload=new Boolean(true);
 
   }
@@ -107,7 +107,7 @@ export class RecycleMainComponent {
   }
   public restoreNodes(list : Node[],toPath=""){
     // archiveRestore list
-    this.fullscreenLoading=true;
+    this.toast.showProgressDialog();
     this.archive.restore(list,toPath)
       .subscribe(
         (result:ArchiveRestore) => this.restoreFinished(list,result),
@@ -117,7 +117,7 @@ export class RecycleMainComponent {
   }
   private handleErrors(error: any) {
     this.toast.error(error);
-    this.fullscreenLoading=false;
+    this.toast.closeModalDialog();
   }
 
   private restoreSingle(node : Node) : void{

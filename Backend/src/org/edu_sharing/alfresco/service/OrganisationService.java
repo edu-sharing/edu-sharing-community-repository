@@ -275,7 +275,12 @@ public class OrganisationService {
 			return;
 		}
 
-		setOrgAdminPermissions(eduGroupHomeDir, getOrganisationAdminGroup(organisationName),execute);
+		String adminGroup =  getOrganisationAdminGroup(organisationName);
+		if(adminGroup == null){
+			logger.error("could not find admin group for organisationName:"+organisationName);
+			return;
+		}
+		setOrgAdminPermissions(eduGroupHomeDir,adminGroup,execute);
 
 	}
 
@@ -298,7 +303,15 @@ public class OrganisationService {
 						childRef.getChildRef() +" "+
 						nodeService.getProperty(childRef.getChildRef(),ContentModel.PROP_NAME));
 				if (execute) {
-					permissionService.setPermission(childRef.getChildRef(), adminAuthority, PermissionService.COORDINATOR, true);
+					this.transactionService.getRetryingTransactionHelper().doInTransaction(()-> {
+						try {
+							policyBehaviourFilter.disableBehaviour(childRef.getChildRef());
+							permissionService.setPermission(childRef.getChildRef(), adminAuthority, PermissionService.COORDINATOR, true);
+						} finally {
+							policyBehaviourFilter.enableBehaviour(childRef.getChildRef());
+						}
+						return null;
+					});
 				}
 			}
 

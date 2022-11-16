@@ -1,11 +1,3 @@
-<es-main-nav
-  *ngIf="mainnav"
-  #mainNav
-  [title]="'SIDEBAR.LOGIN'"
-  [currentScope]="'login'"
-  [searchEnabled]="false"
-  xmlns="http://www.w3.org/1999/html"
-></es-main-nav>
 <es-global-progress *ngIf="isLoading"></es-global-progress>
 <div *ngIf="!isLoading">
   <es-card
@@ -21,8 +13,7 @@
     [height]="showProviders ? '' : 'large'"
     [attr.showProviders]="showProviders"
   >
-    <es-spinner *ngIf="isLoading" class="center"></es-spinner>
-    <div class="login-content" *ngIf="!isLoading">
+    <div class="login-content">
       <h1 esTitle class="cdk-visually-hidden">{{ 'LOGIN.TITLE' | translate }}</h1>
       <div class="branding"><img src="assets/images/logo.svg" esImage-config alt="{{ 'LOGIN.APP_LOGO' | translate }}" /></div>
       <div class="groups">

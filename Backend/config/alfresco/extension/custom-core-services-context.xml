@@ -721,7 +721,7 @@
             <ref bean="versionService" />
         </property>
     </bean>
-     <bean id="beforeDeleteIOPolicy" class="org.edu_sharing.alfresco.policy.BeforeDeleteIOPolicy" init-method="init" lazy-init="true">
+     <bean id="beforeDeleteIOPolicy" class="org.edu_sharing.alfresco.policy.BeforeDeleteIOPolicy" init-method="init" depends-on="eduSharingLightBendConfigCache">
    	  <property name="policyComponent">
             <ref bean="policyComponent"/>
         </property>
@@ -755,6 +755,35 @@
         <property name="transactionService">
         	<ref bean="transactionService" />
       	</property>
+    </bean>
+
+    <bean id="AuthorityService" class="org.springframework.aop.framework.ProxyFactoryBean">
+        <property name="proxyInterfaces">
+            <value>org.alfresco.service.cmr.security.AuthorityService</value>
+        </property>
+        <property name="target">
+            <ref bean="authorityService"/>
+        </property>
+        <property name="interceptorNames">
+            <list>
+                <!--
+                original takes local defined versions of interceptor beans
+                We did not find second declaration in classpath so we use
+                the glabal versions
+                <idref local="AuthorityService_transaction"/>
+                <idref local="AuditMethodInterceptor"/>
+                <idref local="exceptionTranslator"/>
+                -->
+
+                <idref bean="AuthorityService_transaction"/>
+                <idref bean="AuditMethodInterceptor"/>
+                <idref bean="exceptionTranslator"/>
+                <idref bean="AuthorityService_security"/>
+                <idref bean="eduAuthorityServiceInterceptor"/>
+            </list>
+        </property>
+    </bean>
+    <bean id="eduAuthorityServiceInterceptor" class="org.edu_sharing.alfresco.interceptors.AuthorityServiceGuestInterceptor">
     </bean>
     
     

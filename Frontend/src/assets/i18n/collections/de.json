@@ -12,10 +12,12 @@
         "ORDER_COLLECTIONS_INFO": "Betrachter der Sammlung sehen die enthaltenen Untersammlungen in der festgelegten Reihenfolge.",
         "SORT_SLIDER": "Umsortieren",
         "CUSTOM_ORDER": "Festgelegte Reihenfolge",
-        "PERMISSIONS": "Eingeladen:",
+        "PERMISSIONS": "Eingeladen",
         "DETAILS": "Sammlungsdetails",
         "EDITORIAL_PUBLIC": "Öffentlich sichtbar",
         "EDITORIAL_PUBLIC_INFO": "Die redaktionelle Sammlung ist für alle Nutzer und ggf. Gäste sichtbar",
+        "CREATOR": "Ersteller",
+        "SHARING_STATE": "Freigabezustand",
         "STEP": {
             "GENERAL": "Titel, Bild, Beschreibung und Farbe",
             "METADATA": "Weitere Informationen",
@@ -24,6 +26,11 @@
             "EDITORIAL_GROUPS": "Zuständige Redaktionsgruppe",
             "DONE": "Fertig"
         },
+      "EMPTY": {
+        "SHARED": "Sie wurden bisher zu keiner Sammlung eingeladen.",
+        "PUBLIC": "Es sind keine öffentlichen Sammlungen verfügbar.",
+        "SUBCOLLECTIONS": "Es sind keine Untersammlungen verfügbar."
+      },
         "TAB": {
             "TYPE_EDITORIAL_LONG": "Redaktionell betreute Sammlungen",
             "TYPE_MEDIA_CENTER_LONG": "Vom Medienzentrum bereitgestellte Sammlungen",
@@ -79,13 +86,19 @@
         "EXTENDED_PERMISSIONS_BUTTON": "Einladen",
         "TOAST": {
             "DUPLICATE_NAME": "Eine Sammlung mit diesen Namen existiert bereits",
+            "ERROR_IMAGE_APPLY": "Das ausgewählte Bild konnte leider nicht gelesen werden. Bitte versuchen Sie es mit einem anderen Element.",
             "CREATED": "Sammlung wurde erstellt",
             "INVALID_NAME": "Der Name ist unzulässig. Bitte keine Sonderzeichen verwenden",
             "SORT_SAVED_TYPE": "Die gewählte Sortierung nach \"{{type}}\" gilt zukünftig für alle Betrachter der Sammlung",
             "SORT_SAVED_CUSTOM": "Die festgelegte Reihenfolge gilt zukünftig für alle Betrachter der Sammlung"
         },
         "NEW": {
-            "AUTHOR_FREETEXT": "Bezeichnung des Autors"
+            "AUTHOR_FREETEXT": "Bezeichnung des Autors",
+            "IMAGE": {
+              "UPLOAD" : "Bild hochladen",
+              "SEARCH" : "Bild aus Suche wählen",
+              "DELETE" : "Bild löschen"
+            }
         },
         "FEEDBACK_TITLE": "Feedback zur Sammlung geben",
         "FEEDBACK_VIEW_TITLE": "Abgegebenes Feedback zur Sammlung",
@@ -107,16 +120,12 @@
     },
 
     "collections_description": "Beschreibung:",
-    "collections_noOrgaCollections": "Sie wurden bisher zu keiner Sammlung eingeladen.",
-    "collections_noCollections": "Es sind keine öffentlichen Sammlungen verfügbar.",
 
     "collections_content": "Materialien",
     "collections_noContentAvailable": "Hier sind noch keine Materialien vorhanden.",
-    "collections_howToAddContent": "Sie können in der Suchumgebung nach geeigneten Materialien für ihre Sammlung suchen. Klicken sie einfach auf ein geeignetes Material und wählen sie dann die Option 'zu Sammlung hinzufügen' aus.",
+    "collections_howToAddContent": "Sie können in der Suchumgebung nach geeigneten Materialien für Ihre Sammlung suchen. Klicken Sie einfach auf ein geeignetes Material und wählen Sie dann die Option 'zu Sammlung hinzufügen' aus.",
 
     "collectionNew_preview": "Vorschau meiner Sammlung",
-    "collectionNew_uploadCollectionImage": "Ein neues Sammlungsbild hochladen",
-    "collectionNew_deleteCollectionImage": "Das Sammlungsbild löschen",
     "collectionNew_setColor": "Farbe für diese Sammlung:",
     "collectionNew_colorIndex": "Farbe {{ index }}",
     "collectionNew_createCollection": "erstellen",

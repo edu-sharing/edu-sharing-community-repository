@@ -11,6 +11,7 @@ import { map, filter } from 'rxjs/operators';
 
 import { MdsQueryCriteria } from '../models/mds-query-criteria';
 import { Node } from '../models/node';
+import { NodeEntries } from '../models/node-entries';
 import { NodeEntry } from '../models/node-entry';
 import { SearchParameters } from '../models/search-parameters';
 import { SearchParametersFacets } from '../models/search-parameters-facets';
@@ -22,6 +23,90 @@ import { SearchResultNode } from '../models/search-result-node';
 export class SearchV1Service extends BaseService {
     constructor(config: ApiConfiguration, http: HttpClient) {
         super(config, http);
+    }
+
+    /**
+     * Path part for operation getMetdata
+     */
+    static readonly GetMetdataPath = '/search/v1/metadata/{repository}';
+
+    /**
+     * get nodes with metadata and collections.
+     *
+     *
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getMetdata()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getMetdata$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * nodeIds
+         */
+        nodeIds?: Array<string>;
+
+        /**
+         * property filter for result nodes (or &quot;-all-&quot; for all properties)
+         */
+        propertyFilter?: Array<string>;
+    }): Observable<StrictHttpResponse<NodeEntries>> {
+        const rb = new RequestBuilder(this.rootUrl, SearchV1Service.GetMetdataPath, 'get');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.query('nodeIds', params.nodeIds, {});
+            rb.query('propertyFilter', params.propertyFilter, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<NodeEntries>;
+                }),
+            );
+    }
+
+    /**
+     * get nodes with metadata and collections.
+     *
+     *
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getMetdata$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getMetdata(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * nodeIds
+         */
+        nodeIds?: Array<string>;
+
+        /**
+         * property filter for result nodes (or &quot;-all-&quot; for all properties)
+         */
+        propertyFilter?: Array<string>;
+    }): Observable<NodeEntries> {
+        return this.getMetdata$Response(params).pipe(
+            map((r: StrictHttpResponse<NodeEntries>) => r.body as NodeEntries),
+        );
     }
 
     /**
@@ -149,6 +234,7 @@ export class SearchV1Service extends BaseService {
             | 'FILES_AND_FOLDERS'
             | 'COLLECTIONS'
             | 'TOOLPERMISSIONS'
+            | 'COLLECTION_PROPOSALS'
             | 'ALL';
 
         /**
@@ -233,6 +319,7 @@ export class SearchV1Service extends BaseService {
             | 'FILES_AND_FOLDERS'
             | 'COLLECTIONS'
             | 'TOOLPERMISSIONS'
+            | 'COLLECTION_PROPOSALS'
             | 'ALL';
 
         /**
@@ -427,6 +514,7 @@ export class SearchV1Service extends BaseService {
             | 'FILES_AND_FOLDERS'
             | 'COLLECTIONS'
             | 'TOOLPERMISSIONS'
+            | 'COLLECTION_PROPOSALS'
             | 'ALL';
 
         /**
@@ -523,6 +611,7 @@ export class SearchV1Service extends BaseService {
             | 'FILES_AND_FOLDERS'
             | 'COLLECTIONS'
             | 'TOOLPERMISSIONS'
+            | 'COLLECTION_PROPOSALS'
             | 'ALL';
 
         /**
@@ -590,6 +679,7 @@ export class SearchV1Service extends BaseService {
             | 'FILES_AND_FOLDERS'
             | 'COLLECTIONS'
             | 'TOOLPERMISSIONS'
+            | 'COLLECTION_PROPOSALS'
             | 'ALL';
 
         /**
@@ -692,6 +782,7 @@ export class SearchV1Service extends BaseService {
             | 'FILES_AND_FOLDERS'
             | 'COLLECTIONS'
             | 'TOOLPERMISSIONS'
+            | 'COLLECTION_PROPOSALS'
             | 'ALL';
 
         /**

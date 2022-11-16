@@ -1,0 +1,51 @@
+<es-mds-editor-wrapper
+        *ngIf="_edit"
+        [priority]="2"
+        groupId="io_childobject"
+        editorMode="nodes"
+        [setId]="nodes?.[0].metadataset"
+        [currentValues]="_edit.properties"
+        (onCancel)="_edit=null"
+        (onDone)="setProperties($any($event))"
+        [invalidate]="_edit!=null"
+></es-mds-editor-wrapper>
+
+<div class="childobject-wrapper" *ngIf="isSupported">
+  <es-mds-editor-widget-container [label]="'MDS.ADD_CHILD_OBJECT' | translate">
+    <div class="group">
+      <label>{{'MDS.ADD_CHILD_OBJECT_DESCRIPTION' | translate}}</label>
+      <div cdkDropList
+           class="childobject-list"
+           (cdkDropListDropped)="drop($event)">
+        <div class="childobject-entry"
+             cdkDrag
+             *ngFor="let child of children; let pos = index">
+          <div class="icon"><img [src]="child.icon"></div>
+          <div class="name">{{child.name}}</div>
+          <button mat-icon-button
+                  class="license"
+                  (click)="editLicense(child)"
+          ><i esIcon="copyright"></i>
+          </button>
+          <button mat-icon-button
+                  class="edit"
+                  (click)="edit(child)"
+          ><i esIcon="edit"></i>
+          </button>
+          <button mat-icon-button
+                  class="edit"
+                  (click)="remove(child)"
+          ><i esIcon="delete"></i>
+          </button>
+        </div>
+        <button mat-button
+                color="primary"
+                class="add"
+                (click)="openUploadSelectDialog()">
+          <i esIcon="add"></i>
+          {{'ADD' | translate}}
+        </button>
+      </div>
+    </div>
+  </es-mds-editor-widget-container>
+</div>

@@ -1,8 +1,8 @@
 
-import {Component, ViewChild, HostListener, ElementRef, OnDestroy} from '@angular/core';
+import {Component, ViewChild, HostListener, ElementRef, OnDestroy, OnInit} from '@angular/core';
 import {Router, ActivatedRoute, Params} from '@angular/router';
 import {TranslateService} from '@ngx-translate/core';
-import {Translation} from '../../core-ui-module/translation';
+import { TranslationsService } from '../../translations/translations.service';
 import {ListItem, RestSearchService} from '../../core-module/core.module';
 import {RestNodeService} from '../../core-module/core.module';
 import {RestConstants} from '../../core-module/core.module';
@@ -10,17 +10,16 @@ import {RestConnectorService} from '../../core-module/core.module';
 import {Node, NodeList, LoginResult} from '../../core-module/core.module';
 import {OptionItem, Scope} from '../../core-ui-module/option-item';
 import {TemporaryStorageService} from '../../core-module/core.module';
-import {ConfigurationService} from '../../core-module/core.module';
-import {SessionStorageService} from '../../core-module/core.module';
 import {UIConstants} from '../../core-module/ui/ui-constants';
 import {RestMdsService} from '../../core-module/core.module';
 import {RestHelper} from '../../core-module/core.module';
-import {MainNavComponent} from '../../common/ui/main-nav/main-nav.component';
+import { MainNavService } from '../../main/navigation/main-nav.service';
 import {MdsHelper} from '../../core-module/rest/mds-helper';
 import {GlobalContainerComponent} from '../../common/ui/global-container/global-container.component';
 import {Helper} from '../../core-module/rest/helper';
-import {NodeUrlComponent} from "../../core-ui-module/components/node-url/node-url.component";
+import {NodeUrlComponent} from "../../shared/components/node-url/node-url.component";
 import {NodeHelperService} from '../../core-ui-module/node-helper.service';
+import { BehaviorSubject } from 'rxjs';
 
 
 
@@ -32,9 +31,8 @@ import {NodeHelperService} from '../../core-ui-module/node-helper.service';
 
 
 
-export class OerComponent implements OnDestroy{
+export class OerComponent implements OnInit, OnDestroy{
   readonly SCOPES = Scope;
-  @ViewChild('mainNav') mainNavRef: MainNavComponent;
   public COLLECTIONS=0;
   public MATERIALS=1;
   public TOOLS=2;
@@ -42,7 +40,13 @@ export class OerComponent implements OnDestroy{
   columns:ListItem[][]=[];
   private options: OptionItem[][]=[];
   private displayedNode: Node;
-  public currentQuery: string;
+  private currentQuerySubject = new BehaviorSubject<string>(null);
+  get currentQuery(): string {
+    return this.currentQuerySubject.value;
+  }
+  set currentQuery(value: string) {
+    this.currentQuerySubject.next(value);
+  }
   public loading:boolean[]=[];
   showMore:boolean[]=[];
   public hasMore:boolean[]=[];
@@ -57,11 +61,10 @@ export class OerComponent implements OnDestroy{
     private searchService: RestSearchService,
     private mdsService:RestMdsService,
     private storage : TemporaryStorageService,
-    private session : SessionStorageService,
-    private config : ConfigurationService,
+    private translations: TranslationsService,
+    private mainNav: MainNavService,
     private translate : TranslateService) {
-      Translation.initialize(translate,this.config,this.session,this.route).subscribe(()=> {
-        GlobalContainerComponent.finishPreloading();
+      this.translations.waitForInit().subscribe(()=> {
           for(let i=0;i<this.TYPE_COUNT;i++) {
               this.columns.push([]);
               this.updateOptions(i)
@@ -112,9 +115,35 @@ export class OerComponent implements OnDestroy{
 
     setInterval(()=>this.updateHasMore(),1000);
    }
+
+   ngOnInit(): void {
+     this.registerMainNav();
+   }
+
    ngOnDestroy() {
        this.storage.set(TemporaryStorageService.NODE_RENDER_PARAMETER_LIST, this.nodes[this.MATERIALS]);
+       this.mainNav.getMainNav().topBar.elementRef.nativeElement.style.marginTop = null;
    }
+
+   private registerMainNav() {
+    this.mainNav.setMainNavConfig({
+      title: 'SEARCH.TITLE',
+      currentScope: 'oer',
+      searchEnabled: true,
+      searchPlaceholder: 'OER.SEARCH',
+      canOpen: true,
+      onSearch: (query) => this.routeSearch(query),
+    });
+    this.currentQuerySubject.subscribe((currentQuery) =>
+        this.mainNav.patchMainNavConfig({
+            searchQuery: currentQuery,
+        }),
+    );
+  }
+
+  setMainNavOffset(offset: number): void {
+    this.mainNav.getMainNav().topBar.elementRef.nativeElement.style.marginTop = offset + 'px';
+  }
 
     goToCollections() {
     this.router.navigate([UIConstants.ROUTER_PREFIX+'collections'],{queryParams:{mainnav:true}});

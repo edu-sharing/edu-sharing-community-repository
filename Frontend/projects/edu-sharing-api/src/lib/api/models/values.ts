@@ -7,6 +7,7 @@ import { Collections } from './collections';
 import { ConfigFrontpage } from './config-frontpage';
 import { ConfigPrivacy } from './config-privacy';
 import { ConfigPublish } from './config-publish';
+import { ConfigRating } from './config-rating';
 import { ConfigRemote } from './config-remote';
 import { ConfigUpload } from './config-upload';
 import { ConfigWorkflow } from './config-workflow';
@@ -66,6 +67,7 @@ export interface Values {
     privacyInformationUrl?: string;
     publish?: ConfigPublish;
     publishingNotice?: boolean;
+    rating?: ConfigRating;
     recoverPasswordUrl?: string;
     register?: Register;
     remote?: ConfigRemote;
@@ -82,9 +84,11 @@ export interface Values {
     upload?: ConfigUpload;
     userAffiliation?: boolean;
     userDisplayName?: string;
+    userMenuOverrides?: Array<ContextMenuEntry>;
     userSecondaryDisplayName?: string;
     whatsNewUrl?: string;
     workflow?: ConfigWorkflow;
     workspaceColumns?: Array<string>;
+    workspaceSharedToMeDefaultAll?: boolean;
     workspaceViewType?: number;
 }

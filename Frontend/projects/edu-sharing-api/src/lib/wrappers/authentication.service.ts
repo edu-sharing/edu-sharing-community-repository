@@ -1,11 +1,22 @@
 import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { filter, first, map, mapTo, scan, share, startWith, switchMap, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import {
+    debounce,
+    filter,
+    first,
+    map,
+    mapTo,
+    scan,
+    share,
+    startWith,
+    switchMap,
+    tap,
+} from 'rxjs/operators';
 import { ApiRequestConfiguration } from '../api-request-configuration';
 import * as apiModels from '../api/models';
 import { AuthenticationV1Service as AuthenticationApiService } from '../api/services';
-import { switchRelay } from '../utils/switch-relay';
+import { switchReplay } from '../utils/switch-replay';
 
 export type LoginInfo = apiModels.Login;
 
@@ -73,10 +84,7 @@ export class AuthenticationService {
      * The observable will replay the last state as long as there is no request in-flight which will
      * update the information once completed.
      */
-    private readonly loginInfo$ = this.loginActionResponseSubject.pipe(
-        filter((response): response is LoginActionResponse => response !== null),
-        map((response) => response.loginInfo ?? null),
-    );
+    private readonly loginInfo$ = this.createLoginInfo();
     /** Emits when the logged-in user changes. */
     private readonly userChanges$ = this.createUserChanges();
     /**
@@ -87,12 +95,30 @@ export class AuthenticationService {
      * subscribers.
      */
     private readonly accessToScopeObservables: { [scope: string]: Observable<boolean> } = {};
+    /**
+     * Fires when the backend has logged out the user due to inactivity.
+     */
+    private readonly autoLogoutSubject = new Subject<void>();
+    /**
+     * The time of automatic logout due to inactivity by the backend.
+     */
+    private readonly autoLogoutTimeSubject = new BehaviorSubject<Date | null>(null);
+    /**
+     * Fires when an API request was reported that was not performed by this module.
+     */
+    private readonly outsideApiRequest = new Subject<void>();
+    /**
+     * The login information are possible invalid, but we don't want to fetch them without user
+     * interaction to not reset the auto-logout timeout.'
+     */
+    private loginInfoNeedRefresh = false;
 
     constructor(
         private authentication: AuthenticationApiService,
         private apiRequestConfiguration: ApiRequestConfiguration,
     ) {
         this.registerLoginActionResponseSubject();
+        this.registerAutoLogoutSubjects();
     }
 
     /**
@@ -127,11 +153,18 @@ export class AuthenticationService {
      *
      * The observable is updated on any login action.
      */
-    getLoginInfo(): Observable<LoginInfo> {
+    observeLoginInfo(): Observable<LoginInfo> {
         if (this.loginActionTrigger.value === null) {
             this.loginActionTrigger.next({ kind: 'initial' });
         }
         return this.loginInfo$;
+    }
+
+    /**
+     * Emits when the logged-in user changes.
+     */
+    observeUserChanges(): Observable<void> {
+        return this.userChanges$;
     }
 
     /**
@@ -150,11 +183,60 @@ export class AuthenticationService {
      *
      * The observable is updated when the user logs in or out.
      */
-    hasAccessToScope(scope: string): Observable<boolean> {
+    observeHasAccessToScope(scope: string): Observable<boolean> {
         if (!this.accessToScopeObservables[scope]) {
             this.accessToScopeObservables[scope] = this.createHasAccessToScope(scope);
         }
         return this.accessToScopeObservables[scope];
+    }
+
+    /**
+     * Fires when the user was logged out by the backend due to inactivity.
+     */
+    observeAutoLogout(): Observable<void> {
+        return this.autoLogoutSubject;
+    }
+
+    /**
+     * Returns the time of automatic logout due to inactivity by the backend.
+     */
+    observeAutoLogoutTime(): Observable<Date | null> {
+        return this.autoLogoutTimeSubject;
+    }
+
+    /**
+     * Returns the time until automatic logout due to inactivity in milliseconds.
+     *
+     * @param interval how often to emit the updated value in milliseconds
+     */
+    observeTimeUntilAutoLogout(interval: number): Observable<number | null> {
+        let lastEmittedValue: number | null = null;
+        return this.autoLogoutTimeSubject.pipe(
+            switchMap((autoLogoutTime) =>
+                autoLogoutTime
+                    ? rxjs.interval(interval).pipe(
+                          startWith(0),
+                          map(() => autoLogoutTime.getTime() - new Date().getTime()),
+                      )
+                    : rxjs.of(null),
+            ),
+            // Debounce updates. The subscriber is probably not interested in changes smaller than
+            // `interval`. To not miss emissions to arithmetic errors or slight timing offsets, we
+            // use `interval / 2` as threshold.
+            filter((value) => !areSimilar(value, lastEmittedValue, interval / 2)),
+            tap((value) => (lastEmittedValue = value)),
+        );
+    }
+
+    /**
+     * Report an API request that was done without this module.
+     *
+     * API requests are relevant for automatic logouts by the backend.
+     *
+     * This is a transitionary method until all requests have been ported to this module.
+     */
+    reportOutsideApiRequest(): void {
+        this.outsideApiRequest.next();
     }
 
     private registerLoginActionResponseSubject(): void {
@@ -171,7 +253,57 @@ export class AuthenticationService {
             .subscribe((response) => this.loginActionResponseSubject.next(response));
     }
 
-    private handleLoginAction(action: LoginAction) {
+    private registerAutoLogoutSubjects(): void {
+        rxjs.combineLatest([
+            this.loginInfo$,
+            this.apiRequestConfiguration.apiRequest,
+            this.outsideApiRequest,
+        ])
+            .pipe(map(([loginInfo]) => this.calculateAutoLogoutTimeAfterReset(loginInfo)))
+            .subscribe((logoutTime) => this.autoLogoutTimeSubject.next(logoutTime));
+        this.autoLogoutTimeSubject
+            .pipe(debounce((logoutTime) => (logoutTime ? rxjs.timer(logoutTime) : rxjs.NEVER)))
+            .subscribe(() => {
+                this.autoLogoutTimeSubject.next(null);
+                this.autoLogoutSubject.next();
+            });
+        this.autoLogoutSubject.subscribe(() => (this.loginInfoNeedRefresh = true));
+    }
+
+    /**
+     * Calculates the time the backend will automatically log out the user assuming the backend just
+     * reset the timer for automatic logout.
+     *
+     * The automatic logout timer is reset by the backend whenever an API call is made. Use this
+     * function to get the updated logout time after doing an API request.
+     *
+     * @returns the time of automatic logout or null, if not logged in
+     */
+    private calculateAutoLogoutTimeAfterReset(loginInfo: LoginInfo): Date | null {
+        if (loginInfo.statusCode === 'OK') {
+            return new Date(new Date().getTime() + loginInfo.sessionTimeout * 1000);
+        } else {
+            return null;
+        }
+    }
+
+    private createLoginInfo(): Observable<LoginInfo> {
+        return rxjs.of(void 0).pipe(
+            tap(() => {
+                // Reed `loginInfoNeedRefresh` on subscriptions to `loginInfo$` since new
+                // subscriptions should only happen on user interaction.
+                if (this.loginInfoNeedRefresh) {
+                    this.loginActionTrigger.next({ kind: 'forceRefresh' });
+                    this.loginInfoNeedRefresh = false;
+                }
+            }),
+            switchMap(() => this.loginActionResponseSubject),
+            filter((response): response is LoginActionResponse => response !== null),
+            map((response) => response.loginInfo),
+        );
+    }
+
+    private handleLoginAction(action: LoginAction): Observable<LoginInfo> {
         switch (action.kind) {
             case 'login':
                 if (action.scope) {
@@ -267,7 +399,7 @@ export class AuthenticationService {
         // needed.
         const inner$ = this.userChanges$.pipe(
             startWith(void 0 as void),
-            switchRelay(() => this.authentication.hasAccessToScope({ scope })),
+            switchReplay(() => this.authentication.hasAccessToScope({ scope })),
             map((response: { hasAccess: boolean }) => response.hasAccess),
         );
         // Do not resolve the observable for new subscribers while a login request is in-flight.
@@ -277,5 +409,15 @@ export class AuthenticationService {
             first((inFlight) => !inFlight),
             switchMap(() => inner$),
         );
+    }
+}
+
+function areSimilar(lhs: number | null, rhs: number | null, epsilon: number): boolean {
+    if (lhs === null && rhs === null) {
+        return true;
+    } else if (lhs === null || rhs === null) {
+        return false;
+    } else {
+        return Math.abs(lhs - rhs) < epsilon;
     }
 }

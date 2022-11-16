@@ -1,5 +1,5 @@
 @import '../../../../core-ui-module/styles/variables';
-@import '../../../../core-ui-module/components/card/variables';
+@import "../../../../shared/components/card/variables";
 
 .authorities {
     &:not(:last-child):after {

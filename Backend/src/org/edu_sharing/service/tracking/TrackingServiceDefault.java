@@ -52,7 +52,7 @@ public abstract class TrackingServiceDefault implements TrackingService{
     }
 
     @Override
-    public boolean trackActivityOnNode(NodeRef nodeRef,NodeTrackingDetails details, EventType type) {
+    public boolean trackActivityOnNode(NodeRef nodeRef,NodeTrackingDetails details, EventType type, String authorityName) {
         String qname = EVENT_PROPERTY_MAPPING.get(type);
         if(qname == null){
             return false;
@@ -68,7 +68,7 @@ public abstract class TrackingServiceDefault implements TrackingService{
         	RetryingTransactionHelper rth = transactionService.getRetryingTransactionHelper();
     		rth.doInTransaction((RetryingTransactionCallback<Void>) () -> {
                 policyBehaviourFilter.disableBehaviour(nodeRef);
-                nodeService.setProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),qname,finalValue);
+                nodeService.setProperty(nodeRef.getStoreRef().getProtocol(),nodeRef.getStoreRef().getIdentifier(),nodeRef.getId(),qname,finalValue, false);
                 policyBehaviourFilter.enableBehaviour(nodeRef);
                 // change the value in cache
                 Map<String, Object> cache = new RepositoryCache().get(nodeRef.getId());

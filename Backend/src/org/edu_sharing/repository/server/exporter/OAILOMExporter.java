@@ -4,6 +4,7 @@ import java.io.*;
 import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -15,6 +16,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
+import org.apache.commons.collections.IteratorUtils;
 import org.apache.log4j.Logger;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
@@ -24,9 +26,12 @@ import org.edu_sharing.metadataset.v2.MetadataKey;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.VCardConverter;
+import org.edu_sharing.service.license.LicenseService;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.surf.util.ISO8601DateFormat;
@@ -39,8 +44,6 @@ public class OAILOMExporter {
 
 	ServiceRegistry serviceRegistry = null;
 
-	NodeService nodeService = null;
-
 	NodeRef nodeRef = null;
 
 	Locale nodeLanguage = null;
@@ -51,11 +54,11 @@ public class OAILOMExporter {
 
 	public static String configCatalog = "exporter.oai.lom.identifier.catalog";
 	protected String lomIdentifierCatalog = (LightbendConfigLoader.get().hasPath(configCatalog)) ? LightbendConfigLoader.get().getString(configCatalog) : ApplicationInfoList.getHomeRepository().getAppId();
+	protected HashMap<String, Object> properties;
 
 	public OAILOMExporter() throws ParserConfigurationException {
 		ApplicationContext context = AlfAppContextGate.getApplicationContext();
 		serviceRegistry = (ServiceRegistry) context.getBean(ServiceRegistry.SERVICE_REGISTRY);
-		nodeService = serviceRegistry.getNodeService();
 
 
 		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -72,20 +75,26 @@ public class OAILOMExporter {
 			File f = new File(outputDir + "/" + sourceId + ".xml");
 			FileOutputStream os=new FileOutputStream(f);
 			write(os,ioId);
-		} catch (IOException e) {
+		} catch (Throwable e) {
 			logger.error(e.getMessage(), e);
 		}
 	}
 	public void write(OutputStream os,String ioId) {
 		nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, ioId);
-
-		List<String> language = (List<String>)nodeService.getProperty(nodeRef,QName.createQName(CCConstants.LOM_PROP_GENERAL_LANGUAGE));
-		nodeLanguage = (language != null && language.size() > 0) ? Locale.forLanguageTag(language.get(0).trim()) : Locale.getDefault();
+		try {
+			properties = NodeServiceHelper.getProperties(nodeRef);
+			// @TODO: remove all of this from/to multivalue
+			ValueTool.getMultivalue(properties);
+		}catch(Throwable t) {
+			throw new RuntimeException(t);
+		}
+		String language = getAsString(CCConstants.LOM_PROP_GENERAL_LANGUAGE);
+		nodeLanguage = (language != null) ? Locale.forLanguageTag(language.trim()) : Locale.getDefault();
 		if(nodeLanguage == null) nodeLanguage = Locale.getDefault();
 
-		QName type = nodeService.getType(nodeRef);
+		String type = NodeServiceHelper.getType(nodeRef);
 
-		if (!type.equals(QName.createQName(CCConstants.CCM_TYPE_IO))) {
+		if (!type.equals(CCConstants.CCM_TYPE_IO)) {
 			logger.error("this was not an io");
 			return;
 		}
@@ -107,6 +116,25 @@ public class OAILOMExporter {
 
 	}
 
+	String getAsString(String property) {
+		if(properties.get(property) instanceof List) {
+			return (String) ((List<?>) properties.get(property)).get(0);
+		}
+		return (String) properties.get(property);
+	}
+	Iterable<String> getMultivalue(String property) {
+		if(properties.get(property) instanceof Iterable) {
+			return (Iterable<String>) properties.get(property);
+		}
+		return Collections.singletonList((String)properties.get(property));
+	}
+	Integer getAsInteger(String property) {
+		if(properties.get(property) instanceof String) {
+			return Integer.parseInt((String) properties.get(property));
+		}
+		return (Integer) properties.get(property);
+	}
+
 	public void createNameSpace(Element lom) {
 		lom.setAttribute("xmlns", "http://ltsc.ieee.org/xsd/LOM");
 		lom.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
@@ -115,8 +143,8 @@ public class OAILOMExporter {
 	}
 
 	public void createClassification(Element lom) {
-		List<String> taxonIds = (List<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_TAXON_ID));
-		List<String> classificationKeyword = (List<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD));
+		Iterable<String> taxonIds = getMultivalue(CCConstants.CCM_PROP_IO_REPL_TAXON_ID);
+		Iterable<String> classificationKeyword = getMultivalue(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD);
 		if(taxonIds != null || classificationKeyword != null){
 			Element classification = createAndAppendElement("classification", lom);
 			Element purpose = createAndAppendElement("purpose", classification);
@@ -181,18 +209,11 @@ public class OAILOMExporter {
 	public void createRights(Element lom) {
 		Element rights = createAndAppendElement("rights", lom);
 		Element copyrightAndOtherRestrictions = createAndAppendElement("copyrightAndOtherRestrictions", rights);
-		List<String> commonLicenceKeyList = (List<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY));
-		String commonLicenceKey = (commonLicenceKeyList != null && commonLicenceKeyList.size() > 0) ? commonLicenceKeyList.get(0) : null;
-		String commonLicenseVersion = (String)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION));
+		String commonLicenceKey = getAsString(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
+		String commonLicenseLocale = getAsString(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE);
+		String commonLicenseVersion = getAsString(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION);
 		if(commonLicenceKey != null && !commonLicenceKey.trim().equals("")) {
-
-			String urlKey = commonLicenceKey.toLowerCase().replaceAll("_", "-").replaceFirst("cc-", "");
-			String url = "https://creativecommons.org/licenses/" + urlKey + "/" + commonLicenseVersion;
-
-			if(commonLicenceKey.equals(CCConstants.COMMON_LICENSE_CC_ZERO)) {
-				url = CCConstants.COMMON_LICENSE_CC_ZERO_LINK.replace("deed.${locale}", "legalcode");
-			}
-
+			String url = new LicenseService().getLicenseUrl(commonLicenceKey, commonLicenseLocale, commonLicenseVersion);
 			createAndAppendElement("value",copyrightAndOtherRestrictions,"yes");
 			Element description = createAndAppendElement("description",rights);
 			Element rightsDescStrEle = createAndAppendElement("string", description,url);
@@ -249,7 +270,7 @@ public class OAILOMExporter {
 		Element lrt = createAndAppendElement("learningResourceType", educational);
 		createAndAppendElement("value",lrt,QName.createQName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE));
 
-		List<String> educationalContext = (List<String>)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_CONTEXT));
+		Iterable<String> educationalContext = getMultivalue(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_CONTEXT);
 		if(educationalContext != null){
 			for(String context : educationalContext){
 				Element eduContext = createAndAppendElement("context", educational);
@@ -261,8 +282,8 @@ public class OAILOMExporter {
 		createAndAppendElement("value",ieur,QName.createQName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_INTENDEDENDUSERROLE));
 
 		//@todo when its available
-		Integer tarFrom = (Integer)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGEFROM));
-		Integer tarTo = (Integer)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGETO));
+		Integer tarFrom = getAsInteger(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGEFROM);
+		Integer tarTo = getAsInteger(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGETO);
 
 		if(tarFrom != null && tarTo != null){
 			String tar = tarFrom + "-" + tarTo;
@@ -276,8 +297,8 @@ public class OAILOMExporter {
 
 	public void createTechnical(Element lom) {
 		//technical -> first is the "real" binary data
+		Object format = properties.get(CCConstants.LOM_PROP_TECHNICAL_FORMAT);
 		Element technical;
-		Serializable format = nodeService.getProperty(nodeRef, QName.createQName(CCConstants.LOM_PROP_TECHNICAL_FORMAT));
 		if(format!=null) {
 			technical = createAndAppendElement("technical", lom);
 			createAndAppendElement("format", technical, QName.createQName(CCConstants.LOM_PROP_TECHNICAL_FORMAT));
@@ -292,9 +313,9 @@ public class OAILOMExporter {
 	public void createMetadata(Element lom) {
 		//metametadata
 		Element metaMetadata = createAndAppendElement("metaMetadata", lom);
-		addContributer(metaMetadata,QName.createQName(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR),"creator");
-		addContributer(metaMetadata,QName.createQName(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_PROVIDER),"provider");
-		addContributer(metaMetadata,QName.createQName(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_VALIDATOR),"validator");
+		addContributer(metaMetadata,CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR,"creator");
+		addContributer(metaMetadata,CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_PROVIDER,"provider");
+		addContributer(metaMetadata,CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_VALIDATOR,"validator");
 	}
 
 	public void createLifecycle(Element lom) {
@@ -304,22 +325,22 @@ public class OAILOMExporter {
 		createAndAppendElement("value", status,QName.createQName(CCConstants.LOM_PROP_LIFECYCLE_STATUS));
 
 		//@todo autor englisch?, role source
-		addContributer(lifeCycle,QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR),"Author");
+		addContributer(lifeCycle,CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR,"Author");
 
-		addContributer(lifeCycle,QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_CONTENT_PROVIDER),"content provider");
-		addContributer(lifeCycle,QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_EDITOR),"editor");
-		addContributer(lifeCycle,QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_EDUCATIONAL_VALIDATOR),"educational validator");
-		addContributer(lifeCycle,QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_GRAPHICAL_DESIGNER),"graphical designer");
-		addContributer(lifeCycle,QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_INITIATOR),"initiator");
-		addContributer(lifeCycle,QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_INSTRUCTIONAL_DESIGNER),"instructional designer");
-		addContributer(lifeCycle,QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER),"publisher");
-		addContributer(lifeCycle,QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_SCRIPT_WRITER),"script writer");
-		addContributer(lifeCycle,QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_SUBJECT_MATTER_EXPERT),"subject matter expert");
-		addContributer(lifeCycle,QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_TECHNICAL_IMPLEMENTER),"technical implementer");
-		addContributer(lifeCycle,QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_TECHNICAL_VALIDATOR),"technical validator");
-		addContributer(lifeCycle,QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_TERMINATOR),"terminator");
-		addContributer(lifeCycle,QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_UNKNOWN),"unknown");
-		addContributer(lifeCycle,QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_VALIDATOR),"validator");
+		addContributer(lifeCycle,CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_CONTENT_PROVIDER,"content provider");
+		addContributer(lifeCycle,CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_EDITOR,"editor");
+		addContributer(lifeCycle,CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_EDUCATIONAL_VALIDATOR,"educational validator");
+		addContributer(lifeCycle,CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_GRAPHICAL_DESIGNER,"graphical designer");
+		addContributer(lifeCycle,CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_INITIATOR,"initiator");
+		addContributer(lifeCycle,CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_INSTRUCTIONAL_DESIGNER,"instructional designer");
+		addContributer(lifeCycle,CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER,"publisher");
+		addContributer(lifeCycle,CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_SCRIPT_WRITER,"script writer");
+		addContributer(lifeCycle,CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_SUBJECT_MATTER_EXPERT,"subject matter expert");
+		addContributer(lifeCycle,CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_TECHNICAL_IMPLEMENTER,"technical implementer");
+		addContributer(lifeCycle,CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_TECHNICAL_VALIDATOR,"technical validator");
+		addContributer(lifeCycle,CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_TERMINATOR,"terminator");
+		addContributer(lifeCycle,CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_UNKNOWN,"unknown");
+		addContributer(lifeCycle,CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_VALIDATOR,"validator");
 	}
 
 	public void createAggregationLevel(Element general) {
@@ -345,9 +366,9 @@ public class OAILOMExporter {
 
 	public void createTitle(Element general) {
 		Element titleEle = createAndAppendElement("title", general);
-		String title= (String) nodeService.getProperty(nodeRef,QName.createQName(CCConstants.LOM_PROP_GENERAL_TITLE));
+		String title= (String) properties.get(CCConstants.LOM_PROP_GENERAL_TITLE);
 		if(title==null || title.isEmpty()){
-			title= (String) nodeService.getProperty(nodeRef,QName.createQName(CCConstants.CM_NAME));
+			title= (String) properties.get(CCConstants.CM_NAME);
 		}
 		Element titleStrEle = createAndAppendElement("string", titleEle,title);
 		if(titleStrEle != null)titleStrEle.setAttribute(xmlLanguageAttribute, nodeLanguage.getLanguage());
@@ -362,16 +383,13 @@ public class OAILOMExporter {
 		return vCard;
 	}
 
-	protected List<String> prepareContributer(List<String> contrib){
-		if(contrib instanceof List) {
-			return contrib.stream().
-					//sometimes there are empty values in list
-							filter((c) -> c != null && !c.trim().isEmpty()).
-					// validate email ppolicy
-							map(this::cleanupVCardEMail)
-					.collect(Collectors.toList());
-		}
-		return new ArrayList<>();
+	protected List<String> prepareContributer(Iterable<String> contrib){
+		return StreamSupport.stream(contrib.spliterator(), false).
+				//sometimes there are empty values in list
+						filter((c) -> c != null && !c.trim().isEmpty()).
+				// validate email ppolicy
+						map(this::cleanupVCardEMail)
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -379,8 +397,8 @@ public class OAILOMExporter {
 	 * @param contributerProp
 	 * @param role
 	 */
-	public Element addContributer(Element eleParent,QName contributerProp,String role){
-		Serializable contributer = nodeService.getProperty(nodeRef, contributerProp);
+	public Element addContributer(Element eleParent,String contributerProp,String role){
+		Object contributer = properties.get(contributerProp);
 
 		Element eleContribute = null;
 		if(contributer != null && contributer instanceof List){
@@ -400,7 +418,7 @@ public class OAILOMExporter {
 	public Element createAndAppendElement(String elementName, Element parent) {
 		return this.createAndAppendElement(elementName, parent, (String) null);
 	}
-	
+
 	public Element createAndAppendElement(String elementName, Element parent, QName property){
 		return createAndAppendElement(elementName, parent, property,false);
 	}
@@ -409,7 +427,7 @@ public class OAILOMExporter {
 		
 		
 		if (property != null) {
-			Serializable repoValue = nodeService.getProperty(nodeRef, property);
+			Object repoValue = properties.get(property.toString());
 			return this.createAndAppendElement(elementName, parent, repoValue,cdata);
 		}
 		return null;
@@ -423,7 +441,7 @@ public class OAILOMExporter {
 	 * @param repoValue
 	 * @return
 	 */
-	public Element createAndAppendElement(String elementName, Element parent, Serializable repoValue, boolean cdata){
+	public Element createAndAppendElement(String elementName, Element parent, Object repoValue, boolean cdata){
 		
 		if(repoValue == null){
 			return null;
@@ -499,7 +517,7 @@ public class OAILOMExporter {
 
     public Element createAndAppendElementLangStr(String elementName, Element parent, QName textProp, Locale locale) {
         List<MLText> deTextLst = new ArrayList<>();
-        Serializable textLst = nodeService.getProperty(nodeRef, textProp);
+        Object textLst = properties.get(textProp.toString());
         if (textLst != null) {
 
 
@@ -522,13 +540,13 @@ public class OAILOMExporter {
 	 */
 	public Element createAndAppendElementSrcVal(String elementName, Element parent, QName property, String src) {
 		if (property != null) {
-			Serializable repoValue = nodeService.getProperty(nodeRef, property);
+			Object repoValue = properties.get(property.toString());
 			return this.createAndAppendElementSrcVal(elementName, parent, repoValue, src);
 		}
 		return null;
 	}
 
-	public Element createAndAppendElementSrcVal(String elementName, Element parent, Serializable repoValue, String src) {
+	public Element createAndAppendElementSrcVal(String elementName, Element parent, Object repoValue, String src) {
 		if (repoValue != null) {
 			Element langEle = null;
 
@@ -562,7 +580,7 @@ public class OAILOMExporter {
 		if (eleParent != null && !elementName.isEmpty() && !dateCC.isEmpty()) {
 			ele = doc.createElement(elementName);
 
-			Serializable repoValue = nodeService.getProperty(nodeRef, QName.createQName(dateCC));
+			Object repoValue = properties.get(dateCC);
 			if (repoValue != null && repoValue instanceof String) {
 				if (((String) repoValue).startsWith("P"))
 					repoValue = Duration.parse((String) repoValue);
@@ -598,7 +616,7 @@ public class OAILOMExporter {
 
 	public Element createHandle(Element eleParent){
 		Element identifierHandle = null;
-		String handleId = (String)nodeService.getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID));
+		String handleId = (String)properties.get(CCConstants.CCM_PROP_PUBLISHED_HANDLE_ID);
 		if(handleId != null && !handleId.trim().equals("")){
 			identifierHandle = createAndAppendElement("identifier", eleParent);
 			// fixed values: 'HDL' - Handle, 'DOI' or 'URN'

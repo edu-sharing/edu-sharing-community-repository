@@ -8,12 +8,8 @@ import {
 import { Helper } from '../../../core-module/rest/helper';
 import { OptionItem } from '../../../core-ui-module/option-item';
 import { DropData, DragData } from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
-import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
 import {WorkspaceMainComponent} from '../workspace.component';
-import {
-    DropSource,
-    NodeRoot
-} from '../../../core-ui-module/components/node-entries-wrapper/entries-model';
+import { DropSource, NodeRoot } from 'src/app/features/node-entries/entries-model';
 
 @Component({
     selector: 'es-workspace-tree',
@@ -24,7 +20,6 @@ export class WorkspaceTreeComponent {
     @Input() root: NodeRoot;
     @Input() workspace: WorkspaceMainComponent;
     @Input() isSafe: boolean;
-    @Input() mainNav: MainNavComponent;
     @Input() selectedNode: string;
     @Input() set path(path: Node[]) {
         if (path.length === 0) {
@@ -90,7 +85,7 @@ export class WorkspaceTreeComponent {
             let pos = this._path[i].indexOf(id);
             if (pos != -1) {
                 //this._path[i].splice(pos,this._path[i].length-pos);
-                this._path.splice(i, 1);
+                this._path[i].splice(pos, 1);
                 create = false;
                 i--;
             }

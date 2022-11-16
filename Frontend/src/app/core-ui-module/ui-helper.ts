@@ -1,11 +1,11 @@
 import {forkJoin as observableForkJoin, Observable, Observer, of} from 'rxjs';
-import {first, catchError} from 'rxjs/operators';
+import {catchError, first, take} from 'rxjs/operators';
 import {OPEN_URL_MODE, UIConstants} from '../core-module/ui/ui-constants';
 import {ConfigurationService} from '../core-module/rest/services/configuration.service';
 import {TranslateService} from '@ngx-translate/core';
 import {ActivatedRoute, NavigationExtras, Router} from '@angular/router';
 import {
-    Collection, CollectionReference,
+    CollectionReference,
     Connector,
     Filetype,
     MdsInfo,
@@ -19,14 +19,12 @@ import {RestConstants} from '../core-module/rest/rest-constants';
 import {RestNodeService} from '../core-module/rest/services/rest-node.service';
 import {Toast} from './toast';
 import {RestHelper} from '../core-module/rest/rest-helper';
-import {TemporaryStorageService} from '../core-module/rest/services/temporary-storage.service';
 import {UIService} from '../core-module/rest/services/ui.service';
 import {
     ComponentFactoryResolver,
     ComponentRef,
     ElementRef,
     EmbeddedViewRef,
-    EventEmitter,
     Injector,
     NgZone,
     Type,
@@ -44,11 +42,12 @@ import {PlatformLocation} from '@angular/common';
 import {MessageType} from '../core-module/ui/message-type';
 import {Helper} from '../core-module/rest/helper';
 import {NodeHelperService} from './node-helper.service';
-import { RestIamService } from '../core-module/rest/services/rest-iam.service';
-import { DialogButton } from '../core-module/ui/dialog-button';
-import { LoginInfo } from 'ngx-edu-sharing-api';
+import {RestIamService} from '../core-module/rest/services/rest-iam.service';
+import {DialogButton} from '../core-module/ui/dialog-button';
+import {LoginInfo} from 'ngx-edu-sharing-api';
 
 export class UIHelper {
+    static COPY_URL_PARAMS = ['mainnav', 'reurl', 'reurlTypes', 'reurlCreate', 'applyDirectories'];
     public static evaluateMediaQuery(type: string, value: number) {
         if (type == UIConstants.MEDIA_QUERY_MAX_WIDTH)
             return value > window.innerWidth;
@@ -69,7 +68,7 @@ export class UIHelper {
         name: string,
         value: any,
     ) {
-        route.queryParams.subscribe((data: any) => {
+        route.queryParams.pipe(take(1)).subscribe((data: any) => {
             let queryParams: any = {};
             for (let key in data) {
                 queryParams[key] = data[key];
@@ -232,6 +231,39 @@ export class UIHelper {
         } else {
             extras.queryParams = { id: node.ref.id };
             router.navigate([UIConstants.ROUTER_PREFIX, 'collections'], extras);
+        }
+    }
+    /**
+     * Navigate to the search in reurl (apply) mode
+     * when done, the app will redirect to the current location
+     */
+    public static openSearchWithReurl(
+        platformLocation: PlatformLocation,
+        router: Router,
+        mode: 'REDIRECT' | 'WINDOW',
+        extras: NavigationExtras = {},
+    ) {
+        if(!extras.queryParams) {
+            extras.queryParams = {};
+        }
+        if(mode === 'REDIRECT') {
+            extras.queryParams.reurl = window.location.href;
+        } else {
+            extras.queryParams.reurl = 'WINDOW';
+        }
+        if(mode === 'REDIRECT') {
+            return router.navigate([
+                    UIConstants.ROUTER_PREFIX +
+                    'search'
+                ], extras
+            );
+        } else {
+            return window.open(platformLocation.getBaseHrefFromDOM() + router.createUrlTree([
+                UIConstants.ROUTER_PREFIX + 'search'
+                ], extras).toString(),
+                '_blank',
+                'toolbar=no,scrollbars=yes,resizable=yes'
+            );
         }
     }
     /**
@@ -477,7 +509,7 @@ export class UIHelper {
                     if (win) win.close();
                     return;
                 }
-                iam.getUser().subscribe(
+                iam.getCurrentUserAsync().then(
                     user => {
                         if (
                             user.person.quota.enabled &&
@@ -533,122 +565,6 @@ export class UIHelper {
                 if (win) win.close();
             },
         );
-    }
-
-    /**
-     * smoothly scroll to the given y offset
-     * @param {y} number
-     * @param {smoothness} lower numbers indicate less smoothness, higher more smoothness
-     */
-    static scrollSmooth(y: number = 0, smoothness = 1) {
-        let mode = window.scrollY >= y;
-        let divider = 3 * smoothness;
-        let minSpeed = 7 / smoothness;
-        let lastY = y;
-        let interval = setInterval(() => {
-            let yDiff = window.scrollY - lastY;
-            lastY = window.scrollY;
-            if (window.scrollY > y && mode && yDiff) {
-                window.scrollBy(
-                    0,
-                    -Math.max((window.scrollY - y) / divider, minSpeed),
-                );
-            } else if (window.scrollY < y && !mode && yDiff) {
-                window.scrollBy(
-                    0,
-                    Math.max((y - window.scrollY) / divider, minSpeed),
-                );
-            } else {
-                clearInterval(interval);
-            }
-        }, 16);
-    }
-    /**
-     * smoothly scroll to the given y offset inside an element (use offsetTop on the child to determine this position)
-     * @param {y} number
-     * @param {smoothness} lower numbers indicate less smoothness, higher more smoothness
-     */
-    static scrollSmoothElement(
-        pos: number = 0,
-        element: Element,
-        smoothness = 1,
-        axis = 'y',
-    ) {
-        return new Promise<void>(resolve => {
-            let currentPos =
-                axis == 'x' ? element.scrollLeft : element.scrollTop;
-            if (element.getAttribute('data-is-scrolling') == 'true') {
-                return;
-            }
-            let mode = currentPos > pos;
-            let divider = 3 * smoothness;
-            let minSpeed = 7 / smoothness;
-            let lastPos = pos;
-            let maxPos =
-                axis == 'x'
-                    ? element.scrollWidth - element.clientWidth
-                    : element.scrollHeight - element.clientHeight;
-            let limitReached = false;
-            if (mode && pos <= 0) {
-                pos = 0;
-                limitReached = true;
-            }
-            if (!mode && pos >= maxPos) {
-                pos = maxPos;
-                limitReached = true;
-            }
-            let interval = setInterval(() => {
-                let currentPos =
-                    axis == 'x' ? element.scrollLeft : element.scrollTop;
-                let posDiff = currentPos - lastPos;
-                lastPos = currentPos;
-                let finished = true;
-                if (currentPos > pos) {
-                    currentPos -= Math.max(
-                        (currentPos - pos) / divider,
-                        minSpeed,
-                    );
-                    finished = currentPos <= pos;
-                } else if (currentPos < pos && !mode) {
-                    currentPos += Math.max(
-                        (pos - currentPos) / divider,
-                        minSpeed,
-                    );
-                    finished = currentPos >= pos;
-                }
-                if (axis == 'x') element.scrollLeft = currentPos;
-                else element.scrollTop = currentPos;
-                if (finished) {
-                    clearInterval(interval);
-                    element.removeAttribute('data-is-scrolling');
-                    resolve();
-                }
-            }, 16);
-            element.setAttribute('data-is-scrolling', 'true');
-        });
-    }
-
-    /**
-     * smoothly scroll to the given child inside an element (The child will be placed around the first 1/3 of the parent's top)
-     * @param child
-     * @param element
-     * @param smoothness
-     */
-    static scrollSmoothElementToChild(
-        child: Element,
-        element: Element,
-        smoothness = 1,
-    ) {
-        // y equals to the top of the child + any scrolling of the parent - the top of the parent
-        let y =
-            child.getBoundingClientRect().top +
-            element.scrollTop -
-            element.getBoundingClientRect().top;
-        // move the focused element to 1/3 at the top of the container
-        y +=
-            child.getBoundingClientRect().height / 2 -
-            element.getBoundingClientRect().height / 3;
-        this.scrollSmoothElement(y, element, smoothness);
     }
 
     static setFocusOnCard() {
@@ -774,7 +690,7 @@ export class UIHelper {
         targetElement: Element,
         bindings: { [key: string]: any } = null,
         { delay = 0, replace = true } = {},
-        injector?: Injector, 
+        injector?: Injector,
     ): ComponentRef<T> {
         if (targetElement == null) {
             return null;
@@ -794,6 +710,9 @@ export class UIHelper {
                     instance[key].subscribe((value: any) => binding(value));
                 } else {
                     instance[key] = binding;
+                    // `ngOnChanges` won't be called on the component like this. Consider doing
+                    // something like this:
+                    // https://scm.edu-sharing.com/edu-sharing/projects/oeh-redaktion/ng-meta-widgets/-/blob/1603fb2dedadd3952401385bcbd91a4bd8407643/src/app/app.module.ts#L66-79
                 }
             }
         }
@@ -818,14 +737,13 @@ export class UIHelper {
      * @param route
      */
     static getCommonParameters(route: ActivatedRoute) {
-        const COPY_PARAMS = ['mainnav', 'reurl', 'applyDirectories'];
         return new Observable<any>((observer: Observer<any>) => {
             route.queryParams
                 .pipe().pipe(
                 first())
                 .subscribe(queryParams => {
                     let result: any = {};
-                    COPY_PARAMS.forEach(params => {
+                    UIHelper.COPY_URL_PARAMS.forEach(params => {
                         if (queryParams[params]) {
                             result[params] = queryParams[params];
                         }
@@ -941,5 +859,16 @@ export class UIHelper {
             RestConstants.BASIC_PERMISSIONS.indexOf(p1) >
             RestConstants.BASIC_PERMISSIONS.indexOf(p2)
         );
+    }
+
+    static isParentElementOfElement(target: HTMLElement, possibleParent: HTMLElement) {
+        let e = target;
+        while(e != null) {
+            if(e === possibleParent) {
+                return true;
+            }
+            e = e.parentElement;
+        }
+        return false;
     }
 }

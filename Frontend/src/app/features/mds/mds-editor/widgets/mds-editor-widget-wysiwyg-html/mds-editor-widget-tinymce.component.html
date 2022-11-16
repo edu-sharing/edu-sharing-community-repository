@@ -1,0 +1,38 @@
+<es-mds-editor-widget-container
+  #container
+  [widget]="widget"
+  [label]="true"
+  [wrapInGroup]="true"
+  [valueType]="valueType"
+  [control]="dummyControl"
+  [wrapInFormField]="false"
+>
+  <!--
+  <angular-editor #editor
+    [config]="editorConfig"
+    (blur)="onBlur.emit()"
+    [(ngModel)]="html"
+  ></angular-editor>
+
+  <quill-editor #editor
+  (onContentChanged)="contentChanged($event)">
+
+  </quill-editor>
+  <div class="NgxEditor__Wrapper">
+    <ngx-editor-menu [editor]="editor"> </ngx-editor-menu>
+    <ngx-editor
+      #editorComponent
+      [editor]="editor"
+      [(ngModel)]="html"
+      [disabled]="false"
+      [placeholder]="widget.definition.placeholder"
+    ></ngx-editor>
+  </div>-->
+  <editor
+    #editor
+    *ngIf="editorConfig"
+    [init]="editorConfig"
+    [(ngModel)]="html"
+    (onBlur)="onBlur.emit()"
+  ></editor>
+</es-mds-editor-widget-container>

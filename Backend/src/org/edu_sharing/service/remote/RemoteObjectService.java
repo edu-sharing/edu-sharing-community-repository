@@ -220,8 +220,8 @@ public class RemoteObjectService {
 						policyBehaviourFilter.disableBehaviour(ref);
 						// admin is the owner, not the current user
 						nodeService.setOwner(nodeId, ApplicationInfoList.getHomeRepository().getUsername());
-						NodeServiceHelper.setProperty(ref, CCConstants.CM_PROP_C_CREATOR, ApplicationInfoList.getHomeRepository().getUsername());
-						NodeServiceHelper.setProperty(ref, CCConstants.CM_PROP_C_MODIFIER, ApplicationInfoList.getHomeRepository().getUsername());
+						NodeServiceHelper.setProperty(ref, CCConstants.CM_PROP_C_CREATOR, ApplicationInfoList.getHomeRepository().getUsername(), false);
+						NodeServiceHelper.setProperty(ref, CCConstants.CM_PROP_C_MODIFIER, ApplicationInfoList.getHomeRepository().getUsername(), false);
 						nodeService.createVersion(nodeId);
 						policyBehaviourFilter.enableBehaviour(ref);
 						return nodeId;

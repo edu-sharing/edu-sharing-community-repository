@@ -1,7 +1,6 @@
 import {Component, Input, EventEmitter, Output, ViewChild} from '@angular/core';
 import { RestNodeService } from '../../../core-module/core.module';
 import { TranslateService } from '@ngx-translate/core';
-import { Translation } from '../../../core-ui-module/translation';
 import { RestConstants } from '../../../core-module/core.module';
 import { Node, NodeList } from '../../../core-module/core.module';
 import { TemporaryStorageService } from '../../../core-module/core.module';
@@ -13,12 +12,12 @@ import { Helper } from '../../../core-module/rest/helper';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { DropData, DragData } from '../../../core-ui-module/directives/drag-nodes/drag-nodes';
 import {MatMenuTrigger} from '@angular/material/menu';
-import {DropdownComponent} from '../../../core-ui-module/components/dropdown/dropdown.component';
+import {DropdownComponent} from '../../../shared/components/dropdown/dropdown.component';
 import {OPTIONS_HELPER_CONFIG, OptionsHelperService} from '../../../core-ui-module/options-helper.service';
-import {MainNavComponent} from '../../../common/ui/main-nav/main-nav.component';
+import {MainNavComponent} from '../../../main/navigation/main-nav/main-nav.component';
 import {CdkDragDrop, CdkDragEnter, CdkDragExit} from '@angular/cdk/drag-drop';
 import {DragCursorDirective} from '../../../core-ui-module/directives/drag-cursor.directive';
-import {DropSource} from '../../../core-ui-module/components/node-entries-wrapper/entries-model';
+import { DropSource } from 'src/app/features/node-entries/entries-model';
 
 @Component({
     selector: 'es-workspace-sub-tree',
@@ -44,7 +43,6 @@ export class WorkspaceSubTreeComponent {
     dropdownTop: string;
 
     @Input() openPath: string[][] = [];
-    @Input() mainNav: MainNavComponent;
     @Input() set reload(reload: Boolean) {
         if (reload) {
             this.refresh();
@@ -150,7 +148,7 @@ export class WorkspaceSubTreeComponent {
             activeObjects: [node],
             scope: Scope.WorkspaceTree
         });
-        this.optionsService.initComponents(this.mainNav, null, null, this.dropdown);
+        this.optionsService.initComponents(null, null, this.dropdown);
         this.optionsService.setListener({
             onRefresh: () => this.refresh(),
             onDelete: () => this.refresh()

@@ -327,6 +327,7 @@ public class Usages {
 
 	public enum CollectionUsageType {
 		ACTIVE,
-		PROPOSAL
+		PROPOSAL_PENDING,
+		PROPOSAL_DECLINED,
 	}
 }

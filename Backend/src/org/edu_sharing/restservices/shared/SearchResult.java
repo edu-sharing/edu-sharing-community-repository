@@ -65,5 +65,4 @@ public class SearchResult<T> {
 
 	@Schema(required = false, description = "")
 	public List<NodeSearch.Suggest> getSuggests() { return suggests; }
-
 }

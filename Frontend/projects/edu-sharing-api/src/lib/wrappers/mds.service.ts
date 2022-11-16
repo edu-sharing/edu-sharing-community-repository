@@ -2,10 +2,8 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { MdsV1Service } from '../api/services';
-import { MdsDefinition, MdsView, MetadataSetInfo, MdsSort } from '../models';
-
-const DEFAULT = '-default-';
-const HOME_REPOSITORY = '-home-';
+import { DEFAULT, HOME_REPOSITORY } from '../constants';
+import { MdsDefinition, MdsSort, MdsView, MetadataSetInfo } from '../models';
 
 export interface MdsIdentifier {
     repository: string;
@@ -39,6 +37,13 @@ export class MdsService {
         return this.availableSetsDict[repository];
     }
 
+    /**
+     * get the given metadata
+     * NOTE: "DEFAULT" will refer to the primary metadataset of the repository but will NOT
+     * obey any restrictions given via the (client-side) configuration
+     * @param repository
+     * @param metadataSet
+     */
     getMetadataSet({
         repository = HOME_REPOSITORY,
         metadataSet = DEFAULT,

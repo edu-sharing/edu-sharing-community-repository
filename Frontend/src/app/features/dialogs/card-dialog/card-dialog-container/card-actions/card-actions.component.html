@@ -1,0 +1,47 @@
+<ng-container [ngTemplateOutlet]="additionalContent"></ng-container>
+<div class="card-dialog-button-box button-box-left" *ngIf="buttonsLeft && buttonsLeft.length > 0">
+  <ng-container
+    *ngFor="let button of buttonsLeft"
+    [ngTemplateOutlet]="buttonsTemplate"
+    [ngTemplateOutletContext]="{ $implicit: button }"
+  >
+  </ng-container>
+</div>
+<div class="card-dialog-button-box card-dialog-button-box-right">
+  <ng-container
+    *ngFor="let button of buttonsRight"
+    [ngTemplateOutlet]="buttonsTemplate"
+    [ngTemplateOutletContext]="{ $implicit: button }"
+  >
+  </ng-container>
+</div>
+
+<ng-template #buttonsTemplate let-button>
+  <button
+    *ngIf="button.color === 'primary'"
+    mat-flat-button
+    color="primary"
+    [disabled]="button.disabled"
+    (click)="button.callback()"
+  >
+    {{ button.label | translate }}
+  </button>
+  <button
+    *ngIf="button.color === 'standard'"
+    mat-button
+    color="primary"
+    [disabled]="button.disabled"
+    (click)="button.callback()"
+  >
+    {{ button.label | translate }}
+  </button>
+  <button
+    *ngIf="button.color === 'danger'"
+    mat-flat-button
+    color="warn"
+    [disabled]="button.disabled"
+    (click)="button.callback()"
+  >
+    {{ button.label | translate }}
+  </button>
+</ng-template>

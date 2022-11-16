@@ -156,12 +156,12 @@ export class WorkspaceShareComponent {
     usages: any;
     showCollections = false;
     buttons: DialogButton[] = [
-        new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () =>
+        new DialogButton('CANCEL', { color: 'standard' }, () =>
             this.cancel(),
         ),
         new DialogButton(
             'SAVE', // Can be changed in `updateButtons`.
-            DialogButton.TYPE_PRIMARY,
+            { color: 'primary' },
             () => this.save(),
         ),
     ];
@@ -218,7 +218,7 @@ export class WorkspaceShareComponent {
         };
         this.publishEnabled.permissions = [RestConstants.PERMISSION_CONSUMER, RestConstants.ACCESS_CC_PUBLISH];
 
-        this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+        this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
             this.isSafe = data.currentScope != null;
             this.updateToolpermissions();
         });
@@ -357,7 +357,7 @@ export class WorkspaceShareComponent {
                     });
             }
         }
-        this.connector.isLoggedIn().subscribe((data: LoginResult) => {
+        this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
             this.isAdmin = data.isAdmin;
         });
     }
@@ -504,7 +504,7 @@ export class WorkspaceShareComponent {
 
     updateButtons() {
         const saveButton = this.buttons[1];
-        saveButton.name = 'SAVE';// this.tab == 0 ? 'WORKSPACE.BTN_INVITE' : 'APPLY';
+        saveButton.label = 'SAVE';// this.tab == 0 ? 'WORKSPACE.BTN_INVITE' : 'APPLY';
     }
 
     chooseType() {
