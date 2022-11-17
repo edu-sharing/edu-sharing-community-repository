@@ -16,7 +16,7 @@ You can download source and binaries from
 our [artifact repository](https://artifacts.edu-sharing.com).
 
 
-We also offer a ready-to-use docker-compose & kubernetes package for each release. Ccheck out the github releases page [here](https://github.com/edu-sharing/edu-sharing-projects-community/releases).
+We also offer a ready-to-use docker-compose & kubernetes package for each release. Check out the github releases page [here](https://github.com/edu-sharing/edu-sharing-projects-community/releases).
 
 Contributing
 ------------
