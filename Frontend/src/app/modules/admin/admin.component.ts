@@ -1458,10 +1458,11 @@ export class AdminComponent implements OnInit, OnDestroy {
                 });
             });
             this.admin.getRepositoryVersion().subscribe(
-                (data: string) => {
-                    this.repositoryVersion = data;
+                (data) => {
+                    this.repositoryVersion = JSON.stringify(data, null, 2);
                 },
                 (error: any) => {
+                    console.info(error);
                     this.repositoryVersion =
                         'Error accessing version information. Are you in dev mode?';
                 },
