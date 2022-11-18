@@ -223,7 +223,7 @@ public class OAIPMHLOMImporter implements Importer{
 				handler.handleRecord(nodeRecord,cursor,set);
 				String nodeId = persistentHandler.safe(handler, cursor, set);
 				if(getBinaryHandler() != null){
-					getBinaryHandler().safe(nodeId, handler,nodeRecord);
+					getBinaryHandler().safe(nodeId, handler,nodeRecord, set);
 				}
 				new MCAlfrescoAPIClient().createVersion(nodeId);
 			}
@@ -434,7 +434,7 @@ public class OAIPMHLOMImporter implements Importer{
 		String nodeId = persistentHandler.safe(handler, cursor, set);
 		if(nodeId != null) {
 			if(getBinaryHandler() != null){
-				getBinaryHandler().safe(nodeId, handler,nodeRecord);
+				getBinaryHandler().safe(nodeId, handler,nodeRecord, set);
 			}
 			if(job!=null &&
 					(job.getJobDataMap().getBoolean(OAIConst.PARAM_FORCE_UPDATE) || job.getJobDataMap().getBoolean(OAIConst.PARAM_NO_VERSION))){
