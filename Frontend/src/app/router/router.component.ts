@@ -50,6 +50,7 @@ import { MainNavService } from '../main/navigation/main-nav.service';
 import { ManagementDialogsService } from '../modules/management-dialogs/management-dialogs.service';
 import * as rxjs from 'rxjs';
 import { LicenseAgreementService } from '../services/license-agreement.service';
+import { DialogsNavigationGuardService as DialogsNavigationGuard } from '../features/dialogs/dialogs-navigation.guard';
 
 @Component({
     selector: 'es-router',
@@ -222,7 +223,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
  */
 
 // Due to ahead of time, we need to create all routes manually.
-export const ROUTES: Routes = [
+const childRoutes: Routes = [
     // overrides and additional routes
     ...extensionRoutes,
 
@@ -301,4 +302,15 @@ export const ROUTES: Routes = [
 
     // wildcard 404
     { path: '**', component: MessagesComponent, data: { message: 404 } },
+];
+
+export const ROUTES: Routes = [
+    // Add a `canDeactivate` guard to all routes, that closes any open dialogs before allowing
+    // navigation.
+    {
+        path: '',
+        canDeactivate: [DialogsNavigationGuard],
+        children: childRoutes,
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
+    },
 ];

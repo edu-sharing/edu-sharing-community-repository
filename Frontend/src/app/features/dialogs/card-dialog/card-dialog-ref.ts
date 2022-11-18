@@ -108,46 +108,50 @@ export class CardDialogRef<D = unknown, R = unknown> {
         );
     }
 
-    /** @returns whether the cancel try was acknowledged */
-    tryCancel(trigger: 'backdrop' | 'x-button' | 'esc-key'): boolean {
+    tryCancel(trigger: 'backdrop' | 'x-button' | 'esc-key' | 'navigation'): {
+        acknowledged: boolean;
+        closed: Promise<boolean>;
+    } {
         switch (this.config.closable) {
             case Closable.Casual:
                 this.close();
-                return true;
+                return { acknowledged: true, closed: Promise.resolve(true) };
             case Closable.Standard:
                 switch (trigger) {
                     case 'backdrop':
-                        return false;
+                        return { acknowledged: false, closed: Promise.resolve(false) };
                     case 'x-button':
                     case 'esc-key':
+                    case 'navigation':
                         this.close();
-                        return true;
+                        return { acknowledged: true, closed: Promise.resolve(true) };
                 }
             case Closable.Confirm:
                 switch (trigger) {
                     case 'backdrop':
-                        return false;
+                        return { acknowledged: false, closed: Promise.resolve(false) };
                     case 'x-button':
                     case 'esc-key':
-                        void this.dialogs
+                    case 'navigation':
+                        const closed = this.dialogs
                             .openGenericDialog({
                                 title: 'DIALOG.CONFIRM_DISCARD_TITLE',
                                 messageText: 'DIALOG.CONFIRM_DISCARD_MESSAGE',
                                 buttons: DISCARD_OR_BACK,
                             })
-                            .then((dialogRef) =>
-                                dialogRef.afterClosed().subscribe((response) => {
-                                    if (response === 'DISCARD') {
-                                        this.close();
-                                    } else {
-                                        this.containerInstance.trapFocus();
-                                    }
-                                }),
-                            );
-                        return true;
+                            .then((dialogRef) => dialogRef.afterClosed().toPromise())
+                            .then((response) => {
+                                if (response === 'DISCARD') {
+                                    this.close();
+                                    return true;
+                                } else {
+                                    return false;
+                                }
+                            });
+                        return { acknowledged: true, closed };
                 }
             case Closable.Disabled:
-                return false;
+                return { acknowledged: false, closed: Promise.resolve(false) };
         }
     }
 
@@ -163,7 +167,7 @@ export class CardDialogRef<D = unknown, R = unknown> {
                 filter((event) => event.keyCode === ESCAPE && !hasModifierKey(event)),
             )
             .subscribe((event) => {
-                const acknowledged = this.tryCancel('esc-key');
+                const acknowledged = this.tryCancel('esc-key').acknowledged;
                 if (acknowledged) {
                     event.preventDefault();
                 }
@@ -172,9 +176,9 @@ export class CardDialogRef<D = unknown, R = unknown> {
         this.overlayRef
             .backdropClick()
             .pipe(filter(() => !this.state.isLoading && this.state.autoSavingState !== 'saving'))
-            .subscribe(() => {
-                const acknowledged = this.tryCancel('backdrop');
-                if (!acknowledged) {
+            .subscribe(async () => {
+                const closed = await this.tryCancel('backdrop').closed;
+                if (!closed) {
                     // Move focus back to the dialog.
                     this.containerInstance.trapFocus();
                 }
