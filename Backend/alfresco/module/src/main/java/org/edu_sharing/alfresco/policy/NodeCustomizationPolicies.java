@@ -2,6 +2,8 @@ package org.edu_sharing.alfresco.policy;
 
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -44,6 +46,8 @@ import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
+import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
+import org.json.JSONObject;
 import org.quartz.Scheduler;
 import org.springframework.security.crypto.codec.Base64;
 
@@ -732,7 +736,10 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 		if(previewImageBase64 != null) {
 			writeBase64Image(nodeRef, previewImageBase64);
 		} else {
-			byte[] previewImage = getPreviewFromURLSplash(url);
+			byte[] previewImage = getPreviewFromURLPlaywright(url);
+			if(previewImage == null) {
+				previewImage = getPreviewFromURLSplash(url);
+			}
 			if(previewImage != null){
 				writeImage(nodeRef, previewImage);
 			}
@@ -866,6 +873,34 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
 				}
 			}catch(Exception e) {
 				logger.warn("Calling Splash service failed: " + e.getMessage(), e);
+			}
+		}
+		return null;
+	}
+	private static byte[] getPreviewFromURLPlaywright(String httpURL) {
+		Config playwright = LightbendConfigLoader.get().getConfig("repository.communication.playwright");
+		if(playwright != null && playwright.hasPath("url")) {
+			try {
+				final StringBuilder url = new StringBuilder(playwright.getString("url") + "/v1/website?url=" + java.net.URLEncoder.encode(httpURL, "ISO-8859-1"));
+				playwright.entrySet().stream().filter((e) -> !"url".equals(e.getKey())).forEach((e) -> {
+					try {
+						url.append("&").append(e.getKey()).append("=").append(java.net.URLEncoder.encode(e.getValue().unwrapped().toString(), "ISO-8859-1"));
+					}catch(UnsupportedEncodingException ignored) {}
+				});
+				HttpClient client = new HttpClient();
+				GetMethod method = new GetMethod(url.toString());
+				int timeout = (int) (playwright.getDouble("timeout") * 1000);
+				client.getHttpConnectionManager().getParams().setConnectionTimeout(timeout);
+				client.getHttpConnectionManager().getParams().setSoTimeout(timeout);
+				int statusCode = client.executeMethod(method);
+				if (statusCode == HttpStatus.SC_OK) {
+					JSONObject result = new JSONObject(method.getResponseBodyAsString());
+					return Base64.decode(result.getString("preview").getBytes(StandardCharsets.UTF_8));
+				} else {
+					logger.warn("Playwright returned non-okay error code " + statusCode + ", " + url.toString());
+				}
+			}catch(Exception e) {
+				logger.warn("Calling Playwright service failed: " + e.getMessage(), e);
 			}
 		}
 		return null;
