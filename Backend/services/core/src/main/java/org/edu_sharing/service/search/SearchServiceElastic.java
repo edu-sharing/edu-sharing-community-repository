@@ -138,9 +138,13 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
     private RequestOptions getRequestOptions() {
         RequestOptions.Builder b = RequestOptions.DEFAULT.toBuilder();
+
         // add trace headers to elastic request
-        for(Map.Entry<String, String> header: Context.getCurrentInstance().getB3().getX3Headers().entrySet()) {
-            b.addHeader(header.getKey(), header.getValue());
+        Context context = Context.getCurrentInstance();
+        if(context != null) {
+            for(Map.Entry<String, String> header: context.getB3().getX3Headers().entrySet()) {
+                b.addHeader(header.getKey(), header.getValue());
+            }
         }
         return b.build();
     }
