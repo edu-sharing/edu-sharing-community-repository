@@ -27,6 +27,7 @@
     <file-extension>jpg</file-extension>
     <export-filters>
       <entry><family>PortableDocumentFormat</family><string>pdf</string></entry>
+      <entry><family>Presentation</family><string>ppsx</string></entry>
     </export-filters>
   </document-format>
 
@@ -338,7 +339,7 @@
     </export-filters>
   </document-format>
 
-  <!-- Not supported in OpenOffice 3.2 (might be in later versions)
+  <!-- Not supported in OpenOffice 3.2 (might be in later versions) -->
   <document-format><name>Microsoft PowerPoint 2007 slide show</name>
     <family>Presentation</family>
     <mime-type>application/vnd.openxmlformats-officedocument.presentationml.slideshow</mime-type>
@@ -347,9 +348,9 @@
       <entry><family>Presentation</family><string>MS PowerPoint 2007</string></entry>
     </export-filters>
   </document-format>
-  -->
+
   
-  <!-- Not supported in OpenOffice 3.2 (might be in later versions)
+  <!-- Not supported in OpenOffice 3.2 (might be in later versions)-->
   <document-format><name>Microsoft PowerPoint 2007 macro-enabled slide show</name>
     <family>Presentation</family>
     <mime-type>application/vnd.ms-powerpoint.slideshow.macroEnabled.12</mime-type>
@@ -358,7 +359,7 @@
       <entry><family>Presentation</family><string>MS PowerPoint 2007</string></entry>
     </export-filters>
   </document-format>
-  -->
+
 
   <document-format><name>Microsoft PowerPoint 2007 template</name>
     <family>Presentation</family>
