@@ -79,7 +79,6 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
      */
     @Input() allowBinary = true;
     @Input() scope: string;
-    private fallbackFolder: Node;
     /**
      * Parent location. If null, the folder picker will be shown
      */
@@ -150,7 +149,6 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             });
         this.connector.isLoggedIn(false).subscribe((login) => {
             if (login.statusCode === RestConstants.STATUS_CODE_OK) {
-                this.nodeHelper.getDefaultInboxFolder().subscribe((n) => (this.fallbackFolder = n));
             }
         });
         this.cardHasOpenModals$ = cardService.hasOpenModals.pipe(delay(0));
@@ -175,7 +173,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         this.destroyed.complete();
     }
 
-    private onUrlPasteOnPage(url: string) {
+    private async onUrlPasteOnPage(url: string) {
         if (!this.allowed || !this.allowBinary) {
             return;
         }
@@ -186,7 +184,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         // this currently fails because getAsString is called async!
         this.managementService.getDialogsComponent().createUrlLink({
             ...new LinkData(url),
-            parent: this.getParent(),
+            parent: await this.getParent(),
         });
         // `onUploadFilesProcessed` will be fired when the quick edit dialog triggered by
         // `createUrlLink` is confirmed or canceled.
@@ -308,7 +306,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     private async openAddFolderDialog(name?: string) {
         const dialogRef = await this.dialogs.openAddFolderDialog({
             name,
-            parent: this.getParent(),
+            parent: await this.getParent(),
         });
         dialogRef.afterClosed().subscribe((result) => {
             if (result) {
@@ -317,9 +315,9 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         });
     }
 
-    openUploadSelect(): void {
+    async openUploadSelect() {
         this.uploadSelectDialogRef = this.managementDialogs.openUploadSelect({
-            parent: this.getParent(),
+            parent: await this.getParent(),
             showPicker: this.showPicker,
         });
         this.uploadSelectDialogRef.afterClosed().subscribe((files) => {
@@ -357,13 +355,13 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         return this.options.some((o) => o.isEnabled);
     }
 
-    getParent() {
+    async getParent() {
         return this._parent && !this.nodeHelper.isNodeCollection(this._parent)
             ? this._parent
-            : this.fallbackFolder;
+            : this.nodeHelper.getDefaultInboxFolder().toPromise();
     }
 
-    addFolder(folder: AddFolderDialogResult) {
+    async addFolder(folder: AddFolderDialogResult) {
         this.toast.showProgressDialog();
         const properties = RestHelper.createNameProperty(folder.name);
         if (folder.metadataSet) {
@@ -371,7 +369,12 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             properties[RestConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET] = ['true'];
         }
         this.nodeService
-            .createNode(this.getParent().ref.id, RestConstants.CM_TYPE_FOLDER, [], properties)
+            .createNode(
+                (await this.getParent()).ref.id,
+                RestConstants.CM_TYPE_FOLDER,
+                [],
+                properties,
+            )
             .subscribe(
                 (data: NodeWrapper) => {
                     this.toast.closeModalDialog();
@@ -419,9 +422,9 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         this.openUpload(files);
     }
 
-    private openUpload(files: FileList): void {
+    private async openUpload(files: FileList) {
         this.uploadDialogRef = this.managementDialogs.openUpload({
-            parent: this.getParent(),
+            parent: await this.getParent(),
             files,
         });
         this.uploadDialogRef.afterClosed().subscribe((nodes) => {
@@ -512,7 +515,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             });
         });
     }
-    createConnector(event: any) {
+    async createConnector(event: any) {
         const name = event.name + '.' + event.type.filetype;
         this.createConnectorName = null;
         const prop = this.nodeHelper.propertiesFromConnector(event);
@@ -521,7 +524,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             win = window.open('');
         }
         this.nodeService
-            .createNode(this.getParent().ref.id, RestConstants.CCM_TYPE_IO, [], prop, false)
+            .createNode((await this.getParent()).ref.id, RestConstants.CCM_TYPE_IO, [], prop, false)
             .subscribe(
                 (data: NodeWrapper) => {
                     this.editConnector(data.node, event.type, win, this.createConnectorType);

@@ -88,7 +88,6 @@
     "INVITE_GLOBAL_RESULTS": "Global results",
     "INVITE_RECENT_AUTHORITIES": "Recently invited",
     "FILE_LOCATION": "Storage location",
-    "CHANGE__LOCATION": "Change",
     "CHOOSE_LOCATION_TITLE": "Location",
     "CHOOSE_LOCATION_DESCRIPTION": "Choose a directory for storage",
     "TREE_MORE_ITEMS": "+ {{count}} more folders",

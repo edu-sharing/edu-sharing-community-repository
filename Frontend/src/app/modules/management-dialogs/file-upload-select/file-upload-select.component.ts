@@ -278,6 +278,7 @@ export class WorkspaceFileUploadSelectComponent implements OnInit, OnChanges {
         this.showSaveParent = true;
         this.parent = event[0];
         this.parentChange.emit(this.parent);
+        this.updateButtons();
     }
 
     updateButtons() {
