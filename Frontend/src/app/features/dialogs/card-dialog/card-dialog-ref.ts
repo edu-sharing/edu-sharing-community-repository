@@ -180,7 +180,7 @@ export class CardDialogRef<D = unknown, R = unknown> {
                 const closed = await this.tryCancel('backdrop').closed;
                 if (!closed) {
                     // Move focus back to the dialog.
-                    this.containerInstance.trapFocus();
+                    void this.containerInstance.trapFocus();
                 }
             });
     }

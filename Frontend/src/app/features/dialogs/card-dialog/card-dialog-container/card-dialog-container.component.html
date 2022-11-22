@@ -5,7 +5,7 @@
   [avatar]="config.avatar"
   (closeButtonClick)="onCloseButtonClick()"
   [showCloseButton]="shouldShowCloseButton()"
-  [disableCloseButton]="isLoading || autoSavingState === 'saving'"
+  [disableCloseButton]="isLoading || autoSavingState === 'saving' || closeButtonTemporarilyDisabled"
 ></es-card-header>
 
 <div class="card-content" [style.padding.px]="config.contentPadding" [attr.aria-hidden]="isLoading">

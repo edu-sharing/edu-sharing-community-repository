@@ -23,6 +23,12 @@ export class CardDialogConfig<D = unknown> {
     minHeight?: number | string;
     maxHeight?: number | string = '95%';
     closable?: Closable = Closable.Casual;
+    /**
+     * Element that should get initial focus after the dialog is opened.
+     *
+     * Note that for 'first-tabbable', any element that is given the attribute `cdkFocusInitial`
+     * will get priority.
+     */
     autoFocus?: AutoFocusTarget | string | boolean = 'first-tabbable';
     data?: D;
 }

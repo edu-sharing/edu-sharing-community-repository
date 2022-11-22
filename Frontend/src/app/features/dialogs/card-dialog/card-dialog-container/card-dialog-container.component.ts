@@ -118,6 +118,7 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
     config: CardDialogConfig<unknown> = {};
     buttons: DialogButton[];
     isLoading = false;
+    closeButtonTemporarilyDisabled = false;
     autoSavingState: AutoSavingState = null;
 
     /** Emits when an animation state changes. */
@@ -208,7 +209,7 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
         if (this.document) {
             this.elementFocusedBeforeDialogWasOpened = _getFocusedElementPierceShadowDom();
         }
-        this.trapFocus();
+        void this.trapFocus();
     }
 
     @HostListener('@defaultAnimation.start', ['$event'])
@@ -305,8 +306,10 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
      * Moves the focus inside the focus trap. When autoFocus is not set to 'dialog', if focus
      * cannot be moved then focus will go to the dialog container.
      */
-    trapFocus() {
+    async trapFocus() {
         const element = this.elementRef.nativeElement;
+        // Disable the close button, so initial focus will go the the next focusable element.
+        this.closeButtonTemporarilyDisabled = true;
         // If were to attempt to focus immediately, then the content of the dialog would not yet be
         // ready in instances where change detection has to run first. To deal with this, we simply
         // wait for the microtask queue to be empty when setting focus when autoFocus isn't set to
@@ -326,13 +329,12 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
                 break;
             case true:
             case 'first-tabbable':
-                void this.focusTrap.focusInitialElementWhenReady().then((focusedSuccessfully) => {
-                    // If we weren't able to find a focusable element in the dialog, then focus the dialog
-                    // container instead.
-                    if (!focusedSuccessfully) {
-                        this._focusDialogContainer();
-                    }
-                });
+                const focusedSuccessfully = await this.focusTrap.focusInitialElementWhenReady();
+                // If we weren't able to find a focusable element in the dialog, then focus the dialog
+                // container instead.
+                if (!focusedSuccessfully) {
+                    this._focusDialogContainer();
+                }
                 break;
             case 'first-heading':
                 this._focusByCssSelector('h1, h2, h3, h4, h5, h6, [role="heading"]');
@@ -341,6 +343,7 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
                 this._focusByCssSelector(this.config.autoFocus!);
                 break;
         }
+        this.closeButtonTemporarilyDisabled = false;
     }
 
     /**

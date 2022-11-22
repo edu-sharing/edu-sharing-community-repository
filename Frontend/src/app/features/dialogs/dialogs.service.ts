@@ -179,7 +179,6 @@ export class DialogsService {
             ...configForNode(data.parent),
             avatar: { kind: 'image', url: this.restConnector.getThemeMimeIconSvg('folder.svg') },
             width: 600,
-            autoFocus: '[autofocus=""]',
             data,
         });
     }
