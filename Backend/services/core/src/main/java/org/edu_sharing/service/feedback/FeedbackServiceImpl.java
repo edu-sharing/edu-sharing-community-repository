@@ -71,8 +71,8 @@ public class FeedbackServiceImpl implements FeedbackService {
         Config config = LightbendConfigLoader.get().getConfig("repository.feedback");
         userMode = config.getEnum(UserMode.class, "userMode");
         allowMultiple = config.getBoolean("allowMultiple");
-        if(allowMultiple && !Arrays.asList(UserMode.full, UserMode.obfuscate).contains(userMode)) {
-            throw new IllegalArgumentException("Mode allowMultiple is not supported in current userMode");
+        if(!allowMultiple && !Arrays.asList(UserMode.full, UserMode.obfuscate).contains(userMode)) {
+            throw new IllegalArgumentException("Mode allowMultiple == false is not supported in current userMode");
         }
     }
 
