@@ -685,14 +685,13 @@ public EduGroup getEduGroup(String authority){
 
 	@Override
 	public String getSubgroupByType(String parentGroup, String groupType){
-		Optional<String> first = authorityService.getContainedAuthorities(AuthorityType.GROUP, parentGroup, true).stream().filter(
-				(g) -> groupType.equals(nodeService.getProperty(getAuthorityNodeRef(g), QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE))
-				)
-		).findFirst();
-		if(first.isPresent()){
-			return first.get();
-		}
-		return null;
+		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(() -> {
+			Optional<String> first = authorityService.getContainedAuthorities(AuthorityType.GROUP, parentGroup, true).stream().filter(
+					(g) -> groupType.equals(nodeService.getProperty(getAuthorityNodeRef(g), QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE))
+					)
+			).findFirst();
+			return first.orElse(null);
+		});
 	}
 
 }
