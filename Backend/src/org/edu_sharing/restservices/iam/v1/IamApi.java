@@ -1344,7 +1344,7 @@ public class IamApi  {
 	public Response getSubgroupByType(
 			@ApiParam(value = "ID of repository (or \"-home-\" for home repository)",required=true, defaultValue="-home-" ) @PathParam("repository") String repository,
 			@ApiParam(value = "authority name of the parent/primary group (begins with GROUP_)",required=true ) @PathParam("group") String group,
-			@ApiParam(value = "authorityType either GROUP or USER, empty to show all",required=true) @PathParam("type") String type,
+			@ApiParam(value = "group type to filter for, e.g. " + CCConstants.ADMINISTRATORS_GROUP_TYPE,required=true) @PathParam("type") String type,
 
 			@Context HttpServletRequest req) {
 
@@ -1353,7 +1353,7 @@ public class IamApi  {
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 
 			GroupEntry response = new GroupEntry();
-			response.setGroup( GroupDao.getGroup(repoDao, group).getSubgroupByType(type).asGroup());
+			response.setGroup(GroupDao.getGroup(repoDao, group).getSubgroupByType(type).asGroup());
 
 			return Response.status(Response.Status.OK).entity(response).build();
 
