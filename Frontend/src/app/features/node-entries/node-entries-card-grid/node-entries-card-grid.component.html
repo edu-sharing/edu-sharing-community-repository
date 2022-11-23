@@ -95,12 +95,7 @@
       #grid
       (esBorderBoxObserver)="onGridSizeChanges()"
       esInfiniteScroll
-      (scrolled)="
-        entriesGlobalService.getPaginationStrategy(entriesService.scope) ===
-        PaginationStrategy.InfiniteScroll
-          ? !entriesService.disableInfiniteScroll && !visibleItemsLimited && loadData()
-          : null
-      "
+      (scrolled)="!visibleItemsLimited && loadData('scroll')"
     >
       <ng-container *ngTemplateOutlet="globalOptions"></ng-container>
       <ng-container *ngIf="nodes$ | async as nodes">
@@ -172,12 +167,11 @@
     !entriesService.dataSource.isLoading &&
     entriesService.dataSource.hasMore() &&
     !visibleItemsLimited &&
-    entriesGlobalService.getPaginationStrategy(entriesService.scope) ===
-      PaginationStrategy.InfiniteScroll
+    entriesService.paginationStrategy === 'infinite-scroll'
   "
 >
   <div class="load-more">
-    <button mat-button color="primary" (click)="loadData(true)">
+    <button mat-button color="primary" (click)="loadData('button')">
       <i esIcon="refresh"></i>
       <span>{{ 'LOAD_MORE' | translate }}</span>
     </button>

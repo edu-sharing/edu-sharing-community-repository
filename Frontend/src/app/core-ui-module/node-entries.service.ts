@@ -1,20 +1,26 @@
 import { SelectionModel } from '@angular/cdk/collections';
 import { EventEmitter, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { UIService } from '../core-module/rest/services/ui.service';
 import { ListItem } from '../core-module/ui/list-item';
 import {
-    ListEventInterface,
-    NodeEntriesDisplayType,
-    InteractionType,
-    ListOptions,
-    ListSortConfig,
-    ListDragGropConfig,
-    NodeClickEvent,
     FetchEvent,
     GridConfig,
+    InteractionType,
+    ListDragGropConfig,
+    ListEventInterface,
+    ListOptions,
+    ListSortConfig,
+    NodeClickEvent,
+    NodeEntriesDisplayType,
 } from '../features/node-entries/entries-model';
+import { InfiniteScrollPaginator } from '../features/node-entries/infinite-scroll-paginator';
 import { NodeDataSource } from '../features/node-entries/node-data-source';
+import { NodeDataSourceRemote } from '../features/node-entries/node-data-source-remote';
+import {
+    NodeEntriesGlobalService,
+    PaginationStrategy,
+} from '../features/node-entries/node-entries-global.service';
 import { NodeEntriesDataType } from '../features/node-entries/node-entries.component';
 
 import { OptionItem, Scope } from './option-item';
@@ -22,17 +28,22 @@ import { OptionItem, Scope } from './option-item';
 @Injectable()
 export class NodeEntriesService<T extends NodeEntriesDataType> {
     list: ListEventInterface<T>;
-    readonly dataSource$ = new BehaviorSubject<NodeDataSource<T> | null>(null);
+    readonly dataSource$ = new BehaviorSubject<NodeDataSource<T> | NodeDataSourceRemote<T> | null>(
+        null,
+    );
     /**
      * scope the current list is in, e.g. workspace
      * This is used for additional config injection based on the scope
      */
     scope: Scope;
-    get dataSource(): NodeDataSource<T> {
+    get dataSource(): NodeDataSource<T> | NodeDataSourceRemote<T> {
         return this.dataSource$.value;
     }
-    set dataSource(value: NodeDataSource<T>) {
+    set dataSource(value: NodeDataSource<T> | NodeDataSourceRemote<T>) {
         this.dataSource$.next(value);
+    }
+    get paginationStrategy(): PaginationStrategy {
+        return this.entriesGlobal.getPaginationStrategy(this.scope);
     }
     // TODO: Use a subject of an immutable type for columns, so users don't have to monitor
     // `columnsChange` separately.
@@ -62,7 +73,7 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     singleClickHint: 'dynamic' | 'static';
     disableInfiniteScroll: boolean;
 
-    constructor(private uiService: UIService) {}
+    constructor(private uiService: UIService, private entriesGlobal: NodeEntriesGlobalService) {}
 
     onClicked({ event, ...data }: NodeClickEvent<T> & { event: MouseEvent }) {
         if (event.ctrlKey || event.metaKey) {
@@ -88,6 +99,29 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
             this.selection.clear();
         } else {
             this.selectAll();
+        }
+    }
+
+    loadMore(source: 'button' | 'scroll'): boolean {
+        if (this.paginationStrategy !== 'infinite-scroll') {
+            return false;
+        }
+        if (source === 'scroll' && this.disableInfiniteScroll) {
+            return false;
+        }
+        // TODO: focus next item when triggered via button.
+        if (this.dataSource instanceof NodeDataSourceRemote) {
+            return (this.dataSource.paginator as InfiniteScrollPaginator).loadMore();
+        } else {
+            if (this.dataSource.hasMore()) {
+                this.fetchData.emit({
+                    offset: this.dataSource.getData().length,
+                    reset: false,
+                });
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 

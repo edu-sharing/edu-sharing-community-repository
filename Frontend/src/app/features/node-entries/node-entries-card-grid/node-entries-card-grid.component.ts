@@ -23,7 +23,7 @@ import { DragData } from '../../../services/nodes-drag-drop.service';
 import { SortEvent } from '../../../shared/components/sort-dropdown/sort-dropdown.component';
 import { NodeEntriesDisplayType } from '../entries-model';
 import { ItemsCap } from '../items-cap';
-import { NodeEntriesGlobalService, PaginationStrategy } from '../node-entries-global.service';
+import { NodeEntriesGlobalService } from '../node-entries-global.service';
 import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
 
 @Component({
@@ -33,7 +33,6 @@ import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
 })
 export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnChanges, OnDestroy {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
-    readonly PaginationStrategy = PaginationStrategy;
     readonly Target = Target;
     @ViewChildren(CdkDropList) dropListsQuery: QueryList<CdkDropList>;
     @ViewChild('grid') gridRef: ElementRef;
@@ -100,22 +99,17 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnC
         this.entriesService.sortChange.emit(this.entriesService.sort);
     }
 
-    loadData(byButtonClick = false) {
+    loadData(source: 'scroll' | 'button') {
         // @TODO: Maybe this is better handled in a more centraled service
-        if (!byButtonClick) {
+        if (source === 'scroll') {
             // check if there is a footer
             const elements = document.getElementsByTagName('footer');
             if (elements.length && elements.item(0).innerHTML.trim()) {
                 return;
             }
         }
-        if (this.entriesService.dataSource.hasMore()) {
-            this.entriesService.fetchData.emit({
-                offset: this.entriesService.dataSource.getData().length,
-                reset: false,
-            });
-        }
-        if (byButtonClick) {
+        const couldLoadMore = this.entriesService.loadMore(source);
+        if (couldLoadMore && source === 'button') {
             this.focusFirstNewItemWhenLoaded();
         }
     }

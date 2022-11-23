@@ -11,12 +11,13 @@ import { NodeEntriesService } from '../../core-ui-module/node-entries.service';
 import { KeyboardShortcutsService } from '../../services/keyboard-shortcuts.service';
 import { NodeEntriesDisplayType } from './entries-model';
 import { NodeEntriesTemplatesService } from './node-entries-templates.service';
-import { NodeEntriesGlobalService, PaginationStrategy } from './node-entries-global.service';
+import { NodeEntriesGlobalService } from './node-entries-global.service';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { TranslateService } from '@ngx-translate/core';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { TranslationsService } from '../../translations/translations.service';
+import { NodeDataSourceRemote } from './node-data-source-remote';
 
 @Component({
     selector: 'es-node-entries',
@@ -27,7 +28,6 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType>
     implements OnInit, AfterViewInit, OnDestroy
 {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
-    readonly PaginationStrategy = PaginationStrategy;
     private readonly destroyed$ = new Subject();
     @ViewChild(MatPaginator) paginator: MatPaginator;
 
@@ -71,36 +71,39 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType>
         );
     }
 
-    async ngAfterViewInit() {
+    ngAfterViewInit() {
         if (this.paginator) {
-            await this.translations.waitForInit().toPromise();
-            this.paginator._intl.itemsPerPageLabel = this.translate.instant(
-                'PAGINATOR.itemsPerPageLabel',
-            );
-            this.paginator._intl.nextPageLabel = this.translate.instant('PAGINATOR.nextPageLabel');
-            this.paginator._intl.previousPageLabel = this.translate.instant(
-                'PAGINATOR.previousPageLabel',
-            );
-            this.paginator._intl.getRangeLabel = (page, pageSize, length) =>
-                this.translate.instant('PAGINATOR.getRangeLabel', {
-                    page: page + 1,
-                    pageSize,
-                    length,
-                    pageCount: Math.ceil(length / pageSize),
-                });
-            this.paginator.length = this.entriesService.dataSource?.getTotal();
-            this.entriesService.dataSource$
-                .pipe(takeUntil(this.destroyed$))
-                .subscribe((dataSource) => {
-                    this.paginator.length = dataSource?.getTotal();
-                    dataSource
-                        ?.connectPagination()
-                        .pipe(takeUntil(this.destroyed$))
-                        .subscribe(() => {
-                            this.paginator.length = this.entriesService.dataSource.getTotal();
-                        });
-                });
+            void this.initPaginator(this.paginator);
         }
+    }
+
+    private async initPaginator(paginator: MatPaginator) {
+        // I18n.
+        await this.translations.waitForInit().toPromise();
+        paginator._intl.itemsPerPageLabel = this.translate.instant('PAGINATOR.itemsPerPageLabel');
+        paginator._intl.nextPageLabel = this.translate.instant('PAGINATOR.nextPageLabel');
+        paginator._intl.previousPageLabel = this.translate.instant('PAGINATOR.previousPageLabel');
+        paginator._intl.getRangeLabel = (page, pageSize, length) =>
+            this.translate.instant('PAGINATOR.getRangeLabel', {
+                page: page + 1,
+                pageSize,
+                length,
+                pageCount: Math.ceil(length / pageSize),
+            });
+        // Connect data source.
+        this.entriesService.dataSource$.pipe(takeUntil(this.destroyed$)).subscribe((dataSource) => {
+            if (dataSource instanceof NodeDataSourceRemote) {
+                dataSource.paginator = paginator;
+            } else {
+                paginator.length = dataSource?.getTotal();
+                dataSource
+                    ?.connectPagination()
+                    .pipe(takeUntil(this.destroyed$))
+                    .subscribe(() => {
+                        paginator.length = dataSource.getTotal();
+                    });
+            }
+        });
     }
 
     openPage(page: PageEvent) {
