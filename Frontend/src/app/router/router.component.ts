@@ -50,7 +50,7 @@ import { MainNavService } from '../main/navigation/main-nav.service';
 import { ManagementDialogsService } from '../modules/management-dialogs/management-dialogs.service';
 import * as rxjs from 'rxjs';
 import { LicenseAgreementService } from '../services/license-agreement.service';
-import { DialogsNavigationGuardService as DialogsNavigationGuard } from '../features/dialogs/dialogs-navigation.guard';
+import { DialogsNavigationGuard } from '../features/dialogs/dialogs-navigation.guard';
 
 @Component({
     selector: 'es-router',

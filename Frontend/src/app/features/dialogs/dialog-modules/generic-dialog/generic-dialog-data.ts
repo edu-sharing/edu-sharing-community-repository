@@ -1,10 +1,7 @@
 import { ButtonConfig } from '../../../../core-module/ui/dialog-button';
 import { CardDialogConfig } from '../../card-dialog/card-dialog-config';
 
-export type GenericDialogConfig<R extends string> = Pick<CardDialogConfig, 'title'> &
-    GenericDialogData<R>;
-
-export interface GenericDialogData<R extends string> {
+export class GenericDialogData<R extends string> {
     /** Message text to show in the dialog body. Will be translated. */
     messageText?: string;
     /** Translation parameters for the given message text. */
@@ -18,7 +15,13 @@ export interface GenericDialogData<R extends string> {
     buttons?: GenericDialogButton<R>[];
 }
 
-interface GenericDialogButton<R> {
+export class GenericDialogConfig<R extends string> extends GenericDialogData<R> {
+    title: CardDialogConfig['title'];
+    closable?: CardDialogConfig['closable'] = new CardDialogConfig().closable;
+    maxWidth?: CardDialogConfig['maxWidth'] = 750;
+}
+
+interface GenericDialogButton<R extends string> {
     label: R;
     config: ButtonConfig;
 }

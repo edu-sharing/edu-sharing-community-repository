@@ -43,6 +43,7 @@ import { OPEN_URL_MODE, UIConstants } from '../../../core-module/ui/ui-constants
 import { OptionGroup, OptionItem } from '../../../core-ui-module/option-item';
 import { Toast } from '../../../core-ui-module/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
+import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../../features/dialogs/card-dialog/card-dialog-ref';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { NodeStoreService } from '../../../modules/search/node-store.service';
@@ -809,23 +810,21 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             this.authentication
                 .observeAutoLogout()
                 .pipe(takeUntil(this.destroyed$))
-                .subscribe(() => {
-                    this.toast.showModalDialog(
-                        'WORKSPACE.AUTOLOGOUT',
-                        'WORKSPACE.AUTOLOGOUT_INFO',
-                        [
-                            new DialogButton('WORKSPACE.RELOGIN', { color: 'primary' }, () => {
-                                RestHelper.goToLogin(
-                                    this.router,
-                                    this.configService,
-                                    this.isSafe() ? RestConstants.SAFE_SCOPE : null,
-                                );
-                                this.toast.closeModalDialog();
-                            }),
-                        ],
-                        false,
-                        null,
-                        { minutes: Math.round(this.connector.logoutTimeout / 60) },
+                .subscribe(async () => {
+                    const dialogRef = await this.dialogs.openGenericDialog({
+                        title: 'WORKSPACE.AUTOLOGOUT',
+                        messageText: 'WORKSPACE.AUTOLOGOUT_INFO',
+                        messageParameters: {
+                            minutes: Math.round(this.connector.logoutTimeout / 60).toString(),
+                        },
+                        buttons: [{ label: 'WORKSPACE.RELOGIN', config: { color: 'primary' } }],
+                        closable: Closable.Disabled,
+                    });
+                    await dialogRef.afterClosed().toPromise();
+                    RestHelper.goToLogin(
+                        this.router,
+                        this.configService,
+                        this.isSafe() ? RestConstants.SAFE_SCOPE : null,
                     );
                 });
         }

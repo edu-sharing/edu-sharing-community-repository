@@ -1,7 +1,12 @@
 import { Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { RestConnectorService } from '../../core-module/core.module';
-import { Closable, configForNode, configForNodes } from './card-dialog/card-dialog-config';
+import {
+    CardDialogConfig,
+    Closable,
+    configForNode,
+    configForNodes,
+} from './card-dialog/card-dialog-config';
 import { CardDialogRef } from './card-dialog/card-dialog-ref';
 import { CardDialogService } from './card-dialog/card-dialog.service';
 import {
@@ -59,11 +64,19 @@ export class DialogsService {
     async openGenericDialog<R extends string>(
         config: GenericDialogConfig<R>,
     ): Promise<CardDialogRef<GenericDialogData<R>, R>> {
-        const { title, ...data } = config;
+        const { title, maxWidth, closable, ...data } = {
+            ...new GenericDialogConfig<R>(),
+            ...config,
+        };
         const { GenericDialogComponent } = await import(
             './dialog-modules/generic-dialog/generic-dialog.module'
         );
-        return this.cardDialog.open(GenericDialogComponent, { title, data });
+        return this.cardDialog.open(GenericDialogComponent, {
+            title,
+            maxWidth,
+            closable,
+            data,
+        });
     }
 
     async openQrDialog(data: QrDialogData): Promise<CardDialogRef<QrDialogData, void>> {
