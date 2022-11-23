@@ -8,6 +8,7 @@ variables:
   MAVEN_HOME: "/builds/$CI_PROJECT_PATH/mnt/.m2"
   MAVEN_CLI: "-Ddocker.registry=$DOCKER_REGISTRY -Dhelm.deploy.url=$HELM_REGISTRY -Dhelm.deploy.type=$HELM_TYPE -Dmaven.deploy.releases=$MAVEN_DEPLOY_RELEASES -Dmaven.deploy.snapshots=$MAVEN_DEPLOY_SNAPSHOTS --batch-mode --errors --fail-fast --show-version -T 1C"
   MAVEN_OPTS: "-Dmaven.repo.local=/builds/$CI_PROJECT_PATH/mnt/.m2/repository"
+  NODE_VERSION: 14
   REPOSITORY_ANTIVIRUS_ENABLED: "false"
   REPOSITORY_CLUSTER_ENABLED: "false"
   REPOSITORY_ELASTIC_ENABLED: "true"
@@ -34,6 +35,13 @@ test docker:
       - deploy/docker/openapi.json
       - deploy/docker/repository/build/service/target/build/rest-api/openapi.json
     when: always
+  cache:
+    key:
+      files:
+        - repository/Frontend/src/generated/ng/package-lock.json
+      prefix: node-modules-$NODE_VERSION
+    paths:
+      - repository/Frontend/src/generated/ng/node_modules
   before_script:
     - apt-get update -y
     - apt-get install -y ca-certificates curl gnupg jq lsb-release wait-for-it
@@ -99,6 +107,13 @@ test docker:
 
 deploy:
   stage: deploy
+  cache:
+    key:
+      files:
+        - repository/Frontend/src/generated/ng/package-lock.json
+      prefix: node-modules-$NODE_VERSION
+    paths:
+      - repository/Frontend/src/generated/ng/node_modules
   before_script:
     - apt-get update -y
     - apt-get install -y php php-curl php-dom php-gd php-mbstring php-xml php-zip

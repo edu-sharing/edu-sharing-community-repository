@@ -47,22 +47,22 @@
       dockerio.mirror.docker.edu-sharing.com/bitnami/redis-exporter:1.32.0
     </docker.from.redis.exporter>
     <docker.from.redis.server>
-      dockerio.mirror.docker.edu-sharing.com/bitnami/redis:6.2.6
+      dockerio.mirror.docker.edu-sharing.com/bitnami/redis:6.2.7
     </docker.from.redis.server>
     <docker.from.rediscluster.server>
-      dockerio.mirror.docker.edu-sharing.com/bitnami/redis-cluster:6.2.6
+      dockerio.mirror.docker.edu-sharing.com/bitnami/redis-cluster:6.2.7
     </docker.from.rediscluster.server>
     <!--suppress UnresolvedMavenProperty -->
     <docker.from.tomcat>
       dockerio.mirror.docker.edu-sharing.com/tomcat:${tomcat.version}-jdk8-openjdk-bullseye
     </docker.from.tomcat>
 
-    <helm.kube.version>&gt;= 1.19.0</helm.kube.version>
-    <helm.version>3.8.2</helm.version>
+    <helm.kube.version>&gt;= 1.20.0</helm.kube.version>
+    <helm.version>3.10.0</helm.version>
 
     <phpredis.version>5.3.7</phpredis.version>
-    <prometheus.jmx.version>0.14.0</prometheus.jmx.version>
-    <redisson.version>3.17.1</redisson.version>
+    <prometheus.jmx.version>0.17.2</prometheus.jmx.version>
+    <redisson.version>3.18.0</redisson.version>
 
   </properties>
 

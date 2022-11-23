@@ -27,7 +27,7 @@
         <artifactId>frontend-maven-plugin</artifactId>
         <configuration>
           <!--suppress UnresolvedMavenProperty -->
-          <nodeVersion>${node.version}</nodeVersion>
+          <nodeVersion>v${node.version}</nodeVersion>
           <!--suppress UnresolvedMavenProperty -->
           <npmVersion>${npm.version}</npmVersion>
         </configuration>
@@ -77,6 +77,43 @@
   </build>
 
   <profiles>
+
+    <profile>
+
+      <id>frontend.skipInstall</id>
+
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <file>
+          <exists>src/generated/ng/node_modules/.package-lock.json</exists>
+        </file>
+        <property>
+          <name>env.CI</name>
+        </property>
+      </activation>
+
+      <build>
+
+        <plugins>
+
+          <plugin>
+            <groupId>com.github.eirslett</groupId>
+            <artifactId>frontend-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>install</id>
+                <configuration>
+                  <skip.npm>true</skip.npm>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+        </plugins>
+
+      </build>
+
+    </profile>
 
     <profile>
 
