@@ -20,6 +20,8 @@ import org.alfresco.service.cmr.search.SearchParameters.FieldFacet;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.util.Pair;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
@@ -236,8 +238,10 @@ public class MetadataSearchHelper {
 		}
 		
 		ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
-		try{			
-			con = dbAlf.getConnection();
+		SqlSessionFactory sf =dbAlf.getSqlSessionFactoryBean();
+		SqlSession sqlSession = sf.openSession();
+		try{
+			con = sqlSession.getConnection();//dbAlf.getConnection();
 			statement = con.prepareStatement(query);
 			
 			value = StringEscapeUtils.escapeSql(value);
@@ -266,7 +270,7 @@ public class MetadataSearchHelper {
 			}	
 		}catch(Throwable e){
 		}finally {
-			dbAlf.cleanUp(con, statement);
+			sqlSession.close();//dbAlf.cleanUp(con, statement);
 		}
 		return result;
 	}
