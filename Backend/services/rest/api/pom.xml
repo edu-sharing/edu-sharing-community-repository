@@ -20,15 +20,28 @@
 
   <build>
     <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>default-compile</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
 
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
         <executions>
           <execution>
+            <id>default-jar</id>
+            <phase>compile</phase>
             <goals>
               <goal>jar</goal>
             </goals>
-            <phase>compile</phase>
           </execution>
         </executions>
       </plugin>
@@ -37,10 +50,11 @@
         <artifactId>maven-install-plugin</artifactId>
         <executions>
           <execution>
+            <id>default-install</id>
+            <phase>compile</phase>
             <goals>
               <goal>install</goal>
             </goals>
-            <phase>compile</phase>
           </execution>
         </executions>
       </plugin>
