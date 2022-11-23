@@ -187,7 +187,8 @@ public class MetadataSearchHelper {
 		/**
 		 * remote repo
 		 */
-		if(!ApplicationInfoList.getHomeRepository().getAppId().equals(repoId)) {
+		if(!ApplicationInfoList.getHomeRepository().getAppId().equals(repoId) &&
+				!ApplicationInfo.REPOSITORY_TYPE_LOCAL.equals(ApplicationInfoList.getRepositoryInfoById(repoId).getRepositoryType())) {
 			return SearchServiceFactory.getSearchService(repoId).getSuggestions(mds, queryId, parameterId, value, criterias);
 		}
 
@@ -223,7 +224,7 @@ public class MetadataSearchHelper {
 		ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
 		SqlSessionFactory sf =dbAlf.getSqlSessionFactoryBean();
 		SqlSession sqlSession = sf.openSession();
-		try{			
+		try{
 			con = sqlSession.getConnection();//dbAlf.getConnection();
 			statement = con.prepareStatement(query);
 			
