@@ -180,7 +180,7 @@
                 <phase>process-resources</phase>
                 <configuration>
                   <target name="build">
-                    <ant antfile="build.xml" />
+                    <ant antfile="build.xml" target="release-extension"/>
                   </target>
                 </configuration>
                 <goals>

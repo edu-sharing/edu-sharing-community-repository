@@ -41,6 +41,8 @@ global:
       strict: true
     team: edusharing
 
+  password: ""
+
 ########################################################################################################################
 # LOCAL
 ########################################################################################################################
@@ -65,7 +67,7 @@ config:
 
   database: postgresql
   username: postgresql
-  password: postgresql
+  password: ""
 
   extra:
     max_connections: "300"

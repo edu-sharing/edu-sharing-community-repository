@@ -9,6 +9,9 @@ global:
     cert:
       annotations: {}
 
+    ingress:
+      ingressClassName: ""
+
     istio:
       enabled: false
       gateway:
@@ -42,6 +45,8 @@ global:
     name: edusharing-rendering-postgresql
     secrets: "credentials.postgresql.acid.zalan.do"
     team: edusharing
+
+  password: ""
 
 ########################################################################################################################
 # LOCAL
@@ -112,7 +117,7 @@ config:
     port: 5432
     database: rendering;sslmode=disabled
     username: rendering
-    password: rendering
+    password: ""
     patroni: {}
 
   gdpr:
@@ -145,7 +150,7 @@ config:
   repository:
     host: edusharing-repository-service
     port: 8080
-    password: admin
+    password: ""
 
   viewer:
     enabled: true

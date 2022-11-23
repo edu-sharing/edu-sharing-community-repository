@@ -23,6 +23,7 @@ my_base_external="${my_prot_external}://${my_host_external}:${my_port_external}$
 my_auth_external="${my_base_external}/services/authentication"
 my_pool_external="${REPOSITORY_SERVICE_POOL_EXTERNAL:-200}"
 my_wait_external="${REPOSITORY_SERVICE_WAIT_EXTERNAL:--1}"
+my_proxy_buffer_size="${REPOSITORY_SERVICE_PROXY_BUFFER_SIZE:-65536}"
 
 my_host_internal="${REPOSITORY_SERVICE_HOST_INTERNAL:-repository-service}"
 my_port_internal="${REPOSITORY_SERVICE_PORT_INTERNAL:-8080}"
@@ -216,6 +217,7 @@ xmlstarlet ed -L \
 	-i '$external2' -t attr -n "secretRequired" -v "false" \
 	-i '$external2' -t attr -n "tomcatAuthentication" -v "false" \
 	-i '$external2' -t attr -n "allowedRequestAttributesPattern" -v ".*" \
+	-i '$external2' -t attr -n "packetSize" -v "${my_proxy_buffer_size}" \
 	${catSConf}
 
 [[ -n "${cache_host}" && -n "${cache_port}" ]] && {
@@ -471,8 +473,8 @@ xmlstarlet ed -L \
 }
 
 [[ -n "${my_http_client_proxy_nonproxyhosts}" ]] && {
-	export CATALINA_OPTS="-Dhttp.nonProxyHosts=\"${my_http_client_proxy_nonproxyhosts/,/|}\" $CATALINA_OPTS"
-	export CATALINA_OPTS="-Dhttps.nonProxyHosts=\"${my_http_client_proxy_nonproxyhosts/,/|}\" $CATALINA_OPTS"
+	export CATALINA_OPTS="-Dhttp.nonProxyHosts=\"${my_http_client_proxy_nonproxyhosts//,/|}\" $CATALINA_OPTS"
+	export CATALINA_OPTS="-Dhttps.nonProxyHosts=\"${my_http_client_proxy_nonproxyhosts//,/|}\" $CATALINA_OPTS"
 	hocon -f ${eduSConf} \
 		set "repository.httpclient.proxy.nonproxyhosts" '"'"${my_http_client_proxy_nonproxyhosts}"'"'
 }

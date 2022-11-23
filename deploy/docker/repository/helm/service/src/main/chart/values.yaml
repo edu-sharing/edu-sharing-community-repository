@@ -11,6 +11,9 @@ global:
 
     domain: cluster.local
 
+    ingress:
+      ingressClassName: ""
+
     istio:
       enabled: false
       gateway:
@@ -50,6 +53,8 @@ global:
     name: edusharing-repository-postgresql
     secrets: "credentials.postgresql.acid.zalan.do"
     team: edusharing
+
+  password: ""
 
 ########################################################################################################################
 # LOCAL
@@ -111,7 +116,7 @@ ingress:
 config:
 
   admin:
-    password: admin
+    password: ""
 
   antivirus:
     enabled: ${helm.config.antivirus.enabled}
@@ -147,7 +152,7 @@ config:
     port: 5432
     database: repository
     username: repository
-    password: repository
+    password: ""
     protocol: postgresql
     options: "?sslmode=disable"
     patroni: {}
