@@ -242,6 +242,7 @@ public class LTIPlatformApi {
                         && loginInitiationSessionObject.isResourceLinkEditMode()
                         && (loginInitiationSessionObject.getVersion() == null || "".equals(loginInitiationSessionObject.getVersion()))){
                     custom.put(LTIPlatformConstants.CUSTOM_CLAIM_POST_CONTENTAPIURL,homeApp.getClientBaseUrl()+"/rest/ltiplatform/v13/content");
+                    custom.put(LTIPlatformConstants.CUSTOM_CLAIM_DETAILSSNIPPETURL,homeApp.getClientBaseUrl()+"/rest/lti/v13/details");
                 }else{
                     logger.info("user "+username +" has no writeContent Permissions");
                 }

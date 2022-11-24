@@ -13,6 +13,9 @@ public class LTIPlatformConstants {
     public static final String CUSTOM_CLAIM_POST_CONTENTAPIURL = "postContentApiUrl";
 
     public static final String CUSTOM_CLAIM_GET_CONTENTAPIURL = "getContentApiUrl";
+
+    public static final String CUSTOM_CLAIM_DETAILSSNIPPETURL = "getDetailsSnippetUrl";
+
     public static final String CUSTOM_CLAIM_VERSION = "version";
     public static final String CUSTOM_CLAIM_TOKEN = "dataToken";
 }
