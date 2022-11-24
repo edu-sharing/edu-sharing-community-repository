@@ -15135,7 +15135,7 @@
             }
           },
           {
-            "description": "authorityType either GROUP or USER, empty to show all",
+            "description": "group type to filter for, e.g. ORG_ADMINISTRATORS",
             "in": "path",
             "name": "type",
             "required": true,
