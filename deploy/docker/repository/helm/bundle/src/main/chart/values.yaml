@@ -45,7 +45,6 @@ edusharing_repository_postgresql:
 
     database: &postgresqlConfigDatabase repository
     username: &postgresqlConfigUsername repository
-    password: &postgresqlConfigPassword repository
 
 ########################################################################################################################
 
@@ -133,7 +132,6 @@ edusharing_repository_service:
       port: *postgresqlServicePortApi
       database: *postgresqlConfigDatabase
       username: *postgresqlConfigUsername
-      password: *postgresqlConfigPassword
 
     search:
 

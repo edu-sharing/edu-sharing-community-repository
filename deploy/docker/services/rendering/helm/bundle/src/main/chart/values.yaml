@@ -31,7 +31,6 @@ edusharing_services_rendering_postgresql:
 
     database: &postgresqlConfigDatabase rendering
     username: &postgresqlConfigUsername rendering
-    password: &postgresqlConfigPassword rendering
 
 ########################################################################################################################
 
@@ -62,6 +61,5 @@ edusharing_services_rendering_service:
       port: *postgresqlServicePortApi
       database: *postgresqlConfigDatabase
       username: *postgresqlConfigUsername
-      password: *postgresqlConfigPassword
 
 ########################################################################################################################

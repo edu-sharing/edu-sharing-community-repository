@@ -4,6 +4,7 @@ metadata:
   name: {{ include "edusharing_repository_service.name" . }}-env
   labels: {{ include "edusharing_repository_service.labels.app" . | nindent 4 }}
 data:
+  ALLOW_EMPTY_PASSWORD: "yes"
   CACHE_CLUSTER: {{ .Values.config.cache.cluster | quote }}
   CACHE_DATABASE: {{ .Values.config.cache.database | quote }}
   CACHE_HOST: {{ .Values.config.cache.host | quote }}
@@ -87,3 +88,4 @@ data:
   REPOSITORY_TRANSFORM_PORT: {{ if .Values.config.transform.server.enabled }}""{{ else }}"8100"{{ end }}
   REPOSITORY_TRANSFORM_SERVER_HOST: {{ .Values.config.transform.server.host | quote }}
   REPOSITORY_TRANSFORM_SERVER_PORT: {{ .Values.config.transform.server.port | quote }}
+  TOMCAT_INSTALL_DEFAULT_WEBAPPS: "no"

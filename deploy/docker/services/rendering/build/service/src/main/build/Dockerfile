@@ -60,7 +60,7 @@ WORKDIR $RS_ROOT
 COPY artifacts/edu_sharing-community-services-rendering-${org.edu_sharing:edu_sharing-community-services-rendering:tar.gz:bin.version}-bin.tar.gz /tmp/edu_sharing-community-services-rendering.tar.gz
 
 RUN set -eux \
-	&& tar -xzvf /tmp/edu_sharing-community-services-rendering.tar.gz --exclude './vendor/lib/converter' \
+	&& tar -xzf /tmp/edu_sharing-community-services-rendering.tar.gz --exclude './vendor/lib/converter' \
 	&& rm -rf /tmp/edu_sharing-community-services-rendering.tar.gz
 
 COPY assets/apache2/ports.conf /etc/apache2/ports.conf

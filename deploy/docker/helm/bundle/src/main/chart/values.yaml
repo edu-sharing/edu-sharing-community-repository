@@ -56,17 +56,6 @@ edusharing_repository:
 
     enabled: false
 
-  edusharing_repository_postgresql:
-
-    enabled: true
-
-    nameOverride: &repositoryPostgresqlNameOverride edusharing-repository-postgresql
-
-    config:
-      patroni:
-        enabled: false
-        name: *repositoryPostgresqlNameOverride
-
   edusharing_repository_service:
 
     nameOverride: &repositoryNameOverride edusharing-repository-service
@@ -77,9 +66,6 @@ edusharing_repository:
           internal: &repositoryServicePostApiInternal 8080
 
     config:
-
-      admin:
-        password: &repositoryConfigAdminPassword admin
 
       cache:
         host: *redisclusterNameOverride
@@ -95,17 +81,6 @@ edusharing_services_rendering:
 
     enabled: false
 
-  edusharing_services_rendering_postgresql:
-
-    enabled: true
-
-    nameOverride: &renderingPostgresqlNameOverride edusharing-services-rendering-postgresql
-
-    config:
-      patroni:
-        enabled: false
-        name: *renderingPostgresqlNameOverride
-
   edusharing_services_rendering_service:
 
     config:
@@ -117,6 +92,5 @@ edusharing_services_rendering:
       repository:
         host: *repositoryNameOverride
         port: *repositoryServicePostApiInternal
-        password: *repositoryConfigAdminPassword
 
 ########################################################################################################################

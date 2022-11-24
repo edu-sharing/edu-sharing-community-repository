@@ -213,32 +213,40 @@ echo "config saved."
 ########################################################################################################################
 
 dbConf="${RS_ROOT}/conf/db.conf.php"
-sed -i -r "s|\$dsn.*|\$dsn = \"${rendering_database_driv}:host=${rendering_database_host};port=${rendering_database_port};dbname=${rendering_database_name}\";|" "${dbConf}"
-sed -i -r "s|\$dbuser.*|\$dbuser = \"${rendering_database_user}\";|" "${dbConf}"
-sed -i -r "s|\$pwd.*|\pwd = \"${rendering_database_pass}\";|" "${dbConf}"
+sed -i -r 's|\$dsn.*|\$dsn = "'"${rendering_database_driv}:host=${rendering_database_host};port=${rendering_database_port};dbname=${rendering_database_name}"'";|' "${dbConf}"
+sed -i -r 's|\$dbuser.*|\$dbuser = "'"${rendering_database_user}"'";|' "${dbConf}"
+sed -i -r 's|\$pwd.*|\$pwd = "'"${rendering_database_pass}"'";|' "${dbConf}"
 
 systemConf="${RS_ROOT}/conf/system.conf.php"
-sed -i -r "s|\$MC_URL.*|\$MC_URL = '${my_base_external}';|" "${systemConf}"
-sed -i -r "s|\$MC_DOCROOT.*|\$MC_DOCROOT = '${RS_ROOT}';|" "${systemConf}"
-sed -i -r "s|\$CC_RENDER_PATH.*|\$CC_RENDER_PATH = '${RS_CACHE}';|" "${systemConf}"
+sed -i -r 's|\$MC_URL = ['"'"'"].*|\$MC_URL = "'"${my_base_external}"'";|' "${systemConf}"
+sed -i -r 's|\$MC_DOCROOT.*|\$MC_DOCROOT = "'"${RS_ROOT}"'";|' "${systemConf}"
+sed -i -r 's|\$CC_RENDER_PATH.*|\$CC_RENDER_PATH = "'"${RS_CACHE}"'";|' "${systemConf}"
 
-sed -i -r 's|\$DATAPROTECTIONREGULATION_CONFIG.*|\$DATAPROTECTIONREGULATION_CONFIG = ["enabled" => '"${my_gdpr_enabled}"', "modules" => ['"${my_gdpr_modules/,/\",\"}"'], "urls" => ['"${my_gdpr_urls}"']];|' "${systemConf}"
-grep -q '\$DATAPROTECTIONREGULATION_CONFIG' "${systemConf}" || echo "\$DATAPROTECTIONREGULATION_CONFIG = [\"enabled\" => ${my_gdpr_enabled}, \"modules\" => [\"${my_gdpr_modules/,/\",\"}\"], \"urls\" => [${my_gdpr_urls}]];" >> "${systemConf}"
+sed -i -r 's|\$DATAPROTECTIONREGULATION_CONFIG.*|\$DATAPROTECTIONREGULATION_CONFIG = ["enabled" => '"${my_gdpr_enabled}"', "modules" => ['"${my_gdpr_modules//,/\",\"}"'], "urls" => ['"${my_gdpr_urls}"']];|' "${systemConf}"
+grep -q '\$DATAPROTECTIONREGULATION_CONFIG' "${systemConf}" || echo "\$DATAPROTECTIONREGULATION_CONFIG = [\"enabled\" => ${my_gdpr_enabled}, \"modules\" => [\"${my_gdpr_modules//,/\",\"}\"], \"urls\" => [${my_gdpr_urls}]];" >> "${systemConf}"
 
-sed -i -r "s|DEFINE\(\"ENABLE_VIEWER_JS\".*|DEFINE\(\"ENABLE_VIEWER_JS\", ${my_viewer_enabled}\);|" "${systemConf}"
+sed -i -r 's|DEFINE\("ENABLE_VIEWER_JS".*|DEFINE\("ENABLE_VIEWER_JS", '"${my_viewer_enabled}"'\);|' "${systemConf}"
 grep -q 'ENABLE_VIEWER_JS' "${systemConf}" || echo "DEFINE(\"ENABLE_VIEWER_JS\", ${my_viewer_enabled});" >> "${systemConf}"
 
 proxyConf="${RS_ROOT}/conf/proxy.conf.php"
 rm -f "${proxyConf}"
 if [[ -n $my_proxy_host ]] ; then
+
 	my_proxy_auth=""
 	if [[ -n $my_proxy_user ]] ; then
 		my_proxy_auth="${my_proxy_user}:${my_proxy_pass}@"
 	fi
+
+	# attach repository to the non proxy host
+  if [[ -n $my_proxy_nonh ]]; then
+    my_proxy_nonh="${my_proxy_nonh},"
+  fi
+  my_proxy_nonh="${my_proxy_nonh}${REPOSITORY_SERVICE_HOST}"
+
 	{
 		echo "<?php"
 		echo "\$PROXY_CONFIG = ["
-    echo "  \"http.nonproxyhosts\" => [\"${my_proxy_nonh/,/\",\"}\"],"
+    echo "  \"http.nonproxyhosts\" => [\"${my_proxy_nonh//,/\",\"}\"],"
     echo "  \"http.proxy\"         => \"http://${my_proxy_auth}${my_proxy_host}:${my_proxy_port}\","
     echo "  \"https.proxy\"        => \"http://${my_proxy_auth}${my_proxy_host}:${my_proxy_port}\""
 		echo "];"

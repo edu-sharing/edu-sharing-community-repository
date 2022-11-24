@@ -71,4 +71,11 @@ grep -q   '^[#]*\s*alfresco\.secureComms=' "${solr4Arc}" || echo "alfresco.secur
 
 ########################################################################################################################
 
+# Load libraries
+. /opt/bitnami/scripts/libtomcat.sh
+. /opt/bitnami/scripts/liblog.sh
+
+# Load Tomcat environment variables
+. /opt/bitnami/scripts/tomcat-env.sh
+
 exec "$@"
