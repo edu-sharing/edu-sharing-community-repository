@@ -26,6 +26,7 @@ services:
     image: "${docker.repository}/${docker.prefix}-deploy-docker-repository-build-search-solr4:${docker.tag}"
     container_name: "repository-search-solr4_${COMPOSE_PROJECT_NAME}"
     environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
       CATALINA_OPTS: >-
         -Xms${REPOSITORY_SEARCH_SOLR4_JAVA_XMS:-512m}
         -Xmx${REPOSITORY_SEARCH_SOLR4_JAVA_XMX:-512m}
@@ -38,6 +39,7 @@ services:
       REPOSITORY_SEARCH_SOLR4_PORT: "8080"
       REPOSITORY_SERVICE_HOST: repository-service
       REPOSITORY_SERVICE_PORT: "8080"
+      TOMCAT_INSTALL_DEFAULT_WEBAPPS: "no"
     expose:
       - "7199"
       - "8080"
@@ -51,6 +53,7 @@ services:
     image: "${docker.repository}/${docker.prefix}-deploy-docker-repository-build-service:${docker.tag}"
     container_name: "repository-service_${COMPOSE_PROJECT_NAME}"
     environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
       CACHE_CLUSTER: "false"
       CACHE_DATABASE: "0"
       CACHE_HOST: cache
@@ -108,6 +111,7 @@ services:
       REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_PROXYPASS: "${PROXY_PASS:-}"
       REPOSITORY_TRANSFORM_HOST: repository-transform
       REPOSITORY_TRANSFORM_PORT: "8100"
+      TOMCAT_INSTALL_DEFAULT_WEBAPPS: "no"
     expose:
       - "7199"
       - "8080"

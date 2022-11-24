@@ -2,12 +2,15 @@ FROM ${docker.from.tomcat}
 
 ########################################################################################################################
 
+USER root
+
 RUN set -eux \
     && apt-get update -y \
     && apt-get install -y --no-install-recommends \
         curl \
         jq \
         nano \
+        unzip \
         wait-for-it \
         wget \
         xmlstarlet \
@@ -22,7 +25,9 @@ RUN set -eux \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
 
-ENV JAVA_HOME /usr
+RUN set -eux \
+    && rm -rf /opt/bitnami/java \
+    && ln -s /usr/lib/jvm/java-8-openjdk-amd64/jre /opt/bitnami/java
 
 ########################################################################################################################
 
@@ -32,20 +37,13 @@ ENV PATH $ALF_HOME/bin:$PATH
 WORKDIR $ALF_HOME
 
 RUN set -eux \
-    && ln -sf /usr/local/tomcat tomcat
-
-COPY assets/entrypoint.sh bin/
-
-RUN set -eux \
-	&& find bin -type f -name '*.sh' -exec chmod +x {} \;
+    && ln -sf /opt/bitnami/tomcat tomcat
 
 RUN set -eux \
     && adduser --uid=1000 --home=$ALF_HOME --disabled-password --gecos "" --shell=/bin/bash worker \
-    && chown -RL worker:worker /tmp \
+    && mkdir -p bin \
     && mkdir -p alf_data \
-    && chown -RL worker:worker .
-
-USER worker
+	&& mkdir -p solr4
 
 ### Tomcat #############################################################################################################
 
@@ -62,8 +60,6 @@ RUN set -eux \
 	&& mkdir -p /tmp/install/alfresco-solr4 \
 	&& unzip /tmp/alfresco-solr4-distribution.zip -d /tmp/install/alfresco-solr4 \
 	&& rm -f /tmp/alfresco-solr4-distribution.zip \
-	&& mkdir -p alf_data \
-	&& mkdir -p solr4 \
     && mv /tmp/install/alfresco-solr4/alfrescoModels solr4 \
     && mv /tmp/install/alfresco-solr4/archive-SpacesStore solr4 \
     && mv /tmp/install/alfresco-solr4/conf solr4 \
@@ -74,7 +70,9 @@ RUN set -eux \
     && mv /tmp/install/alfresco-solr4/context.xml tomcat/conf/Catalina/localhost/solr4.xml \
     && mkdir -p tomcat/webapps/solr4 \
 	&& unzip /tmp/install/alfresco-solr4/solr4.war -d tomcat/webapps/solr4 \
-    && rm -rf /tmp/install/alfresco-solr4 \
+    && rm -rf /tmp/install/alfresco-solr4
+
+RUN set -eux \
     && sed -i \
         's|@@ALFRESCO_SOLR4_DIR@@|'"$ALF_HOME"'/solr4|' \
         tomcat/conf/Catalina/localhost/solr4.xml \
@@ -93,15 +91,33 @@ RUN set -eux \
 
 COPY --chown=worker:worker assets/solr4 solr4/
 
+RUN set -eux \
+    && chown -RL worker:worker alf_data \
+    && chown -RL worker:worker solr4 \
+    && chown -RL worker:worker tomcat/conf \
+    && chown -RL worker:worker tomcat/webapps \
+    && chown -RL worker:worker tomcat/work \
+    && chown -RL worker:worker tomcat/temp
+
+########################################################################################################################
+
+COPY assets/entrypoint.sh bin/
+
+RUN set -eux \
+	&& find bin -type f -name '*.sh' -exec chmod +x {} \;
+
 ########################################################################################################################
 
 RUN set -eux \
     && mkdir profiler \
-    && wget -qO- https://github.com/Granulate/async-profiler/releases/download/v2.0g1/async-profiler-2.0-linux-x64.tar.gz | tar xvz -C profiler
+    && wget -qO- https://github.com/Granulate/async-profiler/releases/download/v2.0g1/async-profiler-2.0-linux-x64.tar.gz | tar xvz -C profiler \
+    && chown -RL worker:worker profiler
 
 COPY --chown=worker:worker assets/profiler profiler/
 
 ########################################################################################################################
+
+USER worker
 
 EXPOSE 8080
 

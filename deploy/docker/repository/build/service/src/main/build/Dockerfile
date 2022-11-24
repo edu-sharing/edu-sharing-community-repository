@@ -2,6 +2,8 @@ FROM ${docker.from.tomcat}
 
 ########################################################################################################################
 
+USER root
+
 RUN set -eux \
     && apt-get update -y \
     && apt-get install -y --no-install-recommends \
@@ -16,6 +18,7 @@ RUN set -eux \
         postgresql-client \
 	    redis-tools \
         ruby-hocon \
+        unzip \
         wait-for-it \
         wget \
         xmlstarlet \
@@ -30,7 +33,9 @@ RUN set -eux \
     && apt-get clean \
     && rm -r /var/lib/apt/lists/*
 
-ENV JAVA_HOME /usr
+RUN set -eux \
+    && rm -rf /opt/bitnami/java \
+    && ln -s /usr/lib/jvm/java-8-openjdk-amd64/jre /opt/bitnami/java
 
 ########################################################################################################################
 
@@ -40,17 +45,15 @@ ENV PATH $ALF_HOME/bin:$PATH
 WORKDIR $ALF_HOME
 
 RUN set -eux \
-    && ln -sf /usr/local/tomcat tomcat
-
-COPY assets/entrypoint.sh assets/reinstall.sh assets/libcheck.sh bin/
-
-RUN set -eux \
-	&& find bin -type f -name '*.sh' -exec chmod +x {} \;
+    && ln -sf /opt/bitnami/tomcat tomcat
 
 RUN set -eux \
     && adduser --uid=1000 --home=$ALF_HOME --disabled-password --gecos "" --shell=/bin/bash worker \
-    && chown -RL worker:worker /tmp \
+    && mkdir -p bin \
     && mkdir -p alf_data \
+    && mkdir -p tomcat/logs \
+    && touch tomcat/logs/catalina.out \
+    && mkdir -p tomcat/shared/classes/alfresco \
     && mkdir -p tomcat/shared/classes/config/defaults \
     && mkdir -p tomcat/shared/classes/config/plugins/plugin-cluster \
     && mkdir -p tomcat/shared/classes/config/plugins/plugin-elastic \
@@ -58,16 +61,7 @@ RUN set -eux \
     && mkdir -p tomcat/shared/classes/config/plugins/plugin-transform \
     && mkdir -p tomcat/shared/classes/config/cluster/applications \
     && mkdir -p tomcat/shared/classes/config/node \
-    && chown -RL worker:worker .
-
-USER worker
-
-
-RUN set -eux \
-    && mkdir -p tomcat/shared/classes/alfresco \
-    && mkdir -p tomcat/shared/lib \
-    && mkdir -p tomcat/logs \
-    && touch tomcat/logs/catalina.out
+    && mkdir -p tomcat/shared/lib
 
 COPY --chown=worker:worker artifacts/jmx_prometheus_javaagent-${io.prometheus.jmx:jmx_prometheus_javaagent:jar.version}.jar tomcat/agent/jmx_prometheus_javaagent.jar
 COPY --chown=worker:worker assets/agent/jmx-exporter-config.yaml tomcat/agent/
@@ -100,9 +94,9 @@ RUN set -eux \
     && mv /tmp/install/alfresco-platform/licenses . \
     && mv /tmp/install/alfresco-platform/README.txt . \
     && cp -rf /tmp/install/alfresco-platform/bin/* bin \
-    && rm -f /tmp/install/alfresco-platform/web-server/lib/postgresql* \
-    && cp -rf /tmp/install/alfresco-platform/web-server/* tomcat/ \
-    && xmlstarlet ed -L -d '/Context/Loader' tomcat/conf/Catalina/localhost/alfresco.xml \
+    && cp -rf /tmp/install/alfresco-platform/web-server/conf/* tomcat/conf \
+    && cp -rf /tmp/install/alfresco-platform/web-server/shared/* tomcat/shared \
+    && cp -rf /tmp/install/alfresco-platform/web-server/webapps/* tomcat/webapps \
     && rm -rf /tmp/install/alfresco-platform \
     && mkdir -p tomcat/webapps/alfresco \
     && unzip tomcat/webapps/alfresco.war -d tomcat/webapps/alfresco \
@@ -118,6 +112,9 @@ RUN set -eux \
     && rm -f tomcat/webapps/alfresco.war \
     && mv alf_data/keystore .
 
+RUN set -eux \
+    && xmlstarlet ed -L -d '/Context/Loader' tomcat/conf/Catalina/localhost/alfresco.xml
+
 COPY --chown=worker:worker artifacts/alfresco-content-services-share-distribution-${org.alfresco:alfresco-content-services-share-distribution:zip.version}.zip \
     /tmp/alfresco-content-services-share-distribution.zip
 
@@ -129,12 +126,15 @@ RUN set -eux \
 	&& java -jar bin/alfresco-mmt.jar install /tmp/install/alfresco-share/amps/alfresco-share-services.amp \
         tomcat/webapps/alfresco -nobackup -force \
     && mv /tmp/install/alfresco-share/web-extension* tomcat/shared/classes/alfresco/web-extension \
-    && cp -rf /tmp/install/alfresco-share/web-server/* tomcat/ \
-    && xmlstarlet ed -L -d '/Context/Loader' tomcat/conf/Catalina/localhost/share.xml \
+    && cp -rf /tmp/install/alfresco-share/web-server/conf/* tomcat/conf \
+    && cp -rf /tmp/install/alfresco-share/web-server/webapps/* tomcat/webapps \
     && rm -rf /tmp/install/alfresco-share \
     && mkdir -p tomcat/webapps/share \
     && unzip tomcat/webapps/share.war -d tomcat/webapps/share \
     && rm -f tomcat/webapps/share.war
+
+RUN set -eux \
+    && xmlstarlet ed -L -d '/Context/Loader' tomcat/conf/Catalina/localhost/share.xml
 
 COPY --chown=worker:worker assets/share/log4j.properties tomcat/webapps/share/WEB-INF/classes/log4j.properties
 
@@ -161,19 +161,35 @@ COPY --chown=worker:worker amps amps/
 
 COPY --chown=worker:worker config tomcat/shared/lib/
 
+RUN set -eux \
+    && chown -RL worker:worker alf_data \
+    && chown -RL worker:worker tomcat/conf \
+    && chown -RL worker:worker tomcat/shared \
+    && chown -RL worker:worker tomcat/webapps \
+    && chown -RL worker:worker tomcat/work \
+    && chown -RL worker:worker tomcat/temp
+
 ########################################################################################################################
 
+COPY --chown=worker:worker assets/entrypoint.sh assets/reinstall.sh assets/libcheck.sh bin/
+
 COPY --chown=worker:worker assets/plugins bin/plugins/
+
+RUN set -eux \
+	&& find bin -type f -name '*.sh' -exec chmod +x {} \;
 
 ########################################################################################################################
 
 RUN set -eux \
     && mkdir profiler \
-    && wget -qO- https://github.com/Granulate/async-profiler/releases/download/v2.0g1/async-profiler-2.0-linux-x64.tar.gz | tar xvz -C profiler
+    && wget -qO- https://github.com/Granulate/async-profiler/releases/download/v2.0g1/async-profiler-2.0-linux-x64.tar.gz | tar xvz -C profiler \
+    && chown -RL worker:worker profiler
 
 COPY --chown=worker:worker assets/profiler profiler/
 
 ########################################################################################################################
+
+USER worker
 
 STOPSIGNAL SIGWINCH
 
@@ -182,7 +198,7 @@ EXPOSE 8009 8080 8081
 ENTRYPOINT ["entrypoint.sh"]
 CMD ["catalina.sh", "run"]
 
-VOLUME [ "/opt/alfresco/alf_data", "/usr/local/tomcat/shared/classes/config/cluster", "/usr/local/tomcat/shared/classes/config/node" ]
+VOLUME [ "/opt/alfresco/alf_data", "/opt/bitnami/tomcat/shared/classes/config/cluster", "/opt/bitnami/tomcat/shared/classes/config/node" ]
 
 ########################################################################################################################
 

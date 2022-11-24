@@ -101,7 +101,7 @@ compose() {
         -dev) COMPOSE_FILE_TYPE="dev" ;;
         -remote) COMPOSE_FILE_TYPE="remote" ;;
         -productive)
-          COMPOSE_FILE_TYPE="remote"
+          COMPOSE_FILE_TYPE="productive"
           if [[ ! $PRODUCTIVE_ENABLED -eq "true" ]] ; then continue ; fi
           ;;
         *)
