@@ -1,4 +1,4 @@
-import {Component, NgZone, ViewChild} from '@angular/core';
+import {Component, EventEmitter, NgZone, Output, ViewChild} from '@angular/core';
 import {TranslateService} from '@ngx-translate/core';
 import {Group, IamGroup, Mediacenter, Node} from '../../../core-module/rest/data-object';
 // import {NodeList} from "../../../core-module/core.module";
@@ -34,6 +34,7 @@ declare var Chart: any;
 export class AdminMediacenterComponent {
     readonly AuthoritySearchMode = AuthoritySearchMode;
     @ViewChild('mediacenterMds') mediacenterMds: MdsEditorWrapperComponent;
+    @Output() onOpenNode = new EventEmitter();
     // @TODO: declare the mediacenter type when it is finalized in backend
     mediacenters: any[];
     // original link to mediacenter object (contained in mediacenters[])

@@ -371,17 +371,9 @@ public class GroupDao {
 	}
 
 	public GroupDao getSubgroupByType(String type) throws DAOException {
-		Optional<String> authority = searchService.searchGroupMembers(authorityName, "", AuthorityType.GROUP.name(), 0, Integer.MAX_VALUE, new SortDefinition())
-				.getData().stream().filter((a) -> {
-					try {
-						return type.equals(new GroupDao(repoDao, a).groupType);
-					} catch (DAOException e) {
-						e.printStackTrace();
-						return false;
-					}
-				}).findFirst();
-		if(authority.isPresent()){
-			return new GroupDao(repoDao, authority.get());
+		String authority = authorityService.getSubgroupByType(authorityName, type);
+		if(authority != null){
+			return new GroupDao(repoDao, authority);
 		}
 		throw new IllegalArgumentException("Group does not contain sub group of type " + type);
 	}
