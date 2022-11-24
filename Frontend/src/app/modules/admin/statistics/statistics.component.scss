@@ -90,6 +90,11 @@ listTable{
 }
 .export{
   padding:30px 20px;
+    > h4 {
+        > span {
+            flex-grow: 1;
+        }
+    }
   >div {
     display: flex;
     flex-direction: column;

@@ -102,6 +102,23 @@
 
   <dependencies>
 
+    <!-- caused by org.apache.axis.transport.http.AxisServlet -->
+    <dependency>
+      <groupId>org.apache.ws.security</groupId>
+      <artifactId>wss4j</artifactId>
+      <version>1.5.12</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>commons-logging</artifactId>
+          <groupId>commons-logging</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>xalan</artifactId>
+          <groupId>xalan</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
     <!-- provided -->
 
     <dependency>

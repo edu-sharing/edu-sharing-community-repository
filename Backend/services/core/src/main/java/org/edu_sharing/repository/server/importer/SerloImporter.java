@@ -288,7 +288,7 @@ public class SerloImporter implements Importer{
 				eduProps.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_CONTENT_PROVIDER,"serlo");
 				
 				String nodeId = persistentHandler.safe(new RecordHandlerStatic(eduProps), null, "serlo_"+set);
-				binaryHandler.safe(nodeId, new RecordHandlerStatic(eduProps), null);
+				binaryHandler.safe(nodeId, new RecordHandlerStatic(eduProps), null, set);
 			}
 			
 		}catch(Throwable e){

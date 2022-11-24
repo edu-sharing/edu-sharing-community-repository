@@ -1288,5 +1288,10 @@ export class AdminComponent {
 
         }
     }
+
+    openNodeRender(event: Node) {
+        const url = this.router.createUrlTree([UIConstants.ROUTER_PREFIX + 'render', event.ref.id]);
+        window.open(this.connector.getAbsoluteEdusharingUrl() + this.router.serializeUrl(url));
+    }
 }
 

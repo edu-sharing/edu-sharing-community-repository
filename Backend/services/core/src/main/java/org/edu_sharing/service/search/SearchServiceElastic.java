@@ -36,6 +36,8 @@ import org.edu_sharing.service.search.model.SearchVCard;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.search.*;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -122,8 +124,10 @@ public class SearchServiceElastic extends SearchServiceImpl {
     private RequestOptions getRequestOptions() {
         RequestOptions.Builder b = RequestOptions.DEFAULT.toBuilder();
         // add trace headers to elastic request
-        for(Map.Entry<String, String> header: Context.getCurrentInstance().getB3().getX3Headers().entrySet()) {
-            b.addHeader(header.getKey(), header.getValue());
+        if (Context.getCurrentInstance() != null) {
+            for (Map.Entry<String, String> header : Context.getCurrentInstance().getB3().getX3Headers().entrySet()) {
+                b.addHeader(header.getKey(), header.getValue());
+            }
         }
         return b.build();
     }
@@ -719,6 +723,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
     public SearchResponse searchNative(SearchRequest searchRequest) throws IOException {
         return getClient().search(searchRequest, getRequestOptions());
+    }
+    public UpdateResponse updateNative(UpdateRequest updateRequest) throws IOException {
+        return getClient().update(updateRequest, getRequestOptions());
     }
     public SearchResponse scrollNative(SearchScrollRequest searchScrollRequest) throws IOException {
         return getClient().scroll(searchScrollRequest, getRequestOptions());

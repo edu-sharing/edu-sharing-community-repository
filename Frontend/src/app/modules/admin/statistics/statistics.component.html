@@ -112,12 +112,37 @@
         </div>
       </div>
     </div>
+    <div class="export"
+         *ngIf="!nodesNoData && !singleLoading"
+    >
+      <h4 class="mat-heading-4 mat-heading-underline clickable"
+          (click)="showExport = !showExport"
+      >
+        <i icon="cloud_download"></i>
+        <span>{{'ADMIN.STATISTICS.EXPORT_LABEL' | translate}}</span>
+        <i [icon]="'keyboard_arrow_' + (showExport ? 'up' : 'down')"></i>
+      </h4>
+      <div *ngIf="showExport" [@overlay]="showExport">
+        <mat-form-field>
+          <mat-label>{{'ADMIN.STATISTICS.EXPORT_PROPERTIES' | translate}}</mat-label>
+          <textarea matInput
+                    cdkTextareaAutosize
+                    cdkAutosizeMinRows="4"
+                    cdkAutosizeMaxRows="6"
+                    [(ngModel)]="exportProperties"></textarea>
+          <mat-hint>{{'ADMIN.STATISTICS.EXPORT_PROPERTIES_HINT' | translate}}</mat-hint>
+        </mat-form-field>
+        <div><button mat-raised-button color="primary" (click)="export()">{{'ADMIN.STATISTICS.EXPORT' | translate}}</button></div>
+      </div>
+    </div>
+
     <h5 class="mat-heading-5" *ngIf="nodesNoData">{{'ADMIN.STATISTICS.NO_DATA' | translate}}</h5>
     <listTable *ngIf="!nodesNoData"
                [hasIcon]="true"
                [hasHeading]="true"
                [isClickable]="true"
-               (clickRow)="openNode($event)"
+               [createLink]="false"
+               (clickRow)="onOpenNode.emit($event.node)"
                [viewType]="0"
                [columns]="columns"
                [isLoading]="nodesLoading"
@@ -146,12 +171,13 @@
       </div>
     </div>
     <spinner *ngIf="singleLoading"></spinner>
+
     <div class="single-data-table ">
       <mat-table [dataSource]="singleData" [class.mat-table-clickable]="singleMode=='NODES'" *ngIf="singleData && !singleLoading">
 
         <ng-container *ngFor="let key of singleDataRows" [matColumnDef]="key">
           <mat-header-cell *matHeaderCellDef> {{'ADMIN.STATISTICS.HEADERS.'+key | translate}} </mat-header-cell>
-          <mat-cell *matCellDef="let element" (click)="openNode(element.entry ? element.entry : null)">
+          <mat-cell *matCellDef="let element" (click)="onOpenNode.emit(element.entry ? element.entry : null)">
             <span *ngIf="key=='action'">{{'ADMIN.STATISTICS.ACTIONS.'+element[key] | translate}}</span>
             <span *ngIf="key=='date'">{{element[key] | formatDate:{time:true,relative:false} }}</span>
             <span *ngIf="key=='authority'">{{element.authority.hash | slice:0:8 }}</span>
@@ -179,7 +205,7 @@
     </div>
   </mat-tab>
 </mat-tab-group>
-<div class="export" *ngIf="!groupedLoading && !customGroupLoading && !nodesLoading && !singleLoading">
+<div class="export" *ngIf="currentTab != 2 && !groupedLoading && !customGroupLoading && !nodesLoading && !singleLoading">
   <h4 class="mat-heading-4 mat-heading-underline"><i icon="cloud_download"></i>{{'ADMIN.STATISTICS.EXPORT_LABEL' | translate}}</h4>
   <div>
     <mat-form-field *ngIf="currentTab==2">
