@@ -40,9 +40,7 @@
 <es-dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></es-dropdown>
 
 <!-- Do not render the list element (`role="list"` or `li`) when there are no list items. -->
-<ng-container
-  *ngIf="(visibleNodes$ | async)?.length > 0 || entriesService.globalOptions?.length > 0"
->
+<ng-container *ngIf="(nodes$ | async)?.length > 0 || entriesService.globalOptions?.length > 0">
   <!-- FIXME: Ideally, we would use native `ul` and `li` elements, but these have a strict model,
   that only allows `li` elements as direct children of `ul` elements. So we would need to use the
   native elements at all places without any elements between `ul` and `li`. -->
@@ -52,7 +50,7 @@
     class="card-grid card-grid-reorder"
     cdkDropListGroup
   >
-    <ng-container *ngIf="visibleNodes$ | async as nodes">
+    <ng-container *ngIf="nodes$ | async as nodes">
       <div
         class="card-grid-order-wrapper"
         *ngFor="let node of nodes; let i = index"
@@ -105,7 +103,7 @@
       "
     >
       <ng-container *ngTemplateOutlet="globalOptions"></ng-container>
-      <ng-container *ngIf="visibleNodes$ | async as nodes">
+      <ng-container *ngIf="nodes$ | async as nodes">
         <div
           class="card-grid-drag-wrapper"
           *ngFor="let node of nodes; let i = index"

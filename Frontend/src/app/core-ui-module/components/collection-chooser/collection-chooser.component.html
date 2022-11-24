@@ -52,7 +52,7 @@
       </ng-template>
     </es-node-entries-wrapper>
     <button
-      *ngIf="!searchQuery && (!(dataSourceLatest.areAllDisplayed() | async) || showMore)"
+      *ngIf="!searchQuery && (dataSourceLatest.itemsCap?.isActivelyCapping || showMore)"
       mat-button
       color="primary"
       class="show-more"
