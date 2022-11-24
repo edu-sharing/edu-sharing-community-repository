@@ -78,7 +78,7 @@ spec:
         {{- end }}
         {{- with .Values.config.override.logging.server }}
         - name: file
-          mountPath: /usr/local/tomcat/conf/logging.properties
+          mountPath: /opt/bitnami/tomcat/conf/logging.properties
           subPath: logging-server
         {{- end }}
         {{- with .Values.startupProbe }}

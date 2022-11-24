@@ -120,8 +120,8 @@ services:
       - "${COMMON_BIND_HOST:-127.0.0.1}:${REPOSITORY_SERVICE_PORT_AJP:-8102}:8009"
       - "${COMMON_BIND_HOST:-127.0.0.1}:${REPOSITORY_SERVICE_PORT_HTTP:-8100}:8081"
     volumes:
-      - "repository-service-volume-config-cluster:/usr/local/tomcat/shared/classes/config/cluster"
-      - "repository-service-volume-config-node:/usr/local/tomcat/shared/classes/config/node"
+      - "repository-service-volume-config-cluster:/opt/bitnami/tomcat/shared/classes/config/cluster"
+      - "repository-service-volume-config-node:/opt/bitnami/tomcat/shared/classes/config/node"
       - "repository-service-volume-data:/opt/alfresco/alf_data"
     depends_on:
       - repository-database
