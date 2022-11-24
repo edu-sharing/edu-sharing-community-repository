@@ -254,6 +254,12 @@ public class LTIJWTUtil {
             //deepLink.put(LTIConstants.DEEP_LINK_URL, ApplicationInfoList.getHomeRepository().getClientBaseUrl() + "/components/render/"+node.getRef().getId()+"?closeOnBack=true");
             deepLink.put(LTIConstants.DEEP_LINK_URL, ApplicationInfoList.getHomeRepository().getClientBaseUrl() + "/rest/lti/v13/"+LTIConstants.LTI_TOOL_REDIRECTURL_PATH+"/"+node.getRef().getId());
 
+            //@TODO must custom part always be send? is only need when platform is also a tool that has customcontent option
+            HashMap<String,String> custom = new HashMap<>();
+            custom.put("nodeId",node.getRef().getId());
+            custom.put("repositoryId",node.getRef().getRepo());
+            deepLink.put("custom",custom);
+
             try {
                 HashMap<String,String> thumbnail = new HashMap<>();
                 //thumbnail.put("url",node.getPreview().getUrl());
