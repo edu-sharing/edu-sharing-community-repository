@@ -18,6 +18,9 @@ export interface MdsWidget {
     hideIfEmpty?: boolean;
     icon?: string;
     id?: string;
+    ids?: {
+        [key: string]: string;
+    };
     interactionType?: 'Input' | 'None';
     isExtended?: boolean;
     isRequired?: 'mandatory' | 'mandatoryForPublish' | 'recommended' | 'optional' | 'ignore';

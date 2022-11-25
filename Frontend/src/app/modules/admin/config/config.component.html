@@ -121,10 +121,9 @@
       >
     </div>
   </ng-container>
+  <!--
   <ng-container *ngIf="editSupported || configs.nodeOverride">
-    <h3 class="mat-heading-3 mat-heading-underline">
-      {{ 'ADMIN.GLOBAL_CONFIG.NODE_OVERRIDE_CONFIG_TITLE' | translate }}
-    </h3>
+    <h3 class="mat-heading-3 mat-heading-underline">{{ 'ADMIN.GLOBAL_CONFIG.NODE_OVERRIDE_CONFIG_TITLE' | translate}}</h3>
     <div class="monaco-editor">
       <ngx-monaco-editor
         [options]="codeOptionsHocoonRW"
@@ -136,6 +135,7 @@
       >
     </div>
   </ng-container>
+  -->
   <ng-container *ngIf="showRO">
     <h3 class="mat-heading-3 mat-heading-underline">
       {{ 'ADMIN.GLOBAL_CONFIG.PARSED_TITLE' | translate }}

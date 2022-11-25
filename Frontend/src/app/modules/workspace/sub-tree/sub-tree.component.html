@@ -33,7 +33,7 @@
           <i *ngIf="!isOpen(node)" esIcon="keyboard_arrow_right"></i>
           <i *ngIf="isOpen(node)" esIcon="keyboard_arrow_down"></i>
         </button>
-        <img class="node-icon" src="{{ node.iconURL }}" alt="{{ node.name }}" />
+        <img class="node-icon" src="{{ node | esNodeIcon }}" alt="{{ node.name }}" />
         <span class="name">{{ node.name }}</span>
       </div>
       <es-workspace-sub-tree

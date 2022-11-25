@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { AccessibilityComponent } from '../../common/ui/accessibility/accessibility.component';
 import { CookieInfoComponent } from '../../common/ui/cookie-info/cookie-info.component';
 import { FrameEventsService, Node } from '../../core-module/core.module';
+import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { MainNavComponent } from '../../main/navigation/main-nav/main-nav.component';
 import { ManagementDialogsService } from '../../modules/management-dialogs/management-dialogs.service';
 import { SkipNavService } from './skip-nav/skip-nav.service';
@@ -70,34 +70,31 @@ export class MainNavConfig {
 export class MainNavService {
     private mainnav: MainNavComponent;
     private cookieInfo: CookieInfoComponent;
-    private accessibility: AccessibilityComponent;
     private mainNavConfigSubject = new BehaviorSubject<MainNavConfig>(new MainNavConfig());
 
     constructor(
-        private dialogs: ManagementDialogsService,
+        private managementDialogs: ManagementDialogsService,
         private event: FrameEventsService,
         private skipNav: SkipNavService,
+        private dialogs: DialogsService,
     ) {}
 
     getDialogs() {
-        return this.dialogs.getDialogsComponent();
+        return this.managementDialogs.getDialogsComponent();
     }
 
     getCookieInfo() {
         return this.cookieInfo;
     }
 
-    getAccessibility() {
-        return this.accessibility;
-    }
-
     registerCookieInfo(cookieInfo: CookieInfoComponent) {
         this.cookieInfo = cookieInfo;
     }
 
-    registerAccessibility(accessibility: AccessibilityComponent) {
-        this.accessibility = accessibility;
-        this.skipNav.register('ACCESSIBILITY_SETTINGS', () => accessibility.show());
+    registerAccessibility() {
+        this.skipNav.register('ACCESSIBILITY_SETTINGS', () =>
+            this.dialogs.openAccessibilityDialog(),
+        );
     }
 
     getMainNav() {

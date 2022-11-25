@@ -2,6 +2,8 @@ import { ESCAPE, hasModifierKey } from '@angular/cdk/keycodes';
 import { OverlayRef, OverlaySizeConfig } from '@angular/cdk/overlay';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, map, take } from 'rxjs/operators';
+import { DISCARD_OR_BACK } from '../dialog-modules/generic-dialog/generic-dialog-data';
+import { DialogsService } from '../dialogs.service';
 import { CardDialogConfig, Closable } from './card-dialog-config';
 import { CardDialogContainerComponent } from './card-dialog-container/card-dialog-container.component';
 import { CardDialogState } from './card-dialog-state';
@@ -29,6 +31,7 @@ export class CardDialogRef<D = unknown, R = unknown> {
         private containerInstance: CardDialogContainerComponent,
         config: CardDialogConfig<D>,
         state: CardDialogState,
+        private dialogs: DialogsService,
     ) {
         this.configSubject = new BehaviorSubject(config);
         this.stateSubject = new BehaviorSubject(state);
@@ -105,26 +108,50 @@ export class CardDialogRef<D = unknown, R = unknown> {
         );
     }
 
-    /** @returns whether the cancel try was acknowledged */
-    tryCancel(trigger: 'backdrop' | 'x-button' | 'esc-key'): boolean {
+    tryCancel(trigger: 'backdrop' | 'x-button' | 'esc-key' | 'navigation'): {
+        acknowledged: boolean;
+        closed: Promise<boolean>;
+    } {
         switch (this.config.closable) {
             case Closable.Casual:
                 this.close();
-                return true;
+                return { acknowledged: true, closed: Promise.resolve(true) };
             case Closable.Standard:
                 switch (trigger) {
                     case 'backdrop':
-                        return false;
+                        return { acknowledged: false, closed: Promise.resolve(false) };
                     case 'x-button':
                     case 'esc-key':
+                    case 'navigation':
                         this.close();
-                        return true;
+                        return { acknowledged: true, closed: Promise.resolve(true) };
                 }
             case Closable.Confirm:
-                // TODO implement
-                return true;
+                switch (trigger) {
+                    case 'backdrop':
+                        return { acknowledged: false, closed: Promise.resolve(false) };
+                    case 'x-button':
+                    case 'esc-key':
+                    case 'navigation':
+                        const closed = this.dialogs
+                            .openGenericDialog({
+                                title: 'DIALOG.CONFIRM_DISCARD_TITLE',
+                                messageText: 'DIALOG.CONFIRM_DISCARD_MESSAGE',
+                                buttons: DISCARD_OR_BACK,
+                            })
+                            .then((dialogRef) => dialogRef.afterClosed().toPromise())
+                            .then((response) => {
+                                if (response === 'DISCARD') {
+                                    this.close();
+                                    return true;
+                                } else {
+                                    return false;
+                                }
+                            });
+                        return { acknowledged: true, closed };
+                }
             case Closable.Disabled:
-                return false;
+                return { acknowledged: false, closed: Promise.resolve(false) };
         }
     }
 
@@ -136,11 +163,11 @@ export class CardDialogRef<D = unknown, R = unknown> {
         this.overlayRef
             .keydownEvents()
             .pipe(
-                filter(() => !this.state.isLoading),
+                filter(() => !this.state.isLoading && this.state.autoSavingState !== 'saving'),
                 filter((event) => event.keyCode === ESCAPE && !hasModifierKey(event)),
             )
             .subscribe((event) => {
-                const acknowledged = this.tryCancel('esc-key');
+                const acknowledged = this.tryCancel('esc-key').acknowledged;
                 if (acknowledged) {
                     event.preventDefault();
                 }
@@ -148,12 +175,12 @@ export class CardDialogRef<D = unknown, R = unknown> {
 
         this.overlayRef
             .backdropClick()
-            .pipe(filter(() => !this.state.isLoading))
-            .subscribe(() => {
-                const acknowledged = this.tryCancel('backdrop');
-                if (!acknowledged) {
+            .pipe(filter(() => !this.state.isLoading && this.state.autoSavingState !== 'saving'))
+            .subscribe(async () => {
+                const closed = await this.tryCancel('backdrop').closed;
+                if (!closed) {
                     // Move focus back to the dialog.
-                    this.containerInstance.trapFocus();
+                    void this.containerInstance.trapFocus();
                 }
             });
     }

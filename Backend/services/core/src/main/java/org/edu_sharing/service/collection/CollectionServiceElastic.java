@@ -71,7 +71,7 @@ public class CollectionServiceElastic extends CollectionServiceImpl {
             searchSourceBuilder.aggregation(aggregation);
             searchSourceBuilder.size(0);
             searchRequest.source(searchSourceBuilder);
-            SearchResponse result = esClient.search(searchRequest, RequestOptions.DEFAULT);
+            SearchResponse result = searchServiceElastic.searchNative(searchRequest);
             ParsedStringTerms types = result.getAggregations().get("type");
             for(Terms.Bucket bucket : types.getBuckets()){
                 if(bucket.getKeyAsString().equals("ccm:io")){

@@ -256,9 +256,9 @@ export class StatisticV1Service extends BaseService {
     }
 
     /**
-     * Path part for operation getNodesAlteredInRange
+     * Path part for operation getNodesAlteredInRange1
      */
-    static readonly GetNodesAlteredInRangePath = '/statistic/v1/statistics/nodes/altered';
+    static readonly GetNodesAlteredInRange1Path = '/statistic/v1/statistics/nodes/altered';
 
     /**
      * get the range of nodes which had tracked actions since a given timestamp.
@@ -266,11 +266,11 @@ export class StatisticV1Service extends BaseService {
      * requires admin
      *
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
-     * To access only the response body, use `getNodesAlteredInRange()` instead.
+     * To access only the response body, use `getNodesAlteredInRange1()` instead.
      *
      * This method doesn't expect any request body.
      */
-    getNodesAlteredInRange$Response(params: {
+    getNodesAlteredInRange1$Response(params: {
         /**
          * date range from
          */
@@ -278,7 +278,7 @@ export class StatisticV1Service extends BaseService {
     }): Observable<StrictHttpResponse<string>> {
         const rb = new RequestBuilder(
             this.rootUrl,
-            StatisticV1Service.GetNodesAlteredInRangePath,
+            StatisticV1Service.GetNodesAlteredInRange1Path,
             'get',
         );
         if (params) {
@@ -306,17 +306,17 @@ export class StatisticV1Service extends BaseService {
      * requires admin
      *
      * This method provides access to only to the response body.
-     * To access the full response (for headers, for example), `getNodesAlteredInRange$Response()` instead.
+     * To access the full response (for headers, for example), `getNodesAlteredInRange1$Response()` instead.
      *
      * This method doesn't expect any request body.
      */
-    getNodesAlteredInRange(params: {
+    getNodesAlteredInRange1(params: {
         /**
          * date range from
          */
         dateFrom: number;
     }): Observable<string> {
-        return this.getNodesAlteredInRange$Response(params).pipe(
+        return this.getNodesAlteredInRange1$Response(params).pipe(
             map((r: StrictHttpResponse<string>) => r.body as string),
         );
     }

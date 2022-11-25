@@ -166,13 +166,40 @@
         </div>
       </div>
     </div>
+    <div class="export" *ngIf="!nodesNoData && !singleLoading">
+      <h4 class="mat-heading-4 mat-heading-underline clickable" (click)="showExport = !showExport">
+        <i esIcon="cloud_download"></i>
+        <span>{{ 'ADMIN.STATISTICS.EXPORT_LABEL' | translate }}</span>
+        <i [esIcon]="'keyboard_arrow_' + (showExport ? 'up' : 'down')"></i>
+      </h4>
+      <div *ngIf="showExport" [@overlay]="showExport">
+        <mat-form-field>
+          <mat-label>{{ 'ADMIN.STATISTICS.EXPORT_PROPERTIES' | translate }}</mat-label>
+          <textarea
+            matInput
+            cdkTextareaAutosize
+            cdkAutosizeMinRows="4"
+            cdkAutosizeMaxRows="6"
+            [(ngModel)]="exportProperties"
+          ></textarea>
+          <mat-hint>{{ 'ADMIN.STATISTICS.EXPORT_PROPERTIES_HINT' | translate }}</mat-hint>
+        </mat-form-field>
+        <div>
+          <button mat-raised-button color="primary" (click)="export()">
+            {{ 'ADMIN.STATISTICS.EXPORT' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+
     <h5 class="mat-heading-5" *ngIf="nodesNoData">{{ 'ADMIN.STATISTICS.NO_DATA' | translate }}</h5>
     <es-listTable
       *ngIf="!nodesNoData"
       [hasIcon]="true"
       [hasHeading]="true"
       [isClickable]="true"
-      (clickRow)="openNode($event)"
+      [createLink]="false"
+      (clickRow)="onOpenNode.emit($event.node)"
       [viewType]="0"
       [columns]="columns"
       [isLoading]="nodesLoading"
@@ -223,7 +250,7 @@
           </mat-header-cell>
           <mat-cell
             *matCellDef="let element"
-            (click)="openNode(element.entry ? element.entry : null)"
+            (click)="onOpenNode.emit(element.entry ? element.entry : null)"
           >
             <span *ngIf="key === 'action'">{{
               'ADMIN.STATISTICS.ACTIONS.' + element[key] | translate
@@ -267,7 +294,9 @@
 </mat-tab-group>
 <div
   class="export"
-  *ngIf="!groupedLoading && !customGroupLoading && !nodesLoading && !singleLoading"
+  *ngIf="
+    currentTab != 2 && !groupedLoading && !customGroupLoading && !nodesLoading && !singleLoading
+  "
 >
   <h4 class="mat-heading-4 mat-heading-underline">
     <i esIcon="cloud_download"></i>{{ 'ADMIN.STATISTICS.EXPORT_LABEL' | translate }}

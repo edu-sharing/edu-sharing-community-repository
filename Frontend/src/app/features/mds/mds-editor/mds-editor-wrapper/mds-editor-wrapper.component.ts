@@ -24,6 +24,7 @@ import {
     Values,
 } from '../../types/types';
 import { valuesDictIsEquivalent } from './values-dict-is-equivalent';
+import { MdsEditorCardComponent } from '../mds-editor-card/mds-editor-card.component';
 
 /**
  * Wrapper component to select between the legacy `<es-mds>` component and the Angular-native
@@ -44,6 +45,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
 
     // Properties compatible to legacy MdsComponent.
     @ViewChild(MdsComponent) mdsRef: MdsComponent;
+    @ViewChild(MdsEditorCardComponent) mdsCard: MdsEditorCardComponent;
 
     @Input() addWidget = false;
     @Input() allowReplacing = true;
@@ -57,6 +59,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
     @Input() invalidate: boolean;
     @Input() labelNegative = 'CANCEL';
     @Input() labelPositive = 'SAVE';
+    @Input() toastOnSave = 'WORKSPACE.EDITOR.UPDATED';
     @Input() mode: 'search' | 'default' = 'default';
     @Input() nodes: Node[];
     @Input() parentNode: Node;
@@ -238,7 +241,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
                 return;
             }
             const updatedNodes = await this.mdsEditorInstance.save();
-            this.toast.toast('WORKSPACE.EDITOR.UPDATED');
+            this.toast.toast(this.toastOnSave);
             this.onDone.emit(updatedNodes);
         } catch (error) {
             this.handleError(error);

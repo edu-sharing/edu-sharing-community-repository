@@ -2,8 +2,13 @@ import { Component } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { AccessibilityService } from 'src/app/common/ui/accessibility/accessibility.service';
-import { ListItem, RestConstants, Node, RestNetworkService } from 'src/app/core-module/core.module';
+import { AccessibilityService } from '../../../services/accessibility.service';
+import {
+    ListItem,
+    RestConstants,
+    Node,
+    RestNetworkService,
+} from '../../../core-module/core.module';
 import { ListWidget } from '../list-widget';
 import { NodeSourcePipe } from '../node-source.pipe';
 

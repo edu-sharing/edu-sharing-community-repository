@@ -303,7 +303,7 @@ export class IamV1Service extends BaseService {
         '/iam/v1/people/{repository}/{person}/nodeList/{list}/{node}';
 
     /**
-     * Deelete a node of a node list of a user.
+     * Delete a node of a node list of a user.
      *
      * For guest users, the list will be temporary stored in the current session
      *
@@ -357,7 +357,7 @@ export class IamV1Service extends BaseService {
     }
 
     /**
-     * Deelete a node of a node list of a user.
+     * Delete a node of a node list of a user.
      *
      * For guest users, the list will be temporary stored in the current session
      *

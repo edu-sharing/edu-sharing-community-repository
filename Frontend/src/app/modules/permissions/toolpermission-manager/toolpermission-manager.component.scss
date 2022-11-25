@@ -16,6 +16,9 @@ $headingHeight: 60px;
 .heading-group {
     width: 100%;
     background-color: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 1;
     height: $headingHeight;
     .fade {
         position: absolute;
@@ -39,6 +42,7 @@ $headingHeight: 60px;
 .heading {
     font-weight: bold;
     color: $textLight;
+    padding: 10px 0;
     margin: 0 $cardPadding;
 }
 .table {
@@ -91,6 +95,9 @@ $headingHeight: 60px;
     width: 75px;
     min-width: 75px;
     align-self: center;
+    > mat-checkbox {
+        padding-left: 13px;
+    }
 }
 .checkboxInput {
     padding-top: 7px;

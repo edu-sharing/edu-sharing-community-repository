@@ -753,7 +753,7 @@ export class MediacenterV1Service extends BaseService {
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
      * To access only the response body, use `importMcOrgConnections()` instead.
      *
-     * This method sends `application/json` and handles request body of type `application/json`.
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
      */
     importMcOrgConnections$Response(params?: {
         /**
@@ -774,7 +774,7 @@ export class MediacenterV1Service extends BaseService {
         );
         if (params) {
             rb.query('removeSchoolsFromMC', params.removeSchoolsFromMC, {});
-            rb.body(params.body, 'application/json');
+            rb.body(params.body, 'multipart/form-data');
         }
 
         return this.http
@@ -800,7 +800,7 @@ export class MediacenterV1Service extends BaseService {
      * This method provides access to only to the response body.
      * To access the full response (for headers, for example), `importMcOrgConnections$Response()` instead.
      *
-     * This method sends `application/json` and handles request body of type `application/json`.
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
      */
     importMcOrgConnections(params?: {
         /**
@@ -832,7 +832,7 @@ export class MediacenterV1Service extends BaseService {
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
      * To access only the response body, use `importMediacenters()` instead.
      *
-     * This method sends `application/json` and handles request body of type `application/json`.
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
      */
     importMediacenters$Response(params?: {
         body?: {
@@ -848,7 +848,7 @@ export class MediacenterV1Service extends BaseService {
             'post',
         );
         if (params) {
-            rb.body(params.body, 'application/json');
+            rb.body(params.body, 'multipart/form-data');
         }
 
         return this.http
@@ -874,7 +874,7 @@ export class MediacenterV1Service extends BaseService {
      * This method provides access to only to the response body.
      * To access the full response (for headers, for example), `importMediacenters$Response()` instead.
      *
-     * This method sends `application/json` and handles request body of type `application/json`.
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
      */
     importMediacenters(params?: {
         body?: {
@@ -905,7 +905,7 @@ export class MediacenterV1Service extends BaseService {
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
      * To access only the response body, use `importOrganisations()` instead.
      *
-     * This method sends `application/json` and handles request body of type `application/json`.
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
      */
     importOrganisations$Response(params?: {
         body?: {
@@ -921,7 +921,7 @@ export class MediacenterV1Service extends BaseService {
             'post',
         );
         if (params) {
-            rb.body(params.body, 'application/json');
+            rb.body(params.body, 'multipart/form-data');
         }
 
         return this.http
@@ -947,7 +947,7 @@ export class MediacenterV1Service extends BaseService {
      * This method provides access to only to the response body.
      * To access the full response (for headers, for example), `importOrganisations$Response()` instead.
      *
-     * This method sends `application/json` and handles request body of type `application/json`.
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
      */
     importOrganisations(params?: {
         body?: {

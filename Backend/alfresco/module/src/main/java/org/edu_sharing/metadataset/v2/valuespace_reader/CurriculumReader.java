@@ -7,6 +7,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataKey;
+import org.edu_sharing.metadataset.v2.ValuespaceData;
+import org.edu_sharing.metadataset.v2.ValuespaceInfo;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,17 +25,17 @@ public class CurriculumReader extends ValuespaceReader{
     private String url;
     private static Logger logger = Logger.getLogger(CurriculumReader.class);
 
-    public CurriculumReader(String valuespaceUrl) {
-        super(valuespaceUrl);
+    public CurriculumReader(ValuespaceInfo info) {
+        super(info);
         // e.g. http://localhost:8000/api/v1/curricula/metadatasets
         Matcher matched = matches("(https?:\\/\\/.*\\/)api\\/v1\\/curricula\\/metadatasets.*");
         if(matched.matches()){
-            url = valuespaceUrl;
+            url = info.getValue();
             logger.info("matched Curriculum at "+matched.group(1));
         }
     }
 
-    public List<MetadataKey> getValuespace(String locale) throws Exception {
+    public ValuespaceData getValuespace(String locale) throws Exception {
         List<MetadataKey> result = new ArrayList<>();
         JSONArray list = getApi();
         for (int i = 0; i < list.length(); i++) {
@@ -43,7 +45,7 @@ public class CurriculumReader extends ValuespaceReader{
                 result.add(convertEntry(entry));
             }
         }
-        return result;
+        return new ValuespaceData(null, result);
     }
 
     private MetadataKey convertEntry(JSONObject entry) throws JSONException {

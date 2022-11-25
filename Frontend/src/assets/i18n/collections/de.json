@@ -100,12 +100,6 @@
         "DELETE": "Bild löschen"
       }
     },
-    "FEEDBACK_TITLE": "Feedback zur Sammlung geben",
-    "FEEDBACK_VIEW_TITLE": "Abgegebenes Feedback zur Sammlung",
-    "FEEDBACK_VIEW_EMPTY": "Es wurde noch kein Feedback zur Sammlung abgegeben",
-    "FEEDBACK_CREATOR": "Autor{{GENDER_SEPARATOR}}in {{creator}}",
-    "FEEDBACK_SAVE": "Absenden",
-    "FEEDBACK_TOAST": "Feedback gesendet. Vielen Dank!",
     "ADD_TO": {
       "DUPLICATE_TITLE": "Element(e) bereits vorhanden",
       "DUPLICATE_MESSAGE": "{{count}} Element(e) sind bereits in der Sammlung vorhanden. Möchten Sie diese erneut einfügen?"

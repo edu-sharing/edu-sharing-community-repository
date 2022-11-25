@@ -1,3 +1,4 @@
+
 package org.edu_sharing.restservices.iam.v1;
 
 import io.swagger.v3.oas.annotations.Hidden;
@@ -599,7 +600,8 @@ public class IamApi  {
     @PUT
     @Path("/people/{repository}/{person}/avatar")
     @Operation(summary = "Set avatar of the user.", description = "Set avatar of the user. (To set foreign avatars, admin rights are required.)")
-    @ApiResponses(
+	@Consumes({ "multipart/form-data" })
+	@ApiResponses(
     	value = {
 	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
 	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -1273,7 +1275,7 @@ public class IamApi  {
 	public Response getSubgroupByType(
 			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
 			@Parameter(description = "authority name of the parent/primary group (begins with GROUP_)",required=true ) @PathParam("group") String group,
-			@Parameter(description = "authorityType either GROUP or USER, empty to show all",required=true) @PathParam("type") String type,
+			@Parameter(description = "group type to filter for, e.g. " + CCConstants.ADMINISTRATORS_GROUP_TYPE,required=true) @PathParam("type") String type,
 
 			@Context HttpServletRequest req) {
 
@@ -1282,7 +1284,7 @@ public class IamApi  {
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 
 			GroupEntry response = new GroupEntry();
-			response.setGroup( GroupDao.getGroup(repoDao, group).getSubgroupByType(type).asGroup());
+			response.setGroup(GroupDao.getGroup(repoDao, group).getSubgroupByType(type).asGroup());
 
 			return Response.status(Response.Status.OK).entity(response).build();
 

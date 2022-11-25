@@ -1,6 +1,7 @@
 package org.edu_sharing.service.rendering;
 
 import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -21,4 +22,8 @@ public interface RenderingService {
      * @return
      */
     boolean renderingSupported();
+
+    default RenderingVersionInfo getVersion() throws GeneralSecurityException {
+        return null;
+    };
 }

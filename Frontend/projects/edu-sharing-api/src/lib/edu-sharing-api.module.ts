@@ -7,6 +7,7 @@ import {
     getConfigProvider,
 } from './edu-sharing-api-configuration';
 import { TimingInterceptor } from './timing.iterceptor';
+import { ApiHelpersService } from './wrappers/api-helpers.service';
 
 // Note that interceptors provided here will also be called on all requests by the app module using
 // this library.
@@ -51,6 +52,7 @@ export class EduSharingApiModule {
             providers: [
                 ApiRequestConfiguration,
                 ApiInterceptor,
+                ApiHelpersService,
                 API_INTERCEPTOR_PROVIDER,
                 // ...[TimingInterceptor, TIMING_INTERCEPTOR_PROVIDER],
                 getConfigProvider(params),

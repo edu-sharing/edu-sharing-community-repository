@@ -135,7 +135,7 @@
             [homeIcon]="breadcrumbs.homeIcon"
           ></es-breadcrumbs>
           <div class="change">
-            <button mat-button color="primary" (click)="chooseParent = true">
+            <button mat-button color="primary" (click)="chooseParent()">
               {{ 'CHANGE_STORAGE_LOCATION' | translate }}
             </button>
           </div>
@@ -150,12 +150,3 @@
     </div>
   </div>
 </es-card>
-<es-file-chooser
-  *ngIf="chooseParent"
-  [isCancelable]="true"
-  [pickDirectory]="true"
-  [title]="'WORKSPACE.CHOOSE_LOCATION_TITLE'"
-  [subtitle]="'WORKSPACE.CHOOSE_LOCATION_DESCRIPTION'"
-  (onCancel)="chooseParent = false"
-  (onChoose)="parentChoosed($event)"
-></es-file-chooser>

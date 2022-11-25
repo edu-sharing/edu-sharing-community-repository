@@ -5,6 +5,8 @@ import org.edu_sharing.restservices.register.v1.model.RegisterExists;
 import org.edu_sharing.restservices.register.v1.model.RegisterInformation;
 import org.edu_sharing.service.register.RegisterServiceFactory;
 
+import java.security.InvalidKeyException;
+
 public class RegisterDao {
     public static void register(RegisterInformation info) throws DAOException {
         try {
@@ -24,7 +26,7 @@ public class RegisterDao {
     public static void recoverPassword(String mail) throws DAOException {
         try {
             if(!RegisterServiceFactory.getLocalService().recoverPassword(mail))
-                throw new SecurityException("Invalid mail address");
+                throw new InvalidKeyException("Invalid mail address");
         }catch(Throwable t){
             throw DAOException.mapping(t);
         }

@@ -109,9 +109,11 @@ export class CollectionsMainComponent implements OnDestroy {
         this._collectionShare = collectionShare as any as Node;
         this.refreshAll();
     }
+
     get collectionShare() {
         return this._collectionShare as any as Node[];
     }
+
     set tabSelectedIndex(pos: number) {
         if (this.isGuest) {
             pos += 2; // skip first 2 tabs
@@ -124,6 +126,7 @@ export class CollectionsMainComponent implements OnDestroy {
         }
         this.selectTab(CollectionsMainComponent.INDEX_MAPPING[pos]);
     }
+
     get tabSelectedIndex() {
         let pos = CollectionsMainComponent.INDEX_MAPPING.indexOf(this.tabSelected);
         if (this.isGuest) {
@@ -273,6 +276,7 @@ export class CollectionsMainComponent implements OnDestroy {
         }
         return RestHelper.hasAccessPermission(this.collection, RestConstants.PERMISSION_WRITE);
     }
+
     feedbackAllowed(): boolean {
         return (
             !this.isGuest &&
@@ -434,6 +438,12 @@ export class CollectionsMainComponent implements OnDestroy {
             .getNodeParents(this.collection.ref.id, false)
             .subscribe((data: EduData.NodeList) => {
                 this.path = data.nodes.reverse();
+                if (this.path.length > 1) {
+                    this.parentCollectionId = new EduData.Reference(
+                        this.path[this.path.length - 2].ref.repo,
+                        this.path[this.path.length - 2].ref.id,
+                    );
+                }
             });
     }
 
@@ -516,7 +526,6 @@ export class CollectionsMainComponent implements OnDestroy {
         const c = this.collection;
         return c != null && c.ref != null ? c.ref.id : null;
     }
-    test() {}
 
     createAllowed = () => {
         if (this.isGuest) {

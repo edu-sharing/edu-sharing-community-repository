@@ -3,9 +3,9 @@ import { ListWidget } from '../list-widget';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { AccessibilityService } from 'src/app/common/ui/accessibility/accessibility.service';
-import { ListItem, RestConstants, Node } from 'src/app/core-module/core.module';
-import { NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
+import { AccessibilityService } from '../../../services/accessibility.service';
+import { ListItem, RestConstants, Node } from '../../../core-module/core.module';
+import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 
 @Component({
     selector: 'es-list-node-license',

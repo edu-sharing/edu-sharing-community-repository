@@ -54,13 +54,6 @@ public class ShareServlet extends HttpServlet implements SingleThreadModel {
 			return;
 		}
 
-		String[] childIds;
-		if(req.getParameter("childIds")!=null){
-			childIds=req.getParameter("childIds").split(",");
-		}
-		else{
-			childIds=null;
-		}
 		if (token == null) {
 			op.println("missing token");
 			return;
@@ -69,16 +62,19 @@ public class ShareServlet extends HttpServlet implements SingleThreadModel {
 
 		ServiceRegistry serviceRegistry = (ServiceRegistry) appContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
-		NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, nodeId);
+		final NodeRef nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, nodeId);
+		final String[] childIds;
+		if(req.getParameter("childIds")!=null){
+			childIds=req.getParameter("childIds").split(",");
+		}
+		else{
 		// childobject? fetch all sub children as zip
-		if(childIds==null) {
-			NodeRef finalNodeRef = nodeRef;
 			childIds = AuthenticationUtil.runAsSystem(() -> {
-				if (NodeServiceHelper.getType(finalNodeRef).equals(CCConstants.CCM_TYPE_IO)) {
+				if (NodeServiceHelper.getType(nodeRef).equals(CCConstants.CCM_TYPE_IO)) {
 					return AuthenticationUtil.runAsSystem(() ->
 							Stream.concat(
-									Stream.of(finalNodeRef.getId()),
-									NodeServiceHelper.getChildrenChildAssociationRefType(finalNodeRef, CCConstants.CCM_TYPE_IO).
+									Stream.of(nodeRef.getId()),
+									NodeServiceHelper.getChildrenChildAssociationRefType(nodeRef, CCConstants.CCM_TYPE_IO).
 									stream().map((r) -> r.getChildRef().getId())
 							).toArray(String[]::new)
 					);
@@ -87,107 +83,96 @@ public class ShareServlet extends HttpServlet implements SingleThreadModel {
 			});
 		}
 		if(childIds!=null && childIds.length>1){
-			String[] finalChildIds = childIds;
 			NodeRef finalNodeRef = nodeRef;
 			AuthenticationUtil.runAsSystem(() -> {
 				String fileName= (String) serviceRegistry.getNodeService().getProperty(finalNodeRef,QName.createQName(CCConstants.CM_NAME));
-				DownloadServlet.downloadZip(resp, finalChildIds,nodeId,token,password,fileName+".zip");
+				DownloadServlet.downloadZip(resp, childIds,nodeId,token,password,fileName+".zip");
 				return null;
 			});
 			return;
 		}
 
 
+		AuthenticationUtil.runAsSystem(() -> {
+			try {
 
-
-		AuthenticationService authenticationService = serviceRegistry.getAuthenticationService();
-		// authentication
-		String adminUser = ApplicationInfoList.getHomeRepository().getUsername();
-		String adminPassword = ApplicationInfoList.getHomeRepository().getPassword();
-
-		try {
-
-			authenticationService.authenticate(adminUser, adminPassword.toCharArray());
-			
-			
-			if(!serviceRegistry.getNodeService().exists(nodeRef)){
-				resp.sendRedirect(URLTool.getNgMessageUrl("share_file_deleted"));
-				//op.println("File does not longer exist!");
-				return;
-			}
-
-			ShareService shareService = new ShareServiceImpl();
-			Share share = shareService.getShare(nodeId, token);
-			if (share == null) {
-				resp.sendRedirect(URLTool.getNgMessageUrl("invalid_share"));
-				//op.println("no share found for this nodeid and token!");
-				return;
-			}
-
-			if (share.getExpiryDate() != ShareService.EXPIRY_DATE_UNLIMITED) {
-				if (new Date(System.currentTimeMillis()).after(new Date(share.getExpiryDate()))) {
-					resp.sendRedirect(URLTool.getNgMessageUrl("share_expired"));
-					//op.println("share is expired!");
-					return;
+				if (!serviceRegistry.getNodeService().exists(nodeRef)) {
+					resp.sendRedirect(URLTool.getNgMessageUrl("share_file_deleted"));
+					//op.println("File does not longer exist!");
+					return null;
 				}
-			}
-			if (share.getPassword()!=null && (!share.getPassword().equals(ShareServiceImpl.encryptPassword(password)))) {
-				resp.sendRedirect(URLTool.getNgComponentsUrl()+"sharing?"+req.getQueryString());
-			}
-			String wwwUrl = (String)serviceRegistry.getNodeService().getProperty(nodeRef,QName.createQName(CCConstants.CCM_PROP_IO_WWWURL));
-			if(wwwUrl != null && !wwwUrl.trim().equals("")){
-				resp.sendRedirect(wwwUrl);
-				return;
-			}
-			// download child object (io) from a map
-			if(childIds!=null && serviceRegistry.getNodeService().getType(nodeRef).equals(QName.createQName(CCConstants.CCM_TYPE_MAP))){
-				if(!shareService.isNodeAccessibleViaShare(nodeRef,childIds[0])){
+
+				ShareService shareService = new ShareServiceImpl();
+				Share share = shareService.getShare(nodeId, token);
+				if (share == null) {
 					resp.sendRedirect(URLTool.getNgMessageUrl("invalid_share"));
-					return;
+					//op.println("no share found for this nodeid and token!");
+					return null;
 				}
-				nodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, childIds[0]);
+
+				if (share.getExpiryDate() != ShareService.EXPIRY_DATE_UNLIMITED) {
+					if (new Date(System.currentTimeMillis()).after(new Date(share.getExpiryDate()))) {
+						resp.sendRedirect(URLTool.getNgMessageUrl("share_expired"));
+						//op.println("share is expired!");
+						return null;
+					}
+				}
+				if (share.getPassword() != null && (!share.getPassword().equals(ShareServiceImpl.encryptPassword(password)))) {
+					resp.sendRedirect(URLTool.getNgComponentsUrl() + "sharing?" + req.getQueryString());
+				}
+				String wwwUrl = (String) serviceRegistry.getNodeService().getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_WWWURL));
+				if (wwwUrl != null && !wwwUrl.trim().equals("")) {
+					resp.sendRedirect(wwwUrl);
+					return null;
+				}
+				NodeRef mappedNodeRef = nodeRef;
+				// download child object (io) from a map
+				if (childIds != null && serviceRegistry.getNodeService().getType(nodeRef).equals(QName.createQName(CCConstants.CCM_TYPE_MAP))) {
+					if (!shareService.isNodeAccessibleViaShare(nodeRef, childIds[0])) {
+						resp.sendRedirect(URLTool.getNgMessageUrl("invalid_share"));
+						return null;
+					}
+					mappedNodeRef = new NodeRef(MCAlfrescoAPIClient.storeRef, childIds[0]);
+				}
+				String nodeName = (String) serviceRegistry.getNodeService().getProperty(mappedNodeRef, QName.createQName(CCConstants.CM_NAME));
+
+				ContentReader reader = serviceRegistry.getContentService().getReader(mappedNodeRef,
+						ContentModel.PROP_CONTENT);
+				if (reader == null) {
+					resp.sendRedirect(URLTool.getNgMessageUrl("share_empty"));
+					//op.println("The file is empty!");
+					return null;
+				}
+				String mimetype = reader.getMimetype();
+
+				resp.setContentType((mimetype != null) ? mimetype : "application/octet-stream");
+				resp.setContentLength((int) reader.getContentData().getSize());
+				resp.setHeader("Content-Disposition", "attachment; filename=\"" + nodeName + "\"");
+
+				int length = 0;
+				//
+				// Stream to the requester.
+				//
+				byte[] bbuf = new byte[1024];
+				// DataInputStream in = new
+				// DataInputStream(url.openStream());
+				DataInputStream in = new DataInputStream(reader.getContentInputStream());
+				while ((in != null) && ((length = in.read(bbuf)) != -1)) {
+					op.write(bbuf, 0, length);
+				}
+
+				in.close();
+				op.flush();
+				op.close();
+
+				share.setDownloadCount((share.getDownloadCount() + 1));
+				shareService.updateDownloadCount(share);
+
+			} catch (Throwable e) {
+				logger.error(e.getMessage(), e);
 			}
-			String nodeName = (String)serviceRegistry.getNodeService().getProperty(nodeRef,QName.createQName(CCConstants.CM_NAME));
-
-			ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef,
-					ContentModel.PROP_CONTENT);
-			if(reader==null){
-				resp.sendRedirect(URLTool.getNgMessageUrl("share_empty"));
-				//op.println("The file is empty!");
-				return;
-			}
-			String mimetype = reader.getMimetype();
-
-			resp.setContentType((mimetype != null) ? mimetype : "application/octet-stream");
-			resp.setContentLength((int) reader.getContentData().getSize());
-			resp.setHeader("Content-Disposition", "attachment; filename=\""+nodeName+ "\"");
-
-			int length = 0;
-			//
-			// Stream to the requester.
-			//
-			byte[] bbuf = new byte[1024];
-			// DataInputStream in = new
-			// DataInputStream(url.openStream());
-			DataInputStream in = new DataInputStream(reader.getContentInputStream());
-			while ((in != null) && ((length = in.read(bbuf)) != -1)) {
-				op.write(bbuf, 0, length);
-			}
-
-			in.close();
-			op.flush();
-			op.close();
-			
-			share.setDownloadCount( (share.getDownloadCount() + 1) );
-			shareService.updateDownloadCount(share);
-
-		} catch (Throwable e) {
-			logger.error(e.getMessage(), e);
-		} finally {
-			authenticationService.invalidateTicket(authenticationService.getCurrentTicket());
-			authenticationService.clearCurrentSecurityContext();
-		}
-
+			return null;
+		});
 		return;
 
 	}

@@ -48,7 +48,8 @@ import { MdsEditorCommonService } from '../../mds-editor/mds-editor-common.servi
 import { DateHelper } from '../../../../core-ui-module/DateHelper';
 import { MdsService, MdsValue, ConfigService } from 'ngx-edu-sharing-api';
 import { first } from 'rxjs/operators';
-import { DialogsService } from '../../../../modules/management-dialogs/dialogs.service';
+import { DialogsService as LegacyDialogsService } from '../../../../modules/management-dialogs/dialogs.service';
+import { DialogsService } from '../../../dialogs/dialogs.service';
 declare var noUiSlider: any;
 
 @Component({
@@ -295,6 +296,7 @@ export class MdsComponent {
         private mdsEditorCommon: MdsEditorCommonService,
         private nodeHelper: NodeHelperService,
         private _ngZone: NgZone,
+        private legacyDialogsService: LegacyDialogsService,
         private dialogs: DialogsService,
     ) {
         (window as any)['mdsComponentRef_' + this.mdsId] = { component: this, zone: _ngZone };
@@ -1794,7 +1796,7 @@ export class MdsComponent {
                 widget.type == 'singlevalueTree',
             ) +
             `     <div class="dialog darken mds-tree-dialog" style="display:none;z-index:` +
-            (122 + this.priority) +
+            (132 + this.priority) +
             `;" id="` +
             domId +
             `_tree">
@@ -2436,10 +2438,10 @@ export class MdsComponent {
             properties: this.getChildobjectProperties(this.childobjects[pos], pos),
         };
     }
-    private setEditChildobjectLicense(pos: number) {
+    private async setEditChildobjectLicense(pos: number) {
         const child = this.childobjects[pos];
         const properties = this.getChildobjectProperties(this.childobjects[pos], pos);
-        const dialogRef = this.dialogs.openLicenseDialog({ properties });
+        const dialogRef = await this.dialogs.openLicenseDialog({ kind: 'properties', properties });
         dialogRef.afterClosed().subscribe((newProperties) => {
             if (newProperties) {
                 this.setChildobjectProperties(newProperties, { child, properties });
@@ -2527,7 +2529,7 @@ export class MdsComponent {
     }
 
     openUploadSelectDialog(): void {
-        const dialogRef = this.dialogs.openUploadSelectDialog({ showLti: false });
+        const dialogRef = this.legacyDialogsService.openUploadSelectDialog({ showLti: false });
         dialogRef.afterClosed().subscribe((result) => {
             if (result) {
                 switch (result.kind) {
@@ -2898,7 +2900,7 @@ export class MdsComponent {
                 },
             );
         } else if (preview) {
-            this.node.uploadNodePreview(this.currentNodes[0].ref.id, preview).subscribe(
+            this.node.uploadNodePreview(this.currentNodes[0].ref.id, preview, false).subscribe(
                 () => {
                     this.onAddChildobject(callback);
                 },

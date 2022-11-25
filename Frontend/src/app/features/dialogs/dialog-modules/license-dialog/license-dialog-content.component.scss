@@ -1,0 +1,177 @@
+@import '../../../../core-ui-module/styles/variables';
+
+:host {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+:host ::ng-deep {
+    .mat-tab-labels {
+        background-color: #fff;
+    }
+    .mat-checkbox-layout {
+        white-space: normal !important;
+        align-items: baseline !important;
+    }
+}
+
+es-mds-editor-widget-author {
+    flex-grow: 1;
+}
+
+.cc label {
+    width: 100%;
+}
+
+.cc h5 {
+    padding-bottom: 5px;
+}
+
+.cc {
+    mat-radio-group {
+        display: flex;
+        flex-direction: column;
+        mat-radio-button {
+            margin: 3px 0;
+        }
+    }
+}
+
+.cc .ccAbout {
+    text-transform: uppercase;
+    text-align: center;
+    font-weight: bold;
+}
+
+.licenseType {
+    width: 100%;
+    margin: 10px 0;
+}
+
+.custom {
+    > mat-form-field {
+        width: 100%;
+    }
+}
+
+h4 {
+    font-weight: bold;
+    font-size: 100%;
+    margin: 1.6rem 0 1rem 0;
+    color: $textLight;
+    font-weight: bold;
+}
+
+h5 {
+    font-weight: normal;
+    font-size: 90%;
+    color: $textLight;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.currentLicense {
+    text-align: center;
+    background-color: $backgroundColor;
+    padding: 10px 30px;
+    margin: 0 -20px;
+    h4 {
+        margin: 10px 0 20px 0;
+    }
+    width: calc(100% + 40px);
+}
+
+.licenseName {
+    display: table;
+    margin: auto;
+    padding: 10px 0;
+    h4,
+    div {
+        display: table-cell;
+    }
+}
+
+.oerStatus {
+    padding-left: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 80%;
+    color: $textOnPrimary;
+    .oer {
+        background: #0b0;
+    }
+    .notOer {
+        background: #f5a623;
+    }
+    .oer,
+    .notOer {
+        padding: 4px 12px;
+        border-radius: 8px;
+    }
+}
+
+.oerLicenses {
+    width: 100%;
+    .ccAuthor {
+        margin: 5px 20px;
+    }
+}
+
+mat-radio-button {
+    margin-bottom: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.more-information-link {
+    margin-left: 48px;
+    margin-top: -10px;
+    margin-bottom: 20px;
+}
+
+fieldset {
+    border: none;
+    margin: 0;
+    padding: 0;
+    legend {
+        font-weight: bold;
+        margin-bottom: 1em;
+        color: $textLight;
+    }
+}
+
+.oerSelect {
+    float: right;
+}
+
+.currentLicenseIcon {
+    height: 40px;
+    width: auto;
+}
+
+.currentLicenseDescription {
+    color: $textLight;
+}
+
+.currentLicenseDescription div {
+    margin: 0 10px;
+}
+
+.customLicenseDescription {
+    white-space: pre-line;
+}
+
+.license-additional-data {
+    display: flex;
+    justify-content: center;
+    padding-top: 10px;
+    > div {
+        margin: 0 10px;
+    }
+}
+
+.licenseUrl {
+    margin: 10px !important;
+    text-transform: uppercase;
+}

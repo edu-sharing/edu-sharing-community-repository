@@ -5,7 +5,7 @@ import {
     FrameEventsService,
 } from '../../../core-module/rest/services/frame-events.service';
 import { TranslationsService } from '../../../translations/translations.service';
-import { WorkspaceLicenseComponent } from '../../../modules/management-dialogs/license/license.component';
+import { LicenseDialogContentComponent } from '../../../features/dialogs/dialog-modules/license-dialog/license-dialog-content.component';
 import { Toast } from '../../../core-ui-module/toast';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
@@ -26,18 +26,17 @@ import { Subject } from 'rxjs';
             [groupId]="groupId"
             *ngIf="component === 'mds'"
         ></es-mds-editor-wrapper>
-        <es-workspace-license
-            #licenseRef
-            [properties]="data"
-            [embedded]="true"
+        <es-license-dialog-content
             *ngIf="component === 'license'"
-        ></es-workspace-license>
+            #licenseRef
+            [data]="{ kind: 'properties', properties: data }"
+        ></es-license-dialog-content>
     `,
     styleUrls: ['embed.component.scss'],
 })
 export class EmbedComponent implements EventListener, OnDestroy {
     @ViewChild('mdsRef') mdsRef: MdsEditorWrapperComponent;
-    @ViewChild('licenseRef') licenseRef: WorkspaceLicenseComponent;
+    @ViewChild('licenseRef') licenseRef: LicenseDialogContentComponent;
     component: string;
     data: any = {};
     groupId = 'io';
@@ -57,6 +56,7 @@ export class EmbedComponent implements EventListener, OnDestroy {
         this.mainNavService.getCookieInfo().show = false;
         this.mainNavService.patchMainNavConfig({
             currentScope: 'embed',
+            show: false,
         });
         this.event.addListener(this, this.destroyed);
         this.toast.showProgressDialog();

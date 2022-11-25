@@ -1,4 +1,4 @@
-import { first, filter } from 'rxjs/operators';
+import { filter, tap } from 'rxjs/operators';
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Node } from '../../../../../core-module/rest/data-object';
@@ -11,6 +11,7 @@ import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.com
 import { Values } from '../../../types/types';
 import { MatTabGroup } from '@angular/material/tabs';
 import { MainNavService } from '../../../../../main/navigation/main-nav.service';
+import { DialogsService } from '../../../../dialogs/dialogs.service';
 
 export interface AuthorData {
     freetext: string;
@@ -44,6 +45,7 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
         private iamApi: RestIamService,
         private mainNavService: MainNavService,
         public ui: UIService,
+        private dialogs: DialogsService,
     ) {}
 
     ngOnInit(): void {
@@ -63,26 +65,25 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
 
     static async openContributorDialog(
         mdsEditorInstanceService: MdsEditorInstanceService,
-        mainNavService: MainNavService,
-    ) {
-        return new Promise<Node>(async (resolve) => {
-            // update props before switching to contributor to keep local changes
-            const nodes = mdsEditorInstanceService.nodes$.value;
-            const values = await mdsEditorInstanceService.getValues(nodes[0], false);
-            const node = nodes[0];
-            Object.keys(values).forEach((key) => (node.properties[key] = values[key]));
-            // this._nodes[0].properties = await this.getValues(this._nodes[0].properties, this._nodes[0]);
-            mainNavService.getDialogs().nodeContributor = node;
-            mainNavService
-                .getDialogs()
-                .nodeContributorChange.pipe(first())
-                .subscribe((n) => {
-                    if (n) {
-                        mdsEditorInstanceService.updateNodes([n]);
-                        resolve(n);
+        dialogs: DialogsService,
+    ): Promise<Node | null> {
+        // update props before switching to contributor to keep local changes
+        const nodes = mdsEditorInstanceService.nodes$.value;
+        const values = await mdsEditorInstanceService.getValues(nodes[0], false);
+        const node = nodes[0];
+        Object.keys(values).forEach((key) => (node.properties[key] = values[key]));
+        // this._nodes[0].properties = await this.getValues(this._nodes[0].properties, this._nodes[0]);
+        const dialogRef = await dialogs.openContributorsDialog({ node });
+        return dialogRef
+            .afterClosed()
+            .pipe(
+                tap((result) => {
+                    if (result) {
+                        mdsEditorInstanceService.updateNodes([result]);
                     }
-                });
-        });
+                }),
+            )
+            .toPromise();
     }
 
     async setVCardAuthor(author: boolean) {
@@ -160,8 +161,10 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
     async openContributorDialog() {
         const updatedNode = await MdsEditorWidgetAuthorComponent.openContributorDialog(
             this.mdsEditorValues,
-            this.mainNavService,
+            this.dialogs,
         );
-        this.updateValues([updatedNode]);
+        if (updatedNode) {
+            await this.updateValues([updatedNode]);
+        }
     }
 }

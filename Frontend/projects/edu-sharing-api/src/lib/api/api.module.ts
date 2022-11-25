@@ -13,6 +13,7 @@ import { CollectionV1Service } from './services/collection-v-1.service';
 import { CommentV1Service } from './services/comment-v-1.service';
 import { ConfigV1Service } from './services/config-v-1.service';
 import { ConnectorV1Service } from './services/connector-v-1.service';
+import { FeedbackV1Service } from './services/feedback-v-1.service';
 import { IamV1Service } from './services/iam-v-1.service';
 import { KnowledgeV1Service } from './services/knowledge-v-1.service';
 import { AuthenticationV1Service } from './services/authentication-v-1.service';
@@ -51,6 +52,7 @@ import { UsageV1Service } from './services/usage-v-1.service';
         CommentV1Service,
         ConfigV1Service,
         ConnectorV1Service,
+        FeedbackV1Service,
         IamV1Service,
         KnowledgeV1Service,
         AuthenticationV1Service,

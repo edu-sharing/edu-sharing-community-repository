@@ -91,7 +91,7 @@ describe('TranslationsService', () => {
             );
             expect(configurationServiceSpy.calls.mostRecent().args).toEqual([
                 'supportedLanguages',
-                ['de', 'en', 'none'], // Translation.DEFAULT_SUPPORTED_LANGUAGES
+                ['de', 'de-informal', 'en', 'none'], // Translation.DEFAULT_SUPPORTED_LANGUAGES
             ]);
         });
 

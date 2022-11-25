@@ -1014,7 +1014,7 @@ public class SearchServiceImpl implements SearchService {
 					criteriasMap.put(criteria.getProperty(),criteria.getValues().toArray(new String[0]));
 				}
 				MetadataQueries queries = mds.getQueries(MetadataReader.QUERY_SYNTAX_LUCENE);
-				MetadataQuery queryObj = queries.findQuery(queryId);
+				MetadataQuery queryObj = queries.findQuery(queryId).copy();
 				queryObj.setApplyBasequery(false);
 				queryObj.setBasequery(null);
 

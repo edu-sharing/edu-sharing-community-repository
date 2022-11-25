@@ -40,13 +40,14 @@ import { ClipboardObject, TemporaryStorageService } from '../../core-module/core
 import { RestUsageService } from '../../core-module/core.module';
 import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { LinkData, NodeHelperService } from '../../core-ui-module/node-helper.service';
-import { WorkspaceLicenseComponent } from './license/license.component';
 import { ErrorProcessingService } from '../../core-ui-module/error.processing';
 import { BulkBehavior } from '../../features/mds/types/types';
 import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { MainNavService } from 'src/app/main/navigation/main-nav.service';
 import { first } from 'rxjs/operators';
 import { SimpleEditCloseEvent } from './simple-edit-dialog/simple-edit-dialog.component';
+import { FeedbackV1Service } from 'ngx-edu-sharing-api';
+import { DialogsService } from '../../features/dialogs/dialogs.service';
 
 export enum DialogType {
     SimpleEdit = 'SimpleEdit',
@@ -72,7 +73,6 @@ export interface ManagementEvent {
 export class WorkspaceManagementDialogsComponent {
     readonly BulkBehaviour = BulkBehavior;
     @ViewChild(MdsEditorWrapperComponent) mdsEditorWrapperRef: MdsEditorWrapperComponent;
-    @ViewChild(WorkspaceLicenseComponent) licenseComponent: WorkspaceLicenseComponent;
     @ContentChild('collectionChooserBeforeRecent')
     collectionChooserBeforeRecentRef: TemplateRef<any>;
     @Input() showLtiTools = false;
@@ -85,8 +85,6 @@ export class WorkspaceManagementDialogsComponent {
     @Output() filesToUploadChange = new EventEmitter();
     @Input() parent: Node;
     @Output() showLtiToolsChange = new EventEmitter();
-    @Input() nodeLicense: Node[];
-    @Output() nodeLicenseChange = new EventEmitter();
     @Input() addPinnedCollection: Node;
     @Output() addPinnedCollectionChange = new EventEmitter();
     @Output() onEvent = new EventEmitter<ManagementEvent>();
@@ -174,17 +172,15 @@ export class WorkspaceManagementDialogsComponent {
     @Output() nodeMetadataChange = new EventEmitter<Node[]>();
     @Input() nodeTemplate: Node;
     @Output() nodeTemplateChange = new EventEmitter();
-    @Input() nodeContributor: Node;
-    @Output() nodeContributorChange = new EventEmitter<Node>();
     @Input() set nodeSimpleEdit(nodeSimpleEdit: Node[]) {
         this._nodeSimpleEdit = nodeSimpleEdit;
         this._nodeFromUpload = false;
     }
     @Input() nodeSimpleEditChange = new EventEmitter<Node[]>();
-    @Input() collectionWriteFeedback: Node;
-    @Output() collectionWriteFeedbackChange = new EventEmitter<Node>();
-    @Input() collectionViewFeedback: Node;
-    @Output() collectionViewFeedbackChange = new EventEmitter<Node>();
+    @Input() materialWriteFeedback: Node;
+    @Output() materialWriteFeedbackChange = new EventEmitter<Node>();
+    @Input() materialViewFeedback: Node;
+    @Output() materialViewFeedbackChange = new EventEmitter<Node>();
     @Input() nodeSidebar: Node;
     @Output() nodeSidebarChange = new EventEmitter<Node>();
     @Input() showUploadSelect = false;
@@ -207,7 +203,6 @@ export class WorkspaceManagementDialogsComponent {
     @Output() onUploadFilesProcessed = new EventEmitter<Node[]>();
     @Output() onCloseMetadata = new EventEmitter();
     @Output() onUploadFileSelected = new EventEmitter<FileList>();
-    @Output() onUpdateLicense = new EventEmitter();
     @Output() onCloseAddToCollection = new EventEmitter();
     @Output() onStoredAddToCollection = new EventEmitter<{
         collection: Node;
@@ -280,12 +275,6 @@ export class WorkspaceManagementDialogsComponent {
                 event.stopPropagation();
                 return;
             }
-            if (this.nodeLicense != null) {
-                this.closeLicense();
-                event.preventDefault();
-                event.stopPropagation();
-                return;
-            }
             if (this.showLtiTools) {
                 this.closeLtiTools();
                 event.preventDefault();
@@ -306,6 +295,7 @@ export class WorkspaceManagementDialogsComponent {
         private toolService: RestToolService,
         private temporaryStorage: TemporaryStorageService,
         private collectionService: RestCollectionService,
+        private feedbackService: FeedbackV1Service,
         private translate: TranslateService,
         private config: ConfigurationService,
         private connector: RestConnectorService,
@@ -316,6 +306,7 @@ export class WorkspaceManagementDialogsComponent {
         private nodeHelper: NodeHelperService,
         private bridge: BridgeService,
         private router: Router,
+        private dialogs: DialogsService,
     ) {}
     closeLtiToolConfig() {
         this.ltiToolConfig = null;
@@ -426,7 +417,7 @@ export class WorkspaceManagementDialogsComponent {
     }
     public uploadDone(event: Node[]) {
         if (this.config.instant('licenseDialogOnUpload', false)) {
-            this.nodeLicense = event;
+            void this.openLicenseDialog(event);
             this.nodeLicenseOnUpload = true;
         } else {
             this.showMetadataAfterUpload(event);
@@ -469,42 +460,42 @@ export class WorkspaceManagementDialogsComponent {
         this.closeUploadSelect();
         this.onUploadSelectCanceled.emit(false);
     }
-    public closeContributor(node: Node) {
-        if (this.editorPending) {
-            this.editorPending = false;
-            this._nodeMetadata = [this.nodeContributor];
-        }
-        this.nodeContributor = null;
-        this.nodeContributorChange.emit(node);
-        if (node) {
-            this.onRefresh.emit([node]);
-        }
+    async openContributorsDialog(node: Node) {
+        const dialogRef = await this.dialogs.openContributorsDialog({ node });
+        dialogRef.afterClosed().subscribe((updatedNode) => {
+            if (this.editorPending) {
+                this.editorPending = false;
+                this._nodeMetadata = [node];
+            }
+            if (updatedNode) {
+                this.onRefresh.emit([updatedNode]);
+            }
+        });
     }
     closeLtiTools() {
         this.showLtiTools = false;
         this.showLtiToolsChange.emit(false);
     }
-    closeLicense() {
-        if (this.nodeLicenseOnUpload) {
-            this.showMetadataAfterUpload(this.nodeLicense);
-        } else if (this.editorPending) {
-            this.editorPending = false;
-            this._nodeMetadata = this.nodeLicense;
-        } else if (this.reopenSimpleEdit) {
-            this.reopenSimpleEdit = false;
-            this._nodeSimpleEdit = this.nodeLicense;
-        } else if (this._nodeFromUpload) {
-            this.onUploadFilesProcessed.emit(this.nodeLicense);
-            this._nodeFromUpload = false;
-        }
-        this.nodeLicense = null;
-        this.nodeLicenseOnUpload = false;
-        this.nodeLicenseChange.emit(null);
-    }
-    updateLicense(nodes: Node[]) {
-        this.closeLicense();
-        this.onUpdateLicense.emit();
-        this.onRefresh.emit(nodes);
+    async openLicenseDialog(nodes: Node[]): Promise<void> {
+        const dialogRef = await this.dialogs.openLicenseDialog({ kind: 'nodes', nodes });
+        dialogRef.afterClosed().subscribe((updatedNodes) => {
+            if (this.nodeLicenseOnUpload) {
+                this.showMetadataAfterUpload(nodes);
+            } else if (this.editorPending) {
+                this.editorPending = false;
+                this._nodeMetadata = nodes;
+            } else if (this.reopenSimpleEdit) {
+                this.reopenSimpleEdit = false;
+                this._nodeSimpleEdit = nodes;
+            } else if (this._nodeFromUpload) {
+                this.onUploadFilesProcessed.emit(nodes);
+                this._nodeFromUpload = false;
+            }
+            this.nodeLicenseOnUpload = false;
+            if (updatedNodes) {
+                this.onRefresh.emit(updatedNodes);
+            }
+        });
     }
     deleteNodes(nodes: Node[]) {
         this.toast.showProgressDialog();
@@ -704,27 +695,33 @@ export class WorkspaceManagementDialogsComponent {
     }
 
     closeCollectionWriteFeedback() {
-        this.collectionWriteFeedback = null;
-        this.collectionWriteFeedbackChange.emit(null);
+        this.materialWriteFeedback = null;
+        this.materialWriteFeedbackChange.emit(null);
     }
 
-    addCollectionFeedback(feedback: any) {
+    addMaterialFeedback(feedback: { [key in string]: string[] }) {
         if (!feedback) {
             return;
         }
         delete feedback[RestConstants.CM_NAME];
         this.toast.showProgressDialog();
-        this.collectionService.addFeedback(this.collectionWriteFeedback.ref.id, feedback).subscribe(
-            () => {
-                this.toast.closeModalDialog();
-                this.closeCollectionWriteFeedback();
-                this.toast.toast('COLLECTIONS.FEEDBACK_TOAST');
-            },
-            (error) => {
-                this.toast.closeModalDialog();
-                this.toast.error(error);
-            },
-        );
+        this.feedbackService
+            .addFeedback({
+                repository: RestConstants.HOME_REPOSITORY,
+                node: this.materialWriteFeedback.ref.id,
+                body: feedback,
+            })
+            .subscribe(
+                () => {
+                    this.toast.closeModalDialog();
+                    this.closeCollectionWriteFeedback();
+                    this.toast.toast('FEEDBACK.TOAST');
+                },
+                (error) => {
+                    this.toast.closeModalDialog();
+                    this.toast.error(error);
+                },
+            );
     }
     restoreVersion(restore: { version: Version; node: Node }) {
         this.toast.showConfigurableDialog({
@@ -768,9 +765,9 @@ export class WorkspaceManagementDialogsComponent {
             );
     }
 
-    closeCollectionViewFeedback() {
-        this.collectionViewFeedback = null;
-        this.collectionViewFeedbackChange.emit(null);
+    closeMaterialViewFeedback() {
+        this.materialViewFeedback = null;
+        this.materialViewFeedbackChange.emit(null);
     }
 
     closeSidebar() {

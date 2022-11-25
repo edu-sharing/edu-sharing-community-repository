@@ -9,6 +9,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.edu_sharing.alfresco.policy.GuestCagePolicy;
+import org.edu_sharing.service.AspectConstants;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.permission.annotation.NodePermission;
@@ -16,6 +17,7 @@ import org.edu_sharing.service.permission.annotation.Permission;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
@@ -24,6 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Aspect
+@Order(AspectConstants.ORDER.PermissionChecking)
 @Component
 public class PermissionChecking {
 

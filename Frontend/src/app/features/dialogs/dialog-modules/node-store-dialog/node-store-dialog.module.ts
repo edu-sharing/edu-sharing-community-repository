@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
 import { SharedModule } from '../../../../shared/shared.module';
 import { NodeEntriesModule } from '../../../node-entries/node-entries.module';
-import { SearchNodeStoreComponent } from './node-store.component';
+import { SearchNodeStoreDialogComponent } from './node-store-dialog.component';
 
-export { SearchNodeStoreComponent };
+export { SearchNodeStoreDialogComponent as SearchNodeStoreComponent };
 
 @NgModule({
-    declarations: [SearchNodeStoreComponent],
+    declarations: [SearchNodeStoreDialogComponent],
     imports: [SharedModule, NodeEntriesModule],
 })
 export class NodeStoreDialogModule {}

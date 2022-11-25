@@ -2,6 +2,8 @@ package org.edu_sharing.metadataset.v2.valuespace_reader;
 
 import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataKey;
+import org.edu_sharing.metadataset.v2.ValuespaceData;
+import org.edu_sharing.metadataset.v2.ValuespaceInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,25 +13,23 @@ import java.util.stream.Collectors;
 
 public abstract class ValuespaceReader {
     static Logger logger = Logger.getLogger(ValuespaceReader.class);
-    protected final String valuespaceUrl;
-
-    public ValuespaceReader(String valuespaceUrl) {
-        this.valuespaceUrl = valuespaceUrl;
+    protected final ValuespaceInfo info;
+    public ValuespaceReader(ValuespaceInfo valuespaceInfo) {
+        this.info = valuespaceInfo;
     }
-
-    public static ValuespaceReader getSupportedReader(String valuespaceUrl){
+    public static ValuespaceReader getSupportedReader(ValuespaceInfo valuespace){
         List<ValuespaceReader> readers = new ArrayList<>();
 
-        readers.add(new OpenSALTReader(valuespaceUrl));
-        readers.add(new CurriculumReader(valuespaceUrl));
-        readers.add(new SKOSReader(valuespaceUrl));
+        readers.add(new OpenSALTReader(valuespace));
+        readers.add(new CurriculumReader(valuespace));
+        readers.add(new SKOSReader(valuespace));
 
         readers = readers.stream().filter(ValuespaceReader::supportsUrl).collect(Collectors.toList());
 
         if(readers.size() == 0){
-            logger.warn("The given valuespace uri "+valuespaceUrl+" can not be resolved for a supported provider");
+            logger.warn("The given valuespace uri "+valuespace.getValue()+" can not be resolved for a supported provider. Consider to explicitly set a valuespace type.");
         } else if(readers.size() > 1){
-            logger.warn("The given valuespace uri "+valuespaceUrl+" matches multiple providers");
+            logger.warn("The given valuespace uri "+valuespace.getValue()+" matches multiple providers");
             for(ValuespaceReader reader : readers){
                 logger.warn(reader.getClass().getName()+" matched");
             }
@@ -42,11 +42,11 @@ public abstract class ValuespaceReader {
 
     public Matcher matches(String regex){
         Pattern pattern = Pattern.compile(regex);
-        Matcher matched = pattern.matcher(valuespaceUrl);
+        Matcher matched = pattern.matcher(info.getValue());
         return matched;
     }
 
-    public abstract List<MetadataKey> getValuespace(String locale) throws Exception;
+    public abstract ValuespaceData getValuespace(String locale) throws Exception;
 
     protected abstract boolean supportsUrl();
 }

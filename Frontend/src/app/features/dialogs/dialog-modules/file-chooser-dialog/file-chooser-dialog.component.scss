@@ -1,0 +1,84 @@
+@import '../../../../core-ui-module/styles/variables';
+
+:host ::ng-deep es-node-entries-card-grid {
+    display: block;
+    margin: 10px 20px;
+}
+
+.fileChooserOut {
+    padding: 20px;
+}
+
+.card-content {
+    background-color: $backgroundColor;
+}
+.no-permissions {
+    display: flex;
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    padding-bottom: 10px;
+}
+
+.mat-tab-group {
+    height: 100%;
+    overflow: hidden;
+}
+
+.tab-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.breadcrumbFrame,
+.searchInputFrame {
+    flex-shrink: 0;
+    padding: 11px;
+    margin: 0;
+    height: 50px;
+    z-index: 2;
+    width: 100%;
+    background-color: #fff;
+    @include materialShadowBottom();
+}
+
+.searchInputFrame {
+    padding-top: 10px;
+    padding-bottom: 0;
+    height: auto;
+    display: flex;
+    align-items: center;
+    form {
+        flex-grow: 1;
+    }
+    mat-form-field {
+        display: flex;
+        flex-grow: 1;
+        padding: 0 10px;
+        ::ng-deep {
+            .mat-form-field-wrapper {
+                width: 100%;
+            }
+        }
+    }
+}
+
+.listFrame {
+    display: flex;
+    min-height: 0;
+}
+
+.noElements {
+    text-align: center;
+    color: $textLight;
+    display: inline-block;
+    width: 100%;
+    padding-top: 20px;
+}
+
+.fileChooserList {
+    padding-top: 10px;
+    overflow-y: auto;
+    width: 100%;
+}

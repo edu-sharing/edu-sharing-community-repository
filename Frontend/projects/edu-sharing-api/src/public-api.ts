@@ -8,6 +8,7 @@ export {
 } from './lib/edu-sharing-api-configuration';
 export * from './lib/edu-sharing-api.module';
 export * from './lib/models';
+export * from './lib/wrappers/api-helpers.service';
 export * from './lib/wrappers/about.service';
 export * from './lib/wrappers/authentication.service';
 export * from './lib/wrappers/config.service';
@@ -25,4 +26,9 @@ export * from './lib/wrappers/connector.service';
 // Exporting services here indicates that these services are safe to use and don't interfere with
 // any wrappers. If you make assumptions in wrappers about what API calls have been made, make sure
 // to not expose these API calls here, but instead provide a wrapper that keeps track of calls.
-export { MdsV1Service, StreamV1Service, ClientutilsV1Service } from './lib/api/services';
+export {
+    MdsV1Service,
+    StreamV1Service,
+    ClientutilsV1Service,
+    FeedbackV1Service,
+} from './lib/api/services';

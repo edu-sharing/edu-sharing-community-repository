@@ -279,7 +279,7 @@ export class NodeHelperService {
      * @returns {string}
      */
     public getLicenseIcon(node: Node) {
-        return node.license ? node.license.icon : null;
+        return node.license ? getRepoUrl(node.license.icon, node) : null;
     }
 
     /**
@@ -855,6 +855,8 @@ export class NodeHelperService {
         if (mode === 'routerLink') {
             return '/' + data.routerLink;
         }
+        // enforce clearing of parameters which should only be consumed once
+        data.queryParams.redirectFromSSO = null;
         return data.queryParams;
     }
 

@@ -35,8 +35,8 @@
             </goals>
             <phase>prepare-package</phase>
             <configuration>
-              <outputDirectory>src/main/webapp</outputDirectory>
-              <thirdPartyFilename>THIRD-PARTY.txt</thirdPartyFilename>
+              <outputDirectory>src/main/webapp/WEB-INF/licenses</outputDirectory>
+              <thirdPartyFilename>THIRD-PARTY-${project.artifactId}.txt</thirdPartyFilename>
             </configuration>
           </execution>
         </executions>

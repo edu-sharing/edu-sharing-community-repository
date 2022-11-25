@@ -344,6 +344,16 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         });
     }
 
+    /**
+     *
+     * @param widget
+     * @param element
+     * @param editorMode
+     * @param mode
+     * replace: Replace the given element
+     * append: Append it at the given elment, but do not delete the element
+     * @private
+     */
     private injectWidget(
         widget: Widget,
         element: Element,
