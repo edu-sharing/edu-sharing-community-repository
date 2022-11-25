@@ -38,17 +38,27 @@
 
     <java.version.range>[1.8.0, 9)</java.version.range>
 
-    <node.version>v14.18.1</node.version>
+    <node.version.major>14</node.version.major>
+    <node.version.minor>18</node.version.minor>
+    <node.version.patch>1</node.version.patch>
+    <node.version>${node.version.major}.${node.version.minor}.${node.version.patch}</node.version>
 
     <npm.args.install>install</npm.args.install>
     <npm.args.build>run build-dev</npm.args.build>
-    <npm.version>7.24.2</npm.version>
 
-    <postgresql.jdbc.version>42.3.5</postgresql.jdbc.version>
+    <npm.version.major>7</npm.version.major>
+    <npm.version.minor>24</npm.version.minor>
+    <npm.version.patch>2</npm.version.patch>
+    <npm.version>${npm.version.major}.${npm.version.minor}.${npm.version.patch}</npm.version>
+
+    <postgresql.jdbc.version.major>42</postgresql.jdbc.version.major>
+    <postgresql.jdbc.version.minor>5</postgresql.jdbc.version.minor>
+    <postgresql.jdbc.version.patch>0</postgresql.jdbc.version.patch>
+    <postgresql.jdbc.version>${postgresql.jdbc.version.major}.${postgresql.jdbc.version.minor}.${postgresql.jdbc.version.patch}</postgresql.jdbc.version>
 
     <tomcat.version.major>8</tomcat.version.major>
     <tomcat.version.minor>5</tomcat.version.minor>
-    <tomcat.version.patch>78</tomcat.version.patch>
+    <tomcat.version.patch>84</tomcat.version.patch>
     <tomcat.version>${tomcat.version.major}.${tomcat.version.minor}.${tomcat.version.patch}
     </tomcat.version>
 

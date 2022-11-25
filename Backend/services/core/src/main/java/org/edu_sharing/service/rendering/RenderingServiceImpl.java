@@ -131,7 +131,9 @@ public class RenderingServiceImpl implements RenderingService{
 	@Override
 	public String getDetails(String renderingServiceUrl, RenderingServiceData data) throws JsonProcessingException, UnsupportedEncodingException {
 		HttpPost post = new HttpPost(renderingServiceUrl);
-		Context.getCurrentInstance().getB3().addToRequest(post);
+		if (Context.getCurrentInstance() != null) {
+			Context.getCurrentInstance().getB3().addToRequest(post);
+		}
 		/*
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();

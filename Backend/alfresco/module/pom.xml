@@ -71,6 +71,28 @@
               <destinationFile>${project.build.directory}/fixes/org/apache/tika/parser/pdf/PDF2XHTML.class</destinationFile>
             </configuration>
           </execution>
+          <execution>
+            <id>fix5</id>
+            <goals>
+              <goal>rename</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <sourceFile>${project.build.directory}/classes/alfresco/mimetype/openoffice-document-formats.xml</sourceFile>
+              <destinationFile>${project.build.directory}/fixes/alfresco/mimetype/openoffice-document-formats.xml</destinationFile>
+            </configuration>
+          </execution>
+          <execution>
+            <id>fix6</id>
+            <goals>
+              <goal>rename</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <sourceFile>${project.build.directory}/classes/net/sf/jooreports/converter/DocumentFamily.class</sourceFile>
+              <destinationFile>${project.build.directory}/fixes/net/sf/jooreports/converter/DocumentFamily.class</destinationFile>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
 

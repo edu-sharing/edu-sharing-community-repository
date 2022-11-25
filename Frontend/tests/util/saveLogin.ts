@@ -24,6 +24,7 @@ export async function saveLogin(
     ]);
     // Disable tutorials
     await page.evaluate(() => {
+        window.localStorage.setItem('TUTORIAL.USER_TUTORIAL_HEADING', 'true');
         window.localStorage.setItem('TUTORIAL.SEARCH.TUTORIAL_HEADING', 'true');
     });
     // Save session to file

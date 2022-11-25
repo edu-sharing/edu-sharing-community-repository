@@ -1,11 +1,7 @@
 package org.edu_sharing.service.authority;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.transaction.UserTransaction;
@@ -687,6 +683,16 @@ public EduGroup getEduGroup(String authority){
 		return result;
 	}
 
+	@Override
+	public String getSubgroupByType(String parentGroup, String groupType){
+		return serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(() -> {
+			Optional<String> first = authorityService.getContainedAuthorities(AuthorityType.GROUP, parentGroup, true).stream().filter(
+					(g) -> groupType.equals(nodeService.getProperty(getAuthorityNodeRef(g), QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE))
+					)
+			).findFirst();
+			return first.orElse(null);
+		});
+	}
 	public void createProxyUser(){
 		PersonService personService = serviceRegistry.getPersonService();
 

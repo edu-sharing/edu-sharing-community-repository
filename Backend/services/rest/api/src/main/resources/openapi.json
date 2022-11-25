@@ -3926,6 +3926,9 @@
       },
       "RepositoryVersionInfo": {
         "properties": {
+          "git": {
+            "$ref": "#/components/schemas/VersionGit"
+          },
           "maven": {
             "$ref": "#/components/schemas/VersionMaven"
           },
@@ -5607,6 +5610,28 @@
         },
         "type": "object"
       },
+      "VersionGit": {
+        "properties": {
+          "branch": {
+            "type": "string"
+          },
+          "commit": {
+            "$ref": "#/components/schemas/VersionGitCommit"
+          }
+        },
+        "type": "object"
+      },
+      "VersionGitCommit": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "timestamp": {
+            "$ref": "#/components/schemas/VersionTimestamp"
+          }
+        },
+        "type": "object"
+      },
       "VersionMaven": {
         "properties": {
           "bom": {
@@ -5630,6 +5655,14 @@
             "type": "string"
           },
           "version": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VersionTimestamp": {
+        "properties": {
+          "datetime": {
             "type": "string"
           }
         },
@@ -16074,7 +16107,7 @@
             }
           },
           {
-            "description": "authorityType either GROUP or USER, empty to show all",
+            "description": "group type to filter for, e.g. ORG_ADMINISTRATORS",
             "in": "path",
             "name": "type",
             "required": true,

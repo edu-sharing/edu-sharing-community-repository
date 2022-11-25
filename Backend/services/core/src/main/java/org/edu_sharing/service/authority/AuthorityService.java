@@ -98,4 +98,10 @@ public interface AuthorityService {
 	 * @throws Exception
 	 */
 	Map<String, Serializable> getProfileSettingsProperties(String userName,String profileSettingsProperty) throws Exception;
+
+	/**
+	 * finds any matching subgroup of the given group type
+	 * Node: there is no sorting so you need to make sure that exactly only ONE group of this type exists
+	 */
+	String getSubgroupByType(String parentGroup, String groupType);
 }

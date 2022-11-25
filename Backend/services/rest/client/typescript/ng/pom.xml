@@ -39,7 +39,7 @@
         <groupId>com.github.eirslett</groupId>
         <artifactId>frontend-maven-plugin</artifactId>
         <configuration>
-          <nodeVersion>${node.version}</nodeVersion>
+          <nodeVersion>v${node.version}</nodeVersion>
           <npmVersion>${npm.version}</npmVersion>
         </configuration>
         <executions>
@@ -81,7 +81,7 @@
             <goals>
               <goal>single</goal>
             </goals>
-            <phase>package</phase>
+            <phase>compile</phase>
             <configuration>
               <descriptors>
                 <descriptor>src/main/assembly/sources.xml</descriptor>
