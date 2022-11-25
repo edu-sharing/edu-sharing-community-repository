@@ -46,6 +46,8 @@ import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.search.*;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -1040,6 +1042,9 @@ public class SearchServiceElastic extends SearchServiceImpl {
     }
     public SearchResponse searchNative(SearchRequest searchRequest) throws IOException {
         return getClient().search(searchRequest, getRequestOptions());
+    }
+    public UpdateResponse updateNative(UpdateRequest updateRequest) throws IOException {
+        return getClient().update(updateRequest, getRequestOptions());
     }
     public SearchResponse scrollNative(SearchScrollRequest searchScrollRequest) throws IOException {
         return getClient().scroll(searchScrollRequest, getRequestOptions());

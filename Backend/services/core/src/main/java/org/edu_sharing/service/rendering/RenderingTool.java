@@ -12,6 +12,7 @@ import java.util.concurrent.Executors;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -156,9 +157,11 @@ public class RenderingTool {
 	}
 
 	public static void buildRenderingCache(String nodeId) {
+		final Context context = Context.getCurrentInstance();
 		prepareExecutor.execute(()->{
 			AuthenticationUtil.runAsSystem(()-> {
 				try {
+					Context.setInstance(context);
 					// Deprecated, use the Lightbend config!
 					if(!ConfigServiceFactory.getCurrentConfig().getValue("rendering.prerender",true)) {
 						return null;
@@ -172,6 +175,8 @@ public class RenderingTool {
 				} catch (Exception e) {
 					logger.warn("Error building rendering cache for node " + nodeId + ": " + e.getMessage(), e);
 					return e;
+				} finally {
+					Context.release();
 				}
 			});
 		});

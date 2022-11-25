@@ -476,6 +476,11 @@
          <mimetype mimetype="application/vnd.apple.numbers" display="Apple iWork Numbers">
             <extension>numbers</extension>
          </mimetype>
+
+         <mimetype mimetype="application/vnd.openxmlformats-officedocument.presentationml.slideshow" display="Microsoft PowerPoint 2007 slide">
+            <extension>ppsx</extension>
+         </mimetype>
+
       </mimetypes>
    </config>
    

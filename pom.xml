@@ -61,7 +61,7 @@
 
     <tomcat.version.major>8</tomcat.version.major>
     <tomcat.version.minor>5</tomcat.version.minor>
-    <tomcat.version.patch>79</tomcat.version.patch>
+    <tomcat.version.patch>84</tomcat.version.patch>
     <tomcat.version>${tomcat.version.major}.${tomcat.version.minor}.${tomcat.version.patch}
     </tomcat.version>
 

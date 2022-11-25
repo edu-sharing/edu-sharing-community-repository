@@ -42,7 +42,10 @@ type GroupTemplate = {
     selector: 'es-admin-statistics',
     templateUrl: 'statistics.component.html',
     styleUrls: ['statistics.component.scss'],
-    animations: [trigger('dialog', UIAnimation.switchDialog())],
+    animations: [
+        trigger('overlay', UIAnimation.openOverlay()),
+        trigger('dialog', UIAnimation.switchDialog()),
+    ],
 })
 export class AdminStatisticsComponent implements OnInit {
     @ViewChild('groupedChart') groupedChartRef: ElementRef;
@@ -95,6 +98,7 @@ export class AdminStatisticsComponent implements OnInit {
     showModes = false;
     groupModeTemplates: GroupTemplate[];
     currentTemplate: GroupTemplate;
+    showExport: boolean;
 
     set groupedStart(groupedStart: Date) {
         this._groupedStart = groupedStart;
@@ -508,9 +512,6 @@ export class AdminStatisticsComponent implements OnInit {
                 });
             });
     }
-    openNode(entry: any) {
-        this.onOpenNode.emit(entry.node);
-    }
     getValidMode(mode: 'NODES' | 'USERS') {
         if (!this._mediacenter) {
             if (!this.nodesPermission) {
@@ -725,7 +726,8 @@ export class AdminStatisticsComponent implements OnInit {
     }
 
     export() {
-        let csvHeaders: string[];
+        let csvHeadersTranslated: string[];
+        let csvHeadersMapping: string[];
         let csvData: any;
         // node export
         switch (this.currentTab) {
@@ -736,12 +738,20 @@ export class AdminStatisticsComponent implements OnInit {
                     const data = (this.groupedChartData.node as any).concat(
                         this.groupedChartData.user,
                     );
-                    csvHeaders = Helper.uniqueArray(
+                    csvHeadersMapping = Helper.uniqueArray(
                         data
                             .map((d: any) => Object.keys(d.counts))
                             .reduce((a: any, b: any) => a.concat(b)),
                     );
-                    csvHeaders.splice(0, 0, 'Date');
+                    csvHeadersTranslated = csvHeadersMapping.map((s) =>
+                        this.translate.instant('ADMIN.STATISTICS.ACTIONS.' + s),
+                    );
+                    csvHeadersMapping.splice(0, 0, 'Date');
+                    csvHeadersTranslated.splice(
+                        0,
+                        0,
+                        this.translate.instant('ADMIN.STATISTICS.HEADERS.date'),
+                    );
                     const result: any = {};
                     data.forEach((d: any) => {
                         if (!result[d.date]) {
@@ -759,9 +769,12 @@ export class AdminStatisticsComponent implements OnInit {
             }
             case 1: {
                 // grouped / folded data
-                csvHeaders = this.customGroupRows.map((h) => {
+                csvHeadersMapping = this.customGroupRows.map((h) => {
                     return this.customGroupLabels?.[h] || h;
                 });
+                csvHeadersTranslated = csvHeadersMapping.map((s) =>
+                    this.translate.instant('ADMIN.STATISTICS.HEADERS.' + s),
+                );
                 csvData = this.customGroupData.map((c: any) => {
                     c[this.customGroup] = c.displayValue;
                     console.log(c);
@@ -774,7 +787,7 @@ export class AdminStatisticsComponent implements OnInit {
                     }
                     return c;
                 });
-                console.log(csvHeaders, csvData);
+                console.log(csvHeadersTranslated, csvData);
                 break;
             }
             case 2: {
@@ -788,7 +801,10 @@ export class AdminStatisticsComponent implements OnInit {
                     'VIEW_MATERIAL_EMBEDDED',
                     'DOWNLOAD_MATERIAL',
                 ];
-                csvHeaders = properties.concat(countHeaders);
+                csvHeadersMapping = properties.concat(countHeaders);
+                csvHeadersTranslated = properties
+                    .map((e) => this.translate.instant('NODE.' + e))
+                    .concat(countHeaders.map((s) => this.translate.instant('NODE.counts.' + s)));
                 csvData = this.nodes.map((n) => {
                     const c: any = {};
                     console.log(Object.keys(n.counts));
@@ -803,7 +819,10 @@ export class AdminStatisticsComponent implements OnInit {
                 break;
             }
             case 3: {
-                csvHeaders = this.singleDataRows; // .map((s) => this.translate.instant('ADMIN.STATISTICS.HEADERS.' + s));
+                csvHeadersMapping = this.singleDataRows;
+                csvHeadersTranslated = this.singleDataRows.map((s) =>
+                    this.translate.instant('ADMIN.STATISTICS.HEADERS.' + s),
+                );
                 console.log(this.singleData);
                 csvData = this.singleData.map((data: any) => {
                     const c: any = Helper.deepCopy(data);
@@ -816,8 +835,10 @@ export class AdminStatisticsComponent implements OnInit {
                         new AuthorityNamePipe(this.translate).transform(m),
                     );
                     const mainGroup = data.entry.groups[Object.keys(data.entry.groups)[0]];
-                    for (const additional of Object.keys(mainGroup)) {
-                        c[additional] = Object.keys(mainGroup[additional])[0];
+                    if (mainGroup) {
+                        for (const additional of Object.keys(mainGroup)) {
+                            c[additional] = Object.keys(mainGroup[additional])[0];
+                        }
                     }
                     return c;
                 });
@@ -826,8 +847,9 @@ export class AdminStatisticsComponent implements OnInit {
         }
         CsvHelper.download(
             this.translate.instant('ADMIN.STATISTICS.CSV_FILENAME'),
-            csvHeaders,
+            csvHeadersTranslated,
             csvData,
+            csvHeadersMapping,
         );
     }
 

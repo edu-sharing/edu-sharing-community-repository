@@ -1796,7 +1796,7 @@ export class MdsComponent {
                 widget.type == 'singlevalueTree',
             ) +
             `     <div class="dialog darken mds-tree-dialog" style="display:none;z-index:` +
-            (122 + this.priority) +
+            (132 + this.priority) +
             `;" id="` +
             domId +
             `_tree">
