@@ -1,16 +1,6 @@
 package org.edu_sharing.metadataset.v2.tools;
 
-import java.security.InvalidParameterException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
+import com.sun.star.lang.IllegalArgumentException;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -20,7 +10,7 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.queryParser.QueryParser;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.metadataset.v2.*;
-import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
@@ -30,7 +20,11 @@ import org.edu_sharing.service.search.SearchServiceImpl;
 import org.edu_sharing.service.search.Suggestion;
 import org.edu_sharing.service.search.model.SharedToMeType;
 
-import com.sun.star.lang.IllegalArgumentException;
+import java.security.InvalidParameterException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.*;
 
 public class MetadataSearchHelper {
 	
@@ -194,7 +188,8 @@ public class MetadataSearchHelper {
 		/**
 		 * remote repo
 		 */
-		if(!ApplicationInfoList.getHomeRepository().getAppId().equals(repoId)) {
+		if(!ApplicationInfoList.getHomeRepository().getAppId().equals(repoId) &&
+				!ApplicationInfo.REPOSITORY_TYPE_LOCAL.equals(ApplicationInfoList.getRepositoryInfoById(repoId).getRepositoryType())) {
 			return SearchServiceFactory.getSearchService(repoId).getSuggestions(mds, queryId, parameterId, value, criterias);
 		}
 

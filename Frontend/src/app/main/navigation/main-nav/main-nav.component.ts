@@ -23,7 +23,7 @@ import {
 } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { Observable, ReplaySubject, Subject, forkJoin } from 'rxjs';
-import { map, take, takeUntil, tap, delay, filter } from 'rxjs/operators';
+import { map, take, takeUntil, tap, delay, filter, switchMap } from 'rxjs/operators';
 import { NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
 import { RocketChatService } from '../../../common/ui/global-container/rocketchat/rocket-chat.service';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
@@ -412,18 +412,18 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     startTutorial() {
         this.user
             .observeCurrentUserInfo()
-            .pipe(take(1))
-            .subscribe(({ user, loginInfo }) => {
-                if (
-                    loginInfo.statusCode === RestConstants.STATUS_CODE_OK &&
-                    user.editProfile &&
-                    this.configService.instant('editProfile', false)
-                ) {
-                    this.uiService.waitForComponent(this, 'topBar').subscribe(() => {
-                        this.tutorialElement = this.topBar.userRef;
-                    });
-                }
-            });
+            .pipe(
+                filter(
+                    ({ user, loginInfo }) =>
+                        loginInfo.statusCode === RestConstants.STATUS_CODE_OK &&
+                        user.editProfile &&
+                        this.configService.instant('editProfile', false),
+                ),
+                take(1),
+                switchMap(() => this.uiService.waitForComponent(this, 'topBar')),
+                switchMap(() => this.uiService.waitForComponent(this.topBar, 'userRef')),
+            )
+            .subscribe(() => (this.tutorialElement = this.topBar.userRef));
     }
 
     setFixMobileElements(fix: boolean) {
