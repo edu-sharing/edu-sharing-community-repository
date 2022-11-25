@@ -168,9 +168,9 @@
     </div>
     <div class="export" *ngIf="!nodesNoData && !singleLoading">
       <h4 class="mat-heading-4 mat-heading-underline clickable" (click)="showExport = !showExport">
-        <i icon="cloud_download"></i>
+        <i esIcon="cloud_download"></i>
         <span>{{ 'ADMIN.STATISTICS.EXPORT_LABEL' | translate }}</span>
-        <i [icon]="'keyboard_arrow_' + (showExport ? 'up' : 'down')"></i>
+        <i [esIcon]="'keyboard_arrow_' + (showExport ? 'up' : 'down')"></i>
       </h4>
       <div *ngIf="showExport" [@overlay]="showExport">
         <mat-form-field>
