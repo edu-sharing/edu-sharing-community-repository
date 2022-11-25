@@ -58,6 +58,7 @@ test docker:
     - cmp -s openapi.json repository/build/service/target/build/rest-api/openapi.json || exit 1
     - popd
   only:
+    - pipelines
     - triggers
     - schedules
     - tags
