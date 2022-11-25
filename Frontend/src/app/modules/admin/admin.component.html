@@ -246,13 +246,13 @@
       </div>
     </div>
     <div *ngIf="modeIsActive('STATISTICS')" class="content statistics">
-      <es-admin-statistics (onOpenNode)="debugNode($event)"></es-admin-statistics>
+      <es-admin-statistics (onOpenNode)="openNodeRender($event)"></es-admin-statistics>
     </div>
     <div *ngIf="modeIsActive('MEDIACENTER')" class="content mediacenter">
       <es-admin-mediacenter></es-admin-mediacenter>
     </div>
     <div *ngIf="modeIsActive('FRONTPAGE')" class="content frontpage">
-      <es-admin-frontpage (onOpenNode)="debugNode($event)"></es-admin-frontpage>
+      <es-admin-frontpage (onOpenNode)="openNodeRender($event)"></es-admin-frontpage>
     </div>
     <div *ngIf="modeIsActive('GLOBAL_CONFIG')" class="content global-config">
       <es-admin-config></es-admin-config>

@@ -29,7 +29,7 @@ public class BinaryHandlerTechnicalLocation implements BinaryHandler{
 	}
 	
 	@Override
-	public void safe(String alfrescoNodeId, RecordHandlerInterfaceBase recordHandler, Node nodeRecord) {
+	public void safe(String alfrescoNodeId, RecordHandlerInterfaceBase recordHandler, Node nodeRecord, String set) {
 		importFromURL(alfrescoNodeId, recordHandler);
 	}
 

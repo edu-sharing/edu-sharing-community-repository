@@ -14,7 +14,7 @@ import org.w3c.dom.Node;
 public class BinaryHandlerSerlo implements BinaryHandler{
 
 	@Override
-	public void safe(String alfrescoNodeId, RecordHandlerInterfaceBase recordHandler, Node nodeRecord) {
+	public void safe(String alfrescoNodeId, RecordHandlerInterfaceBase recordHandler, Node nodeRecord, String set) {
 		ServiceRegistry serviceRegistry = (ServiceRegistry)AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
 		
 		TransactionService transactionService = serviceRegistry.getTransactionService();

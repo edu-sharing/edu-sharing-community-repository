@@ -203,9 +203,12 @@
             [hasHeading]="true"
             [hasCheckbox]="true"
             icon="node"
+            [isClickable]="true"
+            [createLink]="false"
             [columns]="nodeColumns"
             [sortBy]="mediacenterNodesSort.sortBy"
             [sortAscending]="mediacenterNodesSort.sortAscending"
+            (clickRow)="onOpenNode.emit($event.node)"
             (sortListener)="setMediacenterNodesSort($event)"
             (loadMore)="loadMediacenterNodes()"
             [isLoading]="isLoadingMediacenterNodes"
@@ -219,6 +222,7 @@
         <es-admin-statistics
           *ngIf="currentTab == 3 && currentMediacenter"
           [mediacenter]="currentMediacenter"
+          (onOpenNode)="onOpenNode.emit($event)"
         ></es-admin-statistics>
       </mat-tab>
     </mat-tab-group>

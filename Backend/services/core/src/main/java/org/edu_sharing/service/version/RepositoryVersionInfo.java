@@ -7,6 +7,7 @@ import java.util.Map;
 public class RepositoryVersionInfo implements Serializable {
     public Version version;
     public VersionMaven maven;
+    public VersionGit git;
 
     public static class Version implements Serializable {
         public String full;
@@ -16,6 +17,19 @@ public class RepositoryVersionInfo implements Serializable {
         public String qualifier;
         public String build;
     }
+
+    public static class VersionGit implements Serializable {
+        public String branch;
+        public VersionGitCommit commit;
+        public static class VersionGitCommit implements Serializable {
+            public String id;
+            public VersionTimestamp timestamp;
+        }
+    }
+    public static class VersionTimestamp implements Serializable {
+        public String datetime;
+    }
+
 
     public static class VersionMaven implements Serializable {
         public HashMap<String, String> bom;

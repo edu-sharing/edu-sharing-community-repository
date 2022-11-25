@@ -115,10 +115,13 @@ public class ErrorResponse {
 			PrintWriter printWriter = new PrintWriter( writer );
 			t.printStackTrace( printWriter );
 			printWriter.flush();
-			if(level.toInt()<=Level.DEBUG_INT)
-				setStacktrace(Context.getCurrentInstance().getB3().toString() + "\n" + writer.toString());
-			else
-				setMessage(Context.getCurrentInstance().getB3().toString());
+			if(level.toInt()<=Level.DEBUG_INT) {
+				if (Context.getCurrentInstance() != null) {
+					setStacktrace(Context.getCurrentInstance().getB3().toString() + "\n" + writer.toString());
+				} else {
+					setStacktrace(writer.toString());
+				}
+			}
 		}
 	}
 	

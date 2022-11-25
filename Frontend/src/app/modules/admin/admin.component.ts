@@ -1567,4 +1567,9 @@ export class AdminComponent implements OnInit, OnDestroy {
             UIHelper.goToDefaultLocation(this.router, this.platformLocation, this.config, true);
         } catch (e) {}
     }
+
+    openNodeRender(event: Node) {
+        const url = this.router.createUrlTree([UIConstants.ROUTER_PREFIX + 'render', event.ref.id]);
+        window.open(this.connector.getAbsoluteEdusharingUrl() + this.router.serializeUrl(url));
+    }
 }
