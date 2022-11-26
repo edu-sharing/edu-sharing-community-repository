@@ -2,12 +2,11 @@
 set -e
 set -o pipefail
 
-RELEASE=${1:-"Please specify a release!"}
-VERSION=${2:-""}
-USERNAME=${3:-""}
-PASSWORD=${4:-""}
-
-CHART="edu_sharing-projects-${RELEASE%%-*}"
+RELEASE=${1}
+CHART=${2}
+VERSION=${3:-""}
+USERNAME=${4:-""}
+PASSWORD=${5:-""}
 
 CONTEXT="$(kubectl config current-context)"
 NAMESPACE="$(kubectl config view --minify --output 'jsonpath={..namespace}')"
