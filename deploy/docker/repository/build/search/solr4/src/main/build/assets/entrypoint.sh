@@ -38,6 +38,7 @@ export CATALINA_OPTS="-Duser.country=DE $CATALINA_OPTS"
 export CATALINA_OPTS="-Duser.language=de $CATALINA_OPTS"
 
 xmlstarlet ed -L \
+	-d '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/Valve[@className="org.apache.catalina.valves.AccessLogValve"]' \
   -d '/Server/Service[@name="Catalina"]/Connector' \
   -s '/Server/Service[@name="Catalina"]' -t elem -n 'Connector' -v '' \
   --var internal '$prev' \

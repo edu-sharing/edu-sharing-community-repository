@@ -129,37 +129,37 @@ if [[ ! -f "${RS_CACHE}/config/version.json" ]]; then
 	cat >/tmp/config.ini <<-EOF
 		[application]
 		; url for client requests (accessible from the internet)
-		application_url_client=${my_base_external}
+		application_url_client="${my_base_external}"
 		; url for requests from repository
-		application_url_repository=${my_base_internal}
+		application_url_repository="${my_base_internal}"
 		; ip of the server
 		application_host=
 		; root directory of the rendering service application
-		application_root=${RS_ROOT}
+		application_root="${RS_ROOT}"
 		; cache directory
-		application_cache=${RS_CACHE}/data
+		application_cache="${RS_CACHE}/data"
 		; save cache directory (optional)
 		application_cache_save=
 		; path to the ffmpeg binary
-		application_ffmpeg=/usr/bin/ffmpeg
+		application_ffmpeg="/usr/bin/ffmpeg"
 
 		[database]
 		; driver (mysql or pgsql)
-		db_driver=${rendering_database_driv}
+		db_driver="${rendering_database_driv}"
 		; db host
-		db_host=${rendering_database_host}
+		db_host="${rendering_database_host}"
 		; db port
-		db_port=${rendering_database_port}
+		db_port="${rendering_database_port}"
 		; db name
-		db_name=${rendering_database_name}
+		db_name="${rendering_database_name}"
 		; db user
-		db_user=${rendering_database_user}
+		db_user="${rendering_database_user}"
 		; db password
-		db_password=${rendering_database_pass}
+		db_password="${rendering_database_pass}"
 
 		[repository]
 		; url of the repository to fetch properties and content from
-		repository_url=${repository_service_base}
+		repository_url="${repository_service_base}"
 	EOF
 
 	before="$(mktemp)"

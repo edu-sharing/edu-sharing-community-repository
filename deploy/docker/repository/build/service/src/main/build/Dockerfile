@@ -160,7 +160,7 @@ RUN set -eux \
 
 COPY --chown=worker:worker amps amps/
 
-COPY --chown=worker:worker config tomcat/shared/lib/
+COPY --chown=worker:worker config tomcat/shared/assets/
 
 RUN set -eux \
     && chown -RL worker:worker alf_data \

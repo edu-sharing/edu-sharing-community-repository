@@ -127,7 +127,7 @@ configs=(defaults plugins cluster node)
 for config in "${configs[@]}"; do
 	if [[ ! -f tomcat/shared/classes/config/$config/version.json ]]; then
 		mkdir -p tomcat/shared/classes/config/$config
-		for jar in tomcat/shared/lib/$config/*.jar; do
+		for jar in tomcat/shared/assets/$config/*.jar; do
 		  if [[ -f $jar ]] ; then
         unzip -o $jar -d tomcat/shared/classes/config/$config -x 'META-INF/*'
 			fi
@@ -141,8 +141,6 @@ for config in "${configs[@]}"; do
 		}
 	fi
 done
-
-rm -rf tomcat/shared/lib/*
 
 reinstall.sh
 

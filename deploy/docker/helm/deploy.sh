@@ -13,34 +13,41 @@ NAMESPACE="$(kubectl config view --minify --output 'jsonpath={..namespace}')"
 
 SOURCE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
 
+OPTIONS=()
+
 pushd "${SOURCE_PATH}" >/dev/null || exit
 
 pushd "../../../.." >/dev/null || exit
-mkdir -p "helm" && cd "helm"
-values="$(
-	cd "$(dirname ".")"
-	pwd -P
-)"
 
-mkdir -p "${values}/${CONTEXT}/${NAMESPACE}"
+if [[ -d "helm" ]] ; then
 
-[[ -f "${values}/${RELEASE}.yaml" ]] || sops "${values}/${RELEASE}.yaml"
-[[ -f "${values}/${CONTEXT}/${RELEASE}.yaml" ]] || sops "${values}/${CONTEXT}/${RELEASE}.yaml"
-[[ -f "${values}/${CONTEXT}/${NAMESPACE}/${RELEASE}.yaml" ]] || sops "${values}/${CONTEXT}/${NAMESPACE}/${RELEASE}.yaml"
+  pushd "helm" >/dev/null || exit
+
+  ROOT="$(
+    cd "$(dirname ".")"
+    pwd -P
+  )"
+
+  [[ -f "${ROOT}/${RELEASE}.yaml" ]] && {
+    OPTIONS+=("--values")
+    OPTIONS+=("${ROOT}/${RELEASE}.yaml")
+  }
+
+  [[ -f "${ROOT}/${CONTEXT}/${RELEASE}.yaml" ]] && {
+    OPTIONS+=("--values")
+    OPTIONS+=("${ROOT}/${CONTEXT}/${RELEASE}.yaml")
+  }
+
+  [[ -f "${ROOT}/${CONTEXT}/${NAMESPACE}/${RELEASE}.yaml" ]] && {
+    OPTIONS+=("--values")
+    OPTIONS+=("${ROOT}/${CONTEXT}/${NAMESPACE}/${RELEASE}.yaml")
+  }
+
+  popd >/dev/null || exit
+
+fi
 
 popd >/dev/null || exit
-
-OPTIONS=()
-
-OPTIONS+=("--timeout")
-OPTIONS+=("30m")
-
-OPTIONS+=("--values")
-OPTIONS+=("${values}/${RELEASE}.yaml")
-OPTIONS+=("--values")
-OPTIONS+=("${values}/${CONTEXT}/${RELEASE}.yaml")
-OPTIONS+=("--values")
-OPTIONS+=("${values}/${CONTEXT}/${NAMESPACE}/${RELEASE}.yaml")
 
 [[ -n $USERNAME && -n $PASSWORD ]] && {
 	OPTIONS+=("--set")
@@ -55,9 +62,12 @@ OPTIONS+=("${values}/${CONTEXT}/${NAMESPACE}/${RELEASE}.yaml")
 	OPTIONS+=("image.pullSecrets[0].password=${PASSWORD}")
 }
 
+OPTIONS+=("--timeout")
+OPTIONS+=("30m")
+
 [[ -n $HELM_DEBUG ]] && {
-	OPTIONS+=(--dry-run)
-	OPTIONS+=(--debug)
+	OPTIONS+=("--dry-run")
+	OPTIONS+=("--debug")
 }
 
 file="bundle/target/helm/repo/${CHART}-${VERSION}.tgz"
