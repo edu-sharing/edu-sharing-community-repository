@@ -20,23 +20,24 @@
     z-index: $topBarZIndex;
 }
 :host ::ng-deep .card-licenses {
-    pre {
-        white-space: pre-wrap;
+    display: flex;
+    flex-direction: column;
+    .license-group {
+        white-space: pre;
+        font-family: monospace;
+        overflow-x: auto;
+    }
+    .license-spacer {
+        width: 100%;
+        height: 1px;
+        margin: 15px 10px;
+        background-color: $cardSeparatorLineColor;
     }
 }
 .dialog {
     z-index: $dialogZIndex + 5;
 }
-.card-agreement {
-    z-index: $dialogZIndex + 6;
-    .card-content {
-        display: flex;
-        flex-direction: column;
-    }
-    .card-scroll {
-        height: calc(100% - 68px);
-    }
-}
+
 es-user-profile {
     display: inherit !important;
 }

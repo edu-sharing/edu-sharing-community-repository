@@ -34,6 +34,8 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     set dataSource(value: NodeDataSource<T>) {
         this.dataSource$.next(value);
     }
+    // TODO: Use a subject of an immutable type for columns, so users don't have to monitor
+    // `columnsChange` separately.
     columns: ListItem[];
     configureColumns: boolean;
     columnsChange: EventEmitter<ListItem[]>;
@@ -57,6 +59,8 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
         this.gridConfig$.next(value);
     }
     globalKeyboardShortcuts: boolean;
+    singleClickHint: 'dynamic' | 'static';
+    disableInfiniteScroll: boolean;
 
     constructor(private uiService: UIService) {}
 

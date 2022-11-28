@@ -36,16 +36,16 @@ test.describe('Root collections page', () => {
     });
 
     test('should show collections scope', async () => {
-        await collectionsPage.expectScopeButton();
+        await generalPage.expectScopeButton(/Collections/);
     });
 
     // FIXME: This needs more than 25 root collections as setup
-    test('should load more collections on scroll', async () => {
+    test.skip('should load more collections on scroll', async () => {
         await generalPage.expectLoadingToFinish();
         // FIXME: Page interaction outside test step
         const elements = await generalPage.getCardElement('').count();
-        // FIXME: Playwright confuses test steps when inside `Promise.all`
-        await Promise.all([generalPage.scrollToLastCard(), generalPage.expectLoadingSpinner()]);
+        await generalPage.scrollToLastCard();
+        await generalPage.expectLoadingSpinner();
         await generalPage.expectLoadingToFinish();
         expect(await generalPage.getCardElement('').count()).toBeGreaterThan(elements);
     });

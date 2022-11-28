@@ -388,7 +388,7 @@ img.align-icon {
 }
 .collection {
     @include materialShadow();
-    z-index: 130;
+    z-index: 132;
     @include clickable();
 }
 .collection i {

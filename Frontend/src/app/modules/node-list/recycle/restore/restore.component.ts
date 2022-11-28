@@ -11,7 +11,6 @@ export class RecycleRestoreComponent {
     @Input() results: any;
     @Output() onClose = new EventEmitter();
     @Output() onRestoreFolder = new EventEmitter();
-    public showFileChooser: Boolean;
     buttons: DialogButton[];
     constructor() {
         this.buttons = DialogButton.getSingleButton('CLOSE', () => this.confirm(), 'standard');
@@ -21,24 +20,6 @@ export class RecycleRestoreComponent {
     }
     private cancel(): void {
         this.onClose.emit();
-    }
-    private chooseDirectory(): void {
-        this.showFileChooser = new Boolean(true);
-    }
-    closeFolder() {
-        this.showFileChooser = false;
-    }
-    folderSelected(event: Node[]) {
-        const nodes: any[] = [];
-        for (const result of this.results.results) {
-            if ((result.restoreStatus as any) === 1) {
-                nodes.push({ ref: { nId: result.nodeId } });
-            }
-        }
-        this.showFileChooser = false;
-        // this.appComponent.restoreNodes(nodes,event.ref.id);
-        this.onRestoreFolder.emit({ nodes, parent: event[0].ref.id });
-        this.cancel();
     }
     public static get STATUS_FINE(): string {
         return 'FINE';

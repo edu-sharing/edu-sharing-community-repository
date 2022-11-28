@@ -102,8 +102,11 @@ $sidenavWidthMobile: 66px;
     max-width: 800px;
     margin: auto;
     .version {
-        white-space: pre-line;
-        padding: 0 20px;
+        font-family: monospace;
+        white-space: pre;
+        padding: 20px;
+        border: 1px solid $cardSeparatorLineColor;
+        background-color: $cardLightBackground;
     }
     .checks,
     .checks-toolpermissions {
@@ -686,19 +689,6 @@ $sidenavWidthMobile: 66px;
         .status-error {
             background-color: #ffdcd8;
         }
-    }
-}
-.card-xml {
-    .warning {
-        padding: 10px 0;
-    }
-    .mat-input-group {
-        width: 100%;
-        margin: 15px 0;
-    }
-    .add-property {
-        display: flex;
-        flex-direction: column;
     }
 }
 :host ::ng-deep {

@@ -4,7 +4,7 @@
   role="main"
   esSkipTarget="MAIN_CONTENT"
   avatar="assets/images/app-icon.svg"
-  [buttons]="updateButtons()"
+  [buttons]="buttons"
   title="{{
     (state === 'request' || state === 'done-reset'
       ? 'REGISTER.REQUEST.TITLE'
@@ -23,22 +23,26 @@
     <h1 esTitle class="cdk-visually-hidden">{{ 'REGISTER.TITLE' | translate }}</h1>
     <es-register-form
       [class.display-none]="!(state === 'register')"
+      (onStateChanged)="updateButtons()"
       (onRegisterDone)="onRegisterDone()"
       #registerForm
     ></es-register-form>
     <es-register-done
       *ngIf="state === 'done' || state === 'done-reset'"
+      (onStateChanged)="updateButtons()"
       (onModify)="modifyData()"
       [inputState]="state"
       #registerDone
     ></es-register-done>
     <es-register-request
       *ngIf="state === 'request'"
+      (onStateChanged)="updateButtons()"
       (onDone)="onPasswordRequested()"
       #request
     ></es-register-request>
     <es-register-reset-password
       *ngIf="state === 'reset-password'"
+      (onStateChanged)="updateButtons()"
       #resetPassword
       [params]="params"
     ></es-register-reset-password>
@@ -58,5 +62,4 @@
       </button>
     </div>
   </div>
-  <div class="card-action"></div>
 </es-card>

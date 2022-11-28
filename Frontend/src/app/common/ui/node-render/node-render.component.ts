@@ -31,7 +31,6 @@ import { trigger } from '@angular/animations';
 import { Location, PlatformLocation } from '@angular/common';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
 import { SearchService } from '../../../modules/search/search.service';
-import { ActionbarHelperService } from '../../services/actionbar-helper';
 import { HttpClient } from '@angular/common/http';
 import {
     ConfigurationHelper,
@@ -110,7 +109,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         private cardServcie: CardService,
         private viewContainerRef: ViewContainerRef,
         private frame: FrameEventsService,
-        private actionbarService: ActionbarHelperService,
         private toast: Toast,
         private cd: ChangeDetectorRef,
         private config: ConfigurationService,
@@ -130,7 +128,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
                 this.setDownloadUrl(url);
             },
         };
-        this.frame.addListener(this);
+        this.frame.addListener(this, this.destroyed$);
         this.renderHelper.setViewContainerRef(viewContainerRef);
 
         this.translations.waitForInit().subscribe(() => {
@@ -433,7 +431,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         this.addDownloadButton(download);
     }
     private loadRenderData() {
-        const loadingTask = this.loadingScreen.addLoadingTask();
+        const loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed$ });
         this.isLoading = true;
         this.optionsHelper.clearComponents(this.actionbar);
         if (this.isBuildingPage) {
@@ -474,11 +472,9 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
                             this.moveInnerStyleToHead(nodeRenderContent);
                             this.postprocessHtml();
                             this.handleProposal();
-                            this.addCollections();
-                            this.addNodeRelations();
+                            this.renderHelper.doAll(this._node);
                             this.addVideoControls();
                             this.linkSearchableWidgets();
-                            this.addComments();
                             this.loadNode();
                             this.loadSimilarNodes();
                             this.isLoading = false;
@@ -557,16 +553,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
             target,
             data,
         );
-    }
-
-    addCollections() {
-        this.renderHelper.injectModuleInCollections(this._node);
-    }
-    addNodeRelations() {
-        this.renderHelper.injectNodeRelationsWidget(this._node);
-    }
-    addComments() {
-        this.renderHelper.injectModuleComments(this._node);
     }
     private postprocessHtml() {
         if (!this.config.instant('rendering.showPreview', true)) {

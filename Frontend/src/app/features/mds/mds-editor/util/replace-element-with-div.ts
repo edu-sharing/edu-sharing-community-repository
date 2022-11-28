@@ -17,7 +17,9 @@ export function replaceElementWithDiv(
     }
     if (element.parentNode) {
         if (mode === 'append') {
-            element.parentNode.append(div);
+            // keep the positioning
+            element.parentNode.insertBefore(div, element);
+            // element.parentNode.append(div);
         } else if (mode === 'replace') {
             element.parentNode.replaceChild(div, element);
         }

@@ -1,10 +1,12 @@
 import {
+    ChangeDetectorRef,
     Component,
     ComponentFactoryResolver,
     ElementRef,
     Injector,
     Input,
     OnChanges,
+    NgZone,
     QueryList,
     SimpleChanges,
     ViewChildren,

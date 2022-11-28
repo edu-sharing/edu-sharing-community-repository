@@ -158,7 +158,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     displayType: NodeEntriesDisplayType = null;
     reorderDialog: boolean;
     private readonly destroyed$ = new Subject<void>();
-    private loadingTask = this.loadingScreen.addLoadingTask();
+    private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed$ });
 
     constructor(
         private toast: Toast,
@@ -183,7 +183,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         private loadingScreen: LoadingScreenService,
         private mainNavService: MainNavService,
     ) {
-        this.event.addListener(this);
+        this.event.addListener(this, this.destroyed$);
         this.translations.waitForInit().subscribe(() => {
             void this.initialize();
         });
@@ -401,7 +401,13 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     }
 
     private async initialize() {
-        this.user = await this.iam.getCurrentUserAsync();
+        try {
+            this.user = await this.iam.getCurrentUserAsync();
+        } catch (e) {
+            this.toast.error(e);
+            return;
+        }
+
         this.route.params.subscribe((routeParams: Params) => this.handleParamsUpdate(routeParams));
         this.route.queryParams.subscribe((params: Params) => this.handleQueryParamsUpdate(params));
     }
@@ -413,9 +419,6 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             RestHelper.goToLogin(this.router, this.config);
             return;
         }
-        await this.prepareActionbar();
-        this.loadFolders(this.user);
-
         let valid = true;
         if (!login.isValidLogin || login.isGuest) {
             valid = false;
@@ -442,6 +445,9 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             this.goToLogin();
             return;
         }
+        await this.prepareActionbar();
+        this.loadFolders(this.user);
+
         this.connector.scope = this.isSafe ? RestConstants.SAFE_SCOPE : null;
         this.isLoggedIn = true;
         this.globalProgress = false;
@@ -502,7 +508,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             lastLocation = null;
         }
         if (!params.id && !params.query && lastLocation) {
-            this.openDirectory(lastLocation);
+            this.openDirectory(lastLocation, { replaceUrl: true });
         } else {
             this.openDirectoryFromRoute(params);
         }
@@ -656,8 +662,8 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         this.mainNavService.getDialogs().closeSidebar();
     }
 
-    private openDirectory(id: string) {
-        this.routeTo(this.root, id);
+    private openDirectory(id: string, { replaceUrl = false } = {}) {
+        this.routeTo(this.root, id, null, { replaceUrl });
     }
 
     searchGlobal(query: string) {
@@ -810,7 +816,12 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         });
     }
 
-    private async routeTo(root: string, node: string = null, search: string = null) {
+    private async routeTo(
+        root: string,
+        node: string = null,
+        search: string = null,
+        { replaceUrl = false } = {},
+    ) {
         const params = await UIHelper.getCommonParameters(this.route).toPromise();
         params.root = root;
         params.id = node;
@@ -821,7 +832,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
             params.displayType = this.displayType;
         }
         void this.router
-            .navigate(['./'], { queryParams: params, relativeTo: this.route })
+            .navigate(['./'], { queryParams: params, relativeTo: this.route, replaceUrl })
             .then((result: boolean) => {
                 if (!result) {
                     this.refresh(false);

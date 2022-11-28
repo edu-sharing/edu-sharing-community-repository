@@ -271,7 +271,7 @@ public  class ListIdentifiersHandler extends DefaultHandler {
 							String nodeId = persistentHandler.safe((org.edu_sharing.repository.server.importer.RecordHandlerInterface) recordHandler, cursor, set);
 							if(nodeId != null) {
 								if(binaryHandler != null){
-									binaryHandler.safe(nodeId, (org.edu_sharing.repository.server.importer.RecordHandlerInterface) recordHandler,nodeRecord);
+									binaryHandler.safe(nodeId, (org.edu_sharing.repository.server.importer.RecordHandlerInterface) recordHandler,nodeRecord, set);
 								}
 								
 								if(!exists) {

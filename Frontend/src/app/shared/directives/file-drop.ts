@@ -1,144 +1,118 @@
-import { Directive, EventEmitter, ElementRef, HostListener, Input, Output } from '@angular/core';
+import {
+    Directive,
+    ElementRef,
+    EventEmitter,
+    Input,
+    NgZone,
+    OnDestroy,
+    OnInit,
+    Output,
+} from '@angular/core';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
 
 export interface Options {
     readAs?: string;
 }
 
 @Directive({ selector: '[fileDrop]' })
-export class FileDropDirective {
-    @Output() public fileOver: EventEmitter<boolean> = new EventEmitter<boolean>();
-    @Output() public onFileDrop: EventEmitter<FileList> = new EventEmitter<FileList>();
-    @Input() public options: Options;
+export class FileDropDirective implements OnInit, OnDestroy {
+    @Input() options: Options;
     /**
      * catch drag/drop of whole window
      */
-    @Input() public window = false;
+    @Input() window = false;
 
-    private element: ElementRef;
+    @Output() fileOver: EventEmitter<boolean> = new EventEmitter<boolean>();
+    @Output() onFileDrop: EventEmitter<FileList> = new EventEmitter<FileList>();
 
-    public constructor(element: ElementRef) {
-        this.element = element;
+    /**
+     * Sometimes browsers fire a dragenter event before the dragleave event. When the cursor moves
+     * across different HTML elements while dragging, this results in a dragenter event followed by
+     * a dragleave. This number represents how many more dragenter events than dragleave events we
+     * received. A number > 1 means that we are currently in a drag-over state.
+     */
+    private dragEnterCount = 0;
+    private destroyed = new Subject<void>();
+    private fileOverSubject = new BehaviorSubject(false);
+
+    constructor(private elementRef: ElementRef<HTMLElement>, private ngZone: NgZone) {}
+
+    ngOnInit(): void {
+        this.registerEvents();
+        this.registerOutputs();
     }
 
-    private isFileOver = false;
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
+    }
 
-    @HostListener('dragover', ['$event'])
-    public onDragOver(event: any): void {
+    private registerEvents() {
+        const target = this.getTarget();
+        // All event handlers run outside Angular's zone. We only enter the zone again when emitting
+        // on Outputs.
+        this.ngZone.runOutsideAngular(() => {
+            addEventListenerUntil(target, 'dragenter', this.onDragEnter, this.destroyed);
+            addEventListenerUntil(target, 'dragover', this.onDragOver, this.destroyed);
+            addEventListenerUntil(target, 'dragleave', this.onDragLeave, this.destroyed);
+            addEventListenerUntil(target, 'drop', this.onDrop, this.destroyed);
+        });
+    }
+
+    private registerOutputs() {
+        // Avoid unnecessary change-detection cycles by only emitting on distinct values.
+        this.fileOverSubject.pipe(distinctUntilChanged()).subscribe((value) => {
+            this.ngZone.run(() => {
+                this.fileOver.emit(value);
+            });
+        });
+    }
+
+    private getTarget(): EventTarget {
         if (this.window) {
-            return;
+            return window;
+        } else {
+            return this.elementRef.nativeElement;
         }
-        this.handleEvent(event);
-    }
-    @HostListener('window:dragover', ['$event'])
-    public onDragOverWindow(event: any): void {
-        if (!this.window) {
-            return;
-        }
-        this.handleEvent(event);
     }
 
-    @HostListener('dragleave', ['$event'])
-    public onDragLeave(event: any): void {
-        if (this.window) {
-            return;
-        }
-        this.isFileOver = false;
-        // super hacky, but the only reliable way it seems. May someone will fix this later?
-        setTimeout(() => {
-            if (!this.isFileOver || true) {
-                this.emitFileOver(false);
-            }
-        }, 2000);
-    }
-    @HostListener('window:dragleave', ['$event'])
-    public onDragLeaveWindow(event: any): void {
-        if (!this.window) {
-            return;
-        }
-        this.isFileOver = false;
-        // super hacky, but the only reliable way it seems. May someone will fix this later?
-        setTimeout(() => {
-            if (!this.isFileOver || true) {
-                this.emitFileOver(false);
-            }
-        }, 2000);
-    }
-    @HostListener('dragenter', ['$event'])
-    public onDragEnter(event: any): void {
-        if (this.window) {
-            return;
-        }
-        let transfer = this.getDataTransfer(event);
-        if (!this.haveFiles(transfer.types)) {
-            return;
-        }
-
-        this.preventAndStop(event);
-        this.isFileOver = true;
-        this.emitFileOver(true);
-    }
-    @HostListener('window:dragenter', ['$event'])
-    public onDragEnterWindow(event: any): void {
-        if (!this.window) {
-            return;
-        }
-        let transfer = this.getDataTransfer(event);
-        if (!this.haveFiles(transfer.types)) {
-            return;
-        }
-
-        this.preventAndStop(event);
-        this.isFileOver = true;
-        this.emitFileOver(true);
-    }
-    checkLeave(event: any) {
-        if (event.currentTarget == this.element.nativeElement) {
-            return;
-        }
-
-        let parent = event.target.parentNode;
-        while (parent) {
-            if (parent == this.element.nativeElement) {
-                return;
-            }
-
-            parent = parent.parentNode;
-        }
-
-        this.preventAndStop(event);
-        this.emitFileOver(false);
-    }
-
-    @HostListener('drop', ['$event'])
-    public onDrop(event: any): void {
-        if (this.window) {
-            return;
-        }
+    private onDragEnter = (event: DragEvent) => {
+        ++this.dragEnterCount;
         const transfer = this.getDataTransfer(event);
-
-        if (!transfer.files.length) {
-            return;
+        if (this.haveFiles(transfer.types)) {
+            this.preventAndStop(event);
+            transfer.dropEffect = 'copy';
+            this.emitFileOver(true);
         }
+    };
 
-        this.preventAndStop(event);
-        this.emitFileOver(false);
-        this.readFile(transfer.files);
-    }
-    @HostListener('window:drop', ['$event'])
-    public onDropWindow(event: any): void {
-        if (!this.window) {
-            return;
-        }
+    private onDragOver = (event: DragEvent) => {
         const transfer = this.getDataTransfer(event);
-
-        if (!this.haveFiles(transfer.types) || !transfer.files.length) {
-            return;
+        if (this.haveFiles(transfer.types)) {
+            // If we don't call `preventDefault` on dragover events, we won't get notified of drop
+            // events.
+            this.preventAndStop(event);
+            transfer.dropEffect = 'copy';
         }
+    };
 
-        this.preventAndStop(event);
+    private onDragLeave = () => {
+        if (--this.dragEnterCount === 0) {
+            this.emitFileOver(false);
+        }
+    };
+
+    private onDrop = (event: DragEvent) => {
+        const transfer = this.getDataTransfer(event);
+        this.dragEnterCount = 0;
         this.emitFileOver(false);
-        this.readFile(transfer.files);
-    }
+        const hasFiles = this.haveFiles(transfer.types) && transfer.files.length;
+        if (hasFiles) {
+            this.preventAndStop(event);
+            this.readFile(transfer.files);
+        }
+    };
 
     private readFile(file: FileList): void {
         const strategy = this.pickStrategy();
@@ -162,11 +136,13 @@ export class FileDropDirective {
     }
 
     private emitFileOver(isOver: boolean): void {
-        this.fileOver.emit(isOver);
+        this.fileOverSubject.next(isOver);
     }
 
     private emitFileDrop(file: FileList): void {
-        this.onFileDrop.emit(file);
+        this.ngZone.run(() => {
+            this.onFileDrop.emit(file);
+        });
     }
 
     private pickStrategy(): string | void {
@@ -187,7 +163,7 @@ export class FileDropDirective {
         return event.dataTransfer ? event.dataTransfer : event.originalEvent.dataTransfer;
     }
 
-    private preventAndStop(event: any): void {
+    private preventAndStop(event: Event): void {
         event.preventDefault();
         event.stopPropagation();
     }
@@ -207,15 +183,14 @@ export class FileDropDirective {
 
         return false;
     }
+}
 
-    private handleEvent(event: any) {
-        let transfer = this.getDataTransfer(event);
-        if (!this.haveFiles(transfer.types)) {
-            return;
-        }
-        transfer.dropEffect = 'copy';
-        this.preventAndStop(event);
-        this.isFileOver = true;
-        this.emitFileOver(true);
-    }
+function addEventListenerUntil<T extends Event>(
+    target: EventTarget,
+    eventName: string,
+    callback: (event: T) => void,
+    until: Observable<void>,
+) {
+    target.addEventListener(eventName, callback);
+    until.subscribe(() => target.removeEventListener(eventName, callback));
 }

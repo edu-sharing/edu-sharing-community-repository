@@ -18,7 +18,8 @@ import { Toast } from '../../../../../core-ui-module/toast';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { NodeHelperService } from '../../../../../core-ui-module/node-helper.service';
 import { distinctUntilChanged } from 'rxjs/operators';
-import { DialogsService } from '../../../../../modules/management-dialogs/dialogs.service';
+import { DialogsService as LegacyDialogsService } from '../../../../../modules/management-dialogs/dialogs.service';
+import { DialogsService } from '../../../../dialogs/dialogs.service';
 
 interface Childobject {
     icon: string;
@@ -55,6 +56,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
         private utilities: RestUtilitiesService,
         private nodeHelper: NodeHelperService,
         public toast: Toast,
+        private legacyDialogsService: LegacyDialogsService,
         private dialogs: DialogsService,
     ) {}
 
@@ -88,7 +90,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
     }
 
     openUploadSelectDialog(): void {
-        const dialogRef = this.dialogs.openUploadSelectDialog({ showLti: false });
+        const dialogRef = this.legacyDialogsService.openUploadSelectDialog({ showLti: false });
         dialogRef.afterClosed().subscribe((result) => {
             if (result) {
                 switch (result.kind) {
@@ -182,9 +184,9 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
             properties: this.getProperties(child),
         };
     }
-    editLicense(child: Childobject) {
+    async editLicense(child: Childobject) {
         const properties = this.getProperties(child);
-        const dialogRef = this.dialogs.openLicenseDialog({ properties });
+        const dialogRef = await this.dialogs.openLicenseDialog({ kind: 'properties', properties });
         dialogRef.afterClosed().subscribe((newProperties) => {
             if (newProperties) {
                 this.setProperties(newProperties, { child, properties });

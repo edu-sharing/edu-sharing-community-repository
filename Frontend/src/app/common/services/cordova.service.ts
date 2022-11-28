@@ -1,4 +1,4 @@
-import { Injectable, Injector } from '@angular/core';
+import { Injectable, Injector, NgZone } from '@angular/core';
 import { Observable, Observer } from 'rxjs';
 
 import { Location } from '@angular/common';
@@ -46,6 +46,7 @@ export class CordovaService {
      */
     constructor(
         private router: Router,
+        private ngZone: NgZone,
         private http: HttpClient,
         private location: Location,
         private injector: Injector,
@@ -184,10 +185,12 @@ export class CordovaService {
             if (this.hasValidConfig()) {
                 clearInterval(shareInterval);
                 this.onNewShareContent().subscribe(
-                    (data: any) => {
-                        this.router.navigate([UIConstants.ROUTER_PREFIX, 'app', 'share'], {
-                            queryParams: data,
-                        });
+                    async (data: any) => {
+                        await this.ngZone.run(() =>
+                            this.router.navigate([UIConstants.ROUTER_PREFIX, 'app', 'share'], {
+                                queryParams: data,
+                            }),
+                        );
                     },
                     (error) => {},
                 );
@@ -258,19 +261,11 @@ export class CordovaService {
                     // it's a file
                     if (uri) {
                         this.lastIntent = intent;
-                        (window as any).plugins.intent.getRealPathFromContentUrl(
+                        this.observerShareContent.next({
                             uri,
-                            (file: string) => {
-                                this.observerShareContent.next({
-                                    uri,
-                                    file,
-                                    mimetype: intent.type,
-                                });
-                            },
-                            (error: any) => {
-                                this.observerShareContent.next({ uri, mimetype: intent.type });
-                            },
-                        );
+                            file: intent.clipItems?.length ? intent.clipItems[0].file : null,
+                            mimetype: intent.type,
+                        });
                     }
                 }
             };

@@ -2,11 +2,13 @@ package org.edu_sharing.service.rendering;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -54,7 +56,6 @@ public class RenderingServiceImpl implements RenderingService{
 	AuthenticationTool authTool;
 	
 	Logger logger = Logger.getLogger(RenderingServiceImpl.class);
-	private ContextManagementFilter.B3 b3;
 
 	public RenderingServiceImpl(String appId){
 
@@ -76,7 +77,13 @@ public class RenderingServiceImpl implements RenderingService{
 			throw new RuntimeException(e);
 		}
 	}
-	
+
+	public RenderingVersionInfo getVersion() throws GeneralSecurityException {
+		String url = new RenderingTool().getRenderServiceUrl(ApplicationInfoList.getHomeRepository(), null);
+		url = url.replace("index.php", "version.php");
+		return new Gson().fromJson(new HttpQueryTool().query(url), RenderingVersionInfo.class);
+	}
+
 	@Override
 	public String getDetails(String nodeId,String nodeVersion,String displayMode,Map<String,String> parameters) throws InsufficientPermissionException, Exception{
 		
@@ -125,10 +132,8 @@ public class RenderingServiceImpl implements RenderingService{
 	@Override
 	public String getDetails(String renderingServiceUrl, RenderingServiceData data) throws JsonProcessingException, UnsupportedEncodingException {
 		HttpPost post = new HttpPost(renderingServiceUrl);
-		if(b3 == null) {
-			ContextManagementFilter.b3.get().addToRequest(post);
-		} else {
-			b3.addToRequest(post);
+		if (Context.getCurrentInstance() != null) {
+			Context.getCurrentInstance().getB3().addToRequest(post);
 		}
 		/*
 		ObjectMapper mapper = new ObjectMapper();
@@ -241,9 +246,5 @@ public class RenderingServiceImpl implements RenderingService{
 	@Override
 	public boolean renderingSupported() {
 		return true;
-	}
-
-	public void setB3(ContextManagementFilter.B3 b3) {
-		this.b3 = b3;
 	}
 }

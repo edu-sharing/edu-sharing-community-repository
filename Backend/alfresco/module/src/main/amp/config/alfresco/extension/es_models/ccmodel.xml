@@ -75,6 +75,7 @@
 				<aspect>ccm:eduscope</aspect>
 			</mandatory-aspects>
 		</type>
+		<!--deprecated! DO NOT USE -->
 		<type name="ccm:collection_feedback">
 			<title>Campus Content feedback on ccm:map with aspect ccm:collection</title>
 			<parent>cm:cmobject</parent>
@@ -85,6 +86,23 @@
 				</property>
 				<!-- hashed authority name sha1(authorityName + esuid) -->
 				<property name="ccm:collection_feedback_authority">
+					<type>d:text</type>
+				</property>
+			</properties>
+			<mandatory-aspects>
+				<aspect>ccm:eduscope</aspect>
+			</mandatory-aspects>
+		</type>
+		<type name="ccm:material_feedback">
+			<title>Campus Content feedback on ccm:io</title>
+			<parent>cm:cmobject</parent>
+			<properties>
+				<!-- json property with all feedback data -->
+				<property name="ccm:material_feedback_data">
+					<type>d:text</type>
+				</property>
+				<!-- hashed authority name sha1(authorityName + esuid) -->
+				<property name="ccm:material_feedback_authority">
 					<type>d:text</type>
 				</property>
 			</properties>
@@ -165,6 +183,17 @@
 						<many>false</many>
 					</target>
 				</association>
+				<child-association name="ccm:childmaterialfeedback">
+					<source>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</source>
+					<target>
+						<class>ccm:material_feedback</class>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</target>
+				</child-association>
 				<child-association name="ccm:childcomment">
 					<source>
 						<mandatory>false</mandatory>
@@ -310,17 +339,6 @@
 			<properties>
 			</properties>
 			<associations>
-				<child-association name="ccm:childcollectionfeedback">
-					<source>
-						<mandatory>false</mandatory>
-						<many>true</many>
-					</source>
-					<target>
-						<class>ccm:collection_feedback</class>
-						<mandatory>false</mandatory>
-						<many>true</many>
-					</target>
-				</child-association>
 				<child-association name="ccm:childcollectionproposal">
 					<source>
 						<mandatory>false</mandatory>
@@ -1767,7 +1785,7 @@
 			<title>extension of metadata of alfresco groups</title>
 			<properties>
 				<!-- edu-sharing: for sending invitation mails to groups -->
-				<property name="cm:groupEmail">
+				<property name="ccm:groupEmail">
 					<type>d:text</type>
 					<index enabled="true">
 						<atomic>true</atomic>
@@ -1796,6 +1814,19 @@
 	          			<stored>false</stored>
 	         			<tokenised>false</tokenised>
 	         		</index>	
+				</property>
+
+				<!-- information about the period of a group, i.e. the school year of a class group -->
+				<property name="ccm:groupPeriod">
+					<title>information about the period of a group</title>
+					<type>d:text</type>
+					<mandatory>false</mandatory>
+					<multiple>true</multiple>
+					<index enabled="true">
+						<atomic>true</atomic>
+						<stored>false</stored>
+						<tokenised>false</tokenised>
+					</index>
 				</property>
 				
 				<property name="ccm:groupSource">

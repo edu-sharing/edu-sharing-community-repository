@@ -240,22 +240,30 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		String metadataSetId = (metadataSetIdArr != null && metadataSetIdArr.length > 0) ? metadataSetIdArr[0] : null;
 
 		if(metadataSetId == null) {
-			Boolean forceMds = false;
-			try {
-				forceMds = (Boolean)nodeService.getProperty(new NodeRef(MCAlfrescoAPIClient.storeRef,parentId), QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET));
-				if(forceMds == null) forceMds = false;
-			}catch(Throwable t) {}
-			if(forceMds) {
-				metadataSetId = (String)nodeService.getProperty(new NodeRef(MCAlfrescoAPIClient.storeRef,parentId), QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
-			}
-			else {
-				if(HttpContext.getCurrentMetadataSet() != null && HttpContext.getCurrentMetadataSet().trim().length() > 0) {
-					metadataSetId = HttpContext.getCurrentMetadataSet();
-				}else {
-					metadataSetId = CCConstants.metadatasetdefault_id;
+			// allow to run as admin since user might don't have access to the parent ref
+			metadataSetId = AuthenticationUtil.runAsSystem(() -> {
+				Boolean forceMds = false;
+				NodeRef parentRef = new NodeRef(MCAlfrescoAPIClient.storeRef, parentId);
+				if (nodeService.exists(parentRef)) {
+					try {
+						forceMds = (Boolean) nodeService.getProperty(parentRef, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET));
+						if (forceMds == null) forceMds = false;
+					} catch (Throwable t) {
+					}
 				}
-				props.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, new String[] {metadataSetId});
-			}
+				if (forceMds) {
+					return (String) nodeService.getProperty(parentRef, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
+				} else {
+					String mdsId;
+					if(HttpContext.getCurrentMetadataSet() != null && HttpContext.getCurrentMetadataSet().trim().length() > 0) {
+						mdsId = HttpContext.getCurrentMetadataSet();
+					}else {
+						mdsId = CCConstants.metadatasetdefault_id;
+					}
+					props.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, new String[] {mdsId});
+					return mdsId;
+				}
+			});
 		}
 
 		MetadataSet mds = MetadataHelper.getMetadataset(getApplication(), metadataSetId);
@@ -1102,10 +1110,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					policyBehaviourFilter.disableBehaviour(newNode);
 					// replace owner, creator & modifier
 					setPublishedCopyProperties(oldNodeRef, newNode, owner);
-					setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), oldNodeRef.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_MODE, "copy");
-					setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_DATE, new Date());
+					setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), oldNodeRef.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_MODE, "copy", false);
+					setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_DATE, new Date(), false);
 					setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL,
-							oldNodeRef);
+							oldNodeRef, false);
 					NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.LOM_PROP_LIFECYCLE_VERSION);
 					NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.CCM_PROP_IO_VERSION_COMMENT);
 					//deleteVersionHistory(newNode.getId());
@@ -1340,7 +1348,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 	@Override
 	public void removeProperty(String storeProtocol, String storeId, String nodeId, String property) {
-		nodeService.removeProperty(new NodeRef(new StoreRef(storeProtocol,storeId),nodeId),QName.createQName(property));
+		// when interceptors are active, use set instead to trigger interceptors
+		if(PropertiesInterceptorFactory.getPropertiesSetInterceptors().size() > 0) {
+			setProperty(storeProtocol, storeId, nodeId, property, null, true);
+		} else {
+			nodeService.removeProperty(new NodeRef(new StoreRef(storeProtocol, storeId), nodeId), QName.createQName(property));
+		}
 	}
 	@Override
 	public String[] getAspects(String storeProtocol, String storeId, String nodeId){
@@ -1407,24 +1420,25 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 	}
 
-	public void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value) {
+	public void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value, boolean skipDefinitionChecks) {
 		NodeRef nodeRef = new NodeRef(new StoreRef(protocol, storeId), nodeId);
 		property = NameSpaceTool.transformToLongQName(property);
 		QName prop = QName.createQName(property);
-		PropertyDefinition propertyDefinition = dictionaryService.getProperty(prop);
-		if(propertyDefinition == null){
-			logger.error("property" + property + " is not defined in content model");
-			return;
-		}
+		if(!skipDefinitionChecks) {
+			PropertyDefinition propertyDefinition = dictionaryService.getProperty(prop);
+			if (propertyDefinition == null) {
+				logger.error("property" + property + " is not defined in content model");
+				return;
+			}
 
-		if(!propertyDefinition.isMultiValued() && value instanceof Collection){
-			if(((Collection)value).stream().iterator().hasNext()) {
-				value = (Serializable) ((Collection) value).stream().iterator().next();
-			} else {
-				value = null;
+			if (!propertyDefinition.isMultiValued() && value instanceof Collection) {
+				if (((Collection) value).stream().iterator().hasNext()) {
+					value = (Serializable) ((Collection) value).stream().iterator().next();
+				} else {
+					value = null;
+				}
 			}
 		}
-
 		Map<String, Object> properties = null;
 		if(PropertiesInterceptorFactory.getPropertiesSetInterceptors().size() > 0) {
 			try {
@@ -1479,7 +1493,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 
 	@Override
-	public Collection<NodeRef> getFrontpageNodes() throws Throwable {
+	public Collection<org.edu_sharing.service.model.NodeRef> getFrontpageNodes() throws Throwable {
 		return new NodeFrontpage().getNodesForCurrentUserAndConfig();
 	}
 

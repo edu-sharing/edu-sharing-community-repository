@@ -2,7 +2,6 @@ package org.edu_sharing.repository.server.authentication;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.Map;
 
 import javax.servlet.*;
@@ -13,9 +12,7 @@ import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.AuthenticationService;
-import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.log4j.Logger;
-import org.apache.log4j.MDC;
 import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
@@ -43,32 +40,8 @@ import org.springframework.context.ApplicationContext;
 
 
 public class ContextManagementFilter implements javax.servlet.Filter {
-	public interface B3 {
-		default String getTraceId() {
-			return null;
-		}
-
-		default String getClientTraceId() {
-			return null;
-		}
-
-		default String getSpanId() {
-			return null;
-		}
-
-		default boolean isSampled() {
-			return false;
-		}
-
-		default void addToRequest(HttpRequestBase request) {
-
-		}
-	}
 	// stores the currently accessing tool type, e.g. CONNECTOR
 	public static ThreadLocal<ApplicationInfo> accessTool = new ThreadLocal<>();
-	public static ThreadLocal<B3> b3 = ThreadLocal.withInitial(() ->
-			new B3() {}
-	);
 
 	Logger logger = Logger.getLogger(ContextManagementFilter.class);
 
@@ -97,60 +70,7 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 			final HttpServletRequest http = (HttpServletRequest) req;
 
 			Context.newInstance(http , (HttpServletResponse)res, context);
-			b3.set(new B3() {
 
-				@Override
-				public String getTraceId() {
-					return http.getHeader("X-B3-TraceId");
-				}
-
-				@Override
-				public String getClientTraceId() {
-					return http.getHeader("X-Client-Trace-Id");
-				}
-
-				@Override
-				public String getSpanId() {
-					return http.getHeader("X-B3-SpanId");
-				}
-
-				@Override
-				public boolean isSampled() {
-					return "1".equals(http.getHeader("X-B3-Sampled"));
-				}
-
-				@Override
-				public String toString() {
-					if (getTraceId() != null) {
-						return "TraceId: " + getTraceId();
-					}
-					return "";
-				}
-
-				@Override
-				public void addToRequest(HttpRequestBase request) {
-					for (String header : Collections.list(http.getHeaderNames())) {
-						if (
-								header.toUpperCase().startsWith("X-B3-") ||
-										header.toUpperCase().startsWith("X-OT-") ||
-										header.equalsIgnoreCase("X-Request-Id") ||
-										header.equalsIgnoreCase("X-Client-Trace-Id")
-						) {
-							request.setHeader(header, http.getHeader(header));
-						}
-					}
-				}
-			});
-
-			if(b3.get().getTraceId() != null) {
-				MDC.put("TraceId", b3.get().getTraceId());
-			}
-			if(b3.get().getClientTraceId() != null) {
-				MDC.put("ClientTraceId", b3.get().getClientTraceId());
-			}
-			if(b3.get().getSpanId() != null) {
-				MDC.put("SpanId", b3.get().getSpanId());
-			}
 			ScopeAuthenticationServiceFactory.getScopeAuthenticationService().setScopeForCurrentThread();
 
 			try{

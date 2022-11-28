@@ -867,7 +867,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             try {
                 const sets = ConfigurationHelper.filterValidMds(
                     repository,
-                    (await this.restMdsService.getSets().toPromise()).metadatasets,
+                    await this.mdsService.getAvailableMetadataSets().toPromise(),
                     this.configService,
                 );
                 mdsId = sets[0]?.id;

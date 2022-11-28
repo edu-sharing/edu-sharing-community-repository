@@ -526,7 +526,14 @@ public class CollectionServiceImpl implements CollectionService{
 	@Override
 	public void updateAndSetScope(Collection collection) throws Exception {
 		update(collection);
-		setScope(collection);		
+		if(permissionService.hasPermission(
+				StoreRef.PROTOCOL_WORKSPACE,
+				StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+				collection.getNodeId(),
+				CCConstants.PERMISSION_CHANGEPERMISSIONS
+				)) {
+			setScope(collection);
+		}
 	}
 	
 	public HashMap<String,Object> asProps(Collection collection){
@@ -801,7 +808,8 @@ public class CollectionServiceImpl implements CollectionService{
 				ref.getStoreRef().getIdentifier(),
 				ref.getId(),
 				CCConstants.CCM_PROP_MAP_COLLECTIONSCOPE,
-				result.toString());
+				result.toString(),
+				false);
 	}
 
 	public void setScope(Collection collection) throws Exception {
@@ -983,40 +991,6 @@ public class CollectionServiceImpl implements CollectionService{
 		logger.debug("cmis helper finished");
 		return nodes;
 	}
-
-	@Override
-	public String addFeedback(String id, HashMap<String, String[]> feedbackData) throws Throwable {
-		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK);
-		new PermissionServiceHelper(PermissionServiceFactory.getLocalService()).validatePermissionOrThrow(id,CCConstants.PERMISSION_FEEDBACK);
-		String hashedAuthority = getHashedAuthority();
-		return AuthenticationUtil.runAsSystem(()-> {
-			try {
-				// will reset after runAs automatically
-				AuthenticationUtil.setFullyAuthenticatedUser(AuthenticationUtil.SYSTEM_USER_NAME);
-				HashMap<String, Object> props = new HashMap<>();
-				props.put(CCConstants.CCM_PROP_COLLECTION_FEEDBACK_AUTHORITY,hashedAuthority);
-				props.put(CCConstants.CCM_PROP_COLLECTION_FEEDBACK_DATA,new Gson().toJson(feedbackData));
-				return nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,id,CCConstants.CCM_TYPE_COLLECTION_FEEDBACK,CCConstants.CCM_ASSOC_COLLECTION_FEEDBACK,props);
-			} catch (Throwable t) {
-				logger.warn(t.getMessage(),t);
-				throw t;
-			}
-		});
-	}
-
-	private String getHashedAuthority() {
-		String authorityName=AuthenticationUtil.getFullyAuthenticatedUser();
-		String esuid= (String) serviceRegistry.getNodeService().getProperty(serviceRegistry.getAuthorityService().getAuthorityNodeRef(authorityName), QName.createQName(CCConstants.PROP_USER_ESUID));
-		return DigestUtils.shaHex(authorityName+esuid);
-	}
-
-	@Override
-	public List<String> getFeedbacks(String id) throws Throwable {
-		ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK);
-		new PermissionServiceHelper(PermissionServiceFactory.getLocalService()).validatePermissionOrThrow(id,CCConstants.PERMISSION_COORDINATOR);
-		return AuthenticationUtil.runAsSystem(()-> nodeService.getChildrenChildAssociationRefType(id, CCConstants.CCM_TYPE_COLLECTION_FEEDBACK).stream().map((ref)->ref.getChildRef().getId()).collect(Collectors.toList()));
-	}
-
 	@Override
 	public List<NodeRef> getCollectionProposals(String nodeId, CCConstants.PROPOSAL_STATUS status) {
 		Map<String, Object> filters = new HashMap<>();

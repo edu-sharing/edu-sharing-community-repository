@@ -15,7 +15,6 @@ import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.DateTool;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.VCardConverter;
@@ -187,8 +186,8 @@ public class MetadataTemplateRenderer {
 				} else if ("multivalueCombined".equals(widget.getType())) {
 					empty = renderWidgetSubwidgets(widget, widgetHtml);
 					wasEmpty = empty;
-				} else if ("collection_feedback".equals(widget.getType())) {
-					empty = renderCollectionFeedback(widget, widgetHtml);
+				} else if ("material_feedback".equals(widget.getType())) {
+					empty = renderMaterialFeedback(widget, widgetHtml);
 					wasEmpty = empty;
 				} else {
 					int i = 0;
@@ -196,7 +195,10 @@ public class MetadataTemplateRenderer {
 						String rawValue = value;
 						HashMap<String, Object> vcardData = null;
 						if ("vcard".equals(widget.getType())) {
-							ArrayList<HashMap<String, Object>> map = VCardConverter.vcardToHashMap(value);
+							ArrayList<HashMap<String, Object>> map = VCardConverter.vcardToHashMap(
+									// html in vcards gets escaped beforehand for security reason, unescape special chars to not break the format
+									org.apache.commons.lang.StringEscapeUtils.unescapeHtml(value)
+ 							);
 							if (map.size() > 0) {
 								vcardData = map.get(0);
 							}
@@ -391,7 +393,7 @@ public class MetadataTemplateRenderer {
 		return html;
 	}
 
-	private boolean renderCollectionFeedback(MetadataWidget widget, StringBuffer widgetHtml) {
+	private boolean renderMaterialFeedback(MetadataWidget widget, StringBuffer widgetHtml) {
 		boolean empty=true;
 		String parent = NodeServiceFactory.getLocalService().getPrimaryParent(nodeRef.getId());
 		if(parent!=null){
@@ -402,26 +404,22 @@ public class MetadataTemplateRenderer {
 				- the user has the PERMISSION_FEEDBACK permission
 				- the user is not administrator (PERMISSION_DELETE) of the collection
 			 */
-			logger.info(ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK)+" "+PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),parent,CCConstants.PERMISSION_FEEDBACK)
+			logger.info(ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_MATERIAL_FEEDBACK)+" "+PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),parent,CCConstants.PERMISSION_FEEDBACK)
 					+" "+PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),parent,CCConstants.PERMISSION_DELETE));
-			boolean isInsideCollection = false;
-			try{
-				isInsideCollection = NodeServiceHelper.hasAspect(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parent),CCConstants.CCM_ASPECT_COLLECTION);
-			}catch(Throwable ignored){
-
-			}
-			if( isInsideCollection &&
-				ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK) &&
+			if(
+				ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_MATERIAL_FEEDBACK) &&
 				!GuestCagePolicy.getGuestUsers().contains(userName) &&
-				PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),parent,CCConstants.PERMISSION_FEEDBACK) &&
-				!PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),parent,CCConstants.PERMISSION_DELETE)
+				PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeRef.getId(),CCConstants.PERMISSION_FEEDBACK) &&
+				!PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),nodeRef.getId(),CCConstants.PERMISSION_DELETE)
 			){
 				try {
 					widgetHtml.
 							append("<div class=\"mdsValue\">").
 							append("<a href=\"").
-							append(URLTool.getNgComponentsUrl()).append("collections?id=").append(parent).append("&feedback=true&feedbackClose=true").
-							append("\" data-es-auth-required=\"true\"");
+							append(URLTool.getNgRenderNodeUrl(nodeRef.getId(), null)).
+							append("?action=OPTIONS.MATERIAL_FEEDBACK&feedbackClose=true").
+							append("\" data-es-auth-required=\"true\"").
+							append("\" data-es-action=\"OPTIONS.MATERIAL_FEEDBACK\"");
 					if(widget.getLink()!=null){
 						widgetHtml.append(" target=\"").append(widget.getLink()).append("\"");
 					}
@@ -429,7 +427,7 @@ public class MetadataTemplateRenderer {
 					if(widget.getIcon()!=null){
 						widgetHtml.append(insertIcon(widget.getIcon()));
 					}
-					widgetHtml.append(MetadataHelper.getTranslation("collection_feedback_button")).append("</a></div>");
+					widgetHtml.append(MetadataHelper.getTranslation("material_feedback_button")).append("</a></div>");
 					empty=false;
 				} catch (Exception e) {
 					logger.warn(e.getMessage(),e);
@@ -488,7 +486,7 @@ public class MetadataTemplateRenderer {
 				path = Lists.reverse(path);
 				int j = 0;
 				if (renderingMode.equals(RenderingMode.HTML)) {
-					widgetHtml.append("<li class='mdsValue'>");
+					widgetHtml.append("<li class='mdsValue' data-value-key='").append(value).append("'>");
 				} else if (renderingMode.equals(RenderingMode.TEXT)) {
 					if(i > 0) {
 						widgetHtml.append(TEXT_MULTIVALUE_SEPERATOR);

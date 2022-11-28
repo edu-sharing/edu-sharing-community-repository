@@ -15,6 +15,9 @@ Where can I get the latest release?
 You can download source and binaries from
 our [artifact repository](https://artifacts.edu-sharing.com).
 
+
+We also offer a ready-to-use docker-compose & kubernetes package for each release. Check out the github releases page [here](https://github.com/edu-sharing/edu-sharing-projects-community/releases).
+
 Contributing
 ------------
 For contribution on a regular basis please visit our [community site](http://edu-sharing-network.org/?lang=en).

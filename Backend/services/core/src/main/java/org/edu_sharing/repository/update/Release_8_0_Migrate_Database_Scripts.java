@@ -88,7 +88,7 @@ public class Release_8_0_Migrate_Database_Scripts extends UpdateAbstract {
 							QName.createQName(newName),
 							false
 					);
-					NodeServiceHelper.setProperty(newNode, CCConstants.CM_NAME, newName);
+					NodeServiceHelper.setProperty(newNode, CCConstants.CM_NAME, newName, false);
 				}
 			});
 			return true;

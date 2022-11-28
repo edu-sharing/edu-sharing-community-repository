@@ -17,6 +17,7 @@ import { FrameEventsService } from '../../../core-module/core.module';
 import { OPEN_URL_MODE } from '../../../core-module/ui/ui-constants';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
 
 @Component({
     selector: 'es-node-variant',
@@ -29,7 +30,6 @@ import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 })
 export class NodeVariantComponent {
     _node: Node;
-    chooseDirectory = false;
     breadcrumbs: Node[];
     variantName: string;
     openViaConnector: Connector;
@@ -68,6 +68,7 @@ export class NodeVariantComponent {
         private events: FrameEventsService,
         private router: Router,
         private nodeApi: RestNodeService,
+        private dialogs: DialogsService,
     ) {
         this.updateBreadcrumbs(RestConstants.INBOX);
         this.updateButtons();
@@ -159,12 +160,24 @@ export class NodeVariantComponent {
             );
     }
 
+    async chooseDirectory() {
+        const dialogRef = await this.dialogs.openFileChooserDialog({
+            title: 'NODE_VARIANT.FILE_PICKER_TITLE',
+            pickDirectory: true,
+            writeRequired: true,
+        });
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                this.setDirectory(result);
+            }
+        });
+    }
+
     setDirectory(event: Node[]) {
         this.updateBreadcrumbs(event[0].ref.id);
     }
 
     private updateBreadcrumbs(id: string) {
-        this.chooseDirectory = false;
         this.nodeApi.getNodeParents(id, false).subscribe((parents) => {
             this.breadcrumbs = parents.nodes.reverse();
         });

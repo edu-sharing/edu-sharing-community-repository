@@ -498,24 +498,6 @@
         ],
         "type": "object"
       },
-      "CollectionFeedback": {
-        "properties": {
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "creator": {
-            "type": "string"
-          },
-          "feedback": {
-            "additionalProperties": {
-              "type": "object"
-            },
-            "type": "object"
-          }
-        },
-        "type": "object"
-      },
       "CollectionOptions": {
         "properties": {
           "privateCollections": {
@@ -1257,6 +1239,42 @@
         ],
         "type": "object"
       },
+      "FeedbackData": {
+        "properties": {
+          "authority": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "data": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "modifiedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FeedbackResult": {
+        "properties": {
+          "nodeId": {
+            "type": "string"
+          },
+          "wasUpdated": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
       "Filter": {
         "properties": {
           "entries": {
@@ -1939,6 +1957,26 @@
           },
           "value": {
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Licenses": {
+        "properties": {
+          "repository": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "services": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "type": "object"
           }
         },
         "type": "object"
@@ -3886,6 +3924,20 @@
         },
         "type": "object"
       },
+      "RepositoryVersionInfo": {
+        "properties": {
+          "git": {
+            "$ref": "#/components/schemas/VersionGit"
+          },
+          "maven": {
+            "$ref": "#/components/schemas/VersionMaven"
+          },
+          "version": {
+            "$ref": "#/components/schemas/Version"
+          }
+        },
+        "type": "object"
+      },
       "RestoreResult": {
         "properties": {
           "archiveNodeId": {
@@ -5535,6 +5587,87 @@
         },
         "type": "object"
       },
+      "Version": {
+        "properties": {
+          "build": {
+            "type": "string"
+          },
+          "full": {
+            "type": "string"
+          },
+          "major": {
+            "type": "string"
+          },
+          "minor": {
+            "type": "string"
+          },
+          "patch": {
+            "type": "string"
+          },
+          "qualifier": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VersionGit": {
+        "properties": {
+          "branch": {
+            "type": "string"
+          },
+          "commit": {
+            "$ref": "#/components/schemas/VersionGitCommit"
+          }
+        },
+        "type": "object"
+      },
+      "VersionGitCommit": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "timestamp": {
+            "$ref": "#/components/schemas/VersionTimestamp"
+          }
+        },
+        "type": "object"
+      },
+      "VersionMaven": {
+        "properties": {
+          "bom": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "project": {
+            "$ref": "#/components/schemas/VersionProject"
+          }
+        },
+        "type": "object"
+      },
+      "VersionProject": {
+        "properties": {
+          "artifactId": {
+            "type": "string"
+          },
+          "groupId": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VersionTimestamp": {
+        "properties": {
+          "datetime": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "WebsiteInformation": {
         "properties": {
           "description": {
@@ -5634,6 +5767,38 @@
           }
         },
         "summary": "Discover the API.",
+        "tags": [
+          "ABOUT"
+        ]
+      }
+    },
+    "/_about/licenses": {
+      "get": {
+        "description": "Get information about used 3rd-party licenses.",
+        "operationId": "licenses",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Licenses"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "License information.",
         "tags": [
           "ABOUT"
         ]
@@ -7124,7 +7289,8 @@
                 "cluster",
                 "defaults",
                 "defaults/metadatasets",
-                "defaults/mailtemplates"
+                "defaults/mailtemplates",
+                "defaults/database"
               ],
               "type": "string"
             }
@@ -7221,7 +7387,8 @@
                 "cluster",
                 "defaults",
                 "defaults/metadatasets",
-                "defaults/mailtemplates"
+                "defaults/mailtemplates",
+                "defaults/database"
               ],
               "type": "string"
             }
@@ -10318,6 +10485,78 @@
         ]
       }
     },
+    "/admin/v1/version": {
+      "get": {
+        "description": "detailed information about the running system version",
+        "operationId": "getVersion",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RepositoryVersionInfo"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "get detailed version information",
+        "tags": [
+          "ADMIN v1"
+        ]
+      }
+    },
     "/archive/v1/purge/{repository}": {
       "delete": {
         "description": "Searches for archive nodes.",
@@ -12531,201 +12770,6 @@
         ]
       }
     },
-    "/collection/v1/collections/{repository}/{collection}/feedback": {
-      "get": {
-        "description": "Requires permission \"???\" on the specific permission",
-        "operationId": "getFeedbackOfCollection",
-        "parameters": [
-          {
-            "description": "ID of repository (or \"-home-\" for home repository)",
-            "in": "path",
-            "name": "repository",
-            "required": true,
-            "schema": {
-              "default": "-home-",
-              "type": "string"
-            }
-          },
-          {
-            "description": "ID of collection",
-            "in": "path",
-            "name": "collection",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "description": "OK."
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Preconditions are not present."
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Authorization failed."
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Session user has insufficient rights to perform this operation."
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Ressources are not found."
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Fatal error occured."
-          }
-        },
-        "summary": "Get feedback of collection.",
-        "tags": [
-          "COLLECTION v1"
-        ]
-      },
-      "post": {
-        "description": "Requires permission \"Feedback\" on the specific collection",
-        "operationId": "addFeedbackToCollection",
-        "parameters": [
-          {
-            "description": "ID of repository (or \"-home-\" for home repository)",
-            "in": "path",
-            "name": "repository",
-            "required": true,
-            "schema": {
-              "default": "-home-",
-              "type": "string"
-            }
-          },
-          {
-            "description": "ID of collection",
-            "in": "path",
-            "name": "collection",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": {
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
-                },
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {}
-            },
-            "description": "OK."
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Preconditions are not present."
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Authorization failed."
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Session user has insufficient rights to perform this operation."
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Ressources are not found."
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Fatal error occured."
-          }
-        },
-        "summary": "Post feedback to collection.",
-        "tags": [
-          "COLLECTION v1"
-        ]
-      }
-    },
     "/collection/v1/collections/{repository}/{collection}/icon": {
       "delete": {
         "description": "Deletes Preview Image of a collection.",
@@ -14201,6 +14245,212 @@
         "summary": "List all available connectors",
         "tags": [
           "CONNECTOR v1"
+        ]
+      }
+    },
+    "/feedback/v1/feedback/{repository}/{node}/add": {
+      "put": {
+        "description": "Adds feedback to the given node. Depending on the internal config, the current user will be obscured to prevent back-tracing to the original id",
+        "operationId": "addFeedback",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of node",
+            "in": "path",
+            "name": "node",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "type": "object"
+              }
+            }
+          },
+          "description": "feedback data, key/value pairs",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackResult"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Give feedback on a node",
+        "tags": [
+          "FEEDBACK v1"
+        ]
+      }
+    },
+    "/feedback/v1/feedback/{repository}/{node}/list": {
+      "get": {
+        "description": "Get all given feedback for a node. Requires Coordinator permissions on node",
+        "operationId": "getFeedbacks",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of node",
+            "in": "path",
+            "name": "node",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FeedbackData"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Get given feedback on a node",
+        "tags": [
+          "FEEDBACK v1"
         ]
       }
     },
@@ -15857,7 +16107,7 @@
             }
           },
           {
-            "description": "authorityType either GROUP or USER, empty to show all",
+            "description": "group type to filter for, e.g. ORG_ADMINISTRATORS",
             "in": "path",
             "name": "type",
             "required": true,
@@ -16507,7 +16757,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "properties": {
                   "avatar": {
@@ -17069,7 +17319,7 @@
             "description": "Fatal error occured."
           }
         },
-        "summary": "Deelete a node of a node list of a user",
+        "summary": "Delete a node of a node list of a user",
         "tags": [
           "IAM v1"
         ]
@@ -23071,6 +23321,118 @@
         ]
       }
     },
+    "/node/v1/nodes/{repository}/{node}/metadata/copy/{from}": {
+      "put": {
+        "description": "Copies all common metadata from one note to another. Current user needs write access to the target node and read access to the source node.",
+        "operationId": "copyMetadata",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of node",
+            "in": "path",
+            "name": "node",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The node where to copy the metadata from",
+            "in": "path",
+            "name": "from",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NodeEntry"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Copy metadata from another node.",
+        "tags": [
+          "NODE v1"
+        ]
+      }
+    },
     "/node/v1/nodes/{repository}/{node}/metadata/template": {
       "get": {
         "description": "All the given metadata will be inherited to child nodes.",
@@ -24136,6 +24498,15 @@
             "required": true,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "description": "create a node version",
+            "in": "query",
+            "name": "createVersion",
+            "schema": {
+              "default": true,
+              "type": "boolean"
             }
           }
         ],

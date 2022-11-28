@@ -512,7 +512,7 @@ export class ListTableComponent
             }),
         );
         this.id = Math.random();
-        frame.addListener(this);
+        frame.addListener(this, this.destroyed);
         // wait for all bindings to finish
         setTimeout(() => {
             this.refreshAvailableOptions();

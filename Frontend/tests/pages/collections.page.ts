@@ -6,7 +6,7 @@ import { GeneralPage } from './general.page';
 export class CollectionsPage {
     static readonly url = './components/collections';
     /** The time after which we expect the search index to reflect any changes. */
-    static readonly INDEX_UPDATE_TIMEOUT = 15_000;
+    static readonly INDEX_UPDATE_TIMEOUT = 20_000;
 
     private readonly generalPage = new GeneralPage(this.page);
 
@@ -18,12 +18,6 @@ export class CollectionsPage {
             this.page.goto(CollectionsPage.url),
             this.page.waitForNavigation({ url: CollectionsPage.url }),
         ]);
-    }
-
-    @testStep()
-    async expectScopeButton() {
-        const mainNavScopeButton = this.page.locator('[data-test="main-nav-scope-button"]');
-        await expect(mainNavScopeButton).toHaveText(/Collections/);
     }
 
     @testStep()

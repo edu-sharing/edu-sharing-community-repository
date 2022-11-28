@@ -223,7 +223,6 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             this.nodeEntries.getSelection().clear();
             this.onReset.emit();
             if (event.offset === 0) {
-                console.log('reset pagination', event);
                 this.nodeEntries.resetPagination();
             }
         } else if (this.dataSource.isFullyLoaded()) {

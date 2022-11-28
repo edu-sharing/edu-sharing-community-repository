@@ -5,7 +5,7 @@
   [avatar]="config.avatar"
   (closeButtonClick)="onCloseButtonClick()"
   [showCloseButton]="shouldShowCloseButton()"
-  [disableCloseButton]="isLoading"
+  [disableCloseButton]="isLoading || autoSavingState === 'saving' || closeButtonTemporarilyDisabled"
 ></es-card-header>
 
 <div class="card-content" [style.padding.px]="config.contentPadding" [attr.aria-hidden]="isLoading">
@@ -15,4 +15,19 @@
   </div>
 </div>
 
-<es-card-actions *ngIf="buttons && buttons.length > 0" [buttons]="buttons"></es-card-actions>
+<es-card-actions
+  *ngIf="(buttons && buttons.length > 0) || autoSavingState"
+  [buttons]="buttons"
+  [additionalContent]="config.customBottomBarContent ?? savingInfo"
+></es-card-actions>
+<ng-template #savingInfo>
+  <p *ngIf="autoSavingState === 'saving'" class="saving-info" aria-live="polite">
+    {{ 'DIALOG.SAVING' | translate }}
+  </p>
+  <p *ngIf="autoSavingState === 'saved'" class="saving-info" aria-live="polite">
+    {{ 'DIALOG.SAVED' | translate }}
+  </p>
+  <p *ngIf="autoSavingState === 'error'" class="saving-error" aria-live="polite">
+    {{ 'DIALOG.SAVING_ERROR' | translate }}
+  </p>
+</ng-template>

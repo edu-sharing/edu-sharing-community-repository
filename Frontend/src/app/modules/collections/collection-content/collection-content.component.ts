@@ -164,7 +164,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     dataSourceCollectionProposals = new NodeDataSource<ProposalNode>();
     collectionsColumns: ListItem[] = [];
     referencesColumns: ListItem[] = [];
-    private loadingTask = this.loadingScreen.addLoadingTask();
+    private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed$ });
 
     proposalColumns = [
         new ListItem('NODE', RestConstants.CM_PROP_TITLE),
@@ -459,8 +459,12 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                         this.refreshContent();
                         return;
                     }
-                    if (source.element.length === nodes.length) {
-                        const observables = source.element.map((n: any) =>
+                    if (nodes.length > 0) {
+                        const movedNodes = source.element.filter(
+                            (sourceElement: CollectionReference) =>
+                                nodes.some((node) => node.originalId === sourceElement.originalId),
+                        );
+                        const observables = movedNodes.map((n) =>
                             this.collectionService.removeFromCollection(
                                 n.ref.id,
                                 this.collection.ref.id,

@@ -951,7 +951,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			}
 		}
 
-		boolean hasMds = nodeType.equals(CCConstants.CCM_TYPE_IO) || nodeType.equals(CCConstants.CCM_TYPE_COMMENT) || nodeType.equals(CCConstants.CCM_TYPE_COLLECTION_FEEDBACK) || nodeType.equals(CCConstants.CCM_TYPE_MAP) || nodeType.equals(CCConstants.CM_TYPE_FOLDER);
+		boolean hasMds = nodeType.equals(CCConstants.CCM_TYPE_IO) || nodeType.equals(CCConstants.CCM_TYPE_COMMENT) || nodeType.equals(CCConstants.CCM_TYPE_MATERIAL_FEEDBACK) || nodeType.equals(CCConstants.CCM_TYPE_MAP) || nodeType.equals(CCConstants.CM_TYPE_FOLDER);
 		String mdsId=CCConstants.metadatasetdefault_id;
 		MetadataSet mds = null;
 		/**
@@ -2180,7 +2180,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 	}
 	
-	public Map<String, Serializable> transformQNameKeyToString(Map<QName, Serializable> props) {
+	public static Map<String, Serializable> transformQNameKeyToString(Map<QName, Serializable> props) {
 		Map<String, Serializable> result = new HashMap<String, Serializable>();
 		for (Map.Entry<QName, Serializable> entry : props.entrySet()) {
 			result.put(entry.getKey().toString(), entry.getValue());

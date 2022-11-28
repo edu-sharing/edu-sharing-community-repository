@@ -13,6 +13,7 @@ import org.apache.commons.logging.impl.Log4JLogger;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.restservices.*;
@@ -73,7 +74,7 @@ public class ErrorResponse {
 			logger.info(t.getMessage(), t);
 			return Response.status(CCConstants.HTTP_INSUFFICIENT_STORAGE).entity(new ErrorResponse(t)).build();
 		}
-        if(t instanceof DAODuplicateNodeNameException){
+        if(t instanceof DAODuplicateNodeNameException || t instanceof DAODuplicateNodeException){
         	return Response.status(Response.Status.CONFLICT).entity(new ErrorResponse(t)).build();
         }
 
@@ -114,10 +115,13 @@ public class ErrorResponse {
 			PrintWriter printWriter = new PrintWriter( writer );
 			t.printStackTrace( printWriter );
 			printWriter.flush();
-			if(level.toInt()<=Level.DEBUG_INT)
-				setStacktrace(ContextManagementFilter.b3.get().toString() + "\n" + writer.toString());
-			else
-				setMessage(ContextManagementFilter.b3.get().toString());
+			if(level.toInt()<=Level.DEBUG_INT) {
+				if (Context.getCurrentInstance() != null) {
+					setStacktrace(Context.getCurrentInstance().getB3().toString() + "\n" + writer.toString());
+				} else {
+					setStacktrace(writer.toString());
+				}
+			}
 		}
 	}
 	

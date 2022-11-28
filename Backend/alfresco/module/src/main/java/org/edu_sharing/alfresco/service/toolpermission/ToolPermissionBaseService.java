@@ -332,7 +332,7 @@ public class ToolPermissionBaseService {
         toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING); // pin collections
         toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE); // use handle id
         toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_USAGE_STATISTIC); // get all usages across all nodes (as system)
-        toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK); // give feedback on collections
+        toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_MATERIAL_FEEDBACK); // give feedback on collections
         toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_USER);
         toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_NODES);
         toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_MEDIACENTER_MANAGE);
@@ -371,7 +371,7 @@ public class ToolPermissionBaseService {
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CURRICULUM);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_PINNING);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_HANDLESERVICE);
-        toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK);
+        toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_MATERIAL_FEEDBACK);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_USAGE_STATISTIC);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_COMMENT_WRITE);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_USER);

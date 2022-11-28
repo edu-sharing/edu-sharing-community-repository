@@ -12,7 +12,7 @@ import { UIConstants } from '../core-module/ui/ui-constants';
 import { DateHelper } from './DateHelper';
 import { ToastMessageComponent } from './components/toast-message/toast-message.component';
 import { RestConnectorService } from '../core-module/core.module';
-import { AccessibilityService } from '../common/ui/accessibility/accessibility.service';
+import { AccessibilityService } from '../services/accessibility.service';
 import { takeUntil } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -445,7 +445,15 @@ export class Toast implements OnDestroy {
             json = errorObject.error;
         }
         try {
-            error = json.error + ': ' + json.message;
+            if (json.error || json.message) {
+                error = json.error + ': ' + json.message;
+            } else if (json) {
+                error = JSON.stringify(json, null, 2);
+            }
+            // add url of endpoint (if available) to the message
+            if (errorObject.url) {
+                error += '\n\n' + errorObject.url;
+            }
         } catch (e) {
             if (errorObject) {
                 console.error(errorObject);
@@ -455,13 +463,6 @@ export class Toast implements OnDestroy {
         if (message === 'COMMON_API_ERROR') {
             dialogMessage = '';
             dialogTitle = 'COMMON_API_ERROR_TITLE';
-            translationParameters = {
-                date: DateHelper.formatDate(this.translate, new Date().getTime(), {
-                    useRelativeLabels: false,
-                    showAlwaysTime: true,
-                    showSeconds: true,
-                }),
-            };
             try {
                 if (json.error.stacktraceArray) {
                     errorInfo = json.stacktraceArray.join('\n');
@@ -554,6 +555,15 @@ export class Toast implements OnDestroy {
                 if (!translationParameters) {
                     translationParameters = {};
                 }
+                translationParameters.date = DateHelper.formatDate(
+                    this.translate,
+                    new Date().getTime(),
+                    {
+                        useRelativeLabels: false,
+                        showAlwaysTime: true,
+                        showSeconds: true,
+                    },
+                );
                 translationParameters.error = error;
             }
         }
@@ -565,8 +575,16 @@ export class Toast implements OnDestroy {
             dialogTitle = null;
         }
         if (errorObject?.traceId) {
-            dialogTitle = this.translate.instant(dialogTitle) + ' (' + errorObject.traceId + ')';
-            message = this.translate.instant(message) + '\n(' + errorObject.traceId + ')';
+            dialogTitle =
+                this.translate.instant(dialogTitle, translationParameters) +
+                ' (' +
+                errorObject.traceId +
+                ')';
+            message =
+                this.translate.instant(message, translationParameters) +
+                '\n(' +
+                errorObject.traceId +
+                ')';
         }
         return {
             message,

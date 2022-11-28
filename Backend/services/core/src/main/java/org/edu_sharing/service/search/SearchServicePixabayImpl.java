@@ -37,8 +37,9 @@ import org.json.JSONObject;
 import org.springframework.extensions.surf.util.URLEncoder;
 
 public class SearchServicePixabayImpl extends SearchServiceAdapter{
-	
+
 	private static final String PIXABAY_API = "https://pixabay.com/api/";
+	public static final String PIXABAY_LICENSE_URL = "https://pixabay.com/de/service/terms/#license";
 
 	Logger logger = Logger.getLogger(SearchServicePixabayImpl.class);
 	
@@ -135,7 +136,8 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 			if(json.getString("type").equals("film"))
 				properties.put(CCConstants.LOM_PROP_TECHNICAL_FORMAT, "video/*");
 			properties.put(CCConstants.CM_NAME,json.getString("tags")+"."+extension);
-			properties.put(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY,CCConstants.COMMON_LICENSE_CC_ZERO);
+			properties.put(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY,CCConstants.COMMON_LICENSE_CUSTOM);
+			properties.put(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION, PIXABAY_LICENSE_URL);
 			properties.put(CCConstants.CM_PROP_C_CREATOR,json.getString("user"));
 			properties.put(CCConstants.NODECREATOR_FIRSTNAME,json.getString("user"));
 			properties.put(CCConstants.NODEMODIFIER_FIRSTNAME,json.getString("user"));

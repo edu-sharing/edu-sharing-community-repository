@@ -251,9 +251,9 @@ export class NodeHelperService {
         return new Observable<Node>((observer: Observer<Node>) => {
             const options: any = this.rest.getRequestOptions();
             options.responseType = 'blob';
-
+            const url = getRepoUrl(node.preview.url, node);
             this.rest
-                .get(node.preview.url + '&allowRedirect=false&quality=' + quality, options, false)
+                .get(url + '&allowRedirect=false&quality=' + quality, options, false)
                 .subscribe(
                     async (data: Blob) => {
                         const reader = new FileReader();
@@ -279,7 +279,7 @@ export class NodeHelperService {
      * @returns {string}
      */
     public getLicenseIcon(node: Node) {
-        return node.license ? node.license.icon : null;
+        return node.license ? getRepoUrl(node.license.icon, node) : null;
     }
 
     /**
@@ -855,6 +855,8 @@ export class NodeHelperService {
         if (mode === 'routerLink') {
             return '/' + data.routerLink;
         }
+        // enforce clearing of parameters which should only be consumed once
+        data.queryParams.redirectFromSSO = null;
         return data.queryParams;
     }
 

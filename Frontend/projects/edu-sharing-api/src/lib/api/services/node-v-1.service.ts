@@ -1172,6 +1172,90 @@ export class NodeV1Service extends BaseService {
     }
 
     /**
+     * Path part for operation copyMetadata
+     */
+    static readonly CopyMetadataPath = '/node/v1/nodes/{repository}/{node}/metadata/copy/{from}';
+
+    /**
+     * Copy metadata from another node.
+     *
+     * Copies all common metadata from one note to another. Current user needs write access to the target node and read access to the source node.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `copyMetadata()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    copyMetadata$Response(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+
+        /**
+         * The node where to copy the metadata from
+         */
+        from: string;
+    }): Observable<StrictHttpResponse<NodeEntry>> {
+        const rb = new RequestBuilder(this.rootUrl, NodeV1Service.CopyMetadataPath, 'put');
+        if (params) {
+            rb.path('repository', params.repository, {});
+            rb.path('node', params.node, {});
+            rb.path('from', params.from, {});
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<NodeEntry>;
+                }),
+            );
+    }
+
+    /**
+     * Copy metadata from another node.
+     *
+     * Copies all common metadata from one note to another. Current user needs write access to the target node and read access to the source node.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `copyMetadata$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    copyMetadata(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of node
+         */
+        node: string;
+
+        /**
+         * The node where to copy the metadata from
+         */
+        from: string;
+    }): Observable<NodeEntry> {
+        return this.copyMetadata$Response(params).pipe(
+            map((r: StrictHttpResponse<NodeEntry>) => r.body as NodeEntry),
+        );
+    }
+
+    /**
      * Path part for operation getChildren
      */
     static readonly GetChildrenPath = '/node/v1/nodes/{repository}/{node}/children';

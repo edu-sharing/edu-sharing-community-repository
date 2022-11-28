@@ -7,6 +7,7 @@ The frontend uses Angular 5 and TypeScript and builds via [angular-cli](https://
 Run "npm install" inside the project folder after checking out the project to fetch all dependencies.
 
 ## Development server
+
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
 
 ## Code scaffolding
@@ -23,8 +24,11 @@ Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.
 
 ## Running end-to-end tests
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-Before running the tests make sure you are serving the app via `ng serve`.
+Configure the test setup via `.env`.
+If you test against `localhost:4200`, make sure you are serving the app via `ng serve`.
+Run all tests using the command `npm run e2e`.
+
+For more information, see [tests/README.md](tests/README.md).
 
 ## Deploying to GitHub Pages
 
@@ -37,7 +41,9 @@ To get more help on the `angular-cli` use `ng help` or go check out the [Angular
 ## Build works but packaged electron apps wont :( Use project desktopApp.
 
 ## Managing routes
+
 Routes are defined in the file /src/app/router.component.ts
 
 ## Managing language
-Open the specific components lanaguge file, you can find them in src/assets/i18n/<component>/<language>.json 
+
+Open the specific components lanaguge file, you can find them in src/assets/i18n/<component>/<language>.json
