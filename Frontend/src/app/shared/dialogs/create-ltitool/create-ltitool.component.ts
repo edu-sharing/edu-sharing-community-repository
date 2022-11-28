@@ -30,8 +30,6 @@ export class CreateLtitoolComponent implements OnInit {
     @Output() onCancel = new EventEmitter();
     @Output() onCreate = new EventEmitter();
     public _name = '';
-    public _nodeIds: string[];
-    public _titles: string[];
     nodes: Node[] = [];
 
     constructor(
@@ -53,6 +51,9 @@ export class CreateLtitoolComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        if (!this._tool) {
+            return;
+        }
         console.log(
             'this._tool.appId24:' +
                 this._tool.appId +
