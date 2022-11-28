@@ -7,6 +7,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.cmr.version.VersionService;
+import org.alfresco.webservice.authentication.AuthenticationFault;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -33,6 +34,13 @@ import java.util.stream.Collectors;
 @JobDescription(description = "Removes versions of node which are not referenced")
 public class RemoveNodeVersionsJob extends AbstractJobMapAnnotationParams {
 
+    // all versions with the labels listed here will NOT be deleted
+    static final List<String> BLOCKED_VERSION_LABELS = Arrays.asList(
+            CCConstants.VERSION_COMMENT_BULK_CREATE,
+            CCConstants.VERSION_COMMENT_BULK_UPDATE,
+            CCConstants.VERSION_COMMENT_BULK_UPDATE_RESYNC,
+            CCConstants.VERSION_COMMENT_BULK_MIGRATION
+    );
     protected Logger logger = Logger.getLogger(RemoveNodeVersionsJob.class);
 
     @Setter
@@ -106,6 +114,7 @@ public class RemoveNodeVersionsJob extends AbstractJobMapAnnotationParams {
         List<Version> versionsToDelete = versionHistory.getAllVersions().stream()
                 .skip(keepAtLeast)
                 .filter(version -> !Objects.equals(version.getVersionLabel(), versionInUse))
+                .filter(version -> !BLOCKED_VERSION_LABELS.contains(version.getVersionLabel()))
                 .filter(version -> Math.abs(refDate.getTime() - version.getFrozenModifiedDate().getTime()) > timeSpan)
                 .filter(version -> usages.stream().noneMatch(x-> Objects.equals(x.getUsageVersion(), version.getVersionLabel())))
                 .collect(Collectors.toList());

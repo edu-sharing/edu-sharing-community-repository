@@ -35,6 +35,9 @@ class RemoveNodeVersionsJobTest {
     public String v4Label = "v4";
     public String v5Label = "v5";
     public String v6Label = "v6";
+
+    public String blocked1Label = RemoveNodeVersionsJob.BLOCKED_VERSION_LABELS.get(0);
+    public String blocked2Label = RemoveNodeVersionsJob.BLOCKED_VERSION_LABELS.get(1);
     private NodeRef node = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, "current");
     private NodeRef nodeV1 = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, "v1");
     private NodeRef nodeV2 = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, "v2");
@@ -42,6 +45,9 @@ class RemoveNodeVersionsJobTest {
     private NodeRef nodeV4 = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, "v4");
     private NodeRef nodeV5 = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, "v5");
     private NodeRef nodeV6 = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, "v6");
+
+    private NodeRef nodeBlocked1 = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, "blocked1");
+    private NodeRef nodeBlocked2 = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, "blocked2");
 
     @Mock
     private Usage2Service usage2Service;
@@ -53,7 +59,7 @@ class RemoveNodeVersionsJobTest {
     private NodeService nodeService;
 
     @Mock
-    Version v1, v2, v3, v4, v5, v6;
+    Version v1, v2, v3, v4, v5, v6, blocked1, blocked2;
 
 
     @Captor
@@ -76,6 +82,8 @@ class RemoveNodeVersionsJobTest {
         lenient().when(v4.getVersionLabel()).thenReturn(v4Label);
         lenient().when(v5.getVersionLabel()).thenReturn(v5Label);
         lenient().when(v6.getVersionLabel()).thenReturn(v6Label);
+        lenient().when(blocked1.getVersionLabel()).thenReturn(blocked1Label);
+        lenient().when(blocked2.getVersionLabel()).thenReturn(blocked2Label);
 
         lenient().when(v1.getVersionedNodeRef()).thenReturn(nodeV1);
         lenient().when(v2.getVersionedNodeRef()).thenReturn(nodeV2);
@@ -83,6 +91,9 @@ class RemoveNodeVersionsJobTest {
         lenient().when(v4.getVersionedNodeRef()).thenReturn(nodeV4);
         lenient().when(v5.getVersionedNodeRef()).thenReturn(nodeV5);
         lenient().when(v6.getVersionedNodeRef()).thenReturn(nodeV6);
+        lenient().when(v6.getVersionedNodeRef()).thenReturn(nodeV6);
+        lenient().when(blocked1.getVersionedNodeRef()).thenReturn(nodeBlocked1);
+        lenient().when(blocked2.getVersionedNodeRef()).thenReturn(nodeBlocked2);
 
         Date now = new Date();
         lenient().when(v1.getFrozenModifiedDate()).thenReturn(now);
@@ -91,6 +102,9 @@ class RemoveNodeVersionsJobTest {
         lenient().when(v4.getFrozenModifiedDate()).thenReturn(DateUtils.addDays(now, -3));
         lenient().when(v5.getFrozenModifiedDate()).thenReturn(DateUtils.addDays(now, -4));
         lenient().when(v6.getFrozenModifiedDate()).thenReturn(DateUtils.addDays(now, -5));
+
+        lenient().when(blocked1.getFrozenModifiedDate()).thenReturn(DateUtils.addDays(now, -50));
+        lenient().when(blocked2.getFrozenModifiedDate()).thenReturn(DateUtils.addDays(now, -50));
     }
 
     @Test
@@ -181,6 +195,29 @@ class RemoveNodeVersionsJobTest {
 
         assertEquals(Arrays.asList(node, node), allNodes);
         assertEquals(Arrays.asList(v1, v3), allValues);
+    }
+    @Test
+    void KeepBlockedVersionLabels() {
+        // given
+        VersionHistory versionHistory = mock(VersionHistory.class);
+        Collection<Version> versionCollection = Arrays.asList(blocked1, blocked2, v1, v2, v3);
+
+        // when
+        when(versionService.getVersionHistory(node)).thenReturn(versionHistory);
+        when(versionHistory.getAllVersions()).thenReturn(versionCollection);
+        underTest.setKeepAtLeast(0);
+        underTest.setOlderThan("P0D");
+
+        underTest.handleNode(node);
+
+        // then
+        verify(versionService, times(3)).deleteVersion(nodeArgumentCaptor.capture(), versionArgumentCaptor.capture());
+
+        List<NodeRef> allNodes = nodeArgumentCaptor.getAllValues();
+        List<Version> allValues = versionArgumentCaptor.getAllValues();
+
+        assertEquals(Arrays.asList(node, node, node), allNodes);
+        assertEquals(Arrays.asList(v1, v2, v3), allValues);
     }
 
     @Test
