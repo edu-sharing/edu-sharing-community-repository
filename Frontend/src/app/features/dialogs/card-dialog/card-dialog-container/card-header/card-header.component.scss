@@ -10,6 +10,26 @@
     display: flex;
     align-items: center;
     height: $titleHeight;
+
+    @media screen and (max-width: 599.9px) {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        height: auto;
+        .card-dialog-header-text {
+            grid-column: 2;
+        }
+        .additional-content {
+            grid-row: 2;
+            grid-column: 1 / 4;
+            margin: 0 10px 10px;
+            justify-content: center;
+        }
+    }
+}
+
+.additional-content {
+    display: flex;
+    margin: 0 10px;
 }
 
 .card-dialog-avatar {

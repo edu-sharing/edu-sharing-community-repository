@@ -10,6 +10,10 @@
   </p>
 </div>
 
+<div class="additional-content" *ngIf="additionalContent">
+  <ng-container [ngTemplateOutlet]="additionalContent"></ng-container>
+</div>
+
 <div class="card-dialog-close-button-box" *ngIf="showCloseButton">
   <button
     class="card-dialog-close-button"

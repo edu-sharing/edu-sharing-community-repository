@@ -14,6 +14,7 @@ export class CardDialogConfig<D = unknown> {
     subtitle?: string;
     avatar?: CardAvatar;
     buttons?: DialogButton[];
+    customHeaderBarContent?: TemplateRef<unknown>;
     customBottomBarContent?: TemplateRef<unknown>;
     contentPadding?: number = 25;
     width?: number;

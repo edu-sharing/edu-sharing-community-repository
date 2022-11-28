@@ -822,10 +822,8 @@ export class OptionsHelperService implements OnDestroy {
         createNodeVariant.group = DefaultGroups.Reuse;
         createNodeVariant.priority = 30;
 
-        const inviteNode = new OptionItem(
-            'OPTIONS.INVITE',
-            'group_add',
-            async (object) => (management.nodeShare = await this.getObjectsAsync(object, true)),
+        const inviteNode = new OptionItem('OPTIONS.INVITE', 'group_add', async (object) =>
+            this.dialogs.openShareDialog({ nodes: await this.getObjectsAsync(object, true) }),
         );
         inviteNode.elementType = [ElementType.Node, ElementType.SavedSearch];
         inviteNode.showAsAction = true;

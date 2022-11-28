@@ -35,7 +35,7 @@
   [nodes]="_nodeSimpleEdit"
   [fromUpload]="_nodeFromUpload"
   (onOpenMetadata)="reopenSimpleEdit = true; _nodeMetadata = $event"
-  (onOpenInvite)="reopenSimpleEdit = true; nodeShare = $event"
+  (onOpenInvite)="reopenSimpleEdit = true; openShareDialog($event)"
   (onOpenLicense)="reopenSimpleEdit = true; openLicenseDialog($event)"
   (onClose)="closeSimpleEdit($event)"
 ></es-simple-edit-dialog>
@@ -49,13 +49,6 @@
   [addCollection]="addPinnedCollection"
   (onClose)="closePinnedCollection()"
 ></es-collections-manage-pinning>
-<es-workspace-share
-  *ngIf="nodeShare"
-  [nodes]="nodeShare"
-  [sendMessages]="true"
-  (onLoading)="globalProgress = $event"
-  (onClose)="closeShare()"
-></es-workspace-share>
 <!-- <es-card
         *ngIf="qr"
         [node]="qr.node"
@@ -99,12 +92,6 @@
   (onDone)="closeWorkflow($event)"
   (onClose)="closeWorkflow()"
 ></es-workspace-workflow>
-<es-workspace-share-link
-  *ngIf="nodeShareLink"
-  [node]="nodeShareLink"
-  (onLoading)="globalProgress = $event"
-  (onClose)="closeShareLink()"
-></es-workspace-share-link>
 <es-node-variant
   *ngIf="nodeVariant"
   [node]="nodeVariant"

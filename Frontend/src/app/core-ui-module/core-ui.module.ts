@@ -19,7 +19,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { CollectionChooserComponent } from './components/collection-chooser/collection-chooser.component';
-import { InputPasswordComponent } from './components/input-password/input-password.component';
 import { ListOptionItemComponent } from './components/list-option-item/list-option-item.component';
 import { ListTableComponent } from './components/list-table/list-table.component';
 import { UserTileComponent } from './components/user-tile/user-tile.component';
@@ -31,8 +30,6 @@ import { NodesDropTargetDirective } from './directives/drag-nodes/nodes-drop-tar
 import { TitleDirective } from './directives/title.directive';
 import { NodeHelperService } from './node-helper.service';
 import { OptionsHelperService } from './options-helper.service';
-import { KeysPipe } from './pipes/keys.pipe';
-import { PermissionNamePipe } from './pipes/permission-name.pipe';
 import { UrlPipe } from './pipes/url.pipe';
 import { Toast } from './toast';
 import { ImageConfigDirective } from './directives/image-config.directive';
@@ -60,11 +57,8 @@ import { NodeEntriesModule } from '../features/node-entries/node-entries.module'
         NodeEntriesDragDirective,
         UserTileComponent,
         VideoControlsComponent,
-        InputPasswordComponent,
         MdsNodeRelationsWidgetComponent,
         ToastMessageComponent,
-        KeysPipe,
-        PermissionNamePipe,
         UrlPipe,
         NodesDragSourceDirective,
         NodesDropTargetDirective,
@@ -116,14 +110,11 @@ import { NodeEntriesModule } from '../features/node-entries/node-entries.module'
         SharedModule,
         ListTableComponent,
         ListOptionItemComponent,
-        InputPasswordComponent,
         VideoControlsComponent,
         NodeRowComponent,
         ImageConfigDirective,
         UserTileComponent,
         CollectionChooserComponent,
-        KeysPipe,
-        PermissionNamePipe,
         UrlPipe,
         NodesDragSourceDirective,
         NodesDropTargetDirective,
