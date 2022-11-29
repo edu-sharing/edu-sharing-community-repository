@@ -702,7 +702,6 @@ public class LTIPlatformApi {
         loginInitiationSessionObject.setVersion(version);
         loginInitiationSessionObject.setMessageType(messageType);
         loginInitiationSessionObject.setContentUrlNodeId(contentUrlNodeId);
-        req.getSession().setAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT, loginInitiationSessionObject);
         //remember session in userLTISessions map to reuse in later backend call
         if(contentUrlNodeId != null){
             Map<String,String> map = new HashMap<>();
@@ -715,6 +714,7 @@ public class LTIPlatformApi {
             loginInitiationSessionObject.setToken(encryptedToken);
             AllSessions.userLTISessions.put(encryptedToken, req.getSession());
         }
+        req.getSession().setAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT, loginInitiationSessionObject);
 
         return form;
     }
