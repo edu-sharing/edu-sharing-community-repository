@@ -6,6 +6,10 @@ mat-form-field {
 .node-row-option {
     height: auto;
     line-height: unset;
+    &.mat-option-disabled {
+        color: $textMediumLight;
+        cursor: not-allowed;
+    }
 }
 .more {
     display: flex;
@@ -26,7 +30,6 @@ mat-form-field {
 }
 .missing-permissions {
     position: absolute;
-    width: 100%;
     height: 100%;
     display: grid;
     grid-template-columns: auto auto;
@@ -35,7 +38,8 @@ mat-form-field {
     align-items: center;
     backdrop-filter: blur(1px);
     z-index: 2;
-    background-color: rgba(255, 255, 255, 0.75);
+    padding: 0 9px;
+    background-color: rgba(255, 255, 255, 0.9);
     color: $textMain;
     font-weight: bold;
 }

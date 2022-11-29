@@ -96,7 +96,7 @@ export class NodeSearchSelectorComponent implements AfterViewInit {
         }
         criterias = criterias.concat(this.criterias);
         const request = {
-            maxItems: this.itemCount,
+            count: this.itemCount,
             sortBy: [RestConstants.LUCENE_SCORE],
             sortAscending: [false],
         };
@@ -112,7 +112,17 @@ export class NodeSearchSelectorComponent implements AfterViewInit {
                 this.queryId,
                 this.permissions,
             )
-            .pipe(map((m) => m.nodes));
+            .pipe(
+                map((m) =>
+                    m.nodes.sort((a, b) =>
+                        !this.hasPermissions(a) && this.hasPermissions(b)
+                            ? 1
+                            : this.hasPermissions(a) && !this.hasPermissions(b)
+                            ? -1
+                            : 0,
+                    ),
+                ),
+            );
     }
 
     ngAfterViewInit(): void {
