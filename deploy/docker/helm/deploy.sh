@@ -2,34 +2,52 @@
 set -e
 set -o pipefail
 
-RELEASE=${1:-"Please specify a release name"}
-VERSION=${2:-""}
-USERNAME=${3:-""}
-PASSWORD=${4:-""}
+RELEASE=${1}
+CHART=${2}
+VERSION=${3:-""}
+USERNAME=${4:-""}
+PASSWORD=${5:-""}
 
 CONTEXT="$(kubectl config current-context)"
 NAMESPACE="$(kubectl config view --minify --output 'jsonpath={..namespace}')"
 
-root=${EDU_ROOT:-$HOME/.edusharing}
-
-mkdir -p "${root}/helm/config"
-touch "${root}/helm/config/${RELEASE}.yaml"
-
-mkdir -p "${root}/helm/context/${CONTEXT}/${NAMESPACE}"
-touch "${root}/helm/context/${CONTEXT}/${RELEASE}.yaml"
-touch "${root}/helm/context/${CONTEXT}/${NAMESPACE}/${RELEASE}.yaml"
+SOURCE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
 
 OPTIONS=()
 
-OPTIONS+=("--timeout")
-OPTIONS+=("30m")
+pushd "${SOURCE_PATH}" >/dev/null || exit
 
-OPTIONS+=("--values")
-OPTIONS+=("${root}/helm/config/${RELEASE}.yaml")
-OPTIONS+=("--values")
-OPTIONS+=("${root}/helm/context/${CONTEXT}/${RELEASE}.yaml")
-OPTIONS+=("--values")
-OPTIONS+=("${root}/helm/context/${CONTEXT}/${NAMESPACE}/${RELEASE}.yaml")
+pushd "../../../.." >/dev/null || exit
+
+if [[ -d "helm" ]] ; then
+
+  pushd "helm" >/dev/null || exit
+
+  ROOT="$(
+    cd "$(dirname ".")"
+    pwd -P
+  )"
+
+  [[ -f "${ROOT}/${RELEASE}.yaml" ]] && {
+    OPTIONS+=("--values")
+    OPTIONS+=("${ROOT}/${RELEASE}.yaml")
+  }
+
+  [[ -f "${ROOT}/${CONTEXT}/${RELEASE}.yaml" ]] && {
+    OPTIONS+=("--values")
+    OPTIONS+=("${ROOT}/${CONTEXT}/${RELEASE}.yaml")
+  }
+
+  [[ -f "${ROOT}/${CONTEXT}/${NAMESPACE}/${RELEASE}.yaml" ]] && {
+    OPTIONS+=("--values")
+    OPTIONS+=("${ROOT}/${CONTEXT}/${NAMESPACE}/${RELEASE}.yaml")
+  }
+
+  popd >/dev/null || exit
+
+fi
+
+popd >/dev/null || exit
 
 [[ -n $USERNAME && -n $PASSWORD ]] && {
 	OPTIONS+=("--set")
@@ -44,20 +62,20 @@ OPTIONS+=("${root}/helm/context/${CONTEXT}/${NAMESPACE}/${RELEASE}.yaml")
 	OPTIONS+=("image.pullSecrets[0].password=${PASSWORD}")
 }
 
-[[ -n $DEBUG ]] && {
-	OPTIONS+=(--dry-run)
-	OPTIONS+=(--debug)
+OPTIONS+=("--timeout")
+OPTIONS+=("30m")
+
+[[ -n $HELM_DEBUG ]] && {
+	OPTIONS+=("--dry-run")
+	OPTIONS+=("--debug")
 }
 
-SOURCE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
-pushd "${SOURCE_PATH}" >/dev/null || exit
-
-file="bundle/target/helm/repo/edu_sharing-projects-${RELEASE}-${VERSION}.tgz"
+file="bundle/target/helm/repo/${CHART}-${VERSION}.tgz"
 
 if [[ -f $file ]]; then
 
 	set -x
-	helm upgrade --install "${RELEASE}" \
+	helm secrets upgrade --install "${RELEASE}" \
 	  "${file}" \
     "${OPTIONS[@]}"
 	set +x
@@ -75,8 +93,8 @@ else
 	}
 
 	set -x
-	helm upgrade --install "${RELEASE}" \
-		"edu_sharing-projects-${RELEASE}" --version "${VERSION}" \
+	helm secrets upgrade --install "${RELEASE}" \
+		"${CHART}" --version "${VERSION}" \
 		--repo "https://artifacts.edu-sharing.com/repository/helm/" \
 		"${CREDENTIALS[@]}" \
 		"${OPTIONS[@]}"

@@ -61,7 +61,8 @@ RUN set -eux \
     && mkdir -p tomcat/shared/classes/config/plugins/plugin-transform \
     && mkdir -p tomcat/shared/classes/config/cluster/applications \
     && mkdir -p tomcat/shared/classes/config/node \
-    && mkdir -p tomcat/shared/lib
+    && mkdir -p tomcat/shared/lib \
+    && rm -f tomcat/lib/postgresql-*
 
 COPY --chown=worker:worker artifacts/jmx_prometheus_javaagent-${io.prometheus.jmx:jmx_prometheus_javaagent:jar.version}.jar tomcat/agent/jmx_prometheus_javaagent.jar
 COPY --chown=worker:worker assets/agent/jmx-exporter-config.yaml tomcat/agent/
@@ -159,7 +160,7 @@ RUN set -eux \
 
 COPY --chown=worker:worker amps amps/
 
-COPY --chown=worker:worker config tomcat/shared/lib/
+COPY --chown=worker:worker config tomcat/shared/assets/
 
 RUN set -eux \
     && chown -RL worker:worker alf_data \

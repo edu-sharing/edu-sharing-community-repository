@@ -123,7 +123,12 @@
             <phase>package</phase>
             <configuration>
               <includeArtifactIds>
-                edu_sharing-projects-community-repository-backend-alfresco-module
+                edu_sharing-community-repository-plugin-elastic-backend-alfresco-module,
+                edu_sharing-community-repository-plugin-mongo-backend-alfresco-module,
+                edu_sharing-enterprise-repository-plugin-antivirus-backend-alfresco-module,
+                edu_sharing-enterprise-repository-plugin-cluster-backend-alfresco-module,
+                edu_sharing-enterprise-repository-plugin-remote-backend-alfresco-module,
+                edu_sharing-enterprise-repository-plugin-transform-backend-alfresco-module
               </includeArtifactIds>
               <outputDirectory>${project.build.directory}/build/amps/alfresco/2</outputDirectory>
             </configuration>
@@ -137,12 +142,7 @@
             <phase>package</phase>
             <configuration>
               <includeArtifactIds>
-                edu_sharing-community-repository-plugin-elastic-backend-alfresco-module,
-                edu_sharing-community-repository-plugin-mongo-backend-alfresco-module,
-                edu_sharing-enterprise-repository-plugin-antivirus-backend-alfresco-module,
-                edu_sharing-enterprise-repository-plugin-cluster-backend-alfresco-module,
-                edu_sharing-enterprise-repository-plugin-remote-backend-alfresco-module,
-                edu_sharing-enterprise-repository-plugin-transform-backend-alfresco-module
+                edu_sharing-projects-community-repository-backend-alfresco-module
               </includeArtifactIds>
               <outputDirectory>${project.build.directory}/build/amps/alfresco/3</outputDirectory>
             </configuration>
