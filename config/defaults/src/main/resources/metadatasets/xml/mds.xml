@@ -1354,7 +1354,7 @@
 		</query>
 		<query join="AND" id="search_relation_query">
 			<basequery>{"term":{"type":"ccm:io"}}</basequery>
-			<property name="ngsearchword">
+			<property name="ngsearchword" asFilter="false">
 				<statement>
 					{
 					"simple_query_string" : {
