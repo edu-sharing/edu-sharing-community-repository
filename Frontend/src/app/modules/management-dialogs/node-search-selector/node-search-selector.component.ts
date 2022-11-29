@@ -97,6 +97,8 @@ export class NodeSearchSelectorComponent implements AfterViewInit {
         criterias = criterias.concat(this.criterias);
         const request = {
             maxItems: this.itemCount,
+            sortBy: [RestConstants.LUCENE_SCORE],
+            sortAscending: [false],
         };
         return this.searchApi
             .search(
