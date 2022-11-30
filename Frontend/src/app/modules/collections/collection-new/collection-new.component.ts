@@ -436,8 +436,12 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
             this.editPermissionsId = this.editId;
         } else {
             this.editPermissionsDummy = new EduData.Node();
+            this.editPermissionsDummy.title = this.currentCollection.title;
+            this.editPermissionsDummy.iconURL =
+                this.connector.getThemeMimeIconSvg('collection.svg');
             this.editPermissionsDummy.ref = {} as NodeRef;
             this.editPermissionsDummy.aspects = [RestConstants.CCM_ASPECT_COLLECTION];
+            this.editPermissionsDummy.properties = {};
             this.editPermissionsDummy.isDirectory = true;
         }
         this.showPermissions = true;
