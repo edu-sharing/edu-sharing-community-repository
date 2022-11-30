@@ -8,7 +8,7 @@
 package org.edu_sharing.webservices.usage2;
 
 public class Usage2SoapBindingSkeleton implements org.edu_sharing.webservices.usage2.Usage2, org.apache.axis.wsdl.Skeleton {
-    private org.edu_sharing.webservices.usage2.Usage2 impl;
+    private transient org.edu_sharing.webservices.usage2.Usage2 impl;
     private static java.util.Map _myOperations = new java.util.Hashtable();
     private static java.util.Collection _myOperationsList = new java.util.ArrayList();
 

@@ -32,6 +32,7 @@ import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.restservices.shared.Contributor;
 import org.edu_sharing.restservices.shared.NodeSearch;
+import org.edu_sharing.service.admin.SystemFolder;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.model.CollectionRef;
 import org.edu_sharing.service.model.CollectionRefImpl;
@@ -550,6 +551,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
         }else{
             queryBuilderGlobalConditions = queryBuilderGlobalConditions.must(QueryBuilders.termQuery("properties.ccm:eduscopename.keyword",NodeServiceInterceptor.getEduSharingScope()));
         }
+        queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.wildcardQuery("fullpath", "*/" + SystemFolder.getSystemFolderBase().getId() + "*"));
+        queryBuilderGlobalConditions = queryBuilderGlobalConditions.mustNot(QueryBuilders.wildcardQuery("fullpath", "*/" + SystemFolder.getSitesFolder().getId() + "*"));
         return queryBuilderGlobalConditions;
     }
 

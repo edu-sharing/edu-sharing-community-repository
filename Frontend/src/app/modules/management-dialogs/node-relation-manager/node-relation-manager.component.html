@@ -33,8 +33,7 @@
         label="{{ 'NODE_RELATIONS.RELATION_SEARCH_LABEL' | translate }}"
       >
         <ng-template #noPermissions>
-          <i esIcon="security"></i>
-          <span>{{ 'NODE_RELATIONS.NO_PERMISSIONS' | translate }}</span>
+          <i esIcon="security" matTooltip="{{ 'NODE_RELATIONS.NO_PERMISSIONS' | translate }}"></i>
         </ng-template>
       </es-node-search-selector>
     </form>

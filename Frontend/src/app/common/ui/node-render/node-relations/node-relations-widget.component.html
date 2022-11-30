@@ -35,7 +35,10 @@
       </div>
     </div>
 
-    <div class="empty" *ngIf="!relations?.length && !forkedChilds?.length && !forkedOrigin">
+    <div
+      class="empty"
+      *ngIf="!versions?.length && !relations?.length && !forkedChilds?.length && !forkedOrigin"
+    >
       {{ 'NODE_RELATIONS.NO_RELATIONS' | translate }}
     </div>
     <div class="relations-group" *ngFor="let key of getRelationKeys()">
