@@ -54,7 +54,7 @@ data:
   REPOSITORY_SERVICE_HOME_APPID: {{ .Values.config.home.appid | quote }}
   REPOSITORY_SERVICE_HOME_AUTH: {{ if .Values.config.saml.enabled }}"shibboleth"{{ else }}""{{ end }}
   REPOSITORY_SERVICE_HOST_EXTERNAL: {{ .Values.ingress.hosts | first | quote }}
-  REPOSITORY_SERVICE_HOST_INTERNAL: {{ include "edusharing_repository_service.name" . | quote }}
+  REPOSITORY_SERVICE_HOST_INTERNAL: {{ printf "%s.%s.svc.%s" (include "edusharing_repository_service.name" .) .Release.Namespace .Values.global.cluster.domain | quote }}
   REPOSITORY_SERVICE_HTTP_CLIENT_DISABLE_SNI4HOSTS: {{ .Values.config.http.client.disablesni4host | quote }}
   REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_HOST: {{ .Values.config.http.client.proxy.host | quote }}
   REPOSITORY_SERVICE_HTTP_CLIENT_PROXY_NONPROXYHOSTS: "'{{- join "|" .Values.config.http.client.proxy.nonproxyhosts }}'"
