@@ -386,11 +386,7 @@ public class LTIApi {
                     RepoTools.mapToSSOMap(user, givenName, familyName, email));
         }
 
-        /**
-         * @TODO: what happens when user is using the sames session within two browser windows
-         * maybe use list of LTISessionObject's
-         */
-        req.getSession().setAttribute(LTISessionObject.class.getName(),ltiSessionObject);
+        URI toRedirectTo = null;
 
         if(ltiMessageType.equals(LTIConstants.LTI_MESSAGE_TYPE_DEEP_LINKING)){
             if(jws.getBody().containsKey(LTIConstants.DEEP_LINKING_SETTINGS)){
@@ -402,7 +398,7 @@ public class LTIApi {
              */
 
             //return Response.status(302).location(new URI(ApplicationInfoList.getHomeRepository().getClientBaseUrl()+"/edu-sharing/components/search")).build();
-            return Response.seeOther(new URI(ApplicationInfoList.getHomeRepository().getClientBaseUrl()+"/components/search")).build();
+            toRedirectTo = new URI(ApplicationInfoList.getHomeRepository().getClientBaseUrl()+"/components/search");
             //return Response.temporaryRedirect(new URI("/edu-sharing/components/search")).build();
         }else if(ltiMessageType.equals(LTIConstants.LTI_MESSAGE_TYPE_RESOURCE_LINK)){
             //rendering stuff
@@ -440,13 +436,21 @@ public class LTIApi {
                     req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, nodeId);
                 }
             }
-            return Response.seeOther(new URI(targetLink)).build();
+            toRedirectTo = new URI(targetLink);
             //return Response.temporaryRedirect(new URI(targetLink)).build();
         }else{
             String message = "can not handle message type:" + ltiMessageType;
             logger.error(message);
             throw new Exception(message);
         }
+
+        /**
+         * @TODO: what happens when user is using the sames session within two browser windows
+         * maybe use list of LTISessionObject's
+         */
+        req.getSession().setAttribute(LTISessionObject.class.getName(),ltiSessionObject);
+        return Response.seeOther(toRedirectTo).build();
+
     }
 
 
