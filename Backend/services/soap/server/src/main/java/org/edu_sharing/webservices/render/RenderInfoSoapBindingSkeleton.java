@@ -8,7 +8,7 @@
 package org.edu_sharing.webservices.render;
 
 public class RenderInfoSoapBindingSkeleton implements org.edu_sharing.webservices.render.RenderInfo, org.apache.axis.wsdl.Skeleton {
-    private org.edu_sharing.webservices.render.RenderInfo impl;
+    private transient org.edu_sharing.webservices.render.RenderInfo impl;
     private static java.util.Map _myOperations = new java.util.Hashtable();
     private static java.util.Collection _myOperationsList = new java.util.ArrayList();
 
