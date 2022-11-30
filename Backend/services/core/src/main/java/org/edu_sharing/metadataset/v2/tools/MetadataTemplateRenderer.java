@@ -417,9 +417,9 @@ public class MetadataTemplateRenderer {
 							append("<div class=\"mdsValue\">").
 							append("<a href=\"").
 							append(URLTool.getNgRenderNodeUrl(nodeRef.getId(), null)).
-							append("?action=OPTIONS.MATERIAL_FEEDBACK&feedbackClose=true").
-							append("\" data-es-auth-required=\"true\"").
-							append("\" data-es-action=\"OPTIONS.MATERIAL_FEEDBACK\"");
+							append("?action=OPTIONS.MATERIAL_FEEDBACK&feedbackClose=true\"").
+							append(" data-es-auth-required=\"true\"").
+							append(" data-es-action=\"OPTIONS.MATERIAL_FEEDBACK\"");
 					if(widget.getLink()!=null){
 						widgetHtml.append(" target=\"").append(widget.getLink()).append("\"");
 					}
