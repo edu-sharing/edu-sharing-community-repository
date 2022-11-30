@@ -2,14 +2,16 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal, ComponentType } from '@angular/cdk/portal';
 import { Injectable, Injector } from '@angular/core';
-import { Observable } from 'rxjs';
-import { filter, map, pairwise, skipWhile, takeUntil, tap } from 'rxjs/operators';
+import * as rxjs from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { filter, map, pairwise, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { DialogsService } from '../dialogs.service';
 import { CardDialogConfig, CARD_DIALOG_DATA } from './card-dialog-config';
 import { CardDialogContainerComponent } from './card-dialog-container/card-dialog-container.component';
 import { CardDialogRef } from './card-dialog-ref';
 import { CardDialogState, ViewMode } from './card-dialog-state';
 
+const MOBILE_BACKGROUND_CLASS = 'card-dialog-pane-mobile-background';
 // export const CARD_DIALOG_STATE = new InjectionToken<CardDialogState>('CardDialogState');
 // export const CARD_DIALOG_OVERLAY_REF = new InjectionToken<CardDialogState>('CardDialogOverlayRef');
 
@@ -20,17 +22,26 @@ import { CardDialogState, ViewMode } from './card-dialog-state';
     providedIn: 'root',
 })
 export class CardDialogService {
-    readonly openDialogs: CardDialogRef[] = [];
+    private readonly openDialogsBeforeClosedSubject = new BehaviorSubject<readonly CardDialogRef[]>(
+        [],
+    );
+    private readonly openDialogsSubject = new BehaviorSubject<readonly CardDialogRef[]>([]);
+    get openDialogs(): readonly CardDialogRef[] {
+        return this.openDialogsSubject.value;
+    }
+    private readonly viewModeSubject = new BehaviorSubject<ViewMode>('default');
 
     constructor(
         private injector: Injector,
         private overlay: Overlay,
         private breakpointObserver: BreakpointObserver,
-    ) {}
+    ) {
+        this.registerViewMode();
+    }
 
     open<T, D, R>(component: ComponentType<T>, config?: CardDialogConfig<D>): CardDialogRef<D, R> {
         config = this.applyCardConfigDefaults(config);
-        const overlayRef = this.createOverlay(config);
+        const overlayRef = this.createOverlay();
         const state = new CardDialogState();
         const containerRef = overlayRef.attach(new ComponentPortal(CardDialogContainerComponent));
         const dialogRef = new CardDialogRef<D, R>(
@@ -41,7 +52,6 @@ export class CardDialogService {
             this.injector.get(DialogsService),
         );
         containerRef.instance.dialogRef = dialogRef;
-        this.registerSizeAndPositionSwitch(overlayRef, dialogRef);
         const contentInjector = Injector.create({
             parent: this.injector,
             providers: [
@@ -55,6 +65,7 @@ export class CardDialogService {
         // Notify the dialog container that the content has been attached.
         containerRef.instance.initializeWithAttachedContent();
         this.registerOpenDialog<T, D, R>(dialogRef);
+        this.registerSizeAndPosition(overlayRef, dialogRef);
         return dialogRef;
     }
 
@@ -65,7 +76,7 @@ export class CardDialogService {
         };
     }
 
-    private createOverlay(config: CardDialogConfig): OverlayRef {
+    private createOverlay(): OverlayRef {
         return this.overlay.create({
             hasBackdrop: true,
             panelClass: 'card-dialog-pane',
@@ -75,36 +86,27 @@ export class CardDialogService {
                 .centerHorizontally()
                 .centerVertically(),
             scrollStrategy: this.overlay.scrollStrategies.block(),
-            height: config.height,
-            minHeight: config.minHeight,
-            maxHeight: config.maxHeight,
-            width: config.width,
-            minWidth: config.minWidth,
-            maxWidth: config.maxWidth,
         });
     }
 
-    private registerSizeAndPositionSwitch(overlayRef: OverlayRef, dialogRef: CardDialogRef): void {
+    private registerSizeAndPosition(overlayRef: OverlayRef, dialogRef: CardDialogRef): void {
         // Update dialog size and position based on pre-defined view modes when the viewport size
         // changes.
-        this.createViewModeObservable()
+        this.viewModeSubject
             .pipe(
-                takeUntil(overlayRef.detachments()),
                 tap((viewMode) => dialogRef.patchState({ viewMode })),
-                // Don't need to reset, when we haven't switched to mobile view yet.
-                skipWhile((mode) => mode === 'default'),
+                switchMap((mode) => {
+                    if (mode === 'mobile') {
+                        // On mobile, positioning depends on other dialogs, so we fire again when
+                        // open dialogs change.
+                        return this.openDialogsBeforeClosedSubject.pipe(map(() => mode));
+                    } else {
+                        return rxjs.of(mode);
+                    }
+                }),
+                takeUntil(overlayRef.detachments()),
             )
-            .subscribe((mode) => {
-                switch (mode) {
-                    case 'default':
-                        this.resetSizeAndPosition(dialogRef.config, overlayRef);
-                        break;
-                    case 'mobile':
-                        // The 'mobile' view mode doesn't respect configured sizes as of now.
-                        this.setMobileSizeAndPosition(overlayRef);
-                        break;
-                }
-            });
+            .subscribe((mode) => this.updateSizeAndPosition(mode, overlayRef, dialogRef));
 
         // Reflect size-related changes of config as long as we are in 'default' view mode.
         const sizeProperties: (keyof CardDialogConfig)[] = [
@@ -124,46 +126,97 @@ export class CardDialogService {
                 ),
                 filter(() => dialogRef.state.viewMode === 'default'),
             )
-            .subscribe(([_, current]) => this.resetSizeAndPosition(current, overlayRef));
+            .subscribe(([_, current]) => this.setDefaultSizeAndPosition(current, overlayRef));
+    }
+
+    private updateSizeAndPosition(
+        mode: ViewMode,
+        overlayRef: OverlayRef,
+        dialogRef: CardDialogRef,
+    ): void {
+        switch (mode) {
+            case 'default':
+                this.setDefaultSizeAndPosition(dialogRef.config, overlayRef);
+                break;
+            case 'mobile':
+                // The 'mobile' view mode doesn't respect configured sizes as of now.
+                this.setMobileSizeAndPosition(overlayRef, dialogRef);
+                break;
+        }
     }
 
     private registerOpenDialog<T, D, R>(dialogRef: CardDialogRef<D, R>) {
-        this.openDialogs.push(dialogRef);
-        dialogRef.afterClosed().subscribe(() => {
-            const index = this.openDialogs.indexOf(dialogRef);
+        this.registerOpenDialogInner<T, D, R>(
+            dialogRef,
+            this.openDialogsBeforeClosedSubject,
+            'beforeClosed',
+        );
+        this.registerOpenDialogInner<T, D, R>(dialogRef, this.openDialogsSubject, 'afterClosed');
+    }
+
+    private registerOpenDialogInner<T, D, R>(
+        dialogRef: CardDialogRef<D, R>,
+        openDialogsSubject: BehaviorSubject<readonly CardDialogRef[]>,
+        closed: 'beforeClosed' | 'afterClosed',
+    ) {
+        openDialogsSubject.next([...openDialogsSubject.value, dialogRef]);
+        dialogRef[closed]().subscribe(() => {
+            const index = openDialogsSubject.value.indexOf(dialogRef);
             if (index >= 0) {
-                this.openDialogs.splice(index, 1);
+                const openDialogs = openDialogsSubject.value.slice();
+                openDialogs.splice(index, 1);
+                openDialogsSubject.next(openDialogs);
             }
         });
     }
 
-    private createViewModeObservable(): Observable<ViewMode> {
-        return this.breakpointObserver
+    private registerViewMode(): void {
+        this.breakpointObserver
             .observe([Breakpoints.XSmall])
-            .pipe(map(({ matches }) => (matches ? 'mobile' : 'default')));
+            .pipe(map(({ matches }) => (matches ? 'mobile' : 'default')))
+            .subscribe(this.viewModeSubject);
     }
 
-    private resetSizeAndPosition(config: CardDialogConfig, overlayRef: OverlayRef): void {
-        overlayRef.updateSize({
+    private setDefaultSizeAndPosition(config: CardDialogConfig, overlayRef: OverlayRef): void {
+        const MAX_HEIGHT = '95%';
+        const MAX_WIDTH = '95%';
+        const cssUnit = (value: string | number) =>
+            typeof value === 'number' ? value + 'px' : value;
+        const size = {
             height: config.height,
-            minHeight: config.minHeight,
-            maxHeight: config.maxHeight,
+            minHeight: config.minHeight ? `min(${cssUnit(config.minHeight)}, ${MAX_HEIGHT})` : null,
+            maxHeight: config.maxHeight
+                ? `min(${cssUnit(config.maxHeight)}, ${MAX_HEIGHT})`
+                : MAX_HEIGHT,
             width: config.width,
-            minWidth: config.minWidth,
-            maxWidth: config.maxWidth,
-        });
+            minWidth: config.minWidth ? `min(${cssUnit(config.minWidth)}, ${MAX_WIDTH})` : null,
+            maxWidth: config.maxWidth
+                ? `min(${cssUnit(config.maxWidth)}, ${MAX_WIDTH})`
+                : MAX_WIDTH,
+        };
+        overlayRef.updateSize(size);
         overlayRef.updatePositionStrategy(
             this.overlay.position().global().centerHorizontally().centerVertically(),
         );
+        overlayRef.removePanelClass(MOBILE_BACKGROUND_CLASS);
     }
 
-    private setMobileSizeAndPosition(overlayRef: OverlayRef): void {
+    private setMobileSizeAndPosition(overlayRef: OverlayRef, dialogRef: CardDialogRef): void {
         overlayRef.updateSize({
-            maxHeight: 'calc(100% - 25px)',
-            minHeight: '80%',
+            height: 'calc(100% - 30px)',
+            minHeight: null,
+            maxHeight: null,
             width: '100%',
+            minWidth: null,
             maxWidth: null,
         });
         overlayRef.updatePositionStrategy(this.overlay.position().global().bottom());
+        const openDialogs = this.openDialogsBeforeClosedSubject.value;
+        const isTopMostDialog = openDialogs[openDialogs.length - 1] === dialogRef;
+        if (isTopMostDialog) {
+            overlayRef.removePanelClass(MOBILE_BACKGROUND_CLASS);
+        } else {
+            overlayRef.addPanelClass(MOBILE_BACKGROUND_CLASS);
+        }
     }
 }

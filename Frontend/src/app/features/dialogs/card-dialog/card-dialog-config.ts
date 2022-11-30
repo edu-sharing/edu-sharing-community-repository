@@ -19,10 +19,10 @@ export class CardDialogConfig<D = unknown> {
     contentPadding?: number = 25;
     width?: number;
     minWidth?: number | string;
-    maxWidth?: number | string = '95%';
+    maxWidth?: number | string;
     height?: number;
     minHeight?: number | string;
-    maxHeight?: number | string = '95%';
+    maxHeight?: number | string;
     closable?: Closable = Closable.Casual;
     /**
      * Element that should get initial focus after the dialog is opened.
