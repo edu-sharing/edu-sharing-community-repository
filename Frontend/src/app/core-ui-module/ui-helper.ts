@@ -548,6 +548,19 @@ export class UIHelper {
         );
     }
 
+    static openLTIResourceLink(
+        node: Node
+    ) {
+        let w = window.open(
+            '/edu-sharing/rest/ltiplatform/v13/generateLoginInitiationFormResourceLink?nodeId=' +
+            node.ref.id,
+            '_blank',
+        );
+        if (!w) {
+            window.alert('popups are disabled');
+        }
+    }
+
     static setFocusOnCard() {
         let elements = document.getElementsByClassName('card')[0].getElementsByTagName('*');
         this.focusElements(elements);

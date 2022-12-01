@@ -682,11 +682,16 @@ export class OptionsHelperService implements OnDestroy {
         openNode.group = DefaultGroups.View;
         openNode.priority = 30;
 
-        const editConnectorNode = new OptionItem('OPTIONS.OPEN', 'launch', (node) =>
-            this.editConnector(this.getObjects(node)[0]),
+        const editConnectorNode = new OptionItem('OPTIONS.OPEN', 'launch', (node) => {
+                this.editConnector(this.getObjects(node)[0]);
+            }
         );
         editConnectorNode.customShowCallback = (nodes) => {
-            return this.connectors.connectorSupportsEdit(nodes ? nodes[0] : null) != null;
+            let n  = nodes ? nodes[0] : null;
+            if(n?.aspects?.includes("ccm:ltitool_node")){
+                 return true;
+            }
+            return this.connectors.connectorSupportsEdit(n) != null;
         };
         editConnectorNode.elementType = [
             ElementType.Node,
@@ -1479,16 +1484,20 @@ export class OptionsHelperService implements OnDestroy {
         win: any = null,
         connectorType: Connector = null,
     ) {
-        UIHelper.openConnector(
-            this.connectors,
-            this.iamService,
-            this.eventService,
-            this.toast,
-            node,
-            type,
-            win,
-            connectorType,
-        );
+        if(node.aspects?.includes("ccm:ltitool_node")){
+            UIHelper.openLTIResourceLink(node);
+        }else {
+            UIHelper.openConnector(
+                this.connectors,
+                this.iamService,
+                this.eventService,
+                this.toast,
+                node,
+                type,
+                win,
+                connectorType,
+            );
+        }
     }
 
     private canAddObjects() {

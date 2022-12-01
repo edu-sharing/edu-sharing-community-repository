@@ -576,14 +576,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         if (nodes) {
             nodes.forEach((n) => {
                 if (event.tool.customContentOption == true) {
-                    let w = window.open(
-                        '/edu-sharing/rest/ltiplatform/v13/generateLoginInitiationFormResourceLink?nodeId=' +
-                            n.ref.id,
-                        '_blank',
-                    );
-                    if (!w) {
-                        window.alert('popups are disabled');
-                    }
+                    UIHelper.openLTIResourceLink(n);
 
                     this.onCreate.emit([n]);
                     this.createToolType = null;
