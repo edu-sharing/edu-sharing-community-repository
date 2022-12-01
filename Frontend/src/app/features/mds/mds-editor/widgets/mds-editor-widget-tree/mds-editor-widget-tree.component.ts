@@ -1,6 +1,7 @@
 import { CdkConnectedOverlay, ConnectedPosition } from '@angular/cdk/overlay';
 import {
     AfterViewInit,
+    ChangeDetectorRef,
     Component,
     ElementRef,
     OnDestroy,
@@ -22,6 +23,7 @@ import { Tree } from './tree';
 import { FocusOrigin } from '@angular/cdk/a11y';
 import { MatChip } from '@angular/material/chips';
 import { UIService } from '../../../../../core-module/rest/services/ui.service';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     selector: 'es-mds-editor-widget-tree',
@@ -35,6 +37,8 @@ export class MdsEditorWidgetTreeComponent
     @ViewChild(CdkConnectedOverlay) overlay: CdkConnectedOverlay;
     @ViewChild('chipList', { read: ElementRef }) chipList: ElementRef<HTMLElement>;
     @ViewChild('treeRef') treeRef: MdsEditorWidgetTreeCoreComponent;
+    @ViewChild('openButton') openButtonRef: MatButton;
+    @ViewChild('inputElement') inputElement: ElementRef<HTMLInputElement>;
     @ViewChild(MdsEditorWidgetTreeCoreComponent)
     treeCoreComponent: MdsEditorWidgetTreeCoreComponent;
     @ViewChildren('chip') chips: QueryList<MatChip>;
@@ -73,6 +77,7 @@ export class MdsEditorWidgetTreeComponent
     constructor(
         mdsEditorInstance: MdsEditorInstanceService,
         translate: TranslateService,
+        private changeDetectorRef: ChangeDetectorRef,
         public uiService: UIService,
     ) {
         super(mdsEditorInstance, translate);
@@ -124,12 +129,6 @@ export class MdsEditorWidgetTreeComponent
         this.destroyed$.complete();
     }
 
-    onInputFocusChange(origin: FocusOrigin): void {
-        if (!this.preventOverlayOpen && origin && origin !== 'program') {
-            this.openOverlay();
-        }
-    }
-
     revealInTree(value: DisplayValue): void {
         this.openOverlay();
         setTimeout(() => {
@@ -139,7 +138,11 @@ export class MdsEditorWidgetTreeComponent
     focus() {
         this.openOverlay();
     }
-    openOverlay(): void {
+    openOverlay(event?: FocusEvent): void {
+        // ignore if focus was lost from the button ref to allow back-navigation via keyboard
+        if (event?.relatedTarget === this.openButtonRef._elementRef.nativeElement) {
+            return;
+        }
         if (this.chipsControl.disabled) {
             return;
         }
@@ -148,30 +151,22 @@ export class MdsEditorWidgetTreeComponent
             return;
         }
         this.overlayIsVisible = true;
+        this.changeDetectorRef.detectChanges();
+        setTimeout(() => this.treeRef.input.nativeElement.focus());
     }
 
-    closeOverlay(): void {
-        this.overlayIsVisible = false;
-        this.preventOverlayOpen = true;
-        setTimeout(() => {
-            this.preventOverlayOpen = false;
-            this.onBlur.emit();
-        });
-    }
-
-    toggleOverlay(): void {
-        if (this.overlayIsVisible) {
-            this.closeOverlay();
-        } else {
-            this.openOverlay();
+    closeOverlay(event?: FocusEvent): void {
+        // prevent directly closing because cdk outside click might trigger
+        if (event?.target === this.inputElement.nativeElement) {
+            return;
         }
+        this.overlayIsVisible = false;
+        this.openButtonRef.focus();
     }
 
     onOverlayKeydown(event: KeyboardEvent) {
         if (event.key === 'Escape') {
             event.stopPropagation();
-            this.closeOverlay();
-        } else if (event.key === 'Tab') {
             this.closeOverlay();
         } else {
             const wasHandledByTree = this.treeCoreComponent.handleKeydown(event.code);
