@@ -261,6 +261,10 @@ $optionBarHeight: 50px;
     }
     .card-meta {
         es-list-base {
+            img {
+                max-width: 100px;
+                max-height: 20px;
+            }
             es-list-node-license {
                 img {
                     height: 20px;
