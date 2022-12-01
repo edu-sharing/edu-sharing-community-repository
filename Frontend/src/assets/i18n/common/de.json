@@ -717,6 +717,7 @@
     "SHOW_OPTIONS_BUTTON": "Zeige Auswahlmöglichkeiten",
     "FILTER_FOR": "Nach \"{{value}}\" filtern ({{count}} passende(s) Element(e))",
     "FILTER_TREE": "Filtern...",
+    "FILTER_FACET": "Filtern...",
     "OPEN_CLOSE_EXTENDED": "Ansicht auf-/zuklappen",
     "SUGGEST_VALUE_LABEL": "Neuen Wert vorschlagen",
     "SUGGEST_VALUE_SEND": "Vorschlagen",

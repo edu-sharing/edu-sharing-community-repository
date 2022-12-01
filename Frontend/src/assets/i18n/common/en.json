@@ -674,6 +674,7 @@
     "SHOW_OPTIONS_BUTTON": "Show options",
     "FILTER_FOR": "Filter for \"{{value}}\" ({{count}} matching element(s))",
     "FILTER_TREE": "Filter...",
+    "FILTER_FACET": "Filter...",
     "OPEN_CLOSE_EXTENDED": "Open/close view",
     "SUGGEST_VALUE_LABEL": "Suggest new value",
     "SUGGEST_VALUE_SEND": "Suggest",

@@ -859,6 +859,11 @@ export class NodeV1Service extends BaseService {
          * MIME-Type
          */
         mimetype: string;
+
+        /**
+         * create a node version
+         */
+        createVersion?: boolean;
         body?: {
             image?: {};
         };
@@ -868,6 +873,7 @@ export class NodeV1Service extends BaseService {
             rb.path('repository', params.repository, {});
             rb.path('node', params.node, {});
             rb.query('mimetype', params.mimetype, {});
+            rb.query('createVersion', params.createVersion, {});
             rb.body(params.body, 'multipart/form-data');
         }
 
@@ -911,6 +917,11 @@ export class NodeV1Service extends BaseService {
          * MIME-Type
          */
         mimetype: string;
+
+        /**
+         * create a node version
+         */
+        createVersion?: boolean;
         body?: {
             image?: {};
         };

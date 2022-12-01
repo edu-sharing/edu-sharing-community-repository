@@ -18,6 +18,7 @@ import { Node } from '../models/node';
 import { PersonDeleteOptions } from '../models/person-delete-options';
 import { PersonReport } from '../models/person-report';
 import { RepositoryConfig } from '../models/repository-config';
+import { RepositoryVersionInfo } from '../models/repository-version-info';
 import { SearchResult } from '../models/search-result';
 import { SearchResultElastic } from '../models/search-result-elastic';
 import { UploadResult } from '../models/upload-result';
@@ -2062,6 +2063,57 @@ export class AdminV1Service extends BaseService {
     getStatistics(params?: {}): Observable<AdminStatistics> {
         return this.getStatistics$Response(params).pipe(
             map((r: StrictHttpResponse<AdminStatistics>) => r.body as AdminStatistics),
+        );
+    }
+
+    /**
+     * Path part for operation getVersion
+     */
+    static readonly GetVersionPath = '/admin/v1/version';
+
+    /**
+     * get detailed version information.
+     *
+     * detailed information about the running system version
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `getVersion()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getVersion$Response(params?: {}): Observable<StrictHttpResponse<RepositoryVersionInfo>> {
+        const rb = new RequestBuilder(this.rootUrl, AdminV1Service.GetVersionPath, 'get');
+        if (params) {
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<RepositoryVersionInfo>;
+                }),
+            );
+    }
+
+    /**
+     * get detailed version information.
+     *
+     * detailed information about the running system version
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `getVersion$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    getVersion(params?: {}): Observable<RepositoryVersionInfo> {
+        return this.getVersion$Response(params).pipe(
+            map((r: StrictHttpResponse<RepositoryVersionInfo>) => r.body as RepositoryVersionInfo),
         );
     }
 

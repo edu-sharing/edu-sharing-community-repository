@@ -10,6 +10,7 @@ import { Observable } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
 
 import { About } from '../models/about';
+import { Licenses } from '../models/licenses';
 
 @Injectable({
     providedIn: 'root',
@@ -67,6 +68,57 @@ export class AboutService extends BaseService {
     about(params?: {}): Observable<About> {
         return this.about$Response(params).pipe(
             map((r: StrictHttpResponse<About>) => r.body as About),
+        );
+    }
+
+    /**
+     * Path part for operation licenses
+     */
+    static readonly LicensesPath = '/_about/licenses';
+
+    /**
+     * License information.
+     *
+     * Get information about used 3rd-party licenses.
+     *
+     * This method provides access to the full `HttpResponse`, allowing access to response headers.
+     * To access only the response body, use `licenses()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    licenses$Response(params?: {}): Observable<StrictHttpResponse<Licenses>> {
+        const rb = new RequestBuilder(this.rootUrl, AboutService.LicensesPath, 'get');
+        if (params) {
+        }
+
+        return this.http
+            .request(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                }),
+            )
+            .pipe(
+                filter((r: any) => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => {
+                    return r as StrictHttpResponse<Licenses>;
+                }),
+            );
+    }
+
+    /**
+     * License information.
+     *
+     * Get information about used 3rd-party licenses.
+     *
+     * This method provides access to only to the response body.
+     * To access the full response (for headers, for example), `licenses$Response()` instead.
+     *
+     * This method doesn't expect any request body.
+     */
+    licenses(params?: {}): Observable<Licenses> {
+        return this.licenses$Response(params).pipe(
+            map((r: StrictHttpResponse<Licenses>) => r.body as Licenses),
         );
     }
 

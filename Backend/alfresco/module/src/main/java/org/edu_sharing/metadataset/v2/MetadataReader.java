@@ -485,6 +485,9 @@ public class MetadataReader {
 				if(name.equals("interactionType")){
 					widget.setInteractionType(MetadataWidget.InteractionType.valueOf(value));
 				}
+				if(name.equals("filterMode")){
+					widget.setFilterMode(MetadataWidget.WidgetFilterMode.valueOf(value));
+				}
 				if(name.equals("searchable")){
 					widget.setSearchable(value.equalsIgnoreCase("true"));
 				}

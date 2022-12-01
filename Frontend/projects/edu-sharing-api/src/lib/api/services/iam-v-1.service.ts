@@ -489,7 +489,7 @@ export class IamV1Service extends BaseService {
      * This method provides access to the full `HttpResponse`, allowing access to response headers.
      * To access only the response body, use `changeUserAvatar()` instead.
      *
-     * This method sends `application/json` and handles request body of type `application/json`.
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
      */
     changeUserAvatar$Response(params: {
         /**
@@ -512,7 +512,7 @@ export class IamV1Service extends BaseService {
         if (params) {
             rb.path('repository', params.repository, {});
             rb.path('person', params.person, {});
-            rb.body(params.body, 'application/json');
+            rb.body(params.body, 'multipart/form-data');
         }
 
         return this.http
@@ -538,7 +538,7 @@ export class IamV1Service extends BaseService {
      * This method provides access to only to the response body.
      * To access the full response (for headers, for example), `changeUserAvatar$Response()` instead.
      *
-     * This method sends `application/json` and handles request body of type `application/json`.
+     * This method sends `multipart/form-data` and handles request body of type `multipart/form-data`.
      */
     changeUserAvatar(params: {
         /**
@@ -2123,7 +2123,7 @@ export class IamV1Service extends BaseService {
         group: string;
 
         /**
-         * authorityType either GROUP or USER, empty to show all
+         * group type to filter for, e.g. ORG_ADMINISTRATORS
          */
         type: string;
     }): Observable<StrictHttpResponse<AuthorityEntries>> {
@@ -2171,7 +2171,7 @@ export class IamV1Service extends BaseService {
         group: string;
 
         /**
-         * authorityType either GROUP or USER, empty to show all
+         * group type to filter for, e.g. ORG_ADMINISTRATORS
          */
         type: string;
     }): Observable<AuthorityEntries> {

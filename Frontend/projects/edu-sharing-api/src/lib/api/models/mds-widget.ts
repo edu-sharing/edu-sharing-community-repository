@@ -13,6 +13,7 @@ export interface MdsWidget {
     defaultMax?: number;
     defaultMin?: number;
     defaultvalue?: string;
+    filterMode?: 'disabled' | 'auto' | 'always';
     format?: string;
     hasValues?: boolean;
     hideIfEmpty?: boolean;

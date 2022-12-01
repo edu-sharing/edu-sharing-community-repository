@@ -49,6 +49,36 @@
         }
       }
     },
+    "/_about/licenses" : {
+      "get" : {
+        "tags" : [ "ABOUT" ],
+        "summary" : "License information.",
+        "description" : "Get information about used 3rd-party licenses.",
+        "operationId" : "licenses",
+        "responses" : {
+          "200" : {
+            "description" : "OK.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Licenses"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Fatal error occured.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/_about/status/{mode}" : {
       "get" : {
         "tags" : [ "ABOUT" ],
@@ -2625,6 +2655,76 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/AdminStatistics"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Preconditions are not present.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Authorization failed.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Session user has insufficient rights to perform this operation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Ressources are not found.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Fatal error occured.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/v1/version" : {
+      "get" : {
+        "tags" : [ "ADMIN v1" ],
+        "summary" : "get detailed version information",
+        "description" : "detailed information about the running system version",
+        "operationId" : "getVersion",
+        "responses" : {
+          "200" : {
+            "description" : "OK.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RepositoryVersionInfo"
                 }
               }
             }
@@ -8464,7 +8564,7 @@
         } ],
         "requestBody" : {
           "content" : {
-            "application/json" : {
+            "multipart/form-data" : {
               "schema" : {
                 "required" : [ "avatar" ],
                 "type" : "object",
@@ -10301,7 +10401,7 @@
         }, {
           "name" : "type",
           "in" : "path",
-          "description" : "authorityType either GROUP or USER, empty to show all",
+          "description" : "group type to filter for, e.g. ORG_ADMINISTRATORS",
           "required" : true,
           "schema" : {
             "type" : "string"
@@ -15583,6 +15683,14 @@
           "required" : true,
           "schema" : {
             "type" : "string"
+          }
+        }, {
+          "name" : "createVersion",
+          "in" : "query",
+          "description" : "create a node version",
+          "schema" : {
+            "type" : "boolean",
+            "default" : true
           }
         } ],
         "requestBody" : {
@@ -24880,6 +24988,26 @@
           }
         }
       },
+      "Licenses" : {
+        "type" : "object",
+        "properties" : {
+          "repository" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string"
+            }
+          },
+          "services" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "object",
+              "additionalProperties" : {
+                "type" : "string"
+              }
+            }
+          }
+        }
+      },
       "Collection" : {
         "required" : [ "fromUser", "level0", "title", "type", "viewtype" ],
         "type" : "object",
@@ -26003,11 +26131,11 @@
               "type" : "string"
             }
           },
-          "volatile" : {
-            "type" : "boolean"
-          },
           "fullName" : {
             "type" : "string"
+          },
+          "volatile" : {
+            "type" : "boolean"
           }
         }
       },
@@ -26049,10 +26177,10 @@
           "second" : {
             "type" : "object"
           },
-          "name" : {
+          "group" : {
             "type" : "string"
           },
-          "group" : {
+          "name" : {
             "type" : "string"
           }
         }
@@ -26112,6 +26240,101 @@
             "items" : {
               "$ref" : "#/components/schemas/Node"
             }
+          }
+        }
+      },
+      "RepositoryVersionInfo" : {
+        "type" : "object",
+        "properties" : {
+          "version" : {
+            "$ref" : "#/components/schemas/Version"
+          },
+          "maven" : {
+            "$ref" : "#/components/schemas/VersionMaven"
+          },
+          "git" : {
+            "$ref" : "#/components/schemas/VersionGit"
+          }
+        }
+      },
+      "Version" : {
+        "type" : "object",
+        "properties" : {
+          "full" : {
+            "type" : "string"
+          },
+          "major" : {
+            "type" : "string"
+          },
+          "minor" : {
+            "type" : "string"
+          },
+          "patch" : {
+            "type" : "string"
+          },
+          "qualifier" : {
+            "type" : "string"
+          },
+          "build" : {
+            "type" : "string"
+          }
+        }
+      },
+      "VersionGit" : {
+        "type" : "object",
+        "properties" : {
+          "branch" : {
+            "type" : "string"
+          },
+          "commit" : {
+            "$ref" : "#/components/schemas/VersionGitCommit"
+          }
+        }
+      },
+      "VersionGitCommit" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "timestamp" : {
+            "$ref" : "#/components/schemas/VersionTimestamp"
+          }
+        }
+      },
+      "VersionMaven" : {
+        "type" : "object",
+        "properties" : {
+          "bom" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string"
+            }
+          },
+          "project" : {
+            "$ref" : "#/components/schemas/VersionProject"
+          }
+        }
+      },
+      "VersionProject" : {
+        "type" : "object",
+        "properties" : {
+          "artifactId" : {
+            "type" : "string"
+          },
+          "groupId" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "string"
+          }
+        }
+      },
+      "VersionTimestamp" : {
+        "type" : "object",
+        "properties" : {
+          "datetime" : {
+            "type" : "string"
           }
         }
       },
@@ -28447,6 +28670,10 @@
           "interactionType" : {
             "type" : "string",
             "enum" : [ "Input", "None" ]
+          },
+          "filterMode" : {
+            "type" : "string",
+            "enum" : [ "disabled", "auto", "always" ]
           },
           "subwidgets" : {
             "type" : "array",
