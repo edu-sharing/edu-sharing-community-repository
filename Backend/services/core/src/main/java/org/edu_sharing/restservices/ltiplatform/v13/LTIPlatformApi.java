@@ -167,11 +167,15 @@ public class LTIPlatformApi {
 
             ApplicationInfo homeApp = ApplicationInfoList.getHomeRepository();
 
-            Map<String,Object> context = new HashMap<>();
-            context.put("id", loginInitiationSessionObject.getContextId());
-            context.put("label",nodeService
-                    .getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, loginInitiationSessionObject.getContextId()), ContentModel.PROP_NAME));
 
+            Map<String,Object> context = null;
+            NodeRef contextNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, loginInitiationSessionObject.getContextId());
+            if(serviceRegistry.getPermissionService().hasReadPermission(contextNodeRef).equals(AccessStatus.ALLOWED)){
+                context = new HashMap<>();
+                context.put("id", loginInitiationSessionObject.getContextId());
+                context.put("label",nodeService
+                        .getProperty(contextNodeRef, ContentModel.PROP_NAME));
+            }
 
             Map<String,Object> launchPresentation = new HashMap<>();
             launchPresentation.put("locale", I18NUtil.getLocale());
@@ -297,13 +301,15 @@ public class LTIPlatformApi {
                 .setAudience(clientId)
                 .setSubject(username)
                 .claim(LTIConstants.LTI_DEPLOYMENT_ID, appInfo.getLtiDeploymentId())
-                .claim(LTIConstants.DEEP_LINK_CONTEXT, context)
                 .claim("given_name",firstName)
                 .claim("family_name",lastName)
                 .claim("email",email)
                 .claim(LTIConstants.LTI_TOOL_PLATFORM,toolPlatform)
                 .claim(LTIConstants.LTI_VERSION, LTIConstants.LTI_VERSION_3)
                 .claim("https://purl.imsglobal.org/spec/lti/claim/roles",new ArrayList<>());
+        if(context != null){
+            jwtBuilder = jwtBuilder.claim(LTIConstants.DEEP_LINK_CONTEXT, context);
+        }
         return jwtBuilder;
     }
 
