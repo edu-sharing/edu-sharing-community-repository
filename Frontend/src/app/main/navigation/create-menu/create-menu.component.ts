@@ -79,6 +79,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
      */
     @Input() allowBinary = true;
     @Input() scope: string;
+
     /**
      * Parent location. If null, the folder picker will be shown
      */
@@ -87,6 +88,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         this.showPicker = parent == null || this.nodeHelper.isNodeCollection(parent);
         this.updateOptions();
     }
+
     /**
      * can a folder be created
      */
@@ -535,6 +537,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             connectorType,
         );
     }
+
     pickMaterialFromSearch() {
         UIHelper.getCommonParameters(this.route).subscribe((params) => {
             params.addToCollection = this._parent.ref.id;
@@ -543,6 +546,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             });
         });
     }
+
     async createConnector(event: any) {
         const name = event.name + '.' + event.type.filetype;
         this.createConnectorName = null;

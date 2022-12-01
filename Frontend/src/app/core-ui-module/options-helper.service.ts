@@ -683,13 +683,12 @@ export class OptionsHelperService implements OnDestroy {
         openNode.priority = 30;
 
         const editConnectorNode = new OptionItem('OPTIONS.OPEN', 'launch', (node) => {
-                this.editConnector(this.getObjects(node)[0]);
-            }
-        );
+            this.editConnector(this.getObjects(node)[0]);
+        });
         editConnectorNode.customShowCallback = (nodes) => {
-            let n  = nodes ? nodes[0] : null;
-            if(n?.aspects?.includes("ccm:ltitool_node")){
-                 return true;
+            let n = nodes ? nodes[0] : null;
+            if (n?.aspects?.includes('ccm:ltitool_node')) {
+                return true;
             }
             return this.connectors.connectorSupportsEdit(n) != null;
         };
@@ -1484,9 +1483,9 @@ export class OptionsHelperService implements OnDestroy {
         win: any = null,
         connectorType: Connector = null,
     ) {
-        if(node.aspects?.includes("ccm:ltitool_node")){
+        if (node.aspects?.includes('ccm:ltitool_node')) {
             UIHelper.openLTIResourceLink(node);
-        }else {
+        } else {
             UIHelper.openConnector(
                 this.connectors,
                 this.iamService,
