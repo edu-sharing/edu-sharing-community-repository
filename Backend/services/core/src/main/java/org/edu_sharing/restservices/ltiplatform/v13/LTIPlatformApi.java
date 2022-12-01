@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -170,12 +171,15 @@ public class LTIPlatformApi {
 
             Map<String,Object> context = null;
             NodeRef contextNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, loginInitiationSessionObject.getContextId());
-            if(serviceRegistry.getPermissionService().hasReadPermission(contextNodeRef).equals(AccessStatus.ALLOWED)){
+            try {
                 context = new HashMap<>();
                 context.put("id", loginInitiationSessionObject.getContextId());
-                context.put("label",nodeService
+                context.put("label", nodeService
                         .getProperty(contextNodeRef, ContentModel.PROP_NAME));
+            }catch (AccessDeniedException e){
+                // user has no permission on context node ( parent folder)
             }
+
 
             Map<String,Object> launchPresentation = new HashMap<>();
             launchPresentation.put("locale", I18NUtil.getLocale());
