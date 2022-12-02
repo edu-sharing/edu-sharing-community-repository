@@ -1328,4 +1328,12 @@ export class ListTableComponent
     getShownOptions(node: Node) {
         return this._options?.filter((o) => this.optionIsShown(o, node));
     }
+
+    deleteNodes(objects: Node[]): void {
+        this._nodes = this._nodes.filter((n) => !objects.includes(n));
+        this.nodesChange.emit(this._nodes);
+        this.selectedNodes = [];
+        this.selectionChanged.emit([]);
+        this.refreshAvailableOptions();
+    }
 }
