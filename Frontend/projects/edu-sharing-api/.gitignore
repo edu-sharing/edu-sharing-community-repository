@@ -1,1 +1,5 @@
 node_modules/
+
+# generated sources
+build/
+src/lib/api/
