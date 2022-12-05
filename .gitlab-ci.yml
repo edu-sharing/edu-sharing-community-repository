@@ -26,9 +26,9 @@ unittest frontend:
   before_script:
     - mkdir -p Frontend/projects/edu-sharing-api/build/
     - cp Backend/services/rest/api/src/main/resources/openapi.json Frontend/projects/edu-sharing-api/build/openapi.json
-    - pushd projects/edu-sharing-api
+    - cd projects/edu-sharing-api
     - npm run generate-api
-    - popd
+    - cd ../..
     - apk add chromium
     - cd Frontend
     # Install dependencies on cache miss, e.g., when first running on a ci runner.
