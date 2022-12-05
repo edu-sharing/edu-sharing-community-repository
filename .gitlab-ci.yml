@@ -28,6 +28,7 @@ unittest frontend:
     - mkdir -p Frontend/projects/edu-sharing-api/build/
     - cp Backend/services/rest/api/src/main/resources/openapi.json Frontend/projects/edu-sharing-api/build/openapi.json
     - cd Frontend/projects/edu-sharing-api
+    - npm ci
     - npm run generate-api
     - cd ../..
     # Install dependencies on cache miss, e.g., when first running on a ci runner.
