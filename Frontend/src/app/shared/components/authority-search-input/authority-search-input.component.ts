@@ -16,7 +16,7 @@ import {
     User,
 } from '../../../core-module/core.module';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
-import { PermissionNamePipe } from '../../../core-ui-module/pipes/permission-name.pipe';
+import { PermissionNamePipe } from '../../pipes/permission-name.pipe';
 import { SuggestItem } from '../../../common/ui/autocomplete/autocomplete.component';
 
 interface SuggestionGroup {
@@ -28,6 +28,7 @@ interface SuggestionGroup {
     selector: 'es-authority-search-input',
     templateUrl: 'authority-search-input.component.html',
     styleUrls: ['authority-search-input.component.scss'],
+    providers: [PermissionNamePipe],
 })
 export class AuthoritySearchInputComponent {
     @ViewChild('inputElement') inputElement: ElementRef<HTMLInputElement>;

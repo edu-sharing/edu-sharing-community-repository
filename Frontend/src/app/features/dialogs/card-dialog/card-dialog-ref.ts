@@ -11,6 +11,7 @@ import { CardDialogState } from './card-dialog-state';
 // https://github.com/angular/components/blob/13.3.x/src/material/dialog/dialog-ref.ts.
 
 export class CardDialogRef<D = unknown, R = unknown> {
+    private readonly beforeClosedSubject = new Subject<R | undefined>();
     private readonly afterClosedSubject = new Subject<R | undefined>();
     /** Handle to the timeout that's running as a fallback in case the exit animation doesn't fire. */
     private closeFallbackTimeout: ReturnType<typeof setTimeout>;
@@ -62,8 +63,8 @@ export class CardDialogRef<D = unknown, R = unknown> {
                 take(1),
             )
             .subscribe((event) => {
-                // this._beforeClosed.next(dialogResult);
-                // this._beforeClosed.complete();
+                this.beforeClosedSubject.next(result);
+                this.beforeClosedSubject.complete();
                 this.overlayRef.detachBackdrop();
 
                 // The logic that disposes of the overlay depends on the exit animation completing, however
@@ -79,6 +80,10 @@ export class CardDialogRef<D = unknown, R = unknown> {
 
         // this._state = MatDialogState.CLOSING;
         this.containerInstance.startExitAnimation();
+    }
+
+    beforeClosed(): Observable<R | null> {
+        return this.beforeClosedSubject.asObservable();
     }
 
     afterClosed(): Observable<R | null> {

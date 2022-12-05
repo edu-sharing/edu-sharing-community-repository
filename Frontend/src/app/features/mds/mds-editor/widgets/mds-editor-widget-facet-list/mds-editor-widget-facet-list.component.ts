@@ -1,11 +1,18 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
+    Component,
+    OnDestroy,
+    OnInit,
+} from '@angular/core';
 import { FormArray, FormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { FacetAggregation, FacetValue, SearchService } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { filter, finalize, takeUntil } from 'rxjs/operators';
+import { debounceTime, filter, finalize, first, switchMap, takeUntil } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase, ValueType } from '../mds-editor-widget-base';
+import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 
 @Component({
     selector: 'es-mds-editor-widget-facet-list',
@@ -22,18 +29,39 @@ export class MdsEditorWidgetFacetListComponent
     readonly facetAggregationSubject = new BehaviorSubject<FacetAggregation>(null);
     /** Form array representing checkbox states. */
     formArray: FormArray;
+    /** all available facet values. */
+    facetValues: FacetValue[];
+    facetValuesFiltered: FacetValue[];
+
     /** Whether we are currently loading more facets. */
     isLoading = false;
     /** IDs of selected values. Updated through user interaction. */
     private values: string[];
     private readonly destroyed$ = new Subject<void>();
+    filter = new FormControl('');
 
     constructor(
         mdsEditorInstance: MdsEditorInstanceService,
         translate: TranslateService,
         private search: SearchService,
+        private changeDetectorRef: ChangeDetectorRef,
     ) {
         super(mdsEditorInstance, translate);
+
+        this.filter.valueChanges.pipe(debounceTime(200)).subscribe((filter) => {
+            this.filterControls(filter);
+        });
+        this.filter.valueChanges
+            .pipe(
+                first(),
+                switchMap(() =>
+                    this.search.loadMoreFacets(
+                        this.widget.definition.id,
+                        RestConstants.COUNT_UNLIMITED,
+                    ),
+                ),
+            )
+            .subscribe(() => {});
     }
 
     ngOnInit(): void {
@@ -48,7 +76,7 @@ export class MdsEditorWidgetFacetListComponent
     }
 
     getFacet(index: number): FacetValue {
-        return this.facetAggregationSubject.value.values[index];
+        return this.facetValuesFiltered[index];
     }
 
     onLoadMore(): void {
@@ -61,7 +89,9 @@ export class MdsEditorWidgetFacetListComponent
 
     private registerFacetValuesSubject(): void {
         this.search
-            .observeFacet(this.widget.definition.id, { includeActiveFilters: true })
+            .observeFacet(this.widget.definition.id, {
+                includeActiveFilters: true,
+            })
             .pipe(takeUntil(this.destroyed$))
             .subscribe((facetAggregation) => this.facetAggregationSubject.next(facetAggregation));
     }
@@ -70,9 +100,13 @@ export class MdsEditorWidgetFacetListComponent
         // (Re-)create `formArray` on changed facet values.
         this.facetAggregationSubject.subscribe((facetValues) => {
             if (facetValues) {
+                this.facetValues = facetValues.values;
                 this.formArray = this.generateFormArray(facetValues.values);
+                this.updateFilteredValues();
             } else {
                 this.formArray = null;
+                this.facetValues = null;
+                this.facetValuesFiltered = null;
             }
         });
     }
@@ -85,11 +119,40 @@ export class MdsEditorWidgetFacetListComponent
         formArray.valueChanges
             .pipe(filter((value) => value !== null))
             .subscribe((checkboxStates: boolean[]) => {
-                this.values = this.facetAggregationSubject.value.values
+                this.values = this.facetValuesFiltered
                     .filter((_, index) => checkboxStates[index] === true)
                     .map(({ value }) => value);
                 this.setValue(this.values);
             });
         return formArray;
+    }
+
+    hasFilter() {
+        if (
+            !this.widget.definition.filterMode ||
+            this.widget.definition.filterMode === 'disabled'
+        ) {
+            return false;
+        }
+        if (this.widget.definition.filterMode === 'always') {
+            return true;
+        }
+        return (
+            this.facetAggregationSubject.value.hasMore ||
+            this.facetAggregationSubject.value.values.length > 5
+        );
+    }
+
+    private filterControls(filter: string) {
+        console.log(filter, this.facetValues);
+        this.updateFilteredValues();
+        this.changeDetectorRef.detectChanges();
+    }
+
+    private updateFilteredValues() {
+        this.facetValuesFiltered = this.facetValues.filter((v) =>
+            v.label?.toLowerCase().includes(this.filter.value.toLowerCase()),
+        );
+        this.formArray = this.generateFormArray(this.facetValuesFiltered);
     }
 }

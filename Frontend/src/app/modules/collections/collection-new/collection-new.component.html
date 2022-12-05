@@ -415,14 +415,3 @@
     </es-card>
   </div>
 </div>
-<es-workspace-share
-  #share
-  *ngIf="showPermissions"
-  [nodeId]="editPermissionsId"
-  [node]="editPermissionsDummy"
-  [sendMessages]="true"
-  [sendToApi]="false"
-  [currentPermissions]="permissions"
-  (onClose)="setPermissions($event)"
->
-</es-workspace-share>

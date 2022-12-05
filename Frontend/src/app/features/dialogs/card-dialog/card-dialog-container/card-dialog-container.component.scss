@@ -2,6 +2,10 @@
 
 ::ng-deep .card-dialog-pane {
     flex-direction: column;
+    transition: transform $transitionNormal;
+    &.card-dialog-pane-mobile-background {
+        transform: translate(0, -15px);
+    }
 }
 
 :host {

@@ -17,7 +17,7 @@ import {
 import { Helper } from '../../core-module/rest/helper';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
 import { OPEN_URL_MODE, UIConstants } from '../../core-module/ui/ui-constants';
-import { InputPasswordComponent } from '../../core-ui-module/components/input-password/input-password.component';
+import { InputPasswordComponent } from '../../shared/components/input-password/input-password.component';
 import { RouterHelper } from '../../core-ui-module/router.helper';
 import { Toast } from '../../core-ui-module/toast';
 import { TranslationsService } from '../../translations/translations.service';

@@ -37,6 +37,7 @@ import { CardComponent } from './components/card/card.component';
 import { DropdownComponent } from './components/dropdown/dropdown.component';
 import { GlobalProgressComponent } from './components/global-progress/global-progress.component';
 import { InfoMessageComponent } from './components/info-message/info-message.component';
+import { InputPasswordComponent } from './components/input-password/input-password.component';
 import { LicenseSourceComponent } from './components/license-source/license-source.component';
 import { LinkComponent } from './components/link/link.component';
 import { ModalDialogComponent } from './components/modal-dialog/modal-dialog.component';
@@ -72,9 +73,11 @@ import { NodeImagePipe } from './pipes/node-image.pipe';
 import { NodePersonNamePipe } from './pipes/node-person-name.pipe';
 import { NodeTitlePipe } from './pipes/node-title.pipe';
 import { OptionTooltipPipe } from './pipes/option-tooltip.pipe';
+import { PermissionNamePipe } from './pipes/permission-name.pipe';
 import { ReplaceCharsPipe } from './pipes/replace-chars.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { VCardNamePipe } from './pipes/vcard-name.pipe';
+import { VersionLabelPipe } from './pipes/version-label.pipe';
 
 @NgModule({
     declarations: [
@@ -100,6 +103,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         IconDirective,
         InfiniteScrollDirective,
         InfoMessageComponent,
+        InputPasswordComponent,
         LicenseSourceComponent,
         LinkComponent,
         ModalDialogComponent,
@@ -110,6 +114,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         NodeUrlComponent,
         OnAttributeChangeDirective,
         OptionTooltipPipe,
+        PermissionNamePipe,
         RegisterCustomPropertyDirective,
         ReplaceCharsPipe,
         SafeHtmlPipe,
@@ -120,6 +125,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         TutorialComponent,
         UserAvatarComponent,
         VCardNamePipe,
+        VersionLabelPipe,
         WorkspaceCreateConnector,
         NodesDragDirective,
         NodesDropTargetDirective,
@@ -174,6 +180,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         IconDirective,
         InfiniteScrollDirective,
         InfoMessageComponent,
+        InputPasswordComponent,
         LicenseSourceComponent,
         LinkComponent,
         MatAutocompleteModule,
@@ -205,6 +212,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         OnAttributeChangeDirective,
         OptionTooltipPipe,
         OverlayModule,
+        PermissionNamePipe,
         ReactiveFormsModule,
         RegisterCustomPropertyDirective,
         ReplaceCharsPipe,
@@ -218,6 +226,7 @@ import { VCardNamePipe } from './pipes/vcard-name.pipe';
         TutorialComponent,
         UserAvatarComponent,
         VCardNamePipe,
+        VersionLabelPipe,
         WorkspaceCreateConnector,
         NodesDragDirective,
         NodesDropTargetDirective,

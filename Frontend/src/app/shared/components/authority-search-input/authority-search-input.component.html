@@ -24,6 +24,7 @@
       placeholder="{{ placeholder | translate }}"
       name="authoritySearch"
       [formControl]="input"
+      cdkFocusInitial
     />
     <mat-hint *ngIf="hint">{{ hint }}</mat-hint>
     <mat-autocomplete

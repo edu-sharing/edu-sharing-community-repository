@@ -2391,6 +2391,14 @@
           "defaultvalue": {
             "type": "string"
           },
+          "filterMode": {
+            "enum": [
+              "disabled",
+              "auto",
+              "always"
+            ],
+            "type": "string"
+          },
           "format": {
             "type": "string"
           },

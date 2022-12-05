@@ -19,9 +19,7 @@ import { ButtonsTestComponent } from './common/test/buttons/buttons-test.compone
 import { InputsTestComponent } from './common/test/inputs/inputs-test.component';
 import { UserAvatarTestComponent } from './common/test/user-avatar/user-avatar-test.component';
 import { ModalTestComponent } from './common/test/modal/modal-test.component';
-import { VersionLabelPipe } from './common/ui/version-label.pipe';
 import { ToolpermissionCheckDirective } from './common/directives/toolpermission-check.directive';
-import { NodeAuthorNamePipe } from './common/ui/node-author-name.pipe';
 import { ColorTransformPipe } from './common/ui/color-transform.pipe';
 
 import { MatConfirmGroupComponent } from './common/ui/mat-confirm-group/mat-confirm-group.component';
@@ -36,8 +34,6 @@ export const DECLARATIONS = [
     ModalTestComponent,
     AutocompleteComponent,
     ColorTransformPipe,
-    NodeAuthorNamePipe,
-    VersionLabelPipe,
     TimePipe,
     SmallCollectionComponent,
     ScrollToTopButtonComponent,

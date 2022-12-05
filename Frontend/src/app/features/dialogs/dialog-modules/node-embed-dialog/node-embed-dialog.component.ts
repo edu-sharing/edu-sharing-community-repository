@@ -14,7 +14,7 @@ import {
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { first, startWith, take } from 'rxjs/operators';
+import { startWith, take } from 'rxjs/operators';
 import { DialogButton, RestHelper } from 'src/app/core-module/core.module';
 import { Toast, ToastType } from 'src/app/core-ui-module/toast';
 import { UIHelper } from 'src/app/core-ui-module/ui-helper';
@@ -22,6 +22,7 @@ import { Node } from '../../../../core-module/rest/data-object';
 import { MainNavService } from '../../../../main/navigation/main-nav.service';
 import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
+import { DialogsService } from '../../dialogs.service';
 
 export interface NodeEmbedDialogData {
     node: Node;
@@ -37,7 +38,6 @@ export interface NodeEmbedDialogData {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
-    @HostBinding('hidden') hidden: string | null = null;
     @ViewChild('textarea') textareaRef: ElementRef<HTMLTextAreaElement>;
 
     readonly buttons = [new DialogButton('OPTIONS.COPY', { color: 'primary' }, () => this.copy())];
@@ -67,6 +67,7 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
     constructor(
         @Inject(CARD_DIALOG_DATA) public data: NodeEmbedDialogData,
         private dialogRef: CardDialogRef,
+        private dialogs: DialogsService,
         private changeDetectorRef: ChangeDetectorRef,
         private location: Location,
         private mainNav: MainNavService,
@@ -86,15 +87,11 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
         this.destroyed$.complete();
     }
 
-    openInviteDialog(): void {
-        // We cannot show the invite dialog on top of this dialog, since this dialog is attached via
-        // a `cdkOverlay`, so instead, we just hide this dialog until the invite dialog is closed.
-        this.hidden = 'true';
-        this.mainNav.getDialogs().nodeShare = [this.data.node];
-        this.mainNav
-            .getDialogs()
-            .nodeShareChange.pipe(first((value) => !value))
-            .subscribe(() => (this.hidden = null));
+    async openInviteDialog(): Promise<void> {
+        const dialogRef = await this.dialogs.openShareDialog({ nodes: [this.data.node] });
+        dialogRef.afterClosed().subscribe((result) => {
+            // TODO: Update `isPublic` if necessary.
+        });
     }
 
     private registerFormChanges(): void {

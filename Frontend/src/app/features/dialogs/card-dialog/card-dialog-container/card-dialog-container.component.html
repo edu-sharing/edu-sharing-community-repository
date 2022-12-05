@@ -5,6 +5,7 @@
   [avatar]="config.avatar"
   (closeButtonClick)="onCloseButtonClick()"
   [showCloseButton]="shouldShowCloseButton()"
+  [additionalContent]="config.customHeaderBarContent"
   [disableCloseButton]="isLoading || autoSavingState === 'saving' || closeButtonTemporarilyDisabled"
 ></es-card-header>
 

@@ -1,0 +1,60 @@
+@import '../../../../core-ui-module/styles/variables';
+
+.group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    .info-checkbox {
+        padding-bottom: 10px;
+    }
+    .configuration-link {
+        position: relative;
+        margin-bottom: 20px;
+    }
+    .info-left {
+        width: 100%;
+    }
+    .info-right {
+        position: relative;
+        text-align: right;
+        .switch {
+            float: right;
+        }
+    }
+}
+
+.copyLink {
+    padding-left: 10px;
+    margin-top: 10px;
+}
+
+.heading {
+    font-weight: bold;
+}
+
+.link {
+    background-color: $backgroundColor;
+}
+
+.link-info,
+.link-downloads {
+    display: block;
+    width: 100%;
+    line-height: 1.5;
+}
+
+.link-info {
+    padding: 10px 0 5px;
+    display: flex;
+    .linkInput {
+        flex-grow: 1;
+    }
+}
+
+es-input-password {
+    margin-top: 10px;
+}
+
+.link-disabled {
+    filter: blur(2px);
+}
