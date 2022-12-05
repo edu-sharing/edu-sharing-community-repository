@@ -138,7 +138,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DECLARATIONS_SHARE_APP,
         DECLARATIONS_SERVICES,
     ],
-    schemas: [extensionSchemas],
+    schemas: [].concat(extensionSchemas),
     bootstrap: [RouterComponent],
 })
 export class AppModule {}
