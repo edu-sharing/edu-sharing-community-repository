@@ -1,37 +1,5 @@
 package org.alfresco.repo.webdav.auth;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.CharacterCodingException;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.CodingErrorAction;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
-import javax.naming.CommunicationException;
-import javax.naming.Context;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
-import javax.naming.directory.Attribute;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
-import javax.naming.directory.SearchControls;
-import javax.naming.directory.SearchResult;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.transaction.UserTransaction;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.AuthenticationException;
@@ -42,12 +10,31 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.NoSuchPersonException;
 import org.alfresco.service.cmr.security.PersonService;
+import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.springframework.context.ApplicationContext;
+
+import javax.naming.CommunicationException;
+import javax.naming.Context;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import javax.naming.directory.*;
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.transaction.UserTransaction;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
+import java.util.*;
 
 
 /**
@@ -581,6 +568,17 @@ public class LDAPAuthenticationFilter implements Filter {
 
 			logger.debug("query:"+query + " new username:"+username);
 			//edu-sharing customization
+			if(username != null){
+				NodeRef personRef = this.m_personService.getPerson(username);
+				if(!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")) {
+					String personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
+					String personStatus = (String)this.m_nodeService.getProperty(personRef, QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS));
+					if(!personActiveStatus.equals(personStatus)){
+						throw new AuthenticationException("USER_BLOCKED");
+					}
+				}
+			}
+
 			if(useAlfrescoAuthenticationConponent){
 				this.m_authService.authenticate(username, password.toCharArray());
 			}else{
@@ -625,9 +623,9 @@ public class LDAPAuthenticationFilter implements Filter {
 	 * @param ldapUsername
 	 * @param username
 	 * @param password
-	 * @throws org.alfresco.repo.security.authentication.AuthenticationException
+	 * @throws AuthenticationException
 	 */
-	private void authenticate(String ldapUsername, String ldapUid, String username, String password) throws  org.alfresco.repo.security.authentication.AuthenticationException{
+	private void authenticate(String ldapUsername, String ldapUid, String username, String password) throws  AuthenticationException{
 		
 		if(env != null){
 			Properties authEnv = new Properties();
@@ -651,13 +649,13 @@ public class LDAPAuthenticationFilter implements Filter {
 				return;
 			}catch(javax.naming.AuthenticationException e){
 				logger.error(e.getMessage(), e);
-				throw new org.alfresco.repo.security.authentication.AuthenticationException(e.getMessage());
+				throw new AuthenticationException(e.getMessage());
 			} catch (NamingException e) {
 				logger.error(e.getMessage(), e);
-				throw new org.alfresco.repo.security.authentication.AuthenticationException(e.getMessage());
+				throw new AuthenticationException(e.getMessage());
 			}
 			
 		}
-		throw new org.alfresco.repo.security.authentication.AuthenticationException("LDAPAuthenticationFilter env seems to be null");
+		throw new AuthenticationException("LDAPAuthenticationFilter env seems to be null");
 	}
 }
