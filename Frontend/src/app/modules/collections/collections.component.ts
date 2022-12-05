@@ -154,7 +154,6 @@ export class CollectionsMainComponent implements OnDestroy {
     private _collectionShare: Node;
     private params: Params;
     private destroyed = new Subject<void>();
-    private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
 
     // inject services
     constructor(

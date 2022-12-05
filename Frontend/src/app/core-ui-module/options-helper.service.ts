@@ -67,6 +67,12 @@ import {
 import { Toast } from './toast';
 import { UIHelper } from './ui-helper';
 
+type DeleteEvent = {
+    objects: Node[] | any;
+    count: number;
+    error: boolean;
+};
+
 @Injectable()
 export class OptionsHelperService implements OnDestroy {
     static DownloadElementTypes = [
@@ -79,11 +85,7 @@ export class OptionsHelperService implements OnDestroy {
 
     readonly virtualNodesAdded = new EventEmitter<Node[]>();
     readonly nodesChanged = new EventEmitter<Node[] | void>();
-    readonly nodesDeleted = new EventEmitter<{
-        objects: Node[] | any;
-        count: number;
-        error: boolean;
-    }>();
+    readonly nodesDeleted = new EventEmitter<DeleteEvent>();
     readonly displayTypeChanged = new EventEmitter<NodeEntriesDisplayType>();
 
     private keyboardShortcutsSubscription: Subscription;
@@ -262,7 +264,7 @@ export class OptionsHelperService implements OnDestroy {
                     .getDialogs()
                     ?.onDelete?.subscribe(
                         (result: { objects: any; count: number; error: boolean }) =>
-                            this.nodesDeleted.emit(result),
+                            this.deleteNodes(result),
                     ),
             );
         }
@@ -826,10 +828,8 @@ export class OptionsHelperService implements OnDestroy {
         createNodeVariant.group = DefaultGroups.Reuse;
         createNodeVariant.priority = 30;
 
-        const inviteNode = new OptionItem(
-            'OPTIONS.INVITE',
-            'group_add',
-            async (object) => (management.nodeShare = await this.getObjectsAsync(object, true)),
+        const inviteNode = new OptionItem('OPTIONS.INVITE', 'group_add', async (object) =>
+            this.dialogs.openShareDialog({ nodes: await this.getObjectsAsync(object, true) }),
         );
         inviteNode.elementType = [ElementType.Node, ElementType.SavedSearch];
         inviteNode.showAsAction = true;
@@ -1790,9 +1790,16 @@ export class OptionsHelperService implements OnDestroy {
                 this.collectionService.removeFromCollection(o.ref.id, this.data.parent.ref.id),
             ),
         ).subscribe(
-            () => this.nodesDeleted.emit({ objects, error: false, count: objects.length }),
-            (error) => this.nodesDeleted.emit({ objects, error: true, count: objects.length }),
+            () => this.deleteNodes({ objects, error: false, count: objects.length }),
+            (error) => this.deleteNodes({ objects, error: true, count: objects.length }),
         );
+    }
+
+    private deleteNodes(event: DeleteEvent) {
+        this.nodesDeleted.emit(event);
+        if (this.list && !event.error) {
+            this.list.deleteNodes(event.objects);
+        }
     }
 
     private editCollection(object: Node | any) {

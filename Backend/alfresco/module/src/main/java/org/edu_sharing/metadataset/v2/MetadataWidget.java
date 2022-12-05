@@ -23,6 +23,11 @@ public class MetadataWidget extends MetadataTranslatable{
 		Input,
 		None
 	}
+	public enum WidgetFilterMode {
+		disabled,
+		auto,
+		always
+	}
 	public enum TextEscapingPolicy{
 		// no escaping, strongly discouraged since it can allow XSS vulnerabilities if the data comes from untrusted sources
 		none,
@@ -69,6 +74,7 @@ public class MetadataWidget extends MetadataTranslatable{
 	private int maxlength;
 	private TextEscapingPolicy textEscapingPolicy = TextEscapingPolicy.htmlBasic;
 	private InteractionType interactionType = InteractionType.Input;
+	private WidgetFilterMode filterMode = WidgetFilterMode.disabled;
 	/**
 	 * hint for the client if this widget creates a link to the search
 	 * so e.g. if you click a keyword, you can be directed to the search with this keyword as filter
@@ -313,6 +319,14 @@ public class MetadataWidget extends MetadataTranslatable{
 
 	public InteractionType getInteractionType() {
 		return interactionType;
+	}
+
+	public WidgetFilterMode getFilterMode() {
+		return filterMode;
+	}
+
+	public void setFilterMode(WidgetFilterMode filterMode) {
+		this.filterMode = filterMode;
 	}
 
 	@Override

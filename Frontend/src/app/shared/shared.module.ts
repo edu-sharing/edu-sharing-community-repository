@@ -37,6 +37,7 @@ import { CardComponent } from './components/card/card.component';
 import { DropdownComponent } from './components/dropdown/dropdown.component';
 import { GlobalProgressComponent } from './components/global-progress/global-progress.component';
 import { InfoMessageComponent } from './components/info-message/info-message.component';
+import { InputPasswordComponent } from './components/input-password/input-password.component';
 import { LicenseSourceComponent } from './components/license-source/license-source.component';
 import { LinkComponent } from './components/link/link.component';
 import { ModalDialogComponent } from './components/modal-dialog/modal-dialog.component';
@@ -72,9 +73,11 @@ import { NodeImagePipe } from './pipes/node-image.pipe';
 import { NodePersonNamePipe } from './pipes/node-person-name.pipe';
 import { NodeTitlePipe } from './pipes/node-title.pipe';
 import { OptionTooltipPipe } from './pipes/option-tooltip.pipe';
+import { PermissionNamePipe } from './pipes/permission-name.pipe';
 import { ReplaceCharsPipe } from './pipes/replace-chars.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { VCardNamePipe } from './pipes/vcard-name.pipe';
+import { VersionLabelPipe } from './pipes/version-label.pipe';
 import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.component';
 
 @NgModule({
@@ -101,6 +104,7 @@ import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.
         IconDirective,
         InfiniteScrollDirective,
         InfoMessageComponent,
+        InputPasswordComponent,
         LicenseSourceComponent,
         LinkComponent,
         ModalDialogComponent,
@@ -111,6 +115,7 @@ import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.
         NodeUrlComponent,
         OnAttributeChangeDirective,
         OptionTooltipPipe,
+        PermissionNamePipe,
         RegisterCustomPropertyDirective,
         ReplaceCharsPipe,
         SafeHtmlPipe,
@@ -121,6 +126,7 @@ import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.
         TutorialComponent,
         UserAvatarComponent,
         VCardNamePipe,
+        VersionLabelPipe,
         WorkspaceCreateConnector,
         NodesDragDirective,
         NodesDropTargetDirective,
@@ -176,6 +182,7 @@ import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.
         IconDirective,
         InfiniteScrollDirective,
         InfoMessageComponent,
+        InputPasswordComponent,
         LicenseSourceComponent,
         LinkComponent,
         MatAutocompleteModule,
@@ -207,6 +214,7 @@ import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.
         OnAttributeChangeDirective,
         OptionTooltipPipe,
         OverlayModule,
+        PermissionNamePipe,
         ReactiveFormsModule,
         RegisterCustomPropertyDirective,
         ReplaceCharsPipe,
@@ -220,6 +228,7 @@ import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.
         TutorialComponent,
         UserAvatarComponent,
         VCardNamePipe,
+        VersionLabelPipe,
         WorkspaceCreateConnector,
         NodesDragDirective,
         NodesDropTargetDirective,

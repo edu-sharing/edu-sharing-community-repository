@@ -63,15 +63,11 @@
   ></es-actionbar>
   <!-- collection header -->
   <ng-container
-    [ngTemplateOutlet]="
-      collectionContentTemplateRef
-        ? collectionContentTemplateRef
-        : collectionContentTemplateRefDefault
-    "
+    [ngTemplateOutlet]="collectionContentTemplateRef ?? collectionContentTemplateRefDefault"
     [ngTemplateOutletContext]="{
       $implicit: null,
       collection: collection,
-      permissions: collectionContentRef?.permissions,
+      permissions: collectionContentRef?.permissions ?? null,
       isLoading: isLoading,
       tabSelected: tabSelected
     }"

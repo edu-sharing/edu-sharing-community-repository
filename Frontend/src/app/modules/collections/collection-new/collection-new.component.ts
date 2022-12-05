@@ -57,7 +57,6 @@ import { MainNavComponent } from '../../../main/navigation/main-nav/main-nav.com
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
-import { WorkspaceShareComponent } from '../../workspace/share/share.component';
 import { MdsMetadatasets } from '../../../core-module/core.module';
 import { ConfigurationHelper } from '../../../core-module/core.module';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
@@ -74,6 +73,8 @@ import {
     NodeEntriesDisplayType,
 } from '../../../features/node-entries/entries-model';
 import { NodeEntriesWrapperComponent } from '../../../features/node-entries/node-entries-wrapper.component';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { ShareDialogResult } from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog-data';
 
 type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITORIAL_GROUPS';
 
@@ -86,7 +87,6 @@ type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITO
 export class CollectionNewComponent implements EventListener, OnInit, OnDestroy {
     @ViewChild('mds') mds: MdsEditorWrapperComponent;
     @ViewChild('organizations') organizationsRef: NodeEntriesWrapperComponent<Group>;
-    @ViewChild('share') shareRef: WorkspaceShareComponent;
     readonly InteractionType = InteractionType;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     public hasCustomScope: boolean;
@@ -106,13 +106,11 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         '#692869',
     ];
     public isLoading = true;
-    public showPermissions = false;
     currentCollection: EduData.Node;
     public newCollectionType: string;
     public properties: Values = {};
     user: User;
     public mainnav = true;
-    public editPermissionsId: string;
     permissions: LocalPermissions = null;
     public canInvite: boolean;
     public shareToAll: boolean;
@@ -143,11 +141,10 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         EDITORIAL_GROUPS: 'star',
     };
     public newCollectionStep: Step = this.STEP_NEW;
-    public editPermissionsDummy: EduData.Node;
     availableSteps: Step[];
     private parentCollection: EduData.Node;
     private originalPermissions: LocalPermissions;
-    private permissionsInfo: any;
+    private permissionsInfo: ShareDialogResult;
     private destroyed = new Subject<void>();
     private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
 
@@ -250,6 +247,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         private translationService: TranslateService,
         private loadingScreen: LoadingScreenService,
         private mainNav: MainNavService,
+        private dialogs: DialogsService,
     ) {
         this.eventService.addListener(this, this.destroyed);
         this.translations.waitForInit().subscribe(() => {
@@ -414,7 +412,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
             },
         );
     }
-    setPermissions(permissions: any) {
+    private setPermissions(permissions: ShareDialogResult) {
         if (permissions) {
             this.permissionsInfo = permissions;
             this.permissions = permissions.permissions;
@@ -428,23 +426,31 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
                 }
             }
         }
-        this.showPermissions = false;
     }
-    editPermissions() {
+    async editPermissions(): Promise<void> {
         if (this.permissions == null && !this.editId) {
             this.permissions = new LocalPermissions();
         }
+        let nodes: Node[] | string[];
         if (this.editId) {
-            this.editPermissionsId = this.editId;
+            nodes = [this.editId];
         } else {
-            this.editPermissionsDummy = new EduData.Node();
-            this.editPermissionsDummy.ref = {} as NodeRef;
-            this.editPermissionsDummy.aspects = [RestConstants.CCM_ASPECT_COLLECTION];
-            this.editPermissionsDummy.isDirectory = true;
+            const permissionsDummy = new EduData.Node();
+            permissionsDummy.title = this.currentCollection.title;
+            permissionsDummy.iconURL = this.connector.getThemeMimeIconSvg('collection.svg');
+            permissionsDummy.ref = {} as NodeRef;
+            permissionsDummy.aspects = [RestConstants.CCM_ASPECT_COLLECTION];
+            permissionsDummy.properties = {};
+            permissionsDummy.isDirectory = true;
+            nodes = [permissionsDummy];
         }
-        this.showPermissions = true;
-        // update state after changing different bindings
-        this.uiService.waitForComponent(this, 'shareRef').subscribe(() => this.shareRef.refresh());
+        const dialogRef = await this.dialogs.openShareDialog({
+            nodes,
+            sendMessages: true,
+            sendToApi: false,
+            currentPermissions: this.permissions,
+        });
+        dialogRef.afterClosed().subscribe((result) => this.setPermissions(result));
     }
     isNewCollection(): boolean {
         return this.editId == null;

@@ -328,4 +328,9 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     resetPagination() {
         this.nodeEntriesComponentRef?.paginator?.firstPage();
     }
+
+    deleteNodes(objects: T[]): void {
+        this.dataSource.removeData(objects);
+        this.getSelection().clear();
+    }
 }

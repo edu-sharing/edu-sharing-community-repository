@@ -153,10 +153,6 @@ export class WorkspaceManagementDialogsComponent {
         error: boolean;
         count: number;
     }>();
-    @Input() nodeShare: Node[];
-    @Output() nodeShareChange = new EventEmitter<Node[]>();
-    @Input() nodeShareLink: Node;
-    @Output() nodeShareLinkChange = new EventEmitter();
     @Input() nodeWorkflow: Node[];
     @Output() nodeWorkflowChange = new EventEmitter();
     @Input() signupGroup: boolean;
@@ -312,23 +308,26 @@ export class WorkspaceManagementDialogsComponent {
         this.ltiToolConfig = null;
         this.ltiToolRefresh = new Boolean();
     }
-    closeShareLink() {
-        this.nodeShareLink = null;
-        this.nodeShareLinkChange.emit(null);
+    async openShareDialog(nodes: Node[]): Promise<void> {
+        const dialogRef = await this.dialogs.openShareDialog({
+            nodes,
+            sendMessages: true,
+        });
+        dialogRef.afterClosed().subscribe((result) => {
+            this.closeShare(nodes);
+        });
     }
-    closeShare() {
+    closeShare(originalNodes: Node[]) {
         // reload node metadata
         this.toast.showProgressDialog();
         observableForkJoin(
-            this.nodeShare.map((n) =>
+            originalNodes.map((n) =>
                 this.nodeService.getNodeMetadata(n.ref.id, [RestConstants.ALL]),
             ),
         ).subscribe(
             (nodes: NodeWrapper[]) => {
                 this.onRefresh.emit(nodes.map((n) => n.node));
-                const previousNodes = this.nodeShare;
-                this.nodeShare = null;
-                this.nodeShareChange.emit(null);
+                const previousNodes = originalNodes;
                 if (this.reopenSimpleEdit) {
                     this.reopenSimpleEdit = false;
                     this._nodeSimpleEdit = previousNodes;

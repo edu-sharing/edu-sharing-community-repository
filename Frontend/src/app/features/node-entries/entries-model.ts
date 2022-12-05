@@ -105,4 +105,9 @@ export interface ListEventInterface<T extends NodeEntriesDataType> {
     initOptionsGenerator(config: ListOptionsConfig): void | Promise<void>;
 
     getSelection(): SelectionModel<T>;
+
+    /**
+     * triggered when nodes/objects are deleted and should not be shown in the list anymore
+     */
+    deleteNodes(objects: T[]): void;
 }

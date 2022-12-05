@@ -105,6 +105,8 @@ public class MdsWidget {
 	private int maxlength;
 	private MetadataWidget.InteractionType interactionType;
 
+	private MetadataWidget.WidgetFilterMode filterMode;
+
 	public MdsWidget(){}
 	public MdsWidget(MetadataWidget widget) {
 		this.id=widget.getId();
@@ -118,6 +120,7 @@ public class MdsWidget {
 		this.placeholder=widget.getPlaceholder();
 		this.maxlength=widget.getMaxlength();
 		this.interactionType=widget.getInteractionType();
+		this.filterMode=widget.getFilterMode();
 		this.unit=widget.getUnit();
 		this.configuration=widget.getConfiguration();
 		this.min=widget.getMin();
@@ -381,6 +384,15 @@ public class MdsWidget {
 
 	public void setInteractionType(MetadataWidget.InteractionType interactionType) {
 		this.interactionType = interactionType;
+	}
+
+	@JsonProperty
+	public MetadataWidget.WidgetFilterMode getFilterMode() {
+		return filterMode;
+	}
+
+	public void setFilterMode(MetadataWidget.WidgetFilterMode filterMode) {
+		this.filterMode = filterMode;
 	}
 }
 

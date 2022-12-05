@@ -12,7 +12,9 @@
   "scripts": {
     "generate-api:generate-code": "ng-openapi-gen --input build/openapi.json --output src/lib/api",
     "generate-api:prettify-code": "prettier -w 'src/lib/api/**/*.ts' --end-of-line auto",
-    "generate-api": "npm run generate-api:generate-code && npm run generate-api:prettify-code"
+    "generate-api": "npm run generate-api:generate-code && npm run generate-api:prettify-code",
+    "generate-api-dev:generate-code": "ng-openapi-gen --input ../../../Backend/services/rest/api/src/main/resources/openapi.json --output src/lib/api",
+    "generate-api-dev": "npm run generate-api-dev:generate-code && npm run generate-api:prettify-code"
   },
   "peerDependencies": {
     "@angular/common": "^12.2.0 || ^13.0.0 || ^14.0.0",

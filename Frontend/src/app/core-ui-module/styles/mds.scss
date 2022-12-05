@@ -523,7 +523,8 @@ es-mds .mdsEmbedded {
  */
 
 .mat-autocomplete-panel,
-.suggestion-card {
+.suggestion-card,
+es-mds-editor-widget-facet-list {
     mark {
         font-weight: bold;
         color: $primary;

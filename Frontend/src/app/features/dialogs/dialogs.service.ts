@@ -1,12 +1,7 @@
 import { Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { RestConnectorService } from '../../core-module/core.module';
-import {
-    CardDialogConfig,
-    Closable,
-    configForNode,
-    configForNodes,
-} from './card-dialog/card-dialog-config';
+import { Closable, configForNode, configForNodes } from './card-dialog/card-dialog-config';
 import { CardDialogRef } from './card-dialog/card-dialog-ref';
 import { CardDialogService } from './card-dialog/card-dialog.service';
 import {
@@ -41,6 +36,18 @@ import { NodeEmbedDialogData } from './dialog-modules/node-embed-dialog/node-emb
 import { NodeInfoDialogData } from './dialog-modules/node-info-dialog/node-info-dialog.component';
 import { NodeReportDialogData } from './dialog-modules/node-report-dialog/node-report-dialog.component';
 import { QrDialogData } from './dialog-modules/qr-dialog/qr-dialog.component';
+import {
+    ShareDialogData,
+    ShareDialogResult,
+} from './dialog-modules/share-dialog/share-dialog-data';
+import {
+    ShareHistoryDialogData,
+    ShareHistoryDialogResult,
+} from './dialog-modules/share-history-dialog/share-history-dialog-data';
+import {
+    ShareLinkDialogData,
+    ShareLinkDialogResult,
+} from './dialog-modules/share-link-dialog/share-link-dialog-data';
 import {
     XmlAppPropertiesDialogData,
     XmlAppPropertiesDialogResult,
@@ -137,7 +144,7 @@ export class DialogsService {
         return this.cardDialog.open(SearchNodeStoreComponent, {
             title: 'SEARCH.NODE_STORE.TITLE',
             width: 400,
-            minHeight: 'min(95%, 600px)',
+            minHeight: 600,
             contentPadding: 0,
         });
     }
@@ -259,6 +266,53 @@ export class DialogsService {
             width: 700,
             height: 1100,
             closable: Closable.Standard,
+            data,
+        });
+    }
+
+    async openShareDialog(
+        data: ShareDialogData,
+    ): Promise<CardDialogRef<ShareDialogData, ShareDialogResult>> {
+        const { ShareDialogComponent } = await import(
+            './dialog-modules/share-dialog/share-dialog.module'
+        );
+        return this.cardDialog.open(ShareDialogComponent, {
+            title: 'WORKSPACE.SHARE.TITLE',
+            contentPadding: 0,
+            width: 900,
+            height: 800,
+            closable: Closable.Standard,
+            data: { ...new ShareDialogData(), ...data },
+        });
+    }
+
+    async openShareHistoryDialog(
+        data: ShareHistoryDialogData,
+    ): Promise<CardDialogRef<ShareHistoryDialogData, ShareHistoryDialogResult>> {
+        const { ShareHistoryDialogComponent } = await import(
+            './dialog-modules/share-history-dialog/share-history-dialog.module'
+        );
+        return this.cardDialog.open(ShareHistoryDialogComponent, {
+            title: 'WORKSPACE.SHARE.HISTORY.TITLE',
+            ...configForNode(data.node),
+            contentPadding: 0,
+            minWidth: 500,
+            minHeight: 300,
+            data,
+        });
+    }
+
+    async openShareLinkDialog(
+        data: ShareLinkDialogData,
+    ): Promise<CardDialogRef<ShareLinkDialogData, ShareLinkDialogResult>> {
+        const { ShareLinkDialogComponent } = await import(
+            './dialog-modules/share-link-dialog/share-link-dialog.module'
+        );
+        return this.cardDialog.open(ShareLinkDialogComponent, {
+            title: 'WORKSPACE.SHARE_LINK.TITLE',
+            ...configForNode(data.node),
+            width: 500,
+            height: 700,
             data,
         });
     }

@@ -8,7 +8,7 @@
 package org.edu_sharing.webservices.alfresco.extension;
 
 public class NativeAlfrescoWrapperSoapBindingSkeleton implements org.edu_sharing.webservices.alfresco.extension.NativeAlfrescoWrapper, org.apache.axis.wsdl.Skeleton {
-    private org.edu_sharing.webservices.alfresco.extension.NativeAlfrescoWrapper impl;
+    private transient org.edu_sharing.webservices.alfresco.extension.NativeAlfrescoWrapper impl;
     private static java.util.Map _myOperations = new java.util.Hashtable();
     private static java.util.Collection _myOperationsList = new java.util.ArrayList();
 

@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    EventEmitter,
+    Input,
+    Output,
+    TemplateRef,
+} from '@angular/core';
 import { CardAvatar } from './card-avatar';
 
 @Component({
@@ -15,6 +22,7 @@ export class CardHeaderComponent {
     @Input() avatar?: CardAvatar;
     @Input() showCloseButton: boolean = true;
     @Input() disableCloseButton: boolean = false;
+    @Input() additionalContent: TemplateRef<any>;
     @Output() closeButtonClick: EventEmitter<void> = new EventEmitter();
 
     getIconImageUrl(): string {

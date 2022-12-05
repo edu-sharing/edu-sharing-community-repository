@@ -1,0 +1,96 @@
+@import '../../../../../core-ui-module/styles/variables';
+
+.group {
+    width: 100%;
+}
+.deleted-info {
+    // the outer boundary in share dialog has 15px + 5px padding
+    width: calc(100% + 20px);
+    height: 30px;
+    position: absolute;
+    align-items: center;
+    left: -15px;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    border-radius: 25px;
+    font-weight: bold;
+    background-color: rgba(238, 238, 238, 0.6);
+    .line {
+        flex-grow: 1;
+        padding: 0 15px;
+        &:last-child {
+            padding-right: 25px;
+        }
+        hr {
+            border: none;
+            background: #000;
+            height: 1px;
+        }
+    }
+}
+.container {
+    display: flex;
+    width: 100%;
+    > div {
+        display: flex;
+        overflow: hidden;
+        padding: 1px 0;
+        align-items: center;
+    }
+    > .name {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: left;
+        padding: 0 8px;
+        height: 40px;
+        > .secondary {
+            font-size: 80%;
+            color: $textLight;
+            margin-top: -3px;
+            min-height: 3px;
+        }
+    }
+    .toggle {
+        padding: 0 5px;
+    }
+}
+.single {
+    display: flex;
+    padding-left: 25px;
+    position: relative;
+    > div {
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+}
+.all {
+    padding-bottom: 5px;
+}
+.icon {
+    padding-right: 5px;
+}
+.name {
+    flex-grow: 1;
+    padding: 1px 5px !important;
+    @include shortenText();
+}
+.icon,
+.remove {
+    min-width: 24px;
+}
+.remove {
+    position: relative;
+    z-index: 2;
+    cursor: pointer;
+}
+.remove i,
+.type {
+    color: $textLight;
+}
+.disabled {
+    opacity: 0.5;
+    cursor: default;
+}
