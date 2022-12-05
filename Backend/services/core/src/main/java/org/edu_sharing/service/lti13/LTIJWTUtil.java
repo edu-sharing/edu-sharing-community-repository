@@ -421,7 +421,7 @@ public class LTIJWTUtil {
      * @throws ValidationException
      * @throws org.json.simple.parser.ParseException
      */
-    public String validateForInitialToolSession(String jwt) throws ValidationException, org.json.simple.parser.ParseException {
+    public Jws<Claims> validateForInitialToolSession(String jwt) throws ValidationException, org.json.simple.parser.ParseException {
         String clientId = LTIJWTUtil.getValue(jwt,"aud");
         if(clientId == null){
             throw new ValidationException("missing clientId");
@@ -479,7 +479,7 @@ public class LTIJWTUtil {
         if(!sessionUser.equals(tokenUser)){
             throw new ValidationException("mismatch user");
         }
-        return sessionUser;
+        return claims;
     }
 
     /**

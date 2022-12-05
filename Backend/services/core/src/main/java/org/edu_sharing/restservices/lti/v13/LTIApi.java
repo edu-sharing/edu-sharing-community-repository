@@ -25,6 +25,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.security.AllSessions;
 import org.edu_sharing.repository.server.tools.security.Signing;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
@@ -32,6 +33,7 @@ import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.lti.v13.model.JWKResult;
 import org.edu_sharing.restservices.lti.v13.model.JWKSResult;
 import org.edu_sharing.restservices.lti.v13.model.RegistrationUrl;
+import org.edu_sharing.restservices.ltiplatform.v13.LTIPlatformConstants;
 import org.edu_sharing.restservices.ltiplatform.v13.model.ValidationException;
 import org.edu_sharing.restservices.rendering.v1.RenderingApi;
 import org.edu_sharing.restservices.rendering.v1.model.RenderingDetailsEntry;
@@ -48,7 +50,6 @@ import org.edu_sharing.service.lti13.registration.DynamicRegistrationToken;
 import org.edu_sharing.service.lti13.registration.DynamicRegistrationTokens;
 import org.edu_sharing.service.lti13.registration.RegistrationService;
 import org.edu_sharing.service.lti13.uoc.Config;
-import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.StringUtils;
@@ -61,10 +62,7 @@ import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Path("/lti/v13")
 @Consumes({ "text/html" })
@@ -340,7 +338,7 @@ public class LTIApi {
                 jws.getBody().getAudience(),
                 ltiSessionObject.getDeploymentId()));
 
-        Map<String,Object> context = jws.getBody().get(LTIConstants.DEEP_LINK_CONTEXT, Map.class);
+        Map<String,Object> context = jws.getBody().get(LTIConstants.CONTEXT, Map.class);
         if(context != null){
             String courseId = (String)context.get("id");
             if (courseId != null) {
@@ -430,12 +428,8 @@ public class LTIApi {
                 }
             }
 
-            if(ApplicationInfoList.getRepositoryInfoById(ltiSessionObject.getEduSharingAppId()).isLtiUsagesEnabled()){
-                Usage usage = usageService.getUsage(ltiSessionObject.getEduSharingAppId(), ltiSessionObject.getContextId(), nodeId, null);
-                if(usage != null){
-                    req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, nodeId);
-                }
-            }
+            ApiTool.handleUsagePermissions(nodeId, req.getSession(), ltiSessionObject.getEduSharingAppId(), ltiSessionObject.getContextId(), usageService);
+
             toRedirectTo = new URI(targetLink);
             //return Response.temporaryRedirect(new URI(targetLink)).build();
         }else{
@@ -745,9 +739,30 @@ public class LTIApi {
             @Context HttpServletRequest req){
 
         try{
-            String user = new LTIJWTUtil().validateForInitialToolSession(jwt);
+            Jws<Claims> claims = new LTIJWTUtil().validateForInitialToolSession(jwt);
+            String token = claims.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_TOKEN, String.class);
+            HashMap<String,String> tokenData = new Gson().fromJson(ApiTool.decrpt(token), HashMap.class);
+            String user = tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_USER);
+            //don't use this is the appId of the tool
+            //String appId = tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID);
 
+            String deploymentId = claims.getBody().get(LTIConstants.LTI_DEPLOYMENT_ID,String.class);
+            String iss = claims.getBody().getIssuer();
+            String clientId = claims.getBody().getAudience();
+            String appId = new RepoTools().getAppId(iss,clientId,deploymentId);
+
+            Map context = LTIJWTUtil.getValue(jwt,LTIConstants.CONTEXT);
+            if(context == null){
+                /**
+                 * @TODO check: lti context attribut is optional, but we need it for usage resolving
+                 */
+                throw new ValidationException("missing " +LTIConstants.CONTEXT);
+            }
+            String contextId = (String)context.get("id");
             return AuthenticationUtil.runAs(() -> {
+
+                ApiTool.handleUsagePermissions(node, req.getSession(), appId, contextId, usageService);
+
                 return new RenderingApi().getDetailsSnippet(repository,node,nodeVersion,displayMode,req);
             },user);
         }catch(ValidationException e){
@@ -758,7 +773,7 @@ public class LTIApi {
             logger.error(t.getMessage(), t);
             return ErrorResponse.createResponse(t);
         }
+        //TODO maybe destroy session
     }
-
 
 }

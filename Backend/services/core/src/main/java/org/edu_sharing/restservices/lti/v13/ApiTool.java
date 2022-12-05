@@ -2,12 +2,18 @@ package org.edu_sharing.restservices.lti.v13;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.Encryption;
+import org.edu_sharing.service.lti13.model.LTISessionObject;
+import org.edu_sharing.service.usage.Usage;
+import org.edu_sharing.service.usage.Usage2Service;
+import org.edu_sharing.webservices.usage2.Usage2Exception;
 import org.springframework.extensions.surf.util.URLEncoder;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -88,6 +94,15 @@ public class ApiTool {
                     encryptionTool.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey()));
         }catch (Exception e){
             return null;
+        }
+    }
+
+    public static void handleUsagePermissions(String node, HttpSession session, String appId, String contextId, Usage2Service usageService) throws Usage2Exception {
+        if(ApplicationInfoList.getRepositoryInfoById(appId).isLtiUsagesEnabled()){
+            Usage usage = usageService.getUsage(appId, contextId, node, null);
+            if(usage != null){
+                session.setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, node);
+            }
         }
     }
 }

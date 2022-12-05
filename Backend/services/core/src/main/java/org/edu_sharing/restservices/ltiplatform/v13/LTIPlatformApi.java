@@ -23,8 +23,6 @@ import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.QName;
-import org.apache.catalina.session.StandardSession;
-import org.apache.catalina.session.StandardSessionFacade;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
@@ -52,19 +50,16 @@ import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.extensions.surf.util.I18NUtil;
-import org.springframework.extensions.surf.util.URLEncoder;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.io.DataInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
@@ -312,7 +307,7 @@ public class LTIPlatformApi {
                 .claim(LTIConstants.LTI_VERSION, LTIConstants.LTI_VERSION_3)
                 .claim("https://purl.imsglobal.org/spec/lti/claim/roles",new ArrayList<>());
         if(context != null){
-            jwtBuilder = jwtBuilder.claim(LTIConstants.DEEP_LINK_CONTEXT, context);
+            jwtBuilder = jwtBuilder.claim(LTIConstants.CONTEXT, context);
         }
         return jwtBuilder;
     }
@@ -715,9 +710,9 @@ public class LTIPlatformApi {
         //remember session in userLTISessions map to reuse in later backend call
         if(contentUrlNodeId != null){
             Map<String,String> map = new HashMap<>();
-            map.put("appId",appInfo.getAppId());
-            map.put("user",AuthenticationUtil.getFullyAuthenticatedUser());
-            map.put("nodeId",contentUrlNodeId);
+            map.put(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID,appInfo.getAppId());
+            map.put(LTIPlatformConstants.CUSTOM_CLAIM_USER,AuthenticationUtil.getFullyAuthenticatedUser());
+            map.put(LTIPlatformConstants.CUSTOM_CLAIM_NODEID,contentUrlNodeId);
             map.put("ts",System.currentTimeMillis()+"");
             String json = new Gson().toJson(map);
             String encryptedToken = ApiTool.encrpt(json);
