@@ -364,27 +364,36 @@ xmlstarlet ed -L \
 	-u '/properties/entry[@key="allow_origin"]' -v "${my_origin},http://localhost:54361" \
 	${homeProp}
 
+xmlstarlet ed -L \
+  -d '/properties/entry[@key="guest_username"]' \
+  ${homeProp}
+
 [[ -n "${my_guest_user}" ]] && {
 	xmlstarlet ed -L \
-		-d '/properties/entry[@key="guest_username"]' \
 		-s '/properties' -t elem -n "entry" -v "${my_guest_user}" \
 		--var entry '$prev' \
 		-i '$entry' -t attr -n "key" -v "guest_username" \
 		${homeProp}
 }
 
+xmlstarlet ed -L \
+  -d '/properties/entry[@key="guest_password"]' \
+  ${homeProp}
+
 [[ -n "${my_guest_pass}" ]] && {
 	xmlstarlet ed -L \
-		-d '/properties/entry[@key="guest_password"]' \
 		-s '/properties' -t elem -n "entry" -v "${my_guest_pass}" \
 		--var entry '$prev' \
 		-i '$entry' -t attr -n "key" -v "guest_password" \
 		${homeProp}
 }
 
+xmlstarlet ed -L \
+  -d '/properties/entry[@key="allowed_authentication_types"]' \
+  ${homeProp}
+
 [[ -n "${my_home_auth}" ]] && {
 	xmlstarlet ed -L \
-		-d '/properties/entry[@key="allowed_authentication_types"]' \
 		-s '/properties' -t elem -n "entry" -v "${my_home_auth}" \
 		--var entry '$prev' \
 		-i '$entry' -t attr -n "key" -v "allowed_authentication_types" \
@@ -409,127 +418,105 @@ xmlstarlet ed -L \
 	}
 }
 
+xmlstarlet ed -L \
+  -d '/properties/entry[@key="remote_provider"]' \
+  ${homeProp}
+
 [[ -n "${my_home_provider}" ]] && {
 	xmlstarlet ed -L \
-		-d '/properties/entry[@key="remote_provider"]' \
 		-s '/properties' -t elem -n "entry" -v "${my_home_provider}" \
 		--var entry '$prev' \
 		-i '$entry' -t attr -n "key" -v "remote_provider" \
 		${homeProp}
 }
 
-[[ -n "${my_mail_from}" ]] && {
-	hocon -f ${eduSConf} \
-		set "repository.mail.from" '"'"${my_mail_from}"'"'
-}
+hocon -f ${eduSConf} \
+  set "repository.mail.from" '"'"${my_mail_from}"'"'
 
-[[ -n "${my_mail_addreplyto}" ]] && {
-	hocon -f ${eduSConf} \
-		set "repository.mail.addReplyTo" '"'"${my_mail_addreplyto}"'"'
-}
+hocon -f ${eduSConf} \
+  set "repository.mail.addReplyTo" '"'"${my_mail_addreplyto}"'"'
 
-[[ -n "${my_mail_register_receiver}" ]] && {
-	hocon -f ${eduSConf} \
-		set "repository.mail.register.receiver" '"'"${my_mail_register_receiver}"'"'
-}
+hocon -f ${eduSConf} \
+  set "repository.mail.register.receiver" '"'"${my_mail_register_receiver}"'"'
 
-[[ -n "${my_mail_report_receiver}" ]] && {
-	hocon -f ${eduSConf} \
-		set "repository.mail.report.receiver" '"'"${my_mail_report_receiver}"'"'
-}
+hocon -f ${eduSConf} \
+  set "repository.mail.report.receiver" '"'"${my_mail_report_receiver}"'"'
 
-[[ -n "${my_mail_server_smtp_host}" ]] && {
-	hocon -f ${eduSConf} \
-		set "repository.mail.server.smtp.host" '"'"${my_mail_server_smtp_host}"'"'
-}
+hocon -f ${eduSConf} \
+  set "repository.mail.server.smtp.host" '"'"${my_mail_server_smtp_host}"'"'
 
-[[ -n "${my_mail_server_smtp_port}" ]] && {
-	hocon -f ${eduSConf} \
-		set "repository.mail.server.smtp.port" '"'"${my_mail_server_smtp_port}"'"'
-}
+hocon -f ${eduSConf} \
+  set "repository.mail.server.smtp.port" '"'"${my_mail_server_smtp_port}"'"'
 
-[[ -n "${my_mail_server_smtp_username}" ]] && {
-	hocon -f ${eduSConf} \
-		set "repository.mail.server.smtp.username" '"'"${my_mail_server_smtp_username}"'"'
-}
-[[ -n "${my_mail_server_smtp_password}" ]] && {
-	hocon -f ${eduSConf} \
-		set "repository.mail.server.smtp.password" '"'"${my_mail_server_smtp_password}"'"'
-}
-[[ -n "${my_mail_server_smtp_authtype}" ]] && {
-	hocon -f ${eduSConf} \
-		set "repository.mail.server.smtp.authtype" '"'"${my_mail_server_smtp_authtype}"'"'
-}
+hocon -f ${eduSConf} \
+  set "repository.mail.server.smtp.username" '"'"${my_mail_server_smtp_username}"'"'
 
-[[ -n "${my_http_client_disablesni4hosts}" ]] && {
-	hocon -f ${eduSConf} \
-		set "repository.httpclient.disableSNI4Hosts" '"'"${my_http_client_disablesni4hosts}"'"'
-}
+hocon -f ${eduSConf} \
+  set "repository.mail.server.smtp.password" '"'"${my_mail_server_smtp_password}"'"'
 
-[[ -n "${my_http_client_proxy_host}" ]] && {
-	hocon -f ${eduSConf} \
-		set "repository.httpclient.proxy.host" '"'"${my_http_client_proxy_host}"'"'
-}
+hocon -f ${eduSConf} \
+  set "repository.mail.server.smtp.authtype" '"'"${my_mail_server_smtp_authtype}"'"'
+
+hocon -f ${eduSConf} \
+  set "repository.httpclient.disableSNI4Hosts" '"'"${my_http_client_disablesni4hosts}"'"'
+
+hocon -f ${eduSConf} \
+  set "repository.httpclient.proxy.host" '"'"${my_http_client_proxy_host}"'"'
 
 [[ -n "${my_http_client_proxy_nonproxyhosts}" ]] && {
 	export CATALINA_OPTS="-Dhttp.nonProxyHosts=\"${my_http_client_proxy_nonproxyhosts//,/|}\" $CATALINA_OPTS"
 	export CATALINA_OPTS="-Dhttps.nonProxyHosts=\"${my_http_client_proxy_nonproxyhosts//,/|}\" $CATALINA_OPTS"
-	hocon -f ${eduSConf} \
-		set "repository.httpclient.proxy.nonproxyhosts" '"'"${my_http_client_proxy_nonproxyhosts}"'"'
 }
+
+hocon -f ${eduSConf} \
+  set "repository.httpclient.proxy.nonproxyhosts" '"'"${my_http_client_proxy_nonproxyhosts}"'"'
 
 [[ -n "${my_http_client_proxy_proxyhost}" ]] && {
 	export CATALINA_OPTS="-Dhttp.proxyHost=${my_http_client_proxy_proxyhost} $CATALINA_OPTS"
 	export CATALINA_OPTS="-Dhttps.proxyHost=${my_http_client_proxy_proxyhost} $CATALINA_OPTS"
-	hocon -f ${eduSConf} \
-		set "repository.httpclient.proxy.proxyhost" '"'"${my_http_client_proxy_proxyhost}"'"'
 }
+
+hocon -f ${eduSConf} \
+  set "repository.httpclient.proxy.proxyhost" '"'"${my_http_client_proxy_proxyhost}"'"'
 
 [[ -n "${my_http_client_proxy_proxypass}" ]] && {
 	export CATALINA_OPTS="-Dhttp.proxyPass=${my_http_client_proxy_proxypass} $CATALINA_OPTS"
 	export CATALINA_OPTS="-Dhttps.proxyPass=${my_http_client_proxy_proxypass} $CATALINA_OPTS"
-	hocon -f ${eduSConf} \
-		set "repository.httpclient.proxy.proxypass" '"'"${my_http_client_proxy_proxypass}"'"'
 }
+
+hocon -f ${eduSConf} \
+  set "repository.httpclient.proxy.proxypass" '"'"${my_http_client_proxy_proxypass}"'"'
 
 [[ -n "${my_http_client_proxy_proxyport}" ]] && {
 	export CATALINA_OPTS="-Dhttp.proxyPort=${my_http_client_proxy_proxyport} $CATALINA_OPTS"
 	export CATALINA_OPTS="-Dhttps.proxyPort=${my_http_client_proxy_proxyport} $CATALINA_OPTS"
-	hocon -f ${eduSConf} \
-		set "repository.httpclient.proxy.proxyport" '"'"${my_http_client_proxy_proxyport}"'"'
 }
+
+hocon -f ${eduSConf} \
+  set "repository.httpclient.proxy.proxyport" '"'"${my_http_client_proxy_proxyport}"'"'
 
 [[ -n "${my_http_client_proxy_proxyuser}" ]] && {
 	export CATALINA_OPTS="-Dhttp.proxyUser=${my_http_client_proxy_proxyuser} $CATALINA_OPTS"
 	export CATALINA_OPTS="-Dhttps.proxyUser=${my_http_client_proxy_proxyuser} $CATALINA_OPTS"
-	hocon -f ${eduSConf} \
-		set "repository.httpclient.proxy.proxyuser" '"'"${my_http_client_proxy_proxyuser}"'"'
 }
 
-[[ -n "${my_http_server_csp_default}" ]] && {
-	hocon -f ${eduSConf} \
-		set "angular.headers.Content-Security-Policy.default-src" '"'"${my_http_server_csp_default}"'"'
-}
+hocon -f ${eduSConf} \
+  set "repository.httpclient.proxy.proxyuser" '"'"${my_http_client_proxy_proxyuser}"'"'
 
-[[ -n "${my_http_server_csp_connect}" ]] && {
-	hocon -f ${eduSConf} \
-		set "angular.headers.Content-Security-Policy.connect-src" '"'"${my_http_server_csp_connect}"'"'
-}
+hocon -f ${eduSConf} \
+  set "angular.headers.Content-Security-Policy.default-src" '"'"${my_http_server_csp_default}"'"'
 
-[[ -n "${my_http_server_csp_img}" ]] && {
-	hocon -f ${eduSConf} \
-		set "angular.headers.Content-Security-Policy.img-src" '"'"${my_http_server_csp_img}"'"'
-}
+hocon -f ${eduSConf} \
+  set "angular.headers.Content-Security-Policy.connect-src" '"'"${my_http_server_csp_connect}"'"'
 
-[[ -n "${my_http_server_csp_script}" ]] && {
-	hocon -f ${eduSConf} \
-		set "angular.headers.Content-Security-Policy.script-src" '"'"${my_http_server_csp_script}"'"'
-}
+hocon -f ${eduSConf} \
+  set "angular.headers.Content-Security-Policy.img-src" '"'"${my_http_server_csp_img}"'"'
 
-[[ -n "${my_http_server_csp_font}" ]] && {
-	hocon -f ${eduSConf} \
-		set "angular.headers.Content-Security-Policy.font-src" '"'"${my_http_server_csp_font}"'"'
-}
+hocon -f ${eduSConf} \
+  set "angular.headers.Content-Security-Policy.script-src" '"'"${my_http_server_csp_script}"'"'
+
+hocon -f ${eduSConf} \
+  set "angular.headers.Content-Security-Policy.font-src" '"'"${my_http_server_csp_font}"'"'
 
 xmlstarlet ed -L \
   -N x="http://java.sun.com/xml/ns/javaee" \
