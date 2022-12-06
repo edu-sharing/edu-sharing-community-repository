@@ -56,6 +56,8 @@ deploy:
       - Frontend/node_modules
   before_script:
     - cd Frontend
+    - node -v
+    - npm -v
     # Install dependencies on cache miss, e.g., when first running on a ci runner.
     - ([[ -d node_modules ]] || npm ci)
 
