@@ -743,22 +743,18 @@ public class LTIApi {
             String token = claims.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_TOKEN, String.class);
             HashMap<String,String> tokenData = new Gson().fromJson(ApiTool.decrpt(token), HashMap.class);
             String user = tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_USER);
-            //don't use this is the appId of the tool
+            //context is the embedding node
+            String contextId = tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_NODEID);
+            if(contextId == null){
+                throw new ValidationException("missing " +LTIConstants.CONTEXT);
+            }
+            //don't use this: it is the appId of the tool
             //String appId = tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID);
-
             String deploymentId = claims.getBody().get(LTIConstants.LTI_DEPLOYMENT_ID,String.class);
             String iss = claims.getBody().getIssuer();
             String clientId = claims.getBody().getAudience();
             String appId = new RepoTools().getAppId(iss,clientId,deploymentId);
 
-            Map context = LTIJWTUtil.getValue(jwt,LTIConstants.CONTEXT);
-            if(context == null){
-                /**
-                 * @TODO check: lti context attribut is optional, but we need it for usage resolving
-                 */
-                throw new ValidationException("missing " +LTIConstants.CONTEXT);
-            }
-            String contextId = (String)context.get("id");
             return AuthenticationUtil.runAs(() -> {
 
                 ApiTool.handleUsagePermissions(node, req.getSession(), appId, contextId, usageService);
