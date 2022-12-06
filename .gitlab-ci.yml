@@ -42,6 +42,8 @@ deploy:
   needs: []
   script:
     - mvn $MAVEN_CLI -s .mvn/settings.xml deploy
+  only:
+    - /^maven\//
 
 .frontend_job: &frontend_job
   variables:
