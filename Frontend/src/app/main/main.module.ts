@@ -33,6 +33,6 @@ import { UserProfileComponent } from './navigation/user-profile/user-profile.com
         extensionDeclarationsMap['MainModule'] || [],
     ],
     imports: [SharedModule],
-    exports: [MainNavComponent],
+    exports: [MainNavComponent, SearchFieldComponent, CreateMenuComponent],
 })
 export class MainModule {}
