@@ -772,6 +772,33 @@ export class OptionsHelperService implements OnDestroy {
                     return false;
                 }
             }
+            /**
+             * prevent lti editor as tool with custom content option, embedding nodes as platform created by the same tool
+             */
+
+            let customContentNodeLtiToolUrl =
+                ltiSession.customContentNode.properties['ccm:ltitool_url'][0];
+            if (ltiSession.customContentNode) {
+                return nodes.some((n) => {
+                    let nLtiToolUrlArr = ltiSession.customContentNode.properties['ccm:ltitool_url'];
+                    if (!isArray(nLtiToolUrlArr) || nLtiToolUrlArr.length == 0) {
+                        return true;
+                    }
+                    let nLtiToolUrl = nLtiToolUrlArr[0];
+
+                    if (
+                        n.aspects.includes('ccm:ltitool_node') &&
+                        nLtiToolUrl === customContentNodeLtiToolUrl
+                    ) {
+                        console.log(
+                            "don't allow nodes created for tool " +
+                                n.properties['ccm:ltitool_url'] +
+                                ' become embedded by the same tool',
+                        );
+                        return false;
+                    } else return true;
+                });
+            }
             return true;
         };
 

@@ -1907,6 +1907,9 @@
           "canConfirm": {
             "type": "boolean"
           },
+          "customContentNode": {
+            "$ref": "#/components/schemas/Node"
+          },
           "deeplinkReturnUrl": {
             "type": "string"
           },

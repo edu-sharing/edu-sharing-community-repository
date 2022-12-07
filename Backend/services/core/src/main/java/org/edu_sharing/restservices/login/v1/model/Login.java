@@ -12,10 +12,18 @@ import javax.servlet.http.HttpSession;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.edu_sharing.repository.server.authentication.LoginHelper;
 import org.edu_sharing.repository.server.authentication.RemoteAuthDescription;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.restservices.DAOException;
+import org.edu_sharing.restservices.NodeDao;
+import org.edu_sharing.restservices.RepositoryDao;
+import org.edu_sharing.restservices.ltiplatform.v13.LTIPlatformConstants;
+import org.edu_sharing.restservices.ltiplatform.v13.model.LoginInitiationSessionObject;
+import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.lti13.LTIConstants;
 import org.edu_sharing.service.lti13.model.LTISessionObject;
+import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -67,6 +75,15 @@ public class Login  {
 
       @JsonProperty("text")
       String text;
+
+      /**
+       * custom property:
+       * when the context of ltideeplink message is an edu-sharing nodeId.
+       * we resolve the node to find out if it was created for a ltitool with ltitool_customcontent_option
+       * and prevent a platform representing the same app as the tool: embedding it's own nodes
+       */
+      @JsonProperty("customContentNode")
+      Node customContentNode;
   }
 
 
@@ -127,6 +144,26 @@ public Login(boolean isValidLogin, String scope, HttpSession session) {
                   ltiSession.title = (String) ltiSessionObject.getDeepLinkingSettings().get(LTIConstants.DEEP_LINK_TITLE);
               }
           }
+
+          if(ltiSessionObject.getContextId() != null
+                  && NodeServiceFactory.getLocalService().exists("workspace","SpacesStore",ltiSessionObject.getContextId())){
+              try {
+                  Node node = NodeDao.getNode(RepositoryDao.getHomeRepository(), ltiSessionObject.getContextId()).asNode();
+                  if(node.getAspects().contains("ccm:ltitool_node")){
+                      String toolUrl = node.getProperties().get("ccm:ltitool_url")[0];
+                      ApplicationInfo applicationInfo = ApplicationInfoList
+                              .getApplicationInfos().values().stream()
+                              .filter(a -> toolUrl.equals(a.getLtitoolUrl()))
+                              .findFirst().get();
+                      if(applicationInfo != null && applicationInfo.hasLtiToolCustomContentOption()) {
+                          ltiSession.customContentNode = node;
+                      }
+                  }
+              } catch (DAOException e) {
+                  throw new RuntimeException(e);
+              }
+          }
+
           this.ltiSession = ltiSession;
       }
   }
