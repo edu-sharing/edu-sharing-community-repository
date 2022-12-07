@@ -1,7 +1,7 @@
 @import '../../core-ui-module/styles/variables';
 
 #topWrapper {
-    padding-top: $mainnavHeight + 70px;
+    padding-top: calc(var(--mainnavHeight) + 70px);
     width: 75%;
     position: relative;
     margin: auto;

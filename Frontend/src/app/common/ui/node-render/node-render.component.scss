@@ -83,7 +83,7 @@ a:active {
     padding: 5px 20px;
     top: 0;
     left: 0;
-    height: $mainnavHeight;
+    height: var(--mainnavHeight);
     z-index: 10;
     position: fixed;
     width: 100%;
@@ -122,7 +122,7 @@ a:active {
 
 #nodeRenderContentWrapper {
     background: #ebebeb;
-    margin-top: $mainnavHeight;
+    margin-top: var(--mainnavHeight);
     width: 100%;
 }
 
@@ -186,7 +186,7 @@ a:active {
 }
 .scroller {
     position: absolute;
-    top: calc(8px + #{$mainnavHeight});
+    top: calc(8px + var(--mainnavHeight));
     padding: 5px 10px;
     background-color: rgba(0, 0, 0, 0.6);
     color: #fff;
@@ -199,7 +199,7 @@ a:active {
 }
 
 .nodeRenderLoading {
-    height: calc(100vh - #{$mainnavHeight});
+    height: calc(100vh - var(--mainnavHeight));
     overflow: hidden;
     es-spinner {
         position: relative;
@@ -229,7 +229,7 @@ a.edusharing_rendering_content {
 }
 
 .edusharing_rendering_content {
-    height: calc(100% - #{$mainnavHeight} - 130px) !important;
+    height: calc(100% - var(--mainnavHeight) - 130px) !important;
 }
 
 :host ::ng-deep {

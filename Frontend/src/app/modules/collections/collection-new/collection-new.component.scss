@@ -85,7 +85,7 @@ $imagePath: '../../../../assets/images/collections/';
     max-width: 600px;
     display: flex;
     align-items: center;
-    padding-top: $mainnavHeight;
+    padding-top: var(--mainnavHeight);
 }
 :host ::ng-deep {
     .createCollection {
@@ -497,7 +497,7 @@ input[type='radio'] {
         .createProgress {
             position: fixed;
             display: flex;
-            top: $mainnavHeight + 40px;
+            top: calc(var(--mainnavHeight) + 40px);
             width: 100vw;
             left: 0;
             justify-content: center;
@@ -519,7 +519,7 @@ input[type='radio'] {
                 display: flex;
                 position: fixed;
                 left: 0;
-                top: $mainnavHeight + 20px;
+                top: calc(var(--mainnavHeight) + 20px);
                 width: 100vw;
                 justify-content: center;
             }
@@ -530,7 +530,7 @@ input[type='radio'] {
     .card,
     .card-high,
     .card-low {
-        top: $mainnavHeight + 15px;
+        top: calc(var(--mainnavHeight) + 15px);
     }
     .collectionImage {
         height: 120px;
