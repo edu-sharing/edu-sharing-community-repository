@@ -44,6 +44,7 @@ deploy:
     - mvn $MAVEN_CLI -s .mvn/settings.xml deploy
   only:
     - /^maven\//
+    - tags
 
 .frontend_job: &frontend_job
   variables:
