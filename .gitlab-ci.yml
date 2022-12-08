@@ -25,7 +25,12 @@ unittest frontend:
       - Frontend/node_modules
   before_script:
     - apk add chromium
-    - cd Frontend
+    - mkdir -p Frontend/projects/edu-sharing-api/build/
+    - cp Backend/services/rest/api/src/main/resources/openapi.json Frontend/projects/edu-sharing-api/build/openapi.json
+    - cd Frontend/projects/edu-sharing-api
+    - npm ci
+    - npm run generate-api
+    - cd ../..
     # Install dependencies on cache miss, e.g., when first running on a ci runner.
     - ([[ -d node_modules ]] || npm ci)
   script:
@@ -37,6 +42,8 @@ deploy:
   needs: []
   script:
     - mvn $MAVEN_CLI -s .mvn/settings.xml deploy
+  only:
+    - /^maven\//
 
 .frontend_job: &frontend_job
   variables:
@@ -51,6 +58,8 @@ deploy:
       - Frontend/node_modules
   before_script:
     - cd Frontend
+    - node -v
+    - npm -v
     # Install dependencies on cache miss, e.g., when first running on a ci runner.
     - ([[ -d node_modules ]] || npm ci)
 
