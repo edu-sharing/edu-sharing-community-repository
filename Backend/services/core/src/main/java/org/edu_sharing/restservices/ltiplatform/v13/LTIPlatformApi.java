@@ -119,6 +119,7 @@ public class LTIPlatformApi {
             if (isEmpty(nonce)) throw new Exception("missing param nonce");
             if (isEmpty(prompt)) throw new Exception("missing param prompt");
             if (isEmpty(redirect_uri)) throw new Exception("missing param redirect_uri");
+            if (isEmpty(ltiMessageHint)) throw new Exception("missing param lti_message_hint");
 
             if(!scope.equals("openid")) throw new Exception("invalid scope " +scope);
             if(!responseType.equals("id_token")) throw new Exception("unsupported response_type "+responseType);
@@ -130,15 +131,30 @@ public class LTIPlatformApi {
                 throw new Exception("wrong login_hint. does not match session login");
             }
 
-            LoginInitiationSessionObject loginInitiationSessionObject = (LoginInitiationSessionObject)req.getSession().getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
+
+            Map<String,LoginInitiationSessionObject> loginInitiationSessionObjectMap = (Map<String,LoginInitiationSessionObject>)req.
+                    getSession().
+                    getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
+
+            if(loginInitiationSessionObjectMap == null){
+                throw new Exception(LTIPlatformConstants.ERROR_MISSING_SESSIONOBJECTS);
+            }
+
+
+            LoginInitiationSessionObject loginInitiationSessionObject = loginInitiationSessionObjectMap.get(ltiMessageHint);
 
             if(loginInitiationSessionObject == null){
-                throw new Exception("lti lti session object found");
+                throw new Exception(LTIPlatformConstants.ERROR_MISSING_SESSIONOBJECT+" "+ltiMessageHint);
             }
 
-            if(!loginInitiationSessionObject.getContextId().equals(ltiMessageHint)){
-                throw new Exception("wrong context:" + ltiMessageHint);
-            }
+            /**
+             * we use the tool nonce for resolving the LoginInitiationSessionObject later when no lti_message_hint is available anymore
+             * TODO check find better solution
+             */
+            loginInitiationSessionObject.setToolNonce(nonce);
+            //we have to reset the session object cause of redisson cache management
+            req.getSession().setAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT, loginInitiationSessionObjectMap);
+
 
             ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(loginInitiationSessionObject.getAppId());
             if(appInfo == null){
@@ -693,7 +709,10 @@ public class LTIPlatformApi {
         }
         params.put("target_link_uri", targetLinkUrl);
         params.put("login_hint", AuthenticationUtil.getFullyAuthenticatedUser());
-        params.put("lti_message_hint", contextId);
+
+        //allow multiple lti windows
+        String ltiSessionScope = UUID.randomUUID().toString();
+        params.put("lti_message_hint", ltiSessionScope);
         params.put("client_id", appInfo.getLtiClientId());
         params.put("lti_deployment_id", appInfo.getLtiDeploymentId());
         String form = ApiTool.getHTML(appInfo.getLtitoolLoginInitiationsUrl(),params);
@@ -719,7 +738,16 @@ public class LTIPlatformApi {
             loginInitiationSessionObject.setToken(encryptedToken);
             AllSessions.userLTISessions.put(encryptedToken, req.getSession());
         }
-        req.getSession().setAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT, loginInitiationSessionObject);
+
+        Map<String,LoginInitiationSessionObject> loginInitiationSessionObjectMap = (Map<String,LoginInitiationSessionObject>)req
+                .getSession()
+                .getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
+        if(loginInitiationSessionObjectMap == null){
+            logger.info("");
+            loginInitiationSessionObjectMap = new HashMap<>();
+        }
+        loginInitiationSessionObjectMap.put(ltiSessionScope,loginInitiationSessionObject);
+        req.getSession().setAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT, loginInitiationSessionObjectMap);
 
         return form;
     }
@@ -746,7 +774,20 @@ public class LTIPlatformApi {
             @Context HttpServletRequest req) {
         try{
 
-            LoginInitiationSessionObject sessionObject = (LoginInitiationSessionObject)req.getSession().getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
+            Map<String,LoginInitiationSessionObject> loginInitiationSessionObjectMap = (Map<String,LoginInitiationSessionObject>)req.getSession().getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
+            if(loginInitiationSessionObjectMap == null){
+                throw new Exception(LTIPlatformConstants.ERROR_MISSING_SESSIONOBJECTS);
+            }
+            /**
+             * we don't hat lti_message_hint here so we have to resolve the object by nonce
+             */
+            String nonce = LTIJWTUtil.getValue(jwt,"nonce");
+            if(nonce == null) throw new Exception("missing nonce");
+            LoginInitiationSessionObject sessionObject = loginInitiationSessionObjectMap.entrySet().stream()
+                    .filter(e -> e.getValue().getToolNonce().equals(nonce))
+                    .findFirst()
+                    .orElseThrow(() -> new Exception(LTIPlatformConstants.ERROR_MISSING_SESSIONOBJECT)).getValue();
+
             LTIJWTUtil jwtUtil = new LTIJWTUtil();
             //find out clientid/deploymentid
             ApplicationInfo appInfoTool = ApplicationInfoList.getRepositoryInfoById(sessionObject.getAppId());

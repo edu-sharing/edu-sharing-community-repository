@@ -366,7 +366,9 @@ public class LTIJWTUtil {
             throw new ValidationException("no session found");
         }
 
-        LoginInitiationSessionObject sessionObject = (LoginInitiationSessionObject)session.getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
+        LoginInitiationSessionObject sessionObject = getLoginInitiationSessionObject(token, session);
+
+
         if(!appId.equals(sessionObject.getAppId())){
             throw new ValidationException("wrong appId");
         }
@@ -402,6 +404,21 @@ public class LTIJWTUtil {
         logger.info("last AccessTime:" + new Date(session.getLastAccessedTime()));
 
         return jwtObj;
+    }
+
+    private static LoginInitiationSessionObject getLoginInitiationSessionObject(String token, HttpSession session) throws Exception {
+        Map<String,LoginInitiationSessionObject> loginInitiationSessionObjectMap = (
+                Map<String,LoginInitiationSessionObject>) session.getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
+
+        if(loginInitiationSessionObjectMap == null){
+            throw new Exception(LTIPlatformConstants.ERROR_MISSING_SESSIONOBJECTS);
+        }
+
+        LoginInitiationSessionObject sessionObject = loginInitiationSessionObjectMap.entrySet().stream()
+                .filter(e -> token.equals(e.getValue().getToken()))
+                .findFirst()
+                .orElseThrow(() -> new Exception(LTIPlatformConstants.ERROR_MISSING_SESSIONOBJECT)).getValue();
+        return sessionObject;
     }
 
     /**
@@ -454,10 +471,13 @@ public class LTIJWTUtil {
         }
 
         //validate that there a tool session exists for the token
-        LoginInitiationSessionObject sessionObject = (LoginInitiationSessionObject)session.getAttribute(LTIPlatformConstants.LOGIN_INITIATIONS_SESSIONOBJECT);
-        if(sessionObject == null) {
-            throw new ValidationException("no tool session found for token");
+        LoginInitiationSessionObject sessionObject = null;
+        try {
+            sessionObject = getLoginInitiationSessionObject(token, session);
+        } catch (Exception e) {
+            throw new ValidationException(e.getMessage());
         }
+
 
         /**
          *  validate token was originally created with tool session

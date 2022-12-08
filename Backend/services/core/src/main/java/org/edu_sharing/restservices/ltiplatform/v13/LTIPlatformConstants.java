@@ -18,4 +18,8 @@ public class LTIPlatformConstants {
 
     public static final String CUSTOM_CLAIM_VERSION = "version";
     public static final String CUSTOM_CLAIM_TOKEN = "dataToken";
+
+    public static final String ERROR_MISSING_SESSIONOBJECTS = "missing ltiplatform session objects";
+
+    public static final String ERROR_MISSING_SESSIONOBJECT = "missing ltiplatform session object";
 }
