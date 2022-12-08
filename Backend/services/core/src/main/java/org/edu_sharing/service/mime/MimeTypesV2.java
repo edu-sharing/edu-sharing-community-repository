@@ -204,7 +204,7 @@ public class MimeTypesV2 {
 			return "tool_definition";
 		if(isSavedSearch(nodeType))
 			return "saved_search";
-		if(isLtiObject(aspects))
+		if(isLtiObject(aspects) || isLTI13ToolObject(aspects))
 			return "tool_object";
 		if(isLtiInstance(nodeType))
 			return "tool_instance";
@@ -288,6 +288,12 @@ private static boolean isSavedSearch(String type) {
 }
 private static boolean isLtiInstance(String nodeType) {
 	return CCConstants.CCM_TYPE_TOOL_INSTANCE.equals(nodeType);
+}
+
+private static boolean isLTI13ToolObject(List<String> aspects){
+	if(aspects==null)
+		return false;
+	return aspects.contains(CCConstants.CCM_ASPECT_LTITOOL_NODE);
 }
 private static boolean isLtiObject(List<String> aspects) {
 	if(aspects==null)
