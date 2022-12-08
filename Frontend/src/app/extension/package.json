@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+  },
+  "name": "edu-sharing-extension-dependencies",
+  "version": "1.0.0",
+  "main": "",
+  "author": "",
+  "license": "",
+  "description": "Use this package to add additional npm packages that your extension or components may need or include"
+}
