@@ -1,4 +1,5 @@
 @use '@angular/material' as mat;
+@import '~angular-material-css-vars/src/lib/main';
 @import 'variables';
 @import 'branding';
 
@@ -22,47 +23,6 @@ $custom-typography: mat.define-typography-config(
 ) !default;
 // Override typography for all Angular Material, including mat-base-typography and all components.
 @include mat.all-component-typographies($custom-typography);
-$mat-custom: (
-    50: lighten($primary, 50%),
-    100: lighten($primary, 40%),
-    200: lighten($primary, 30%),
-    300: lighten($primary, 20%),
-    400: lighten($primary, 10%),
-    500: $primary,
-    600: darken($primary, 10%),
-    700: darken($primary, 20%),
-    800: darken($primary, 30%),
-    900: darken($primary, 40%),
-    A100: lighten($primary, 40%),
-    A200: lighten($primary, 30%),
-    A400: $primary,
-    A700: darken($primary, 20%),
-    contrast: (
-        50: $textOnPrimaryLight,
-        100: $textOnPrimaryLight,
-        200: $textOnPrimaryLight,
-        300: $textOnPrimaryLight,
-        400: $textOnPrimary,
-        500: $textOnPrimary,
-        600: $textOnPrimary,
-        700: $textOnPrimary,
-        800: $textOnPrimary,
-        900: $textOnPrimary,
-        A100: $textOnPrimaryLight,
-        A200: $textOnPrimaryLight,
-        A400: $textOnPrimary,
-        A700: $textOnPrimary,
-    ),
-);
-
-$candy-app-primary: mat.define-palette($mat-custom);
-$candy-app-accent: mat.define-palette($mat-custom);
-
-// The warn palette is optional (defaults to red).
-$candy-app-warn: mat.define-palette(mat.$red-palette);
-
-// Create the theme object (a Sass map containing all of the palettes).
-$candy-app-theme: mat.define-light-theme($candy-app-primary, $candy-app-accent, $candy-app-warn);
 
 // Override the themes foreground colors.
 // WCAG minimums are
@@ -114,17 +74,16 @@ $light-theme-foreground-palette: (
     slider-off-active: rgba(black, 0.38),
 );
 
-$my-app-theme-custom: map-merge(
-    $candy-app-theme,
-    (
-        foreground: $light-theme-foreground-palette,
-    )
-);
 // Include theme styles for core and each component used in your app.
 // Alternatively, you can import and @include the theme mixins for each component
 // that you are using.
-@include mat.all-component-themes($my-app-theme-custom);
-// @include mat.strong-focus-indicators-theme($my-app-theme-custom);
+// @include mat.all-component-themes($my-app-theme-custom);
+// init theme
+@include init-material-css-vars() {
+    // If your app has any theme mixins, call them here.
+    // $mat-css-theme gets set to an appropriate value before this content is called.
+    // @include your-custom-component-theme($mat-css-theme);
+}
 
 /** custom project specifics */
 [matripplecolor='primary'] {

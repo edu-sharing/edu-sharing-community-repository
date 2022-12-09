@@ -48,6 +48,7 @@ import { TranslationsService } from '../translations/translations.service';
 import { LoadingScreenService } from '../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../main/navigation/main-nav.service';
 import { ManagementDialogsService } from '../modules/management-dialogs/management-dialogs.service';
+import { ThemeService } from '../common/services/theme.service';
 import * as rxjs from 'rxjs';
 import { LicenseAgreementService } from '../services/license-agreement.service';
 import { DialogsNavigationGuard } from '../features/dialogs/dialogs-navigation.guard';
@@ -119,6 +120,7 @@ export class RouterComponent implements OnInit, DoCheck, AfterViewInit {
         private translations: TranslationsService,
         private loadingScreen: LoadingScreenService,
         private licenseAgreement: LicenseAgreementService,
+        private themeService: ThemeService,
     ) {
         this.injector.get(Router).events.subscribe((event) => {
             if (event instanceof NavigationEnd) {
