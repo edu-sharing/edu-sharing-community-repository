@@ -19,6 +19,10 @@ export class ThemeService {
             if (colors) {
                 console.info('apply branding from config', colors);
                 colors.forEach((c) => this.setColor(c.variable, c.value));
+            } else {
+                console.info('no branding colors in config, using defaults');
+                this.setColor(Variable.Primary, '#48708e');
+                this.setColor(Variable.Accent, '#48708e');
             }
         });
     }
