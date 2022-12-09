@@ -9,6 +9,17 @@
 @include mat.core();
 // @include mat.strong-focus-indicators();
 
+// Include theme styles for core and each component used in your app.
+// Alternatively, you can import and @include the theme mixins for each component
+// that you are using.
+// @include mat.all-component-themes($my-app-theme-custom);
+// init theme
+@include init-material-css-vars() {
+    // If your app has any theme mixins, call them here.
+    // $mat-css-theme gets set to an appropriate value before this content is called.
+    // @include your-custom-component-theme($mat-css-theme);
+}
+
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
@@ -73,17 +84,6 @@ $light-theme-foreground-palette: (
     slider-off: rgba(black, 0.26),
     slider-off-active: rgba(black, 0.38),
 );
-
-// Include theme styles for core and each component used in your app.
-// Alternatively, you can import and @include the theme mixins for each component
-// that you are using.
-// @include mat.all-component-themes($my-app-theme-custom);
-// init theme
-@include init-material-css-vars() {
-    // If your app has any theme mixins, call them here.
-    // $mat-css-theme gets set to an appropriate value before this content is called.
-    // @include your-custom-component-theme($mat-css-theme);
-}
 
 /** custom project specifics */
 [matripplecolor='primary'] {
