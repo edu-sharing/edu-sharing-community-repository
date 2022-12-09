@@ -50,6 +50,7 @@
     "@angular/router": "~13.3.5",
     "@ngx-translate/core": "^14.0.0",
     "@tinymce/tinymce-angular": "^4.2.4",
+    "angular-material-css-vars": "~3.0.0",
     "angular-resizable-element": "^3.4.0",
     "angularx-qrcode": "^13.0.0",
     "chart.js": "^2.7.2",
