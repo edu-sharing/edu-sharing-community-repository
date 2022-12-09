@@ -221,7 +221,10 @@ public class LTIPlatformApi {
                 claimResourceLink.put("title",(String)nodeService.getProperty(nodeRef,ContentModel.PROP_NAME));
                 claimResourceLink.put("id",loginInitiationSessionObject.getResourceLinkNodeId());
 
-                launchPresentation.put("document_target","window");
+                String presentation = (loginInitiationSessionObject.getLaunchPresentation() != null)
+                        ? loginInitiationSessionObject.getLaunchPresentation()
+                        : "window";
+                launchPresentation.put("document_target",presentation);
                 launchPresentation.put("return_url",homeApp.getClientBaseUrl()+"/components/workspace?id=" + loginInitiationSessionObject.getContextId() + "&mainnav=true&displayType=0");
 
 
@@ -614,7 +617,7 @@ public class LTIPlatformApi {
 
             for(ApplicationInfo appInfo : ApplicationInfoList.getApplicationInfos().values()){
                 if(appInfo.isLtiTool() && appInfo.getAppId().equals(appId)){
-                    String form = prepareLoginInitiation(parentId,null, null, nodeId, null, appInfo, LoginInitiationSessionObject.MessageType.deeplink, req);
+                    String form = prepareLoginInitiation(parentId,null, null, nodeId, null, appInfo, LoginInitiationSessionObject.MessageType.deeplink,null, req);
                     return Response.status(Response.Status.OK).entity(form).build();
                 }
             }
@@ -641,6 +644,7 @@ public class LTIPlatformApi {
     public Response generateLoginInitiationFormResourceLink(@Parameter(description = "the nodeid of a node that contains a lti resourcelink. is required for lti resourcelink",required=true) @QueryParam("nodeId") String nodeId,
                                                 @Parameter(description = "for tools with content option, this param sends changeContentUrl (true) else contentUrl will be excluded",required = false,schema = @Schema(defaultValue = "true")) @QueryParam("editMode") Boolean editMode,
                                                 @Parameter(description = "the version. for tools with contentoption.", required = false) @QueryParam("version") String version,
+                                                @Parameter(description = "launchPresentation. how the resourcelink will be embedded. valid values: window,iframe", required = false) @QueryParam("launchPresentation") String launchPresentation,
                                                 @Context HttpServletRequest req){
         try{
             //@TODO find out why defaultvalue of swagger definition does not work
@@ -672,6 +676,7 @@ public class LTIPlatformApi {
                             version,
                             appInfo,
                             LoginInitiationSessionObject.MessageType.resourcelink,
+                            launchPresentation,
                             req);
                     return Response.status(Response.Status.OK).entity(form).build();
                 }
@@ -699,6 +704,7 @@ public class LTIPlatformApi {
                                           String version,
                                           ApplicationInfo appInfo,
                                           LoginInitiationSessionObject.MessageType messageType,
+                                          String launchPresentation,
                                           HttpServletRequest req) {
         Map<String,String> params = new HashMap<>();
         params.put("iss",ApplicationInfoList.getHomeRepository().getClientBaseUrl());
@@ -726,6 +732,7 @@ public class LTIPlatformApi {
         loginInitiationSessionObject.setVersion(version);
         loginInitiationSessionObject.setMessageType(messageType);
         loginInitiationSessionObject.setContentUrlNodeId(contentUrlNodeId);
+        loginInitiationSessionObject.setLaunchPresentation(launchPresentation);
         //remember session in userLTISessions map to reuse in later backend call
         if(contentUrlNodeId != null){
             Map<String,String> map = new HashMap<>();

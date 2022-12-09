@@ -8,9 +8,17 @@ public class LoginInitiationSessionObject implements Serializable {
         this.version = version;
     }
 
+    public void setLaunchPresentation(String launchPresentation) {
+        this.launchPresentation = launchPresentation;
+    }
+
+    public String getLaunchPresentation() {
+        return launchPresentation;
+    }
+
     public static enum MessageType{resourcelink,deeplink}
 
-    String contextId,clientId,appId,resourceLinkNodeId,contentUrlNodeId,version,token,toolNonce;
+    String contextId,clientId,appId,resourceLinkNodeId,contentUrlNodeId,version,token,toolNonce,launchPresentation;
     boolean resourceLinkEditMode = true;
 
     MessageType messageType;
