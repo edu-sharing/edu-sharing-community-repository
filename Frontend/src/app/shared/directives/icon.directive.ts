@@ -25,7 +25,7 @@ import { ConfigurationService } from '../../core-module/rest/services/configurat
 export class IconDirective implements OnInit, OnDestroy {
     private _id: string;
     private _aria: boolean;
-    private iconsConfig: Array<{ original: string; replace: string }>;
+    private iconsConfig: Array<{ original: string; replace?: string; cssClass?: string }>;
     private altTextSpan: HTMLElement;
     private isReady = false;
 
@@ -84,25 +84,30 @@ export class IconDirective implements OnInit, OnDestroy {
                 'material-icons',
             );
         }
+        let customClass: string = null;
         const mapping = this.iconsConfig?.filter((i) => i.original === id);
         if (mapping?.length === 1) {
-            id = mapping[0].replace;
+            id = mapping[0].replace || '';
+            customClass = mapping[0].cssClass;
         }
         this._id = id;
         if (this._aria) {
             this.updateAria();
         }
         let cssClass: string;
-        if (id?.startsWith('edu-')) {
+        if (id?.startsWith('edu-') && !customClass) {
             cssClass = 'edu-icons';
             id = id.substr(4);
-        } else if (id?.startsWith('custom-')) {
+        } else if (id?.startsWith('custom-') || customClass) {
             cssClass = 'custom-icons';
             id = id.substr(7);
         } else {
             cssClass = 'material-icons';
         }
         this.element.nativeElement.classList.add(cssClass);
+        if (customClass) {
+            this.element.nativeElement.classList.add(customClass);
+        }
         this.element.nativeElement.innerText = id;
     }
 

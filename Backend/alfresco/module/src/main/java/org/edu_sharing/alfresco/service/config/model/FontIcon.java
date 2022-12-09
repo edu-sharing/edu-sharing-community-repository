@@ -7,4 +7,5 @@ public class FontIcon implements Serializable {
     @XmlElement
     public String original;
     @XmlElement public String replace;
+    @XmlElement public String cssClass;
 }
