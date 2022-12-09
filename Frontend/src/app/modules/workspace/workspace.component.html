@@ -64,7 +64,6 @@
           } : null"-->
         <es-breadcrumbs
           *ngIf="isLoggedIn"
-          [breadcrumbsAsNode]="path"
           [searchQuery]="searchQuery ? searchQuery.query : null"
           [home]="'WORKSPACE.' + root"
           [canDropNodes]="canDropOnBreadcrumb"

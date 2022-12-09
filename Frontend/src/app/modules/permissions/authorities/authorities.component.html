@@ -224,7 +224,6 @@
         <div class="folder-path" *ngIf="edit.folderPath?.length">
           <label>{{ 'PERMISSIONS.ORG_HOME_FOLDER_LABEL' | translate }}</label>
           <es-breadcrumbs
-            [breadcrumbsAsNode]="edit.folderPath"
             home="{{ 'PERMISSIONS.ORG_HOME_FOLDER_MAIN' | translate }}"
             [clickable]="true"
             [createLink]="true"

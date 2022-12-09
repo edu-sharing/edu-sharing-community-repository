@@ -2,7 +2,7 @@
   <!-- Full (not short) breadcrumbs -->
   <div class="breadcrumb breadcrumb-full" [attr.role]="nodes.length > 0 ? 'list' : null">
     <ng-container *ngTemplateOutlet="homeBreadcrumbElement"></ng-container>
-    <ng-container *ngIf="nodes.length === 0">
+    <ng-container *ngIf="nodes.length === 0 && showHomeNotice">
       <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
       <span class="home-notice">{{ 'BREADCRUMBS.YOU_ARE_HOME' | translate }}</span>
     </ng-container>
@@ -70,7 +70,7 @@ Short version works only with `short="always"`.
     <ng-container *ngIf="home">{{ home | translate }}</ng-container>
     <ng-container *ngIf="!home && !homeIcon"><i class="home-icon" esIcon="home"></i></ng-container>
   </span>
-  <ng-container *ngIf="nodes.length === 0">
+  <ng-container *ngIf="nodes.length === 0 && showHomeNotice">
     <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
     <span class="home-notice">{{ 'BREADCRUMBS.IN_HOME' | translate }}</span>
   </ng-container>

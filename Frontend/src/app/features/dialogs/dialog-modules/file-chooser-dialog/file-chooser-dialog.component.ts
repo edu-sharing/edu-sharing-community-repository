@@ -26,6 +26,7 @@ import { NodeDataSource } from '../../../node-entries/node-data-source';
 import { CardDialogConfig, CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { FileChooserDialogData, FileChooserDialogResult } from './file-chooser-dialog-data';
+import { BreadcrumbsService } from '../../../../shared/components/breadcrumbs/breadcrumbs.service';
 
 const SINGLE_COLUMN_WIDTH = 600;
 const MULTI_COLUMN_WIDTH = 900;
@@ -34,6 +35,7 @@ const MULTI_COLUMN_WIDTH = 900;
     selector: 'es-file-chooser-dialog',
     templateUrl: './file-chooser-dialog.component.html',
     styleUrls: ['./file-chooser-dialog.component.scss'],
+    providers: [BreadcrumbsService],
 })
 export class FileChooserDialogComponent implements OnInit, AfterViewInit {
     @ViewChild('bottomBarContent') bottomBarContent: TemplateRef<HTMLElement>;
@@ -91,6 +93,7 @@ export class FileChooserDialogComponent implements OnInit, AfterViewInit {
         private collectionApi: RestCollectionService,
         private nodeApi: RestNodeService,
         private toast: Toast,
+        private breadcrumbsService: BreadcrumbsService,
         private translate: TranslateService,
     ) {
         // http://plnkr.co/edit/btpW3l0jr5beJVjohy1Q?p=preview
@@ -137,7 +140,10 @@ export class FileChooserDialogComponent implements OnInit, AfterViewInit {
         this.loadDirectoryTrigger
             .pipe(switchMap(({ directory, reset }) => this.loadDirectory(directory, reset)))
             .subscribe();
-        this.path$.subscribe(() => this.updateButtons());
+        this.path$.subscribe((path) => {
+            this.breadcrumbsService.setNodePath(path);
+            this.updateButtons();
+        });
     }
 
     onTabChange(event: MatTabChangeEvent) {
