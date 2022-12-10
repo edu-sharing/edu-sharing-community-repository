@@ -199,6 +199,7 @@
       "USAGE_TYPE": {
         "MOODLE": "Moodle-Courses",
         "ILIAS": "Ilias-Courses",
+        "TYPO3": "Typo3 pages",
         "COLLECTION": "Collections",
         "UNKNOWN": "Other / Unknown"
       },
