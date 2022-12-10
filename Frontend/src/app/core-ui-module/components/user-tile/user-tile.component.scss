@@ -30,7 +30,7 @@
         color: $textOnPrimary;
         background-color: $primary;
         &:hover {
-            background-color: lighten($primary, 4%);
+            background-color: rgb(var(--palette-primary-50));
         }
     }
     &:hover {

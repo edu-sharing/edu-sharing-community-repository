@@ -3,6 +3,7 @@ package org.edu_sharing.repository.server;
 import com.google.gson.Gson;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.edu_sharing.repository.server.rendering.RenderingException;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.restservices.DAOException;
 import org.edu_sharing.restservices.DAOMissingException;
@@ -74,6 +75,11 @@ public class ErrorFilter implements Filter {
 		try {
 			chain.doFilter(req, res);
 		} catch(Throwable t) {
+			if (t instanceof RenderingException) {
+				logger.error(((RenderingException)t).getTechnicalDetail(), t);
+			} else {
+				logger.error(t.getMessage(), t);
+			}
 			int statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 			if(t instanceof ErrorFilterException) {
 				statusCode = ((ErrorFilterException) t).getStatusCode();

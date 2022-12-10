@@ -10,7 +10,7 @@
 }
 .isBlocked {
     position: absolute;
-    top: $mainnavHeight;
+    top: var(--mainnavHeight);
     color: $noResultsColor;
     font-size: 150%;
     text-align: center;
@@ -30,21 +30,23 @@ $quotaHeight: 60px;
 .tree {
     min-width: $workspaceTreeWidth;
     max-width: $workspaceTreeWidth;
-    top: $workspaceBreadcrumbsHeight + $mainnavHeight;
+    top: calc(#{$workspaceBreadcrumbsHeight} + var(--mainnavHeight));
     position: fixed;
-    height: calc(100% - #{$workspaceBreadcrumbsHeight} - #{$mainnavHeight});
+    height: calc(100% - #{$workspaceBreadcrumbsHeight} - var(--mainnavHeight));
     z-index: 2;
     background: $workspaceTreeBackground;
     es-workspace-tree {
         min-width: $workspaceTreeWidth;
         max-width: $workspaceTreeWidth;
-        top: $workspaceBreadcrumbsHeight + $mainnavHeight;
+        top: calc(#{$workspaceBreadcrumbsHeight} + var(--mainnavHeight));
         position: fixed;
-        height: calc(100% - #{$workspaceBreadcrumbsHeight} - #{$mainnavHeight});
+        height: calc(100% - #{$workspaceBreadcrumbsHeight} - var(--mainnavHeight));
         overflow-y: auto;
     }
     .tree-quota {
-        height: calc(100% - #{$workspaceBreadcrumbsHeight} - #{$mainnavHeight} - #{$quotaHeight});
+        height: calc(
+            100% - #{$workspaceBreadcrumbsHeight} - var(--mainnavHeight) - #{$quotaHeight}
+        );
     }
 }
 
@@ -75,7 +77,7 @@ es-user-quota {
     position: fixed;
     width: 250px;
     left: 311px;
-    top: 7px + $mainnavHeight;
+    top: calc(7px + var(--mainnavHeight));
 }
 .selectRootMenu .collection-item {
     color: $textLight;
@@ -90,9 +92,9 @@ es-user-quota {
     position: relative;
     display: block;
     left: 300px;
-    top: $mainnavHeight + $secondaryBarHeight;
+    top: calc(var(--mainnavHeight) + #{$secondaryBarHeight});
     width: calc(100% - 300px);
-    height: calc(100% - #{$mainnavHeight+$secondaryBarHeight});
+    height: calc(100% - (var(--mainnavHeight) + #{$secondaryBarHeight}));
     transition: all $transitionNormal;
 }
 
@@ -103,7 +105,7 @@ es-user-quota {
 .actionbarFrame {
     width: auto;
     position: fixed;
-    top: $mainnavHeight;
+    top: var(--mainnavHeight);
     right: 0;
     z-index: 62;
     > div {
@@ -122,7 +124,7 @@ es-user-quota {
 .viewType {
     position: fixed;
     color: $textLight;
-    top: $mainnavHeight;
+    top: var(--mainnavHeight);
     padding-top: 20px;
     padding-right: 25px;
     right: 0;
@@ -133,7 +135,7 @@ es-user-quota {
 }
 .breadcrumbFrame {
     position: fixed;
-    top: $mainnavHeight;
+    top: var(--mainnavHeight);
     left: 0;
     width: 100%;
     z-index: 60;
@@ -160,15 +162,17 @@ es-user-quota {
             position: relative;
             &.list-type-card {
                 top: 0;
-                height: calc(100vh - #{$mainnavHeight+$secondaryBarHeight});
+                height: calc(100vh - (var(--mainnavHeight) + #{$secondaryBarHeight}));
             }
             &.list-type-table {
                 top: $listHeadingHeight;
-                height: calc(100vh - #{$mainnavHeight+$secondaryBarHeight+$listHeadingHeight});
+                height: calc(
+                    100vh - (var(--mainnavHeight) + #{$secondaryBarHeight+$listHeadingHeight})
+                );
                 .headingGroup {
                     position: fixed !important;
                     z-index: 1;
-                    top: $mainnavHeight + $workspaceBreadcrumbsHeight;
+                    top: calc(var(--mainnavHeight) + #{$workspaceBreadcrumbsHeight});
                     width: calc(100% - #{$workspaceTreeWidth});
                 }
             }
@@ -221,7 +225,7 @@ es-user-quota {
     .explorer {
         left: 0;
         width: 100%;
-        height: calc(100% - #{$mainnavHeight+$secondaryBarHeight+$mobileTabNavHeight});
+        height: calc(100% - (var(--mainnavHeight) + #{$secondaryBarHeight+$mobileTabNavHeight}));
     }
     :host ::ng-deep {
         es-workspace-explorer .list {

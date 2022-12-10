@@ -4,6 +4,7 @@ import { DropSource } from 'src/app/features/node-entries/entries-model';
 import { Node, RestConstants, RestNodeService } from '../../../core-module/core.module';
 import { DragData, NodesDragDropService } from '../../../services/nodes-drag-drop.service';
 import { CanDrop } from '../../directives/nodes-drop-target.directive';
+import { BreadcrumbsService } from './breadcrumbs.service';
 
 /**
  * Breadcrumbs for nodes or collections.
@@ -24,6 +25,10 @@ export class BreadcrumbsComponent {
      */
     @Input() homeIcon: string;
 
+    /**
+     * should an information be shown that you're in the root path in case of an empty nodes path?
+     */
+    @Input() showHomeNotice = true;
     /**
      * shall an invisbile description (for screen readers) be generated, similar to
      * 'You're here'
@@ -64,30 +69,6 @@ export class BreadcrumbsComponent {
         this._searchQuery = searchQuery;
         this.addSearch();
     }
-    /**
-     * Set the breadcrumb list as a @Node array.
-     */
-    @Input() set breadcrumbsAsNode(nodes: Node[]) {
-        if (nodes == null) {
-            return;
-        }
-        this.nodes = nodes;
-        this.addSearch();
-    }
-    /**
-     * Set the breadcrumb main id.
-     *
-     * The breadcrumb nodes will get async resolved via API.
-     */
-    @Input() set breadcrumbsForId(id: string) {
-        if (id == null) {
-            return;
-        }
-        this.node.getNodeParents(id, false, [RestConstants.ALL]).subscribe((nodes) => {
-            this.nodes = nodes.nodes.reverse();
-            this.addSearch();
-        });
-    }
 
     @Input() canDropNodes: (dragData: DragData<'HOME' | Node>) => CanDrop;
 
@@ -107,7 +88,19 @@ export class BreadcrumbsComponent {
 
     private _searchQuery: string;
 
-    constructor(private node: RestNodeService, private nodesDragDrop: NodesDragDropService) {}
+    constructor(
+        private node: RestNodeService,
+        private breadcrumbsService: BreadcrumbsService,
+        private nodesDragDrop: NodesDragDropService,
+    ) {
+        this.breadcrumbsService.breadcrumbs$.subscribe((nodes) => {
+            if (nodes == null) {
+                return;
+            }
+            this.nodes = nodes;
+            this.addSearch();
+        });
+    }
 
     openBreadcrumb(position: number) {
         this.onClick.emit(position);

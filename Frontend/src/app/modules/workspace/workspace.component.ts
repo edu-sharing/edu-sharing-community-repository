@@ -58,6 +58,7 @@ import { CanDrop } from '../../shared/directives/nodes-drop-target.directive';
 import { TranslationsService } from '../../translations/translations.service';
 import { WorkspaceExplorerComponent } from './explorer/explorer.component';
 import { canDragDrop, canDropOnNode } from './workspace-utils';
+import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
 
 @Component({
     selector: 'es-workspace-main',
@@ -178,6 +179,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         private ui: UIService,
         private event: FrameEventsService,
         private connector: RestConnectorService,
+        private breadcrumbsService: BreadcrumbsService,
         private card: CardService,
         private ngZone: NgZone,
         private loadingScreen: LoadingScreenService,
@@ -574,6 +576,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         this.createAllowed = 'EMIT_EVENT';
         this.notAllowedReason = 'WORKSPACE.CREATE_REASON.SEARCH';
         this.path = [];
+        this.breadcrumbsService.setNodePath(this.path);
         this.setSelection([]);
     }
 
@@ -675,6 +678,7 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         this.closeMetadata();
         if (!id) {
             this.path = [];
+            this.breadcrumbsService.setNodePath(this.path);
             id = this.getRootFolderInternalId();
             if (this.root === 'RECYCLE') {
                 this.createAllowed = false;
@@ -687,15 +691,18 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
                 (data: NodeList) => {
                     if (this.root === 'RECYCLE') {
                         this.path = [];
+                        this.breadcrumbsService.setNodePath(this.path);
                         this.createAllowed = false;
                     } else {
                         this.path = data.nodes.reverse();
+                        this.breadcrumbsService.setNodePath(this.path);
                     }
                     this.selectedNodeTree = null;
                 },
                 (error: any) => {
                     this.selectedNodeTree = null;
                     this.path = [];
+                    this.breadcrumbsService.setNodePath(this.path);
                 },
             );
         }
@@ -808,9 +815,11 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
         const path = this.path;
         if (refreshPath) {
             this.path = [];
+            this.breadcrumbsService.setNodePath(this.path);
         }
         setTimeout(() => {
             this.path = path;
+            this.breadcrumbsService.setNodePath(this.path);
             this.currentFolder = folder;
             this.searchQuery = search;
         });

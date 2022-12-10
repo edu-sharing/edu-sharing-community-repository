@@ -3,7 +3,7 @@
 $sidenavWidth: 250px;
 $sidenavWidthMobile: 66px;
 .main-nav-placeholder {
-    height: $mainnavHeight;
+    height: var(--mainnavHeight);
 }
 .main {
     display: flex;
@@ -14,7 +14,7 @@ $sidenavWidthMobile: 66px;
         display: flex;
         flex-direction: column;
         background-color: #fff;
-        height: calc(100% - #{$mainnavHeight});
+        height: calc(100% - var(--mainnavHeight));
         overflow-y: auto;
         width: $sidenavWidth;
         > div {
@@ -717,7 +717,7 @@ $sidenavWidthMobile: 66px;
 }
 .row {
     position: fixed;
-    top: $mainnavHeight;
+    top: var(--mainnavHeight);
     width: 100%;
     height: 48px;
     z-index: 50;

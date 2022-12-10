@@ -70,7 +70,7 @@
     margin-top: 0;
 }
 .actionbarWorkspace {
-    top: $mainnavHeight + 20px;
+    top: calc(var(--mainnavHeight) + 20px);
     right: 20px;
 }
 .noResults {

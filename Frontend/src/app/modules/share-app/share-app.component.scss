@@ -5,7 +5,7 @@
     width: 100%;
     max-width: $cardWidth * 4 + 125px;
     margin: auto;
-    margin-top: $mainnavHeight;
+    margin-top: var(--mainnavHeight);
     display: flex;
     flex-direction: column;
     .breadcrumbs {

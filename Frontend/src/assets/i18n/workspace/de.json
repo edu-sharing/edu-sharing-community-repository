@@ -197,6 +197,7 @@
       "USAGE_TYPE": {
         "MOODLE": "Moodle-Kurse",
         "ILIAS": "Ilias-Kurse",
+        "TYPO3": "Typo3-Seiten",
         "COLLECTION": "Sammlungen",
         "UNKNOWN": "Andere / Unbekannt"
       },
