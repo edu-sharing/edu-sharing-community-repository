@@ -1,6 +1,6 @@
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
-  MAVEN_CLI: "-Ddocker.registry=$DOCKER_REGISTRY -Dhelm.deploy.url=$HELM_REGISTRY -Dhelm.deploy.type=$HELM_TYPE -Dmaven.deploy.releases=$MAVEN_DEPLOY_RELEASES -Dmaven.deploy.snapshots=$MAVEN_DEPLOY_SNAPSHOTS --batch-mode --errors --fail-fast --show-version -T 1C"
+  MAVEN_CLI: "-Ddocker.registry=$DOCKER_REGISTRY -Dhelm.deploy.url=$HELM_REGISTRY -Dhelm.deploy.type=$HELM_TYPE -Dmaven.deploy.releases=$MAVEN_DEPLOY_RELEASES -Dmaven.deploy.snapshots=$MAVEN_DEPLOY_SNAPSHOTS --batch-mode --errors --fail-fast --show-version"
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
 
 default:
@@ -42,6 +42,9 @@ deploy:
   needs: []
   script:
     - mvn $MAVEN_CLI -s .mvn/settings.xml deploy
+  only:
+    - /^maven\//
+    - tags
 
 .frontend_job: &frontend_job
   variables:
@@ -56,6 +59,8 @@ deploy:
       - Frontend/node_modules
   before_script:
     - cd Frontend
+    - node -v
+    - npm -v
     # Install dependencies on cache miss, e.g., when first running on a ci runner.
     - ([[ -d node_modules ]] || npm ci)
 
