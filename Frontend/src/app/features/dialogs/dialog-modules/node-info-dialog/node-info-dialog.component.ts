@@ -20,6 +20,7 @@ import {
 } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
+import { BreadcrumbsService } from '../../../../shared/components/breadcrumbs/breadcrumbs.service';
 
 export interface NodeInfoDialogData {
     nodes: Node[];
@@ -29,13 +30,13 @@ export interface NodeInfoDialogData {
     selector: 'es-node-info-dialog',
     templateUrl: 'node-info-dialog.component.html',
     styleUrls: ['node-info-dialog.component.scss'],
+    providers: [BreadcrumbsService],
 })
 /**
  * A node info dialog (useful primary for admin stuff)
  */
 export class NodeInfoDialogComponent implements OnInit {
     _nodes: Node[];
-    _path: Node[];
     _children: Node[];
     _permissions: Permissions;
     _properties: any[];
@@ -52,6 +53,7 @@ export class NodeInfoDialogComponent implements OnInit {
         private toast: Toast,
         private config: ConfigurationService,
         private router: Router,
+        private breadcrumbsService: BreadcrumbsService,
         private translate: TranslateService,
     ) {}
 
@@ -94,7 +96,7 @@ export class NodeInfoDialogComponent implements OnInit {
             );
             this._json = JSON.stringify(node, null, 4);
             this.nodeApi.getNodeParents(node.ref.id, true).subscribe((data: NodeList) => {
-                this._path = data.nodes.reverse();
+                this.breadcrumbsService.setNodePath(data.nodes.reverse());
             });
             this.nodeApi
                 .getChildren(node.ref.id, [RestConstants.FILTER_SPECIAL], {
@@ -111,7 +113,7 @@ export class NodeInfoDialogComponent implements OnInit {
     }
 
     openNodes(nodes: Node[]) {
-        this._path = null;
+        this.breadcrumbsService.setNodePath(null);
         this._children = null;
         this.setNodes(nodes);
     }
@@ -122,8 +124,8 @@ export class NodeInfoDialogComponent implements OnInit {
         this.dialogRef.close();
     }
     openBreadcrumb(pos: number) {
-        let node = this._path[pos - 1];
-        this._path = null;
+        let node = this.breadcrumbsService.breadcrumbs$.value[pos - 1];
+        this.breadcrumbsService.setNodePath([]);
         this._children = null;
         this.setNodes([node]);
         //this.router.navigate([UIConstants.ROUTER_PREFIX,"workspace"],{queryParams:{id:node.ref.id}});

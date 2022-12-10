@@ -1,7 +1,7 @@
 @import '../../core-ui-module/styles/variables';
 
 .editorial-container {
-    padding-top: $mainnavHeight + 20px;
+    padding-top: calc(var(--mainnavHeight) + 20px);
     es-actionbar {
         display: flex;
         justify-content: flex-end;

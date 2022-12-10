@@ -1,0 +1,7 @@
+/**
+    declarations of dynamic css variabled
+    will only be included once via angular to prevent duplicate :root entries
+ */
+:root {
+    --mainnavHeight: 70px;
+}

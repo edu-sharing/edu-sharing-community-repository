@@ -10,7 +10,7 @@ table, div {
 mat-tab-group {
     margin-bottom: 0;
     position: fixed;
-    top: $mainnavHeight;
+    top: var(--mainnavHeight);
     width: 100%;
     z-index: 15;
 }
@@ -23,12 +23,12 @@ mat-tab-group {
     position: relative;
     // Use `margin-top` instead of `top` to not create a negative position offset at the bottom of
     // the container, which could be overlapped by a custom footer.
-    margin-top: $mainnavHeight;
-    min-height: calc(100vh - $mainnavHeight);
+    margin-top: var(--mainnavHeight);
+    min-height: calc(100vh - var(--mainnavHeight));
 
     &.collectionsContainerTabs {
-        margin-top: $mainnavHeight + 48px;
-        min-height: calc(100vh - ($mainnavHeight + 48px));
+        margin-top: calc(var(--mainnavHeight) + 48px);
+        min-height: calc(100vh - (var(--mainnavHeight) + 48px));
     }
 
     es-collection-content {
@@ -146,7 +146,7 @@ section {
     es-collection-content {
         .actionbarMaterials {
             position: sticky;
-            top: $mainnavHeight;
+            top: var(--mainnavHeight);
             z-index: 2;
             background-color: $backgroundColor;
         }

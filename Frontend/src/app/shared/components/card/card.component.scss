@@ -41,7 +41,7 @@
 
 @mixin no-modal {
     padding: #{$nonModalPadding};
-    top: #{$mainnavHeight};
+    top: var(--mainnavHeight);
     height: unset;
     @media screen and (max-width: $mobileTabSwitchWidth) {
         bottom: #{$mobileTabNavHeight};

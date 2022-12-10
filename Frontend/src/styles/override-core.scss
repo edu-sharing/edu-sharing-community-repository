@@ -3,6 +3,6 @@
 */
 
 .dialog-right {
-    top: $mainnavHeight;
-    height: calc(100% - #{$mainnavHeight});
+    top: var(--mainnavHeight);
+    height: calc(100% - var(--mainnavHeight));
 }

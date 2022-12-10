@@ -51,6 +51,7 @@ import { CollectionInfoBarComponent } from './collection-info-bar/collection-inf
 import { CollectionContentComponent } from './collection-content/collection-content.component';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { TranslationsService } from '../../translations/translations.service';
+import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
 
 // component class
 @Component({
@@ -147,7 +148,6 @@ export class CollectionsMainComponent implements OnDestroy {
         RestConstants.ROOT,
     );
     private person: EduData.User;
-    path: EduData.Node[];
     hasEditorial = false;
     hasMediacenter = false;
     reurl: any;
@@ -181,7 +181,7 @@ export class CollectionsMainComponent implements OnDestroy {
         private config: ConfigurationService,
         private translationService: TranslateService,
         private translations: TranslationsService,
-        private loadingScreen: LoadingScreenService,
+        private breadcrumbsService: BreadcrumbsService,
     ) {
         this.translations.waitForInit().subscribe(() => {
             this.connector.isLoggedIn().subscribe(
@@ -432,17 +432,18 @@ export class CollectionsMainComponent implements OnDestroy {
     }
 
     private renderBreadcrumbs() {
-        this.path = [];
+        this.breadcrumbsService.setNodePath([]);
         this.nodeService
             .getNodeParents(this.collection.ref.id, false)
             .subscribe((data: EduData.NodeList) => {
-                this.path = data.nodes.reverse();
-                if (this.path.length > 1) {
+                const path = data.nodes.reverse();
+                if (path.length > 1) {
                     this.parentCollectionId = new EduData.Reference(
-                        this.path[this.path.length - 2].ref.repo,
-                        this.path[this.path.length - 2].ref.id,
+                        path[path.length - 2].ref.repo,
+                        path[path.length - 2].ref.id,
                     );
                 }
+                this.breadcrumbsService.setNodePath(path);
             });
     }
 

@@ -1,10 +1,14 @@
-$primary: #48708e;
-$primaryMediumLight: #87acb5;
-$primaryLight: #dde7ee;
-$primaryComplementary: $primary;
-$primaryDark: #283851;
+$primary: var(--primary);
+$primaryMediumLight: var(--palette-primary-200);
+$primaryLight: var(--palette-primary-100);
+$primaryComplementary: var(--accent);
+$primaryDark: var(--palette-primary-900);
 $textOnPrimary: #fff;
 $textOnPrimaryLight: rgba(255, 255, 255, 0.75);
 $textPrimary: #000;
 $workspaceTopBarBackground: #383838;
 $workspaceTopBarFontColor: #fff;
+
+:root {
+    --primary: #000000;
+}

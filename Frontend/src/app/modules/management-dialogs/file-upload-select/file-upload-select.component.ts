@@ -31,6 +31,7 @@ import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { LinkData } from '../../../core-ui-module/node-helper.service';
 import { Toast } from '../../../core-ui-module/toast';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
 
 @Component({
     selector: 'es-workspace-file-upload-select',
@@ -41,6 +42,7 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
         trigger('cardAnimation', UIAnimation.cardAnimation()),
         trigger('openOverlay', UIAnimation.openOverlay()),
     ],
+    providers: [BreadcrumbsService],
 })
 export class WorkspaceFileUploadSelectComponent implements OnInit, OnChanges {
     @ViewChild('fileSelect') file: ElementRef;
@@ -82,7 +84,6 @@ export class WorkspaceFileUploadSelectComponent implements OnInit, OnChanges {
     showSaveParent = false;
     saveParent = false;
     breadcrumbs: {
-        nodes: Node[];
         homeLabel: string;
         homeIcon: string;
     };
@@ -110,6 +111,7 @@ export class WorkspaceFileUploadSelectComponent implements OnInit, OnChanges {
         private storageService: SessionStorageService,
         public configService: ConfigurationService,
         private toast: Toast,
+        private breadcrumbsService: BreadcrumbsService,
         private clientUtils: ClientutilsV1Service,
         private dialogs: DialogsService,
     ) {
@@ -124,9 +126,10 @@ export class WorkspaceFileUploadSelectComponent implements OnInit, OnChanges {
     }
     ngOnChanges(changes: SimpleChanges) {
         if (changes?.parent) {
-            this.getBreadcrumbs(this.parent).subscribe(
-                (breadcrumbs) => (this.breadcrumbs = breadcrumbs),
-            );
+            this.getBreadcrumbs(this.parent).subscribe((breadcrumbs) => {
+                this.breadcrumbs = breadcrumbs;
+                this.breadcrumbsService.setNodePath(breadcrumbs.nodes);
+            });
         }
     }
 

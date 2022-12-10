@@ -9,6 +9,7 @@ import { Toast } from '../../../core-ui-module/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { Router } from '@angular/router';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
 
 @Component({
     selector: 'es-map-link',
@@ -18,10 +19,10 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
         trigger('fade', UIAnimation.fade()),
         trigger('cardAnimation', UIAnimation.cardAnimation()),
     ],
+    providers: [BreadcrumbsService],
 })
 export class MapLinkComponent {
     _node: Node;
-    breadcrumbs: Node[];
     buttons: DialogButton[];
     @Input() set node(node: Node) {
         this._node = node;
@@ -36,6 +37,7 @@ export class MapLinkComponent {
         private toast: Toast,
         private router: Router,
         private nodeApi: RestNodeService,
+        private breadcrumbsService: BreadcrumbsService,
         private dialogs: DialogsService,
     ) {
         this.updateBreadcrumbs(RestConstants.INBOX);
@@ -64,7 +66,7 @@ export class MapLinkComponent {
 
     private updateBreadcrumbs(id: string) {
         this.nodeApi.getNodeParents(id, false).subscribe((parents) => {
-            this.breadcrumbs = parents.nodes.reverse();
+            this.breadcrumbsService.setNodePath(parents.nodes.reverse());
         });
     }
 
@@ -84,7 +86,9 @@ export class MapLinkComponent {
         this.toast.showProgressDialog();
         this.nodeApi
             .createNode(
-                this.breadcrumbs[this.breadcrumbs.length - 1].ref.id,
+                this.breadcrumbsService.breadcrumbs$.value[
+                    this.breadcrumbsService.breadcrumbs$.value.length - 1
+                ].ref.id,
                 RestConstants.CCM_TYPE_MAP,
                 [RestConstants.CCM_ASPECT_MAP_REF],
                 properties,
@@ -99,14 +103,20 @@ export class MapLinkComponent {
                                     this.nodeApi,
                                     this.router,
                                     this.connector.getCurrentLogin(),
-                                    this.breadcrumbs[this.breadcrumbs.length - 1].ref.id,
+                                    this.breadcrumbsService.breadcrumbs$.value[
+                                        this.breadcrumbsService.breadcrumbs$.value.length - 1
+                                    ].ref.id,
                                 );
                             },
                         },
                     };
                     this.toast.toast(
                         'MAP_LINK.CREATED',
-                        { folder: this.breadcrumbs[this.breadcrumbs.length - 1].name },
+                        {
+                            folder: this.breadcrumbsService.breadcrumbs$.value[
+                                this.breadcrumbsService.breadcrumbs$.value.length - 1
+                            ].name,
+                        },
                         null,
                         null,
                         additional,
