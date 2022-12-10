@@ -28,6 +28,18 @@ do
 	sleep 3
 done
 
+until wait-for-it "${repository_service_host}:${repository_service_port}" -t 3; do sleep 1; done
+
+until [[ $(curl -sSf -w "%{http_code}\n" -o /dev/null -H 'Accept: application/json' "${repository_service_base}/rest/_about/status/SERVICE?timeoutSeconds=3") -eq 200 ]]; do
+	echo >&2 "Waiting for ${repository_service_host} service ..."
+	sleep 3
+done
+
+until [[ $(curl -sSf -w "%{http_code}\n" -o /dev/null -H 'Accept: application/json' "${repository_service_base}/rest/_about/status/SEARCH?timeoutSeconds=3") -eq 200 ]]; do
+	echo >&2 "Waiting for ${repository_service_host} search ..."
+	sleep 3
+done
+
 ########################################################################################################################
 
 my_appid=$( \

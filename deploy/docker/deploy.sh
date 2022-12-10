@@ -506,7 +506,7 @@ terminal() {
 		exec -u root -it  $1 /bin/bash || exit
 }
 
-shift
+shift || true
 case "${CLI_OPT1}" in
 rstart)
 	rstart $@ && note

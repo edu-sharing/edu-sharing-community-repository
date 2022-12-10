@@ -19,61 +19,6 @@
 
     <finalName>edu-sharing</finalName>
 
-    <plugins>
-
-      <plugin>
-
-        <groupId>com.github.eirslett</groupId>
-        <artifactId>frontend-maven-plugin</artifactId>
-        <configuration>
-          <!--suppress UnresolvedMavenProperty -->
-          <nodeVersion>v${node.version}</nodeVersion>
-          <!--suppress UnresolvedMavenProperty -->
-          <npmVersion>${npm.version}</npmVersion>
-        </configuration>
-        <executions>
-          <execution>
-            <id>bootstrap</id>
-            <goals>
-              <goal>install-node-and-npm</goal>
-            </goals>
-            <phase>process-sources</phase>
-          </execution>
-          <execution>
-            <id>install</id>
-            <goals>
-              <goal>npm</goal>
-            </goals>
-            <phase>process-sources</phase>
-            <configuration>
-              <arguments>${npm.args.install}</arguments>
-            </configuration>
-          </execution>
-          <execution>
-            <id>build</id>
-            <goals>
-              <goal>npm</goal>
-            </goals>
-            <phase>compile</phase>
-            <configuration>
-              <arguments>${npm.args.build}</arguments>
-            </configuration>
-          </execution>
-          <execution>
-            <id>licenses</id>
-            <goals>
-              <goal>npm</goal>
-            </goals>
-            <phase>process-classes</phase>
-            <configuration>
-              <arguments>run print-licenses</arguments>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-    </plugins>
-
   </build>
 
   <profiles>
@@ -140,7 +85,7 @@
                 <goals>
                   <goal>copy-resources</goal>
                 </goals>
-                <phase>generate-resources</phase>
+                <phase>generate-sources</phase>
                 <configuration>
                   <resources>
                     <resource>
@@ -159,7 +104,50 @@
             <artifactId>frontend-maven-plugin</artifactId>
             <configuration>
               <workingDirectory>src/generated/ng</workingDirectory>
+              <!--suppress UnresolvedMavenProperty -->
+              <nodeVersion>v${node.version}</nodeVersion>
+              <!--suppress UnresolvedMavenProperty -->
+              <npmVersion>${npm.version}</npmVersion>
             </configuration>
+            <executions>
+              <execution>
+                <id>bootstrap</id>
+                <goals>
+                  <goal>install-node-and-npm</goal>
+                </goals>
+                <phase>process-sources</phase>
+              </execution>
+              <execution>
+                <id>install</id>
+                <goals>
+                  <goal>npm</goal>
+                </goals>
+                <phase>process-sources</phase>
+                <configuration>
+                  <arguments>${npm.args.install}</arguments>
+                </configuration>
+              </execution>
+              <execution>
+                <id>build</id>
+                <goals>
+                  <goal>npm</goal>
+                </goals>
+                <phase>compile</phase>
+                <configuration>
+                  <arguments>${npm.args.build}</arguments>
+                </configuration>
+              </execution>
+              <execution>
+                <id>licenses</id>
+                <goals>
+                  <goal>npm</goal>
+                </goals>
+                <phase>process-classes</phase>
+                <configuration>
+                  <arguments>run print-licenses</arguments>
+                </configuration>
+              </execution>
+            </executions>
           </plugin>
 
           <plugin>
@@ -237,7 +225,7 @@
                 <goals>
                   <goal>copy-resources</goal>
                 </goals>
-                <phase>generate-resources</phase>
+                <phase>generate-sources</phase>
                 <configuration>
                   <resources>
                     <resource>
@@ -264,6 +252,56 @@
                   </resources>
                   <outputDirectory>dist/assets/i18n</outputDirectory>
                   <overwrite>true</overwrite>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>com.github.eirslett</groupId>
+            <artifactId>frontend-maven-plugin</artifactId>
+            <configuration>
+              <!--suppress UnresolvedMavenProperty -->
+              <nodeVersion>v${node.version}</nodeVersion>
+              <!--suppress UnresolvedMavenProperty -->
+              <npmVersion>${npm.version}</npmVersion>
+            </configuration>
+            <executions>
+              <execution>
+                <id>bootstrap</id>
+                <goals>
+                  <goal>install-node-and-npm</goal>
+                </goals>
+                <phase>process-sources</phase>
+              </execution>
+              <execution>
+                <id>install</id>
+                <goals>
+                  <goal>npm</goal>
+                </goals>
+                <phase>process-sources</phase>
+                <configuration>
+                  <arguments>${npm.args.install}</arguments>
+                </configuration>
+              </execution>
+              <execution>
+                <id>build</id>
+                <goals>
+                  <goal>npm</goal>
+                </goals>
+                <phase>compile</phase>
+                <configuration>
+                  <arguments>${npm.args.build}</arguments>
+                </configuration>
+              </execution>
+              <execution>
+                <id>licenses</id>
+                <goals>
+                  <goal>npm</goal>
+                </goals>
+                <phase>process-classes</phase>
+                <configuration>
+                  <arguments>run print-licenses</arguments>
                 </configuration>
               </execution>
             </executions>
