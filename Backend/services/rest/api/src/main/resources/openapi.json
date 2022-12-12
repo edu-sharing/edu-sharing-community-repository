@@ -820,6 +820,31 @@
       "ConfigRemoteRocketchat": {
         "type": "object"
       },
+      "ConfigThemeColor": {
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "variable": {
+            "type": "string",
+            "xml": {
+              "attribute": true
+            }
+          }
+        },
+        "type": "object"
+      },
+      "ConfigThemeColors": {
+        "properties": {
+          "color": {
+            "items": {
+              "$ref": "#/components/schemas/ConfigThemeColor"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "ConfigUpload": {
         "properties": {
           "postDialog": {
@@ -1309,6 +1334,9 @@
       },
       "FontIcon": {
         "properties": {
+          "cssClass": {
+            "type": "string"
+          },
           "original": {
             "type": "string"
           },
@@ -5537,6 +5565,9 @@
               "type": "string"
             },
             "type": "array"
+          },
+          "themeColors": {
+            "$ref": "#/components/schemas/ConfigThemeColors"
           },
           "upload": {
             "$ref": "#/components/schemas/ConfigUpload"
