@@ -20429,6 +20429,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "description": "launchPresentation. how the resourcelink will be embedded. valid values: window,iframe",
+            "in": "query",
+            "name": "launchPresentation",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
