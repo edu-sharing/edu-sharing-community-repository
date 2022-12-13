@@ -88,7 +88,7 @@ public class RegistrationService {
             String kid = UUID.randomUUID().toString();
             Map<String,String> newProps = new HashMap<>();
             newProps.put(ApplicationInfo.KEY_LTI_KID, kid);
-            AdminServiceFactory.getInstance().updatePropertiesXML(homeApp.getAppFile(),newProps);
+            AdminServiceFactory.getInstance().updatePropertiesXML(homeApp.getAppFileName(),newProps);
         }
 
         if(eduSharingRegistrationToken == null || eduSharingRegistrationToken.trim().equals("")){
