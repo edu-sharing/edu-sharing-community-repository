@@ -540,8 +540,10 @@ export class Toast implements OnDestroy {
             dialogTitle = null;
         }
         if(errorObject?.traceId) {
-            dialogTitle = this.translate.instant(dialogTitle) + ' (' + errorObject.traceId + ')';
-            message = this.translate.instant(message) + '\n(' + errorObject.traceId + ')';
+            if(dialogTitle) {
+                dialogTitle = this.translate.instant(dialogTitle) + ' (' + errorObject.traceId + ')';
+            }
+            message = message ? this.translate.instant(message) : '' + '\n(' + errorObject.traceId + ')';
         }
         return {
             message,
