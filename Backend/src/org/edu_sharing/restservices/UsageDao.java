@@ -137,26 +137,50 @@ public class UsageDao {
 
 	public void deleteUsage(String nodeId, String usageId) throws DAOException {
 		try {
+			org.edu_sharing.service.usage.Usage usage = AuthenticationUtil.runAsSystem(() -> {
+				for (org.edu_sharing.service.usage.Usage u : new Usage2Service().getUsageByParentNodeId(null, null,
+						nodeId)) {
+					if (u.getNodeId().equals(usageId)) {
+						return u;
+					}
+				}
+				return null;
+			});
+			if(usage == null) {
+				throw new DAOMissingException(new IllegalArgumentException(usageId + " is not an usage of " + nodeId));
+			}
 			boolean permission = (ContextManagementFilter.accessTool.get() != null) ? true : permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,
 					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId,
 					CCConstants.PERMISSION_CHANGEPERMISSIONS);
-
+			if(ContextManagementFilter.accessTool != null
+					&& ContextManagementFilter.accessTool.get() != null){
+				if(ContextManagementFilter.accessTool.get().getAppId().equals(usage.getLmsId())) {
+					permission = true;
+					logger.info("Delete usage allowed for app id " + usage.getLmsId());
+				} else {
+					throw new SecurityException("The current authenticated app id is not allowed to delete this usage");
+				}
+			}
 			if (!permission) {
 				throw new SecurityException("Can not modify usages on node " + nodeId);
 			}
-			for (org.edu_sharing.service.usage.Usage usage : new Usage2Service().getUsageByParentNodeId(null, null,
-					nodeId)) {
-				if (usage.getNodeId().equals(usageId)) {
-					if (new Usage2Service().deleteUsage(null, null, usage.getLmsId(), usage.getCourseId(), nodeId,
-							usage.getResourceId()))
-						return;
-					else
-						throw new Exception("Error deleting usage " + usage.getNodeId());
+			AuthenticationUtil.runAsSystem(() -> {
+				if (new Usage2Service().deleteUsage(null, null, usage.getLmsId(), usage.getCourseId(), nodeId,
+						usage.getResourceId())) {
+					return null;
+				} else {
+					throw new RuntimeException("Error deleting usage " + usage.getNodeId());
 				}
-			}
-			throw new DAOMissingException(new IllegalArgumentException(usageId + " is not an usage of " + nodeId));
+			});
 		} catch (Throwable t) {
-			throw DAOException.mapping(t);
+			// unmarshall exception
+			if(t instanceof DAOException) {
+				throw t;
+			} else if(t.getCause() != null) {
+				throw DAOException.mapping(t.getCause().getCause());
+			} else {
+				throw DAOException.mapping(t);
+			}
 		}
 	}
 
