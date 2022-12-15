@@ -612,7 +612,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
         // set correct scope
         const request: RequestObject = Helper.deepCopy(CollectionContentComponent.DEFAULT_REQUEST);
-        if (this.sortCollections) {
+        if (this.sortCollections?.active) {
             request.sortBy = [this.sortCollections.active];
             request.sortAscending = [this.sortCollections.direction === 'asc'];
         } else {
