@@ -433,6 +433,9 @@ export class CollectionsMainComponent implements OnDestroy {
 
     private renderBreadcrumbs() {
         this.breadcrumbsService.setNodePath([]);
+        if (this.collection.ref.id === RestConstants.ROOT) {
+            return;
+        }
         this.nodeService
             .getNodeParents(this.collection.ref.id, false)
             .subscribe((data: EduData.NodeList) => {
