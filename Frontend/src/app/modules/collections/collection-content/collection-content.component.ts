@@ -101,7 +101,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
      * this is required if you want to interconnect it to have support for editing & managing the collection
      * (the options service is inited in the content component)
      */
-    @Input() infobar: CollectionInfoBarComponent;
+    @Input() getInfobar: () => CollectionInfoBarComponent;
     @Input() isRootLevel: boolean;
     @Input() createAllowed: () => boolean;
     @Output() clickItem = new EventEmitter<NodeClickEvent<Node | CollectionReference>>();
@@ -824,7 +824,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             scope: Scope.CollectionsCollection,
             activeObjects: [this.collection],
         });
-        this.optionsService.initComponents(this.infobar?.actionbar, this.listReferences);
+        this.optionsService.initComponents(this.getInfobar()?.actionbar, this.listReferences);
         this.optionsService.refreshComponents();
     }
     toggleCollectionsOrder() {
