@@ -10,9 +10,13 @@
   },
   "homepage": "https://edu-sharing-network.org/",
   "scripts": {
+    "check-if-up-to-date": "cmp -s ../../../Backend/services/rest/api/src/main/resources/openapi.json build/openapi.json",
+    "copy-api-spec": "cp ../../../Backend/services/rest/api/src/main/resources/openapi.json build/openapi.json",
     "generate-api:generate-code": "ng-openapi-gen --input build/openapi.json --output src/lib/api",
     "generate-api:prettify-code": "prettier -w 'src/lib/api/**/*.ts' --end-of-line auto",
-    "generate-api": "npm run generate-api:generate-code && npm run generate-api:prettify-code"
+    "generate-api": "npm run generate-api:generate-code && npm run generate-api:prettify-code",
+    "update": "npm i && npm run copy-api-spec && npm run generate-api",
+    "update-if-needed": "npm run check-if-up-to-date || npm run update"
   },
   "peerDependencies": {
     "@angular/common": "^12.2.0 || ^13.0.0",
