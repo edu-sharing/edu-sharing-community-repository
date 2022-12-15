@@ -20,6 +20,7 @@ export * from './lib/wrappers/search.service';
 export * from './lib/wrappers/user.service';
 export * from './lib/wrappers/relation.service';
 export * from './lib/wrappers/connector.service';
+export * from './lib/wrappers/lti-platform.service';
 
 // Unwrapped API services.
 //

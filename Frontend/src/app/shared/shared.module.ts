@@ -78,6 +78,7 @@ import { ReplaceCharsPipe } from './pipes/replace-chars.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { VCardNamePipe } from './pipes/vcard-name.pipe';
 import { VersionLabelPipe } from './pipes/version-label.pipe';
+import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.component';
 
 @NgModule({
     declarations: [
@@ -129,6 +130,7 @@ import { VersionLabelPipe } from './pipes/version-label.pipe';
         WorkspaceCreateConnector,
         NodesDragDirective,
         NodesDropTargetDirective,
+        CreateLtitoolComponent,
         NodeIconPipe,
         NodeImagePipe,
     ],
@@ -231,6 +233,7 @@ import { VersionLabelPipe } from './pipes/version-label.pipe';
         NodesDragDirective,
         NodesDropTargetDirective,
         MatBadgeModule,
+        CreateLtitoolComponent,
         NodeIconPipe,
         NodeImagePipe,
     ],

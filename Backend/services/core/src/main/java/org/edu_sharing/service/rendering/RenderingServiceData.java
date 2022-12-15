@@ -13,6 +13,8 @@ public class RenderingServiceData implements Serializable {
     private String metadataHTML;
     private Values configValues;
 
+    private NodeUrls nodeUrls;
+
     public Node getNode() {
         return node;
     }
@@ -51,5 +53,13 @@ public class RenderingServiceData implements Serializable {
 
     public List<Node> getChildren() {
         return children;
+    }
+
+    public void setNodeUrls(NodeUrls nodeUrls) {
+        this.nodeUrls = nodeUrls;
+    }
+
+    public NodeUrls getNodeUrls() {
+        return nodeUrls;
     }
 }

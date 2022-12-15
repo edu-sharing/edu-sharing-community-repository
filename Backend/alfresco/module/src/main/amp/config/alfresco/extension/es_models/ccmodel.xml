@@ -2173,5 +2173,17 @@
 				</property>
 			</properties>
 		</aspect>
+
+		<aspect name="ccm:ltitool_node">
+			<title>represents a node hosted by a connected lti tool</title>
+			<properties>
+				<property name="ccm:ltitool_resourcelink">
+					<type>d:text</type>
+				</property>
+				<property name="ccm:ltitool_url">
+					<type>d:text</type>
+				</property>
+			</properties>
+		</aspect>
 	</aspects>
 </model>

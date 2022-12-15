@@ -48,6 +48,7 @@ import { LoginInfo } from 'ngx-edu-sharing-api';
 
 export class UIHelper {
     static COPY_URL_PARAMS = ['mainnav', 'reurl', 'reurlTypes', 'reurlCreate', 'applyDirectories'];
+
     public static evaluateMediaQuery(type: string, value: number) {
         if (type == UIConstants.MEDIA_QUERY_MAX_WIDTH) return value > window.innerWidth;
         if (type == UIConstants.MEDIA_QUERY_MIN_WIDTH) return value < window.innerWidth;
@@ -58,6 +59,7 @@ export class UIHelper {
     }
 
     public static getBlackWhiteContrast(color: string) {}
+
     static changeQueryParameter(router: Router, route: ActivatedRoute, name: string, value: any) {
         route.queryParams.pipe(take(1)).subscribe((data: any) => {
             let queryParams: any = {};
@@ -143,6 +145,7 @@ export class UIHelper {
         // console.log('Strengt: '+strength);
         return strength;
     }
+
     /**
      * returns an factor indicating the repeat of signd in a password
      * Higher values mean better password strength
@@ -200,9 +203,11 @@ export class UIHelper {
             },
         });
     }
+
     public static goToNode(router: Router, node: Node) {
         router.navigate([UIConstants.ROUTER_PREFIX, 'render', node.ref.id]);
     }
+
     public static goToCollection(
         router: Router,
         node: Node,
@@ -219,6 +224,7 @@ export class UIHelper {
             router.navigate([UIConstants.ROUTER_PREFIX, 'collections'], extras);
         }
     }
+
     /**
      * Navigate to the search in reurl (apply) mode
      * when done, the app will redirect to the current location
@@ -248,6 +254,7 @@ export class UIHelper {
             );
         }
     }
+
     /**
      * Navigate to the workspace
      * @param nodeService instance of NodeService
@@ -278,6 +285,7 @@ export class UIHelper {
             );
         });
     }
+
     /**
      * Navigate to the workspace
      * @param nodeService instance of NodeService
@@ -302,6 +310,7 @@ export class UIHelper {
             extras,
         );
     }
+
     static convertSearchParameters(node: Node) {
         let parameters = JSON.parse(
             node.properties[RestConstants.CCM_PROP_SAVED_SEARCH_PARAMETERS],
@@ -377,6 +386,7 @@ export class UIHelper {
                 });
         }
     }
+
     static addToCollection(
         nodeHelper: NodeHelperService,
         collectionService: RestCollectionService,
@@ -469,6 +479,7 @@ export class UIHelper {
             }
         });
     }
+
     static openConnector(
         connector: RestConnectorsService,
         iam: RestIamService,
@@ -548,10 +559,22 @@ export class UIHelper {
         );
     }
 
+    static openLTIResourceLink(node: Node) {
+        let w = window.open(
+            '/edu-sharing/rest/ltiplatform/v13/generateLoginInitiationFormResourceLink?nodeId=' +
+                node.ref.id,
+            '_blank',
+        );
+        if (!w) {
+            window.alert('popups are disabled');
+        }
+    }
+
     static setFocusOnCard() {
         let elements = document.getElementsByClassName('card')[0].getElementsByTagName('*');
         this.focusElements(elements);
     }
+
     static setFocusOnDropdown(ref: ElementRef) {
         // the first element(s) might be currently invisible, so try to focus from bottom to top
         if (ref && ref.nativeElement) {
@@ -620,6 +643,7 @@ export class UIHelper {
         }
         return optionsFiltered;
     }
+
     static filterToggleOptions(options: OptionItem[], toggle: boolean) {
         let result: OptionItem[] = [];
         for (let option of options) {
@@ -761,6 +785,7 @@ export class UIHelper {
         document.execCommand('SelectAll');
         document.execCommand('Copy', false, null);
     }
+
     static copyToClipboard(text: string) {
         let input = document.createElement('textarea') as HTMLTextAreaElement;
         input.innerHTML = text;
@@ -779,6 +804,7 @@ export class UIHelper {
         }
         return merge;
     }
+
     /**
      * merge two permission sets
      * If a user/group is duplicated, the one with the highest permission will win
@@ -812,6 +838,7 @@ export class UIHelper {
         }
         return result;
     }
+
     static permissionIsGreaterThan(p1: string, p2: string) {
         return (
             RestConstants.BASIC_PERMISSIONS.indexOf(p1) >

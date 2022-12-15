@@ -10,6 +10,8 @@ import javax.servlet.http.HttpSession;
 
 public class AllSessions {
 	static Map<String,HttpSession> allSessions = null;
+
+	public static Map<String,HttpSession> userLTISessions = Collections.synchronizedMap(new HashMap<>());
 	
 	static Map<String,HttpSession>  getInstance(){
 		ReentrantReadWriteLock rw = new ReentrantReadWriteLock(); 

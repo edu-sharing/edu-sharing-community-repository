@@ -19,6 +19,8 @@ import org.edu_sharing.service.tracking.TrackingService;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.springframework.context.ApplicationContext;
 
+import java.util.Map;
+
 public class SessionListener implements HttpSessionListener{
 	
 	Logger logger = Logger.getLogger(SessionListener.class);
@@ -71,10 +73,14 @@ public class SessionListener implements HttpSessionListener{
 		
 		//try to remove Session from AllSessions
 		HttpSession removeedSession = AllSessions.remove(event.getSession().getId());
-		
+
+		Map.Entry<String,HttpSession> entry = AllSessions.userLTISessions.entrySet().stream().filter(e -> e.getValue().getId().equals(event.getSession().getId())).findFirst().orElse(null);
+		if(entry != null) AllSessions.userLTISessions.remove(entry.getKey());
+
 		String sessionId = (removeedSession != null) ? removeedSession.getId() : null;
 		String ticket = (removeedSession != null) ? (String)removeedSession.getAttribute(CCConstants.AUTH_TICKET) : null;
 		String ssoSessionId = (removeedSession != null) ? (String)removeedSession.getAttribute(CCConstants.AUTH_SSO_SESSIONID) : null;
+
 		
 		logger.debug("jsessionid:"+sessionId+" ticket:"+ticket+" ssoSessionId:"+ssoSessionId);
 		logger.debug("AllSessions:"+AllSessions.size() + " ShibbolethSessions.size():"+ShibbolethSessions.size() + " ShibbolethSessionsCache.size():"+ShibbolethSessionsCache.size());
