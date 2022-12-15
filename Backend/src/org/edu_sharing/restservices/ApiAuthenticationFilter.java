@@ -171,7 +171,7 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 		 * allow authless calls with AUTH_SINGLE_USE_NODEID by appauth
 		 */
 		boolean trustedAuth = false;
-		if(ContextManagementFilter.accessToolType != null && ContextManagementFilter.accessToolType.get() != null){
+		if(ContextManagementFilter.accessTool != null && ContextManagementFilter.accessTool.get() != null){
 			if(httpReq.getSession() != null && httpReq.getSession().getAttribute(CCConstants.AUTH_SINGLE_USE_NODEID) != null ){
 
 				trustedAuth = true;

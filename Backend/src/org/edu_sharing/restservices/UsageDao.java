@@ -137,7 +137,7 @@ public class UsageDao {
 
 	public void deleteUsage(String nodeId, String usageId) throws DAOException {
 		try {
-			boolean permission = (ContextManagementFilter.accessToolType.get() != null) ? true : permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,
+			boolean permission = (ContextManagementFilter.accessTool.get() != null) ? true : permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE,
 					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId,
 					CCConstants.PERMISSION_CHANGEPERMISSIONS);
 
@@ -231,9 +231,8 @@ public class UsageDao {
 
 	public Usages.Usage setUsage(String repository, CreateUsage usage) throws Exception {
 
-		if(ContextManagementFilter.accessToolType == null
-				|| ContextManagementFilter.accessToolType.get() == null
-				|| ContextManagementFilter.accessToolType.get().trim().equals("") ){
+		if(ContextManagementFilter.accessTool == null
+				|| ContextManagementFilter.accessTool.get() == null){
 			throw new DAOSecurityException(new Exception("app signature required to use this endpoint."));
 		}
 		if(AuthenticationUtil.getFullyAuthenticatedUser() == null || AuthorityServiceFactory.getLocalService().isGuest()){

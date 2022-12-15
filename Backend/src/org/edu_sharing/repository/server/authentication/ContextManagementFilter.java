@@ -40,9 +40,8 @@ import org.springframework.context.ApplicationContext;
 
 
 public class ContextManagementFilter implements javax.servlet.Filter {
-
 	// stores the currently accessing tool type, e.g. CONNECTOR
-	public static ThreadLocal<String> accessToolType = new ThreadLocal<>();
+	public static ThreadLocal<ApplicationInfo> accessTool = new ThreadLocal<>();
 
 	Logger logger = Logger.getLogger(ContextManagementFilter.class);
 
@@ -68,8 +67,10 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 		logger.debug("thread:"+Thread.currentThread().getId() +" "+((HttpServletRequest)req).getServletPath()+" starting");
 
 		try {
+			final HttpServletRequest http = (HttpServletRequest) req;
 
-			Context.newInstance((HttpServletRequest)req , (HttpServletResponse)res, context);
+			Context.newInstance(http , (HttpServletResponse)res, context);
+
 			ScopeAuthenticationServiceFactory.getScopeAuthenticationService().setScopeForCurrentThread();
 
 			try{
@@ -103,7 +104,7 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 				logger.debug(e.getMessage());
 			}
 
-			handleAppSignature((HttpServletRequest)req);
+			handleAppSignature((HttpServletRequest)req, (HttpServletResponse)res);
 
 			chain.doFilter(req,res);
 
@@ -149,19 +150,20 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 
 	/**
 	 * Checks if app headers and signature are present and sets the header accordingly
-	 * @param httpReq
 	 */
-	private void handleAppSignature(HttpServletRequest httpReq) {
-		accessToolType.set(null);
+	private void handleAppSignature(HttpServletRequest httpReq, HttpServletResponse httpRes) throws IOException {
+		accessTool.set(null);
 
 		String appId = httpReq.getHeader("X-Edu-App-Id");
 		if(appId != null) {
 			SignatureVerifier.Result result = new SignatureVerifier().verifyAppSignature(httpReq);
 			if (result.getStatuscode() != 200) {
-				logger.warn("application request could not be verified:" + appId + " " + result.getMessage());
+				String msg = "application request could not be verified:" + appId + " " + result.getMessage();
+				logger.warn(msg);
+				httpRes.sendError(result.getStatuscode(), result.getMessage());
 			} else {
 				ApplicationInfo appInfo = result.getAppInfo();
-				accessToolType.set(appInfo.getType());
+				accessTool.set(appInfo);
 
 				String courseId = httpReq.getHeader("X-Edu-Usage-Course-Id");
 				String nodeId = httpReq.getHeader("X-Edu-Usage-Node-Id");
