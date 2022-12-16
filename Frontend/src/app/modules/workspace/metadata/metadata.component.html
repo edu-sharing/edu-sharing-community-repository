@@ -50,7 +50,8 @@
       </p>
       <p class="description collections" *ngIf="!usagesCollection.isEmpty()">
         {{
-          'WORKSPACE.METADATA.COLLECTIONS' | translate: { count: usagesCollection.getData().length }
+          'WORKSPACE.METADATA.COLLECTIONS'
+            | translate: { count: (usagesCollectionData | async).length }
         }}
       </p>
       <es-node-entries-wrapper

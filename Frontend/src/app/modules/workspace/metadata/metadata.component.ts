@@ -72,6 +72,7 @@ export class WorkspaceMetadataComponent implements OnInit {
     tab = this.INFO;
     permissions: any;
     usagesCollection = new NodeDataSource();
+    usagesCollectionData = this.usagesCollection.connect();
     nodeObject: Node;
     versions: Version[];
     versionsLoading = false;
