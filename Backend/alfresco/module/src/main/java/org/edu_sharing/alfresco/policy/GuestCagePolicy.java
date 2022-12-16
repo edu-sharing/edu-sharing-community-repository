@@ -57,7 +57,7 @@ public class GuestCagePolicy implements BeforeCreateNodePolicy, BeforeDeleteAsso
 	}
 
 	static List<String> guestUsers = new ArrayList<>();
-	
+
 	
 	private void checkGuest() throws GuestPermissionDeniedException{
 		
@@ -138,6 +138,4 @@ public class GuestCagePolicy implements BeforeCreateNodePolicy, BeforeDeleteAsso
 			guestUsers.add(gun);
 		}
 
-		return guestUsers;
-	}
 }

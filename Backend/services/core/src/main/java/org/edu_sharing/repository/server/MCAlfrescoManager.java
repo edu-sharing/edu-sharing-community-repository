@@ -112,9 +112,7 @@ public class MCAlfrescoManager implements ServletContextListener {
 			new Release_3_2_FillOriginalId(null).execute();
 			
 			new Release_3_2_PermissionInheritFalse(null).execute();
-
-			new Release_8_0_Migrate_Database_Scripts(null).execute();
-
+			
 			new SQLUpdater().execute();
 			
 			new Release_4_2_PersonStatusUpdater(null).execute();
