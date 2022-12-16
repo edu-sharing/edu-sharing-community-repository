@@ -85,7 +85,7 @@ public class MCAlfrescoManager implements ServletContextListener {
 			ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
 
 			logger.info("load Metadatasets");
-			MetadataReaderV2.refresh();
+			MetadataReader.refresh();
 			
 			//do update this class checks if it is already done
 			AuthenticationToolAPI authTool = new AuthenticationToolAPI();
