@@ -485,7 +485,9 @@ public class PersonDao {
     	return data;
 	}
 	public UserRender asPersonRender() {
+		org.edu_sharing.service.authority.AuthorityService service=AuthorityServiceFactory.getAuthorityService(ApplicationInfoList.getHomeRepository().getAppId());
 		UserRender data = new UserRender();
+		data.setIsGuest(authorityService.isGuest());
 		data.setAuthorityName(getAuthorityName());
 		data.setAuthorityType(Authority.Type.USER);
 		data.setUserName(getUserName());
