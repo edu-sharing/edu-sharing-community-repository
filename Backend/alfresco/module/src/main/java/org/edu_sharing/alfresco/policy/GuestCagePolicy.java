@@ -129,13 +129,15 @@ public class GuestCagePolicy implements BeforeCreateNodePolicy, BeforeDeleteAsso
 
 	public static List<String> getGuestUsers() {
 
-		if(guestUsers.size() == 0){
+		if (guestUsers.size() == 0) {
 			guestUsers.add(CCConstants.PROXY_USER);
 			guestUsers.add("guest");
 		}
 		String gun = ApplicationInfoList.getHomeRepository().getGuest_username();
-		if(gun != null && !guestUsers.contains(gun)){
+		if (gun != null && !guestUsers.contains(gun)) {
 			guestUsers.add(gun);
 		}
+		return guestUsers;
 
+	}
 }
