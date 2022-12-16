@@ -334,7 +334,10 @@
                       }})
                     </h2>
                     <button
-                      *ngIf="(areAllCollectionsDisplayed$ | async) === false || collectionsMore"
+                      *ngIf="
+                        searchService.dataSourceCollections.itemsCap?.isActivelyCapping ||
+                        collectionsMore
+                      "
                       mat-button
                       color="primary"
                       class="toggle"

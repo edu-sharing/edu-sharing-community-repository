@@ -31,6 +31,7 @@ import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.shared.Node;
+import org.edu_sharing.restservices.shared.NodeUrls;
 import org.edu_sharing.restservices.shared.SearchResult;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.config.ConfigServiceFactory;
@@ -236,6 +237,7 @@ public class RenderingServiceImpl implements RenderingService{
 
 		// context/config
 		data.setConfigValues(ConfigServiceFactory.getCurrentConfig().values);
+		data.setNodeUrls(new NodeUrls(node, nodeVersion));
 
 		logger.info("Preparing rendering data took "+(System.currentTimeMillis()-time)+" ms");
 		return data;

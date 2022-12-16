@@ -5,6 +5,7 @@ import {
     Input,
     NgZone,
     OnChanges,
+    OnDestroy,
     OnInit,
     QueryList,
     SimpleChanges,
@@ -13,25 +14,25 @@ import {
 } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
-import { distinctUntilChanged, map, switchMap, take } from 'rxjs/operators';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { distinctUntilChanged, map, switchMap, take, takeUntil } from 'rxjs/operators';
 import { ListItemSort, RestConstants, UIService } from '../../../core-module/core.module';
 import { NodeEntriesService } from '../../../core-ui-module/node-entries.service';
 import { Target } from '../../../core-ui-module/option-item';
 import { DragData } from '../../../services/nodes-drag-drop.service';
 import { SortEvent } from '../../../shared/components/sort-dropdown/sort-dropdown.component';
 import { NodeEntriesDisplayType } from '../entries-model';
+import { ItemsCap } from '../items-cap';
+import { NodeEntriesGlobalService } from '../node-entries-global.service';
 import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
-import { NodeEntriesGlobalService, PaginationStrategy } from '../node-entries-global.service';
 
 @Component({
     selector: 'es-node-entries-card-grid',
     templateUrl: 'node-entries-card-grid.component.html',
     styleUrls: ['node-entries-card-grid.component.scss'],
 })
-export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnChanges {
+export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnChanges, OnDestroy {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
-    readonly PaginationStrategy = PaginationStrategy;
     readonly Target = Target;
     @ViewChildren(CdkDropList) dropListsQuery: QueryList<CdkDropList>;
     @ViewChild('grid') gridRef: ElementRef;
@@ -47,7 +48,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnC
      */
     visibleItemsLimited = false;
 
-    private readonly nodes$ = this.entriesService.dataSource$.pipe(
+    readonly nodes$ = this.entriesService.dataSource$.pipe(
         switchMap((dataSource) => dataSource?.connect()),
     );
     private readonly maxRows$ = this.entriesService.gridConfig$.pipe(
@@ -55,18 +56,9 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnC
         distinctUntilChanged(),
     );
     private readonly itemsPerRowSubject = new BehaviorSubject<number | null>(null);
-    readonly visibleNodes$ = rxjs
-        .combineLatest([
-            this.nodes$,
-            this.itemsPerRowSubject.pipe(distinctUntilChanged()),
-            this.maxRows$,
-        ])
-        .pipe(
-            map(([nodes, itemsPerRow, maxRows]) =>
-                this.getVisibleNodes(nodes, itemsPerRow, maxRows),
-            ),
-        );
+    readonly itemsCap = new ItemsCap<T>();
     private globalCursorStyle: HTMLStyleElement;
+    private destroyed = new Subject<void>();
 
     constructor(
         public entriesService: NodeEntriesService<T>,
@@ -77,10 +69,29 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnC
     ) {}
 
     ngOnInit(): void {
+        this.registerItemsCap();
         this.registerVisibleItemsLimited();
     }
 
+    private registerItemsCap() {
+        this.entriesService.dataSource$
+            .pipe(takeUntil(this.destroyed))
+            .subscribe((dataSource) => (dataSource.itemsCap = this.itemsCap));
+        rxjs.combineLatest([this.itemsPerRowSubject.pipe(distinctUntilChanged()), this.maxRows$])
+            .pipe(
+                map(([itemsPerRow, maxRows]) =>
+                    maxRows > 0 && itemsPerRow !== null ? itemsPerRow * maxRows : null,
+                ),
+            )
+            .subscribe((cap) => (this.itemsCap.cap = cap));
+    }
+
     ngOnChanges(changes: SimpleChanges): void {}
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
+    }
 
     changeSort(sort: SortEvent) {
         this.entriesService.sort.active = sort.name;
@@ -88,22 +99,17 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnC
         this.entriesService.sortChange.emit(this.entriesService.sort);
     }
 
-    loadData(byButtonClick = false) {
+    loadData(source: 'scroll' | 'button') {
         // @TODO: Maybe this is better handled in a more centraled service
-        if (!byButtonClick) {
+        if (source === 'scroll') {
             // check if there is a footer
             const elements = document.getElementsByTagName('footer');
             if (elements.length && elements.item(0).innerHTML.trim()) {
                 return;
             }
         }
-        if (this.entriesService.dataSource.hasMore()) {
-            this.entriesService.fetchData.emit({
-                offset: this.entriesService.dataSource.getData().length,
-                reset: false,
-            });
-        }
-        if (byButtonClick) {
+        const couldLoadMore = this.entriesService.loadMore(source);
+        if (couldLoadMore && source === 'button') {
             this.focusFirstNewItemWhenLoaded();
         }
     }
@@ -186,17 +192,6 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnC
         return getComputedStyle(this.gridRef.nativeElement)
             .getPropertyValue('grid-template-columns')
             .split(' ').length;
-    }
-
-    private getVisibleNodes(nodes: T[], itemsPerRow: number | null, maxRows: number | null): T[] {
-        if (maxRows > 0 && itemsPerRow !== null) {
-            const count = itemsPerRow * maxRows;
-            this.entriesService.dataSource.setDisplayCount(count);
-            return nodes.slice(0, this.entriesService.dataSource.getDisplayCount());
-        } else {
-            this.entriesService.dataSource.setDisplayCount();
-            return nodes;
-        }
     }
 
     getSortColumns() {

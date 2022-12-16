@@ -85,7 +85,7 @@
       #infobar
       *ngIf="!isLoading && !isRootLevelCollection() && collection"
       [collection]="collection"
-      [permissions]="collectionContentRef?.permissions"
+      [permissions]="collectionContentRef?.permissions ?? null"
       (edit)="collectionEdit()"
     ></es-collection-info-bar>
     <!-- <div *ngIf="isLoading" class="collection-loading"><es-spinner-small></es-spinner-small></div> -->
@@ -132,7 +132,7 @@
         <es-collection-content
           #collectionContentComponent
           [collection]="collection"
-          [infobar]="infobar"
+          [getInfobar]="getInfobar"
           [scope]="getScope()"
           [isRootLevel]="isRootLevelCollection()"
           [createAllowed]="createAllowed"

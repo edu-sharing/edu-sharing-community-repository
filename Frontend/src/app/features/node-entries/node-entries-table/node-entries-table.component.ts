@@ -34,7 +34,7 @@ import { BorderBoxObserverDirective } from '../../../shared/directives/border-bo
 import { ClickSource, InteractionType } from '../entries-model';
 
 import { NodeEntriesDataType } from '../node-entries.component';
-import { NodeEntriesGlobalService, PaginationStrategy } from '../node-entries-global.service';
+import { NodeEntriesGlobalService } from '../node-entries-global.service';
 import { CanDrop } from '../../../shared/directives/nodes-drop-target.directive';
 
 @Component({
@@ -48,7 +48,6 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     readonly InteractionType = InteractionType;
     readonly ClickSource = ClickSource;
     readonly Target = Target;
-    readonly PaginationStrategy = PaginationStrategy;
 
     @ViewChild(MatSort) sort: MatSort;
     @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -295,14 +294,9 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         this.isDragging = false;
     }
 
-    loadData() {
+    loadData(source: 'scroll' | 'button') {
         // TODO: focus next item when triggered via button.
-        if (this.entriesService.dataSource.hasMore()) {
-            this.entriesService.fetchData.emit({
-                offset: this.entriesService.dataSource.getData().length,
-                reset: false,
-            });
-        }
+        this.entriesService.loadMore(source);
     }
 
     async openMenu(node: T) {

@@ -72,6 +72,7 @@ export class CollectionsMainComponent implements OnDestroy {
     readonly SCOPES = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
+    readonly getInfobar = () => this.infobar;
 
     @ViewChild('infobar') infobar: CollectionInfoBarComponent;
     @ViewChild('collectionContentComponent') collectionContentRef: CollectionContentComponent;
@@ -433,6 +434,9 @@ export class CollectionsMainComponent implements OnDestroy {
 
     private renderBreadcrumbs() {
         this.breadcrumbsService.setNodePath([]);
+        if (this.collection.ref.id === RestConstants.ROOT) {
+            return;
+        }
         this.nodeService
             .getNodeParents(this.collection.ref.id, false)
             .subscribe((data: EduData.NodeList) => {

@@ -211,10 +211,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     private collectionsPerRowSubject = new BehaviorSubject(0);
     visibleCollectionsSubject = new BehaviorSubject<Node[]>(null);
     hasMoreCollectionsSubject = new BehaviorSubject(false);
-    areAllCollectionsDisplayed$ = this.searchService.dataSourceCollections
-        .areAllDisplayed()
-        // Prevent changed-after-checked error
-        .pipe(delay(0));
     readonly didYouMeanSuggestion$ = this.searchApi
         .observeDidYouMeanSuggestion()
         .pipe(shareReplay(1));

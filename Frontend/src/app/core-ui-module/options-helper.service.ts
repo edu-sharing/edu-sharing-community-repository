@@ -684,11 +684,15 @@ export class OptionsHelperService implements OnDestroy {
         openNode.group = DefaultGroups.View;
         openNode.priority = 30;
 
-        const editConnectorNode = new OptionItem('OPTIONS.OPEN', 'launch', (node) =>
-            this.editConnector(this.getObjects(node)[0]),
-        );
+        const editConnectorNode = new OptionItem('OPTIONS.OPEN', 'launch', (node) => {
+            this.editConnector(this.getObjects(node)[0]);
+        });
         editConnectorNode.customShowCallback = (nodes) => {
-            return this.connectors.connectorSupportsEdit(nodes ? nodes[0] : null) != null;
+            let n = nodes ? nodes[0] : null;
+            if (n?.aspects?.includes('ccm:ltitool_node')) {
+                return true;
+            }
+            return this.connectors.connectorSupportsEdit(n) != null;
         };
         editConnectorNode.elementType = [
             ElementType.Node,
@@ -767,6 +771,33 @@ export class OptionsHelperService implements OnDestroy {
                 if (this.data.selectedObjects && this.data.selectedObjects.length > 1) {
                     return false;
                 }
+            }
+            /**
+             * prevent lti editor as tool with custom content option, embedding nodes as platform created by the same tool
+             */
+
+            let customContentNodeLtiToolUrl =
+                ltiSession.customContentNode.properties['ccm:ltitool_url'][0];
+            if (ltiSession.customContentNode) {
+                return nodes.some((n) => {
+                    let nLtiToolUrlArr = ltiSession.customContentNode.properties['ccm:ltitool_url'];
+                    if (!isArray(nLtiToolUrlArr) || nLtiToolUrlArr.length == 0) {
+                        return true;
+                    }
+                    let nLtiToolUrl = nLtiToolUrlArr[0];
+
+                    if (
+                        n.aspects.includes('ccm:ltitool_node') &&
+                        nLtiToolUrl === customContentNodeLtiToolUrl
+                    ) {
+                        console.log(
+                            "don't allow nodes created for tool " +
+                                n.properties['ccm:ltitool_url'] +
+                                ' become embedded by the same tool',
+                        );
+                        return false;
+                    } else return true;
+                });
             }
             return true;
         };
@@ -1479,16 +1510,20 @@ export class OptionsHelperService implements OnDestroy {
         win: any = null,
         connectorType: Connector = null,
     ) {
-        UIHelper.openConnector(
-            this.connectors,
-            this.iamService,
-            this.eventService,
-            this.toast,
-            node,
-            type,
-            win,
-            connectorType,
-        );
+        if (node.aspects?.includes('ccm:ltitool_node')) {
+            UIHelper.openLTIResourceLink(node);
+        } else {
+            UIHelper.openConnector(
+                this.connectors,
+                this.iamService,
+                this.eventService,
+                this.toast,
+                node,
+                type,
+                win,
+                connectorType,
+            );
+        }
     }
 
     private canAddObjects() {

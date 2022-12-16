@@ -1,12 +1,15 @@
 package org.edu_sharing.restservices.lti.v13;
 
 import com.google.gson.Gson;
-import com.nimbusds.jose.jwk.*;
+import com.nimbusds.jose.jwk.KeyUse;
+import com.nimbusds.jose.jwk.RSAKey;
 import edu.uoc.elc.lti.tool.Tool;
 import edu.uoc.elc.lti.tool.oidc.LoginRequest;
 import edu.uoc.elc.spring.lti.security.openid.HttpSessionOIDCLaunchSession;
 import edu.uoc.elc.spring.lti.security.openid.LoginRequestFactory;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,6 +25,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.security.AllSessions;
 import org.edu_sharing.repository.server.tools.security.Signing;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
@@ -29,20 +33,25 @@ import org.edu_sharing.restservices.RestConstants;
 import org.edu_sharing.restservices.lti.v13.model.JWKResult;
 import org.edu_sharing.restservices.lti.v13.model.JWKSResult;
 import org.edu_sharing.restservices.lti.v13.model.RegistrationUrl;
+import org.edu_sharing.restservices.ltiplatform.v13.LTIPlatformConstants;
+import org.edu_sharing.restservices.ltiplatform.v13.model.ValidationException;
+import org.edu_sharing.restservices.rendering.v1.RenderingApi;
+import org.edu_sharing.restservices.rendering.v1.model.RenderingDetailsEntry;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.NodeLTIDeepLink;
+import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
-import org.edu_sharing.service.lti13.*;
+import org.edu_sharing.service.lti13.LTIConstants;
+import org.edu_sharing.service.lti13.LTIJWTUtil;
+import org.edu_sharing.service.lti13.RepoTools;
 import org.edu_sharing.service.lti13.model.LTISessionObject;
 import org.edu_sharing.service.lti13.registration.DynamicRegistrationToken;
 import org.edu_sharing.service.lti13.registration.DynamicRegistrationTokens;
 import org.edu_sharing.service.lti13.registration.RegistrationService;
 import org.edu_sharing.service.lti13.uoc.Config;
-import org.edu_sharing.service.usage.Usage;
 import org.edu_sharing.service.usage.Usage2Service;
 import org.springframework.context.ApplicationContext;
-import org.springframework.extensions.surf.util.URLEncoder;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -51,8 +60,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.*;
@@ -92,50 +99,93 @@ public class LTIApi {
         /**
          * @TODO check if multiple deployments got an own key pair
          */
-
-        RepoTools repoTools = new RepoTools();
+        
         try {
-
-            ApplicationInfo platform = repoTools.getApplicationInfo(iss, clientId, ltiDeploymentId);
-            Tool tool = Config.getTool(platform,req,true);
-            // get data from request
-            final LoginRequest loginRequest = LoginRequestFactory.from(req);
-            if (this.logger.isInfoEnabled()) {
-                this.logger.info("OIDC launch received with " + loginRequest.toString());
-            }
-            final URI uri = new URI(loginRequest.getTarget_link_uri());
-			/* commented in local because localhost resolves to 0:0:0:0*/
-            String host = uri.getHost();
-			String remoteHost = new URI(req.getRequestURL().toString()).getHost();
-
-            logger.info("host:" + host + " remoteHost:"+remoteHost);
-            if (!host.equals(remoteHost)) {
-				throw new Exception("Bad request target uri host:" + host +" remoteHost:"+remoteHost);
-			}
-
-
-            // do the redirection
-            String authRequest = tool.getOidcAuthUrl(loginRequest);
-
-            /**
-             * fix: when it's an LtiResourceLinkRequest moodle sends rendering url (/edu-sharing/components/render)
-             * as targetUrl. edu.uoc.elc.lti.tool.Tool take this url for redirect_url which is wrong.
-             * moodle validates redirect url against config redirecturl which would fail with nodeId
-             *
-             * we can not detect if it will be an ResourceLink or Deeplink call here.
-             * This fix is only for ResourceLink calls. Deeplinks use the same redirect url so this is ok here.
-             */
-            authRequest = UrlTool.removeParam(authRequest,"redirect_uri");
-            authRequest = UrlTool.setParam(authRequest,"redirect_uri",ApplicationInfoList.getHomeRepository().getClientBaseUrl()+"/rest/lti/v13/" + LTIConstants.LTI_TOOL_REDIRECTURL_PATH);
-
-
-            //response.sendRedirect(authRequest);
-            return Response.status(302).location(new URI(authRequest)).build();
+            return loginInitiationsCore(iss, clientId, ltiDeploymentId, req);
 
         } catch (Throwable e) {
             logger.error(e.getMessage(),e);
-            return processError(req,e,"LTI_ERROR");
+            return ApiTool.processError(req,e,"LTI_ERROR");
         }
+    }
+
+    @GET
+    @Path("/oidc/login_initiations")
+    @Operation(summary = "lti authentication process preparation.", description = "preflight phase. prepares lti authentication process. checks it issuer is valid")
+    @Consumes({"application/x-www-form-urlencoded"})
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode="200", description= RestConstants.HTTP_200, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(mediaType = "text/html", schema = @Schema(implementation = String.class)))
+            })
+    public Response loginInitiationsGet(@Parameter(description = "Issuer of the request, will be validated",required=true) @QueryParam(LTIConstants.LTI_PARAM_ISS) String iss,
+                                     @Parameter(description = "target url of platform at the end of the flow",required=true) @QueryParam(LTIConstants.LTI_PARAM_TARGET_LINK_URI) String targetLinkUrl,
+                                     @Parameter(description = "Id of the issuer",required=false) @QueryParam(LTIConstants.LTI_PARAM_CLIENT_ID) String clientId,
+                                     @Parameter(description = "context information of the platform",required=false) @QueryParam(LTIConstants.LTI_PARAM_LOGIN_HINT) String loginHint,
+                                     @Parameter(description = "additional context information of the platform",required=false) @QueryParam(LTIConstants.LTI_PARAM_MESSAGE_HINT) String ltiMessageHint,
+                                     @Parameter(description = "A can have multiple deployments in a platform",required=false) @QueryParam(LTIConstants.LTI_PARAM_DEPLOYMENT_ID) String ltiDeploymentId,
+                                     @Context HttpServletRequest req
+    ){
+        /**
+         * @TODO check if multiple deployments got an own key pair
+         */
+
+        try {
+            return loginInitiationsCore(iss, clientId, ltiDeploymentId, req);
+
+        } catch (Throwable e) {
+            logger.error(e.getMessage(),e);
+            return ApiTool.processError(req,e,"LTI_ERROR");
+        }
+    }
+
+    private Response loginInitiationsCore(String iss, String clientId, String ltiDeploymentId, HttpServletRequest req) throws Exception {
+        RepoTools repoTools = new RepoTools();
+        ApplicationInfo platform = repoTools.getApplicationInfo(iss, clientId, ltiDeploymentId);
+        Tool tool = Config.getTool(platform, req,true);
+        // get data from request
+        final LoginRequest loginRequest = LoginRequestFactory.from(req);
+        if (this.logger.isInfoEnabled()) {
+            this.logger.info("OIDC launch received with " + loginRequest.toString());
+        }
+
+        String targetLinkUri = loginRequest.getTarget_link_uri();
+        if(targetLinkUri == null){
+            throw new Exception("Bad request targetLinkUri is null. check tool config on platform side.");
+        }
+
+        final URI uri = new URI(targetLinkUri);
+        /* commented in local because localhost resolves to 0:0:0:0*/
+        String host = uri.getHost();
+        String remoteHost = new URI(req.getRequestURL().toString()).getHost();
+
+        logger.info("host:" + host + " remoteHost:"+remoteHost);
+        if (!host.equals(remoteHost)) {
+            throw new Exception("Bad request target uri host:" + host +" remoteHost:"+remoteHost);
+        }
+
+
+        // do the redirection
+        String authRequest = tool.getOidcAuthUrl(loginRequest);
+
+        /**
+         * fix: when it's an LtiResourceLinkRequest moodle sends rendering url (/edu-sharing/components/render)
+         * as targetUrl. edu.uoc.elc.lti.tool.Tool take this url for redirect_url which is wrong.
+         * moodle validates redirect url against config redirecturl which would fail with nodeId
+         *
+         * we can not detect if it will be an ResourceLink or Deeplink call here.
+         * This fix is only for ResourceLink calls. Deeplinks use the same redirect url so this is ok here.
+         */
+        authRequest = UrlTool.removeParam(authRequest,"redirect_uri");
+        authRequest = UrlTool.setParam(authRequest,"redirect_uri",ApplicationInfoList.getHomeRepository().getClientBaseUrl()+"/rest/lti/v13/" + LTIConstants.LTI_TOOL_REDIRECTURL_PATH);
+
+
+        //response.sendRedirect(authRequest);
+        return Response.status(302).location(new URI(authRequest)).build();
     }
 
     /**
@@ -154,36 +204,7 @@ public class LTIApi {
         }
     }
 
-    private String getHTML(String formTargetUrl, Map<String,String> params, String errorMessage){
-        return this.getHTML(formTargetUrl,params,errorMessage,null);
-    }
-    /**
-     * @TODO use template engine?
-     * @param formTargetUrl
-     * @param params
-     * @return
-     */
-    private String getHTML(String formTargetUrl, Map<String,String> params, String message, String javascript){
-        StringBuilder sb = new StringBuilder();
-        sb.append("<html><body>");
-        if(javascript != null){
-            sb.append("<script type=\"text/javascript\">"+javascript+"</script>");
-        }
-        if(message == null) {
-            String FORMNAME = "ltiform";
-            sb.append("<script type=\"text/javascript\">window.onload=function(){document.forms[\""+FORMNAME+"\"].submit();}</script>");
-            sb.append("<form action=\"" + formTargetUrl + "\" method=\"post\" name=\"" + FORMNAME + "\"");
-            for (Map.Entry<String, String> entry : params.entrySet()) {
-                sb.append("<input type=\"hidden\" id=\"" + entry.getKey() + "\" name=\"" + entry.getKey() + "\" value=\"" + entry.getValue() + "\" class=\"form-control\"/>");
-            }
-            sb.append("<input type=\"submit\" value=\"Submit POST\" class=\"btn btn-primary\">")
-                    .append("</form>");
-        }else {
-            sb.append(message);
-        }
-        sb.append("</body></html>");
-        return sb.toString();
-    }
+
 
 
     @POST
@@ -208,7 +229,7 @@ public class LTIApi {
             return ltiLaunch(idToken, state, req, null);
         }catch(Exception e){
             logger.error(e.getMessage(),e);
-            return processError(req,e,"LTI_ERROR");
+            return ApiTool.processError(req,e,"LTI_ERROR");
         }
     }
 
@@ -235,7 +256,7 @@ public class LTIApi {
             return ltiLaunch(idToken, state, req, nodeId);
         }catch(Exception e){
             logger.error(e.getMessage(),e);
-            return processError(req,e,"LTI_ERROR");
+            return ApiTool.processError(req,e,"LTI_ERROR");
         }
     }
 
@@ -272,12 +293,13 @@ public class LTIApi {
             throw new IllegalStateException("nonce is invalid");
         }
 
-        Tool tool = Config.getTool(ltijwtUtil.getPlatform(), req,false);
+        Tool tool = Config.getTool(ltijwtUtil.getApplicationInfo(), req,false);
 
         /**
          * Launch validation: validates authentication response, and specific message(deeplink,....) validation
          * https://www.imsglobal.org/spec/security/v1p0/#authentication-response-validation
          */
+        logger.info("idToken:"+idToken+" state:"+state);
         tool.validate(idToken, state);
         if (!tool.isValid()) {
             logger.error(tool.getReason());
@@ -316,7 +338,7 @@ public class LTIApi {
                 jws.getBody().getAudience(),
                 ltiSessionObject.getDeploymentId()));
 
-        Map<String,Object> context = jws.getBody().get(LTIConstants.DEEP_LINK_CONTEXT, Map.class);
+        Map<String,Object> context = jws.getBody().get(LTIConstants.CONTEXT, Map.class);
         if(context != null){
             String courseId = (String)context.get("id");
             if (courseId != null) {
@@ -344,7 +366,14 @@ public class LTIApi {
                     }
                 }
             }
-            user = user+"@"+jws.getBody().getIssuer();
+            if(ltijwtUtil.getApplicationInfo().isLtiScopeUsername()){
+                user = user+"@"+jws.getBody().getIssuer();
+            }else{
+                /**
+                 * prevent an lti platform can becomes an alfresco admin
+                 */
+                user = SSOAuthorityMapper.mapAdminAuthority(user,ltijwtUtil.getApplicationInfo().getAppId());
+            }
 
             String name = jws.getBody().get(LTIConstants.LTI_NAME, String.class);
             String familyName = jws.getBody().get(LTIConstants.LTI_FAMILY_NAME, String.class);
@@ -355,11 +384,7 @@ public class LTIApi {
                     RepoTools.mapToSSOMap(user, givenName, familyName, email));
         }
 
-        /**
-         * @TODO: what happens when user is using the sames session within two browser windows
-         * maybe use list of LTISessionObject's
-         */
-        req.getSession().setAttribute(LTISessionObject.class.getName(),ltiSessionObject);
+        URI toRedirectTo = null;
 
         if(ltiMessageType.equals(LTIConstants.LTI_MESSAGE_TYPE_DEEP_LINKING)){
             if(jws.getBody().containsKey(LTIConstants.DEEP_LINKING_SETTINGS)){
@@ -371,7 +396,7 @@ public class LTIApi {
              */
 
             //return Response.status(302).location(new URI(ApplicationInfoList.getHomeRepository().getClientBaseUrl()+"/edu-sharing/components/search")).build();
-            return Response.seeOther(new URI(ApplicationInfoList.getHomeRepository().getClientBaseUrl()+"/components/search")).build();
+            toRedirectTo = new URI(ApplicationInfoList.getHomeRepository().getClientBaseUrl()+"/components/search");
             //return Response.temporaryRedirect(new URI("/edu-sharing/components/search")).build();
         }else if(ltiMessageType.equals(LTIConstants.LTI_MESSAGE_TYPE_RESOURCE_LINK)){
             //rendering stuff
@@ -394,7 +419,7 @@ public class LTIApi {
             }
             String targetLink = ApplicationInfoList.getHomeRepository().getClientBaseUrl() + "/components/render/"+ nodeId +"?closeOnBack=true";
 
-            Map<String,String> lauchPresentation = jws.getBody().get(LTIConstants.RESOURCE_LINK_LAUNCH_PRESENTATION,Map.class);
+            Map<String,String> lauchPresentation = jws.getBody().get(LTIConstants.LTI_LAUNCH_PRESENTATION,Map.class);
             if(lauchPresentation != null && lauchPresentation.containsKey("document_target")){
                 String documentTarget = lauchPresentation.get("document_target");
                 if(documentTarget != null && (documentTarget.equals("iframe") || documentTarget.equals("frame")) ){
@@ -403,31 +428,25 @@ public class LTIApi {
                 }
             }
 
-            if(ApplicationInfoList.getRepositoryInfoById(ltiSessionObject.getEduSharingAppId()).isLtiUsagesEnabled()){
-                Usage usage = usageService.getUsage(ltiSessionObject.getEduSharingAppId(), ltiSessionObject.getContextId(), nodeId, null);
-                if(usage != null){
-                    req.getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEID, nodeId);
-                }
-            }
-            return Response.seeOther(new URI(targetLink)).build();
+            ApiTool.handleUsagePermissions(nodeId, req.getSession(), ltiSessionObject.getEduSharingAppId(), ltiSessionObject.getContextId(), usageService);
+
+            toRedirectTo = new URI(targetLink);
             //return Response.temporaryRedirect(new URI(targetLink)).build();
         }else{
             String message = "can not handle message type:" + ltiMessageType;
             logger.error(message);
             throw new Exception(message);
         }
+
+        /**
+         * @TODO: what happens when user is using the sames session within two browser windows
+         * maybe use list of LTISessionObject's
+         */
+        req.getSession().setAttribute(LTISessionObject.class.getName(),ltiSessionObject);
+        return Response.seeOther(toRedirectTo).build();
+
     }
 
-    private Response processError(HttpServletRequest req, Throwable e, String errorType){
-        try {
-            return Response.seeOther(new URI(req.getScheme() +"://"
-                            + req.getServerName()
-                            + "/edu-sharing/components/messages/"+errorType+"/"+ URLEncoder.encode(e.getMessage())))
-                    .build();
-        } catch (URISyntaxException ex) {
-            return Response.status(Response.Status.OK).entity(getHTML(null,null,"error:" + ex.getMessage())).build();
-        }
-    }
 
     @GET
     @Path("/generateDeepLinkingResponse")
@@ -556,13 +575,19 @@ public class LTIApi {
             });
             if(throwable != null) throw throwable;
 
+           String serverPort = "";
+           if(!("443".equals(new Integer(req.getServerPort()).toString()) || "80".equals(new Integer(req.getServerPort()).toString()))){
+               serverPort = ":" + new Integer(req.getServerPort()).toString();
+           }
+
            return Response.seeOther(new URI(req.getScheme() +"://"
                            + req.getServerName()
+                           + serverPort
                            + "/edu-sharing/components/lti"))
                    .build();
         }catch(Throwable e){
            logger.error(e.getMessage(),e);
-           return processError(req,e,"LTI_REG_ERROR");
+           return ApiTool.processError(req,e,"LTI_REG_ERROR");
        }
 
     }
@@ -688,5 +713,63 @@ public class LTIApi {
         }
     }
 
+    @GET
+    @Path("/details/{repository}/{node}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json"})
+
+    @Operation(summary = "get a html snippet containing a rendered version of a node. this method can be called from a platform as a xhr request instead of doing the resource link flow", description = "get rendered html snippet for a node.")
+
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode="200", description="OK.", content = @Content(schema = @Schema(implementation = RenderingDetailsEntry.class))),
+                    @ApiResponse(responseCode="400", description="Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="401", description="Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="403", description="Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="404", description="Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode="500", description="Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response getDetailsSnippet(
+            @Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+            @Parameter(description = "ID of node",required=true ) @PathParam("node") String node,
+            @Parameter(description = "version of node",required=false) @QueryParam("version") String nodeVersion,
+            @Parameter(description = "Rendering displayMode", required=false) @QueryParam("displayMode") String displayMode,
+            @Parameter(description = "jwt containing the claims aud (clientId of platform), deploymentId and a token. must be signed by platform", required=true ) @QueryParam("jwt")  String jwt,
+            @Context HttpServletRequest req){
+
+        try{
+            Jws<Claims> claims = new LTIJWTUtil().validateForInitialToolSession(jwt);
+            String token = claims.getBody().get(LTIPlatformConstants.CUSTOM_CLAIM_TOKEN, String.class);
+            HashMap<String,String> tokenData = new Gson().fromJson(ApiTool.decrpt(token), HashMap.class);
+            String user = tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_USER);
+            //context is the embedding node
+            String contextId = tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_NODEID);
+            if(contextId == null){
+                throw new ValidationException("missing " +LTIConstants.CONTEXT);
+            }
+            //don't use this: it is the appId of the tool
+            //String appId = tokenData.get(LTIPlatformConstants.CUSTOM_CLAIM_APP_ID);
+            String deploymentId = claims.getBody().get(LTIConstants.LTI_DEPLOYMENT_ID,String.class);
+            String iss = claims.getBody().getIssuer();
+            String clientId = claims.getBody().getAudience();
+            String appId = new RepoTools().getAppId(iss,clientId,deploymentId);
+
+            return AuthenticationUtil.runAs(() -> {
+
+                ApiTool.handleUsagePermissions(node, req.getSession(), appId, contextId, usageService);
+
+                return new RenderingApi().getDetailsSnippet(repository,node,nodeVersion,displayMode,req);
+            },user);
+        }catch(ValidationException e){
+            logger.warn(e.getMessage(),e);
+            return Response.status(Response.Status.FORBIDDEN).entity(e.getMessage()).build();
+        }catch (Throwable t) {
+
+            logger.error(t.getMessage(), t);
+            return ErrorResponse.createResponse(t);
+        }
+        //TODO maybe destroy session
+    }
 
 }

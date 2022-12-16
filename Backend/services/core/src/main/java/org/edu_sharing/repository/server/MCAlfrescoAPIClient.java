@@ -108,7 +108,9 @@ import org.edu_sharing.alfresco.fixes.VirtualEduGroupFolderTool;
 import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.metadataset.v2.MetadataKey;
 import org.edu_sharing.metadataset.v2.MetadataSet;
+import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.exception.CCException;
 import org.edu_sharing.repository.client.rpc.ACE;
@@ -985,6 +987,20 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 					// put formated
 					addAndOverwriteDateMap.put(entry.getKey(), ValueTool.toMultivalue(formattedValues));
 				}
+				try{
+					MetadataWidget widget = mds.findWidget(CCConstants.getValidLocalName(entry.getKey()));
+					Map<String, MetadataKey> map = widget.getValuesAsMap();
+					if(!map.isEmpty()){
+						String[] keys=ValueTool.getMultivalue((String) entry.getValue());
+						String[] values=new String[keys.length];
+						for(int i=0;i<keys.length;i++)
+							values[i]=map.containsKey(keys[i]) ? map.get(keys[i]).getCaption() : keys[i];
+						addAndOverwriteDateMap.put(entry.getKey() + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(values,CCConstants.MULTIVALUE_SEPARATOR));
+					}
+
+				}catch(Throwable t){
+
+				}
 			}
 
 			for (Map.Entry<String, Object> entry : addAndOverwriteDateMap.entrySet()) {
@@ -1511,27 +1527,22 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	public void removeNode(StoreRef store, String nodeId) {
 		nodeService.deleteNode(new NodeRef(store, nodeId));
 	}
-	
+
 	public String getRootNodeId() {
 
 		String result = null;
 		try {
-			result = PropertiesHelper.getProperty("explorer-start-nodeid", MCAlfrescoAPIClient.propertyfile, PropertiesHelper.XML);
+			result = null;
 
-			if (result == null || result.trim().equals("")) {
-				result = null;
+			// access from API Client always is the HomeRepository
+			ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
 
-				// access from API Client always is the HomeRepository
-				ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
-
-				String adminUser = appInfo.getUsername();
-				String tmpUser = authenticationInfo.get(CCConstants.AUTH_USERNAME);
-				if (!adminUser.equals(tmpUser)) {
-					result = getHomeFolderID(tmpUser);
-				}else if ("admin".equals(tmpUser)) {
-					result = getCompanyHomeNodeId();
-				}
-
+			String adminUser = appInfo.getUsername();
+			String tmpUser = authenticationInfo.get(CCConstants.AUTH_USERNAME);
+			if (!adminUser.equals(tmpUser)) {
+				result = getHomeFolderID(tmpUser);
+			}else if ("admin".equals(tmpUser)) {
+				result = getCompanyHomeNodeId();
 			}
 
 		} catch (Exception e) {

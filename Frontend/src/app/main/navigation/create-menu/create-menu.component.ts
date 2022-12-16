@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { ConnectorService } from 'ngx-edu-sharing-api';
+import { ConnectorService, LtiPlatformService, Tools, Tool } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { Observable, Subject } from 'rxjs';
 import { delay, take, takeUntil } from 'rxjs/operators';
@@ -79,6 +79,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
      */
     @Input() allowBinary = true;
     @Input() scope: string;
+
     /**
      * Parent location. If null, the folder picker will be shown
      */
@@ -87,6 +88,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         this.showPicker = parent == null || this.nodeHelper.isNodeCollection(parent);
         this.updateOptions();
     }
+
     /**
      * can a folder be created
      */
@@ -108,6 +110,8 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     createConnectorType: Connector;
     cardHasOpenModals$: Observable<boolean>;
     options: OptionItem[];
+    tools: Tools;
+    createToolType: Tool;
 
     private params: Params;
     private destroyed = new Subject<void>();
@@ -135,6 +139,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         private managementDialogs: ManagementDialogsService,
         private paste: PasteService,
         private dialogs: DialogsService,
+        private ltiPlatformService: LtiPlatformService, //private paste: PasteService,
     ) {
         this.route.queryParams.subscribe((params) => {
             this.params = params;
@@ -152,6 +157,11 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             }
         });
         this.cardHasOpenModals$ = cardService.hasOpenModals.pipe(delay(0));
+
+        this.ltiPlatformService.getTools().subscribe((t) => {
+            this.tools = t;
+            this.updateOptions();
+        });
     }
 
     ngOnInit(): void {
@@ -279,6 +289,22 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                 camera.group = DefaultGroups.Create;
                 camera.priority = 20;
                 this.options.push(camera);
+            }
+
+            if (this.tools?.tools.length > 0) {
+                this.options = this.options.concat(
+                    this.tools.tools.map((tool, i) => {
+                        const option = new OptionItem(
+                            tool.name + ' (' + tool.appId + ')',
+                            'create',
+                            () => this.showCreateLtiTool(tool),
+                        );
+                        option.elementType = [ElementType.Unknown];
+                        option.group = DefaultGroups.CreateLtiTools;
+                        option.priority = i;
+                        return option;
+                    }),
+                );
             }
         }
         if (this.folder) {
@@ -463,6 +489,10 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         }
     }
 
+    async showCreateLtiTool(tool: Tool) {
+        this.createToolType = tool;
+    }
+
     private openCamera() {
         this.bridge.getCordova().getPhotoFromCamera(
             (data: any) => {
@@ -507,6 +537,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             connectorType,
         );
     }
+
     pickMaterialFromSearch() {
         UIHelper.getCommonParameters(this.route).subscribe((params) => {
             params.addToCollection = this._parent.ref.id;
@@ -515,6 +546,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             });
         });
     }
+
     async createConnector(event: any) {
         const name = event.name + '.' + event.type.filetype;
         this.createConnectorName = null;
@@ -540,6 +572,53 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                     }
                 },
             );
+    }
+
+    createLtiTool(event: any) {
+        console.log('createLtiTool called' + event + ' nodes:' + event.nodes);
+        let nodes: Node[] = event.nodes;
+        if (nodes) {
+            nodes.forEach((n) => {
+                if (event.tool.customContentOption == true) {
+                    UIHelper.openLTIResourceLink(n);
+
+                    this.onCreate.emit([n]);
+                    this.createToolType = null;
+                } else {
+                    const prop = RestHelper.createNameProperty(n.name);
+                    this.nodeService.editNodeMetadata(n.ref.id, prop).subscribe(
+                        (data: NodeWrapper) => {
+                            this.onCreate.emit([data.node]);
+                            this.createToolType = null;
+                        },
+                        (error: any) => {
+                            if (
+                                this.nodeHelper.handleNodeError(n.name, error) ===
+                                RestConstants.DUPLICATE_NODE_RESPONSE
+                            ) {
+                                this.createConnectorName = event.name;
+                            }
+                        },
+                    );
+                }
+            });
+        }
+    }
+
+    cancelLtiTool(event: any) {
+        console.log('cancelLtiTool called' + event);
+        let nodes: Node[] = event.nodes;
+        if (nodes) {
+            nodes.forEach((n) => {
+                this.nodeService.deleteNode(n.ref.id, false).subscribe(
+                    (data: NodeWrapper) => {},
+                    (error) => {
+                        this.nodeHelper.handleNodeError(n.name, error);
+                    },
+                );
+            });
+        }
+        this.createToolType = null;
     }
 
     isAllowed() {

@@ -7,10 +7,8 @@ export type CustomFieldInfo = {
     name: string;
     templateRef: TemplateRef<unknown>;
 };
-export enum PaginationStrategy {
-    InfiniteScroll,
-    Paginator,
-}
+
+export type PaginationStrategy = 'infinite-scroll' | 'paginator';
 
 type PaginationScope = Scope | 'DEFAULT';
 /**
@@ -20,9 +18,9 @@ type PaginationScope = Scope | 'DEFAULT';
 export class NodeEntriesGlobalService {
     private customFields: CustomFieldInfo[] = [];
     private paginationStrategy: { [key in PaginationScope]?: PaginationStrategy } = {
-        [Scope.WorkspaceList]: PaginationStrategy.InfiniteScroll,
-        [Scope.Search]: PaginationStrategy.InfiniteScroll,
-        DEFAULT: PaginationStrategy.InfiniteScroll,
+        [Scope.WorkspaceList]: 'infinite-scroll',
+        [Scope.Search]: 'infinite-scroll',
+        DEFAULT: 'infinite-scroll',
     };
     private paginatorSizeOptions: { [key in PaginationScope]?: number[] } = {
         DEFAULT: [25, 50, 75, 100],

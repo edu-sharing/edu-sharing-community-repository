@@ -15,12 +15,7 @@
   [matSortActive]="entriesService.sort?.active"
   [matSortDirection]="entriesService.sort?.direction"
   esInfiniteScroll
-  (scrolled)="
-    entriesGlobalService.getPaginationStrategy(entriesService.scope) ===
-    PaginationStrategy.InfiniteScroll
-      ? !entriesService.disableInfiniteScroll && loadData()
-      : null
-  "
+  (scrolled)="loadData('scroll')"
 >
   <!-- Checkbox Column -->
   <ng-container matColumnDef="select">
@@ -202,12 +197,11 @@
   *ngIf="
     !entriesService.dataSource.isLoading &&
     entriesService.dataSource.hasMore() &&
-    entriesGlobalService.getPaginationStrategy(entriesService.scope) ===
-      PaginationStrategy.InfiniteScroll
+    entriesService.paginationStrategy === 'infinite-scroll'
   "
 >
   <div class="load-more">
-    <button mat-button color="primary" (click)="loadData()">
+    <button mat-button color="primary" (click)="loadData('button')">
       <i esIcon="refresh"></i>
       <span>{{ 'LOAD_MORE' | translate }}</span>
     </button>

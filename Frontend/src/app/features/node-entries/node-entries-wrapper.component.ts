@@ -47,6 +47,7 @@ import {
     NodeEntriesDisplayType,
 } from './entries-model';
 import { NodeDataSource } from './node-data-source';
+import { NodeDataSourceRemote } from './node-data-source-remote';
 
 @Component({
     selector: 'es-node-entries-wrapper',
@@ -74,7 +75,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
      */
     @ContentChild('overlay') overlayRef: TemplateRef<any>;
     @ViewChild('nodeEntriesComponent') nodeEntriesComponentRef: NodeEntriesComponent<T>;
-    @Input() dataSource: NodeDataSource<T>;
+    @Input() dataSource: NodeDataSource<T> | NodeDataSourceRemote<T>;
     @Input() columns: ListItem[];
     @Input() configureColumns: boolean;
     @Input() checkbox = true;

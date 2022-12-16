@@ -144,15 +144,8 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
 
     @ViewChild('list') list: ListTableComponent;
     @ViewChild(NodeEntriesWrapperComponent) nodeEntries: NodeEntriesWrapperComponent<Node>;
-    readonly dataSourceSubject = new BehaviorSubject<NodeDataSource<Node>>(null);
     @Input() customOptions: CustomOptions;
-    @Input()
-    get dataSource() {
-        return this.dataSourceSubject.value;
-    }
-    set dataSource(dataSource: NodeDataSource<Node>) {
-        this.dataSourceSubject.next(dataSource);
-    }
+    @Input() dataSource: NodeDataSource<Node>;
     @Output() nodesChange = new EventEmitter<Node[]>();
     sort: ListSortConfig = {
         allowed: true,
