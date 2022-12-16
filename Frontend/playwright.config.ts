@@ -15,7 +15,7 @@ require('dotenv').config();
  */
 const ciConfig: Partial<PlaywrightTestConfig> = {
     // expect: {
-    //     timeout: 10 * 1000,
+    //     timeout: 10_000,
     // },
     /* Opt out of parallel tests on CI. */
     workers: 1,
@@ -23,7 +23,7 @@ const ciConfig: Partial<PlaywrightTestConfig> = {
     forbidOnly: true,
     retries: 2,
     use: {
-        actionTimeout: 10 * 1000,
+        actionTimeout: 10_000,
         trace: 'retain-on-failure',
         screenshot: 'only-on-failure',
         video: 'retain-on-failure',
@@ -47,13 +47,19 @@ const devConfig: Partial<PlaywrightTestConfig> = {
     // Opt out of parallel tests since timeouts are likely to be exceeded
     workers: 1,
     use: {
-        actionTimeout: 5 * 1000,
+        actionTimeout: 5_000,
         headless: false,
     },
+    retries: 0,
 };
 
 const parallelConfig: Partial<PlaywrightTestConfig> = {
-    retries: 2,
+    expect: {
+        timeout: 10_000,
+    },
+    use: {
+        actionTimeout: 10_000,
+    },
 };
 
 /**
@@ -65,7 +71,7 @@ const config: PlaywrightTestConfig = {
     testDir: './playwright/out',
     globalSetup: require.resolve('./playwright/out/global-setup'),
     /* Maximum time one test can run for. */
-    timeout: 60 * 1000,
+    timeout: 60_000,
     expect: {
         /**
          * Maximum time expect() should wait for the condition to be met. For example in `await
@@ -78,6 +84,8 @@ const config: PlaywrightTestConfig = {
     /* This causes `beforeAll` and `afterAll` hooks to be executed for each test. */
     fullyParallel: true,
     forbidOnly: false,
+    retries: readInt(process.env.E2E_TEST_RETRIES) ?? 0,
+    maxFailures: readInt(process.env.E2E_TEST_MAX_FAILURES) ?? 0,
     workers: readInt(process.env.E2E_TEST_MAX_WORKERS),
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
     reporter: [['list'], ['html']],

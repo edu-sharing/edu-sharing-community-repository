@@ -85,6 +85,10 @@ test.describe('Empty collection', () => {
         const testFile = generateTestFile();
 
         await collectionsPage.uploadFileToCurrentCollection(testFile);
+        await generalPage.expectToastMessage(
+            `1 element(s) have been added to the collection "${collectionName}" ` +
+                `and are visible for you`,
+        );
         await collectionsPage.expectToBeOnCollectionPage(collectionName);
         await collectionsPage.expectToHaveElement(testFile.name);
     });

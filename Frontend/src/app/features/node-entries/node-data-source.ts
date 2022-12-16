@@ -95,6 +95,8 @@ export class NodeDataSource<T extends Node | GenericAuthority> extends DataSourc
         return this.pagination$.value.total > this.dataStream.value?.length;
     }
 
+    // FIXME: This is somewhat dangerous because we rely on `connect` being called from outside, but
+    // this method provides a way to access data without ever calling `connect`.
     getData() {
         return this.renderData.value;
     }
