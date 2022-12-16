@@ -207,6 +207,8 @@ public class CCConstants {
 
 	public final static String CCM_TYPE_COMMENT = "{http://www.campuscontent.de/model/1.0}comment";
 
+	public final static String CCM_TYPE_COLLECTION_FEEDBACK = "{http://www.campuscontent.de/model/1.0}collection_feedback";
+
 	public final static String CCM_TYPE_MATERIAL_FEEDBACK = "{http://www.campuscontent.de/model/1.0}material_feedback";
 
 	public final static String CCM_TYPE_RATING = "{http://www.campuscontent.de/model/1.0}rating";
@@ -393,6 +395,11 @@ public class CCConstants {
 
 	public final static String CCM_PROP_COMMENT_REPLY = "{http://www.campuscontent.de/model/1.0}comment_reply";
 	public final static String CCM_PROP_COMMENT_CONTENT = "{http://www.campuscontent.de/model/1.0}comment_content";
+
+	public final static String CCM_PROP_COLLECTION_FEEDBACK_AUTHORITY = "{http://www.campuscontent.de/model/1.0}collection_feedback_authority";
+
+	public final static String CCM_PROP_COLLECTION_FEEDBACK_DATA = "{http://www.campuscontent.de/model/1.0}collection_feedback_data";
+
 
 	public final static String CCM_PROP_MATERIAL_FEEDBACK_AUTHORITY = "{http://www.campuscontent.de/model/1.0}material_feedback_authority";
 
@@ -602,6 +609,8 @@ public class CCConstants {
 	public final static String CCM_ASSOC_COMMENT = "{http://www.campuscontent.de/model/1.0}childcomment";
 
 	public final static String CCM_ASSOC_RATING = "{http://www.campuscontent.de/model/1.0}childrating";
+
+	public final static String CCM_ASSOC_COLLECTION_FEEDBACK = "{http://www.campuscontent.de/model/1.0}childcollectionfeedback";
 
 	public final static String CCM_ASSOC_MATERIAL_FEEDBACK = "{http://www.campuscontent.de/model/1.0}childmaterialfeedback";
 	/**
@@ -898,6 +907,8 @@ public class CCConstants {
 	public final static String CCM_VALUE_TOOLPERMISSION_MEDIACENTER_EDIT = "TOOLPERMISSION_MEDIACENTER_EDIT";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_HANDLESERVICE = "TOOLPERMISSION_HANDLESERVICE";
+
+	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK = "TOOLPERMISSION_COLLECTION_FEEDBACK";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_MATERIAL_FEEDBACK = "TOOLPERMISSION_MATERIAL_FEEDBACK";
 
