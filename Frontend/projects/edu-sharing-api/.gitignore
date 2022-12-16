@@ -1,6 +1,5 @@
 node_modules/
 
 # generated sources
-build/*
-!build/.gitkeep
+build/
 src/lib/api/

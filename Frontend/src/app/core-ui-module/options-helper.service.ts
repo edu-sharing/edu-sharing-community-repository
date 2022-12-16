@@ -1811,14 +1811,20 @@ export class OptionsHelperService implements OnDestroy {
         return null;
     }
 
-    private removeFromCollection(objects: Node[] | any) {
+    private removeFromCollection(nodes: Node[]) {
         observableForkJoin(
-            objects.map((o: Node | any) =>
-                this.collectionService.removeFromCollection(o.ref.id, this.data.parent.ref.id),
+            nodes.map((node: Node) =>
+                this.collectionService.removeFromCollection(node.ref.id, this.data.parent.ref.id),
             ),
         ).subscribe(
-            () => this.deleteNodes({ objects, error: false, count: objects.length }),
-            (error) => this.deleteNodes({ objects, error: true, count: objects.length }),
+            () => {
+                this.deleteNodes({ objects: nodes, error: false, count: nodes.length });
+                this.toast.toast('COLLECTIONS.REMOVED_FROM_COLLECTION');
+            },
+            (error) => {
+                this.deleteNodes({ objects: nodes, error: true, count: nodes.length });
+                this.toast.error(error);
+            },
         );
     }
 

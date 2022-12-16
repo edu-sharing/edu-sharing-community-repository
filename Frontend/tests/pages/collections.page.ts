@@ -79,9 +79,6 @@ export class CollectionsPage {
             await this.generalPage.sleep(delayEditMetadata);
         }
         await this.page.locator('[data-test="dialog-button-SAVE"]').click();
-        await this.generalPage.expectToastMessage(
-            /1 element\(s\) have been added to the collection/,
-        );
     }
 
     @testStep()
