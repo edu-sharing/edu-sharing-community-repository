@@ -513,6 +513,10 @@ public class CCConstants {
 			CCConstants.LOM_PROP_TECHNICAL_SIZE
 	);
     public static final String AUTHORITY_DELETED_USER = "DELETED_USER";
+    /**
+     * authority needed for appAuth authentication and read only tasks
+     */
+    public static final String PROXY_USER = "edu_proxy";
 
     public static String CCM_WF_STATUS_VALUE_UNCHECKED="100_unchecked";
 	public static String CCM_WF_STATUS_VALUE_TO_CHECK="200_tocheck";

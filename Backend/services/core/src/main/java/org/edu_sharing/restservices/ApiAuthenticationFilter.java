@@ -23,6 +23,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.authentication.AuthenticationFilter;
+import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.service.authentication.EduAuthentication;
 import org.edu_sharing.service.authentication.oauth2.TokenService;
 import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
@@ -165,8 +166,20 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 			httpResp.getWriter().print("Admin rights are required for this endpoint");
 			return;
 		}
+
+		/**
+		 * allow authless calls with AUTH_SINGLE_USE_NODEID by appauth
+		 */
+		boolean trustedAuth = false;
+		if(ContextManagementFilter.accessTool != null && ContextManagementFilter.accessTool.get() != null){
+			if(httpReq.getSession() != null && httpReq.getSession().getAttribute(CCConstants.AUTH_SINGLE_USE_NODEID) != null ){
+
+				trustedAuth = true;
+			}
+		}
+
 		// ignore the auth for the login
-		if(validatedAuth == null && !noAuthenticationNeeded){
+		if(validatedAuth == null && (!noAuthenticationNeeded && !trustedAuth)){
 			if(httpReq.getPathInfo().equals("/openapi.json"))
 				httpResp.setHeader("WWW-Authenticate", "BASIC realm=\""+ "Edu-Sharing Rest API" +"\"");
 			httpResp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
