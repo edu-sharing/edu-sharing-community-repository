@@ -10,9 +10,6 @@
 		<register>
 			<local>false</local>
 		</register>
-		<services>
-			<visualization>https://appserver7.metaventis.com/stat/</visualization>
-		</services>
 		<helpMenuOptions>
 			<key>ONLINE_HELP</key>
 			<icon>help_outline</icon>
