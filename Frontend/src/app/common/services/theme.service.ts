@@ -13,18 +13,25 @@ export class ThemeService {
         private materialCssVarsService: MaterialCssVarsService,
         private configService: ConfigService,
     ) {
-        let hue = 0;
-        this.configService.observeConfig().subscribe((config) => {
-            const colors = config.themeColors?.color;
-            if (colors) {
-                console.info('apply branding from config', colors);
-                colors.forEach((c) => this.setColor(c.variable, c.value));
-            } else {
-                console.info('no branding colors in config, using defaults');
-                this.setColor(Variable.Primary, '#48708e');
-                this.setColor(Variable.Accent, '#48708e');
-            }
-        });
+        this.configService.observeConfig().subscribe(
+            (config) => {
+                const colors = config.themeColors?.color;
+                if (colors) {
+                    console.info('apply branding from config', colors);
+                    colors.forEach((c) => this.setColor(c.variable, c.value));
+                } else {
+                    console.info('no branding colors in config, using defaults');
+                    this.setColor(Variable.Primary, '#48708e');
+                    this.setColor(Variable.Accent, '#48708e');
+                }
+            },
+            (error) => {
+                console.warn(
+                    'Theme service failed to observe config, no branding colors applied',
+                    error,
+                );
+            },
+        );
     }
     setColor(variable: Variable | string, color: string) {
         document.documentElement.style.setProperty('--' + variable, color);
