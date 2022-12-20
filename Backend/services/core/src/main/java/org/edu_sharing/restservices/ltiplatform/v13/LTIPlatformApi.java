@@ -939,7 +939,18 @@ public class LTIPlatformApi {
                 throw new Exception("application "+ appId + " is no tool");
             }
 
-            updateToResourceLink(nodeId,appInfo,appInfo.getLtitoolUrl());
+            String resourceLink = appInfo.getLtitoolTargetLinkUri();
+            if(resourceLink == null){
+                String redirectUrls = appInfo.getLtitoolRedirectUrls();
+                if(redirectUrls != null && !redirectUrls.trim().isEmpty()){
+                    resourceLink = redirectUrls.split(",")[0];
+                }
+            }
+            if(resourceLink == null){
+                resourceLink =appInfo.getLtitoolUrl();
+            }
+
+            updateToResourceLink(nodeId,appInfo,resourceLink);
             return Response.ok().build();
 
         } catch (DAOValidationException t) {
