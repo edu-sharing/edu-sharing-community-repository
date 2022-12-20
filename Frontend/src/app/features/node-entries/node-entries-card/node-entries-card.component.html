@@ -216,7 +216,7 @@
     <div class="card-meta">
       <div
         *ngFor="let displayPart of getVisibleColumns(); let first = first"
-        class="card-meta-row"
+        class="card-meta-row card-meta-row-{{ displayPart.name | lowercase }}"
         [class.card-meta-row-primary]="first"
       >
         <ng-container *ngIf="first">
