@@ -1,10 +1,10 @@
 $primary: var(--primary);
-$primaryMediumLight: var(--palette-primary-200);
-$primaryLight: var(--palette-primary-100);
+$primaryMediumLight: rgb(var(--palette-primary-200));
+$primaryLight: rgb(var(--palette-primary-100));
 $primaryComplementary: var(--accent);
-$primaryDark: var(--palette-primary-900);
-$textOnPrimary: #fff;
-$textOnPrimaryLight: rgba(255, 255, 255, 0.75);
-$textPrimary: #000;
+$primaryDark: rgb(var(--palette-primary-900));
+$textOnPrimary: rgb(var(--palette-foreground-text-dark));
+$textOnPrimaryLight: rgba(var(--palette-foreground-text-dark), 0.75);
+$textPrimary: rgb(var(--palette-foreground-text));
 $workspaceTopBarBackground: #383838;
 $workspaceTopBarFontColor: #fff;
