@@ -13,7 +13,7 @@
 html,
 body {
     font-family: $primaryFontFamily !important;
-    font-size: 10pt;
+    font-size: $primaryFontSize;
     -webkit-font-smoothing: antialiased;
 }
 // storybook no background
