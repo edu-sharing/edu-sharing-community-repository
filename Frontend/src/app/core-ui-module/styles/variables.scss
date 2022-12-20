@@ -83,7 +83,7 @@ $colorStatusRecommended: #acd331 !default;
 $colorStatusNeutral: #777 !default;
 $colorStatusNegative: $warning !default;
 $colorStarActive: #ba7c00 !default;
-$focusColor: var(--palette-primary-300) !default;
+$focusColor: rgb(var(--palette-primary-300)) !default;
 $placeholderColor: #767676 !default;
 $focusWidth: 2px !default;
 $cardWidth: 200px !default;
