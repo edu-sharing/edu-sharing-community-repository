@@ -9,7 +9,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import { first } from 'rxjs/operators';
-import { Node, RestConstants } from '../../../../core-module/core.module';
+import {Node, RestConstants} from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
 import { BulkBehavior, MdsComponent } from '../../mds/mds.component';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
@@ -202,7 +202,11 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges {
             this.toast.toast('WORKSPACE.EDITOR.UPDATED');
             this.onDone.emit(updatedNodes);
         } catch (error) {
-            this.handleError(error);
+            if(error?.error?.error?.endsWith(RestConstants.CONTENT_FILE_EXTENSION_VERIFICATION_EXCEPTION)) {
+                this.handleError(new UserPresentableError('MDS.ERROR_FILE_EXTENSION_VERIFICATION_EXCEPTION'));
+            } else {
+                this.handleError(error);
+            }
         } finally {
             this.isLoading = false;
         }
