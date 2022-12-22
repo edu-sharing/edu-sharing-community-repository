@@ -70,7 +70,9 @@ export class WorkspaceMetadataBlockComponent {
             this.configService,
         );
         data.createDate = new FormatDatePipe(this.translate).transform(node.createdAt);
-        data.duration = RestHelper.getDurationFormatted(node);
+        data.duration = RestHelper.getDurationFormatted(
+            node.properties[RestConstants.LOM_PROP_TECHNICAL_DURATION],
+        );
         data.author = this.toVCards(
             node.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR],
         ).join(', ');

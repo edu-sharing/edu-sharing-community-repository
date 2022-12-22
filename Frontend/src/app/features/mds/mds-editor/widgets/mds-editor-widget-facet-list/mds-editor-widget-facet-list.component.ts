@@ -24,6 +24,7 @@ export class MdsEditorWidgetFacetListComponent
     extends MdsEditorWidgetBase
     implements OnInit, OnDestroy
 {
+    readonly MAX_FACET_COUNT = 50;
     readonly valueType: ValueType = ValueType.MultiValue;
     /** Available facet values being updated from `mdsEditorInstance.suggestions$`. */
     readonly facetAggregationSubject = new BehaviorSubject<FacetAggregation>(null);
@@ -153,6 +154,9 @@ export class MdsEditorWidgetFacetListComponent
         this.facetValuesFiltered = this.facetValues.filter((v) =>
             v.label?.toLowerCase().includes(this.filter.value.toLowerCase()),
         );
+        if (this.facetValuesFiltered.length > this.MAX_FACET_COUNT) {
+            this.facetValuesFiltered = this.facetValuesFiltered.slice(0, this.MAX_FACET_COUNT);
+        }
         this.formArray = this.generateFormArray(this.facetValuesFiltered);
     }
 }

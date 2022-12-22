@@ -42,7 +42,7 @@ button {
     .mat-button {
         color: $textOnPrimary;
         &:disabled {
-            color: darken($textOnPrimary, 30%);
+            color: $textOnPrimaryLight;
         }
     }
 }

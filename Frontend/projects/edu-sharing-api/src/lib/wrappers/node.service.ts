@@ -34,6 +34,23 @@ export class NodeService {
             })
             .pipe(map((nodeEntry) => nodeEntry.node));
     }
+
+    getChildren(
+        parent: string,
+        skipCount?: number,
+        maxItems?: number,
+        filter?: string[],
+        { repository = HOME_REPOSITORY } = {},
+    ) {
+        return this.nodeV1.getChildren({
+            repository,
+            node: parent,
+            filter,
+            skipCount,
+            maxItems,
+            propertyFilter: ['-all-'],
+        });
+    }
     /**
      * return the forked childs (variants) of this node
      * @returns

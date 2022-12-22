@@ -195,10 +195,7 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 		 */
 		boolean trustedAuth = false;
 		if(ContextManagementFilter.accessTool != null && ContextManagementFilter.accessTool.get() != null){
-			if(httpReq.getSession() != null && httpReq.getSession().getAttribute(CCConstants.AUTH_SINGLE_USE_NODEID) != null ){
-
-				trustedAuth = true;
-			}
+			trustedAuth = true;
 		}
 
 		// ignore the auth for the login
