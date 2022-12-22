@@ -8,6 +8,8 @@ public class UserRender extends UserSimple {
     private String primaryAffiliation;
     private List<String> remoteRoles;
 
+    private boolean isGuest;
+
     @JsonProperty
     public String getPrimaryAffiliation() {
         return primaryAffiliation;
@@ -24,5 +26,14 @@ public class UserRender extends UserSimple {
 
     public void setRemoteRoles(List<String> remoteRoles) {
         this.remoteRoles = remoteRoles;
+    }
+
+    @JsonProperty
+    public boolean getIsGuest() {
+        return isGuest;
+    }
+
+    public void setIsGuest(boolean loginStatusCode) {
+        this.isGuest = loginStatusCode;
     }
 }

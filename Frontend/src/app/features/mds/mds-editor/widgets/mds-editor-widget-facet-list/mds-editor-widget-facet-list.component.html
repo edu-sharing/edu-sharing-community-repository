@@ -29,7 +29,9 @@
     </li>
   </ul>
   <button
-    *ngIf="(facetAggregationSubject | async)?.hasMore"
+    *ngIf="
+      (facetAggregationSubject | async)?.hasMore && facetValuesFiltered.length < MAX_FACET_COUNT
+    "
     mat-button
     color="primary"
     (click)="onLoadMore()"
