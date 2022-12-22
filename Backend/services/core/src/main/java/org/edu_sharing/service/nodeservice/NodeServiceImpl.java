@@ -902,6 +902,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				}
 
 				if (compare == 0) {
+					// cast ml text to string
 					if(prop1 instanceof MLText && prop2 instanceof MLText) {
 						prop1 = ((MLText) prop1).getDefaultValue();
 						prop2 = ((MLText) prop2).getDefaultValue();

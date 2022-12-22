@@ -89,6 +89,9 @@
           <filesets>
             <fileset>
               <directory>projects/edu-sharing-api/build</directory>
+              <includes>
+                  <include>openapi.json</include>
+              </includes>
             </fileset>
             <fileset>
               <directory>projects/edu-sharing-api/src/lib/api</directory>
