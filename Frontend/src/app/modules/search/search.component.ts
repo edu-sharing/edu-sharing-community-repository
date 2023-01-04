@@ -97,6 +97,7 @@ import {
 } from 'src/app/features/node-entries/entries-model';
 import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-entries-wrapper.component';
+import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
 
 @Component({
     selector: 'es-search',
@@ -241,6 +242,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         private temporaryStorageService: TemporaryStorageService,
         private searchField: SearchFieldService,
         private searchApi: SearchApiService,
+        private breadcrumbsService: BreadcrumbsService,
         private ngZone: NgZone,
         private loadingScreen: LoadingScreenService,
         private mainNavService: MainNavService,
@@ -252,6 +254,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     ngOnInit(): void {
         this.registerScrollHandler();
         this.registerMainNav();
+        this.breadcrumbsService.setNodePath(null);
     }
 
     ngAfterViewInit() {
