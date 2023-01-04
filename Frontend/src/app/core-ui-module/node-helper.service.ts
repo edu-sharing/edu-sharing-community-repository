@@ -757,6 +757,21 @@ export class NodeHelperService {
     }
 
     /**
+     * returns true if the nodes have different values for the given property, false if all values of this property are identical
+     */
+    hasMixedPropertyValues(nodes: Node[], prop: string) {
+        let found=null;
+        let foundAny=false;
+        for (let node of nodes) {
+            const value = node.properties[prop];
+            if(foundAny && !Helper.arrayEquals(found, value))
+                return true;
+            found = value;
+            foundAny = !!value;
+        }
+        return false;
+    }
+    /**
      * get the value for all nodes, if it is identical. Otherwise, the fallback is returned
      * @param prop
      * @param fallbackNotIdentical Fallback when they're not equaling
