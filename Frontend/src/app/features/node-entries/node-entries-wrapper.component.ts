@@ -88,6 +88,10 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @Input() dragDrop: ListDragGropConfig<T>;
     @Input() gridConfig: GridConfig;
     /**
+     * this can be set instead of calling initOptionsGenerator()
+     */
+    @Input() initConfig: ListOptionsConfig;
+    /**
      * Handle page-wide keyboard shortcuts in this node-entries instance.
      *
      * This should be set to true if this instance represents the page's main content. Only set to
@@ -187,6 +191,9 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.singleClickHint = this.singleClickHint;
         this.entriesService.disableInfiniteScroll = this.disableInfiniteScroll;
 
+        if (changes['initConfig']) {
+            this.initOptionsGenerator(this.initConfig);
+        }
         if (this.componentRef) {
             this.componentRef.instance.changeDetectorRef?.detectChanges();
         }
