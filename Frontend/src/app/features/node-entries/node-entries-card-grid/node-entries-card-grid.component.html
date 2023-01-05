@@ -88,13 +88,15 @@
       </div>
     </ng-container>
   </div>
-  <ng-container *ngIf="!entriesService.sort?.customSortingInProgress">
+  <div class="card-grid-wrapper" *ngIf="!entriesService.sort?.customSortingInProgress">
+    <ng-container *ngTemplateOutlet="scrollHelper"></ng-container>
     <div
       role="list"
-      class="card-grid"
+      class="card-grid card-grid-layout-{{ layout }}"
       #grid
       (esBorderBoxObserver)="onGridSizeChanges()"
       esInfiniteScroll
+      (scroll)="updateScrollState()"
       (scrolled)="!visibleItemsLimited && loadData('scroll')"
     >
       <ng-container *ngTemplateOutlet="globalOptions"></ng-container>
@@ -160,14 +162,15 @@
         </div>
       </ng-container>
     </div>
-  </ng-container>
+  </div>
 </ng-container>
 <ng-container
   *ngIf="
     !entriesService.dataSource.isLoading &&
     entriesService.dataSource.hasMore() &&
     !visibleItemsLimited &&
-    entriesService.paginationStrategy === 'infinite-scroll'
+    entriesService.paginationStrategy === 'infinite-scroll' &&
+    layout !== 'scroll'
   "
 >
   <div class="load-more">
@@ -209,4 +212,38 @@
     <i [esIcon]="option.icon"></i>
     <span class="label">{{ option.name | translate }}</span>
   </span>
+</ng-template>
+<ng-template #scrollHelper>
+  <ng-container *ngIf="layout === 'scroll'">
+    <div
+      class="scroll-helper-left"
+      role="presentation"
+      (click)="doScroll('left')"
+      *ngIf="scroll.left"
+    >
+      <button
+        mat-icon-button
+        color="primary"
+        class="mat-button-badge"
+        (click)="$event.stopPropagation(); doScroll('left')"
+      >
+        <i esIcon="keyboard_arrow_left" [aria]="true"></i>
+      </button>
+    </div>
+    <div
+      class="scroll-helper-right"
+      role="presentation"
+      (click)="doScroll('right')"
+      *ngIf="scroll.right"
+    >
+      <button
+        mat-icon-button
+        color="primary"
+        class="mat-button-badge"
+        (click)="$event.stopPropagation(); doScroll('right')"
+      >
+        <i esIcon="keyboard_arrow_right" [aria]="true"></i>
+      </button>
+    </div>
+  </ng-container>
 </ng-template>
