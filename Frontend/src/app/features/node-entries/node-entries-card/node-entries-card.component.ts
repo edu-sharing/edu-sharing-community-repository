@@ -19,6 +19,7 @@ import { ConfigurationService } from '../../../core-module/rest/services/configu
 import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { ClickSource, InteractionType } from '../entries-model';
+import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
 
 @Component({
     selector: 'es-node-entries-card',
@@ -42,6 +43,7 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
         public applicationRef: ApplicationRef,
         public connector: RestConnectorService,
         public configService: ConfigurationService,
+        public templatesService: NodeEntriesTemplatesService,
         private toast: Toast,
     ) {}
 
@@ -66,6 +68,11 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
     openContextmenu(event: MouseEvent | Event) {
         event.stopPropagation();
         event.preventDefault();
+        if (!this.dropdown) {
+            // Call `preventDefault()` even when there is no menu, so we can use `cdkDrag` with a
+            // start delay without being interrupted by the standard long-tap action.
+            return;
+        }
         if (event instanceof MouseEvent) {
             ({ clientX: this.dropdownLeft, clientY: this.dropdownTop } = event);
         } else {

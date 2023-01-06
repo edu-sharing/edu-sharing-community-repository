@@ -43,7 +43,8 @@ public class PropertiesHelper {
 			CLUSTER("cluster"),
 			DEFAULTS("defaults"),
 			DEFAULTS_METADATASETS("defaults/metadatasets"),
-			DEFAULTS_MAILTEMPLATES("defaults/mailtemplates");
+			DEFAULTS_MAILTEMPLATES("defaults/mailtemplates"),
+			DEFAULTS_DATABASE("defaults/database");
 
 			private final String path;
 

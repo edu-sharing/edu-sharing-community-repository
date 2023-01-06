@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.alfresco.repo.bulkimport.impl.FileUtils;
 import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -48,6 +49,8 @@ import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.edu_sharing.service.admin.model.ToolPermission;
+import org.edu_sharing.service.version.RepositoryVersionInfo;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.xcontent.ToXContent;
 import org.elasticsearch.xcontent.XContentBuilder;
@@ -95,6 +98,28 @@ public class AdminApi {
 		try {
 			AdminServiceFactory.getInstance().refreshApplicationInfo();
 			return Response.ok().build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+	@GET
+	@Path("/version")
+
+	@Operation(summary = "get detailed version information", description="detailed information about the running system version")
+
+	@ApiResponses(value = {
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = RepositoryVersionInfo.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
+	public Response getVersion(@Context HttpServletRequest req){
+		try {
+			RepositoryVersionInfo result = AdminServiceFactory.getInstance().getVersion();
+			return Response.ok().entity(result).build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}
@@ -230,7 +255,7 @@ public class AdminApi {
 				entry.setRepositoryType(appInfo.getRepositoryType());
 				entry.setSubtype(appInfo.getSubtype());
 				entry.setXml(appInfo.getXml());
-				entry.setFile(appInfo.getAppFile());
+				entry.setFile(appInfo.getAppFileName());
 				if (ApplicationInfo.TYPE_RENDERSERVICE.equals(entry.getType()) && entry.getContentUrl() != null) {
 					entry.setConfigUrl(appInfo.getContentUrl().replace("/application/esmain/index.php", "/admin"));
 				}
@@ -415,7 +440,6 @@ public class AdminApi {
 	@Path("/applications/xml")
 	@Consumes({ "multipart/form-data" })
 	@Operation(summary = "register/add an application via xml file", description = "register the xml file provided.")
-
 	@ApiResponses(value = { @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = HashMap.class))),
 			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),

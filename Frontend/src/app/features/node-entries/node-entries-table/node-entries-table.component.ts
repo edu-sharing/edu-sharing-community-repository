@@ -1,28 +1,41 @@
-import { CdkDragDrop, CdkDragExit, CdkDropList } from '@angular/cdk/drag-drop';
-import { CdkDrag } from '@angular/cdk/drag-drop/directives/drag';
 import { CdkOverlayOrigin } from '@angular/cdk/overlay';
 import {
     AfterViewInit,
     ApplicationRef,
     Component,
+    ElementRef,
     NgZone,
     OnChanges,
+    OnDestroy,
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
-import { BehaviorSubject, Observable } from 'rxjs';
+import * as rxjs from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import {
+    delay,
+    distinctUntilChanged,
+    first,
+    map,
+    shareReplay,
+    startWith,
+    takeUntil,
+} from 'rxjs/operators';
 import { Toast } from 'src/app/core-ui-module/toast';
-import { UIService, ListItem, Node } from '../../../core-module/core.module';
-import { DragCursorDirective } from '../../../shared/directives/drag-cursor.directive';
+import { ListItem, Node, UIService } from '../../../core-module/core.module';
 import { NodeEntriesService } from '../../../core-ui-module/node-entries.service';
 import { Target } from '../../../core-ui-module/option-item';
+import { DragData } from '../../../services/nodes-drag-drop.service';
 import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
-import { InteractionType, ClickSource } from '../entries-model';
+import { BorderBoxObserverDirective } from '../../../shared/directives/border-box-observer.directive';
+import { ClickSource, InteractionType } from '../entries-model';
 
 import { NodeEntriesDataType } from '../node-entries.component';
+import { NodeEntriesGlobalService } from '../node-entries-global.service';
+import { CanDrop } from '../../../shared/directives/nodes-drop-target.directive';
 
 @Component({
     selector: 'es-node-entries-table',
@@ -30,7 +43,7 @@ import { NodeEntriesDataType } from '../node-entries.component';
     styleUrls: ['./node-entries-table.component.scss'],
 })
 export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
-    implements OnChanges, AfterViewInit
+    implements OnChanges, AfterViewInit, OnDestroy
 {
     readonly InteractionType = InteractionType;
     readonly ClickSource = ClickSource;
@@ -49,28 +62,45 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     isPageSelected = new BehaviorSubject(false);
     isAllSelected = new BehaviorSubject(false);
     columnChooserVisible = false;
-    ready = false;
+    columnChooserTriggerReady = false;
     error: Observable<any>;
     pageSizeOptions = [25, 50, 100];
-    dragSource: T;
+    isDragging = false;
+
+    private readonly maximumColumnsNumber$ = new BehaviorSubject(1);
+    readonly visibleDataColumns$ = this.getVisibleDataColumns();
+    readonly visibleColumnNames$ = this.getVisibleColumnNames();
+
+    private destroyed = new Subject<void>();
 
     constructor(
         public entriesService: NodeEntriesService<T>,
+        public entriesGlobalService: NodeEntriesGlobalService,
         private applicationRef: ApplicationRef,
         private toast: Toast,
         public ui: UIService,
         private ngZone: NgZone,
-    ) {}
+        private elementRef: ElementRef<HTMLElement>,
+    ) {
+        this.registerMaximumColumnsNumber();
+    }
 
     ngAfterViewInit(): void {
-        Promise.resolve().then(() => {
-            this.ready = true;
+        void Promise.resolve().then(() => {
             this.registerSortChanges();
         });
+        this.visibleDataColumns$
+            .pipe(first(), delay(0))
+            .subscribe(() => (this.columnChooserTriggerReady = true));
     }
 
     ngOnChanges(changes: SimpleChanges): void {
         this.updateSort();
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
     }
 
     onRowContextMenu({ event, node }: { event: MouseEvent | Event; node: T }) {
@@ -132,15 +162,60 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         });
          */
     }
-    getVisibleColumns() {
-        const columns = [];
-        if (this.entriesService.checkbox) {
-            columns.push('select');
-        }
-        columns.push('icon');
-        return columns
-            .concat(this.entriesService.columns.filter((c) => c.visible).map((c) => c.name))
-            .concat(['actions']);
+
+    private registerMaximumColumnsNumber() {
+        BorderBoxObserverDirective.observeElement(this.elementRef)
+            .pipe(
+                takeUntil(this.destroyed),
+                map((box) => this.getMaximumColumnsNumber(box.width)),
+                distinctUntilChanged(),
+            )
+            .subscribe((maximumColumnsNumber) =>
+                this.ngZone.run(() => this.maximumColumnsNumber$.next(maximumColumnsNumber)),
+            );
+    }
+
+    private getMaximumColumnsNumber(tableWidth: number): number {
+        return Math.max(
+            1,
+            Math.floor(
+                // Subtract total width of always visible columns like checkboxes and icons.
+                (tableWidth - 187) /
+                    // Divide by with of data columns (including margin).
+                    126,
+            ),
+        );
+    }
+
+    private getVisibleDataColumns(): Observable<ListItem[]> {
+        return rxjs
+            .combineLatest([
+                this.maximumColumnsNumber$,
+                this.entriesService.columnsChange.pipe(startWith(void 0)),
+            ])
+            .pipe(
+                map(([maximumColumnsNumber]) => {
+                    const columns = this.entriesService.columns;
+                    return (columns ?? [])
+                        .filter((column) => column.visible)
+                        .filter((_, index) => index < maximumColumnsNumber);
+                }),
+                shareReplay(1),
+            );
+    }
+
+    private getVisibleColumnNames(): Observable<string[]> {
+        return this.visibleDataColumns$.pipe(
+            map((visibleDataColumns) => {
+                const columns = [];
+                if (this.entriesService.checkbox) {
+                    columns.push('select');
+                }
+                columns.push('icon');
+                return columns.concat(visibleDataColumns.map((c) => c.name)).concat(['actions']);
+            }),
+            shareReplay(1),
+        );
     }
 
     isSortable(column: ListItem) {
@@ -187,49 +262,41 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
          */
     }
 
-    sortPredicate = (index: number) => {
-        const currentTarget = this.entriesService.dataSource.getData()[index];
-        if (DragCursorDirective.dragState.element !== currentTarget) {
-            this.ngZone.run(() => {
-                this.dragEnter(currentTarget as Node);
-            });
-        }
-        return false;
+    canDrop = (dragData: DragData<T>): CanDrop => {
+        return this.entriesService.dragDrop.dropAllowed?.(dragData);
     };
 
-    private dragEnter = (target: Node) => {
-        const allowed = this.entriesService.dragDrop.dropAllowed?.(target, {
-            element: [this.dragSource],
-            sourceList: this.entriesService.list,
-            mode: DragCursorDirective.dragState.mode,
+    drop(dragData: DragData<Node>) {
+        this.entriesService.dragDrop.dropped(dragData.target, {
+            element: dragData.draggedNodes,
+            mode: dragData.action,
         });
-        DragCursorDirective.dragState.element = target;
-        DragCursorDirective.dragState.dropAllowed = allowed;
-    };
-
-    drop(drop: CdkDragDrop<T, any>) {
-        this.entriesService.dragDrop.dropped(DragCursorDirective.dragState.element, {
-            element: [this.dragSource],
-            sourceList: this.entriesService.list,
-            mode: DragCursorDirective.dragState.mode,
-        });
-        DragCursorDirective.dragState.element = null;
     }
 
-    dragExit(exit: CdkDragExit<T> | any) {
-        DragCursorDirective.dragState.element = null;
-    }
-
-    loadData() {
-        if (this.entriesService.dataSource.hasMore()) {
-            this.entriesService.fetchData.emit({
-                offset: this.entriesService.dataSource.getData().length,
-            });
+    getDragData(node: T): T[] {
+        const selection = this.entriesService.selection;
+        if (selection.isSelected(node)) {
+            return selection.selected;
+        } else {
+            return [node];
         }
     }
 
-    getDragState() {
-        return DragCursorDirective.dragState;
+    onDragStarted(node: T) {
+        if (!this.entriesService.selection.isSelected(node)) {
+            this.entriesService.selection.clear();
+            this.entriesService.selection.select(node);
+        }
+        this.isDragging = true;
+    }
+
+    onDragEnded() {
+        this.isDragging = false;
+    }
+
+    loadData(source: 'scroll' | 'button') {
+        // TODO: focus next item when triggered via button.
+        this.entriesService.loadMore(source);
     }
 
     async openMenu(node: T) {

@@ -1078,10 +1078,13 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 						//subQuery.append((furtherToken ? " AND( " : "(")).append("@cm\\:authorityName:").append("\"")
 						//		.append(token).append("\"").append(" OR @cm\\:authorityDisplayName:").append("\"")
 
-						subQuery.append((furtherToken ? " AND( " : "(")).append("@cm\\:authorityDisplayName:")
-								.append("\"").append(token).append("\"").
+						subQuery.append((furtherToken ? " AND( " : "("))
+								.append("@cm\\:authorityDisplayName:")
+								.append("\"").append(LuceneQueryParser.escape(token)).append("\"").
 								// boost groups so that they'll appear before users
-								append("^10");
+								append("^10 OR ")
+								.append("@ccm\\:groupEmail:")
+								.append("\"").append(LuceneQueryParser.escape(token)).append("\"");
 						subQuery.append(")");
 	
 					}
@@ -1569,7 +1572,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 		return repoClient.getPermissions(nodeId);
 	}
 	private boolean isAdminOrSystem(){
-		return Arrays.asList(AuthenticationUtil.SYSTEM_USER_NAME,ApplicationInfoList.getHomeRepository().getUsername()).contains(AuthenticationUtil.getFullyAuthenticatedUser());
+		return Arrays.asList(AuthenticationUtil.SYSTEM_USER_NAME,ApplicationInfoList.getHomeRepository().getUsername()).contains(AuthenticationUtil.getFullyAuthenticatedUser()) || AuthenticationUtil.isRunAsUserTheSystemUser();
 	}
 
 	@Override

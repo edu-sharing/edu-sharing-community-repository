@@ -4,8 +4,10 @@ import {
     Component,
     EventEmitter,
     Input,
+    OnChanges,
     OnInit,
     Output,
+    SimpleChanges,
 } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import {
@@ -14,10 +16,11 @@ import {
     Node,
     NodesRightMode,
     RestConstants,
+    RestHelper,
     SearchRequestCriteria,
 } from '../../../core-module/core.module';
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import { RelationData, RelationService, UserService } from 'ngx-edu-sharing-api';
+import { RelationData, RelationService, UserService, NodeService } from 'ngx-edu-sharing-api';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
@@ -37,36 +40,19 @@ import { first } from 'rxjs/operators';
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NodeRelationManagerComponent implements OnInit {
+export class NodeRelationManagerComponent implements OnInit, OnChanges {
     readonly Relations = Object.values(Relations);
     readonly RelationsInverted = {
         [Relations.isBasedOn]: 'isBasisFor',
         [Relations.isPartOf]: 'hasPart',
         [Relations.references]: 'references',
     };
+    @Input() nodes: UniversalNode[];
     source: UniversalNode;
-    _nodes: UniversalNode[];
     relations: RelationData[];
     addRelations: RelationData[] = [];
     deleteRelations: RelationData[] = [];
     swapRelation: boolean;
-    @Input() set nodes(nodes: Node[]) {
-        console.log(nodes);
-        if (nodes?.length > 1) {
-            throw new Error('relation manager does currently not support bulk features');
-        }
-        this._nodes = nodes;
-        this.source = nodes[0];
-        this.relationService.getRelations(this._nodes[0].ref.id).subscribe(
-            (relations) => {
-                this.relations = relations.relations;
-                this.loading = false;
-            },
-            (e) => {
-                this.close.emit(false);
-            },
-        );
-    }
     @Output() close = new EventEmitter<boolean>();
 
     readonly form = new FormGroup({
@@ -84,6 +70,7 @@ export class NodeRelationManagerComponent implements OnInit {
     constructor(
         private relationService: RelationService,
         private nodeHelper: NodeHelperService,
+        private nodeService: NodeService,
         private userService: UserService,
         private toast: Toast,
         private bridgeService: BridgeService,
@@ -110,7 +97,7 @@ export class NodeRelationManagerComponent implements OnInit {
         return [
             {
                 property: 'sourceNode',
-                values: [this._nodes[0].ref.id],
+                values: [this.nodes[0].ref.id],
             },
         ];
     }
@@ -222,7 +209,7 @@ export class NodeRelationManagerComponent implements OnInit {
     }
 
     isPublishedCopy() {
-        return !!this._nodes[0].properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]?.[0];
+        return !!this.nodes[0].properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]?.[0];
     }
 
     isSwappable() {
@@ -241,8 +228,8 @@ export class NodeRelationManagerComponent implements OnInit {
     private cancel() {
         if (this.hasChanges()) {
             this.toast.showModalDialog(
-                'MDS.CONFIRM_DISCARD_TITLE',
-                'MDS.CONFIRM_DISCARD_MESSAGE',
+                'DIALOG.CONFIRM_DISCARD_TITLE',
+                'DIALOG.CONFIRM_DISCARD_MESSAGE',
                 [
                     new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => {
                         this.toast.closeModalDialog();
@@ -261,6 +248,38 @@ export class NodeRelationManagerComponent implements OnInit {
 
     private hasChanges() {
         return this.addRelations?.length || this.deleteRelations?.length;
+    }
+
+    async ngOnChanges(changes: SimpleChanges) {
+        if (changes.nodes) {
+            if (this.nodes?.length > 1) {
+                throw new Error('relation manager does currently not support bulk features');
+            }
+            // published original: we now need to switch to the original id!
+            if (this.nodes[0].properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]) {
+                // switch to original node id!
+                this.nodes = await forkJoin(
+                    this.nodes.map((n) =>
+                        this.nodeService.getNode(
+                            RestConstants.HOME_REPOSITORY,
+                            RestHelper.removeSpacesStoreRef(
+                                n.properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL],
+                            ),
+                        ),
+                    ),
+                ).toPromise();
+            }
+            this.source = this.nodes[0];
+            this.relationService.getRelations(this.nodes[0].ref.id).subscribe(
+                (relations) => {
+                    this.relations = relations.relations;
+                    this.loading = false;
+                },
+                (e) => {
+                    this.close.emit(false);
+                },
+            );
+        }
     }
 }
 export enum Relations {

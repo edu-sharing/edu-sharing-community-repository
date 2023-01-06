@@ -2,7 +2,7 @@ import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@
 import { FormControl } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete/autocomplete';
 import { forkJoin, Observable, of } from 'rxjs';
-import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
+import { catchError, debounceTime, map, startWith, switchMap } from 'rxjs/operators';
 import {
     Authority,
     AuthorityProfile,
@@ -16,7 +16,7 @@ import {
     User,
 } from '../../../core-module/core.module';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
-import { PermissionNamePipe } from '../../../core-ui-module/pipes/permission-name.pipe';
+import { PermissionNamePipe } from '../../pipes/permission-name.pipe';
 import { SuggestItem } from '../../../common/ui/autocomplete/autocomplete.component';
 
 interface SuggestionGroup {
@@ -28,6 +28,7 @@ interface SuggestionGroup {
     selector: 'es-authority-search-input',
     templateUrl: 'authority-search-input.component.html',
     styleUrls: ['authority-search-input.component.scss'],
+    providers: [PermissionNamePipe],
 })
 export class AuthoritySearchInputComponent {
     @ViewChild('inputElement') inputElement: ElementRef<HTMLInputElement>;
@@ -145,6 +146,11 @@ export class AuthoritySearchInputComponent {
                         label: 'WORKSPACE.INVITE_LOCAL_RESULTS',
                         values: this.convertData(authorities),
                     })),
+                    catchError((err) =>
+                        of({
+                            values: [],
+                        } as SuggestionGroup),
+                    ),
                 ),
         );
         if (this.globalSearchAllowed) {
@@ -216,13 +222,44 @@ export class AuthoritySearchInputComponent {
         );
     }
     private getOrganizationsSuggestions(inputValue: string): Observable<SuggestionGroup[]> {
-        return this.organization.getOrganizations(inputValue).pipe(
-            map(({ organizations }) => [
-                {
-                    label: 'WORKSPACE.INVITE_LOCAL_RESULTS',
-                    values: this.convertData(organizations),
-                },
-            ]),
+        const observables: Observable<SuggestionGroup>[] = [];
+        observables.push(
+            this.organization.getOrganizations(inputValue).pipe(
+                map(({ organizations }) => {
+                    return {
+                        label: 'WORKSPACE.INVITE_LOCAL_RESULTS',
+                        values: this.convertData(organizations),
+                    };
+                }),
+            ),
+        );
+        if (this.globalSearchAllowed) {
+            observables.push(
+                this.organization.getOrganizations(inputValue, false).pipe(
+                    map(({ organizations }) => {
+                        return {
+                            label: 'WORKSPACE.INVITE_GLOBAL_RESULTS',
+                            values: this.convertData(organizations),
+                        };
+                    }),
+                ),
+            );
+        }
+        return forkJoin(observables).pipe(
+            // Filter double entries from global results
+            map((suggestionGroups) => {
+                if (suggestionGroups.length === 2) {
+                    suggestionGroups[1].values = suggestionGroups[1].values.filter(
+                        (globalSuggestion) =>
+                            suggestionGroups[0].values.every(
+                                (localSuggestion) => localSuggestion.id !== globalSuggestion.id,
+                            ),
+                    );
+                }
+                return suggestionGroups;
+            }),
+            // Filter empty lists
+            map((suggestionGroups) => suggestionGroups.filter((group) => group.values.length > 0)),
         );
     }
 

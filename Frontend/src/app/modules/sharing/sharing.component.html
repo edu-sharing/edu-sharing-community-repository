@@ -8,7 +8,7 @@
       [ngClass]="{ 'details-opacity': !(!sharingInfo.password || sharingInfo.passwordMatches) }"
     >
       <div class="details-type">
-        <img class="icon" [src]="sharingInfo.node.iconURL" />
+        <img class="icon" [src]="sharingInfo.node | esNodeIcon" />
         <div>
           <div class="name">{{ sharingInfo.node.name }}</div>
           <div class="subobjects" *ngIf="childCount() > 0">
@@ -65,20 +65,16 @@
           </button>
         </div>
         <div class="folder">
-          <es-listTable
-            [nodes]="childs"
+          <es-node-entries-wrapper
+            #nodeEntries
+            [dataSource]="nodesDataSource"
             [columns]="columns"
-            [hasIcon]="true"
-            [hasCheckbox]="false"
-            [reorderColumns]="false"
-            [sortBy]="sort.sortBy"
-            [loadRepositories]="false"
-            [sortAscending]="sort.sortAscending"
-            [isClickable]="false"
-            [isLoading]="loadingChildren"
-            [customOptions]="options"
-            (sortListener)="changeSort($event)"
-          ></es-listTable>
+            [checkbox]="false"
+            [sort]="sort"
+            [elementInteractionType]="InteractionType.None"
+            [displayType]="NodeEntriesDisplayType.Table"
+            (sortChange)="changeSort($event)"
+          ></es-node-entries-wrapper>
         </div>
       </div>
       <div class="download">
@@ -86,9 +82,9 @@
           <i class="material-icons">cloud_download</i
           >{{
             'SHARING.' +
-              (sharingInfo.node.mediatype == 'link'
+              (sharingInfo.node.mediatype === 'link'
                 ? 'LINK'
-                : sharingInfo.node.isDirectory && childs.length > 1
+                : sharingInfo.node.isDirectory && nodesDataSource.getData()?.length > 1
                 ? 'DOWNLOAD_ZIP'
                 : 'DOWNLOAD') | translate
           }}

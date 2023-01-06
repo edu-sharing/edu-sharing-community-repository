@@ -124,7 +124,11 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 				"/lti/v13/oidc/login_initiations",
 				"/lti/v13/lti13",
 				"/lti/v13/registration/dynamic",
-				"/lti/v13/jwks"});
+				"/lti/v13/jwks",
+				"/lti/v13/details",
+				"/ltiplatform/v13/openid-configuration",
+				"/ltiplatform/v13/openid-registration",
+				"/ltiplatform/v13/content"});
 		List<String> ADMIN_ENDPOINTS=Arrays.asList(new String[]{"/admin", "/bulk","/lti/v13/registration/static","/lti/v13/registration/url"});
 		List<String> DISABLED_ENDPOINTS=new ArrayList<>();
 
@@ -191,10 +195,7 @@ public class ApiAuthenticationFilter implements javax.servlet.Filter {
 		 */
 		boolean trustedAuth = false;
 		if(ContextManagementFilter.accessTool != null && ContextManagementFilter.accessTool.get() != null){
-			if(httpReq.getSession() != null && httpReq.getSession().getAttribute(CCConstants.AUTH_SINGLE_USE_NODEID) != null ){
-
-				trustedAuth = true;
-			}
+			trustedAuth = true;
 		}
 
 		// ignore the auth for the login

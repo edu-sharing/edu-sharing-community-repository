@@ -109,7 +109,9 @@ import org.edu_sharing.alfresco.fixes.VirtualEduGroupFolderTool;
 import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.edu_sharing.metadataset.v2.MetadataKey;
 import org.edu_sharing.metadataset.v2.MetadataSet;
+import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.exception.CCException;
 import org.edu_sharing.repository.client.rpc.ACE;
@@ -952,7 +954,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 			}
 		}
 
-		boolean hasMds = nodeType.equals(CCConstants.CCM_TYPE_IO) || nodeType.equals(CCConstants.CCM_TYPE_COMMENT) || nodeType.equals(CCConstants.CCM_TYPE_COLLECTION_FEEDBACK) || nodeType.equals(CCConstants.CCM_TYPE_MAP) || nodeType.equals(CCConstants.CM_TYPE_FOLDER);
+		boolean hasMds = nodeType.equals(CCConstants.CCM_TYPE_IO) || nodeType.equals(CCConstants.CCM_TYPE_COMMENT) || nodeType.equals(CCConstants.CCM_TYPE_MATERIAL_FEEDBACK) || nodeType.equals(CCConstants.CCM_TYPE_MAP) || nodeType.equals(CCConstants.CM_TYPE_FOLDER);
 		String mdsId=CCConstants.metadatasetdefault_id;
 		MetadataSet mds = null;
 		/**
@@ -985,6 +987,20 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 					addAndOverwriteDateMap.put(entry.getKey() + CCConstants.LONG_DATE_SUFFIX, entry.getValue());
 					// put formated
 					addAndOverwriteDateMap.put(entry.getKey(), ValueTool.toMultivalue(formattedValues));
+				}
+				try{
+					MetadataWidget widget = mds.findWidget(CCConstants.getValidLocalName(entry.getKey()));
+					Map<String, MetadataKey> map = widget.getValuesAsMap();
+					if(!map.isEmpty()){
+						String[] keys=ValueTool.getMultivalue((String) entry.getValue());
+						String[] values=new String[keys.length];
+						for(int i=0;i<keys.length;i++)
+							values[i]=map.containsKey(keys[i]) ? map.get(keys[i]).getCaption() : keys[i];
+						addAndOverwriteDateMap.put(entry.getKey() + CCConstants.DISPLAYNAME_SUFFIX, StringUtils.join(values,CCConstants.MULTIVALUE_SEPARATOR));
+					}
+
+				}catch(Throwable t){
+
 				}
 			}
 
@@ -1512,27 +1528,22 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 	public void removeNode(StoreRef store, String nodeId) {
 		nodeService.deleteNode(new NodeRef(store, nodeId));
 	}
-	
+
 	public String getRootNodeId() {
 
 		String result = null;
 		try {
-			result = PropertiesHelper.getProperty("explorer-start-nodeid", MCAlfrescoAPIClient.propertyfile, PropertiesHelper.XML);
+			result = null;
 
-			if (result == null || result.trim().equals("")) {
-				result = null;
+			// access from API Client always is the HomeRepository
+			ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
 
-				// access from API Client always is the HomeRepository
-				ApplicationInfo appInfo = ApplicationInfoList.getHomeRepository();
-
-				String adminUser = appInfo.getUsername();
-				String tmpUser = authenticationInfo.get(CCConstants.AUTH_USERNAME);
-				if (!adminUser.equals(tmpUser)) {
-					result = getHomeFolderID(tmpUser);
-				}else if ("admin".equals(tmpUser)) {
-					result = getCompanyHomeNodeId();
-				}
-
+			String adminUser = appInfo.getUsername();
+			String tmpUser = authenticationInfo.get(CCConstants.AUTH_USERNAME);
+			if (!adminUser.equals(tmpUser)) {
+				result = getHomeFolderID(tmpUser);
+			}else if ("admin".equals(tmpUser)) {
+				result = getCompanyHomeNodeId();
 			}
 
 		} catch (Exception e) {
@@ -2180,7 +2191,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
 	}
 	
-	public Map<String, Serializable> transformQNameKeyToString(Map<QName, Serializable> props) {
+	public static Map<String, Serializable> transformQNameKeyToString(Map<QName, Serializable> props) {
 		Map<String, Serializable> result = new HashMap<String, Serializable>();
 		for (Map.Entry<QName, Serializable> entry : props.entrySet()) {
 			result.put(entry.getKey().toString(), entry.getValue());
@@ -3525,43 +3536,31 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 				(String) nodeService.getProperty(
 						new NodeRef(storeRef, nodeId),
 						QName.createQName(CCConstants.CM_NAME));
-		for(int i=0;i<=11;i++) {
-			String name=originalName;
-			if(i>0) {
-				name = NodeServiceHelper.renameNode(name, i);
-				if(i>10) {
-					logger.info("Node " + name +" already exists, falling back to uuid " + nodeId);
-					// fallback
-					name = nodeId;
-				}
-			}
-			if(nodeService.getChildByName(new NodeRef(storeRef, newParentId), ContentModel.ASSOC_CONTAINS, name) != null ||
-					nodeService.getChildByName(NodeServiceHelper.getPrimaryParent(new NodeRef(storeRef, nodeId)), ContentModel.ASSOC_CONTAINS, name) != null) {
-				logger.debug("Node " + name +" already exists, retrying...");
-				continue;
-			}
-			if(i>0) {
-				nodeService.setProperty(new NodeRef(storeRef, nodeId),
-						QName.createQName(CCConstants.CM_NAME),name);
-			}
-			try {
-				nodeService.moveNode(
-						new NodeRef(storeRef, nodeId),
-						new NodeRef(storeRef, newParentId),
-						QName.createQName(childAssocType),
-						QName.createQName(CCConstants.NAMESPACE_CCM, name));
 
-				// remove from cache so that the new primary parent will be refreshed
-				Cache repCache = new RepositoryCache();
-				repCache.remove(nodeId);
-				return;
-			}catch(DuplicateChildNodeNameException e){
-				logger.warn("Node renaming to " + name + " throwed " + e.getName());
-				// let the loop run
-			}
+		nodeService.setProperty(new NodeRef(storeRef, nodeId), QName.createQName(CCConstants.CM_NAME), UUID.randomUUID().toString());
+		nodeService.moveNode(
+				new NodeRef(storeRef, nodeId),
+				new NodeRef(storeRef, newParentId),
+				QName.createQName(childAssocType),
+				QName.createQName(CCConstants.NAMESPACE_CCM, nodeId));
+
+		String name = originalName;
+		int i = 1;
+		int maxRetries = 10;
+		while (nodeService.getChildByName(new NodeRef(storeRef, newParentId), ContentModel.ASSOC_CONTAINS, name) != null && i <= maxRetries) {
+			name = NodeServiceHelper.renameNode(originalName, i++);
 		}
-		throw new RuntimeException("Could not move node, creating new node at location " +newParentId + " failed, renaming failed for " + nodeId);
+
+		boolean canApplyName = i <= maxRetries;
+		if (canApplyName) {
+			nodeService.setProperty(new NodeRef(storeRef, nodeId), QName.createQName(CCConstants.CM_NAME), name);
+		}
+
+		// remove from cache so that the new primary parent will be refreshed
+		Cache repCache = new RepositoryCache();
+		repCache.remove(nodeId);
 	}
+
 
 	/**
 	 * @param nodeId : the id of the node to copy

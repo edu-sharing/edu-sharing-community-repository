@@ -5,13 +5,6 @@
   [options]="options"
   position="right"
 ></es-dropdown>
-<es-workspace-add-folder
-  *ngIf="addFolderName != null"
-  [folder]="addFolderName"
-  [parent]="getParent()"
-  (onCancel)="addFolderName = null"
-  (onFolderAdded)="addFolder($event)"
-></es-workspace-add-folder>
 <!-- TODO: include via overlays -->
 <!-- <es-workspace-management #management
         [parent]="getParent()"
@@ -28,6 +21,15 @@
   (onCancel)="createConnectorName = null"
   (onCreate)="createConnector($event)"
 ></es-workspace-create-connector>
+
+<es-create-ltitool
+  *ngIf="createToolType != null"
+  [tool]="createToolType"
+  [parent]="_parent"
+  (onCancel)="cancelLtiTool($event)"
+  (onCreate)="createLtiTool($event)"
+>
+</es-create-ltitool>
 
 <div
   *ngIf="!(cardHasOpenModals$ | async)"

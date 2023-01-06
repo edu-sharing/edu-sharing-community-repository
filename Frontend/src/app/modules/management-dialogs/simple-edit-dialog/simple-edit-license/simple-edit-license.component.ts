@@ -27,7 +27,6 @@ import { OPEN_URL_MODE } from '../../../../core-module/ui/ui-constants';
 import { BridgeService } from '../../../../core-bridge-module/bridge.service';
 import { forkJoin, Observable, Observer } from 'rxjs';
 import { MatButtonToggleGroup } from '@angular/material/button-toggle';
-import { WorkspaceShareComponent } from '../../../workspace/share/share.component';
 import { Helper } from '../../../../core-module/rest/helper';
 import { CollectionChooserComponent } from '../../../../core-ui-module/components/collection-chooser/collection-chooser.component';
 import { VCard } from '../../../../core-module/ui/VCard';

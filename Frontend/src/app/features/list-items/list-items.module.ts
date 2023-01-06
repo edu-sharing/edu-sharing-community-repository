@@ -23,6 +23,6 @@ import { NodeSourcePipe } from './node-source.pipe';
         FormatDurationPipe,
     ],
     imports: [SharedModule],
-    exports: [ListBaseComponent, ListTextComponent],
+    exports: [ListBaseComponent, ListTextComponent, FormatDurationPipe],
 })
 export class ListItemsModule {}

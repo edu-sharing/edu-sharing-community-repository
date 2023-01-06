@@ -12,6 +12,12 @@ export class NodeTools {
     static createSpacesStoreRef(id: string) {
         return NodeConstants.SPACES_STORE_REF + id;
     }
+    static removeSpacesStoreRef(id: string) {
+        if (id.startsWith(NodeConstants.SPACES_STORE_REF)) {
+            return id.substr(NodeConstants.SPACES_STORE_REF.length);
+        }
+        return id;
+    }
 }
 @Injectable({
     providedIn: 'root',
@@ -28,16 +34,40 @@ export class NodeService {
             })
             .pipe(map((nodeEntry) => nodeEntry.node));
     }
+
+    getChildren(
+        parent: string,
+        skipCount?: number,
+        maxItems?: number,
+        filter?: string[],
+        { repository = HOME_REPOSITORY } = {},
+    ) {
+        return this.nodeV1.getChildren({
+            repository,
+            node: parent,
+            filter,
+            skipCount,
+            maxItems,
+            propertyFilter: ['-all-'],
+        });
+    }
     /**
      * return the forked childs (variants) of this node
      * @returns
      */
-    getForkedChilds(id: string, { repository = HOME_REPOSITORY } = {}) {
+    getForkedChilds(node: Node, { repository = HOME_REPOSITORY } = {}) {
+        let id = node.ref.id;
+        // if it's a published copy, use the original node id
+        // since variants are always forked from their
+        if (node.properties?.['ccm:published_original']) {
+            id = NodeTools.removeSpacesStoreRef(node.properties['ccm:published_original'][0]);
+        }
         return this.searchV1.searchByProperty({
             repository,
             comparator: ['='],
             contentType: 'FILES',
             property: ['ccm:forked_origin'],
+            propertyFilter: ['-all-'],
             value: [NodeTools.createSpacesStoreRef(id)],
         });
     }
@@ -45,6 +75,13 @@ export class NodeService {
         return this.nodeV1.getPublishedCopies({
             repository,
             node: id,
+        });
+    }
+    copyMetadata(node: string, from: string, { repository = HOME_REPOSITORY }) {
+        return this.nodeV1.copyMetadata({
+            node,
+            from,
+            repository,
         });
     }
 

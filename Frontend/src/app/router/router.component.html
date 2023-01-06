@@ -3,10 +3,11 @@
 <es-modal-dialog-toast></es-modal-dialog-toast>
 <es-global-container></es-global-container>
 <es-cookie-info #cookie></es-cookie-info>
-<es-accessibility #accessibility></es-accessibility>
 <!-- central access to all dialogs for actions -->
 <es-workspace-management #management></es-workspace-management>
 <es-scroll-to-top-button
   role="navigation"
   [attr.aria-label]="'GO_TO_TOP' | translate"
 ></es-scroll-to-top-button>
+<!-- custom component to override or inject global templates or html -->
+<es-custom-global-extensions></es-custom-global-extensions>

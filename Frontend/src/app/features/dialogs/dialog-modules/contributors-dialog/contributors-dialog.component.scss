@@ -1,0 +1,30 @@
+@import '../../../../core-ui-module/styles/variables';
+@import '../../../../shared/components/card/variables';
+
+.lifecycleHeading,
+.metadataHeading {
+    font-weight: bold;
+    color: $textLight;
+}
+
+.role {
+    color: $textLight;
+}
+
+.group {
+    padding-bottom: 10px;
+}
+
+.metadataHeading {
+    padding-top: 30px;
+}
+
+.btnAdd {
+    margin-top: 10px;
+    float: none !important;
+    display: inline-flex;
+    align-items: center;
+    .material-icons {
+        top: 0;
+    }
+}

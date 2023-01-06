@@ -28,8 +28,10 @@
           *ngTemplateOutlet="noPermissionsRef; context: { node: suggestion }"
         ></ng-container>
         <ng-container *ngIf="!noPermissionsRef">
-          <i esIcon="security"></i>
-          <span>{{ 'NODE_SEARCH_SELECTOR.NO_PERMISSIONS' | translate }}</span>
+          <i
+            esIcon="security"
+            matTooltip="{{ 'NODE_SEARCH_SELECTOR.NO_PERMISSIONS' | translate }}"
+          ></i>
         </ng-container>
       </div>
       <es-node-row [node]="suggestion" [columns]="columns"></es-node-row>
@@ -42,7 +44,7 @@
     <i [esIcon]="'keyboard_arrow_' + (showMds ? 'up' : 'down')"></i>
   </button>
 </div>
-<div [@switchDialog]="showMds">
+<div [@switchDialog]="showMds" class="mds-wrapper">
   <es-mds-editor-wrapper
     #mds
     [embedded]="true"

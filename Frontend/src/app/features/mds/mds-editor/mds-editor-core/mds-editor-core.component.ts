@@ -14,7 +14,7 @@ import { EditorMode } from '../../types/mds-types';
 })
 export class MdsEditorCoreComponent {
     /** Reference to the card component it is embedded in (if any). */
-    @Input('card') card: CardComponent;
+    @Input() card: CardComponent;
     @ViewChildren('view') viewRef: QueryList<MdsEditorViewComponent>;
 
     views: MdsView[];

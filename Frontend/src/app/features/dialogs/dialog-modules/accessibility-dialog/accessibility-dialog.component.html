@@ -1,0 +1,89 @@
+<ng-container *ngIf="settings">
+  <p>{{ 'ACCESSIBILITY.ENTRY_MESSAGE' | translate }}</p>
+
+  <label for="contrastMode">{{ 'ACCESSIBILITY.CONTRAST_MODE_TITLE' | translate }}</label>
+  <p id="contrastModeDescription">{{ 'ACCESSIBILITY.CONTRAST_MODE_MESSAGE' | translate }}</p>
+  <mat-radio-group
+    id="contrastMode"
+    [(ngModel)]="settings.contrastMode"
+    aria-describedby="contrastModeDescription"
+    [disabled]="settings.contrastMode === null"
+    (change)="updateSettings()"
+  >
+    <mat-radio-button [value]="false">{{
+      'ACCESSIBILITY.CONTRAST_MODE_OPTION.STANDARD' | translate
+    }}</mat-radio-button>
+    <mat-radio-button [value]="true">{{
+      'ACCESSIBILITY.CONTRAST_MODE_OPTION.CONTRAST' | translate
+    }}</mat-radio-button>
+  </mat-radio-group>
+
+  <label for="indicatorIcons">{{ 'ACCESSIBILITY.INDICATOR_ICONS_TITLE' | translate }}</label>
+  <p id="contrastModeDescription">{{ 'ACCESSIBILITY.INDICATOR_ICONS_MESSAGE' | translate }}</p>
+  <mat-radio-group
+    id="indicatorIcons"
+    [(ngModel)]="settings.indicatorIcons"
+    aria-describedby="contrastModeDescription"
+    [disabled]="settings.indicatorIcons === null"
+    (change)="updateSettings()"
+  >
+    <mat-radio-button [value]="false">{{
+      'ACCESSIBILITY.INDICATOR_ICONS_OPTION.TEXT_ONLY' | translate
+    }}</mat-radio-button>
+    <mat-radio-button [value]="true">{{
+      'ACCESSIBILITY.INDICATOR_ICONS_OPTION.ICONS' | translate
+    }}</mat-radio-button>
+  </mat-radio-group>
+
+  <label for="toastMode">{{ 'ACCESSIBILITY.TOAST_TITLE' | translate }}</label>
+  <p id="toastModeDescription">{{ 'ACCESSIBILITY.TOAST_MESSAGE' | translate }}</p>
+  <mat-radio-group
+    id="toastMode"
+    [(ngModel)]="settings.toastMode"
+    aria-describedby="toastModeDescription"
+    [disabled]="settings.toastMode === null"
+    (change)="updateSettings()"
+  >
+    <mat-radio-button value="important">{{
+      'ACCESSIBILITY.TOAST_TYPE.IMPORTANT' | translate
+    }}</mat-radio-button>
+    <mat-radio-button value="all">{{
+      'ACCESSIBILITY.TOAST_TYPE.ALL' | translate
+    }}</mat-radio-button>
+  </mat-radio-group>
+
+  <label for="toastDuration">{{ 'ACCESSIBILITY.TOAST_DURATION_TITLE' | translate }}</label>
+  <p id="toastDurationDescription">{{ 'ACCESSIBILITY.TOAST_DURATION_MESSAGE' | translate }}</p>
+  <mat-radio-group
+    id="toastDuration"
+    [(ngModel)]="settings.toastDuration"
+    aria-describedby="toastDurationDescription"
+    [disabled]="settings.toastDuration === null"
+    (change)="updateSettings()"
+  >
+    <mat-radio-button [value]="TOAST_DURATION.Seconds_3">{{
+      'ACCESSIBILITY.TOAST_DURATION_SECONDS' | translate: { seconds: 3 }
+    }}</mat-radio-button>
+    <mat-radio-button [value]="TOAST_DURATION.Seconds_5">{{
+      'ACCESSIBILITY.TOAST_DURATION_SECONDS' | translate: { seconds: 5 }
+    }}</mat-radio-button>
+    <mat-radio-button [value]="TOAST_DURATION.Seconds_8">{{
+      'ACCESSIBILITY.TOAST_DURATION_SECONDS' | translate: { seconds: 8 }
+    }}</mat-radio-button>
+    <mat-radio-button [value]="TOAST_DURATION.Seconds_15">{{
+      'ACCESSIBILITY.TOAST_DURATION_SECONDS' | translate: { seconds: 15 }
+    }}</mat-radio-button>
+    <mat-radio-button [value]="TOAST_DURATION.Seconds_30">{{
+      'ACCESSIBILITY.TOAST_DURATION_SECONDS' | translate: { seconds: 30 }
+    }}</mat-radio-button>
+    <mat-radio-button [value]="TOAST_DURATION.Seconds_60">{{
+      'ACCESSIBILITY.TOAST_DURATION_SECONDS' | translate: { seconds: 60 }
+    }}</mat-radio-button>
+    <!-- <mat-radio-button [value]="TOAST_DURATION.Infinite">{{
+    'ACCESSIBILITY.TOAST_DURATION_INFINITE' | translate
+  }}</mat-radio-button> -->
+  </mat-radio-group>
+  <p *ngIf="settings.toastDuration == TOAST_DURATION.Infinite">
+    {{ 'ACCESSIBILITY.TOAST_DURATION_INFINITE_INFO' | translate }}
+  </p>
+</ng-container>

@@ -68,6 +68,7 @@ public class SitemapServlet extends HttpServlet{
         SearchToken token=new SearchToken();
         token.setContentType(SearchService.ContentType.FILES);
         token.setMaxResult(0);
+        token.setExcludes(Arrays.asList(new String[]{"preview"}));
         SearchResultNodeRef resultFiles = search.search(getMds(request), MetadataSet.DEFAULT_CLIENT_QUERY, getSearchAllCriterias(), token);
         token.setContentType(SearchService.ContentType.COLLECTIONS);
         SearchResultNodeRef resultCollections = search.search(getMds(request), MetadataSet.DEFAULT_CLIENT_QUERY, getSearchAllCriterias(), token);
@@ -108,14 +109,18 @@ public class SitemapServlet extends HttpServlet{
             token.setContentType(SearchService.ContentType.FILES);
         token.setMaxResult(NODES_PER_MAP);
         token.setFrom(from);
+        token.setExcludes(Arrays.asList(new String[]{"preview"}));
         SortDefinition sort = new SortDefinition();
         sort.addSortDefinitionEntry(new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CM_PROP_C_CREATED),true));
         token.setSortDefinition(sort);
         SearchResultNodeRef result = search.search(getMds(request), MetadataSet.DEFAULT_CLIENT_QUERY, getSearchAllCriterias(), token);
         for(org.edu_sharing.service.model.NodeRef ref : result.getData()){
+            logger.info("node:"+ref.getNodeId() +" "+ref.getStoreId());
             Urlset.Url url=new Urlset.Url();
-            String[] aspects=nodeService.getAspects(ref.getStoreProtocol(),ref.getStoreId(),ref.getNodeId());
-            Date property = (Date) nodeService.getPropertyNative(ref.getStoreProtocol(), ref.getStoreId(), ref.getNodeId(), CCConstants.CM_PROP_C_MODIFIED);
+            String[] aspects = nodeService.getAspects(ref.getStoreProtocol(),ref.getStoreId(),ref.getNodeId());
+            Date property = (ref.getProperties() != null)
+                    ? new Date((long)ref.getProperties().get(CCConstants.CM_PROP_C_MODIFIED))
+                    : (Date) nodeService.getPropertyNative(ref.getStoreProtocol(), ref.getStoreId(), ref.getNodeId(), CCConstants.CM_PROP_C_MODIFIED);
             url.lastmod = DATE_FORMAT.format(property);
             if(Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_COLLECTION)){
                 url.loc=URLTool.getNgCollectionUrl(ref.getNodeId());

@@ -1,0 +1,32 @@
+@import '../../../../core-ui-module/styles/variables';
+
+:host {
+    > label {
+        display: flex;
+        font-size: $fontSizeLarge;
+        font-weight: bold;
+        margin: 20px 0;
+        color: $primaryDark;
+    }
+    > mat-radio-group {
+        display: flex;
+        flex-direction: column;
+
+        mat-radio-button {
+            padding: 5px 0;
+        }
+    }
+    > p {
+        display: flex;
+        margin: 5px 0;
+    }
+    > .toast-duration {
+        display: flex;
+        align-items: baseline;
+        > p {
+            min-width: 60px;
+            padding-left: 5px;
+            text-align: right;
+        }
+    }
+}

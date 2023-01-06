@@ -21,7 +21,12 @@ public class RenderingServlet extends HttpServlet {
         @Override
         protected void doGet(HttpServletRequest req, HttpServletResponse resp)
                 throws ServletException, IOException {
-            String node_id = req.getParameter("node_id");
+            // new, preferred parameter
+            String node_id = req.getParameter("nodeId");
+            if(node_id == null) {
+                // deprecated parameter
+                node_id = req.getParameter("node_id");
+            }
             String version = req.getParameter("version");
             RenderingService renderingService = RenderingServiceFactory.getLocalService();
             Map<String, String> params=new HashMap<>();

@@ -62,6 +62,8 @@
   "LOADING": "Lädt...",
   "TODAY": "Heute",
   "YESTERDAY": "Gestern",
+  "YEARS_AGO": "Vor {{ years }} Jahr(en)",
+  "MONTHS_AGO": "Vor {{ months }} Monat(en)",
   "DAYS_AGO": "Vor {{ days }} Tagen",
   "HOURS_AGO": "Vor {{ hours }} Stunden",
   "MINUTES_AGO": "Vor {{ minutes }} Minuten",
@@ -88,6 +90,12 @@
   "RADIO_BUTTON_SELECTED": "Optionsfeld ausgewählt",
   "RADIO_BUTTON_NOT_SELECTED": "Optionsfeld nicht ausgewählt",
   "DISABLED": "deaktiviert",
+  "PAGINATOR": {
+    "itemsPerPageLabel": "Einträge pro Seite:",
+    "nextPageLabel": "Nächste Seite",
+    "previousPageLabel": "Vorherige Seite",
+    "getRangeLabel": "Seite {{page}} von {{pageCount}}"
+  },
   "COLLECTION_CHOOSER": {
     "ADD_TO_RECENT_COLLECTION": "In zuletzt verwendete Sammlungen",
     "SEARCH_COLLECTIONS": "Sammlung suchen...",
@@ -138,7 +146,7 @@
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE": "Suchen und Einladen Nutzender außerhalb der Organisation in gemeinsamen Ordnern im Safe",
     "TOOLPERMISSION_COLLECTION_PINNING": "Sammlungen anpinnen und gepinnte Sammlungen verwalten",
     "TOOLPERMISSION_COLLECTION_CURRICULUM": "Lehrplansammlungen erstellen (aktuell nicht verwendet)",
-    "TOOLPERMISSION_COLLECTION_FEEDBACK": "Feedback an anderen Sammlungen abgeben",
+    "TOOLPERMISSION_MATERIAL_FEEDBACK": "Feedback an Materialien abgeben",
     "TOOLPERMISSION_CONFIDENTAL": "Zugriff auf gesicherten Bereich (Safe)",
     "TOOLPERMISSION_UNCHECKEDCONTENT": "Quellen wie zbsp. Youtube in der Suche anzeigen",
     "TOOLPERMISSION_WORKSPACE": "Zugriff auf den Workspace",
@@ -211,7 +219,7 @@
     "JSON": "Gesamtes Objekt",
     "PERMISSIONS": "Berechtigungen",
     "PERMISSIONS_INHERITED": "Geerbte Berechtigungen",
-    "PERMISSIONS_INHERIT_DISABLED": "Vereerbung dektiviert",
+    "PERMISSIONS_INHERIT_DISABLED": "Vereerbung deaktiviert",
     "PERMISSIONS_INHERIT_EMPTY": "Keine Berechtigungen vom Parent geerbt",
     "PERMISSIONS_LOCAL": "Explizite Berechtigungen",
     "PERMISSIONS_LOCAL_EMPTY": "Keine Berechtigungen am Objekt festgelegt",
@@ -413,6 +421,7 @@
   },
   "COMMENTS_SINGLE": "Kommentar",
   "COMMENTS_MULTIPLE": "Kommentare",
+  "PUBLISHED_COPY_TOOLTIP": "Veröffentlichte Kopie",
   "NODE_COMMENTS": {
     "TITLE": "Kommentare",
     "NEW_COMMENT_PLACEHOLDER": "Neuer Kommentar...",
@@ -504,7 +513,6 @@
     "TOAST_DURATION_INFINITE_INFO": "Statusmeldungen werden nicht automatisch ausgeblendet und müssen manuell geschlossen werden",
     "TOAST_DURATION_TITLE": "Anzeigedauer",
     "TOAST_DURATION_MESSAGE": "Statusmeldungen können automatisch nach einer festgelegten Zeit verschwinden oder durch klicken manuell geschlossen werden.",
-    "SAVED": "Einstellungen wurden gespeichert.",
     "DISMISS_TOAST": "Ausblenden"
   },
   "AUTHORITY_TYPE_GROUP": "Gruppe",
@@ -597,6 +605,11 @@
     "TOTAL_COUNT_TOOLTIP": "{{selected}} Elemente ausgewählt von insgesamt {{total}}"
   },
   "DIALOG": {
+    "SAVING": "Speichern...",
+    "SAVED": "Änderungen gespeichert",
+    "SAVING_ERROR": "Fehler beim Speichern der Änderungen",
+    "CONFIRM_DISCARD_TITLE": "Änderungen verwerfen?",
+    "CONFIRM_DISCARD_MESSAGE": "Dialog schließen, ohne die Änderungen zu speichern?",
     "COLLECTION_SHARE_PUBLIC": "Material zur Sammlung hinzufügen?",
     "COLLECTION_SHARE_PUBLIC_INFO": "Durch Hinzufügen des Materials in die Sammlung \"{{collection}}\" wird es für alle Personen sichtbar, die Zugriff auf diese Sammlung haben.",
     "COLLECTION_PROPSE": "Vorschlag einreichen?",
@@ -609,6 +622,7 @@
     "APPLY": "Übernehmen",
     "SHOW": "Vorschau & Infos",
     "SHOW_IN_FOLDER": "Zum Speicherort",
+    "OPEN_ORIGINAL_NODE": "Original öffnen",
     "DEBUG": "Debug",
     "INVITE": "Freigeben",
     "EDIT": "Infos bearbeiten",
@@ -616,8 +630,8 @@
     "EDIT_SIMPLE": "Schnell-Bearbeitung",
     "COLLECTION_EDIT": "Bearbeiten",
     "COLLECTION_PIN": "Sammlung pinnen",
-    "COLLECTION_FEEDBACK": "Feedback...",
-    "COLLECTION_FEEDBACK_VIEW": "Feedback ansehen",
+    "MATERIAL_FEEDBACK": "Feedback...",
+    "MATERIAL_FEEDBACK_VIEW": "Feedback ansehen",
     "COLLECTION_PROPOSAL_ACCEPT": "Vorschlag bestätigen",
     "COLLECTION_PROPOSAL_DECLINE": "Vorschlag ablehnen",
     "OPEN": "Öffnen",
@@ -697,14 +711,13 @@
     "ADD_CHILD_OBJECT_DESCRIPTION": "Erzeugen Sie eine neue Serie, indem Sie dazugehörige Materialien ergänzen",
     "ADD_CHILD_OBJECT_QUOTA_REACHED": "Fehler beim Hochladen des Objekts \"{{ name }}\": Speicherplatz-Quota überschritten",
     "ADD_CHILD_OBJECT_VIRUS_DETECTED": "Fehler beim Hochladen des Objekts \"{{ name }}\": Virus entdeckt. Objekt wurde gelöscht",
-    "CONFIRM_DISCARD_TITLE": "Änderungen verwerfen?",
-    "CONFIRM_DISCARD_MESSAGE": "Dialog schließen, ohne die Änderungen zu speichern?",
     "REQUIRED_MESSAGE": "Pflichtfeld",
     "REQUIRED_FOR_PUBLISH_MESSAGE": "Für die Veröffentlichung erforderliches Feld",
     "INDETERMINATE_NOTICE": "Klicken sie auf die Marke, um allen Elementen den Wert \"{{ value }}\" hinzuzufügen, oder entfernen Sie sie, um ihn aus allen Elementen zu löschen.",
     "SHOW_OPTIONS_BUTTON": "Zeige Auswahlmöglichkeiten",
     "FILTER_FOR": "Nach \"{{value}}\" filtern ({{count}} passende(s) Element(e))",
     "FILTER_TREE": "Filtern...",
+    "FILTER_FACET": "Filtern...",
     "OPEN_CLOSE_EXTENDED": "Ansicht auf-/zuklappen",
     "SUGGEST_VALUE_LABEL": "Neuen Wert vorschlagen",
     "SUGGEST_VALUE_SEND": "Vorschlagen",
@@ -713,6 +726,14 @@
     "NO_ARBITRARY_VALUES_NOTICE": "Für dieses Feld können Werte nicht frei gewählt werden. Bitte wählen Sie Werte aus der Liste.",
     "DELETE_KEY_NOTICE": "Löschen mit Entf-Taste",
     "SHOW_EXTENDED": "Erweitere Infos anzeigen"
+  },
+  "FEEDBACK": {
+    "TITLE": "Feedback zum Material geben",
+    "VIEW_TITLE": "Abgegebenes Feedback zum Material",
+    "VIEW_EMPTY": "Es wurde noch kein Feedback zum Material abgegeben",
+    "CREATOR": "Autor{{GENDER_SEPARATOR}}in {{creator}}",
+    "SAVE": "Absenden",
+    "TOAST": "Feedback gesendet. Vielen Dank!"
   },
   "SIMPLE_EDIT": {
     "TITLE": "Schnell-Bearbeitung",
@@ -778,6 +799,7 @@
   "SHARING": {
     "TITLE": "Dateifreigabe",
     "DOWNLOAD": "Herunterladen",
+    "OPEN": "Öffnen",
     "DOWNLOAD_ZIP": "Als Zip Herunterladen",
     "LINK": "Zur Originalseite springen",
     "INVITED_AND_CREATED_BY": "Erstellt und freigegeben von {{inviter}}",
@@ -849,11 +871,17 @@
     "RELATION_TYPE": {
       "VERSIONS": "Versionen",
       "FORKED_CHILDS": "Hat Varianten",
+      "FORKED_ORIGIN": "Ist Variante von",
       "isPartOf": "ist Teil von",
       "isBasedOn": "basiert auf",
       "references": "bezieht sich auf",
       "hasPart": "besitzt Teil",
       "isBasisFor": "ist Basis von"
+    },
+    "RELATION_TYPE_FULLY": {
+      "isPartOf": "ist Teil von (isPartOf)",
+      "isBasedOn": "basiert auf (isBasedOn)",
+      "references": "bezieht sich auf (references)"
     }
   },
   "VCARD": {
@@ -896,7 +924,7 @@
     "redo": "Übernehmen"
   },
   "FILL_STATUS": {
-    "MESSAGE": "Felder ausgefüllt",
+    "MESSAGE": "Feldern ausgefüllt",
     "REQUIRED": "erforderliche Felder",
     "REQUIREDPUBLISH": "für Veröffentlichung erforderliche Felder",
     "SHOW": "zeigen"

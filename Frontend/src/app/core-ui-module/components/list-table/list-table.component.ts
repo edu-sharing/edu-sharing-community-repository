@@ -65,22 +65,14 @@ import { DistinctClickEvent } from '../../directives/distinct-click.directive';
 import { DragData, DropData } from '../../directives/drag-nodes/drag-nodes';
 import { NodeHelperService } from '../../node-helper.service';
 import { CustomOptions, OptionItem, Scope, Target } from '../../option-item';
-import { OptionsHelperService, OPTIONS_HELPER_CONFIG } from '../../options-helper.service';
+import { OptionsHelperService } from '../../options-helper.service';
 import { Toast } from '../../toast';
 
 @Component({
     selector: 'es-listTable',
     templateUrl: 'list-table.component.html',
     styleUrls: ['list-table.component.scss'],
-    providers: [
-        OptionsHelperService,
-        {
-            provide: OPTIONS_HELPER_CONFIG,
-            useValue: {
-                subscribeEvents: true,
-            },
-        },
-    ],
+    providers: [OptionsHelperService],
     animations: [
         trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST)),
         trigger(
@@ -505,6 +497,7 @@ export class ListTableComponent
         private renderer: Renderer2,
         private mainnavService: MainNavService,
     ) {
+        this.optionsHelper.registerGlobalKeyboardShortcuts();
         this.nodeHelper.setViewContainerRef(this.viewContainerRef);
         this.reorderButtons = DialogButton.getSaveCancel(
             () => this.closeReorder(false),
@@ -519,7 +512,7 @@ export class ListTableComponent
             }),
         );
         this.id = Math.random();
-        frame.addListener(this);
+        frame.addListener(this, this.destroyed);
         // wait for all bindings to finish
         setTimeout(() => {
             this.refreshAvailableOptions();
@@ -585,7 +578,7 @@ export class ListTableComponent
     handleKeyboardEvent(event: KeyboardEvent): void {
         if (
             event.code === 'KeyA' &&
-            (event.ctrlKey || this.ui.isAppleCmd()) &&
+            (event.ctrlKey || event.metaKey) &&
             !KeyEvents.eventFromInputField(event) &&
             !this.preventKeyevents
         ) {
@@ -607,7 +600,7 @@ export class ListTableComponent
     }
 
     toggleAll(): void {
-        if (this.selectedNodes.length === this._nodes.length) {
+        if (this.selectedNodes?.length === this._nodes.length) {
             this.selectedNodes = [];
             this.refreshAvailableOptions();
             this.selectionChanged.emit(this.selectedNodes);
@@ -835,7 +828,7 @@ export class ListTableComponent
     }
 
     onCheckboxClick(node: Node) {
-        if (this.ui.isShiftCmd() && this.selectedNodes.length > 0 && !this.isSelected(node)) {
+        if (this.ui.shiftKeyPressed && this.selectedNodes.length > 0 && !this.isSelected(node)) {
             this.expandNodeSelection(node);
         } else {
             this.toggleSelection(node);
@@ -1222,7 +1215,7 @@ export class ListTableComponent
     }
     updateNodes(objects: Node[] | any) {
         this.replaceNodes(objects, this._nodes);
-        this.replaceNodes(objects, this.selectedNodes);
+        this.replaceNodes(objects, this.selectedNodes ?? []);
         this.nodesChange.emit(this._nodes);
     }
     addVirtualNodes(objects: Node[]) {
@@ -1330,5 +1323,17 @@ export class ListTableComponent
     async initOptionsGenerator(config: ListOptionsConfig) {
         await this.optionsHelper.initComponents(this.actionbar, this);
         this.optionsHelper.refreshComponents();
+    }
+
+    getShownOptions(node: Node) {
+        return this._options?.filter((o) => this.optionIsShown(o, node));
+    }
+
+    deleteNodes(objects: Node[]): void {
+        this._nodes = this._nodes.filter((n) => !objects.includes(n));
+        this.nodesChange.emit(this._nodes);
+        this.selectedNodes = [];
+        this.selectionChanged.emit([]);
+        this.refreshAvailableOptions();
     }
 }

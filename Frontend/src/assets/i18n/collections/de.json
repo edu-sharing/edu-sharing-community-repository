@@ -26,6 +26,11 @@
       "EDITORIAL_GROUPS": "Zuständige Redaktionsgruppe",
       "DONE": "Fertig"
     },
+    "EMPTY": {
+      "SHARED": "Sie wurden bisher zu keiner Sammlung eingeladen.",
+      "PUBLIC": "Es sind keine öffentlichen Sammlungen verfügbar.",
+      "SUBCOLLECTIONS": "Es sind keine Untersammlungen verfügbar."
+    },
     "TAB": {
       "TYPE_EDITORIAL_LONG": "Redaktionell betreute Sammlungen",
       "TYPE_MEDIA_CENTER_LONG": "Vom Medienzentrum bereitgestellte Sammlungen",
@@ -95,12 +100,6 @@
         "DELETE": "Bild löschen"
       }
     },
-    "FEEDBACK_TITLE": "Feedback zur Sammlung geben",
-    "FEEDBACK_VIEW_TITLE": "Abgegebenes Feedback zur Sammlung",
-    "FEEDBACK_VIEW_EMPTY": "Es wurde noch kein Feedback zur Sammlung abgegeben",
-    "FEEDBACK_CREATOR": "Autor{{GENDER_SEPARATOR}}in {{creator}}",
-    "FEEDBACK_SAVE": "Absenden",
-    "FEEDBACK_TOAST": "Feedback gesendet. Vielen Dank!",
     "ADD_TO": {
       "DUPLICATE_TITLE": "Element(e) bereits vorhanden",
       "DUPLICATE_MESSAGE": "{{count}} Element(e) sind bereits in der Sammlung vorhanden. Möchten Sie diese erneut einfügen?"
@@ -114,8 +113,7 @@
     }
   },
   "collections_description": "Beschreibung:",
-  "collections_noOrgaCollections": "Sie wurden bisher zu keiner Sammlung eingeladen.",
-  "collections_noCollections": "Es sind keine öffentlichen Sammlungen verfügbar.",
+
   "collections_content": "Materialien",
   "collections_noContentAvailable": "Hier sind noch keine Materialien vorhanden.",
   "collections_howToAddContent": "Sie können in der Suchumgebung nach geeigneten Materialien für Ihre Sammlung suchen. Klicken Sie einfach auf ein geeignetes Material und wählen Sie dann die Option 'zu Sammlung hinzufügen' aus.",

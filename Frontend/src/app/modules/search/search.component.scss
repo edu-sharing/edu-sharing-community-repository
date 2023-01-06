@@ -23,7 +23,7 @@ $sidenavTopBaseOffset: $repoTabBarHeight + $toolbarHeight;
     .collection {
         position: absolute;
         right: 20px;
-        top: $mainnavHeight;
+        top: var(--mainnavHeight);
         width: calc(25% - 20px);
         text-transform: uppercase;
         &.no-mainnav {
@@ -41,7 +41,7 @@ $sidenavTopBaseOffset: $repoTabBarHeight + $toolbarHeight;
 }
 .rowRepositories {
     position: fixed;
-    top: $mainnavHeight;
+    top: var(--mainnavHeight);
     width: 100%;
     z-index: 13;
     > div {
@@ -312,7 +312,7 @@ button {
     // pointer events on this container and explicitly enable them again on the underlying `div`
     // using `pointer-events: auto`.
     pointer-events: none;
-    top: $mainnavHeight + 48px;
+    top: calc(var(--mainnavHeight) + 48px);
     z-index: 12;
     width: 100%;
     &.no-mainnav {
@@ -338,7 +338,7 @@ es-small-collection {
     width: calc(100% - #{$sidenavWidth});
 }
 .topNoRepositories {
-    top: $mainnavHeight;
+    top: var(--mainnavHeight);
     &.no-mainnav {
         top: 0;
     }
@@ -382,8 +382,8 @@ es-small-collection {
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
     width: $sidenavWidth;
-    top: $mainnavHeight + $sidenavTopBaseOffset;
-    height: calc(100% - #{$mainnavHeight} - #{$sidenavTopBaseOffset});
+    top: calc(var(--mainnavHeight) + #{$sidenavTopBaseOffset});
+    height: calc(100% - var(--mainnavHeight) - #{$sidenavTopBaseOffset});
     transition: $transitionNormal all ease;
     @include iosScrolling();
     &.no-mainnav {
@@ -403,9 +403,9 @@ es-small-collection {
     display: none;
 }
 .sidenavNoRepositories {
-    top: $mainnavHeight + $toolbarHeight;
+    top: calc(var(--mainnavHeight) + #{$toolbarHeight});
     // This brakes when the site has a custom header, that adds to the page height.
-    height: calc(100% - #{$mainnavHeight} - #{$toolbarHeight});
+    height: calc(100% - var(--mainnavHeight) - #{$toolbarHeight});
     &.no-mainnav {
         top: $toolbarHeight;
         height: calc(100% - #{$toolbarHeight});
@@ -416,7 +416,7 @@ es-small-collection {
 }
 
 .results {
-    margin-top: $mainnavHeight + 130px;
+    margin-top: calc(var(--mainnavHeight) + 130px);
     padding-bottom: 20px;
     text-align: left;
     min-height: 1000px;
@@ -427,7 +427,7 @@ es-small-collection {
     }
 }
 .resultsNoRepositories {
-    margin-top: $mainnavHeight + 85px;
+    margin-top: calc(var(--mainnavHeight) + 85px);
     &.no-mainnav {
         margin-top: 85px;
     }
@@ -761,10 +761,10 @@ div.dialog.darken {
         margin-bottom: $mobileTabNavHeight;
     }
     .sidenav {
-        height: calc(100% - #{$mainnavHeight} - #{$mobileTabNavHeight} - 105px);
+        height: calc(100% - var(--mainnavHeight) - #{$mobileTabNavHeight} - 105px);
     }
     .sidenavNoRepositories {
-        height: calc(100% - #{$mainnavHeight} - #{$mobileTabNavHeight} - 65px - 70px);
+        height: calc(100% - var(--mainnavHeight) - #{$mobileTabNavHeight} - 65px - 70px);
     }
     .sidenav-container .apply {
         bottom: $mobileTabNavHeight;

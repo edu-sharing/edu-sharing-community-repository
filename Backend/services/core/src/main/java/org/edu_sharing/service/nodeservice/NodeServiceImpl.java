@@ -183,7 +183,6 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	@Override
 	public String createNodeBasic(StoreRef store, String parentID, String nodeTypeString, String childAssociation, HashMap<String, ?> _props) {
 		childAssociation = (childAssociation == null) ? CCConstants.CM_ASSOC_FOLDER_CONTAINS : childAssociation;
-		Map<QName, Serializable> properties = transformPropMap(_props);
 
 		NodeRef parentNodeRef = new NodeRef(store, parentID);
 		QName nodeType = QName.createQName(nodeTypeString);
@@ -198,6 +197,24 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 			assocName = QName.createValidLocalName(assocName);
 		}
 		assocName = "{" + CCConstants.NAMESPACE_CCM + "}" + assocName;
+		Map<String, Object> propsConverted = new HashMap<>();
+		propsConverted.putAll(_props);
+		for (PropertiesSetInterceptor i : PropertiesInterceptorFactory.getPropertiesSetInterceptors()) {
+			try {
+				propsConverted = i.beforeSetProperties(
+						PropertiesInterceptorFactory.getPropertiesContext(
+								null,
+								propsConverted,
+								Collections.emptyList(),
+								null
+						)
+				);
+			} catch (Throwable e) {
+				logger.warn("Error while calling interceptor " + i.getClass().getName() + ": " + e.toString());
+			}
+		}
+		Map<QName, Serializable> properties = transformPropMap(propsConverted);
+
 
 		ChildAssociationRef childRef = nodeService.createNode(parentNodeRef, QName.createQName(childAssociation), QName.createQName(assocName), nodeType,
 				properties);
@@ -223,22 +240,30 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		String metadataSetId = (metadataSetIdArr != null && metadataSetIdArr.length > 0) ? metadataSetIdArr[0] : null;
 
 		if(metadataSetId == null) {
-			Boolean forceMds = false;
-			try {
-				forceMds = (Boolean)nodeService.getProperty(new NodeRef(MCAlfrescoAPIClient.storeRef,parentId), QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET));
-				if(forceMds == null) forceMds = false;
-			}catch(Throwable t) {}
-			if(forceMds) {
-				metadataSetId = (String)nodeService.getProperty(new NodeRef(MCAlfrescoAPIClient.storeRef,parentId), QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
-			}
-			else {
-				if(HttpContext.getCurrentMetadataSet() != null && HttpContext.getCurrentMetadataSet().trim().length() > 0) {
-					metadataSetId = HttpContext.getCurrentMetadataSet();
-				}else {
-					metadataSetId = CCConstants.metadatasetdefault_id;
+			// allow to run as admin since user might don't have access to the parent ref
+			metadataSetId = AuthenticationUtil.runAsSystem(() -> {
+				Boolean forceMds = false;
+				NodeRef parentRef = new NodeRef(MCAlfrescoAPIClient.storeRef, parentId);
+				if (nodeService.exists(parentRef)) {
+					try {
+						forceMds = (Boolean) nodeService.getProperty(parentRef, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET));
+						if (forceMds == null) forceMds = false;
+					} catch (Throwable t) {
+					}
 				}
-				props.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, new String[] {metadataSetId});
-			}
+				if (forceMds) {
+					return (String) nodeService.getProperty(parentRef, QName.createQName(CCConstants.CM_PROP_METADATASET_EDU_METADATASET));
+				} else {
+					String mdsId;
+					if(HttpContext.getCurrentMetadataSet() != null && HttpContext.getCurrentMetadataSet().trim().length() > 0) {
+						mdsId = HttpContext.getCurrentMetadataSet();
+					}else {
+						mdsId = CCConstants.metadatasetdefault_id;
+					}
+					props.put(CCConstants.CM_PROP_METADATASET_EDU_METADATASET, new String[] {mdsId});
+					return mdsId;
+				}
+			});
 		}
 
 		MetadataSet mds = MetadataHelper.getMetadataset(getApplication(), metadataSetId);
@@ -397,38 +422,54 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	public List<NodeRef> getChildrenRecursive(StoreRef store, String nodeId,List<String> types,RecurseMode recurseMode) {
 		// this method uses nodeServiceAlfresco instead of nodeService
 		// to prevent that recursive fetch data of user homes will fetch (and also produce duplicates) of the shared org folders
-		List<ChildAssociationRef> assocs;
-		NodeRef nodeRef = new NodeRef(store, nodeId);
-		if(types==null){
-			assocs = nodeServiceAlfresco.getChildAssocs(nodeRef);
+
+		List<NodeRef> result = new ArrayList<>();
+		try {
+			NodeRef nodeRef = new NodeRef(store, nodeId);
+			//logger.info("nodeRef:"+ nodeRef +"path: " + nodeServiceAlfresco.getPath(nodeRef).toDisplayPath(serviceRegistry.getNodeService(),serviceRegistry.getPermissionService()));
+			logger.debug("nodeRef:"+ nodeRef +"path: " + nodeServiceAlfresco.getPath(nodeRef).toPrefixString(serviceRegistry.getNamespaceService()));
+			List<ChildAssociationRef> assocs;
+			if (types == null) {
+				assocs = nodeServiceAlfresco.getChildAssocs(nodeRef);
+			} else {
+				Set<QName> typesConverted = types.stream().map(QName::createQName).collect(Collectors.toSet());
+				assocs = nodeServiceAlfresco.getChildAssocs(nodeRef, typesConverted);
+			}
+
+			for (ChildAssociationRef assoc : assocs) {
+				if(assoc.isPrimary()){
+					result.add(assoc.getChildRef());
+				}else{
+					logger.warn("ignoring non primary association parent:" + assoc.getParentRef() +" child:"+assoc.getChildRef());
+				}
+			}
+			List<ChildAssociationRef> maps;
+			if (recurseMode.equals(RecurseMode.Folders)) {
+				maps = nodeServiceAlfresco.getChildAssocs(nodeRef, new HashSet<>(Arrays.asList(QName.createQName(CCConstants.CCM_TYPE_MAP), QName.createQName(CCConstants.CM_TYPE_FOLDER))));
+			} else if (recurseMode.equals(RecurseMode.All)) {
+				// in theory, every object may have children, so we need to access all of them
+				maps = nodeServiceAlfresco.getChildAssocs(nodeRef);
+			} else {
+				throw new IllegalArgumentException("invalid RecurseMode");
+			}
+			String user = AuthenticationUtil.getFullyAuthenticatedUser();
+			// run in parallel to increase performance
+			maps.parallelStream().forEach((map) -> {
+				if(map.isPrimary()){
+					AuthenticationUtil.runAs(() -> result.addAll(getChildrenRecursive(store, map.getChildRef().getId(), types, recurseMode))
+							, user);
+				}else{
+					logger.warn("ignoring non primary association for recursive traversing parent:" + map.getParentRef() +" child:"+map.getChildRef());
+				}
+			});
+
+
+			logger.info("Get children recursive finished with " + result.size() + " nodes");
+			return result;
+		}catch (Exception e){
+			logger.error(e.getMessage(),e);
+			return result;
 		}
-		else {
-			Set<QName> typesConverted = types.stream().map(QName::createQName).collect(Collectors.toSet());
-			assocs = nodeServiceAlfresco.getChildAssocs(nodeRef, typesConverted);
-		}
-		List<NodeRef> result=new ArrayList<>();
-		for(ChildAssociationRef assoc : assocs){
-			result.add(assoc.getChildRef());
-		}
-		List<ChildAssociationRef> maps;
-		if(recurseMode.equals(RecurseMode.Folders)) {
-			maps = nodeServiceAlfresco.getChildAssocs(nodeRef, new HashSet<>(Arrays.asList(QName.createQName(CCConstants.CCM_TYPE_MAP), QName.createQName(CCConstants.CM_TYPE_FOLDER))));
-		}
-		else if(recurseMode.equals(RecurseMode.All)){
-			// in theory, every object may have children, so we need to access all of them
-			maps = nodeServiceAlfresco.getChildAssocs(nodeRef);
-		}
-		else{
-			throw new IllegalArgumentException("invalid RecurseMode");
-		}
-		String user = AuthenticationUtil.getFullyAuthenticatedUser();
-		// run in parallel to increase performance
-		maps.parallelStream().forEach((map)->{
-			AuthenticationUtil.runAs(()->result.addAll(getChildrenRecursive(store,map.getChildRef().getId(),types,recurseMode))
-			,user);
-		});
-		logger.info("Get children recursive finished with "+result.size()+" nodes");
-		return result;
 	}
 
 		@Override
@@ -856,6 +897,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				}
 
 				if (compare == 0) {
+					// cast ml text to string
 					if(prop1 instanceof MLText && prop2 instanceof MLText) {
 						prop1 = ((MLText) prop1).getDefaultValue();
 						prop2 = ((MLText) prop2).getDefaultValue();
@@ -1064,10 +1106,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 					policyBehaviourFilter.disableBehaviour(newNode);
 					// replace owner, creator & modifier
 					setPublishedCopyProperties(oldNodeRef, newNode, owner);
-					setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), oldNodeRef.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_MODE, "copy");
-					setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_DATE, new Date());
+					setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), oldNodeRef.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_MODE, "copy", false);
+					setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_DATE, new Date(), false);
 					setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL,
-							oldNodeRef);
+							oldNodeRef, false);
 					NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.LOM_PROP_LIFECYCLE_VERSION);
 					NodeServiceHelper.copyProperty(oldNodeRef, newNode, CCConstants.CCM_PROP_IO_VERSION_COMMENT);
 					//deleteVersionHistory(newNode.getId());
@@ -1302,7 +1344,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 	@Override
 	public void removeProperty(String storeProtocol, String storeId, String nodeId, String property) {
-		nodeService.removeProperty(new NodeRef(new StoreRef(storeProtocol,storeId),nodeId),QName.createQName(property));
+		// when interceptors are active, use set instead to trigger interceptors
+		if(PropertiesInterceptorFactory.getPropertiesSetInterceptors().size() > 0) {
+			setProperty(storeProtocol, storeId, nodeId, property, null, true);
+		} else {
+			nodeService.removeProperty(new NodeRef(new StoreRef(storeProtocol, storeId), nodeId), QName.createQName(property));
+		}
 	}
 	@Override
 	public String[] getAspects(String storeProtocol, String storeId, String nodeId){
@@ -1369,24 +1416,25 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 		}
 	}
 
-	public void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value) {
+	public void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value, boolean skipDefinitionChecks) {
 		NodeRef nodeRef = new NodeRef(new StoreRef(protocol, storeId), nodeId);
 		property = NameSpaceTool.transformToLongQName(property);
 		QName prop = QName.createQName(property);
-		PropertyDefinition propertyDefinition = dictionaryService.getProperty(prop);
-		if(propertyDefinition == null){
-			logger.error("property" + property + " is not defined in content model");
-			return;
-		}
+		if(!skipDefinitionChecks) {
+			PropertyDefinition propertyDefinition = dictionaryService.getProperty(prop);
+			if (propertyDefinition == null) {
+				logger.error("property" + property + " is not defined in content model");
+				return;
+			}
 
-		if(!propertyDefinition.isMultiValued() && value instanceof Collection){
-			if(((Collection)value).stream().iterator().hasNext()) {
-				value = (Serializable) ((Collection) value).stream().iterator().next();
-			} else {
-				value = null;
+			if (!propertyDefinition.isMultiValued() && value instanceof Collection) {
+				if (((Collection) value).stream().iterator().hasNext()) {
+					value = (Serializable) ((Collection) value).stream().iterator().next();
+				} else {
+					value = null;
+				}
 			}
 		}
-
 		Map<String, Object> properties = null;
 		if(PropertiesInterceptorFactory.getPropertiesSetInterceptors().size() > 0) {
 			try {
@@ -1441,7 +1489,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 	}
 
 	@Override
-	public Collection<NodeRef> getFrontpageNodes() throws Throwable {
+	public Collection<org.edu_sharing.service.model.NodeRef> getFrontpageNodes() throws Throwable {
 		return new NodeFrontpage().getNodesForCurrentUserAndConfig();
 	}
 

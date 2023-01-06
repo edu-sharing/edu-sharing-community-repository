@@ -24,7 +24,7 @@
           <mat-option *ngFor="let filetype of _connector.filetypes; let i = index" [value]="i">
             {{
               'CONNECTOR.MIMETYPE.' +
-                (filetype.mimetype == 'application/zip'
+                (filetype.mimetype === 'application/zip'
                   ? filetype.ccressourcetype +
                     '_' +
                     filetype.ccressourceversion +

@@ -45,6 +45,8 @@ public class SearchToken implements Serializable {
 	private boolean resolveCollections = false;
 	private boolean returnSuggestion = false;
 
+	List<String> excludes = new ArrayList<>();
+
 	public ContentType getContentType(){
 		if(contentType==null)
 			return ContentType.FILES;
@@ -288,4 +290,12 @@ public class SearchToken implements Serializable {
 	public boolean isReturnSuggestion() { return returnSuggestion; }
 
 	public void setReturnSuggestion(boolean returnSuggestion) {	this.returnSuggestion = returnSuggestion; }
+
+	public List<String> getExcludes() {
+		return excludes;
+	}
+
+	public void setExcludes(List<String> excludes) {
+		this.excludes = excludes;
+	}
 }

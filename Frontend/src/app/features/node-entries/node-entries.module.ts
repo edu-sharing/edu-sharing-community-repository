@@ -12,8 +12,9 @@ import { NodeEntriesWrapperComponent } from './node-entries-wrapper.component';
 import { NodeEntriesComponent } from './node-entries.component';
 import { NodeRatingComponent } from './node-rating/node-rating.component';
 import { OptionButtonComponent } from './option-button/option-button.component';
-import { NodeImagePipe } from './preview-image/node-image.pipe';
 import { PreviewImageComponent } from './preview-image/preview-image.component';
+import { DragPreviewComponent } from './drag-preview/drag-preview.component';
+import { NodeEntriesGlobalService } from './node-entries-global.service';
 
 @NgModule({
     declarations: [
@@ -25,13 +26,14 @@ import { PreviewImageComponent } from './preview-image/preview-image.component';
         PreviewImageComponent,
         NodeEntriesWrapperComponent,
         NodeEntriesComponent,
-        NodeImagePipe,
         ColumnChooserComponent,
         ListItemLabelPipe,
         OptionButtonComponent,
         FocusStateDirective,
+        DragPreviewComponent,
     ],
     imports: [SharedModule, ListItemsModule],
+    providers: [NodeEntriesGlobalService],
     exports: [NodeEntriesWrapperComponent, ListItemLabelPipe],
 })
 export class NodeEntriesModule {}

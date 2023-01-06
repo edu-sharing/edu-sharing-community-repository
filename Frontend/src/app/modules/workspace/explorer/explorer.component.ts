@@ -31,6 +31,7 @@ import { ListTableComponent } from '../../../core-ui-module/components/list-tabl
 import {
     DropSource,
     DropTarget,
+    FetchEvent,
     InteractionType,
     ListSortConfig,
     NodeClickEvent,
@@ -40,6 +41,8 @@ import {
 import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-entries-wrapper.component';
 import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 import { NodeEntriesDataType } from 'src/app/features/node-entries/node-entries.component';
+import { canDropOnNode } from '../workspace-utils';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
     selector: 'es-workspace-explorer',
@@ -141,11 +144,8 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
 
     @ViewChild('list') list: ListTableComponent;
     @ViewChild(NodeEntriesWrapperComponent) nodeEntries: NodeEntriesWrapperComponent<Node>;
-    public _dataSource: NodeDataSource<Node>;
     @Input() customOptions: CustomOptions;
-    @Input() set dataSource(dataSource: NodeDataSource<Node>) {
-        this._dataSource = dataSource;
-    }
+    @Input() dataSource: NodeDataSource<Node>;
     @Output() nodesChange = new EventEmitter<Node[]>();
     sort: ListSortConfig = {
         allowed: true,
@@ -205,22 +205,25 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     searchGlobal() {
         this.onSearchGlobal.emit(this._searchQuery);
     }
-    public load(reset: boolean) {
+    public load(event: FetchEvent = null) {
         if (this._node == null && !this._searchQuery) return;
-        if (this._dataSource.isLoading) {
-            setTimeout(() => this.load(reset), 10);
+        if (this.dataSource.isLoading) {
+            setTimeout(() => this.load(event), 10);
             return;
         }
-        if (reset) {
-            this._dataSource = new NodeDataSource<Node>();
+        if (event?.reset) {
+            this.dataSource.reset();
             this.nodeEntries.getSelection().clear();
             this.onReset.emit();
-        } else if (this._dataSource.isFullyLoaded()) {
+            if (event.offset === 0) {
+                this.nodeEntries.resetPagination();
+            }
+        } else if (this.dataSource.isFullyLoaded()) {
             return;
         }
-        this._dataSource.isLoading = true;
+        this.dataSource.isLoading = true;
         // ignore virtual (new) added/uploaded elements
-        const offset = this.getRealNodeCount();
+        const offset = event.offset || this.getRealNodeCount();
         const request: any = {
             offset,
             propertyFilter: [
@@ -240,6 +243,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             ],
             sortBy: [this.sort.active],
             sortAscending: this.sort.direction === 'asc',
+            count: event?.amount,
         };
         if (this._searchQuery) {
             const query = '*' + this._searchQuery + '*';
@@ -292,7 +296,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     ngOnDestroy(): void {
         this.temporaryStorage.set(
             TemporaryStorageService.NODE_RENDER_PARAMETER_DATA_SOURCE,
-            this._dataSource,
+            this.dataSource,
         );
     }
 
@@ -307,16 +311,16 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             this.toast.error(null, 'WORKSPACE.TOAST.NOT_FOUND', { id: this._node.ref.id });
         else this.toast.error(error);
 
-        this._dataSource.isLoading = false;
+        this.dataSource.isLoading = false;
     }
     private addNodes(data: NodeList, wasSearch: boolean) {
         if (this.lastRequestSearch !== wasSearch) {
             return;
         }
-        this._dataSource.isLoading = false;
+        this.dataSource.isLoading = false;
         if (data && data.nodes) {
-            this._dataSource.appendData(data.nodes);
-            this._dataSource.setPagination(data.pagination);
+            this.dataSource.appendData(data.nodes);
+            this.dataSource.setPagination(data.pagination);
         }
     }
     constructor(
@@ -343,7 +347,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             sortBy: config.active,
             sortAscending: config.direction === 'asc',
         });
-        this.load(true);
+        this.load({ reset: true, offset: 0 });
     }
     public onSelection(event: Node[]) {
         this.onSelectionChanged.emit(event);
@@ -373,14 +377,14 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
                 this._node = null;
                 return;
             }
-            if (this._dataSource.isLoading) {
+            if (this.dataSource.isLoading) {
                 setTimeout(() => this.setNode(current), 10);
                 return;
             }
             if (Helper.objectEquals(this._node, current)) return;
             this._node = current;
             this.initOptions();
-            this.load(true);
+            this.load({ reset: true, offset: 0 });
         });
     }
 
@@ -389,19 +393,13 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             if (query && query.query) {
                 this._searchQuery = query.query;
                 this._node = query.node;
-                this.load(true);
+                this.load({ reset: true, offset: 0 });
             } else {
                 this._searchQuery = null;
             }
         });
     }
-    canDrop = (target: DropTarget, source: DropSource<Node>) => {
-        return (
-            (target as Node).isDirectory &&
-            (target as Node).access?.includes(RestConstants.ACCESS_WRITE) &&
-            source.element.every((s) => s.access.includes(RestConstants.ACCESS_WRITE))
-        );
-    };
+    canDrop = canDropOnNode;
     drop = (target: DropTarget, source: DropSource<Node>) => {
         this.onDrop.emit({
             target,
@@ -410,7 +408,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     };
 
     private getRealNodeCount() {
-        return this._dataSource?.getData().filter((n) => !n.virtual).length;
+        return this.dataSource?.getData().filter((n) => !n.virtual).length;
     }
 
     initColumns() {
@@ -443,7 +441,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     }
 
     onDelete(nodes: Node[]): void {
-        this._dataSource.removeData(nodes);
+        this.dataSource.removeData(nodes);
         this.nodeEntries?.getSelection().clear();
     }
 

@@ -170,11 +170,11 @@ public interface NodeService {
 
 	List<AssociationRef> getNodesByAssoc(String nodeId, AssocInfo assoc);
 
-	void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value);
+	void setProperty(String protocol, String storeId, String nodeId, String property, Serializable value, boolean skipDefinitionChecks);
 
     GetPreviewResult getPreview(String storeProtocol, String storeIdentifier, String nodeId, HashMap<String, Object> nodeProps, String version);
 
-    Collection<NodeRef> getFrontpageNodes() throws Throwable;
+    Collection<org.edu_sharing.service.model.NodeRef> getFrontpageNodes() throws Throwable;
 
     Serializable getPropertyNative(String storeProtocol, String storeId, String nodeId, String property) throws Throwable;
 

@@ -1,5 +1,5 @@
 @mixin clickable() {
-    cursor: pointer !important;
+    cursor: pointer;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -55,19 +55,12 @@
     -webkit-box-orient: vertical;
     /* autoprefixer: off */
 }
-@mixin fadeRight($color, $position) {
-    background: linear-gradient(
-        to right,
-        rgba(red($color), green($color), blue($color), 0.001) 0,
-        $color $position
-    );
-}
 @mixin unselectableText() {
     cursor: default;
     user-select: none;
 }
-@mixin materialShadowBottom() {
-    box-shadow: 0 3px 3px rgba(0, 0, 0, 0.1);
+@mixin materialShadowBottom($opacity: 0.1) {
+    box-shadow: 0 3px 3px rgba(0, 0, 0, $opacity);
 }
 @mixin removeDefaultFocus() {
     outline: none;
@@ -165,5 +158,41 @@
         }
     } @else {
         @error "Invalid scope #{$scope}.";
+    }
+}
+
+@mixin removeButtonDefaultStyles {
+    background: unset;
+    border: unset;
+    padding: unset;
+}
+
+@mixin afterPseudoElement {
+    position: relative;
+    &:after {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        @content;
+    }
+}
+@mixin materialScrollbar() {
+    &::-webkit-scrollbar-track {
+        -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        background-color: transparent;
+    }
+    &::-webkit-scrollbar {
+        height: 10px;
+        background-color: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+        max-width: 20px;
+        border-radius: 10px;
+        // -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+        background-color: $primary;
     }
 }

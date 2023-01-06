@@ -9,6 +9,6 @@
 }
 mat-tab-group {
     position: absolute;
-    top: $mainnavHeight;
+    top: var(--mainnavHeight);
     width: 100%;
 }

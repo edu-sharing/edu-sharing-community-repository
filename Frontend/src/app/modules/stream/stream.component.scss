@@ -1,7 +1,7 @@
 @import '../../core-ui-module/styles/variables';
 
 .stream-container {
-    padding-top: $mainnavHeight;
+    padding-top: var(--mainnavHeight);
 }
 .stream-boxes {
     display: flex;
@@ -52,8 +52,8 @@
         padding: 0;
     }
     .stream-container {
-        padding-top: $mainnavHeight;
-        padding-bottom: $mainnavHeight;
+        padding-top: var(--mainnavHeight);
+        padding-bottom: var(--mainnavHeight);
     }
     .hideMenu {
         display: none;
@@ -82,8 +82,8 @@
         padding: 0;
     }
     .stream-container {
-        padding-top: $mainnavHeight;
-        padding-bottom: $mainnavHeight;
+        padding-top: var(--mainnavHeight);
+        padding-bottom: var(--mainnavHeight);
     }
     .hideMenu {
         display: none;

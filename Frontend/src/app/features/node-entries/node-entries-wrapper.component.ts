@@ -10,10 +10,12 @@ import {
     NgZone,
     OnChanges,
     OnDestroy,
+    OnInit,
     Output,
     SimpleChange,
     TemplateRef,
     Type,
+    ViewChild,
     ViewContainerRef,
 } from '@angular/core';
 import { Subject } from 'rxjs';
@@ -27,14 +29,11 @@ import {
 import { NodeEntriesService } from '../../core-ui-module/node-entries.service';
 import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { OptionItem } from '../../core-ui-module/option-item';
-import {
-    OptionsHelperService,
-    OPTIONS_HELPER_CONFIG,
-} from '../../core-ui-module/options-helper.service';
+import { OptionsHelperService } from '../../core-ui-module/options-helper.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { MainNavService } from '../../main/navigation/main-nav.service';
-import { NodeEntriesTemplatesService } from '../node-entries/node-entries-templates.service';
-import { NodeEntriesComponent, NodeEntriesDataType } from '../node-entries/node-entries.component';
+import { NodeEntriesTemplatesService } from './node-entries-templates.service';
+import { NodeEntriesComponent, NodeEntriesDataType } from './node-entries.component';
 import {
     FetchEvent,
     GridConfig,
@@ -48,29 +47,35 @@ import {
     NodeEntriesDisplayType,
 } from './entries-model';
 import { NodeDataSource } from './node-data-source';
+import { NodeDataSourceRemote } from './node-data-source-remote';
 
 @Component({
     selector: 'es-node-entries-wrapper',
-    template: ` <es-node-entries *ngIf="!customNodeListComponent"> </es-node-entries>`,
-    providers: [
-        NodeEntriesService,
-        OptionsHelperService,
-        NodeEntriesTemplatesService,
-        {
-            provide: OPTIONS_HELPER_CONFIG,
-            useValue: {
-                subscribeEvents: false,
-            },
-        },
-    ],
+    template: ` <es-node-entries #nodeEntriesComponent *ngIf="!customNodeListComponent">
+    </es-node-entries>`,
+    providers: [NodeEntriesService, OptionsHelperService, NodeEntriesTemplatesService],
 })
 export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
-    implements AfterViewInit, OnChanges, OnDestroy, ListEventInterface<T>
+    implements AfterViewInit, OnInit, OnChanges, OnDestroy, ListEventInterface<T>
 {
+    /**
+     * title (above) the table/grid
+     */
     @ContentChild('title') titleRef: TemplateRef<any>;
+    /**
+     * data shown when data source is empty
+     */
     @ContentChild('empty') emptyRef: TemplateRef<any>;
+    /**
+     * custom area for actions only for NodeEntriesDisplayType.SmallGrid (per card at the bottom)
+     */
     @ContentChild('actionArea') actionAreaRef: TemplateRef<any>;
-    @Input() dataSource: NodeDataSource<T>;
+    /**
+     * custom area for an overlay "above" each card (i.e. to show disabled infos), only for NodeEntriesDisplayType.SmallGrid & odeEntriesDisplayType.Grid
+     */
+    @ContentChild('overlay') overlayRef: TemplateRef<any>;
+    @ViewChild('nodeEntriesComponent') nodeEntriesComponentRef: NodeEntriesComponent<T>;
+    @Input() dataSource: NodeDataSource<T> | NodeDataSourceRemote<T>;
     @Input() columns: ListItem[];
     @Input() configureColumns: boolean;
     @Input() checkbox = true;
@@ -82,6 +87,35 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @Input() sort: ListSortConfig;
     @Input() dragDrop: ListDragGropConfig<T>;
     @Input() gridConfig: GridConfig;
+    /**
+     * this can be set instead of calling initOptionsGenerator()
+     */
+    @Input() initConfig: ListOptionsConfig;
+    /**
+     * Handle page-wide keyboard shortcuts in this node-entries instance.
+     *
+     * This should be set to true if this instance represents the page's main content. Only set to
+     * true for one instance per page.
+     */
+    @Input() globalKeyboardShortcuts: boolean;
+    /**
+     * UI hints for whether a single click will cause a dynamic action.
+     *
+     * This does not configure the actual behavior but only UI hints to the user. Hints include
+     * hover effects and a changed cursor.
+     *
+     * - When choosing 'static', the `clickItem` event should trigger some stationary action like
+     *   selecting the element or displaying information in a complementary page area. The
+     *   `dblClickItem` event can be used for a more disruptive action.
+     * - When choosing 'dynamic', the `clickItem` event should trigger a major action like
+     *   navigating to a new page or closing a dialog.
+     */
+    // TODO: Consider controlling the ui hints and the actual behavior with a single option.
+    @Input() singleClickHint: 'dynamic' | 'static' = 'dynamic';
+    /**
+     * Do not load more data on scroll.
+     */
+    @Input() disableInfiniteScroll = false;
     @Output() fetchData = new EventEmitter<FetchEvent>();
     @Output() clickItem = new EventEmitter<NodeClickEvent<T>>();
     @Output() dblClickItem = new EventEmitter<NodeClickEvent<T>>();
@@ -92,7 +126,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @Output() displayTypeChanged = this.optionsHelper.displayTypeChanged;
 
     customNodeListComponent: Type<NodeEntriesComponent<T>>;
-    private componentRef: ComponentRef<any>;
+    private componentRef: ComponentRef<NodeEntriesComponent<T>>;
     private options: ListOptions;
     private destroyed = new Subject<void>();
 
@@ -102,7 +136,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         private viewContainerRef: ViewContainerRef,
         private ngZone: NgZone,
         private entriesService: NodeEntriesService<T>,
-        private optionsHelper: OptionsHelperService,
+        public optionsHelper: OptionsHelperService,
         private nodeHelperService: NodeHelperService,
         private mainNav: MainNavService,
         private templatesService: NodeEntriesTemplatesService,
@@ -115,10 +149,21 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         );
         */
         this.entriesService.selection.changed.subscribe(() => {
-            this.optionsHelper.getData().selectedObjects = this.entriesService.selection.selected;
-            this.optionsHelper.getData().activeObjects = this.entriesService.selection.selected;
+            if (this.optionsHelper.getData()) {
+                this.optionsHelper.getData().selectedObjects =
+                    this.entriesService.selection.selected;
+                this.optionsHelper.getData().activeObjects = this.entriesService.selection.selected;
+            } else {
+                console.warn('optionsHelper is not initalized correctly; data is empty');
+            }
             this.optionsHelper.refreshComponents();
         });
+    }
+
+    ngOnInit(): void {
+        if (this.globalKeyboardShortcuts) {
+            this.optionsHelper.registerGlobalKeyboardShortcuts();
+        }
     }
 
     ngOnChanges(changes: { [key: string]: SimpleChange } = {}) {
@@ -142,7 +187,13 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.clickItem = this.clickItem;
         this.entriesService.dblClickItem = this.dblClickItem;
         this.entriesService.fetchData = this.fetchData;
+        this.entriesService.globalKeyboardShortcuts = this.globalKeyboardShortcuts;
+        this.entriesService.singleClickHint = this.singleClickHint;
+        this.entriesService.disableInfiniteScroll = this.disableInfiniteScroll;
 
+        if (changes['initConfig']) {
+            this.initOptionsGenerator(this.initConfig);
+        }
         if (this.componentRef) {
             this.componentRef.instance.changeDetectorRef?.detectChanges();
         }
@@ -216,16 +267,6 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
                 this.nodeHelperService.copyDataToNode(d as Node, hits[0] as Node);
             }
         });
-        nodes?.forEach((node) => {
-            if (
-                !this.dataSource
-                    .getData()
-                    .filter((n) => (n as Node).ref.id === (node as Node).ref.id).length
-            ) {
-                (node as Node).virtual = true;
-                this.dataSource.appendData([node], 'before');
-            }
-        });
     }
 
     showReorderColumnsDialog(): void {}
@@ -264,6 +305,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
 
     async initOptionsGenerator(config: ListOptionsConfig) {
         await this.optionsHelper.initComponents(config.actionbar, this);
+        this.entriesService.scope = config.scope;
         this.optionsHelper.setData({
             scope: config.scope,
             activeObjects: this.entriesService.selection.selected,
@@ -284,5 +326,19 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.templatesService.title = this.titleRef;
         this.templatesService.empty = this.emptyRef;
         this.templatesService.actionArea = this.actionAreaRef;
+        this.templatesService.overlay = this.overlayRef;
+    }
+
+    /**
+     * reset the pagination to the first page
+     * hint: this will do nothing in case the paginationStrategy !== Pagination
+     */
+    resetPagination() {
+        this.nodeEntriesComponentRef?.paginator?.firstPage();
+    }
+
+    deleteNodes(objects: T[]): void {
+        this.dataSource.removeData(objects);
+        this.getSelection().clear();
     }
 }

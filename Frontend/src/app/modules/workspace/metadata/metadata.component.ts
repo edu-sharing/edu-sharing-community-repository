@@ -28,9 +28,22 @@ import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { FormatDatePipe } from '../../../shared/pipes/format-date.pipe';
 import { NodeImageSizePipe } from '../../../shared/pipes/node-image-size.pipe';
+import { NodeService } from 'ngx-edu-sharing-api';
+import { NodeDataSource } from '../../../features/node-entries/node-data-source';
+import {
+    InteractionType,
+    NodeEntriesDisplayType,
+} from '../../../features/node-entries/entries-model';
 
 // Charts.js
 declare var Chart: any;
+
+interface Stats {
+    labels: string[];
+    colors: string[];
+    points: number[];
+    pointsIcons: string[];
+}
 
 @Component({
     selector: 'es-workspace-metadata',
@@ -49,13 +62,17 @@ export class WorkspaceMetadataComponent implements OnInit {
     @Output() onClose = new EventEmitter();
     @Output() onRestore = new EventEmitter();
 
+    readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    readonly InteractionType = InteractionType;
     readonly INFO = 'INFO';
     readonly PROPERTIES = 'PROPERTIES';
     readonly VERSIONS = 'VERSIONS';
     data: any;
+    loading = true;
     tab = this.INFO;
     permissions: any;
-    usagesCollection: Node[];
+    usagesCollection = new NodeDataSource();
+    usagesCollectionData = this.usagesCollection.connect();
     nodeObject: Node;
     versions: Version[];
     versionsLoading = false;
@@ -63,11 +80,8 @@ export class WorkspaceMetadataComponent implements OnInit {
     columnsCollections: ListItem[] = [];
     statsTotalPoints: number;
     forkedParent: Node;
-    forkedChilds: Node[];
-    /*Chart.js*/
-    canvas: any;
-    ctx: any;
-    stats: any = {
+    forkedChildren = new NodeDataSource();
+    stats: Stats = {
         labels: [],
         points: [],
         pointsIcons: ['input', 'layers', 'cloud_download', 'remove_red_eye'],
@@ -89,30 +103,38 @@ export class WorkspaceMetadataComponent implements OnInit {
         private router: Router,
         private iamApi: RestIamService,
         private nodeApi: RestNodeService,
+        private nodeService: NodeService,
         private searchApi: RestSearchService,
         private usageApi: RestUsageService,
     ) {
         this.columns.push(new ListItem('NODE', RestConstants.CM_NAME));
         this.columnsCollections.push(new ListItem('COLLECTION', 'title'));
+        this.columnsCollections.push(new ListItem('COLLECTION', 'info'));
+        this.columnsCollections.push(new ListItem('COLLECTION', 'scope'));
     }
 
     ngOnInit(): void {
         this.nodeSubject
             .pipe(
                 filter((node) => node !== null),
-                map((node) => node.ref.id),
+                // map((node) => node.ref.id),
+                // TODO: check if distinct still working
                 distinctUntilChanged(),
             )
-            .subscribe((nodeId) => this.load(nodeId));
+            .subscribe((node) => this.load(node));
     }
 
-    private async load(nodeId: string) {
+    private async load(node: Node) {
         this.versions = null;
         this.versionsLoading = true;
         this.resetStats();
+        this.loading = true;
+        // use temporary the given data to show headers
+        this.data = this.format(node);
         this.nodeObject = (
-            await this.nodeApi.getNodeMetadata(nodeId, [RestConstants.ALL]).toPromise()
+            await this.nodeApi.getNodeMetadata(node.ref.id, [RestConstants.ALL]).toPromise()
         ).node;
+        this.loading = false;
         if (this.nodeObject.isDirectory) {
             this.tab = this.INFO;
         }
@@ -164,7 +186,7 @@ export class WorkspaceMetadataComponent implements OnInit {
         });
         this.usages = null;
         this.forkedParent = null;
-        this.forkedChilds = null;
+        this.forkedChildren.reset();
         if (this.nodeObject.properties[RestConstants.CCM_PROP_FORKED_ORIGIN]) {
             this.nodeApi
                 .getNodeMetadata(
@@ -183,26 +205,19 @@ export class WorkspaceMetadataComponent implements OnInit {
         const request = {
             propertyFilter: [RestConstants.ALL],
         };
-        this.searchApi
-            .searchByProperties(
-                [RestConstants.CCM_PROP_FORKED_ORIGIN],
-                [RestHelper.createSpacesStoreRef(this.nodeObject)],
-                ['='],
-                RestConstants.COMBINE_MODE_AND,
-                RestConstants.CONTENT_TYPE_FILES,
-                request,
-            )
-            .subscribe((childs) => {
-                this.forkedChilds = childs.nodes;
-            });
+        this.nodeService.getForkedChilds(node).subscribe((childs) => {
+            this.forkedChildren.setData(childs.nodes);
+        });
         this.usageApi.getNodeUsages(this.nodeObject.ref.id).subscribe((usages: UsageList) => {
             this.usages = usages.usages;
             this.usageApi
                 .getNodeUsagesCollection(this.nodeObject.ref.id)
                 .subscribe((collection) => {
-                    this.usagesCollection = collection
-                        .filter((c) => c.collectionUsageType === 'ACTIVE')
-                        .map((c) => c.collection);
+                    this.usagesCollection.setData(
+                        collection
+                            .filter((c) => c.collectionUsageType === 'ACTIVE')
+                            .map((c) => c.collection),
+                    );
                     this.getStats();
                 });
         });
@@ -258,7 +273,9 @@ export class WorkspaceMetadataComponent implements OnInit {
             this.config,
         );
         data.createDate = new FormatDatePipe(this.translate).transform(node.createdAt);
-        data.duration = RestHelper.getDurationFormatted(node);
+        data.duration = RestHelper.getDurationFormatted(
+            node.properties[RestConstants.LOM_PROP_TECHNICAL_DURATION]?.[0],
+        );
         data.author = this.toVCards(
             node.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR],
         ).join(', ');
@@ -368,29 +385,28 @@ export class WorkspaceMetadataComponent implements OnInit {
         this.stats.labels.push(this.translate.instant('WORKSPACE.METADATA.USAGE_TYPE.DOWNLOAD'));
         this.stats.labels.push(this.translate.instant('WORKSPACE.METADATA.USAGE_TYPE.VIEW'));
 
-        this.stats.points.push(this.usages.length - this.usagesCollection.length);
-        this.stats.points.push(this.usagesCollection.length);
+        this.stats.points.push(this.usages.length - this.usagesCollection.getData().length);
+        this.stats.points.push(this.usagesCollection.getData().length);
         this.stats.points.push(
-            this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_DOWNLOADS]
-                ? this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_DOWNLOADS]
-                : 0,
+            propertyToNumber(this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_DOWNLOADS]),
         );
         this.stats.points.push(
-            this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_VIEWS]
-                ? this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_VIEWS]
-                : 0,
+            propertyToNumber(this.nodeObject.properties[RestConstants.CCM_PROP_TRACKING_VIEWS]),
         );
-        this.statsTotalPoints = this.stats.points.reduce(
-            (a: any, b: any) => parseInt(a) + parseInt(b),
-        );
-        const statsMax = this.stats.points.reduce((a: any, b: any) =>
-            Math.max(parseInt(a), parseInt(b)),
-        );
-        this.canvas = document.getElementById('myChart');
-        this.ctx = this.canvas.getContext('2d');
+        this.statsTotalPoints = this.stats.points.reduce((a, b) => a + b);
+        this.drawBarChart();
+    }
+
+    private drawBarChart() {
+        const canvas = document.getElementById('myChart') as HTMLCanvasElement;
+        if (!canvas) {
+            return;
+        }
+        const ctx = canvas.getContext('2d');
         // FontFamily
         Chart.defaults.global.defaultFontFamily = 'open_sansregular';
-        const myChart = new Chart(this.ctx, {
+        const statsMax = Math.max(...this.stats.points);
+        const myChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: this.stats.labels,
@@ -439,5 +455,17 @@ export class WorkspaceMetadataComponent implements OnInit {
 
     canEdit() {
         return this.nodeObject && this.nodeObject.access.indexOf(RestConstants.ACCESS_WRITE) !== -1;
+    }
+
+    staticDataSource(node: Node) {
+        return new NodeDataSource([node]);
+    }
+}
+
+function propertyToNumber(property: string[]): number {
+    if (property?.length > 0) {
+        return parseInt(property[0]);
+    } else {
+        return 0;
     }
 }

@@ -25,7 +25,7 @@
   <div class="mdsEmbeddedGroup">
     <div class="dialogMds" *ngIf="currentWidgetSuggestion" (click)="closeDialog()"></div>
     <div [innerHTML]="rendered" *ngIf="rendered"></div>
-    <div class="reset" *ngIf="mode == 'search' && rendered">
+    <div class="reset" *ngIf="mode === 'search' && rendered">
       <a class="btn-flat" tabindex="0" (click)="resetValues()" (keyup.enter)="resetValues()">{{
         'CLEAR_FILTERS' | translate
       }}</a>

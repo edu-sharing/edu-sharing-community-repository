@@ -1,20 +1,22 @@
 import { DataSource } from '@angular/cdk/collections';
-import { BehaviorSubject, Observable } from 'rxjs';
-import * as rxjs from 'rxjs';
-import { distinctUntilChanged, map, shareReplay } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { GenericAuthority, Pagination, Node } from 'src/app/core-module/core.module';
+import { ItemsCap } from './items-cap';
 
 export class NodeDataSource<T extends Node | GenericAuthority> extends DataSource<T> {
     private dataStream = new BehaviorSubject<T[]>([]);
-    private pagination: Pagination;
+    private pagination$ = new BehaviorSubject<Pagination>(null);
     public isLoading: boolean;
-    private displayCountSubject = new BehaviorSubject<number | null>(null);
-    private canLoadMore = true;
-    private areAllDisplayed$ = rxjs.combineLatest([this.dataStream, this.displayCountSubject]).pipe(
-        map(([data, displayCount]) => this.getAreAllDisplayed(displayCount, data)),
-        distinctUntilChanged(),
-        shareReplay(1),
-    );
+    private _itemsCap: ItemsCap<T> | null;
+    get itemsCap(): ItemsCap<T> | null {
+        return this._itemsCap;
+    }
+    set itemsCap(value: ItemsCap<T> | null) {
+        this._itemsCap = value;
+        this.connectRenderData();
+    }
+    private renderData = new BehaviorSubject<T[]>([]);
+    private renderDataSubscription: Subscription | null;
 
     constructor(initialData: T[] = []) {
         super();
@@ -22,7 +24,27 @@ export class NodeDataSource<T extends Node | GenericAuthority> extends DataSourc
     }
 
     connect(): Observable<T[]> {
-        return this.dataStream;
+        if (!this.renderDataSubscription) {
+            this.connectRenderData();
+        }
+        return this.renderData;
+    }
+
+    private connectRenderData(): void {
+        this.renderDataSubscription?.unsubscribe();
+        if (this.itemsCap) {
+            this.renderDataSubscription = this.itemsCap
+                .connect(this.dataStream)
+                .subscribe((data) => this.renderData.next(data));
+        } else {
+            this.renderDataSubscription = this.dataStream.subscribe((data) =>
+                this.renderData.next(data),
+            );
+        }
+    }
+
+    connectPagination(): Observable<Pagination> {
+        return this.pagination$;
     }
 
     disconnect() {}
@@ -48,83 +70,46 @@ export class NodeDataSource<T extends Node | GenericAuthority> extends DataSourc
     removeData(removeData: T[]): void {
         const data = this.getData().filter((value) => !removeData.includes(value));
         this.dataStream.next(data);
-        if (this.pagination) {
+        if (this.pagination$.value) {
+            const pagination = this.pagination$.value;
             this.setPagination({
-                count: this.pagination.count - removeData.length,
-                from: this.pagination.from,
-                total: this.pagination.total - removeData.length,
+                count: pagination.count - removeData.length,
+                from: pagination.from,
+                total: pagination.total - removeData.length,
             });
         }
     }
 
     setPagination(pagination: Pagination) {
-        this.pagination = pagination;
+        this.pagination$.next(pagination);
     }
 
     reset() {
         this.setData([]);
-        this.setCanLoadMore(true);
     }
 
     hasMore() {
-        if (!this.pagination) {
+        if (!this.pagination$.value) {
             return undefined;
         }
-        return this.pagination.total > this.getData()?.length;
+        return this.pagination$.value.total > this.dataStream.value?.length;
     }
 
+    // FIXME: This is somewhat dangerous because we rely on `connect` being called from outside, but
+    // this method provides a way to access data without ever calling `connect`.
     getData() {
-        return this.dataStream.value;
+        return this.renderData.value;
     }
 
     isEmpty(): boolean {
-        return this.getData()?.length === 0;
+        return this.dataStream.value?.length === 0;
     }
 
     getTotal() {
-        return this.pagination?.total ?? this.getData()?.length ?? 0;
-    }
-
-    /**
-     * true if the underlying rendering component is currently displaying all data
-     * false otherwise
-     * useful to trigger visibility of "show/hide more" elements
-     */
-    areAllDisplayed(): Observable<boolean> {
-        return this.areAllDisplayed$;
-    }
-
-    private getAreAllDisplayed(displayCount: number | null, data?: T[]): boolean {
-        return displayCount === null || displayCount === data?.length;
-    }
-
-    /**
-     * get the actual visible count
-     * will return null if no visiblity constrain limit was set to the underlying rendering component
-     */
-    getDisplayCount() {
-        return this.displayCountSubject.value;
-    }
-    setDisplayCount(displayCount: number | null = null) {
-        if (displayCount === null) {
-            this.displayCountSubject.next(null);
-        } else {
-            this.displayCountSubject.next(Math.min(this.getData()?.length, displayCount));
-        }
+        return this.pagination$.value?.total ?? this.dataStream.value?.length ?? 0;
     }
 
     isFullyLoaded() {
-        return this.getTotal() <= this.getData()?.length;
-    }
-
-    /**
-     * set info if this datasource is able to fetch more data from the list
-     * @param _canLoadMore
-     */
-    setCanLoadMore(canLoadMore: boolean) {
-        this.canLoadMore = canLoadMore;
-    }
-    getCanLoadMore() {
-        return this.canLoadMore;
+        return this.getTotal() <= this.dataStream.value?.length;
     }
 }

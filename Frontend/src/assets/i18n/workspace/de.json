@@ -87,7 +87,6 @@
     "INVITE_GLOBAL_RESULTS": "Globale Ergebnisse",
     "INVITE_RECENT_AUTHORITIES": "Zuletzt eingeladen",
     "FILE_LOCATION": "Speicherort der Datei",
-    "CHANGE__LOCATION": "Ändern",
     "CHOOSE_LOCATION_TITLE": "Speicherort",
     "CHOOSE_LOCATION_DESCRIPTION": "Einen Ordner für die Ablage wählen",
     "TREE_MORE_ITEMS": "+ {{count}} weitere Ordner",
@@ -159,7 +158,11 @@
         "COPY_ACTIVE": "Das Element ist bereits als Kopie veröffentlicht wurden. Die Option kann nicht mehr geändert werden.",
         "CURRENT_VERSION": "Aktuelle Materialversion",
         "NO_REPUBLISH": "Keine neue Version veröffentlichen",
+        "NO_REPUBLISH_DESCRIPTION": "Es wird keine neue Version veröffentlicht und die bestehende veröffentlichte Version bleibt unverändert.",
         "REPUBLISH": "Neue Materialversion veröffentlichen",
+        "REPUBLISH_DESCRIPTION": "Es wird eine neue Version dieses Materials veröffentlicht, alle bestehenden Versionen bleiben als Vorgänger bestehen.",
+        "UPDATE_METADATA": "Letzte Version aktualisieren",
+        "UPDATE_METADATA_DESCRIPTION": "Die Metadaten der bestehenden, zuletzt veröffentlichten Version werden mit den aktuellen Metadaten des Originals aktualisiert.",
         "MODE_OFF": "Unveröffentlicht",
         "MODE_OFF_INFO": "Das Element ist nicht öffentlich zugänglich und kann nur von eingelandenen Nutzenen abgerufen werden",
         "MODE_DIRECT": "Öffentlich freigeben",
@@ -194,6 +197,7 @@
       "USAGE_TYPE": {
         "MOODLE": "Moodle-Kurse",
         "ILIAS": "Ilias-Kurse",
+        "TYPO3": "Typo3-Seiten",
         "COLLECTION": "Sammlungen",
         "UNKNOWN": "Andere / Unbekannt"
       },
@@ -250,6 +254,7 @@
         "BULK_CREATE": "Node via Bulk importiert",
         "BULK_UPDATE": "Node via Bulk aktualisiert",
         "BULK_UPDATE_RESYNC": "Lokale Änderungen auf Bulk-Änderungen angewendet",
+        "BULK_MIGRATION": "Migrationsschritt für OAI-Import auf ETL/Bulk-Import",
         "REMOTE_OBJECT_INIT": "Objekt wurde aus förderierter Suche importiert",
         "IMPORT_BLOCKED": "Status der Import-Blockierung wurde geändert"
       }
@@ -270,6 +275,14 @@
       "DELETE_CONFIG": "Konfiguration Löschen",
       "DELETE_CONFIG_TITLE": "Konfiguration Löschen?",
       "DELETE_CONFIG_MESSAGE": "Möchten Sie die gewählte Tool-Konfiguration wirklich löschen?\nJegliche bereits erstellte Objekte, die diese Konfiguration verwenden, werden unbrauchbar."
+    },
+    "LTI_V13_PLATFORM": {
+      "NODE": {
+        "CREATE": {
+          "TITLE": "Neues LTI Tool Object erstellen/einbinden",
+          "NAME": "Tool: {{ltitool}}"
+        }
+      }
     },
     "EDITOR": {
       "TITLE": "Allgemeine Informationen",
@@ -381,6 +394,8 @@
     "PASTE_MOVE": "verschoben",
     "SOURCE_TARGET_IDENTICAL": "Die Quelle und Ziel des Vorgangs sind identisch",
     "TARGET_NO_DIRECTORY": "Das Ziel muss ein Verzeichnis sein",
+    "TARGET_NO_WRITE_PERMISSIONS": "Sie haben nicht die nötigen Rechte, um Dateien in dieses Verzeichnis zu verschieben",
+    "SOURCE_NO_WRITE_PERMISSIONS": "Sie haben nicht die nötigen Rechte, um die gewählten Dateien in ein anderes Verzeichnis zu verschieben",
     "DRAG_DROP_TITLE": "Elementoperation",
     "DRAG_DROP_MESSAGE": "Element {{source}} nach {{target}} kopieren oder verschieben?",
     "DRAG_DROP_COPY": "Kopieren",
@@ -463,6 +478,7 @@
       "NO_WRITE_PERMISSION": "Sie haben unzureichende Rechte, um Dateien am aktuellen Ort abzulegen.",
       "ONGOING_UPLOAD": "Ein Upload-Vorgang läuft bereits. Bitte warten Sie, bis der Vorgang abgeschlossen ist",
       "NOT_FOUND": "Die gewünschte Ordner-ID {{id}} wurde nicht gefunden. Eventuell wurde sie gelöscht.",
+      "ELEMENT_NOT_IN_FOLDER": "Das Element konnte in diesem Ordner nicht gefunden werden",
       "LICENSE_UPDATED": "Lizenzinformationen wurden aktualisiert",
       "CONTRIBUTOR_UPDATED": "Informationen zu Beteiligten wurden aktualisiert",
       "WORKFLOW_UPDATED": "Informationen zum Workflow wurden aktualisiert",

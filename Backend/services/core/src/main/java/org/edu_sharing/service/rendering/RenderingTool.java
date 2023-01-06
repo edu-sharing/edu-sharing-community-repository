@@ -5,12 +5,14 @@ import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -59,12 +61,18 @@ public class RenderingTool {
 				renderingService = UrlTool.setParam(renderingService, param.getKey(),param.getValue());
 			}
 		}
+		String appId = repInfo.getAppId();
+		if(nodeId == null) {
+			appId = "";
+			nodeId = UUID.randomUUID().toString();
+			renderingService = UrlTool.setParam(renderingService, "sig_token", nodeId);
+		}
 		renderingService = UrlTool.setParam(renderingService, "ts",""+timestamp);
 		try{
 			renderingService = UrlTool.setParam(renderingService, "language",new AuthenticationToolAPI().getCurrentLanguage());
 		}catch(Throwable t){}
 
-		renderingService = UrlTool.setParam(renderingService, "sig", getSignatureSigned(repInfo.getAppId(),nodeId,timestamp));
+		renderingService = UrlTool.setParam(renderingService, "sig", getSignatureSigned(appId,nodeId,timestamp));
 		return renderingService;
 
 	}
@@ -149,10 +157,11 @@ public class RenderingTool {
 	}
 
 	public static void buildRenderingCache(String nodeId) {
-		ContextManagementFilter.B3 b3 = ContextManagementFilter.b3.get();
+		final Context context = Context.getCurrentInstance();
 		prepareExecutor.execute(()->{
 			AuthenticationUtil.runAsSystem(()-> {
 				try {
+					Context.setInstance(context);
 					// Deprecated, use the Lightbend config!
 					if(!ConfigServiceFactory.getCurrentConfig().getValue("rendering.prerender",true)) {
 						return null;
@@ -162,11 +171,12 @@ public class RenderingTool {
 					}
 					// @TODO: May we need to build up caches just for particular file types?
 					RenderingServiceImpl service = (RenderingServiceImpl) RenderingServiceFactory.getLocalService();
-					service.setB3(b3);
 					return service.getDetails(nodeId, null, DISPLAY_PRERENDER, null);
 				} catch (Exception e) {
 					logger.warn("Error building rendering cache for node " + nodeId + ": " + e.getMessage(), e);
 					return e;
+				} finally {
+					Context.release();
 				}
 			});
 		});

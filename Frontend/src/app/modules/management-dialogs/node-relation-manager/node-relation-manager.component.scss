@@ -10,6 +10,9 @@
             width: 100%;
         }
     }
+    h2:first-child {
+        margin-top: 0;
+    }
     .relation-result {
         display: flex;
         align-items: center;

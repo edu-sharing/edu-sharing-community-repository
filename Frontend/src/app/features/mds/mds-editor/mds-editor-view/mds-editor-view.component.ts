@@ -344,6 +344,16 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         });
     }
 
+    /**
+     *
+     * @param widget
+     * @param element
+     * @param editorMode
+     * @param mode
+     * replace: Replace the given element
+     * append: Append it at the given elment, but do not delete the element
+     * @private
+     */
     private injectWidget(
         widget: Widget,
         element: Element,
@@ -402,7 +412,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
             ];
         } else if (widget.definition.interactionType === 'None' || editorMode === 'inline') {
             // if inline editing -> we don't hide any widget so it can be edited
-            if (editorMode === 'inline') {
+            if (editorMode === 'inline' && widget.definition.interactionType !== 'None') {
                 widget.definition.hideIfEmpty = false;
             }
             return MdsWidgetComponent;
@@ -452,6 +462,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
                 mdsWidgetComponent.finishEdit(injected.instance);
             });
         });
+        return injected;
     }
 
     isInHiddenState() {

@@ -14,7 +14,6 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { Toast } from '../../../../../core-ui-module/toast';
 import { DateHelper } from '../../../../../core-ui-module/DateHelper';
-import { WorkspaceContributorComponent } from '../../../../../modules/management-dialogs/contributor/contributor.component';
 import { MatTabGroup } from '@angular/material/tabs';
 
 export interface AuthorData {

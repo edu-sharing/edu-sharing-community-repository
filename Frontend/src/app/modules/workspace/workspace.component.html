@@ -1,41 +1,41 @@
-<div class="frame" cdkDropListGroup>
+<div class="frame" cdkDropList [cdkDropListSortingDisabled]="true">
   <div *ngIf="isBlocked" class="isBlocked">{{ 'NO_PERMISSIONS_FOR_SCOPE' | translate }}</div>
   <div *ngIf="!isBlocked" [class.hide]="globalProgress">
     <div class="dialog" *ngIf="showSelectRoot" (click)="showSelectRoot = false"></div>
     <div class="selectRootMenu collection" [@overlay]="showSelectRoot" *ngIf="showSelectRoot">
       <a
         class="collection-item"
-        [class.rootSelected]="root == 'MY_FILES'"
+        [class.rootSelected]="root === 'MY_FILES'"
         (click)="showSelectRoot = false; setRoot('MY_FILES')"
         ><i esIcon="person"></i> {{ 'WORKSPACE.MY_FILES' | translate }}</a
       >
       <a
         class="collection-item"
-        [class.rootSelected]="root == 'SHARED_FILES'"
+        [class.rootSelected]="root === 'SHARED_FILES'"
         (click)="showSelectRoot = false; setRoot('SHARED_FILES')"
         ><i esIcon="group"></i> {{ 'WORKSPACE.SHARED_FILES' | translate }}</a
       >
       <a
         class="collection-item"
-        [class.rootSelected]="root == 'MY_SHARED_FILES'"
+        [class.rootSelected]="root === 'MY_SHARED_FILES'"
         (click)="showSelectRoot = false; setRoot('MY_SHARED_FILES')"
         ><i esIcon="share"></i> {{ 'WORKSPACE.MY_SHARED_FILES' | translate }}</a
       >
       <a
         class="collection-item"
-        [class.rootSelected]="root == 'TO_ME_SHARED_FILES'"
+        [class.rootSelected]="root === 'TO_ME_SHARED_FILES'"
         (click)="showSelectRoot = false; setRoot('TO_ME_SHARED_FILES')"
         ><i esIcon="send"></i> {{ 'WORKSPACE.TO_ME_SHARED_FILES' | translate }}</a
       >
       <a
         class="collection-item"
-        [class.rootSelected]="root == 'WORKFLOW_RECEIVE'"
+        [class.rootSelected]="root === 'WORKFLOW_RECEIVE'"
         (click)="showSelectRoot = false; setRoot('WORKFLOW_RECEIVE')"
         ><i esIcon="inbox"></i> {{ 'WORKSPACE.WORKFLOW_RECEIVE' | translate }}</a
       >
       <a
         class="collection-item"
-        [class.rootSelected]="root == 'RECYCLE'"
+        [class.rootSelected]="root === 'RECYCLE'"
         (click)="showSelectRoot = false; setRoot('RECYCLE')"
         ><i esIcon="delete"></i> {{ 'WORKSPACE.RECYCLE' | translate }}</a
       >
@@ -43,7 +43,6 @@
     <div class="tree" *ngIf="isLoggedIn">
       <es-workspace-tree
         [class.tree-quota]="user.person.quota.enabled"
-        [current]="currentFolder ? currentFolder.ref.id : null"
         [path]="path"
         [selectedNode]="selectedNodeTree"
         [root]="root"
@@ -65,21 +64,15 @@
           } : null"-->
         <es-breadcrumbs
           *ngIf="isLoggedIn"
-          [breadcrumbsAsNode]="path"
           [searchQuery]="searchQuery ? searchQuery.query : null"
           [home]="'WORKSPACE.' + root"
-          (onDrop)="handleDrop($event)"
+          [canDropNodes]="canDropOnBreadcrumb"
+          (onDrop)="handleDropOnBreadcrumb($event)"
           (onClick)="openBreadcrumb($event)"
         ></es-breadcrumbs>
       </div>
     </div>
-    <es-recycle
-      *ngIf="root == 'RECYCLE'"
-      class="explorer"
-      [actionbar]="actionbar"
-      [searchWorkspace]="searchQuery ? searchQuery.query : null"
-      [isInsideWorkspace]="true"
-    ></es-recycle>
+    <es-recycle *ngIf="root === 'RECYCLE'" class="explorer" [actionbar]="actionbar"></es-recycle>
     <div class="actionbarFrame">
       <div class="mobile-move-top">
         <es-actionbar #actionbar></es-actionbar>
@@ -92,7 +85,7 @@
       role="main"
       esSkipTarget="MAIN_CONTENT"
       appCreateContextMenu
-      *ngIf="root != 'RECYCLE'"
+      *ngIf="root !== 'RECYCLE'"
       [current]="currentFolder"
       [root]="root"
       [searchQuery]="searchQuery"

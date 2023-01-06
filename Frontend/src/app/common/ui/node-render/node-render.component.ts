@@ -31,7 +31,6 @@ import { trigger } from '@angular/animations';
 import { Location, PlatformLocation } from '@angular/common';
 import { UIConstants } from '../../../core-module/ui/ui-constants';
 import { SearchService } from '../../../modules/search/search.service';
-import { ActionbarHelperService } from '../../services/actionbar-helper';
 import { HttpClient } from '@angular/common/http';
 import {
     ConfigurationHelper,
@@ -62,10 +61,7 @@ import {
 import { MdsHelper } from '../../../core-module/rest/mds-helper';
 import { VideoControlsComponent } from '../../../core-ui-module/components/video-controls/video-controls.component';
 import { ActionbarComponent } from '../../../shared/components/actionbar/actionbar.component';
-import {
-    OPTIONS_HELPER_CONFIG,
-    OptionsHelperService,
-} from '../../../core-ui-module/options-helper.service';
+import { OptionsHelperService } from '../../../core-ui-module/options-helper.service';
 import { RestTrackingService } from '../../../core-module/rest/services/rest-tracking.service';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { CardComponent } from '../../../shared/components/card/card.component';
@@ -76,20 +72,13 @@ import { Subject } from 'rxjs';
 import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
+import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
 
 @Component({
     selector: 'es-node-render',
     templateUrl: 'node-render.component.html',
     styleUrls: ['node-render.component.scss'],
-    providers: [
-        OptionsHelperService,
-        {
-            provide: OPTIONS_HELPER_CONFIG,
-            useValue: {
-                subscribeEvents: true,
-            },
-        },
-    ],
+    providers: [OptionsHelperService],
     animations: [trigger('fadeFast', UIAnimation.fade(UIAnimation.ANIMATION_TIME_FAST))],
 })
 export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
@@ -121,12 +110,12 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         private cardServcie: CardService,
         private viewContainerRef: ViewContainerRef,
         private frame: FrameEventsService,
-        private actionbarService: ActionbarHelperService,
         private toast: Toast,
         private cd: ChangeDetectorRef,
         private config: ConfigurationService,
         private route: ActivatedRoute,
         private networkService: RestNetworkService,
+        private breadcrumbsService: BreadcrumbsService,
         private _ngZone: NgZone,
         private router: Router,
         private platformLocation: PlatformLocation,
@@ -141,7 +130,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
                 this.setDownloadUrl(url);
             },
         };
-        this.frame.addListener(this);
+        this.frame.addListener(this, this.destroyed$);
         this.renderHelper.setViewContainerRef(viewContainerRef);
 
         this.translations.waitForInit().subscribe(() => {
@@ -194,6 +183,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
             show: false,
             currentScope: 'render',
         });
+        this.optionsHelper.registerGlobalKeyboardShortcuts();
         this.optionsHelper.nodesChanged
             .pipe(takeUntil(this.destroyed$))
             .subscribe(() => this.refresh());
@@ -224,8 +214,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
     private isOpenable: boolean;
     private closeOnBack: boolean;
     public nodeMetadata: Node[];
-    public nodeShare: Node[];
-    public nodeShareLink: Node;
     public nodeWorkflow: Node[];
     public addNodesStream: Node[];
     public nodeDelete: Node[];
@@ -443,7 +431,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         this.addDownloadButton(download);
     }
     private loadRenderData() {
-        const loadingTask = this.loadingScreen.addLoadingTask();
+        const loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed$ });
         this.isLoading = true;
         this.optionsHelper.clearComponents(this.actionbar);
         if (this.isBuildingPage) {
@@ -484,11 +472,9 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
                             this.moveInnerStyleToHead(nodeRenderContent);
                             this.postprocessHtml();
                             this.handleProposal();
-                            this.addCollections();
-                            this.addNodeRelations();
+                            this.renderHelper.doAll(this._node);
                             this.addVideoControls();
                             this.linkSearchableWidgets();
-                            this.addComments();
                             this.loadNode();
                             this.loadSimilarNodes();
                             this.isLoading = false;
@@ -526,6 +512,9 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
                     loadingTask.done();
                 },
             );
+        this.nodeApi
+            .getNodeParents(this._nodeId)
+            .subscribe((nodes) => this.breadcrumbsService.setNodePath(nodes.nodes.reverse()));
     }
     onDelete(event: any) {
         if (event.error) return;
@@ -567,16 +556,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
             target,
             data,
         );
-    }
-
-    addCollections() {
-        this.renderHelper.injectModuleInCollections(this._node);
-    }
-    addNodeRelations() {
-        this.renderHelper.injectNodeRelationsWidget(this._node);
-    }
-    addComments() {
-        this.renderHelper.injectModuleComments(this._node);
     }
     private postprocessHtml() {
         if (!this.config.instant('rendering.showPreview', true)) {
@@ -626,7 +605,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         }
     }
 
-    private initOptions() {
+    private async initOptions() {
         this.optionsHelper.setData({
             scope: Scope.Render,
             activeObjects: [this._node],
@@ -636,8 +615,13 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
                 useDefaultOptions: true,
                 addOptions: this.currentOptions,
             },
+            postPrepareOptions: (options, objects) => {
+                if (this.version && this.version !== RestConstants.NODE_VERSION_CURRENT) {
+                    options.filter((o) => o.name === 'OPTIONS.OPEN')[0].isEnabled = false;
+                }
+            },
         });
-        this.optionsHelper.initComponents(this.actionbar);
+        await this.optionsHelper.initComponents(this.actionbar);
         this.optionsHelper.refreshComponents();
         this.postprocessHtml();
         this.isBuildingPage = false;

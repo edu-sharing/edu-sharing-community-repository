@@ -209,6 +209,8 @@ public class CCConstants {
 
 	public final static String CCM_TYPE_COLLECTION_FEEDBACK = "{http://www.campuscontent.de/model/1.0}collection_feedback";
 
+	public final static String CCM_TYPE_MATERIAL_FEEDBACK = "{http://www.campuscontent.de/model/1.0}material_feedback";
+
 	public final static String CCM_TYPE_RATING = "{http://www.campuscontent.de/model/1.0}rating";
 
 	public final static String CCM_TYPE_LO = "{http://www.campuscontent.de/model/1.0}lo";
@@ -398,6 +400,11 @@ public class CCConstants {
 
 	public final static String CCM_PROP_COLLECTION_FEEDBACK_DATA = "{http://www.campuscontent.de/model/1.0}collection_feedback_data";
 
+
+	public final static String CCM_PROP_MATERIAL_FEEDBACK_AUTHORITY = "{http://www.campuscontent.de/model/1.0}material_feedback_authority";
+
+	public final static String CCM_PROP_MATERIAL_FEEDBACK_DATA = "{http://www.campuscontent.de/model/1.0}material_feedback_data";
+
 	public final static String CCM_PROP_RATING_VALUE = "{http://www.campuscontent.de/model/1.0}rating_value";
 	public final static String CCM_PROP_RATING_TEXT = "{http://www.campuscontent.de/model/1.0}rating_text";
 
@@ -506,6 +513,12 @@ public class CCConstants {
 
 	public static final String CCM_PROP_TRACKING_VIEWS = "{http://www.campuscontent.de/model/1.0}tracking_views";
 
+	public static final String CCM_ASPECT_LTITOOL_NODE = "{http://www.campuscontent.de/model/1.0}ltitool_node";
+
+	public static final String CCM_PROP_LTITOOL_NODE_RESOURCELINK = "{http://www.campuscontent.de/model/1.0}ltitool_resourcelink";
+
+	public static final String CCM_PROP_LTITOOL_NODE_TOOLURL = "{http://www.campuscontent.de/model/1.0}ltitool_url";
+
 	public static final int HTTP_INSUFFICIENT_STORAGE = 503;
 
     public static final List<String> CHILDOBJECT_IGNORED_PARENT_PROPERTIES = Arrays.asList(
@@ -598,6 +611,8 @@ public class CCConstants {
 	public final static String CCM_ASSOC_RATING = "{http://www.campuscontent.de/model/1.0}childrating";
 
 	public final static String CCM_ASSOC_COLLECTION_FEEDBACK = "{http://www.campuscontent.de/model/1.0}childcollectionfeedback";
+
+	public final static String CCM_ASSOC_MATERIAL_FEEDBACK = "{http://www.campuscontent.de/model/1.0}childmaterialfeedback";
 	/**
 	 * update alfresco3stable auf alfresco34e
 	 *
@@ -894,6 +909,8 @@ public class CCConstants {
 	public final static String CCM_VALUE_TOOLPERMISSION_HANDLESERVICE = "TOOLPERMISSION_HANDLESERVICE";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_COLLECTION_FEEDBACK = "TOOLPERMISSION_COLLECTION_FEEDBACK";
+
+	public final static String CCM_VALUE_TOOLPERMISSION_MATERIAL_FEEDBACK = "TOOLPERMISSION_MATERIAL_FEEDBACK";
 
 	public final static String CCM_VALUE_TOOLPERMISSION_USAGE_STATISTIC = "TOOLPERMISSION_USAGE_STATISTIC";
 
@@ -1901,6 +1918,7 @@ public class CCConstants {
 			permission.add(PERMISSION_READ_PREVIEW);
 			permission.add(PERMISSION_READ_ALL);
 			permission.add(PERMISSION_COMMENT);
+			permission.add(PERMISSION_FEEDBACK);
 			permission.add(PERMISSION_RATE);
 			permission.add(PERMISSION_RATE_READ);
 			permission.add(PERMISSION_RELATION);
@@ -2170,6 +2188,8 @@ public class CCConstants {
 
 	public static final String VERSION_COMMENT_BULK_CREATE = "BULK_CREATE";
 	public static final String VERSION_COMMENT_BULK_UPDATE = "BULK_UPDATE";
+
+	public static final String VERSION_COMMENT_BULK_MIGRATION = "BULK_MIGRATION";
 	public static final String VERSION_COMMENT_BULK_UPDATE_RESYNC = "BULK_UPDATE_RESYNC";
 	public static final String VERSION_COMMENT_REMOTE_OBJECT_INIT = "REMOTE_OBJECT_INIT";
 

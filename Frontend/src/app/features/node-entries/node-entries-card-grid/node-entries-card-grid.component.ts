@@ -1,66 +1,113 @@
-import { CdkDragDrop, CdkDragEnter, CdkDragExit, moveItemInArray } from '@angular/cdk/drag-drop';
+import { CdkDragEnter, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import {
     Component,
     ElementRef,
     Input,
+    NgZone,
     OnChanges,
+    OnDestroy,
+    OnInit,
     QueryList,
     SimpleChanges,
     ViewChild,
     ViewChildren,
 } from '@angular/core';
+import { Node } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
-import { distinctUntilChanged, map, switchMap, take } from 'rxjs/operators';
-import { UIService, ListItemSort, RestConstants } from '../../../core-module/core.module';
-import { SortEvent } from '../../../shared/components/sort-dropdown/sort-dropdown.component';
-import { DragCursorDirective } from '../../../shared/directives/drag-cursor.directive';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { distinctUntilChanged, map, switchMap, take, takeUntil } from 'rxjs/operators';
+import { ListItemSort, RestConstants, UIService } from '../../../core-module/core.module';
 import { NodeEntriesService } from '../../../core-ui-module/node-entries.service';
 import { Target } from '../../../core-ui-module/option-item';
-import { NodeEntriesDisplayType } from '../entries-model';
-
+import { DragData } from '../../../services/nodes-drag-drop.service';
+import { SortEvent } from '../../../shared/components/sort-dropdown/sort-dropdown.component';
+import { GridLayout, NodeEntriesDisplayType } from '../entries-model';
+import { ItemsCap } from '../items-cap';
+import { NodeEntriesGlobalService } from '../node-entries-global.service';
 import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
-import { Node } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-node-entries-card-grid',
     templateUrl: 'node-entries-card-grid.component.html',
     styleUrls: ['node-entries-card-grid.component.scss'],
 })
-export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
+export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnChanges, OnDestroy {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Target = Target;
+    @ViewChildren(CdkDropList) dropListsQuery: QueryList<CdkDropList>;
     @ViewChild('grid') gridRef: ElementRef;
     @ViewChildren('item', { read: ElementRef }) itemRefs: QueryList<ElementRef<HTMLElement>>;
     @Input() displayType: NodeEntriesDisplayType;
 
-    private readonly nodes$ = this.entriesService.dataSource$.pipe(
+    isDragging = false; // Drag-and-drop, not rearrange
+    dropLists: CdkDropList[];
+    /**
+     * Whether the number of shown items is limited by `gridConfig.maxRows`.
+     *
+     * A value of `true` does not mean, that there would be more items available.
+     */
+    visibleItemsLimited = false;
+    layout: GridLayout;
+    /**
+     * updates via boxObserver
+     * and holds the information if scrolling in the direction is currently feasible
+     */
+    scroll = {
+        left: false,
+        right: false,
+    };
+
+    readonly nodes$ = this.entriesService.dataSource$.pipe(
         switchMap((dataSource) => dataSource?.connect()),
     );
     private readonly maxRows$ = this.entriesService.gridConfig$.pipe(
         map((gridConfig) => gridConfig?.maxRows || null),
         distinctUntilChanged(),
     );
+    private readonly layout$ = this.entriesService.gridConfig$.pipe(
+        map((gridConfig) => gridConfig?.layout || 'grid'),
+        distinctUntilChanged(),
+    );
     private readonly itemsPerRowSubject = new BehaviorSubject<number | null>(null);
-    readonly visibleNodes$ = rxjs
-        .combineLatest([
-            this.nodes$,
-            this.itemsPerRowSubject.pipe(distinctUntilChanged()),
-            this.maxRows$,
-        ])
-        .pipe(
-            map(([nodes, itemsPerRow, maxRows]) =>
-                this.getVisibleNodes(nodes, itemsPerRow, maxRows),
-            ),
-        );
+    readonly itemsCap = new ItemsCap<T>();
+    private globalCursorStyle: HTMLStyleElement;
+    private destroyed = new Subject<void>();
 
     constructor(
         public entriesService: NodeEntriesService<T>,
+        public entriesGlobalService: NodeEntriesGlobalService,
         public templatesService: NodeEntriesTemplatesService,
         public ui: UIService,
+        private ngZone: NgZone,
     ) {}
 
+    ngOnInit(): void {
+        this.registerItemsCap();
+        this.registerLayout();
+        this.registerVisibleItemsLimited();
+    }
+
+    private registerItemsCap() {
+        this.entriesService.dataSource$
+            .pipe(takeUntil(this.destroyed))
+            .subscribe((dataSource) => (dataSource.itemsCap = this.itemsCap));
+        rxjs.combineLatest([this.itemsPerRowSubject.pipe(distinctUntilChanged()), this.maxRows$])
+            .pipe(
+                map(([itemsPerRow, maxRows]) =>
+                    maxRows > 0 && itemsPerRow !== null ? itemsPerRow * maxRows : null,
+                ),
+            )
+            .subscribe((cap) => (this.itemsCap.cap = cap));
+    }
+    private registerLayout() {
+        this.layout$.subscribe((layout) => (this.layout = layout));
+    }
     ngOnChanges(changes: SimpleChanges): void {}
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
+    }
 
     changeSort(sort: SortEvent) {
         this.entriesService.sort.active = sort.name;
@@ -68,31 +115,68 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
         this.entriesService.sortChange.emit(this.entriesService.sort);
     }
 
-    reorder(drag: CdkDragDrop<number>) {
-        moveItemInArray(
-            this.entriesService.dataSource.getData(),
-            drag.previousContainer.data,
-            drag.container.data,
-        );
-    }
-
-    loadData(byButtonClick = false) {
+    loadData(source: 'scroll' | 'button') {
         // @TODO: Maybe this is better handled in a more centraled service
-        if (!byButtonClick) {
+        if (source === 'scroll') {
             // check if there is a footer
             const elements = document.getElementsByTagName('footer');
             if (elements.length && elements.item(0).innerHTML.trim()) {
                 return;
             }
         }
-        if (this.entriesService.dataSource.hasMore()) {
-            this.entriesService.fetchData.emit({
-                offset: this.entriesService.dataSource.getData().length,
-            });
-        }
-        if (byButtonClick) {
+        const couldLoadMore = this.entriesService.loadMore(source);
+        if (couldLoadMore && source === 'button') {
             this.focusFirstNewItemWhenLoaded();
         }
+    }
+
+    onCustomSortingInProgressChange() {
+        this.entriesService.sortChange.emit(this.entriesService.sort);
+        setTimeout(() => {
+            this.refreshDropLists();
+        });
+    }
+
+    onRearrangeDragEntered($event: CdkDragEnter) {
+        moveItemInArray(
+            this.entriesService.dataSource.getData(),
+            $event.item.data,
+            $event.container.data,
+        );
+        // `CdkDrag` doesn't really want us to rearrange the items while dragging. Its cached
+        // element positions get out of sync unless we update them manually.
+        this.ngZone.runOutsideAngular(() =>
+            setTimeout(() => this.dropLists?.forEach((list) => list._dropListRef['_cacheItems']())),
+        );
+    }
+
+    onRearrangeDragStarted() {
+        this.globalCursorStyle = document.createElement('style');
+        document.body.appendChild(this.globalCursorStyle);
+        this.globalCursorStyle.innerHTML = `* {cursor: grabbing !important; }`;
+    }
+
+    onRearrangeDragEnded() {
+        document.body.removeChild(this.globalCursorStyle);
+        this.globalCursorStyle = null;
+    }
+
+    getDragStartDelay(): number {
+        if (this.ui.isMobile()) {
+            return 500;
+        } else {
+            return null;
+        }
+    }
+
+    private registerVisibleItemsLimited() {
+        this.maxRows$.subscribe((maxRows) => {
+            this.visibleItemsLimited = maxRows > 0;
+        });
+    }
+
+    private refreshDropLists() {
+        this.dropLists = this.dropListsQuery.toArray();
     }
 
     private focusFirstNewItemWhenLoaded() {
@@ -115,6 +199,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
     onGridSizeChanges(): void {
         const itemsPerRow = this.getItemsPerRow();
         this.itemsPerRowSubject.next(itemsPerRow);
+        this.updateScrollState();
     }
 
     private getItemsPerRow(): number | null {
@@ -124,17 +209,6 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
         return getComputedStyle(this.gridRef.nativeElement)
             .getPropertyValue('grid-template-columns')
             .split(' ').length;
-    }
-
-    private getVisibleNodes(nodes: T[], itemsPerRow: number | null, maxRows: number | null): T[] {
-        if (maxRows > 0 && itemsPerRow !== null) {
-            const count = itemsPerRow * maxRows;
-            this.entriesService.dataSource.setDisplayCount(count);
-            return nodes.slice(0, this.entriesService.dataSource.getDisplayCount());
-        } else {
-            this.entriesService.dataSource.setDisplayCount();
-            return nodes;
-        }
     }
 
     getSortColumns() {
@@ -151,32 +225,72 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnChanges {
         );
     }
 
-    dragEnter(drag: CdkDragEnter<T>) {
-        const allowed = this.entriesService.dragDrop.dropAllowed?.(drag.container.data, {
-            element: [drag.item.data],
-            sourceList: this.entriesService.list,
-            mode: DragCursorDirective.dragState.mode,
+    canDropNodes = (dragData: DragData<T>) => this.entriesService.dragDrop.dropAllowed?.(dragData);
+
+    onNodesDropped(dragData: DragData<Node>) {
+        this.entriesService.dragDrop.dropped(dragData.target, {
+            element: dragData.draggedNodes,
+            mode: dragData.action,
         });
-
-        DragCursorDirective.dragState.element = drag.container.data;
-        DragCursorDirective.dragState.dropAllowed = allowed;
     }
 
-    drop(drop: CdkDragDrop<T, any>) {
-        this.entriesService.dragDrop.dropped(drop.container.data, {
-            element: [drop.item.data],
-            sourceList: this.entriesService.list,
-            mode: DragCursorDirective.dragState.mode,
+    getDragEnabled(): boolean {
+        return this.entriesService.dragDrop?.dragAllowed && !this.ui.isMobile();
+    }
+
+    getDragData(node: T): T[] {
+        const selection = this.entriesService.selection;
+        if (selection.isSelected(node)) {
+            return selection.selected;
+        } else {
+            return [node];
+        }
+    }
+
+    onDragStarted(node: T) {
+        if (!this.entriesService.selection.isSelected(node)) {
+            this.entriesService.selection.clear();
+            this.entriesService.selection.select(node);
+        }
+        this.isDragging = true;
+    }
+
+    onDragEnded() {
+        this.isDragging = false;
+    }
+
+    private canScroll(direction: 'left' | 'right') {
+        const element = this.gridRef?.nativeElement;
+        if (direction === 'left') {
+            return element.scrollLeft > 0;
+        } else if (direction === 'right') {
+            console.log(
+                element.scrollLeft,
+                element.scrollWidth - element.clientWidth,
+                element.clientWidth,
+            );
+            /*
+             use a small pixel buffer (10px) because scrolling aligns with the start of each card and
+             it can cause slight alignment issues on the end of the container
+             */
+            return element.scrollLeft < element.scrollWidth - element.clientWidth - 10;
+        }
+        return false;
+    }
+
+    updateScrollState() {
+        if (this.layout === 'scroll') {
+            this.scroll.left = this.canScroll('left');
+            this.scroll.right = this.canScroll('right');
+        }
+    }
+
+    doScroll(direction: 'left' | 'right') {
+        console.log('doScroll');
+        // 1 is enough because the browser will handle it via css snapping
+        this.gridRef?.nativeElement.scrollBy({
+            left: direction === 'right' ? 1 : -1,
+            behavior: 'smooth',
         });
-        DragCursorDirective.dragState.element = null;
-    }
-
-    dragExit(exit: CdkDragExit<T> | any) {
-        console.log(exit);
-        DragCursorDirective.dragState.element = null;
-    }
-
-    getDragState() {
-        return DragCursorDirective.dragState;
     }
 }

@@ -14,7 +14,9 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.tracking.ibatis.EduTrackingMapper;
 import org.edu_sharing.service.tracking.ibatis.NodeData;
@@ -26,8 +28,8 @@ import org.postgresql.util.PGobject;
 import org.postgresql.util.PSQLException;
 import org.springframework.context.ApplicationContext;
 
-import java.sql.*;
 import java.sql.Date;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.*;
@@ -176,6 +178,8 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
             try {
                 if (NodeServiceHelper.hasAspect(nodeRef, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
                     originalNodeRef = NodeServiceHelper.getProperty(nodeRef, CCConstants.CCM_PROP_IO_ORIGINAL);
+                } else if (NodeServiceHelper.hasAspect(nodeRef, CCConstants.CCM_ASPECT_PUBLISHED)) {
+                    originalNodeRef = ((NodeRef)NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL)).getId();
                 }
             }catch(Throwable ignored) { }
         String finalOriginalNodeRef = originalNodeRef;
@@ -339,6 +343,12 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
                         entry.setNode(resultSet.getString("node"));
                     }
                 }
+                // filter nodes which are not associated with this media center
+                if(entry.getNode() != null && mediacenter!=null && !mediacenter.isEmpty()) {
+                    if(!isPartOfMediacenter(mediacenter, entry.getNode())) {
+                        continue;
+                    }
+                }
 
                 mapResult(EventType.valueOf(resultSet.getString("type")), additionalFields, groupFields, resultSet, entry);
 
@@ -357,6 +367,20 @@ public class TrackingServiceImpl extends TrackingServiceDefault{
         }finally {
             dbAlf.cleanUp(con, statement);
         }
+    }
+
+    private boolean isPartOfMediacenter(String mediacenter, String nodeId) {
+        List<String> readPermissions = Arrays.asList(
+                CCConstants.PERMISSION_READ,
+                CCConstants.PERMISSION_READ_ALL,
+                CCConstants.PERMISSION_CONSUMER
+                );
+        return AuthenticationUtil.runAsSystem(
+                () -> PermissionServiceFactory.getLocalService().
+                        getExplicitPermissionsForAuthority(nodeId,
+                                MediacenterServiceFactory.getLocalService().getMediacenterProxyGroup(mediacenter))
+                        .stream().anyMatch(readPermissions::contains)
+            );
     }
 
     /**

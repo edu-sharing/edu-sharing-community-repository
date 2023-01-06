@@ -11,7 +11,7 @@ $collectionIconSize: 25px;
     a {
         &.cdk-keyboard-focused {
             // Normal focusColor might have insufficient contrast on color-matching background.
-            outline-color: darken($focusColor, 10%);
+            outline-color: var(--palette-primary-400);
         }
     }
 }

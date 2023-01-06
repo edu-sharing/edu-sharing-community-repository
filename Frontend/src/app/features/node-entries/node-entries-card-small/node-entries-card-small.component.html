@@ -1,10 +1,25 @@
 <div
   class="grid-card"
   [class.grid-card-collection]="nodeHelper.isNodeCollection(node)"
+  [class.dynamic-single-click]="entriesService.singleClickHint === 'dynamic'"
   [style.background-color]="nodeHelper.isNodeCollection(node) ? node.collection.color : null"
   (contextmenu)="openContextmenu($event)"
   (keydown.ContextMenu)="openContextmenu($event)"
 >
+  <div
+    *ngIf="templatesService.overlay"
+    class="card-overlay"
+    (click)="
+      entriesService.clickItem.emit({
+        element: node,
+        source: ClickSource.Overlay
+      })
+    "
+  >
+    <ng-container
+      *ngTemplateOutlet="templatesService.overlay; context: { element: node }"
+    ></ng-container>
+  </div>
   <es-node-url
     *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
     mode="wrapper"
@@ -28,7 +43,7 @@
 <ng-template #image let-playAnimation="playAnimation">
   <div
     class="card-image-area"
-    (esDistinctClick)="
+    (click)="
       entriesService.clickItem.emit({
         element: node,
         source: ClickSource.Preview
@@ -51,7 +66,7 @@
 <ng-template #meta>
   <div
     class="card-meta"
-    (esDistinctClick)="
+    (click)="
       entriesService.clickItem.emit({
         element: node,
         source: ClickSource.Metadata

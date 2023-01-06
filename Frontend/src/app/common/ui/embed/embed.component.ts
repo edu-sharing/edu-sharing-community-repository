@@ -1,16 +1,17 @@
-import { Component, NgZone, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, NgZone, OnDestroy, ViewChild, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
     EventListener,
     FrameEventsService,
 } from '../../../core-module/rest/services/frame-events.service';
 import { TranslationsService } from '../../../translations/translations.service';
-import { WorkspaceLicenseComponent } from '../../../modules/management-dialogs/license/license.component';
+import { LicenseDialogContentComponent } from '../../../features/dialogs/dialog-modules/license-dialog/license-dialog-content.component';
 import { Toast } from '../../../core-ui-module/toast';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import { Subject } from 'rxjs';
 
 @Component({
     selector: 'es-mds-embed',
@@ -25,23 +26,23 @@ import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-
             [groupId]="groupId"
             *ngIf="component === 'mds'"
         ></es-mds-editor-wrapper>
-        <es-workspace-license
-            #licenseRef
-            [properties]="data"
-            [embedded]="true"
+        <es-license-dialog-content
             *ngIf="component === 'license'"
-        ></es-workspace-license>
+            #licenseRef
+            [data]="{ kind: 'properties', properties: data }"
+        ></es-license-dialog-content>
     `,
     styleUrls: ['embed.component.scss'],
 })
-export class EmbedComponent implements EventListener {
+export class EmbedComponent implements EventListener, OnDestroy {
     @ViewChild('mdsRef') mdsRef: MdsEditorWrapperComponent;
-    @ViewChild('licenseRef') licenseRef: WorkspaceLicenseComponent;
+    @ViewChild('licenseRef') licenseRef: LicenseDialogContentComponent;
     component: string;
     data: any = {};
     groupId = 'io';
     setId = RestConstants.DEFAULT;
     refresh: Boolean;
+    private destroyed = new Subject<void>();
     constructor(
         private translations: TranslationsService,
         private mainNavService: MainNavService,
@@ -53,7 +54,11 @@ export class EmbedComponent implements EventListener {
         (window as any).ngEmbed = this;
         // disable the cookie info when in embedded context
         this.mainNavService.getCookieInfo().show = false;
-        this.event.addListener(this);
+        this.mainNavService.patchMainNavConfig({
+            currentScope: 'embed',
+            show: false,
+        });
+        this.event.addListener(this, this.destroyed);
         this.toast.showProgressDialog();
         this.translations.waitForInit().subscribe(() => {
             this.route.params.subscribe((params) => {
@@ -82,6 +87,12 @@ export class EmbedComponent implements EventListener {
             });
         });
     }
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
+    }
+
     async onEvent(event: string, data: any) {
         if (event === FrameEventsService.EVENT_PARENT_FETCH_DATA) {
             if (this.component === 'mds') {

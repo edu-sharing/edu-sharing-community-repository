@@ -144,7 +144,7 @@
   >
     <es-mds-editor-wrapper
       #mdsMobile
-      [class.display-none]="currentRepository == '-all-'"
+      [class.display-none]="currentRepository === '-all-'"
       [groupId]="queryId"
       [repository]="currentRepository"
       [setId]="mdsId"
@@ -179,7 +179,7 @@
               <i class="material-icons">tune</i>{{ 'SEARCH.TAB_FILTER' | translate }}
             </div>
           </ng-template>
-          <div *ngIf="currentRepository == '-all-'" class="repositoryList">
+          <div *ngIf="currentRepository === '-all-'" class="repositoryList">
             <label>{{ 'SEARCH.REPOSITORY_FILTER' | translate }}</label>
             <div *ngFor="let repo of repositoryIds">
               <mat-checkbox [(ngModel)]="repo.enabled">{{ repo.title }}</mat-checkbox>
@@ -187,7 +187,7 @@
           </div>
           <es-mds-editor-wrapper
             #mdsDesktop
-            [class.display-none]="currentRepository == '-all-'"
+            [class.display-none]="currentRepository === '-all-'"
             [groupId]="queryId"
             [repository]="currentRepository"
             [setId]="mdsId"
@@ -285,7 +285,7 @@
         role="main"
         esSkipTarget="MAIN_CONTENT"
         class="content_wrapper"
-        [class.content_wrapper_grouped]="currentRepository == '-all-' && groupResults"
+        [class.content_wrapper_grouped]="currentRepository === '-all-' && groupResults"
         [class.contentSidenav]="searchService.sidenavOpened"
       >
         <h1 esTitle class="cdk-visually-hidden">{{ 'SEARCH.TITLE' | translate }}</h1>
@@ -323,6 +323,8 @@
                 [gridConfig]="{
                   maxRows: collectionsMore ? -1 : 1
                 }"
+                (fetchData)="loadCollections('load-more')"
+                [disableInfiniteScroll]="true"
               >
                 <ng-template #title>
                   <div class="heading">
@@ -332,7 +334,10 @@
                       }})
                     </h2>
                     <button
-                      *ngIf="(areAllCollectionsDisplayed$ | async) === false || collectionsMore"
+                      *ngIf="
+                        searchService.dataSourceCollections.itemsCap?.isActivelyCapping ||
+                        collectionsMore
+                      "
                       mat-button
                       color="primary"
                       class="toggle"
@@ -347,7 +352,7 @@
           </div>
           <div
             [class.display-none]="
-              currentRepository == '-all-' &&
+              currentRepository === '-all-' &&
               groupResults &&
               !searchService.dataSourceSearchResult[0]?.isLoading
             "
@@ -370,24 +375,28 @@
               [dataSource]="searchService.dataSourceSearchResult[0]"
               [columns]="searchService.columns"
               [sort]="{
-                allowed: true,
+                allowed: !searchService.isFrontpage,
                 active: searchService.sort?.active,
                 direction: searchService.sort?.direction,
                 columns: searchService.sort?.columns
               }"
+              [globalKeyboardShortcuts]="true"
               (sortChange)="updateSort($event)"
               [displayType]="searchService.displayType"
-              (fetchData)="getMoreResults()"
+              (fetchData)="getMoreResults($event)"
             >
               <ng-template #title>
                 <div class="heading" *ngIf="!searchService.dataSourceSearchResult[0]?.isEmpty()">
-                  <h2>
+                  <h2 *ngIf="searchService.isFrontpage">
+                    {{ 'SEARCH.FRONTPAGE' | translate }}
+                  </h2>
+                  <h2 *ngIf="!searchService.isFrontpage">
                     {{ 'SEARCH.MATERIALS' | translate }}
                     <ng-container
                       *ngIf="
                         searchService.dataSourceSearchResult[0] &&
                         !searchService.dataSourceSearchResult[0]?.isEmpty() &&
-                        currentRepository != '-all-'
+                        currentRepository !== '-all-'
                       "
                     >
                       ({{ searchService.dataSourceSearchResult[0]?.getTotal() }})
@@ -441,7 +450,7 @@
           </div>
           <div
             class="searchGrouped"
-            *ngIf="currentRepository == '-all-' && groupResults && repositories"
+            *ngIf="currentRepository === '-all-' && groupResults && repositories"
           >
             Feature not implemented in 6.1
             <!--

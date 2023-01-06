@@ -438,8 +438,8 @@
 			<required>true</required>
 		</widget>
 		<widget>
-			<id>collection_feedback</id>
-			<type>collection_feedback</type>
+			<id>material_feedback</id>
+			<type>material_feedback</type>
 			<link>_BLANK</link>
 			<icon>chat_bubble</icon>
 			<hideIfEmpty>true</hideIfEmpty>
@@ -752,7 +752,7 @@
 				]]></html>
 		</template>
 		<template>
-			<id>collection_feedback</id>
+			<id>material_feedback</id>
 			<html><![CDATA[
 					<style>
 					.feedback_comment_container textarea{
@@ -932,15 +932,17 @@
 			</views>
 		</group>
 		<group>
-			<id>collection_feedback_view</id>
+			<id>material_feedback_view</id>
+			<rendering>angular</rendering>
 			<views>
-				<view>collection_feedback</view>
+				<view>material_feedback</view>
 			</views>
 		</group>
 		<group>
-			<id>collection_feedback</id>
+			<id>material_feedback</id>
+			<rendering>angular</rendering>
 			<views>
-				<view>collection_feedback</view>
+				<view>material_feedback</view>
 			</views>
 		</group>
 		<group>
@@ -1152,19 +1154,6 @@
 				<statement>(@cm\:name:"*${value}*" OR @cclom\:title:"*${value}*")</statement>
 			</property>
 		</query>
-		<query join="AND" id="search_relation_query" applyBasequery="true">
-			<basequery>TYPE:"ccm:io"</basequery>
-			<property name="ngsearchword">
-				<statement>(@sys\:node-uuid:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*")</statement>
-			</property>
-			<property name="sourceNode">
-				<statement>TYPE:"ccm:io" AND NOT @sys\:node-uuid:"${value}" AND NOT @ccm\:published_original:"${value}"</statement>
-			</property>
-			<property name="virtual:user_files">
-				<statement value="false">TYPE:"ccm:io"</statement>
-				<statement value="true">CREATOR:"${authority}" OR OWNER:"${authority}"</statement>
-			</property>
-		</query>
 		<query join="AND"  id="tools">
 			<basequery>ASPECT:"{http://www.campuscontent.de/model/1.0}tool_definition"</basequery>
 			<property name="toolname">
@@ -1199,42 +1188,122 @@
 				<multiplejoin>AND</multiplejoin>
 			</property>
 			<property name="sourceNode">
-				<multiple>true</multiple>
-				<multiplejoin>AND</multiplejoin>
-				<statement>TYPE:"ccm:io" AND NOT @sys\:node-uuid:"${value}"</statement>
+				<statement>TYPE:"ccm:io" AND NOT @sys\:node-uuid:"${value}" AND NOT @ccm\:published_original:"${value}"</statement>
 			</property>
 			<property name="ccm:taxonid">
 				<multiple>true</multiple>
 				<multiplejoin>OR</multiplejoin>
 			</property>
+			<property name="virtual:user_files">
+				<statement value="false">TYPE:"ccm:io"</statement>
+				<statement value="true">CREATOR:"${authority}" OR OWNER:"${authority}"</statement>
+			</property>
 		</query>
 	</queries>
 	<queries syntax="dsl">
-		<basequery></basequery>
+		<basequery>
+			{"bool":
+			{"must":[
+			{"term":{"nodeRef.storeRef.protocol":"workspace"}}
+			]
+			}}
+		</basequery>
 		<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
 
+		<query join="AND" id="collections">
+			<basequery propertyNull="ngsearchword">
+			{"bool":{
+			"must":[
+			{"term":{"aspects":"ccm:collection"}},{"term":{"nodeRef.storeRef.protocol":"workspace"}}
+			{"bool":{
+			"should":[
+			{"term":{"properties.ccm:collectionlevel0.keyword":"true"}},
+			{"term":{"properties.ccm:collection_pinned_status":"true"}},
+			]
+			}}]
+			}}
+			</basequery>
+			<basequery>{"bool":{
+				"must":[
+				{"term":{"type":"ccm:map"}},{"term":{"aspects":"ccm:collection"}}
+				]
+				}}
+			</basequery>
+			<property name="ngsearchword">
+				<statement>
+					{"bool":{"should":[
+					{
+					"simple_query_string": {
+					"query": "${valueRaw}*",
+					"flags": "OR|AND|PREFIX|PHRASE|WHITESPACE",
+					"fields": [
+					"properties.cm:name^2",
+					"properties.cm:title^2",
+					"properties.cclom:title^5",
+					"properties.cclom:general_description^2",
+					"properties.cclom:general_keyword^4",
+					"i18n.de_DE.ccm:taxonid^2"
+					],
+					"default_operator": "and"
+					}
+					},
+					{"wildcard":{"nodeRef.id": {"value":"*${value}*", "case_insensitive": true }}}
+					]
+					}}</statement>
+			</property>
+		</query>
 		<query join="AND" id="ngsearch">
 			<!--TODO basequery-->
 			<!--basequery>ISNULL:@ccm\:tool_category</basequery-->
-			<basequery>
-				{"bool":
-				{"must":[{"term":{"nodeRef.storeRef.protocol":"workspace"}}],
-				 "must_not":[{"term":{"aspects":"ccm:metadataPresettingTemplate"}},
-							 {"term":{"aspects":"ccm:io_childobject"}},
-							 {"wildcard":{"properties.cm:name.keyword":"._*"}},
-							 {"term":{"aspects":"ccm:collection_io_reference"}},
-				             {"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}]
-				}
-				}</basequery>
+			<basequery>{"bool":{
+				"must":[
+				{"term":{"type":"ccm:io"}},
+				{"term":{"nodeRef.storeRef.protocol":"workspace"}}
+				],
+				"must_not":[
+				{"term":{"aspects":"ccm:metadataPresettingTemplate"}},
+				{"term":{"aspects":"ccm:io_childobject"}},
+				{"wildcard":{"properties.cm:name.keyword":"._*"}},
+				{"term":{"aspects":"ccm:collection_io_reference"}},
+				{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}
+				]
+				}}</basequery>
 			<property name="ngsearchword">
-				<statement>{"bool":{"should":[
-					{"wildcard":{"properties.cm:name":{"value":"*${value}*", "case_insensitive": true }}},
-					{"wildcard":{"properties.cclom:title.keyword":{"value":"*${value}*", "case_insensitive": true }}},
-					{"wildcard":{"properties.cclom:general_description":{"value":"*${value}*", "case_insensitive": true }}},
-					{"wildcard":{"properties.cclom:general_keyword":{"value":"*${value}*", "case_insensitive": true }}},
-					{"wildcard":{"content.fulltext":{"value":"*${value}*", "case_insensitive": true }}},
-					{"wildcard":{"nodeRef.id":{"value":"*${value}*", "case_insensitive": true }}}
-					]}}</statement>
+				<basequery>
+					{"bool": {
+					"must_not":[
+					{"term":{"aspects":"ccm:metadataPresettingTemplate"}},
+					{"term":{"aspects":"ccm:io_childobject"}},
+					{"wildcard":{"properties.cm:name.keyword":"._*"}},
+					{"term":{"aspects":"ccm:collection_io_reference"}},
+					{"wildcard":{"properties.cm:name.keyword":".DS_Store*"}}
+					]
+					}
+					}</basequery>
+				<statement>
+					{"bool":{"should":[
+					{
+					"simple_query_string": {
+					"query": "${valueRaw}*",
+					"flags": "OR|AND|PREFIX|PHRASE|WHITESPACE",
+					"fields": [
+					"properties.cm:name^2",
+					"properties.cm:title^2",
+					"properties.cclom:title^5",
+					"properties.cclom:general_description^2",
+					"properties.cclom:general_keyword^4",
+					"properties.ccm:lifecyclecontributer_author^1",
+					"properties.ccm:lifecyclecontributer_publisher^1",
+					"properties.ccm:publisher^1",
+					"i18n.de_DE.ccm:taxonid^2",
+					"content.fulltext^1"
+					],
+					"default_operator": "and"
+					}
+					},
+					{"wildcard":{"nodeRef.id": {"value":"*${value}*", "case_insensitive": true }}}
+					]
+					}}</statement>
 				<exactMatching>false</exactMatching>
 				<multiple>true</multiple>
 				<multiplejoin>AND</multiplejoin>
@@ -1275,7 +1344,60 @@
 		<query join="AND" id="mediacenter_filter">
 			<basequery>{"term":{"type":"ccm:io"}}</basequery>
 			<property name="ngsearchword">
-				<statement>{"bool":{"should":[{"wildcard":{"properties.cm:name":{"value":"*${value}*"}}},{"wildcard":{"properties.ccm.replicationsourceid":{"value":"*${value}*"}}}]}}</statement>
+				<statement>{"bool":{"should":[
+					{"wildcard":{"properties.cm:name.keyword":{"value":"*${value}*"}}},
+					{"wildcard":{"properties.cclom:title.keyword":{"value":"*${value}*"}}},
+					{"wildcard":{"properties.ccm:replicationsourceid.keyword":{"value":"*${value}*"}}}
+					]}}
+				</statement>
+			</property>
+		</query>
+		<query join="AND" id="search_relation_query">
+			<basequery>{"term":{"type":"ccm:io"}}</basequery>
+			<property name="ngsearchword" asFilter="false">
+				<statement>
+					{
+					"simple_query_string" : {
+					"query": "${value}*",
+					"fields": [
+					"properties.cm:name.keyword^4",
+					"properties.cclom:title^4",
+					"properties.cclom:general_description^2",
+					"properties.cclom:general_keyword^2",
+					"content.fulltext",
+					"nodeRef.id",
+					"i18n.de_DE.ccm:taxonid^3",
+					"i18n.de_DE.ccm:educationallearningresourcetype^3",
+					"i18n.de_DE.ccm:educationalcontext^3",
+					"i18n.de_DE.ccm:educationalintendedenduserrole^3"
+					],
+					"default_operator": "and"
+					}}
+				</statement>
+				<exactMatching>false</exactMatching>
+				<multiple>true</multiple>
+				<multiplejoin>AND</multiplejoin>
+			</property>
+			<property name="sourceNode">
+				<statement>{"bool": {
+					"must_not": [
+					{"match": {"nodeRef.id": "${valueRaw}"}},
+					{"wildcard": {"properties.ccm:published_original.keyword": "*${valueRaw}"}}
+					]}}</statement>
+			</property>
+			<property name="ccm:taxonid">
+				<multiple>true</multiple>
+				<multiplejoin>OR</multiplejoin>
+			</property>
+			<property name="virtual:user_files">
+				<statement value="false">{"term":{"type":"ccm:io"}}</statement>
+				<statement value="true">{"bool": {
+					"should": [
+					{"match": {"properties.cm:creator.keyword": "${authority}"}},
+					{"match": {"owner": "${authority}"}}
+					]
+					}}
+				</statement>
 			</property>
 		</query>
 	</queries>

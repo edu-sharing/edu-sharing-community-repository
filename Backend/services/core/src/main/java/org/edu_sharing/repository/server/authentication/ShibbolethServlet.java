@@ -29,7 +29,7 @@ package org.edu_sharing.repository.server.authentication;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
+import org.springframework.extensions.surf.util.URLDecoder;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -298,11 +298,11 @@ public class ShibbolethServlet extends HttpServlet {
 	    		try {
 
 	        		// see https://wiki.shibboleth.net/confluence/display/SHIB2/NativeSPAttributeAccess#NativeSPAttributeAccess-Tool-SpecificExamples
-				attValue= new String( attValue.getBytes("ISO-8859-1"), "UTF-8");
+					attValue= new String( attValue.getBytes("ISO-8859-1"), "UTF-8");
 
-			} catch (UnsupportedEncodingException e) {
-				logger.error(e.getMessage(), e);
-			}
+				} catch (UnsupportedEncodingException e) {
+					logger.error(e.getMessage(), e);
+				}
 
 	    		attValue = URLDecoder.decode(attValue);
 	    	}

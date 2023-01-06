@@ -22,6 +22,80 @@
 
     <plugins>
 
+      <!-- see src/main/assembly/amp.xml -->
+      <plugin>
+        <groupId>com.coderplus.maven.plugins</groupId>
+        <artifactId>copy-rename-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>fix1</id>
+            <goals>
+              <goal>rename</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <sourceFile>${project.build.directory}/classes/org/alfresco/repo/search/impl/lucene/SolrJSONResultSet.class</sourceFile>
+              <destinationFile>${project.build.directory}/fixes/org/alfresco/repo/search/impl/lucene/SolrJSONResultSet.class</destinationFile>
+            </configuration>
+          </execution>
+          <execution>
+            <id>fix2</id>
+            <goals>
+              <goal>rename</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <sourceFile>${project.build.directory}/classes/org/alfresco/repo/search/impl/solr/ESSearchParameters.class</sourceFile>
+              <destinationFile>${project.build.directory}/fixes/org/alfresco/repo/search/impl/solr/ESSearchParameters.class</destinationFile>
+            </configuration>
+          </execution>
+          <execution>
+            <id>fix3</id>
+            <goals>
+              <goal>rename</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <sourceFile>${project.build.directory}/classes/org/alfresco/repo/search/impl/solr/SolrQueryHTTPClient.class</sourceFile>
+              <destinationFile>${project.build.directory}/fixes/org/alfresco/repo/search/impl/solr/SolrQueryHTTPClient.class</destinationFile>
+            </configuration>
+          </execution>
+          <execution>
+            <id>fix4</id>
+            <goals>
+              <goal>rename</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <sourceFile>${project.build.directory}/classes/org/apache/tika/parser/pdf/PDF2XHTML.class</sourceFile>
+              <destinationFile>${project.build.directory}/fixes/org/apache/tika/parser/pdf/PDF2XHTML.class</destinationFile>
+            </configuration>
+          </execution>
+          <execution>
+            <id>fix5</id>
+            <goals>
+              <goal>rename</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <sourceFile>${project.build.directory}/classes/alfresco/mimetype/openoffice-document-formats.xml</sourceFile>
+              <destinationFile>${project.build.directory}/fixes/alfresco/mimetype/openoffice-document-formats.xml</destinationFile>
+            </configuration>
+          </execution>
+          <execution>
+            <id>fix6</id>
+            <goals>
+              <goal>rename</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <sourceFile>${project.build.directory}/classes/net/sf/jooreports/converter/DocumentFamily.class</sourceFile>
+              <destinationFile>${project.build.directory}/fixes/net/sf/jooreports/converter/DocumentFamily.class</destinationFile>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
@@ -53,8 +127,8 @@
             </goals>
             <phase>prepare-package</phase>
             <configuration>
-              <outputDirectory>src/main/amp/config/alfresco/module/${project.artifactId}</outputDirectory>
-              <thirdPartyFilename>THIRD-PARTY.txt</thirdPartyFilename>
+              <outputDirectory>src/main/amp/licenses</outputDirectory>
+              <thirdPartyFilename>THIRD-PARTY-${project.artifactId}.txt</thirdPartyFilename>
             </configuration>
           </execution>
         </executions>
@@ -97,17 +171,18 @@
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
-            <id>unpack</id>
             <goals>
               <goal>unpack-dependencies</goal>
             </goals>
-            <phase>prepare-package</phase>
+            <phase>generate-sources</phase>
             <configuration>
               <includeArtifactIds>
-                edu_sharing-community-repository-backend-alfresco-fixes
+                edu_sharing-community-repository-repackaged-elasticsearch,
+                edu_sharing-community-repository-repackaged-isoparser
               </includeArtifactIds>
-              <excludes>META-INF/**</excludes>
-              <outputDirectory>${project.build.directory}/fixes</outputDirectory>
+              <type>tar.gz</type>
+              <classifier>bin</classifier>
+              <outputDirectory>src/main/amp/licenses</outputDirectory>
             </configuration>
           </execution>
         </executions>
@@ -261,12 +336,6 @@
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>edu_sharing-community-repository-backend-alfresco-fixes</artifactId>
       <scope>provided</scope>
     </dependency>
 

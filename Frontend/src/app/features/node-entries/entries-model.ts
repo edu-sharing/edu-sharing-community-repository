@@ -6,6 +6,8 @@ import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.
 import { ListItemSort, ListItem, Node } from '../../core-module/core.module';
 import { DropAction } from '../../core-ui-module/directives/drag-nodes/drag-nodes';
 import { OptionItem, Scope, CustomOptions, Target } from '../../core-ui-module/option-item';
+import { CanDrop } from '../../shared/directives/nodes-drop-target.directive';
+import { DragData } from '../../services/nodes-drag-drop.service';
 
 export type NodeRoot =
     | 'MY_FILES'
@@ -33,7 +35,7 @@ export enum InteractionType {
 export type ListOptions = { [key in Target]?: OptionItem[] };
 export type ListOptionsConfig = {
     scope: Scope;
-    actionbar: ActionbarComponent;
+    actionbar?: ActionbarComponent;
     parent?: Node;
     customOptions?: CustomOptions;
 };
@@ -48,14 +50,14 @@ export type DropTarget = Node | NodeRoot;
 
 export interface DropSource<T extends NodeEntriesDataType> {
     element: T[];
-    sourceList: ListEventInterface<T>;
+    // sourceList: ListEventInterface<T>;
     mode: DropAction;
 }
 
 export interface ListDragGropConfig<T extends NodeEntriesDataType> {
     dragAllowed: boolean;
-    dropAllowed?: (target: DropTarget, source: DropSource<NodeEntriesDataType>) => boolean;
-    dropped?: (target: DropTarget, source: DropSource<NodeEntriesDataType>) => void;
+    dropAllowed?: (dragData: DragData<T>) => CanDrop;
+    dropped?: (target: Node, source: DropSource<NodeEntriesDataType>) => void;
 }
 
 export enum ClickSource {
@@ -63,6 +65,7 @@ export enum ClickSource {
     Icon,
     Metadata,
     Comments,
+    Overlay,
 }
 
 export type NodeClickEvent<T extends NodeEntriesDataType> = {
@@ -73,9 +76,23 @@ export type NodeClickEvent<T extends NodeEntriesDataType> = {
 export type FetchEvent = {
     offset: number;
     amount?: number;
+    /**
+     * is a reset of the current data required?
+     * this should be true if this was a pagination request
+     */
+    reset?: boolean;
 };
+export type GridLayout = 'grid' | 'scroll';
 export type GridConfig = {
+    /**
+     * max amount of rows that should be visible, unset for no limit
+     */
     maxRows?: number;
+    /**
+     * layout, defaults to 'grid'
+     * 'scroll' may only be used when maxRows is not set
+     */
+    layout?: GridLayout;
 };
 
 export interface ListEventInterface<T extends NodeEntriesDataType> {
@@ -94,7 +111,12 @@ export interface ListEventInterface<T extends NodeEntriesDataType> {
     /**
      * activate option (dropdown) generation
      */
-    initOptionsGenerator(actionbar: ListOptionsConfig): void | Promise<void>;
+    initOptionsGenerator(config: ListOptionsConfig): void | Promise<void>;
 
     getSelection(): SelectionModel<T>;
+
+    /**
+     * triggered when nodes/objects are deleted and should not be shown in the list anymore
+     */
+    deleteNodes(objects: T[]): void;
 }

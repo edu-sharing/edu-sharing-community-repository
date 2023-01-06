@@ -24,7 +24,6 @@ import { RestHelper } from '../../../core-module/core.module';
 import { PlatformLocation } from '@angular/common';
 
 import { CordovaService } from '../../../common/services/cordova.service';
-import { InputPasswordComponent } from '../../../core-ui-module/components/input-password/input-password.component';
 import { RestRegisterService } from '../../../core-module/core.module';
 
 @Component({
@@ -33,9 +32,9 @@ import { RestRegisterService } from '../../../core-module/core.module';
     styleUrls: ['register-reset-password.component.scss'],
 })
 export class RegisterResetPasswordComponent {
+    @Output() onStateChanged = new EventEmitter<void>();
     public new_password = '';
-    public key: string;
-
+    @Input() params: Params;
     public buttonCheck() {
         if (
             UIHelper.getPasswordStrengthString(this.new_password) != 'weak' &&
@@ -48,8 +47,7 @@ export class RegisterResetPasswordComponent {
     }
     public newPassword() {
         this.toast.showProgressDialog();
-        console.log('reset pass');
-        this.register.resetPassword(this.key, this.new_password).subscribe(
+        this.register.resetPassword(this.params.key, this.new_password).subscribe(
             () => {
                 this.toast.closeModalDialog();
                 this.toast.toast('REGISTER.RESET.TOAST');
@@ -58,7 +56,7 @@ export class RegisterResetPasswordComponent {
             (error) => {
                 console.log('error', error);
                 this.toast.closeModalDialog();
-                if (UIHelper.errorContains(error, 'InvalidKeyException')) {
+                if (error?.error?.error?.includes('DAOInvalidKeyException')) {
                     this.toast.error(null, 'REGISTER.TOAST_INVALID_RESET_KEY');
                     this.router.navigate([UIConstants.ROUTER_PREFIX, 'register', 'request']);
                 } else {

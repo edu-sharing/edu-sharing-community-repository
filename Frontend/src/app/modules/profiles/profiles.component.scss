@@ -23,8 +23,8 @@ $path: '../../../assets/images/';
 }
 .profiles-wrapper {
     display: flex;
-    padding-top: $mainnavHeight;
-    height: calc(100% - #{$mainnavHeight});
+    padding-top: var(--mainnavHeight);
+    height: calc(100vh - var(--mainnavHeight));
     align-items: center;
     .profiles {
         position: relative;

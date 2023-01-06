@@ -18,6 +18,7 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.namespace.QName;
+import org.apache.axis.utils.StringUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.validator.EmailValidator;
 import org.apache.log4j.Logger;
@@ -195,11 +196,14 @@ public class ShareServiceImpl implements ShareService {
 		Map<QName,Serializable> props = new HashMap<QName,Serializable>();
 		props.put(SHARE_PROP_SHARE_TOKEN, share.getToken());
 		props.put(SHARE_PROP_EXPIRYDATE, share.getExpiryDate());
-		if(share.getPassword()!=null && !share.getPassword().isEmpty()) {
-			props.put(SHARE_PROP_PASSWORD, encryptPassword(share.getPassword()));
-		}else{
+
+		// reset password only if it is given and empty otherwise update the password if given or use the stored one if not provided
+		if(share.getPassword()==null){
 			props.put(SHARE_PROP_PASSWORD, serviceRegistry.getNodeService().getProperty(shareNodeRef,SHARE_PROP_PASSWORD));
+		} else if(!StringUtils.isEmpty(share.getPassword())) {
+			props.put(SHARE_PROP_PASSWORD, encryptPassword(share.getPassword()));
 		}
+
 		props.put(SHARE_PROP_SHARE_MAIL, share.getEmail());
 		props.put(SHARE_PROP_DOWNLOAD_COUNTER, share.getDownloadCount());
 		throwIfScopedNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,share.getIoNodeId()));

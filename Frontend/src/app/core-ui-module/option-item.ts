@@ -6,6 +6,7 @@
 
  */
 import { NodesRightMode } from '../core-module/rest/data-object';
+import { KeyboardShortcutCondition } from '../services/keyboard-shortcuts.service';
 
 export class OptionItem {
     /**
@@ -111,8 +112,8 @@ export class OptionItem {
      */
     public group: OptionGroup;
 
-    public key: string;
-    public keyCombination: KeyCombination[];
+    public keyboardShortcut: KeyboardShortcutCondition;
+
     /**
      * Or concat of supported element types for the action
      */
@@ -165,9 +166,11 @@ export enum Scope {
     Render = 'Render',
     Search = 'Search',
     CollectionsReferences = 'CollectionsReferences',
-    CollectionsCollection = 'CollectionsCollection',
+    CollectionsProposals = 'CollectionsReferences',
+    CollectionsCollection = 'CollectionsProposals',
     WorkspaceList = 'WorkspaceList',
     WorkspaceTree = 'WorkspaceTree',
+    Sharing = 'Sharing',
     Oer = 'Oer',
     UserManagement = 'UserManagement',
     Stream = 'Stream',
@@ -198,6 +201,7 @@ export class DefaultGroups {
     static Create = new OptionGroup('Create', 15);
     static View = new OptionGroup('View', 20);
     static CreateConnector = new OptionGroup('CreateConnector', 25);
+    static CreateLtiTools = new OptionGroup('CreateLtiTools', 28);
     static Reuse = new OptionGroup('Reuse', 30);
     static Edit = new OptionGroup('Edit', 40);
     static FileOperations = new OptionGroup('FileOperations', 50);
@@ -219,12 +223,11 @@ export enum Constrain {
     AddObjects, // Only visible when it is possible to add objects into the current list
     HomeRepository, // Only visible when the nodes are from the local (home) repository
     User, // Only visible when a user is present and logged in
+    NoScope, // Only visible when no current scope (i.e "safe" scope) is set
     ReurlMode, // Only visible when a reurl is present (called to pick object from lms)
     LTIMode, // Only visible when a lti session is present (called to pick object from lti platform)
 }
-export enum KeyCombination {
-    CtrlOrAppleCmd,
-}
+
 export enum Target {
     List, // Target is the ListTableComponent
     ListDropdown,

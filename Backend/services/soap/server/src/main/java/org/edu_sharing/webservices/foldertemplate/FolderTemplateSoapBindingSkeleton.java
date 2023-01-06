@@ -8,7 +8,7 @@
 package org.edu_sharing.webservices.foldertemplate;
 
 public class FolderTemplateSoapBindingSkeleton implements org.edu_sharing.webservices.foldertemplate.FolderTemplate, org.apache.axis.wsdl.Skeleton {
-    private org.edu_sharing.webservices.foldertemplate.FolderTemplate impl;
+    private transient org.edu_sharing.webservices.foldertemplate.FolderTemplate impl;
     private static java.util.Map _myOperations = new java.util.Hashtable();
     private static java.util.Collection _myOperationsList = new java.util.ArrayList();
 

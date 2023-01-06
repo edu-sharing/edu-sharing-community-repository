@@ -14,5 +14,9 @@
  *   - No bulk
  *   - Editing individual values on demand
  *   - default apperance is read only
+ * - `viewer`
+ *   - No editing
+ *   - Read only
+ *   - Triggered via mds-viewer
  */
-export type EditorMode = 'nodes' | 'search' | 'form' | 'inline';
+export type EditorMode = 'nodes' | 'search' | 'form' | 'inline' | 'viewer';

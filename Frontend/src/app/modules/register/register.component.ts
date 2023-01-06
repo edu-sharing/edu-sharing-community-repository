@@ -32,7 +32,7 @@ export class RegisterComponent {
     public isLoading = true;
     state: 'register' | 'request' | 'reset-password' | 'done' | 'done-reset' = 'register';
     buttons: DialogButton[];
-    private params: Params;
+    params: Params;
 
     public cancel() {
         RestHelper.goToLogin(this.router, this.configService, null, null);
@@ -109,26 +109,26 @@ export class RegisterComponent {
         const email = this.registerForm.info.email;
         this.state = 'done';
         this.changes.detectChanges();
+        this.updateButtons();
         // will loose state when going back to register form
         // this.router.navigate([UIConstants.ROUTER_PREFIX,"register","done","-",email]);
         this.uiService.waitForComponent(this, 'registerDone').subscribe(() => {
             this.registerDone.email = email;
             this.changes.detectChanges();
+            this.updateButtons();
         });
         this.toast.toast('REGISTER.TOAST');
     }
 
     private setParams() {
         this.route.params.subscribe((params) => {
+            this.params = params;
             if (params.email) {
                 this.registerDone.email = params.email;
             }
             if (params.key) {
                 if (this.registerDone) {
                     this.registerDone.keyUrl = params.key;
-                }
-                if (this.resetPassword) {
-                    this.resetPassword.key = params.key;
                 }
             }
         });
@@ -140,6 +140,7 @@ export class RegisterComponent {
         } else {
             this.state = 'request';
         }
+        this.updateButtons();
     }
 
     onPasswordRequested() {

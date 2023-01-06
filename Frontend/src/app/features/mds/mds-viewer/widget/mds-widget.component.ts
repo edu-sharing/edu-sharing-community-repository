@@ -19,6 +19,9 @@ import { NodeHelperService } from '../../../../core-ui-module/node-helper.servic
 import { RestHelper } from '../../../../core-module/rest/rest-helper';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { MdsWidgetType } from '../../types/types';
+import { UIHelper } from '../../../../core-ui-module/ui-helper';
+import { UIService } from '../../../../core-module/rest/services/ui.service';
+import { MatRipple } from '@angular/material/core';
 
 @Component({
     selector: 'es-mds-widget',
@@ -33,6 +36,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
         MdsWidgetType.Textarea,
         MdsWidgetType.Singleoption,
         MdsWidgetType.SingleValueTree,
+        MdsWidgetType.SingleValueSuggestBadges,
         MdsWidgetType.MultiValueBadges,
         MdsWidgetType.MultiValueFixedBadges,
         MdsWidgetType.MultiValueSuggestBadges,
@@ -45,6 +49,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
     @Input() view: MdsEditorViewComponent;
 
     @ViewChild('editWrapper') editWrapper: ElementRef;
+    @ViewChild(MatRipple) matRipple: MatRipple;
 
     get headingLevel() {
         return this.viewInstance.headingLevel;
@@ -54,8 +59,9 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
     private temporaryValue: string[] = undefined;
 
     constructor(
-        mdsEditorInstance: MdsEditorInstanceService,
+        public mdsEditorInstance: MdsEditorInstanceService,
         translate: TranslateService,
+        private ui: UIService,
         private viewInstance: ViewInstanceService,
     ) {
         super(mdsEditorInstance, translate);
@@ -86,6 +92,7 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
                 return 'vcard';
             case 'multivalueFixedBadges':
             case 'multivalueSuggestBadges':
+            case 'singlevalueSuggestBadges':
             case 'multivalueBadges':
             case 'singlevalueTree':
             case 'multivalueTree':
@@ -212,5 +219,14 @@ export class MdsWidgetComponent extends MdsEditorWidgetBase implements OnInit, O
             RestHelper.hasAccessPermission(nodes[0], RestConstants.ACCESS_WRITE) &&
             this.supportsInlineEditing()
         );
+    }
+
+    async focus() {
+        if (this.isEditable()) {
+            this.matRipple.launch({});
+            await this.ui.scrollSmoothElementToChild(this.editWrapper.nativeElement);
+            //const result = await this.view.injectEditField(this, this.editWrapper.nativeElement.children[0]);
+            //await this.ui.scrollSmoothElementToChild(result.htmlElement);
+        }
     }
 }

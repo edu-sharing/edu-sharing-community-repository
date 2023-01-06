@@ -22,24 +22,33 @@
     },
     "PLUGINS": {
       "TITLE": "Erweiterungen",
-      "INFO": "In dieser Liste werden Erweiterungen, die aktuell für Alfresco & edu-sharing auf diesem System verfügbar sind, angezeigt. Es handelt sich hierbei um zusätzliche Funktionskomponenten für das Repository.",
+      "INFO": "In dieser Liste werden Erweiterungen, die aktuell für auf diesem System verfügbar bzw. aktiv sind, angezeigt. Es handelt sich hierbei um zusätzliche Funktionskomponenten für das Repository.",
       "NO_DESCRIPTION": "Für dieses Plugin sind keine Details verfügbar",
       "ENABLED": "Aktiviert",
       "DISABLED": "Deaktiviert",
       "PLUGIN_DETAILS": {
         "edu_sharing-community-repository-backend-alfresco-module": {
-          "DESCRIPTION": "Das Core-Modul von edu-sharing. Es erweitert Alfresco um edu-sharing API's und Oberflächen"
+          "TITLE": "edu-sharing Core",
+          "DESCRIPTION": "Das Core-Modul von edu-sharing. Es erweitert das Basis-System um edu-sharing API's und Oberflächen sowie weitere Funktionalitäten"
         },
         "Alfresco Share Services AMP": {
+          "TITLE": "Alfresco Share Service",
           "DESCRIPTION": "Dieses Alfresco-Modul stellt die Alfresco Share-Oberflächen bereit"
         },
         "edu_sharing-community-repository-plugin-elastic-backend-alfresco-module": {
+          "TITLE": "edu-sharing Elasticsearch Plugin",
           "DESCRIPTION": "Das Elasticsearch-Modul transformiert die Objekte inkl. Statistiken und Metadaten in eine spezielle Elasticsearch-Indexstruktur und erlaubt effiziente und sehr detaillierte Suchqueries"
         },
         "alfresco-trashcan-cleaner project": {
+          "TITLE": "Trashcan Cleaner",
           "DESCRIPTION": "Der Trashcan-Cleaner löscht regelmäßig alte Inhalte im Papierkorb aller Nutzer"
         },
+        "edu_sharing-projects-community-repository-backend-alfresco-module": {
+          "TITLE": "edu-sharing Customizing",
+          "DESCRIPTION": "Dieses Modul beinhaltet ggf. projektspezifische Anpassungen"
+        },
         "edu_sharing-enterprise-repository-plugin-transform-backend-alfresco-module": {
+          "TITLE": "edu-sharing Transformer Plugin",
           "DESCRIPTION": "Dieses Plugin trennt die Transformationsfunktionen (Screenshot & Volltext-Generierung von Dokumenten via LibreOffice) vom Repository-Server und erlaubt eine bessere, stabilere Verteilung der Workload"
         }
       },
@@ -50,7 +59,7 @@
       "EDIT_DISABLED": "Die Konfiguration wurde auf Read-Only eingestellt. Es können keine Modifikationen über dieses Tool vorgenommen werden. Der Parameter {{key}} muss auf true gesetzt werden, damit die Config hier bearbeitet werden kann. Dies ist nur für Testsysteme empfohlen.",
       "SHOW_RO": "Read-Only Konfigurationsdateien anzeigen",
       "INHERIT_INFO": "Die angezeigten Konfigurationswerte werden von unten nach oben eingelesen. Konfigurationswerte der darunterliegenden Konfiguration haben eine höhere Priorität und können Werte überschreiben.",
-      "VOLATILE_WARNING": "Die Änderungen an dieser Konfigurationsdatei sind temporär und werden beim nächsten Update/Rollout überschrieben! Persistente Änderungen müssen an das edu-sharing Entwicklerteam weitergegeben werden",
+      "VOLATILE_WARNING": "Die Änderungen an dieser Konfigurationsdatei sind temporär und werden beim nächsten Neustart überschrieben! Es erfolgt keine Verteilung im Cluster! Nur für temporäre Änderungen oder Tests verwenden!",
       "CLIENT_CONFIG_TITLE": "Client-Konfiguration (Konfiguration von anzeigerelevanten Funktionen)",
       "CLIENT_CONFIG_HINT": "Sie können hier Werte eintragen, um Labels zu überschreiben, Kontexte zu konfigurieren, Authentifizierungsmethoden einzurichten und mehr. Nach dem Speichern müssen Sie möglicherweise die gesamte Seite im Browser neu laden",
       "BASE_CONFIG_TITLE": "Globale Konfigurationsdatei (Standard-Werte)",
@@ -75,8 +84,8 @@
       "PARSE_ERROR": "Fehler beim Übernehmen der Config! Prüfen Sie den Syntax die Konfiguration, und wiederholen Sie den Vorgang.<br><b>Das Repository befindet sich aktuell in einem ungültigen Zustand!</b><br>Für weitere Details prüfen Sie bitte die Logdateien<br><br>{{error}}",
       "DEPLOYMENT_CONFIG_TITLE": "Deployment Konfigurationsdatei",
       "DEPLOYMENT_CONFIG_HINT": "Diese Datei wurde durch das Deployment festgelegt und ändert ggf. Daten abweichend der Vorlage. Diese Datei kann nur durch das Deployment verändert werden.",
-      "EXTENSION_CONFIG_TITLE": "Extension-Konfigurationsdatei (Überschreiben)",
-      "EXTENSION_CONFIG_HINT": "Sie können hier Werte der Konfiguration überschreiben. Beachten Sie, dass diese Konfiguration beim Rollout überschrieben wird. Die hier erfolgten Änderungen müssen an das edu-sharing Entwicklerteam gegeben werden",
+      "EXTENSION_CONFIG_TITLE": "Extension-Konfigurationsdatei (Kunden/Projektspezifische Werte)",
+      "EXTENSION_CONFIG_HINT": "Diese Datei ist über das Git-Repository des Kundenprojekts eingefügt und gilt für alle Knoten.",
       "SERVER_CONFIG_TITLE": "Server-Konfigurationsdatei (Überschreiben)",
       "SERVER_CONFIG_HINT": "Sie können hier Werte der Konfiguration überschreiben. Diese Änderungen gelten für den aktuellen Server und werden bei Updates nicht überschrieben. Sie haben die höchste Priorität. ACHTUNG! Im Cluster-Betrieb gelten diese Parameter nur für den aktuellen Cluster-Server!"
     },
@@ -167,7 +176,6 @@
         "mail.smtp.username": "Nutzername für die Authentifizierung am Mailserver",
         "mail.smtp.passwd": "Passwort für die AUthentifizierung am Mailserver",
         "mail.smtp.from": "Angezeigte E-Mailadresse des Absenders. Empfohlen \"noreply@yourdomain.com\"",
-        "mail.admin": "Deprecated",
         "mail.addReplyTo": "Wenn true (Standard), wird als Reply-To Adresse der jeweilige Nutzer, der das Event ausgelöst hat, angehangen"
       }
     },
@@ -182,8 +190,7 @@
       "RESULT": "Update-Ausgabe"
     },
     "INFO": {
-      "REPOSITORY": "Repository-Version (Server-Side)",
-      "NG": "Angular/Interface-Version (Client-Side)",
+      "REPOSITORY": "Repository-Version",
       "SYSTEM_CHECKS": "Allgemeine Systemtests",
       "CHECK": {
         "RENDERING": {
@@ -197,7 +204,7 @@
         "APPID": {
           "TITLE": "Bezeichnung des Home-Repositories",
           "STATUS_OK": "Dem System wurde ein eigener Identifier zugewiesen ({{id}}).",
-          "STATUS_WARN": "Dem System wurde keine ID zugewiesen, es verwendet den Standardwert ({{id}}).\nDamit dieses Repository fehlerfrei mit anderen Systemen kommunizieren kann, ist ein eindeutiger Identifier wichtig. Es wird empfohlen, einen möglichst eindeutigen Identifier zu benutzen (z.B. die Hauptdomain des Systems)",
+          "STATUS_WARN": "Dem System wurde keine ID zugewiesen, es verwendet den Standardwert ({{id}}).\nDamit dieses Repository fehlerfrei mit anderen Systemen kommunizieren kann, ist ein eindeutiger Identifier wichtig. Es wird empfohlen, einen möglichst eindeutigen Identifier zu benutzen (z.B. die Hauptdomain des Systems).\n\nWichtig: Starten Sie nach Änderungen an der App-ID den Server neu!",
           "SOLUTION": "Wechseln Sie zu \"Grundkonfiguration\" und bearbeiten Sie das Feld \"appid\" in der homeApplication.properties.xml",
           "SOLUTION_LINK": "homeApplication.properties.xml bearbeiten"
         },

@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { SharedModule } from '../../../../shared/shared.module';
-import { NodeReportComponent } from './node-report/node-report.component';
+import { NodeReportDialogComponent } from './node-report-dialog.component';
 
-export { NodeReportComponent };
+export { NodeReportDialogComponent };
 
 @NgModule({
-    declarations: [NodeReportComponent],
+    declarations: [NodeReportDialogComponent],
     imports: [SharedModule],
 })
 export class NodeReportDialogModule {}

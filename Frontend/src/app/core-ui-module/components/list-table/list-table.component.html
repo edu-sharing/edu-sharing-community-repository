@@ -181,7 +181,7 @@
           [class.dark-color]="getIsDarkColor(node)"
           [class.import-blocked]="
             node.properties && node.properties['ccm:importblocked']
-              ? node.properties['ccm:importblocked'][0] == 'true'
+              ? node.properties['ccm:importblocked'][0] === 'true'
               : false
           "
           (esDistinctClick)="onDistinctClick($event, node)"
@@ -191,7 +191,7 @@
           [esNodesDragSource]="dragDrop ? selectedNodes : null"
           (nodesDragStart)="onNodesDragStart($event, node)"
           (nodesDragEnd)="onNodesDragEnd()"
-          [esNodesDropTarget]="canDropNodes.bind(this, node)"
+          [esLegacyNodesDropTarget]="canDropNodes.bind(this, node)"
           [nodesDragAllowedActions]="['move', 'copy']"
           (nodesDragEnter)="onNodesDragEnter(node)"
           (nodesHoveringChange)="onNodesHoveringChange($event, node)"
@@ -266,7 +266,7 @@
               </div>
             </div>
             <div
-              *ngIf="isCollection(node) && node.collection.type == 'EDITORIAL'"
+              *ngIf="isCollection(node) && node.collection.type === 'EDITORIAL'"
               class="collectionEditorial"
               aria-hidden="true"
             >
@@ -289,7 +289,7 @@
                 <a
                   *ngIf="
                     node.properties['ccm:questionsallowed'] &&
-                    node.properties['ccm:questionsallowed'][0] == 'true'
+                    node.properties['ccm:questionsallowed'][0] === 'true'
                   "
                   (click)="askCCPublish($event, node)"
                   ><i esIcon="message"></i> {{ 'ASK_CC_PUBLISH' | translate }}</a
@@ -459,7 +459,7 @@
             </div>
           </ng-container>
           <ng-container *ngIf="!orderElementsActive && viewType !== 2">
-            <div class="more column" *ngIf="_options && _options.length > 1">
+            <div class="more column" *ngIf="_options && getShownOptions(node)?.length > 1">
               <button
                 mat-icon-button
                 color="primary"
@@ -474,16 +474,16 @@
             </div>
             <div
               class="more moreSingle column"
-              *ngIf="_options && _options.length == 1 && optionIsShown(_options[0], node)"
+              *ngIf="_options && getShownOptions(node)?.length === 1"
             >
               <button
                 mat-icon-button
                 color="primary"
-                [class.disabled]="!optionIsValid(_options[0], node)"
-                matTooltip="{{ _options[0].name | translate }}"
-                (click)="callOption(_options[0], node); $event.stopPropagation()"
+                [class.disabled]="!optionIsValid(getShownOptions(node)[0], node)"
+                matTooltip="{{ getShownOptions(node)[0].name | translate }}"
+                (click)="callOption(getShownOptions(node)[0], node); $event.stopPropagation()"
               >
-                <i esIcon="{{ _options[0].icon }}"></i>
+                <i esIcon="{{ getShownOptions(node)[0].icon }}"></i>
               </button>
             </div>
           </ng-container>

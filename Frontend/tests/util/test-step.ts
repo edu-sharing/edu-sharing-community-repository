@@ -29,19 +29,28 @@ async function testStepWrapper<R>(
             // await page.waitForLoadState('networkidle');
             return testFunction();
         })(),
-        checkConsoleMessages(page, options),
+        ...(options.failOnConsoleError ? [checkConsoleErrors(page)] : []),
+        ...(options.failOnConsoleWarning ? [checkConsoleWarnings(page)] : []),
     ]);
     return result as R; // checkConsoleMessages runs indefinitely and will never win the race.
 }
 
-async function checkConsoleMessages(page: Page, options: TestStepOptions): Promise<void> {
-    while (true) {
-        const msg = await page.waitForEvent('console', { timeout: 0 });
-        if (options.failOnConsoleError) {
-            expect(msg.type(), 'expect no console error').not.toBe('error');
-        }
-        if (options.failOnConsoleWarning) {
-            expect(msg.type(), 'expect no console warning').not.toBe('warning');
-        }
-    }
+async function checkConsoleErrors(page: Page): Promise<void> {
+    const msg = await page.waitForEvent('console', {
+        timeout: 0,
+        predicate: (message) =>
+            message.type() === 'error' &&
+            // These are Playwright errors that are probably caused by us racing page navigation
+            // with this console message listener.
+            !['JSHandle@object', 'ERROR JSHandle@object', 'ERROR Error'].includes(message.text()),
+    });
+    expect(msg.text() ?? '<empty message>', `expect no console error`).not.toBeDefined();
+}
+
+async function checkConsoleWarnings(page: Page): Promise<void> {
+    const msg = await page.waitForEvent('console', {
+        timeout: 0,
+        predicate: (message) => message.type() === 'warning',
+    });
+    expect(msg.text() ?? '<empty message>', `expect no console warning`).not.toBeDefined();
 }

@@ -26,6 +26,11 @@
       "EDITORIAL_GROUPS": "Editors groups in charge",
       "DONE": "Done"
     },
+    "EMPTY": {
+      "SHARED": "You have not been invited to any collections yet.",
+      "PUBLIC": "There are no public collections available yet.",
+      "SUBCOLLECTIONS": "There are no sub-collections available yet."
+    },
     "TAB": {
       "TYPE_EDITORIAL_LONG": "editorially managed collections",
       "TYPE_MEDIA_CENTER_LONG": "collections provided by your media center",
@@ -92,12 +97,6 @@
         "DELETE": "Delete image"
       }
     },
-    "FEEDBACK_TITLE": "Give feedback for collection",
-    "FEEDBACK_VIEW_TITLE": "Given feedback for collection",
-    "FEEDBACK_VIEW_EMPTY": "No feedback was given for this collection yet",
-    "FEEDBACK_CREATOR": "Author {{creator}}",
-    "FEEDBACK_SAVE": "Send",
-    "FEEDBACK_TOAST": "Feedback sent. Thank you!",
     "ADD_TO": {
       "DUPLICATE_TITLE": "Element(s) already existing",
       "DUPLICATE_MESSAGE": "The collection already contains {{count}} of the element(s). Are you want to add them again?"
@@ -105,8 +104,6 @@
   },
 
   "collections_description": "Description:",
-  "collections_noOrgaCollections": "You have not been invited to any collections yet.",
-  "collections_noCollections": "There are no public collections available yet.",
 
   "collections_content": "Content",
   "collections_noContentAvailable": "No content available yet.",

@@ -44,11 +44,9 @@ import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescript
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.springframework.security.core.Authentication;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 @JobDescription(description = "Migrate a metadata field to a new valuespace (The new valuespace must already be configured for this field in the mds and must provide related-keys in order to transform)")
@@ -138,8 +136,8 @@ public class MigrateMetadataValuespaceJob extends AbstractJobMapAnnotationParams
 					 if(mapped.size() > 0) {
 						NodeServiceHelper.setProperty(nodeRef,
 								CCConstants.getValidGlobalName(targetProperty),
-								mapped
-						);
+								mapped,
+								false);
 					}
 					 if(clearSourceProperty) {
 						 NodeServiceHelper.removeProperty(nodeRef, CCConstants.getValidGlobalName(sourceProperty));

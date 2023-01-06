@@ -169,8 +169,8 @@
         <div
           class="move"
           *ngIf="
-            options.sharedFolders.privateFiles == 'assign' ||
-            options.sharedFolders.ccFiles == 'assign'
+            options.sharedFolders.privateFiles === 'assign' ||
+            options.sharedFolders.ccFiles === 'assign'
           "
         >
           <mat-checkbox [(ngModel)]="options.sharedFolders.move">{{
@@ -227,6 +227,7 @@
           <es-authority-search-input
             [mode]="AuthoritySearchMode.Organizations"
             hint="{{ 'PERMISSIONS.DELETE.RECEIVER_GROUP_HINT' | translate }}"
+            [globalSearchAllowed]="true"
             [showRecent]="false"
             (onChooseAuthority)="receiverGroup = $event"
             placeholder="{{ 'PERMISSIONS.DELETE.RECEIVER_GROUP' | translate }}"
@@ -247,8 +248,8 @@
         ></es-info-message>
         <es-info-message
           *ngIf="
-            options.collections.privateCollections == 'delete' ||
-            options.collections.publicCollections == 'delete'
+            options.collections.privateCollections === 'delete' ||
+            options.collections.publicCollections === 'delete'
           "
           mode="warning"
           message="{{ 'PERMISSIONS.DELETE.STATE.DELETE_COLLECTIONS' | translate }}"

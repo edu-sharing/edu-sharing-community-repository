@@ -118,6 +118,21 @@ public class NodeDao {
 	private static ThreadLocal<Boolean> isGlobalAdmin = new ThreadLocal<>();
 	private boolean isPublic;
 
+	private NodeDao(org.alfresco.service.cmr.repository.NodeRef nodeRef) throws Throwable {
+		this.nodeId = nodeRef.getId();
+		storeId = nodeRef.getStoreRef().getIdentifier();
+		storeProtocol = nodeRef.getStoreRef().getProtocol();
+		filter = Filter.createShowAllFilter();
+		repoDao = RepositoryDao.getHomeRepository();
+		access = new ArrayList<>();
+		type = NodeServiceHelper.getType(nodeRef);
+		aspects = Arrays.asList(NodeServiceHelper.getAspects(nodeRef));
+		nodeProps = NodeServiceHelper.getProperties(nodeRef);
+		previewData = null;
+		ownerUsername = null;
+		isCollectionHomePath=false; // TODO do we need to resolve this here?
+	}
+
 	public static NodeDao getNodeWithVersion(RepositoryDao repoDao, String nodeId,String versionLabel) throws DAOException {
 		if(versionLabel!=null && versionLabel.equals("-1"))
 			versionLabel = null;
@@ -134,6 +149,12 @@ public class NodeDao {
 				throw new DAOMissingException(new Exception("Node "+nodeId+" does not have this version: "+versionLabel));
 		}
 		return nodeDao;
+	}
+
+	public NodeDao copyProperties(NodeDao fromDao) throws DAOException {
+		HashMap<String, String[]> props = fromDao.getAllProperties();
+		props.remove(CCConstants.getValidLocalName(CCConstants.CM_NAME));
+		return changeProperties(props);
 	}
 
 	enum ExistingMode {
@@ -785,6 +806,22 @@ public class NodeDao {
         return result;
     }
     public static List<Node> convertToRest(RepositoryDao repoDao, List<NodeRef> list, Filter propFilter, Function<NodeDao, NodeDao> transform){
+		if(AuthenticationUtil.isRunAsUserTheSystemUser()) {
+			return list.stream().map(nodeRef -> {
+				try {
+					NodeDao nodeDao = NodeDao.getNode(repoDao, nodeRef.getId(), propFilter);
+					if (transform != null) {
+						nodeDao = transform.apply(nodeDao);
+					}
+					return nodeDao.asNode();
+				} catch (DAOMissingException daoException) {
+					logger.warn("Missing node " + nodeRef.getId() + " tried to fetch, skipping fetch", daoException);
+					return null;
+				} catch (DAOException e) {
+					throw new RuntimeException(e);
+				}
+			}).filter(Objects::nonNull).collect(Collectors.toList());
+		}
 		final String user = AuthenticationUtil.getFullyAuthenticatedUser();
 		final Context context = Context.getCurrentInstance();
 		final String scope = NodeServiceInterceptor.getEduSharingScope();
@@ -896,7 +933,7 @@ public class NodeDao {
 				NodeServiceHelper.setProperty(
 						new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, sourceId),
 						CCConstants.CCM_PROP_MAP_COLLECTIONLEVEL0,
-						true);
+						true, false);
 			}
 			return new NodeDao(repoDao, sourceId, Filter.createShowAllFilter());
 
@@ -1008,6 +1045,11 @@ public class NodeDao {
 	public NodeDao changePropertiesWithVersioning(
 			HashMap<String,String[]> properties, String comment) throws DAOException {
 
+		// Throws ConcurrencyFailureException if the previous call changes the preview (DESP-851)
+		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+		ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+		serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(()-> {
+
 		try {
 			mergeVersionComment(properties, comment);
 
@@ -1017,20 +1059,31 @@ public class NodeDao {
 			// 2. versioning
 			this.nodeService.createVersion(nodeId);
 
+			} catch (Throwable t) {
+				throw DAOException.mapping(t);
+			}
+			return null;
+		});
+		// don't do this in transaction since it could cause rollbacks!
+		try {
 			return new NodeDao(repoDao, nodeId, Filter.createShowAllFilter());
-
 		} catch (Throwable t) {
-
 			throw DAOException.mapping(t);
 		}
 	}
 
-	public NodeDao changePreview(InputStream is,String mimetype) throws DAOException {
+	public NodeDao changePreview(InputStream is,String mimetype, boolean version) throws DAOException {
 
 		try {
 			is=ImageTool.autoRotateImage(is,ImageTool.MAX_THUMB_SIZE);
-			nodeService.setProperty(storeProtocol,storeId,nodeId,
-					CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_PREVIEW_CHANGED);
+
+			HashMap<String,String[]> props = new HashMap<>();
+			if(version){
+				props.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, new String[]{CCConstants.VERSION_COMMENT_PREVIEW_CHANGED});
+				//mergeVersionComment(props, versionComment);
+			}
+			props.put(CCConstants.CCM_PROP_IO_CREATE_VERSION,new String[]{new Boolean(version).toString()});
+			nodeService.updateNode(nodeId, props);
 			nodeService.writeContent(storeRef, nodeId, is, mimetype, null,
 					isDirectory() ? CCConstants.CCM_PROP_MAP_ICON : CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
 			PreviewCache.purgeCache(nodeId);
@@ -1144,7 +1197,7 @@ public class NodeDao {
 		public Node asNode(boolean fetchReference) throws DAOException {
 		if(this.version!=null){
 			VersionedNode node=new VersionedNode();
-			fillNodeObject(node);
+			fillNodeObject(node, true, true);
 			VersionedNode.Version version=new VersionedNode.Version();
 			version.setComment((String)nodeProps.get(CCConstants.CCM_PROP_IO_VERSION_COMMENT));
 			node.setVersion(version);
@@ -1158,7 +1211,7 @@ public class NodeDao {
 			data = new CollectionReference();
 			fillNodeReference((CollectionReference) data);
 		}
-		fillNodeObject(data);
+		fillNodeObject(data, true, true);
 		return data;
 	}
 
@@ -1211,7 +1264,7 @@ public class NodeDao {
 		return originalId;
 	}
 
-	public <T extends Node> void fillNodeObject(T data) throws DAOException {
+	public <T extends Node> void fillNodeObject(T data,  boolean fillOwner, boolean fillContent) throws DAOException {
 		data.setRef(getRef());
 		data.setParent(getParentRef());
 		data.setRemote(getRemote());
@@ -1225,12 +1278,16 @@ public class NodeDao {
 
 		data.setCreatedAt(getCreatedAt());
 		data.setCreatedBy(getCreatedBy());
-		data.setOwner(getOwner());
+		if(fillOwner) {
+			data.setOwner(getOwner());
+		}
 
 		data.setModifiedAt(getModifiedAt());
 		data.setModifiedBy(getModifiedBy());
 
-		data.setContent(getContent(data));
+		if(fillContent) {
+			data.setContent(getContent(data));
+		}
 
 		data.setDownloadUrl(getDownloadUrl());
 		data.setMetadataset(getMetadataSet());
@@ -1649,7 +1706,8 @@ public class NodeDao {
 				return true;
 			else {
 				Map<String, Serializable> profileSettings = AuthorityServiceFactory.getLocalService().getProfileSettingsProperties(userName, CCConstants.CCM_PROP_PERSON_SHOW_EMAIL);
-				boolean isEmailPublic = false;
+				// default value is true for backward compatibility reasons
+				boolean isEmailPublic = true;
 				if (profileSettings.containsKey(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL)) {
 					isEmailPublic = (boolean) profileSettings.get(CCConstants.CCM_PROP_PERSON_SHOW_EMAIL);
 				}
@@ -1730,7 +1788,14 @@ public class NodeDao {
 				logger.warn("Error while fetching original node version from " + nodeId + ":" + t.getMessage());
 			}
 		}
-		return (String) nodeProps.get(CCConstants.LOM_PROP_LIFECYCLE_VERSION);
+		String version = (String) nodeProps.get(CCConstants.LOM_PROP_LIFECYCLE_VERSION);
+		if(version == null) {
+			version = (String) nodeProps.get(CCConstants.CM_PROP_VERSIONABLELABEL);
+		}
+		if(version == null) {
+			version = this.version;
+		}
+		return version;
 	}
 
 	private String getContentUrl() {
@@ -1860,10 +1925,10 @@ public class NodeDao {
 			list.add(0, json.toString());
 			org.alfresco.service.cmr.repository.NodeRef nodeRef = new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
 					nodeId);
-			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_INSTRUCTIONS,history.getComment());
-			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_RECEIVER,receivers);
-			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_STATUS,history.getStatus());
-			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_PROTOCOL,list);
+			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_INSTRUCTIONS,history.getComment(), false);
+			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_RECEIVER,receivers, false);
+			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_STATUS,history.getStatus(), false);
+			NodeServiceHelper.setProperty(nodeRef, CCConstants.CCM_PROP_WF_PROTOCOL,list, false);
 			if(sendMail) {
 				receivers.forEach((receiver) -> {
 					MailTemplate.UserMail r = MailTemplate.getUserMailData(receiver);
@@ -2363,7 +2428,7 @@ public class NodeDao {
 		if(value==null){
 			nodeService.removeProperty(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), this.getId(), property);
 		}else {
-			nodeService.setProperty(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), this.getId(), property, value);
+			nodeService.setProperty(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(), StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), this.getId(), property, value, false);
 		}
 	}
 
@@ -2377,9 +2442,9 @@ public class NodeDao {
 					permissionService.createNotifyObject(newNode.getId(), new AuthenticationToolAPI().getCurrentUser(), CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
 					nodeService.addAspect(newNode.getId(), CCConstants.CCM_ASPECT_FORKED);
 					nodeService.setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_FORKED_ORIGIN,
-							new org.alfresco.service.cmr.repository.NodeRef(storeProtocol, storeId, source[0]));
+							new org.alfresco.service.cmr.repository.NodeRef(storeProtocol, storeId, source[0]), false);
 					nodeService.setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_FORKED_ORIGIN_VERSION,
-					nodeService.getProperty(storeProtocol, storeId, source[0], CCConstants.LOM_PROP_LIFECYCLE_VERSION));
+					nodeService.getProperty(storeProtocol, storeId, source[0], CCConstants.LOM_PROP_LIFECYCLE_VERSION), false);
 					AuthenticationUtil.runAsSystem(() -> {
 						permissionService.removeAllPermissions(newNode.getId());
 						// re-activate inherition
@@ -2415,10 +2480,23 @@ public class NodeDao {
 			throw DAOException.mapping(t);
 		}
 	}
-	public static List<NodeRef> getFrontpageNodes(RepositoryDao repoDao) throws DAOException {
+	public static SearchResult<NodeDao> getFrontpageNodes(RepositoryDao repoDao) throws DAOException {
 		try {
-			return NodeServiceFactory.getNodeService(repoDao.getId()).
-					getFrontpageNodes().stream().map((ref)->new NodeRef(repoDao,ref.getId())).collect(Collectors.toList());
+			SearchResult<NodeDao> sr = new SearchResult<>();
+			sr.setNodes(NodeServiceFactory.getNodeService(repoDao.getId()).
+					getFrontpageNodes().stream().map((ref)-> {
+						try {
+							return NodeDao.getNode(repoDao,ref);
+						} catch (DAOException e) {
+							throw new RuntimeException(e);
+						}
+					}).collect(Collectors.toList()));
+			Pagination p = new Pagination();
+			p.setFrom(0);
+			p.setCount(sr.getNodes().size());
+			p.setTotal(sr.getNodes().size());
+			sr.setPagination(p);
+			return sr;
 		}catch(Throwable t){
 			throw DAOException.mapping(t);
 		}
@@ -2491,5 +2569,27 @@ public class NodeDao {
 
 	public static void setIsGlobalAdmin(Boolean isGlobalAdmin){
 		NodeDao.isGlobalAdmin.set(isGlobalAdmin);
+	}
+
+	/**
+	 * simply transfer an alfresco node to an rest-api compatible node object
+	 * This is a pretty simple call which is only supposed to be used for performance critical calls and will skip things like
+	 * 	- Current Access permission list
+	 * 	- Previews
+	 * 	- Content info
+	 * 	and ONLY include:
+	 * 	- aspects
+	 * 	- properties
+	 * 	Only use it if you don't need any advanced data or mappings
+	 */
+	public static Node getAsNodeSimple(org.alfresco.service.cmr.repository.NodeRef nodeRef) throws DAOException {
+		try {
+			NodeDao dao = new NodeDao(nodeRef);
+			Node node = new Node();
+			dao.fillNodeObject(node, false, false);
+			return node;
+		} catch (Throwable t) {
+			throw DAOException.mapping(t);
+		}
 	}
 }

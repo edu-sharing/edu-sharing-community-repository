@@ -7,18 +7,20 @@ es-workspace-lti-tools {
     margin-top: 20px;
 }
 .metadata-sidebar {
-    min-width: 300px;
-    max-width: 300px;
+    min-width: 350px;
+    max-width: 350px;
     position: fixed;
     @include iosScrolling();
     @include materialShadow();
-    height: calc(100% - #{$mainnavHeight+$workspaceBreadcrumbsHeight});
-    top: $mainnavHeight + $workspaceBreadcrumbsHeight;
+    height: calc(100% - (var(--mainnavHeight) + #{$workspaceBreadcrumbsHeight}));
+    top: calc(var(--mainnavHeight) + #{$workspaceBreadcrumbsHeight});
     right: 0;
     z-index: 5;
     background-color: #fff;
     @media screen and (max-width: ($mobileTabSwitchWidth)) {
-        height: calc(100% - #{$mainnavHeight+$workspaceBreadcrumbsHeight+$mobileTabNavHeight});
+        height: calc(
+            100% - (var(--mainnavHeight) + #{$workspaceBreadcrumbsHeight+$mobileTabNavHeight})
+        );
     }
 }
 .card-title-actionbar {

@@ -19,25 +19,14 @@
       <div class="breadcrumb-group">
         <es-breadcrumbs
           short="always"
-          [breadcrumbsAsNode]="breadcrumbs"
           [home]="'WORKSPACE.MY_FILES'"
           [clickable]="false"
         ></es-breadcrumbs>
         <div class="btn-choose"></div>
-        <button mat-raised-button (click)="chooseDirectory = true">
+        <button mat-raised-button (click)="chooseDirectory()">
           {{ 'MAP_LINK.CHOOSE' | translate }}
         </button>
       </div>
     </div>
   </div>
 </es-card>
-<es-file-chooser
-  *ngIf="chooseDirectory"
-  [title]="'MAP_LINK.FILE_PICKER_TITLE'"
-  [pickDirectory]="true"
-  [isCancelable]="true"
-  [writeRequired]="true"
-  [priority]="1"
-  (onCancel)="chooseDirectory = false"
-  (onChoose)="setDirectory($event)"
-></es-file-chooser>

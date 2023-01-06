@@ -17,6 +17,8 @@ import { FrameEventsService } from '../../../core-module/core.module';
 import { OPEN_URL_MODE } from '../../../core-module/ui/ui-constants';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
 
 @Component({
     selector: 'es-node-variant',
@@ -26,11 +28,10 @@ import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
         trigger('fade', UIAnimation.fade()),
         trigger('cardAnimation', UIAnimation.cardAnimation()),
     ],
+    providers: [BreadcrumbsService],
 })
 export class NodeVariantComponent {
     _node: Node;
-    chooseDirectory = false;
-    breadcrumbs: Node[];
     variantName: string;
     openViaConnector: Connector;
     licenseWarning: string;
@@ -67,7 +68,9 @@ export class NodeVariantComponent {
         private bridge: BridgeService,
         private events: FrameEventsService,
         private router: Router,
+        private breadcrumbsService: BreadcrumbsService,
         private nodeApi: RestNodeService,
+        private dialogs: DialogsService,
     ) {
         this.updateBreadcrumbs(RestConstants.INBOX);
         this.updateButtons();
@@ -77,14 +80,21 @@ export class NodeVariantComponent {
     }
 
     public create() {
-        if (!this.breadcrumbs || !this.breadcrumbs.length) return;
+        if (!this.breadcrumbsService.breadcrumbs$.value?.length) {
+            return;
+        }
         let win: any = null;
         if (this.openViaConnector) {
             win = UIHelper.getNewWindow(this.connector);
         }
         this.onLoading.emit(true);
         this.nodeApi
-            .forkNode(this.breadcrumbs[this.breadcrumbs.length - 1].ref.id, this._node.ref.id)
+            .forkNode(
+                this.breadcrumbsService.breadcrumbs$.value[
+                    this.breadcrumbsService.breadcrumbs$.value.length - 1
+                ].ref.id,
+                this._node.ref.id,
+            )
             .subscribe(
                 (created) => {
                     this.nodeApi
@@ -109,7 +119,9 @@ export class NodeVariantComponent {
                                         this.nodeApi,
                                         this.router,
                                         this.connector.getCurrentLogin(),
-                                        this.breadcrumbs[this.breadcrumbs.length - 1].ref.id,
+                                        this.breadcrumbsService.breadcrumbs$.value[
+                                            this.breadcrumbsService.breadcrumbs$.value.length - 1
+                                        ].ref.id,
                                     );
                                 } else {
                                     let additional = {
@@ -120,8 +132,10 @@ export class NodeVariantComponent {
                                                     this.nodeApi,
                                                     this.router,
                                                     this.connector.getCurrentLogin(),
-                                                    this.breadcrumbs[this.breadcrumbs.length - 1]
-                                                        .ref.id,
+                                                    this.breadcrumbsService.breadcrumbs$.value[
+                                                        this.breadcrumbsService.breadcrumbs$.value
+                                                            .length - 1
+                                                    ].ref.id,
                                                 );
                                             },
                                         },
@@ -129,8 +143,10 @@ export class NodeVariantComponent {
                                     this.toast.toast(
                                         'NODE_VARIANT.CREATED',
                                         {
-                                            folder: this.breadcrumbs[this.breadcrumbs.length - 1]
-                                                .name,
+                                            folder: this.breadcrumbsService.breadcrumbs$.value[
+                                                this.breadcrumbsService.breadcrumbs$.value.length -
+                                                    1
+                                            ].name,
                                         },
                                         null,
                                         null,
@@ -159,14 +175,26 @@ export class NodeVariantComponent {
             );
     }
 
+    async chooseDirectory() {
+        const dialogRef = await this.dialogs.openFileChooserDialog({
+            title: 'NODE_VARIANT.FILE_PICKER_TITLE',
+            pickDirectory: true,
+            writeRequired: true,
+        });
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                this.setDirectory(result);
+            }
+        });
+    }
+
     setDirectory(event: Node[]) {
         this.updateBreadcrumbs(event[0].ref.id);
     }
 
     private updateBreadcrumbs(id: string) {
-        this.chooseDirectory = false;
         this.nodeApi.getNodeParents(id, false).subscribe((parents) => {
-            this.breadcrumbs = parents.nodes.reverse();
+            this.breadcrumbsService.setNodePath(parents.nodes.reverse());
         });
     }
     openLicense() {

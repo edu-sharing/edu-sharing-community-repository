@@ -25,7 +25,11 @@
     >
       <ng-container *ngTemplateOutlet="content"></ng-container>
       <p
-        *ngIf="widget?.definition.bottomCaption && !shouldShowError()"
+        *ngIf="
+          mdsEditorInstance.editorMode !== 'viewer' &&
+          widget?.definition.bottomCaption &&
+          !shouldShowError()
+        "
         class="mat-hint subscript"
         [id]="descriptionId"
       >

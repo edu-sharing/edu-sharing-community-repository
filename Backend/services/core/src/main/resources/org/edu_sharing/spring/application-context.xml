@@ -14,6 +14,7 @@
 	<import resource="classpath:org/edu_sharing/spring/authentication-services.xml" />
 	<import resource="classpath:org/edu_sharing/spring/edu-sharing-sso-context.xml" />
 	<import resource="classpath:org/edu_sharing/spring/base-services.xml"/>
+	<import resource="classpath:org/edu_sharing/spring/feedback-services.xml"/>
 	<import resource="classpath:org/edu_sharing/spring/jmx-services.xml"/>
 	<import resource="classpath:org/edu_sharing/spring/cluster-services.xml"/>
 	<import resource="classpath*:org/edu_sharing/spring/plugin-*.xml"/>

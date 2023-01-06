@@ -4,11 +4,11 @@
   role="main"
   esSkipTarget="MAIN_CONTENT"
   avatar="assets/images/app-icon.svg"
-  [buttons]="updateButtons()"
+  [buttons]="buttons"
   title="{{
-    (state == 'request' || state == 'done-reset'
+    (state === 'request' || state === 'done-reset'
       ? 'REGISTER.REQUEST.TITLE'
-      : state == 'reset-password'
+      : state === 'reset-password'
       ? 'REGISTER.RESET.TITLE'
       : 'REGISTER.TITLE'
     ) | translate
@@ -22,31 +22,36 @@
   <div class="register-content card-content-padding">
     <h1 esTitle class="cdk-visually-hidden">{{ 'REGISTER.TITLE' | translate }}</h1>
     <es-register-form
-      [class.display-none]="!(state == 'register')"
+      [class.display-none]="!(state === 'register')"
+      (onStateChanged)="updateButtons()"
       (onRegisterDone)="onRegisterDone()"
       #registerForm
     ></es-register-form>
     <es-register-done
-      *ngIf="state == 'done' || state == 'done-reset'"
+      *ngIf="state === 'done' || state === 'done-reset'"
+      (onStateChanged)="updateButtons()"
       (onModify)="modifyData()"
       [inputState]="state"
       #registerDone
     ></es-register-done>
     <es-register-request
-      *ngIf="state == 'request'"
+      *ngIf="state === 'request'"
+      (onStateChanged)="updateButtons()"
       (onDone)="onPasswordRequested()"
       #request
     ></es-register-request>
     <es-register-reset-password
-      *ngIf="state == 'reset-password'"
+      *ngIf="state === 'reset-password'"
+      (onStateChanged)="updateButtons()"
       #resetPassword
+      [params]="params"
     ></es-register-reset-password>
     <div
       *ngIf="
-        state != 'register' &&
-        state != 'done' &&
-        state != 'done-reset' &&
-        state != 'request' &&
+        state !== 'register' &&
+        state !== 'done' &&
+        state !== 'done-reset' &&
+        state !== 'request' &&
         canRegister()
       "
       class="register"
@@ -57,5 +62,4 @@
       </button>
     </div>
   </div>
-  <div class="card-action"></div>
 </es-card>

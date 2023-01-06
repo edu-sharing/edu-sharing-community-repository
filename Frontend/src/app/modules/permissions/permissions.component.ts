@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, OnInit } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnInit, OnDestroy } from '@angular/core';
 import { TranslationsService } from '../../translations/translations.service';
 import {
     NodeRef,
@@ -21,6 +21,7 @@ import { ConfigurationService } from '../../core-module/core.module';
 import { RestHelper } from '../../core-module/core.module';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
+import { Subject } from 'rxjs';
 
 @Component({
     selector: 'es-permissions-main',
@@ -28,7 +29,7 @@ import { LoadingScreenService } from '../../main/loading-screen/loading-screen.s
     styleUrls: ['permissions.component.scss'],
     animations: [],
 })
-export class PermissionsMainComponent implements OnInit {
+export class PermissionsMainComponent implements OnInit, OnDestroy {
     public tab: number = 0;
     public searchQuery: string;
     selected: Organization;
@@ -36,6 +37,8 @@ export class PermissionsMainComponent implements OnInit {
     public disabled = false;
     public isLoading = true;
     TABS = ['ORG', 'GROUP', 'USER', 'DELETE'];
+    private destroyed = new Subject<void>();
+
     constructor(
         private toast: Toast,
         private router: Router,
@@ -46,7 +49,7 @@ export class PermissionsMainComponent implements OnInit {
         private mainNav: MainNavService,
         private connector: RestConnectorService,
     ) {
-        const loadingTask = this.loadingScreen.addLoadingTask();
+        const loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
         this.translations.waitForInit().subscribe(() => {
             this.connector.isLoggedIn().subscribe(
                 (data: LoginResult) => {
@@ -75,6 +78,11 @@ export class PermissionsMainComponent implements OnInit {
 
     ngOnInit(): void {
         this.registerMainNav();
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
     }
 
     private registerMainNav(): void {

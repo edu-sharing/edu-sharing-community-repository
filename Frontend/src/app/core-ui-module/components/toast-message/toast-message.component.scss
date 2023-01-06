@@ -6,6 +6,9 @@
     justify-content: center;
     width: 100%;
     padding: 0 20px;
+    .mat-simple-snackbar-message-plain {
+        white-space: pre-line;
+    }
     > button {
         flex-shrink: 0;
         font-weight: bold;

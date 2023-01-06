@@ -1,4 +1,5 @@
 @import '../app/core-ui-module/styles/variables';
+@import '../app/core-ui-module/styles/branding';
 .clickable {
     @include clickable();
 }
@@ -11,9 +12,8 @@
 
 html,
 body {
-    height: 100%;
-    font-family: 'open_sansregular', sans-serif !important;
-    font-size: 10pt;
+    font-family: $primaryFontFamily !important;
+    font-size: $primaryFontSize;
     -webkit-font-smoothing: antialiased;
 }
 // storybook no background
@@ -200,5 +200,23 @@ input[type='checkbox']:not(:checked),
 input[type='checkbox']:checked {
     &.mat-checkbox-input {
         left: 50%; // Undo materialize styling and reapply standard material style.
+    }
+}
+
+.cdk-drag:not(.cdk-drag-disabled) {
+    // Fixes a bug where Firefox won't fire mouseenter/-leave events while dragging. The bug only
+    // occurs in combination with `overflow: hidden`.
+    user-select: none;
+}
+.es-nodes-active-drop-target-accept {
+    @include afterPseudoElement {
+        outline: 2px dashed $colorStatusPositive;
+        outline-offset: -2px;
+    }
+}
+.es-nodes-active-drop-target-deny {
+    @include afterPseudoElement {
+        outline: 2px dashed $colorStatusNegative;
+        outline-offset: -2px;
     }
 }

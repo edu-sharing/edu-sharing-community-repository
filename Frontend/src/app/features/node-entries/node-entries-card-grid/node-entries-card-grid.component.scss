@@ -1,5 +1,6 @@
 @use 'sass:math';
 @import '../../../core-ui-module/styles/variables';
+@import '../../../core-ui-module/styles/mixins';
 
 @keyframes OrderAnimationCards {
     0% {
@@ -32,16 +33,78 @@
     display: flex;
     justify-content: center;
 }
+.card-grid-wrapper {
+    position: relative;
+    .scroll-helper-left,
+    .scroll-helper-right {
+        position: absolute;
+        width: 15%;
+        min-width: 60px;
+        max-width: $cardWidth * 0.4;
+        display: flex;
+        align-items: center;
+        // do not overlay scrollbar
+        height: calc(100% - 10px);
+        z-index: 5;
+        @include clickable();
+        > button {
+            background-color: #fff;
+            color: $primary;
+            @include materialShadowMediumLarge(false, 0.25);
+        }
+    }
+    .scroll-helper-left {
+        left: 0;
+        justify-content: flex-start;
+        background: linear-gradient(
+            to left,
+            rgba(255, 255, 255, 0.000001) 0,
+            rgb(255, 255, 255) calc(100% - 10px)
+        );
+        > button {
+            margin-left: -1px;
+        }
+    }
+    .scroll-helper-right {
+        right: 0;
+        justify-content: flex-end;
+        background: linear-gradient(
+            to right,
+            rgba(255, 255, 255, 0.000001) 0,
+            rgb(255, 255, 255) calc(100% - 10px)
+        );
+        > button {
+            margin-right: -10px;
+        }
+    }
+}
 .card-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax($cardWidth, 1fr));
     grid-column-gap: 20px;
     grid-row-gap: 20px;
     grid-template-rows: auto;
     padding-block-start: 1em;
     padding-block-end: 1em;
+    &.card-grid-layout-scroll {
+        position: relative;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax($cardWidth, 1fr);
+        // slightly more padding to prevent shadow clipping
+        padding: 1.5em;
+        @include materialScrollbar();
+        > .card-grid-drag-wrapper {
+            scroll-snap-align: center;
+            scroll-snap-stop: always;
+        }
+    }
     > .card-grid-drag-wrapper {
         position: relative;
+        // .cdk-drag-placeholder ~ .card-grid-drop-blocked-container {
+        //     display: none;
+        // }
         .card-grid-drop-allowed-container,
         .card-grid-drop-blocked-container {
             position: absolute;
@@ -74,11 +137,8 @@
                 color: $colorStatusNegative;
             }
         }
-        &.card-grid-drop-blocked {
-            outline: 2px dashed $colorStatusNegative;
-        }
-        &.card-grid-drop-allowed {
-            outline: 2px dashed $colorStatusPositive;
+        .selected-when-dragging {
+            opacity: 0.5; // Same as .cdk-drag-placeholder
         }
         &.cdk-drop-list-dragging {
             > *:first-child {
@@ -104,12 +164,8 @@
             &:nth-of-type(5n) {
                 animation-delay: math.div(-$orderAnimationTime, 8);
             }
-            &.cdk-drop-list-dragging {
-                opacity: 0.75;
-                outline: 3px solid $primary;
-                > *:last-child {
-                    display: none;
-                }
+            .cdk-drag-placeholder {
+                display: none;
             }
         }
     }
@@ -165,4 +221,15 @@
             }
         }
     }
+}
+
+.card-drag-preview {
+    width: 250px;
+}
+
+// Disable animations for rearranging. We misuse `entered` events for doing the rearranging, so the
+// preview animation would go to the wrong position (see
+// https://stackblitz.com/edit/drag-drop-dashboard).
+::ng-deep .es-card-grid-rearrange-drag-preview.cdk-drag-animating {
+    transition: none;
 }

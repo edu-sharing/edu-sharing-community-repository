@@ -12,6 +12,7 @@ export {
     MdsWidget,
     MdsWidgetCondition,
     MetadataSetInfo,
+    FeedbackData,
     Node,
     NodeEntries,
     NodeRef,
@@ -20,10 +21,13 @@ export {
     RelationData,
     SearchResultNode as SearchResults,
     StreamEntry,
+    Tools,
+    Tool,
     UserProfile,
     UserQuota,
     UserStatus,
     WebsiteInformation,
+    LicenseAgreement,
 } from './api/models';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MdsView } from './api/models';

@@ -3,59 +3,51 @@ import { UIHelper } from '../../core-ui-module/ui-helper';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Toast } from '../../core-ui-module/toast';
 import {
+    Application,
+    Authority,
+    CacheInfo,
     ConfigurationService,
     DialogButton,
     JobDescription,
     ListItem,
+    LoginResult,
+    Node,
     NodeListElastic,
+    NodeWrapper,
+    RestAdminService,
+    RestConnectorService,
+    RestConstants,
+    RestHelper,
     RestIamService,
     RestMediacenterService,
+    RestNetworkService,
+    RestNodeService,
+    RestOrganizationService,
+    RestSearchService,
+    ServerUpdate,
+    SessionStorageService,
 } from '../../core-module/core.module';
 import { TranslateService } from '@ngx-translate/core';
-import { SessionStorageService } from '../../core-module/core.module';
-import { RestConnectorService } from '../../core-module/core.module';
 import {
     Component,
-    ViewChild,
-    ElementRef,
-    ViewContainerRef,
     ComponentFactoryResolver,
+    ElementRef,
     OnDestroy,
     OnInit,
+    ViewChild,
+    ViewContainerRef,
 } from '@angular/core';
-import {
-    LoginResult,
-    ServerUpdate,
-    CacheInfo,
-    Application,
-    Node,
-    Authority,
-    NodeList,
-    NodeWrapper,
-    RestoreResult,
-} from '../../core-module/core.module';
-import { RestAdminService } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
-import { RestConstants } from '../../core-module/core.module';
 import { UIConstants } from '../../core-module/ui/ui-constants';
-import { RestNodeService } from '../../core-module/core.module';
 import { SuggestItem } from '../../common/ui/autocomplete/autocomplete.component';
-import { RestOrganizationService } from '../../core-module/core.module';
-import { RestSearchService } from '../../core-module/core.module';
-import { RestHelper } from '../../core-module/core.module';
 import { Observable, Observer } from 'rxjs';
-import { RestNetworkService } from '../../core-module/core.module';
-import { MainNavComponent } from '../../main/navigation/main-nav/main-nav.component';
 import { CustomHelper } from '../../common/custom-helper';
 import { DateHelper } from '../../core-ui-module/DateHelper';
 import { CsvHelper } from '../../core-module/csv.helper';
 import { trigger } from '@angular/animations';
 import { UIAnimation } from '../../core-module/ui/ui-animation';
-import IEditorOptions = monaco.editor.IEditorOptions;
-import { NgxEditorModel } from 'ngx-monaco-editor';
 import { Scope } from '../../core-ui-module/option-item';
 import { AboutService } from 'ngx-edu-sharing-api';
-import { SkipTarget } from '../../main/navigation/skip-nav/skip-nav.service';
 import { AuthoritySearchMode } from '../../shared/components/authority-search-input/authority-search-input.component';
 import { PlatformLocation } from '@angular/common';
 import { MainNavService } from '../../main/navigation/main-nav.service';
@@ -66,6 +58,9 @@ import {
 } from 'src/app/features/node-entries/entries-model';
 import { NodeDataSource } from '../../features/node-entries/node-data-source';
 import { WorkspaceExplorerComponent } from '../workspace/explorer/explorer.component';
+import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';
+import { NodeEntriesWrapperComponent } from '../../features/node-entries/node-entries-wrapper.component';
+import { XmlAppPropertiesDialogData } from '../../features/dialogs/dialog-modules/xml-app-properties-dialog/xml-app-properties-dialog-data';
 
 type LuceneData = {
     mode: 'NODEREF' | 'SOLR' | 'ELASTIC';
@@ -91,6 +86,8 @@ export class AdminComponent implements OnInit, OnDestroy {
     readonly SCOPES = Scope;
     readonly InteractionType = InteractionType;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    @ViewChild('searchResults') nodeEntriesSearchResult: NodeEntriesWrapperComponent<Node>;
+    @ViewChild('actionbarComponent') actionbarComponent: ActionbarComponent;
     elasticResponse: NodeListElastic;
 
     constructor(
@@ -131,14 +128,6 @@ export class AdminComponent implements OnInit, OnDestroy {
                     this.showWarning = false;
                 }),
             ];
-            this.xmlCardButtons = [
-                new DialogButton('CANCEL', { color: 'standard' }, () => {
-                    this.xmlAppProperties = null;
-                }),
-                new DialogButton('APPLY', { color: 'primary' }, () => {
-                    this.saveApp();
-                }),
-            ];
             this.getTemplates();
             this.connector.isLoggedIn().subscribe((data: LoginResult) => {
                 this.loginResult = data;
@@ -149,7 +138,6 @@ export class AdminComponent implements OnInit, OnDestroy {
             });
         });
     }
-    private static MULTILINE_PROPERTIES = ['custom_html_headers', 'public_key'];
     static RS_CONFIG_HELP =
         'https://docs.edu-sharing.com/confluence/edp/de/installation-en/installation-of-the-edu-sharing-rendering-service';
     mailTemplates = [
@@ -172,8 +160,6 @@ export class AdminComponent implements OnInit, OnDestroy {
     public globalProgress = true;
     public appUrl: string;
     public propertyName: string;
-    public chooseDirectory = false;
-    public chooseCollection = false;
     public cacheName: string;
     public cacheInfo: string;
     public oai: any = {};
@@ -227,10 +213,6 @@ export class AdminComponent implements OnInit, OnDestroy {
     public dialogButtons: DialogButton[] = [];
     public dialogParameters: any;
     public warningButtons: DialogButton[] = [];
-    public xmlCardButtons: DialogButton[] = [];
-    public xmlAppProperties: any;
-    public xmlAppAdditionalPropertyName: string;
-    public xmlAppAdditionalPropertyValue: string;
     parentNode: Node;
     parentCollection: Node;
     parentCollectionType = 'root';
@@ -250,8 +232,6 @@ export class AdminComponent implements OnInit, OnDestroy {
     uploadJobsFile: File;
     uploadOaiFile: File;
     public xmlAppKeys: string[];
-    public currentApp: string;
-    currentAppXml: string;
     public editableXmls = [{ name: 'HOMEAPP', file: RestConstants.HOME_APPLICATION_XML }];
     searchResponse = new NodeDataSource<Node>();
     searchColumns: ListItem[] = [];
@@ -305,7 +285,7 @@ export class AdminComponent implements OnInit, OnDestroy {
         }
     }
     public debugNode(node: Node) {
-        this.dialogs.openNodeInfoDialog({ node });
+        this.dialogs.openNodeInfoDialog({ nodes: [node] });
     }
     public getModeButton(mode = this.mode): any {
         return this.buttons[Helper.indexOfObjectArray(this.buttons, 'id', mode)];
@@ -328,7 +308,7 @@ export class AdminComponent implements OnInit, OnDestroy {
             },
         );
     }
-    public searchNodes() {
+    public async searchNodes() {
         this.storage.set('admin_lucene', this.lucene);
         const authorities = [];
         if (this.lucene.authorities) {
@@ -336,6 +316,10 @@ export class AdminComponent implements OnInit, OnDestroy {
                 authorities.push(auth.authorityName);
             }
         }
+        await this.nodeEntriesSearchResult.initOptionsGenerator({
+            actionbar: this.actionbarComponent,
+            scope: Scope.Admin,
+        });
         const request = {
             offset: this.lucene.offset ? this.lucene.offset : 0,
             count: this.lucene.count,
@@ -375,10 +359,6 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
     public removeLuceneAuthority(authority: Authority) {
         this.lucene.authorities.splice(this.lucene.authorities.indexOf(authority), 1);
-    }
-    public isMultilineProperty(key: string) {
-        if (AdminComponent.MULTILINE_PROPERTIES.indexOf(key) != -1) return true;
-        return this.xmlAppProperties[key].indexOf('\n') != -1;
     }
     public downloadApp(app: Application) {
         Helper.downloadContent(app.file, app.xml);
@@ -464,42 +444,17 @@ export class AdminComponent implements OnInit, OnDestroy {
             },
         );
     }
-    public closeAppEditor() {
-        this.xmlAppProperties = null;
-        this.xmlAppAdditionalPropertyName = null;
-        this.xmlAppAdditionalPropertyValue = null;
-    }
-    public saveApp() {
-        this.globalProgress = true;
-        if (this.xmlAppAdditionalPropertyName && this.xmlAppAdditionalPropertyName.trim()) {
-            this.xmlAppProperties[this.xmlAppAdditionalPropertyName.trim()] =
-                this.xmlAppAdditionalPropertyValue;
-        }
-        this.admin.updateApplicationXML(this.currentAppXml, this.xmlAppProperties).subscribe(
-            () => {
-                this.toast.toast('ADMIN.APPLICATIONS.APP_SAVED', { xml: this.currentAppXml });
-                this.globalProgress = false;
-                this.closeAppEditor();
-                this.refreshAppList();
-            },
-            (error: any) => {
-                this.globalProgress = false;
-                this.toast.error(error);
-            },
-        );
-    }
     public configApp(app: Application) {
         window.open(app.configUrl);
     }
     public editApp(app: any) {
-        this.currentApp = app.name || 'HOMEAPP';
-        this.currentAppXml = app.file;
+        const appName = app.name || 'HOMEAPP';
+        const appXml = app.file;
         this.globalProgress = true;
         this.admin.getApplicationXML(app.file).subscribe(
-            (data: any[]) => {
+            async (properties: any[]) => {
+                await this.showXmlAppPropertiesDialog({ appName, appXml, properties });
                 this.globalProgress = false;
-                this.xmlAppKeys = Object.keys(data);
-                this.xmlAppProperties = data;
             },
             (error: any) => {
                 this.globalProgress = false;
@@ -507,6 +462,16 @@ export class AdminComponent implements OnInit, OnDestroy {
             },
         );
     }
+
+    private async showXmlAppPropertiesDialog(data: XmlAppPropertiesDialogData) {
+        const dialogRef = await this.dialogs.openXmlAppPropertiesDialog(data);
+        dialogRef.afterClosed().subscribe((wasUpdated) => {
+            if (wasUpdated) {
+                this.refreshAppList();
+            }
+        });
+    }
+
     public removeApp(app: Application) {
         this.dialogTitle = 'ADMIN.APPLICATIONS.REMOVE_TITLE';
         this.dialogMessage = 'ADMIN.APPLICATIONS.REMOVE_MESSAGE';
@@ -544,13 +509,33 @@ export class AdminComponent implements OnInit, OnDestroy {
             skipLocationChange: skipLocationChange,
         });
     }
+    async chooseDirectory() {
+        const dialogRef = await this.dialogs.openFileChooserDialog({
+            title: 'ADMIN.IMPORT.CHOOSE_DIRECTORY',
+            pickDirectory: true,
+        });
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                this.pickDirectory(result);
+            }
+        });
+    }
     public pickDirectory(event: Node[]) {
         this.parentNode = event[0];
-        this.chooseDirectory = false;
+    }
+    async chooseCollection() {
+        const dialogRef = await this.dialogs.openFileChooserDialog({
+            title: 'ADMIN.IMPORT.CHOOSE_COLLECTION',
+            collections: true,
+        });
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                this.pickCollection(result);
+            }
+        });
     }
     public pickCollection(event: Node[]) {
         this.parentCollection = event[0];
-        this.chooseCollection = false;
     }
     public registerAppXml(event: any) {
         const file = event.target.files[0];
@@ -644,11 +629,7 @@ export class AdminComponent implements OnInit, OnDestroy {
                 },
             );
     }
-    public removeAppProperty(pos: number) {
-        const key = this.xmlAppKeys[pos];
-        this.xmlAppKeys.splice(pos, 1);
-        delete this.xmlAppProperties[key];
-    }
+
     public oaiImport() {
         if (!this.oaiPreconditions()) return;
         this.globalProgress = true;
@@ -746,7 +727,7 @@ export class AdminComponent implements OnInit, OnDestroy {
         this.admin.getPropertyValuespace(this.propertyName).subscribe(
             (data: any) => {
                 this.globalProgress = false;
-                this.dialogTitle = 'ADMIN.IMPORT.PROPERTY_VALUESPACE';
+                this.dialogTitle = 'ADMIN.TOOLKIT.PROPERTY_VALUESPACE';
                 this.dialogMessage = data.xml;
                 this.dialogButtons = DialogButton.getOk(() => {
                     this.dialogTitle = null;
@@ -1013,7 +994,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
     getMajorVersion(version: string) {
         const v = version.split('.');
-        if (v.length < 3) return v;
+        if (v.length < 3) return version;
         v.splice(2, v.length - 2);
         return v.join('.');
     }
@@ -1458,10 +1439,11 @@ export class AdminComponent implements OnInit, OnDestroy {
                 });
             });
             this.admin.getRepositoryVersion().subscribe(
-                (data: string) => {
-                    this.repositoryVersion = data;
+                (data) => {
+                    this.repositoryVersion = JSON.stringify(data, null, 2);
                 },
                 (error: any) => {
+                    console.info(error);
                     this.repositoryVersion =
                         'Error accessing version information. Are you in dev mode?';
                 },
@@ -1565,5 +1547,10 @@ export class AdminComponent implements OnInit, OnDestroy {
                 .toPromise();
             UIHelper.goToDefaultLocation(this.router, this.platformLocation, this.config, true);
         } catch (e) {}
+    }
+
+    openNodeRender(event: Node) {
+        const url = this.router.createUrlTree([UIConstants.ROUTER_PREFIX + 'render', event.ref.id]);
+        window.open(this.connector.getAbsoluteEdusharingUrl() + this.router.serializeUrl(url));
     }
 }

@@ -867,7 +867,7 @@ export class MdsEditorInstanceService implements OnDestroy {
             try {
                 const sets = ConfigurationHelper.filterValidMds(
                     repository,
-                    (await this.restMdsService.getSets().toPromise()).metadatasets,
+                    await this.mdsService.getAvailableMetadataSets().toPromise(),
                     this.configService,
                 );
                 mdsId = sets[0]?.id;
@@ -1515,7 +1515,9 @@ export class MdsEditorInstanceService implements OnDestroy {
             ...values,
         });
     }
-
+    focusWidget(id: string): void {
+        this.widgets.value.filter((w) => w.definition.id === id)?.[0]?.focusTrigger?.next();
+    }
     focusFirstWidget(): void {
         for (const widget of this.widgets.value) {
             if (widget.focusTrigger.observers.length > 0) {

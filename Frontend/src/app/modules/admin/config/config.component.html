@@ -51,6 +51,26 @@
         ><div>{{ 'ADMIN.GLOBAL_CONFIG.BASE_CONFIG_HINT' | translate }}</div></mat-hint
       >
     </div>
+  </ng-container>
+  <ng-container *ngIf="configs.extension">
+    <h3 class="mat-heading-3 mat-heading-underline">
+      {{ 'ADMIN.GLOBAL_CONFIG.EXTENSION_CONFIG_TITLE' | translate }}
+    </h3>
+    <es-info-message mode="warning" *ngIf="editSupported">{{
+      'ADMIN.GLOBAL_CONFIG.VOLATILE_WARNING' | translate
+    }}</es-info-message>
+    <div class="monaco-editor">
+      <ngx-monaco-editor
+        [options]="codeOptionsHocoonRW"
+        [(ngModel)]="configs.extension"
+        [ngModelOptions]="{ standalone: true }"
+      ></ngx-monaco-editor>
+      <mat-hint
+        ><div>{{ 'ADMIN.GLOBAL_CONFIG.EXTENSION_CONFIG_HINT' | translate }}</div></mat-hint
+      >
+    </div>
+  </ng-container>
+  <ng-container *ngIf="showRO">
     <ng-container *ngIf="configs.clusterDeployment">
       <h3 class="mat-heading-3 mat-heading-underline">
         {{ 'ADMIN.GLOBAL_CONFIG.CLUSTER_DEPLOYMENT_CONFIG_TITLE' | translate }}
@@ -101,10 +121,9 @@
       >
     </div>
   </ng-container>
-  <ng-container *ngIf="editSupported || configs.translate">
-    <h3 class="mat-heading-3 mat-heading-underline">
-      {{ 'ADMIN.GLOBAL_CONFIG.NODE_OVERRIDE_CONFIG_TITLE' | translate }}
-    </h3>
+  <!--
+  <ng-container *ngIf="editSupported || configs.nodeOverride">
+    <h3 class="mat-heading-3 mat-heading-underline">{{ 'ADMIN.GLOBAL_CONFIG.NODE_OVERRIDE_CONFIG_TITLE' | translate}}</h3>
     <div class="monaco-editor">
       <ngx-monaco-editor
         [options]="codeOptionsHocoonRW"
@@ -116,6 +135,7 @@
       >
     </div>
   </ng-container>
+  -->
   <ng-container *ngIf="showRO">
     <h3 class="mat-heading-3 mat-heading-underline">
       {{ 'ADMIN.GLOBAL_CONFIG.PARSED_TITLE' | translate }}

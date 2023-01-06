@@ -75,7 +75,7 @@ export class MdsEditorWidgetPreviewComponent implements OnInit, NativeWidgetComp
             return null;
         }
         return observableForkJoin(
-            nodes.map((n) => this.nodeService.uploadNodePreview(n.ref.id, this.file)),
+            nodes.map((n) => this.nodeService.uploadNodePreview(n.ref.id, this.file, false)),
         )
             .pipe(map(() => nodes))
             .toPromise();

@@ -70,6 +70,7 @@ import {
 } from 'src/app/features/node-entries/entries-model';
 import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-entries-wrapper.component';
+import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
 
 @Component({
     selector: 'es-permissions-authorities',
@@ -80,6 +81,7 @@ import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-
         trigger('fade', UIAnimation.fade()),
         trigger('cardAnimation', UIAnimation.cardAnimation()),
     ],
+    providers: [BreadcrumbsService],
 })
 export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit {
     readonly DisplayType = NodeEntriesDisplayType;
@@ -102,7 +104,16 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     public SCOPE_TYPES = RestConstants.VALID_SCOPE_TYPES;
     public ORG_TYPES = RestConstants.VALID_GROUP_TYPES_ORG;
     public PRIMARY_AFFILIATIONS = RestConstants.USER_PRIMARY_AFFILIATIONS;
-    public edit: any;
+    public edit: {
+        authorityName?: string;
+        constrains?: Constrain[];
+        elementType?: ElementType[];
+        folderPath?: Node[];
+        group?: DefaultGroups;
+        profile: any;
+        quota?: any;
+        priority?: number;
+    };
     editDetails: any;
     editId: string;
     public columns: ListItem[] = [];
@@ -309,6 +320,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         private nodeHelper: NodeHelperService,
         private uiService: UIService,
         private router: Router,
+        private breadcrumbsService: BreadcrumbsService,
         private ref: ApplicationRef,
         private translate: TranslateService,
         private organization: RestOrganizationService,
@@ -832,8 +844,6 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                     await this.dataSource.appendData(
                         orgs.organizations.filter((o) => o.administrationAccess),
                     );
-                    // org endpoint does not support proper pagination, so check if result was empty
-                    this.dataSource.setCanLoadMore(orgs.organizations.length > 0);
                     this.dataSource.isLoading = false;
                     this.updateOptions();
                 });
@@ -887,6 +897,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                     this.edit = Helper.deepCopy(list[0]);
                     data.nodes = data.nodes.reverse().slice(1);
                     this.edit.folderPath = data.nodes;
+                    this.breadcrumbsService.setNodePath(data.nodes);
                     this.editId = this.edit.authorityName;
                 },
                 (error: any) => this.toast.error(error),

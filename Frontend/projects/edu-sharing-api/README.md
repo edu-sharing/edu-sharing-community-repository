@@ -294,7 +294,7 @@ which other wrappers rely on controlling themselves for consistent state.
 Download an updated `swagger.json` to `build`, e.g.:
 
 ```sh
-wget https://redaktion-staging.openeduhub.net/edu-sharing/rest/openapi.json -O build/openapi.json
+wget http://repository.127.0.0.1.nip.io:8100/edu-sharing/rest/openapi.json -O build/openapi.json
 ```
 
 Generate API Code:

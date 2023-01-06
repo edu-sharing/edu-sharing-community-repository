@@ -11,6 +11,7 @@ public class CallSourceHelper {
         Search,
         Render,
         Preview,
+        Sitemap,
         Workspace,
         Unknown
     }
@@ -43,6 +44,8 @@ public class CallSourceHelper {
             return CallSource.Render;
         }else if(isPreview(requestPath)){
             return CallSource.Preview;
+        }else if(isSitemap(requestPath)){
+            return CallSource.Sitemap;
         }else{
             return CallSource.Workspace;
         }
@@ -67,6 +70,13 @@ public class CallSourceHelper {
 
     private static boolean isPreview(String path){
         if(path.startsWith("/edu-sharing/preview")){
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean isSitemap(String path){
+        if(path.startsWith("/edu-sharing/eduservlet/sitemap")){
             return true;
         }
         return false;

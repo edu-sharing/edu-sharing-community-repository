@@ -6,10 +6,10 @@
 ></es-dropdown>
 <div
   class="actionbar"
-  [class.actionbar-all-flat]="style == 'flat'"
-  [class.actionbar-background-dark]="backgroundType == 'dark'"
-  [class.actionbar-background-primary]="backgroundType == 'primary'"
-  [class.actionbar-round]="appearance == 'round'"
+  [class.actionbar-all-flat]="style === 'flat'"
+  [class.actionbar-background-dark]="backgroundType === 'dark'"
+  [class.actionbar-background-primary]="backgroundType === 'primary'"
+  [class.actionbar-round]="appearance === 'round'"
 >
   <button
     *ngFor="let option of optionsAlways; let i = index"
@@ -23,7 +23,7 @@
     (click)="click(option)"
   >
     <i [esIcon]="option.icon"></i>
-    <span class="action-always-caption" *ngIf="option.showName && appearance != 'round'">
+    <span class="action-always-caption" *ngIf="option.showName && appearance !== 'round'">
       {{ option.name | translate }}</span
     >
   </button>

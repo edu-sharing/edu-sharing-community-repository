@@ -1,6 +1,6 @@
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
-  MAVEN_CLI: "-Ddocker.registry=$DOCKER_REGISTRY -Dhelm.deploy.url=$HELM_REGISTRY -Dhelm.deploy.type=$HELM_TYPE -Dmaven.deploy.releases=$MAVEN_DEPLOY_RELEASES -Dmaven.deploy.snapshots=$MAVEN_DEPLOY_SNAPSHOTS --batch-mode --errors --fail-fast --show-version -T 1C"
+  MAVEN_CLI: "-Ddocker.registry=$DOCKER_REGISTRY -Dhelm.deploy.url=$HELM_REGISTRY -Dhelm.deploy.type=$HELM_TYPE -Dmaven.deploy.releases=$MAVEN_DEPLOY_RELEASES -Dmaven.deploy.snapshots=$MAVEN_DEPLOY_SNAPSHOTS --batch-mode --errors --fail-fast --show-version"
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
 
 default:
@@ -10,11 +10,41 @@ stages:
   - test
   - deploy
 
+unittest frontend:
+  stage: test
+  variables:
+    NODE_VERSION: 16
+    CHROME_BIN: /usr/bin/chromium-browser
+  image: node:$NODE_VERSION-alpine3.16
+  cache:
+    key:
+      files:
+        - Frontend/package-lock.json
+      prefix: node-modules-$NODE_VERSION
+    paths:
+      - Frontend/node_modules
+  before_script:
+    - apk add chromium
+    - mkdir -p Frontend/projects/edu-sharing-api/build/
+    - cp Backend/services/rest/api/src/main/resources/openapi.json Frontend/projects/edu-sharing-api/build/openapi.json
+    - cd Frontend/projects/edu-sharing-api
+    - npm ci
+    - npm run generate-api
+    - cd ../..
+    # Install dependencies on cache miss, e.g., when first running on a ci runner.
+    - ([[ -d node_modules ]] || npm ci)
+  script:
+    - npm run prebuild
+    - npm run test-ci
+
 deploy:
   stage: deploy
   needs: []
   script:
     - mvn $MAVEN_CLI -s .mvn/settings.xml deploy
+  only:
+    - /^maven\//
+    - tags
 
 .frontend_job: &frontend_job
   variables:
@@ -29,6 +59,8 @@ deploy:
       - Frontend/node_modules
   before_script:
     - cd Frontend
+    - node -v
+    - npm -v
     # Install dependencies on cache miss, e.g., when first running on a ci runner.
     - ([[ -d node_modules ]] || npm ci)
 

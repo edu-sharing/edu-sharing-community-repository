@@ -31,10 +31,6 @@ import { BridgeService } from '../../../../core-bridge-module/bridge.service';
 import { forkJoin, Observable, Observer } from 'rxjs';
 import { MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { Helper } from '../../../../core-module/rest/helper';
-import {
-    ShareMode,
-    SharePublishComponent,
-} from '../../../workspace/share/share-publish/share-publish.component';
 
 type Org = { organization: Organization; groups?: any };
 

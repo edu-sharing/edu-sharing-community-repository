@@ -1,5 +1,11 @@
+@import '../../../../core-ui-module/styles/variables';
+
 ::ng-deep .card-dialog-pane {
     flex-direction: column;
+    transition: transform $transitionNormal;
+    &.card-dialog-pane-mobile-background {
+        transform: translate(0, -15px);
+    }
 }
 
 :host {
@@ -44,4 +50,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.saving-info {
+    color: $textMain;
+}
+
+.saving-error {
+    color: $warning;
 }

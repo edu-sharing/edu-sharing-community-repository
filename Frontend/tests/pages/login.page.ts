@@ -16,4 +16,11 @@ export class LoginPage {
         await this.page.locator('input[type="password"]').press('Enter');
         await this.page.waitForNavigation();
     }
+
+    @testStep()
+    async loginPasswordOnly({ password }: LoginCredentials) {
+        await this.page.locator('input[type="password"]').fill(password);
+        await this.page.locator('input[type="password"]').press('Enter');
+        await this.page.waitForNavigation();
+    }
 }

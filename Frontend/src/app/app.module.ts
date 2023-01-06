@@ -46,6 +46,9 @@ import { PROVIDERS } from './providers';
 import { RouterComponent } from './router/router.component';
 import { SharedModule } from './shared/shared.module';
 import { TranslationsModule } from './translations/translations.module';
+import { CoreUiModule } from './core-ui-module/core-ui.module';
+import { MaterialCssVarsModule } from 'angular-material-css-vars';
+import { extensionSchemas } from './extension/extension-schemas';
 
 // http://blog.angular-university.io/angular2-ngmodule/
 // -> Making modules more readable using the spread operator
@@ -96,6 +99,10 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         ResizableModule,
         MdsModule,
         DialogsModule,
+        CoreUiModule,
+        MaterialCssVarsModule.forRoot({
+            isAutoContrast: true,
+        }),
     ],
     providers: [
         {
@@ -135,6 +142,7 @@ const matTooltipDefaultOptions: MatTooltipDefaultOptions = {
         DECLARATIONS_SHARE_APP,
         DECLARATIONS_SERVICES,
     ],
+    schemas: [].concat(extensionSchemas),
     bootstrap: [RouterComponent],
 })
 export class AppModule {}

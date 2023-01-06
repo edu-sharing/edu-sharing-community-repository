@@ -24,7 +24,7 @@
     background-color: $primaryDark !important;
 }
 .btn-complementary:focus:not(.disabled) {
-    background-color: darken($primaryComplementary, 20%) !important;
+    background-color: rgb(var(--palette-accent-700)) !important;
 }
 .btn-flat {
     color: $primary;
@@ -388,7 +388,7 @@ img.align-icon {
 }
 .collection {
     @include materialShadow();
-    z-index: 130;
+    z-index: 132;
     @include clickable();
 }
 .collection i {

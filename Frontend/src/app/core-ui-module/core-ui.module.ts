@@ -19,8 +19,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { CollectionChooserComponent } from './components/collection-chooser/collection-chooser.component';
-import { CustomNodeListWrapperComponent } from './components/custom-node-list-wrapper/custom-node-list-wrapper.component';
-import { InputPasswordComponent } from './components/input-password/input-password.component';
 import { ListOptionItemComponent } from './components/list-option-item/list-option-item.component';
 import { ListTableComponent } from './components/list-table/list-table.component';
 import { UserTileComponent } from './components/user-tile/user-tile.component';
@@ -32,8 +30,6 @@ import { NodesDropTargetDirective } from './directives/drag-nodes/nodes-drop-tar
 import { TitleDirective } from './directives/title.directive';
 import { NodeHelperService } from './node-helper.service';
 import { OptionsHelperService } from './options-helper.service';
-import { KeysPipe } from './pipes/keys.pipe';
-import { PermissionNamePipe } from './pipes/permission-name.pipe';
 import { UrlPipe } from './pipes/url.pipe';
 import { Toast } from './toast';
 import { ImageConfigDirective } from './directives/image-config.directive';
@@ -52,6 +48,7 @@ import { ListItemsModule } from '../features/list-items/list-items.module';
 import { MdsNodeRelationsWidgetComponent } from '../common/ui/node-render/node-relations/node-relations-widget.component';
 import { AppModule } from '../app.module';
 import { NodeRowComponent } from './components/node-row/node-row.component';
+import { NodeEntriesModule } from '../features/node-entries/node-entries.module';
 
 @NgModule({
     declarations: [
@@ -59,13 +56,9 @@ import { NodeRowComponent } from './components/node-row/node-row.component';
         ListTableComponent,
         NodeEntriesDragDirective,
         UserTileComponent,
-        CustomNodeListWrapperComponent,
         VideoControlsComponent,
-        InputPasswordComponent,
         MdsNodeRelationsWidgetComponent,
         ToastMessageComponent,
-        KeysPipe,
-        PermissionNamePipe,
         UrlPipe,
         NodesDragSourceDirective,
         NodesDropTargetDirective,
@@ -77,6 +70,7 @@ import { NodeRowComponent } from './components/node-row/node-row.component';
         NodeRowComponent,
     ],
     imports: [
+        NodeEntriesModule,
         SharedModule,
         A11yModule,
         BrowserModule,
@@ -115,16 +109,12 @@ import { NodeRowComponent } from './components/node-row/node-row.component';
     exports: [
         SharedModule,
         ListTableComponent,
-        CustomNodeListWrapperComponent,
         ListOptionItemComponent,
-        InputPasswordComponent,
         VideoControlsComponent,
         NodeRowComponent,
         ImageConfigDirective,
         UserTileComponent,
         CollectionChooserComponent,
-        KeysPipe,
-        PermissionNamePipe,
         UrlPipe,
         NodesDragSourceDirective,
         NodesDropTargetDirective,

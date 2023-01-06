@@ -2,6 +2,7 @@ import { expect, Locator, Page } from '@playwright/test';
 import { testFilesFolder } from '../util/constants';
 import { testStep } from '../util/test-step';
 import { InlineFile } from '../util/util';
+import { LoginPage } from './login.page';
 
 export class GeneralPage {
     constructor(private readonly page: Page) {}
@@ -20,6 +21,21 @@ export class GeneralPage {
     @testStep()
     async sleep(ms: number) {
         await sleep(ms);
+    }
+
+    @testStep()
+    async logout() {
+        await this.page.locator('[data-test="main-nav-user-menu-button"]').click();
+        await Promise.all([
+            this.page.locator('[data-test="menu-item-LOGOUT"]').click(),
+            this.page.waitForNavigation({ url: LoginPage.url }),
+        ]);
+    }
+
+    @testStep()
+    async expectScopeButton(buttonText: string | RegExp) {
+        const mainNavScopeButton = this.page.locator('[data-test="main-nav-scope-button"]');
+        await expect(mainNavScopeButton).toHaveText(buttonText);
     }
 
     @testStep()

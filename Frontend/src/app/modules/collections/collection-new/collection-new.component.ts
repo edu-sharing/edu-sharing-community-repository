@@ -7,6 +7,8 @@ import {
     Sanitizer,
     ElementRef,
     EventEmitter,
+    ApplicationRef,
+    OnDestroy,
 } from '@angular/core';
 
 import { Router, Params, ActivatedRoute } from '@angular/router';
@@ -24,6 +26,7 @@ import {
     UIService,
     FrameEventsService,
     EventListener,
+    Node,
 } from '../../../core-module/core.module';
 import { RestNodeService } from '../../../core-module/core.module';
 import { RestConstants } from '../../../core-module/core.module';
@@ -47,24 +50,31 @@ import { UIConstants } from '../../../core-module/ui/ui-constants';
 import { MdsComponent } from '../../../features/mds/legacy/mds/mds.component';
 import { TranslateService } from '@ngx-translate/core';
 import { ColorHelper, PreferredColor } from '../../../core-module/ui/color-helper';
-import { DomSanitizer } from '@angular/platform-browser';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { TemporaryStorageService } from '../../../core-module/core.module';
 import { RegisterResetPasswordComponent } from '../../register/register-reset-password/register-reset-password.component';
 import { MainNavComponent } from '../../../main/navigation/main-nav/main-nav.component';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { AuthorityNamePipe } from '../../../shared/pipes/authority-name.pipe';
 import { BridgeService } from '../../../core-bridge-module/bridge.service';
-import { WorkspaceShareComponent } from '../../workspace/share/share.component';
 import { MdsMetadatasets } from '../../../core-module/core.module';
 import { ConfigurationHelper } from '../../../core-module/core.module';
 import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
 import { DefaultGroups, OptionItem } from '../../../core-ui-module/option-item';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { PlatformLocation } from '@angular/common';
 import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { Values } from '../../../features/mds/types/types';
+import { NodeDataSource } from '../../../features/node-entries/node-data-source';
+import {
+    InteractionType,
+    NodeEntriesDisplayType,
+} from '../../../features/node-entries/entries-model';
+import { NodeEntriesWrapperComponent } from '../../../features/node-entries/node-entries-wrapper.component';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { ShareDialogResult } from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog-data';
 
 type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITORIAL_GROUPS';
 
@@ -74,9 +84,11 @@ type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITO
     templateUrl: 'collection-new.component.html',
     styleUrls: ['collection-new.component.scss'],
 })
-export class CollectionNewComponent implements EventListener, OnInit {
+export class CollectionNewComponent implements EventListener, OnInit, OnDestroy {
     @ViewChild('mds') mds: MdsEditorWrapperComponent;
-    @ViewChild('share') shareRef: WorkspaceShareComponent;
+    @ViewChild('organizations') organizationsRef: NodeEntriesWrapperComponent<Group>;
+    readonly InteractionType = InteractionType;
+    readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     public hasCustomScope: boolean;
     public COLORS: string[];
     public DEFAULT_COLORS: string[] = [
@@ -94,13 +106,11 @@ export class CollectionNewComponent implements EventListener, OnInit {
         '#692869',
     ];
     public isLoading = true;
-    public showPermissions = false;
     currentCollection: EduData.Node;
     public newCollectionType: string;
     public properties: Values = {};
     user: User;
     public mainnav = true;
-    public editPermissionsId: string;
     permissions: LocalPermissions = null;
     public canInvite: boolean;
     public shareToAll: boolean;
@@ -110,13 +120,12 @@ export class CollectionNewComponent implements EventListener, OnInit {
     public mediacenter: any;
     public parentId: any;
     public editId: any;
-    public editorialGroups: Group[] = [];
-    public editorialGroupsSelected: Group[] = [];
+    public editorialGroups = new NodeDataSource<Group>();
     public editorialPublic = true;
     public editorialColumns: ListItem[] = [
         new ListItem('GROUP', RestConstants.AUTHORITY_DISPLAYNAME),
     ];
-    imageData: any = null;
+    imageData: string | SafeUrl = null;
     private imageFile: File = null;
     readonly STEP_NEW = 'NEW';
     readonly STEP_GENERAL = 'GENERAL';
@@ -132,12 +141,12 @@ export class CollectionNewComponent implements EventListener, OnInit {
         EDITORIAL_GROUPS: 'star',
     };
     public newCollectionStep: Step = this.STEP_NEW;
-    public editPermissionsDummy: EduData.Node;
     availableSteps: Step[];
     private parentCollection: EduData.Node;
     private originalPermissions: LocalPermissions;
-    private permissionsInfo: any;
-    private loadingTask = this.loadingScreen.addLoadingTask();
+    private permissionsInfo: ShareDialogResult;
+    private destroyed = new Subject<void>();
+    private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
 
     @ViewChild('file') imageFileRef: ElementRef;
     @ViewChild('authorFreetextInput') authorFreetextInput: ElementRef<HTMLInputElement>;
@@ -147,6 +156,7 @@ export class CollectionNewComponent implements EventListener, OnInit {
     mdsSet: string;
     imageOptions: OptionItem[];
     imageWindow: Window;
+    editorialGroupsSelected: Group[] = [];
 
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
@@ -162,9 +172,12 @@ export class CollectionNewComponent implements EventListener, OnInit {
             const id = collection.ref.id;
             this.nodeService.getNodePermissions(id).subscribe((perm: EduData.NodePermissions) => {
                 this.mdsSet = collection.metadataset;
-                this.editorialGroupsSelected = this.getEditoralGroups(
-                    perm.permissions.localPermissions.permissions,
-                );
+                this.canInvite =
+                    this.canInvite &&
+                    RestHelper.hasAccessPermission(
+                        collection,
+                        RestConstants.ACCESS_CHANGE_PERMISSIONS,
+                    );
                 this.editorialPublic = perm.permissions.localPermissions?.permissions?.some(
                     (p: Permission) =>
                         p.authority?.authorityName === RestConstants.AUTHORITY_EVERYONE,
@@ -191,13 +204,13 @@ export class CollectionNewComponent implements EventListener, OnInit {
         });
     }
 
-    onEvent(event: string, data: any): void {
+    onEvent(event: string, data: Node): void {
         if (event === FrameEventsService.EVENT_APPLY_NODE) {
-            const imageData = data.preview?.data;
+            const imageData = data.preview?.data?.[0];
             if (imageData) {
                 this.imageData = imageData;
                 this.updateImageOptions();
-                fetch(this.imageData)
+                fetch(imageData)
                     .then((res) => res.blob())
                     .then((blob) => {
                         this.imageFile = blob as File;
@@ -229,12 +242,14 @@ export class CollectionNewComponent implements EventListener, OnInit {
         private zone: NgZone,
         private sanitizer: DomSanitizer,
         private config: ConfigurationService,
+        private ref: ApplicationRef,
         private translations: TranslationsService,
         private translationService: TranslateService,
         private loadingScreen: LoadingScreenService,
         private mainNav: MainNavService,
+        private dialogs: DialogsService,
     ) {
-        this.eventService.addListener(this);
+        this.eventService.addListener(this, this.destroyed);
         this.translations.waitForInit().subscribe(() => {
             this.connector.isLoggedIn().subscribe((data) => {
                 this.mdsService.getSets().subscribe((mdsSets) => {
@@ -341,9 +356,11 @@ export class CollectionNewComponent implements EventListener, OnInit {
                         this.iamService
                             .searchGroups('*', true, RestConstants.GROUP_TYPE_EDITORIAL, '', {
                                 count: RestConstants.COUNT_UNLIMITED,
+                                sortBy: [RestConstants.CM_PROP_AUTHORITY_DISPLAYNAME],
+                                sortAscending: [true],
                             })
                             .subscribe((data: IamGroups) => {
-                                this.editorialGroups = data.groups;
+                                this.editorialGroups.setData(data.groups, data.pagination);
                             });
                     }
                 });
@@ -357,6 +374,11 @@ export class CollectionNewComponent implements EventListener, OnInit {
             currentScope: 'collections',
             searchEnabled: false,
         });
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
     }
 
     getShareStatus() {
@@ -390,7 +412,7 @@ export class CollectionNewComponent implements EventListener, OnInit {
             },
         );
     }
-    setPermissions(permissions: any) {
+    private setPermissions(permissions: ShareDialogResult) {
         if (permissions) {
             this.permissionsInfo = permissions;
             this.permissions = permissions.permissions;
@@ -404,23 +426,31 @@ export class CollectionNewComponent implements EventListener, OnInit {
                 }
             }
         }
-        this.showPermissions = false;
     }
-    editPermissions() {
+    async editPermissions(): Promise<void> {
         if (this.permissions == null && !this.editId) {
             this.permissions = new LocalPermissions();
         }
+        let nodes: Node[] | string[];
         if (this.editId) {
-            this.editPermissionsId = this.editId;
+            nodes = [this.editId];
         } else {
-            this.editPermissionsDummy = new EduData.Node();
-            this.editPermissionsDummy.ref = {} as NodeRef;
-            this.editPermissionsDummy.aspects = [RestConstants.CCM_ASPECT_COLLECTION];
-            this.editPermissionsDummy.isDirectory = true;
+            const permissionsDummy = new EduData.Node();
+            permissionsDummy.title = this.currentCollection.title;
+            permissionsDummy.iconURL = this.connector.getThemeMimeIconSvg('collection.svg');
+            permissionsDummy.ref = {} as NodeRef;
+            permissionsDummy.aspects = [RestConstants.CCM_ASPECT_COLLECTION];
+            permissionsDummy.properties = {};
+            permissionsDummy.isDirectory = true;
+            nodes = [permissionsDummy];
         }
-        this.showPermissions = true;
-        // update state after changing different bindings
-        this.uiService.waitForComponent(this, 'shareRef').subscribe(() => this.shareRef.refresh());
+        const dialogRef = await this.dialogs.openShareDialog({
+            nodes,
+            sendMessages: true,
+            sendToApi: false,
+            currentPermissions: this.permissions,
+        });
+        dialogRef.afterClosed().subscribe((result) => this.setPermissions(result));
     }
     isNewCollection(): boolean {
         return this.editId == null;
@@ -631,6 +661,18 @@ export class CollectionNewComponent implements EventListener, OnInit {
             setTimeout(() => {
                 this.mds?.loadMds(true);
             });
+            if (this.newCollectionStep == this.STEP_EDITORIAL_GROUPS) {
+                setTimeout(() => {
+                    this.organizationsRef
+                        .getSelection()
+                        .select(...this.getEditoralGroups(this.originalPermissions.permissions));
+                    this.organizationsRef
+                        .getSelection()
+                        .changed.subscribe(
+                            (change) => (this.editorialGroupsSelected = change.source.selected),
+                        );
+                });
+            }
         }
         this.updateButtons();
     }
@@ -795,7 +837,7 @@ export class CollectionNewComponent implements EventListener, OnInit {
     private getEditoralGroups(permissions: Permission[]) {
         let list: Group[] = [];
         for (let perm of permissions) {
-            for (let group of this.editorialGroups) {
+            for (let group of this.editorialGroups.getData()) {
                 if (group.authorityName == perm.authority.authorityName) {
                     list.push(group);
                 }

@@ -1,22 +1,27 @@
-import { forkJoin as observableForkJoin, fromEvent, of, Subscription } from 'rxjs';
-import { RestNetworkService } from '../core-module/rest/services/rest-network.service';
-import { RestConnectorsService } from '../core-module/rest/services/rest-connectors.service';
-import { RestConstants } from '../core-module/rest/rest-constants';
-import { ActionbarComponent } from '../shared/components/actionbar/actionbar.component';
+import { PlatformLocation } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { EventEmitter, Injectable, NgZone, OnDestroy } from '@angular/core';
+import { ActivatedRoute, Params, Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import {
-    Constrain,
-    CustomOptions,
-    DefaultGroups,
-    ElementType,
-    HideMode,
-    KeyCombination,
-    OptionItem,
-    Scope,
-    Target,
-} from './option-item';
-import { UIHelper } from './ui-helper';
-import { UIService } from '../core-module/rest/services/ui.service';
-import { WorkspaceManagementDialogsComponent } from '../modules/management-dialogs/management-dialogs.component';
+    forkJoin,
+    forkJoin as observableForkJoin,
+    fromEvent,
+    of,
+    Subject,
+    Subscription,
+} from 'rxjs';
+import { isArray } from 'rxjs/internal/util/isArray';
+import { takeUntil } from 'rxjs/operators';
+import { BridgeService } from '../core-bridge-module/bridge.service';
+import {
+    ConfigurationService,
+    FrameEventsService,
+    RestCollectionService,
+    RestConnectorService,
+    RestHelper,
+    RestIamService,
+} from '../core-module/core.module';
 import {
     Connector,
     Filetype,
@@ -26,48 +31,47 @@ import {
     ProposalNode,
 } from '../core-module/rest/data-object';
 import { Helper } from '../core-module/rest/helper';
+import { RestConstants } from '../core-module/rest/rest-constants';
+import { RestConnectorsService } from '../core-module/rest/services/rest-connectors.service';
+import { RestNetworkService } from '../core-module/rest/services/rest-network.service';
+import { RestNodeService } from '../core-module/rest/services/rest-node.service';
 import {
     ClipboardObject,
     TemporaryStorageService,
 } from '../core-module/rest/services/temporary-storage.service';
-import { BridgeService } from '../core-bridge-module/bridge.service';
+import { UIService } from '../core-module/rest/services/ui.service';
 import { MessageType } from '../core-module/ui/message-type';
-import {
-    EventEmitter,
-    Inject,
-    Injectable,
-    InjectionToken,
-    OnDestroy,
-    Optional,
-} from '@angular/core';
-import { CardComponent } from '../shared/components/card/card.component';
-import { TranslateService } from '@ngx-translate/core';
-import { RestNodeService } from '../core-module/rest/services/rest-node.service';
-import {
-    ConfigurationService,
-    FrameEventsService,
-    RestCollectionService,
-    RestConnectorService,
-    RestHelper,
-    RestIamService,
-} from '../core-module/core.module';
-import { Toast } from './toast';
-import { HttpClient } from '@angular/common/http';
-import { ActivatedRoute, Params, Router } from '@angular/router';
-import { DropdownComponent } from '../shared/components/dropdown/dropdown.component';
-import { ConfigOptionItem, NodeHelperService } from './node-helper.service';
-import { PlatformLocation } from '@angular/common';
-import { isArray } from 'rxjs/internal/util/isArray';
-import { MainNavService } from '../main/navigation/main-nav.service';
 import { DialogsService } from '../features/dialogs/dialogs.service';
 import { ListEventInterface, NodeEntriesDisplayType } from '../features/node-entries/entries-model';
 import { NodeEntriesDataType } from '../features/node-entries/node-entries.component';
+import { MainNavService } from '../main/navigation/main-nav.service';
+import { WorkspaceManagementDialogsComponent } from '../modules/management-dialogs/management-dialogs.component';
 import { NodeStoreService } from '../modules/search/node-store.service';
+import {
+    KeyboardShortcutsService,
+    matchesShortcutCondition,
+} from '../services/keyboard-shortcuts.service';
+import { ActionbarComponent } from '../shared/components/actionbar/actionbar.component';
+import { DropdownComponent } from '../shared/components/dropdown/dropdown.component';
+import { ConfigOptionItem, NodeHelperService } from './node-helper.service';
+import {
+    Constrain,
+    CustomOptions,
+    DefaultGroups,
+    ElementType,
+    HideMode,
+    OptionItem,
+    Scope,
+    Target,
+} from './option-item';
+import { Toast } from './toast';
+import { UIHelper } from './ui-helper';
 
-export class OptionsHelperConfig {
-    subscribeEvents? = true;
-}
-export const OPTIONS_HELPER_CONFIG = new InjectionToken<OptionsHelperConfig>('OptionsHelperConfig');
+type DeleteEvent = {
+    objects: Node[] | any;
+    count: number;
+    error: boolean;
+};
 
 @Injectable()
 export class OptionsHelperService implements OnDestroy {
@@ -78,21 +82,13 @@ export class OptionsHelperService implements OnDestroy {
         ElementType.NodePublishedCopy,
     ];
     static ElementTypesAddToCollection = [ElementType.Node, ElementType.NodePublishedCopy];
-    private static subscriptionUp: Subscription[] = [];
-    private static subscriptionDown: Subscription[] = [];
 
     readonly virtualNodesAdded = new EventEmitter<Node[]>();
     readonly nodesChanged = new EventEmitter<Node[] | void>();
-    readonly nodesDeleted = new EventEmitter<{
-        objects: Node[] | any;
-        count: number;
-        error: boolean;
-    }>();
+    readonly nodesDeleted = new EventEmitter<DeleteEvent>();
     readonly displayTypeChanged = new EventEmitter<NodeEntriesDisplayType>();
 
-    private localSubscripitionUp: Subscription;
-    private localSubscripitionDown: Subscription;
-    private appleCmd: boolean;
+    private keyboardShortcutsSubscription: Subscription;
     private globalOptions: OptionItem[];
     private list: ListEventInterface<NodeEntriesDataType>;
     private subscriptions: Subscription[] = [];
@@ -100,6 +96,7 @@ export class OptionsHelperService implements OnDestroy {
     private dropdown: DropdownComponent;
     private queryParams: Params;
     private data: OptionData;
+    private destroyed = new Subject<void>();
 
     constructor(
         private networkService: RestNetworkService,
@@ -123,69 +120,29 @@ export class OptionsHelperService implements OnDestroy {
         private bridge: BridgeService,
         private nodeStore: NodeStoreService,
         private dialogs: DialogsService,
-        @Optional() @Inject(OPTIONS_HELPER_CONFIG) config: OptionsHelperConfig,
+        private keyboardShortcuts: KeyboardShortcutsService,
+        private ngZone: NgZone,
     ) {
-        if (config == null) {
-            config = new OptionsHelperConfig();
-        }
         this.route.queryParams.subscribe((queryParams) => (this.queryParams = queryParams));
-        // @HostListener decorator unfortunately does not work in services
-        if (config.subscribeEvents) {
-            this.initSubscription();
-        }
     }
 
     ngOnDestroy(): void {
-        this.clearSubscription();
+        this.destroyed.next();
+        this.destroyed.complete();
     }
 
-    handleKeyboardEventUp(event: any) {
-        if (event.keyCode === 91 || event.keyCode === 93) {
-            this.appleCmd = false;
-        }
-    }
-
-    handleKeyboardEvent(event: KeyboardEvent) {
-        if (event.keyCode === 91 || event.keyCode === 93) {
-            this.appleCmd = true;
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
-        // do nothing if a modal dialog is still open
-        if (CardComponent.getNumberOfOpenCards() > 0) {
-            return;
-        }
-        // check if it was triggered from a valid component
-        if (
-            !event.composedPath().some((t) => {
-                const name = (t as HTMLElement)?.nodeName;
-                return ['LISTTABLE', 'ACTIONBAR', 'APP-NODE-ENTRIES'].indexOf(name) !== -1;
-            })
-        ) {
-            return;
-        }
-        if (this.globalOptions) {
-            const option = this.globalOptions.filter((o: OptionItem) => {
-                if (!o.isEnabled) {
-                    return false;
-                }
-                if (o.key !== event.code && o.key !== event.key) {
-                    return false;
-                }
-                if (o.keyCombination) {
-                    if (o.keyCombination.indexOf(KeyCombination.CtrlOrAppleCmd) !== -1) {
-                        if (!(event.ctrlKey || this.appleCmd)) {
-                            return false;
-                        }
-                    }
-                }
-                return true;
-            });
-            if (option.length === 1) {
-                option[0].callback(null);
+    private handleKeyboardEvent(event: KeyboardEvent) {
+        if (this.globalOptions && !this.keyboardShortcuts.shouldIgnoreShortcut(event)) {
+            const matchedOption = this.globalOptions.find(
+                (option: OptionItem) =>
+                    option.isEnabled &&
+                    option.keyboardShortcut &&
+                    matchesShortcutCondition(event, option.keyboardShortcut),
+            );
+            if (matchedOption) {
                 event.preventDefault();
                 event.stopPropagation();
+                this.ngZone.run(() => matchedOption.callback(null));
             }
         }
     }
@@ -277,7 +234,9 @@ export class OptionsHelperService implements OnDestroy {
         this.actionbar = actionbar;
         this.list = list;
         this.dropdown = dropdown;
-        await this.networkService.getRepositories().toPromise();
+        if ((await this.iamService.getCurrentUserAsync()).person.authorityName) {
+            await this.networkService.getRepositories().toPromise();
+        }
     }
 
     /**
@@ -294,19 +253,18 @@ export class OptionsHelperService implements OnDestroy {
         }
         if (this.mainNavService.getMainNav()) {
             this.subscriptions.push(
-                this.mainNavService.getDialogs().onRefresh.subscribe((nodes: void | Node[]) => {
-                    this.nodesChanged.emit(nodes);
-                    if (this.list) {
-                        this.list.updateNodes(nodes);
-                    }
-                }),
+                this.mainNavService
+                    .getDialogs()
+                    .onRefresh.subscribe((nodes: void | Node[]) =>
+                        this.onNodesChanged(nodes ? nodes : undefined),
+                    ),
             );
             this.subscriptions.push(
                 this.mainNavService
                     .getDialogs()
                     ?.onDelete?.subscribe(
                         (result: { objects: any; count: number; error: boolean }) =>
-                            this.nodesDeleted.emit(result),
+                            this.deleteNodes(result),
                     ),
             );
         }
@@ -323,6 +281,13 @@ export class OptionsHelperService implements OnDestroy {
         }
         if (this.actionbar) {
             this.actionbar.options = this.globalOptions;
+        }
+    }
+
+    private onNodesChanged(nodes?: Node[]): void {
+        this.nodesChanged.emit(nodes);
+        if (this.list) {
+            this.list.updateNodes(nodes);
         }
     }
 
@@ -563,23 +528,26 @@ export class OptionsHelperService implements OnDestroy {
      }
         */
         const debugNode = new OptionItem('OPTIONS.DEBUG', 'build', async (object) => {
-            let node = this.getObjects(object)[0];
-            if (node.authorityName) {
+            let nodes = this.getObjects(object);
+            console.info(nodes);
+            if (nodes.some((n) => n.authorityName)) {
                 try {
-                    node = (
-                        await this.nodeService
-                            .getNodeMetadata(
-                                node.ref?.id || node.properties?.[RestConstants.NODE_ID]?.[0],
-                                [RestConstants.ALL],
-                            )
-                            .toPromise()
-                    ).node;
+                    nodes = (
+                        await forkJoin(
+                            nodes.map((n) =>
+                                this.nodeService.getNodeMetadata(
+                                    n.ref?.id || n.properties?.[RestConstants.NODE_ID]?.[0],
+                                    [RestConstants.ALL],
+                                ),
+                            ),
+                        ).toPromise()
+                    ).map((n) => n.node);
                 } catch (e) {
-                    console.info(node);
+                    console.info(nodes);
                     console.warn(e);
                 }
             }
-            this.dialogs.openNodeInfoDialog({ node });
+            this.dialogs.openNodeInfoDialog({ nodes });
         });
         debugNode.elementType = [
             ElementType.Node,
@@ -593,7 +561,7 @@ export class OptionsHelperService implements OnDestroy {
             ElementType.MapRef,
         ];
         debugNode.onlyDesktop = true;
-        debugNode.constrains = [Constrain.AdminOrDebug, Constrain.NoBulk];
+        debugNode.constrains = [Constrain.AdminOrDebug];
         debugNode.group = DefaultGroups.View;
         debugNode.priority = 10;
 
@@ -635,6 +603,47 @@ export class OptionsHelperService implements OnDestroy {
             options.push(openFolder);
          */
 
+        const openOriginalNode = new OptionItem(
+            'OPTIONS.OPEN_ORIGINAL_NODE',
+            'description',
+            async (object) => {
+                const nodeId = RestHelper.removeSpacesStoreRef(
+                    this.getObjects(object)[0].properties[
+                        RestConstants.CCM_PROP_PUBLISHED_ORIGINAL
+                    ][0],
+                );
+                UIHelper.goToNode(this.router, new Node(nodeId));
+            },
+        );
+        openOriginalNode.constrains = [
+            Constrain.Files,
+            Constrain.NoBulk,
+            Constrain.HomeRepository,
+            Constrain.User,
+        ];
+        openOriginalNode.toolpermissions = [RestConstants.TOOLPERMISSION_WORKSPACE];
+        openOriginalNode.scopes = [Scope.CollectionsReferences, Scope.Search, Scope.Render];
+        openOriginalNode.customEnabledCallback = (nodes) => {
+            if (nodes && nodes.length === 1) {
+                openOriginalNode.customEnabledCallback = null;
+                let nodeId = RestHelper.removeSpacesStoreRef(
+                    nodes[0].properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL][0],
+                );
+                this.nodeService.getNodeMetadata(nodeId).subscribe(
+                    () => {
+                        openOriginalNode.isEnabled = true;
+                    },
+                    () => {
+                        openOriginalNode.isEnabled = false;
+                    },
+                );
+            }
+            return false;
+        };
+        openOriginalNode.elementType = [ElementType.NodePublishedCopy];
+        openOriginalNode.group = DefaultGroups.View;
+        openOriginalNode.priority = 13;
+
         const openParentNode = new OptionItem('OPTIONS.SHOW_IN_FOLDER', 'folder', async (object) =>
             this.goToWorkspace((await this.getObjectsAsync(object, true))[0]),
         );
@@ -675,11 +684,15 @@ export class OptionsHelperService implements OnDestroy {
         openNode.group = DefaultGroups.View;
         openNode.priority = 30;
 
-        const editConnectorNode = new OptionItem('OPTIONS.OPEN', 'launch', (node) =>
-            this.editConnector(this.getObjects(node)[0]),
-        );
+        const editConnectorNode = new OptionItem('OPTIONS.OPEN', 'launch', (node) => {
+            this.editConnector(this.getObjects(node)[0]);
+        });
         editConnectorNode.customShowCallback = (nodes) => {
-            return this.connectors.connectorSupportsEdit(nodes ? nodes[0] : null) != null;
+            let n = nodes ? nodes[0] : null;
+            if (n?.aspects?.includes('ccm:ltitool_node')) {
+                return true;
+            }
+            return this.connectors.connectorSupportsEdit(n) != null;
         };
         editConnectorNode.elementType = [
             ElementType.Node,
@@ -723,7 +736,7 @@ export class OptionsHelperService implements OnDestroy {
         );
         addNodeToCollection.elementType = OptionsHelperService.ElementTypesAddToCollection;
         addNodeToCollection.showAsAction = true;
-        addNodeToCollection.constrains = [Constrain.Files, Constrain.User];
+        addNodeToCollection.constrains = [Constrain.Files, Constrain.User, Constrain.NoScope];
         addNodeToCollection.customShowCallback = (nodes) => {
             addNodeToCollection.name =
                 this.data.scope === Scope.CollectionsReferences
@@ -759,6 +772,33 @@ export class OptionsHelperService implements OnDestroy {
                     return false;
                 }
             }
+            /**
+             * prevent lti editor as tool with custom content option, embedding nodes as platform created by the same tool
+             */
+
+            let customContentNodeLtiToolUrl =
+                ltiSession.customContentNode.properties['ccm:ltitool_url'][0];
+            if (ltiSession.customContentNode) {
+                return nodes.some((n) => {
+                    let nLtiToolUrlArr = ltiSession.customContentNode.properties['ccm:ltitool_url'];
+                    if (!isArray(nLtiToolUrlArr) || nLtiToolUrlArr.length == 0) {
+                        return true;
+                    }
+                    let nLtiToolUrl = nLtiToolUrlArr[0];
+
+                    if (
+                        n.aspects.includes('ccm:ltitool_node') &&
+                        nLtiToolUrl === customContentNodeLtiToolUrl
+                    ) {
+                        console.log(
+                            "don't allow nodes created for tool " +
+                                n.properties['ccm:ltitool_url'] +
+                                ' become embedded by the same tool',
+                        );
+                        return false;
+                    } else return true;
+                });
+            }
             return true;
         };
 
@@ -766,7 +806,7 @@ export class OptionsHelperService implements OnDestroy {
             this.bookmarkNodes(this.getObjects(object)),
         );
         bookmarkNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
-        bookmarkNode.constrains = [Constrain.Files, Constrain.HomeRepository];
+        bookmarkNode.constrains = [Constrain.Files, Constrain.HomeRepository, Constrain.NoScope];
         bookmarkNode.group = DefaultGroups.Reuse;
         bookmarkNode.priority = 20;
         bookmarkNode.customShowCallback = (nodes) => {
@@ -815,10 +855,8 @@ export class OptionsHelperService implements OnDestroy {
         createNodeVariant.group = DefaultGroups.Reuse;
         createNodeVariant.priority = 30;
 
-        const inviteNode = new OptionItem(
-            'OPTIONS.INVITE',
-            'group_add',
-            async (object) => (management.nodeShare = await this.getObjectsAsync(object, true)),
+        const inviteNode = new OptionItem('OPTIONS.INVITE', 'group_add', async (object) =>
+            this.dialogs.openShareDialog({ nodes: await this.getObjectsAsync(object, true) }),
         );
         inviteNode.elementType = [ElementType.Node, ElementType.SavedSearch];
         inviteNode.showAsAction = true;
@@ -856,11 +894,15 @@ export class OptionsHelperService implements OnDestroy {
         streamNode.customShowCallback = (objects) =>
             this.configService.instant('stream.enabled', false);
 
-        const licenseNode = new OptionItem(
-            'OPTIONS.LICENSE',
-            'copyright',
-            (object) => (management.nodeLicense = this.getObjects(object)),
-        );
+        const licenseNode = new OptionItem('OPTIONS.LICENSE', 'copyright', async (object) => {
+            const nodes = this.getObjects(object);
+            const dialogRef = await this.dialogs.openLicenseDialog({ kind: 'nodes', nodes });
+            dialogRef.afterClosed().subscribe((result: Node[] | null) => {
+                if (result) {
+                    this.onNodesChanged(result);
+                }
+            });
+        });
         licenseNode.elementType = [ElementType.Node, ElementType.NodeChild];
         licenseNode.constrains = [
             Constrain.Files,
@@ -875,11 +917,16 @@ export class OptionsHelperService implements OnDestroy {
         licenseNode.group = DefaultGroups.Edit;
         licenseNode.priority = 30;
 
-        const contributorNode = new OptionItem(
-            'OPTIONS.CONTRIBUTOR',
-            'group',
-            (object) => (management.nodeContributor = this.getObjects(object)[0]),
-        );
+        const contributorNode = new OptionItem('OPTIONS.CONTRIBUTOR', 'group', async (object) => {
+            const dialogRef = await this.dialogs.openContributorsDialog({
+                node: this.getObjects(object)[0],
+            });
+            dialogRef.afterClosed().subscribe((updatedNode) => {
+                if (updatedNode) {
+                    this.onNodesChanged([updatedNode]);
+                }
+            });
+        });
         contributorNode.constrains = [
             Constrain.Files,
             Constrain.NoCollectionReference,
@@ -1060,8 +1107,10 @@ export class OptionsHelperService implements OnDestroy {
         cutNodes.scopes = [Scope.WorkspaceList, Scope.WorkspaceTree];
         cutNodes.permissions = [RestConstants.ACCESS_WRITE];
         cutNodes.permissionsMode = HideMode.Disable;
-        cutNodes.key = 'KeyX';
-        cutNodes.keyCombination = [KeyCombination.CtrlOrAppleCmd];
+        cutNodes.keyboardShortcut = {
+            keyCode: 'KeyX',
+            modifiers: ['Ctrl/Cmd'],
+        };
         cutNodes.group = DefaultGroups.FileOperations;
         cutNodes.priority = 10;
 
@@ -1079,8 +1128,10 @@ export class OptionsHelperService implements OnDestroy {
         copyNodes.elementType = [ElementType.Node, ElementType.SavedSearch, ElementType.MapRef];
         copyNodes.constrains = [Constrain.HomeRepository, Constrain.User];
         copyNodes.scopes = [Scope.WorkspaceList, Scope.WorkspaceTree];
-        copyNodes.key = 'KeyC';
-        copyNodes.keyCombination = [KeyCombination.CtrlOrAppleCmd];
+        copyNodes.keyboardShortcut = {
+            keyCode: 'KeyC',
+            modifiers: ['Ctrl/Cmd'],
+        };
         copyNodes.group = DefaultGroups.FileOperations;
         copyNodes.priority = 20;
 
@@ -1099,8 +1150,10 @@ export class OptionsHelperService implements OnDestroy {
             RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES,
         ];
         pasteNodes.scopes = [Scope.WorkspaceList];
-        pasteNodes.key = 'KeyV';
-        pasteNodes.keyCombination = [KeyCombination.CtrlOrAppleCmd];
+        pasteNodes.keyboardShortcut = {
+            keyCode: 'KeyV',
+            modifiers: ['Ctrl/Cmd'],
+        };
         pasteNodes.group = DefaultGroups.FileOperations;
 
         const deleteNode = new OptionItem('OPTIONS.DELETE', 'delete', (object) => {
@@ -1114,7 +1167,9 @@ export class OptionsHelperService implements OnDestroy {
         ];
         deleteNode.permissions = [RestConstants.PERMISSION_DELETE];
         deleteNode.permissionsMode = HideMode.Hide;
-        deleteNode.key = 'Delete';
+        deleteNode.keyboardShortcut = {
+            keyCode: 'Delete',
+        };
         deleteNode.group = DefaultGroups.Delete;
         deleteNode.priority = 10;
 
@@ -1262,60 +1317,50 @@ export class OptionsHelperService implements OnDestroy {
         pinCollection.group = DefaultGroups.Edit;
         pinCollection.priority = 20;
 
-        const feedbackCollection = new OptionItem(
-            'OPTIONS.COLLECTION_FEEDBACK',
+        const feedbackMaterial = new OptionItem(
+            'OPTIONS.MATERIAL_FEEDBACK',
             'chat_bubble',
-            (object) => (management.collectionWriteFeedback = this.getObjects(object)[0]),
+            (object) => (management.materialWriteFeedback = this.getObjects(object)[0]),
         );
-        feedbackCollection.constrains = [
+        feedbackMaterial.constrains = [
             Constrain.HomeRepository,
-            Constrain.Collections,
+            Constrain.Files,
             Constrain.NoBulk,
             Constrain.User,
         ];
-        feedbackCollection.permissions = [RestConstants.PERMISSION_FEEDBACK];
-        feedbackCollection.permissionsMode = HideMode.Hide;
-        feedbackCollection.toolpermissions = [RestConstants.TOOLPERMISSION_COLLECTION_FEEDBACK];
-        feedbackCollection.group = DefaultGroups.View;
-        feedbackCollection.priority = 10;
+        feedbackMaterial.permissions = [RestConstants.PERMISSION_FEEDBACK];
+        feedbackMaterial.permissionsRightMode = NodesRightMode.Original;
+        feedbackMaterial.scopes = [Scope.Render];
+        feedbackMaterial.permissionsMode = HideMode.Hide;
+        feedbackMaterial.toolpermissions = [RestConstants.TOOLPERMISSION_MATERIAL_FEEDBACK];
+        feedbackMaterial.group = DefaultGroups.View;
+        feedbackMaterial.priority = 15;
         // feedback is only shown for non-managers
-        feedbackCollection.customShowCallback = (objects) =>
-            objects &&
-            objects[0].access &&
-            objects[0].access.indexOf(RestConstants.ACCESS_WRITE) === -1;
-        /*
-         if (
-         this.feedbackAllowed() &&
-         !this.isAllowedToDeleteCollection() &&
-         this.connector.hasToolPermissionInstant(
-         RestConstants.TOOLPERMISSION_COLLECTION_FEEDBACK,
-         )
-         ) {
-            this.optionsCollection.push(
-                new OptionItem(
-                    'COLLECTIONS.ACTIONBAR.FEEDBACK',
-                    'chat_bubble',
-                    () => this.collectionFeedback(true),
-                ),
+        feedbackMaterial.customShowCallback = (objects) =>
+            !this.nodeHelper.getNodesRight(
+                objects,
+                RestConstants.ACCESS_WRITE,
+                NodesRightMode.Original,
             );
-        }
-         */
-        const feedbackCollectionView = new OptionItem(
-            'OPTIONS.COLLECTION_FEEDBACK_VIEW',
+
+        const feedbackMaterialView = new OptionItem(
+            'OPTIONS.MATERIAL_FEEDBACK_VIEW',
             'speaker_notes',
-            (object) => (management.collectionViewFeedback = this.getObjects(object)[0]),
+            (object) => (management.materialViewFeedback = this.getObjects(object)[0]),
         );
-        feedbackCollectionView.constrains = [
+        feedbackMaterialView.constrains = [
             Constrain.HomeRepository,
-            Constrain.Collections,
+            Constrain.Files,
             Constrain.NoBulk,
             Constrain.User,
         ];
-        feedbackCollectionView.permissions = [RestConstants.ACCESS_DELETE];
-        feedbackCollectionView.permissionsMode = HideMode.Hide;
-        feedbackCollectionView.toolpermissions = [RestConstants.TOOLPERMISSION_COLLECTION_FEEDBACK];
-        feedbackCollectionView.group = DefaultGroups.View;
-        feedbackCollectionView.priority = 20;
+        feedbackMaterialView.scopes = [Scope.Render];
+        feedbackMaterialView.permissions = [RestConstants.ACCESS_DELETE];
+        feedbackMaterialView.permissionsRightMode = NodesRightMode.Original;
+        feedbackMaterialView.permissionsMode = HideMode.Hide;
+        feedbackMaterialView.toolpermissions = [RestConstants.TOOLPERMISSION_MATERIAL_FEEDBACK];
+        feedbackMaterialView.group = DefaultGroups.View;
+        feedbackMaterialView.priority = 20;
 
         const setDisplayType = (viewType: number, emit = true) => {
             switch (viewType) {
@@ -1375,6 +1420,7 @@ export class OptionsHelperService implements OnDestroy {
             this.infoToggle.isToggle = true;
             options.push(this.infoToggle);
          */
+        let metadataSidebarSubscription: Subscription;
         const metadataSidebar = new OptionItem(
             'OPTIONS.METADATA_SIDEBAR',
             'info_outline',
@@ -1383,6 +1429,23 @@ export class OptionsHelperService implements OnDestroy {
                     metadataSidebar.icon = change ? 'info' : 'info_outline';
                 });
                 management.nodeSidebar = management.nodeSidebar ? null : this.getObjects(object)[0];
+                if (management.nodeSidebar == null) {
+                    metadataSidebarSubscription?.unsubscribe();
+                } else {
+                    metadataSidebarSubscription = this.list
+                        ?.getSelection()
+                        .changed.subscribe((selection) => {
+                            if (selection.source.selected.length === 0) {
+                                return;
+                            }
+                            if (management.nodeSidebar == null) {
+                                metadataSidebarSubscription?.unsubscribe();
+                                return;
+                            }
+                            management.nodeSidebar = selection.source.selected[0] as Node;
+                            management.nodeSidebarChange.emit(management.nodeSidebar);
+                        });
+                }
                 management.nodeSidebarChange.emit(management.nodeSidebar);
             },
         );
@@ -1396,14 +1459,15 @@ export class OptionsHelperService implements OnDestroy {
         options.push(debugNode);
         options.push(acceptProposal);
         options.push(declineProposal);
+        options.push(openOriginalNode);
         options.push(openParentNode);
         options.push(openNode);
         options.push(editConnectorNode);
         options.push(bookmarkNode);
         options.push(editCollection);
         options.push(pinCollection);
-        options.push(feedbackCollection);
-        options.push(feedbackCollectionView);
+        options.push(feedbackMaterial);
+        options.push(feedbackMaterialView);
         options.push(simpleEditNode);
         options.push(editNode);
         // add to collection
@@ -1434,6 +1498,9 @@ export class OptionsHelperService implements OnDestroy {
         options.push(toggleViewType);
         options.push(metadataSidebar);
 
+        if (this.data.postPrepareOptions) {
+            this.data.postPrepareOptions(options, objects);
+        }
         return options;
     }
 
@@ -1443,16 +1510,20 @@ export class OptionsHelperService implements OnDestroy {
         win: any = null,
         connectorType: Connector = null,
     ) {
-        UIHelper.openConnector(
-            this.connectors,
-            this.iamService,
-            this.eventService,
-            this.toast,
-            node,
-            type,
-            win,
-            connectorType,
-        );
+        if (node.aspects?.includes('ccm:ltitool_node')) {
+            UIHelper.openLTIResourceLink(node);
+        } else {
+            UIHelper.openConnector(
+                this.connectors,
+                this.iamService,
+                this.eventService,
+                this.toast,
+                node,
+                type,
+                win,
+                connectorType,
+            );
+        }
     }
 
     private canAddObjects() {
@@ -1704,6 +1775,14 @@ export class OptionsHelperService implements OnDestroy {
                 return Constrain.LTIMode;
             }
         }
+        if (constrains.indexOf(Constrain.NoScope) !== -1) {
+            if (
+                this.connectors.getRestConnector().getCurrentLogin() &&
+                !!this.connectors.getRestConnector().getCurrentLogin().currentScope
+            ) {
+                return Constrain.NoScope;
+            }
+        }
         if (constrains.indexOf(Constrain.NoSelection) !== -1) {
             if (objects && objects.length) {
                 return Constrain.NoSelection;
@@ -1732,15 +1811,28 @@ export class OptionsHelperService implements OnDestroy {
         return null;
     }
 
-    private removeFromCollection(objects: Node[] | any) {
+    private removeFromCollection(nodes: Node[]) {
         observableForkJoin(
-            objects.map((o: Node | any) =>
-                this.collectionService.removeFromCollection(o.ref.id, this.data.parent.ref.id),
+            nodes.map((node: Node) =>
+                this.collectionService.removeFromCollection(node.ref.id, this.data.parent.ref.id),
             ),
         ).subscribe(
-            () => this.nodesDeleted.emit({ objects, error: false, count: objects.length }),
-            (error) => this.nodesDeleted.emit({ objects, error: true, count: objects.length }),
+            () => {
+                this.deleteNodes({ objects: nodes, error: false, count: nodes.length });
+                this.toast.toast('COLLECTIONS.REMOVED_FROM_COLLECTION');
+            },
+            (error) => {
+                this.deleteNodes({ objects: nodes, error: true, count: nodes.length });
+                this.toast.error(error);
+            },
         );
+    }
+
+    private deleteNodes(event: DeleteEvent) {
+        this.nodesDeleted.emit(event);
+        if (this.list && !event.error) {
+            this.list.deleteNodes(event.objects);
+        }
     }
 
     private editCollection(object: Node | any) {
@@ -1768,29 +1860,14 @@ export class OptionsHelperService implements OnDestroy {
         return options;
     }
 
-    clearSubscription() {
-        if (this.localSubscripitionDown) {
-            this.localSubscripitionDown.unsubscribe();
-            this.localSubscripitionUp.unsubscribe();
-        }
-        OptionsHelperService.subscriptionDown = OptionsHelperService.subscriptionDown.filter(
-            (s) => s !== this.localSubscripitionDown,
-        );
-        OptionsHelperService.subscriptionUp = OptionsHelperService.subscriptionUp.filter(
-            (s) => s !== this.localSubscripitionUp,
-        );
-    }
-
-    initSubscription() {
-        this.clearSubscription();
-        this.localSubscripitionUp = fromEvent(document, 'keyup').subscribe((event) =>
-            this.handleKeyboardEventUp(event),
-        );
-        OptionsHelperService.subscriptionUp.push(this.localSubscripitionUp);
-        this.localSubscripitionDown = fromEvent(document, 'keydown').subscribe(
-            (event: KeyboardEvent) => this.handleKeyboardEvent(event),
-        );
-        OptionsHelperService.subscriptionDown.push(this.localSubscripitionDown);
+    registerGlobalKeyboardShortcuts() {
+        this.ngZone.runOutsideAngular(() => {
+            if (!this.keyboardShortcutsSubscription) {
+                this.keyboardShortcutsSubscription = fromEvent(document, 'keydown')
+                    .pipe(takeUntil(this.destroyed))
+                    .subscribe((event: KeyboardEvent) => this.handleKeyboardEvent(event));
+            }
+        });
     }
 }
 
@@ -1801,4 +1878,8 @@ export interface OptionData {
     allObjects?: Node[] | any[];
     parent?: Node | any;
     customOptions?: CustomOptions;
+    /**
+     * custom interceptor to modify the default options array
+     */
+    postPrepareOptions?: (options: OptionItem[], objects: Node[]) => void;
 }

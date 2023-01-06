@@ -112,25 +112,25 @@
     <div class="custom-group-data-table">
       <mat-table
         [dataSource]="customGroupData"
-        [class.mat-table-clickable]="singleMode == 'NODES'"
+        [class.mat-table-clickable]="singleMode === 'NODES'"
         *ngIf="customGroupData && !customGroupLoading"
       >
         <ng-container *ngFor="let key of customGroupRows" [matColumnDef]="key">
           <mat-header-cell *matHeaderCellDef>
-            <span *ngIf="key == 'action' || key == 'count' || key == customGroup">{{
+            <span *ngIf="key === 'action' || key === 'count' || key == customGroup">{{
               'ADMIN.STATISTICS.HEADERS.' + key | translate
             }}</span>
-            <span *ngIf="!(key == 'action' || key == 'count' || key == customGroup)">{{
+            <span *ngIf="!(key === 'action' || key === 'count' || key == customGroup)">{{
               customGroupLabels[key] || key
             }}</span>
           </mat-header-cell>
           <mat-cell *matCellDef="let element">
-            <span *ngIf="key == 'action'">{{
+            <span *ngIf="key === 'action'">{{
               'ADMIN.STATISTICS.ACTIONS.' + element[key] | translate
             }}</span>
-            <span *ngIf="key == 'count'">{{ element[key] }}</span>
+            <span *ngIf="key === 'count'">{{ element[key] }}</span>
             <span *ngIf="key == customGroup">{{ element.displayValue }}</span>
-            <span *ngIf="!(key == 'action' || key == 'count' || key == customGroup)">{{
+            <span *ngIf="!(key === 'action' || key === 'count' || key == customGroup)">{{
               element.entry.groups[element['action']]
                 ? element.entry.groups[element['action']][customUnfold][key]
                 : 0
@@ -166,13 +166,40 @@
         </div>
       </div>
     </div>
+    <div class="export" *ngIf="!nodesNoData && !singleLoading">
+      <h4 class="mat-heading-4 mat-heading-underline clickable" (click)="showExport = !showExport">
+        <i esIcon="cloud_download"></i>
+        <span>{{ 'ADMIN.STATISTICS.EXPORT_LABEL' | translate }}</span>
+        <i [esIcon]="'keyboard_arrow_' + (showExport ? 'up' : 'down')"></i>
+      </h4>
+      <div *ngIf="showExport" [@overlay]="showExport">
+        <mat-form-field>
+          <mat-label>{{ 'ADMIN.STATISTICS.EXPORT_PROPERTIES' | translate }}</mat-label>
+          <textarea
+            matInput
+            cdkTextareaAutosize
+            cdkAutosizeMinRows="4"
+            cdkAutosizeMaxRows="6"
+            [(ngModel)]="exportProperties"
+          ></textarea>
+          <mat-hint>{{ 'ADMIN.STATISTICS.EXPORT_PROPERTIES_HINT' | translate }}</mat-hint>
+        </mat-form-field>
+        <div>
+          <button mat-raised-button color="primary" (click)="export()">
+            {{ 'ADMIN.STATISTICS.EXPORT' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+
     <h5 class="mat-heading-5" *ngIf="nodesNoData">{{ 'ADMIN.STATISTICS.NO_DATA' | translate }}</h5>
     <es-listTable
       *ngIf="!nodesNoData"
       [hasIcon]="true"
       [hasHeading]="true"
       [isClickable]="true"
-      (clickRow)="openNode($event)"
+      [createLink]="false"
+      (clickRow)="onOpenNode.emit($event.node)"
       [viewType]="0"
       [columns]="columns"
       [isLoading]="nodesLoading"
@@ -214,7 +241,7 @@
     <div class="single-data-table">
       <mat-table
         [dataSource]="singleData"
-        [class.mat-table-clickable]="singleMode == 'NODES'"
+        [class.mat-table-clickable]="singleMode === 'NODES'"
         *ngIf="singleData && !singleLoading"
       >
         <ng-container *ngFor="let key of singleDataRows" [matColumnDef]="key">
@@ -223,35 +250,35 @@
           </mat-header-cell>
           <mat-cell
             *matCellDef="let element"
-            (click)="openNode(element.entry ? element.entry : null)"
+            (click)="onOpenNode.emit(element.entry ? element.entry : null)"
           >
-            <span *ngIf="key == 'action'">{{
+            <span *ngIf="key === 'action'">{{
               'ADMIN.STATISTICS.ACTIONS.' + element[key] | translate
             }}</span>
-            <span *ngIf="key == 'date'">{{
+            <span *ngIf="key === 'date'">{{
               element[key] | formatDate: { time: true, relative: false }
             }}</span>
-            <span *ngIf="key == 'authority'">{{ element.authority.hash | slice: 0:8 }}</span>
-            <span *ngIf="key == 'authority_organization'">
+            <span *ngIf="key === 'authority'">{{ element.authority.hash | slice: 0:8 }}</span>
+            <span *ngIf="key === 'authority_organization'">
               <div *ngFor="let org of element.authority.organization">
                 {{ org | authorityName }}
               </div>
             </span>
-            <span *ngIf="key == 'authority_mediacenter'">
+            <span *ngIf="key === 'authority_mediacenter'">
               <div *ngFor="let med of element.authority.mediacenter">
                 {{ med | authorityName }}
               </div>
             </span>
-            <span *ngIf="key == 'node'">{{ element[key] }}</span>
+            <span *ngIf="key === 'node'">{{ element[key] }}</span>
             <span
               *ngIf="
                 !(
-                  key == 'action' ||
-                  key == 'date' ||
-                  key == 'authority' ||
-                  key == 'node' ||
-                  key == 'authority_organization' ||
-                  key == 'authority_mediacenter'
+                  key === 'action' ||
+                  key === 'date' ||
+                  key === 'authority' ||
+                  key === 'node' ||
+                  key === 'authority_organization' ||
+                  key === 'authority_mediacenter'
                 )
               "
             >
@@ -267,7 +294,9 @@
 </mat-tab-group>
 <div
   class="export"
-  *ngIf="!groupedLoading && !customGroupLoading && !nodesLoading && !singleLoading"
+  *ngIf="
+    currentTab != 2 && !groupedLoading && !customGroupLoading && !nodesLoading && !singleLoading
+  "
 >
   <h4 class="mat-heading-4 mat-heading-underline">
     <i esIcon="cloud_download"></i>{{ 'ADMIN.STATISTICS.EXPORT_LABEL' | translate }}
