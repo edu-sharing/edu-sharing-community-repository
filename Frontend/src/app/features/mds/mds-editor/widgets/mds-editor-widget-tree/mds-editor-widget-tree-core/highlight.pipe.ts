@@ -18,13 +18,12 @@ export class HighlightPipe implements PipeTransform {
                 // (index === 0 || (index > 0 && /\s/.test(value[index - 1]))) {
                 if (index !== -1) {
                     const matchingString = value.substr(index, length);
+                    const addStr = '<mark>' + matchingString + '</mark>';
                     value =
                         value.substr(0, index) +
-                        '<mark>' +
-                        matchingString +
-                        '</mark>' +
+                        addStr +
                         value.substr(index + length);
-                    index += '<mark></mark>'.length;
+                    index += addStr.length;
                 }
             } while (index >= 0);
         }
