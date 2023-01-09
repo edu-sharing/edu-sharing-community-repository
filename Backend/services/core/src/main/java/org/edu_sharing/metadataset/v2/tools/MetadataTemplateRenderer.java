@@ -270,8 +270,12 @@ public class MetadataTemplateRenderer {
 									value += "</a>";
 								}
 								if (properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL)) != null) {
+									String url = properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL))[0];
+									if (!url.contains("://")) {
+										url = "http://" + url;
+									}
 									value += " (<a href='" +
-											properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_LICENSE_PROFILE_URL))[0] + "'>" +
+											url + "'>" +
 											I18nAngular.getTranslationAngular("common", "LICENSE.LINK_AUTHOR")
 											+ "</a>)";
 								}
