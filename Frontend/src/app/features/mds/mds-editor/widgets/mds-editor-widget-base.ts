@@ -27,7 +27,7 @@ export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {
         } else {
             switch (this.valueType) {
                 case ValueType.String:
-                    return [this.translate.instant('MDS.DIFFERENT_VALUES')];
+                    return [];
                 case ValueType.MultiValue:
                 case ValueType.Range:
                     return [];
