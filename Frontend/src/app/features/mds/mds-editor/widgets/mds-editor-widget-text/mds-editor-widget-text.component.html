@@ -13,6 +13,15 @@
   <input
     matInput
     #inputElement
+    *ngIf="showBulkMixedValues()"
+    [type]="widget.definition.type"
+    disabled
+    value="{{ 'MDS.DIFFERENT_VALUES' | translate }}"
+  />
+  <input
+    matInput
+    #inputElement
+    *ngIf="!showBulkMixedValues()"
     [type]="widget.definition.type"
     [placeholder]="widget.definition.placeholder"
     [formControl]="formControl"
@@ -27,9 +36,13 @@
   [valueType]="valueType"
   [control]="formControl"
 >
+  <textarea matInput #textAreaElement *ngIf="showBulkMixedValues()" disabled>{{
+    'MDS.DIFFERENT_VALUES' | translate
+  }}</textarea>
   <textarea
     matInput
     #textAreaElement
+    *ngIf="!showBulkMixedValues()"
     [placeholder]="widget.definition.placeholder"
     [formControl]="formControl"
     (blur)="blur()"
