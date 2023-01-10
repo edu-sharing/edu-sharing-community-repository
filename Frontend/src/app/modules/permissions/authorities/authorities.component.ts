@@ -324,9 +324,9 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     }
 
     ngAfterViewInit(): void {
-        this.nodeEntries
+        /*this.nodeEntries
             .getSelection()
-            .changed.subscribe((selection) => this.onSelection.emit(selection.source.selected));
+            .changed.subscribe((selection) => this.onSelection.emit(selection.source.selected));*/
     }
 
     async ngOnChanges(changes: SimpleChanges) {
@@ -1249,6 +1249,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     }
     deselectOrg() {
         this.onDeselectOrg.emit();
+        setTimeout(() => this.refresh());
     }
     setOrgTab() {
         this.setTab.emit(0);
@@ -1377,6 +1378,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             }
             this._org = event.element as Organization;
         }
+        console.log(event, this._mode);
         this.nodeEntries.getSelection().clear();
         this.nodeEntries.getSelection().select(event.element);
         this.onSelection.emit(this.nodeEntries.getSelection().selected);
