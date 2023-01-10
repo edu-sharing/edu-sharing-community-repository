@@ -1329,7 +1329,11 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             () => this.saveGroupSignup(),
         );
         this.signupListButtons = [
-            new DialogButton('CLOSE', { color: 'standard' }, () => (this.groupSignup = null)),
+            new DialogButton(
+                'CLOSE',
+                { color: 'standard' },
+                () => (this.groupSignupListShown = null),
+            ),
         ];
     }
     private setPersonStatus(data: UserSimple) {
