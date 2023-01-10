@@ -40,6 +40,10 @@ unittest frontend:
 deploy:
   stage: deploy
   needs: []
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^maven\/release\/.*/ && $CI_PIPELINE_SOURCE == "pipeline"
+    - if: $CI_COMMIT_TAG && $CI_PIPELINE_SOURCE == "pipeline"
+    - if: $CI_COMMIT_BRANCH !~ /^maven\/release\/.*/ && $CI_COMMIT_TAG == null
   script:
     - mvn $MAVEN_CLI -s .mvn/settings.xml deploy
   only:
@@ -54,7 +58,7 @@ deploy:
     key:
       files:
         - Frontend/package-lock.json
-      prefix: node-modules-$NODE_VERSION  
+      prefix: node-modules-$NODE_VERSION
     paths:
       - Frontend/node_modules
   before_script:
@@ -92,7 +96,7 @@ check linting:
 #   variables:
 #     NODE_VERSION: 16  # Matches the preinstalled version of node in the image.
 #     # Test against external frontend.
-#     # E2E_TEST_BASE_URL: http://192.168.16.171/edu-sharing/ 
+#     # E2E_TEST_BASE_URL: http://192.168.16.171/edu-sharing/
 #     BACKEND_URL: http://192.168.16.171
 #   script:
 #     - node -v
