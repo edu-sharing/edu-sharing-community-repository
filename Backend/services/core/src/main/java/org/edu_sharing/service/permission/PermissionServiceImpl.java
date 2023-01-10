@@ -1080,11 +1080,11 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
 						subQuery.append((furtherToken ? " AND( " : "("))
 								.append("@cm\\:authorityDisplayName:")
-								.append("\"").append(LuceneQueryParser.escape(token)).append("\"").
+								.append("\"").append(QueryParser.escape(token)).append("\"").
 								// boost groups so that they'll appear before users
 								append("^10 OR ")
 								.append("@ccm\\:groupEmail:")
-								.append("\"").append(LuceneQueryParser.escape(token)).append("\"");
+								.append("\"").append(QueryParser.escape(token)).append("\"");
 						subQuery.append(")");
 	
 					}
