@@ -102,7 +102,7 @@ public class SearchApi {
 			NodeSearch search = NodeDao.search(repoDao, mdsDao, query, parameters.getCriteria(), token, filter);
 
 		    	List<Node> data = null;//new ArrayList<Node>();
-		    	if(search.getNodes().size() < search.getResult().size()){
+		    	if(search.getNodes().size() == 0){
 		    		//searched repo deliveres only nodeRefs by query time
 					data = NodeDao.convertToRest(repoDao, search.getResult(), filter, null);
 		    	}else{
