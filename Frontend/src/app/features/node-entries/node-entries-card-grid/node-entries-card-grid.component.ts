@@ -21,7 +21,7 @@ import { NodeEntriesService } from '../../../core-ui-module/node-entries.service
 import { Target } from '../../../core-ui-module/option-item';
 import { DragData } from '../../../services/nodes-drag-drop.service';
 import { SortEvent } from '../../../shared/components/sort-dropdown/sort-dropdown.component';
-import { NodeEntriesDisplayType } from '../entries-model';
+import { GridLayout, NodeEntriesDisplayType } from '../entries-model';
 import { ItemsCap } from '../items-cap';
 import { NodeEntriesGlobalService } from '../node-entries-global.service';
 import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
@@ -47,12 +47,25 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnC
      * A value of `true` does not mean, that there would be more items available.
      */
     visibleItemsLimited = false;
+    layout: GridLayout;
+    /**
+     * updates via boxObserver
+     * and holds the information if scrolling in the direction is currently feasible
+     */
+    scroll = {
+        left: false,
+        right: false,
+    };
 
     readonly nodes$ = this.entriesService.dataSource$.pipe(
         switchMap((dataSource) => dataSource?.connect()),
     );
     private readonly maxRows$ = this.entriesService.gridConfig$.pipe(
         map((gridConfig) => gridConfig?.maxRows || null),
+        distinctUntilChanged(),
+    );
+    private readonly layout$ = this.entriesService.gridConfig$.pipe(
+        map((gridConfig) => gridConfig?.layout || 'grid'),
         distinctUntilChanged(),
     );
     private readonly itemsPerRowSubject = new BehaviorSubject<number | null>(null);
@@ -70,6 +83,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnC
 
     ngOnInit(): void {
         this.registerItemsCap();
+        this.registerLayout();
         this.registerVisibleItemsLimited();
     }
 
@@ -85,7 +99,9 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnC
             )
             .subscribe((cap) => (this.itemsCap.cap = cap));
     }
-
+    private registerLayout() {
+        this.layout$.subscribe((layout) => (this.layout = layout));
+    }
     ngOnChanges(changes: SimpleChanges): void {}
 
     ngOnDestroy(): void {
@@ -183,6 +199,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnC
     onGridSizeChanges(): void {
         const itemsPerRow = this.getItemsPerRow();
         this.itemsPerRowSubject.next(itemsPerRow);
+        this.updateScrollState();
     }
 
     private getItemsPerRow(): number | null {
@@ -240,5 +257,40 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnC
 
     onDragEnded() {
         this.isDragging = false;
+    }
+
+    private canScroll(direction: 'left' | 'right') {
+        const element = this.gridRef?.nativeElement;
+        if (direction === 'left') {
+            return element.scrollLeft > 0;
+        } else if (direction === 'right') {
+            console.log(
+                element.scrollLeft,
+                element.scrollWidth - element.clientWidth,
+                element.clientWidth,
+            );
+            /*
+             use a small pixel buffer (10px) because scrolling aligns with the start of each card and
+             it can cause slight alignment issues on the end of the container
+             */
+            return element.scrollLeft < element.scrollWidth - element.clientWidth - 10;
+        }
+        return false;
+    }
+
+    updateScrollState() {
+        if (this.layout === 'scroll') {
+            this.scroll.left = this.canScroll('left');
+            this.scroll.right = this.canScroll('right');
+        }
+    }
+
+    doScroll(direction: 'left' | 'right') {
+        console.log('doScroll');
+        // 1 is enough because the browser will handle it via css snapping
+        this.gridRef?.nativeElement.scrollBy({
+            left: direction === 'right' ? 1 : -1,
+            behavior: 'smooth',
+        });
     }
 }

@@ -72,6 +72,7 @@ import { Subject } from 'rxjs';
 import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
+import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
 
 @Component({
     selector: 'es-node-render',
@@ -114,6 +115,7 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
         private config: ConfigurationService,
         private route: ActivatedRoute,
         private networkService: RestNetworkService,
+        private breadcrumbsService: BreadcrumbsService,
         private _ngZone: NgZone,
         private router: Router,
         private platformLocation: PlatformLocation,
@@ -510,6 +512,9 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
                     loadingTask.done();
                 },
             );
+        this.nodeApi
+            .getNodeParents(this._nodeId)
+            .subscribe((nodes) => this.breadcrumbsService.setNodePath(nodes.nodes.reverse()));
     }
     onDelete(event: any) {
         if (event.error) return;

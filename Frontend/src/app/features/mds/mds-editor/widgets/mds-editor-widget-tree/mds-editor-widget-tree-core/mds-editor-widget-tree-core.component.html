@@ -52,6 +52,7 @@
         <button
           mat-icon-button
           matTreeNodeToggle
+          (click)="changeDetectorRef.detectChanges()"
           [attr.aria-label]="
             (treeControl.isExpanded(node) ? 'COLLAPSE' : 'EXPAND')
               | translate: { element: node.caption }
