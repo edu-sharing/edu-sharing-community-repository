@@ -1,0 +1,36 @@
+@import '../../../../core-ui-module/styles/variables';
+
+es-info-message {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+mat-form-field {
+    margin: 25px 0px 5px;
+    width: 100%;
+}
+
+.breadcrumb-style {
+    margin: 0 $cardPadding * -1 -5px;
+    padding: 20px $cardPadding;
+    background: $cardLightBackground;
+    display: flex;
+    flex-direction: column;
+    width: calc(100% + #{$cardPadding * 2});
+    .breadcrumb-group {
+        display: flex;
+        > es-breadcrumbs {
+            flex-grow: 1;
+        }
+    }
+    .breadcrumb-info {
+        margin: 3px 3px 15px;
+    }
+}
+
+.btn-choose {
+    flex-grow: 1;
+    > button {
+        margin-top: 10px;
+    }
+}

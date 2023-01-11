@@ -1073,10 +1073,8 @@ export class OptionsHelperService implements OnDestroy {
         templateNode.onlyDesktop = true;
         templateNode.group = DefaultGroups.Edit;
 
-        const linkMap = new OptionItem(
-            'OPTIONS.LINK_MAP',
-            'link',
-            (node) => (management.linkMap = this.getObjects(node)[0]),
+        const linkMap = new OptionItem('OPTIONS.LINK_MAP', 'link', (node) =>
+            this.dialogs.openCreateMapLinkDialog({ node: this.getObjects(node)[0] }),
         );
         linkMap.constrains = [
             Constrain.NoBulk,

@@ -88,8 +88,6 @@ export class WorkspaceManagementDialogsComponent {
     @Input() addPinnedCollection: Node;
     @Output() addPinnedCollectionChange = new EventEmitter();
     @Output() onEvent = new EventEmitter<ManagementEvent>();
-    @Input() linkMap: Node;
-    @Output() linkMapChange = new EventEmitter<Node>();
     @Input() set nodeImportUnblock(nodeImportUnblock: Node[]) {
         this.toast.showConfigurableDialog({
             title: 'WORKSPACE.UNBLOCK_TITLE',
@@ -836,11 +834,6 @@ export class WorkspaceManagementDialogsComponent {
             this.toast.closeModalDialog();
             this.onRefresh.emit(results);
         });
-    }
-
-    closeLinkMap(node: Node = null) {
-        this.linkMap = null;
-        this.linkMapChange.emit(null);
     }
 
     declineProposals(nodes: ProposalNode[]) {

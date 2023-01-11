@@ -17,6 +17,10 @@ import {
     ContributorsDialogResult,
 } from './dialog-modules/contributors-dialog/contributors-dialog-data';
 import {
+    CreateMapLinkDialogData,
+    CreateMapLinkDialogResult,
+} from './dialog-modules/create-map-link-dialog/create-map-link-dialog-data';
+import {
     FileChooserDialogData,
     FileChooserDialogResult,
 } from './dialog-modules/file-chooser-dialog/file-chooser-dialog-data';
@@ -313,6 +317,21 @@ export class DialogsService {
             ...configForNode(data.node),
             width: 500,
             height: 700,
+            data,
+        });
+    }
+
+    async openCreateMapLinkDialog(
+        data: CreateMapLinkDialogData,
+    ): Promise<CardDialogRef<CreateMapLinkDialogData, CreateMapLinkDialogResult>> {
+        const { CreateMapLinkDialogComponent } = await import(
+            './dialog-modules/create-map-link-dialog/create-map-link-dialog.module'
+        );
+        return this.cardDialog.open(CreateMapLinkDialogComponent, {
+            title: 'MAP_LINK.TITLE',
+            ...configForNode(data.node),
+            closable: Closable.Standard,
+            width: 600,
             data,
         });
     }

@@ -99,12 +99,6 @@
   (onCancel)="closeVariant()"
   (onDone)="closeVariant()"
 ></es-node-variant>
-<es-map-link
-  *ngIf="linkMap"
-  [node]="linkMap"
-  (onCancel)="closeLinkMap()"
-  (onDone)="closeLinkMap($event)"
-></es-map-link>
 <es-collection-chooser
   class="dialog-right scrollWithBanner"
   *ngIf="addToCollection"
