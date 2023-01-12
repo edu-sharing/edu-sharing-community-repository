@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 
 
 public class SortDefinition implements Serializable {
-	Logger logger = Logger.getLogger(SortDefinition.class);
+	static Logger logger = Logger.getLogger(SortDefinition.class);
 
 	private static final List<String> ALLOWED_SORT_MAIN_PROPERTIES = Collections.singletonList(
 			"fullpath"
