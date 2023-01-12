@@ -1,0 +1,22 @@
+<div class="enable-toggle">
+  <mat-slide-toggle [(ngModel)]="enabled"></mat-slide-toggle>
+  <div class="node-status">
+    <strong>{{ 'WORKSPACE.NODE_TEMPLATE.STATUS' | translate }}</strong>
+    <p>{{ 'WORKSPACE.NODE_TEMPLATE.STATUS_DESKRIPTION' | translate }}</p>
+  </div>
+</div>
+<div class="template-content">
+  <es-mds
+    #mds
+    [embedded]="true"
+    [groupId]="'io_template'"
+    [currentValues]="templateNode?.properties ?? {}"
+    [invalidate]="true"
+    [class.display-none]="!enabled"
+  ></es-mds>
+  <div *ngIf="!enabled" class="template-disabled">
+    <div class="disabled-info" data-i18n="[html]content.body">
+      {{ 'WORKSPACE.NODE_TEMPLATE.STATUS_DISABLED' | translate }}
+    </div>
+  </div>
+</div>

@@ -164,8 +164,6 @@ export class WorkspaceManagementDialogsComponent {
         this._nodeFromUpload = false;
     }
     @Output() nodeMetadataChange = new EventEmitter<Node[]>();
-    @Input() nodeTemplate: Node;
-    @Output() nodeTemplateChange = new EventEmitter();
     @Input() set nodeSimpleEdit(nodeSimpleEdit: Node[]) {
         this._nodeSimpleEdit = nodeSimpleEdit;
         this._nodeFromUpload = false;
@@ -257,12 +255,6 @@ export class WorkspaceManagementDialogsComponent {
             }
             if (this.addToCollection != null) {
                 this.cancelAddToCollection();
-                event.preventDefault();
-                event.stopPropagation();
-                return;
-            }
-            if (this.nodeTemplate != null) {
-                this.closeTemplate();
                 event.preventDefault();
                 event.stopPropagation();
                 return;
@@ -679,9 +671,8 @@ export class WorkspaceManagementDialogsComponent {
         this._nodeFromUpload = true;
     }
 
-    closeTemplate() {
-        this.nodeTemplate = null;
-        this.nodeTemplateChange.emit(null);
+    openNodeTemplateDialog(node: Node): void {
+        this.dialogs.openNodeTemplateDialog({ node });
     }
 
     closePinnedCollection() {

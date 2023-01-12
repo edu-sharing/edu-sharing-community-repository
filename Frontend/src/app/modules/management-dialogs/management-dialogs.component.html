@@ -144,14 +144,9 @@
   (onCancel)="closeEditor(false)"
   (onDone)="closeEditor(true, $any($event))"
   (openLicense)="openLicenseDialog(_nodeMetadata); editorPending = true"
-  (openTemplate)="nodeTemplate = _nodeMetadata[0]"
+  (openTemplate)="openNodeTemplateDialog(_nodeMetadata[0])"
   (openContributor)="openContributorsDialog(_nodeMetadata[0]); editorPending = true"
 ></es-mds-editor-wrapper>
-<es-node-template
-  *ngIf="nodeTemplate"
-  [nodeId]="nodeTemplate.ref.id"
-  (onClose)="closeTemplate()"
-></es-node-template>
 <es-workspace-file-upload
   *ngIf="filesToUpload"
   [current]="parent"

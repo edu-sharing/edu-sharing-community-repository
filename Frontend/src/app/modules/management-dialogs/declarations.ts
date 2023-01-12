@@ -5,7 +5,6 @@ import { WorkspaceCreateLtiComponent } from './create-lti/create-lti.component';
 import { WorkspaceFileUploadComponent } from './file-upload/file-upload.component';
 import { WorkspaceFileUploadSelectComponent } from './file-upload-select/file-upload-select.component';
 import { AddStreamComponent } from './add-stream/add-stream.component';
-import { NodeTemplateComponent } from './node-template/node-template.component';
 import { NodeVariantComponent } from './node-variant/node-variant.component';
 import { CommentsListComponent } from './node-comments/comments-list/comments-list.component';
 import { ViewMaterialFeedbackComponent } from './view-material-feedback/view-material-feedback.component';
@@ -26,7 +25,6 @@ export const DECLARATIONS_MANAGEMENT_DIALOGS = [
     CommentsListComponent,
     AddStreamComponent,
     NodeVariantComponent,
-    NodeTemplateComponent,
     ViewMaterialFeedbackComponent,
     AddMaterialFeedbackComponent,
     SimpleEditDialogComponent,

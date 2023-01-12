@@ -1062,10 +1062,8 @@ export class OptionsHelperService implements OnDestroy {
         editNode.group = DefaultGroups.Edit;
         editNode.priority = 20;
 
-        const templateNode = new OptionItem(
-            'OPTIONS.TEMPLATE',
-            'assignment_turned_in',
-            (object) => (management.nodeTemplate = this.getObjects(object)[0]),
+        const templateNode = new OptionItem('OPTIONS.TEMPLATE', 'assignment_turned_in', (object) =>
+            this.dialogs.openNodeTemplateDialog({ node: this.getObjects(object)[0] }),
         );
         templateNode.constrains = [Constrain.NoBulk, Constrain.Directory, Constrain.User];
         templateNode.permissions = [RestConstants.ACCESS_WRITE];

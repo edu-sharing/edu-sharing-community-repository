@@ -43,6 +43,10 @@ import {
     NodeRelationsDialogResult,
 } from './dialog-modules/node-relations-dialog/node-relations-dialog-data';
 import { NodeReportDialogData } from './dialog-modules/node-report-dialog/node-report-dialog.component';
+import {
+    NodeTemplateDialogData,
+    NodeTemplateDialogResult,
+} from './dialog-modules/node-template-dialog/node-template-dialog-data';
 import { QrDialogData } from './dialog-modules/qr-dialog/qr-dialog.component';
 import {
     ShareDialogData,
@@ -352,6 +356,22 @@ export class DialogsService {
             width: 700,
             minHeight: 700,
             data,
+        });
+    }
+
+    async openNodeTemplateDialog(
+        data: NodeTemplateDialogData,
+    ): Promise<CardDialogRef<NodeTemplateDialogData, NodeTemplateDialogResult>> {
+        const { NodeTemplateDialogComponent } = await import(
+            './dialog-modules/node-template-dialog/node-template-dialog.module'
+        );
+        return this.cardDialog.open(NodeTemplateDialogComponent, {
+            title: 'OPTIONS.TEMPLATE',
+            ...configForNode(data.node),
+            width: 600,
+            minHeight: 700,
+            data,
+            closable: Closable.Standard,
         });
     }
 }
