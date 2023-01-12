@@ -12,17 +12,21 @@ import { combineLatest, Observable } from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { debounceTime, map, switchMap } from 'rxjs/operators';
-import { RestSearchService } from '../../../core-module/rest/services/rest-search.service';
-import { Node, NodesRightMode, SearchRequestCriteria } from '../../../core-module/rest/data-object';
-import { RestConstants } from '../../../core-module/rest/rest-constants';
-import { MdsHelper } from '../../../core-module/rest/mds-helper';
-import { RestMdsService } from '../../../core-module/rest/services/rest-mds.service';
+import { RestSearchService } from '../../../../../core-module/rest/services/rest-search.service';
+import {
+    Node,
+    NodesRightMode,
+    SearchRequestCriteria,
+} from '../../../../../core-module/rest/data-object';
+import { RestConstants } from '../../../../../core-module/rest/rest-constants';
+import { MdsHelper } from '../../../../../core-module/rest/mds-helper';
+import { RestMdsService } from '../../../../../core-module/rest/services/rest-mds.service';
 import { TranslateService } from '@ngx-translate/core';
-import { ListItem } from '../../../core-module/ui/list-item';
-import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
+import { ListItem } from '../../../../../core-module/ui/list-item';
+import { NodeHelperService } from '../../../../../core-ui-module/node-helper.service';
 import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import { UIAnimation } from '../../../../../core-module/ui/ui-animation';
+import { MdsEditorWrapperComponent } from '../../../../mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 
 @Component({
     selector: 'es-node-search-selector',
@@ -56,7 +60,7 @@ export class NodeSearchSelectorComponent implements AfterViewInit {
     /**
      * additional search criterias that should be added
      */
-    @Input() criterias: SearchRequestCriteria[] = [];
+    @Input() criteria: SearchRequestCriteria[] = [];
     /**
      * count of items to search
      */
@@ -94,7 +98,7 @@ export class NodeSearchSelectorComponent implements AfterViewInit {
                 RestSearchService.convertCritierias(this.values, this.mdsEditor.currentWidgets),
             );
         }
-        criterias = criterias.concat(this.criterias);
+        criterias = criterias.concat(this.criteria);
         const request = {
             count: this.itemCount,
             sortBy: [RestConstants.LUCENE_SCORE],

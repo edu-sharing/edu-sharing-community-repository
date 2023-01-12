@@ -14,8 +14,6 @@ import { SimpleEditMetadataComponent } from './simple-edit-dialog/simple-edit-me
 import { SimpleEditInviteComponent } from './simple-edit-dialog/simple-edit-invite/simple-edit-invite.component';
 import { SimpleEditLicenseComponent } from './simple-edit-dialog/simple-edit-license/simple-edit-license.component';
 import { SignupGroupComponent } from './signup-group/signup-group.component';
-import { NodeSearchSelectorComponent } from './node-search-selector/node-search-selector.component';
-import { NodeRelationManagerComponent } from './node-relation-manager/node-relation-manager.component';
 import { AddMaterialFeedbackComponent } from './add-material-feedback/add-material-feedback.component';
 
 export const DECLARATIONS_MANAGEMENT_DIALOGS = [
@@ -25,9 +23,7 @@ export const DECLARATIONS_MANAGEMENT_DIALOGS = [
     WorkspaceCreateLtiComponent,
     WorkspaceFileUploadComponent,
     WorkspaceFileUploadSelectComponent,
-    NodeRelationManagerComponent,
     CommentsListComponent,
-    NodeSearchSelectorComponent,
     AddStreamComponent,
     NodeVariantComponent,
     NodeTemplateComponent,

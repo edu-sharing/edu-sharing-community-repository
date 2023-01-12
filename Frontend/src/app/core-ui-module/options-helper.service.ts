@@ -1255,7 +1255,13 @@ export class OptionsHelperService implements OnDestroy {
         embedNode.priority = 80;
 
         const relationNode = new OptionItem('OPTIONS.RELATIONS', 'swap_horiz', async (node) => {
-            management.nodeRelations = await this.getObjectsAsync(node, true);
+            const nodes = await this.getObjectsAsync(node, true);
+            const dialogRef = await this.dialogs.openNodeRelationsDialog({ node: nodes[0] });
+            dialogRef.afterClosed().subscribe((wasUpdated) => {
+                if (wasUpdated) {
+                    this.onNodesChanged();
+                }
+            });
         });
         relationNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         relationNode.constrains = [Constrain.NoBulk, Constrain.User];

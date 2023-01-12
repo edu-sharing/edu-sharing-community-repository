@@ -38,6 +38,10 @@ import {
 } from './dialog-modules/license-dialog/license-dialog-data';
 import { NodeEmbedDialogData } from './dialog-modules/node-embed-dialog/node-embed-dialog.component';
 import { NodeInfoDialogData } from './dialog-modules/node-info-dialog/node-info-dialog.component';
+import {
+    NodeRelationsDialogData,
+    NodeRelationsDialogResult,
+} from './dialog-modules/node-relations-dialog/node-relations-dialog-data';
 import { NodeReportDialogData } from './dialog-modules/node-report-dialog/node-report-dialog.component';
 import { QrDialogData } from './dialog-modules/qr-dialog/qr-dialog.component';
 import {
@@ -332,6 +336,21 @@ export class DialogsService {
             ...configForNode(data.node),
             closable: Closable.Standard,
             width: 600,
+            data,
+        });
+    }
+
+    async openNodeRelationsDialog(
+        data: NodeRelationsDialogData,
+    ): Promise<CardDialogRef<NodeRelationsDialogData, NodeRelationsDialogResult>> {
+        const { NodeRelationsDialogComponent } = await import(
+            './dialog-modules/node-relations-dialog/node-relations-dialog.module'
+        );
+        return this.cardDialog.open(NodeRelationsDialogComponent, {
+            title: 'NODE_RELATIONS.TITLE',
+            ...configForNode(data.node),
+            width: 700,
+            minHeight: 700,
             data,
         });
     }
