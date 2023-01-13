@@ -20,11 +20,6 @@
   (onEditMetadata)="nodeMetadata = [$event]"
   (onClose)="closeSidebar()"
 ></es-workspace-metadata>
-<es-node-relation-manager
-  *ngIf="nodeRelations"
-  [nodes]="nodeRelations"
-  (close)="closeRelations($event)"
-></es-node-relation-manager>
 <es-add-material-feedback
   *ngIf="materialWriteFeedback"
   [node]="materialWriteFeedback"
@@ -99,12 +94,6 @@
   (onCancel)="closeVariant()"
   (onDone)="closeVariant()"
 ></es-node-variant>
-<es-map-link
-  *ngIf="linkMap"
-  [node]="linkMap"
-  (onCancel)="closeLinkMap()"
-  (onDone)="closeLinkMap($event)"
-></es-map-link>
 <es-collection-chooser
   class="dialog-right scrollWithBanner"
   *ngIf="addToCollection"
@@ -155,14 +144,9 @@
   (onCancel)="closeEditor(false)"
   (onDone)="closeEditor(true, $any($event))"
   (openLicense)="openLicenseDialog(_nodeMetadata); editorPending = true"
-  (openTemplate)="nodeTemplate = _nodeMetadata[0]"
+  (openTemplate)="openNodeTemplateDialog(_nodeMetadata[0])"
   (openContributor)="openContributorsDialog(_nodeMetadata[0]); editorPending = true"
 ></es-mds-editor-wrapper>
-<es-node-template
-  *ngIf="nodeTemplate"
-  [nodeId]="nodeTemplate.ref.id"
-  (onClose)="closeTemplate()"
-></es-node-template>
 <es-workspace-file-upload
   *ngIf="filesToUpload"
   [current]="parent"

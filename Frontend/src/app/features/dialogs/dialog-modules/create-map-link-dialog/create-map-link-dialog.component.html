@@ -1,0 +1,21 @@
+<es-info-message>
+  {{ 'MAP_LINK.INFO' | translate }}
+</es-info-message>
+<mat-form-field>
+  <mat-label>{{ 'MAP_LINK.NAME' | translate }}</mat-label>
+  <input matInput type="text" [(ngModel)]="name" (ngModelChange)="updateButtons()" />
+</mat-form-field>
+<div class="breadcrumb-style">
+  <div class="breadcrumb-info">{{ 'MAP_LINK.BREADCRUMB_INFO' | translate }}</div>
+  <div class="breadcrumb-group">
+    <es-breadcrumbs
+      short="always"
+      [home]="'WORKSPACE.MY_FILES'"
+      [clickable]="false"
+    ></es-breadcrumbs>
+    <div class="btn-choose"></div>
+    <button mat-raised-button (click)="chooseDirectory()">
+      {{ 'MAP_LINK.CHOOSE' | translate }}
+    </button>
+  </div>
+</div>

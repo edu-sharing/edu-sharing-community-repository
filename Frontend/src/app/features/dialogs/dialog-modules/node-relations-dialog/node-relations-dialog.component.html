@@ -1,0 +1,120 @@
+<es-info-message mode="info" *ngIf="isPublishedCopy()">
+  {{ 'NODE_RELATIONS.RELATION_COPY_HINT' | translate }}
+</es-info-message>
+<h2 class="mat-heading-4">{{ 'NODE_RELATIONS.CREATE_RELATION' | translate }}</h2>
+<form #formElement [formGroup]="form">
+  <mat-form-field>
+    <mat-label>{{ 'NODE_RELATIONS.RELATION_TYPE_LABEL' | translate }}</mat-label>
+    <mat-select formControlName="relation">
+      <mat-option *ngFor="let key of Relations" [value]="key">
+        {{ 'NODE_RELATIONS.RELATION_TYPE_FULLY.' + key | translate }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <es-node-search-selector
+    #selector
+    [class.display-none]="target"
+    [groupId]="'search_relation_node'"
+    [queryId]="'search_relation_query'"
+    [columnsIds]="'relationNodes'"
+    [permissions]="permissions"
+    [criteria]="getCriteria()"
+    (onSelect)="target = $event; updateButtons()"
+    label="{{ 'NODE_RELATIONS.RELATION_SEARCH_LABEL' | translate }}"
+  >
+    <ng-template #noPermissions>
+      <i esIcon="security" matTooltip="{{ 'NODE_RELATIONS.NO_PERMISSIONS' | translate }}"></i>
+    </ng-template>
+  </es-node-search-selector>
+</form>
+<div class="relation-result" *ngIf="target">
+  <es-node-row [node]="swapRelation ? target : source" [columns]="selector.columns"></es-node-row>
+  <div class="relation-details">
+    <span>{{
+      'NODE_RELATIONS.RELATION_TYPE.' + $any(RelationsInverted)[form.get('relation').value]
+        | translate
+    }}</span>
+    <i esIcon="swap_horiz" altText="{{ 'NODE_RELATIONS.RELATES_TO' | translate }}"></i>
+    <span>{{ 'NODE_RELATIONS.RELATION_TYPE.' + form.get('relation').value | translate }}</span>
+  </div>
+  <es-node-row [node]="swapRelation ? source : target" [columns]="selector.columns"></es-node-row>
+</div>
+<div class="actions" *ngIf="target">
+  <button mat-flat-button color="warn" (click)="target = null; updateButtons()">
+    <i esIcon="clear" [aria]="false"></i>
+    {{ 'NODE_RELATIONS.RESELECT' | translate }}
+  </button>
+  <button mat-button color="primary" (click)="swap()" [disabled]="!isSwappable()">
+    <i esIcon="swap_horiz" [aria]="false"></i>
+    {{ 'NODE_RELATIONS.SWAP' | translate }}
+  </button>
+  <button mat-flat-button color="primary" [disabled]="!form.valid" (click)="createRelation()">
+    <i esIcon="add" [aria]="false"></i>
+    {{ 'NODE_RELATIONS.CREATE_CONFIRM' | translate }}
+  </button>
+</div>
+<h2 class="mat-heading-4">{{ 'NODE_RELATIONS.EXISTING_RELATIONS' | translate }}</h2>
+<div class="relations-none" *ngIf="!getRelationKeys().length">
+  {{ 'NODE_RELATIONS.NO_RELATIONS' | translate }}
+</div>
+<div class="relations-group" *ngFor="let key of getRelationKeys()">
+  <div>
+    <h5 class="mat-heading-5">
+      "{{ source | nodeTitle }}" {{ 'NODE_RELATIONS.RELATION_TYPE.' + key | translate }}
+    </h5>
+    <div class="relation-nodes">
+      <!--[node]="relation.node" -->
+      <div
+        class="relation-node"
+        *ngFor="let relation of getRelations(key)"
+        [class.added]="addRelations.includes(relation)"
+      >
+        <es-node-row [node]="relation.node" [columns]="columns">
+          <ng-template #customMetadata>
+            <div class="info-group">
+              <label>{{ 'NODE_RELATIONS.RELATION_CREATED' | translate }}</label>
+              <span>{{ relation.timestamp | formatDate: { relative: false } }}</span>
+            </div>
+            <div class="info-group">
+              <label>{{ 'NODE_RELATIONS.RELATION_CREATOR' | translate }}</label>
+              <span>{{ relation.creator | authorityName }}</span>
+            </div>
+          </ng-template>
+        </es-node-row>
+        <button
+          mat-icon-button
+          color="primary"
+          (click)="openNode(relation.node)"
+          matTooltip="{{ 'NODE_RELATIONS.OPEN_NODE' | translate }}"
+        >
+          <i esIcon="open_in_new" [aria]="false"></i>
+        </button>
+        <button
+          mat-icon-button
+          color="primary"
+          *ngIf="!deleteRelations.includes(relation)"
+          [disabled]="!canModify(relation)"
+          (click)="removeRelation(relation)"
+          matTooltip="{{ 'NODE_RELATIONS.REMOVE_RELATION' | translate }}"
+        >
+          <i esIcon="delete" [aria]="false"></i>
+        </button>
+        <div *ngIf="deleteRelations.includes(relation)" class="deleted-overlay">
+          <div class="deleted-info">
+            <div class="line"><hr /></div>
+            <div class="info">{{ 'WORKSPACE.SHARE.DELETED' | translate }}</div>
+            <div class="line"><hr /></div>
+          </div>
+          <button
+            mat-icon-button
+            color="primary"
+            (click)="deleteRelations.splice(deleteRelations.indexOf(relation), 1)"
+            matTooltip="{{ 'NODE_RELATIONS.RESTORE_RELATION' | translate }}"
+          >
+            <i esIcon="undo" [aria]="false"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

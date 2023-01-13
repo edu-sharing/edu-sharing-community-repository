@@ -17,6 +17,10 @@ import {
     ContributorsDialogResult,
 } from './dialog-modules/contributors-dialog/contributors-dialog-data';
 import {
+    CreateMapLinkDialogData,
+    CreateMapLinkDialogResult,
+} from './dialog-modules/create-map-link-dialog/create-map-link-dialog-data';
+import {
     FileChooserDialogData,
     FileChooserDialogResult,
 } from './dialog-modules/file-chooser-dialog/file-chooser-dialog-data';
@@ -34,7 +38,15 @@ import {
 } from './dialog-modules/license-dialog/license-dialog-data';
 import { NodeEmbedDialogData } from './dialog-modules/node-embed-dialog/node-embed-dialog.component';
 import { NodeInfoDialogData } from './dialog-modules/node-info-dialog/node-info-dialog.component';
+import {
+    NodeRelationsDialogData,
+    NodeRelationsDialogResult,
+} from './dialog-modules/node-relations-dialog/node-relations-dialog-data';
 import { NodeReportDialogData } from './dialog-modules/node-report-dialog/node-report-dialog.component';
+import {
+    NodeTemplateDialogData,
+    NodeTemplateDialogResult,
+} from './dialog-modules/node-template-dialog/node-template-dialog-data';
 import { QrDialogData } from './dialog-modules/qr-dialog/qr-dialog.component';
 import {
     ShareDialogData,
@@ -314,6 +326,52 @@ export class DialogsService {
             width: 500,
             height: 700,
             data,
+        });
+    }
+
+    async openCreateMapLinkDialog(
+        data: CreateMapLinkDialogData,
+    ): Promise<CardDialogRef<CreateMapLinkDialogData, CreateMapLinkDialogResult>> {
+        const { CreateMapLinkDialogComponent } = await import(
+            './dialog-modules/create-map-link-dialog/create-map-link-dialog.module'
+        );
+        return this.cardDialog.open(CreateMapLinkDialogComponent, {
+            title: 'MAP_LINK.TITLE',
+            ...configForNode(data.node),
+            closable: Closable.Standard,
+            width: 600,
+            data,
+        });
+    }
+
+    async openNodeRelationsDialog(
+        data: NodeRelationsDialogData,
+    ): Promise<CardDialogRef<NodeRelationsDialogData, NodeRelationsDialogResult>> {
+        const { NodeRelationsDialogComponent } = await import(
+            './dialog-modules/node-relations-dialog/node-relations-dialog.module'
+        );
+        return this.cardDialog.open(NodeRelationsDialogComponent, {
+            title: 'NODE_RELATIONS.TITLE',
+            ...configForNode(data.node),
+            width: 700,
+            minHeight: 700,
+            data,
+        });
+    }
+
+    async openNodeTemplateDialog(
+        data: NodeTemplateDialogData,
+    ): Promise<CardDialogRef<NodeTemplateDialogData, NodeTemplateDialogResult>> {
+        const { NodeTemplateDialogComponent } = await import(
+            './dialog-modules/node-template-dialog/node-template-dialog.module'
+        );
+        return this.cardDialog.open(NodeTemplateDialogComponent, {
+            title: 'OPTIONS.TEMPLATE',
+            ...configForNode(data.node),
+            width: 600,
+            minHeight: 700,
+            data,
+            closable: Closable.Standard,
         });
     }
 }

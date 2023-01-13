@@ -1,82 +1,82 @@
-import { trigger } from '@angular/animations';
 import {
     ChangeDetectionStrategy,
+    ChangeDetectorRef,
     Component,
-    EventEmitter,
-    Input,
-    OnChanges,
+    Inject,
     OnInit,
-    Output,
     SimpleChanges,
 } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { NodeService, RelationData, RelationService, UserService } from 'ngx-edu-sharing-api';
+import { forkJoin } from 'rxjs';
+import { first } from 'rxjs/operators';
+import { UniversalNode } from '../../../../common/definitions';
+import { BridgeService } from '../../../../core-bridge-module/bridge.service';
 import {
     DialogButton,
-    ListItem,
     Node,
+    ListItem,
     NodesRightMode,
     RestConstants,
     RestHelper,
     SearchRequestCriteria,
-} from '../../../core-module/core.module';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import { RelationData, RelationService, UserService, NodeService } from 'ngx-edu-sharing-api';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { NodeHelperService } from '../../../core-ui-module/node-helper.service';
-import { BridgeService } from '../../../core-bridge-module/bridge.service';
-import { OPEN_URL_MODE } from '../../../core-module/ui/ui-constants';
-import { UniversalNode } from '../../../common/definitions';
-import { forkJoin } from 'rxjs';
-import { Toast } from '../../../core-ui-module/toast';
-import { first } from 'rxjs/operators';
+} from '../../../../core-module/core.module';
+import { OPEN_URL_MODE } from '../../../../core-module/ui/ui-constants';
+import { NodeHelperService } from '../../../../core-ui-module/node-helper.service';
+import { Toast } from '../../../../core-ui-module/toast';
+import { UIHelper } from '../../../../core-ui-module/ui-helper';
+import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
+import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
+import { NodeRelationsDialogData, NodeRelationsDialogResult } from './node-relations-dialog-data';
 
 @Component({
-    selector: 'es-node-relation-manager',
-    templateUrl: 'node-relation-manager.component.html',
-    styleUrls: ['node-relation-manager.component.scss'],
-    animations: [
-        trigger('fade', UIAnimation.fade()),
-        trigger('cardAnimation', UIAnimation.cardAnimation()),
-    ],
+    selector: 'es-node-relations-dialog',
+    templateUrl: './node-relations-dialog.component.html',
+    styleUrls: ['./node-relations-dialog.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NodeRelationManagerComponent implements OnInit, OnChanges {
+export class NodeRelationsDialogComponent implements OnInit {
     readonly Relations = Object.values(Relations);
     readonly RelationsInverted = {
         [Relations.isBasedOn]: 'isBasisFor',
         [Relations.isPartOf]: 'hasPart',
         [Relations.references]: 'references',
     };
-    @Input() nodes: UniversalNode[];
+
     source: UniversalNode;
     relations: RelationData[];
     addRelations: RelationData[] = [];
     deleteRelations: RelationData[] = [];
     swapRelation: boolean;
-    @Output() close = new EventEmitter<boolean>();
-
     readonly form = new FormGroup({
         relation: new FormControl(Relations.isBasedOn, Validators.required),
     });
-    readonly buttons = [
-        new DialogButton('CLOSE', DialogButton.TYPE_CANCEL, () => this.cancel()),
-        new DialogButton('SAVE', DialogButton.TYPE_PRIMARY, () => this.save()),
-    ];
     permissions = [RestConstants.PERMISSION_WRITE];
     target: UniversalNode;
     columns = [new ListItem('NODE', RestConstants.LOM_PROP_TITLE)];
-    loading = true;
+
+    private readonly buttons = [
+        new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => this.dialogRef.close(null)),
+        new DialogButton('SAVE', DialogButton.TYPE_PRIMARY, () => this.save()),
+    ];
 
     constructor(
+        @Inject(CARD_DIALOG_DATA) public data: NodeRelationsDialogData,
+        private dialogRef: CardDialogRef<NodeRelationsDialogData, NodeRelationsDialogResult>,
         private relationService: RelationService,
         private nodeHelper: NodeHelperService,
         private nodeService: NodeService,
         private userService: UserService,
         private toast: Toast,
         private bridgeService: BridgeService,
-    ) {}
+        private cdr: ChangeDetectorRef,
+    ) {
+        this.dialogRef.patchState({ isLoading: true });
+    }
 
-    ngOnInit() {
+    ngOnInit(): void {
+        this.dialogRef.patchConfig({ buttons: this.buttons });
+        this.initNode(this.data.node);
         this.updateButtons();
     }
 
@@ -88,19 +88,17 @@ export class NodeRelationManagerComponent implements OnInit, OnChanges {
 
     swap() {
         this.swapRelation = !this.swapRelation;
-        /*const tmp = this.target;
-        this.target = this.source;
-        this.source = tmp;*/
     }
 
-    getCriterias(): SearchRequestCriteria[] {
+    getCriteria(): SearchRequestCriteria[] {
         return [
             {
                 property: 'sourceNode',
-                values: [this.nodes[0].ref.id],
+                values: [this.source.ref.id],
             },
         ];
     }
+
     getAllExistingRelations() {
         return this.getAllRelations().filter((r) => !this.deleteRelations.includes(r));
     }
@@ -127,6 +125,7 @@ export class NodeRelationManagerComponent implements OnInit, OnChanges {
         }
         this.updateButtons();
     }
+
     resolveRelationSendData(r: RelationData) {
         const inverted = this.isInverted(r);
         let source = this.source.ref.id;
@@ -143,6 +142,7 @@ export class NodeRelationManagerComponent implements OnInit, OnChanges {
             type,
         };
     }
+
     private async save() {
         this.toast.showProgressDialog();
         try {
@@ -166,15 +166,25 @@ export class NodeRelationManagerComponent implements OnInit, OnChanges {
                     );
                 }),
             ).toPromise();
-            this.close.emit(true);
+            this.dialogRef.close(true);
         } catch (e) {}
         this.toast.closeModalDialog();
     }
 
-    private updateButtons() {
-        this.buttons[1].disabled = !this.addRelations.length && !this.deleteRelations.length;
+    updateButtons() {
+        const hasChanges = this.hasChanges();
+        this.buttons[1].disabled = !hasChanges;
+        if (hasChanges) {
+            this.dialogRef.patchConfig({ closable: Closable.Confirm });
+        } else if (this.target) {
+            this.dialogRef.patchConfig({ closable: Closable.Standard });
+        } else {
+            this.dialogRef.patchConfig({ closable: Closable.Casual });
+        }
     }
+
     getCurrentType() {}
+
     async createRelation() {
         let type = this.form.get('relation').value;
         if (this.swapRelation) {
@@ -198,8 +208,8 @@ export class NodeRelationManagerComponent implements OnInit, OnChanges {
         this.form.reset();
         this.form.setValue({ relation: Relations.isBasedOn });
         this.swapRelation = false;
-        this.updateButtons();
         this.target = null;
+        this.updateButtons();
     }
 
     private isInverted(r: RelationData) {
@@ -209,7 +219,7 @@ export class NodeRelationManagerComponent implements OnInit, OnChanges {
     }
 
     isPublishedCopy() {
-        return !!this.nodes[0].properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]?.[0];
+        return !!this.source.properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]?.[0];
     }
 
     isSwappable() {
@@ -225,64 +235,38 @@ export class NodeRelationManagerComponent implements OnInit, OnChanges {
         );
     }
 
-    private cancel() {
-        if (this.hasChanges()) {
-            this.toast.showModalDialog(
-                'DIALOG.CONFIRM_DISCARD_TITLE',
-                'DIALOG.CONFIRM_DISCARD_MESSAGE',
-                [
-                    new DialogButton('CANCEL', DialogButton.TYPE_CANCEL, () => {
-                        this.toast.closeModalDialog();
-                    }),
-                    new DialogButton('DISCARD', DialogButton.TYPE_PRIMARY, () => {
-                        this.close.emit();
-                        this.toast.closeModalDialog();
-                    }),
-                ],
-                true,
-            );
-        } else {
-            this.close.emit();
-        }
-    }
-
     private hasChanges() {
         return this.addRelations?.length || this.deleteRelations?.length;
     }
 
-    async ngOnChanges(changes: SimpleChanges) {
-        if (changes.nodes) {
-            if (this.nodes?.length > 1) {
-                throw new Error('relation manager does currently not support bulk features');
-            }
-            // published original: we now need to switch to the original id!
-            if (this.nodes[0].properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]) {
-                // switch to original node id!
-                this.nodes = await forkJoin(
-                    this.nodes.map((n) =>
-                        this.nodeService.getNode(
-                            RestConstants.HOME_REPOSITORY,
-                            RestHelper.removeSpacesStoreRef(
-                                n.properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL],
-                            ),
-                        ),
+    private async initNode(node: Node): Promise<void> {
+        // published original: we now need to switch to the original id!
+        if (node.properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL]) {
+            // switch to original node id!
+            node = await this.nodeService
+                .getNode(
+                    RestConstants.HOME_REPOSITORY,
+                    RestHelper.removeSpacesStoreRef(
+                        node.properties[RestConstants.CCM_PROP_PUBLISHED_ORIGINAL],
                     ),
-                ).toPromise();
-            }
-            this.source = this.nodes[0];
-            this.relationService.getRelations(this.nodes[0].ref.id).subscribe(
-                (relations) => {
-                    this.relations = relations.relations;
-                    this.loading = false;
-                },
-                (e) => {
-                    this.close.emit(false);
-                },
-            );
+                )
+                .toPromise();
         }
+        this.source = node;
+        this.relationService.getRelations(node.ref.id).subscribe(
+            (relations) => {
+                this.relations = relations.relations;
+                this.dialogRef.patchState({ isLoading: false });
+                this.cdr.detectChanges();
+            },
+            (e) => {
+                this.dialogRef.close(null);
+            },
+        );
     }
 }
-export enum Relations {
+
+enum Relations {
     isBasedOn = 'isBasedOn',
     isPartOf = 'isPartOf',
     references = 'references',

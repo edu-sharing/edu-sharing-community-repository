@@ -88,8 +88,6 @@ export class WorkspaceManagementDialogsComponent {
     @Input() addPinnedCollection: Node;
     @Output() addPinnedCollectionChange = new EventEmitter();
     @Output() onEvent = new EventEmitter<ManagementEvent>();
-    @Input() linkMap: Node;
-    @Output() linkMapChange = new EventEmitter<Node>();
     @Input() set nodeImportUnblock(nodeImportUnblock: Node[]) {
         this.toast.showConfigurableDialog({
             title: 'WORKSPACE.UNBLOCK_TITLE',
@@ -166,8 +164,6 @@ export class WorkspaceManagementDialogsComponent {
         this._nodeFromUpload = false;
     }
     @Output() nodeMetadataChange = new EventEmitter<Node[]>();
-    @Input() nodeTemplate: Node;
-    @Output() nodeTemplateChange = new EventEmitter();
     @Input() set nodeSimpleEdit(nodeSimpleEdit: Node[]) {
         this._nodeSimpleEdit = nodeSimpleEdit;
         this._nodeFromUpload = false;
@@ -180,8 +176,6 @@ export class WorkspaceManagementDialogsComponent {
     @Input() nodeSidebar: Node;
     @Output() nodeSidebarChange = new EventEmitter<Node>();
     @Input() showUploadSelect = false;
-    @Input() nodeRelations: Node[];
-    @Output() nodeRelationsChange = new EventEmitter<Node[]>();
     @Output() showUploadSelectChange = new EventEmitter();
     @Output() onUploadSelectCanceled = new EventEmitter();
     @Output() onClose = new EventEmitter();
@@ -261,12 +255,6 @@ export class WorkspaceManagementDialogsComponent {
             }
             if (this.addToCollection != null) {
                 this.cancelAddToCollection();
-                event.preventDefault();
-                event.stopPropagation();
-                return;
-            }
-            if (this.nodeTemplate != null) {
-                this.closeTemplate();
                 event.preventDefault();
                 event.stopPropagation();
                 return;
@@ -683,9 +671,8 @@ export class WorkspaceManagementDialogsComponent {
         this._nodeFromUpload = true;
     }
 
-    closeTemplate() {
-        this.nodeTemplate = null;
-        this.nodeTemplateChange.emit(null);
+    openNodeTemplateDialog(node: Node): void {
+        this.dialogs.openNodeTemplateDialog({ node });
     }
 
     closePinnedCollection() {
@@ -774,14 +761,6 @@ export class WorkspaceManagementDialogsComponent {
         this.nodeSidebarChange.emit(null);
     }
 
-    closeRelations(changed: boolean) {
-        this.nodeRelations = null;
-        this.nodeRelationsChange.emit(null);
-        if (changed) {
-            this.onRefresh.emit();
-        }
-    }
-
     displayNode(node: Node) {
         if (node.version) {
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'render', node.ref.id, node.version]);
@@ -836,11 +815,6 @@ export class WorkspaceManagementDialogsComponent {
             this.toast.closeModalDialog();
             this.onRefresh.emit(results);
         });
-    }
-
-    closeLinkMap(node: Node = null) {
-        this.linkMap = null;
-        this.linkMapChange.emit(null);
     }
 
     declineProposals(nodes: ProposalNode[]) {

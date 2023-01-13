@@ -1062,10 +1062,8 @@ export class OptionsHelperService implements OnDestroy {
         editNode.group = DefaultGroups.Edit;
         editNode.priority = 20;
 
-        const templateNode = new OptionItem(
-            'OPTIONS.TEMPLATE',
-            'assignment_turned_in',
-            (object) => (management.nodeTemplate = this.getObjects(object)[0]),
+        const templateNode = new OptionItem('OPTIONS.TEMPLATE', 'assignment_turned_in', (object) =>
+            this.dialogs.openNodeTemplateDialog({ node: this.getObjects(object)[0] }),
         );
         templateNode.constrains = [Constrain.NoBulk, Constrain.Directory, Constrain.User];
         templateNode.permissions = [RestConstants.ACCESS_WRITE];
@@ -1073,10 +1071,8 @@ export class OptionsHelperService implements OnDestroy {
         templateNode.onlyDesktop = true;
         templateNode.group = DefaultGroups.Edit;
 
-        const linkMap = new OptionItem(
-            'OPTIONS.LINK_MAP',
-            'link',
-            (node) => (management.linkMap = this.getObjects(node)[0]),
+        const linkMap = new OptionItem('OPTIONS.LINK_MAP', 'link', (node) =>
+            this.dialogs.openCreateMapLinkDialog({ node: this.getObjects(node)[0] }),
         );
         linkMap.constrains = [
             Constrain.NoBulk,
@@ -1257,7 +1253,13 @@ export class OptionsHelperService implements OnDestroy {
         embedNode.priority = 80;
 
         const relationNode = new OptionItem('OPTIONS.RELATIONS', 'swap_horiz', async (node) => {
-            management.nodeRelations = await this.getObjectsAsync(node, true);
+            const nodes = await this.getObjectsAsync(node, true);
+            const dialogRef = await this.dialogs.openNodeRelationsDialog({ node: nodes[0] });
+            dialogRef.afterClosed().subscribe((wasUpdated) => {
+                if (wasUpdated) {
+                    this.onNodesChanged();
+                }
+            });
         });
         relationNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         relationNode.constrains = [Constrain.NoBulk, Constrain.User];

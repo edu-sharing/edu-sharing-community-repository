@@ -1,50 +1,53 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { DialogButton, RestConnectorService, RestHelper } from '../../../core-module/core.module';
-import { RestNodeService } from '../../../core-module/core.module';
-import { Node } from '../../../core-module/core.module';
-import { trigger } from '@angular/animations';
-import { UIAnimation } from '../../../core-module/ui/ui-animation';
-import { RestConstants } from '../../../core-module/core.module';
-import { Toast } from '../../../core-ui-module/toast';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
+import { Component, Inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { DialogsService } from '../../../features/dialogs/dialogs.service';
-import { BreadcrumbsService } from '../../../shared/components/breadcrumbs/breadcrumbs.service';
-
+import {
+    DialogButton,
+    Node,
+    RestConnectorService,
+    RestConstants,
+    RestHelper,
+    RestNodeService,
+} from '../../../../core-module/core.module';
+import { Toast } from '../../../../core-ui-module/toast';
+import { UIHelper } from '../../../../core-ui-module/ui-helper';
+import { DialogsService } from '../../dialogs.service';
+import { BreadcrumbsService } from '../../../../shared/components/breadcrumbs/breadcrumbs.service';
+import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
+import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
+import { CreateMapLinkDialogData, CreateMapLinkDialogResult } from './create-map-link-dialog-data';
 @Component({
-    selector: 'es-map-link',
-    templateUrl: 'map-link.component.html',
-    styleUrls: ['map-link.component.scss'],
-    animations: [
-        trigger('fade', UIAnimation.fade()),
-        trigger('cardAnimation', UIAnimation.cardAnimation()),
-    ],
-    providers: [BreadcrumbsService],
+    selector: 'es-create-map-link-dialog',
+    templateUrl: './create-map-link-dialog.component.html',
+    styleUrls: ['./create-map-link-dialog.component.scss'],
 })
-export class MapLinkComponent {
-    _node: Node;
-    buttons: DialogButton[];
-    @Input() set node(node: Node) {
-        this._node = node;
-        this.name = node.name;
-        this.updateButtons();
-    }
-    @Output() onCancel = new EventEmitter();
-    @Output() onDone = new EventEmitter();
+export class CreateMapLinkDialogComponent implements OnInit {
     name: string;
+
+    private readonly buttons = [
+        new DialogButton('CANCEL', { color: 'standard' }, () => this.dialogRef.close(null)),
+        new DialogButton('MAP_LINK.CREATE', { color: 'primary' }, () => this.createLink()),
+    ];
+
     constructor(
+        @Inject(CARD_DIALOG_DATA) public data: CreateMapLinkDialogData,
+        private dialogRef: CardDialogRef<CreateMapLinkDialogData, CreateMapLinkDialogResult>,
         private connector: RestConnectorService,
         private toast: Toast,
         private router: Router,
         private nodeApi: RestNodeService,
         private breadcrumbsService: BreadcrumbsService,
         private dialogs: DialogsService,
-    ) {
+    ) {}
+
+    ngOnInit(): void {
+        this.dialogRef.patchConfig({ buttons: this.buttons });
+        this.name = this.data.node.name;
         this.updateBreadcrumbs(RestConstants.INBOX);
         this.updateButtons();
     }
-    public cancel() {
-        this.onCancel.emit();
+
+    updateButtons(): any {
+        this.buttons[1].disabled = !this.name;
     }
 
     async chooseDirectory() {
@@ -70,18 +73,10 @@ export class MapLinkComponent {
         });
     }
 
-    updateButtons(): any {
-        this.buttons = [
-            new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel()),
-            new DialogButton('MAP_LINK.CREATE', { color: 'primary' }, () => this.createLink()),
-        ];
-        this.buttons[1].disabled = !this.name;
-    }
-
     private createLink() {
         const properties = RestHelper.createNameProperty(this.name);
         properties[RestConstants.CCM_PROP_MAP_REF_TARGET] = [
-            RestHelper.createSpacesStoreRef(this._node),
+            RestHelper.createSpacesStoreRef(this.data.node),
         ];
         this.toast.showProgressDialog();
         this.nodeApi
@@ -122,7 +117,7 @@ export class MapLinkComponent {
                         additional,
                     );
                     this.toast.closeModalDialog();
-                    this.onDone.emit(node);
+                    this.dialogRef.close(node);
                 },
                 (error) => {
                     this.toast.closeModalDialog();
