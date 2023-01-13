@@ -13,6 +13,8 @@ import { EditorMode } from '../../types/mds-types';
     styleUrls: ['./mds-editor-core.component.scss'],
 })
 export class MdsEditorCoreComponent {
+    /** Reference to the card component it is embedded in (if any). */
+    @Input() card: CardComponent;
     @ViewChildren('view') viewRef: QueryList<MdsEditorViewComponent>;
 
     views: MdsView[];

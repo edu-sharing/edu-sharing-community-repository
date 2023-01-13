@@ -42,7 +42,7 @@
         color="primary"
         *ngFor="let jumpmark of jumpmarks"
         [class.active]="jumpmark == jumpmarkActive"
-        (click)="scrollToJumpMark(jumpmark)"
+        (click)="scrollSmooth(jumpmark)"
       >
         <i [esIcon]="jumpmark.icon"></i> {{ jumpmark.label }}
       </button>
