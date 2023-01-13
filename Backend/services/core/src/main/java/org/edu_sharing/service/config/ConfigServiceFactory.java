@@ -47,6 +47,13 @@ public class ConfigServiceFactory {
 		return getCurrentDomain(Context.getCurrentInstance().getRequest());
 	}
 	public static String getCurrentDomain(ServletRequest req) {
+		if(req instanceof HttpServletRequest) {
+			// prefer the proxy given host header if it exists to resolve the current domain
+			String originalHost = ((HttpServletRequest) req).getHeader("x-forwarded-host");
+			if(originalHost != null) {
+				return originalHost;
+			}
+		}
 		return req.getServerName();
 	}
 
