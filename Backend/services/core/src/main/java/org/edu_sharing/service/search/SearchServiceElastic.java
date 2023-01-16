@@ -176,7 +176,8 @@ public class SearchServiceElastic extends SearchServiceImpl {
 
         //enhance to collection permissions
         MatchQueryBuilder collectionTypeProposal = QueryBuilders.matchQuery("collections.relation.type", "ccm:collection_proposal");
-        BoolQueryBuilder collectionPermissions = getPermissionsQuery("collections.permissions.read");
+        // @TODO: FIX after DESP-840
+        BoolQueryBuilder collectionPermissions = getPermissionsQuery("collections.permissions.read.keyword");
         collectionPermissions.should(QueryBuilders.matchQuery("collections.owner", user));
         collectionPermissions.mustNot(collectionTypeProposal);
 
