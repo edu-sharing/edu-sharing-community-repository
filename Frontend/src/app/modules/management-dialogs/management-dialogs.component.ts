@@ -1,11 +1,9 @@
-import { forkJoin as observableForkJoin, observable, Observable } from 'rxjs';
+import { forkJoin as observableForkJoin, Observable } from 'rxjs';
 import {
     Component,
     Input,
     EventEmitter,
     Output,
-    ViewChild,
-    ElementRef,
     HostListener,
     ContentChild,
     TemplateRef,
@@ -15,7 +13,6 @@ import {
     CollectionReference,
     DialogButton,
     LocalPermissions,
-    NodeProperties,
     NodeVersions,
     ProposalNode,
     RestConnectorService,
@@ -26,7 +23,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { RestSearchService } from '../../core-module/core.module';
 import { Toast } from '../../core-ui-module/toast';
 import { RestConstants } from '../../core-module/core.module';
-import { NodeWrapper, Node, Collection } from '../../core-module/core.module';
+import { NodeWrapper, Node } from '../../core-module/core.module';
 import { RestHelper } from '../../core-module/core.module';
 import { RestToolService } from '../../core-module/core.module';
 import { ConfigurationService } from '../../core-module/core.module';
@@ -42,9 +39,7 @@ import { BridgeService } from '../../core-bridge-module/bridge.service';
 import { LinkData, NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { ErrorProcessingService } from '../../core-ui-module/error.processing';
 import { BulkBehavior } from '../../features/mds/types/types';
-import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { MainNavService } from 'src/app/main/navigation/main-nav.service';
-import { first } from 'rxjs/operators';
 import { SimpleEditCloseEvent } from './simple-edit-dialog/simple-edit-dialog.component';
 import { FeedbackV1Service } from 'ngx-edu-sharing-api';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
@@ -71,8 +66,6 @@ export interface ManagementEvent {
     ],
 })
 export class WorkspaceManagementDialogsComponent {
-    readonly BulkBehaviour = BulkBehavior;
-    @ViewChild(MdsEditorWrapperComponent) mdsEditorWrapperRef: MdsEditorWrapperComponent;
     @ContentChild('collectionChooserBeforeRecent')
     collectionChooserBeforeRecentRef: TemplateRef<any>;
     @Input() showLtiTools = false;
@@ -159,11 +152,6 @@ export class WorkspaceManagementDialogsComponent {
     @Output() addNodesStreamChange = new EventEmitter();
     @Input() nodeVariant: Node;
     @Output() nodeVariantChange = new EventEmitter();
-    @Input() set nodeMetadata(nodeMetadata: Node[]) {
-        this._nodeMetadata = nodeMetadata;
-        this._nodeFromUpload = false;
-    }
-    @Output() nodeMetadataChange = new EventEmitter<Node[]>();
     @Input() set nodeSimpleEdit(nodeSimpleEdit: Node[]) {
         this._nodeSimpleEdit = nodeSimpleEdit;
         this._nodeFromUpload = false;
@@ -199,7 +187,6 @@ export class WorkspaceManagementDialogsComponent {
         references: CollectionReference[];
     }>();
     _nodeDelete: Node[];
-    _nodeMetadata: Node[];
     _nodeSimpleEdit: Node[];
     _nodeFromUpload = false;
     nodeDeleteTitle: string;
@@ -238,11 +225,8 @@ export class WorkspaceManagementDialogsComponent {
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
         if (event.key === 'Escape') {
-            if (this._nodeMetadata != null || this.createMetadata) {
-                if (this.mdsEditorWrapperRef.handleKeyboardEvent(event)) {
-                    return;
-                }
-                this.closeEditor(false);
+            if (this.createMetadata) {
+                this.closeMdsEditor(null);
                 event.preventDefault();
                 event.stopPropagation();
                 return;
@@ -447,18 +431,6 @@ export class WorkspaceManagementDialogsComponent {
         this.closeUploadSelect();
         this.onUploadSelectCanceled.emit(false);
     }
-    async openContributorsDialog(node: Node) {
-        const dialogRef = await this.dialogs.openContributorsDialog({ node });
-        dialogRef.afterClosed().subscribe((updatedNode) => {
-            if (this.editorPending) {
-                this.editorPending = false;
-                this._nodeMetadata = [node];
-            }
-            if (updatedNode) {
-                this.onRefresh.emit([updatedNode]);
-            }
-        });
-    }
     closeLtiTools() {
         this.showLtiTools = false;
         this.showLtiToolsChange.emit(false);
@@ -468,9 +440,6 @@ export class WorkspaceManagementDialogsComponent {
         dialogRef.afterClosed().subscribe((updatedNodes) => {
             if (this.nodeLicenseOnUpload) {
                 this.showMetadataAfterUpload(nodes);
-            } else if (this.editorPending) {
-                this.editorPending = false;
-                this._nodeMetadata = nodes;
             } else if (this.reopenSimpleEdit) {
                 this.reopenSimpleEdit = false;
                 this._nodeSimpleEdit = nodes;
@@ -492,29 +461,44 @@ export class WorkspaceManagementDialogsComponent {
             this.toast.closeModalDialog();
         });
     }
-    closeEditor(refresh: boolean, nodes: Node[] = null) {
-        if (this._nodeFromUpload && !this.reopenSimpleEdit && nodes == null) {
-            this.deleteNodes(this._nodeMetadata);
+
+    async openMdsEditor(nodes: Node[]): Promise<void> {
+        const dialogRef = await this.dialogs.openMdsEditorDialog({
+            nodes,
+            bulkBehavior: this._nodeFromUpload ? BulkBehavior.Replace : BulkBehavior.Default,
+        });
+        dialogRef
+            .afterClosed()
+            .subscribe((updatedNodes) => this.closeMdsEditor(nodes, updatedNodes));
+    }
+
+    private closeMdsEditor(originalNodes: Node[], updatedNodes: Node[] = null) {
+        let refresh = !!updatedNodes;
+        if (this._nodeFromUpload && !this.reopenSimpleEdit && updatedNodes == null) {
+            this.deleteNodes(originalNodes);
             refresh = true;
         }
-        const previousNodes = this._nodeMetadata;
-        this._nodeMetadata = null;
-        this.nodeMetadataChange.emit(null);
         this.createMetadata = null;
-        this.onCloseMetadata.emit(nodes);
+        this.onCloseMetadata.emit(updatedNodes);
         if (this.reopenSimpleEdit) {
             this.reopenSimpleEdit = false;
-            this._nodeSimpleEdit = previousNodes;
+            this._nodeSimpleEdit = originalNodes;
         } else if (this._nodeFromUpload) {
-            this.onUploadFilesProcessed.emit(nodes);
+            this.onUploadFilesProcessed.emit(updatedNodes);
+        } else if (
+            this.nodeSidebar &&
+            this.nodeSidebar.ref.id === originalNodes[0]?.ref.id &&
+            updatedNodes
+        ) {
+            this.nodeSidebar = updatedNodes[0];
         }
         if (refresh) {
-            this.onRefresh.emit(nodes);
+            this.onRefresh.emit(updatedNodes);
             if (
-                nodes?.length === 1 &&
-                nodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION) !== -1
+                updatedNodes?.length === 1 &&
+                updatedNodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION) !== -1
             ) {
-                this.currentLtiTool = nodes[0];
+                this.currentLtiTool = updatedNodes[0];
             } else {
                 this.ltiToolRefresh = new Boolean();
             }
@@ -523,7 +507,7 @@ export class WorkspaceManagementDialogsComponent {
 
     public editLti(event: Node) {
         //this.closeLtiTools();
-        this._nodeMetadata = [event];
+        void this.openMdsEditor([event]);
     }
     public createLti(event: any) {
         //this.closeLtiTools();
@@ -659,16 +643,16 @@ export class WorkspaceManagementDialogsComponent {
     }
 
     private showMetadataAfterUpload(event: Node[]) {
+        this._nodeFromUpload = true;
         const dialog = this.config.instant('upload.postDialog', DialogType.SimpleEdit);
         if (dialog === DialogType.SimpleEdit) {
             this._nodeSimpleEdit = event;
             this.nodeSimpleEditChange.emit(event);
         } else if (dialog === DialogType.Mds) {
-            this._nodeMetadata = event;
+            void this.openMdsEditor(event);
         } else {
             console.error('Invalid configuration for upload.postDialog: ' + dialog);
         }
-        this._nodeFromUpload = true;
     }
 
     openNodeTemplateDialog(node: Node): void {

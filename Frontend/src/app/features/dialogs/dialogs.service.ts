@@ -36,6 +36,10 @@ import {
     LicenseDialogData,
     LicenseDialogResult,
 } from './dialog-modules/license-dialog/license-dialog-data';
+import {
+    MdsEditorDialogData,
+    MdsEditorDialogResult,
+} from './dialog-modules/mds-editor-dialog/mds-editor-dialog-data';
 import { NodeEmbedDialogData } from './dialog-modules/node-embed-dialog/node-embed-dialog.component';
 import { NodeInfoDialogData } from './dialog-modules/node-info-dialog/node-info-dialog.component';
 import {
@@ -372,6 +376,23 @@ export class DialogsService {
             minHeight: 700,
             data,
             closable: Closable.Standard,
+        });
+    }
+
+    async openMdsEditorDialog(
+        data: MdsEditorDialogData,
+    ): Promise<CardDialogRef<MdsEditorDialogData, MdsEditorDialogResult>> {
+        const { MdsEditorDialogComponent } = await import(
+            './dialog-modules/mds-editor-dialog/mds-editor-dialog.module'
+        );
+        data = { ...new MdsEditorDialogData(), ...data };
+        return this.cardDialog.open(MdsEditorDialogComponent, {
+            title: 'MDS.TITLE',
+            ...(await configForNodes(data.nodes, this.translate).toPromise()),
+            minWidth: 600,
+            minHeight: 700,
+            contentPadding: 0,
+            data,
         });
     }
 }

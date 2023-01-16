@@ -26,6 +26,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { DialogButton } from '../../../../core-module/core.module';
 import { UIAnimation } from '../../../../core-module/ui/ui-animation';
+import { JumpMark, JumpMarksService } from '../../../../services/jump-marks.service';
 import { CardDialogConfig, Closable } from '../card-dialog-config';
 import { CardDialogRef } from '../card-dialog-ref';
 import { AutoSavingState } from '../card-dialog-state';
@@ -47,6 +48,7 @@ type CardState = 'void' | 'enter' | 'exit';
     selector: 'es-card-dialog-container',
     templateUrl: './card-dialog-container.component.html',
     styleUrls: ['./card-dialog-container.component.scss'],
+    providers: [JumpMarksService],
     animations: [
         trigger('defaultAnimation', [
             state('void, exit', style({ opacity: 0, transform: 'scale(0.7)' })),
@@ -102,8 +104,6 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
     readonly id = idCounter++;
     @HostBinding('attr.aria-modal') readonly ariaModal = 'true';
     @HostBinding('attr.role') readonly role = 'dialog';
-    @HostBinding('class') readonly class = 'mat-elevation-z24';
-    @HostBinding('class.card-dialog-mobile') isMobile: boolean;
     // Make the container focusable, so keyboard shortcuts keep working when the user clicked some
     // non-interactive element.
     @HostBinding('attr.tabindex') readonly tabIndex = '-1';
@@ -120,6 +120,8 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
     isLoading = false;
     closeButtonTemporarilyDisabled = false;
     autoSavingState: AutoSavingState = null;
+    isMobile: boolean;
+    activeJumpMark: JumpMark | null = null;
 
     /** Emits when an animation state changes. */
     readonly animationStateChanged = new EventEmitter<DialogAnimationEvent>();

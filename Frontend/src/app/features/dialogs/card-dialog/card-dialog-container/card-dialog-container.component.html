@@ -1,34 +1,56 @@
-<es-card-header
-  [id]="id"
-  [title]="config.title | translate"
-  [subtitle]="config.subtitle | translate"
-  [avatar]="config.avatar"
-  (closeButtonClick)="onCloseButtonClick()"
-  [showCloseButton]="shouldShowCloseButton()"
-  [additionalContent]="config.customHeaderBarContent"
-  [disableCloseButton]="isLoading || autoSavingState === 'saving' || closeButtonTemporarilyDisabled"
-></es-card-header>
+<es-card-jump-marks
+  *ngIf="config.jumpMarks?.length > 1"
+  class="jump-marks mat-elevation-z24"
+  [jumpMarks]="config.jumpMarks"
+  [activeJumpMark]="activeJumpMark"
+  (scrollToJumpMark)="jumpMarksHandler.scrollToJumpMark($event)"
+></es-card-jump-marks>
 
-<div class="card-content" [style.padding.px]="config.contentPadding" [attr.aria-hidden]="isLoading">
-  <ng-template cdkPortalOutlet></ng-template>
-  <div *ngIf="isLoading" class="loading-overlay">
-    <es-spinner></es-spinner>
+<div class="card-dialog mat-elevation-z24" [class.card-dialog-mobile]="isMobile">
+  <es-card-header
+    [id]="id"
+    [title]="config.title | translate"
+    [subtitle]="config.subtitle | translate"
+    [avatar]="config.avatar"
+    (closeButtonClick)="onCloseButtonClick()"
+    [showCloseButton]="shouldShowCloseButton()"
+    [additionalContent]="config.customHeaderBarContent"
+    [disableCloseButton]="
+      isLoading || autoSavingState === 'saving' || closeButtonTemporarilyDisabled
+    "
+    class="card-dialog-header"
+  ></es-card-header>
+
+  <div
+    class="card-content"
+    [style.padding.px]="config.contentPadding"
+    [attr.aria-hidden]="isLoading"
+    [esJumpMarksHandler]="config.jumpMarks"
+    (activeJumpMarkChanged)="activeJumpMark = $event"
+    #jumpMarksHandler="esJumpMarksHandler"
+    cdkScrollable
+  >
+    <ng-template cdkPortalOutlet></ng-template>
+    <div *ngIf="isLoading" class="loading-overlay">
+      <es-spinner></es-spinner>
+    </div>
   </div>
-</div>
 
-<es-card-actions
-  *ngIf="(buttons && buttons.length > 0) || autoSavingState"
-  [buttons]="buttons"
-  [additionalContent]="config.customBottomBarContent ?? savingInfo"
-></es-card-actions>
-<ng-template #savingInfo>
-  <p *ngIf="autoSavingState === 'saving'" class="saving-info" aria-live="polite">
-    {{ 'DIALOG.SAVING' | translate }}
-  </p>
-  <p *ngIf="autoSavingState === 'saved'" class="saving-info" aria-live="polite">
-    {{ 'DIALOG.SAVED' | translate }}
-  </p>
-  <p *ngIf="autoSavingState === 'error'" class="saving-error" aria-live="polite">
-    {{ 'DIALOG.SAVING_ERROR' | translate }}
-  </p>
-</ng-template>
+  <es-card-actions
+    *ngIf="(buttons && buttons.length > 0) || config.customBottomBarContent || autoSavingState"
+    [buttons]="buttons"
+    [additionalContent]="config.customBottomBarContent ?? savingInfo"
+  ></es-card-actions>
+
+  <ng-template #savingInfo>
+    <p *ngIf="autoSavingState === 'saving'" class="saving-info" aria-live="polite">
+      {{ 'DIALOG.SAVING' | translate }}
+    </p>
+    <p *ngIf="autoSavingState === 'saved'" class="saving-info" aria-live="polite">
+      {{ 'DIALOG.SAVED' | translate }}
+    </p>
+    <p *ngIf="autoSavingState === 'error'" class="saving-error" aria-live="polite">
+      {{ 'DIALOG.SAVING_ERROR' | translate }}
+    </p>
+  </ng-template>
+</div>

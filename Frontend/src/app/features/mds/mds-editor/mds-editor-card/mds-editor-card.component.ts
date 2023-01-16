@@ -9,13 +9,16 @@ import {
     ViewChild,
 } from '@angular/core';
 import { DialogButton, Node } from '../../../../core-module/core.module';
-import { CardJumpmark } from '../../../../shared/components/card/card.component';
+import { JumpMark } from '../../../../services/jump-marks.service';
 import { Toast } from '../../../../core-ui-module/toast';
 import { FillTypeStatus } from '../input-fill-progress/input-fill-progress.component';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 import { ReplaySubject, Observable, combineLatest } from 'rxjs';
 import { MdsEditorCoreComponent } from '../mds-editor-core/mds-editor-core.component';
 
+/**
+ * @deprecated replaced with MdsEditorDialogComponent
+ */
 @Component({
     selector: 'es-mds-editor-card',
     templateUrl: './mds-editor-card.component.html',
@@ -37,7 +40,7 @@ export class MdsEditorCardComponent implements OnInit, OnDestroy {
     @Output() save = new EventEmitter();
 
     nodes: Node[];
-    jumpMarks: CardJumpmark[];
+    jumpMarks: JumpMark[];
     readonly buttons = [
         new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel.emit()),
         new DialogButton('SAVE', { color: 'primary' }, () => this.save.emit()),
@@ -93,14 +96,14 @@ export class MdsEditorCardComponent implements OnInit, OnDestroy {
         this.mdsEditorInstance.showMissingRequiredWidgets();
     }
 
-    private getJumpMarks(): Observable<CardJumpmark[]> {
+    private getJumpMarks(): Observable<JumpMark[]> {
         return combineLatest([
             this.mdsEditorInstance.activeViews,
             this.mdsEditorInstance.shouldShowExtendedWidgets$,
         ]).pipe(
-            map((observed) =>
-                observed[0].map(
-                    (view) => this.coreRef?.viewRef?.filter((v) => v.view.id === view.id)?.[0],
+            map(([activeViews]) =>
+                activeViews.map((view) =>
+                    this.coreRef?.viewRef?.find((v) => v.view.id === view.id),
                 ),
             ),
             map((viewRef) =>
@@ -108,7 +111,7 @@ export class MdsEditorCardComponent implements OnInit, OnDestroy {
                     .filter((v) => v && !v.isInHiddenState())
                     .map(
                         (v) =>
-                            new CardJumpmark(
+                            new JumpMark(
                                 v.view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX,
                                 v.view.caption,
                                 v.view.icon,

@@ -97,6 +97,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
         MdsEditorWidgetAuthorComponent,
         MdsEditorWrapperComponent,
         MdsViewerComponent,
+        MdsEditorCoreComponent,
+        InputFillProgressComponent,
     ],
 })
 export class MdsModule {}

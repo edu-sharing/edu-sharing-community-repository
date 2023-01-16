@@ -932,6 +932,10 @@ export class MdsEditorInstanceService implements OnDestroy {
         return this.hasUserChanges$.value;
     }
 
+    observeHasUserChanges(): Observable<boolean> {
+        return this.hasUserChanges$.asObservable();
+    }
+
     getCanSave(): boolean {
         return this.canSave$.value;
     }

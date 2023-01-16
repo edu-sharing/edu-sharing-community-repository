@@ -213,7 +213,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
     private isSafe = false;
     private isOpenable: boolean;
     private closeOnBack: boolean;
-    public nodeMetadata: Node[];
     public nodeWorkflow: Node[];
     public addNodesStream: Node[];
     public nodeDelete: Node[];
@@ -261,9 +260,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
 
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
-        if (this.nodeMetadata != null) {
-            return;
-        }
         if (CardComponent.getNumberOfOpenCards() > 0) {
             return;
         }
@@ -359,9 +355,6 @@ export class NodeRenderComponent implements EventListener, OnInit, OnDestroy {
             this.getPosition() < this.list.length - 1 &&
             !this.list[this.getPosition() + 1].isDirectory
         );
-    }
-    public closeMetadata() {
-        this.nodeMetadata = null;
     }
     public refresh() {
         if (this.isLoading) {

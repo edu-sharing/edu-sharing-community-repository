@@ -1045,11 +1045,15 @@ export class OptionsHelperService implements OnDestroy {
         simpleEditNode.group = DefaultGroups.Edit;
         simpleEditNode.priority = 15;
 
-        const editNode = new OptionItem(
-            'OPTIONS.EDIT',
-            'edit',
-            async (object) => (management.nodeMetadata = await this.getObjectsAsync(object, true)),
-        );
+        const editNode = new OptionItem('OPTIONS.EDIT', 'edit', async (object) => {
+            const nodes = await this.getObjectsAsync(object, true);
+            const dialogRef = await this.dialogs.openMdsEditorDialog({ nodes });
+            dialogRef.afterClosed().subscribe((result) => {
+                if (result) {
+                    this.onNodesChanged(result);
+                }
+            });
+        });
         editNode.elementType = [ElementType.Node, ElementType.NodeChild, ElementType.MapRef];
         editNode.constrains = [
             Constrain.FilesAndDirectories,

@@ -12,6 +12,7 @@ import {
     OnChanges,
     OnDestroy,
     OnInit,
+    Optional,
     SimpleChanges,
     Type,
     ViewChild,
@@ -63,6 +64,7 @@ import { MdsEditorWidgetBase } from '../widgets/mds-editor-widget-base';
 import { MdsEditorWidgetVCardComponent } from '../widgets/mds-editor-widget-vcard/mds-editor-widget-vcard.component';
 import { MdsEditorWidgetTinyMCE } from '../widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-tinymce.component';
 import { EditorMode } from '../../types/mds-types';
+import { JumpMarksService } from '../../../../services/jump-marks.service';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;
@@ -163,6 +165,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         private ngZone: NgZone,
         private viewInstance: ViewInstanceService,
         private injector: Injector,
+        @Optional() private jumpMarks: JumpMarksService,
     ) {
         this.isEmbedded = this.mdsEditorInstance.isEmbedded;
         this.knownWidgetTags = [
@@ -184,16 +187,22 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
             )
             .subscribe((isActive) => (this.isHidden = !isActive));
 
-        this.core?.card?.onScrollToJumpmark.pipe(takeUntil(this.destroyed)).subscribe(async (j) => {
-            if (
-                j.id === this.view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX &&
-                !this.isExpanded$.value
-            ) {
-                this.isExpanded$.next(true);
-                await this.applicationRef.tick();
-                this.core.card.scrollSmooth(j);
-            }
-        });
+        this.jumpMarks?.beforeScrollToJumpMark
+            .pipe(
+                takeUntil(this.destroyed),
+                filter(
+                    (jumpMark) =>
+                        jumpMark.id === this.view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX,
+                ),
+            )
+            .subscribe((jumpMark) => {
+                if (!this.isExpanded$.value) {
+                    this.isExpanded$.next(true);
+                    // Trigger again to scroll now-expanded section into view.
+                    this.applicationRef.tick();
+                    this.jumpMarks.triggerScrollToJumpMark.next(jumpMark);
+                }
+            });
         this.isExpanded$
             .pipe(takeUntil(this.destroyed))
             .subscribe((isExpanded) => (this.isExpanded = isExpanded));
@@ -438,13 +447,11 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
     toggleShow() {
         this.isExpanded$.next(!this.isExpanded$.value);
         if (this.isExpanded$.value) {
-            setTimeout(() => {
-                this.core.card?.scrollSmooth(
-                    this.core.card?.jumpmarks.filter(
-                        (j) => j.id === this.view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX,
-                    )[0],
-                );
-            });
+            setTimeout(() =>
+                this.jumpMarks?.triggerScrollToJumpMark.next(
+                    this.view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX,
+                ),
+            );
         }
     }
     async injectEditField(mdsWidgetComponent: MdsWidgetComponent, targetElement: Element) {

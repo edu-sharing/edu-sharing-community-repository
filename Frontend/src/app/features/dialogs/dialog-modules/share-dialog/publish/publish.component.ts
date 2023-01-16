@@ -165,25 +165,21 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
             }
         });
     }
-    openMetadata() {
-        this.mainNavService.getDialogs().nodeMetadata = [this.node];
-        setTimeout(() => {
-            // Wait for `mdsEditorWrapperRef`
-            this.mainNavService
-                .getDialogs()
-                .mdsEditorWrapperRef.mdsEditorInstance.mdsInflated.subscribe(() =>
-                    this.mainNavService
-                        .getDialogs()
-                        .mdsEditorWrapperRef.mdsEditorInstance.showMissingRequiredWidgets(false),
-                );
+    async openMetadata() {
+        const dialogRef = await this.dialogs.openMdsEditorDialog({
+            nodes: [this.node],
+            immediatelyShowMissingRequiredWidgets: true,
         });
-        this.mainNavService.getDialogs().nodeMetadataChange.subscribe(async () => {
-            this.node = (
-                await this.legacyNodeService
-                    .getNodeMetadata(this.node.ref.id, [RestConstants.ALL])
-                    .toPromise()
-            ).node;
-            this.refresh();
+        dialogRef.afterClosed().subscribe((nodes) => {
+            if (nodes) {
+                this.node = nodes[0];
+                // this.node = (
+                //     await this.legacyNodeService
+                //         .getNodeMetadata(this.node.ref.id, [RestConstants.ALL])
+                //         .toPromise()
+                // ).node;
+                this.refresh();
+            }
         });
     }
 
