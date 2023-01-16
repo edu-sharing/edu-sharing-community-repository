@@ -34,8 +34,8 @@
             </goals>
             <phase>package</phase>
             <configuration>
-              <sourceFile>${project.build.directory}/classes/org/alfresco/repo/search/impl/lucene/SolrJSONResultSet.class</sourceFile>
-              <destinationFile>${project.build.directory}/fixes/org/alfresco/repo/search/impl/lucene/SolrJSONResultSet.class</destinationFile>
+              <sourceFile>${project.build.directory}/classes/org/alfresco/repo/search/impl/solr/SolrJSONResultSet.class</sourceFile>
+              <destinationFile>${project.build.directory}/fixes/org/alfresco/repo/search/impl/solr/SolrJSONResultSet.class</destinationFile>
             </configuration>
           </execution>
           <execution>

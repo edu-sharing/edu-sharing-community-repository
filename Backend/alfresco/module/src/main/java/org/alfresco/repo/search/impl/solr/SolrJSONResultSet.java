@@ -270,7 +270,7 @@ public class SolrJSONResultSet implements SearchEngineResultSet {
                             Long dbid = doc.optLong("DBID");
                             if(dbid != null)
                             {
-                                Float score = Float.valueOf(doc.getString("score"));
+                                Float score = doc.getFloat("score");
                                 rawDbids.add(dbid);
                                 rawScores.add(score);
                             }
@@ -284,7 +284,7 @@ public class SolrJSONResultSet implements SearchEngineResultSet {
                     }
 
                     /*there is always the same maxScore for every group*/
-                    maxScore = Float.valueOf(doclist.getString("maxScore"));
+                    maxScore = Float.valueOf(doclist.getFloat("maxScore"));
                 }
 
 
