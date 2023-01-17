@@ -25,7 +25,6 @@ import { Toast } from '../../core-ui-module/toast';
 import { RestConstants } from '../../core-module/core.module';
 import { NodeWrapper, Node } from '../../core-module/core.module';
 import { RestHelper } from '../../core-module/core.module';
-import { RestToolService } from '../../core-module/core.module';
 import { ConfigurationService } from '../../core-module/core.module';
 import { RestCollectionService } from '../../core-module/core.module';
 import { trigger } from '@angular/animations';
@@ -68,7 +67,6 @@ export interface ManagementEvent {
 export class WorkspaceManagementDialogsComponent {
     @ContentChild('collectionChooserBeforeRecent')
     collectionChooserBeforeRecentRef: TemplateRef<any>;
-    @Input() showLtiTools = false;
     @Input() uploadShowPicker = false;
     @Input() uploadMultiple = true;
     @Input() fileIsOver = false;
@@ -77,7 +75,6 @@ export class WorkspaceManagementDialogsComponent {
     @Input() filesToUpload: FileList;
     @Output() filesToUploadChange = new EventEmitter();
     @Input() parent: Node;
-    @Output() showLtiToolsChange = new EventEmitter();
     @Input() addPinnedCollection: Node;
     @Output() addPinnedCollectionChange = new EventEmitter();
     @Output() onEvent = new EventEmitter<ManagementEvent>();
@@ -195,13 +192,7 @@ export class WorkspaceManagementDialogsComponent {
     nodeDeleteBlock: boolean;
     nodeDeleteBlockStatus = true;
     nodeDeleteButtons: DialogButton[];
-    public createMetadata: string;
     public editorPending = false;
-    public metadataParent: Node;
-    public ltiToolConfig: Node;
-    public ltiObject: Node;
-    currentLtiTool: Node;
-    ltiToolRefresh: Boolean;
     reopenSimpleEdit = false;
     private nodeLicenseOnUpload = false;
     /**
@@ -225,12 +216,6 @@ export class WorkspaceManagementDialogsComponent {
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
         if (event.key === 'Escape') {
-            if (this.createMetadata) {
-                this.closeMdsEditor(null);
-                event.preventDefault();
-                event.stopPropagation();
-                return;
-            }
             if (this.nodeSidebar != null) {
                 this.closeSidebar();
                 event.preventDefault();
@@ -243,24 +228,11 @@ export class WorkspaceManagementDialogsComponent {
                 event.stopPropagation();
                 return;
             }
-            if (this.showLtiTools) {
-                this.closeLtiTools();
-                event.preventDefault();
-                event.stopPropagation();
-                return;
-            }
-            if (this.ltiObject) {
-                this.ltiObject = null;
-                event.preventDefault();
-                event.stopPropagation();
-                return;
-            }
         }
     }
     public constructor(
         private nodeService: RestNodeService,
         private usageService: RestUsageService,
-        private toolService: RestToolService,
         private temporaryStorage: TemporaryStorageService,
         private collectionService: RestCollectionService,
         private feedbackService: FeedbackV1Service,
@@ -276,10 +248,6 @@ export class WorkspaceManagementDialogsComponent {
         private router: Router,
         private dialogs: DialogsService,
     ) {}
-    closeLtiToolConfig() {
-        this.ltiToolConfig = null;
-        this.ltiToolRefresh = new Boolean();
-    }
     async openShareDialog(nodes: Node[]): Promise<void> {
         const dialogRef = await this.dialogs.openShareDialog({
             nodes,
@@ -420,9 +388,6 @@ export class WorkspaceManagementDialogsComponent {
                 this.toast.closeModalDialog();
             });
     }
-    openLtiConfig(event: Node) {
-        this.ltiToolConfig = event;
-    }
     public closeUploadSelect() {
         this.showUploadSelect = false;
         this.showUploadSelectChange.emit(false);
@@ -430,10 +395,6 @@ export class WorkspaceManagementDialogsComponent {
     public cancelUploadSelect() {
         this.closeUploadSelect();
         this.onUploadSelectCanceled.emit(false);
-    }
-    closeLtiTools() {
-        this.showLtiTools = false;
-        this.showLtiToolsChange.emit(false);
     }
     async openLicenseDialog(nodes: Node[]): Promise<void> {
         const dialogRef = await this.dialogs.openLicenseDialog({ kind: 'nodes', nodes });
@@ -478,7 +439,6 @@ export class WorkspaceManagementDialogsComponent {
             this.deleteNodes(originalNodes);
             refresh = true;
         }
-        this.createMetadata = null;
         this.onCloseMetadata.emit(updatedNodes);
         if (this.reopenSimpleEdit) {
             this.reopenSimpleEdit = false;
@@ -494,57 +454,9 @@ export class WorkspaceManagementDialogsComponent {
         }
         if (refresh) {
             this.onRefresh.emit(updatedNodes);
-            if (
-                updatedNodes?.length === 1 &&
-                updatedNodes[0].aspects.indexOf(RestConstants.CCM_ASPECT_TOOL_DEFINITION) !== -1
-            ) {
-                this.currentLtiTool = updatedNodes[0];
-            } else {
-                this.ltiToolRefresh = new Boolean();
-            }
         }
     }
 
-    public editLti(event: Node) {
-        //this.closeLtiTools();
-        void this.openMdsEditor([event]);
-    }
-    public createLti(event: any) {
-        //this.closeLtiTools();
-        this.createMetadata = event.type;
-        this.metadataParent = event.node;
-    }
-    public createLtiObject(event: Node) {
-        this.closeLtiTools();
-        this.ltiObject = event;
-    }
-    public createLtiNodeObject(event: any) {
-        let win = window.open('', '_blank');
-        let properties = RestHelper.createNameProperty(event.name);
-        properties[RestConstants.CCM_PROP_TOOL_INSTANCE_REF] = [
-            RestHelper.createSpacesStoreRef(this.ltiObject),
-        ];
-        this.nodeService
-            .createNode(
-                event.parent.ref.id,
-                RestConstants.CCM_TYPE_IO,
-                [RestConstants.CCM_ASPECT_TOOL_OBJECT],
-                properties,
-                true,
-                RestConstants.COMMENT_MAIN_FILE_UPLOAD,
-            )
-            .subscribe(
-                (data: NodeWrapper) => {
-                    this.ltiObject = null;
-                    this.toolService.openLtiObject(data.node, win);
-                    this.onRefresh.emit();
-                },
-                (error: any) => {
-                    this.toast.error(error);
-                    win.close();
-                },
-            );
-    }
     public closeStream() {
         this.addNodesStream = null;
         this.addNodesStreamChange.emit(null);
@@ -653,10 +565,6 @@ export class WorkspaceManagementDialogsComponent {
         } else {
             console.error('Invalid configuration for upload.postDialog: ' + dialog);
         }
-    }
-
-    openNodeTemplateDialog(node: Node): void {
-        this.dialogs.openNodeTemplateDialog({ node });
     }
 
     closePinnedCollection() {

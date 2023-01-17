@@ -1,7 +1,4 @@
 import { WorkspaceManagementDialogsComponent } from '../management-dialogs/management-dialogs.component';
-import { WorkspaceLtiToolsComponent } from './lti-tools/lti-tools.component';
-import { WorkspaceLtiToolConfigsComponent } from './lti-tool-configs/lti-tool-configs.component';
-import { WorkspaceCreateLtiComponent } from './create-lti/create-lti.component';
 import { WorkspaceFileUploadComponent } from './file-upload/file-upload.component';
 import { WorkspaceFileUploadSelectComponent } from './file-upload-select/file-upload-select.component';
 import { AddStreamComponent } from './add-stream/add-stream.component';
@@ -16,10 +13,7 @@ import { SignupGroupComponent } from './signup-group/signup-group.component';
 import { AddMaterialFeedbackComponent } from './add-material-feedback/add-material-feedback.component';
 
 export const DECLARATIONS_MANAGEMENT_DIALOGS = [
-    WorkspaceLtiToolsComponent,
-    WorkspaceLtiToolConfigsComponent,
     WorkspaceManagementDialogsComponent,
-    WorkspaceCreateLtiComponent,
     WorkspaceFileUploadComponent,
     WorkspaceFileUploadSelectComponent,
     CommentsListComponent,

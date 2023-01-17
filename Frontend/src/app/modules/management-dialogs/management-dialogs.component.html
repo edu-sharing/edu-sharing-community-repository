@@ -110,43 +110,7 @@
     ></ng-container>
   </ng-template>
 </es-collection-chooser>
-<es-workspace-lti-tools
-  *ngIf="showLtiTools"
-  [refresh]="ltiToolRefresh"
-  [(currentTool)]="currentLtiTool"
-  (onClose)="closeLtiTools()"
-  (onEdit)="editLti($event)"
-  (onCreateLtiObject)="createLtiObject($event)"
-  (onCreate)="createLti($event)"
-  (onOpenConfig)="openLtiConfig($event)"
-></es-workspace-lti-tools>
 
-<es-workspace-lti-tool-configs
-  *ngIf="ltiToolConfig"
-  [tool]="ltiToolConfig"
-  (onClose)="closeLtiToolConfig()"
-  (onEdit)="editLti($event)"
-  (onCreate)="createLti($event)"
-></es-workspace-lti-tool-configs>
-<es-workspace-create-lti
-  *ngIf="ltiObject"
-  [tool]="ltiObject"
-  [parent]="parent"
-  (onCancel)="ltiObject = null"
-  (onCreate)="createLtiNodeObject($event)"
-></es-workspace-create-lti>
-<!-- <es-mds-editor-wrapper
-  *ngIf="_nodeMetadata || createMetadata"
-  [nodes]="_nodeMetadata"
-  [create]="createMetadata"
-  [parentNode]="metadataParent"
-  [bulkBehaviour]="_nodeFromUpload ? BulkBehaviour.Replace : BulkBehaviour.Default"
-  (onCancel)="closeEditor(false)"
-  (onDone)="closeEditor(true, $any($event))"
-  (openLicense)="openLicenseDialog(_nodeMetadata); editorPending = true"
-  (openTemplate)="openNodeTemplateDialog(_nodeMetadata[0])"
-  (openContributor)="openContributorsDialog(_nodeMetadata[0]); editorPending = true"
-></es-mds-editor-wrapper> -->
 <es-workspace-file-upload
   *ngIf="filesToUpload"
   [current]="parent"
