@@ -1047,7 +1047,7 @@ export class OptionsHelperService implements OnDestroy {
 
         const editNode = new OptionItem('OPTIONS.EDIT', 'edit', async (object) => {
             const nodes = await this.getObjectsAsync(object, true);
-            const dialogRef = await this.dialogs.openMdsEditorDialog({ nodes });
+            const dialogRef = await this.dialogs.openMdsEditorDialogForNodes({ nodes });
             dialogRef.afterClosed().subscribe((result) => {
                 if (result) {
                     this.onNodesChanged(result);

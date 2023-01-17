@@ -424,7 +424,7 @@ export class WorkspaceManagementDialogsComponent {
     }
 
     async openMdsEditor(nodes: Node[]): Promise<void> {
-        const dialogRef = await this.dialogs.openMdsEditorDialog({
+        const dialogRef = await this.dialogs.openMdsEditorDialogForNodes({
             nodes,
             bulkBehavior: this._nodeFromUpload ? BulkBehavior.Replace : BulkBehavior.Default,
         });

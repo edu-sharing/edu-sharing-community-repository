@@ -37,8 +37,10 @@ import {
     LicenseDialogResult,
 } from './dialog-modules/license-dialog/license-dialog-data';
 import {
-    MdsEditorDialogData,
-    MdsEditorDialogResult,
+    MdsEditorDialogDataNodes,
+    MdsEditorDialogDataValues,
+    MdsEditorDialogResultNodes,
+    MdsEditorDialogResultValues,
 } from './dialog-modules/mds-editor-dialog/mds-editor-dialog-data';
 import { NodeEmbedDialogData } from './dialog-modules/node-embed-dialog/node-embed-dialog.component';
 import { NodeInfoDialogData } from './dialog-modules/node-info-dialog/node-info-dialog.component';
@@ -379,16 +381,32 @@ export class DialogsService {
         });
     }
 
-    async openMdsEditorDialog(
-        data: MdsEditorDialogData,
-    ): Promise<CardDialogRef<MdsEditorDialogData, MdsEditorDialogResult>> {
+    async openMdsEditorDialogForNodes(
+        data: MdsEditorDialogDataNodes,
+    ): Promise<CardDialogRef<MdsEditorDialogDataNodes, MdsEditorDialogResultNodes>> {
         const { MdsEditorDialogComponent } = await import(
             './dialog-modules/mds-editor-dialog/mds-editor-dialog.module'
         );
-        data = { ...new MdsEditorDialogData(), ...data };
+        data = { ...new MdsEditorDialogDataNodes(), ...data };
         return this.cardDialog.open(MdsEditorDialogComponent, {
             title: 'MDS.TITLE',
             ...(await configForNodes(data.nodes, this.translate).toPromise()),
+            minWidth: 600,
+            minHeight: 700,
+            contentPadding: 0,
+            data,
+        });
+    }
+
+    async openMdsEditorDialogForValues(
+        data: MdsEditorDialogDataValues,
+    ): Promise<CardDialogRef<MdsEditorDialogDataValues, MdsEditorDialogResultValues>> {
+        const { MdsEditorDialogComponent } = await import(
+            './dialog-modules/mds-editor-dialog/mds-editor-dialog.module'
+        );
+        data = { ...new MdsEditorDialogDataValues(), ...data };
+        return this.cardDialog.open(MdsEditorDialogComponent, {
+            title: 'MDS.TITLE',
             minWidth: 600,
             minHeight: 700,
             contentPadding: 0,

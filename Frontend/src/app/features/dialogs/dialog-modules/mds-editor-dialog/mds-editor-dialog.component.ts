@@ -1,16 +1,22 @@
 import { AfterViewInit, Component, Inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
-import { DialogButton, Node } from '../../../../core-module/core.module';
+import { DialogButton } from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
 import { JumpMark } from '../../../../services/jump-marks.service';
 import { FillTypeStatus } from '../../../mds/mds-editor/input-fill-progress/input-fill-progress.component';
 import { MdsEditorCardComponent } from '../../../mds/mds-editor/mds-editor-card/mds-editor-card.component';
 import { MdsEditorCoreComponent } from '../../../mds/mds-editor/mds-editor-core/mds-editor-core.component';
 import { MdsEditorInstanceService } from '../../../mds/mds-editor/mds-editor-instance.service';
+import { EditorType } from '../../../mds/types/types';
 import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
-import { MdsEditorDialogData, MdsEditorDialogResult } from './mds-editor-dialog-data';
+import {
+    hasNodes,
+    hasValues,
+    MdsEditorDialogData,
+    MdsEditorDialogResult,
+} from './mds-editor-dialog-data';
 
 @Component({
     selector: 'es-mds-editor-dialog',
@@ -59,10 +65,27 @@ export class MdsEditorDialogComponent implements OnInit, AfterViewInit {
     }
 
     private async initMdsEditor(): Promise<void> {
-        await this.mdsEditorInstance.initWithNodes(this.data.nodes, {
-            bulkBehavior: this.data.bulkBehavior,
-            editorMode: 'nodes',
-        });
+        let editorType: EditorType;
+        if (hasNodes(this.data)) {
+            editorType = await this.mdsEditorInstance.initWithNodes(this.data.nodes, {
+                groupId: this.data.groupId,
+                bulkBehavior: this.data.bulkBehavior,
+                editorMode: 'nodes',
+            });
+        } else if (hasValues(this.data)) {
+            editorType = await this.mdsEditorInstance.initWithoutNodes(
+                this.data.groupId,
+                this.data.setId,
+                this.data.repository,
+                this.data.editorMode,
+                this.data.values,
+            );
+        }
+        if (editorType !== 'angular') {
+            throw new Error(
+                'Called mds-editor-dialog with legacy mds. Supports only "angular" rendering.',
+            );
+        }
     }
 
     private initButtons(): void {
@@ -119,9 +142,9 @@ export class MdsEditorDialogComponent implements OnInit, AfterViewInit {
     private async save(): Promise<void> {
         if (this.mdsEditorInstance.getCanSave()) {
             this.dialogRef.patchState({ isLoading: true });
-            const updatedNodes = (await this.mdsEditorInstance.save()) as Node[];
+            const updatedNodesOrValues = await this.mdsEditorInstance.save();
             this.toast.toast('WORKSPACE.EDITOR.UPDATED');
-            this.dialogRef.close(updatedNodes);
+            this.dialogRef.close(updatedNodesOrValues);
         } else {
             // No changes, behave like close.
             if (this.mdsEditorInstance.getIsValid()) {

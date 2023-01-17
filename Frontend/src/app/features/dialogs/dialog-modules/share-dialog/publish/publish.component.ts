@@ -166,7 +166,7 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
         });
     }
     async openMetadata() {
-        const dialogRef = await this.dialogs.openMdsEditorDialog({
+        const dialogRef = await this.dialogs.openMdsEditorDialogForNodes({
             nodes: [this.node],
             immediatelyShowMissingRequiredWidgets: true,
         });
