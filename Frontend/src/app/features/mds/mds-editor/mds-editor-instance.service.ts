@@ -797,6 +797,8 @@ export class MdsEditorInstanceService implements OnDestroy {
      *
      * @throws UserPresentableError
      */
+    // TODO: provide high-level functions (also `initWithValues`) that resolve when the mds is
+    // inflated.
     async initWithNodes(
         nodes: Node[],
         {

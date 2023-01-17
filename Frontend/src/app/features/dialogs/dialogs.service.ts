@@ -55,6 +55,10 @@ import {
 } from './dialog-modules/node-template-dialog/node-template-dialog-data';
 import { QrDialogData } from './dialog-modules/qr-dialog/qr-dialog.component';
 import {
+    SendFeedbackDialogData,
+    SendFeedbackDialogResult,
+} from './dialog-modules/send-feedback-dialog/send-feedback-dialog-data';
+import {
     ShareDialogData,
     ShareDialogResult,
 } from './dialog-modules/share-dialog/share-dialog-data';
@@ -411,6 +415,21 @@ export class DialogsService {
             minHeight: 700,
             contentPadding: 0,
             data,
+        });
+    }
+
+    async openSendFeedbackDialog(
+        data: SendFeedbackDialogData,
+    ): Promise<CardDialogRef<SendFeedbackDialogData, SendFeedbackDialogResult>> {
+        const { SendFeedbackDialogComponent } = await import(
+            './dialog-modules/send-feedback-dialog/send-feedback-dialog.module'
+        );
+        return this.cardDialog.open(SendFeedbackDialogComponent, {
+            title: 'FEEDBACK.TITLE',
+            ...configForNode(data.node),
+            minWidth: 500,
+            data,
+            closable: Closable.Standard,
         });
     }
 }

@@ -1326,7 +1326,7 @@ export class OptionsHelperService implements OnDestroy {
         const feedbackMaterial = new OptionItem(
             'OPTIONS.MATERIAL_FEEDBACK',
             'chat_bubble',
-            (object) => (management.materialWriteFeedback = this.getObjects(object)[0]),
+            (object) => this.dialogs.openSendFeedbackDialog({ node: this.getObjects(object)[0] }),
         );
         feedbackMaterial.constrains = [
             Constrain.HomeRepository,

@@ -10,7 +10,6 @@ import { SimpleEditMetadataComponent } from './simple-edit-dialog/simple-edit-me
 import { SimpleEditInviteComponent } from './simple-edit-dialog/simple-edit-invite/simple-edit-invite.component';
 import { SimpleEditLicenseComponent } from './simple-edit-dialog/simple-edit-license/simple-edit-license.component';
 import { SignupGroupComponent } from './signup-group/signup-group.component';
-import { AddMaterialFeedbackComponent } from './add-material-feedback/add-material-feedback.component';
 
 export const DECLARATIONS_MANAGEMENT_DIALOGS = [
     WorkspaceManagementDialogsComponent,
@@ -20,7 +19,6 @@ export const DECLARATIONS_MANAGEMENT_DIALOGS = [
     AddStreamComponent,
     NodeVariantComponent,
     ViewMaterialFeedbackComponent,
-    AddMaterialFeedbackComponent,
     SimpleEditDialogComponent,
     SimpleEditMetadataComponent,
     SimpleEditLicenseComponent,

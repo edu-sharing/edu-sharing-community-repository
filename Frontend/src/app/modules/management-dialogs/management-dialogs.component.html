@@ -20,11 +20,6 @@
   (onEditMetadata)="openMdsEditor([$event])"
   (onClose)="closeSidebar()"
 ></es-workspace-metadata>
-<es-add-material-feedback
-  *ngIf="materialWriteFeedback"
-  [node]="materialWriteFeedback"
-  (onClose)="closeCollectionWriteFeedback()"
-></es-add-material-feedback>
 <es-simple-edit-dialog
   *ngIf="_nodeSimpleEdit"
   [nodes]="_nodeSimpleEdit"

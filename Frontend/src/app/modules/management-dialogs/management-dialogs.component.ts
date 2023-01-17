@@ -154,8 +154,6 @@ export class WorkspaceManagementDialogsComponent {
         this._nodeFromUpload = false;
     }
     @Input() nodeSimpleEditChange = new EventEmitter<Node[]>();
-    @Input() materialWriteFeedback: Node;
-    @Output() materialWriteFeedbackChange = new EventEmitter<Node>();
     @Input() materialViewFeedback: Node;
     @Output() materialViewFeedbackChange = new EventEmitter<Node>();
     @Input() nodeSidebar: Node;
@@ -572,35 +570,6 @@ export class WorkspaceManagementDialogsComponent {
         this.addPinnedCollectionChange.emit(null);
     }
 
-    closeCollectionWriteFeedback() {
-        this.materialWriteFeedback = null;
-        this.materialWriteFeedbackChange.emit(null);
-    }
-
-    addMaterialFeedback(feedback: { [key in string]: string[] }) {
-        if (!feedback) {
-            return;
-        }
-        delete feedback[RestConstants.CM_NAME];
-        this.toast.showProgressDialog();
-        this.feedbackService
-            .addFeedback({
-                repository: RestConstants.HOME_REPOSITORY,
-                node: this.materialWriteFeedback.ref.id,
-                body: feedback,
-            })
-            .subscribe(
-                () => {
-                    this.toast.closeModalDialog();
-                    this.closeCollectionWriteFeedback();
-                    this.toast.toast('FEEDBACK.TOAST');
-                },
-                (error) => {
-                    this.toast.closeModalDialog();
-                    this.toast.error(error);
-                },
-            );
-    }
     restoreVersion(restore: { version: Version; node: Node }) {
         this.toast.showConfigurableDialog({
             title: 'WORKSPACE.METADATA.RESTORE_TITLE',

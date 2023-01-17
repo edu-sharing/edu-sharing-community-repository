@@ -45,6 +45,8 @@ export class MdsEditorDialogComponent implements OnInit, AfterViewInit {
         await this.initMdsEditor();
         this.initButtons();
         this.registerProgressIndicator();
+        // `SendFeedbackDialog` works similar to this component. Please update accordingly when
+        // making changes here.
         this.mdsEditorInstance.mdsInflated.pipe(first()).subscribe(() => {
             this.dialogRef.patchState({ isLoading: false });
             if (this.data.immediatelyShowMissingRequiredWidgets) {
