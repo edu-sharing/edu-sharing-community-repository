@@ -1002,14 +1002,14 @@ public class NodeDao {
 	private void fillNodeReference(CollectionReference reference) throws DAOException {
 		final String originalId = getReferenceOriginalId();
 		reference.setOriginalId(originalId);
-		// not supported and used by remote repositories
-		if(isFromRemoteRepository()){
-			return;
-		}
 		try {
 			reference.setAccessOriginal(NodeDao.getNode(repoDao, originalId).asNode(false).getAccess());
 		} catch (Throwable t) {
 			// user may has no access to the original or it is deleted, this is okay
+		}
+		// not supported and used by remote repositories
+		if(isFromRemoteRepository()){
+			return;
 		}
 		AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
 
