@@ -4,12 +4,12 @@ import { filter, first, map } from 'rxjs/operators';
 import { DialogButton } from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
 import { JumpMark } from '../../../../services/jump-marks.service';
-import { FillTypeStatus } from '../../../mds/mds-editor/input-fill-progress/input-fill-progress.component';
-import { MdsEditorCardComponent } from '../../../mds/mds-editor/mds-editor-card/mds-editor-card.component';
+import { FillTypeStatus } from './input-fill-progress/input-fill-progress.component';
 import { MdsEditorCoreComponent } from '../../../mds/mds-editor/mds-editor-core/mds-editor-core.component';
 import { MdsEditorInstanceService } from '../../../mds/mds-editor/mds-editor-instance.service';
 import { EditorType } from '../../../mds/types/types';
 import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
+import { JUMP_MARK_POSTFIX } from '../../card-dialog/card-dialog-container/jump-marks-handler.directive';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import {
     hasNodes,
@@ -121,7 +121,7 @@ export class MdsEditorDialogComponent implements OnInit, AfterViewInit {
                         .map(
                             (v) =>
                                 new JumpMark(
-                                    v.view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX,
+                                    v.view.id + JUMP_MARK_POSTFIX,
                                     v.view.caption,
                                     v.view.icon,
                                 ),

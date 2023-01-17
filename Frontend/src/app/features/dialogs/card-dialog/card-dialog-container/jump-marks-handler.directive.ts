@@ -12,6 +12,8 @@ import { takeUntil } from 'rxjs/operators';
 import { UIService } from '../../../../core-module/core.module';
 import { JumpMark, JumpMarksService } from '../../../../services/jump-marks.service';
 
+export const JUMP_MARK_POSTFIX = '_header';
+
 /**
  * Container that contains jump-mark anchors.
  */

@@ -24,7 +24,6 @@ import {
     Values,
 } from '../../types/types';
 import { valuesDictIsEquivalent } from './values-dict-is-equivalent';
-import { MdsEditorCardComponent } from '../mds-editor-card/mds-editor-card.component';
 
 /**
  * Wrapper component to select between the legacy `<es-mds>` component and the Angular-native
@@ -45,7 +44,6 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
 
     // Properties compatible to legacy MdsComponent.
     @ViewChild(MdsComponent) mdsRef: MdsComponent;
-    @ViewChild(MdsEditorCardComponent) mdsCard: MdsEditorCardComponent;
 
     @Input() addWidget = false;
     @Input() allowReplacing = true;
@@ -109,6 +107,13 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
             this.init();
         }
         this.mdsEditorInstance.values.subscribe((values) => (this.values = values));
+
+        if (!this.embedded) {
+            throw new Error(
+                'Non-embedded use of mds-editor-wrapper has been deprecated in favor of mds-editor-dialog. ' +
+                    'Please migrate.',
+            );
+        }
     }
 
     ngOnDestroy(): void {

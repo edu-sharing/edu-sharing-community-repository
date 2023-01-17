@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { RequiredMode } from '../../types/types';
+import { RequiredMode } from '../../../../mds/types/types';
 
 @Component({
     selector: 'es-input-fill-progress',

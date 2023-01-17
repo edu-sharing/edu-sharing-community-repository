@@ -25,7 +25,7 @@ import { Node } from '../../../../core-module/core.module';
 import { UIAnimation } from '../../../../core-module/ui/ui-animation';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { MdsWidgetComponent } from '../../mds-viewer/widget/mds-widget.component';
-import { MdsEditorCardComponent } from '../mds-editor-card/mds-editor-card.component';
+import { JUMP_MARK_POSTFIX } from '../../../dialogs/card-dialog/card-dialog-container/jump-marks-handler.directive';
 import { MdsEditorCoreComponent } from '../mds-editor-core/mds-editor-core.component';
 import { GeneralWidget, MdsEditorInstanceService, Widget } from '../mds-editor-instance.service';
 import {
@@ -190,10 +190,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         this.jumpMarks?.beforeScrollToJumpMark
             .pipe(
                 takeUntil(this.destroyed),
-                filter(
-                    (jumpMark) =>
-                        jumpMark.id === this.view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX,
-                ),
+                filter((jumpMark) => jumpMark.id === this.view.id + JUMP_MARK_POSTFIX),
             )
             .subscribe((jumpMark) => {
                 if (!this.isExpanded$.value) {
@@ -448,9 +445,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
         this.isExpanded$.next(!this.isExpanded$.value);
         if (this.isExpanded$.value) {
             setTimeout(() =>
-                this.jumpMarks?.triggerScrollToJumpMark.next(
-                    this.view.id + MdsEditorCardComponent.JUMPMARK_POSTFIX,
-                ),
+                this.jumpMarks?.triggerScrollToJumpMark.next(this.view.id + JUMP_MARK_POSTFIX),
             );
         }
     }
