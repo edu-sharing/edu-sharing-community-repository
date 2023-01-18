@@ -5,6 +5,7 @@ import {
     FocusMonitor,
     InteractivityChecker,
 } from '@angular/cdk/a11y';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { _getFocusedElementPierceShadowDom } from '@angular/cdk/platform';
 import { CdkPortalOutlet, ComponentPortal } from '@angular/cdk/portal';
 import { DOCUMENT } from '@angular/common';
@@ -23,7 +24,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
 import { DialogButton } from '../../../../core-module/core.module';
 import { UIAnimation } from '../../../../core-module/ui/ui-animation';
 import { JumpMark, JumpMarksService } from '../../../../services/jump-marks.service';
@@ -109,6 +110,10 @@ type CardState = 'void' | 'enter' | 'exit';
                 ),
             ]),
         ]),
+        trigger('slideInFromRight', [
+            state('void', style({ transform: 'translateX(100%)', width: 0 })),
+            transition(':enter, :leave', [animate(UIAnimation.ANIMATION_TIME_SLOW + 'ms ease')]),
+        ]),
     ],
 })
 export class CardDialogContainerComponent implements OnInit, OnDestroy {
@@ -139,6 +144,9 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
         height: '0px',
         width: '0px',
     };
+    readonly hideJumpMarks = this.breakpointObserver
+        .observe(['(max-width: 800px)'])
+        .pipe(map((result) => result.matches));
 
     /** Emits when an animation state changes. */
     readonly animationStateChanged = new EventEmitter<DialogAnimationEvent>();
@@ -160,6 +168,7 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
         private focusTrapFactory: ConfigurableFocusTrapFactory,
         private _interactivityChecker: InteractivityChecker,
         private _ngZone: NgZone,
+        private breakpointObserver: BreakpointObserver,
         private focusMonitor?: FocusMonitor,
     ) {}
 

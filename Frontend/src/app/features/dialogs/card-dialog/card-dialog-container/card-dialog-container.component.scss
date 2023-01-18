@@ -18,15 +18,11 @@
 }
 
 .jump-marks {
-    align-self: flex-start;
-    flex-shrink: 0;
+    position: relative;
     // Don't let the card's shadow cover the jump marks.
     z-index: 0;
     margin-right: 5px;
     width: 200px;
-    @media only screen and (max-width: 800px) {
-        display: none;
-    }
 }
 
 .card-dialog {

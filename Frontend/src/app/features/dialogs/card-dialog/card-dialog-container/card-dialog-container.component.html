@@ -1,10 +1,11 @@
-<es-card-jump-marks
-  *ngIf="config.jumpMarks?.length > 1"
-  class="jump-marks mat-elevation-z24"
-  [jumpMarks]="config.jumpMarks"
-  [activeJumpMark]="activeJumpMark"
-  (scrollToJumpMark)="jumpMarksHandler.scrollToJumpMark($event)"
-></es-card-jump-marks>
+<div *ngIf="config.jumpMarks?.length > 1 && (hideJumpMarks | async) === false" @slideInFromRight>
+  <es-card-jump-marks
+    class="jump-marks mat-elevation-z24"
+    [jumpMarks]="config.jumpMarks"
+    [activeJumpMark]="activeJumpMark"
+    (scrollToJumpMark)="jumpMarksHandler.scrollToJumpMark($event)"
+  ></es-card-jump-marks>
+</div>
 
 <div class="card-dialog mat-elevation-z24" [class.card-dialog-mobile]="isMobile">
   <es-card-header
