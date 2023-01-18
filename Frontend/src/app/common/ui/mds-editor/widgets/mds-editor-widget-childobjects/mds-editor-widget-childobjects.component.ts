@@ -230,6 +230,7 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
                             RestConstants.CCM_ASSOC_CHILDIO,
                         )
                         .subscribe(() => {
+                            observer.complete();
                         });
                 } else {
                     this.nodeApi
