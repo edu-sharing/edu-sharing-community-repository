@@ -258,6 +258,15 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 'OPTIONS.' + (this.isRootLevel ? 'NEW_COLLECTION' : 'NEW_SUB_COLLECTION');
             if (this.isRootLevel) {
                 // display root collections with tabs
+
+                // Use hardcoded sorting for root collection.
+                this.sortCollections.active = RestConstants.CM_MODIFIED_DATE;
+                this.sortCollections.direction = 'desc';
+                // To respect sort configuration of the mds, we would need to wait for it here.
+                //
+                // const sort = metadataSet.sorts.find(sort => sort.id === 'collections');
+                // this.sortCollections.active = sort?.default?.sortBy ?? RestConstants.CM_MODIFIED_DATE;
+                // this.sortCollections.direction = sort?.default?.sortAscending ? 'asc' : 'desc';
                 this.refreshContent();
             } else {
                 // load metadata of collection
