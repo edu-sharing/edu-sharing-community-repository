@@ -612,10 +612,11 @@ public class NodeDao {
 			slice.add(children.get(i));
         }
 		List<Node> nodes = convertToRest(repoDao, slice, propFilter, transform);
+		int removedNodes = slice.size() - nodes.size();
 		Pagination pagination=new Pagination();
         pagination.setFrom(skipCount);
         pagination.setCount(nodes.size());
-        pagination.setTotal(children.size());
+        pagination.setTotal(children.size() - removedNodes);
         result.setPagination(pagination);
         result.setNodes(nodes);
         return result;
@@ -655,6 +656,9 @@ public class NodeDao {
 							return nodeDao.asNode();
 						} catch (DAOMissingException daoException) {
 							logger.warn("Missing node " + nodeRef.getId() + " tried to fetch, skipping fetch", daoException);
+							return null;
+						} catch (DAOToolPermissionException daoException) {
+							logger.info("Toolpermission exception for node " + nodeRef.getId() + " tried to fetch, skipping fetch", daoException);
 							return null;
 						} finally {
 							Context.release();
@@ -1032,14 +1036,14 @@ public class NodeDao {
 	private void fillNodeReference(CollectionReference reference) throws DAOException {
 		final String originalId = getReferenceOriginalId();
 		reference.setOriginalId(originalId);
-		// not supported and used by remote repositories
-		if(isFromRemoteRepository()){
-			return;
-		}
 		try {
 			reference.setAccessOriginal(NodeDao.getNode(repoDao, originalId).asNode(false).getAccess());
 		} catch (Throwable t) {
 			// user may has no access to the original or it is deleted, this is okay
+		}
+		// not supported and used by remote repositories
+		if(isFromRemoteRepository()){
+			return;
 		}
 		AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
 
