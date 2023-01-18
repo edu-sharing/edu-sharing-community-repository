@@ -67,7 +67,6 @@
     flex-grow: 1;
     position: relative;
     & ::ng-deep > * {
-        min-height: 100%;
         flex-grow: 1;
     }
 }
