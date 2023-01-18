@@ -11,7 +11,8 @@
         overflow: hidden;
     }
 }
-h3 {
+
+.heading {
     display: flex;
     align-items: center;
     background-color: $workspaceMetadataBackground;
@@ -20,21 +21,28 @@ h3 {
     height: 40px;
     padding: 5px 10px;
     font-size: 110%;
-    > span {
+    .heading-caption {
         flex-grow: 1;
+        text-align: start;
     }
-    > i {
-        top: 0;
+    .header-icon {
         color: #666;
         margin-right: 10px;
     }
-    > button {
-        border-radius: 50%;
+    .toggle-icon {
         color: #666;
-        height: 40px;
         width: 40px;
-        min-width: 40px;
+        transition: transform 0.2s ease;
+        &.toggle-icon-expanded {
+            transform: rotate(180deg);
+        }
     }
+}
+
+.toggle-button {
+    border: none;
+    width: 100%;
+    padding: 0;
 }
 
 .content {
@@ -48,5 +56,7 @@ h3 {
         margin: 0;
         height: 0;
         opacity: 0;
+        // padding-top: 0;
+        // padding-bottom: 5px;
     }
 }

@@ -38,11 +38,13 @@ es-input-fill-progress {
             );
         }
     }
-    .heading {
-        margin: 0;
+    .heading-container {
         position: sticky;
         top: 0;
         z-index: 10;
+    }
+    .heading {
+        margin: 0;
         border-bottom: 1px solid #eee;
         font-size: 130%;
         font-weight: normal;

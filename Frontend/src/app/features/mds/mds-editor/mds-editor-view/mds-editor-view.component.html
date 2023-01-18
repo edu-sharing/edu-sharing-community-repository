@@ -1,16 +1,16 @@
 <div [class.display-none]="isInHiddenState()">
-  <h3 *ngIf="view.caption" id="{{ view.id }}_header" class="heading">
-    <i [esIcon]="view.icon"></i>
-    <span>{{ view.caption }}</span>
-    <button
-      *ngIf="view.isExtended"
-      mat-button
-      (click)="toggleShow()"
-      [attr.aria-label]="'MDS.OPEN_CLOSE_EXTENDED' | translate"
-    >
-      <i [aria]="false" [esIcon]="'keyboard_arrow_' + (isExpanded ? 'up' : 'down')"></i>
-    </button>
-  </h3>
+  <button
+    id="{{ view.id }}_header"
+    *ngIf="view.isExtended"
+    (click)="toggleShow()"
+    class="heading-container toggle-button"
+    [attr.aria-expanded]="isExpanded"
+  >
+    <ng-container *ngTemplateOutlet="heading"></ng-container>
+  </button>
+  <div class="heading-container" id="{{ view.id }}_header" *ngIf="!view.isExtended">
+    <ng-container *ngTemplateOutlet="heading"></ng-container>
+  </div>
   <div
     class="content"
     #container
@@ -19,3 +19,17 @@
     [@openOverlay]="isExpanded"
   ></div>
 </div>
+
+<ng-template #heading>
+  <h3 *ngIf="view.caption" class="heading">
+    <i [esIcon]="view.icon" class="header-icon"></i>
+    <span class="heading-caption">{{ view.caption }}</span>
+    <i
+      class="toggle-icon"
+      [class.toggle-icon-expanded]="isExpanded"
+      *ngIf="view.isExtended"
+      [aria]="false"
+      [esIcon]="'keyboard_arrow_down'"
+    ></i>
+  </h3>
+</ng-template>

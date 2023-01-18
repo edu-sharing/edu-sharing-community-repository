@@ -718,7 +718,6 @@
     "FILTER_FOR": "Nach \"{{value}}\" filtern ({{count}} passende(s) Element(e))",
     "FILTER_TREE": "Filtern...",
     "FILTER_FACET": "Filtern...",
-    "OPEN_CLOSE_EXTENDED": "Ansicht auf-/zuklappen",
     "SUGGEST_VALUE_LABEL": "Neuen Wert vorschlagen",
     "SUGGEST_VALUE_SEND": "Vorschlagen",
     "SUGGEST_VALUE_SENT": "Der Vorschlag wurde eingereicht und wird durch die Redaktion geprüft. Der Vorschlag taucht erst auf, wenn er durch die Redaktion aktiviert wurde. Vielen Dank!",
