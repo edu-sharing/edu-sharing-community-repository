@@ -98,6 +98,17 @@ type CardState = 'void' | 'enter' | 'exit';
                 ),
             ]),
         ]),
+        trigger('expandContent', [
+            state('locked', style({ height: '{{height}}', width: '{{width}}' }), {
+                params: { height: '0px', width: '0px' },
+            }),
+            transition('* => expand', [
+                animate(
+                    UIAnimation.ANIMATION_TIME_SLOW + 'ms ease',
+                    style({ height: '*', width: '*' }),
+                ),
+            ]),
+        ]),
     ],
 })
 export class CardDialogContainerComponent implements OnInit, OnDestroy {
@@ -114,6 +125,7 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
     @HostBinding('@mobileAnimation') mobileAnimation: CardState | null = null;
 
     @ViewChild(CdkPortalOutlet, { static: true }) portalOutlet: CdkPortalOutlet;
+    @ViewChild('cardContent', { static: true }) cardContent: ElementRef<HTMLElement>;
 
     config: CardDialogConfig<unknown> = {};
     buttons: DialogButton[];
@@ -122,6 +134,11 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
     autoSavingState: AutoSavingState = null;
     isMobile: boolean;
     activeJumpMark: JumpMark | null = null;
+    expandAnimation = {
+        state: 'initial' as 'initial' | 'locked' | 'expand',
+        height: '0px',
+        width: '0px',
+    };
 
     /** Emits when an animation state changes. */
     readonly animationStateChanged = new EventEmitter<DialogAnimationEvent>();
@@ -167,6 +184,7 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
             .subscribe((isLoading) => {
                 this.updateButtons();
                 this.isLoading = isLoading;
+                this.triggerExpandAnimation();
             });
         this.dialogRef
             .observeState('autoSavingState')
@@ -189,6 +207,21 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
             }));
         } else {
             this.buttons = this.config.buttons;
+        }
+    }
+
+    private triggerExpandAnimation() {
+        const element = this.cardContent.nativeElement;
+        if (this.expandAnimation.state === 'initial' && this.isLoading) {
+            // Wait for the container to assume its initial dimensions, then lock these until
+            // loading stops.
+            setTimeout(() => {
+                this.expandAnimation.state = 'locked';
+                this.expandAnimation.height = element.scrollHeight + 'px';
+                this.expandAnimation.width = element.scrollWidth + 'px';
+            });
+        } else if (this.expandAnimation.state === 'locked' && !this.isLoading) {
+            this.expandAnimation.state = 'expand';
         }
     }
 

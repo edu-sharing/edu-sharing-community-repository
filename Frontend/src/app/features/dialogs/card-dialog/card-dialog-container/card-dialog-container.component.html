@@ -22,6 +22,7 @@
   ></es-card-header>
 
   <div
+    #cardContent
     class="card-content"
     [style.padding.px]="config.contentPadding"
     [attr.aria-hidden]="isLoading"
@@ -29,6 +30,13 @@
     (activeJumpMarkChanged)="activeJumpMark = $event"
     #jumpMarksHandler="esJumpMarksHandler"
     cdkScrollable
+    [@expandContent]="{
+      value: expandAnimation.state,
+      params: {
+        height: expandAnimation.height,
+        width: expandAnimation.width
+      }
+    }"
   >
     <ng-template cdkPortalOutlet></ng-template>
     <div *ngIf="isLoading" class="loading-overlay">

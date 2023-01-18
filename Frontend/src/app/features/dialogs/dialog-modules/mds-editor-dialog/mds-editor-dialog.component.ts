@@ -1,16 +1,16 @@
 import { AfterViewInit, Component, Inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import * as rxjs from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
+import { delay, filter, first, map } from 'rxjs/operators';
 import { DialogButton } from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
 import { JumpMark } from '../../../../services/jump-marks.service';
-import { FillTypeStatus } from './input-fill-progress/input-fill-progress.component';
 import { MdsEditorCoreComponent } from '../../../mds/mds-editor/mds-editor-core/mds-editor-core.component';
 import { MdsEditorInstanceService } from '../../../mds/mds-editor/mds-editor-instance.service';
 import { EditorType } from '../../../mds/types/types';
 import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
 import { JUMP_MARK_POSTFIX } from '../../card-dialog/card-dialog-container/jump-marks-handler.directive';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
+import { FillTypeStatus } from './input-fill-progress/input-fill-progress.component';
 import {
     hasNodes,
     hasValues,
@@ -47,7 +47,7 @@ export class MdsEditorDialogComponent implements OnInit, AfterViewInit {
         this.registerProgressIndicator();
         // `SendFeedbackDialog` works similar to this component. Please update accordingly when
         // making changes here.
-        this.mdsEditorInstance.mdsInflated.pipe(first()).subscribe(() => {
+        this.mdsEditorInstance.mdsInflated.pipe(first(), delay(0)).subscribe(() => {
             this.dialogRef.patchState({ isLoading: false });
             if (this.data.immediatelyShowMissingRequiredWidgets) {
                 this.mdsEditorInstance.showMissingRequiredWidgets(false);

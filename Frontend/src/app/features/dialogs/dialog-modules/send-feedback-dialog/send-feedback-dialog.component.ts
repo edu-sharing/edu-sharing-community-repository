@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { first } from 'rxjs/operators';
+import { delay, first } from 'rxjs/operators';
 import { DialogButton, RestConstants } from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
 import { FeedbackV1Service } from '../../../../rest/ng/services';
@@ -37,7 +37,7 @@ export class SendFeedbackDialogComponent implements OnInit {
             'form',
             {},
         );
-        this.mdsEditorInstance.mdsInflated.pipe(first()).subscribe(() => {
+        this.mdsEditorInstance.mdsInflated.pipe(first(), delay(0)).subscribe(() => {
             this.dialogRef.patchState({ isLoading: false });
         });
     }
