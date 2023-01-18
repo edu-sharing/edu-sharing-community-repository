@@ -1,0 +1,5 @@
+<ng-container *ngFor="let license of licenseDetails; let first = first">
+  <!-- <div class="license-spacer" role="separator" *ngIf="!first"></div> -->
+  <h5 class="mat-heading-5">{{ license.component }} / {{ license.plugin }}</h5>
+  <div [innerHTML]="license.details" class="license-group"></div>
+</ng-container>

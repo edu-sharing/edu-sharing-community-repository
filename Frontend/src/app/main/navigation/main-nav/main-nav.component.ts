@@ -41,7 +41,6 @@ import {
 import { UIAnimation } from '../../../core-module/ui/ui-animation';
 import { OPEN_URL_MODE, UIConstants } from '../../../core-module/ui/ui-constants';
 import { OptionGroup, OptionItem } from '../../../core-ui-module/option-item';
-import { Toast } from '../../../core-ui-module/toast';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../../features/dialogs/card-dialog/card-dialog-ref';
@@ -90,8 +89,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     showEditProfile: boolean;
     showProfile: boolean;
     showUser = false;
-    licenseDialog: boolean;
-    licenseDetails: { component: string; plugin: string; details: string }[];
     mainMenuStyle: 'sidebar' | 'dropdown' = 'sidebar';
     currentUser: User;
     canOpen: boolean;
@@ -122,7 +119,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         private http: HttpClient,
         private router: Router,
         private route: ActivatedRoute,
-        private toast: Toast,
         private nodeHelper: NodeHelperService,
         private authentication: AuthenticationService,
         private user: UserService,
@@ -440,34 +436,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     showLicenses() {
-        this.licenseDialog = true;
-        this.connector.getLicenses().subscribe(
-            (licenses) => {
-                const mapping = (component: string, plugin: string, details: string) => {
-                    return {
-                        component,
-                        plugin: plugin.replace('.txt', ''),
-                        details: details,
-                    };
-                };
-                this.licenseDetails = Object.keys(licenses.repository).map((k) =>
-                    mapping('Repository', k, licenses.repository[k]),
-                );
-                const services = Object.keys(licenses.services).forEach(
-                    (k) =>
-                        (this.licenseDetails = this.licenseDetails.concat(
-                            Object.keys(licenses.services[k]).map((p) =>
-                                mapping(k, p, licenses.services[k][p]),
-                            ),
-                        )),
-                );
-            },
-            (error) => {
-                this.licenseDialog = false;
-                this.toast.error(error);
-                console.error(error);
-            },
-        );
+        void this.dialogs.openThirdPartyLicensesDialog();
     }
 
     showChat() {

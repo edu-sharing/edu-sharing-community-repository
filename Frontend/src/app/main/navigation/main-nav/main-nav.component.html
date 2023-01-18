@@ -5,27 +5,6 @@
   <div role="navigation" [attr.aria-label]="'NAV.MAIN' | translate">
     <es-user-profile *ngIf="showProfile" (onCancel)="showProfile = false"></es-user-profile>
 
-    <es-card
-      *ngIf="licenseDialog"
-      title="{{ 'LICENSE_INFORMATION' | translate }}"
-      icon="copyright"
-      width="xxlarge"
-      height="xxlarge"
-      [isCancelable]="true"
-      (onCancel)="licenseDialog = false"
-    >
-      <div class="card-content-padding card-licenses">
-        <es-spinner *ngIf="!licenseDetails"></es-spinner>
-        <ng-container *ngIf="licenseDetails">
-          <ng-container *ngFor="let license of licenseDetails; let first = first">
-            <!-- <div class="license-spacer" role="separator" *ngIf="!first"></div> -->
-            <h5 class="mat-heading-5">{{ license.component }} / {{ license.plugin }}</h5>
-            <div [innerHTML]="license.details" class="license-group"></div>
-          </ng-container>
-        </ng-container>
-      </div>
-    </es-card>
-
     <es-global-progress *ngIf="globalProgress"></es-global-progress>
     <es-tutorial
       [element]="tutorialElement"

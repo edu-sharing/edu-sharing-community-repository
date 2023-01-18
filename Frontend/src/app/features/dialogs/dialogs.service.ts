@@ -432,4 +432,16 @@ export class DialogsService {
             closable: Closable.Standard,
         });
     }
+
+    async openThirdPartyLicensesDialog(): Promise<CardDialogRef<void, void>> {
+        const { ThirdPartyLicensesDialogComponent } = await import(
+            './dialog-modules/third-party-licenses-dialog/third-party-licenses-dialog.module'
+        );
+        return this.cardDialog.open(ThirdPartyLicensesDialogComponent, {
+            title: 'LICENSE_INFORMATION',
+            avatar: { kind: 'icon', icon: 'copyright' },
+            minWidth: 800,
+            minHeight: 800,
+        });
+    }
 }
