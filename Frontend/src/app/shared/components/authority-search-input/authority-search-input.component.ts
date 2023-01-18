@@ -125,12 +125,18 @@ export class AuthoritySearchInputComponent {
 
     private getRecentSuggestions(): Observable<SuggestionGroup[]> {
         return this.iam.getRecentlyInvited().pipe(
-            map(({ authorities }) => [
-                {
-                    label: 'WORKSPACE.INVITE_RECENT_AUTHORITIES',
-                    values: this.convertData(authorities),
-                },
-            ]),
+            map(({ authorities }) => {
+                if (authorities.length > 0) {
+                    return [
+                        {
+                            label: 'WORKSPACE.INVITE_RECENT_AUTHORITIES',
+                            values: this.convertData(authorities),
+                        },
+                    ];
+                } else {
+                    return [];
+                }
+            }),
         );
     }
 
