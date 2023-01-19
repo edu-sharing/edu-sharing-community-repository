@@ -119,7 +119,7 @@
         ><i esIcon="filter_none"></i>
       </div>
     </div>
-    <div class="card-top-bar-checkbox">
+    <div class="card-top-bar-checkbox" *ngIf="entriesService.checkbox">
       <mat-checkbox
         [checked]="entriesService.selection.isSelected(node)"
         (change)="entriesService.onCheckboxChanged(node, $event.checked)"
