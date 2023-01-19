@@ -103,6 +103,16 @@
       ]
     },
     {
+      "transformerName": "EduSharingSerloIndexExecutor",
+      "supportedSourceAndTargetList": [
+        {"sourceMediaType": "application/json", "targetMediaType": "text/plain"}
+      ],
+      "transformOptions": [
+        "eduVideoThumbnail",
+        "directAccessUrl"
+      ]
+    },
+    {
       "transformerName": "EduSharingVideoMetadataExecutor",
       "supportedSourceAndTargetList": [
         {"sourceMediaType": "video/quicktime", "targetMediaType": "alfresco-metadata-extract"},

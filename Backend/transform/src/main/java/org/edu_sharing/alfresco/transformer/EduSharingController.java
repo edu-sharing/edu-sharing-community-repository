@@ -3,6 +3,7 @@ package org.edu_sharing.alfresco.transformer;
 import org.alfresco.transformer.AbstractTransformerController;
 import org.alfresco.transformer.probes.ProbeTestTransform;
 import org.edu_sharing.alfresco.transformer.executors.H5pThumbnailExecutor;
+import org.edu_sharing.alfresco.transformer.executors.SerloIndexExecutor;
 import org.edu_sharing.alfresco.transformer.executors.VideoThumbnailExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,9 @@ public class EduSharingController extends AbstractTransformerController {
 
     @Autowired
     H5pThumbnailExecutor h5pThumbnailExecutor;
+
+    @Autowired
+    SerloIndexExecutor serloIndexExecutor;
 
 
     @Override
@@ -47,6 +51,12 @@ public class EduSharingController extends AbstractTransformerController {
                 this.videoThumbnailExecutor.extractMetadata(transformName,sourceMimetype,targetMimetype,transformOptions,
                         sourceFile,targetFile);
             }catch (Exception e){
+                throw new RuntimeException(e);
+            }
+        }else if(transformName.equals(SerloIndexExecutor.ID)){
+            try {
+                this.serloIndexExecutor.transform(transformName,sourceMimetype,targetMimetype,transformOptions,sourceFile,targetFile);
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }else{
