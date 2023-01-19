@@ -534,7 +534,7 @@ export class CollectionsMainComponent {
             );
         }
     }
-    addNodesToCollection(nodes: Node[]) {
+    addNodesToCollection(nodes: Node[], allowDuplicate: boolean | 'ignore' = false) {
         this.toast.showProgressDialog();
         UIHelper.addToCollection(
             this.nodeHelper,
@@ -547,6 +547,7 @@ export class CollectionsMainComponent {
                 this.refreshContent();
                 this.toast.closeModalDialog();
             },
+            allowDuplicate
         );
     }
 
