@@ -428,7 +428,7 @@
             "CUT_COPY": "{{count}} Element(s) copied to clipboard",
             "PASTE": "{{count}} Element(s) have been {{mode}} from \"{{from}}\" to \"{{to}}\"",
             "PASTE_DRAG": "{{count}} Element(s) have been {{mode}} to {{to}}",
-            "DUPLICATE_NAME": "The name {{name}} already exists.<br>Please use an other, unique name",
+            "DUPLICATE_NAME": "The name {{name}} already exists.\nPlease use an other, unique name",
             "CYCLIC_NODE": "A folder can not be pasted into its own",
             "NOT_POSSIBLE_IN_SEARCH": "This operation is not possible during search",
             "NOT_POSSIBLE_GENERAL": "Uploading is not possible in the current area",
