@@ -68,6 +68,8 @@
     position: relative;
     & ::ng-deep > * {
         flex-grow: 1;
+        // We scroll to jump-mark sections when expanding. Don't let the browser interfere.
+        overflow-anchor: none;
     }
 }
 

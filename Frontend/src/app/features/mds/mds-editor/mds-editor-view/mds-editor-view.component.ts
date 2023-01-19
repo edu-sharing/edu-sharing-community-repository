@@ -1,4 +1,4 @@
-import { trigger } from '@angular/animations';
+import { animate, state, style, transition, trigger } from '@angular/animations';
 import {
     AfterViewInit,
     ApplicationRef,
@@ -19,8 +19,8 @@ import {
     ViewContainerRef,
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { BehaviorSubject, combineLatest, Observable, ReplaySubject } from 'rxjs';
-import { filter, first, map, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, ReplaySubject, Subject } from 'rxjs';
+import { filter, first, map, take, takeUntil } from 'rxjs/operators';
 import { Node } from '../../../../core-module/core.module';
 import { UIAnimation } from '../../../../core-module/ui/ui-animation';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
@@ -64,7 +64,7 @@ import { MdsEditorWidgetBase } from '../widgets/mds-editor-widget-base';
 import { MdsEditorWidgetVCardComponent } from '../widgets/mds-editor-widget-vcard/mds-editor-widget-vcard.component';
 import { MdsEditorWidgetTinyMCE } from '../widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-tinymce.component';
 import { EditorMode } from '../../types/mds-types';
-import { JumpMarksService } from '../../../../services/jump-marks.service';
+import { JumpMark, JumpMarksService } from '../../../../services/jump-marks.service';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;
@@ -83,7 +83,16 @@ type NativeWidgetClass = {
     templateUrl: './mds-editor-view.component.html',
     styleUrls: ['./mds-editor-view.component.scss'],
     animations: [
-        trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_NORMAL)),
+        trigger('expandContent', [
+            state('collapsed', style({ height: 0, overflow: 'hidden' })),
+            transition('collapsed => expanded', [
+                animate(UIAnimation.ANIMATION_TIME_NORMAL + 'ms ease', style({ height: '*' })),
+            ]),
+            transition('expanded => collapsed', [
+                style({ overflow: 'hidden' }),
+                animate(UIAnimation.ANIMATION_TIME_NORMAL + 'ms ease', style({ height: 0 })),
+            ]),
+        ]),
     ],
     providers: [ViewInstanceService],
 })
@@ -155,6 +164,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
     private knownWidgetTags: string[];
     private destroyed = new ReplaySubject<void>(1);
     private allWidgetsHidden = false;
+    private expandContentDone = new Subject<void>();
 
     constructor(
         private sanitizer: DomSanitizer,
@@ -173,6 +183,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
             ...this.mdsEditorInstance.mdsDefinition$.value.widgets.map((w) => w.id),
         ];
     }
+
     getWidgets() {
         return (this.mdsEditorInstance.widgets.value as GeneralWidget[])
             .concat(this.mdsEditorInstance.nativeWidgets.value)
@@ -194,10 +205,7 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
             )
             .subscribe((jumpMark) => {
                 if (!this.isExpanded$.value) {
-                    this.isExpanded$.next(true);
-                    // Trigger again to scroll now-expanded section into view.
-                    this.applicationRef.tick();
-                    this.jumpMarks.triggerScrollToJumpMark.next(jumpMark);
+                    this.expandAndScrollToTop(jumpMark);
                 }
             });
         this.isExpanded$
@@ -219,6 +227,22 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
     ngOnDestroy(): void {
         this.destroyed.next();
         this.destroyed.complete();
+    }
+
+    private expandAndScrollToTop(jumpMark?: JumpMark) {
+        const height = this.container.nativeElement.scrollHeight;
+        this.isExpanded$.next(true);
+        this.jumpMarks.triggerScrollToJumpMark.next({
+            jumpMark: jumpMark ?? this.view.id + JUMP_MARK_POSTFIX,
+            expandAnimation: {
+                height,
+                done: this.expandContentDone.pipe(take(1)).toPromise(),
+            },
+        });
+    }
+
+    onDoneExpandContent() {
+        this.expandContentDone.next();
     }
 
     private getHtml(): SafeHtml {
@@ -442,11 +466,10 @@ export class MdsEditorViewComponent implements OnInit, AfterViewInit, OnChanges,
     }
 
     toggleShow() {
-        this.isExpanded$.next(!this.isExpanded$.value);
-        if (this.isExpanded$.value) {
-            setTimeout(() =>
-                this.jumpMarks?.triggerScrollToJumpMark.next(this.view.id + JUMP_MARK_POSTFIX),
-            );
+        if (this.isExpanded) {
+            this.isExpanded$.next(false);
+        } else {
+            this.expandAndScrollToTop();
         }
     }
     async injectEditField(mdsWidgetComponent: MdsWidgetComponent, targetElement: Element) {

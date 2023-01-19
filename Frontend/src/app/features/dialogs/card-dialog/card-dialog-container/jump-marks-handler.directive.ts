@@ -10,7 +10,11 @@ import {
 import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { UIService } from '../../../../core-module/core.module';
-import { JumpMark, JumpMarksService } from '../../../../services/jump-marks.service';
+import {
+    JumpMark,
+    JumpMarksService,
+    ScrollToJumpMarkTrigger,
+} from '../../../../services/jump-marks.service';
 
 export const JUMP_MARK_POSTFIX = '_header';
 
@@ -51,12 +55,7 @@ export class JumpMarksHandlerDirective implements OnDestroy {
     private registerJumpMarksService() {
         this.jumpMarksService.triggerScrollToJumpMark
             .pipe(takeUntil(this.destroyed))
-            .subscribe((jumpMark) => {
-                if (typeof jumpMark === 'string') {
-                    jumpMark = this.jumpMarks.find((j) => j.id === jumpMark);
-                }
-                void this.scrollToJumpMark(jumpMark);
-            });
+            .subscribe((trigger) => this.onTriggerScrollToJumpMark(trigger));
     }
 
     ngOnDestroy(): void {
@@ -76,8 +75,26 @@ export class JumpMarksHandlerDirective implements OnDestroy {
         // Leave a little time for the last scroll event to propagate before enabling updates
         // again.
         this.ngZone.runOutsideAngular(() =>
-            window.setTimeout(() => (this.shouldUpdateJumpMarkOnScroll = true), 20),
+            window.setTimeout(() => (this.shouldUpdateJumpMarkOnScroll = true), 100),
         );
+    }
+
+    private onTriggerScrollToJumpMark({ jumpMark, expandAnimation }: ScrollToJumpMarkTrigger) {
+        this.ngZone.runOutsideAngular(async () => {
+            if (typeof jumpMark === 'string') {
+                jumpMark = this.jumpMarks.find((j) => j.id === jumpMark);
+            }
+            if (expandAnimation) {
+                const div = document.createElement('div');
+                div.style.height = expandAnimation.height + 'px';
+                div.style.flexShrink = '0';
+                this.elementRef.nativeElement.appendChild(div);
+                await Promise.all([this.scrollToJumpMark(jumpMark), expandAnimation.done]);
+                this.elementRef.nativeElement.removeChild(div);
+            } else {
+                await this.scrollToJumpMark(jumpMark);
+            }
+        });
     }
 
     private registerUpdateActiveJumpMark(): void {
