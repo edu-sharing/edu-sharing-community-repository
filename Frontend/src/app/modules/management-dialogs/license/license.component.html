@@ -229,10 +229,22 @@
         </mat-form-field>
       </div>
     </div>
-    <es-mds-editor-widget-author
-      #author
-      [showContributorDialog]="!_properties"
-    ></es-mds-editor-widget-author>
+    <div class="authors">
+      <div class="mixed-authors" *ngIf="hasMixedAuthorValues()">
+        <span class="title">{{ 'WORKSPACE.LICENSE.MIXED_AUTHORS' | translate }}</span>
+        <span>{{ 'WORKSPACE.LICENSE.MIXED_AUTHORS_INFO' | translate }}</span>
+        <div>
+          <button mat-flat-button color="primary" (click)="resetMixedAuthorValues()">
+            {{ 'WORKSPACE.LICENSE.MIXED_AUTHORS_EDIT' | translate }}
+          </button>
+        </div>
+      </div>
+      <es-mds-editor-widget-author
+        #author
+        *ngIf="!hasMixedAuthorValues()"
+        [showContributorDialog]="!_properties"
+      ></es-mds-editor-widget-author>
+    </div>
     <es-license-source
       class="cc-additional"
       *ngIf="isCCAttributableLicense()"

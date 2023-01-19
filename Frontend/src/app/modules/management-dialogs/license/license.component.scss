@@ -190,3 +190,27 @@ h4 {
         margin-right: 10px;
     }
 }
+.authors {
+    .mixed-authors {
+        padding: 30px 20px;
+        margin-bottom: 20px;
+        background-color: $cardLightBackground;
+        @include materialShadowBottom();
+        > span {
+            text-align: center;
+            white-space: pre-line;
+            &.title {
+                font-weight: bold;
+            }
+        }
+        > div {
+            display: flex;
+            justify-content: center;
+        }
+        justify-content: center;
+        display: grid;
+        grid-template-rows: auto auto auto;
+        grid-gap: 15px;
+        width: 100%;
+    }
+}
