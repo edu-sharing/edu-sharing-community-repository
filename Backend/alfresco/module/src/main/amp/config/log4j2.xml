@@ -22,6 +22,18 @@
     <Logger name="org.hibernate" level="warn"/>
     <Logger name="org.springframework" level="warn"/>
 
+    <!-- debug transform framework
+    <Logger name="org.alfresco.repo.rendition2" level="debug"/>
+    <Logger name="org.alfresco.repo.content.transform" level="debug"/>
+    <Logger name="org.alfresco.repo.content.transform.RemoteTransformerClient" level="debug"/>
+    <Logger name="org.alfresco.repo.content.transform.LocalTransform" level="debug"/>
+    <Logger name="org.alfresco.util.ConfigScheduler" level="debug"/>
+    <Logger name="org.edu_sharing.repository.server.tools.ActionObserver" level="debug"/>
+    <Logger name="org.edu_sharing.alfresco.jobs.PreviewJob" level="debug"/>
+    <Logger name="org.alfresco.repo.thumbnail.CreateThumbnailActionExecuter" level="debug"/>
+
+    -->
+
   </Loggers>
 
 </Configuration>
