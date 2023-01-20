@@ -3,6 +3,7 @@ package org.alfresco.repo.webdav.auth;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.AuthenticationException;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -569,14 +570,23 @@ public class LDAPAuthenticationFilter implements Filter {
 			logger.debug("query:"+query + " new username:"+username);
 			//edu-sharing customization
 			if(username != null){
-				NodeRef personRef = this.m_personService.getPerson(username);
-				if(!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")) {
-					String personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
-					String personStatus = (String)this.m_nodeService.getProperty(personRef, QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS));
-					if(!personActiveStatus.equals(personStatus)){
-						throw new AuthenticationException("USER_BLOCKED");
+				final String fusername = username;
+				boolean allowed = AuthenticationUtil.runAsSystem(() -> {
+					NodeRef personRef = this.m_personService.getPerson(fusername);
+					if(!LightbendConfigLoader.get().getIsNull("repository.personActiveStatus")) {
+						String personActiveStatus = LightbendConfigLoader.get().getString("repository.personActiveStatus");
+						String personStatus = (String)this.m_nodeService.getProperty(personRef, QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS));
+						if(!personActiveStatus.equals(personStatus)){
+							logger.info("personActiveStatus mismatch. " + personStatus + " vs " + personActiveStatus );
+							return false;
+						}
 					}
+					return true;
+				});
+				if(!allowed){
+					throw new AuthenticationException("USER_BLOCKED");
 				}
+
 			}
 
 			if(useAlfrescoAuthenticationConponent){

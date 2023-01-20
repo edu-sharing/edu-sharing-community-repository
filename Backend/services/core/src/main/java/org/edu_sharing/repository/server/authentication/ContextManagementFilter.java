@@ -154,7 +154,7 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 	private void handleAppSignature(HttpServletRequest httpReq, HttpServletResponse httpRes) throws IOException {
 		accessTool.set(null);
 
-		String appId = httpReq.getHeader("X-Edu-App-Id");
+		String appId = SignatureVerifier.getHeaderOrParam("X-Edu-App-Id",httpReq);
 		if(appId != null) {
 			SignatureVerifier.Result result = new SignatureVerifier().verifyAppSignature(httpReq);
 			if (result.getStatuscode() != 200) {
@@ -165,9 +165,9 @@ public class ContextManagementFilter implements javax.servlet.Filter {
 				ApplicationInfo appInfo = result.getAppInfo();
 				accessTool.set(appInfo);
 
-				String courseId = httpReq.getHeader("X-Edu-Usage-Course-Id");
-				String nodeId = httpReq.getHeader("X-Edu-Usage-Node-Id");
-				String resourceId = httpReq.getHeader("X-Edu-Usage-Resource-Id");
+				String courseId = SignatureVerifier.getHeaderOrParam("X-Edu-Usage-Course-Id",httpReq);
+				String nodeId = SignatureVerifier.getHeaderOrParam("X-Edu-Usage-Node-Id",httpReq);
+				String resourceId = SignatureVerifier.getHeaderOrParam("X-Edu-Usage-Resource-Id",httpReq);
 				if (courseId != null && nodeId != null && resourceId != null) {
 					Usage2Service u2 = new Usage2Service();
 					try {
