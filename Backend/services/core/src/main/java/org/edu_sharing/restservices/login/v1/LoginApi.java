@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
+import org.edu_sharing.repository.server.RequestHelper;
 import org.edu_sharing.repository.server.authentication.AppSignatureFilter;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
@@ -245,7 +246,7 @@ public class LoginApi  {
 			ssoDataMap.put(SSOAuthorityMapper.PARAM_APP_ID, verifiedApp.getAppId());
 			ssoDataMap.put(SSOAuthorityMapper.PARAM_SSO_TYPE, SSOAuthorityMapper.SSO_TYPE_AuthByApp);
 
-			ssoDataMap.put(SSOAuthorityMapper.PARAM_APP_IP,req.getRemoteAddr());
+			ssoDataMap.put(SSOAuthorityMapper.PARAM_APP_IP, new RequestHelper(req).getRemoteAddr());
 
 			if(userProfile != null){
 				String firstNameProp = ssoMapper.getUserAttribute(CCConstants.PROP_USER_FIRSTNAME);
