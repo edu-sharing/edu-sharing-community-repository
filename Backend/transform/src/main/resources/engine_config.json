@@ -80,8 +80,11 @@
       "transformerName": "EduSharingVideoThumbnailExecutor",
       "supportedSourceAndTargetList": [
         {"sourceMediaType": "video/mp4", "targetMediaType": "image/png"},
+        {"sourceMediaType": "video/mp4", "targetMediaType": "image/jpeg"},
         {"sourceMediaType": "video/quicktime", "targetMediaType": "image/png"},
-        {"sourceMediaType": "video/x-matroska", "targetMediaType": "image/png"}
+        {"sourceMediaType": "video/quicktime", "targetMediaType": "image/jpeg"},
+        {"sourceMediaType": "video/x-matroska", "targetMediaType": "image/png"},
+        {"sourceMediaType": "video/x-matroska", "targetMediaType": "image/jpeg"}
       ],
       "transformOptions": [
         "eduVideoThumbnail",
