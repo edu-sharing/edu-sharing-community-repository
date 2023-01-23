@@ -162,7 +162,7 @@
     "TOOLPERMISSION_RATE_WRITE": "The permission to rate materials (requires TOOLPERMISSION_RATE_READ)",
     "TOOLPERMISSION_CONNECTOR": "Editor \"{{connector}}\" can be used",
     "TOOLPERMISSION_CONNECTOR_SAFE": "Editor \"{{connector}}\" can be used in safe",
-        "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" can be viewed & browsed and media can be retrieved from it",
+    "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" can be viewed & browsed and media can be retrieved from it",
     "TOOLPERMISSION_CREATE_MAP_LINK": "Create folders that link to other folders",
     "TOOLPERMISSION_SIGNUP_GROUP": "Signup to an organisation/group (only applies to organisation/groups which are configured for signup)",
     "TOOLPERMISSION_COLLECTION_PROPOSAL": "Allow the user to propose materials for collection where he/she doesn't has write permissions for",

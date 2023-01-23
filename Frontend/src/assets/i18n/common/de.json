@@ -160,7 +160,7 @@
     "TOOLPERMISSION_RATE_WRITE": "Die Berechtigung zum Bewerten von Materialien (benötigt TOOLPERMISSION_RATE_READ)",
     "TOOLPERMISSION_CONNECTOR": "Editor \"{{connector}}\" darf benutzt werden",
     "TOOLPERMISSION_CONNECTOR_SAFE": "Editor \"{{connector}}\" darf im gesicherten Bereich benutzt werden",
-        "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" darf angezeigt und durchsucht werden sowie Medien dieses Repositories geöffnet werden",
+    "TOOLPERMISSION_REPOSITORY": "Repository \"{{repository}}\" darf angezeigt und durchsucht werden sowie Medien dieses Repositories geöffnet werden",
     "TOOLPERMISSION_CREATE_MAP_LINK": "Ordner anlegen, welche auf andere Ordner verweisen/verlinken",
     "TOOLPERMISSION_SIGNUP_GROUP": "Zu einer Organisation/Gruppe einschreiben (gilt nur für seperat dafür freigegebene Organisationen/Gruppen)",
     "TOOLPERMISSION_COLLECTION_PROPOSAL": "Vorschlagen von Materialien für Sammlungen, für welche die nutzende Person keine Schreibrechte hat",
