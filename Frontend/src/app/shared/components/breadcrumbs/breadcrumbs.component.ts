@@ -126,10 +126,10 @@ export class BreadcrumbsComponent {
             if (add) {
                 this.nodes.splice(this.nodes.length, 0, search);
             } else {
-                this.nodes[this.nodes.length - 1] = search;
+                this.nodes = this.nodes.filter((n) => n.type !== 'SEARCH');
             }
         } else if (!add) {
-            this.nodes.splice(this.nodes.length, 1);
+            this.nodes = this.nodes.filter((n) => n.type !== 'SEARCH');
         }
     }
 
