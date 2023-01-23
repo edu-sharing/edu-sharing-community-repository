@@ -401,9 +401,9 @@
       "RELEASE_MULTI": "Release {{count}} objects under this license",
       "CONTACT": "Other users may contact me for further licensing negotiations",
       "MORE": "More information",
-            "MIXED_AUTHORS": "Varying contributorsn",
-            "MIXED_AUTHORS_INFO": "The chosen elements have varying contributor data. In order to edit them in bulk mode you need to overwrite them.\nChoose \"Edit\" if you want to do so.",
-            "MIXED_AUTHORS_EDIT": "Edit",
+      "MIXED_AUTHORS": "Varying contributorsn",
+      "MIXED_AUTHORS_INFO": "The chosen elements have varying contributor data. In order to edit them in bulk mode you need to overwrite them.\nChoose \"Edit\" if you want to do so.",
+      "MIXED_AUTHORS_EDIT": "Edit",
       "COPYRIGHT": {
         "FREE": "protected by copyright law, open access",
         "FREE_INFO": "can be used free of charge according to copyright laws.",
