@@ -64,6 +64,7 @@ import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { FormControl } from '@angular/forms';
 import { BehaviorSubject, ReplaySubject, combineLatest, Observable, Subject } from 'rxjs';
 import {
+    debounceTime,
     delay,
     distinctUntilChanged,
     first,
@@ -1670,6 +1671,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 ),
                 map((valuesDict) => JSON.stringify(valuesDict)),
                 distinctUntilChanged(),
+                debounceTime(250),
                 map((json) => JSON.parse(json)),
             )
             .subscribe((values) => {
