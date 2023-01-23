@@ -255,7 +255,6 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             sortBy: [this.sort.active],
             sortAscending: this.sort.direction === 'asc',
         };
-        console.log('load');
         if (this.searchQuery$.value) {
             const query = '*' + this.searchQuery$.value + '*';
             this.lastRequestSearch = true;
@@ -342,7 +341,6 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
                 debounceTime(10),
             )
             .subscribe(async (value) => {
-                console.log(value);
                 await this.load(true);
             });
         this.load$
