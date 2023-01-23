@@ -41,15 +41,15 @@ import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-
 import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 import { NodeEntriesDataType } from 'src/app/features/node-entries/node-entries.component';
 import { canDropOnNode } from '../workspace-utils';
+import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject } from 'rxjs';
 import {
-    AsyncSubject,
-    BehaviorSubject,
-    combineLatest,
-    Observable,
-    ReplaySubject,
-    Subject,
-} from 'rxjs';
-import { debounceTime, distinctUntilChanged, last, map, switchMap, tap } from 'rxjs/operators';
+    catchError,
+    debounceTime,
+    distinctUntilChanged,
+    retryWhen,
+    switchMap,
+    tap,
+} from 'rxjs/operators';
 
 @Component({
     selector: 'es-workspace-explorer',
@@ -353,10 +353,22 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
                     }
                     this.dataSource.isLoading = true;
                 }),
-                switchMap(async ({ nodes }) => await nodes.toPromise()),
+                switchMap(
+                    async ({ nodes }) =>
+                        await nodes
+                            .pipe(
+                                catchError((err) => {
+                                    this.handleError(err);
+                                    return of(null);
+                                }),
+                            )
+                            .toPromise(),
+                ),
             )
             .subscribe(async (data) => {
-                this.addNodes(data);
+                if (data) {
+                    this.addNodes(data);
+                }
             });
     }
 
