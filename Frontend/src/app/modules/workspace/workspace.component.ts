@@ -699,7 +699,9 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
                 },
             );
         }
-        this.currentFolder = null;
+        if (this.currentFolder?.ref.id !== id) {
+            this.currentFolder = null;
+        }
         this.allowBinary = true;
         const root = !id || WorkspaceMainComponent.VALID_ROOTS_NODES.indexOf(id) !== -1;
         if (!root) {
