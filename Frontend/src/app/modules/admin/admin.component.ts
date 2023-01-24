@@ -66,6 +66,8 @@ import {
 } from 'src/app/features/node-entries/entries-model';
 import { NodeDataSource } from '../../features/node-entries/node-data-source';
 import { WorkspaceExplorerComponent } from '../workspace/explorer/explorer.component';
+import { ActionbarComponent } from '../../shared/components/actionbar/actionbar.component';
+import { NodeEntriesWrapperComponent } from '../../features/node-entries/node-entries-wrapper.component';
 
 type LuceneData = {
     mode: 'NODEREF' | 'SOLR' | 'ELASTIC';
@@ -91,6 +93,8 @@ export class AdminComponent implements OnInit, OnDestroy {
     readonly SCOPES = Scope;
     readonly InteractionType = InteractionType;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+    @ViewChild('searchResults') nodeEntriesSearchResult: NodeEntriesWrapperComponent<Node>;
+    @ViewChild('actionbarComponent') actionbarComponent: ActionbarComponent;
     elasticResponse: NodeListElastic;
 
     constructor(
@@ -328,7 +332,7 @@ export class AdminComponent implements OnInit, OnDestroy {
             },
         );
     }
-    public searchNodes() {
+    public async searchNodes() {
         this.storage.set('admin_lucene', this.lucene);
         const authorities = [];
         if (this.lucene.authorities) {
@@ -336,6 +340,10 @@ export class AdminComponent implements OnInit, OnDestroy {
                 authorities.push(auth.authorityName);
             }
         }
+        await this.nodeEntriesSearchResult.initOptionsGenerator({
+            actionbar: this.actionbarComponent,
+            scope: Scope.Admin,
+        });
         const request = {
             offset: this.lucene.offset ? this.lucene.offset : 0,
             count: this.lucene.count,

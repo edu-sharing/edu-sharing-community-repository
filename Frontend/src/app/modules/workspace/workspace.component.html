@@ -65,7 +65,7 @@
         <es-breadcrumbs
           *ngIf="isLoggedIn"
           [breadcrumbsAsNode]="path"
-          [searchQuery]="searchQuery ? searchQuery.query : null"
+          [searchQuery]="searchQuery?.query"
           [home]="'WORKSPACE.' + root"
           [canDropNodes]="canDropOnBreadcrumb"
           (onDrop)="handleDropOnBreadcrumb($event)"

@@ -1126,6 +1126,7 @@
       <div *ngIf="lucene.mode === 'NODEREF' || lucene.outputMode === 'view'" class="search-list">
         <es-actionbar #actionbarComponent></es-actionbar>
         <es-node-entries-wrapper
+          #searchResults
           [dataSource]="searchResponse"
           [columns]="searchColumns"
           [configureColumns]="true"

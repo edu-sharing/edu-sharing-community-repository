@@ -64,6 +64,7 @@ import { NodeHelperService } from '../../core-ui-module/node-helper.service';
 import { FormControl } from '@angular/forms';
 import { BehaviorSubject, ReplaySubject, combineLatest, Observable, Subject } from 'rxjs';
 import {
+    debounceTime,
     delay,
     distinctUntilChanged,
     first,
@@ -628,10 +629,8 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
     getSearch(searchString: string = null, init = false) {
         if ((this.isSearching && init) || this.repositoryIds.length == 0) {
-            /*setTimeout(
-                () => this.getSearch(searchString, init),
-                100,
-            );*/
+            // dirty fix for legacy search
+            setTimeout(() => this.getSearch(searchString, init), 16);
             return;
         }
         if (this.isSearching && !init) {
@@ -1672,10 +1671,13 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                 ),
                 map((valuesDict) => JSON.stringify(valuesDict)),
                 distinctUntilChanged(),
+                debounceTime(250),
                 map((json) => JSON.parse(json)),
             )
             .subscribe((values) => {
-                this.applyParameters('mds', values, { replaceUrl: !initDone });
+                this.ngZone.run(() =>
+                    this.applyParameters('mds', values, { replaceUrl: !initDone }),
+                );
                 initDone = true;
             });
         this.mdsDesktopRef.mdsEditorInstance.mdsInitDone
