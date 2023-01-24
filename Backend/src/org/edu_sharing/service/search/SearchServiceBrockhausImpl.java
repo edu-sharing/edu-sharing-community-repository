@@ -75,7 +75,7 @@ public class SearchServiceBrockhausImpl extends SearchServiceAdapter{
 
 			HashMap<String,Object> properties=new HashMap<>();
 			// swagger doesn't like / as %2F encoded, so we try to prevent issues by mapping the data
-			properties.put(CCConstants.SYS_PROP_NODE_UID,document.getString("url").replace("/","-"));
+			properties.put(CCConstants.SYS_PROP_NODE_UID,document.getString("url").replace("/","%2f"));
 			properties.put(CCConstants.CM_PROP_C_MODIFIED,System.currentTimeMillis());
 
 			properties.put(CCConstants.CM_NAME,document.getString("title"));
@@ -91,8 +91,8 @@ public class SearchServiceBrockhausImpl extends SearchServiceAdapter{
 			properties.put(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE,"brockhaus");
 			//String contentUrl=buildUrl(apiKey,document.getString("url"));
 			//properties.put(CCConstants.CONTENTURL,URLTool.getRedirectServletLink(repositoryId, document.getString("url")));
-			properties.put(CCConstants.CONTENTURL,buildUrl(apiKey,document.getString("url")));
-			properties.put(CCConstants.CCM_PROP_IO_WWWURL,buildUrl(apiKey,document.getString("url")));
+			properties.put(CCConstants.CONTENTURL,buildUrl(apiKey, (String) properties.get(CCConstants.SYS_PROP_NODE_UID)));
+			properties.put(CCConstants.CCM_PROP_IO_WWWURL,buildUrl(apiKey, (String) properties.get(CCConstants.SYS_PROP_NODE_UID)));
 
 			NodeRef ref = new org.edu_sharing.service.model.NodeRefImpl(repositoryId,
 					StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol(),
@@ -105,7 +105,7 @@ public class SearchServiceBrockhausImpl extends SearchServiceAdapter{
 		return searchResultNodeRef;
 	}
 	public static String buildUrl(String apiKey,String id){
-		return "https://www.brockhaus.de/portal/user/"+URLEncoder.encodeUriComponent(apiKey)+"?url="+URLEncoder.encodeUriComponent("/ecs/" + id);
+		return "https://www.brockhaus.de/portal/user/"+URLEncoder.encodeUriComponent(apiKey)+"?url="+URLEncoder.encodeUriComponent("/ecs/" + id.replace("%2f", "/"));
 	}
 	@Override
 	public SearchResultNodeRef searchV2(MetadataSetV2 mds, String query, Map<String, String[]> criterias,
