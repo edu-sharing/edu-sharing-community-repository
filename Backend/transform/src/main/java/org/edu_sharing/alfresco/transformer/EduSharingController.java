@@ -73,12 +73,12 @@ public class EduSharingController extends AbstractTransformerController {
 
     @Override
     public ProbeTestTransform getProbeTestTransform() {
-        return new ProbeTestTransform(this,"source.txt","target.txt",180, 20, 150, 1024,
+        return new ProbeTestTransform(this,"spark.mp4","spark.jpeg",5526, 20, 150, 1024,
                 1,1) {
             @Override
             protected void executeTransformCommand(File sourceFile, File targetFile) {
                 Map<String, String> transformOptions = Collections.singletonMap("language", "Spanish");
-                transformImpl("helloWorld", "text/plain", "text/html", transformOptions, sourceFile, targetFile);
+                transformImpl(VideoThumbnailExecutor.ID, "video/mp4", "image/jpeg", transformOptions, sourceFile, targetFile);
             }
         };
     }
