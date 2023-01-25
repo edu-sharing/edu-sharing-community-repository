@@ -7,7 +7,6 @@
   <es-workspace-sub-tree
     [node]="'-userhome-'"
     [currentPath]="currentPath"
-    [reload]="reload"
     (onUpdateOptions)="updateOptions($event)"
     (onDrop)="drop($event)"
     (onClick)="openNode($event)"
@@ -26,7 +25,6 @@
   <es-workspace-sub-tree
     [node]="'-shared_files-'"
     [currentPath]="currentPath"
-    [reload]="reload"
     (onUpdateOptions)="updateOptions($event)"
     (onDrop)="drop($event)"
     (onClick)="openNode($event)"
@@ -45,7 +43,6 @@
   <es-workspace-sub-tree
     [node]="'-my_shared_files-'"
     [currentPath]="currentPath"
-    [reload]="reload"
     (onUpdateOptions)="updateOptions($event)"
     (onDrop)="drop($event)"
     (onClick)="openNode($event)"
@@ -66,7 +63,6 @@
   <es-workspace-sub-tree
     [node]="workspace.getRootFolderInternalId()"
     [currentPath]="currentPath"
-    [reload]="reload"
     (onUpdateOptions)="updateOptions($event)"
     (onDrop)="drop($event)"
     (onClick)="openNode($event)"
@@ -83,7 +79,6 @@
   <es-workspace-sub-tree
     [node]="'-workflow_receive-'"
     [currentPath]="currentPath"
-    [reload]="reload"
     (onUpdateOptions)="updateOptions($event)"
     (onDrop)="drop($event)"
     (onClick)="openNode($event)"

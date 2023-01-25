@@ -50,6 +50,7 @@ import {
     switchMap,
     tap,
 } from 'rxjs/operators';
+import { WorkspaceTreeComponent } from '../tree/tree.component';
 
 @Component({
     selector: 'es-workspace-explorer',
@@ -170,6 +171,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
 
     public columns: ListItem[] = [];
     @Input() displayType = NodeEntriesDisplayType.Table;
+    @Input() tree: WorkspaceTreeComponent;
     @Output() displayTypeChange = new EventEmitter<NodeEntriesDisplayType>();
     @Input() reorderDialog = false;
     @Output() reorderDialogChange = new EventEmitter<boolean>();
@@ -484,6 +486,12 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             this.onOpenNode.emit(event.element);
         } else {
             this.select(event);
+        }
+    }
+
+    syncTreeView(nodes: Node[]) {
+        if (nodes.filter((n) => n.virtual && n.isDirectory).length && this.tree) {
+            this.tree.refresh();
         }
     }
 }

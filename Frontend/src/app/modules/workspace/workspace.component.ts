@@ -58,6 +58,7 @@ import { CanDrop } from '../../shared/directives/nodes-drop-target.directive';
 import { TranslationsService } from '../../translations/translations.service';
 import { WorkspaceExplorerComponent } from './explorer/explorer.component';
 import { canDragDrop, canDropOnNode } from './workspace-utils';
+import { WorkspaceTreeComponent } from './tree/tree.component';
 
 @Component({
     selector: 'es-workspace-main',
@@ -90,6 +91,8 @@ export class WorkspaceMainComponent implements EventListener, OnInit, OnDestroy 
     ];
 
     @ViewChild('explorer') explorer: WorkspaceExplorerComponent;
+
+    @ViewChild(WorkspaceTreeComponent) treeComponent: WorkspaceTreeComponent;
     @ViewChild('actionbar') actionbarRef: ActionbarComponent;
 
     cardHasOpenModals$: Observable<boolean>;
