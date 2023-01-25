@@ -475,6 +475,9 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     onDelete(nodes: Node[]): void {
         this.dataSource.removeData(nodes);
         this.nodeEntries?.getSelection().clear();
+        if (nodes.filter((n) => n.isDirectory).length && this.tree) {
+            this.tree.refresh();
+        }
     }
 
     saveColumns(columns: ListItem[]) {
