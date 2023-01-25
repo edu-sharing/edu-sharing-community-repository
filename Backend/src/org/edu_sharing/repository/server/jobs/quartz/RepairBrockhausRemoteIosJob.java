@@ -1,33 +1,34 @@
 /**
  *
- *  
- * 
- * 
- *	
  *
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
  *
  */
 package org.edu_sharing.repository.server.jobs.quartz;
 
 import org.alfresco.service.ServiceRegistry;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.MetadataSetV2;
@@ -49,10 +50,7 @@ import org.quartz.JobExecutionException;
 import org.springframework.context.ApplicationContext;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @JobDescription(description = "Fix brockhaus nodes with wrong identifiers")
@@ -62,8 +60,10 @@ public class RepairBrockhausRemoteIosJob extends AbstractJob{
 	private org.alfresco.service.cmr.repository.NodeService nodeService;
 	private NodeService nodeServiceEdu;
 
-	@JobFieldDescription(description = "testMode", sampleValue = "true")
+	@JobFieldDescription(description = "test only, do not migrate ids", sampleValue = "true")
 	private Boolean test;
+	@JobFieldDescription(description = "throttle in ms between each request to reduce api load on brockhaus", sampleValue = "1000")
+	private Integer throttle;
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -78,6 +78,10 @@ public class RepairBrockhausRemoteIosJob extends AbstractJob{
 		test = context.getJobDetail().getJobDataMap().getBooleanFromString("test");
 		if(test == null){
 			throw new IllegalArgumentException("Missing required boolean parameter 'test'");
+		}
+		throttle = context.getJobDetail().getJobDataMap().getIntegerFromString("throttle");
+		if(throttle == null){
+			throw new IllegalArgumentException("Missing required boolean parameter 'throttle'");
 		}
 		NodeRunner runner = new NodeRunner();
 		SearchService searchServiceBrockhaus = SearchServiceFactory.getSearchService(ApplicationInfoList.getRepositoryInfoByRepositoryType("BROCKHAUS").getAppId());
@@ -100,33 +104,64 @@ public class RepairBrockhausRemoteIosJob extends AbstractJob{
 				if(description instanceof List) {
 					description = (Serializable) ((List<?>) description).get(0);
 				}
+				String searchPhrase;
 				if(title == null) {
-					logger.warn("Object " + ref + " " + brockhausId + " does not have a title");
-					return;
+					logger.debug("Object " + ref + " " + brockhausId + " does not have a title");
+					ArrayList<String> split = new ArrayList<>(Arrays.asList(brockhausId.substring(1).split("-")));
+					split.remove(0);
+					split.remove(0);
+					searchPhrase = StringUtils.join(split, " ");
+				} else {
+					searchPhrase = title;
 				}
-				logger.info("Processing Object " + ref + "... " + brockhausId + " " + title);
+				logger.info("Processing Object " + ref + "... " + brockhausId + " " + title + " phrase: " + searchPhrase);
 				Map<String, String[]> criteria = new HashMap<>();
-				criteria.put(MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA, new String[]{title});
+				criteria.put(MetadataSetV2.DEFAULT_CLIENT_QUERY_CRITERIA, new String[]{searchPhrase});
+				String src = brockhausId.substring(1).split("-")[0];
+				criteria.put("src", new String[]{"ecs"});
+				if(src.equalsIgnoreCase("julex")) {
+					criteria.put("src", new String[]{"ecs.julex"});
+				}
 				SearchToken token = new SearchToken();
-				token.setMaxResult(100);
+				token.setMaxResult(50);
+				Thread.sleep(throttle);
 				SearchResultNodeRef results = searchServiceBrockhaus.searchV2(null, MetadataSetV2.DEFAULT_CLIENT_QUERY, criteria, token);
-				Serializable finalDescription = description;
+				String finalDescription = (String) description;
 				List<NodeRef> filtered = results.getData().stream().filter(r -> {
 					HashMap<String, Object> props = r.getProperties();
 					return
-							Objects.equals(props.get(CCConstants.LOM_PROP_GENERAL_TITLE), title) &&
-							Objects.equals(props.get(CCConstants.LOM_PROP_GENERAL_DESCRIPTION), finalDescription);
+							(
+									Objects.equals(props.get(CCConstants.LOM_PROP_GENERAL_TITLE), title) &&
+											Objects.equals(props.get(CCConstants.LOM_PROP_GENERAL_DESCRIPTION), finalDescription)
+							)
+									||
+									Objects.equals(
+											r.getNodeId().replace("%2f", "-"),
+											brockhausId
+									);
+
 				}).collect(Collectors.toList());
+
+				String newId = null;
 				if(filtered.size() == 1) {
-					String newId = filtered.get(0).getNodeId();
+					 newId = filtered.get(0).getNodeId();
+				} else if(filtered.size() == 0) {
+					logger.warn("Failed: Brockhaus search did not return results for this item. Guessing new id");
+
+					// -enzy-article-a-b ==> %2fenzy%2farticle%2fa-b
+					ArrayList<String> split = new ArrayList<>(Arrays.asList(brockhausId.substring(1).split("-")));
+					String prefix = "%2f" + split.get(0) + "%2f" + split.get(1) + "%2f";
+					split.remove(0);
+					split.remove(0);
+					newId = prefix + StringUtils.join(split, "-");
+				}else {
+					logger.error("Failed: Brockhaus search did return too many results for this item (" + filtered.size() + ")");
+				}
+				if(newId != null) {
 					logger.info("Replacing old id " + brockhausId + " with new id " + newId);
-					if(!test) {
+					if (!test) {
 						NodeServiceHelper.setProperty(ref, CCConstants.CCM_PROP_REMOTEOBJECT_NODEID, newId);
 					}
-				} else if(filtered.size() == 0) {
-					logger.warn("Failed: Brockhaus search did not return results for this item");
-				} else {
-					logger.warn("Failed: Brockhaus search did return too many results for this item (" + filtered.size() + ")");
 				}
 			}catch (Throwable t){
 				logger.error(t.getMessage(),t);
