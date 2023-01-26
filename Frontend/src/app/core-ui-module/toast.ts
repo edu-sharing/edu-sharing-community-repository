@@ -405,11 +405,13 @@ export class Toast implements OnDestroy {
         let tpDescription = this.injector
             .get(TranslateService)
             .instant('TOOLPERMISSION.' + permission);
-        if(permission.startsWith(RestConstants.TOOLPERMISSION_REPOSITORY_PREFIX)) {
+        if (permission.startsWith(RestConstants.TOOLPERMISSION_REPOSITORY_PREFIX)) {
             tpDescription = this.injector
                 .get(TranslateService)
                 .instant('TOOLPERMISSION.TOOLPERMISSION_REPOSITORY', {
-                    repository: permission.substring(RestConstants.TOOLPERMISSION_REPOSITORY_PREFIX.length)
+                    repository: permission.substring(
+                        RestConstants.TOOLPERMISSION_REPOSITORY_PREFIX.length,
+                    ),
                 });
         }
         return (

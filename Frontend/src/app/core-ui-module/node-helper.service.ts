@@ -760,12 +760,11 @@ export class NodeHelperService {
      * returns true if the nodes have different values for the given property, false if all values of this property are identical
      */
     hasMixedPropertyValues(nodes: Node[], prop: string) {
-        let found=null;
-        let foundAny=false;
+        let found = null;
+        let foundAny = false;
         for (let node of nodes) {
             const value = node.properties[prop];
-            if(foundAny && !Helper.arrayEquals(found, value))
-                return true;
+            if (foundAny && !Helper.arrayEquals(found, value)) return true;
             found = value;
             foundAny = !!value;
         }
