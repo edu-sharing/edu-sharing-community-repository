@@ -292,6 +292,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         });
         this.entriesService.selection.clear();
         this.entriesService.selection.select(...virtual);
+        this.virtualNodesAdded.emit(virtual as Node[]);
     }
 
     setOptions(options: ListOptions): void {

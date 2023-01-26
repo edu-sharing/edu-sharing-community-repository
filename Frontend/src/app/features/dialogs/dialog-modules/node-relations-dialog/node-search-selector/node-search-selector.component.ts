@@ -1,5 +1,6 @@
 import {
     AfterViewInit,
+    ChangeDetectorRef,
     Component,
     ContentChild,
     EventEmitter,
@@ -8,10 +9,10 @@ import {
     TemplateRef,
     ViewChild,
 } from '@angular/core';
-import { combineLatest, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-import { debounceTime, map, switchMap } from 'rxjs/operators';
+import { debounceTime, filter, map, switchMap, tap } from 'rxjs/operators';
 import { RestSearchService } from '../../../../../core-module/rest/services/rest-search.service';
 import {
     Node,
@@ -28,6 +29,10 @@ import { trigger } from '@angular/animations';
 import { UIAnimation } from '../../../../../core-module/ui/ui-animation';
 import { MdsEditorWrapperComponent } from '../../../../mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 
+type Status = {
+    loading: boolean;
+    result?: Node[];
+};
 @Component({
     selector: 'es-node-search-selector',
     templateUrl: 'node-search-selector.component.html',
@@ -64,9 +69,11 @@ export class NodeSearchSelectorComponent implements AfterViewInit {
     /**
      * count of items to search
      */
-    @Input() itemCount = 100;
+    @Input() itemCount = 25;
     @Output() onSelect = new EventEmitter<Node>();
-    searchResult$: Observable<Node[]>;
+    searchStatus: Status = {
+        loading: false,
+    };
     input = new FormControl('');
     columns: ListItem[];
     showMds = false;
@@ -78,6 +85,7 @@ export class NodeSearchSelectorComponent implements AfterViewInit {
         private mdsService: RestMdsService,
         private translate: TranslateService,
         private nodeHelper: NodeHelperService,
+        private changeDetectorRef: ChangeDetectorRef,
     ) {}
 
     setOption(event: MatAutocompleteSelectedEvent) {
@@ -133,13 +141,32 @@ export class NodeSearchSelectorComponent implements AfterViewInit {
         this.mdsService.getSet().subscribe((set) => {
             this.columns = MdsHelper.getColumns(this.translate, set, this.columnsIds);
         });
-        this.searchResult$ = combineLatest([
-            this.input.valueChanges,
-            this.mdsEditor.mdsEditorInstance.values,
-        ]).pipe(
-            debounceTime(200),
-            switchMap(() => this.searchNodes()),
-        );
+        combineLatest([this.input.valueChanges, this.mdsEditor.mdsEditorInstance.values])
+            .pipe(
+                debounceTime(500),
+                filter(() => {
+                    if (this.input.value?.length < 2) {
+                        this.searchStatus = {
+                            loading: false,
+                        };
+                        this.changeDetectorRef.detectChanges();
+                        return false;
+                    }
+                    return true;
+                }),
+                tap(() => {
+                    this.searchStatus.loading = true;
+                    this.changeDetectorRef.detectChanges();
+                }),
+                switchMap(() => this.searchNodes()),
+            )
+            .subscribe((result) => {
+                this.searchStatus = {
+                    loading: false,
+                    result,
+                };
+                this.changeDetectorRef.detectChanges();
+            });
         this.mdsEditor.loadMds();
         this.mdsEditor.mdsEditorInstance.values.subscribe((v) => (this.values = v));
     }

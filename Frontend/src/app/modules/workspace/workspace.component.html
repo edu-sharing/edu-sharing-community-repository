@@ -64,7 +64,7 @@
           } : null"-->
         <es-breadcrumbs
           *ngIf="isLoggedIn"
-          [searchQuery]="searchQuery ? searchQuery.query : null"
+          [searchQuery]="searchQuery?.query"
           [home]="'WORKSPACE.' + root"
           [canDropNodes]="canDropOnBreadcrumb"
           (onDrop)="handleDropOnBreadcrumb($event)"
@@ -88,6 +88,7 @@
       *ngIf="root !== 'RECYCLE'"
       [current]="currentFolder"
       [root]="root"
+      [tree]="treeComponent"
       [searchQuery]="searchQuery"
       [customOptions]="customOptions"
       [displayType]="displayType"

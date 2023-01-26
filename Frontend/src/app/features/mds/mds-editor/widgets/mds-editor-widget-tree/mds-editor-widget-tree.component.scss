@@ -15,7 +15,8 @@ mat-form-field {
     width: 100%;
     min-width: 350px;
     max-height: 500px;
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
     // margin-top: -22px;
     @include mat.elevation(2);
     border-bottom-left-radius: 4px;

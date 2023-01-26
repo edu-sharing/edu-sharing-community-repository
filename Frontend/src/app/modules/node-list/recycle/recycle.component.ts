@@ -183,9 +183,9 @@ export class RecycleMainComponent implements AfterViewInit {
 
     async refresh(event?: FetchEvent) {
         this.dataSource.isLoading = true;
-        // @TODO: handle pagination after merge!
         if (event == null) {
             this.dataSource.reset();
+            this.list?.getSelection().clear();
         }
         const result = await this.loadData(
             this.searchQuery,
@@ -193,8 +193,12 @@ export class RecycleMainComponent implements AfterViewInit {
             this.sort.active,
             this.sort.direction === 'asc',
         ).toPromise();
-
-        this.dataSource.setData(result.nodes, result.pagination);
+        if (event == null) {
+            this.dataSource.setData(result.nodes, result.pagination);
+        } else {
+            this.dataSource.appendData(result.nodes);
+            this.dataSource.setPagination(result.pagination);
+        }
         this.dataSource.isLoading = false;
     }
 

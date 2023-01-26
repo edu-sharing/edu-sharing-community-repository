@@ -40,7 +40,7 @@ public class BulkServiceImpl implements BulkService {
 			ContentModel.PROP_VERSION_TYPE
 	).map(QName::toString).collect(Collectors.toList());
 	static NodeService nodeServiceAlfresco = (NodeService) AlfAppContextGate.getApplicationContext().getBean("alfrescoDefaultDbNodeService");
-	static ServiceRegistry serviceRegistry = (ServiceRegistry) AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
+	static final ServiceRegistry serviceRegistry = (ServiceRegistry) AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
 	static VersionService versionServiceAlfresco = serviceRegistry.getVersionService();
 	static Repository repositoryHelper = (Repository) AlfAppContextGate.getApplicationContext().getBean("repositoryHelper");
 	NodeService dbNodeService = (NodeService)AlfAppContextGate.getApplicationContext().getBean("alfrescoDefaultDbNodeService");
@@ -129,7 +129,6 @@ public class BulkServiceImpl implements BulkService {
 			throw new IllegalArgumentException("match contained property names that did not exist in the properties section. Please check that you provide data for all match properties.");
 		}
 		properties = NodeServiceHelper.transformShortToLongProperties(properties);
-		NodeRef existing = find(propertiesFiltered);
 		HashMap<String, Object> propertiesNative = NodeServiceHelper.getPropertiesSinglevalue(properties);
 		propertiesNative.put(CCConstants.CM_NAME, NodeServiceHelper.cleanupCmName((String)(propertiesNative.get(CCConstants.CM_NAME))) + "_" + System.currentTimeMillis());
 		propertiesNative.remove(CCConstants.CCM_PROP_IO_VERSION_COMMENT);
@@ -146,47 +145,51 @@ public class BulkServiceImpl implements BulkService {
 				(map, e) -> map.put(e.getKey(), e.getValue()),
 				Map::putAll
 		);
-		if(existing == null) {
-			NodeRef groupFolder = getOrCreate(primaryFolder, group, propertiesNative);
-			if(groupBy != null && groupBy.size()>0){
-				if(groupBy.size() == 1){
-					groupFolder = getOrCreate(groupFolder, rawProperties.get(CCConstants.getValidGlobalName(groupBy.get(0))).toString(), propertiesNative);
-				} else {
-					throw new IllegalArgumentException("groupBy currently only supports exactly one value");
+		NodeRef existing;
+		synchronized (serviceRegistry) {
+			existing = find(propertiesFiltered);
+			if (existing == null) {
+				NodeRef groupFolder = getOrCreate(primaryFolder, group, propertiesNative);
+				if (groupBy != null && groupBy.size() > 0) {
+					if (groupBy.size() == 1) {
+						groupFolder = getOrCreate(groupFolder, rawProperties.get(CCConstants.getValidGlobalName(groupBy.get(0))).toString(), propertiesNative);
+					} else {
+						throw new IllegalArgumentException("groupBy currently only supports exactly one value");
+					}
 				}
-			}
-			// clean up and remove "null" values since they will result in weird data otherwise
-			propertiesNative = new HashMap<>(propertiesNative.entrySet().stream().filter((e) -> e.getValue() != null).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-			// add a default comment for bulk import
-			propertiesNative.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_BULK_CREATE);
-			existing = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
-					NodeServiceFactory.getLocalService().createNodeBasic(
-							groupFolder.getId(),
-							CCConstants.getValidGlobalName(type),
-							propertiesNative
-					));
-			// 2. versioning (use the regular service for proper versioning)
-			NodeServiceFactory.getLocalService().createVersion(existing.getId());
-		}else{
-			String blocked = NodeServiceHelper.getProperty(existing, CCConstants.CCM_PROP_IO_IMPORT_BLOCKED);
-			if (Boolean.parseBoolean(blocked)) {
-				throw new IllegalStateException("The given node was blocked for any updates and should not be reimported");
-			}
-			HashMap<String, Object> propertiesKeep = checkInternalOverrides(propertiesNative, existing);
-			if(resetVersion){
-				versionServiceAlfresco.deleteVersionHistory(existing);
-			}
-			propertiesNative = getCleanProps(existing, propertiesNative);
-			propertiesNative.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, resetVersion ? CCConstants.VERSION_COMMENT_BULK_CREATE : CCConstants.VERSION_COMMENT_BULK_UPDATE);
-			NodeServiceFactory.getLocalService().updateNodeNative(existing.getId(), propertiesNative);
-			// version the previous state
-			NodeServiceFactory.getLocalService().createVersion(existing.getId());
-			if(propertiesKeep != null){
-				propertiesKeep = getCleanProps(existing, propertiesKeep);
-				propertiesKeep.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_BULK_UPDATE_RESYNC);
-				NodeServiceFactory.getLocalService().updateNodeNative(existing.getId(), propertiesKeep);
-				// 2. versioning
+				// clean up and remove "null" values since they will result in weird data otherwise
+				propertiesNative = new HashMap<>(propertiesNative.entrySet().stream().filter((e) -> e.getValue() != null).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+				// add a default comment for bulk import
+				propertiesNative.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_BULK_CREATE);
+				existing = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+						NodeServiceFactory.getLocalService().createNodeBasic(
+								groupFolder.getId(),
+								CCConstants.getValidGlobalName(type),
+								propertiesNative
+						));
+				// 2. versioning (use the regular service for proper versioning)
 				NodeServiceFactory.getLocalService().createVersion(existing.getId());
+			} else {
+				String blocked = NodeServiceHelper.getProperty(existing, CCConstants.CCM_PROP_IO_IMPORT_BLOCKED);
+				if (Boolean.parseBoolean(blocked)) {
+					throw new IllegalStateException("The given node was blocked for any updates and should not be reimported");
+				}
+				HashMap<String, Object> propertiesKeep = checkInternalOverrides(propertiesNative, existing);
+				if (resetVersion) {
+					versionServiceAlfresco.deleteVersionHistory(existing);
+				}
+				propertiesNative = getCleanProps(existing, propertiesNative);
+				propertiesNative.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, resetVersion ? CCConstants.VERSION_COMMENT_BULK_CREATE : CCConstants.VERSION_COMMENT_BULK_UPDATE);
+				NodeServiceFactory.getLocalService().updateNodeNative(existing.getId(), propertiesNative);
+				// version the previous state
+				NodeServiceFactory.getLocalService().createVersion(existing.getId());
+				if (propertiesKeep != null) {
+					propertiesKeep = getCleanProps(existing, propertiesKeep);
+					propertiesKeep.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, CCConstants.VERSION_COMMENT_BULK_UPDATE_RESYNC);
+					NodeServiceFactory.getLocalService().updateNodeNative(existing.getId(), propertiesKeep);
+					// 2. versioning
+					NodeServiceFactory.getLocalService().createVersion(existing.getId());
+				}
 			}
 		}
 		if(aspects != null) {

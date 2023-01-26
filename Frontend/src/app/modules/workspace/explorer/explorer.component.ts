@@ -42,7 +42,16 @@ import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-
 import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 import { NodeEntriesDataType } from 'src/app/features/node-entries/node-entries.component';
 import { canDropOnNode } from '../workspace-utils';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject } from 'rxjs';
+import {
+    catchError,
+    debounceTime,
+    distinctUntilChanged,
+    retryWhen,
+    switchMap,
+    tap,
+} from 'rxjs/operators';
+import { WorkspaceTreeComponent } from '../tree/tree.component';
 
 @Component({
     selector: 'es-workspace-explorer',
@@ -156,6 +165,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
 
     public columns: ListItem[] = [];
     @Input() displayType = NodeEntriesDisplayType.Table;
+    @Input() tree: WorkspaceTreeComponent;
     @Output() displayTypeChange = new EventEmitter<NodeEntriesDisplayType>();
     @Input() reorderDialog = false;
     @Output() reorderDialogChange = new EventEmitter<boolean>();
@@ -164,8 +174,9 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
 
     totalCount: number;
 
-    public _searchQuery: string = null;
-    _node: Node;
+    public searchQuery$ = new BehaviorSubject<string>(null);
+    node$ = new BehaviorSubject<Node>(null);
+    load$ = new ReplaySubject<{ nodes: Observable<NodeList>; reset: boolean }>();
     private lastRequestSearch: boolean;
 
     _root: NodeRoot;
@@ -203,13 +214,12 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     @Output() onReset = new EventEmitter();
     private path: Node[];
     searchGlobal() {
-        this.onSearchGlobal.emit(this._searchQuery);
+        this.onSearchGlobal.emit(this.searchQuery$.value);
     }
     public load(event: FetchEvent = null) {
-        if (this._node == null && !this._searchQuery) return;
+        if (this.node$.value == null && !this.searchQuery$.value) return;
         if (this.dataSource.isLoading) {
-            setTimeout(() => this.load(event), 10);
-            return;
+            // return;
         }
         if (event?.reset) {
             this.dataSource.reset();
@@ -245,21 +255,22 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             sortAscending: this.sort.direction === 'asc',
             count: event?.amount,
         };
-        if (this._searchQuery) {
-            const query = '*' + this._searchQuery + '*';
+        if (this.searchQuery$.value) {
+            const query = '*' + this.searchQuery$.value + '*';
             this.lastRequestSearch = true;
             /*this.search.searchByProperties([RestConstants.NODE_ID,RestConstants.CM_PROP_TITLE,RestConstants.CM_NAME,RestConstants.LOM_PROP_DESCRIPTION,RestConstants.LOM_PROP_GENERAL_KEYWORD],
               [query,query,query,query,query],[],RestConstants.COMBINE_MODE_OR,RestConstants.CONTENT_TYPE_FILES_AND_FOLDERS, request).subscribe((data : NodeList) => this.addNodes(data,true));*/
             const criterias: any = [];
             criterias.push({ property: RestConstants.PRIMARY_SEARCH_CRITERIA, values: [query] });
-            if (this._node) {
+            if (this.node$.value) {
                 criterias.push({
                     property: 'parent',
-                    values: [this._node ? this._node.ref.id : ''],
+                    values: [this.node$.value ? this.node$.value.ref.id : ''],
                 });
             }
-            this.search
-                .search(
+            this.load$.next({
+                reset,
+                nodes: this.search.search(
                     criterias,
                     [],
                     request,
@@ -270,26 +281,15 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
                     RestConstants.DEFAULT,
                     [],
                     'workspace',
-                )
-                .subscribe(
-                    (data: NodeList) => {
-                        this.addNodes(data, true);
-                    },
-                    (error: any) => {
-                        this.totalCount = 0;
-                        this.handleError(error);
-                    },
-                );
+                ),
+            });
             // this.nodeApi.searchNodes(query,[],request).subscribe((data : NodeList) => this.addNodes(data,true));
         } else {
             this.lastRequestSearch = false;
-            this.nodeApi.getChildren(this._node.ref.id, [], request).subscribe(
-                (data: NodeList) => this.addNodes(data, false),
-                (error: any) => {
-                    this.totalCount = 0;
-                    this.handleError(error);
-                },
-            );
+            this.load$.next({
+                reset,
+                nodes: this.nodeApi.getChildren(this.node$.value.ref.id, [], request),
+            });
         }
     }
 
@@ -308,15 +308,12 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
 
     private handleError(error: any) {
         if (error.status == 404)
-            this.toast.error(null, 'WORKSPACE.TOAST.NOT_FOUND', { id: this._node.ref.id });
+            this.toast.error(null, 'WORKSPACE.TOAST.NOT_FOUND', { id: this.node$.value.ref.id });
         else this.toast.error(error);
 
         this.dataSource.isLoading = false;
     }
-    private addNodes(data: NodeList, wasSearch: boolean) {
-        if (this.lastRequestSearch !== wasSearch) {
-            return;
-        }
+    private addNodes(data: NodeList) {
         this.dataSource.isLoading = false;
         if (data && data.nodes) {
             this.dataSource.appendData(data.nodes);
@@ -336,18 +333,55 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     ) {
         // super(temporaryStorage,['_node','_nodes','sortBy','sortAscending','columns','totalCount','hasMoreToLoad']);
         this.initColumns();
+        combineLatest([this.node$, this.searchQuery$])
+            .pipe(
+                distinctUntilChanged((a, b) => {
+                    return Helper.objectEquals(a[0], b[0]) && a[1] === b[1];
+                }),
+                debounceTime(10),
+            )
+            .subscribe(async (value) => {
+                await this.load(true);
+            });
+        this.load$
+            .pipe(
+                // map((o) => o.toPromise()),
+                // switchMap(result => result.toPromise())
+                tap(({ reset }) => {
+                    if (reset) {
+                        this.dataSource.reset();
+                    }
+                    this.dataSource.isLoading = true;
+                }),
+                switchMap(
+                    async ({ nodes }) =>
+                        await nodes
+                            .pipe(
+                                catchError((err) => {
+                                    this.handleError(err);
+                                    return of(null);
+                                }),
+                            )
+                            .toPromise(),
+                ),
+            )
+            .subscribe(async (data) => {
+                if (data) {
+                    this.addNodes(data);
+                }
+            });
     }
 
     async ngAfterViewInit() {
         await this.initOptions();
     }
-    public setSorting(config: ListSortConfig) {
+    public async setSorting(config: ListSortConfig) {
         this.sort = config;
         this.storage.set(SessionStorageService.KEY_WORKSPACE_SORT + this._root, {
             sortBy: config.active,
             sortAscending: config.direction === 'asc',
         });
-        this.load({ reset: true, offset: 0 });
+        await this.load({ reset: true, offset: 0 });
     }
     public onSelection(event: Node[]) {
         this.onSelectionChanged.emit(event);
@@ -371,31 +405,27 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     }
 
     private setNode(current: Node) {
-        setTimeout(() => {
-            this._searchQuery = null;
-            if (!current) {
-                this._node = null;
-                return;
-            }
-            if (this.dataSource.isLoading) {
-                setTimeout(() => this.setNode(current), 10);
-                return;
-            }
-            if (Helper.objectEquals(this._node, current)) return;
-            this._node = current;
-            this.initOptions();
-            this.load({ reset: true, offset: 0 });
-        });
+        this.searchQuery$.next(null);
+        if (!current) {
+            this.node$.next(null);
+            return;
+        }
+        if (this.dataSource.isLoading) {
+            setTimeout(() => this.setNode(current), 10);
+            return;
+        }
+        if (Helper.objectEquals(this.node$.value, current)) return;
+        this.node$.next(current);
+        this.initOptions();
     }
 
     private setSearchQuery(query: any) {
         setTimeout(() => {
             if (query && query.query) {
-                this._searchQuery = query.query;
-                this._node = query.node;
-                this.load({ reset: true, offset: 0 });
+                this.searchQuery$.next(query.query);
+                this.node$.next(query.node);
             } else {
-                this._searchQuery = null;
+                this.searchQuery$.next(null);
             }
         });
     }
@@ -436,13 +466,16 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             actionbar: this.actionbar,
             customOptions: this.customOptions,
             scope: Scope.WorkspaceList,
-            parent: this._node,
+            parent: this.node$.value,
         });
     }
 
     onDelete(nodes: Node[]): void {
         this.dataSource.removeData(nodes);
         this.nodeEntries?.getSelection().clear();
+        if (nodes.filter((n) => n.isDirectory).length && this.tree) {
+            this.tree.refresh();
+        }
     }
 
     saveColumns(columns: ListItem[]) {
@@ -454,6 +487,12 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             this.onOpenNode.emit(event.element);
         } else {
             this.select(event);
+        }
+    }
+
+    syncTreeView(nodes: Node[]) {
+        if (nodes.filter((n) => n.virtual && n.isDirectory).length && this.tree) {
+            this.tree.refresh();
         }
     }
 }
