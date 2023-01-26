@@ -20,6 +20,8 @@ import { RestConnectorService } from '../../../core-module/rest/services/rest-co
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { ClickSource, InteractionType } from '../entries-model';
 import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
+import { NodeEntriesGlobalService } from '../node-entries-global.service';
+import { DefaultListItem } from '../../../core-module/ui/list-item';
 
 @Component({
     selector: 'es-node-entries-card',
@@ -44,6 +46,7 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
         public connector: RestConnectorService,
         public configService: ConfigurationService,
         public templatesService: NodeEntriesTemplatesService,
+        private nodeEntriesGlobalService: NodeEntriesGlobalService,
         private toast: Toast,
     ) {}
 
@@ -111,5 +114,9 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
             (await this.connector
                 .hasToolPermission(RestConstants.TOOLPERMISSION_RATE_READ)
                 .toPromise());
+    }
+
+    getTypeTemplate() {
+        return this.nodeEntriesGlobalService.getCustomFieldTemplate(DefaultListItem.NODE_TYPE);
     }
 }

@@ -52,19 +52,7 @@
         ></i>
       </ng-container>
       <ng-container *ngIf="!nodeHelper.isNodeCollection(node)">
-        <img
-          [src]="node | esNodeIcon"
-          [alt]="
-            node.mediatype
-              ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
-              : ''
-          "
-          [matTooltip]="
-            node.mediatype
-              ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
-              : ''
-          "
-        />
+        <ng-container *ngTemplateOutlet="type; context: { node: this.node }"></ng-container>
       </ng-container>
     </div>
     <div
@@ -239,5 +227,25 @@
         </ng-container>
       </div>
     </div>
+  </ng-template>
+  <ng-template #type let-node="node">
+    <ng-container *ngIf="getTypeTemplate() as ref">
+      <ng-container *ngTemplateOutlet="ref; context: { node: this.node }"></ng-container>
+    </ng-container>
+    <ng-container *ngIf="!getTypeTemplate()">
+      <img
+        [src]="node | esNodeIcon"
+        [alt]="
+          node.mediatype
+            ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
+            : ''
+        "
+        [matTooltip]="
+          node.mediatype
+            ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + node.mediatype | translate)
+            : ''
+        "
+      />
+    </ng-container>
   </ng-template>
 </div>
