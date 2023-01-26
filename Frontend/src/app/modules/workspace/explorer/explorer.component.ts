@@ -269,7 +269,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
                 });
             }
             this.load$.next({
-                reset,
+                reset: event?.reset,
                 nodes: this.search.search(
                     criterias,
                     [],
@@ -287,7 +287,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         } else {
             this.lastRequestSearch = false;
             this.load$.next({
-                reset,
+                reset: event?.reset,
                 nodes: this.nodeApi.getChildren(this.node$.value.ref.id, [], request),
             });
         }
@@ -341,7 +341,10 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
                 debounceTime(10),
             )
             .subscribe(async (value) => {
-                await this.load(true);
+                await this.load({
+                    offset: 0,
+                    reset: true,
+                });
             });
         this.load$
             .pipe(
