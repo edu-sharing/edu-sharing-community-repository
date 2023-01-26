@@ -1,5 +1,13 @@
 import { EventEmitter, Injectable } from '@angular/core';
 
+export interface ScrollToJumpMarkTrigger {
+    jumpMark: JumpMark | string;
+    expandAnimation: {
+        height: number;
+        done: Promise<void>;
+    };
+}
+
 /**
  * Provided by dialog cards that provide jump mark functionality.
  *
@@ -8,7 +16,7 @@ import { EventEmitter, Injectable } from '@angular/core';
 @Injectable()
 export class JumpMarksService {
     readonly beforeScrollToJumpMark = new EventEmitter<JumpMark>();
-    readonly triggerScrollToJumpMark = new EventEmitter<JumpMark | string>();
+    readonly triggerScrollToJumpMark = new EventEmitter<ScrollToJumpMarkTrigger>();
 }
 
 export class JumpMark {

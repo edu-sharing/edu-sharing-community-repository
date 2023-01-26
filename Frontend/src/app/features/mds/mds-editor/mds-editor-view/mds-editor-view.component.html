@@ -12,12 +12,11 @@
     <ng-container *ngTemplateOutlet="heading"></ng-container>
   </div>
   <div
-    class="content"
-    #container
-    [class.content-hidden]="!isExpanded"
-    [innerHTML]="html"
-    [@openOverlay]="isExpanded"
-  ></div>
+    [@expandContent]="isExpanded ? 'expanded' : 'collapsed'"
+    (@expandContent.done)="onDoneExpandContent()"
+  >
+    <div class="content" #container [innerHTML]="html"></div>
+  </div>
 </div>
 
 <ng-template #heading>

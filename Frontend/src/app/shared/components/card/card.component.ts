@@ -277,7 +277,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
     }
 
     private registerJumpMarkHandler(): void {
-        this.jumpMarksService.triggerScrollToJumpMark.subscribe((jumpMark) => {
+        this.jumpMarksService.triggerScrollToJumpMark.subscribe(({ jumpMark }) => {
             if (typeof jumpMark === 'string') {
                 jumpMark = this.jumpmarks.find((j) => j.id === jumpMark);
             }

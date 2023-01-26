@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { delay, first } from 'rxjs/operators';
 import { DialogButton, RestConstants } from '../../../../core-module/core.module';
 import { Toast } from '../../../../core-ui-module/toast';
-import { FeedbackV1Service } from '../../../../rest/ng/services';
+import { FeedbackV1Service } from 'ngx-edu-sharing-api';
 import { MdsEditorInstanceService } from '../../../mds/mds-editor/mds-editor-instance.service';
 import { Values } from '../../../mds/types/types';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
