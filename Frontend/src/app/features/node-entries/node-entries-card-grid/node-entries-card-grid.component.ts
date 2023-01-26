@@ -264,11 +264,6 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnC
         if (direction === 'left') {
             return element.scrollLeft > 0;
         } else if (direction === 'right') {
-            console.log(
-                element.scrollLeft,
-                element.scrollWidth - element.clientWidth,
-                element.clientWidth,
-            );
             /*
              use a small pixel buffer (10px) because scrolling aligns with the start of each card and
              it can cause slight alignment issues on the end of the container
@@ -286,10 +281,12 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnC
     }
 
     doScroll(direction: 'left' | 'right') {
-        console.log('doScroll');
         // 1 is enough because the browser will handle it via css snapping
-        this.gridRef?.nativeElement.scrollBy({
-            left: direction === 'right' ? 1 : -1,
+        const leftScroll = this.gridRef?.nativeElement.scrollLeft;
+        const rect = this.gridRef?.nativeElement.getBoundingClientRect();
+        // using scroll because it works more reliable than scrollBy
+        this.gridRef?.nativeElement.scroll({
+            left: leftScroll + (rect.width / 3) * (direction === 'right' ? 1 : -1),
             behavior: 'smooth',
         });
     }
