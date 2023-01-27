@@ -34,6 +34,11 @@ import { NodeEntriesTemplatesService } from '../node-entries-templates.service';
 export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnChanges, OnDestroy {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Target = Target;
+    /**
+     * relative scrolling when a scrolling arrow (left or right) is used
+     * a value of 1 would mean to scroll the full width of the entire content
+     */
+    readonly ScrollingOffsetPercentage = 0.4;
     @ViewChildren(CdkDropList) dropListsQuery: QueryList<CdkDropList>;
     @ViewChild('grid') gridRef: ElementRef;
     @ViewChildren('item', { read: ElementRef }) itemRefs: QueryList<ElementRef<HTMLElement>>;
@@ -286,7 +291,9 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnC
         const rect = this.gridRef?.nativeElement.getBoundingClientRect();
         // using scroll because it works more reliable than scrollBy
         this.gridRef?.nativeElement.scroll({
-            left: leftScroll + (rect.width / 3) * (direction === 'right' ? 1 : -1),
+            left:
+                leftScroll +
+                rect.width * this.ScrollingOffsetPercentage * (direction === 'right' ? 1 : -1),
             behavior: 'smooth',
         });
     }
