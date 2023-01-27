@@ -1,6 +1,7 @@
 package org.edu_sharing.repository.server.rendering;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.tools.HttpException;
@@ -47,10 +48,16 @@ public class RenderingErrorServlet extends HttpServlet {
                 }
                 html = html.replace("{{statusCode}}", exception.getStatusCode() + "");
                 html = html.replace("{{message}}", I18nServer.getTranslationDefaultResourcebundleNoException("rendering_error_" + exception.getI18nName()));
-                html = html.replace("{{technicalMessage}}",
-                        (exception.getNested()!=null && exception.getNested() instanceof HttpException) ?
+                String technicalMessage = (exception.getNested()!=null && exception.getNested() instanceof HttpException) ?
                                 exception.getTechnicalDetail() :
-                                "");
+                                "";
+
+                Level level=logger.getEffectiveLevel();
+                if(level.toInt() > Level.DEBUG_INT) {
+                    technicalMessage = "";
+                }
+
+                html = html.replace("{{technicalMessage}}", technicalMessage);
                 html = html.replace("{{exception}}", exceptionName);
             }
             else{

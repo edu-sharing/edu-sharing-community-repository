@@ -12,7 +12,7 @@ import {
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
+import { debounceTime, filter, map, switchMap, tap } from 'rxjs/operators';
 import { RestSearchService } from '../../../core-module/rest/services/rest-search.service';
 import { Node, NodesRightMode, SearchRequestCriteria } from '../../../core-module/rest/data-object';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
@@ -138,17 +138,30 @@ export class NodeSearchSelectorComponent implements AfterViewInit {
             this.columns = MdsHelper.getColumns(this.translate, set, this.columnsIds);
         });
         combineLatest([this.input.valueChanges, this.mdsEditor.mdsEditorInstance.values])
-            .pipe(debounceTime(200))
-            .subscribe(() => {
-                this.searchStatus.loading = true;
-                this.changeDetectorRef.detectChanges();
-                this.searchNodes().subscribe((result) => {
-                    this.searchStatus = {
-                        loading: false,
-                        result,
-                    };
+            .pipe(
+                debounceTime(500),
+                filter(() => {
+                    if (this.input.value?.length < 2) {
+                        this.searchStatus = {
+                            loading: false,
+                        };
+                        this.changeDetectorRef.detectChanges();
+                        return false;
+                    }
+                    return true;
+                }),
+                tap(() => {
+                    this.searchStatus.loading = true;
                     this.changeDetectorRef.detectChanges();
-                });
+                }),
+                switchMap(() => this.searchNodes()),
+            )
+            .subscribe((result) => {
+                this.searchStatus = {
+                    loading: false,
+                    result,
+                };
+                this.changeDetectorRef.detectChanges();
             });
         this.mdsEditor.loadMds();
         this.mdsEditor.mdsEditorInstance.values.subscribe((v) => (this.values = v));

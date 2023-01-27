@@ -57,6 +57,7 @@
   (clickItem)="clickItem($event)"
   (dblClickItem)="onOpenNode.emit($event.element)"
   (nodesDeleted)="onDelete($event.objects)"
+  (virtualNodesAdded)="syncTreeView($event)"
 >
   <ng-template #empty>
     <h5 class="noElementsInfo" *ngIf="searchQuery$.value == null || searchQuery$.value === ''">
