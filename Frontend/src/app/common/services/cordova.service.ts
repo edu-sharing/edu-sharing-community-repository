@@ -11,6 +11,7 @@ import {FrameEventsService} from '../../core-module/rest/services/frame-events.s
 import {DateHelper} from '../../core-ui-module/DateHelper';
 import {OAuthResult} from '../../core-module/rest/data-object';
 import {RestConstants} from '../../core-module/rest/rest-constants';
+import {RestConnectorService} from "../../core-module/rest/services/rest-connector.service";
 
 declare var cordova : any;
 
@@ -1054,15 +1055,15 @@ export class CordovaService {
     const headers = {'Content-Type':'application/x-www-form-urlencoded',Accept: '*/*'};
     const options = { headers, withCredentials: true };
 
-    let data = 'client_id=eduApp&client_secret=secret&grant_type=' + encodeURIComponent(grantType);
-    if(grantType === 'password') {
-        data += '&username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password);
-    } else if (grantType === 'client_credentials') {
-        // nothing is needed, session will be sent automatically
-    }
-    return new Observable<OAuthResult>((observer: Observer<OAuthResult>) => {
-      this.http.post<OAuthResult>(url, data, options).subscribe(
-        (oauth: OAuthResult) => {
+        let data = 'client_id=eduApp&client_secret=secret&grant_type=' + encodeURIComponent(grantType);
+        if(grantType === 'password') {
+            data += '&username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password);
+        } else if (grantType === 'client_credentials') {
+            // nothing is needed, session will be sent automatically
+        }
+        return new Observable<OAuthResult>((observer: Observer<OAuthResult>) => {
+            this.http.post<OAuthResult>(url, data, options).subscribe(
+                async (oauth: OAuthResult) => {
 
           if (oauth == null) {
             observer.error('INVALID_CREDENTIALS');
@@ -1070,10 +1071,12 @@ export class CordovaService {
             return;
           }
 
-          // set local expire ts on token
-          this.oauth=oauth;
-          observer.next(this.oauth);
-          observer.complete();
+                    // set local expire ts on token
+                    this.oauth = oauth;
+                    await this.injector.get(RestConnectorService).isLoggedIn(true).toPromise();
+
+                    observer.next(this.oauth);
+                    observer.complete();
 
         },
         (error: any) => {
@@ -1092,7 +1095,7 @@ export class CordovaService {
   public reinitStatus(endpointUrl:string,goToLogin=true,loginNext=window.location.href):Observable<void> {
       return new Observable<void>((observer: Observer<void>) => {
 
-          console.info('cordova: reinit');
+            console.info('cordova: reinit', this.reiniting, this.oauth, goToLogin);
 
           if(this.reiniting) {
               const interval=setInterval(()=> {
@@ -1254,6 +1257,10 @@ export class CordovaService {
     }
 
     private goToLogin(next:string) {
-        this.router.navigate([UIConstants.ROUTER_PREFIX,'app'],{queryParams:{next}});
+        console.info('navigating to app login', next);
+        this.router.navigate([UIConstants.ROUTER_PREFIX,'app'],{
+            replaceUrl: true,
+            queryParams:{next}
+        });
     }
 }
