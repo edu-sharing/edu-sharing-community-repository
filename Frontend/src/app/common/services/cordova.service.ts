@@ -11,6 +11,7 @@ import { FrameEventsService } from '../../core-module/rest/services/frame-events
 import { DateHelper } from '../../core-ui-module/DateHelper';
 import { OAuthResult } from '../../core-module/rest/data-object';
 import { RestConstants } from '../../core-module/rest/rest-constants';
+import { RestConnectorService } from '../../core-module/rest/services/rest-connector.service';
 
 declare var cordova: any;
 
@@ -23,8 +24,10 @@ export enum OnBackBehaviour {
  * All services that touch the mobile app or cordova plugins are available here.
  */
 @Injectable()
+// tslint:disable:no-console
 export class CordovaService {
     private onBackBehaviour = OnBackBehaviour.default;
+    platform: 'ios' | 'android';
 
     get oauth() {
         return this._oauth;
@@ -52,6 +55,37 @@ export class CordovaService {
         private injector: Injector,
         private events: FrameEventsService,
     ) {
+        const userAgent = navigator.userAgent;
+        if (userAgent?.includes('ionic / edu-sharing-app')) {
+            if (userAgent.includes('ios')) {
+                this.platform = 'ios';
+            }
+            if (userAgent.includes('android')) {
+                this.platform = 'android';
+            }
+            const splitted = userAgent.split('/');
+            const version =
+                splitted
+                    .filter((s) => {
+                        const versionRegExp = new RegExp('\\d\\.\\d(\\.\\d)?');
+                        if (versionRegExp.test(s.trim())) {
+                            return true;
+                        }
+                        return false;
+                    })?.[0]
+                    .trim() || '0.0.0';
+
+            const script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.src =
+                'https://app-registry.edu-sharing.com/js/' +
+                version +
+                '/' +
+                this.platform +
+                '/cordova.js';
+            document.getElementsByTagName('head')[0].appendChild(script);
+            console.info('ionic user agent, add cordova.js to header', this.platform, version);
+        }
         this.initialHref = window.location.href;
 
         // CORDOVA EVENT: Pause (App is put into Background)
@@ -340,47 +374,47 @@ export class CordovaService {
     /*
    private resolveFileUri(URI:string, callbackResult:Function) : void {
 
-     try {
+      try {
 
-       if ((typeof URI !== "undefined") && (URI !== null)) {
+        if ((typeof URI !== "undefined") && (URI !== null)) {
 
-         if (URI.indexOf("file://") === 0) {
+          if (URI.indexOf("file://") === 0) {
 
-           // lets resolve to native path
-           (window as any).FilePath.resolveNativePath(URI, (localFileUri: string) => {
-             callbackResult(localFileUri)
-           }, (e: any) => {
-             alert("FAILED to resolve ContentURL(" + URI + ")");
-           });
+            // lets resolve to native path
+            (window as any).FilePath.resolveNativePath(URI, (localFileUri: string) => {
+              callbackResult(localFileUri)
+            }, (e: any) => {
+              alert("FAILED to resolve ContentURL(" + URI + ")");
+            });
 
-         }
+          }
 
-         if (URI.indexOf("content://") === 0) {
+          if (URI.indexOf("content://") === 0) {
 
-           // try to resolve CONTENT-URL: https://developer.android.com/guide/topics/providers/content-providers.html
-           (window as any).FilePath.resolveNativePath(URI, (win: string) => {
-             this.resolveFileUri(win, callbackResult);
+            // try to resolve CONTENT-URL: https://developer.android.com/guide/topics/providers/content-providers.html
+            (window as any).FilePath.resolveNativePath(URI, (win: string) => {
+              this.resolveFileUri(win, callbackResult);
 
-           }, (error: any) => {
-             alert("FAILED to resolve ContentURL(" + URI + ")");
-           });
-         }
+            }, (error: any) => {
+              alert("FAILED to resolve ContentURL(" + URI + ")");
+            });
+          }
 
-         else {
-           alert("ImageShare ERROR: fileUri unkown " + URI);
-         }
+          else {
+            alert("ImageShare ERROR: fileUri unkown " + URI);
+          }
 
-       } else {
-         alert("ERROR: fileUri undefined or NULL");
-       }
+        } else {
+          alert("ERROR: fileUri undefined or NULL");
+        }
 
-     } catch (e) {
-       console.error("EXCEPTION resolveFileUri", e);
-       callbackResult(URI);
-     }
+      } catch (e) {
+        console.error("EXCEPTION resolveFileUri", e);
+        callbackResult(URI);
+      }
 
-   }
-   */
+    }
+    */
 
     /**********************************************************
      * BASIC CORDOVA
@@ -398,7 +432,7 @@ export class CordovaService {
 
     // just for internal use
     private isReallyRunningCordova(): boolean {
-        return typeof (window as any).cordova != 'undefined';
+        return typeof (window as any).cordova != 'undefined' || this.platform != null;
     }
 
     /**
@@ -526,45 +560,45 @@ export class CordovaService {
       if (this.isReallyRunningCordova() & this.isIOS()) {
         if (key==CordovaService.STORAGE_OAUTHTOKENS) {
 
-          // see what was the last ios share oauth expire date
-          this.iosShareScreenLoadValue(CordovaService.IOSSHARE_EXPIRES, (shareExpire:any) => {
+              // see what was the last ios share oauth expire date
+              this.iosShareScreenLoadValue(CordovaService.IOSSHARE_EXPIRES, (shareExpire:any) => {
 
-            // if there is no value continue with local
-            if (shareExpire==null) {
-              callback(val);
-            } else {
-
-              // check if expire is newer in share then local
-              try {
-                let oAuthLocal:any = null;
-                if (val!=null) oAuthLocal = JSON.parse(val);
-                if ((oAuthLocal==null) || (+shareExpire>oAuthLocal.expires_ts)) {
-
-                  // OK share has more up to date oauth
-                  // --> update local from share
-                  oAuthLocal.expires_ts = +shareExpire;
-                  this.iosShareScreenLoadValue(CordovaService.IOSSHARE_ACCESS,(shareAccess:string)=>{
-                    oAuthLocal.access_token = shareAccess;
-                    this.iosShareScreenLoadValue(CordovaService.IOSSHARE_REFRESH, (shareRefresh:string)=>{
-                      oAuthLocal.refresh_token = shareRefresh;
-                      let oAuthLocalJSON = JSON.stringify(oAuthLocal);
-                      this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS, oAuthLocalJSON);
-                      callback(oAuthLocalJSON);
-                    });
-                  });
-
-                } else {
+                // if there is no value continue with local
+                if (shareExpire==null) {
                   callback(val);
+                } else {
+
+                  // check if expire is newer in share then local
+                  try {
+                    let oAuthLocal:any = null;
+                    if (val!=null) oAuthLocal = JSON.parse(val);
+                    if ((oAuthLocal==null) || (+shareExpire>oAuthLocal.expires_ts)) {
+
+                      // OK share has more up to date oauth
+                      // --> update local from share
+                      oAuthLocal.expires_ts = +shareExpire;
+                      this.iosShareScreenLoadValue(CordovaService.IOSSHARE_ACCESS,(shareAccess:string)=>{
+                        oAuthLocal.access_token = shareAccess;
+                        this.iosShareScreenLoadValue(CordovaService.IOSSHARE_REFRESH, (shareRefresh:string)=>{
+                          oAuthLocal.refresh_token = shareRefresh;
+                          let oAuthLocalJSON = JSON.stringify(oAuthLocal);
+                          this.setPermanentStorage(CordovaService.STORAGE_OAUTHTOKENS, oAuthLocalJSON);
+                          callback(oAuthLocalJSON);
+                        });
+                      });
+
+                    } else {
+                      callback(val);
+                    }
+
+                  } catch (e) {
+                    console.error("EXCEPTION on sync with ios share extension", e);
+                    callback(val);
+                  }
+
                 }
 
-              } catch (e) {
-                console.error("EXCEPTION on sync with ios share extension", e);
-                callback(val);
-              }
-
-            }
-
-          });
+              });
 
         } else {
           callback(val);
@@ -635,7 +669,7 @@ export class CordovaService {
         }
 
         // if a oauth relevant key - sync with sharescreen
-        if (key == RestConstants.CORDOVA_STORAGE_OAUTHTOKENS) {
+        if (key == RestConstants.CORDOVA_STORAGE_OAUTHTOKENS && this.isIOS()) {
             try {
                 const oauthData: any = JSON.parse(value);
                 this.iosShareScreenStoreValue(
@@ -728,7 +762,7 @@ export class CordovaService {
      */
     private iosShareScreenLoadValue(key: string, callback: Function): void {
         try {
-            if (this.isReallyRunningCordova() && this.isIOS) {
+            if (this.isReallyRunningCordova() && this.isIOS()) {
                 (window as any).AppGroupsUserDefaults.save(
                     {
                         suite: 'group.edusharing',
@@ -760,7 +794,7 @@ export class CordovaService {
      */
     private iosShareScreenStoreValue(key: string, value: string): void {
         try {
-            if (this.isReallyRunningCordova() && this.isIOS) {
+            if (this.isReallyRunningCordova() && this.isIOS()) {
                 (window as any).AppGroupsUserDefaults.save(
                     {
                         suite: 'group.edusharing',
@@ -1179,7 +1213,7 @@ export class CordovaService {
         }
         return new Observable<OAuthResult>((observer: Observer<OAuthResult>) => {
             this.http.post<OAuthResult>(url, data, options).subscribe(
-                (oauth: OAuthResult) => {
+                async (oauth: OAuthResult) => {
                     if (oauth == null) {
                         observer.error('INVALID_CREDENTIALS');
                         observer.complete();
@@ -1188,6 +1222,8 @@ export class CordovaService {
 
                     // set local expire ts on token
                     this.oauth = oauth;
+                    await this.injector.get(RestConnectorService).isLoggedIn(true).toPromise();
+
                     observer.next(this.oauth);
                     observer.complete();
                 },
@@ -1210,7 +1246,7 @@ export class CordovaService {
         loginNext = window.location.href,
     ): Observable<void> {
         return new Observable<void>((observer: Observer<void>) => {
-            console.info('cordova: reinit');
+            console.info('cordova: reinit', this.reiniting, this.oauth, goToLogin);
 
             if (this.reiniting) {
                 const interval = setInterval(() => {
@@ -1292,39 +1328,39 @@ export class CordovaService {
     /*
   public initOAuthSession(oauth: OAuthResult): Observable<OAuthResult> {
 
-    return new Observable<OAuthResult>((observer: Observer<OAuthResult>) => {
+      return new Observable<OAuthResult>((observer: Observer<OAuthResult>) => {
 
-      let localErrorHandling = (error: any, tag: string = "") => {
-        if ((typeof error != "string") && (error.status == 401)) {
-          // oauth tokens are invalid
-          observer.error("INVALID");
-          observer.complete();
-        } else {
-          // on all other errors (server, internet, etc)
-          observer.error(error);
-          observer.complete();
+        let localErrorHandling = (error: any, tag: string = "") => {
+          if ((typeof error != "string") && (error.status == 401)) {
+            // oauth tokens are invalid
+            observer.error("INVALID");
+            observer.complete();
+          } else {
+            // on all other errors (server, internet, etc)
+            observer.error(error);
+            observer.complete();
+          }
+        };
+        if ((Date.now() + 60000) > oauth.expires_ts || true) {
+            // oAuth needs refresh first
+            this.refreshOAuth(oauth).subscribe(
+                (win) => {
+
+                    // now oauth is fresh - continue with init session
+                    this.oauth = win;
+                    observer.next(this.oauth);
+                    observer.complete();
+
+                },
+                (error) => {
+                    localErrorHandling(error, "(on planned refresh)");
+                }
+            );
         }
-      };
-      if ((Date.now() + 60000) > oauth.expires_ts || true) {
-          // oAuth needs refresh first
-          this.refreshOAuth(oauth).subscribe(
-              (win) => {
+      });
 
-                  // now oauth is fresh - continue with init session
-                  this.oauth = win;
-                  observer.next(this.oauth);
-                  observer.complete();
-
-              },
-              (error) => {
-                  localErrorHandling(error, "(on planned refresh)");
-              }
-          );
-      }
-    });
-
-  }
-  */
+    }
+    */
 
     hasValidConfig() {
         return this._oauth;
@@ -1390,6 +1426,10 @@ export class CordovaService {
     }
 
     private goToLogin(next: string) {
-        this.router.navigate([UIConstants.ROUTER_PREFIX, 'app'], { queryParams: { next } });
+        console.info('navigating to app login', next);
+        this.router.navigate([UIConstants.ROUTER_PREFIX, 'app'], {
+            replaceUrl: true,
+            queryParams: { next },
+        });
     }
 }

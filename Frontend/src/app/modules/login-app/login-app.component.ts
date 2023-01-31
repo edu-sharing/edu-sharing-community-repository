@@ -37,6 +37,7 @@ enum StateUI {
     templateUrl: 'login-app.component.html',
     styleUrls: ['login-app.component.scss'],
 })
+// tslint:disable:no-console
 export class LoginAppComponent implements OnInit {
     public isLoading = true;
     public disabled = true;
@@ -173,6 +174,7 @@ export class LoginAppComponent implements OnInit {
 
     private goToDefaultLocation() {
         if (this.locationNext) {
+            console.info('location next', this.locationNext);
             window.location.replace(this.locationNext);
         } else {
             this.configService.getAll().subscribe(() => {
@@ -193,10 +195,10 @@ export class LoginAppComponent implements OnInit {
             this.serverurl = this.locator.endpointUrl;
             this.configService.getAll().subscribe((config) => {
                 this.config = config;
-                if (!this.config.register)
+                if (!this.config.register) {
                     // default register mode: allow local registration if not disabled
                     this.config.register = { local: true };
-
+                }
                 this.isLoading = false;
 
                 this.handleCurrentState();
@@ -215,10 +217,10 @@ export class LoginAppComponent implements OnInit {
         }
     }
     updateButtons() {
-        let login = new DialogButton('LOGIN.LOGIN', { color: 'primary' }, () => this.login());
+        const login = new DialogButton('LOGIN.LOGIN', { color: 'primary' }, () => this.login());
         login.disabled = this.disabled;
         if (this.config && (this.config.register.local || this.config.register.recoverUrl)) {
-            let recover = new DialogButton('LOGIN.RECOVER_PASSWORD', { color: 'standard' }, () =>
+            const recover = new DialogButton('LOGIN.RECOVER_PASSWORD', { color: 'standard' }, () =>
                 this.recoverPassword(),
             );
             this.buttons = [recover, login];
