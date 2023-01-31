@@ -1,7 +1,7 @@
 import {
     Component,
     OnInit,
-    //ApplicationRef 
+    //ApplicationRef
 } from '@angular/core';
 
 import { Toast } from "../../core-ui-module/toast";
@@ -27,14 +27,15 @@ enum StateUI { SERVERLIST = 0, LOGIN = 1, SERVERURL = 2, NOINTERNET = 3}
     templateUrl: 'login-app.component.html',
     styleUrls: ['login-app.component.scss']
 })
+// tslint:disable:no-console
 export class LoginAppComponent  implements OnInit {
 
     public isLoading=true;
     public disabled=true;
     username="";
     password="";
-    private serverurl = "https://";   
-    
+    private serverurl = "https://";
+
     errorURL:string = null;
 
     servers: any;
@@ -55,8 +56,7 @@ export class LoginAppComponent  implements OnInit {
         private bridge: BridgeService,
         private configService: ConfigurationService,
         private locator: RestLocatorService,
-    ){
-
+    ) {
         this.isLoading=true;
 
         // WHEN RUNNING ON DESKTOP --> FORWARD TO BASIC LOGIN PAGE
@@ -64,7 +64,7 @@ export class LoginAppComponent  implements OnInit {
             this.router.navigate([UIConstants.ROUTER_PREFIX + 'login']);
             return;
         }
-        
+
         this.route.queryParams.subscribe((params)=>{
             this.locationNext=params['next'];
         });
@@ -166,7 +166,8 @@ export class LoginAppComponent  implements OnInit {
     }
 
     private goToDefaultLocation() {
-        if(this.locationNext){
+        if(this.locationNext) {
+            console.info('location next', this.locationNext);
             window.location.replace(this.locationNext);
         }
         else {
@@ -184,10 +185,10 @@ export class LoginAppComponent  implements OnInit {
                 this.serverurl=this.locator.endpointUrl;
                 this.configService.getAll().subscribe((config)=>{
                     this.config=config;
-                    if(!this.config.register)
-                    // default register mode: allow local registration if not disabled
-                        this.config.register={local:true};
-
+                    if(!this.config.register) {
+                        // default register mode: allow local registration if not disabled
+                        this.config.register = {local: true};
+                    }
                     this.isLoading=false;
 
                     this.handleCurrentState();
@@ -197,7 +198,7 @@ export class LoginAppComponent  implements OnInit {
 
         });
     }
-    register(){
+    register() {
         if(this.config.register.local){
             this.router.navigate([UIConstants.ROUTER_PREFIX+"register"]);
         }
@@ -205,11 +206,11 @@ export class LoginAppComponent  implements OnInit {
             UIHelper.openUrl(this.config.register.registerUrl,this.bridge,OPEN_URL_MODE.BlankSystemBrowser);
         }
     }
-    updateButtons(){
-        let login=new DialogButton('LOGIN.LOGIN',DialogButton.TYPE_PRIMARY,()=>this.login());
+    updateButtons() {
+        const login=new DialogButton('LOGIN.LOGIN',DialogButton.TYPE_PRIMARY,()=>this.login());
         login.disabled=this.disabled;
         if(this.config && (this.config.register.local || this.config.register.recoverUrl)){
-            let recover=new DialogButton('LOGIN.RECOVER_PASSWORD',DialogButton.TYPE_CANCEL,()=>this.recoverPassword());
+            const recover=new DialogButton('LOGIN.RECOVER_PASSWORD',DialogButton.TYPE_CANCEL,()=>this.recoverPassword());
             this.buttons=[recover,login];
         }
         else{
@@ -228,7 +229,7 @@ export class LoginAppComponent  implements OnInit {
                     this.goToDefaultLocation();
                 });
             } else {
-               this.checkLoginUrl();
+                this.checkLoginUrl();
             }
         }, error => {
             this.checkLoginUrl();

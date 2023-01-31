@@ -76,6 +76,15 @@ export class LoginComponent implements OnInit {
                     // default register mode: allow local registration if not disabled
                     this.config.register = { local: true };
                 }
+                if(this.bridge.getCordova().isRunningCordova()) {
+                    this.router.navigate([
+                        UIConstants.ROUTER_PREFIX,
+                        'app'
+                    ], {
+                        replaceUrl: true
+                    });
+                    return;
+                }
                 this.updateButtons();
                 this.username = this.configService.instant('defaultUsername', '');
                 this.password = this.configService.instant('defaultPassword', '');
