@@ -110,7 +110,13 @@ export class CordovaService {
 
         if (this.isRunningCordova()) {
             // deviceready may not work, because cordova is already loaded, so try to set it ready after some time
-            setTimeout(() => (this.deviceIsReady = true), 1000);
+            const checkInterval = setInterval(() => {
+                if ((window as any).plugins) {
+                    console.info('cordova: plugins object found, setting device ready');
+                    this.deviceIsReady = true;
+                    clearInterval(checkInterval);
+                }
+            }, 100);
         }
         // adding listener for cordova events
         document.addEventListener(
@@ -281,6 +287,7 @@ export class CordovaService {
         });
     }
     private registerOnShareContent(): void {
+        console.info('registerOnShareContent', this.platform, this.isAndroid());
         if (this.isAndroid()) {
             const handleIntentBase = (intent: any) => {
                 if (intent && intent.extras) {
@@ -306,6 +313,7 @@ export class CordovaService {
             // only run once. Will loop otherwise if no auth is found and intent was send
             const handleIntent = (intent: any) => {
                 // Do things
+                console.info('cordova: android new intent', intent);
                 if (intent && intent.action == 'android.intent.action.VIEW') {
                     const hit = '/edu-sharing';
                     const target = intent.data.substr(0, intent.data.indexOf(hit));
@@ -1051,6 +1059,7 @@ export class CordovaService {
             downloadURL,
             filePath,
             (result: any) => {
+                console.info('content download done', result);
                 winCallback(localPath);
             },
             (err: any) => {
