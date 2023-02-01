@@ -2622,34 +2622,27 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 		PersonService personService = serviceRegistry.getPersonService();
 		
 		serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(
-				
-        new RetryingTransactionCallback<Void>() {
-            public Void execute() throws Throwable {
-        		Throwable runAs = AuthenticationUtil.runAs(
-        				
-    				new AuthenticationUtil.RunAsWork<Throwable>() {
-    					
-    					@Override
-    					public Throwable doWork() throws Exception {
-    						try{
-    							addUserExtensionAspect(userName);
-    							personService.setPersonProperties(userName, transformPropMap(userInfo));
-    						} catch (Throwable e) {
-    							logger.error(e.getMessage(), e);
-    							return e;
-    						}
-    						return null;
-    					}
-    				}, 
-    				ApplicationInfoList.getHomeRepository().getUsername());
-        		
-        		if (runAs != null) {
-        			throw runAs;
-        		}
-        		return null;
-            }
-        }, 
-        false); 
+				(RetryingTransactionCallback<Void>) () -> {
+					Throwable runAs = AuthenticationUtil.runAs(
+							() -> {
+								try{
+									addUserExtensionAspect(userName);
+									personService.setPersonProperties(userName, transformPropMap(userInfo));
+								} catch (Throwable e) {
+									logger.error(e.getMessage(), e);
+									return e;
+								}
+								return null;
+							},
+						ApplicationInfoList.getHomeRepository().getUsername());
+
+					if (runAs != null) {
+						throw runAs;
+					}
+					return null;
+				},
+        false);
+		UserCache.refresh(userName);
 	}
 	
 	private void addUserExtensionAspect(String userName) {
