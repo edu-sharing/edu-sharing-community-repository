@@ -51,6 +51,8 @@ public class NodeRunner {
      */
     private String startFolder=nodeService.getCompanyHome();
 
+    private StoreRef startFolderStore = StoreRef.STORE_REF_WORKSPACE_SPACESSTORE;
+
     /**
      * The types of nodes that should be processed (or null for all)
      */
@@ -186,9 +188,9 @@ public class NodeRunner {
 
             if(lucene == null || lucene.trim().equals("")) {
                 if (runAsSystem)
-                    nodes = AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types, recurseMode));
+                    nodes = AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenRecursive(startFolderStore, startFolder, types, recurseMode));
                 else
-                    nodes = nodeService.getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, startFolder, types, recurseMode);
+                    nodes = nodeService.getChildrenRecursive(startFolderStore, startFolder, types, recurseMode);
             }else{
                 logger.info("collection nodes by lucene:"+lucene);
                 if (runAsSystem)
@@ -330,6 +332,14 @@ public class NodeRunner {
 
     public StoreRef getLuceneStore() {
         return luceneStore;
+    }
+
+    public void setStartFolderStore(StoreRef startFolderStore) {
+        this.startFolderStore = startFolderStore;
+    }
+
+    public StoreRef getStartFolderStore() {
+        return startFolderStore;
     }
 
     public enum TransactionMode{
