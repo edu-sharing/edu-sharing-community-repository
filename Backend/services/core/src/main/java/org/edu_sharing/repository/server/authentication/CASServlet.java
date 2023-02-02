@@ -20,7 +20,7 @@ import org.springframework.context.ApplicationContext;
 
 public class CASServlet extends HttpServlet {
 
-	Logger logger = Logger.getLogger(CASServlet.class);
+	private static Logger logger = Logger.getLogger(CASServlet.class);
 	
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

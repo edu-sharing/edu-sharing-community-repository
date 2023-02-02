@@ -36,7 +36,7 @@ import java.util.Map;
 
 public class RobotsTXTServlet extends HttpServlet{
 
-    Logger logger = Logger.getLogger(RobotsTXTServlet.class);
+    private static Logger logger = Logger.getLogger(RobotsTXTServlet.class);
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {

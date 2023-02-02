@@ -55,7 +55,7 @@ public class RenderingProxy extends HttpServlet {
 	private static final String[] ALLOWED_GET_PARAMS = new String[]{
 			"closeOnBack","childobject","childobject_order"
 	};
-	Logger logger = Logger.getLogger(RenderingProxy.class);
+	private static Logger logger = Logger.getLogger(RenderingProxy.class);
 	
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)

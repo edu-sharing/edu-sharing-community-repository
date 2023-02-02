@@ -35,7 +35,7 @@ import org.springframework.util.StreamUtils;
 public class ContentServlet extends HttpServlet{
 
 	
-	Logger logger = Logger.getLogger(ContentServlet.class);
+	static Logger logger = Logger.getLogger(ContentServlet.class);
 	
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)

@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class RenderingServlet extends HttpServlet {
     private static final String DEFAULT_DISPLAY_MODE = RenderingTool.DISPLAY_EMBED;
-    Logger logger = Logger.getLogger(RenderingServlet.class);
+    private static Logger logger = Logger.getLogger(RenderingServlet.class);
 
         @Override
         protected void doGet(HttpServletRequest req, HttpServletResponse resp)

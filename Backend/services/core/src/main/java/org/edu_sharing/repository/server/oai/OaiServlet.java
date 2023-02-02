@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 
 public class OaiServlet extends HttpServlet{
     private static final int MAX_ITEMS_PER_PAGE = 300;
-    Logger logger = Logger.getLogger(OaiServlet.class);
+    private static Logger logger = Logger.getLogger(OaiServlet.class);
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
