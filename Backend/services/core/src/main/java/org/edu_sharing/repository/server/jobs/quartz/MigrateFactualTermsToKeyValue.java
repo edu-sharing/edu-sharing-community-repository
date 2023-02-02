@@ -3,6 +3,8 @@ package org.edu_sharing.repository.server.jobs.quartz;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -29,6 +31,9 @@ public class MigrateFactualTermsToKeyValue extends AbstractJob{
     @JobFieldDescription(description = "testmode")
     boolean test = true;
 
+    @JobFieldDescription(description = " weather to use the archive store, default is false")
+    boolean archive = false;
+
     static String PROP = CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD;
     static String PROP_DISPLAY = CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD_DISPLAY;
 
@@ -47,17 +52,20 @@ public class MigrateFactualTermsToKeyValue extends AbstractJob{
             return;
         }
         AuthenticationUtil.runAsSystem(() ->{
-            run(startFolder);
+
+            StoreRef storeRef = (archive) ? StoreRef.STORE_REF_ARCHIVE_SPACESSTORE : StoreRef.STORE_REF_WORKSPACE_SPACESSTORE;
+            run(new NodeRef(storeRef,startFolder));
             return null;
         });
     }
 
-    public void run(String startFolder){
+    public void run(NodeRef startFolder){
 
 
         PersistenHandlerKeywordsDNBMarc ph = new PersistenHandlerKeywordsDNBMarc();
         NodeRunner nr = new NodeRunner();
-        nr.setStartFolder(startFolder);
+        nr.setStartFolder(startFolder.getId());
+        nr.setStartFolderStore(startFolder.getStoreRef());
         nr.setTypes(Arrays.asList(CCConstants.CCM_TYPE_IO));
         nr.setRecurseMode(RecurseMode.Folders);
         nr.setInvalidateCache(true);
