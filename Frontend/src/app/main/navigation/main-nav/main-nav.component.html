@@ -69,7 +69,7 @@
         "
         [placeholder]="mainNavConfig.searchPlaceholder"
         [enableFiltersAndSuggestions]="mainNavConfig.currentScope === 'search'"
-        (search)="doSearch(searchQuery)"
+        (searchSubmit)="doSearch(searchQuery)"
         (clear)="clearSearch()"
       ></es-search-field
     ></es-top-bar>

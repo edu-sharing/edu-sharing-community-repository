@@ -8,6 +8,7 @@ import {
 import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 import { SearchFieldService } from 'src/app/main/navigation/search-field/search-field.service';
 import { ListItem, Node } from '../../core-module/core.module';
+import { CombinedDataSource } from '../../features/node-entries/combined-data-source';
 
 /**
  * Session state for search.component.
@@ -24,7 +25,8 @@ export class SearchService {
     set searchTerm(value: string) {
         this.searchTermSubject.next(value);
     }
-    dataSourceSearchResult: { [key: number]: NodeDataSource<Node> } = [];
+    dataSourceSearchResultAll = new CombinedDataSource<Node>([]);
+    dataSourceSearchResult: NodeDataSource<Node>;
     searchResultRepositories: Node[][] = [];
     dataSourceCollections = new NodeDataSource<Node>();
     columns: ListItem[] = [];
@@ -72,8 +74,8 @@ export class SearchService {
             return;
         }
         this.offset = 0;
-        this.dataSourceSearchResult = [new NodeDataSource<Node>()];
-        this.dataSourceSearchResult[0].isLoading = true;
+        this.dataSourceSearchResult = new NodeDataSource<Node>();
+        this.dataSourceSearchResult.isLoading = true;
         this.dataSourceCollections.reset();
         this.searchResultRepositories = [];
         this.complete = false;
