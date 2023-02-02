@@ -178,8 +178,8 @@ label.search {
     position: fixed;
     right: 0;
     width: $addToWidth;
-    top: 105px + $mainnavHeight;
-    height: calc(100% - 105px - #{$mainnavHeight});
+    top: 115px + $mainnavHeight;
+    height: calc(100% - 115px - #{$mainnavHeight});
     z-index: 2;
     padding-bottom: 20px;
     background-color: #fff;
