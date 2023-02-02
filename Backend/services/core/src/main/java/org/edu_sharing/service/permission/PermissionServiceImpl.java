@@ -1086,6 +1086,12 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 								append("^10 OR ")
 								.append("@ccm\\:groupEmail:")
 								.append("\"").append(LuceneQueryParser.escape(token)).append("\"");
+						// allow global admins to find groups based on authority name (e.g. default system groups)
+						if(isAdminOrSystem()) {
+							subQuery.append(" OR ")
+									.append("@cm\\:authorityName:")
+									.append("\"").append(LuceneQueryParser.escape(token)).append("\"");
+						}
 						subQuery.append(")");
 	
 					}
