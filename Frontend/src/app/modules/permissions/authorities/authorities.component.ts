@@ -263,7 +263,6 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 'PERMISSIONS.MENU_REMOVE_MEMBER',
                 'delete',
                 (data) => {
-                    console.log(this.nodeMemberAdd.getSelection(), data);
                     this.deleteMember(
                         NodeHelperService.getActionbarNodes(
                             this.nodeMemberAdd.getSelection().selected,
@@ -1378,7 +1377,6 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             }
             this._org = event.element as Organization;
         }
-        console.log(event, this._mode);
         this.nodeEntries.getSelection().clear();
         this.nodeEntries.getSelection().select(event.element);
         this.onSelection.emit(this.nodeEntries.getSelection().selected);
