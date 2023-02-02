@@ -67,6 +67,7 @@ import {
 } from 'src/app/features/node-entries/entries-model';
 import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-entries-wrapper.component';
+import { filter } from 'rxjs/operators';
 
 @Component({
     selector: 'es-permissions-authorities',
@@ -322,7 +323,11 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     ngAfterViewInit(): void {
         this.nodeEntries
             .getSelection()
-            .changed.subscribe((selection) => this.onSelection.emit(selection.source.selected));
+            .changed.pipe(
+                // do not fire in org mode since this loses selection on tab switch
+                filter(() => this._mode !== 'ORG'),
+            )
+            .subscribe((selection) => this.onSelection.emit(selection.source.selected));
     }
 
     async ngOnChanges(changes: SimpleChanges) {
