@@ -2,10 +2,12 @@ import { Component } from '@angular/core';
 import { ListItem, RestConstants, ProposalNode, Node } from 'src/app/core-module/core.module';
 import { NodeHelperService } from 'src/app/core-ui-module/node-helper.service';
 import { ListWidget } from '../list-widget';
+import { Organization } from 'ngx-edu-sharing-api';
 
 @Component({
     selector: 'es-list-text',
     templateUrl: './list-text.component.html',
+    styleUrls: ['./list-text.component.scss'],
 })
 export class ListTextComponent extends ListWidget {
     static supportedItems = [
@@ -46,5 +48,12 @@ export class ListTextComponent extends ListWidget {
 
     getI18n(item: ListItem) {
         return (item.type === 'NODE_PROPOSAL' ? 'NODE_PROPOSAL' : 'NODE') + '.' + item.name;
+    }
+
+    isDangerousGroup() {
+        return (
+            (this.node as Organization).authorityName ===
+            RestConstants.GROUP_ALFRESCO_ADMINISTRATORS
+        );
     }
 }
