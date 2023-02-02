@@ -11,17 +11,19 @@ import {
     ViewChild,
 } from '@angular/core';
 import {
-    Authority,
     ConfigurationService,
     DialogButton,
+    GenericAuthority,
     Group,
+    GroupSignupDetails,
     IamAuthorities,
     IamGroups,
     IamUsers,
     ListItem,
+    ListItemSort,
+    Node,
     NodeList,
     Organization,
-    GroupSignupDetails,
     OrganizationOrganizations,
     RestConnectorService,
     RestConstants,
@@ -32,12 +34,8 @@ import {
     UIService,
     User,
     UserSimple,
-    Person,
-    Node,
-    GenericAuthority,
-    ListItemSort,
 } from '../../../core-module/core.module';
-import { Toast } from '../../../core-ui-module/toast';
+import { Toast, ToastType } from '../../../core-ui-module/toast';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -45,7 +43,6 @@ import {
     CustomOptions,
     DefaultGroups,
     ElementType,
-    OptionGroup,
     OptionItem,
     Scope,
 } from '../../../core-ui-module/option-item';
@@ -62,11 +59,11 @@ import { CsvHelper } from '../../../core-module/csv.helper';
 import { ListItemType } from '../../../core-module/ui/list-item';
 import { OptionsHelperService } from '../../../core-ui-module/options-helper.service';
 import {
-    NodeEntriesDisplayType,
+    FetchEvent,
     InteractionType,
     ListSortConfig,
-    FetchEvent,
     NodeClickEvent,
+    NodeEntriesDisplayType,
 } from 'src/app/features/node-entries/entries-model';
 import { NodeDataSource } from 'src/app/features/node-entries/node-data-source';
 import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-entries-wrapper.component';
@@ -323,9 +320,9 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     }
 
     ngAfterViewInit(): void {
-        /*this.nodeEntries
+        this.nodeEntries
             .getSelection()
-            .changed.subscribe((selection) => this.onSelection.emit(selection.source.selected));*/
+            .changed.subscribe((selection) => this.onSelection.emit(selection.source.selected));
     }
 
     async ngOnChanges(changes: SimpleChanges) {
@@ -931,25 +928,25 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             } else {
                 if (groupPosition == 0) {
                     if (errors)
-                        this.toast.toast('PERMISSIONS.USER_ADDED_FAILED', {
+                        this.showToast('PERMISSIONS.USER_ADDED_FAILED', {
                             count: position - errors,
                             error: errors,
                             group: (this.addToSelection[0] as Group).profile.displayName,
                         });
                     else
-                        this.toast.toast('PERMISSIONS.USER_ADDED_TO_GROUP', {
+                        this.showToast('PERMISSIONS.USER_ADDED_TO_GROUP', {
                             count: position,
                             group: (this.addToSelection[0] as Group).profile.displayName,
                         });
                 } else {
                     const count = this.addToList.length * this.addToSelection.length;
                     if (errors)
-                        this.toast.toast('PERMISSIONS.USER_ADDED_FAILED_MULTI', {
+                        this.showToast('PERMISSIONS.USER_ADDED_FAILED_MULTI', {
                             count: count - errors,
                             error: errors,
                         });
                     else
-                        this.toast.toast('PERMISSIONS.USER_ADDED_TO_GROUP_MULTI', {
+                        this.showToast('PERMISSIONS.USER_ADDED_TO_GROUP_MULTI', {
                             count,
                         });
                 }
@@ -1421,5 +1418,14 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             scope: Scope.UserManagement,
         });
         this.nodeMemberAdd.getSelection().changed.subscribe(() => this.updateButtons());
+    }
+
+    private showToast(message: string, translationParams: any) {
+        this.toast.toast(message, translationParams, null, null, null, {
+            message,
+            type: 'info',
+            subtype: ToastType.InfoData,
+            html: true,
+        });
     }
 }
