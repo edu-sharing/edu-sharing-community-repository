@@ -11,12 +11,25 @@
         flex-grow: 1;
         color: $textPrimary;
         font-weight: bold;
-        line-height: 1.5em;
         margin: 0 20px;
         a {
             text-transform: uppercase;
         }
-        @include limitLineCount(3);
+        > div > div {
+            display: grid;
+            grid-template-rows: auto auto;
+            grid-gap: 5px;
+            > span {
+                &:first-child {
+                    @include limitLineCount(1, 1.25);
+                }
+                > a:not(:first-child):before {
+                    color: $textMain;
+                    content: ' | ';
+                    cursor: default;
+                }
+            }
+        }
     }
     es-actionbar {
         min-width: 170px;
