@@ -986,7 +986,7 @@ public class CollectionServiceImpl implements CollectionService{
 		List<String> aspects = new ArrayList<>();
 		aspects.add(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE);
 		logger.debug("cmis helper start");
-		List<org.alfresco.service.cmr.repository.NodeRef> nodes = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO,map,aspects,null,100000);
+		List<org.alfresco.service.cmr.repository.NodeRef> nodes = CMISSearchHelper.fetchNodesByTypeAndFilters(CCConstants.CCM_TYPE_IO,map,aspects,null,100000,(StoreRef)null);
 		logger.debug("cmis helper finished");
 		return nodes;
 	}

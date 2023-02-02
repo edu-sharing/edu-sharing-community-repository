@@ -25,13 +25,13 @@ public class CMISSearchHelper {
 
     private static Logger logger= Logger.getLogger(CMISSearchHelper.class);
 
-    public static ResultSet fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters,List<String> aspects, CMISSearchData data, int from, int pageSize, int maxPermissionChecks){
+    public static ResultSet fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters,List<String> aspects, CMISSearchData data, int from, int pageSize, int maxPermissionChecks, StoreRef storeRef){
     	logger.info("from: "+from+ " pageSize:"+ pageSize);
     	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
         ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 
         SearchParameters params=new SearchParameters();
-        params.addStore(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+        params.addStore((storeRef == null) ? StoreRef.STORE_REF_WORKSPACE_SPACESSTORE : storeRef);
         // will use the database
         params.setLanguage(SearchService.LANGUAGE_CMIS_ALFRESCO);
 
@@ -112,7 +112,7 @@ public class CMISSearchHelper {
         }
     }
 
-    public static List<NodeRef> fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters, List<String> aspects, CMISSearchData data, int maxPermissionChecks){
+    public static List<NodeRef> fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters, List<String> aspects, CMISSearchData data, int maxPermissionChecks, StoreRef storeRef){
     	List<NodeRef> result = new ArrayList<NodeRef>();
 
         int from = 0;
@@ -121,7 +121,7 @@ public class CMISSearchHelper {
 
         ResultSet resultSet = null;
         do {
-     	   resultSet = fetchNodesByTypeAndFilters(nodeType, filters,aspects, data, from, pageSize, maxPermissionChecks);
+     	   resultSet = fetchNodesByTypeAndFilters(nodeType, filters,aspects, data, from, pageSize, maxPermissionChecks, storeRef);
      	   result.addAll(resultSet.getNodeRefs());
      	   from += pageSize;
         }while(resultSet.length() > 0);
@@ -131,11 +131,15 @@ public class CMISSearchHelper {
     }
 
     public static List<NodeRef> fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters, CMISSearchData data){
-       return fetchNodesByTypeAndFilters(nodeType,filters,null, data,1000);
+       return fetchNodesByTypeAndFilters(nodeType,filters,null, data,1000, null);
     }
 
     public static List<NodeRef> fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters){
-        return fetchNodesByTypeAndFilters(nodeType,filters,null, null,1000);
+        return fetchNodesByTypeAndFilters(nodeType,filters,(StoreRef)null);
+    }
+
+    public static List<NodeRef> fetchNodesByTypeAndFilters(String nodeType, Map<String,Object> filters, StoreRef storeRef){
+        return fetchNodesByTypeAndFilters(nodeType,filters,null, null,1000,storeRef);
     }
 
     /**
