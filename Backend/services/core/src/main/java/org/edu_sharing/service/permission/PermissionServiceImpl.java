@@ -1159,9 +1159,10 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 				searchQuery.append(" AND (").append(groupPathQuery).append(")");
 			}
 		}
-
-		searchQuery.append(" AND NOT (@cm\\:authorityName:" + CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS
-				+ " or @cm\\:authorityName:" + CCConstants.AUTHORITY_GROUP_EMAIL_CONTRIBUTORS + ")");
+		if(!isAdminOrSystem()) {
+			searchQuery.append(" AND NOT (@cm\\:authorityName:" + CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS
+					+ " or @cm\\:authorityName:" + CCConstants.AUTHORITY_GROUP_EMAIL_CONTRIBUTORS + ")");
+		}
 
 		logger.info("findGroups: " + searchQuery);
 
