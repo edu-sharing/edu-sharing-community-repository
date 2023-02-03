@@ -810,6 +810,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                 .observeAutoLogout()
                 .pipe(takeUntil(this.destroyed$))
                 .subscribe(() => {
+                    this.topBar?.mainMenuSidebar?.close();
                     this.toast.showModalDialog(
                         'WORKSPACE.AUTOLOGOUT',
                         'WORKSPACE.AUTOLOGOUT_INFO',

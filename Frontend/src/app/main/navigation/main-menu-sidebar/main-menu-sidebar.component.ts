@@ -59,6 +59,10 @@ export class MainMenuSidebarComponent implements OnInit, OnDestroy {
         this.show = !this.show;
     }
 
+    close() {
+        this.show = false;
+    }
+
     // Internal methods, should only be called by this component.
 
     ngOnInit() {
