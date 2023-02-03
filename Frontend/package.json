@@ -54,7 +54,7 @@
     "zone.js": "~0.10.2"
   },
   "devDependencies": {
-    "@angular/cli": "^9.0.6",
+    "@angular/cli": "^9.1.0",
     "@babel/core": "^7.8.7",
     "@storybook/angular": "^5.3.14",
     "@types/core-js": "^2.5.2",
