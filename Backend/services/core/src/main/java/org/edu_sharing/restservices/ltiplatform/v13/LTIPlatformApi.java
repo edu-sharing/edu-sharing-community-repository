@@ -260,11 +260,11 @@ public class LTIPlatformApi {
                             ContentModel.PROP_NAME));
                 }
                 custom.put(LTIPlatformConstants.CUSTOM_CLAIM_GET_CONTENTAPIURL,homeApp.getClientBaseUrl()+"/rest/ltiplatform/v13/content");
+                custom.put(LTIPlatformConstants.CUSTOM_CLAIM_DETAILSSNIPPETURL,homeApp.getClientBaseUrl()+"/rest/lti/v13/details");
                 if(accessStatus != null && accessStatus.equals(AccessStatus.ALLOWED)
                         && loginInitiationSessionObject.isResourceLinkEditMode()
                         && (loginInitiationSessionObject.getVersion() == null || "".equals(loginInitiationSessionObject.getVersion()))){
                     custom.put(LTIPlatformConstants.CUSTOM_CLAIM_POST_CONTENTAPIURL,homeApp.getClientBaseUrl()+"/rest/ltiplatform/v13/content");
-                    custom.put(LTIPlatformConstants.CUSTOM_CLAIM_DETAILSSNIPPETURL,homeApp.getClientBaseUrl()+"/rest/lti/v13/details");
                 }else{
                     logger.info("user "+username +" has no writeContent Permissions");
                 }
