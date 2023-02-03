@@ -1,7 +1,7 @@
 {
   "WORKSPACE": {
     "AUTOLOGOUT": "Du wurdest abgemeldet",
-    "AUTOLOGOUT_INFO": "Deine Sitzung wurde aufgrund von Inaktivität zu Deiner Sicherheit automatisch beendet, da Du mindestens {{ minutes }} Minuten nicht aktiv warst. Bitte melde Dich erneut an.",
+    "AUTOLOGOUT_INFO": "Deine Sitzung wurde zu Deiner Sicherheit automatisch beendet, da Du mindestens {{ minutes }} Minuten nicht aktiv warst. Bitte melde Dich erneut an.",
     "LTI_INFO": "Gib die entsprechenden Daten an, um eine externe LTI-Ressource anzulegen",
     "LTI_INFO_PRIVACY": "<b>Informationen zum Datenschutz:</b><br />Eventuell werden Namen und E-Mail-Adressen der Teilnehmer-/innen an den externen Anbieter übertragen. Frage den Anbieter.",
     "DELETE_MESSAGE_SINGLE": "Möchtest Du das Element '{{name}}' wirklich löschen?",
