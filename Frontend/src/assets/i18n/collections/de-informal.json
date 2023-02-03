@@ -1,6 +1,7 @@
 {
   "COLLECTIONS": {
     "TUTORIAL_HEADING": "Einsammeln was dir gefällt",
+    "NO_SUBCOLLECTIONS_HINT": "Du kannst weitere Sammlungen über den \"Neu\"-Button anlegen",
     "CREATE": {
       "PRIVATE_DESCRIPTION": "Außer Dir kann die Sammlung niemand sehen. Du kannst die Sammlung später für andere freigeben oder veröffentlichen.",
       "SHARED_DESCRIPTION": "Sammle gemeinsam mit Freunden und Kollegen. Dabei kannst Du festlegen, wer was tun darf.",

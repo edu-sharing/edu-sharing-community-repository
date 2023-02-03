@@ -18,6 +18,8 @@
     "EDITORIAL_PUBLIC_INFO": "The editorial collection is for all users and guests visible",
     "CREATOR": "Creator",
     "SHARING_STATE": "Sharing state",
+    "NO_SUBCOLLECTIONS": "No subcollections available",
+    "NO_SUBCOLLECTIONS_HINT": "You can create new subcollections using the \"New\"-Button",
     "STEP": {
       "GENERAL": "Title, Image, Description and Color",
       "METADATA": "Additional information",
@@ -103,8 +105,8 @@
   "collections_noCollections": "There are no public collections available yet.",
 
   "collections_content": "Content",
-  "collections_noContentAvailable": "No content available yet.",
-  "collections_howToAddContent": "Just click on the \"ADD MATERIAL\" button and use the search engine to find contents for your collection.",
+  "collections_noContentAvailable": "No content available",
+  "collections_howToAddContent": "Just click on the \"Add Material\" button and use the search engine to find contents for your collection.",
 
   "collectionNew_preview": "preview of the collection",
   "collectionNew_setColor": "color of the collection:",
