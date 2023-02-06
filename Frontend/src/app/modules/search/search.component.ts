@@ -101,6 +101,7 @@ import { NodeEntriesWrapperComponent } from 'src/app/features/node-entries/node-
 import { A } from '@angular/cdk/keycodes';
 import { CombinedDataSource } from '../../features/node-entries/combined-data-source';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
+import { DialogsService } from '../../features/dialogs/dialogs.service';
 
 @Component({
     selector: 'es-search',
@@ -179,7 +180,6 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     extendedRepositorySelected = false;
     savedSearch: Node[] = [];
     savedSearchColumns: ListItem[] = [];
-    saveSearchDialog = false;
     savedSearchLoading = false;
     savedSearchQuery: string = null;
     savedSearchQueryModel: string = null;
@@ -249,6 +249,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         private ngZone: NgZone,
         private loadingScreen: LoadingScreenService,
         private mainNavService: MainNavService,
+        private dialogs: DialogsService,
     ) {
         // Subscribe early to make sure the suggestions are requested with search requests.
         this.didYouMeanSuggestion$.pipe(takeUntil(this.destroyed$)).subscribe();
@@ -1307,7 +1308,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     this.applyMode ? 'SEARCH.EMBED_SEARCH_ACTION' : 'SEARCH.SAVE_SEARCH_ACTION',
                     this.applyMode ? 'redo' : 'save',
                     () => {
-                        this.saveSearchDialog = true;
+                        this.openSaveSearchDialog();
                     },
                 ),
             );
@@ -1329,50 +1330,19 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         this.mdsButtons = DialogButton.fromOptionItem([searchAction]);
     }
 
-    closeSaveSearchDialog() {
-        this.saveSearchDialog = false;
-    }
-
-    saveSearch(name: string, replace = false) {
-        this.search
-            .saveSearch(
-                name,
-                this.queryId,
-                this.getCriterias(),
-                this.currentRepository,
-                this.mdsId,
-                replace,
-            )
-            .subscribe(
-                (data: NodeWrapper) => {
-                    this.saveSearchDialog = false;
-                    this.toast.toast('SEARCH.SAVE_SEARCH.TOAST_SAVED');
-                    this.loadSavedSearch();
-                    if (this.applyMode) {
-                        this.nodeHelper.addNodeToLms(data.node, this.searchService.reurl);
-                    }
-                },
-                (error: any) => {
-                    if (error.status === RestConstants.DUPLICATE_NODE_RESPONSE) {
-                        this.toast.showConfigurableDialog({
-                            title: 'SEARCH.SAVE_SEARCH.SEARCH_EXISTS_TITLE',
-                            message: 'SEARCH.SAVE_SEARCH.SEARCH_EXISTS_MESSAGE',
-                            buttons: [
-                                new DialogButton('RENAME', { color: 'standard' }, () =>
-                                    this.toast.closeModalDialog(),
-                                ),
-                                new DialogButton('REPLACE', { color: 'primary' }, () => {
-                                    this.toast.closeModalDialog();
-                                    this.saveSearch(name, true);
-                                }),
-                            ],
-                            isCancelable: true,
-                        });
-                    } else {
-                        this.toast.error(error);
-                    }
-                },
-            );
+    private async openSaveSearchDialog(): Promise<void> {
+        const dialogRef = await this.dialogs.openSaveSearchDialog({
+            name: this.currentSavedSearch ? this.currentSavedSearch.title : null,
+            searchString: this.searchService.searchTerm,
+        });
+        dialogRef.afterClosed().subscribe((node) => {
+            if (node) {
+                this.loadSavedSearch();
+                if (this.applyMode) {
+                    this.nodeHelper.addNodeToLms(node, this.searchService.reurl);
+                }
+            }
+        });
     }
 
     private getCriterias(

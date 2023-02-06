@@ -40,3 +40,8 @@ export const DISCARD_OR_BACK: GenericDialogButton<'DISCARD' | 'BACK'>[] = [
     { label: 'BACK', config: { color: 'standard' } },
     { label: 'DISCARD', config: { color: 'primary' } },
 ];
+
+export const REPLACE_OR_BACK: GenericDialogButton<'REPLACE' | 'BACK'>[] = [
+    { label: 'BACK', config: { color: 'standard' } },
+    { label: 'REPLACE', config: { color: 'primary' } },
+];

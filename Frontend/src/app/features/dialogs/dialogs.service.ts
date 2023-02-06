@@ -55,6 +55,10 @@ import {
 } from './dialog-modules/node-template-dialog/node-template-dialog-data';
 import { QrDialogData } from './dialog-modules/qr-dialog/qr-dialog.component';
 import {
+    SaveSearchDialogData,
+    SaveSearchDialogResult,
+} from './dialog-modules/save-search-dialog/save-search-dialog-data';
+import {
     SendFeedbackDialogData,
     SendFeedbackDialogResult,
 } from './dialog-modules/send-feedback-dialog/send-feedback-dialog-data';
@@ -442,6 +446,21 @@ export class DialogsService {
             avatar: { kind: 'icon', icon: 'copyright' },
             minWidth: 800,
             minHeight: 800,
+        });
+    }
+
+    async openSaveSearchDialog(
+        data: SaveSearchDialogData,
+    ): Promise<CardDialogRef<SaveSearchDialogData, SaveSearchDialogResult>> {
+        const { SaveSearchDialogComponent } = await import(
+            './dialog-modules/save-search-dialog/save-search-dialog.module'
+        );
+        return this.cardDialog.open(SaveSearchDialogComponent, {
+            title: 'SEARCH.SAVE_SEARCH.TITLE',
+            avatar: { kind: 'icon', icon: 'search' },
+            width: 600,
+            data,
+            closable: Closable.Standard,
         });
     }
 }

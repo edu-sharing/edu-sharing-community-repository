@@ -65,9 +65,9 @@
     "SAVED_SEARCH_ONLY_OWN": "Show only my searches.",
     "SAVED_SEARCH_QUERY": "browse...",
     "SAVE_SEARCH": {
-      "TITLE": "save search",
+      "TITLE": "Save Search",
       "DESCRIPTION": "Your current search criteria are saved in a file. When you open this file, you can restore the current search query. The results of the current search are not saved and will change with new / deleted objects.",
-      "NAME": "description",
+      "NAME": "Label",
       "UNKNOWN_QUERY": "new search",
       "SEARCH_EXISTS_TITLE": "A search with the same criteria has already been saved.",
       "SEARCH_EXISTS_MESSAGE": "A saved search query with the same name already exists. If you continue, the existing query will be replaced with the current settings.",

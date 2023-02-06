@@ -499,12 +499,5 @@
       </a>
     </div>
   </div>
-  <es-search-save-search
-    *ngIf="saveSearchDialog"
-    [searchQuery]="searchService.searchTerm"
-    [name]="currentSavedSearch ? currentSavedSearch.title : null"
-    (onClose)="closeSaveSearchDialog()"
-    (onSave)="saveSearch($event)"
-  ></es-search-save-search>
   <es-global-progress *ngIf="globalProgress"></es-global-progress>
 </div>
