@@ -1108,6 +1108,7 @@ public class LTIPlatformApi {
 
                 ContentReader reader = serviceRegistry.getContentService().getReader(nodeRef, ContentModel.PROP_CONTENT);
                 if (reader == null) {
+                    logger.info("no content found for " + nodeRef);
                     return Response.status(Response.Status.NOT_FOUND).entity("no content found").build();
                 }
 
