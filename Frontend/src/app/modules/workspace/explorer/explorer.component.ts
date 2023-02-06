@@ -1,5 +1,6 @@
 import {
     AfterViewInit,
+    ChangeDetectorRef,
     Component,
     EventEmitter,
     Input,
@@ -160,7 +161,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         allowed: true,
         active: RestConstants.CM_NAME,
         direction: 'asc',
-        columns: RestConstants.POSSIBLE_SORT_BY_FIELDS,
+        columns: [],
     };
 
     public columns: ListItem[] = [];
@@ -182,17 +183,12 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     _root: NodeRoot;
     @Input() set root(root: NodeRoot) {
         this._root = root;
-        if (['MY_FILES', 'SHARED_FILES'].includes(root)) {
-            this.sort.columns = RestConstants.POSSIBLE_SORT_BY_FIELDS;
-        } else {
-            this.sort.columns = RestConstants.POSSIBLE_SORT_BY_FIELDS_SOLR;
-        }
         this.storage
             .get(SessionStorageService.KEY_WORKSPACE_SORT + root, null)
             .subscribe((data) => {
-                if (data?.sortBy != null) {
-                    this.sort.active = data.sortBy;
-                    this.sort.direction = data.sortAscending ? 'asc' : 'desc';
+                if (data?.active != null) {
+                    this.sort.active = data.active;
+                    this.sort.direction = data.direction;
                 } else {
                     this.sort.active = RestConstants.CM_NAME;
                     this.sort.direction = 'asc';
@@ -220,6 +216,18 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         if (this.node$.value == null && !this.searchQuery$.value) return;
         if (this.dataSource.isLoading) {
             // return;
+        }
+        if (this.searchQuery$.value) {
+            this.sort.columns = RestConstants.POSSIBLE_SORT_BY_FIELDS_SOLR;
+        } else {
+            this.sort.columns = RestConstants.POSSIBLE_SORT_BY_FIELDS;
+        }
+        if (!this.sort.columns.some((s) => s.name === this.sort.active)) {
+            this.sort.active = RestConstants.CM_NAME;
+            this.sort.direction = 'asc';
+            // set sorting will reinit everything
+            this.setSorting(this.sort);
+            return;
         }
         if (event?.reset) {
             this.dataSource.reset();
@@ -380,9 +388,9 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     }
     public async setSorting(config: ListSortConfig) {
         this.sort = config;
-        this.storage.set(SessionStorageService.KEY_WORKSPACE_SORT + this._root, {
-            sortBy: config.active,
-            sortAscending: config.direction === 'asc',
+        await this.storage.set(SessionStorageService.KEY_WORKSPACE_SORT + this._root, {
+            active: config.active,
+            direction: config.direction,
         });
         await this.load({ reset: true, offset: 0 });
     }

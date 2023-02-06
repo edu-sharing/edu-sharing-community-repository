@@ -23,6 +23,7 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
 
@@ -612,7 +613,12 @@ public class MetadataTemplateRenderer {
 
 	private static String cleanupText(MetadataWidget.TextEscapingPolicy textEscapingPolicy, String untrustedHTML) {
 		if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.htmlBasic)) {
-			PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.BLOCKS).and(Sanitizers.LINKS);
+			PolicyFactory policy = Sanitizers.FORMATTING.and(Sanitizers.BLOCKS).and(
+					new HtmlPolicyBuilder()
+							.allowStandardUrlProtocols().allowElements("a")
+							.allowAttributes("href", "target").onElements("a").requireRelNofollowOnLinks()
+							.toFactory()
+			);
 			return policy.sanitize(untrustedHTML);
 		} else if(textEscapingPolicy.equals(MetadataWidget.TextEscapingPolicy.all)){
 			return StringEscapeUtils.escapeHtml4(untrustedHTML);

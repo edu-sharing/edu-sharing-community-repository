@@ -296,7 +296,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                         this.collection = collection;
                         this.mainNavUpdateTrigger.next();
                         this.dataSourceCollections.isLoading = false;
-
+                        this.setOptionsCollection();
                         this.refreshContent();
                         if (
                             this.collection.access.indexOf(

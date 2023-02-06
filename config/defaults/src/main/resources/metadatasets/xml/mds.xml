@@ -102,6 +102,7 @@
 			<hideIfEmpty>true</hideIfEmpty>
 			<valuespace>valuespaces.xml</valuespace>
 			<valuespace_i18n>valuespaces_i18n</valuespace_i18n>
+			<valuespace_sort>caption</valuespace_sort>
 			<searchable>true</searchable>
 		</widget>
 		<widget>

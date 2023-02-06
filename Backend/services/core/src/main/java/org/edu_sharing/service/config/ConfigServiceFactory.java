@@ -6,6 +6,7 @@ import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.config.model.Config;
 import org.edu_sharing.alfresco.service.config.model.KeyValuePair;
 import org.edu_sharing.alfresco.service.config.model.Language;
+import org.edu_sharing.repository.server.RequestHelper;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
@@ -47,14 +48,7 @@ public class ConfigServiceFactory {
 		return getCurrentDomain(Context.getCurrentInstance().getRequest());
 	}
 	public static String getCurrentDomain(ServletRequest req) {
-		if(req instanceof HttpServletRequest) {
-			// prefer the proxy given host header if it exists to resolve the current domain
-			String originalHost = ((HttpServletRequest) req).getHeader("x-forwarded-host");
-			if(originalHost != null) {
-				return originalHost;
-			}
-		}
-		return req.getServerName();
+		return new RequestHelper(req).getServerName();
 	}
 
 	public static List<KeyValuePair> getLanguageData(List<Language> languages,String language) {

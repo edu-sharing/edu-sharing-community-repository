@@ -2,18 +2,17 @@
   <div class="info">
     <div *ngIf="_mode !== 'ORG' && !embedded">
       <div *ngIf="!org">
-        {{ 'PERMISSIONS.INFO_GLOBAL_' + _mode | translate }}
-        <br />
+        <span>{{ 'PERMISSIONS.INFO_GLOBAL_' + _mode | translate }}</span>
         <a class="clickable" (click)="setOrgTab()">{{ 'PERMISSIONS.CHOOSE_ORG' | translate }}</a>
       </div>
       <div *ngIf="org">
-        {{ 'PERMISSIONS.INFO_ORG_' + _mode | translate: { org: org.profile.displayName } }}
-        <br />
+        <span>{{
+          'PERMISSIONS.INFO_ORG_' + _mode | translate: { org: org.profile.displayName }
+        }}</span>
         <span *ngIf="isAdmin">
           <a class="clickable" (click)="deselectOrg()">{{ 'PERMISSIONS.NO_ORG' | translate }}</a>
-          |
+          <a class="clickable" (click)="setOrgTab()">{{ 'PERMISSIONS.CHOOSE_ORG' | translate }}</a>
         </span>
-        <a class="clickable" (click)="setOrgTab()">{{ 'PERMISSIONS.CHOOSE_ORG' | translate }}</a>
       </div>
     </div>
   </div>
@@ -370,7 +369,7 @@
   </div>
 </es-card>
 <!-- <div *ngIf="addTo" [@fade]="addTo" class="dialog darken"></div> -->
-<div *ngIf="addTo" [@fromRight]="addTo" class="addTo">
+<div *ngIf="addTo" [@fromRight]="addTo" class="addTo scrollWithBanner">
   <div class="addToList">
     <es-permissions-authorities
       #addToComponent

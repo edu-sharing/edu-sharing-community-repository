@@ -1,8 +1,16 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import {
+    ChangeDetectorRef,
+    Component,
+    ElementRef,
+    EventEmitter,
+    Input,
+    Output,
+    ViewChild,
+} from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete/autocomplete';
-import { forkJoin, Observable, of } from 'rxjs';
-import { catchError, debounceTime, map, startWith, switchMap } from 'rxjs/operators';
+import { BehaviorSubject, forkJoin, Observable, of } from 'rxjs';
+import { catchError, debounceTime, filter, map, startWith, switchMap, tap } from 'rxjs/operators';
 import {
     Authority,
     AuthorityProfile,
@@ -67,6 +75,7 @@ export class AuthoritySearchInputComponent {
 
     input = new FormControl('');
     suggestionGroups$: Observable<SuggestionGroup[]>;
+    suggestionLoading = new BehaviorSubject<boolean>(false);
 
     constructor(
         private iam: RestIamService,
@@ -74,11 +83,21 @@ export class AuthoritySearchInputComponent {
         private restConnector: RestConnectorService,
         private namePipe: PermissionNamePipe,
         private nodeHelper: NodeHelperService,
+        private changeDetectorRef: ChangeDetectorRef,
     ) {
         this.suggestionGroups$ = this.input.valueChanges.pipe(
             startWith(''),
-            debounceTime(200),
+            debounceTime(500),
+            filter(() => {
+                if (this.input.value?.length < 2) {
+                    this.suggestionLoading.next(false);
+                    return false;
+                }
+                return true;
+            }),
+            tap(() => this.suggestionLoading.next(true)),
             switchMap((value) => this.getSuggestions(value)),
+            tap(() => this.suggestionLoading.next(false)),
         );
     }
 

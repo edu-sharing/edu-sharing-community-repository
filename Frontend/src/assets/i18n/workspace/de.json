@@ -31,7 +31,7 @@
     "LINK_DUPLICATES_INFO": "Für diesen Link wurden bereits ähnliche Inhalte gefunden. Bitte überprüfen Sie, ob dieser Inhalt bereits existiert",
     "RELOGIN": "Neu Anmelden",
     "AUTOLOGOUT": "Sie wurden abgemeldet",
-    "AUTOLOGOUT_INFO": "Ihre Sitzung wurde aufgrund von Inaktivität zu Ihrer Sicherheit automatisch beendet, da Sie mindestens {{ minutes }} Minuten nicht aktiv waren. Bitte melden Sie sich erneut an.",
+    "AUTOLOGOUT_INFO": "Ihre Sitzung wurde zu Ihrer Sicherheit automatisch beendet, da sie mindestens {{ minutes }} Minuten nicht aktiv waren. Bitte melden sie sich erneut an.",
     "ADD_FOLDER": "Neuer Ordner",
     "ADD_LTI": "LTI-Tools",
     "LTI_HEADING": "Link als externe LTI-Ressource anlegen",

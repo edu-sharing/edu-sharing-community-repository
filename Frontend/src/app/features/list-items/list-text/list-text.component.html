@@ -3,7 +3,7 @@
 </label>
 <ng-container *ngIf="item.type === 'ORG' || item.type === 'GROUP'">
   <ng-container [ngSwitch]="item.name">
-    <span *ngSwitchCase="'displayName'">
+    <span *ngSwitchCase="'displayName'" [class.type-danger]="isDangerousGroup()">
       {{ $any(getNode()).profile.displayName }}
     </span>
     <span *ngSwitchCase="'groupType'">
