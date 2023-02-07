@@ -3,13 +3,13 @@ package org.edu_sharing.service.rendering;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import lombok.RequiredArgsConstructor;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -24,7 +24,6 @@ import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationTool;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
-import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.rendering.RenderingErrorServlet;
 import org.edu_sharing.repository.server.rendering.RenderingException;
 import org.edu_sharing.repository.server.tools.*;
@@ -35,19 +34,25 @@ import org.edu_sharing.restservices.shared.NodeUrls;
 import org.edu_sharing.restservices.shared.SearchResult;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.config.ConfigServiceFactory;
+import org.edu_sharing.service.connector.ConnectorServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
+import org.edu_sharing.service.nodeservice.annotation.NodeManipulation;
+import org.edu_sharing.service.nodeservice.annotation.NodeOriginal;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletResponse;
 
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class RenderingServiceImpl implements RenderingService{
 
 
-	private PermissionService permissionService;
+	private final NodeService nodeService;
+	private final PermissionService permissionService;
 	ApplicationInfo appInfo;
 	
 	HashMap<String,String> authInfo;
@@ -57,12 +62,12 @@ public class RenderingServiceImpl implements RenderingService{
 	
 	Logger logger = Logger.getLogger(RenderingServiceImpl.class);
 
-	public RenderingServiceImpl(String appId){
+	@Override
+	public void setAppId(String appId) {
 
 		try{
 			this.appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
 			this.authTool = RepoFactory.getAuthenticationToolInstance(appId);
-			this.permissionService = PermissionServiceFactory.getLocalService();
 
 			if((AuthenticationUtil.isRunAsUserTheSystemUser() || "admin".equals(AuthenticationUtil.getRunAsUser())) ) {
 				logger.debug("starting in runas user mode");
@@ -71,8 +76,8 @@ public class RenderingServiceImpl implements RenderingService{
 			}else {
 				this.authInfo = this.authTool.validateAuthentication(Context.getCurrentInstance().getCurrentInstance().getRequest().getSession());
 			}
-			
-			
+
+
 		}catch(Throwable e){
 			throw new RuntimeException(e);
 		}
@@ -163,6 +168,7 @@ public class RenderingServiceImpl implements RenderingService{
 		long time=System.currentTimeMillis();
 		NodeService nodeService = NodeServiceFactory.getNodeService(appInfo.getAppId());
 		RenderingServiceData data=new RenderingServiceData();
+		data.setEditors(getAvailableEditors(nodeId, nodeVersion, user));
 		RepositoryDao repoDao = RepositoryDao.getRepository(this.appInfo.getAppId());
 		NodeDao nodeDao = NodeDao.getNodeWithVersion(repoDao, nodeId, nodeVersion);
 
@@ -241,6 +247,53 @@ public class RenderingServiceImpl implements RenderingService{
 
 		logger.info("Preparing rendering data took "+(System.currentTimeMillis()-time)+" ms");
 		return data;
+	}
+
+	@NodeManipulation
+	List<RenderingServiceData.Editor> getAvailableEditors(@NodeOriginal String nodeId, String nodeVersion, String user) {
+		if(nodeVersion != null && !nodeVersion.equals("-1")) {
+			return Collections.emptyList();
+		}
+		return ConnectorServiceFactory.getConnectorList().getConnectors().stream().filter(
+				connector -> {
+					if (!connector.isHasViewMode() && !permissionService.hasPermission(
+							StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
+							nodeId, user, CCConstants.PERMISSION_WRITE
+					)
+					) {
+						return false;
+					}
+					String mimetype = nodeService.getContentMimetype(
+							StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId
+					);
+					return connector.getFiletypes().stream().anyMatch(type -> {
+						if(!type.isEditable()) {
+							return false;
+						}
+						if(type.getMimetype().equals("application/zip") && Objects.equals(mimetype, type.getMimetype())) {
+							String ccRessourcetype = nodeService.getProperty(
+									StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.CCM_PROP_CCRESSOURCETYPE
+							);
+							String ccRessourceVersion = nodeService.getProperty(
+									StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.CCM_PROP_CCRESSOURCEVERSION
+							);
+							String ccresourcesubtype = nodeService.getProperty(
+									StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.CCM_PROP_CCRESSOURCESUBTYPE
+							);
+							return
+									(type.getCcressourcetype() == null || type.getCcressourcetype().equals(ccRessourcetype)) &&
+									(type.getCcressourceversion() == null || type.getCcressourceversion().equals(ccRessourceVersion)) &&
+									(type.getCcresourcesubtype() == null || type.getCcresourcesubtype().equals(ccresourcesubtype));
+						}
+						return Objects.equals(mimetype, type.getMimetype());
+					});
+				}
+		).map(connector -> {
+			RenderingServiceData.Editor editor = new RenderingServiceData.Editor();
+			editor.setId(connector.getId());
+			editor.setOnlyDesktop(connector.isOnlyDesktop());
+			return editor;
+		}).collect(Collectors.toList());
 	}
 
 	@Override

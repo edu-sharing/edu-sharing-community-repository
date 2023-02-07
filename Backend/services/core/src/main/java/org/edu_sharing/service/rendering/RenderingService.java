@@ -23,6 +23,8 @@ public interface RenderingService {
      */
     boolean renderingSupported();
 
+    void setAppId(String appId);
+
     default RenderingVersionInfo getVersion() throws GeneralSecurityException {
         return null;
     };

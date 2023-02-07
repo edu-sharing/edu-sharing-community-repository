@@ -31,4 +31,10 @@ public class RenderingServiceNotSupported implements RenderingService{
 	public boolean renderingSupported() {
 		return false;
 	}
+
+
+	@Override
+	public void setAppId(String appId) {
+
+	}
 }
