@@ -50,7 +50,7 @@
     }}</mat-checkbox>
     <div class="status-change" *ngIf="editStatus.status.date">
       {{ 'PERMISSIONS.STATUS_LAST_CHANGE' | translate }}:
-      {{ editStatus.status.date | formatDate: { useRelativeLabels: false, time: true } }}
+      {{ editStatus.status.date | formatDate: { relative: false, time: true } }}
     </div>
   </div>
 </es-card>

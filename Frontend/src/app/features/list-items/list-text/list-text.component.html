@@ -168,14 +168,10 @@
           : ''
       }}
     </ng-container>
-    <ng-container *ngIf="DATE_FIELDS.indexOf(item.name) !== -1">
-      {{
-        $any(getNode()).properties[item.name]
-          ? ($any(getNode()).properties[item.name][0] | formatDate)
-          : ''
-      }}
+    <ng-container *ngIf="DATE_FIELDS.includes(item.name)">
+      {{ $any(getNode()).properties[item.name]?.[0] | formatDate: { async: true } | async }}
     </ng-container>
-    <ng-container *ngIf="VCARD_FIELDS.indexOf(item.name) !== -1">
+    <ng-container *ngIf="VCARD_FIELDS.includes(item.name)">
       {{
         $any(getNode()).properties[item.name]
           ? ($any(getNode()).properties[item.name][0] | vcardName)
