@@ -64,7 +64,9 @@
         >
       </mat-label>
       <ng-container *ngTemplateOutlet="content"></ng-container>
-      <mat-hint *ngIf="widget.definition.bottomCaption">
+      <!-- Use [hidden] instead of *ngIf to avoid changed-after-checked errors when setting
+      bottomCaption. -->
+      <mat-hint [hidden]="!widget.definition.bottomCaption">
         {{ widget.definition.bottomCaption }}
       </mat-hint>
       <mat-error [hidden]="!control.errors?.required">
