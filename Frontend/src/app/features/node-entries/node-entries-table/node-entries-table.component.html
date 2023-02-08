@@ -105,7 +105,7 @@
         mat-sort-header
         [disabled]="!(entriesService.sort?.allowed && isSortable(column))"
         [class.mat-column-primary]="first"
-        >{{ column | appListItemLabel }}</mat-header-cell
+        >{{ column | esListItemLabel | async }}</mat-header-cell
       >
     </ng-container>
     <mat-cell

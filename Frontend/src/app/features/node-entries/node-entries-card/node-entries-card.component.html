@@ -221,7 +221,7 @@
         </ng-container>
         <ng-container *ngIf="!first">
           <label>
-            {{ displayPart | appListItemLabel }}
+            {{ displayPart | esListItemLabel | async }}
           </label>
           <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
         </ng-container>
