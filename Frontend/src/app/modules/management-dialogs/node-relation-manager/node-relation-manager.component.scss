@@ -1,5 +1,12 @@
 @import '../../../core-ui-module/styles/variables';
 
+@mixin nodeGroup() {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    grid-gap: 10px;
+    align-items: center;
+    padding: 5px 10px;
+}
 .card-content-padding {
     form {
         display: flex;
@@ -19,6 +26,10 @@
         flex-direction: column;
         padding: 20px 15px;
         background-color: $cardLightBackground;
+        .relation-node {
+            width: 100%;
+            @include nodeGroup();
+        }
         .relation-details {
             display: flex;
             width: 100%;
@@ -62,11 +73,7 @@
             margin: 10px 0;
             // padding: 5px 10px;
             .relation-node {
-                display: grid;
-                grid-template-columns: 1fr auto auto;
-                grid-gap: 10px;
-                align-items: center;
-                padding: 5px 10px;
+                @include nodeGroup();
 
                 &.added {
                     border-radius: 25px;

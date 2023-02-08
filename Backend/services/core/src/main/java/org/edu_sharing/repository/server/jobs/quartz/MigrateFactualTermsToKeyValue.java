@@ -47,6 +47,7 @@ public class MigrateFactualTermsToKeyValue extends AbstractJob{
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         startFolder = (String)jobExecutionContext.getJobDetail().getJobDataMap().get("startFolder");
         test = new Boolean((String)jobExecutionContext.getJobDetail().getJobDataMap().get("test"));
+        archive = new Boolean((String)jobExecutionContext.getJobDetail().getJobDataMap().get("archive"));
         if(startFolder == null || startFolder.trim().equals("")) {
             logger.error("no start folder provided");
             return;

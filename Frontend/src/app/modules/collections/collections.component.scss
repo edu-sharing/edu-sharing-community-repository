@@ -159,9 +159,9 @@ section {
 
 .collection-nocontent-big {
     font-size: $fontSizeLarge;
-    color: $textLight;
-    margin-top: 20px;
-    text-align: center;
+    color: $textMain;
+    margin: 20px 0;
+    // text-align: center;
     width: 100%;
 }
 
@@ -169,6 +169,7 @@ section {
     padding: 16px;
     padding-top: 0px;
     padding-left: 0px;
+    color: $textLight;
 }
 
 .icon-bottom {
@@ -374,6 +375,22 @@ section {
         i {
             position: relative;
             top: 7px;
+        }
+    }
+}
+.references-wrapper,
+.collections-wrapper {
+    &.wrapper-empty.wrapper-edit {
+        display: grid;
+        grid-template-columns: max-content auto;
+        grid-gap: 50px;
+        align-items: center;
+        @media only screen and (max-width: $mobileWidth+$mobileStage*1) {
+            grid-gap: 0;
+            grid-template-columns: auto;
+            .collection-nocontent-container {
+                padding: 0 20px;
+            }
         }
     }
 }

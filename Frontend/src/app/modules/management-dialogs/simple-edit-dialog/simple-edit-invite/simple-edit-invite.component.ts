@@ -35,6 +35,7 @@ import {
     ShareMode,
     SharePublishComponent,
 } from '../../../workspace/share/share-publish/share-publish.component';
+import { AuthenticationService } from 'ngx-edu-sharing-api';
 
 type Org = { organization: Organization; groups?: any };
 
@@ -91,6 +92,7 @@ export class SimpleEditInviteComponent {
         private configService: ConfigurationService,
         private iamApi: RestIamService,
         private organizationApi: RestOrganizationService,
+        public authenticationService: AuthenticationService,
         private toast: Toast,
     ) {
         this.configService

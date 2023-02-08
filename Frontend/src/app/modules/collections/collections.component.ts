@@ -1023,7 +1023,7 @@ export class CollectionsMainComponent implements OnInit, OnDestroy {
                     this.mainNavUpdateTrigger.next();
 
                     this.renderBreadcrumbs();
-
+                    this.setOptionsCollection();
                     this.refreshContent(callback);
                     if (this.feedbackAllowed() && this.params.feedback === 'true') {
                         this.mainNavService.getDialogs().materialWriteFeedback = collection;

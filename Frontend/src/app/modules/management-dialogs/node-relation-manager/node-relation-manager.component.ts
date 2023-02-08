@@ -1,6 +1,7 @@
 import { trigger } from '@angular/animations';
 import {
     ChangeDetectionStrategy,
+    ChangeDetectorRef,
     Component,
     EventEmitter,
     Input,
@@ -74,6 +75,7 @@ export class NodeRelationManagerComponent implements OnInit, OnChanges {
         private userService: UserService,
         private toast: Toast,
         private bridgeService: BridgeService,
+        private changeDetectorRef: ChangeDetectorRef,
     ) {}
 
     ngOnInit() {
@@ -274,6 +276,7 @@ export class NodeRelationManagerComponent implements OnInit, OnChanges {
                 (relations) => {
                     this.relations = relations.relations;
                     this.loading = false;
+                    this.changeDetectorRef.detectChanges();
                 },
                 (e) => {
                     this.close.emit(false);
