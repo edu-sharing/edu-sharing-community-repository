@@ -1,4 +1,9 @@
-<!-- <mat-progress-bar mode="indeterminate"></mat-progress-bar> -->
+<mat-progress-bar
+  mode="determinate"
+  [value]="progressBarIsVisible ? loadingProgress.value : 0"
+  [@fadeOut]="progressBarIsVisible ? 'visible' : 'hidden'"
+  (animationEnd)="onProgressBarAnimationEnd()"
+></mat-progress-bar>
 
 <ng-container *ngIf="tabBarIsVisible; else noTabsPage">
   <nav mat-tab-nav-bar [tabPanel]="tabPanel">

@@ -180,7 +180,13 @@
     </button>
   </div>
 </ng-container>
-<ng-container *ngIf="entriesService.dataSource.isLoading">
+<ng-container
+  *ngIf="
+    entriesService.dataSource.isLoading === true ||
+    entriesService.dataSource.isLoading === 'initial' ||
+    entriesService.dataSource.isLoading === 'page'
+  "
+>
   <ng-container *ngTemplateOutlet="loading"></ng-container>
 </ng-container>
 

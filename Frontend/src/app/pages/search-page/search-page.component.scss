@@ -6,11 +6,12 @@
     flex-direction: column;
     margin-top: var(--mainnavHeight);
     min-height: calc(100vh - var(--mainnavHeight));
-    --top-bars-height: var(--mainnavHeight);
-    &.has-tab-bar {
-        --tab-bar-height: 48px;
-        --top-bars-height: calc(var(--mainnavHeight) + var(--tab-bar-height));
-    }
+    // height: calc(100vh - var(--mainnavHeight));
+}
+
+mat-progress-bar {
+    flex-shrink: 0;
+    transition: unset;
 }
 
 // Unset materialize styles
@@ -25,10 +26,6 @@ nav {
 }
 
 .mat-tab-header {
-    position: sticky;
-    top: var(--mainnavHeight);
-    z-index: 3;
-    background-color: white;
 }
 
 .mat-tab-label-active {
@@ -58,13 +55,12 @@ mat-tab-nav-panel {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
+    min-height: 0;
 }
 
 es-search-page-toolbar {
-    margin: 20px 0;
     padding-left: 20px;
     padding-right: 20px;
-    z-index: 2;
 }
 
 .mat-drawer-container {

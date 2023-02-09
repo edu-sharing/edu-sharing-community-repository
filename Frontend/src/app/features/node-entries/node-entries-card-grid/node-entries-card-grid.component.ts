@@ -2,6 +2,7 @@ import { CdkDragEnter, CdkDropList, moveItemInArray } from '@angular/cdk/drag-dr
 import {
     Component,
     ElementRef,
+    HostBinding,
     Input,
     NgZone,
     OnChanges,

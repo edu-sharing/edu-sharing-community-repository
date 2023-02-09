@@ -1,7 +1,9 @@
+import { animate, state, style, transition, trigger } from '@angular/animations';
 import { AfterViewInit, Component, HostBinding, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { map } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 import { ListItem, Node, RestConstants } from '../../core-module/core.module';
+import { UIAnimation } from '../../core-module/ui/ui-animation';
 import { Scope } from '../../core-ui-module/option-item';
 import { NodeEntriesDisplayType } from '../../features/node-entries/entries-model';
 import { NodeEntriesWrapperComponent } from '../../features/node-entries/node-entries-wrapper.component';
@@ -14,6 +16,13 @@ import { UserModifiableValuesService } from './user-modifiable-values';
     templateUrl: './search-page.component.html',
     styleUrls: ['./search-page.component.scss'],
     providers: [SearchPageService],
+    animations: [
+        trigger('fadeOut', [
+            state('visible', style({ opacity: 1 })),
+            state('hidden', style({ opacity: 0 })),
+            transition('visible => hidden', [animate(UIAnimation.ANIMATION_TIME_NORMAL)]),
+        ]),
+    ],
 })
 export class SearchPageComponent implements OnInit, AfterViewInit {
     readonly Scope = Scope;
@@ -24,6 +33,7 @@ export class SearchPageComponent implements OnInit, AfterViewInit {
     filterBarIsVisible = this.userModifiableValues.createBoolean(false);
     @HostBinding('class.has-tab-bar') tabBarIsVisible = false;
     shouldLimitCollectionRows = true;
+    progressBarIsVisible = false;
 
     readonly columns = [
         new ListItem('NODE', RestConstants.CM_NAME),
@@ -34,6 +44,7 @@ export class SearchPageComponent implements OnInit, AfterViewInit {
     readonly collectionsDataSource = this.searchPage.collectionsDataSource;
     readonly availableRepositories = this.searchPage.availableRepositories;
     readonly activeRepository = this.searchPage.activeRepository;
+    readonly loadingProgress = this.searchPage.loadingProgress;
 
     constructor(
         private searchPage: SearchPageService,
@@ -48,6 +59,7 @@ export class SearchPageComponent implements OnInit, AfterViewInit {
         this.availableRepositories
             .pipe(map((availableRepositories) => availableRepositories?.length > 1))
             .subscribe((tabBarIsVisible) => (this.tabBarIsVisible = tabBarIsVisible));
+        this.registerProgressBarIsVisible();
     }
 
     ngAfterViewInit(): void {
@@ -65,5 +77,17 @@ export class SearchPageComponent implements OnInit, AfterViewInit {
             canOpen: true,
             // onCreate: (nodes) => this.nodeEntriesResults.addVirtualNodes(nodes),
         });
+    }
+
+    onProgressBarAnimationEnd(): void {
+        if (this.searchPage.loadingProgress.value >= 100) {
+            this.progressBarIsVisible = false;
+        }
+    }
+
+    private registerProgressBarIsVisible(): void {
+        this.searchPage.loadingProgress
+            .pipe(filter((progress) => progress < 100))
+            .subscribe(() => (this.progressBarIsVisible = true));
     }
 }

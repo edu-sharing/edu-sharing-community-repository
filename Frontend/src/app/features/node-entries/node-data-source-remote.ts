@@ -26,6 +26,16 @@ export interface NodeResponse<T> {
     total: number;
 }
 
+export type LoadingState =
+    // The data source is loading data for the first time.
+    | 'initial'
+    // Loading data after change of parameters, i.e., it will replace the current data when done.
+    | 'reset'
+    // Loading another page with unchanged parameters.
+    | 'page'
+    // Loading done.
+    | false;
+
 // TODO: Rename to something like "fetch implementation" or "request handler"
 export type NodeRemote<T> = (params: NodeRequestParams) => Observable<NodeResponse<T>>;
 
@@ -57,7 +67,7 @@ export class NodeDataSourceRemote<
     private _renderChangesSubscription: Subscription | null = null;
     private _cache = new NodeCache<T>();
     private dataStream = new BehaviorSubject<T[]>([]);
-    isLoading: boolean;
+    isLoading: LoadingState;
     private _itemsCap: ItemsCap<T> | null;
     get itemsCap(): ItemsCap<T> | null {
         return this._itemsCap;
@@ -68,10 +78,14 @@ export class NodeDataSourceRemote<
     }
     private renderData = new BehaviorSubject<T[]>([]);
     private renderDataSubscription: Subscription | null;
+    private _isLoading = new BehaviorSubject<boolean>(false);
+    private _initDone = false;
+    private _resetDone = false;
 
     constructor() {
         super();
         this.paginator = new InfiniteScrollPaginator();
+        this._registerLoadingState();
     }
 
     connect(): Observable<T[]> {
@@ -123,6 +137,20 @@ export class NodeDataSourceRemote<
         throw new Error('not implemented');
     }
 
+    private _registerLoadingState(): void {
+        this._isLoading.subscribe((isLoading) => {
+            if (!isLoading) {
+                this.isLoading = false;
+            } else if (!this._initDone) {
+                this.isLoading = 'initial';
+            } else if (!this._resetDone) {
+                this.isLoading = 'reset';
+            } else {
+                this.isLoading = 'page';
+            }
+        });
+    }
+
     private _connectRenderData(): void {
         this.renderDataSubscription?.unsubscribe();
         if (this.itemsCap) {
@@ -142,13 +170,19 @@ export class NodeDataSourceRemote<
             // connected.
             return;
         }
+        this._resetDone = false;
         const sortChange: Observable<Sort | null | void> = this._sort
             ? (
                   rxjs.merge(
                       this._sort.sortChange,
                       this._sort.initialized,
                   ) as Observable<Sort | void>
-              ).pipe(tap(() => this._cache.clear()))
+              ).pipe(
+                  tap(() => {
+                      this._resetDone = false;
+                      this._cache.clear();
+                  }),
+              )
             : rxjs.of(null);
         const pageChange: Observable<MatTableDataSourcePageEvent | void> = rxjs.merge(
             this._paginator.page,
@@ -163,6 +197,10 @@ export class NodeDataSourceRemote<
                 map(() => this._cache.getMissingRange(this._getRequestRange())),
                 switchMap((missingRange) => this._downloadAndCache(missingRange)),
                 map(() => this._cache.get(this._getDisplayRange())),
+                tap(() => {
+                    this._initDone = true;
+                    this._resetDone = true;
+                }),
             )
             .subscribe((data) => this.dataStream.next(data));
     }
@@ -184,15 +222,15 @@ export class NodeDataSourceRemote<
 
     private _downloadAndCache(missingRange: Range): Observable<void> {
         if (missingRange) {
-            this.isLoading = true;
+            this._isLoading.next(true);
             return this._remote({ range: missingRange, sort: this._sort }).pipe(
                 tap((response) => (this.paginator.length = response.total)),
                 tap((response) =>
                     this._cache.add(this._getCacheSlice(missingRange, response.data)),
                 ),
                 tap({
-                    next: () => (this.isLoading = false),
-                    error: () => (this.isLoading = false),
+                    next: () => this._isLoading.next(false),
+                    error: () => this._isLoading.next(false),
                 }),
                 map(() => void 0),
             );

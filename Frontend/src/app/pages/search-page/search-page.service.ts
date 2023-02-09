@@ -13,6 +13,7 @@ import {
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 import {
+    debounceTime,
     distinctUntilChanged,
     filter,
     map,
@@ -55,8 +56,11 @@ export class SearchPageService implements OnDestroy {
     readonly activeMetadataSet = this.userModifiableValues.createString();
     readonly searchFilters = this.userModifiableValues.createDict();
     readonly searchString = this.userModifiableValues.createString();
+    readonly loadingProgress = new BehaviorSubject<number>(null);
 
-    private destroyed = new Subject<void>();
+    private readonly destroyed = new Subject<void>();
+    private readonly loadingContent = new BehaviorSubject<boolean>(false);
+    private readonly loadingCollections = new BehaviorSubject<boolean>(false);
 
     constructor(
         private config: ConfigService,
@@ -76,6 +80,7 @@ export class SearchPageService implements OnDestroy {
         this.registerActiveMetadataSet();
         this.registerSearchField();
         this.registerSearchObservables();
+        this.registerLoadingProgress();
     }
 
     ngOnDestroy(): void {
@@ -205,11 +210,33 @@ export class SearchPageService implements OnDestroy {
         // TODO: sync up the two remotes to keep the content of both until both have finished
         // loading.
         searchRequestParams
-            .pipe(map((params) => this.getSearchRemote(params)))
+            .pipe(
+                tap(() => this.loadingContent.next(true)),
+                map((params) => this.getSearchRemote(params)),
+            )
             .subscribe((remote) => this.resultsDataSource.setRemote(remote));
         collectionRequestParams
-            .pipe(map((params) => this.getCollectionsSearchRemote(params)))
+            .pipe(
+                tap(() => this.loadingCollections.next(true)),
+                map((params) => this.getCollectionsSearchRemote(params)),
+            )
             .subscribe((remote) => this.collectionsDataSource.setRemote(remote));
+    }
+
+    private registerLoadingProgress(): void {
+        rxjs.combineLatest([this.loadingContent, this.loadingCollections])
+            .pipe(
+                map(
+                    ([loadingContent, loadingCollections]) =>
+                        (loadingContent ? 0 : 0.5) + (loadingCollections ? 0 : 0.5),
+                ),
+                debounceTime(0),
+                distinctUntilChanged(),
+                tap((progress) => console.log('progress', progress)),
+                map((progress) => progress * 100),
+                // map((progress) => progress >= 100 ? null : progress),
+            )
+            .subscribe((progress) => this.loadingProgress.next(progress));
     }
 
     private getSearchRemote(params: SearchRequestParams): NodeRemote<Node> {
@@ -233,7 +260,10 @@ export class SearchPageService implements OnDestroy {
                     query: RestConstants.DEFAULT_QUERY_NAME,
                     propertyFilter: [RestConstants.ALL],
                 })
-                .pipe(map(fromSearchResults));
+                .pipe(
+                    map(fromSearchResults),
+                    tap(() => this.loadingContent.next(false)),
+                );
         };
     }
 
@@ -268,7 +298,10 @@ export class SearchPageService implements OnDestroy {
                     query: RestConstants.QUERY_NAME_COLLECTIONS,
                     propertyFilter: [RestConstants.ALL],
                 })
-                .pipe(map(fromSearchResults));
+                .pipe(
+                    map(fromSearchResults),
+                    tap(() => this.loadingCollections.next(false)),
+                );
         };
     }
 
