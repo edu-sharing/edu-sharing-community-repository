@@ -931,7 +931,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
 	private Serializable getSortPropertyValue(NodeRef ref, QName prop) {
 		Serializable value =  nodeServiceAlfresco.getProperty(ref, prop);
-		if(prop.toString().equals(CCConstants.LOM_PROP_GENERAL_TITLE) && value == null) {
+		if(prop.toString().equals(CCConstants.LOM_PROP_GENERAL_TITLE) &&
+				(value == null || ((String)value).isEmpty())
+		) {
 			return nodeServiceAlfresco.getProperty(ref, ContentModel.PROP_NAME);
 		}
 		return value;
