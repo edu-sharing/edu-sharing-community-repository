@@ -187,17 +187,22 @@
       class="card-image-area"
       [style.background-color]="nodeHelper.isNodeCollection(node) ? node.collection.color : null"
     >
-      <es-preview-image
-        *ngIf="!(nodeHelper.isNodeCollection(node) && node.preview.isIcon)"
-        [node]="node"
-        [playAnimation]="playAnimation"
-      ></es-preview-image>
-      <div
-        *ngIf="nodeHelper.isNodeCollection(node) && node.preview.isIcon"
-        class="card-collection-image"
-      >
-        <i esIcon="layers"></i>
-      </div>
+      <ng-container *ngIf="getTemplate(CustomFieldSpecialType.preview) as ref">
+        <ng-container *ngTemplateOutlet="ref; context: { node: this.node }"></ng-container>
+      </ng-container>
+      <ng-container *ngIf="!getTemplate(CustomFieldSpecialType.preview)">
+        <es-preview-image
+          *ngIf="!(nodeHelper.isNodeCollection(node) && node.preview.isIcon)"
+          [node]="node"
+          [playAnimation]="playAnimation"
+        ></es-preview-image>
+        <div
+          *ngIf="nodeHelper.isNodeCollection(node) && node.preview.isIcon"
+          class="card-collection-image"
+        >
+          <i esIcon="layers"></i>
+        </div>
+      </ng-container>
     </div>
   </ng-template>
   <ng-template #meta let-link="link">
@@ -229,10 +234,10 @@
     </div>
   </ng-template>
   <ng-template #type let-node="node">
-    <ng-container *ngIf="getTypeTemplate() as ref">
+    <ng-container *ngIf="getTemplate(CustomFieldSpecialType.type) as ref">
       <ng-container *ngTemplateOutlet="ref; context: { node: this.node }"></ng-container>
     </ng-container>
-    <ng-container *ngIf="!getTypeTemplate()">
+    <ng-container *ngIf="!getTemplate(CustomFieldSpecialType.type)">
       <img
         [src]="node | esNodeIcon"
         [alt]="
