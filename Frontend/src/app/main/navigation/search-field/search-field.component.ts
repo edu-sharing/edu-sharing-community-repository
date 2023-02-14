@@ -1,10 +1,10 @@
-import { CdkConnectedOverlay, ConnectedPosition } from '@angular/cdk/overlay';
+import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition } from '@angular/cdk/overlay';
 import { Component, ElementRef, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatChip } from '@angular/material/chips';
 import { FacetsDict, LabeledValue, LabeledValuesDict } from 'ngx-edu-sharing-api';
-import { Subject } from 'rxjs';
 import * as rxjs from 'rxjs';
+import { Subject } from 'rxjs';
 import { filter, map, takeUntil } from 'rxjs/operators';
 import { SearchFieldFacetsComponent } from '../../../features/mds/mds-editor/search-field-facets/search-field-facets.component';
 import { Values } from '../../../features/mds/types/types';
@@ -134,7 +134,9 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
 
     onOutsideClick(event: MouseEvent): void {
         const clickTarget = event.target as HTMLElement;
-        if (!(this.overlay.origin.elementRef.nativeElement as HTMLElement).contains(clickTarget)) {
+        const origin = this.overlay.origin as CdkOverlayOrigin;
+        const element = origin.elementRef.nativeElement as HTMLElement;
+        if (!element.contains(clickTarget)) {
             this.showOverlay = false;
         }
     }
