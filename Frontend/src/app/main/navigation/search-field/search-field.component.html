@@ -70,7 +70,7 @@
 <ng-template
   cdkConnectedOverlay
   [cdkConnectedOverlayOrigin]="trigger"
-  [cdkConnectedOverlayOpen]="showOverlay && (!!filtersCount || hasSuggestions)"
+  [cdkConnectedOverlayOpen]="showOverlay.value && (!!filtersCount || hasSuggestions)"
   [cdkConnectedOverlayPositions]="overlayPositions"
   [cdkConnectedOverlayWidth]="triggerBorderBox.width$ | async"
   (overlayOutsideClick)="onOutsideClick($event)"

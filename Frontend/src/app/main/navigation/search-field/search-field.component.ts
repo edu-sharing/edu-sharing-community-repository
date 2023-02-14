@@ -4,8 +4,8 @@ import { FormControl } from '@angular/forms';
 import { MatChip } from '@angular/material/chips';
 import { FacetsDict, LabeledValue, LabeledValuesDict } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
-import { Subject } from 'rxjs';
-import { filter, map, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { distinctUntilChanged, filter, map, takeUntil } from 'rxjs/operators';
 import { SearchFieldFacetsComponent } from '../../../features/mds/mds-editor/search-field-facets/search-field-facets.component';
 import { Values } from '../../../features/mds/types/types';
 import { SearchFieldInternalService } from './search-field-internal.service';
@@ -35,7 +35,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
     readonly rawFilters$ = this.internal.rawFilters$;
     readonly categories$ = this.internal.categoriesSubject;
     readonly suggestions$ = this.internal.suggestions$;
-    showOverlay = false;
+    showOverlay = new BehaviorSubject(false);
     inhibitOverlay = false;
     hasSuggestions = true;
     readonly overlayPositions: ConnectedPosition[] = [
@@ -50,6 +50,15 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
     ];
     readonly mdsInfo$ = this.internal.mdsInfo$;
     inputHasFocus = false;
+    /**
+     * Whether we got any user input into the search field since the overlay was dismissed the last
+     * time.
+     *
+     * We need this to decide whether to open the overlay on new suggestions. In case this component
+     * is included multiple times in the DOM, we only want to open the overlay on the instance the
+     * user is currently interacting with.
+     */
+    private inputSinceOverlayDismissed = false;
 
     private readonly destroyed$ = new Subject<void>();
 
@@ -70,6 +79,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
             if (inputString !== this.internal.searchString.value) {
                 // The value was updated through user interaction and not by the component input
                 // `searchString`.
+                this.inputSinceOverlayDismissed = true;
                 this.internal.searchString.next(inputString);
                 this.internal.updateSuggestions(inputString);
                 this.internal.searchStringChanged.next(inputString);
@@ -97,10 +107,16 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
                 // We only fetch new suggestions when the user types into the search field. In case
                 // the user dismissed the suggestions overlay earlier (`showOverlay = false`), this
                 // is the time to show it again.
-                if (this.hasSuggestions) {
-                    this.showOverlay = true;
+                if (this.hasSuggestions && this.inputSinceOverlayDismissed) {
+                    this.showOverlay.next(true);
                 }
             });
+        this.showOverlay
+            .pipe(
+                distinctUntilChanged(),
+                filter((showOverlay) => showOverlay === false),
+            )
+            .subscribe(() => (this.inputSinceOverlayDismissed = false));
     }
 
     ngOnDestroy(): void {
@@ -112,7 +128,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
     }
 
     onSubmit(): void {
-        this.showOverlay = false;
+        this.showOverlay.next(false);
         this.internal.triggerSearch({ searchString: this.inputControl.value, cleared: false });
     }
 
@@ -137,7 +153,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
         const origin = this.overlay.origin as CdkOverlayOrigin;
         const element = origin.elementRef.nativeElement as HTMLElement;
         if (!element.contains(clickTarget)) {
-            this.showOverlay = false;
+            this.showOverlay.next(false);
         }
     }
 
@@ -146,7 +162,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
             this.firstActiveChip._elementRef.nativeElement.focus();
             event.stopPropagation();
             event.preventDefault();
-        } else if (this.showOverlay && this.hasSuggestions) {
+        } else if (this.showOverlay.value && this.hasSuggestions) {
             this.searchFieldFacets.focus();
             event.stopPropagation();
             event.preventDefault();
@@ -164,14 +180,14 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
         // was detached because we have no suggestions right now. In the latter case, we want to
         // show the overlay again as soon as suggestions become available.
         if (this.hasSuggestions) {
-            this.showOverlay = false;
+            this.showOverlay.next(false);
         }
     }
 
     onInputFocus(): void {
         Promise.resolve().then(() => (this.inputHasFocus = true));
         if (!this.inhibitOverlay) {
-            this.showOverlay = true;
+            this.showOverlay.next(true);
         }
     }
 
@@ -180,7 +196,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
         if (
             !this.overlay?.overlayRef?.overlayElement.contains(event.relatedTarget as HTMLElement)
         ) {
-            this.showOverlay = false;
+            this.showOverlay.next(false);
         }
     }
 
