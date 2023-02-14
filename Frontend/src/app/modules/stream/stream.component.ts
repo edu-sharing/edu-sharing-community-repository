@@ -173,15 +173,17 @@ export class StreamComponent implements OnInit, AfterViewInit, OnDestroy {
         this.mainNavService.setMainNavConfig({
             title: 'STREAM.TITLE',
             currentScope: 'stream',
-            searchEnabled: false,
-            searchPlaceholder: 'STREAM.SEARCH_PLACEHOLDER',
         });
-        this.searchField
-            .onSearchStringChanged(this.destroyed)
-            .subscribe((searchString) => (this.searchQuery = searchString));
-        this.searchField
-            .onSearchTriggered(this.destroyed)
-            .subscribe((event) => this.doSearch(event));
+        // const searchFieldInstance = this.searchField.enable(
+        //     {
+        //         placeholder: 'STREAM.SEARCH_PLACEHOLDER',
+        //     },
+        //     this.destroyed,
+        // );
+        // searchFieldInstance
+        //     .onSearchStringChanged()
+        //     .subscribe((searchString) => (this.searchQuery = searchString));
+        // searchFieldInstance.onSearchTriggered().subscribe((event) => this.doSearch(event));
     }
 
     async ngAfterViewInit() {

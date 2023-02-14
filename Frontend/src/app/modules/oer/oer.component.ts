@@ -133,15 +133,19 @@ export class OerComponent implements OnInit, OnDestroy {
         this.mainNav.setMainNavConfig({
             title: 'SEARCH.TITLE',
             currentScope: 'oer',
-            searchEnabled: true,
-            searchPlaceholder: 'OER.SEARCH',
             canOpen: true,
         });
-        this.searchField
-            .onSearchTriggered(this.destroyed)
+        const searchFieldInstance = this.searchField.enable(
+            {
+                placeholder: 'OER.SEARCH',
+            },
+            this.destroyed,
+        );
+        searchFieldInstance
+            .onSearchTriggered()
             .subscribe(({ searchString }) => this.routeSearch(searchString));
         this.currentQuerySubject.subscribe((currentQuery) =>
-            this.searchField.setSearchString(currentQuery),
+            searchFieldInstance.setSearchString(currentQuery),
         );
     }
 

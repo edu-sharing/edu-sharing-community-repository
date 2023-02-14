@@ -253,7 +253,6 @@ export class AdminComponent implements OnInit, OnDestroy {
         this.mainNav.setMainNavConfig({
             title: 'ADMIN.TITLE',
             currentScope: 'admin',
-            searchEnabled: false,
         });
     }
 

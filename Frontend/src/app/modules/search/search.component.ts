@@ -279,7 +279,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private initAfterView(): void {
-        this.tutorialElement = this.searchField.getInputElement();
+        // this.tutorialElement = this.searchField.getInputElement();
         this.handleScroll();
         this.searchService.clear();
         this.initalized = true;
@@ -396,29 +396,31 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
                     create: { allowed: this.isHomeRepository(), allowBinary: true },
                 }),
         );
-        this.searchService.searchTermSubject
-            .pipe(takeUntil(this.destroyed$))
-            .subscribe((searchTerm) => this.searchField.setSearchString(searchTerm));
+        // this.searchService.searchTermSubject
+        //     .pipe(takeUntil(this.destroyed$))
+        //     .subscribe((searchTerm) => this.searchField.setSearchString(searchTerm));
     }
 
     private initMainNav(): void {
         this.mainNavService.setMainNavConfig({
             title: 'SEARCH.TITLE',
             currentScope: 'search',
-            searchEnabled: true,
-            searchPlaceholder: 'SEARCH.SEARCH_STUFF',
             canOpen: true,
             // Why do we need this, when the top bar is hidden anyway?
             // showScope: this.mainnav,
             // showUser: this.mainnav,
             onCreate: (nodes) => this.nodeEntriesResults.addVirtualNodes(nodes),
         });
-        this.searchField
-            .onSearchStringChanged(this.destroyed$)
+        const searchFieldInstance = this.searchField.enable(
+            {
+                placeholder: 'SEARCH.SEARCH_STUFF',
+            },
+            this.destroyed$,
+        );
+        searchFieldInstance
+            .onSearchStringChanged()
             .subscribe((searchString) => (this.searchService.searchTerm = searchString));
-        this.searchField
-            .onSearchTriggered(this.destroyed$)
-            .subscribe(() => this.applyParameters('mainnav'));
+        searchFieldInstance.onSearchTriggered().subscribe(() => this.applyParameters('mainnav'));
     }
 
     registerScrollHandler(): void {
@@ -659,7 +661,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
             this.currentRepository == RestConstants.ALL
                 ? this.repositoryIds
                 : [{ id: this.currentRepository, enabled: true }];
-        this.searchField.setFilterValues(this.currentValues);
+        // this.searchField.setFilterValues(this.currentValues);
         this.searchRepository(repos, criterias, init, event);
 
         if (init) {
@@ -1648,7 +1650,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
         // navigation will skip the resulting redirect.
         let initDone = false;
         rxjs.merge(
-            this.searchField.onFilterValuesChanged(this.destroyed$),
+            // this.searchField.onFilterValuesChanged(this.destroyed$),
             this.mdsDesktopRef.mdsEditorInstance.values,
         )
             .pipe(

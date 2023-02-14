@@ -30,7 +30,6 @@ export class SearchPageComponent implements OnInit, AfterViewInit {
 
     @ViewChild('nodeEntriesResults') nodeEntriesResults: NodeEntriesWrapperComponent<Node>;
 
-    filterBarIsVisible = this.userModifiableValues.createBoolean(false);
     @HostBinding('class.has-tab-bar') tabBarIsVisible = false;
     shouldLimitCollectionRows = true;
     progressBarIsVisible = false;
@@ -44,6 +43,7 @@ export class SearchPageComponent implements OnInit, AfterViewInit {
     readonly collectionsDataSource = this.searchPage.collectionsDataSource;
     readonly availableRepositories = this.searchPage.availableRepositories;
     readonly activeRepository = this.searchPage.activeRepository;
+    readonly filterBarIsVisible = this.searchPage.filterBarIsVisible;
     readonly loadingProgress = this.searchPage.loadingProgress;
 
     constructor(
@@ -55,7 +55,6 @@ export class SearchPageComponent implements OnInit, AfterViewInit {
 
     ngOnInit(): void {
         this.initMainNav();
-        this.filterBarIsVisible.registerQueryParameter('filterBar', this.route);
         this.availableRepositories
             .pipe(map((availableRepositories) => availableRepositories?.length > 1))
             .subscribe((tabBarIsVisible) => (this.tabBarIsVisible = tabBarIsVisible));
@@ -72,8 +71,6 @@ export class SearchPageComponent implements OnInit, AfterViewInit {
         this.mainNav.setMainNavConfig({
             title: 'SEARCH.TITLE',
             currentScope: 'search',
-            searchEnabled: true,
-            searchPlaceholder: 'SEARCH.SEARCH_STUFF',
             canOpen: true,
             // onCreate: (nodes) => this.nodeEntriesResults.addVirtualNodes(nodes),
         });

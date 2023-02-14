@@ -590,7 +590,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.mainNavService.setMainNavConfig({
             title: 'COLLECTIONS.TITLE',
             currentScope: 'collections',
-            searchEnabled: false,
             // TODO: document where this fails.
             //
             // onCreate: (nodes) => this.addNodesToCollection(nodes),

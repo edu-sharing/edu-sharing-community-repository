@@ -46,6 +46,7 @@ import { NodeStoreService } from '../../../modules/search/node-store.service';
 import { LicenseAgreementService } from '../../../services/license-agreement.service';
 import { MainMenuEntriesService } from '../main-menu-entries.service';
 import { MainNavConfig, MainNavService } from '../main-nav.service';
+import { SearchFieldService } from '../search-field/search-field.service';
 import { TopBarComponent } from '../top-bar/top-bar.component';
 
 /**
@@ -88,6 +89,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     currentUser: User;
     canOpen: boolean;
     mainNavConfig: MainNavConfig;
+    searchFieldEnabled: boolean;
 
     private readonly initDone$ = new ReplaySubject<void>();
     private readonly destroyed$ = new Subject<void>();
@@ -121,11 +123,13 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         private rocketChat: RocketChatService,
         private dialogs: DialogsService,
         private licenseAgreement: LicenseAgreementService,
+        private searchField: SearchFieldService,
     ) {}
 
     ngOnInit(): void {
         this.init();
         this.registerMainNavConfig();
+        this.registerSearchField();
         this.registerCurrentUser();
         this.registerAutoLogoutDialog();
         this.registerAutoLogoutTimeout();
@@ -177,6 +181,13 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.updateConfig(mainNavConfig, userInfo, queryParams);
                 // this.changeDetectorRef.detectChanges();
             });
+    }
+
+    private registerSearchField() {
+        this.searchField
+            .observeEnabled()
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((searchFieldEnabled) => (this.searchFieldEnabled = searchFieldEnabled));
     }
 
     private updateConfig(

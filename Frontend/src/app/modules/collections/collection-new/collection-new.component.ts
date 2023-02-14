@@ -372,7 +372,6 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         this.mainNav.setMainNavConfig({
             title: 'COLLECTIONS.TITLE',
             currentScope: 'collections',
-            searchEnabled: false,
         });
     }
 

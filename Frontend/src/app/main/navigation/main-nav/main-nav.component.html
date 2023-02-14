@@ -26,7 +26,7 @@
       [isCreateAllowed]="isCreateAllowed()"
       [isSafe]="isSafe()"
       [mainMenuStyle]="mainMenuStyle"
-      [searchEnabled]="mainNavConfig.searchEnabled"
+      [searchEnabled]="searchFieldEnabled"
       [showChat]="showChat()"
       [showScope]="mainNavConfig.showScope"
       [showUser]="showUser"
@@ -39,12 +39,7 @@
       (openPrivacy)="openPrivacy()"
       (showLicenses)="showLicenses()"
     >
-      <es-search-field
-        data-selector-search-field
-        *ngIf="mainNavConfig.searchEnabled"
-        [placeholder]="mainNavConfig.searchPlaceholder"
-        [enableFiltersAndSuggestions]="mainNavConfig.currentScope === 'search'"
-      ></es-search-field
+      <es-search-field data-selector-search-field *ngIf="searchFieldEnabled"></es-search-field
     ></es-top-bar>
 
     <div *ngIf="canOpen && mainNavConfig.currentScope !== 'render'" #tabNav class="tab-nav">

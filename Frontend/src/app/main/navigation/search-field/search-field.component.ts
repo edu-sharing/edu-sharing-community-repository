@@ -1,14 +1,15 @@
 import { CdkConnectedOverlay, ConnectedPosition } from '@angular/cdk/overlay';
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatChip } from '@angular/material/chips';
 import { FacetsDict, LabeledValue, LabeledValuesDict } from 'ngx-edu-sharing-api';
-import * as rxjs from 'rxjs';
 import { Subject } from 'rxjs';
+import * as rxjs from 'rxjs';
 import { filter, map, takeUntil } from 'rxjs/operators';
 import { SearchFieldFacetsComponent } from '../../../features/mds/mds-editor/search-field-facets/search-field-facets.component';
 import { Values } from '../../../features/mds/types/types';
 import { SearchFieldInternalService } from './search-field-internal.service';
+import { SearchFieldConfig } from './search-field.service';
 
 @Component({
     selector: 'es-search-field',
@@ -16,20 +17,11 @@ import { SearchFieldInternalService } from './search-field-internal.service';
     styleUrls: ['./search-field.component.scss'],
 })
 export class SearchFieldComponent implements OnInit, OnDestroy {
+    /** The number of filters visible on the facets overlay. */
     filtersCount: number;
-
-    @Input() placeholder: string;
-    /**
-     * If enabled, shows filters as chips inside the search field and suggests additional filters in
-     * an overlay as the user types into the search field.
-     *
-     * Relies on active filters values being provided to `SearchFieldService` via `setFilterValues`
-     * and `filterValuesChange` being handled.
-     */
-    @Input()
-    set enableFiltersAndSuggestions(value: boolean) {
-        this.internal.setEnableFiltersAndSuggestions(value);
-    }
+    /** The total number of filters independently of categories of the facets overlay. */
+    totalFiltersCount: number;
+    config: SearchFieldConfig;
 
     @ViewChild('input') input: ElementRef;
     @ViewChild(CdkConnectedOverlay) private overlay: CdkConnectedOverlay;
@@ -37,11 +29,14 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
     @ViewChild(MatChip) private firstActiveChip: MatChip;
 
     readonly inputControl = new FormControl('');
+    /** The user clicked the filters button inside the search field. */
+    readonly filtersButtonClicked = this.internal.filtersButtonClicked;
     readonly filters$ = this.internal.filters$;
     readonly rawFilters$ = this.internal.rawFilters$;
     readonly categories$ = this.internal.categoriesSubject;
     readonly suggestions$ = this.internal.suggestions$;
     showOverlay = false;
+    inhibitOverlay = false;
     hasSuggestions = true;
     readonly overlayPositions: ConnectedPosition[] = [
         {
@@ -58,10 +53,13 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
 
     private readonly destroyed$ = new Subject<void>();
 
-    constructor(private internal: SearchFieldInternalService) {}
+    constructor(private internal: SearchFieldInternalService, private ngZone: NgZone) {}
 
     ngOnInit(): void {
         this.internal.searchFieldComponent = this;
+        this.internal.config
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((config) => (this.config = config));
         this.internal.searchString
             .pipe(
                 takeUntil(this.destroyed$),
@@ -83,6 +81,12 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
                 map(([filters, categories]) => this.getFiltersCount(filters, categories)),
             )
             .subscribe((filtersCount) => (this.filtersCount = filtersCount));
+        this.filters$
+            .pipe(
+                takeUntil(this.destroyed$),
+                map((filters) => this.getTotalFiltersCount(filters)),
+            )
+            .subscribe((totalFiltersCount) => (this.totalFiltersCount = totalFiltersCount));
         this.suggestions$
             .pipe(
                 takeUntil(this.destroyed$),
@@ -128,6 +132,13 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
         this.internal.removeFilter(property, filter);
     }
 
+    onOutsideClick(event: MouseEvent): void {
+        const clickTarget = event.target as HTMLElement;
+        if (!(this.overlay.origin.elementRef.nativeElement as HTMLElement).contains(clickTarget)) {
+            this.showOverlay = false;
+        }
+    }
+
     focusOverlayIfOpen(event: Event): void {
         if (this.firstActiveChip) {
             this.firstActiveChip._elementRef.nativeElement.focus();
@@ -157,7 +168,9 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
 
     onInputFocus(): void {
         Promise.resolve().then(() => (this.inputHasFocus = true));
-        this.showOverlay = true;
+        if (!this.inhibitOverlay) {
+            this.showOverlay = true;
+        }
     }
 
     onInputBlur(event: FocusEvent): void {
@@ -167,6 +180,12 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
         ) {
             this.showOverlay = false;
         }
+    }
+
+    onFiltersButtonClicked(): void {
+        this.inhibitOverlay = true;
+        this.filtersButtonClicked.next();
+        this.ngZone.runOutsideAngular(() => setTimeout(() => (this.inhibitOverlay = false)));
     }
 
     onCategories(properties: string[]): void {
@@ -187,6 +206,18 @@ export class SearchFieldComponent implements OnInit, OnDestroy {
         const mapped = Object.keys(filters)
             .filter((f) => categories?.includes(f))
             .map((k) => filters[k].length);
+        if (!mapped.length) {
+            return 0;
+        } else {
+            return mapped.reduce((a, b) => a + b);
+        }
+    }
+
+    getTotalFiltersCount(filters: LabeledValuesDict | null): number {
+        if (!filters) {
+            return 0;
+        }
+        const mapped = Object.keys(filters).map((k) => filters[k].length);
         if (!mapped.length) {
             return 0;
         } else {

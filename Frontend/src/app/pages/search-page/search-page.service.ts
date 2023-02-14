@@ -54,6 +54,7 @@ export class SearchPageService implements OnDestroy {
     readonly activeRepository = this.userModifiableValues.createString();
     readonly availableMetadataSets = new BehaviorSubject<MetadataSetInfo[]>(null);
     readonly activeMetadataSet = this.userModifiableValues.createString();
+    readonly filterBarIsVisible = this.userModifiableValues.createBoolean(false);
     readonly searchFilters = this.userModifiableValues.createDict();
     readonly searchString = this.userModifiableValues.createString();
     readonly loadingProgress = new BehaviorSubject<number>(null);
@@ -75,6 +76,7 @@ export class SearchPageService implements OnDestroy {
         this.activeMetadataSet.registerQueryParameter('mds', this.route);
         this.searchFilters.registerQueryParameter('filters', this.route);
         this.searchString.registerQueryParameter('q', this.route);
+        this.filterBarIsVisible.registerQueryParameter('filterBar', this.route);
         this.registerRepositories();
         this.registerAvailableMetadataSets();
         this.registerActiveMetadataSet();
@@ -145,12 +147,25 @@ export class SearchPageService implements OnDestroy {
     }
 
     private registerSearchField() {
-        this.searchField
-            .onSearchTriggered(this.destroyed)
+        const searchFieldInstance = this.searchField.enable(
+            {
+                placeholder: 'SEARCH.SEARCH_STUFF',
+                showFiltersButton: true,
+                enableFiltersAndSuggestions: true,
+            },
+            this.destroyed,
+        );
+        searchFieldInstance
+            .onFiltersButtonClicked()
+            .subscribe(() =>
+                this.filterBarIsVisible.setUserValue(!this.filterBarIsVisible.getValue()),
+            );
+        searchFieldInstance
+            .onSearchTriggered()
             .subscribe(({ searchString }) => this.searchString.setUserValue(searchString || null));
         this.searchString
             .observeUserValue()
-            .subscribe((searchString) => this.searchField.setSearchString(searchString));
+            .subscribe((searchString) => searchFieldInstance.setSearchString(searchString));
         rxjs.combineLatest([
             this.activeRepository.observeValue().pipe(filter(notNull)),
             this.activeMetadataSet.observeValue().pipe(filter(notNull)),
@@ -159,14 +174,14 @@ export class SearchPageService implements OnDestroy {
                 takeUntil(this.destroyed),
                 map(([repository, metadataSet]) => ({ repository, metadataSet })),
             )
-            .subscribe((mdsInfo) => this.searchField.setMdsInfo(mdsInfo));
-        this.searchField.onFilterValuesChanged(this.destroyed).subscribe((filterValues) => {
+            .subscribe((mdsInfo) => searchFieldInstance.setMdsInfo(mdsInfo));
+        searchFieldInstance.onFilterValuesChanged().subscribe((filterValues) => {
             // console.log('onFilterValuesChanged', filterValues);
             this.searchFilters.setUserValue(filterValues);
         });
         this.searchFilters.observeUserValue().subscribe((searchFilters) => {
             // console.log('searchFilters.userValue', searchFilters);
-            this.searchField.setFilterValues(searchFilters);
+            searchFieldInstance.setFilterValues(searchFilters);
         });
     }
 
@@ -232,7 +247,7 @@ export class SearchPageService implements OnDestroy {
                 ),
                 debounceTime(0),
                 distinctUntilChanged(),
-                tap((progress) => console.log('progress', progress)),
+                // tap((progress) => console.log('progress', progress)),
                 map((progress) => progress * 100),
                 // map((progress) => progress >= 100 ? null : progress),
             )

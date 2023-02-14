@@ -11,14 +11,24 @@
     <mat-form-field class="search-field" appearance="legacy" floatLabel="always">
       <mat-label></mat-label>
       <div class="search-field-input-wrapper">
-        <div
+        <button
+          *ngIf="config.showFiltersButton"
           matPrefix
-          class="filter-prefix"
-          matTooltip="{{ 'SEARCH.ACTIVE_FILTER_TOOLTIP' | translate: { count: filtersCount } }}"
-          *ngIf="filtersCount"
+          class="filters-button"
+          mat-icon-button
+          type="button"
+          matTooltip="{{ 'TOGGLE_SEARCH_FILTERS' | translate }} {{
+            totalFiltersCount > 0
+              ? '(' +
+                ('SEARCH.ACTIVE_FILTER_TOOLTIP' | translate: { count: totalFiltersCount }) +
+                ')'
+              : ''
+          }}"
+          [matBadge]="totalFiltersCount || null"
+          (click)="onFiltersButtonClicked()"
         >
-          {{ filtersCount }}
-        </div>
+          <i esIcon="filter_list" [aria]="false"></i>
+        </button>
         <input
           class="search-input"
           #input
@@ -27,12 +37,13 @@
           matInput
           [formControl]="inputControl"
           autocomplete="off"
-          placeholder="{{ placeholder | translate }}"
-          [attr.aria-label]="placeholder | translate"
+          placeholder="{{ config.placeholder | translate }}"
+          [attr.aria-label]="config.placeholder | translate"
           (focus)="onInputFocus()"
           (blur)="onInputBlur($event)"
           (keydown.tab)="focusOverlayIfOpen($event)"
           data-test="top-bar-search-field"
+          (click)="onInputFocus()"
         />
         <button
           class="clear-button"
@@ -62,7 +73,7 @@
   [cdkConnectedOverlayOpen]="showOverlay && (!!filtersCount || hasSuggestions)"
   [cdkConnectedOverlayPositions]="overlayPositions"
   [cdkConnectedOverlayWidth]="triggerBorderBox.width$ | async"
-  (overlayOutsideClick)="showOverlay = false"
+  (overlayOutsideClick)="onOutsideClick($event)"
   (detach)="onDetach()"
 >
   <!-- FIXME: The focus trap doesn't seem to work, when there are suggestions for only one facet
@@ -73,7 +84,7 @@
       class="suggestion-active-filter"
       [class.suggestion-active-filter-separator]="!facets.isEmpty()"
     >
-      <label #label>{{ 'SEARCH.ACTIVE_FILTER' | translate: { count: filtersCount } }}</label>
+      <label #label>{{ 'SEARCH.ACTIVE_FILTER' | translate }}</label>
       <mat-chip-list [attr.aria-labelledby]="label" #chipList>
         <div class="chips-wrapper" *ngIf="filters$ | async as filtersDict">
           <ng-container *ngFor="let filters of filtersDict | keyvalue">

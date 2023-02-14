@@ -22,10 +22,6 @@ export class MainNavConfig {
      */
     show? = true;
     /**
-     * Show and enables the search field
-     */
-    searchEnabled?: boolean;
-    /**
      * Shows the current location
      */
     showScope? = true;
@@ -33,10 +29,6 @@ export class MainNavConfig {
      * Shows and enables the user menu
      */
     showUser? = true;
-    /**
-     * The placeholder text for the search field, will be translated
-     */
-    searchPlaceholder?: string;
     /**
      * When true, the sidebar can be clicked to open the menu
      */

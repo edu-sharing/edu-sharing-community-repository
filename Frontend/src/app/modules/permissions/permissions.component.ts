@@ -92,18 +92,24 @@ export class PermissionsMainComponent implements OnInit, OnDestroy {
             title: 'PERMISSIONS.TITLE',
             currentScope: 'permissions',
         });
-        this.updateMainNav();
-        this.searchField
-            .onSearchTriggered(this.destroyed)
-            .subscribe(({ searchString }) => this.doSearch(searchString));
+        this.updateSearchField();
     }
 
-    private updateMainNav(): void {
-        this.mainNav.patchMainNavConfig({
-            searchEnabled: this.tab !== 3,
-            searchPlaceholder: 'PERMISSIONS.SEARCH_' + this.TABS[this.tab],
-        });
-        this.searchField.setSearchString(this.searchQuery);
+    private updateSearchField(): void {
+        if (this.tab !== 3) {
+            const searchFieldInstance = this.searchField.enable(
+                {
+                    placeholder: 'PERMISSIONS.SEARCH_' + this.TABS[this.tab],
+                },
+                this.destroyed,
+            );
+            searchFieldInstance.setSearchString(this.searchQuery);
+            searchFieldInstance
+                .onSearchTriggered()
+                .subscribe(({ searchString }) => this.doSearch(searchString));
+        } else {
+            this.searchField.disable();
+        }
     }
 
     private doSearch(searchString: string) {
@@ -123,7 +129,7 @@ export class PermissionsMainComponent implements OnInit, OnDestroy {
             this.searchQuery = null;
             this.tab = tab;
         }
-        this.updateMainNav();
+        this.updateSearchField();
     }
 
     private goToLogin() {

@@ -19,11 +19,20 @@ import {
     Subject,
     timer,
 } from 'rxjs';
-import { catchError, debounce, filter, first, map, switchMap, tap, timeout } from 'rxjs/operators';
+import {
+    catchError,
+    debounce,
+    distinctUntilChanged,
+    filter,
+    first,
+    map,
+    switchMap,
+    timeout,
+} from 'rxjs/operators';
 import { EventListener, FrameEventsService } from '../../../core-module/core.module';
 import { notNull } from '../../../util/functions';
 import { SearchFieldComponent } from './search-field.component';
-import { MdsInfo, SearchEvent } from './search-field.service';
+import { MdsInfo, SearchEvent, SearchFieldConfig } from './search-field.service';
 
 const NUMBER_OF_FACET_SUGGESTIONS = 5;
 
@@ -35,8 +44,11 @@ const NUMBER_OF_FACET_SUGGESTIONS = 5;
     providedIn: 'root',
 })
 export class SearchFieldInternalService implements EventListener {
+    readonly config = new BehaviorSubject<SearchFieldConfig | null>(null);
     /** Reference to the search-field component, if currently visible. */
     searchFieldComponent: SearchFieldComponent;
+    /** The user clicked the filters button inside the search field. */
+    readonly filtersButtonClicked = new Subject<void>();
     /** The user triggered a search using the search field. */
     readonly searchTriggered = new Subject<SearchEvent>();
     /** The user changed the search string by typing into the search field. */
@@ -76,6 +88,12 @@ export class SearchFieldInternalService implements EventListener {
         this.suggestions$ = this.suggestionsSubject.asObservable();
         this.registerSuggestionsSubject();
         this.event.addListener(this, rxjs.NEVER);
+        this.config
+            .pipe(
+                map((config) => config?.enableFiltersAndSuggestions || false),
+                distinctUntilChanged(),
+            )
+            .subscribe((enabled) => this.setEnableFiltersAndSuggestions(enabled));
     }
 
     onEvent(event: string, data: any) {
@@ -98,7 +116,7 @@ export class SearchFieldInternalService implements EventListener {
      *
      * To be called by the search-field component.
      */
-    setEnableFiltersAndSuggestions(enabled: boolean): void {
+    private setEnableFiltersAndSuggestions(enabled: boolean): void {
         this.enableFiltersAndSuggestionsSubject.next(enabled);
         if (!enabled) {
             this.suggestionsInputStringSubject.next('');

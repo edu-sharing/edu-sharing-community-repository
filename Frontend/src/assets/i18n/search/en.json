@@ -15,7 +15,7 @@
     "SEARCH_STUFF": "Search for stuff ...",
     "EXPANDED_SEARCH": "Extended Search",
     "EXPANDED_SEARCH_SHORT": "Extended Search",
-    "ACTIVE_FILTER": "Active filter criteria ({{count}})",
+    "ACTIVE_FILTER": "Active filter criteria",
     "ACTIVE_FILTER_TOOLTIP": "{{count}} criteria filtered",
     "METADATASET": "Choose Metadataset",
     "METADATASET_INFO": "Filter other search criteria",

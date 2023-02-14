@@ -1,4 +1,7 @@
-import { AfterViewInit, Component, Input, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import {
     ArchiveRestore,
     GenericAuthority,
@@ -10,10 +13,7 @@ import {
     TemporaryStorageService,
 } from '../../../core-module/core.module';
 import { CustomOptions, ElementType, OptionItem, Scope } from '../../../core-ui-module/option-item';
-import { RecycleRestoreComponent } from './restore/restore.component';
-import { TranslateService } from '@ngx-translate/core';
 import { Toast } from '../../../core-ui-module/toast';
-import { ActionbarComponent } from '../../../shared/components/actionbar/actionbar.component';
 import {
     FetchEvent,
     InteractionType,
@@ -21,17 +21,18 @@ import {
     NodeClickEvent,
     NodeEntriesDisplayType,
 } from '../../../features/node-entries/entries-model';
-import { NodeEntriesWrapperComponent } from '../../../features/node-entries/node-entries-wrapper.component';
 import { NodeDataSource } from '../../../features/node-entries/node-data-source';
+import { NodeEntriesWrapperComponent } from '../../../features/node-entries/node-entries-wrapper.component';
 import { SearchFieldService } from '../../../main/navigation/search-field/search-field.service';
-import { Subject } from 'rxjs';
+import { ActionbarComponent } from '../../../shared/components/actionbar/actionbar.component';
+import { RecycleRestoreComponent } from './restore/restore.component';
 
 @Component({
     selector: 'es-recycle',
     templateUrl: 'recycle.component.html',
     styleUrls: ['recycle.component.scss'],
 })
-export class RecycleMainComponent implements AfterViewInit, OnDestroy {
+export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     readonly Scope = Scope;
@@ -76,7 +77,9 @@ export class RecycleMainComponent implements AfterViewInit, OnDestroy {
         private translate: TranslateService,
         private service: TemporaryStorageService,
         private searchField: SearchFieldService,
-    ) {
+    ) {}
+
+    ngOnInit(): void {
         this.options.addOptions.push(
             new OptionItem('RECYCLE.OPTION.RESTORE_SINGLE', 'undo', (node: Node) =>
                 this.restoreSingle(node),
@@ -90,10 +93,14 @@ export class RecycleMainComponent implements AfterViewInit, OnDestroy {
         this.options.addOptions.forEach((o) => {
             o.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         });
-        this.searchField.onSearchTriggered(this.destroyed).subscribe(({ searchString }) => {
-            this.searchQuery = searchString;
-            this.refresh();
-        });
+        this.searchField
+            .getCurrentInstance()
+            .onSearchTriggered()
+            .pipe(takeUntil(this.destroyed))
+            .subscribe(({ searchString }) => {
+                this.searchQuery = searchString;
+                this.refresh();
+            });
     }
 
     ngAfterViewInit(): void {

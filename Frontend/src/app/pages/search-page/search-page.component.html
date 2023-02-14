@@ -5,7 +5,7 @@
   (animationEnd)="onProgressBarAnimationEnd()"
 ></mat-progress-bar>
 
-<ng-container *ngIf="tabBarIsVisible; else noTabsPage">
+<ng-container *ngIf="tabBarIsVisible; else tabBody">
   <nav mat-tab-nav-bar [tabPanel]="tabPanel">
     <a
       mat-tab-link
@@ -19,22 +19,10 @@
       {{ repository.title }}
     </a>
   </nav>
-  <ng-container *ngTemplateOutlet="toolbar"></ng-container>
   <mat-tab-nav-panel #tabPanel>
     <ng-container *ngTemplateOutlet="tabBody"></ng-container>
   </mat-tab-nav-panel>
 </ng-container>
-
-<ng-template #noTabsPage>
-  <ng-container *ngTemplateOutlet="toolbar"></ng-container>
-  <ng-container *ngTemplateOutlet="tabBody"></ng-container>
-</ng-template>
-
-<ng-template #toolbar>
-  <es-search-page-toolbar
-    [(filterBarIsVisible)]="filterBarIsVisible.value"
-  ></es-search-page-toolbar>
-</ng-template>
 
 <ng-template #tabBody>
   <mat-drawer-container #filterBar>
