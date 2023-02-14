@@ -36,6 +36,7 @@ import {
     ViewRelation,
 } from './types';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
+import {Helper} from "../../../core-module/rest/helper";
 
 export interface CompletionStatusEntry {
     completed: number;
@@ -124,14 +125,20 @@ export class MdsEditorInstanceService implements OnDestroy {
             shareReplay(1),
         );
 
+        get definition() {
+            return this._definition;
+        }
+
         constructor(
             private mdsEditorInstanceService: MdsEditorInstanceService,
-            public readonly definition: MdsWidget,
+            private _definition: MdsWidget,
             public readonly viewId: string,
             public readonly repositoryId: string,
             public readonly relation: ViewRelation = null,
             public readonly variables: { [key: string]: string } = null,
         ) {
+            // deep copy to prevent persistence from inline overrides
+            this._definition = Helper.deepCopy(this._definition)
             this.replaceVariables();
             combineLatest([this.value$, this.bulkMode, this.ready])
                 .pipe(
