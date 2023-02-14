@@ -39,7 +39,10 @@
       (openPrivacy)="openPrivacy()"
       (showLicenses)="showLicenses()"
     >
-      <es-search-field data-selector-search-field *ngIf="searchFieldEnabled"></es-search-field
+      <es-search-field
+        data-selector-search-field
+        *ngIf="searchFieldEnabled && !mainNavConfig.hideSearchField"
+      ></es-search-field
     ></es-top-bar>
 
     <div *ngIf="canOpen && mainNavConfig.currentScope !== 'render'" #tabNav class="tab-nav">

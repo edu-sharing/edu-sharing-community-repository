@@ -42,6 +42,12 @@ export class MainNavConfig {
      */
     create?: MainNavCreateConfig = new MainNavCreateConfig();
     currentScope: string;
+    /**
+     * Hide the search field although it was enabled via `SearchFieldService`.
+     *
+     * Use if you include the search-field component yourself in your page.
+     */
+    hideSearchField? = false;
 
     /**
      * If create is allowed, this event will fire the new nodes
