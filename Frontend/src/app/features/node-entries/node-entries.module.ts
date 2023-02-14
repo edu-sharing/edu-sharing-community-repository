@@ -33,7 +33,6 @@ import { NodeEntriesGlobalService } from './node-entries-global.service';
         DragPreviewComponent,
     ],
     imports: [SharedModule, ListItemsModule],
-    providers: [NodeEntriesGlobalService],
     exports: [NodeEntriesWrapperComponent, ListItemLabelPipe],
 })
 export class NodeEntriesModule {}
