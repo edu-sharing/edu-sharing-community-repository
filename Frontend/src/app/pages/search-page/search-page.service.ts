@@ -23,7 +23,13 @@ import {
     takeUntil,
     tap,
 } from 'rxjs/operators';
-import { ListItem, Node, Repository, RestConstants } from '../../core-module/core.module';
+import {
+    ListItem,
+    Node,
+    Repository,
+    RestConstants,
+    UIConstants,
+} from '../../core-module/core.module';
 import { MdsHelper } from '../../core-module/rest/mds-helper';
 import {
     fromSearchResults,
@@ -31,8 +37,12 @@ import {
     NodeRemote,
     NodeRequestParams,
 } from '../../features/node-entries/node-data-source-remote';
-import { SearchFieldService } from '../../main/navigation/search-field/search-field.service';
+import {
+    SearchFieldInstance,
+    SearchFieldService,
+} from '../../main/navigation/search-field/search-field.service';
 import { notNull } from '../../util/functions';
+import { NavigationScheduler } from './navigation-scheduler';
 import { UserModifiableValuesService } from './user-modifiable-values';
 
 class SearchRequestParams {
@@ -71,32 +81,70 @@ export class SearchPageService implements OnDestroy {
         private config: ConfigService,
         private searchField: SearchFieldService,
         private mds: MdsService,
+        private navigationScheduler: NavigationScheduler,
         private network: NetworkService,
         private route: ActivatedRoute,
         private search: SearchService,
         private translate: TranslateService,
         private userModifiableValues: UserModifiableValuesService,
-    ) {
-        this.activeRepository.registerQueryParameter('repo', this.route);
-        this.activeMetadataSet.registerQueryParameter('mds', this.route);
-        this.searchFilters.registerQueryParameter('filters', this.route);
-        this.searchString.registerQueryParameter('q', this.route);
-        this.filterBarIsVisible.registerQueryParameter('filterBar', this.route);
-        this.registerRepositories();
-        this.registerAvailableMetadataSets();
-        this.registerActiveMetadataSet();
-        this.registerSearchField();
-        this.registerSearchObservables();
-        this.registerLoadingProgress();
-        this.registerColumns();
-    }
+    ) {}
 
     ngOnDestroy(): void {
         this.destroyed.next();
         this.destroyed.complete();
     }
 
-    private registerRepositories() {
+    /** Initializes the service for use on the search page. */
+    init(): void {
+        this.initBasicData();
+        this.registerSearchField();
+        this.initSearchPageUi();
+        this.initQueryParams();
+    }
+
+    /**
+     * Utilizes this service to provide facet search via a search field when not on the search page.
+     *
+     * When a search is triggered by either entering a search string and hitting the search button
+     * or by selecting a facet, we jump to the search page.
+     */
+    initSearchFieldOnly(): void {
+        this.initBasicData();
+        const searchFieldInstance = this.registerSearchField();
+        this.initQueryParams();
+        searchFieldInstance.patchConfig({ showFiltersButton: false });
+        // Jump to the search page when a search is triggered.
+        rxjs.merge(
+            searchFieldInstance.onSearchTriggered().pipe(filter(({ cleared }) => !cleared)),
+            searchFieldInstance.onFilterValuesChanged(),
+        ).subscribe(() => {
+            this.navigationScheduler.scheduleNavigation({
+                route: [UIConstants.ROUTER_PREFIX, 'search'],
+            });
+        });
+    }
+
+    private initBasicData(): void {
+        this.registerRepositories();
+        this.registerAvailableMetadataSets();
+        this.registerActiveMetadataSet();
+    }
+
+    private initSearchPageUi(): void {
+        this.registerSearchObservables();
+        this.registerLoadingProgress();
+        this.registerColumns();
+    }
+
+    private initQueryParams(): void {
+        this.activeRepository.registerQueryParameter('repo', this.route);
+        this.activeMetadataSet.registerQueryParameter('mds', this.route);
+        this.searchFilters.registerQueryParameter('filters', this.route);
+        this.searchString.registerQueryParameter('q', this.route);
+        this.filterBarIsVisible.registerQueryParameter('filterBar', this.route);
+    }
+
+    private registerRepositories(): void {
         rxjs.combineLatest([this.network.getRepositories(), this.config.observeConfig()]).subscribe(
             ([repositories, config]) =>
                 this.availableRepositories.next(filterRepositories(repositories, config)),
@@ -152,7 +200,7 @@ export class SearchPageService implements OnDestroy {
         });
     }
 
-    private registerSearchField() {
+    private registerSearchField(): SearchFieldInstance {
         const searchFieldInstance = this.searchField.enable(
             {
                 placeholder: 'SEARCH.SEARCH_STUFF',
@@ -189,6 +237,7 @@ export class SearchPageService implements OnDestroy {
             // console.log('searchFilters.userValue', searchFilters);
             searchFieldInstance.setFilterValues(searchFilters);
         });
+        return searchFieldInstance;
     }
 
     private registerSearchObservables() {

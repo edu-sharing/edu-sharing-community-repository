@@ -40,7 +40,9 @@ export class SearchPageComponent implements OnInit, AfterViewInit {
     readonly resultColumns = this.searchPage.resultColumns;
     readonly collectionColumns = this.searchPage.collectionColumns;
 
-    constructor(private searchPage: SearchPageService, private mainNav: MainNavService) {}
+    constructor(private searchPage: SearchPageService, private mainNav: MainNavService) {
+        this.searchPage.init();
+    }
 
     ngOnInit(): void {
         this.initMainNav();

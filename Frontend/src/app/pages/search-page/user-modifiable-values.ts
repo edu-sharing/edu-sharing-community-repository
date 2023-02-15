@@ -1,9 +1,10 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { ActivatedRoute, Params, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map, tap } from 'rxjs/operators';
+import { NavigationScheduler } from './navigation-scheduler';
 
 /**
  * Provides a factory for user-modifiable values.
@@ -16,11 +17,8 @@ import { distinctUntilChanged, filter, map, tap } from 'rxjs/operators';
  */
 @Injectable({ providedIn: 'root' })
 export class UserModifiableValuesService {
-    constructor(private router: Router, private ngZone: NgZone) {
-        UserModifiableValue.queryParamsScheduler = new QueryParamsScheduler(
-            this.router,
-            this.ngZone,
-        );
+    constructor(navigationScheduler: NavigationScheduler) {
+        UserModifiableValue.navigationScheduler = navigationScheduler;
     }
 
     createDict(systemValue?: { [key: string]: any }): UserModifiableValue<{ [key: string]: any }> {
@@ -47,7 +45,7 @@ export class UserModifiableValuesService {
  * reflected in the query parameters.
  */
 class UserModifiableValue<T> {
-    static queryParamsScheduler: QueryParamsScheduler;
+    static navigationScheduler: NavigationScheduler;
 
     /**
      * Shorthand for registration with two-way bindings, e.g.,
@@ -158,7 +156,9 @@ class UserModifiableValue<T> {
                 tap((param) => (currentParam = param)),
             )
             .subscribe((param) => {
-                UserModifiableValue.queryParamsScheduler.scheduleQueryParams({ [key]: param });
+                UserModifiableValue.navigationScheduler.scheduleNavigation({
+                    queryParams: { [key]: param },
+                });
             });
     }
 
@@ -233,41 +233,3 @@ const userModifiableBooleanType: UserModifiableType<boolean> = {
     serialize: (value: boolean) => (value ? 'true' : 'false'),
     deserialize: (value: string) => value === 'true',
 };
-
-class QueryParamsScheduler {
-    private params: Params = null;
-    private timeout: ReturnType<typeof setTimeout> = null;
-    private shouldAppend = false;
-
-    constructor(
-        private router: Router,
-        private ngZone: NgZone,
-        private appendTimeout: number = 500,
-    ) {}
-
-    scheduleQueryParams(queryParams: Params): void {
-        // console.log('scheduleNavigation', queryParams);
-        this.params = {
-            ...(this.params ?? {}),
-            ...queryParams,
-        };
-        if (!this.timeout) {
-            this.timeout = setTimeout(() => {
-                // console.log('navigate', { params: this.params, shouldAppend: this.shouldAppend });
-                void this.router.navigate([], {
-                    queryParams: this.params,
-                    queryParamsHandling: 'merge',
-                    replaceUrl: this.shouldAppend,
-                });
-                this.timeout = null;
-                this.params = null;
-                if (!this.shouldAppend) {
-                    this.shouldAppend = true;
-                    this.ngZone.runOutsideAngular(() =>
-                        setTimeout(() => (this.shouldAppend = false), this.appendTimeout),
-                    );
-                }
-            });
-        }
-    }
-}

@@ -74,7 +74,10 @@ export class NodeDataSourceRemote<
     }
     set itemsCap(value: ItemsCap<T> | null) {
         this._itemsCap = value;
-        this._connectRenderData();
+        // Only reconnect if already connected.
+        if (this.renderDataSubscription) {
+            this._connectRenderData();
+        }
     }
     private renderData = new BehaviorSubject<T[]>([]);
     private renderDataSubscription: Subscription | null;

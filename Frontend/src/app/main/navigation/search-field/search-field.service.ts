@@ -1,7 +1,7 @@
 import { ElementRef, Injectable } from '@angular/core';
 import { RawValuesDict, SearchConfig } from 'ngx-edu-sharing-api';
 import { Observable, Subject } from 'rxjs';
-import { map, skip, takeUntil } from 'rxjs/operators';
+import { map, take, takeUntil } from 'rxjs/operators';
 import { notNull } from '../../../util/functions';
 import { SearchFieldInternalService } from './search-field-internal.service';
 
@@ -34,44 +34,49 @@ export type SearchEvent = {
 };
 
 export class SearchFieldInstance {
-    constructor(private until: Observable<void>, private internal: SearchFieldInternalService) {}
+    constructor(private _until: Observable<void>, private _internal: SearchFieldInternalService) {}
+
+    patchConfig(config: Partial<SearchFieldConfig>) {
+        const newConfig = { ...this._internal.config.value, ...config };
+        this._internal.config.next(newConfig);
+    }
 
     /** Emits when the user clicked the filters button inside the search field. */
     onFiltersButtonClicked(): Observable<void> {
-        return this.internal.filtersButtonClicked.pipe(takeUntil(this.until));
+        return this._internal.filtersButtonClicked.pipe(takeUntil(this._until));
     }
 
     /** Emits when the user triggered a search using the search field. */
     onSearchTriggered(): Observable<SearchEvent> {
-        return this.internal.searchTriggered.pipe(takeUntil(this.until));
+        return this._internal.searchTriggered.pipe(takeUntil(this._until));
     }
 
     /** Emits when the user changed the search string by typing into the search field. */
     onSearchStringChanged(): Observable<string> {
-        return this.internal.searchStringChanged.pipe(takeUntil(this.until));
+        return this._internal.searchStringChanged.pipe(takeUntil(this._until));
     }
 
     /** Emits when the user added or removed filters through the search field. */
     onFilterValuesChanged(): Observable<RawValuesDict> {
-        return this.internal.filterValuesChanged.pipe(takeUntil(this.until));
+        return this._internal.filterValuesChanged.pipe(takeUntil(this._until));
     }
 
     setSearchString(value: string): void {
-        this.internal.searchString.next(value);
+        this._internal.searchString.next(value);
     }
 
     /**
      * Sets the repository and metadata set to be used for suggestions and value lookups.
      */
     setMdsInfo(mdsInfo: MdsInfo): void {
-        this.internal.mdsInfoSubject.next(mdsInfo);
+        this._internal.mdsInfoSubject.next(mdsInfo);
     }
 
     /**
      * Sets the active filters to be displayed as chips.
      */
     setFilterValues(values: RawValuesDict): void {
-        this.internal.setFilterValues(values);
+        this._internal.setFilterValues(values);
     }
 
     /**
@@ -80,7 +85,7 @@ export class SearchFieldInstance {
      * Use only for positioning, not for data.
      */
     getInputElement(): ElementRef {
-        return this.internal.searchFieldComponent.input;
+        return this._internal.searchFieldComponent.input;
     }
 }
 
@@ -92,12 +97,18 @@ export class SearchFieldInstance {
     providedIn: 'root',
 })
 export class SearchFieldService {
-    _currentInstance: SearchFieldInstance | null = null;
+    private _currentInstance: SearchFieldInstance | null = null;
+    private _resetInstance = new Subject<void>();
 
-    constructor(private internal: SearchFieldInternalService) {}
+    constructor(private _internal: SearchFieldInternalService) {
+        this._resetInstance.subscribe(() => {
+            this._currentInstance = null;
+            this._internal.config.next(null);
+        });
+    }
 
     observeEnabled(): Observable<boolean> {
-        return this.internal.config.pipe(map(notNull));
+        return this._internal.config.pipe(map(notNull));
     }
 
     /**
@@ -110,18 +121,15 @@ export class SearchFieldService {
      * - `disable` is called.
      */
     enable(config: Partial<SearchFieldConfig>, until: Subject<void>): SearchFieldInstance {
+        this._resetInstance.next();
         const configWithDefaults = { ...new SearchFieldConfig(), ...config };
-        this.internal.config.next(configWithDefaults);
-        until.subscribe(() => {
-            if (this.internal.config.value === configWithDefaults) {
-                this.internal.config.next(null);
-            }
-        });
+        this._internal.config.next(configWithDefaults);
+        until.subscribe(() => this._resetInstance.next());
         return this._createInstance();
     }
 
     disable() {
-        this.internal.config.next(null);
+        this._resetInstance.next();
     }
 
     /**
@@ -137,17 +145,8 @@ export class SearchFieldService {
     }
 
     private _createInstance(): SearchFieldInstance {
-        const until = this.internal.config.pipe(
-            skip(1),
-            map(() => void 0),
-        );
-        const instance = new SearchFieldInstance(until, this.internal);
-        this._currentInstance = instance;
-        until.subscribe(() => {
-            if (this._currentInstance === instance) {
-                this._currentInstance = null;
-            }
-        });
-        return instance;
+        const until = this._resetInstance.pipe(take(1));
+        this._currentInstance = new SearchFieldInstance(until, this._internal);
+        return this._currentInstance;
     }
 }
