@@ -37,22 +37,11 @@
         [columns]="collectionColumns.value"
         [disableInfiniteScroll]="true"
         [displayType]="NodeEntriesDisplayType.SmallGrid"
-        [gridConfig]="{ maxRows: shouldLimitCollectionRows ? 1 : -1 }"
+        [gridConfig]="{ layout: 'scroll' }"
       >
         <ng-template #title>
           <div class="collections-heading-container">
             <h2 class="mat-heading-2">{{ 'SEARCH.COLLECTIONS' | translate }}</h2>
-            <button
-              *ngIf="
-                collectionsDataSource.itemsCap?.isActivelyCapping || !shouldLimitCollectionRows
-              "
-              mat-button
-              color="primary"
-              class="toggle"
-              (click)="shouldLimitCollectionRows = !shouldLimitCollectionRows"
-            >
-              {{ (shouldLimitCollectionRows ? 'SHOW_MORE' : 'HIDE_MORE') | translate }}
-            </button>
           </div>
         </ng-template>
       </es-node-entries-wrapper>

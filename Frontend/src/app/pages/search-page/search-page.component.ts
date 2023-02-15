@@ -29,7 +29,6 @@ export class SearchPageComponent implements OnInit, AfterViewInit {
     @ViewChild('nodeEntriesResults') nodeEntriesResults: NodeEntriesWrapperComponent<Node>;
 
     @HostBinding('class.has-tab-bar') tabBarIsVisible = false;
-    shouldLimitCollectionRows = true;
     progressBarIsVisible = false;
 
     readonly resultsDataSource = this.searchPage.resultsDataSource;
